@@ -1,0 +1,26 @@
+<!-- Copyright 2021 Yubico AB
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. -->
+
+<!--
+  Directory.Build.targets
+
+  This file is the root of all post-project build settings and targets. It is evaluated _after_ the
+  csproj file. Properties and item groups in the csproj should be visible here, however any variables
+  set here will not have any effect on conditions in the csproj as they will have already been evaluated.
+-->
+<Project>
+
+  <!-- No target files yet. -->
+
+</Project>

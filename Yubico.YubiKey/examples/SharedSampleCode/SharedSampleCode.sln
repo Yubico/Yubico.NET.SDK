@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+# Copyright 2021 Yubico AB
+# 
+# Licensed under the Apache License, Version 2.0 (the "License").
+# You may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+VisualStudioVersion = 16.0.31410.357
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedSampleCode", "SharedSampleCode.csproj", "{DD4B20A6-1EF8-455D-A691-978BB8AB5F6F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{DD4B20A6-1EF8-455D-A691-978BB8AB5F6F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DD4B20A6-1EF8-455D-A691-978BB8AB5F6F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DD4B20A6-1EF8-455D-A691-978BB8AB5F6F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DD4B20A6-1EF8-455D-A691-978BB8AB5F6F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CF36BC01-E1C2-48CF-A139-5DB1EED566EF}
+	EndGlobalSection
+EndGlobal

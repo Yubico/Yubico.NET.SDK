@@ -1,0 +1,79 @@
+﻿// Copyright 2021 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
+using System.Collections.Generic;
+using Yubico.Core.Iso7816;
+using Yubico.PlatformInterop;
+
+namespace Yubico.Core.Devices.SmartCard
+{
+    /// <summary>
+    /// Base class for <see cref="DesktopSmartCardDevice"/>.
+    /// </summary>
+    public abstract class SmartCardDevice : ISmartCardDevice
+    {
+        /// <summary>
+        /// Gets the path to the smart card device.
+        /// </summary>
+        /// <value>
+        /// A platform defined path to the device.
+        /// </value>
+        public string Path { get; private set; }
+
+        /// <summary>
+        /// The "answer to reset" (ATR) for the smart card.
+        /// </summary>
+        /// <value>
+        /// The ATR.
+        /// </value>
+        /// <remarks>
+        /// The ATR for a smart card can act as an identifier for the type of card that is inserted.
+        /// </remarks>
+        public AnswerToReset? Atr { get; private set; }
+
+        /// <summary>
+        /// Gets the smart card's connection type.
+        /// </summary>
+        public SmartCardConnectionKind Kind { get; private set; }
+
+        /// <summary>
+        /// Returns the set of smart card reader devices available to the system.
+        /// </summary>
+        /// <returns>A read-only list of <see cref="SmartCardDevice"/> objects.</returns>
+        public static IReadOnlyList<ISmartCardDevice> GetSmartCardDevices() => SdkPlatformInfo.OperatingSystem switch
+        {
+            SdkPlatform.Windows => DesktopSmartCardDevice.GetList(),
+            SdkPlatform.MacOS => DesktopSmartCardDevice.GetList(),
+            _ => throw new PlatformNotSupportedException()
+        };
+
+        /// <summary>
+        /// Constructs a <see cref="SmartCardDevice"/> with the specified properties.
+        /// </summary>
+        /// <param name="path">Device path.</param>
+        /// <param name="atr"><see cref="AnswerToReset"/> properties.</param>
+        protected SmartCardDevice(string path, AnswerToReset? atr)
+        {
+            Path = path;
+            Atr = atr;
+        }
+
+        /// <summary>
+        /// Establishes an active connection to the smart card for the transmittal of data.
+        /// </summary>
+        /// <returns>An already opened connection to the smart card reader.</returns>
+        public abstract ISmartCardConnection Connect();
+    }
+}

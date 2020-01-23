@@ -1,0 +1,64 @@
+<!-- Copyright 2021 Yubico AB
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. -->
+
+<!--
+  ProjectTypes.props
+
+  This file contains properties that attempt to classify projects as being of a certain type.
+  The project types currently defined are:
+  - Production: Any project that compiles to a binary that is shipped as part of the final
+                product.
+  - Test:       Any project that is used to test production code. This could include unit tests,
+                integration tests, or scenario tests. Test tools are not included in this project
+                type. Only projects that need to link against a test framework should fall into
+                this bucket.
+  - Reference:  A special metadata only project type used by Visual Studio and Intellisense for
+                resolving types contained within a multi-targeted assembly. This blog post by
+                MSBuild developer Claire Novotny explains why and when reference assemblies are
+                used: https://claires.site/2018/07/03/create-and-pack-reference-assemblies/.
+  -->
+<Project>
+
+  <!--
+  Define project types in this group. Other properties that need to be set according to one of these
+  project types should be done in a separate property group.
+  -->
+  <PropertyGroup Label="Project type detection using convention based approach">
+
+    <!--
+    A project is a test project if it it ends with Tests in the project name. For example:
+    MyProject.UnitTests.csproj will pick up this property. MyProject.UnitTest.csproj will not.
+    The filename convention is case Insensitive.
+    -->
+    <IsTestProject Condition="$(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase))">true</IsTestProject>
+    <IsTestProject Condition="!$(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase))">false</IsTestProject>
+
+    <!--
+    A project is a reference assembly project if it ends with Ref in the project name. For
+    example: MyProject.Ref.csproj will pick up this property. The filename convention is case
+    insensitive.
+    -->
+    <IsRefProject Condition="$(MSBuildProjectName.EndsWith('Ref', StringComparison.OrdinalIgnoreCase))">true</IsRefProject>
+    <IsRefProject Condition="!$(MSBuildProjectName.EndsWith('Ref', StringComparison.OrdinalIgnoreCase))">false</IsRefProject>
+
+    <!--
+    A project is a production project if it does not end in any of the other special suffixes handled
+    previously.
+    -->
+    <IsProdProject Condition="('$(IsTestProject)' == 'false') AND ('$(IsRefProject)' == 'false')">true</IsProdProject>
+    <IsProdProject Condition="('$(IsTestProject)' == 'true') OR ('$(IsRefProject)' == 'true')">false</IsProdProject>
+
+  </PropertyGroup>
+
+</Project>

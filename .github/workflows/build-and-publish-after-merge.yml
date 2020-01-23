@@ -1,0 +1,141 @@
+# Copyright 2021 Yubico AB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Build and publish artifacts from main and develop
+
+# Triggers build on pushes to the main and develop branches.
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build:
+    # Give this job a friendly name to show in GitHub UI.
+    name: Build the .NET YubiKey SDK project
+
+    # Even though we build for multiple platforms, we only need to run
+    # on a single host operating system. This is because we utilize cross-
+    # build functionality of the dotnet build system.
+    runs-on: windows-latest
+
+    steps:
+      # Checkout the local repository
+      - uses: actions/checkout@v2
+
+      # We use 3.1.x for unit tests, and 5 for the build tools.
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.x
+
+      - name: Setup .NET 5
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+
+      # Build the project
+      - name: Build Yubico.NET.SDK.sln
+        run: dotnet build --configuration ReleaseWithDocs Yubico.NET.SDK.sln
+
+      # Upload artifacts
+      - name: Save documentation artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: sdk-documentation
+          path: Yubico.YubiKey/docs/_site/
+
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Nuget Packages
+          path: |
+            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.nupkg
+            Yubico.Core/src/bin/ReleaseWithDocs/*.nupkg
+            Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
+
+      # Package the sample code source
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: OATH Sample Code
+          path: |
+            Yubico.YubiKey/examples/OathSampleCode
+
+      # Package the sample code source
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: PIV Sample Code
+          path: |
+            Yubico.YubiKey/examples/PivSampleCode
+
+      # Test the project
+      - name: Test Yubico.YubiKey
+        run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --configuration Release --verbosity detailed
+
+      - name: Test Yubico.Core
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --configuration Release --verbosity detailed
+
+      - name: Test Yubico.DotNetPolyfills
+        run: dotnet test Yubico.DotNetPolyfills/tests/Yubico.DotNetPolyfills.UnitTests.csproj --configuration Release --verbosity detailed
+
+
+
+  publish_docs:
+    # Give this job a friendly name to show in GitHub UI.
+    name: Publish documentation
+
+    # Publish the docs using Ubuntu as the docker image we want to create is linux-based.
+    runs-on: ubuntu-latest
+
+    # Don't run this step until build completes.
+    needs: build
+
+    # Connection information for our docker image registry
+    env:
+      IMAGE_REGISTRY_URL: us-docker.pkg.dev
+      IMAGE_REGISTRY_PROJECT: support-cluster-769001
+      IMAGE_REPOSITORY: yesdk
+      IMAGE_NAME: yesdk-docserver
+
+    steps:
+      # Checkout the local repository as we need the Dockerfile and other things even for this step.
+      - uses: actions/checkout@v2
+
+      # Grab the just-built documentation artifact and inflate the archive at the expected location.
+      - uses: actions/download-artifact@v2
+        with:
+          name: sdk-documentation
+          path: Yubico.YubiKey/docs/_site/
+
+      # Construct the docker image
+      - name: Docker build
+        run: |
+          docker build -t "${IMAGE_NAME}:${{ github.sha }}" .
+
+      # Connect to our GCloud instance
+      - uses: google-github-actions/setup-gcloud@master
+        with:
+          service_account_key: ${{ secrets.IMAGE_REPO_GCP_SA_KEY }}
+
+      # Push our docker image to GCP
+      - name: Push Docker image
+        run: |
+          gcloud components install beta --quiet
+          gcloud beta auth configure-docker ${IMAGE_REGISTRY_URL} --project ${IMAGE_REGISTRY_PROJECT}
+          docker tag "${IMAGE_NAME}:${{ github.sha }}" "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
+          docker push "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
+          echo "New image tag: ${{ github.sha }}"

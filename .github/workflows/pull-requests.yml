@@ -1,0 +1,85 @@
+# Copyright 2021 Yubico AB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: CI build for pull requests into main and develop
+
+# Triggers build on pull requests and pushes to the main and develop branches.
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  build:
+    # Give this job a friendly name to show in GitHub UI.
+    name: Build the .NET YubiKey SDK project
+
+    # Even though we build for multiple platforms, we only need to run
+    # on a single host operating system. This is because we utilize cross-
+    # build functionality of the dotnet build system.
+    runs-on: windows-latest
+
+    # Build both Debug and Release configurations.
+    strategy:
+      matrix:
+        configuration: [Debug, ReleaseWithDocs]
+
+    steps:
+      # Checkout the local repository
+      - uses: actions/checkout@v2
+
+      # We use 3.1.x for unit tests, and 5 for the build tools.
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.x
+
+      - name: Setup .NET 5
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
+
+      - name: Setup MSBuild.exe
+        uses: microsoft/setup-msbuild@v1.0.2
+
+      - name: Setup NuGet.exe
+        uses: NuGet/setup-nuget@v1.0.5
+
+      - name: Nuget Restore
+        run: nuget restore Yubico.NET.SDK.sln
+
+      # Build the project
+      - name: Build Yubico.NET.SDK.sln
+        # run: dotnet build --configuration ${{matrix.configuration}} Yubico.NET.SDK.sln
+        run: msbuild /p:Configuration=${{matrix.configuration}} /p:Platform="Any CPU" Yubico.NET.SDK.sln -verbosity:normal
+
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Nuget Packages ${{matrix.configuration}}
+          path: |
+            Yubico.DotNetPolyfills/src/bin/${{matrix.configuration}}/*.nupkg
+            Yubico.Core/src/bin/${{matrix.configuration}}/*.nupkg
+            Yubico.YubiKey/src/bin/${{matrix.configuration}}/*.nupkg
+
+      # Test the project
+      - name: Test Yubico.YubiKey
+        run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --configuration ${{matrix.configuration}} --verbosity normal
+
+      - name: Test Yubico.Core
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj --configuration ${{matrix.configuration}} --verbosity detailed
+
+      - name: Test Yubico.DotNetPolyfills
+        run: dotnet test Yubico.DotNetPolyfills/tests/Yubico.DotNetPolyfills.UnitTests.csproj --configuration ${{matrix.configuration}} --verbosity normal

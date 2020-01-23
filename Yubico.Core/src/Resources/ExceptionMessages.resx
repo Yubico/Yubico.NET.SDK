@@ -1,0 +1,252 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ApduError" xml:space="preserve">
+    <value>A command APDU has returned an error in the status word. Check ApduStatus and other properties for more details.</value>
+  </data>
+  <data name="CmPropertyNotSupported" xml:space="preserve">
+    <value>The specified device property is not in the set of supported properties for this API.</value>
+  </data>
+  <data name="HexNotEvenLength" xml:space="preserve">
+    <value>The provided string was not of even length.</value>
+  </data>
+  <data name="HidDriverCantAttach" xml:space="preserve">
+    <value>Encountered a USB interface which appeared to be supported by the HID driver, but was unable to attach the driver.</value>
+  </data>
+  <data name="HidUnsupportedDeviceClass" xml:space="preserve">
+    <value>[{0}] is not a supported HID class. Only generic HidClass and Keyboard are supported at this time.</value>
+  </data>
+  <data name="NfcConnectionFailed" xml:space="preserve">
+    <value>Unable to open connection to NFC device. The tag may have been removed.</value>
+  </data>
+  <data name="ResponseApduNotEnoughBytes" xml:space="preserve">
+    <value>Response APDUs must contain at least 2 bytes for status. The data passed in has a [{0}] byte length.</value>
+  </data>
+  <data name="SCardError" xml:space="preserve">
+    <value>Encountered an error communicating with the smart card subsystem.</value>
+  </data>
+  <data name="TlvUnexpectedEndOfBuffer" xml:space="preserve">
+    <value>Unexpected end of buffer when trying to parse a TLV data structure.</value>
+  </data>
+  <data name="TlvUnsupportedLengthField" xml:space="preserve">
+    <value>Cannot parse element with either an initial octet of 80 or a length field longer than 4 bytes.</value>
+  </data>
+  <data name="TlvUnsupportedTag" xml:space="preserve">
+    <value>Cannot parse element with tag longer than 2 bytes.</value>
+  </data>
+  <data name="TlvUnexpectedEncoding" xml:space="preserve">
+    <value>The TLV reading code encountered an unexpected tag or value.</value>
+  </data>
+  <data name="TlvInvalidSchema" xml:space="preserve">
+    <value>The input does not build a valid schema.</value>
+  </data>
+  <data name="UnknownApduError" xml:space="preserve">
+    <value>An unspecified error has been raised during the issuance of a command APDU.</value>
+  </data>
+  <data name="UnknownPlatformApiError" xml:space="preserve">
+    <value>Encountered a Platform API exception of unknown origin.</value>
+  </data>
+  <data name="UsbInterfaceOutOfRange" xml:space="preserve">
+    <value>Attempted to access interface index [{0}]. The interface list only contains [{1}] elements.</value>
+  </data>
+  <data name="ValueConversionFailed" xml:space="preserve">
+    <value>Cannot convert the data to the requested type. Expected only [{0}] byte(s) of data, but [{1}] byte(s) were present.</value>
+  </data>
+  <data name="CommandApduFieldOutOfRangeEncoding" xml:space="preserve">
+    <value>CommandApdu field [{0}] out of range for [{1}] APDU encoding.</value>
+  </data>
+  <data name="CommandApduNoValidEncoding" xml:space="preserve">
+    <value>No valid ApduEncoding found.</value>
+  </data>
+  <data name="CommandApduNeRangeError" xml:space="preserve">
+    <value>Ne must be a non-negative integer.</value>
+  </data>
+  <data name="SCardCantEstablish" xml:space="preserve">
+    <value>Unable to establish a connection to the platform's smartcard subsystem.</value>
+  </data>
+  <data name="SCardCardCantConnect" xml:space="preserve">
+    <value>Unable to establish a connection to the smart card in [{0}].</value>
+  </data>
+  <data name="SCardListReadersFailed" xml:space="preserve">
+    <value>An error occurred while attempting to retrieve the list of smart card readers.</value>
+  </data>
+  <data name="SCardTransactionFailed" xml:space="preserve">
+    <value>Unable to begin a transaction with the given smart card.</value>
+  </data>
+  <data name="SCardTransmitFailure" xml:space="preserve">
+    <value>Encountered an error while attempting to transmit data to a smart card.</value>
+  </data>
+  <data name="SCardGetStatusChangeFailed" xml:space="preserve">
+    <value>An error occurred while attempting to get the current status of the smart cards available to the system.</value>
+  </data>
+  <data name="SCardListReadersUnexpectedLength" xml:space="preserve">
+    <value>The smart card subsystem indicated success when enumerating smart cards, however no data was returned.</value>
+  </data>
+  <data name="GetUnmanagedFunctionFailed" xml:space="preserve">
+    <value>Failed to resolve the native function [{0}].</value>
+  </data>
+  <data name="LibraryLoadFailed" xml:space="preserve">
+    <value>Could not load library [{0}].</value>
+  </data>
+  <data name="SCardReconnectFailed" xml:space="preserve">
+    <value>Unable to reconnect to the smart card.</value>
+  </data>
+  <data name="IOKitTypeMismatch" xml:space="preserve">
+    <value>Encountered unexpected property type on an IOKit device. Expected [{0}] but encountered [{1}].</value>
+  </data>
+  <data name="IOKitRegistryEntryNotFound" xml:space="preserve">
+    <value>No IOKit registry entry was found for the device.</value>
+  </data>
+  <data name="IOKitCannotOpenDevice" xml:space="preserve">
+    <value>Can't open IOKit device.</value>
+  </data>
+  <data name="IOKitOperationFailed" xml:space="preserve">
+    <value>The IOKit operation [{0}] failed.</value>
+  </data>
+  <data name="WrongIOKitRunLoopMode" xml:space="preserve">
+    <value>The runloop used for the IOKit operation did not complete successfully. Result was [{0}].</value>
+  </data>
+  <data name="InvalidSafeFileHandle" xml:space="preserve">
+    <value>The file handle cannot be null.</value>
+  </data>
+  <data name="InvalidCharForHidCode" xml:space="preserve">
+    <value>Keyboard layout [{0}] doesn't have HID code [0x{1}]</value>
+  </data>
+  <data name="InvalidHidCode" xml:space="preserve">
+    <value>Keyboard layout [{0}] doesn't have an HID code for [{1}].</value>
+  </data>
+  <data name="IllegalCharacter" xml:space="preserve">
+    <value>Illegal character: {0}.</value>
+  </data>
+  <data name="InvalidBase32Digit" xml:space="preserve">
+    <value>The value, 0x{0x2}, is not a valid Base32 digit.</value>
+  </data>
+  <data name="InvalidReportBufferLength" xml:space="preserve">
+    <value>The buffer length must be large enough to hold the report, plus one additional byte that specifies a nonzero report ID or zero.</value>
+  </data>
+  <data name="EncodingOverflow" xml:space="preserve">
+    <value>The output span is not sufficient to contain the encoded output.</value>
+  </data>
+  <data name="DecodingOverflow" xml:space="preserve">
+    <value>The output span is not sufficient to contain the decoded output.</value>
+  </data>
+  <data name="InvalidDigit" xml:space="preserve">
+    <value>Invalid digit (0x{0}). Digit value must be 0x0 to 0x{1}.</value>
+  </data>
+</root>

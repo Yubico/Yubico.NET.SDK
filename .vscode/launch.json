@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run TestApp",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "Build Yubico.Authenticators.TestApp",
+            "program": "${workspaceFolder}/Yubico.Authenticators/testapp/bin/Debug/netcoreapp3.1/Yubico.Authenticators.TestApp.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Yubico.Authenticators",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        }
+    ]
+}

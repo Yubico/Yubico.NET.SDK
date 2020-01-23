@@ -1,0 +1,172 @@
+# Copyright 2021 Yubico AB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+- name: Getting started
+  items:
+  - name: What is a YubiKey?
+    href: getting-started/what-is-a-yubikey.md
+  - name: Overview of the SDK
+    href: getting-started/overview-of-sdk.md
+  - name: How to install
+    href: getting-started/how-to-install.md
+  - name: What's new in the SDK?
+    href: getting-started/whats-new.md
+  - name: Roadmap
+    href: getting-started/roadmap.md
+
+- name: YubiKey reference
+  items:
+  - name: Hardware
+    href: yubikey-reference/hardware.md
+  - name: Transports
+    href: yubikey-reference/transports/overview.md
+  - name: APDUs
+    href: yubikey-reference/apdu.md
+
+- name: SDK programming guide
+  items:
+  - name: Making a connection
+    href: sdk-programming-guide/making-a-connection.md
+  - name: Threads
+    href: sdk-programming-guide/threads.md
+  - name: Delegates (callbacks) in the SDK
+    href: sdk-programming-guide/delegates-in-sdk.md
+  - name: Providing alternate cryptographic implementations
+    href: sdk-programming-guide/alternate-crypto.md
+  - name: Sensitive data
+    href: sdk-programming-guide/sensitive-data.md
+
+- name: "Application: OTP"
+  homepage: application-otp/otp-overview.md
+  items:
+  - name: Yubico OTP
+    href: application-otp/yubico-otp.md
+  - name: HOTP
+    href: application-otp/hotp.md
+  - name: Challenge-response
+    href: application-otp/challenge-response.md
+  - name: Static passwords
+    href: application-otp/static-password.md
+  - name: NDEF
+    href: application-otp/ndef.md
+  - name: "How-To: Programming slot 2 with the serial number"
+    href: application-otp/slot-2-serial.md
+  - name: "How-To: Using challenge-response"
+    href: application-otp/using-challenge.md
+  - name: Commands
+    items:
+    - name: OTP commands and APDUs
+      href: application-otp/otp-commands.md
+
+- name: "Application: OATH"
+  homepage: application-oath/oath-overview.md
+  items:
+  - name: Overview
+    href: application-oath/oath-overview.md
+  - name: OATH credentials
+    href: application-oath/oath-credentials.md
+  - name: OATH session
+    href: application-oath/oath-session.md
+  - name: Protecting OATH application with a password
+    href: application-oath/oath-password.md
+  - name: Building a basic authenticator
+    href: application-oath/oath-use-case.md
+  - name: URI string format
+    href: application-oath/uri-string-format.md
+  - name: How to backup credentials
+    href: application-oath/oath-backup-credentials.md
+  - name: Commands
+    items:
+    - name: OATH commands and APDUs
+      href: application-oath/oath-commands.md
+
+- name: "Application: PIV"
+  homepage: application-piv/piv-overview.md
+  items:
+  - name: Slots
+    href: application-piv/slots.md
+  - name: PIN, PUK, and management key
+    href: application-piv/pin-puk-mgmt-key.md
+  - name: Access control
+    href: application-piv/access-control.md
+  - name: PIN and touch policy
+    href: application-piv/pin-touch-policies.md
+  - name: Keeping track of slot contents
+    href: application-piv/keeping-track.md
+  - name: Attestation statements
+    href: application-piv/attestation.md
+  - name: Building a cert request
+    href: application-piv/cert-request.md
+  - name: ECDSA signatures
+    href: application-piv/ecdsa-signatures.md
+  - name: EC Diffie-Hellman Key Agreement
+    href: application-piv/key-agreement.md
+  - name: Reading and writing objects
+    href: application-piv/get-and-put-data.md
+  - name: Public keys
+    href: application-piv/public-keys.md
+  - name: Private keys
+    href: application-piv/private-keys.md
+  - name: Migrating from SmartCard.NET/Minidriver
+    href: application-piv/migrate-smartcardnet.md
+  - name: Commands
+    items:
+    - name: PIV commands
+      href: application-piv/commands.md
+    - name: APDU reference
+      items:
+      - name: Attest
+        href: application-piv/apdu/attest.md
+      - name: "Authenticate: Decrypt"
+        href: application-piv/apdu/auth-decrypt.md
+      - name: "Authenticate: Key agreement"
+        href: application-piv/apdu/auth-key-agree.md
+      - name: "Authenticate: Management key"
+        href: application-piv/apdu/auth-mgmt.md
+      - name: "Authenticate: Sign"
+        href: application-piv/apdu/auth-sign.md
+      - name: "Change ref"
+        href: application-piv/apdu/change-ref.md
+      - name: "Generate key-pair"
+        href: application-piv/apdu/generate-pair.md
+      - name: "Get data"
+        href: application-piv/apdu/get-data.md
+      - name: "Import key"
+        href: application-piv/apdu/import-asym.md
+      - name: "Metadata"
+        href: application-piv/apdu/metadata.md
+      - name: "Put data"
+        href: application-piv/apdu/put-data.md
+      - name: "Reset"
+        href: application-piv/apdu/reset-piv.md
+      - name: "Reset retry count"
+        href: application-piv/apdu/reset-retry.md
+      - name: "Get serial number"
+        href: application-piv/apdu/serial.md
+      - name: "Set management key"
+        href: application-piv/apdu/set-mgmt-key.md
+      - name: "Set PIN retries"
+        href: application-piv/apdu/set-pin-retries.md
+      - name: "Verify PIN"
+        href: application-piv/apdu/verify.md
+      - name: "Get firmware version"
+        href: application-piv/apdu/version.md
+
+- name: "Supporting routines"
+  homepage: support/support-overview.md
+  items:
+  - name: TLV
+    href: support/support-tlv.md
+  - name: RSA padding
+    href: support/rsa-unpad.md

@@ -1,0 +1,153 @@
+﻿// Copyright 2021 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
+using Yubico.Core.Iso7816;
+using Yubico.PlatformInterop;
+
+namespace Yubico.Core.Devices.SmartCard
+{
+    internal class DesktopSmartCardDevice : SmartCardDevice
+    {
+        private readonly string _readerName;
+
+        public static IReadOnlyList<ISmartCardDevice> GetList()
+        {
+            uint result = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);
+
+            if (result != ErrorCode.SCARD_S_SUCCESS)
+            {
+                throw new SCardException(
+                    ExceptionMessages.SCardCantEstablish,
+                    result);
+            }
+
+            try
+            {
+                result = PlatformLibrary.Instance.SCard.ListReaders(context, null, out string[] readerNames);
+
+                // It's OK if there are no readers on the system. Treat this the same as if we
+                // didn't find any devices.
+                if (result == ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
+                {
+                    return new List<ISmartCardDevice>();
+                }
+
+                if (result != ErrorCode.SCARD_S_SUCCESS)
+                {
+                    throw new SCardException(
+                        ExceptionMessages.SCardListReadersFailed,
+                        result);
+                }
+
+                // We could probably get away with zero, however this small delay can help us
+                // be resilient to race conditions with device arrival.
+                int timeoutMs = 100;
+
+                using var readerStates = new SCardReaderStates(readerNames.Length);
+                for (int i = 0; i < readerStates.Count; i++)
+                {
+                    readerStates[i].ReaderName = readerNames[i];
+                }
+
+                result = PlatformLibrary.Instance.SCard.GetStatusChange(
+                    context,
+                    timeoutMs,
+                    readerStates);
+
+                if (result != ErrorCode.SCARD_S_SUCCESS)
+                {
+                    throw new SCardException(
+                        ExceptionMessages.SCardGetStatusChangeFailed,
+                        result);
+                }
+
+                return readerStates
+                    .Select(readerState => NewSmartCardDevice(readerState.ReaderName, readerState.Atr))
+                    .ToArray();
+            }
+            finally
+            {
+                context.Dispose();
+            }
+        }
+
+        private static ISmartCardDevice NewSmartCardDevice(string readerName, AnswerToReset? atr) => SdkPlatformInfo.OperatingSystem switch
+        {
+            SdkPlatform.Windows => new WindowsSmartCardDevice(readerName, atr),
+            SdkPlatform.MacOS => new DesktopSmartCardDevice(readerName, atr),
+            _ => throw new PlatformNotSupportedException()
+        };
+
+        public DesktopSmartCardDevice(string readerName, AnswerToReset? atr) :
+            base(readerName, atr)
+        {
+            _readerName = readerName;
+        }
+
+        public override ISmartCardConnection Connect()
+        {
+            uint result = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext? context);
+
+            if (result != ErrorCode.SCARD_S_SUCCESS)
+            {
+                throw new SCardException(
+                    ExceptionMessages.SCardCantEstablish,
+                    result);
+            }
+
+            SCardCardHandle? cardHandle = null;
+
+            try
+            {
+                result = PlatformLibrary.Instance.SCard.Connect(
+                    context,
+                    _readerName,
+                    SCARD_SHARE.SHARED,
+                    SCARD_PROTOCOL.Tx,
+                    out cardHandle,
+                    out SCARD_PROTOCOL activeProtocol);
+
+                if (result != ErrorCode.SCARD_S_SUCCESS)
+                {
+                    throw new SCardException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.SCardCardCantConnect,
+                            Path),
+                        result);
+                }
+
+                var connection = new DesktopSmartCardConnection(
+                    context,
+                    cardHandle,
+                    activeProtocol);
+
+                // We are transferring ownership to SmartCardConnection
+                context = null;
+                cardHandle = null;
+
+                return connection;
+            }
+            finally
+            {
+                context?.Dispose();
+                cardHandle?.Dispose();
+            }
+        }
+    }
+}

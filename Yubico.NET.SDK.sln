@@ -1,0 +1,344 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30711.63
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yubico.DotNetPolyfills", "Yubico.DotNetPolyfills\src\Yubico.DotNetPolyfills.csproj", "{469432E1-A0C7-4E16-9DE5-56E46312F542}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yubico.DotNetPolyfills.UnitTests", "Yubico.DotNetPolyfills\tests\Yubico.DotNetPolyfills.UnitTests.csproj", "{DA4567B2-FE75-4C8C-85E6-9DFEF666BEE4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yubico.Core", "Yubico.Core\src\Yubico.Core.csproj", "{E7157F16-ACD9-427D-A0D3-568B4EF91E7C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yubico.Core.UnitTests", "Yubico.Core\tests\Yubico.Core.UnitTests.csproj", "{C580309E-4712-434A-BAFB-5BF1932860EE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A487E6E9-6E7D-47CF-B1D2-70B558DFC4F7}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		docker-compose.yaml = docker-compose.yaml
+		Dockerfile = Dockerfile
+		LICENSE.txt = LICENSE.txt
+		nginx.conf = nginx.conf
+		nuget.config = nuget.config
+		README.md = README.md
+		CONTRIBUTING.md = CONTRIBUTING.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{8FFE6A2D-4DC1-4CC0-8B96-E6CE11F29B3E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{14C2FBE2-2204-46A5-9FE8-A770CB5A0261}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
+		.github\workflows\build-and-publish-after-merge.yml = .github\workflows\build-and-publish-after-merge.yml
+		.github\workflows\pull-requests.yml = .github\workflows\pull-requests.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.Core", "Yubico.Core", "{45D2A3BE-5111-4890-8898-2D43DB658A40}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.Core\Directory.Build.props = Yubico.Core\Directory.Build.props
+		Yubico.Core\Directory.Build.targets = Yubico.Core\Directory.Build.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.YubiKey", "Yubico.YubiKey", "{43F5DCFE-2AB7-4156-AA03-3DD5D5D61C1D}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\Directory.Build.props = Yubico.YubiKey\Directory.Build.props
+		Yubico.YubiKey\Directory.Build.targets = Yubico.YubiKey\Directory.Build.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{350719F2-9981-4D55-9B0D-5814A4389085}"
+ProjectSection(SolutionItems) = preProject
+	Yubico.YubiKey\docs\index.md = Yubico.YubiKey\docs\index.md
+	Yubico.YubiKey\docs\filterConfig.yml = Yubico.YubiKey\docs\filterConfig.yml
+	Yubico.YubiKey\docs\toc.yml = Yubico.YubiKey\docs\toc.yml
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Namespaces", "Namespaces", "{6BDF31A9-ABB4-4895-81C1-19EE259EA3BD}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\namespaces\Yubico.YubiKey.md = Yubico.YubiKey\docs\namespaces\Yubico.YubiKey.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "User Manual", "User Manual", "{6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\intro.md = Yubico.YubiKey\docs\users-manual\intro.md
+		Yubico.YubiKey\docs\users-manual\toc.yml = Yubico.YubiKey\docs\users-manual\toc.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.DotNetPolyfills", "Yubico.DotNetPolyfills", "{911992B7-10DE-4433-85A2-8FED53C305BE}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.DotNetPolyfills\Directory.Build.props = Yubico.DotNetPolyfills\Directory.Build.props
+		Yubico.DotNetPolyfills\Directory.Build.targets = Yubico.DotNetPolyfills\Directory.Build.targets
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{778EE2C1-34B3-4CAB-B89A-7F2E37BCE4CA}"
+	ProjectSection(SolutionItems) = preProject
+		build\Attribution.props = build\Attribution.props
+		build\build.ps1 = build\build.ps1
+		build\CompilerSettings.props = build\CompilerSettings.props
+		build\Directory.Build.props = build\Directory.Build.props
+		build\Directory.Build.targets = build\Directory.Build.targets
+		build\PackageReferences.props = build\PackageReferences.props
+		build\ProjectTypes.props = build\ProjectTypes.props
+		build\Versions.props = build\Versions.props
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Oath", "Oath", "{54B401F4-1E38-46E3-AAA9-674DB98754B8}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\application-oath\oath-backup-credentials.md = Yubico.YubiKey\docs\users-manual\application-oath\oath-backup-credentials.md
+		Yubico.YubiKey\docs\users-manual\application-oath\oath-commands.md = Yubico.YubiKey\docs\users-manual\application-oath\oath-commands.md
+		Yubico.YubiKey\docs\users-manual\application-oath\oath-credentials.md = Yubico.YubiKey\docs\users-manual\application-oath\oath-credentials.md
+		Yubico.YubiKey\docs\users-manual\application-oath\oath-overview.md = Yubico.YubiKey\docs\users-manual\application-oath\oath-overview.md
+		Yubico.YubiKey\docs\users-manual\application-oath\oath-password.md = Yubico.YubiKey\docs\users-manual\application-oath\oath-password.md
+		Yubico.YubiKey\docs\users-manual\application-oath\oath-session.md = Yubico.YubiKey\docs\users-manual\application-oath\oath-session.md
+		Yubico.YubiKey\docs\users-manual\application-oath\oath-use-case.md = Yubico.YubiKey\docs\users-manual\application-oath\oath-use-case.md
+		Yubico.YubiKey\docs\users-manual\application-oath\uri-string-format.md = Yubico.YubiKey\docs\users-manual\application-oath\uri-string-format.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Otp", "Otp", "{BA01E787-FF01-4C14-A929-9135D0B97752}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\application-otp\otp-commands.md = Yubico.YubiKey\docs\users-manual\application-otp\otp-commands.md
+		Yubico.YubiKey\docs\users-manual\application-otp\otp-overview.md = Yubico.YubiKey\docs\users-manual\application-otp\otp-overview.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Piv", "Piv", "{DBCBCAC7-DDB0-4062-A6FF-4386702F9D4F}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\application-piv\access-control.md = Yubico.YubiKey\docs\users-manual\application-piv\access-control.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\attest.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\attest.md
+		Yubico.YubiKey\docs\users-manual\application-piv\attestation.md = Yubico.YubiKey\docs\users-manual\application-piv\attestation.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-decrypt.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-decrypt.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-key-agree.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-key-agree.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-mgmt.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-mgmt.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-sign.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-sign.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\change-ref.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\change-ref.md
+		Yubico.YubiKey\docs\users-manual\application-piv\commands.md = Yubico.YubiKey\docs\users-manual\application-piv\commands.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\generate-pair.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\generate-pair.md
+		Yubico.YubiKey\docs\users-manual\application-piv\get-and-put-data.md = Yubico.YubiKey\docs\users-manual\application-piv\get-and-put-data.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\get-data.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\get-data.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\import-asym.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\import-asym.md
+		Yubico.YubiKey\docs\users-manual\application-piv\keeping-track.md = Yubico.YubiKey\docs\users-manual\application-piv\keeping-track.md
+		Yubico.YubiKey\docs\users-manual\application-piv\key-agreement.md = Yubico.YubiKey\docs\users-manual\application-piv\key-agreement.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\metadata.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\metadata.md
+		Yubico.YubiKey\docs\users-manual\application-piv\migrate-smartcardnet.md = Yubico.YubiKey\docs\users-manual\application-piv\migrate-smartcardnet.md
+		Yubico.YubiKey\docs\users-manual\application-piv\pin-puk-mgmt-key.md = Yubico.YubiKey\docs\users-manual\application-piv\pin-puk-mgmt-key.md
+		Yubico.YubiKey\docs\users-manual\application-piv\pin-touch-policies.md = Yubico.YubiKey\docs\users-manual\application-piv\pin-touch-policies.md
+		Yubico.YubiKey\docs\users-manual\application-piv\piv-overview.md = Yubico.YubiKey\docs\users-manual\application-piv\piv-overview.md
+		Yubico.YubiKey\docs\users-manual\application-piv\private-keys.md = Yubico.YubiKey\docs\users-manual\application-piv\private-keys.md
+		Yubico.YubiKey\docs\users-manual\application-piv\public-keys.md = Yubico.YubiKey\docs\users-manual\application-piv\public-keys.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-data.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-data.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-vendor-data.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-vendor-data.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-piv.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-piv.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-retry.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-retry.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\serial.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\serial.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-mgmt-key.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-mgmt-key.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-pin-retries.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-pin-retries.md
+		Yubico.YubiKey\docs\users-manual\application-piv\slots.md = Yubico.YubiKey\docs\users-manual\application-piv\slots.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\verify.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\verify.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\version.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\version.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Getting Started", "Getting Started", "{D8091437-C063-4CC2-A52A-5734AE23FB0F}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\getting-started\how-to-install.md = Yubico.YubiKey\docs\users-manual\getting-started\how-to-install.md
+		Yubico.YubiKey\docs\users-manual\getting-started\overview-of-sdk.md = Yubico.YubiKey\docs\users-manual\getting-started\overview-of-sdk.md
+		Yubico.YubiKey\docs\users-manual\getting-started\what-is-a-yubikey.md = Yubico.YubiKey\docs\users-manual\getting-started\what-is-a-yubikey.md
+		Yubico.YubiKey\docs\users-manual\getting-started\whats-new.md = Yubico.YubiKey\docs\users-manual\getting-started\whats-new.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk Programming Guide", "Sdk Programming Guide", "{749DAF15-E6A8-44DC-906E-BE3FC8DE3983}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\alternate-crypto.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\alternate-crypto.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\commands.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\commands.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\delegates-in-sdk.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\delegates-in-sdk.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\making-a-connection.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\making-a-connection.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\sensitive-data.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\sensitive-data.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\threads.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\threads.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{BA394A0D-B336-4B6E-83B8-B41FC165D6D9}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\attest.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\attest.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-decrypt.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-decrypt.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-key-agree.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-key-agree.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-mgmt.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-mgmt.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-sign.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-sign.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\change-ref.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\change-ref.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\generate-pair.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\generate-pair.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\get-data.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\get-data.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\import-asym.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\import-asym.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\metadata.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\metadata.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-data.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-data.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-vendor-data.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-vendor-data.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-piv.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-piv.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-retry.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-retry.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\serial.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\serial.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-mgmt-key.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-mgmt-key.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-pin-retries.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-pin-retries.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\verify.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\verify.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\version.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\version.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yubico.YubiKey.IntegrationTests", "Yubico.YubiKey\tests\integration\Yubico.YubiKey.IntegrationTests.csproj", "{0D349F5B-7C87-4A2D-B9E1-D5805F033FB0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yubico.YubiKey.TestApp", "Yubico.YubiKey\tests\sandbox\Yubico.YubiKey.TestApp.csproj", "{4CBA6ABD-C09D-4227-B6B3-58E30C38EACE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yubico.YubiKey.UnitTests", "Yubico.YubiKey\tests\unit\Yubico.YubiKey.UnitTests.csproj", "{C378DD92-9107-4B7E-9D4B-59271A8ABB42}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yubico.YubiKey.TestUtilities", "Yubico.YubiKey\tests\utilities\Yubico.YubiKey.TestUtilities.csproj", "{A69022BB-4582-4373-AAC7-62712923559B}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yubico.YubiKey", "Yubico.YubiKey\src\Yubico.YubiKey.csproj", "{B6C9FB57-AF94-4170-AE17-020809E5CED2}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiKey Reference", "YubiKey Reference", "{E7B994D1-AB44-4799-B98B-00515A9C63CE}"
+ProjectSection(SolutionItems) = preProject
+	Yubico.YubiKey\docs\users-manual\yubikey-reference\apdu.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\apdu.md
+	Yubico.YubiKey\docs\users-manual\yubikey-reference\hardware.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\hardware.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transports", "Transports", "{FEE624EE-2E54-4E02-9492-C646D6FB3C68}"
+ProjectSection(SolutionItems) = preProject
+	Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\hidfido.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\hidfido.md
+	Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\hidkeyboard.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\hidkeyboard.md
+	Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\overview.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\overview.md
+	Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\smartcard.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\smartcard.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiKey-API", "YubiKey-API", "{13F7E3CF-C909-40EC-A376-EC278CEC632D}"
+ProjectSection(SolutionItems) = preProject
+	Yubico.YubiKey\docs\yubikey-api\index.md = Yubico.YubiKey\docs\yubikey-api\index.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core-API", "Core-API", "{C0575667-4479-4446-B883-A6D4F3B99457}"
+ProjectSection(SolutionItems) = preProject
+	Yubico.YubiKey\docs\core-api\index.md = Yubico.YubiKey\docs\core-api\index.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "U2f", "U2f", "{2C7EFA92-1B47-4F5B-91B5-C130BDB19D93}"
+ProjectSection(SolutionItems) = preProject
+	Yubico.YubiKey\docs\users-manual\application-u2f\u2f-commands.md = Yubico.YubiKey\docs\users-manual\application-u2f\u2f-commands.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "contributordocs", "contributordocs", "{522DEBA9-211E-425A-916D-30F5636F5646}"
+ProjectSection(SolutionItems) = preProject
+	contributordocs\allowed-dotnet-things-and-versions.md = contributordocs\allowed-dotnet-things-and-versions.md
+	contributordocs\code-flow-and-pull-requests.md = contributordocs\code-flow-and-pull-requests.md
+	contributordocs\getting-started.md = contributordocs\getting-started.md
+	contributordocs\polyfills.md = contributordocs\polyfills.md
+	contributordocs\README.md = contributordocs\README.md
+	contributordocs\testing.md = contributordocs\testing.md
+	contributordocs\useful-links.md = contributordocs\useful-links.md
+	contributordocs\versioning.md = contributordocs\versioning.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "coding-guidelines", "coding-guidelines", "{B7A8A40E-4191-4520-ACE6-2550B1D272B5}"
+ProjectSection(SolutionItems) = preProject
+	contributordocs\coding-guidelines\exception-usage.md = contributordocs\coding-guidelines\exception-usage.md
+	contributordocs\coding-guidelines\README.md = contributordocs\coding-guidelines\README.md
+EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation-system", "documentation-system", "{BB9E350C-E4C8-4902-84B6-29957554B330}"
+ProjectSection(SolutionItems) = preProject
+	contributordocs\documentation-system\building-docs-and-running.md = contributordocs\documentation-system\building-docs-and-running.md
+	contributordocs\documentation-system\comments-in-code.md = contributordocs\documentation-system\comments-in-code.md
+	contributordocs\documentation-system\README.md = contributordocs\documentation-system\README.md
+	contributordocs\documentation-system\setup.md = contributordocs\documentation-system\setup.md
+EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+		ReleaseWithDocs|Any CPU = ReleaseWithDocs|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{469432E1-A0C7-4E16-9DE5-56E46312F542}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{469432E1-A0C7-4E16-9DE5-56E46312F542}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{469432E1-A0C7-4E16-9DE5-56E46312F542}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{469432E1-A0C7-4E16-9DE5-56E46312F542}.Release|Any CPU.Build.0 = Release|Any CPU
+		{469432E1-A0C7-4E16-9DE5-56E46312F542}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
+		{469432E1-A0C7-4E16-9DE5-56E46312F542}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
+		{DA4567B2-FE75-4C8C-85E6-9DFEF666BEE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DA4567B2-FE75-4C8C-85E6-9DFEF666BEE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DA4567B2-FE75-4C8C-85E6-9DFEF666BEE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DA4567B2-FE75-4C8C-85E6-9DFEF666BEE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DA4567B2-FE75-4C8C-85E6-9DFEF666BEE4}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
+		{DA4567B2-FE75-4C8C-85E6-9DFEF666BEE4}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
+		{E7157F16-ACD9-427D-A0D3-568B4EF91E7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E7157F16-ACD9-427D-A0D3-568B4EF91E7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E7157F16-ACD9-427D-A0D3-568B4EF91E7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E7157F16-ACD9-427D-A0D3-568B4EF91E7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E7157F16-ACD9-427D-A0D3-568B4EF91E7C}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
+		{E7157F16-ACD9-427D-A0D3-568B4EF91E7C}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
+		{C580309E-4712-434A-BAFB-5BF1932860EE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C580309E-4712-434A-BAFB-5BF1932860EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C580309E-4712-434A-BAFB-5BF1932860EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C580309E-4712-434A-BAFB-5BF1932860EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C580309E-4712-434A-BAFB-5BF1932860EE}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
+		{C580309E-4712-434A-BAFB-5BF1932860EE}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
+		{0D349F5B-7C87-4A2D-B9E1-D5805F033FB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D349F5B-7C87-4A2D-B9E1-D5805F033FB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D349F5B-7C87-4A2D-B9E1-D5805F033FB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D349F5B-7C87-4A2D-B9E1-D5805F033FB0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D349F5B-7C87-4A2D-B9E1-D5805F033FB0}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
+		{0D349F5B-7C87-4A2D-B9E1-D5805F033FB0}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
+		{4CBA6ABD-C09D-4227-B6B3-58E30C38EACE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4CBA6ABD-C09D-4227-B6B3-58E30C38EACE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4CBA6ABD-C09D-4227-B6B3-58E30C38EACE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4CBA6ABD-C09D-4227-B6B3-58E30C38EACE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4CBA6ABD-C09D-4227-B6B3-58E30C38EACE}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
+		{4CBA6ABD-C09D-4227-B6B3-58E30C38EACE}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
+		{C378DD92-9107-4B7E-9D4B-59271A8ABB42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C378DD92-9107-4B7E-9D4B-59271A8ABB42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C378DD92-9107-4B7E-9D4B-59271A8ABB42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C378DD92-9107-4B7E-9D4B-59271A8ABB42}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C378DD92-9107-4B7E-9D4B-59271A8ABB42}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
+		{C378DD92-9107-4B7E-9D4B-59271A8ABB42}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
+		{A69022BB-4582-4373-AAC7-62712923559B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A69022BB-4582-4373-AAC7-62712923559B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A69022BB-4582-4373-AAC7-62712923559B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A69022BB-4582-4373-AAC7-62712923559B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A69022BB-4582-4373-AAC7-62712923559B}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
+		{A69022BB-4582-4373-AAC7-62712923559B}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
+		{B6C9FB57-AF94-4170-AE17-020809E5CED2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6C9FB57-AF94-4170-AE17-020809E5CED2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6C9FB57-AF94-4170-AE17-020809E5CED2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6C9FB57-AF94-4170-AE17-020809E5CED2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6C9FB57-AF94-4170-AE17-020809E5CED2}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
+		{B6C9FB57-AF94-4170-AE17-020809E5CED2}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{469432E1-A0C7-4E16-9DE5-56E46312F542} = {911992B7-10DE-4433-85A2-8FED53C305BE}
+		{DA4567B2-FE75-4C8C-85E6-9DFEF666BEE4} = {911992B7-10DE-4433-85A2-8FED53C305BE}
+		{E7157F16-ACD9-427D-A0D3-568B4EF91E7C} = {45D2A3BE-5111-4890-8898-2D43DB658A40}
+		{C580309E-4712-434A-BAFB-5BF1932860EE} = {45D2A3BE-5111-4890-8898-2D43DB658A40}
+		{8FFE6A2D-4DC1-4CC0-8B96-E6CE11F29B3E} = {A487E6E9-6E7D-47CF-B1D2-70B558DFC4F7}
+		{14C2FBE2-2204-46A5-9FE8-A770CB5A0261} = {8FFE6A2D-4DC1-4CC0-8B96-E6CE11F29B3E}
+		{350719F2-9981-4D55-9B0D-5814A4389085} = {43F5DCFE-2AB7-4156-AA03-3DD5D5D61C1D}
+		{6BDF31A9-ABB4-4895-81C1-19EE259EA3BD} = {350719F2-9981-4D55-9B0D-5814A4389085}
+		{6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC} = {350719F2-9981-4D55-9B0D-5814A4389085}
+		{778EE2C1-34B3-4CAB-B89A-7F2E37BCE4CA} = {A487E6E9-6E7D-47CF-B1D2-70B558DFC4F7}
+		{54B401F4-1E38-46E3-AAA9-674DB98754B8} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
+		{BA01E787-FF01-4C14-A929-9135D0B97752} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
+		{DBCBCAC7-DDB0-4062-A6FF-4386702F9D4F} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
+		{D8091437-C063-4CC2-A52A-5734AE23FB0F} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
+		{749DAF15-E6A8-44DC-906E-BE3FC8DE3983} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
+		{BA394A0D-B336-4B6E-83B8-B41FC165D6D9} = {DBCBCAC7-DDB0-4062-A6FF-4386702F9D4F}
+		{0D349F5B-7C87-4A2D-B9E1-D5805F033FB0} = {43F5DCFE-2AB7-4156-AA03-3DD5D5D61C1D}
+		{4CBA6ABD-C09D-4227-B6B3-58E30C38EACE} = {43F5DCFE-2AB7-4156-AA03-3DD5D5D61C1D}
+		{C378DD92-9107-4B7E-9D4B-59271A8ABB42} = {43F5DCFE-2AB7-4156-AA03-3DD5D5D61C1D}
+		{A69022BB-4582-4373-AAC7-62712923559B} = {43F5DCFE-2AB7-4156-AA03-3DD5D5D61C1D}
+		{B6C9FB57-AF94-4170-AE17-020809E5CED2} = {43F5DCFE-2AB7-4156-AA03-3DD5D5D61C1D}
+		{E7B994D1-AB44-4799-B98B-00515A9C63CE} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
+		{FEE624EE-2E54-4E02-9492-C646D6FB3C68} = {E7B994D1-AB44-4799-B98B-00515A9C63CE}
+		{13F7E3CF-C909-40EC-A376-EC278CEC632D} = {350719F2-9981-4D55-9B0D-5814A4389085}
+		{C0575667-4479-4446-B883-A6D4F3B99457} = {350719F2-9981-4D55-9B0D-5814A4389085}
+		{2C7EFA92-1B47-4F5B-91B5-C130BDB19D93} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
+		{522DEBA9-211E-425A-916D-30F5636F5646} = {A487E6E9-6E7D-47CF-B1D2-70B558DFC4F7}
+		{B7A8A40E-4191-4520-ACE6-2550B1D272B5} = {522DEBA9-211E-425A-916D-30F5636F5646}
+		{BB9E350C-E4C8-4902-84B6-29957554B330} = {522DEBA9-211E-425A-916D-30F5636F5646}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3DF71DF2-3B6F-4855-8BC4-35B9714F3B0F}
+	EndGlobalSection
+EndGlobal

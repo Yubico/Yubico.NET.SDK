@@ -1,0 +1,76 @@
+{
+  "metadata": [
+    {
+      "src": [
+        "bin/ReleaseWithDocs/netstandard2.0/Yubico.YubiKey.dll"
+      ],
+      "dest": "../docs/yubikey-api/",
+      "disableGitFeatures": true,
+      "disableDefaultFilter": false,
+      "filter": "../docs/filterConfig.yml"
+    },
+    {
+      "src": [
+        "bin/ReleaseWithDocs/netstandard2.0/Yubico.Core.dll"
+      ],
+      "dest": "../docs/core-api/",
+      "disableGitFeatures": true,
+      "disableDefaultFilter": false,
+      "filter": "../docs/filterConfig.yml"
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "yubikey-api/**.yml",
+          "yubikey-api/index.md",
+          "core-api/**.yml",
+          "core-api/index.md",
+          "users-manual/**.md",
+          "users-manual/**/toc.yml",
+          "toc.yml",
+          "*.md"
+        ],
+        "src": "../docs/"
+      }
+    ],
+    "resource": [
+      {
+        "files": [
+          "images/**"
+        ],
+        "src": "../docs/"
+      }
+    ],
+    "overwrite": [
+      {
+        "files": [
+          "namespaces/**.md"
+        ],
+        "exclude": [
+          "obj/**",
+          "_site/**"
+        ],
+        "src": "../docs/"
+      }
+    ],
+    "dest": "../docs/_site/",
+    "globalMetadataFiles": [],
+    "globalMetadata": {
+      "_appFaviconPath": "images/favicon.ico"
+    },
+    "fileMetadataFiles": [],
+    "template": [
+      "default",
+      "../docs/memberpage",
+      "../docs/yubikeysdk-template"
+    ],
+    "postProcessors": [],
+    "markdownEngineName": "markdig",
+    "noLangKeyword": false,
+    "keepFileLink": false,
+    "cleanupCacheHistory": false,
+    "disableGitFeatures": false
+  }
+}

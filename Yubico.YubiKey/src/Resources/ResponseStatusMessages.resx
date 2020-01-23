@@ -1,0 +1,285 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<!-- Copyright 2021 Yubico AB
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. -->
+
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="BaseAuthenticationMethodBlocked" xml:space="preserve">
+    <value>Authentication method blocked.</value>
+  </data>
+  <data name="BaseCommandChainingNotSupported" xml:space="preserve">
+    <value>Command chaining not supported.</value>
+  </data>
+  <data name="BaseCommandNotAllowed" xml:space="preserve">
+    <value>Command not allowed.</value>
+  </data>
+  <data name="BaseCommandNotAllowedNoEF" xml:space="preserve">
+    <value>Command not allowed (no current elementary file).</value>
+  </data>
+  <data name="BaseConditionsNotSatisfied" xml:space="preserve">
+    <value>Conditions of use not satisfied.</value>
+  </data>
+  <data name="BaseDataNotFound" xml:space="preserve">
+    <value>Referenced data or reference data not found.</value>
+  </data>
+  <data name="BaseDFNameAlreadyExists" xml:space="preserve">
+    <value>Dedicated file name already exists.</value>
+  </data>
+  <data name="BaseEOFReached" xml:space="preserve">
+    <value>End of file or record reached before reading the expected number of bytes.</value>
+  </data>
+  <data name="BaseErrorNvmChanged" xml:space="preserve">
+    <value>Error, state of non-volatile memory has changed.</value>
+  </data>
+  <data name="BaseExecutionError" xml:space="preserve">
+    <value>Execution error.</value>
+  </data>
+  <data name="BaseFailed" xml:space="preserve">
+    <value>The comand failed to complete.</value>
+  </data>
+  <data name="BaseFileAlreadyExists" xml:space="preserve">
+    <value>File already exists.</value>
+  </data>
+  <data name="BaseFileDeactivated" xml:space="preserve">
+    <value>Selected file deactivated.</value>
+  </data>
+  <data name="BaseFileOrApplicationNotFound" xml:space="preserve">
+    <value>File or application not found.</value>
+  </data>
+  <data name="BaseFileTerminated" xml:space="preserve">
+    <value>Selected file in termination state.</value>
+  </data>
+  <data name="BaseFunctionError" xml:space="preserve">
+    <value>Function error.</value>
+  </data>
+  <data name="BaseFunctionNotSupported" xml:space="preserve">
+    <value>Function not supported.</value>
+  </data>
+  <data name="BaseIncompatibleCommand" xml:space="preserve">
+    <value>Command incompatible with file structure.</value>
+  </data>
+  <data name="BaseInconsistentLengthWithP1P2" xml:space="preserve">
+    <value>Number of sent bytes inconsistent with parameters P1-P2.</value>
+  </data>
+  <data name="BaseInconsistentLengthWithTlv" xml:space="preserve">
+    <value>Number of sent bytes inconsistent with TLV structure.</value>
+  </data>
+  <data name="BaseIncorrectP1orP2" xml:space="preserve">
+    <value>Incorrect parameters P1-P2.</value>
+  </data>
+  <data name="BaseInvalidCommandDataParameter" xml:space="preserve">
+    <value>Incorrect parameters in the command data field.</value>
+  </data>
+  <data name="BaseInvalidFileFormat" xml:space="preserve">
+    <value>File control information not formatted correctly.</value>
+  </data>
+  <data name="BaseInvalidParameter" xml:space="preserve">
+    <value>Invalid parameters.</value>
+  </data>
+  <data name="BaseLastCommandOfChainExpected" xml:space="preserve">
+    <value>Last command of the chain expected.</value>
+  </data>
+  <data name="BaseLogicalChannelNotSupported" xml:space="preserve">
+    <value>Logical channel not supported.</value>
+  </data>
+  <data name="BaseMemoryFailure" xml:space="preserve">
+    <value>Memory failure.</value>
+  </data>
+  <data name="BaseNoMoreSpaceInFile" xml:space="preserve">
+    <value>File filled up by the last write</value>
+  </data>
+  <data name="BaseNoSensorData" xml:space="preserve">
+    <value>No input data available from a sensor on the card.</value>
+  </data>
+  <data name="BaseNotEnoughSpace" xml:space="preserve">
+    <value>Not enough memory space in the file.</value>
+  </data>
+  <data name="BasePartialCorruption" xml:space="preserve">
+    <value>Part of returned data may be corrupted.</value>
+  </data>
+  <data name="BaseRecordNotFound" xml:space="preserve">
+    <value>Record not found.</value>
+  </data>
+  <data name="BaseReferenceDataUnusable" xml:space="preserve">
+    <value>Reference data not usable.</value>
+  </data>
+  <data name="BaseResponseRequired" xml:space="preserve">
+    <value>Immediate response required by the card.</value>
+  </data>
+  <data name="BaseSecureMessageDataMissing" xml:space="preserve">
+    <value>Expected secure messaging data objects missing.</value>
+  </data>
+  <data name="BaseSecureMessageMalformed" xml:space="preserve">
+    <value>Incorrect secure messaging data objects.</value>
+  </data>
+  <data name="BaseSecureMessagingNotSupported" xml:space="preserve">
+    <value>Secure messaging not supported.</value>
+  </data>
+  <data name="BaseSecurityStatusNotSatisfied" xml:space="preserve">
+    <value>Security status not satisfied.</value>
+  </data>
+  <data name="BaseSuccess" xml:space="preserve">
+    <value>The command succeeded.</value>
+  </data>
+  <data name="BaseWarningNvmChanged" xml:space="preserve">
+    <value>Warning, state of non-volatile memory has changed.</value>
+  </data>
+  <data name="BaseWarningNvmUnchanged" xml:space="preserve">
+    <value>Warning, state of non-volatile memory is unchanged.</value>
+  </data>
+  <data name="OathAuthNotEnabled" xml:space="preserve">
+    <value>Authentication is not enabled.</value>
+  </data>
+  <data name="OathGenericError" xml:space="preserve">
+    <value>Generic error.</value>
+  </data>
+  <data name="OathNoSuchObject" xml:space="preserve">
+    <value>No such object.</value>
+  </data>
+  <data name="OathResponseDoesNotMatch" xml:space="preserve">
+    <value>Response does not match.</value>
+  </data>
+  <data name="OathWrongSyntax" xml:space="preserve">
+    <value>Wrong syntax.</value>
+  </data>
+  <data name="PivPinPukBlocked" xml:space="preserve">
+    <value>Maximum number of retries for user verification (PIN or PUK) exceeded. 0 retries remaining.</value>
+  </data>
+  <data name="PivPinPukFailedWithRetries" xml:space="preserve">
+    <value>User verification (PIN or PUK) failed. Retries remaining: {0}.</value>
+  </data>
+  <data name="PivSecurityStatusNotSatisfied" xml:space="preserve">
+    <value>User verification (PIN, PUK, or Management Key) or presence (touch) requirement not satisfied.</value>
+  </data>
+  <data name="OathSecurityStatusNotSatisfied" xml:space="preserve">
+    <value>Authentication with a password is required to access the OATH application.</value>
+  </data>
+</root>

@@ -1,0 +1,76 @@
+<!-- Copyright 2021 Yubico AB
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License. -->
+
+<!--
+Versions.props
+
+A centralized place to configure the versions assigned to assemblies built by this repository. All
+versions should be referenced from this file - do not manually set properties of a project elsewhere.
+
+Versions should follow the semver 2.0 specification. Projects can and should adjust their revisions
+independently. See each specific project's version property for further guidance.
+
+Projects can use the pre-release suffixes alpha and preview, followed by an incremented number to denote
+working versions prior to a major or minor release. Note that if the previous version was 1.1.0, the
+next pre-release version would be 1.2.0-alpha.1. Alpha is used for internal milestones, preview is used
+for external milestones.
+-->
+<Project>
+
+  <PropertyGroup Label="Versions for all projects">
+
+    <!--
+    Yubico.DotNetPolyfills project
+
+    This project includes polyfill code that allows other projects in this repository to use .NET
+    library features and APIs in older versions of the .NET Standard.
+
+    Increment the major version whenever we remove support for a .NET version.
+    Increment the minor version whenever we add support for a new class or type.
+    Increment the patch version for bug fixes.
+    -->
+    <YubicoDotNetPolyfillsVersion>1.0.0-Beta.20210721.1</YubicoDotNetPolyfillsVersion>
+
+    <!--
+    Yubico.Core project
+
+    This project provides foundational components and platform abstractions to other libraries
+    so that they may be written in a platform-agnostic manner.
+
+    Increment the major version whenever a new platform is added or removed, or a breaking change
+    must take place.
+    Increment the minor version for any cross-platform feature work or improvements.
+    Increment the patch version for bug fixes.
+
+    This project can, and should, use pre-release suffixes for development milestones.
+    -->
+    <YubicoCoreVersion>1.0.0-Beta.20210721.1</YubicoCoreVersion>
+
+    <!--
+    Yubico.Authenticator project
+
+    This project defines the concept of a YubiKey as well as all of the public capabilities of
+    of a YubiKey authenticator token. This project is platform-agnostic.
+
+    Increment the major version whenever a breaking API change must take place.
+    Increment the minor version whenever a new feature or improvement is added.
+    Increment the patch version for bug fixes.
+
+    This project can, and should, use pre-release suffixes for development milestones.
+    -->
+    <YubicoYubiKeyVersion>1.0.0-Beta.20210721.1</YubicoYubiKeyVersion>
+
+  </PropertyGroup>
+
+</Project>

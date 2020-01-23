@@ -1,0 +1,691 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ApplicationIdNotFound" xml:space="preserve">
+    <value>There isn't an application ID associated with this YubiKeyApplication. Either the application is not supported, or is a meta application (like InterIndustry) which does not have an ID.</value>
+  </data>
+  <data name="BuildExternalAuthenticatePriorToLoadInitializeUpdateResponse" xml:space="preserve">
+    <value>SCP03 handshake called out-of-order: building an external authenticate response before processing the preceding initialize update response is not possible.</value>
+  </data>
+  <data name="CantSelectInterIndustry" xml:space="preserve">
+    <value>InterIndustry is a meta application which cannot be selected directly. Its commands can be issued on other previously selected applications.</value>
+  </data>
+  <data name="CcidNotSupported" xml:space="preserve">
+    <value>The CCID interface is not supported on this YubiKey.</value>
+  </data>
+  <data name="ChecksumError" xml:space="preserve">
+    <value>Checksum error.</value>
+    <comment>This error needs to be more detailed</comment>
+  </data>
+  <data name="DecodedResponseStatusWordNotSuccess" xml:space="preserve">
+    <value>Attempted to decode a response with a failed status word. SCP03 can only verify the successful execution of a command APDU - no verification is possible of status words.</value>
+  </data>
+  <data name="HidFidoNotSupported" xml:space="preserve">
+    <value>The FIDO interface is not supported on this YubiKey.</value>
+  </data>
+  <data name="HidKeyboardNotSupported" xml:space="preserve">
+    <value>The keyboard interface is not supported on this YubiKey.</value>
+  </data>
+  <data name="IncorrectAesKeyLength" xml:space="preserve">
+    <value>The supplied AES key was an incorrect length.</value>
+  </data>
+  <data name="IncorrectTripleDesKeyLength" xml:space="preserve">
+    <value>The supplied Triple-DES key was an incorrect length.</value>
+  </data>
+  <data name="TripleDesFailed" xml:space="preserve">
+    <value>The Triple-DES operation failed.</value>
+  </data>
+  <data name="IncorrectRsaKeyLength" xml:space="preserve">
+    <value>The supplied RSA key was an incorrect length.</value>
+  </data>
+  <data name="IncorrectEccKeyLength" xml:space="preserve">
+    <value>The supplied ECC key was an incorrect length.</value>
+  </data>
+  <data name="IncorrectDigestLength" xml:space="preserve">
+    <value>The supplied message digest was an incorrect length.</value>
+  </data>
+  <data name="UnsupportedAlgorithm" xml:space="preserve">
+    <value>The requested algorithm is not supported.</value>
+  </data>
+  <data name="InvalidPublicKeyData" xml:space="preserve">
+    <value>The data does not match a supported public key format.</value>
+  </data>
+  <data name="InvalidPrivateKeyData" xml:space="preserve">
+    <value>The data does not match a supported private key format.</value>
+  </data>
+  <data name="UnsupportedAttestationCert" xml:space="preserve">
+    <value>The certificate provided is not supported as an Attestation Certificate.</value>
+  </data>
+  <data name="IncorrectCardCryptogram" xml:space="preserve">
+    <value>The response from the device contained an incorrect card cryptogram. This could be due to incorrect static keys, a skipped or missing response, or man-in-the-middle attack.</value>
+  </data>
+  <data name="IncorrectCiphertextLength" xml:space="preserve">
+    <value>The supplied ciphertext was not a multiple of the block size in length.</value>
+  </data>
+  <data name="InvalidChannelId" xml:space="preserve">
+    <value>The CTAPHID channel ID cannot be null or empty. A valid CTAPHID channel needs to be acquired.</value>
+  </data>
+  <data name="InvalidCiphertextLength" xml:space="preserve">
+    <value>The length of the supplied ciphertext was not valid for the usage.</value>
+  </data>
+  <data name="InvalidOutputBuffer" xml:space="preserve">
+    <value>Given the offset, the length of the output buffer was not valid.</value>
+  </data>
+  <data name="IncorrectDerivationLength" xml:space="preserve">
+    <value>Tried to derive an incorrectly-sized output.</value>
+  </data>
+  <data name="IncorrectExternalAuthenticateData" xml:space="preserve">
+    <value>The ExternalAuthenticate command was supplied invalid data.</value>
+  </data>
+  <data name="IncorrectInitializeUpdateResponseData" xml:space="preserve">
+    <value>Parsing of an InitializeUpdateResponse failed due to an incorrect response length.</value>
+  </data>
+  <data name="IncorrectIVLength" xml:space="preserve">
+    <value>The supplied IV was an incorrect length.</value>
+  </data>
+  <data name="IncorrectPlaintextLength" xml:space="preserve">
+    <value>The supplied plaintext was not a multiple of the block size in length.</value>
+  </data>
+  <data name="IncorrectResponseLengthToDecrypt" xml:space="preserve">
+    <value>The device response was not the correct length (a multiple of the block size) to decrypt.</value>
+  </data>
+  <data name="IncorrectRmac" xml:space="preserve">
+    <value>The response from the device contained an incorrect RMAC. This could be due to incorrect static keys, a skipped or missing response, or man-in-the-middle attack.</value>
+  </data>
+  <data name="IncorrectStaticKeyLength" xml:space="preserve">
+    <value>The supplied static key was an incorrect length.</value>
+  </data>
+  <data name="InsufficientResponseLengthToVerifyRmac" xml:space="preserve">
+    <value>The device response was not long enough to contain an RMAC.</value>
+  </data>
+  <data name="InvalidHostChallengeLength" xml:space="preserve">
+    <value>Incorrect host challenge length.</value>
+  </data>
+  <data name="InvalidInitializeUpdateResponse" xml:space="preserve">
+    <value>Bad response to InitializeUpdate.</value>
+  </data>
+  <data name="InvalidOtpSlot" xml:space="preserve">
+    <value>Invalid OTP slot.</value>
+  </data>
+  <data name="InvalidPadding" xml:space="preserve">
+    <value>Invalid padding.</value>
+  </data>
+  <data name="LoadExternalAuthenticateResponsePriorToLoadInitializUpdateResponse" xml:space="preserve">
+    <value>SCP03 handshake called out-of-order: loading an external authenticate response before processing the preceding initialize update response is not possible.</value>
+    <comment>We should improve this</comment>
+  </data>
+  <data name="LoadInitializeUpdatePriorToBuild" xml:space="preserve">
+    <value>SCP03 handshake called out-of-order: loading the response to an initialize update command before building it is not possible.</value>
+    <comment>We should improve this</comment>
+  </data>
+  <data name="ManagementApplicationUnavailable" xml:space="preserve">
+    <value>Cannot open the management application.</value>
+  </data>
+  <data name="NoResponseDataApduFailed" xml:space="preserve">
+    <value>Response data is not available as the ResponseApdu has indicated a failure. Check the SW property or call ThrowIfFailed for more information.</value>
+  </data>
+  <data name="InvalidApduResponseData" xml:space="preserve">
+    <value>Response data contains invalid data.</value>
+  </data>
+  <data name="CommandResponseApduUnexpectedResult" xml:space="preserve">
+    <value>A Command/Response operation returned the unexpected value of {0}.</value>
+  </data>
+  <data name="IncompleteCommandInput" xml:space="preserve">
+    <value>The response APDU indicates further information or action, such as PIN, management key, or touch, is needed to complete the command.</value>
+  </data>
+  <data name="NoMoreRetriesRemaining" xml:space="preserve">
+    <value>There are no retries remaining for a PIN, PUK, or other authentication element.</value>
+  </data>
+  <data name="YubiKeyNotAuthenticatedInPiv" xml:space="preserve">
+    <value>PIV management key mutual authentication failed because the YubiKey did not authenticate.</value>
+  </data>
+  <data name="MissingKeyCollector" xml:space="preserve">
+    <value>A KeyCollector delegate is needed but not supplied.</value>
+  </data>
+  <data name="StreamNotReadable" xml:space="preserve">
+    <value>An input Stream was not readable.</value>
+  </data>
+  <data name="InvalidSlot" xml:space="preserve">
+    <value>Slot number {0:X2} is not valid for the given operation on the given YubiKey.</value>
+  </data>
+  <data name="InvalidAlgorithm" xml:space="preserve">
+    <value>The given algorithm is not valid for the given command.</value>
+  </data>
+  <data name="ApplicationResetFailure" xml:space="preserve">
+    <value>The application could not be reset.</value>
+  </data>
+  <data name="InvalidPinPukLength" xml:space="preserve">
+    <value>A PIN or PUK must be 6, 7, or 8 characters long.</value>
+  </data>
+  <data name="InvalidPivPutDataLength" xml:space="preserve">
+    <value>The length of input to a Put Data operation, {0}, was invalid, the maximum is {1}.</value>
+  </data>
+  <data name="InvalidPinPukRetryCount" xml:space="preserve">
+    <value>A PIN or PUK retry count must be greater than 0 and less than 256.</value>
+  </data>
+  <data name="NotSupportedByYubiKeyVersion" xml:space="preserve">
+    <value>This operation is not supported by this version of YubiKey.</value>
+  </data>
+  <data name="InvalidDataTag" xml:space="preserve">
+    <value>The value {0} is not a data tag supported by the YubiKey application.</value>
+  </data>
+  <data name="InvalidDataEncoding" xml:space="preserve">
+    <value>The data provided does not match the expected encoding.</value>
+  </data>
+  <data name="OperationPriorToLoadInitializeUpdate" xml:space="preserve">
+    <value>Attempted to perform command encoding or response decoding prior to loading the response to initialize update.</value>
+  </data>
+  <data name="OtpConfigFlagsInvalid" xml:space="preserve">
+    <value>There are values set as ConfigurationFlags that are not valid.</value>
+  </data>
+  <data name="OtpExtendedFlagsInvalid" xml:space="preserve">
+    <value>There are values set as ExtendedFlags that are not valid.</value>
+  </data>
+  <data name="OtpTicketFlagsInvalid" xml:space="preserve">
+    <value>There are values set as TicketFlags that are not valid.</value>
+  </data>
+  <data name="TouchRequired" xml:space="preserve">
+    <value>This command will block as it is requesting user presence (touch).</value>
+  </data>
+  <data name="UnknownError" xml:space="preserve">
+    <value>An unknown error has occurred.</value>
+    <comment>Candidate for removal</comment>
+  </data>
+  <data name="UnknownScp03Error" xml:space="preserve">
+    <value>An unknown SCP03 error has occurred.</value>
+  </data>
+  <data name="ValueConversionFailed" xml:space="preserve">
+    <value>Cannot convert the data to the requested type. Expected only {0} byte(s) of data, but {1} byte(s) were present.</value>
+  </data>
+  <data name="UnknownFidoError" xml:space="preserve">
+    <value>An unknown FIDO error has occurred.</value>
+  </data>
+  <data name="Ctap2CborDeserializationError" xml:space="preserve">
+    <value>The CBOR response failed to deserialize correctly.</value>
+  </data>
+  <data name="InvalidCredential" xml:space="preserve">
+    <value>A credential cannot be null.</value>
+  </data>
+  <data name="InvalidCredentialAccount" xml:space="preserve">
+    <value>A credential's account cannot be null.</value>
+  </data>
+  <data name="InvalidCredentialNameLength" xml:space="preserve">
+    <value>A credential's name cannot be more than 64 bytes in length.</value>
+  </data>
+  <data name="InvalidCredentialSecret" xml:space="preserve">
+    <value>A credential secret can only contain the characters 'a-z', 'A-Z', '2-7', or '='.</value>
+  </data>
+  <data name="InvalidCredentialDigits" xml:space="preserve">
+    <value>The number of digits for a one-time passcode can only be 6, 7 or 8.</value>
+  </data>
+  <data name="InvalidCredentialPeriod" xml:space="preserve">
+    <value>The validity period for a TOTP passcode can only be 15, 30 or 60 seconds. HOTP should be set to zero.</value>
+  </data>
+  <data name="ValueIsNotEnum" xml:space="preserve">
+    <value>The value {0} is not valid for the enum type {1}.</value>
+  </data>
+  <data name="InvalidUriScheme" xml:space="preserve">
+    <value>The URI scheme must be 'otpauth://'.</value>
+  </data>
+  <data name="InvalidUriPath" xml:space="preserve">
+    <value>A URI path cannot be null or empty.</value>
+  </data>
+  <data name="InvalidOathPassword" xml:space="preserve">
+    <value>A password cannot be null or empty.</value>
+  </data>
+  <data name="InvalidChallengeLength" xml:space="preserve">
+    <value>A challenge must be 8 bytes.</value>
+  </data>
+  <data name="Ctap2CborIndefiniteLength" xml:space="preserve">
+    <value>The CBOR response contained an indefinite-length array or map, which is unsupported.</value>
+  </data>
+  <data name="Ctap2CborUnexpectedKey" xml:space="preserve">
+    <value>An unexpected key was encountered in a CBOR map; expected to find {0} (name '{1}')</value>
+  </data>
+  <data name="Ctap2CborUnexpectedValue" xml:space="preserve">
+    <value>An unexpected value was encountered in a CBOR map.</value>
+  </data>
+  <data name="InvalidCtap2Data" xml:space="preserve">
+    <value>A supplied property contained invalid data for CTAP2.</value>
+  </data>
+  <data name="MissingCtap2Data" xml:space="preserve">
+    <value>A required property was missing for CTAP2.</value>
+  </data>
+  <data name="Fido2ResponseMissing" xml:space="preserve">
+    <value>No FIDO2 status was available in the response to a FIDO2 command.</value>
+  </data>
+  <data name="BadFido2Status" xml:space="preserve">
+    <value>The authenticator returned a FIDO2 status indicating an error ({0}: {1})</value>
+  </data>
+  <data name="NoInterfaceAvailable" xml:space="preserve">
+    <value>There is no YubiKey interface available to communicate with the requested application.</value>
+  </data>
+  <data name="OtpFlagConflict" xml:space="preserve">
+    <value>Conflicting OTP configuration flags: {0} cannot be set with {1}.</value>
+  </data>
+  <data name="OtpFlagRequiredOr" xml:space="preserve">
+    <value>The {0} flag requires at least one of the flags {1} to also be set.</value>
+  </data>
+  <data name="InvalidPropertyLength" xml:space="preserve">
+    <value>The {0} property must be exactly {1} bytes long. Only {2} bytes were given.</value>
+  </data>
+  <data name="PropertyValueTooLarge" xml:space="preserve">
+    <value>The {0} property can only be set to a maximum value of {1}. The value is {2}.</value>
+  </data>
+  <data name="UnexpectedState" xml:space="preserve">
+    <value>Unexpected state encountered. This most likely indicates a bug in the SDK. Please report this exception to Yubico Support.</value>
+  </data>
+  <data name="OtpConfigFlagsNotUpdatable" xml:space="preserve">
+    <value>One or more flags specified are not allowed to be updated.</value>
+  </data>
+  <data name="BadNdefRecordType" xml:space="preserve">
+    <value>An unsupported or unknown NDEF record type was encountered. Contact Yubico Support if this error persists.</value>
+  </data>
+  <data name="MalformedNdefRecord" xml:space="preserve">
+    <value>The NDEF record is malformed. Contact Yubico Support if this error persists.</value>
+  </data>
+  <data name="OutOfRangeUriPrefixCode" xml:space="preserve">
+    <value>The prefix code specified in the NDEF record is not valid. Prefix codes are between 0 and 35.</value>
+  </data>
+  <data name="WrongNdefType" xml:space="preserve">
+    <value>The NDEF record has a type of {0}. Unable to translate it to {1} as requested.</value>
+  </data>
+  <data name="UnknownFido2Status" xml:space="preserve">
+    <value>The authenticator returned an unknown FIDO2 status indicating an error.</value>
+  </data>
+  <data name="Ctap2CommandTooLarge" xml:space="preserve">
+    <value>The CTAP2 command was too large to transmit.</value>
+  </data>
+  <data name="Ctap2MalformedResponse" xml:space="preserve">
+    <value>The authenticator produced a malformed CTAP2 response.</value>
+  </data>
+  <data name="Ctap2UnknownAttestationFormat" xml:space="preserve">
+    <value>The attestation was provided in an unknown format and cannot be parsed.</value>
+  </data>
+  <data name="FailedParsingCertificate" xml:space="preserve">
+    <value>A certificate was not able to parsed.</value>
+  </data>
+  <data name="InvalidOtpChallengeResponseAlgorithm" xml:space="preserve">
+    <value>The challenge / response algorithm specified is invalid.</value>
+  </data>
+  <data name="HmacChallengeTooLong" xml:space="preserve">
+    <value>The HMAC-SHA1 algorithm requires a 0-64 byte challenge.</value>
+  </data>
+  <data name="YubicoOtpChallengeLengthInvalid" xml:space="preserve">
+    <value>The Yubico OTP algorithm requires a 6-byte challenge.</value>
+  </data>
+  <data name="WrongHidCodeMapLength" xml:space="preserve">
+    <value>The HID code map must contain {0} HID codes. The supplied map contains {1}.</value>
+  </data>
+  <data name="LockCodeWrongLength" xml:space="preserve">
+    <value>The lock code must be {0}-bytes. {1} bytes were specified.</value>
+  </data>
+  <data name="NdefTextTooLong" xml:space="preserve">
+    <value>The value and languageCode specified must fit within a buffer of less than {0} bytes. It requires {1} bytes in total, with value requiring {2} bytes, and languageCode requiring {3} bytes.</value>
+  </data>
+  <data name="NdefUriTooLong" xml:space="preserve">
+    <value>The uri specified must fit within a buffer of less than {0} bytes. The length is {1} after matching with a prefix code of {2}.</value>
+  </data>
+  <data name="InvalidNdefConfig" xml:space="preserve">
+    <value>The NDEF configuration data is not formed correctly.</value>
+  </data>
+  <data name="NdefLanguageCodeTooLong" xml:space="preserve">
+    <value>The NDEF language code is too long.</value>
+  </data>
+  <data name="InvalidPin" xml:space="preserve">
+    <value>A PIN cannot be null or empty.</value>
+  </data>
+  <data name="InvalidPinLength" xml:space="preserve">
+    <value>A PIN must be 6 to 32 bytes long.</value>
+  </data>
+  <data name="SmartCardPipelineSetupFailed" xml:space="preserve">
+    <value>Failed to select the smart card application. 0x{0:X4}</value>
+  </data>
+  <data name="InvalidCredentialType" xml:space="preserve">
+    <value>A credential type cannot be null.</value>
+  </data>
+  <data name="InvalidKeyboardInstruction" xml:space="preserve">
+    <value>A YubiOTP APDU was received with instruction number {0}. This instruction is not supported.</value>
+  </data>
+  <data name="KeyboardDataTooBig" xml:space="preserve">
+    <value>The keyboard connection does not support writing more than 64 bytes to the device.</value>
+  </data>
+  <data name="KeyboardInvalidFlag" xml:space="preserve">
+    <value>The flag {0} is not a valid keyboard report flag.</value>
+  </data>
+  <data name="KeyboardNoReply" xml:space="preserve">
+    <value>Tried writing a keyboard report and unexpectedly recieved no reply.</value>
+  </data>
+  <data name="KeyboardReadReportFailed" xml:space="preserve">
+    <value>Attempted to read a status keyboard report and failed.</value>
+  </data>
+  <data name="KeyboardSequenceOutOfRange" xml:space="preserve">
+    <value>The sequence number {0} is outside the range of allowed values.</value>
+  </data>
+  <data name="KeyboardTimeout" xml:space="preserve">
+    <value>The YubiKey did not acknowledge a write to the keyboard interface within the alloted time.</value>
+  </data>
+  <data name="KeyboardUnexpectedEndOfBuffer" xml:space="preserve">
+    <value>Expected to read another keyboard report, but that failed. UnexpectedEOR = {0}, WaitingForTouch = {1}</value>
+  </data>
+  <data name="UserInteractionTimeout" xml:space="preserve">
+    <value>Timed out waiting for user interaction.</value>
+  </data>
+  <data name="InvalidDeviceNotYubico" xml:space="preserve">
+    <value>Device must be a Yubico device.</value>
+  </data>
+  <data name="InvalidConnectionTypeNone" xml:space="preserve">
+    <value>ConnectionType None is not an accepted value.</value>
+  </data>
+  <data name="NotImplementedHidFidoEnumeration" xml:space="preserve">
+    <value>Enumeration of ConnectionType.HidFido devices is not implemented.</value>
+  </data>
+  <data name="InvalidDeviceNotFido" xml:space="preserve">
+    <value>Device must be a FIDO device.</value>
+  </data>
+  <data name="InvalidDeviceNotKeyboard" xml:space="preserve">
+    <value>Device must be a Keyboard device.</value>
+  </data>
+  <data name="InvalidStatusReport" xml:space="preserve">
+    <value>The status report must be the first and only report returned by the YubiKey.</value>
+  </data>
+  <data name="StatusReportNotFirstReportRead" xml:space="preserve">
+    <value>The status report must be the first report read by the KeyboardFrameReader.</value>
+  </data>
+  <data name="ArgumentMustBeFirmwareVersion" xml:space="preserve">
+    <value>The parameter must be a FirmwareVersion.</value>
+  </data>
+  <data name="OtpFlagsNotValid" xml:space="preserve">
+    <value>The value given to GetYubiKeyFlags is not a valid OtpFlags value.</value>
+  </data>
+  <data name="StaticTicketNotSettable" xml:space="preserve">
+    <value>The StaticTicket flag cannot be changed in a StaticTicketFlags object.</value>
+  </data>
+  <data name="InvalidScancode" xml:space="preserve">
+    <value>Keyboard layout [{0}] doesn't have a scancode for [{1}].</value>
+  </data>
+  <data name="UnableToVerifyOathPassword" xml:space="preserve">
+    <value>The verification of the current password failed.</value>
+  </data>
+  <data name="IncorrectOathNewPassword" xml:space="preserve">
+    <value>The current password that protects the OATH application and the new password to set are the same.</value>
+  </data>
+  <data name="OtpFlagRequired" xml:space="preserve">
+    <value>The {0} flag requires the {1} flag to also be set.</value>
+  </data>
+  <data name="OtpFlagRequiredAnd" xml:space="preserve">
+    <value>The {0} flag requires all of the {1} flag to also be set.</value>
+  </data>
+  <data name="SHA512NotSupported" xml:space="preserve">
+    <value>The HMAC-SHA512 algorithm is not supported on YubiKeys with firmware version less than 4.3.1.</value>
+  </data>
+  <data name="TouchNotSupported" xml:space="preserve">
+    <value>The require touch property is not supported on YubiKeys with firmware version less than 4.2.4.</value>
+  </data>
+  <data name="RenameCommandNotSupported" xml:space="preserve">
+    <value>Renaming a credential is not supported on YubiKeys with firmware version less than 5.3.0.</value>
+  </data>
+  <data name="MustEnableOneAvailableUsbCapability" xml:space="preserve">
+    <value>At least one available USB capability must be enabled.</value>
+  </data>
+  <data name="AccessCodeTooLong" xml:space="preserve">
+    <value>Access code must be {0} or fewer bytes.</value>
+  </data>
+  <data name="BothGenerateAndSpecify" xml:space="preserve">
+    <value>You cannot both generate and specify a static password.</value>
+  </data>
+  <data name="SlotNotSet" xml:space="preserve">
+    <value>No YubiKey slot was set. You must select a slot to configure.</value>
+  </data>
+  <data name="StaticPasswordInvalidLength" xml:space="preserve">
+    <value>The static password length must be between 1 and {0} characters.</value>
+  </data>
+  <data name="LockCodeAllZeroNotAllowed" xml:space="preserve">
+    <value>The configuration lock code cannot be set to all zeros.</value>
+  </data>
+  <data name="AutoEjectTimeoutRequiresTouchEjectEnabled" xml:space="preserve">
+    <value>Auto eject timeout cannot be set when touch eject is disabled.</value>
+  </data>
+  <data name="SupportsOnlyUsbInterfaces" xml:space="preserve">
+    <value>Only USB interfaces are supported by this operation.</value>
+  </data>
+  <data name="TouchEjectTimeoutRequiresCcidOnly" xml:space="preserve">
+    <value>Touch eject timeout requires the YubiKey to only have the CCID interface enabled.</value>
+  </data>
+  <data name="MustEnableOneAvailableUsbInterface" xml:space="preserve">
+    <value>At least one USB interface must be enabled.</value>
+  </data>
+  <data name="YubiKeyOperationFailed" xml:space="preserve">
+    <value>YubiKey Operation Failed [{0}]</value>
+  </data>
+  <data name="OtpSwapCommandNotSupported" xml:space="preserve">
+    <value>Swapping OTP slot configurations is not supported on YubiKeys with firmware version less than 2.3.2.</value>
+  </data>
+  <data name="OtpSlotsNotConfigured" xml:space="preserve">
+    <value>The command cannot be performed because none of the slots are configured.</value>
+  </data>
+  <data name="BothTotpAndChallenge" xml:space="preserve">
+    <value>You can't specify both TOTP and a challenge.</value>
+  </data>
+  <data name="MustChooseTotpOrChallenge" xml:space="preserve">
+    <value>You must specify either TOTP or a challenge.</value>
+  </data>
+  <data name="OnlyOneAlgorithm" xml:space="preserve">
+    <value>You must choose either Yubico OTP or HMAC-SHA1, but not both.</value>
+  </data>
+  <data name="CantSpecifyPrivateIdAndGenerate" xml:space="preserve">
+    <value>You must specify a six-byte private ID or choose to generate one, but not both.</value>
+  </data>
+  <data name="CantSpecifyPublicIdAndUseSerial" xml:space="preserve">
+    <value>You must specify a public ID or choose to use the YubiKey serial number, but not both.</value>
+  </data>
+  <data name="KeyHasNoVisibleSerial" xml:space="preserve">
+    <value>The YubiKey has no visible serial number. Either API visibility is disabled or the YubiKey does not have a serial number.</value>
+  </data>
+  <data name="MultipleExceptions" xml:space="preserve">
+    <value>Multiple exceptions encountered. See inner exceptions for details.</value>
+  </data>
+  <data name="MustChooseOrGeneratePrivateId" xml:space="preserve">
+    <value>You must either specify or choose to generate a private ID.</value>
+  </data>
+  <data name="MustChooseOrUseSerialAsPublicId" xml:space="preserve">
+    <value>You must either specify a value or choose to use the YubiKey serial number as a public ID.</value>
+  </data>
+  <data name="MustChooseOrGenerateKey" xml:space="preserve">
+    <value>You must either specify or choose to generate a key.</value>
+  </data>
+  <data name="PrivateIdWrongSize" xml:space="preserve">
+    <value>The private identifier must be exactly 6 bytes.</value>
+  </data>
+  <data name="PublicIdWrongSize" xml:space="preserve">
+    <value>The public identifier must be between 1 and 16 bytes.</value>
+  </data>
+  <data name="YubicoKeyWrongSize" xml:space="preserve">
+    <value>The AES key must be exactly 16 bytes.</value>
+  </data>
+  <data name="MustChooseAlgorithm" xml:space="preserve">
+    <value>You must choose either the HMAC-SHA1 or Yubico OTP algorithm for the challenge response.</value>
+  </data>
+  <data name="CantSpecifyKeyAndGenerate" xml:space="preserve">
+    <value>You must specify a 16-byte key or choose to generate one, but not both.</value>
+  </data>
+  <data name="PrivateIdNotSet" xml:space="preserve">
+    <value>The private ID must be set either explicitly or by specifying that it should be generated before it can be read.</value>
+  </data>
+  <data name="PublicIdNotSet" xml:space="preserve">
+    <value>The public ID must be set either explicitly or by specifying to use serial number before it can be read.</value>
+  </data>
+  <data name="KeyNotSet" xml:space="preserve">
+    <value>The key must be set either explicitly or by specifying that it should be generated before it can be read.</value>
+  </data>
+  <data name="AlgorithmNotChosen" xml:space="preserve">
+    <value>The algorithm (Yubico OTP or HMAC-SHA1) must be chosen before you can retrieve the key.</value>
+  </data>
+  <data name="HmacKeyWrongSize" xml:space="preserve">
+    <value>The key must be exactly 20 bytes.</value>
+  </data>
+  <data name="IntOrCodeOnlyWithHmac" xml:space="preserve">
+    <value>Getting the response as an int or numeric code is only supported with HMAC-SHA1 mode.</value>
+  </data>
+  <data name="OtpCodeDigitRange" xml:space="preserve">
+    <value>An OTP code must be between 6 and 10 digits.</value>
+  </data>
+  <data name="YubicoOtpNotCompatible" xml:space="preserve">
+    <value>Yubico OTP is not compatible with TOTP.</value>
+  </data>
+  <data name="InvalidImfValue" xml:space="preserve">
+    <value>Initial moving factor must be between 0 and 0xffff0 (1,048,560) and be divisable by 0x10 (16).</value>
+  </data>
+  <data name="RequiresNfc" xml:space="preserve">
+    <value>This method can only be called on a YubiKey that is connected via NFC.</value>
+  </data>
+  <data name="OtpNdefSelectFileFailed" xml:space="preserve">
+    <value>Unable to select the NDEF file record. {0}</value>
+  </data>
+  <data name="CantDeleteEmptySlot" xml:space="preserve">
+    <value>You cannot delete a slot that does not contain a configuration.</value>
+  </data>
+  <data name="OtpNdefPropertiesHaveNoEffect" xml:space="preserve">
+    <value>Specifying UTF-16 encoding or a language code does not have any effect when programming a URI into the NDEF slot.</value>
+  </data>
+  <data name="OtpNdefNoTypeChosen" xml:space="preserve">
+    <value>An NDEF slot must be programmed as text or as a URI. Neither of these were specified.</value>
+  </data>
+  <data name="OtpNdefTypeConflict" xml:space="preserve">
+    <value>An NDEF configuration cannot contain both both text and a URI.</value>
+  </data>
+  <data name="OtpNdefInvalidLanguageCode" xml:space="preserve">
+    <value>The language code is invalid.</value>
+  </data>
+  <data name="PasswordNotSetYet" xml:space="preserve">
+    <value>The password is not set yet. You should execute the operation before attempting to retrieve the password.</value>
+  </data>
+  <data name="MustSpecifyOrGeneratePassword" xml:space="preserve">
+    <value>You must either supply a static password or specify that one should be generated.</value>
+  </data>
+  <data name="MustSpecifyKeyboardLayout" xml:space="preserve">
+    <value>You must specify a keyboard layout to configure a static password.</value>
+  </data>
+  <data name="MustBeSixBytesForSerial" xml:space="preserve">
+    <value>To use the YubiKey serial number as the public ID, the Memory&lt;byte&gt; collection must be exactly six bytes.</value>
+  </data>
+  <data name="ValueMustBeBetweenXandY" xml:space="preserve">
+    <value>The value must be between {0} and {1}, and the first value must be less than the second.</value>
+  </data>
+</root>

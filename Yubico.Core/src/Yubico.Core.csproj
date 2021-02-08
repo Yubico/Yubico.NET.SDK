@@ -89,6 +89,7 @@ limitations under the License. -->
 
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
     <ProjectReference Include="..\..\Yubico.DotNetPolyfills\src\Yubico.DotNetPolyfills.csproj" />
   </ItemGroup>

@@ -12,25 +12,32 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Microsoft.Extensions.Logging;
 using System;
 using Yubico.Core.Iso7816;
+using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.SmartCard
 {
     public class DesktopSmartCardConnection : ISmartCardConnection
     {
+        private readonly ILogger _log = Log.GetLogger();
         private readonly SCardContext _context;
         private readonly SCardCardHandle _cardHandle;
         private SCARD_PROTOCOL _activeProtocol;
 
         private class TransactionScope : IDisposable
         {
+            private readonly ILogger _log = Log.GetLogger();
             private readonly DesktopSmartCardConnection _thisConnection;
+            private readonly IDisposable _logScope;
             private bool _disposedValue;
 
             public TransactionScope(DesktopSmartCardConnection thisConnection)
             {
+                _logScope = _log.BeginTransactionScope(this);
+
                 _thisConnection = thisConnection;
             }
 
@@ -38,11 +45,18 @@ namespace Yubico.Core.Devices.SmartCard
             {
                 if (!_disposedValue)
                 {
-                    _ = PlatformLibrary.Instance.SCard.EndTransaction(
+                    uint result = PlatformLibrary.Instance.SCard.EndTransaction(
                         _thisConnection._cardHandle,
                         SCARD_DISPOSITION.LEAVE_CARD);
 
+                    _log.SCardApiCall(nameof(PlatformLibrary.Instance.SCard.EndTransaction), result);
+
                     _disposedValue = true;
+                }
+
+                if (disposing)
+                {
+                    _logScope.Dispose();
                 }
             }
 
@@ -84,15 +98,18 @@ namespace Yubico.Core.Devices.SmartCard
         {
             cardWasReset = false;
             uint result = PlatformLibrary.Instance.SCard.BeginTransaction(_cardHandle);
+            _log.SCardApiCall(nameof(PlatformLibrary.Instance.SCard.BeginTransaction), result);
 
             // Sometime the smart card is left in a state where it needs to be reset prior to beginning
             // a transaction. We should automatically handle this case.
             if (result == ErrorCode.SCARD_W_RESET_CARD)
             {
+                _log.CardReset();
                 Reconnect();
 
                 result = PlatformLibrary.Instance.SCard.BeginTransaction(_cardHandle);
                 cardWasReset = true;
+                _log.SCardApiCall(nameof(PlatformLibrary.Instance.SCard.BeginTransaction), result);
             }
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
@@ -133,6 +150,7 @@ namespace Yubico.Core.Devices.SmartCard
                 outputBuffer,
                 out int outputBufferSize
                 );
+            _log.SCardApiCall(nameof(PlatformLibrary.Instance.SCard.Transmit), result);
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {
@@ -152,6 +170,7 @@ namespace Yubico.Core.Devices.SmartCard
                 SCARD_PROTOCOL.T1,
                 SCARD_DISPOSITION.RESET_CARD,
                 out SCARD_PROTOCOL updatedActiveProtocol);
+            _log.SCardApiCall(nameof(PlatformLibrary.Instance.SCard.Reconnect), result);
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {

@@ -23,8 +23,8 @@ Here you can find all of the updates and release notes for published versions of
 Release date: August 30th, 2021
 
 This is the first official, generally available release of the YubiKey SDK for Desktop aimed at the .NET developer community and
-ecosystem. In this release, the OTP, OATH, and PIV applications are fully supported. Please refer to those application's sections
-within the documentation for more information.
+ecosystem. In this release, the [OTP](xref:OtpOverview), [OATH](xref:OathOverview), and [PIV](xref:PivOverview) applications are
+fully supported. Please refer to those applications' sections within the documentation for more information.
 
 The [Overview of the SDK](xref:OverviewOfSdk) page also goes into much more depth on what this SDK contains, and how it is structured.
 

@@ -18,6 +18,19 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.0.x Releases
 
+### 1.0.0
+
+Release date: August 30th, 2021
+
+This is the first official, generally available release of the YubiKey SDK for Desktop aimed at the .NET developer community and
+ecosystem. In this release, the OTP, OATH, and PIV applications are fully supported. Please refer to those application's sections
+within the documentation for more information.
+
+The [Overview of the SDK](xref:OverviewOfSdk) page also goes into much more depth on what this SDK contains, and how it is structured.
+
+Lastly, this SDK has also been released as open source under the Apache 2.0 license. Please refer to the `CONTRIBUTING.md` file in the
+root of the repository for information on how you can contribute.
+
 ### 1.0.0-Beta.20210721.1
 
 Release date: July 21st, 2021

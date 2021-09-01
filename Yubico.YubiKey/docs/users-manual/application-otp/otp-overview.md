@@ -47,7 +47,7 @@ The SDK is designed to enable developers to accomplish common YubiKey OTP applic
 - Calculate a challenge-response credential
 - Delete a slot’s configuration
 - Program a slot with an HMAC-SHA1 OATH-HOTP credential
-- Display a slot’s status
+- Retrieve a slot’s status
 - Configure NDEF to use a slot to generate an OTP
 - Update slot settings
 - Swap slot configurations

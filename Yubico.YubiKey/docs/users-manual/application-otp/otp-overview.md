@@ -44,7 +44,7 @@ The SDK is designed to enable developers to accomplish common YubiKey OTP applic
 - Program a slot with a Yubico OTP credential
 - Program a slot with a static password
 - Program a slot with a challenge-response credential
-- Calculate a challenge-response credential
+- Calculate a response code for a challenge-response credential
 - Delete a slot’s configuration
 - Program a slot with an HMAC-SHA1 OATH-HOTP credential
 - Retrieve a slot’s status

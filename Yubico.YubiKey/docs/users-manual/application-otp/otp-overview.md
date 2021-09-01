@@ -22,11 +22,15 @@ limitations under the License. -->
 
 ## YubiKey OTP Application
 
-The OTP application on the YubiKey allows developers to program the device with a variety of configurations through two "slots." Each slot may be programmed with a single configuration--no data is shared between slots, and each slot may be protected with an access code to prevent modification.
+The OTP application on the YubiKey allows developers to program the device with a variety of configurations
+through two "slots." Each slot may be programmed with a single configuration — no data is shared between
+slots, and each slot may be protected with an access code to prevent modification.
 
 The slots are activated by touching the YubiKey during authentication. However, only one slot may be used at a time. Which slot is used is determined by the duration of touch. The first slot, or “short press” slot, is activated when the YubiKey is touched for 1 - 2.5 seconds. The second slot, or “long press” slot, is activated when the YubiKey is touched for 3 - 5 seconds.
 
-"OTP application" is a bit of a misnomer. While the OTP (one-time password) protocol is the focus of the application, the slots may be programmed with additional configurations. The supported configurations include:
+"OTP application" is a bit of a misnomer. While OTP (one-time password) functionality is the focus of
+the application, the slots may be programmed with other configurations. Supported configurations
+include:
 
 - Yubico OTP
 - Initiative for Open Authentication HMAC-based OTP (OATH HOTP)

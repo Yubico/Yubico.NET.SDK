@@ -13,8 +13,6 @@
 # limitations under the License.
 
 # CodeQL static code analysis
-# 
-
 name: "CodeQL"
 
 on:
@@ -22,9 +20,11 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main, develop]
-  # While there's a lot of development on this repo - not scheduling a weekly run, but if/when development slows down, uncomment to run Mondays a 7:00
-  # schedule:
-  #   - cron: '0 7 * * 1'
+    paths-ignore:
+      - '**/*.md'
+      - '**/*.txt'
+      - '**/*.xml'
+      - '**/*.yml'
 
 jobs:
   analyze:

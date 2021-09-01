@@ -16,7 +16,7 @@ limitations under the License. -->
 
   <PropertyGroup>
     <AssemblyName>Yubico.Core.UnitTests</AssemblyName>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
     <RootNamespace></RootNamespace>
     <Configurations>Debug;Release;ReleaseWithDocs</Configurations>
   </PropertyGroup>

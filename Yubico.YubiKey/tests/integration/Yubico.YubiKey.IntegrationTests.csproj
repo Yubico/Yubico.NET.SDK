@@ -26,7 +26,6 @@ limitations under the License. -->
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
-    <ProjectReference Include="..\unit\Yubico.YubiKey.UnitTests.csproj" />
     <ProjectReference Include="..\utilities\Yubico.YubiKey.TestUtilities.csproj" />
     <None Update="xunit.runner.json"> 
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

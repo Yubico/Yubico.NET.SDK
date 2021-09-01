@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Linq;
 using Yubico.YubiKey.Piv;
@@ -140,6 +141,7 @@ namespace Yubico.YubiKey.Cryptography
                     _ => CryptographyProviders.Sha512Creator(),
                 };
                 _ = digester.TransformFinalBlock(mPrimeAndH, 0, (2 * digest.Length) + 8);
+                Debug.Assert(digester.Hash != null, "digester.Hash != null");
                 byte[] messageDigest = new byte[digester.Hash.Length];
                 Array.Copy(digester.Hash, messageDigest, digester.Hash.Length);
 
@@ -385,6 +387,7 @@ namespace Yubico.YubiKey.Cryptography
 
                     Assert.True(isValid);
                     Assert.Equal(digestAlgorithm, digestAlg);
+                    Debug.Assert(digester.Hash != null, "digester.Hash != null");
                     isValid = digest.SequenceEqual(digester.Hash);
                     Assert.True(isValid);
                 }

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Linq;
 using Xunit;
@@ -356,6 +357,7 @@ namespace Yubico.YubiKey.Piv
                 // keySize.
                 ECParameters eccParams = eccObject.ExportParameters(true);
                 byte[] privateValue = new byte[keySize];
+                Debug.Assert(eccParams.D != null, "eccParams.D != null");
                 offset = keySize - eccParams.D.Length;
                 Array.Copy(eccParams.D, 0, privateValue, offset, eccParams.D.Length);
 

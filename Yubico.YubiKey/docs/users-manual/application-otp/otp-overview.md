@@ -31,7 +31,7 @@ The slots are activated by touching the YubiKey during authentication. However, 
 - Yubico OTP
 - Initiative for Open Authentication HMAC-based OTP (OATH HOTP)
 - Static password
-- Challenge-response
+- Challenge-response (using HMAC-SHA1 or Yubico OTP Algorithms)
 - Near-Field Communication Data Exchange Format (NDEF)
 
 Off-the-shelf YubiKeys come with the first slot preconfigured with a Yubico OTP (registered with the [YubiCloud validation service](https://www.yubico.com/products/yubicloud/)) and the second slot empty.

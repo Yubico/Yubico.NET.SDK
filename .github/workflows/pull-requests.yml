@@ -20,21 +20,19 @@ on:
     branches:
       - main
       - develop
-  push:
-    branches:
-      - greg/build-perf
 
 jobs:
   build:
     # Give this job a friendly name to show in GitHub UI.
-    name: Build the .NET YubiKey SDK project
+    name: Build + Test the SDK
 
     # Even though we build for multiple platforms, we only need to run
     # on a single host operating system. This is because we utilize cross-
     # build functionality of the dotnet build system.
     runs-on: windows-latest
 
-    # Build both Debug and Release configurations.
+    # Build both Debug and ReleaseWithDocs configurations. Most people are probably building 'Debug' the most often. We
+    # should be sure that Release also builds, and that our documentation also compiles successfully.
     strategy:
       matrix:
         configuration: [Debug, ReleaseWithDocs]
@@ -43,13 +41,15 @@ jobs:
       # Checkout the local repository
       - uses: actions/checkout@v2
 
-      - name: List pre-installed frameworks
-        run: dotnet --list-runtimes
-
       # Build the project
+      # The default GitHub runners seem to have N and N-1 versions of .NET Framework installed. In practice, they seem
+      # to have even more installed than that, but at a minimum N and N-1 seem like safe assumptions. We can therefore
+      # save some time and use the pre-installed version rather than downloading a fresh copy.
+
       - name: Build Yubico.NET.SDK.sln
         run: dotnet build --configuration ${{matrix.configuration}} --nologo --verbosity normal Yubico.NET.SDK.sln
 
+      # Save the built NuGet packages, just in case we need to inspect the build output.
       - name: Save build artifacts
         uses: actions/upload-artifact@v2
         with:
@@ -60,6 +60,12 @@ jobs:
             Yubico.YubiKey/src/bin/${{matrix.configuration}}/*.nupkg
 
       # Test the project
+      #
+      # Here we call `dotnet test` on each individual test project that we want to have run as part of CI. We do this
+      # to skip running the integration tests which require actual YubiKeys to be present. We have tried using the filter
+      # capabilities of the `dotnet test` runner tool, however we have found that failures don't always register with
+      # GitHub when that is done.
+
       - name: Test Yubico.YubiKey
         run: dotnet test --configuration ${{matrix.configuration}} --verbosity normal --no-build --nologo Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj
 

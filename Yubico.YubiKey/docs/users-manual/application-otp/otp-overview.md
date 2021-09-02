@@ -17,26 +17,21 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# OTP overview
+# YubiKey OTP Application Overview
 
 
-## YubiKey OTP Application
+## YubiKey OTP Application Configurations
 
-The OTP application on the YubiKey allows developers to program the device with a variety of configurations
-through two "slots." Each slot may be programmed with a single configuration — no data is shared between
-slots, and each slot may be protected with an access code to prevent modification.
+The OTP application on the YubiKey allows developers to program the device with a variety of configurations through two "slots." Each slot may be programmed with a single configuration — no data is shared between slots, and each slot may be protected with an access code to prevent modification. With the exception of NFC (Near-Field Communication) scenarios, slots are activated by touching the YubiKey during authentication.
 
-The slots are activated by touching the YubiKey during authentication. However, only one slot may be used at a time. Which slot is used is determined by the duration of touch. The first slot, or “short press” slot, is activated when the YubiKey is touched for 1 - 2.5 seconds. The second slot, or “long press” slot, is activated when the YubiKey is touched for 3 - 5 seconds.
-
-"OTP application" is a bit of a misnomer. While OTP (one-time password) functionality is the focus of
-the application, the slots may be programmed with other configurations. Supported configurations
-include:
+"OTP application" is a bit of a misnomer. While OTP (one-time password) functionality is the focus of the application, the slots may be programmed with other configurations. Supported configurations include:
 
 - Yubico OTP
 - Initiative for Open Authentication HMAC-based OTP (OATH HOTP)
 - Static password
-- Challenge-response (using HMAC-SHA1 or Yubico OTP Algorithms)
-- Near-Field Communication Data Exchange Format (NDEF)
+- Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)
+
+YubiKeys that support NFC also include a configurable NDEF (NFC Data Exchange Format) tag. This tag can be configured to point to a slot that is programmed with a Yubico OTP or an OATH HOTP in order to make the OTP easily readable in NFC authentication scenarios.
 
 Off-the-shelf YubiKeys come with the first slot preconfigured with a Yubico OTP (registered with the [YubiCloud validation service](https://www.yubico.com/products/yubicloud/)) and the second slot empty.
 

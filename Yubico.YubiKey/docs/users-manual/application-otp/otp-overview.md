@@ -22,7 +22,7 @@ limitations under the License. -->
 
 ## YubiKey OTP Application Configurations
 
-The OTP application on the YubiKey allows developers to program the device with a variety of configurations through two "slots." Each slot may be programmed with a single configuration — no data is shared between slots, and each slot may be protected with an access code to prevent modification. With the exception of NFC (Near-Field Communication) scenarios, slots are activated by touching the YubiKey during authentication.
+The OTP application on the YubiKey allows developers to program the device with a variety of configurations through two "slots." Each slot may be programmed with a single configuration — no data is shared between slots, and each slot may be protected with an access code to prevent modification.
 
 "OTP application" is a bit of a misnomer. While OTP (one-time password) functionality is the focus of the application, the slots may be programmed with other configurations. Supported configurations include:
 

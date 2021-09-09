@@ -17,10 +17,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# YubiKey OTP Application Overview
+# OTP Application Overview
 
 
-## YubiKey OTP Application Configurations
+## OTP Application Configurations
 
 The OTP application on the YubiKey allows developers to program the device with a variety of configurations through two "slots." Each slot may be programmed with a single configuration — no data is shared between slots, and each slot may be protected with an access code to prevent modification.
 

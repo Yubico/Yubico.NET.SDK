@@ -50,23 +50,57 @@
 - name: "Application: OTP"
   homepage: application-otp/otp-overview.md
   items:
-  - name: Yubico OTP
-    href: application-otp/yubico-otp.md
-  - name: HOTP
-    href: application-otp/hotp.md
-  - name: Challenge-response
-    href: application-otp/challenge-response.md
-  - name: Static passwords
-    href: application-otp/static-password.md
-  - name: NDEF
-    href: application-otp/ndef.md
-  - name: "How-To: Programming slot 2 with the serial number"
-    href: application-otp/slot-2-serial.md
-  - name: "How-To: Using challenge-response"
-    href: application-otp/using-challenge.md
+  - name: Concepts
+    href: application-otp/concepts-overview.md
+    items:
+    - name: OTP Application
+      href: application-otp/application-concepts-overview.md
+      items:
+      - name: Slots
+        href: application-otp/slots.md
+      - name: HID
+        href: application-otp/hid.md
+    - name: Configurations
+      href: application-otp/configuration-concepts-overview.md
+      items:
+      - name: Yubico OTP
+        href: application-otp/yubico-otp.md
+      - name: OATH-HOTP
+        href: application-otp/hotp.md
+      - name: Challenge-Response
+        href: application-otp/challenge-response.md
+      - name: Static Passwords
+        href: application-otp/static-password.md
+      - name: NDEF
+        href: application-otp/ndef.md
+  - name: Operations
+    href: application-otp/operations-overview.md
+    items:
+    - name: How to Enumerate and Find YubiKeys
+      href: application-otp/how-to-enumerate-and-find-yubikeys.md
+    - name: How to Program a Slot with a Yubico OTP Credential
+      href: application-otp/how-to-program-a-yubico-otp-credential.md
+    - name: How to Program a Slot with an HMAC-SHA1 OATH-HOTP Credential
+      href: application-otp/how-to-program-an-oath-hotp-credential.md
+    - name: How to Program a Slot with a Challenge-Response Credential
+      href: application-otp/how-to-program-a-challenge-response-credential.md
+    - name: How to Calculate a Response Code for a Challenge-Response Credential
+      href: application-otp/how-to-calculate-a-challenge-response-code.md
+    - name: How to Program a Slot with a Static Password
+      href: application-otp/how-to-program-a-static-password.md
+    - name: How to Configure NDEF to Use a Slot to Generate an OTP
+      href: application-otp/how-to-configure-ndef.md
+    - name: How to Retrieve a Slot's Status
+      href: application-otp/how-to-retrieve-slot-status.md
+    - name: How to Update Slot Settings
+      href: application-otp/how-to-update-slot-settings.md
+    - name: How to Delete a Slot's Configuration
+      href: application-otp/how-to-delete-a-slot-configuration.md
+    - name: How to Swap Slot Configurations
+      href: application-otp/how-to-swap-slot-configs.md
   - name: Commands
     items:
-    - name: OTP commands and APDUs
+    - name: OTP Commands and APDUs
       href: application-otp/otp-commands.md
 
 - name: "Application: OATH"

@@ -78,10 +78,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
                 case OathMainMenuItem.RenameOathCredential:
                     _ = ChooseCredential.RunChooseAction(_menuObject, out _optionIndex, "rename");
-                    isValid = RenameCredential.RunRenameCredential(
-                        _yubiKeyChosen,
-                        SampleKeyCollector.SampleKeyCollectorDelegate,
-                        _optionIndex != 0 ? null : _menuObject);
+                    isValid = RunRenameCredentialMenuItem(_optionIndex);
                     break;
 
                 case OathMainMenuItem.RemoveOathCredential:
@@ -211,6 +208,73 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 _yubiKeyChosen,
                 _credentialChosen,
                 SampleKeyCollector.SampleKeyCollectorDelegate);
+        }
+
+        private bool RunRenameCredentialMenuItem(int? index)
+        {
+            if (index != 0)
+            {
+                _ = ChooseCredential.RunChooseCredential(
+                    _yubiKeyChosen,
+                    true,
+                    _menuObject,
+                    out _credentialChosen);
+
+                return RenameCredential.RunRenameCredential(
+                    _yubiKeyChosen,
+                    SampleKeyCollector.SampleKeyCollectorDelegate,
+                    _credentialChosen,
+                    "Yubico", 
+                    "testRename@example.com");
+            }
+            else
+            {
+                RunCollectCredential(_menuObject,
+                    out Credential credential,
+                    out string newIssuer,
+                    out string newAccount);
+
+                return RenameCredential.RunRenameCredential(
+                    _yubiKeyChosen,
+                    SampleKeyCollector.SampleKeyCollectorDelegate,
+                    credential,
+                    newIssuer,
+                    newAccount);
+            }
+        }
+
+        // Collect a credential.
+        private static void RunCollectCredential(
+            SampleMenu menuObject,
+            out Credential credential,
+            out string newIssuer,
+            out string newAccount)
+        {
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter current issuer");
+            _ = SampleMenu.ReadResponse(out string currentIssuer);
+
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter current account name");
+            _ = SampleMenu.ReadResponse(out string currentAccount);
+
+            _ = ChooseCredentialProperties.RunChooseTypeOption(menuObject, out CredentialType? type);
+
+            CredentialPeriod period = CredentialPeriod.Undefined;
+
+            if (type == CredentialType.Totp)
+            {
+                _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject, out CredentialPeriod? credentialPeriod);
+                period = credentialPeriod.Value;
+            }
+
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter new issuer");
+            _ = SampleMenu.ReadResponse(out string issuer);
+
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter new account name");
+            _ = SampleMenu.ReadResponse(out string account);
+
+            newIssuer = issuer;
+            newAccount = account;
+            credential = new Credential(currentIssuer, currentAccount, type.Value, period);
         }
     }
 }

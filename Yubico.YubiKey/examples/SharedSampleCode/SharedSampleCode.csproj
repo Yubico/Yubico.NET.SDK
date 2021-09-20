@@ -1,4 +1,4 @@
-<!-- Copyright 2021 Yubico AB
+﻿<!-- Copyright 2021 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ limitations under the License. -->
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Yubico.YubiKey" Version="1.0.0-Beta.20210618.1" />
+    <PackageReference Include="Yubico.YubiKey" Version="1.0.0" />
   </ItemGroup>
 
 </Project>

@@ -17,7 +17,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# OTP Application Overview
+# OTP application overview
 
 
 The OTP application on the YubiKey allows developers to program the device with a variety of configurations through two "[slots](xref:OtpSlots)." Each slot may be programmed with a single configuration — no data is shared between slots, and each slot may be protected with an access code to prevent modification.
@@ -34,7 +34,7 @@ YubiKeys that support NFC also include a configurable [NDEF](xref:OtpNdef) (NFC 
 Off-the-shelf YubiKeys come with the first slot preconfigured with a Yubico OTP (registered with the [YubiCloud validation service](https://www.yubico.com/products/yubicloud/)) and the second slot empty.
 
 
-## .NET SDK Functionality
+## .NET SDK functionality
 
 The SDK is designed to enable developers to accomplish common YubiKey OTP application configuration tasks:
 

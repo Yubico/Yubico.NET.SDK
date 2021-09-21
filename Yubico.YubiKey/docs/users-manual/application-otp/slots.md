@@ -26,7 +26,7 @@ The OTP application on the YubiKey contains two configurable slots: the "long pr
 - [Static password](xref:OtpStaticPassword)
 - [Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)](xref:OtpChallengeResponse)
 
-## Slot Activation
+## Slot activation
 
 The slots are activated during authentication. Activation results in the generation and/or submission of a password or challenge-response code from the YubiKey to the authenticating party. Only one slot may be activated at a time.
 
@@ -39,7 +39,7 @@ NFC-compatible YubiKeys also contain an [NDEF](xref:OtpNdef) tag that can be con
 > [!NOTE]
 > NDEF tags only work with Yubico OTPs and OATH HOTPs.
 
-## Slot Properties
+## Slot properties
 
 The OTP application slots have the following properties:
 

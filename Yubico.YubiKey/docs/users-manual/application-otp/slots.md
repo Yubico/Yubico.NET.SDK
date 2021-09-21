@@ -19,7 +19,7 @@ limitations under the License. -->
 
 # Slots
 
-The OTP application on the YubiKey contains two configurable slots: the LongPress slot and the ShortPress slot. Each slot may be programmed with one of the following configurations:
+The OTP application on the YubiKey contains two configurable slots: the "long press" slot and the "short press" slot. Each slot may be programmed with one of the following configurations:
 
 - [Yubico OTP](xref:OtpYubicoOtp)
 - [Initiative for Open Authentication HMAC-based OTP (OATH HOTP)](xref:OtpHotp)

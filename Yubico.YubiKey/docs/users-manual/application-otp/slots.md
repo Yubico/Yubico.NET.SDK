@@ -34,7 +34,7 @@ Slots configured with a Yubico OTP, OATH HOTP, or static password are activated 
 
 If a challenge-response configuration is programmed to require a user to touch the YubiKey, the touch will activate the appropriate slot regardless of duration. If touch is not required, activation will occur automatically.
 
-NFC-compatible YubiKeys also contain an [NDEF](xref:OtpNdef) tag that can be configured to point to one of the slots. When the YubiKey is scanned by an NFC reader, the slot that is pointed to by the NDEF tag will activate, causing the generation and submission of an OTP.
+NFC-compatible YubiKeys also contain an [NDEF](xref:OtpNdef) tag that can be configured to point to one of the slots. When the YubiKey is scanned by an NFC reader, the slot that is pointed to by the NDEF tag will activate, causing the generation of an OTP.
 
 > [!NOTE]
 > NDEF tags only work with Yubico OTPs and OATH HOTPs.

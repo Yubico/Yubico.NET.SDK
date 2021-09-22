@@ -56,6 +56,7 @@ namespace Yubico.Core.Devices.SmartCard
         {
             SdkPlatform.Windows => DesktopSmartCardDevice.GetList(),
             SdkPlatform.MacOS => DesktopSmartCardDevice.GetList(),
+            SdkPlatform.Linux => DesktopSmartCardDevice.GetList(),
             _ => throw new PlatformNotSupportedException()
         };
 

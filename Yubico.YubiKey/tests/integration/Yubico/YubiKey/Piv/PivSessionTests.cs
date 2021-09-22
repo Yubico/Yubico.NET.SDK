@@ -243,6 +243,8 @@ namespace Yubico.YubiKey.Piv
                 isChanged = pivSession.TryChangePin();
                 Assert.True(isChanged);
                 Assert.True(pivSession.PinVerified);
+                isVerified = pivSession.TryVerifyPin();
+                Assert.True(isVerified);
 
                 _isValid = TrySign(pivSession, 0x86, ResponseStatus.Success);
                 Assert.True(_isValid);

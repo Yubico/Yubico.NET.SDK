@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.Piv
             Assert.True(yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
             isValid = DoGenerate(
-                yubiKey, 0x86, algorithm, PivPinPolicy.Always, PivTouchPolicy.Always);
+                yubiKey, 0x86, algorithm, PivPinPolicy.Once, PivTouchPolicy.Never);
             Assert.True(isValid);
 
             isValid = DoSignNoPin(yubiKey, 0x86, algorithm);

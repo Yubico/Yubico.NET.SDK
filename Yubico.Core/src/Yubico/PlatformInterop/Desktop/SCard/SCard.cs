@@ -49,6 +49,7 @@ namespace Yubico.PlatformInterop
             {
                 SdkPlatform.Windows => "WinSCard.dll",
                 SdkPlatform.MacOS => "PCSC.framework/PCSC",
+                SdkPlatform.Linux => "libpcsclite.so",
                 _ => throw new PlatformNotSupportedException()
             };
 

@@ -28,6 +28,7 @@ namespace Yubico.PlatformInterop
         {
             SdkPlatform.Windows => new WindowsUnmanagedDynamicLibrary(fileName),
             SdkPlatform.MacOS => new MacOSUnmanagedDynamicLibrary(fileName),
+            SdkPlatform.Linux => new LinuxUnmanagedDynamicLibrary(fileName),
             _ => throw new PlatformNotSupportedException()
         };
 

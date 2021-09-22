@@ -66,17 +66,26 @@ namespace Yubico.PlatformInterop
 #pragma warning restore CA1810
             {
                 _readerNameOffset = 0;
-                _currentStateOffset = _readerNameOffset + IntPtr.Size * 2;
-                _eventStateOffset = _currentStateOffset + sizeof(int);
-                _atrSizeOffset = _eventStateOffset + sizeof(int);
-                _atrOffset = _atrSizeOffset + sizeof(int);
+                _currentStateOffset = _readerNameOffset + (IntPtr.Size * 2);
+                _eventStateOffset = _currentStateOffset + SdkPlatformInfo.DwordSize;
+                _atrSizeOffset = _eventStateOffset + SdkPlatformInfo.DwordSize;
+                _atrOffset = _atrSizeOffset + SdkPlatformInfo.DwordSize;
 
-                // Note: Windows defines the maximum ATR size to be 36 bytes. PCSC defines it as 33. Since this byte
-                // array is embedded in the structure, and the SCardGetStatusChange function takes an array of this
-                // structure, we need to adjust the size depending on the operating system / implementation. Failure to
-                // do this results in alignment issues past the first smart card reader entry and will cause an access
-                // violation in the best of cases.
-                Size = _atrOffset + (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows ? 36 : 33);
+                // Note: Windows defines the maximum ATR size to be 36 bytes.
+                // PCSC defines it as 33. For Linux, however, because of
+                // alignment, set the size to 40.
+                // Since this byte array is embedded in the structure, and the
+                // SCardGetStatusChange function takes an array of this
+                // structure, we need to adjust the size depending on the
+                // operating system / implementation. Failure to do this results
+                // in alignment issues past the first smart card reader entry and
+                // will cause an access violation in the best of cases.
+                Size = SdkPlatformInfo.OperatingSystem switch
+                {
+                    SdkPlatform.Windows => _atrOffset + 36,
+                    SdkPlatform.Linux => _atrOffset + 40,
+                    _ => _atrOffset + 33,
+                };
             }
 
             public Entry(Memory<byte> bufferSlice)
@@ -150,7 +159,7 @@ namespace Yubico.PlatformInterop
 
             private int ReadInt32(int offset)
             {
-                var slice = _bufferSlice.Span.Slice(offset, 4);
+                Span<byte> slice = _bufferSlice.Span.Slice(offset, 4);
                 return BitConverter.ToInt32(slice.ToArray(), 0);
             }
 
@@ -196,7 +205,7 @@ namespace Yubico.PlatformInterop
 
         private void ReleaseUnmanagedResources()
         {
-            foreach (var item in this)
+            foreach (Entry item in this)
             {
                 item.ReleaseReaderName();
             }
@@ -221,9 +230,6 @@ namespace Yubico.PlatformInterop
             }
         }
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 }

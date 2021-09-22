@@ -34,6 +34,12 @@ namespace Yubico.PlatformInterop
             _ => 1
         };
 
+        public static int DwordSize => OperatingSystem switch
+        {
+            SdkPlatform.Linux => 8,
+            _ => 4
+        };
+
         public static SdkPlatform OperatingSystem
         {
             get

@@ -19,9 +19,9 @@ using Yubico.Core;
 
 namespace Yubico.PlatformInterop
 {
-    internal sealed class MacOSUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
+    internal sealed class LinuxUnmanagedDynamicLibrary : UnmanagedDynamicLibrary
     {
-        public MacOSUnmanagedDynamicLibrary(string fileName) :
+        public LinuxUnmanagedDynamicLibrary(string fileName) :
             base(OpenLibrary(fileName))
         {
 
@@ -29,7 +29,7 @@ namespace Yubico.PlatformInterop
 
         private static SafeLibraryHandle OpenLibrary(string fileName)
         {
-            SafeMacOSLibraryHandle handle = NativeMethods.mac_dlopen(fileName, NativeMethods.DlOpenFlags.Lazy);
+            SafeLinuxLibraryHandle handle = NativeMethods.linux_dlopen(fileName, NativeMethods.DlOpenFlags.Lazy);
             if (handle.IsInvalid)
             {
                 throw new PlatformApiException(
@@ -43,7 +43,7 @@ namespace Yubico.PlatformInterop
 
         public override bool TryGetFunction<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class
         {
-            IntPtr p = NativeMethods.mac_dlsym(_handle, functionName);
+            IntPtr p = NativeMethods.linux_dlsym(_handle, functionName);
 
             if (p != IntPtr.Zero)
             {

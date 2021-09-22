@@ -41,6 +41,16 @@ namespace Yubico.PlatformInterop
 
         }
 
-        protected override bool ReleaseHandle() => NativeMethods.dlclose(handle) == 0;
+        protected override bool ReleaseHandle() => NativeMethods.mac_dlclose(handle) == 0;
+    }
+
+    internal sealed class SafeLinuxLibraryHandle : SafeLibraryHandle
+    {
+        private SafeLinuxLibraryHandle() : base()
+        {
+
+        }
+
+        protected override bool ReleaseHandle() => NativeMethods.linux_dlclose(handle) == 0;
     }
 }

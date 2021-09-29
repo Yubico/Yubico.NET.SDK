@@ -375,6 +375,7 @@ MigrationBackup/
 **/docs/yubikey-api/**/.manifest
 **/docs/core-api/**/*.yml
 **/docs/core-api/**/.manifest
+**/docs/memberpage/
 
 build/latestpackages
 

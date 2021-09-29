@@ -60,6 +60,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             PivMainMenuItem.BuildSelfSignedCert => RunBuildSelfSignedCert(),
             PivMainMenuItem.BuildCert => RunBuildCert(),
             PivMainMenuItem.RetrieveCert => RunRetrieveCert(),
+            PivMainMenuItem.CreateAttestationStatement => RunCreateAttestationStatement(),
+            PivMainMenuItem.GetAttestationCertificate => RunGetAttestationCert(),
             PivMainMenuItem.ResetPiv =>
                 ChangeSecret.RunResetPiv(_yubiKeyChosen, _keyCollector.SampleKeyCollectorDelegate),
             _ => RunUnimplementedOperation(),
@@ -497,6 +499,34 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 _keyCollector.SampleKeyCollectorDelegate,
                 slotNumber,
                 out X509Certificate2 certificate);
+
+            byte[] certDer = certificate.Export(X509ContentType.Cert);
+            char[] certPem = PemOperations.BuildPem("CERTIFICATE", certDer);
+            SampleMenu.WriteMessage(MessageType.Title, 0, "\n" + new string(certPem) + "\n");
+            return true;
+        }
+
+        public bool RunCreateAttestationStatement()
+        {
+            if (!GetAsymmetricSlotNumber(out byte slotNumber))
+            {
+                return RunInvalidEntry();
+            }
+
+            KeyPairs.RunCreateAttestationStatement(
+                _yubiKeyChosen,
+                slotNumber,
+                out X509Certificate2 certificate);
+
+            byte[] certDer = certificate.Export(X509ContentType.Cert);
+            char[] certPem = PemOperations.BuildPem("CERTIFICATE", certDer);
+            SampleMenu.WriteMessage(MessageType.Title, 0, "\n" + new string(certPem) + "\n");
+            return true;
+        }
+
+        public bool RunGetAttestationCert()
+        {
+            KeyPairs.RunGetAttestationCert(_yubiKeyChosen, out X509Certificate2 certificate);
 
             byte[] certDer = certificate.Export(X509ContentType.Cert);
             char[] certPem = PemOperations.BuildPem("CERTIFICATE", certDer);

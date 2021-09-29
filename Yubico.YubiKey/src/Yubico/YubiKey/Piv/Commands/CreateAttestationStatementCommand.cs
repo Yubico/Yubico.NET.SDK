@@ -34,10 +34,10 @@ namespace Yubico.YubiKey.Piv.Commands
     /// </para>
     /// <para>
     /// It is possible to build attestation statements for keys in slots <c>9A</c>,
-    /// <c>9C</c>, <c>9D</c>, and <c>9E</c>. The certificate created will conatin
-    /// the public key partner to the private key in the cert, along with the
-    /// YubiKey's serial number. The cert will be signed by the attestation key,
-    /// the private key in slot <c>F9</c>.
+    /// <c>9C</c>, <c>9D</c>, <c>9E</c>, and <c>82</c> through <c>95</c>. The
+    /// certificate created will contain the public key partner to the private
+    /// key in the cert, along with the YubiKey's serial number. The cert will be
+    /// signed by the attestation key, the private key in slot <c>F9</c>.
     /// </para>
     /// <para>
     /// Example:
@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Piv.Commands
             get => _slotNumber;
             set
             {
-                if (PivSlot.IsValidSlotNumberForAttestation(value) == false)
+                if (PivSlot.IsValidSlotNumberForSigning(value) == false)
                 {
                     throw new ArgumentException(
                         string.Format(
@@ -103,9 +103,10 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </summary>
         /// <remarks>
         /// The slot number must be either <c>0x9A</c>, <c>0x9C</c>, <c>0x9D</c>,
-        /// or <c>0x9E</c>. These are the slots named,
+        /// <c>0x9E</c>, or <c>82</c> through <c>95</c>. These are the slots named,
         /// <c>PivSlot.Authentication</c>, <c>PivSlot.Signing</c>,
-        /// <c>PivSlot.KeyManagement</c>, and <c>PivSlot.CardAuthentication</c>.
+        /// <c>PivSlot.KeyManagement</c>, <c>PivSlot.CardAuthentication</c>, and
+        /// <c>PivSlot.Retired1</c> through <c>PivSlot.Retired20</c>
         /// <para>
         /// If the slot specified does not have a private key, the YubiKey will
         /// not build a certificate and return an error StatusWord.
@@ -151,7 +152,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </exception>
         public CommandApdu CreateCommandApdu()
         {
-            if (PivSlot.IsValidSlotNumberForAttestation(_slotNumber) == false)
+            if (PivSlot.IsValidSlotNumberForSigning(_slotNumber) == false)
             {
                 throw new InvalidOperationException(
                     string.Format(

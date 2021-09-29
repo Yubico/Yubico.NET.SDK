@@ -376,54 +376,12 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Is the given number a valid slot number for creating an attestation
-        /// statement.
-        /// </summary>
-        /// <remarks>
-        /// This verifies that a number given is not only a valid slot number,
-        /// but a valid slot number for a slot that can be attested by the
-        /// attestation key. For example, if the input is <c>0x9A</c>, it
-        /// will return <c>true</c>. If the input is <c>0x80</c>, <c>0x95</c>, or
-        /// <c>0x9B</c>, it will return <c>false</c>. Even though <c>80</c> and
-        /// <c>9B</c> are valid slot numbers, they are for slots that cannot hold
-        /// asymmetric keys. Even though <c>9B</c> is a valid slot and can hold
-        /// an asymmetric key, it cannot be attested. Only keys in slots
-        /// <c>9A</c>, <c>9C</c>, <c>9D</c>, and <c>9E</c> can be attested.
-        /// <para>
-        /// Note that slot <c>F9</c> cannot be attested, it contains the
-        /// attestation key itself.
-        /// </para>
-        /// <para>
-        /// See the User's Manual entry on
-        /// <xref href="UsersManualPivSlots"> PIV slots</xref>
-        /// for more details on each of the possible slots.
-        /// </para>
-        /// </remarks>
-        /// <param name="slotNumber">
-        /// The number to check.
-        /// </param>
-        /// <returns>
-        /// True if <c>slotNumber</c> is a valid PIV asymmetric key slot that can
-        /// be attested, or False otherwise.
-        /// </returns>
-        public static bool IsValidSlotNumberForAttestation(byte slotNumber)
-        {
-            // The only slots that can be attested are 9A, 9C, 9D, 9E.
-            // Ideally we would like to have a system of checking for valid slot
-            // numbers not dependent on the specific layout, but rather
-            // something that is only dependent on some private const values, but
-            // the slots are almost certainly never going to change. If they do
-            // change, this code will need to be revisited.
-            return ((slotNumber != Management)
-                && ((slotNumber >= Authentication) && (slotNumber <= CardAuthentication)));
-        }
-
-        /// <summary>
         /// Is the given number a valid slot number for signing arbitrary data.
         /// </summary>
         /// <remarks>
         /// Note that if a slot is valid for signing, it is also valid for
-        /// decrypting and key exchange as well.
+        /// decrypting, key exchange, and obtaining an attestation statement as
+        /// well.
         /// <para>
         /// This verifies that a number given is not only a valid slot number,
         /// but a valid slot number for a slot that can perform signing. For

@@ -106,5 +106,26 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 certificate = pivSession.GetCertificate(slotNumber);
             }
         }
+
+        public static void RunCreateAttestationStatement(
+            IYubiKeyDevice yubiKey,
+            byte slotNumber,
+            out X509Certificate2 certificate)
+        {
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                certificate = pivSession.CreateAttestationStatement(slotNumber);
+            }
+        }
+
+        public static void RunGetAttestationCert(
+            IYubiKeyDevice yubiKey,
+            out X509Certificate2 certificate)
+        {
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                certificate = pivSession.GetAttestationCertificate();
+            }
+        }
     }
 }

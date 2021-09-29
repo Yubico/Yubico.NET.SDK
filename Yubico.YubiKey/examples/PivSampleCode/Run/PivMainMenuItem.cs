@@ -39,7 +39,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         BuildCert = 15,
         RetrieveCert = 16,
 
-        ResetPiv = 17,
-        Exit = 18,
+        CreateAttestationStatement = 17,
+        GetAttestationCertificate = 18,
+
+        ResetPiv = 19,
+        Exit = 20,
     }
 }

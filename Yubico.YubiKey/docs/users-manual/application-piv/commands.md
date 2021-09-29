@@ -976,9 +976,13 @@ attestation statement is an X.509 certificate. This certificate is signed by the
 attestation key.
 
 The cert returned will affirm that a private key was generated on the YubiKey, and not
-imported. The private keys that can be attested are those in slots `9A`, `9C`, `9D`, or
-`9E`. Even though it is possible to have the YubiKey generate a key pair in the retired
-slots (`82` - `95`), a YubiKey will not attest a key in those slots.
+imported. The private keys that can be attested are those in slots `9A`, `9C`, `9D`, `9E`
+and `82` - `95`.
+
+> [!NOTE]
+> In version 1.0 of the SDK, it was not possible to create an attestation statement for
+> keys in slots 82 - 95 (retired key slots). Beginning with version 1.1 of the SDK it is
+> possible to create an attestation statement for the keys in those slots.
 
 The private key that will sign this newly-created certificate (the attestation statement)
 is the attestation key in slot `F9`. This slot also contains the attestation certificate.
@@ -998,7 +1002,7 @@ statement) and verify it is the serial number of the YubiKey in question, and fi
 verify the certificate. To verify the certificate, use the attestation cert (acquired by
 using the GET DATA command), the YubiKey PIV CA cert, and the YubiKey root cert.
 
-```
+```txt
       Yubico Root Cert
              |
              |

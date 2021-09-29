@@ -27,6 +27,11 @@ YubiKey. Such a statement simply offers evidence that a private key was generate
 YubiKey. It does not say anything about who owns the YubiKey, or who signed some data
 using the private key, only that the key is from a YubiKey.
 
+> [!NOTE]
+> In version 1.0 of the SDK, it was not possible to create an attestation statement for
+> keys in slots 82 - 95 (retired key slots). Beginning with version 1.1 of the SDK it is
+> possible to create an attestation statement for the keys in those slots.
+
 This attestation statement is provided in the form of an X.509 certificate. What this
 certificate attests (or asserts, affirms) is that "the private key partner to the public
 key in this certificate was generated on a YubiKey."
@@ -88,7 +93,7 @@ The process of verifying a certificate by using the cert of the issuer, and veri
 issuer's cert by using the cert of the issuer's issuer, and so on until reaching a root
 cert, is known as chaining.
 
-```C
+```txt
                         Root Cert
                             |
                             |
@@ -114,8 +119,8 @@ built by a YubiKey.
 
 ## Terminology
 
-Start with the private key in an attestable slot (9A, 9C, 9D, 9E). This key has a partner
-public key.
+Start with the private key in an attestable slot (9A, 9C, 9D, 9E, and 82 - 95). This key
+has a partner public key.
 
 On every YubiKey (since version 4.3) is an attestation key and certificate. These are in
 slot F9.
@@ -124,7 +129,7 @@ When an attestation statement is built, the private key in the attestable slot i
 "attested key". A new certificate is created. This new certificate is called the
 attestation statement.
 
-* Slot 9A, 9C, 9D, 9E:
+* Slot 9A, 9C, 9D, 9E, 82 - 95:
   * public and private key pair
   * private key is the attested key
   * attestation statement:
@@ -275,7 +280,7 @@ before deployment.
 
 There is a method in the `PivSession` class to replace the attestation key and cert.
 
-```
+```csharp
 public void ReplaceAttestationKeyAndCertificate(PivPrivateKey privateKey, X509Certificate2 certificate)
 ```
 

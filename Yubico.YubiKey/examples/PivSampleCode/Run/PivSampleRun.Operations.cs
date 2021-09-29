@@ -53,6 +53,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 ChangeSecret.RunChangePivManagementKey(_yubiKeyChosen, _keyCollector.SampleKeyCollectorDelegate),
             PivMainMenuItem.GenerateKeyPair => RunGenerateKeyPair(),
             PivMainMenuItem.ImportPrivateKey => RunImportPrivateKey(),
+            PivMainMenuItem.ImportCertificate => WriteImportCertMessage(),
             PivMainMenuItem.Sign => RunSignData(),
             PivMainMenuItem.Decrypt => RunDecryptData(),
             PivMainMenuItem.KeyAgree => RunKeyAgree(),
@@ -183,6 +184,14 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             return false;
+        }
+
+        public static bool WriteImportCertMessage()
+        {
+            SampleMenu.WriteMessage(MessageType.Title, 0, "See the items/code for BuildSelfSignedCert and BuildCert");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "for examples on importing a certificate. The code is in");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "CertificateOperations/SampleCertificateOperations.cs.\n");
+            return true;
         }
 
         public bool RunSignData()
@@ -408,10 +417,17 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 return RunInvalidEntry();
             }
 
+            var nameBuilder = new X500NameBuilder();
+            nameBuilder.AddNameElement(X500NameElement.Country, "US");
+            nameBuilder.AddNameElement(X500NameElement.State, "CA");
+            nameBuilder.AddNameElement(X500NameElement.Locality, "Palo Alto");
+            nameBuilder.AddNameElement(X500NameElement.Organization, "Fake");
+            nameBuilder.AddNameElement(X500NameElement.CommonName, "Fake Cert");
+            X500DistinguishedName sampleCertName = nameBuilder.GetDistinguishedName();
             SampleCertificateOperations.GetCertRequest(
                 _yubiKeyChosen,
                 _keyCollector.SampleKeyCollectorDelegate,
-                "C=US,ST=CA,L=Palo Alto,O=Fake,CN=Fake Cert",
+                sampleCertName,
                 requestSlotContents);
 
             requestSlotContents.PrintCertRequestPem();

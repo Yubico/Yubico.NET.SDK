@@ -14,7 +14,6 @@
 
 using System;
 using Yubico.YubiKey.Sample.SharedCode;
-using Yubico.YubiKey;
 
 namespace Yubico.YubiKey.Sample.PivSampleCode
 {

@@ -16,7 +16,6 @@ using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Yubico.YubiKey;
 using Yubico.YubiKey.Piv;
 using Yubico.Core.Tlv;
 
@@ -33,7 +32,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         public static void GetCertRequest(
             IYubiKeyDevice yubiKey,
             Func<KeyEntryData, bool> KeyCollectorDelegate,
-            string subjectName,
+            X500DistinguishedName distinguishedName,
             SamplePivSlotContents slotContents)
         {
             if (slotContents is null)
@@ -50,15 +49,15 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             slotContents.CertRequest = slotContents.Algorithm switch
             {
                 PivAlgorithm.EccP256 => new CertificateRequest(
-                    subjectName,
+                    distinguishedName,
                     (ECDsa)dotNetPubKey,
                     HashAlgorithmName.SHA256),
                 PivAlgorithm.EccP384 => new CertificateRequest(
-                    subjectName,
+                    distinguishedName,
                     (ECDsa)dotNetPubKey,
                     HashAlgorithmName.SHA384),
                 _ => new CertificateRequest(
-                    subjectName,
+                    distinguishedName,
                     (RSA)dotNetPubKey,
                     HashAlgorithmName.SHA256,
                     RSASignaturePadding.Pss),
@@ -93,7 +92,14 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             Func<KeyEntryData, bool> KeyCollectorDelegate,
             SamplePivSlotContents slotContents)
         {
-            string sampleRootName = "C=US,ST=CA,L=Palo Alto,O=Fake,CN=Fake Root";
+            var nameBuilder = new X500NameBuilder();
+            nameBuilder.AddNameElement(X500NameElement.Country, "US");
+            nameBuilder.AddNameElement(X500NameElement.State, "CA");
+            nameBuilder.AddNameElement(X500NameElement.Locality, "Palo Alto");
+            nameBuilder.AddNameElement(X500NameElement.Organization, "Fake");
+            nameBuilder.AddNameElement(X500NameElement.CommonName, "Fake Root");
+            X500DistinguishedName sampleRootName = nameBuilder.GetDistinguishedName();
+
             GetCertRequest(yubiKey, KeyCollectorDelegate, sampleRootName, slotContents);
 
             // Add the BasicConstraints and KeyUsage extensions.
@@ -101,8 +107,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             var keyUsage = new X509KeyUsageExtension(X509KeyUsageFlags.KeyCertSign, true);
             slotContents.CertRequest.CertificateExtensions.Add(basicConstraints);
             slotContents.CertRequest.CertificateExtensions.Add(keyUsage);
-
-            X500DistinguishedName subjectName = slotContents.CertRequest.SubjectName;
 
             DateTimeOffset notBefore = DateTimeOffset.Now;
             DateTimeOffset notAfter = notBefore.AddDays(3650);
@@ -114,7 +118,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
                 var signer = new YubiKeySignatureGenerator(pivSession, slotContents.SlotNumber, slotContents.PublicKey);
                 X509Certificate2 selfSignedCert = slotContents.CertRequest.Create(
-                    subjectName,
+                    sampleRootName,
                     signer,
                     notBefore,
                     notAfter,
@@ -161,21 +165,27 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 signerCert = pivSession.GetCertificate(signerSlotContents.SlotNumber);
             }
 
-            string sampleCaName = "C=US,ST=CA,L=Palo Alto,O=Fake,CN=Fake CA";
-            string sampleLeafName = "C=US,ST=CA,L=Palo Alto,O=Fake,CN=Fake Leaf";
-            string newCertName;
+            var nameBuilder = new X500NameBuilder();
+            nameBuilder.AddNameElement(X500NameElement.Country, "US");
+            nameBuilder.AddNameElement(X500NameElement.State, "CA");
+            nameBuilder.AddNameElement(X500NameElement.Locality, "Palo Alto");
+            nameBuilder.AddNameElement(X500NameElement.Organization, "Fake");
 
-            // Self-Signed? If so, we'll need to make sure the pathLen is at
-            // leadt 2, and then we'll be building a CA cert. If not, the pathLen
-            // only needs to be 1 and we'll be building a leaf cert.
+            // Is the issuer cert a self-signed cert? If so, the cert we're now
+            // creating will be a CA cert and we'll need to make sure the
+            // pathLen is at least 2. If not, the pathLen only needs to be 1 and
+            // we'll be building a leaf cert.
             int pathLength = 1;
-            newCertName = sampleLeafName;
             bool isCa = false;
             if (signerCert.SubjectName.RawData.SequenceEqual(signerCert.IssuerName.RawData))
             {
                 pathLength = 2;
-                newCertName = sampleCaName;
+                nameBuilder.AddNameElement(X500NameElement.CommonName, "Fake CA");
                 isCa = true;
+            }
+            else
+            {
+                nameBuilder.AddNameElement(X500NameElement.CommonName, "Fake Leaf");
             }
 
             // We can use this signerCert only if it contains BasicConstraints
@@ -209,7 +219,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             // Get a signed cert request.
-            GetCertRequest(yubiKey, KeyCollectorDelegate, newCertName, requestorSlotContents);
+            X500DistinguishedName sampleCertName = nameBuilder.GetDistinguishedName();
+            GetCertRequest(yubiKey, KeyCollectorDelegate, sampleCertName, requestorSlotContents);
 
             // In the real world, the cert request would be sent as a PEM
             // construction or something similar, not an object.

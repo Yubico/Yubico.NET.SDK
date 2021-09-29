@@ -14,7 +14,6 @@
 
 using System;
 using System.Security.Cryptography;
-using Yubico.YubiKey;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Cryptography;
 

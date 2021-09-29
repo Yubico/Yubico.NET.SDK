@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey;
 using Yubico.YubiKey.Piv;
 using System.Security.Cryptography.X509Certificates;
 
@@ -84,10 +83,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 slotContents = new SamplePivSlotContents()
                 {
                     SlotNumber = slotNumber,
-                        Algorithm = privateKey.Algorithm,
-                        PinPolicy = pinPolicy,
-                        TouchPolicy = touchPolicy,
-                        PublicKey = PivPublicKey.Create(publicKey.YubiKeyEncodedPublicKey),
+                    Algorithm = privateKey.Algorithm,
+                    PinPolicy = pinPolicy,
+                    TouchPolicy = touchPolicy,
+                    PublicKey = PivPublicKey.Create(publicKey.YubiKeyEncodedPublicKey),
                 };
             }
 

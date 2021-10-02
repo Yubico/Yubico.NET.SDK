@@ -37,9 +37,9 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Create an attestation statement for the private key in the given slot.
         /// &gt; [!NOTE]
-        /// &gt; In version 1.0 of the SDK, it was not possible to get an
+        /// &gt; In version 1.0.0 of the SDK, it was not possible to get an
         /// &gt; attestation statement for keys in slots 82 - 95 (retired key
-        /// &gt; slots). However, beginning with SDK 1.1, it is possible to get
+        /// &gt; slots). However, beginning with SDK 1.0.1, it is possible to get
         /// &gt; attestation statements for keys in those slots.
         /// </summary>
         /// <remarks>

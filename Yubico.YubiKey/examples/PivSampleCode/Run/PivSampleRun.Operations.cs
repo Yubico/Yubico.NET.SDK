@@ -40,8 +40,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // To get only YubiKeys connected via NFC, call
             //   YubiKey.FindByTransport(Transport.NfcSmartCard);
             PivMainMenuItem.ListYubiKeys => ListYubiKeys.RunListYubiKeys(Transport.SmartCard),
-            PivMainMenuItem.ChooseYubiKey =>
-                ChooseYubiKey.RunChooseYubiKey(true, _menuObject, Transport.SmartCard, out _yubiKeyChosen),
+            PivMainMenuItem.ChooseYubiKey => RunChooseYubiKey(),
             PivMainMenuItem.ChangePivPinAndPukRetryCount => RunChangeRetryCount(),
             PivMainMenuItem.ChangePivPin =>
                 ChangeSecret.RunChangePivPin(_yubiKeyChosen, _keyCollector.SampleKeyCollectorDelegate),

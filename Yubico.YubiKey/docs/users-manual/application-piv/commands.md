@@ -980,8 +980,8 @@ imported. The private keys that can be attested are those in slots `9A`, `9C`, `
 and `82` - `95`.
 
 > [!NOTE]
-> In version 1.0 of the SDK, it was not possible to create an attestation statement for
-> keys in slots 82 - 95 (retired key slots). Beginning with version 1.1 of the SDK it is
+> In version 1.0.0 of the SDK, it was not possible to create an attestation statement for
+> keys in slots 82 - 95 (retired key slots). Beginning with version 1.0.1 of the SDK it is
 > possible to create an attestation statement for the keys in those slots.
 
 The private key that will sign this newly-created certificate (the attestation statement)

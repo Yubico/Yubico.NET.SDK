@@ -54,8 +54,6 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(2, 0x9B)]
         [InlineData(3, 0x80)]
         [InlineData(1, 0x81)]
-        [InlineData(2, 0x82)]
-        [InlineData(3, 0x8C)]
         [InlineData(4, 0x9F)]
         [InlineData(2, 0x01)]
         public void Constructor_InvalidSlot_CorrectException(int cStyle, byte slotNum)

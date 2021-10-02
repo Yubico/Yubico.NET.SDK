@@ -40,8 +40,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // To get only YubiKeys connected via NFC, call
             //   YubiKey.FindByTransport(Transport.NfcSmartCard);
             PivMainMenuItem.ListYubiKeys => ListYubiKeys.RunListYubiKeys(Transport.SmartCard),
-            PivMainMenuItem.ChooseYubiKey =>
-                ChooseYubiKey.RunChooseYubiKey(true, _menuObject, Transport.SmartCard, out _yubiKeyChosen),
+            PivMainMenuItem.ChooseYubiKey => RunChooseYubiKey(),
             PivMainMenuItem.ChangePivPinAndPukRetryCount => RunChangeRetryCount(),
             PivMainMenuItem.ChangePivPin =>
                 ChangeSecret.RunChangePivPin(_yubiKeyChosen, _keyCollector.SampleKeyCollectorDelegate),
@@ -53,6 +52,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 ChangeSecret.RunChangePivManagementKey(_yubiKeyChosen, _keyCollector.SampleKeyCollectorDelegate),
             PivMainMenuItem.GenerateKeyPair => RunGenerateKeyPair(),
             PivMainMenuItem.ImportPrivateKey => RunImportPrivateKey(),
+            PivMainMenuItem.ImportCertificate => WriteImportCertMessage(),
             PivMainMenuItem.Sign => RunSignData(),
             PivMainMenuItem.Decrypt => RunDecryptData(),
             PivMainMenuItem.KeyAgree => RunKeyAgree(),
@@ -60,6 +60,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             PivMainMenuItem.BuildSelfSignedCert => RunBuildSelfSignedCert(),
             PivMainMenuItem.BuildCert => RunBuildCert(),
             PivMainMenuItem.RetrieveCert => RunRetrieveCert(),
+            PivMainMenuItem.CreateAttestationStatement => RunCreateAttestationStatement(),
+            PivMainMenuItem.GetAttestationCertificate => RunGetAttestationCert(),
             PivMainMenuItem.ResetPiv =>
                 ChangeSecret.RunResetPiv(_yubiKeyChosen, _keyCollector.SampleKeyCollectorDelegate),
             _ => RunUnimplementedOperation(),
@@ -181,6 +183,14 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             return false;
+        }
+
+        public static bool WriteImportCertMessage()
+        {
+            SampleMenu.WriteMessage(MessageType.Title, 0, "See the items/code for BuildSelfSignedCert and BuildCert");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "for examples on importing a certificate. The code is in");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "CertificateOperations/SampleCertificateOperations.cs.\n");
+            return true;
         }
 
         public bool RunSignData()
@@ -406,10 +416,17 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 return RunInvalidEntry();
             }
 
+            var nameBuilder = new X500NameBuilder();
+            nameBuilder.AddNameElement(X500NameElement.Country, "US");
+            nameBuilder.AddNameElement(X500NameElement.State, "CA");
+            nameBuilder.AddNameElement(X500NameElement.Locality, "Palo Alto");
+            nameBuilder.AddNameElement(X500NameElement.Organization, "Fake");
+            nameBuilder.AddNameElement(X500NameElement.CommonName, "Fake Cert");
+            X500DistinguishedName sampleCertName = nameBuilder.GetDistinguishedName();
             SampleCertificateOperations.GetCertRequest(
                 _yubiKeyChosen,
                 _keyCollector.SampleKeyCollectorDelegate,
-                "C=US,ST=CA,L=Palo Alto,O=Fake,CN=Fake Cert",
+                sampleCertName,
                 requestSlotContents);
 
             requestSlotContents.PrintCertRequestPem();
@@ -497,6 +514,34 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 _keyCollector.SampleKeyCollectorDelegate,
                 slotNumber,
                 out X509Certificate2 certificate);
+
+            byte[] certDer = certificate.Export(X509ContentType.Cert);
+            char[] certPem = PemOperations.BuildPem("CERTIFICATE", certDer);
+            SampleMenu.WriteMessage(MessageType.Title, 0, "\n" + new string(certPem) + "\n");
+            return true;
+        }
+
+        public bool RunCreateAttestationStatement()
+        {
+            if (!GetAsymmetricSlotNumber(out byte slotNumber))
+            {
+                return RunInvalidEntry();
+            }
+
+            KeyPairs.RunCreateAttestationStatement(
+                _yubiKeyChosen,
+                slotNumber,
+                out X509Certificate2 certificate);
+
+            byte[] certDer = certificate.Export(X509ContentType.Cert);
+            char[] certPem = PemOperations.BuildPem("CERTIFICATE", certDer);
+            SampleMenu.WriteMessage(MessageType.Title, 0, "\n" + new string(certPem) + "\n");
+            return true;
+        }
+
+        public bool RunGetAttestationCert()
+        {
+            KeyPairs.RunGetAttestationCert(_yubiKeyChosen, out X509Certificate2 certificate);
 
             byte[] certDer = certificate.Export(X509ContentType.Cert);
             char[] certPem = PemOperations.BuildPem("CERTIFICATE", certDer);

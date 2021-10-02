@@ -22,6 +22,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
     public partial class PivSampleRun
     {
         private readonly SampleMenu _menuObject;
+        private bool _chosenByUser;
         private IYubiKeyDevice _yubiKeyChosen;
         private readonly SampleKeyCollector _keyCollector;
         private readonly List<SamplePivSlotContents> _slotContentsList;
@@ -74,7 +75,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 menuItem = (PivMainMenuItem)_menuObject.RunMainMenu("What do you want to do?");
 
                 // If whatever the user wants to do requires a YubiKey, make sure
-                // we have one chosen. If one is already chosen or the menuItem
+                // we have one chosen. If the caller has chosen one specifically
+                // (they ran ChooseYubiKey), use it. If not, pick a default.
+                // If we have already picked a default, it is possible the user
+                // removed it and inserted another, so verify it is still
+                // inserted. If so, keep using it. If not, find another default.
                 // does not require a chosen YubiKey, this method will do nothing
                 // and return true.
                 if (DefaultChooseYubiKey(menuItem))
@@ -89,31 +94,43 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         }
 
         // Make sure a YubiKey is chosen.
-        // If there is a chosen YubiKey already, don't do anything, just return
-        // true.
-        // If the menuItem is Exit or NoItem or ChooseYubiKey (or something
+        // If the user has already chosen a YubiKey, don't do anything, just
+        // return true.
+        // If the menuItem is Exit or NoItem or ListYubiKeys (or something
         // similar), don't choose, just return true.
         private bool DefaultChooseYubiKey(PivMainMenuItem menuItem)
         {
-            if (!(_yubiKeyChosen is null))
-            {
-                return true;
-            }
-
             switch (menuItem)
             {
                 case PivMainMenuItem.ListYubiKeys:
-                case PivMainMenuItem.ChooseYubiKey:
                 case PivMainMenuItem.Exit:
+                case PivMainMenuItem.ChooseYubiKey:
                     return true;
 
                 default:
+                    if (_chosenByUser)
+                    {
+                        return true;
+                    }
+
                     return ChooseYubiKey.RunChooseYubiKey(
                         false,
                         _menuObject,
                         Transport.SmartCard,
-                        out _yubiKeyChosen);
+                        ref _yubiKeyChosen);
             }
+        }
+
+        // Run this method if the caller has chosen the menu item ChooseYubiKey.
+        private bool RunChooseYubiKey()
+        {
+            _chosenByUser = ChooseYubiKey.RunChooseYubiKey(
+                true,
+                _menuObject,
+                Transport.SmartCard,
+                ref _yubiKeyChosen);
+
+            return _chosenByUser;
         }
     }
 }

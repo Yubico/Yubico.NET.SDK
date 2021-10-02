@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey;
 using Yubico.YubiKey.Piv;
 using System.Security.Cryptography.X509Certificates;
 
@@ -84,10 +83,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 slotContents = new SamplePivSlotContents()
                 {
                     SlotNumber = slotNumber,
-                        Algorithm = privateKey.Algorithm,
-                        PinPolicy = pinPolicy,
-                        TouchPolicy = touchPolicy,
-                        PublicKey = PivPublicKey.Create(publicKey.YubiKeyEncodedPublicKey),
+                    Algorithm = privateKey.Algorithm,
+                    PinPolicy = pinPolicy,
+                    TouchPolicy = touchPolicy,
+                    PublicKey = PivPublicKey.Create(publicKey.YubiKeyEncodedPublicKey),
                 };
             }
 
@@ -104,6 +103,27 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 pivSession.KeyCollector = KeyCollectorDelegate;
                 certificate = pivSession.GetCertificate(slotNumber);
+            }
+        }
+
+        public static void RunCreateAttestationStatement(
+            IYubiKeyDevice yubiKey,
+            byte slotNumber,
+            out X509Certificate2 certificate)
+        {
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                certificate = pivSession.CreateAttestationStatement(slotNumber);
+            }
+        }
+
+        public static void RunGetAttestationCert(
+            IYubiKeyDevice yubiKey,
+            out X509Certificate2 certificate)
+        {
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                certificate = pivSession.GetAttestationCertificate();
             }
         }
     }

@@ -75,6 +75,12 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384)]
         public void AttestGenerated(PivAlgorithm algorithm)
         {
+            byte[] slotNumbers = new byte[] {
+                0x9A, 0x9C, 0x9D, 0x9E,
+                0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F,
+                0x90, 0x91, 0x92, 0x93, 0x94, 0x95
+            };
+
             bool isValid = LoadAttestationPair(algorithm, true);
             Assert.True(isValid);
 
@@ -92,18 +98,22 @@ namespace Yubico.YubiKey.Piv
                 isValid = PivSupport.ResetPiv(pivSession);
                 Assert.True(isValid);
 
-                isValid = PivSupport.GenerateKey(pivSession, PivSlot.Authentication);
-                Assert.True(isValid);
+                for (int index = 0; index < slotNumbers.Length; index++)
+                {
+                    _ = pivSession.GenerateKeyPair(
+                        slotNumbers[index], PivAlgorithm.EccP256, PivPinPolicy.Never, PivTouchPolicy.Never);
+                    Assert.True(isValid);
 
-                X509Certificate2? cert = null;
-                try
-                {
-                    cert = pivSession.CreateAttestationStatement(PivSlot.Authentication);
-                    Assert.NotEqual(1, cert.Version);
-                }
-                finally
-                {
-                    cert?.Dispose();
+                    X509Certificate2? cert = null;
+                    try
+                    {
+                        cert = pivSession.CreateAttestationStatement(slotNumbers[index]);
+                        Assert.NotEqual(1, cert.Version);
+                    }
+                    finally
+                    {
+                        cert?.Dispose();
+                    }
                 }
             }
         }

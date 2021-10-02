@@ -28,50 +28,30 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
         public static bool RunRenameCredential(
             IYubiKeyDevice yubiKey,
             Func<KeyEntryData, bool> KeyCollectorDelegate,
-            SampleMenu menuObject)
+            Credential credential,
+            string newIssuer,
+            string newAccount)
         {
+            if (credential is null)
+            {
+                throw new ArgumentNullException(nameof(credential));
+            }
+
             using var oathSession = new OathSession(yubiKey);
             {
                 oathSession.KeyCollector = KeyCollectorDelegate;
 
-                if (menuObject is null)
-                {
-                    _ = ChooseCredential.RunChooseCredential(
-                        yubiKey,
-                        true,
-                        menuObject,
-                        out Credential credential);
+                Credential renamedCredential = oathSession.RenameCredential(
+                    credential.Issuer,
+                    credential.AccountName,
+                    newIssuer,
+                    newAccount,
+                    credential.Type.Value,
+                    credential.Period.Value);
 
-                    Credential renamedCredential = oathSession.RenameCredential(
-                        credential.Issuer,
-                        credential.AccountName,
-                        "Yubico",
-                        "testRename@example.com",
-                        credential.Type.Value,
-                        credential.Period.Value);
+                ReportResult(renamedCredential);
 
-                    ReportResult(renamedCredential);
-                }
-                else
-                {
-                    RunCollectCredential(
-                        menuObject,
-                        out Credential credential,
-                        out string newIssuer,
-                        out string newAccount);
-
-                    Credential renamedCredential = oathSession.RenameCredential(
-                        credential.Issuer,
-                        credential.AccountName,
-                        newIssuer,
-                        newAccount,
-                        credential.Type.Value,
-                        credential.Period.Value);
-
-                    ReportResult(renamedCredential);
-                }
             }
-
             return true;
         }
 

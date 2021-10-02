@@ -90,7 +90,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                     return true;
 
                 default:
-                    return ChooseYubiKey.RunChooseYubiKey(false, _menuObject, Transport.UsbSmartCard, out _yubiKeyChosen);
+                    return ChooseYubiKey.RunChooseYubiKey(false, _menuObject, Transport.UsbSmartCard, ref _yubiKeyChosen);
             }
         }
     }

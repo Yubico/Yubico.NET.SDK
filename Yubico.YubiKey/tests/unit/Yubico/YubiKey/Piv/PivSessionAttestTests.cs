@@ -21,8 +21,13 @@ namespace Yubico.YubiKey.Piv
 {
     public class PivSessionAttestationTests
     {
-        [Fact]
-        public void CreateAttest_BadSlot_ThrowsArgException()
+        [Theory]
+        [InlineData(PivSlot.Pin)]
+        [InlineData(PivSlot.Puk)]
+        [InlineData(PivSlot.Management)]
+        [InlineData(PivSlot.Attestation)]
+        [InlineData(0x96)]
+        public void CreateAttest_BadSlot_ThrowsArgException(byte slotNumber)
         {
             var yubiKey = new HollowYubiKeyDevice();
             yubiKey.FirmwareVersion.Major = 4;
@@ -30,7 +35,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.CreateAttestationStatement(0x88));
+                _ = Assert.Throws<ArgumentException>(() => pivSession.CreateAttestationStatement(slotNumber));
             }
         }
 

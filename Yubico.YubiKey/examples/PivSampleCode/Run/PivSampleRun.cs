@@ -96,7 +96,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // Make sure a YubiKey is chosen.
         // If the user has already chosen a YubiKey, don't do anything, just
         // return true.
-        // If this
         // If the menuItem is Exit or NoItem or ListYubiKeys (or something
         // similar), don't choose, just return true.
         private bool DefaultChooseYubiKey(PivMainMenuItem menuItem)

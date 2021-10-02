@@ -28,8 +28,8 @@ YubiKey. It does not say anything about who owns the YubiKey, or who signed some
 using the private key, only that the key is from a YubiKey.
 
 > [!NOTE]
-> In version 1.0 of the SDK, it was not possible to create an attestation statement for
-> keys in slots 82 - 95 (retired key slots). Beginning with version 1.1 of the SDK it is
+> In version 1.0.0 of the SDK, it was not possible to create an attestation statement for
+> keys in slots 82 - 95 (retired key slots). Beginning with version 1.0.1 of the SDK it is
 > possible to create an attestation statement for the keys in those slots.
 
 This attestation statement is provided in the form of an X.509 certificate. What this

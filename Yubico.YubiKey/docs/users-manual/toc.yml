@@ -50,20 +50,52 @@
 - name: "Application: OTP"
   homepage: application-otp/otp-overview.md
   items:
-  - name: Yubico OTP
-    href: application-otp/yubico-otp.md
-  - name: HOTP
-    href: application-otp/hotp.md
-  - name: Challenge-response
-    href: application-otp/challenge-response.md
-  - name: Static passwords
-    href: application-otp/static-password.md
-  - name: NDEF
-    href: application-otp/ndef.md
-  - name: "How-To: Programming slot 2 with the serial number"
-    href: application-otp/slot-2-serial.md
-  - name: "How-To: Using challenge-response"
-    href: application-otp/using-challenge.md
+  - name: Concepts
+    href: application-otp/concepts-overview.md
+    items:
+    - name: OTP application
+      href: application-otp/application-concepts-overview.md
+      items:
+      - name: Slots
+        href: application-otp/slots.md
+      - name: HID
+        href: application-otp/hid.md
+    - name: Configurations
+      href: application-otp/configuration-concepts-overview.md
+      items:
+      - name: Yubico OTP
+        href: application-otp/yubico-otp.md
+      - name: OATH-HOTP
+        href: application-otp/hotp.md
+      - name: Challenge-Response
+        href: application-otp/challenge-response.md
+      - name: Static passwords
+        href: application-otp/static-password.md
+      - name: NDEF
+        href: application-otp/ndef.md
+  - name: How-to Guides
+    href: application-otp/how-to-guides-overview.md
+    items:
+    - name: How to program a slot with a Yubico OTP credential
+      href: application-otp/how-to-program-a-yubico-otp-credential.md
+    - name: How to program a slot with an HMAC-SHA1 OATH-HOTP credential
+      href: application-otp/how-to-program-an-oath-hotp-credential.md
+    - name: How to program a slot with a challenge-response credential
+      href: application-otp/how-to-program-a-challenge-response-credential.md
+    - name: How to calculate a response code for a challenge-response credential
+      href: application-otp/how-to-calculate-a-challenge-response-code.md
+    - name: How to program a slot with a static password
+      href: application-otp/how-to-program-a-static-password.md
+    - name: How to configure NDEF to use a slot to generate an OTP
+      href: application-otp/how-to-configure-ndef.md
+    - name: How to retrieve a slot's status
+      href: application-otp/how-to-retrieve-slot-status.md
+    - name: How to update slot settings
+      href: application-otp/how-to-update-slot-settings.md
+    - name: How to delete a slot's configuration
+      href: application-otp/how-to-delete-a-slot-configuration.md
+    - name: How to swap slot configurations
+      href: application-otp/how-to-swap-slot-configs.md
   - name: Commands
     items:
     - name: OTP commands and APDUs

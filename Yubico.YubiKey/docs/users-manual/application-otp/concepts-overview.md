@@ -1,5 +1,5 @@
 ---
-uid: OtpHotp
+uid: OtpConcepts
 summary: *content
 ---
 
@@ -17,6 +17,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# OATH-HOTP
+# Concepts overview
 
 Content coming soon.

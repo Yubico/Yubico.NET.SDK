@@ -73,8 +73,8 @@
         href: application-otp/static-password.md
       - name: NDEF
         href: application-otp/ndef.md
-  - name: Operations
-    href: application-otp/operations-overview.md
+  - name: How-to Guides
+    href: application-otp/how-to-guides-overview.md
     items:
     - name: How to program a slot with a Yubico OTP credential
       href: application-otp/how-to-program-a-yubico-otp-credential.md

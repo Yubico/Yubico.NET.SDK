@@ -26,11 +26,12 @@ namespace Yubico.Core.Devices.SmartCard
     internal class DesktopSmartCardDevice : SmartCardDevice
     {
         private readonly string _readerName;
-        private readonly ILogger _log;
+        private readonly ILogger _log = Log.GetLogger();
 
         public static IReadOnlyList<ISmartCardDevice> GetList()
         {
             ILogger log = Log.GetLogger();
+            using IDisposable logScope = log.BeginScope("SmartCardDevice.GetList()");
 
             uint result = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);
             log.SCardApiCall(nameof(SCard.EstablishContext), result);
@@ -54,6 +55,8 @@ namespace Yubico.Core.Devices.SmartCard
                     log.LogInformation("No smart card devices found.");
                     return new List<ISmartCardDevice>();
                 }
+
+                log.LogInformation("Found {numSmartCards} smart card devices.", readerNames.Length);
 
                 if (result != ErrorCode.SCARD_S_SUCCESS)
                 {
@@ -146,6 +149,11 @@ namespace Yubico.Core.Devices.SmartCard
                         result);
                 }
 
+                _log.LogInformation(
+                    "Connected to smart card [{readerName}]. Active protocol is {activeProtocol}",
+                    _readerName,
+                    activeProtocol);
+
                 var connection = new DesktopSmartCardConnection(
                     context,
                     cardHandle,
@@ -161,6 +169,7 @@ namespace Yubico.Core.Devices.SmartCard
             {
                 context?.Dispose();
                 cardHandle?.Dispose();
+                _log.LogInformation("Disposed of context and cardHandle.");
             }
         }
     }

@@ -12,12 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging;
 using Microsoft.Win32.SafeHandles;
 using System;
 using System.Runtime.ConstrainedExecution;
-using Yubico.Core.Devices.SmartCard;
-using Yubico.Core.Logging;
 
 namespace Yubico.PlatformInterop
 {
@@ -26,8 +23,6 @@ namespace Yubico.PlatformInterop
     /// </summary>
     internal class SCardContext : SafeHandleZeroOrMinusOneIsInvalid
     {
-        private readonly ILogger _log = Log.GetLogger();
-
         public SCardContext(IntPtr handle) :
             base(true)
         {
@@ -35,17 +30,7 @@ namespace Yubico.PlatformInterop
         }
 
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-        protected override bool ReleaseHandle()
-        {
-            _log.LogInformation(
-                "Releasing smart card service context. Handle = [{Handle:X}]",
-                handle.ToInt64());
-
-            uint result = PlatformLibrary.Instance.SCard.ReleaseContext(handle);
-            _log.SCardApiCall(nameof(SCard.ReleaseContext), result);
-
-            return result == ErrorCode.SCARD_S_SUCCESS;
-        }
-
+        protected override bool ReleaseHandle() =>
+            PlatformLibrary.Instance.SCard.ReleaseContext(handle) == ErrorCode.SCARD_S_SUCCESS;
     }
 }

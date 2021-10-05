@@ -12,19 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging;
 using System;
 using Yubico.Core;
 using Yubico.Core.Buffers;
-using Yubico.Core.Logging;
 
 namespace Yubico.PlatformInterop
 {
     internal class SCard : ISCard, IDisposable
     {
         private static readonly Lazy<SCard> _instance = new Lazy<SCard>(() => new SCard());
-        private readonly UnmanagedDynamicLibrary _scardLib;
-        private readonly ILogger _log = Log.GetLogger();
+        readonly UnmanagedDynamicLibrary _scardLib;
 
         public static SCard Instance => _instance.Value;
 
@@ -59,18 +56,6 @@ namespace Yubico.PlatformInterop
             return UnmanagedDynamicLibrary.Open(libraryName);
         }
 
-        private void LogResult(string apiName, uint result)
-        {
-            if (result == ErrorCode.SCARD_S_SUCCESS)
-            {
-                _log.LogInformation("SCard{APIName} called successfully.", apiName);
-            }
-            else
-            {
-                _log.LogError("SCard{APIName} called and FAILED. Result = {Result}", apiName, result);
-            }
-        }
-
         #region Wrappers
 
         public uint Connect(
@@ -99,14 +84,6 @@ namespace Yubico.PlatformInterop
             )
         {
             uint result = EstablishContext(scope, out IntPtr hContext);
-            LogResult(nameof(EstablishContext), result);
-
-            _log.LogInformation(
-                "New smart card context {Context:X} opened within scope {Scope}",
-                hContext.ToInt64(),
-                scope
-                );
-
             context = new SCardContext(hContext);
             return result;
         }
@@ -133,7 +110,6 @@ namespace Yubico.PlatformInterop
                 rawGroups,
                 null,
                 ref readerNamesLength);
-            LogResult(nameof(ListReaders), result);
 
             if (result == ErrorCode.SCARD_S_SUCCESS)
             {
@@ -149,13 +125,8 @@ namespace Yubico.PlatformInterop
                     rawGroups,
                     rawReaderNames,
                     ref readerNamesLength);
-                LogResult(nameof(ListReaders), result);
 
                 readerNames = MultiString.GetStrings(rawReaderNames, SdkPlatformInfo.Encoding);
-                _log.LogInformation(
-                    "Found {ReaderCount} readers: {ReaderNames}",
-                    readerNames.Length,
-                    readerNames);
             }
 
             return result;
@@ -181,7 +152,6 @@ namespace Yubico.PlatformInterop
                 out _,
                 null,
                 ref atrLength);
-            LogResult(nameof(Status), result);
 
             if (result == ErrorCode.SCARD_S_SUCCESS)
             {
@@ -197,24 +167,12 @@ namespace Yubico.PlatformInterop
                     out protocol,
                     atrBuffer,
                     ref atrLength);
-                LogResult(nameof(Status), result);
 
                 if (result == ErrorCode.SCARD_S_SUCCESS)
                 {
                     readerNames = MultiString.GetStrings(rawReaderNames, SdkPlatformInfo.Encoding);
+
                     atr = atrBuffer;
-
-                    _log.LogInformation(
-                        "Status call for smart card handle {Handle:X} returned the following:\n"
-                        + "Serviced by readers: {ReaderNames}\n"
-                        + "Status: {Status}\n"
-                        + "Protocol: {Protocol}\n"
-                        + "ATR: {ATR}",
-                        card.DangerousGetHandle().ToInt64(),
-                        status,
-                        protocol,
-                        atr);
-
                     return result;
                 }
             }
@@ -248,7 +206,6 @@ namespace Yubico.PlatformInterop
                     ioRecvPci,
                     (IntPtr)recvBufferPtr,
                     ref recvBufferSize);
-                LogResult(nameof(Transmit), result);
 
                 bytesReceived = recvBufferSize;
                 return result;

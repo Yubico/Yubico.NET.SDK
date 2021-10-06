@@ -19,4 +19,14 @@ limitations under the License. -->
 
 # How to swap slot configurations
 
-Content coming soon.
+Because swapping [slot](xref:OtpSlots) settings requires zero configuration, this operation is not designed as a Fluent Builder operation. It’s as simple as calling the ```SwapSlots``` method:
+
+```
+using (OtpSession otp = new OtpSession(yKey))
+{
+  otp.SwapSlots();
+}
+```
+
+> [!NOTE]
+> This method will fail if at least one of the slots is not currently configured.

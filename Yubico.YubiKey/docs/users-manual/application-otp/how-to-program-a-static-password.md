@@ -23,6 +23,8 @@ To configure a [slot](xref:OtpSlots) to emit a [static password](xref:OtpStaticP
 
 The properties of the static password you wish to set are specified by calling methods on your ```SetStatusPassword``` instance. Each of those methods return a ```this``` reference back to the ```SetStaticPassword``` instance. This allows you to chain together the configuration in a flexible and simple way, regardless of the combination of options you choose.
 
+## SetStatusPassword example
+
 The following example code will set a static password on the [short-press](xref:Yubico.YubiKey.Otp.Slot.ShortPress) slot on a YubiKey. We will assume that you already have an [IYubiKeyDevice](xref:Yubico.YubiKey.IYubiKeyDevice) reference.
 
 ```

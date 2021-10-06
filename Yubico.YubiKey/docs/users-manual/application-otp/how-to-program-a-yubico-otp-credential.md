@@ -37,7 +37,7 @@ A Yubico OTP credential contains the following three parts, which must be set du
 
    The key is a 16-byte AES key that is used as the primary secret for the credential.
 
-## Example  
+## ConfigureYubicoOtp example  
 
 You can configure the [ShortPress](xref:Yubico.YubiKey.Otp.Slot.ShortPress) slot of your YubiKey with a Yubico OTP credential as follows:
 

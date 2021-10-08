@@ -88,6 +88,8 @@
       href: application-otp/how-to-program-a-static-password.md
     - name: How to configure NDEF to use a slot to generate an OTP
       href: application-otp/how-to-configure-ndef.md
+    - name: How to read NDEF information
+      href: application-otp/how-to-read-ndef-information.md
     - name: How to retrieve a slot's status
       href: application-otp/how-to-retrieve-slot-status.md
     - name: How to update slot settings

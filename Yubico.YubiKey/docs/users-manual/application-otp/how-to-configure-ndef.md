@@ -21,7 +21,7 @@ limitations under the License. -->
 
 The [NDEF](xref:OtpNdef) (NFC Data Exchange Format) configuration for the OTP application is a special case. The NDEF configuration is always active. If you present the YubiKey to an NFC reader and issue an NDEF read command, the YubiKey will always emit something.
 
-When you configure NDEF functionality, you are setting two things: some text and which OTP configuration slot to use to generate a challenge. The text can be either a URI or just static text.
+When you configure NDEF functionality, you are setting two things: some text and which OTP configuration [slot](xref:OtpSlots) to use to generate a challenge. The text can be either a URI or just static text.
 
 Unlike other configuration operations that take a slot identifier, configuring NDEF does not alter the configuration of the OTP application slot. It only sets which slot to activate after sending the text.
 

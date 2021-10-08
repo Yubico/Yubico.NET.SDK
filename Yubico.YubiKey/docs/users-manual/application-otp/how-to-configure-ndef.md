@@ -53,3 +53,7 @@ using (OtpSession otp = new OtpSession(yKey))
     .Execute();
 }
 ```
+
+## Next steps
+
+After configuring a slot with NDEF, learn [how to read from the NDEF tag](xref:OtpReadNDEF).

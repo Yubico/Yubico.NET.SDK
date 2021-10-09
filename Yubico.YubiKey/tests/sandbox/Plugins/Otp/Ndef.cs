@@ -27,30 +27,39 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         public override string Description => "Configure or read a slot to be used over NDEF (NFC).";
 
         protected override ParameterUse ParametersUsed =>
-            ParameterUse.Text
+            ParameterUse.Slot
+            | ParameterUse.Text
             | ParameterUse.Force
             | ParameterUse.Uri
             | ParameterUse.Utf16
             | ParameterUse.Read;
 
-        public Ndef(IOutput output) : base(output) { }
+        public Ndef(IOutput output) : base(output)
+        {
+            Parameters["slot"].Required = false;
+        }
 
         public override void HandleParameters()
         {
             // We'll let the base class handle populating all of the fields.
             base.HandleParameters();
 
-            // NDEF is always slot 1.
-            _slot = Slot.ShortPress;
-
             // It's better, however, for the individual plugins to decide how to
             // validate options.
             var exceptions = new List<Exception>();
 
-            if (_read && (_uri != null || !string.IsNullOrEmpty(_text)))
+            if (_read)
             {
-                exceptions.Add(new InvalidOperationException(
-                    "You cannot read and program NDEF tag in the same operation"));
+                if (_uri != null || !string.IsNullOrEmpty(_text))
+                {
+                    exceptions.Add(new InvalidOperationException(
+                        "You cannot read and program NDEF tag in the same operation."));
+                }
+                if(_slot != Slot.None)
+                {
+                    exceptions.Add(new InvalidOperationException(
+                        "Setting the slot is not relevant when reading an NDEF tag."));
+                }
             }
 
             // To allow for notifying the user to touch the YubiKey to the NFC

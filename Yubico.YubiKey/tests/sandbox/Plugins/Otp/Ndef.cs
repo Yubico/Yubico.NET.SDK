@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 if (_uri != null || !string.IsNullOrEmpty(_text))
                 {
                     exceptions.Add(new InvalidOperationException(
-                        "You cannot read and program NDEF tag in the same operation."));
+                        "You cannot read and program an NDEF tag in the same operation."));
                 }
                 if(_slot != Slot.None)
                 {

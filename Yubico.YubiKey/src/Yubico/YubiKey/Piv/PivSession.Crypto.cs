@@ -395,71 +395,74 @@ namespace Yubico.YubiKey.Piv
             PivAlgorithm algorithm,
             string algorithmExceptionMessage)
         {
-            bool pinRequired = false;
+            bool pinRequired = true;
 
             // First, do we need to verify the PIN? It is possible the key in the
             // slot was generated or imported with a PIN policy of Never. If
             // that's the case, we don't want to try to verify the PIN.
-            // If the PIN is already verified, it doesn't matter whether the slot
-            // requires PIN or not, so make this check only if the PIN is not yet
-            // verified.
-            if (PinVerified == false)
+            // If the PIN policy is Once and the PIN is already verified, no need
+            // to verify the PIN again.
+            // If the PIN policy is Always, we need to verify the PIN.
+
+            // Metadata will give us our answer, but that feature is
+            // available only on YubiKeys beginning with version 5.3.
+            if (_yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0)
             {
-                // Metadata will give us our answer, but that feature is
-                // available only on YubiKeys beginning with version 5.3.
-                if (_yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0)
+                var metadataCommand = new GetMetadataCommand(slotNumber);
+                GetMetadataResponse metadataResponse = Connection.SendCommand(metadataCommand);
+
+                // If there is no key in the slot, this will throw an exception.
+                PivMetadata metadata = metadataResponse.GetData();
+
+                // We know the algorithm based on the input data. Is it the
+                // algorithm of the key in the slot?
+                // We can make this check with metadata. Without metadata there's
+                // no way to know until we try to perform the operation.
+                if (metadata.Algorithm != algorithm)
                 {
-                    var metadataCommand = new GetMetadataCommand(slotNumber);
-                    GetMetadataResponse metadataResponse = Connection.SendCommand(metadataCommand);
-
-                    // If there is no key in the slot, this will throw an exception.
-                    PivMetadata metadata = metadataResponse.GetData();
-
-                    // We know the algorithm based on the input data. Is it the
-                    // algorithm of the key in the slot?
-                    // We can make this check with metadata. Without metadata there's
-                    // no way to know until we try to perform the operation.
-                    if (metadata.Algorithm != algorithm)
-                    {
-                        throw new ArgumentException(algorithmExceptionMessage);
-                    }
-
-                    if (metadata.PinPolicy != PivPinPolicy.Never)
-                    {
-                        pinRequired = true;
-                    }
+                    throw new ArgumentException(algorithmExceptionMessage);
                 }
-                else
-                {
-                    // Metadata is not available on this YubiKey.
-                    // Try to perform the operation. If it works, we're done. If not,
-                    // we can get limited information on why not.
-                    IYubiKeyResponseWithData<byte[]> initialResponse = Connection.SendCommand(command);
 
-                    if (initialResponse.Status == ResponseStatus.AuthenticationRequired)
-                    {
-                        // If the response is AuthRequired, either the PIN is required or
-                        // touch is. The response does not tell us which.
-                        // If the PIN is already verified, then we do know that the
-                        // problem was not the PIN, hence, touch is required. But if we reach
-                        // this code, the PIN had not been verified.
-                        // So we don't know. Set pinRequired to true.
-                        // This means it is possible the slot is configured for a PIN
-                        // policy of never, and the problem was touch. If so, we're
-                        // asking for the PIN even though it is not required, but we have
-                        // no other choice.
-                        pinRequired = true;
-                    }
-                    else
-                    {
-                        // If the response is not AuthRequired, then GetData.
-                        // If the response was Success, we'll get the result and we're
-                        // done.
-                        // If it was not Success, this call will throw an exception.
-                        // Anything other than Success means invalid key or empty
-                        // slot or pub key data does not match the key, etc.
-                        return initialResponse.GetData();
-                    }
+                // If the metadata says Never, then pinRequired is false.
+                // If the metadata says Once, and the PIN is verified, then the
+                // PIN is not required.
+                // The only other case is Always which means we set the
+                // pinRequired to true, but we init that variable to true.
+                if ((metadata.PinPolicy == PivPinPolicy.Never) ||
+                    ((metadata.PinPolicy == PivPinPolicy.Once) && PinVerified))
+                {
+                    pinRequired = false;
+                }
+            }
+            else
+            {
+                // Metadata is not available on this YubiKey.
+                // Try to perform the operation. If it works, we're done. If not,
+                // we can get limited information on why not.
+                IYubiKeyResponseWithData<byte[]> initialResponse = Connection.SendCommand(command);
+
+                // If the response is AuthRequired, either the PIN is required or
+                // touch is. The response does not tell us which.
+                // If the PIN is already verified, we still don't know if
+                // that means it must be touch, because the policy might be
+                // PIN always.
+                // So we don't know. Set pinRequired to true.
+                // This means it is possible the slot is configured for a PIN
+                // policy of never, and the problem was touch. If so, we're
+                // asking for the PIN even though it is not required, but we have
+                // no other choice.
+                // Because we init pinRequired to true, what we need to do now is
+                // perform the cases when the response is Success or some other
+                // error.
+                if (initialResponse.Status != ResponseStatus.AuthenticationRequired)
+                {
+                    // If the response is not AuthRequired, then GetData.
+                    // If the response was Success, we'll get the result and we're
+                    // done.
+                    // If it was not Success, this call will throw an exception.
+                    // Anything other than Success means invalid key or empty
+                    // slot or pub key data does not match the key, etc.
+                    return initialResponse.GetData();
                 }
             }
 

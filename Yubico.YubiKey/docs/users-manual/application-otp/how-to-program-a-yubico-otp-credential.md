@@ -19,9 +19,9 @@ limitations under the License. -->
 
 # How to program a slot with a Yubico OTP credential
 
-To program a [slot](xref:OtpSlots) with a [Yubico OTP](xref:OtpYubicoOtp) credential, you will use a ```ConfigureYubicoOtp``` instance. It is instantiated by calling the method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
+To program a [slot](xref:OtpSlots) with a [Yubico OTP](xref:OtpYubicoOtp) credential, you will use a [ConfigureYubicoOtp](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp) instance. It is instantiated by calling the factory method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
 
-First, a clarification of terms is needed. “Yubico OTP” is both an OTP credential type and a [challenge-response](xref:OtpChallengeResponse) algorithm. In this context, we are referring to the credential type. A Yubico OTP credential is touch-activated. When you touch the YubiKey, it will emit a binary challenge using ModHex characters.
+First, a clarification of terms is needed. “Yubico OTP” is both an OTP credential type and a [challenge-response](xref:OtpChallengeResponse) algorithm. In this context, we are referring to the credential type. A Yubico OTP credential is touch-activated. When you touch the YubiKey, it will emit a binary challenge using [ModHex](xref:OtpModhex) characters.
 
 A Yubico OTP credential contains the following three parts, which must be set during instantiation:
 
@@ -41,7 +41,7 @@ A Yubico OTP credential contains the following three parts, which must be set du
 
 You can configure the [ShortPress](xref:Yubico.YubiKey.Otp.Slot.ShortPress) slot of your YubiKey with a Yubico OTP credential as follows:
 
-```
+```C#
 using (OtpSession otp = new OtpSession(yKey))
 {
   // privateId and aesKey are Memory<byte> references.
@@ -49,7 +49,7 @@ using (OtpSession otp = new OtpSession(yKey))
     .UseSerialNumberAsPublicId()
     .UsePrivateId(privateId)
     .UseKey(aesKey)
-    .Execute();
+    .ExecuteOperation();
 }
 ```
 
@@ -57,7 +57,7 @@ In this example, we’re configuring a Yubico OTP credential using the serial nu
 
 You can also generate a new private ID and AES key to use instead:
 
-```
+```C#
 using (OtpSession otp = new OtpSession(yKey))
 {
   Memory<byte> privateId = new byte[ConfigureYubicoOtp.PrivateIdentifierSize];
@@ -67,7 +67,7 @@ using (OtpSession otp = new OtpSession(yKey))
     .UseSerialNumberAsPublicId()
     .GeneratePrivateId(privateId)
     .GenerateKey(aesKey)
-    .Execute();
+    .ExecuteOperation();
 
   // Do whatever is needed with privateId and aesKey, and clear them.
 }

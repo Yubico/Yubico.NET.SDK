@@ -1,5 +1,5 @@
 ---
-uid: OtpSwapSlot
+uid: OtpModhex
 summary: *content
 ---
 
@@ -17,16 +17,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# How to swap slot configurations
+# ModHex
 
-Because swapping [slot](xref:OtpSlots) settings requires zero configuration, this operation is not designed as a Fluent Builder operation. It’s as simple as calling the [SwapSlots](xref:Yubico.YubiKey.Otp.OtpSession.SwapSlots) method:
-
-```C#
-using (OtpSession otp = new OtpSession(yKey))
-{
-  otp.SwapSlots();
-}
-```
-
-> [!NOTE]
-> This method will fail if at least one of the slots is not currently configured.
+Content coming soon.

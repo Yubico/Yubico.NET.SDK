@@ -19,7 +19,7 @@ limitations under the License. -->
 
 # How to program a slot with a challenge-response credential
 
-To program a [slot](xref:OtpSlots) with a [challenge-response](xref:OtpChallengeResponse) credential, you must use a ```ConfigureChallengeResponse``` instance. It is instantiated by calling the method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
+To program a [slot](xref:OtpSlots) with a [challenge-response](xref:OtpChallengeResponse) credential, you must use a [ConfigureChallengeResponse](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse) instance. It is instantiated by calling the factory method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
 
 The challenge-response credential, unlike the other configurations, is passive. It only responds when it is queried with challenge data.
 
@@ -29,7 +29,7 @@ There are two distinct flavors of a challenge-response credential, based on the 
 
 * The YubiKey supports a short challenge mode for HMAC-SHA1 (see below for more details).
 
-When configuring the credential, use the appropriate method (```UseYubiOtp()``` or ```UseSha1Hmac()```) to select the algorithm you'd like to use.
+When configuring the credential, use the appropriate method ([UseYubiOtp()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseYubiOtp) or [UseHmacSha1()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseHmacSha1)) to select the algorithm you'd like to use.
 
 ## Short Challenge Mode
 
@@ -40,22 +40,22 @@ An HMAC-SHA1 challenge is normally 64 bytes. However, the YubiKey supports a sho
 
 ## Require Touch
 
-Both the Yubico OTP and HMAC-SHA1 challenge-response credentials can include the setting that requires the user to touch the YubiKey before the cryptographic operation can proceed. Requiring touch improves security by ensuring that a user performs a physical operation.
+Both the Yubico OTP and HMAC-SHA1 challenge-response credentials can include a setting that requires the user to touch the YubiKey before the cryptographic operation can proceed. Requiring touch improves security by ensuring that a user performs a physical operation.
 
-To enable this setting, add the ```UseButton()``` method to your operation.
+To enable this setting, add the [UseButton()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseButton) method to your operation.
 
 ## ConfigureChallengeResponse example
 
 The following code configures the [short press](xref:Yubico.YubiKey.Otp.Slot.ShortPress) slot with a challenge-response credential. This configuration uses the HMAC-SHA1 algorithm and requires the user to touch the button when there is a challenge-response operation.
 
-```
+```C#
 using (OtpSession otp = new OtpSession(yKey))
 {
   // The key, hmacKey, will have been set elsewhere.
   otp.ConfigureChallengeResponse(Slot.ShortPress)
-    .UseSha1Hmac()
+    .UseHmacSha1()
     .UseKey(hmacKey)
     .UseButton()
-    .Execute();
+    .ExecuteOperation();
 }
 ```

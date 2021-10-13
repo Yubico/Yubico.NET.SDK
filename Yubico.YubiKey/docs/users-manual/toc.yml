@@ -60,6 +60,8 @@
         href: application-otp/slots.md
       - name: HID
         href: application-otp/hid.md
+      - name: ModHex
+        href: application-otp/modhex.md
     - name: Configurations
       href: application-otp/configuration-concepts-overview.md
       items:

@@ -26,7 +26,7 @@ When you construct an [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) object, y
 
 To output slot status to the console, do the following:
 
-```
+```C#
 using (OtpSession otp = new OtpSession(yKey))
 {
   Output(Slot.ShortPress, otp.IsShortPressConfigured, otp.ShortPressRequiresTouch);

@@ -19,7 +19,7 @@ limitations under the License. -->
 
 # How to update slot settings
 
-Some [slot](xref:OtpSlots) settings can be updated via the ```UpdateSlot``` method without completely reconfiguring an OTP application slot. These settings primarily involve behaviors not related to encryption or other sensitive information.
+Some [slot](xref:OtpSlots) settings can be updated via the [UpdateSlot](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot) method without completely reconfiguring an OTP application slot. These settings involve behaviors not related to encryption or other sensitive information.
 
 The slot settings that can be updated include the following:
 
@@ -42,7 +42,7 @@ The slot settings that can be updated include the following:
 
 The following is an example of how to update the settings of a slot with ```UpdateSlot```. We’ll assume that the boolean variables are set elsewhere.
 
-```
+```C#
 using (OtpSession otp = new OtpSession(_yubiKey))
 {
   otp.UpdateSlot(_slot)
@@ -65,6 +65,6 @@ using (OtpSession otp = new OtpSession(_yubiKey))
     .SetUse20msPacing(_use20msPacing)
     .SetAllowUpdate(_allowUpdate)
     .ProtectLongPressSlot(_protectLongPressSlot)
-    .Execute();
+    .ExecuteOperation();
 }
 ```

@@ -25,12 +25,12 @@ Deleting the configuration stored in a [slot](xref:OtpSlots) via the ```DeleteSl
 
 In the following example, the configuration of the [long-press](xref:Yubico.YubiKey.Otp.Slot.LongPress) slot of the OTP application will be deleted, assuming the correct access code is given:
 
-```
+```C#
 using (OtpSession otp = new OtpSession(yKey))
 {
   otp.DeleteSlot(Slot.LongPress)
     .UseCurrentAccessCode(_currentAccessCode)
-    .Execute();
+    .ExecuteOperation();
 }
 
 ```

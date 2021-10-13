@@ -19,51 +19,51 @@ limitations under the License. -->
 
 # How to program a slot with a static password
 
-To configure a [slot](xref:OtpSlots) to emit a [static password](xref:OtpStaticPassword), you will use a ```SetStaticPassword``` instance. It is instantiated by calling the static method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
+To configure a [slot](xref:OtpSlots) to emit a [static password](xref:OtpStaticPassword), you will use a [ConfigureStaticPassword](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword) instance. It is instantiated by calling the factory method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
 
-The properties of the static password you wish to set are specified by calling methods on your ```SetStatusPassword``` instance. Each of those methods return a ```this``` reference back to the ```SetStaticPassword``` instance. This allows you to chain together the configuration in a flexible and simple way, regardless of the combination of options you choose.
+The properties of the static password you wish to set are specified by calling methods on your ```ConfigureStatusPassword``` instance. Each of those methods return a ```this``` reference back to the ```ConfigureStaticPassword``` instance. This allows you to chain together the configuration in a flexible and simple way, regardless of the combination of options you choose.
 
 ## SetStatusPassword example
 
 The following example code will set a static password on the [short-press](xref:Yubico.YubiKey.Otp.Slot.ShortPress) slot on a YubiKey. We will assume that you already have an [IYubiKeyDevice](xref:Yubico.YubiKey.IYubiKeyDevice) reference.
 
-```
+```C#
 using (OtpSession otp = new OtpSession(yKey))
 {
-  otp.SetStaticPassword(Slot.ShortPress)
+  otp.ConfigureStaticPassword(Slot.ShortPress)
     .WithKeyboard(KeyboardLayout.en_US)
     .AppendCarriageReturn()
     .SetPassword("You'll never guess this!".ToCharArray())
-    .Execute();
+    .ExecuteOperation();
 }
 ```
 
-Because each of these calls returns a reference to the ```SetStaticPassword``` instance, you can break up the chain if you need to. For example:
+Because each of these calls returns a reference to the ```ConfigureStaticPassword``` instance, you can break up the chain if you need to. For example:
 
-```
+```C#
 using (OtpSession otp = new OtpSession(yKey))
 {
-  SetStaticPassword operation = otp.SetStaticPassword(Slot.ShortPress)
+  ConfigureStaticPassword operation = otp.ConfigureStaticPassword(Slot.ShortPress)
     .WithKeyboard(KeyboardLayout.en_US);
   if (addCR)
   {
     operation = operation.AppendCarriageReturn();
   }
   operation.SetPassword("You'll never guess this!".ToCharArray())
-    .Execute();
+    .ExecuteOperation();
 }
 ```
 
 Most operations have default parameters, but they also allow you to specify the value like so:
 
-```
+```C#
 using (OtpSession otp = new OtpSession(yKey))
 {
-  otp.SetStaticPassword(Slot.ShortPress)
+  otp.ConfigureStaticPassword(Slot.ShortPress)
     .WithKeyboard(KeyboardLayout.en_US)
     .AppendCarriageReturn(addCR)
     .SetPassword("You'll never guess this!".ToCharArray())
-    .Execute();
+    .ExecuteOperation();
 }
 ```
 

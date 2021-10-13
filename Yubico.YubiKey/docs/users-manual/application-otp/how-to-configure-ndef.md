@@ -25,7 +25,10 @@ When you configure NDEF functionality, you are setting two things: some text and
 
 Unlike other configuration operations that take a slot identifier, configuring NDEF does not alter the configuration of the OTP application slot. It only sets which slot to activate after sending the text.
 
-In its default state, the YubiKey has NDEF configured to emit https://my.yubico.com/neo/? and then activate slot 1 (the [short press](xref:Yubico.YubiKey.Otp.Slot.ShortPress) slot), which is configured for Yubico OTP. The result looks something like this:  https://my.yubico.com/neo/?vvccccnnjfhbtdgbflcbfcegkkdvttldvlcvvfinvvdu.
+In its default state, the YubiKey has NDEF configured to emit https://my.yubico.com/yk/# and then activate slot 1 (the [short press](xref:Yubico.YubiKey.Otp.Slot.ShortPress) slot), which is configured for Yubico OTP. The result looks something like this: https://my.yubico.com/yk/#vvccccnnjfhbtdgbflcbfcegkkdvttldvlcvvfinvvdu.
+
+> [!NOTE]
+> YubiKey NEOs use a different URL: https://my.yubico.com/neo/?.
 
 The most likely use case for this is to configure the YubiKey with a specific Yubico OTP credential and a URL to a validation server.
 
@@ -40,19 +43,21 @@ In this example, we will configure the [long-press](xref:Yubico.YubiKey.Otp.Slot
 
 To execute the code below, the YubiKey needs to either be inserted into a USB port or be on an NFC reader when the command is run.
 
-```
+```C#
 using (OtpSession otp = new OtpSession(yKey))
 {
   otp.ConfigureHotp(Slot.LongPress)
     .UseInitialMovingFactor(4096)
     .Use8Digits()
     .UseKey(_key)
-    .Execute();
+    .ExecuteOperation();
   otp.ConfigureNdef(Slot.LongPress)
     .AsText("AgentSmith:")
-    .Execute();
+    .ExecuteOperation();
 }
 ```
+
+After configuring NDEF with the code above, if you [read](xref:OtpReadNDEF) the YubiKey with an NFC reader, the result will look something like `AgentSmith:00901250`.
 
 ## Next steps
 

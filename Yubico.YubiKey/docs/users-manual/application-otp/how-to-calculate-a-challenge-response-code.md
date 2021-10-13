@@ -62,7 +62,7 @@ using (OtpSession otp = new OtpSession(key))
 }
 ```
 
-In the final example, we send a TOTP challenge to the key and get the result as an eight-digit code:
+In the final example, we generate a TOTP code by sending a time-based challenge to the key and get the result as an eight-digit code:
 
 ```
 using (OtpSession otp = new OtpSession(yKey))

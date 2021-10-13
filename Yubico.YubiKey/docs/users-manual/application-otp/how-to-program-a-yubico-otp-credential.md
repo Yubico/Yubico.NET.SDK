@@ -21,7 +21,7 @@ limitations under the License. -->
 
 To program a [slot](xref:OtpSlots) with a [Yubico OTP](xref:OtpYubicoOtp) credential, you will use a ```ConfigureYubicoOtp``` instance. It is instantiated by calling the method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
 
-First, a clarification of terms is needed. “Yubico OTP” is both a credential type and a [challenge-response](xref:OtpChallengeResponse) algorithm. In this context, we are referring to the credential type. A Yubico OTP credential is touch-activated. When you touch the YubiKey, it will emit a binary challenge using ModHex characters.
+First, a clarification of terms is needed. “Yubico OTP” is both an OTP credential type and a [challenge-response](xref:OtpChallengeResponse) algorithm. In this context, we are referring to the credential type. A Yubico OTP credential is touch-activated. When you touch the YubiKey, it will emit a binary challenge using ModHex characters.
 
 A Yubico OTP credential contains the following three parts, which must be set during instantiation:
 

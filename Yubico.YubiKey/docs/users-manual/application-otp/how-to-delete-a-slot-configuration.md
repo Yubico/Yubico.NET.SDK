@@ -19,7 +19,7 @@ limitations under the License. -->
 
 # How to delete a slot's configuration
 
-Deleting the configuration stored in a [slot](xref:OtpSlots) via the ```DeleteSlot``` method is a simple operation. The only parameters that must be provided are the slot name and the slot access code (if applicable).
+Deleting the configuration stored in a [slot](xref:OtpSlots) via the ```DeleteSlot()``` method is a simple operation. The only parameters that must be provided are the slot name and the slot access code (if applicable). Therefore, ```DeleteSlot()``` executes the operation directly instead of constructing an object.
 
 ## DeleteSlot example
 

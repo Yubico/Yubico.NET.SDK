@@ -13,6 +13,9 @@
 // limitations under the License.
 
 using System;
+using Microsoft.Extensions.Logging;
+using Yubico.Core.Buffers;
+using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 using static Yubico.PlatformInterop.NativeMethods;
 
@@ -25,6 +28,7 @@ namespace Yubico.Core.Devices.Hid
     {
         private readonly long _entryId;
         private IntPtr _deviceHandle;
+        private readonly ILogger _log = Log.GetLogger();
 
         private bool _isDisposed;
 
@@ -46,11 +50,18 @@ namespace Yubico.Core.Devices.Hid
         /// </param>
         public MacOSHidFeatureReportConnection(long entryId)
         {
+            _log.LogInformation("Creating a new feature report connection for device [{EntryId}]", entryId);
+
             _entryId = entryId;
             SetupConnection();
 
             InputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
             OutputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
+
+            _log.LogInformation(
+                "InputReportSize = {InputReportSize}; OutputReportSize = {OutputReportSize}",
+                InputReportSize,
+                OutputReportSize);
         }
 
         private void SetupConnection()
@@ -63,6 +74,7 @@ namespace Yubico.Core.Devices.Hid
 
                 if (deviceEntry == 0)
                 {
+                    _log.LogError("Failed to find a matching device entry in the IO registry.");
                     throw new PlatformApiException(ExceptionMessages.IOKitRegistryEntryNotFound);
                 }
 
@@ -70,10 +82,12 @@ namespace Yubico.Core.Devices.Hid
 
                 if (_deviceHandle == IntPtr.Zero)
                 {
+                    _log.LogError("Failed to open the device handle.");
                     throw new PlatformApiException(ExceptionMessages.IOKitCannotOpenDevice);
                 }
 
                 int result = IOHIDDeviceOpen(_deviceHandle, 0);
+                _log.IOKitApiCall(nameof(IOHIDDeviceOpen), (kern_return_t)result);
 
                 if (result != 0)
                 {
@@ -87,6 +101,7 @@ namespace Yubico.Core.Devices.Hid
             {
                 if (deviceEntry != 0)
                 {
+                    _log.LogDebug("Releasing deviceEntry object.");
                     _ = IOObjectRelease(deviceEntry);
                 }
             }
@@ -115,6 +130,8 @@ namespace Yubico.Core.Devices.Hid
                buffer,
                ref bufferSize);
 
+            _log.IOKitApiCall(nameof(IOHIDDeviceGetReport), (kern_return_t)result);
+
             if (result != 0)
             {
                 throw new PlatformApiException(
@@ -122,6 +139,10 @@ namespace Yubico.Core.Devices.Hid
                     result,
                     ExceptionMessages.IOKitOperationFailed);
             }
+
+            _log.SensitiveLogInformation(
+                "GetReport returned buffer: {report}",
+                Hex.BytesToHex(buffer));
 
             return buffer;
         }
@@ -137,12 +158,18 @@ namespace Yubico.Core.Devices.Hid
         /// </exception>
         public void SetReport(byte[] report)
         {
+            _log.SensitiveLogInformation(
+                "Calling SetReport with data: {report}",
+                Hex.BytesToHex(report));
+
             int result = IOHIDDeviceSetReport(
                 _deviceHandle,
                 IOKitHidConstants.kIOHidReportTypeFeature,
                 0,
                 report,
                 report.Length);
+
+            _log.IOKitApiCall(nameof(IOHIDDeviceSetReport), (kern_return_t)result);
 
             if (result != 0)
             {

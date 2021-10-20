@@ -39,7 +39,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogDebug(0, exception, "Error while processing request from {Address}", address)</example>
-        public static void LogDebug(this Logger logger, EventId eventId, Exception exception, string message, params object[] args) =>
+        public static void LogDebug(this Logger logger, EventId eventId, Exception exception, string message, params object?[] args) =>
             ((ILogger)logger).LogDebug(eventId, exception, message, args);
 
         /// <summary>
@@ -51,7 +51,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogDebug(0, exception, "Error while processing request from {Address}", address)</example>
-        public static void SensitiveLogDebug(this Logger logger, EventId eventId, Exception exception, string message, params object[] args) =>
+        public static void SensitiveLogDebug(this Logger logger, EventId eventId, Exception exception, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogDebug(eventId, exception, message, args);
 #else
@@ -66,7 +66,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogDebug(0, "Processing request from {Address}", address)</example>
-        public static void LogDebug(this Logger logger, EventId eventId, string message, params object[] args) =>
+        public static void LogDebug(this Logger logger, EventId eventId, string message, params object?[] args) =>
             ((ILogger)logger).LogDebug(eventId, message, args);
 
         /// <summary>
@@ -77,7 +77,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogDebug(0, "Processing request from {Address}", address)</example>
-        public static void SensitiveLogDebug(this Logger logger, EventId eventId, string message, params object[] args) =>
+        public static void SensitiveLogDebug(this Logger logger, EventId eventId, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogDebug(eventId, message, args);
 #else
@@ -92,7 +92,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogDebug(exception, "Error while processing request from {Address}", address)</example>
-        public static void LogDebug(this Logger logger, Exception exception, string message, params object[] args) =>
+        public static void LogDebug(this Logger logger, Exception exception, string message, params object?[] args) =>
             ((ILogger)logger).LogDebug(exception, message, args);
 
         /// <summary>
@@ -103,7 +103,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogDebug(exception, "Error while processing request from {Address}", address)</example>
-        public static void SensitiveLogDebug(this Logger logger, Exception exception, string message, params object[] args) =>
+        public static void SensitiveLogDebug(this Logger logger, Exception exception, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogDebug(exception, message, args);
 #else
@@ -117,7 +117,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogDebug("Processing request from {Address}", address)</example>
-        public static void LogDebug(this Logger logger, string message, params object[] args) =>
+        public static void LogDebug(this Logger logger, string message, params object?[] args) =>
             ((ILogger)logger).LogDebug(message, args);
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogDebug("Processing request from {Address}", address)</example>
-        public static void SensitiveLogDebug(this Logger logger, string message, params object[] args) =>
+        public static void SensitiveLogDebug(this Logger logger, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogDebug(message, args);
 #else
@@ -145,7 +145,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogTrace(0, exception, "Error while processing request from {Address}", address)</example>
-        public static void LogTrace(this Logger logger, EventId eventId, Exception exception, string message, params object[] args) =>
+        public static void LogTrace(this Logger logger, EventId eventId, Exception exception, string message, params object?[] args) =>
             ((ILogger)logger).LogTrace(eventId, exception, message, args);
 
         /// <summary>
@@ -157,7 +157,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogTrace(0, exception, "Error while processing request from {Address}", address)</example>
-        public static void SensitiveLogTrace(this Logger logger, EventId eventId, Exception exception, string message, params object[] args) =>
+        public static void SensitiveLogTrace(this Logger logger, EventId eventId, Exception exception, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogTrace(eventId, exception, message, args);
 #else
@@ -172,7 +172,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogTrace(0, "Processing request from {Address}", address)</example>
-        public static void LogTrace(this Logger logger, EventId eventId, string message, params object[] args) =>
+        public static void LogTrace(this Logger logger, EventId eventId, string message, params object?[] args) =>
             ((ILogger)logger).LogTrace(eventId, message, args);
 
         /// <summary>
@@ -183,7 +183,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogTrace(0, "Processing request from {Address}", address)</example>
-        public static void SensitiveLogTrace(this Logger logger, EventId eventId, string message, params object[] args) =>
+        public static void SensitiveLogTrace(this Logger logger, EventId eventId, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogTrace(eventId, message, args);
 #else
@@ -198,7 +198,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogTrace(exception, "Error while processing request from {Address}", address)</example>
-        public static void LogTrace(this Logger logger, Exception exception, string message, params object[] args) =>
+        public static void LogTrace(this Logger logger, Exception exception, string message, params object?[] args) =>
             ((ILogger)logger).LogTrace(exception, message, args);
 
         /// <summary>
@@ -209,7 +209,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogTrace(exception, "Error while processing request from {Address}", address)</example>
-        public static void SensitiveLogTrace(this Logger logger, Exception exception, string message, params object[] args) =>
+        public static void SensitiveLogTrace(this Logger logger, Exception exception, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogTrace(exception, message, args);
 #else
@@ -223,7 +223,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogTrace("Processing request from {Address}", address)</example>
-        public static void LogTrace(this Logger logger, string message, params object[] args) =>
+        public static void LogTrace(this Logger logger, string message, params object?[] args) =>
             ((ILogger)logger).LogTrace(message, args);
 
         /// <summary>
@@ -233,7 +233,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogTrace("Processing request from {Address}", address)</example>
-        public static void SensitiveLogTrace(this Logger logger, string message, params object[] args) =>
+        public static void SensitiveLogTrace(this Logger logger, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogTrace(message, args);
 #else
@@ -251,7 +251,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogInformation(0, exception, "Error while processing request from {Address}", address)</example>
-        public static void LogInformation(this Logger logger, EventId eventId, Exception exception, string message, params object[] args) =>
+        public static void LogInformation(this Logger logger, EventId eventId, Exception exception, string message, params object?[] args) =>
             ((ILogger)logger).LogInformation(eventId, exception, message, args);
 
         /// <summary>
@@ -263,7 +263,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogInformation(0, exception, "Error while processing request from {Address}", address)</example>
-        public static void SensitiveLogInformation(this Logger logger, EventId eventId, Exception exception, string message, params object[] args) =>
+        public static void SensitiveLogInformation(this Logger logger, EventId eventId, Exception exception, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogInformation(eventId, exception, message, args);
 #else
@@ -278,7 +278,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogInformation(0, "Processing request from {Address}", address)</example>
-        public static void LogInformation(this Logger logger, EventId eventId, string message, params object[] args) =>
+        public static void LogInformation(this Logger logger, EventId eventId, string message, params object?[] args) =>
             ((ILogger)logger).LogInformation(eventId, message, args);
 
         /// <summary>
@@ -289,7 +289,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogInformation(0, "Processing request from {Address}", address)</example>
-        public static void SensitiveLogInformation(this Logger logger, EventId eventId, string message, params object[] args) =>
+        public static void SensitiveLogInformation(this Logger logger, EventId eventId, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogInformation(eventId, message, args);
 #else
@@ -304,7 +304,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogInformation(exception, "Error while processing request from {Address}", address)</example>
-        public static void LogInformation(this Logger logger, Exception exception, string message, params object[] args) =>
+        public static void LogInformation(this Logger logger, Exception exception, string message, params object?[] args) =>
             ((ILogger)logger).LogInformation(exception, message, args);
 
         /// <summary>
@@ -315,7 +315,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogInformation(exception, "Error while processing request from {Address}", address)</example>
-        public static void SensitiveLogInformation(this Logger logger, Exception exception, string message, params object[] args) =>
+        public static void SensitiveLogInformation(this Logger logger, Exception exception, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogInformation(exception, message, args);
 #else
@@ -329,7 +329,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogInformation("Processing request from {Address}", address)</example>
-        public static void LogInformation(this Logger logger, string message, params object[] args) =>
+        public static void LogInformation(this Logger logger, string message, params object?[] args) =>
             ((ILogger)logger).LogInformation(message, args);
 
         /// <summary>
@@ -339,7 +339,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogInformation("Processing request from {Address}", address)</example>
-        public static void SensitiveLogInformation(this Logger logger, string message, params object[] args) =>
+        public static void SensitiveLogInformation(this Logger logger, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogInformation(message, args);
 #else
@@ -357,7 +357,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogWarning(0, exception, "Error while processing request from {Address}", address)</example>
-        public static void LogWarning(this Logger logger, EventId eventId, Exception exception, string message, params object[] args) =>
+        public static void LogWarning(this Logger logger, EventId eventId, Exception exception, string message, params object?[] args) =>
             ((ILogger)logger).LogWarning(eventId, exception, message, args);
 
         /// <summary>
@@ -369,7 +369,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogWarning(0, exception, "Error while processing request from {Address}", address)</example>
-        public static void SensitiveLogWarning(this Logger logger, EventId eventId, Exception exception, string message, params object[] args) =>
+        public static void SensitiveLogWarning(this Logger logger, EventId eventId, Exception exception, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogWarning(eventId, exception, message, args);
 #else
@@ -384,7 +384,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogWarning(0, "Processing request from {Address}", address)</example>
-        public static void LogWarning(this Logger logger, EventId eventId, string message, params object[] args) =>
+        public static void LogWarning(this Logger logger, EventId eventId, string message, params object?[] args) =>
             ((ILogger)logger).LogWarning(eventId, message, args);
 
         /// <summary>
@@ -395,7 +395,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogWarning(0, "Processing request from {Address}", address)</example>
-        public static void SensitiveLogWarning(this Logger logger, EventId eventId, string message, params object[] args) =>
+        public static void SensitiveLogWarning(this Logger logger, EventId eventId, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogWarning(eventId, message, args);
 #else
@@ -410,7 +410,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogWarning(exception, "Error while processing request from {Address}", address)</example>
-        public static void LogWarning(this Logger logger, Exception exception, string message, params object[] args) =>
+        public static void LogWarning(this Logger logger, Exception exception, string message, params object?[] args) =>
             ((ILogger)logger).LogWarning(exception, message, args);
 
         /// <summary>
@@ -421,7 +421,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogWarning(exception, "Error while processing request from {Address}", address)</example>
-        public static void SensitiveLogWarning(this Logger logger, Exception exception, string message, params object[] args) =>
+        public static void SensitiveLogWarning(this Logger logger, Exception exception, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogWarning(exception, message, args);
 #else
@@ -435,7 +435,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogWarning("Processing request from {Address}", address)</example>
-        public static void LogWarning(this Logger logger, string message, params object[] args) =>
+        public static void LogWarning(this Logger logger, string message, params object?[] args) =>
             ((ILogger)logger).LogWarning(message, args);
 
         /// <summary>
@@ -445,7 +445,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogWarning("Processing request from {Address}", address)</example>
-        public static void SensitiveLogWarning(this Logger logger, string message, params object[] args) =>
+        public static void SensitiveLogWarning(this Logger logger, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogWarning(message, args);
 #else
@@ -463,7 +463,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogError(0, exception, "Error while processing request from {Address}", address)</example>
-        public static void LogError(this Logger logger, EventId eventId, Exception exception, string message, params object[] args) =>
+        public static void LogError(this Logger logger, EventId eventId, Exception exception, string message, params object?[] args) =>
             ((ILogger)logger).LogError(eventId, exception, message, args);
 
         /// <summary>
@@ -475,7 +475,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogError(0, exception, "Error while processing request from {Address}", address)</example>
-        public static void SensitiveLogError(this Logger logger, EventId eventId, Exception exception, string message, params object[] args) =>
+        public static void SensitiveLogError(this Logger logger, EventId eventId, Exception exception, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogError(eventId, exception, message, args);
 #else
@@ -490,7 +490,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogError(0, "Processing request from {Address}", address)</example>
-        public static void LogError(this Logger logger, EventId eventId, string message, params object[] args) =>
+        public static void LogError(this Logger logger, EventId eventId, string message, params object?[] args) =>
             ((ILogger)logger).LogError(eventId, message, args);
 
         /// <summary>
@@ -501,7 +501,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogError(0, "Processing request from {Address}", address)</example>
-        public static void SensitiveLogError(this Logger logger, EventId eventId, string message, params object[] args) =>
+        public static void SensitiveLogError(this Logger logger, EventId eventId, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogError(eventId, message, args);
 #else
@@ -516,7 +516,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogError(exception, "Error while processing request from {Address}", address)</example>
-        public static void LogError(this Logger logger, Exception exception, string message, params object[] args) =>
+        public static void LogError(this Logger logger, Exception exception, string message, params object?[] args) =>
             ((ILogger)logger).LogError(exception, message, args);
 
         /// <summary>
@@ -527,7 +527,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogError(exception, "Error while processing request from {Address}", address)</example>
-        public static void SensitiveLogError(this Logger logger, Exception exception, string message, params object[] args) =>
+        public static void SensitiveLogError(this Logger logger, Exception exception, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogError(exception, message, args);
 #else
@@ -541,7 +541,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogError("Processing request from {Address}", address)</example>
-        public static void LogError(this Logger logger, string message, params object[] args) =>
+        public static void LogError(this Logger logger, string message, params object?[] args) =>
             ((ILogger)logger).LogError(message, args);
 
         /// <summary>
@@ -551,7 +551,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogError("Processing request from {Address}", address)</example>
-        public static void SensitiveLogError(this Logger logger, string message, params object[] args) =>
+        public static void SensitiveLogError(this Logger logger, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogError(message, args);
 #else
@@ -569,7 +569,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogCritical(0, exception, "Error while processing request from {Address}", address)</example>
-        public static void LogCritical(this Logger logger, EventId eventId, Exception exception, string message, params object[] args) =>
+        public static void LogCritical(this Logger logger, EventId eventId, Exception exception, string message, params object?[] args) =>
             ((ILogger)logger).LogCritical(eventId, exception, message, args);
 
         /// <summary>
@@ -581,7 +581,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogCritical(0, exception, "Error while processing request from {Address}", address)</example>
-        public static void SensitiveLogCritical(this Logger logger, EventId eventId, Exception exception, string message, params object[] args) =>
+        public static void SensitiveLogCritical(this Logger logger, EventId eventId, Exception exception, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogCritical(eventId, exception, message, args);
 #else
@@ -596,7 +596,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogCritical(0, "Processing request from {Address}", address)</example>
-        public static void LogCritical(this Logger logger, EventId eventId, string message, params object[] args) =>
+        public static void LogCritical(this Logger logger, EventId eventId, string message, params object?[] args) =>
             ((ILogger)logger).LogCritical(eventId, message, args);
 
         /// <summary>
@@ -607,7 +607,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogCritical(0, "Processing request from {Address}", address)</example>
-        public static void SensitiveLogCritical(this Logger logger, EventId eventId, string message, params object[] args) =>
+        public static void SensitiveLogCritical(this Logger logger, EventId eventId, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogCritical(eventId, message, args);
 #else
@@ -622,7 +622,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogCritical(exception, "Error while processing request from {Address}", address)</example>
-        public static void LogCritical(this Logger logger, Exception exception, string message, params object[] args) =>
+        public static void LogCritical(this Logger logger, Exception exception, string message, params object?[] args) =>
             ((ILogger)logger).LogCritical(exception, message, args);
 
         /// <summary>
@@ -633,7 +633,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogCritical(exception, "Error while processing request from {Address}", address)</example>
-        public static void SensitiveLogCritical(this Logger logger, Exception exception, string message, params object[] args) =>
+        public static void SensitiveLogCritical(this Logger logger, Exception exception, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogCritical(exception, message, args);
 #else
@@ -647,7 +647,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogCritical("Processing request from {Address}", address)</example>
-        public static void LogCritical(this Logger logger, string message, params object[] args) =>
+        public static void LogCritical(this Logger logger, string message, params object?[] args) =>
             ((ILogger)logger).LogCritical(message, args);
 
         /// <summary>
@@ -657,7 +657,7 @@ namespace Yubico.Core.Logging
         /// <param name="message">Format string of the log message in message template format. Example: <c>"User {User} logged in from {Address}"</c></param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
         /// <example>logger.LogCritical("Processing request from {Address}", address)</example>
-        public static void SensitiveLogCritical(this Logger logger, string message, params object[] args) =>
+        public static void SensitiveLogCritical(this Logger logger, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).LogCritical(message, args);
 #else
@@ -673,7 +673,7 @@ namespace Yubico.Core.Logging
         /// <param name="logLevel">Entry will be written on this level.</param>
         /// <param name="message">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void Log(this Logger logger, LogLevel logLevel, string message, params object[] args) =>
+        public static void Log(this Logger logger, LogLevel logLevel, string message, params object?[] args) =>
             ((ILogger)logger).Log(logLevel, 0, null, message, args);
 
         /// <summary>
@@ -683,7 +683,7 @@ namespace Yubico.Core.Logging
         /// <param name="logLevel">Entry will be written on this level.</param>
         /// <param name="message">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void SensitiveLog(this Logger logger, LogLevel logLevel, string message, params object[] args) =>
+        public static void SensitiveLog(this Logger logger, LogLevel logLevel, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).Log(logLevel, 0, null, message, args);
 #else
@@ -698,7 +698,7 @@ namespace Yubico.Core.Logging
         /// <param name="eventId">The event id associated with the log.</param>
         /// <param name="message">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void Log(this Logger logger, LogLevel logLevel, EventId eventId, string message, params object[] args) =>
+        public static void Log(this Logger logger, LogLevel logLevel, EventId eventId, string message, params object?[] args) =>
             ((ILogger)logger).Log(logLevel, eventId, null, message, args);
 
         /// <summary>
@@ -709,7 +709,7 @@ namespace Yubico.Core.Logging
         /// <param name="eventId">The event id associated with the log.</param>
         /// <param name="message">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void SensitiveLog(this Logger logger, LogLevel logLevel, EventId eventId, string message, params object[] args) =>
+        public static void SensitiveLog(this Logger logger, LogLevel logLevel, EventId eventId, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).Log(logLevel, eventId, null, message, args);
 #else
@@ -724,7 +724,7 @@ namespace Yubico.Core.Logging
         /// <param name="exception">The exception to log.</param>
         /// <param name="message">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void Log(this Logger logger, LogLevel logLevel, Exception exception, string message, params object[] args) =>
+        public static void Log(this Logger logger, LogLevel logLevel, Exception exception, string message, params object?[] args) =>
             ((ILogger)logger).Log(logLevel, 0, exception, message, args);
 
         /// <summary>
@@ -735,7 +735,7 @@ namespace Yubico.Core.Logging
         /// <param name="exception">The exception to log.</param>
         /// <param name="message">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void SensitiveLog(this Logger logger, LogLevel logLevel, Exception exception, string message, params object[] args) =>
+        public static void SensitiveLog(this Logger logger, LogLevel logLevel, Exception exception, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).Log(logLevel, 0, exception, message, args);
 #else
@@ -751,7 +751,7 @@ namespace Yubico.Core.Logging
         /// <param name="exception">The exception to log.</param>
         /// <param name="message">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void Log(this Logger logger, LogLevel logLevel, EventId eventId, Exception exception, string message, params object[] args) =>
+        public static void Log(this Logger logger, LogLevel logLevel, EventId eventId, Exception exception, string message, params object?[] args) =>
             ((ILogger)logger).Log(logLevel, eventId, exception, message, args);
 
         /// <summary>
@@ -763,7 +763,7 @@ namespace Yubico.Core.Logging
         /// <param name="exception">The exception to log.</param>
         /// <param name="message">Format string of the log message.</param>
         /// <param name="args">An object array that contains zero or more objects to format.</param>
-        public static void SensitiveLog(this Logger logger, LogLevel logLevel, EventId eventId, Exception exception, string message, params object[] args) =>
+        public static void SensitiveLog(this Logger logger, LogLevel logLevel, EventId eventId, Exception exception, string message, params object?[] args) =>
 #if DEBUG
             ((ILogger)logger).Log(logLevel, eventId, exception, message, args);
 #else
@@ -787,7 +787,7 @@ namespace Yubico.Core.Logging
         public static IDisposable BeginScope(
             this Logger logger,
             string messageFormat,
-            params object[] args) =>
+            params object?[] args) =>
             ((ILogger)logger).BeginScope(messageFormat, args);
     }
 }

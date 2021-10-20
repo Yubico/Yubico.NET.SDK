@@ -36,11 +36,6 @@ namespace Yubico.Core.Logging
     /// formatting the error and calling one of the existing log methods.
     /// </para>
     /// </remarks>
-    // Arguably we don't need this class, and could instead introduce the sensitive log functions in via extension methods,
-    // just as LoggerExtensions does. I did this for a different reason: I wanted to avoid making folks import two separate
-    // namespaces (Yubico.Core.Logging AND Microsoft.Extensions.Logging) in each file they want to log. This was because
-    // we needed to refer to ILogger type in addition to the LoggerFactory. Instead, if we use this type, we can now only
-    // refer to the Yubico.Core.Logging namespace.
     public sealed class Logger : ILogger
     {
         private readonly ILogger _logger;
@@ -127,105 +122,5 @@ namespace Yubico.Core.Logging
         /// A disposable object that ends the logical operation scope on dispose.
         /// </returns>
         public IDisposable BeginScope<TState>(TState state) => _logger.BeginScope(state);
-
-        /// <summary>
-        /// Formats and writes a debug log message that contains sensitive information in the message.
-        /// </summary>
-        /// <param name="message">
-        /// Format string of the log message in the message template format. Example: "User {User} logged in from {Address}"
-        /// </param>
-        /// <param name="args">
-        /// An object array that contains zero or more objects to format.
-        /// </param>
-        /// <remarks>
-        /// This method is a no-op in Release builds of the SDK. The code that performs the logging is not compiled into
-        /// the SDK unless the Debug configuration is present.
-        /// </remarks>
-        public void SensitiveLogDebug(string message, params object[] args)
-        {
-#if DEBUG
-            _logger.LogDebug(message, args);
-#endif
-        }
-
-        /// <summary>
-        /// Formats and writes an informational log message that contains sensitive information in the message.
-        /// </summary>
-        /// <param name="message">
-        /// Format string of the log message in the message template format. Example: "User {User} logged in from {Address}"
-        /// </param>
-        /// <param name="args">
-        /// An object array that contains zero or more objects to format.
-        /// </param>
-        /// <remarks>
-        /// This method is a no-op in Release builds of the SDK. The code that performs the logging is not compiled into
-        /// the SDK unless the Debug configuration is present.
-        /// </remarks>
-        public void SensitiveLogInformation(string message, params object[] args)
-        {
-#if DEBUG
-            _logger.LogInformation(message, args);
-#endif
-        }
-
-        /// <summary>
-        /// Formats and writes a warning log message that contains sensitive information in the message.
-        /// </summary>
-        /// <param name="message">
-        /// Format string of the log message in the message template format. Example: "User {User} logged in from {Address}"
-        /// </param>
-        /// <param name="args">
-        /// An object array that contains zero or more objects to format.
-        /// </param>
-        /// <remarks>
-        /// This method is a no-op in Release builds of the SDK. The code that performs the logging is not compiled into
-        /// the SDK unless the Debug configuration is present.
-        /// </remarks>
-        public void SensitiveLogWarning(string message, params object[] args)
-        {
-#if DEBUG
-            _logger.LogWarning(message, args);
-#endif
-        }
-
-        /// <summary>
-        /// Formats and writes an error log message that contains sensitive information in the message.
-        /// </summary>
-        /// <param name="message">
-        /// Format string of the log message in the message template format. Example: "User {User} logged in from {Address}"
-        /// </param>
-        /// <param name="args">
-        /// An object array that contains zero or more objects to format.
-        /// </param>
-        /// <remarks>
-        /// This method is a no-op in Release builds of the SDK. The code that performs the logging is not compiled into
-        /// the SDK unless the Debug configuration is present.
-        /// </remarks>
-        public void SensitiveLogError(string message, params object[] args)
-        {
-#if DEBUG
-            _logger.LogError(message, args);
-#endif
-        }
-
-        /// <summarys>
-        /// Formats and writes a critical log message that contains sensitive information in the message.
-        /// </summary>
-        /// <param name="message">
-        /// Format string of the log message in the message template format. Example: "User {User} logged in from {Address}"
-        /// </param>
-        /// <param name="args">
-        /// An object array that contains zero or more objects to format.
-        /// </param>
-        /// <remarks>
-        /// This method is a no-op in Release builds of the SDK. The code that performs the logging is not compiled into
-        /// the SDK unless the Debug configuration is present.
-        /// </remarks>
-        public void SensitiveLogCritical(string message, params object[] args)
-        {
-#if DEBUG
-            _logger.LogCritical(message, args);
-#endif
-        }
     }
 }

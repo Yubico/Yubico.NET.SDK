@@ -1,17 +1,17 @@
 ﻿// Copyright (c) Yubico AB
 
-using Microsoft.Extensions.Logging;
 using System;
+using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.SmartCard
 {
     internal static class SmartCardLoggerExtensions
     {
-        public static IDisposable BeginTransactionScope(this ILogger logger, IDisposable transactionScope) =>
+        public static IDisposable BeginTransactionScope(this Logger logger, IDisposable transactionScope) =>
             logger.BeginScope("Transaction[{TransactionID}]", transactionScope.GetHashCode());
 
-        public static void SCardApiCall(this ILogger logger, string apiName, uint result)
+        public static void SCardApiCall(this Logger logger, string apiName, uint result)
         {
             if (result == ErrorCode.SCARD_S_SUCCESS)
             {
@@ -23,7 +23,7 @@ namespace Yubico.Core.Devices.SmartCard
             }
         }
 
-        public static void CardReset(this ILogger logger) =>
+        public static void CardReset(this Logger logger) =>
             logger.LogWarning("The smart card was reset.");
     }
 }

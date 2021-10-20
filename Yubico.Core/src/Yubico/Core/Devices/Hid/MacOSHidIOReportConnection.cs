@@ -13,12 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using Microsoft.Extensions.Logging;
 using Yubico.Core.Buffers;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
@@ -35,7 +33,7 @@ namespace Yubico.Core.Devices.Hid
         private IntPtr _deviceHandle;
         private bool _isDisposed;
         private readonly IntPtr _loopId;
-        private readonly ILogger _log = Log.GetLogger();
+        private readonly Logger _log = Log.GetLogger();
 
         /// <summary>
         /// The correct size, in bytes, for the data buffer to be transmitted to the device.
@@ -223,7 +221,7 @@ namespace Yubico.Core.Devices.Hid
             byte[] report,
             long reportLength)
         {
-            ILogger log = Log.GetLogger();
+            Logger log = Log.GetLogger();
 
             log.LogInformation("MacOSHidIOReportConnection.ReportCallback has been called.");
 

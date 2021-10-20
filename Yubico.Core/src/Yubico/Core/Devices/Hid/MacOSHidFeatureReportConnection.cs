@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using Microsoft.Extensions.Logging;
 using Yubico.Core.Buffers;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
@@ -28,7 +27,7 @@ namespace Yubico.Core.Devices.Hid
     {
         private readonly long _entryId;
         private IntPtr _deviceHandle;
-        private readonly ILogger _log = Log.GetLogger();
+        private readonly Logger _log = Log.GetLogger();
 
         private bool _isDisposed;
 

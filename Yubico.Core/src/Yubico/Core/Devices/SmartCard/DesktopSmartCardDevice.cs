@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -26,11 +25,11 @@ namespace Yubico.Core.Devices.SmartCard
     internal class DesktopSmartCardDevice : SmartCardDevice
     {
         private readonly string _readerName;
-        private readonly ILogger _log = Log.GetLogger();
+        private readonly Logger _log = Log.GetLogger();
 
         public static IReadOnlyList<ISmartCardDevice> GetList()
         {
-            ILogger log = Log.GetLogger();
+            Logger log = Log.GetLogger();
             using IDisposable logScope = log.BeginScope("SmartCardDevice.GetList()");
 
             uint result = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);

@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Extensions.Logging;
+using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid
 {
     internal static class HidLoggerExtensions
     {
-        public static void IOKitApiCall(this ILogger logger, string apiName, kern_return_t result)
+        public static void IOKitApiCall(this Logger logger, string apiName, kern_return_t result)
         {
             if (result == kern_return_t.KERN_SUCCESS)
             {

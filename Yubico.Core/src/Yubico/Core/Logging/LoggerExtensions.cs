@@ -20,6 +20,7 @@ namespace Yubico.Core.Logging
     /// <summary>
     /// Logger extension methods for common scenarios.
     /// </summary>
+
     // These extension methods include both the standard extensions introduced by the Microsoft ILogger APIs, as well
     // as some new methods for logging potentially sensitive messages. We could have just introduced the sensitive log
     // methods and re-used the extensions from Microsoft.Extensions.Logging, however combining them here allows users
@@ -28,8 +29,12 @@ namespace Yubico.Core.Logging
     // of files. Files that have to include both namespaces should then hopefully be exceptional cases.
     public static class LoggerExtensions
     {
-        //------------------------------------------DEBUG------------------------------------------//
+        // Needed to satisfy compiling out the sensitive logs in Release builds.
+        #pragma warning disable CA1801
+        private static void NoOp(params object?[] args) { }
+        #pragma warning restore CA1801
 
+        //------------------------------------------DEBUG------------------------------------------//
         /// <summary>
         /// Formats and writes a debug log message.
         /// </summary>
@@ -55,7 +60,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogDebug(eventId, exception, message, args);
 #else
-            { }
+            NoOp(eventId, exception, message, args);
 #endif
 
         /// <summary>
@@ -81,7 +86,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogDebug(eventId, message, args);
 #else
-            { }
+            NoOp(eventId, message, args);
 #endif
 
         /// <summary>
@@ -107,7 +112,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogDebug(exception, message, args);
 #else
-            { }
+            NoOp(exception, message, args);
 #endif
 
         /// <summary>
@@ -131,7 +136,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogDebug(message, args);
 #else
-            { }
+            NoOp(message, args);
 #endif
 
         //------------------------------------------TRACE------------------------------------------//
@@ -161,7 +166,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogTrace(eventId, exception, message, args);
 #else
-            { }
+            NoOp(eventId, exception, message, args);
 #endif
 
         /// <summary>
@@ -187,7 +192,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogTrace(eventId, message, args);
 #else
-            { }
+            NoOp(eventId, message, args);
 #endif
 
         /// <summary>
@@ -213,7 +218,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogTrace(exception, message, args);
 #else
-            { }
+            NoOp(exception, message, args);
 #endif
 
         /// <summary>
@@ -237,7 +242,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogTrace(message, args);
 #else
-            { }
+            NoOp(message, args);
 #endif
 
         //------------------------------------------INFORMATION------------------------------------------//
@@ -267,7 +272,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogInformation(eventId, exception, message, args);
 #else
-            { }
+            NoOp(eventId, exception, message, args);
 #endif
 
         /// <summary>
@@ -293,7 +298,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogInformation(eventId, message, args);
 #else
-            { }
+            NoOp(eventId, message, args);
 #endif
 
         /// <summary>
@@ -319,7 +324,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogInformation(exception, message, args);
 #else
-            { }
+            NoOp(exception, message, args);
 #endif
 
         /// <summary>
@@ -343,7 +348,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogInformation(message, args);
 #else
-            { }
+            NoOp(message, args);
 #endif
 
         //------------------------------------------WARNING------------------------------------------//
@@ -373,7 +378,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogWarning(eventId, exception, message, args);
 #else
-            { }
+            NoOp(eventId, exception, message, args);
 #endif
 
         /// <summary>
@@ -399,7 +404,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogWarning(eventId, message, args);
 #else
-            { }
+            NoOp(eventId, message, args);
 #endif
 
         /// <summary>
@@ -425,7 +430,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogWarning(exception, message, args);
 #else
-            { }
+            NoOp(exception, message, args);
 #endif
 
         /// <summary>
@@ -449,7 +454,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogWarning(message, args);
 #else
-            { }
+            NoOp(message, args);
 #endif
 
         //------------------------------------------ERROR------------------------------------------//
@@ -479,7 +484,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogError(eventId, exception, message, args);
 #else
-            { }
+            NoOp(eventId, exception, message, args);
 #endif
 
         /// <summary>
@@ -505,7 +510,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogError(eventId, message, args);
 #else
-            { }
+            NoOp(eventId, message, args);
 #endif
 
         /// <summary>
@@ -531,7 +536,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogError(exception, message, args);
 #else
-            { }
+            NoOp(exception, message, args);
 #endif
 
         /// <summary>
@@ -555,7 +560,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogError(message, args);
 #else
-            { }
+            NoOp(message, args);
 #endif
 
         //------------------------------------------CRITICAL------------------------------------------//
@@ -585,7 +590,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogCritical(eventId, exception, message, args);
 #else
-            { }
+            NoOp(eventId, exception, message, args);
 #endif
 
         /// <summary>
@@ -611,7 +616,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogCritical(eventId, message, args);
 #else
-            { }
+            NoOp(eventId, message, args);
 #endif
 
         /// <summary>
@@ -637,7 +642,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogCritical(exception, message, args);
 #else
-            { }
+            NoOp(exception, message, args);
 #endif
 
         /// <summary>
@@ -661,7 +666,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).LogCritical(message, args);
 #else
-            { }
+            NoOp(message, args);
 #endif
 
         //--------------------------------------------LOG---------------------------------------------//
@@ -687,7 +692,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).Log(logLevel, 0, null, message, args);
 #else
-            { }
+            NoOp(logLevel, message, args);
 #endif
 
         /// <summary>
@@ -713,7 +718,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).Log(logLevel, eventId, null, message, args);
 #else
-            { }
+            NoOp(logLevel, eventId, message, args);
 #endif
 
         /// <summary>
@@ -739,7 +744,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).Log(logLevel, 0, exception, message, args);
 #else
-            { }
+            NoOp(logLevel, exception, message, args);
 #endif
 
         /// <summary>
@@ -767,7 +772,7 @@ namespace Yubico.Core.Logging
 #if DEBUG
             ((ILogger)logger).Log(logLevel, eventId, exception, message, args);
 #else
-            { }
+            NoOp(logLevel, eventId, exception, message, args);
 #endif
 
         //------------------------------------------Scope------------------------------------------//

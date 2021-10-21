@@ -14,6 +14,8 @@
 
 using System;
 using System.Linq;
+using Microsoft.Extensions.Logging;
+using Yubico.Core.Logging;
 using Yubico.YubiKey.Otp;
 
 namespace Yubico.YubiKey.TestApp.Plugins
@@ -27,6 +29,16 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         public override bool Execute()
         {
+            Log.LoggerFactory = LoggerFactory.Create(
+                builder => builder.AddSimpleConsole(
+                        options =>
+                        {
+                            options.IncludeScopes = true;
+                            options.SingleLine = true;
+                            options.TimestampFormat = "hh:mm:ss";
+                        })
+                    .AddFilter(level => level >= LogLevel.Information));
+
             IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
 
             using (var otp = new OtpSession(yubiKey))

@@ -22,6 +22,12 @@ limitations under the License. -->
     <RootNamespace></RootNamespace>
     <Configurations>Debug;Release;ReleaseWithDocs</Configurations>
     <PackageId>Yubico.YubiKey.IntegrationTests</PackageId>
+
+    <!-- StrongName signing -->
+    <!-- StrongNaming requires that friend assemblies are strong named as well. That means this unit test project must
+         be strong named, since it uses InternalsVisibleTo. -->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>

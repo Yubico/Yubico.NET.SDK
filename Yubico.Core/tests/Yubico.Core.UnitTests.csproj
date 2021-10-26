@@ -27,6 +27,12 @@ limitations under the License. -->
     <AnalysisLevel>5.0</AnalysisLevel>
     <AnalysisMode>AllDisabledByDefault</AnalysisMode>
     <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+
+    <!-- StrongName signing -->
+    <!-- StrongNaming requires that friend assemblies are strong named as well. That means this unit test project must
+         be strong named, since it uses InternalsVisibleTo. -->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
 
   <ItemGroup>

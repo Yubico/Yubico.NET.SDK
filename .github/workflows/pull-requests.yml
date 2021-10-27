@@ -74,6 +74,15 @@ jobs:
             Yubico.Core/src/bin/${{matrix.configuration}}/*.nupkg
             Yubico.YubiKey/src/bin/${{matrix.configuration}}/*.nupkg
 
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Assemblies ${{matrix.configuration}}
+          path: |
+            Yubico.DotNetPolyfills/src/bin/${{matrix.configuration}}/**/*.dll
+            Yubico.Core/src/bin/${{matrix.configuration}}/**/*.dll
+            Yubico.YubiKey/src/bin/${{matrix.configuration}}/**/*.dll
+
       # Test the project
       - name: Test Yubico.YubiKey
         run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --configuration ${{matrix.configuration}} --verbosity normal

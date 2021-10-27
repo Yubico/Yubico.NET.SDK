@@ -66,6 +66,15 @@ jobs:
             Yubico.Core/src/bin/ReleaseWithDocs/*.nupkg
             Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
 
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Assemblies
+          path: |
+            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/**/*.dll
+            Yubico.Core/src/bin/ReleaseWithDocs/**/*.dll
+            Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll
+
       # Package the sample code source
       - name: Save build artifacts
         uses: actions/upload-artifact@v2

@@ -33,7 +33,17 @@ limitations under the License. -->
 
     <!-- DocFX will throw a warning (which we set as an error) if it doesn't find a reference assembly. -->
     <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+
+    <!-- StrongName signing -->
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
+
+  <ItemGroup Label="Resource file definitions">
+    <None Include="..\..\Yubico.NET.SDK.snk">
+      <Link>Yubico.NET.SDK.snk</Link>
+    </None>
+  </ItemGroup>
 
   <Target Name="CopyPackage" AfterTargets="Pack">
     <Copy SourceFiles="$(PackageOutputPath)$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(MSBuildProjectDirectory)\..\..\build\latestpackages" />

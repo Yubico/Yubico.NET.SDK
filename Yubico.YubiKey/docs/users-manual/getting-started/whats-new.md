@@ -18,6 +18,14 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.0.x Releases
 
+### 1.0.2
+
+Release date: October 26th, 2021
+
+Added Authenticode signing to the release process. Assemblies are now signed in addition to the NuGet package.
+
+No code changes in this release.
+
 ### 1.0.1
 
 Release date: October 1st, 2021

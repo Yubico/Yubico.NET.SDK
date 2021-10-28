@@ -13,11 +13,12 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using Yubico.Core.Buffers;
+using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 using static Yubico.PlatformInterop.NativeMethods;
 
@@ -32,6 +33,7 @@ namespace Yubico.Core.Devices.Hid
         private IntPtr _deviceHandle;
         private bool _isDisposed;
         private readonly IntPtr _loopId;
+        private readonly Logger _log = Log.GetLogger();
 
         /// <summary>
         /// The correct size, in bytes, for the data buffer to be transmitted to the device.
@@ -51,6 +53,8 @@ namespace Yubico.Core.Devices.Hid
         /// </param>
         public MacOSHidIOReportConnection(long entryId)
         {
+            _log.LogInformation("Creating a new IO report connection for device [{EntryId}]", entryId);
+
             _entryId = entryId;
 
             byte[] cstr = Encoding.UTF8.GetBytes($"fido2-loopid-{entryId}");
@@ -60,6 +64,11 @@ namespace Yubico.Core.Devices.Hid
 
             InputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxInputReportSize);
             OutputReportSize = IOKitHelpers.GetIntPropertyValue(_deviceHandle, IOKitHidConstants.MaxOutputReportSize);
+
+            _log.LogInformation(
+                "InputReportSize = {InputReportSize}; OutputReportSize = {OutputReportSize}",
+                InputReportSize,
+                OutputReportSize);
         }
 
         private void SetupConnection()
@@ -72,6 +81,7 @@ namespace Yubico.Core.Devices.Hid
 
                 if (deviceEntry == 0)
                 {
+                    _log.LogError("Failed to find a matching device entry in the IO registry.");
                     throw new PlatformApiException(ExceptionMessages.IOKitRegistryEntryNotFound);
                 }
 
@@ -79,10 +89,12 @@ namespace Yubico.Core.Devices.Hid
 
                 if (_deviceHandle == IntPtr.Zero)
                 {
+                    _log.LogError("Failed to open the device handle.");
                     throw new PlatformApiException(ExceptionMessages.IOKitCannotOpenDevice);
                 }
 
                 int result = IOHIDDeviceOpen(_deviceHandle, 0);
+                _log.IOKitApiCall(nameof(IOHIDDeviceOpen), (kern_return_t)result);
 
                 if (result != 0)
                 {
@@ -96,6 +108,7 @@ namespace Yubico.Core.Devices.Hid
             {
                 if (deviceEntry != 0)
                 {
+                    _log.LogDebug("Releasing deviceEntry object.");
                     _ = IOObjectRelease(deviceEntry);
                 }
             }
@@ -149,6 +162,10 @@ namespace Yubico.Core.Devices.Hid
                 }
 
                 IOHIDDeviceUnscheduleFromRunLoop(_deviceHandle, runLoop, _loopId);
+
+                _log.SensitiveLogInformation(
+                    "GetReport returned buffer: {Report}",
+                    Hex.BytesToHex(readBuffer));
 
                 // Return a copy of the report
                 return readBuffer.ToArray();
@@ -204,19 +221,31 @@ namespace Yubico.Core.Devices.Hid
             byte[] report,
             long reportLength)
         {
+            Logger log = Log.GetLogger();
+
+            log.LogInformation("MacOSHidIOReportConnection.ReportCallback has been called.");
+
             if (result != 0 || type != IOKitHidConstants.kIOHidReportTypeOutput || reportId != 0 || reportLength < 0)
             {
                 // Something went wrong. We don't currently signal, just continue.
-                Debug.WriteLine(
+                log.LogWarning(
                     "ReportCallback did not receive some or all of the expected output.\n" +
-                    $"result = [{result}], type = [{type}], reportId = [{reportId}], reportLength = [{reportLength}]"
-                    );
+                    "result = [{Result}], type = [{Type}], reportId = [{ReportId}], reportLength = [{ReportLength}]",
+                    result,
+                    type,
+                    reportId,
+                    reportLength);
 
                 return;
             }
 
             byte[] buffer = (byte[])GCHandle.FromIntPtr(context).Target;
             long length = Math.Min(buffer.Length, reportLength);
+            log.LogInformation(
+                "Buffer length determined to be {Length} bytes. (buffer.Length was {BufferLength}, and reportLength was {ReportLength}",
+                length,
+                buffer.Length,
+                reportLength);
 
             Array.Copy(report, buffer, length);
         }
@@ -252,12 +281,18 @@ namespace Yubico.Core.Devices.Hid
                 throw new ArgumentNullException(nameof(report));
             }
 
+            _log.SensitiveLogInformation(
+                "Calling SetReport with data: {Report}",
+                Hex.BytesToHex(report));
+
             int result = IOHIDDeviceSetReport(
                 _deviceHandle,
                 IOKitHidConstants.kIOHidReportTypeOutput,
                 0,
                 report,
                 report.Length);
+
+            _log.IOKitApiCall(nameof(IOHIDDeviceSetReport), (kern_return_t)result);
 
             if (result != 0)
             {

@@ -214,7 +214,7 @@ namespace Yubico.YubiKey
         private class YubicoDeviceWithInfo
         {
             /// <summary>
-            /// Device information sythesized from various commands.
+            /// Device information synthesized from various commands.
             /// </summary>
             public YubiKeyDeviceInfo Info { get; }
             public IDevice Device { get; }

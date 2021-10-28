@@ -55,7 +55,7 @@ namespace Yubico.Core.Devices.SmartCard
                     return new List<ISmartCardDevice>();
                 }
 
-                log.LogInformation("Found {numSmartCards} smart card devices.", readerNames.Length);
+                log.LogInformation("Found {NumSmartCards} smart card devices.", readerNames.Length);
 
                 if (result != ErrorCode.SCARD_S_SUCCESS)
                 {
@@ -79,7 +79,7 @@ namespace Yubico.Core.Devices.SmartCard
                     timeoutMs,
                     readerStates);
                 log.SCardApiCall(nameof(SCard.GetStatusChange), result);
-                log.LogInformation("Updated SCard reader states: {STATES}", readerStates);
+                log.LogInformation("Updated SCard reader states: {ReaderStates}", readerStates);
 
                 if (result != ErrorCode.SCARD_S_SUCCESS)
                 {
@@ -149,7 +149,7 @@ namespace Yubico.Core.Devices.SmartCard
                 }
 
                 _log.LogInformation(
-                    "Connected to smart card [{readerName}]. Active protocol is {activeProtocol}",
+                    "Connected to smart card [{ReaderName}]. Active protocol is [{ActiveProtocol}]",
                     _readerName,
                     activeProtocol);
 

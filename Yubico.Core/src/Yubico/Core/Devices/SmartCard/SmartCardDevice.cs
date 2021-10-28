@@ -73,7 +73,7 @@ namespace Yubico.Core.Devices.SmartCard
             Path = path;
             Atr = atr;
 
-            _log.LogInformation("SmartCardDevice instance created [path = {path}, atr = {atr}]", path, atr);
+            _log.LogInformation("SmartCardDevice instance created [path = {Path}, atr = {Atr}]", path, atr);
         }
 
         /// <summary>

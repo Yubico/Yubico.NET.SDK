@@ -15,11 +15,11 @@ namespace Yubico.Core.Devices.SmartCard
         {
             if (result == ErrorCode.SCARD_S_SUCCESS)
             {
-                logger.LogInformation("{APIName} called successfully.", apiName);
+                logger.LogInformation("{ApiName} called successfully.", apiName);
             }
             else
             {
-                logger.LogError("{APIName} called and FAILED. Result = {Result}", apiName, result);
+                logger.LogError("{ApiName} called and FAILED. Result = {Result}", apiName, result);
             }
         }
 

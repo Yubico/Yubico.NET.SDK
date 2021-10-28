@@ -40,6 +40,8 @@ limitations under the License. -->
       Yubico.Core is a support library used by other .NET Yubico libraries. You should likely never need to consume this package directly, as it will be included with other libraries.
     </Description>
     <PackageIcon>yubico-circle-y-mark.png</PackageIcon>
+
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);ENABLE_SENSITIVE_LOG</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Label="Resource file definition">

@@ -63,7 +63,7 @@ namespace Yubico.Core.Devices.Hid
                 deviceSet = IOHIDManagerCopyDevices(manager);
 
                 long deviceSetCount = CFSetGetCount(deviceSet);
-                log.LogInformation("Found {deviceCount} HID devices in this device set.", deviceSetCount);
+                log.LogInformation("Found {DeviceCount} HID devices in this device set.", deviceSetCount);
 
                 var devices = new IntPtr[deviceSetCount];
 

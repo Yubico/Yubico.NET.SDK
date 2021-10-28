@@ -140,7 +140,7 @@ namespace Yubico.Core.Devices.Hid
             }
 
             _log.SensitiveLogInformation(
-                "GetReport returned buffer: {report}",
+                "GetReport returned buffer: {Report}",
                 Hex.BytesToHex(buffer));
 
             return buffer;
@@ -158,7 +158,7 @@ namespace Yubico.Core.Devices.Hid
         public void SetReport(byte[] report)
         {
             _log.SensitiveLogInformation(
-                "Calling SetReport with data: {report}",
+                "Calling SetReport with data: {Report}",
                 Hex.BytesToHex(report));
 
             int result = IOHIDDeviceSetReport(

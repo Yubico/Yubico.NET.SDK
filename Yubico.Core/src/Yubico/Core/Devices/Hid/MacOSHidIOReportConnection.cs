@@ -164,7 +164,7 @@ namespace Yubico.Core.Devices.Hid
                 IOHIDDeviceUnscheduleFromRunLoop(_deviceHandle, runLoop, _loopId);
 
                 _log.SensitiveLogInformation(
-                    "GetReport returned buffer: {report}",
+                    "GetReport returned buffer: {Report}",
                     Hex.BytesToHex(readBuffer));
 
                 // Return a copy of the report
@@ -230,7 +230,7 @@ namespace Yubico.Core.Devices.Hid
                 // Something went wrong. We don't currently signal, just continue.
                 log.LogWarning(
                     "ReportCallback did not receive some or all of the expected output.\n" +
-                    "result = [{result}], type = [{type}], reportId = [{reportId}], reportLength = [{reportLength}]",
+                    "result = [{Result}], type = [{Type}], reportId = [{ReportId}], reportLength = [{ReportLength}]",
                     result,
                     type,
                     reportId,
@@ -242,7 +242,7 @@ namespace Yubico.Core.Devices.Hid
             byte[] buffer = (byte[])GCHandle.FromIntPtr(context).Target;
             long length = Math.Min(buffer.Length, reportLength);
             log.LogInformation(
-                "Buffer length determined to be {length} bytes. (buffer.Length was {bufferlength}, and reportLength was {reportLength}",
+                "Buffer length determined to be {Length} bytes. (buffer.Length was {BufferLength}, and reportLength was {ReportLength}",
                 length,
                 buffer.Length,
                 reportLength);
@@ -282,7 +282,7 @@ namespace Yubico.Core.Devices.Hid
             }
 
             _log.SensitiveLogInformation(
-                "Calling SetReport with data: {report}",
+                "Calling SetReport with data: {Report}",
                 Hex.BytesToHex(report));
 
             int result = IOHIDDeviceSetReport(

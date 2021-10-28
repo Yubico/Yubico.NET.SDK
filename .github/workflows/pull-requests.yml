@@ -59,6 +59,15 @@ jobs:
             Yubico.Core/src/bin/${{matrix.configuration}}/*.nupkg
             Yubico.YubiKey/src/bin/${{matrix.configuration}}/*.nupkg
 
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Assemblies ${{matrix.configuration}}
+          path: |
+            Yubico.DotNetPolyfills/src/bin/${{matrix.configuration}}/**/*.dll
+            Yubico.Core/src/bin/${{matrix.configuration}}/**/*.dll
+            Yubico.YubiKey/src/bin/${{matrix.configuration}}/**/*.dll
+
       # Test the project
       #
       # Here we call `dotnet test` on each individual test project that we want to have run as part of CI. We do this

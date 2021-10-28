@@ -1,6 +1,5 @@
 ---
 uid: UsersManualPivPinTouchPolicy
-summary: *content
 ---
 
 <!-- Copyright 2021 Yubico AB
@@ -75,9 +74,17 @@ before version 4 and after, are programmed with the same default policies. In th
 there could be a YubiKey with a different default policy. But for now, the default PIN and
 touch policies are the following.
 
-* PIN policy: Once (the PIN is required once per session to use a private key to sign or
-  decrypt)
+* Slot 9C PIN policy: Always (the PIN is required before each private key operation)
+* PIN policy: Once (the PIN is required once per session to use a private key to sign,
+  decrypt, or perform key agreement)
 * Touch policy: Never (touch is never required to use any PIV key, private or management)
+
+> Note:
+>
+> The default PIN policy for slot 9C is different from the default for the other slots.
+> This is from the PIV standard. So remember that if you generate a key in slot 9C and set
+> the PIN policy to default, the actual PIN policy will be Always. It is a good idea to
+> simply always specify the PIN policy you want, Never or Once, rather than Default.
 
 > Note:
 >

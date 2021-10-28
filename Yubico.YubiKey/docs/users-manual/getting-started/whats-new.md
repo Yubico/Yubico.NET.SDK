@@ -18,6 +18,23 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.0.x Releases
 
+### 1.0.2
+
+Release date: October 26th, 2021
+
+Added Authenticode signing to the release process. Assemblies are now signed in addition to the NuGet package.
+
+No code changes in this release.
+
+### 1.0.1
+
+Release date: October 1st, 2021
+
+Bug fixes:
+- PIV: Fixed an issue that was preventing the SDK from allowing attestation to occur on certain slots.
+- OATH Sample code: Fixed an issue that was causing an exception to be thrown during `RunGetCredentials`.
+- PIV Sample code: Worked around an issue in the .NET BCL where certificate generation behavior was different on macOS from Windows.
+
 ### 1.0.0
 
 Release date: August 30th, 2021

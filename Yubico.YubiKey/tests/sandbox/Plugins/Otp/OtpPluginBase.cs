@@ -324,7 +324,9 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Shortcut = "r",
                                 Description = "Read the data stored in the NDEF device. If this " +
                                 "parameter is specified, no other NDEF-specific ones can be. You can " +
-                                "either program an NDEF device or read from it, but not both.",
+                                "either program an NDEF device or read from it, but not both. Also, " +
+                                "you cannot specify a slot when you're reading. Slot is only used to " +
+                                "program the NDEF configuration.",
                                 Type = typeof(bool)
                             }),
                         ParameterUse.LanguageId => new KeyValuePair<string, Parameter>(

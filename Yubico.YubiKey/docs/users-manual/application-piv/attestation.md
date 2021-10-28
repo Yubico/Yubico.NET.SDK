@@ -28,8 +28,8 @@ YubiKey. It does not say anything about who owns the YubiKey, or who signed some
 using the private key, only that the key is from a YubiKey.
 
 > [!NOTE]
-> In version 1.0 of the SDK, it was not possible to create an attestation statement for
-> keys in slots 82 - 95 (retired key slots). Beginning with version 1.1 of the SDK it is
+> In version 1.0.0 of the SDK, it was not possible to create an attestation statement for
+> keys in slots 82 - 95 (retired key slots). Beginning with version 1.0.1 of the SDK it is
 > possible to create an attestation statement for the keys in those slots.
 
 This attestation statement is provided in the form of an X.509 certificate. What this
@@ -167,7 +167,7 @@ There are two ways to replace the key: generate a new attestation key or import 
 First, you will almost certainly NOT want to generate the attestation key. If you generate
 a new key, you will get a public key at the time the key is generated and will have to
 build a certificate for that public key, then import the certificate. That attestation key
-will only work for the YubiKey on which it was generated. 
+will only work for the YubiKey on which it was generated.
 
 Generally, the same attestation key and cert is loaded onto many YubiKeys. It is much more
 efficient to get one attestation certificate for thousands of YubiKeys than to get
@@ -194,7 +194,7 @@ contain one or more extensions.
 That is, if the certificate to build will contain no extensions, the OpenSSL software will
 produce a version 1 certificate. If the cert will contain at least one extension, the
 OpenSSL software will create a version 3 cert. The OpenSSL command line tool currently
-does not support building version 2 certificates. 
+does not support building version 2 certificates.
 
 Hence, to make sure you build a version 3 certificate using the OpenSSL command line tool,
 build it with at least one extension. For example, here is a command that builds a

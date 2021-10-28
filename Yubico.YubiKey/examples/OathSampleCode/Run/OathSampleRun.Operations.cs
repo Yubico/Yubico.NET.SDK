@@ -50,7 +50,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                     // If there are no YubiKeys, this will return false. In that
                     // case, we don't want to exit, we just want to report the
                     // result and run through the main menu again.
-                    _ = ChooseYubiKey.RunChooseYubiKey(true, _menuObject, Transport.SmartCard, out _yubiKeyChosen);
+                    _ = ChooseYubiKey.RunChooseYubiKey(true, _menuObject, Transport.SmartCard, ref _yubiKeyChosen);
                     break;
 
                 case OathMainMenuItem.GetOathCredentials:

@@ -141,6 +141,9 @@
   <data name="SCardError" xml:space="preserve">
     <value>Encountered an error communicating with the smart card subsystem.</value>
   </data>
+  <data name="LinuxUdevError" xml:space="preserve">
+    <value>Encountered an error in the Linux udev library.</value>
+  </data>
   <data name="TlvUnexpectedEndOfBuffer" xml:space="preserve">
     <value>Unexpected end of buffer when trying to parse a TLV data structure.</value>
   </data>

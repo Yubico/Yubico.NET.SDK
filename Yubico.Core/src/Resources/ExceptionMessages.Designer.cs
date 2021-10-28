@@ -268,6 +268,15 @@ namespace Yubico.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Encountered an error in the Linux udev library..
+        /// </summary>
+        internal static string LinuxUdevError {
+            get {
+                return ResourceManager.GetString("LinuxUdevError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to open connection to NFC device. The tag may have been removed..
         /// </summary>
         internal static string NfcConnectionFailed {

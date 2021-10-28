@@ -30,6 +30,7 @@ namespace Yubico.Core.Devices.Hid
         {
             SdkPlatform.Windows => WindowsHidDevice.GetList(),
             SdkPlatform.MacOS => MacOSHidDevice.GetList(),
+            SdkPlatform.Linux => LinuxHidDevice.GetList(),
             _ => throw new PlatformNotSupportedException()
         };
 

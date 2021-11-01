@@ -60,7 +60,7 @@ The Apple Lightning connector on the YubiKey 5Ci uses the iAP communication prot
 
 NFC-enabled YubiKeys communicate with host devices through close (wireless) contact with a host's NFC-reader via the [NDEF](xref:OtpNdef) (NFC Data Exchange Format) protocol.
 
-Unlike HID communication, where passwords are sent as bytes that represent HID usage reports, NDEF sends text. When a YubiKey is scanned by an NFC reader, the key emits a URL containing the web address of an OTP validation server followed by the password.
+Unlike HID communication, where passwords are sent as bytes that represent HID usage reports, NDEF sends text. When a YubiKey is scanned by an NFC reader, the key emits a URL containing the web address of an OTP validation server followed by the OTP.
 
 > [!NOTE]
 > NFC is only compatible with Yubico OTPs and OATH HOTPs--static passwords can only be communicated through HID usage reports.

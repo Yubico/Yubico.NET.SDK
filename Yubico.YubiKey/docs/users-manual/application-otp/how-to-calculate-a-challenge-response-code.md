@@ -25,7 +25,7 @@ As with [programming a challenge-response credential](xref:OtpProgramChallengeRe
 
 ## Touch
 
-An important consideration when calculating a challenge-response code is that you must handle the possibility that the key was programmed to require the user to touch the YubiKey button to execute a challenge-response operation. Although your program doesn’t have to process the button-touch, you do need to alert the user to touch the button. This is handled by calling the ```UseTouchNotifier()``` method, which takes an Action delegate as a parameter.
+An important consideration when calculating a challenge-response code is that you must handle the possibility that the key was programmed to require the user to touch the YubiKey button to execute a challenge-response operation. Although your program doesn’t have to process the button-touch, you do need to alert the user to touch the button. This is handled by calling the [UseTouchNotifier()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseTouchNotifier(System.Action)) method, which takes an Action delegate as a parameter.
 
 When the YubiKey requires a touch, the SDK spawns your handler as a Task. There are two important considerations:
 

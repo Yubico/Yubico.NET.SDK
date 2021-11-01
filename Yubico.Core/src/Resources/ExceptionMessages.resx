@@ -225,6 +225,12 @@
   <data name="WrongIOKitRunLoopMode" xml:space="preserve">
     <value>The runloop used for the IOKit operation did not complete successfully. Result was [{0}].</value>
   </data>
+  <data name="LinuxHidOpenFailed" xml:space="preserve">
+    <value>Could not open HID node on Linux.</value>
+  </data>
+  <data name="HidrawFailed" xml:space="preserve">
+    <value>A HIDRAW operation failed.</value>
+  </data>
   <data name="InvalidSafeFileHandle" xml:space="preserve">
     <value>The file handle cannot be null.</value>
   </data>

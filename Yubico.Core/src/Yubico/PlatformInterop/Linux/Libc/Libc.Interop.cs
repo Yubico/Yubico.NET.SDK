@@ -24,6 +24,18 @@ namespace Yubico.PlatformInterop
         public const long HIDIOCGRAWINFO = 0x0000000080084803;
         public const long HIDIOCGRDESCSIZE = 0x0000000080044801;
         public const long HIDIOCGRDESC = 0x0000000090044802;
+        // The FEATURE flags need to be combined with the buffer size. With "CG"
+        // (Get), the buffer size is the size of the buffer into which the result
+        // will be placed. With "CS" (Set), the buffer size is the size of the
+        // data being sent.
+        // The buffer size is ORed into bits 16 - 21.
+        // For example, to build the ioctl flag for Get with a buffer of 256
+        // bytes, use
+        //   HIDIOCGFEATURE | (256 << 16);
+        // Make sure the buffer size is not greatuer than the maximum.
+        public const long HIDIOCGFEATURE = 0x00000000C0004807;
+        public const long HIDIOCSFEATURE = 0x00000000C0004806;
+        public const int MaxFeatureBufferSize = 256;
         public const int InfoSize = 8;
         public const int DescriptorSizeSize = 4;
         public const int DescriptorSize = 4100;

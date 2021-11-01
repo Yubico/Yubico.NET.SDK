@@ -30,7 +30,7 @@ namespace Yubico.Core.Devices.Hid
         private const int UsageKeyboard = 6;
         private const int UsageU2FDevice = 1;
 
-        private readonly byte[] _devnode;
+        private readonly string _devnode;
 
         // Return a List of all the HIDs we can find (not just YubiKeys).
         public static IEnumerable<HidDevice> GetList()
@@ -50,7 +50,7 @@ namespace Yubico.Core.Devices.Hid
             ProductId = 0;
             Usage = 0;
             UsagePage = HidUsagePage.Unknown;
-            _devnode = Encoding.ASCII.GetBytes(devnode);
+            _devnode = devnode;
 
             // If this call fails, the handle will be < 0. If so, the following
             // function calls will do nothing.
@@ -238,7 +238,7 @@ namespace Yubico.Core.Devices.Hid
         // connection to the HID, and will be able to Get and Set Feature Reports.
         public override IHidConnection ConnectToFeatureReports()
         {
-            throw new NotImplementedException();
+            return new LinuxHidFeatureReportConnection(_devnode);
         }
 
         public override IHidConnection ConnectToIOReports()

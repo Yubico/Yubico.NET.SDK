@@ -42,7 +42,7 @@ An HMAC-SHA1 challenge is normally 64 bytes. However, the YubiKey supports a sho
 
 Both the Yubico OTP and HMAC-SHA1 challenge-response credentials can include a setting that requires the user to touch the YubiKey before the cryptographic operation can proceed. Requiring touch improves security by ensuring that a user performs a physical operation.
 
-To enable this setting, add the [UseButton()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseButton) method to your operation.
+To enable this setting, add the [UseButton()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseButton(System.Boolean)) method to your operation.
 
 ## ConfigureChallengeResponse example
 

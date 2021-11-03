@@ -243,7 +243,7 @@ namespace Yubico.Core.Devices.Hid
 
         public override IHidConnection ConnectToIOReports()
         {
-            throw new NotImplementedException();
+            return new LinuxHidIOReportConnection(_devnode);
         }
     }
 }

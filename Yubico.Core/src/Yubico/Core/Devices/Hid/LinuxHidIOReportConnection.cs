@@ -20,9 +20,9 @@ using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid
 {
-    internal class LinuxHidFeatureReportConnection : IHidConnection
+    internal class LinuxHidIOReportConnection : IHidConnection
     {
-        private const int YubiKeyFeatureReportSize = 8;
+        private const int YubiKeyIOReportSize = 64;
 
         private readonly LinuxFileSafeHandle _handle;
         private bool _isDisposed;
@@ -30,10 +30,10 @@ namespace Yubico.Core.Devices.Hid
         public int InputReportSize { get; private set; }
         public int OutputReportSize { get; private set; }
 
-        public LinuxHidFeatureReportConnection(string devnode)
+        public LinuxHidIOReportConnection(string devnode)
         {
-            InputReportSize = YubiKeyFeatureReportSize;
-            OutputReportSize = YubiKeyFeatureReportSize;
+            InputReportSize = YubiKeyIOReportSize;
+            OutputReportSize = YubiKeyIOReportSize;
 
             _handle = NativeMethods.open(
                 devnode, NativeMethods.OpenFlags.O_RDWR | NativeMethods.OpenFlags.O_NONBLOCK);
@@ -47,12 +47,11 @@ namespace Yubico.Core.Devices.Hid
             }
         }
 
-        // Send the given report as a HID feature report.
-        // We expect to get a report that is FeatureReportSize bytes long. Then
-        // we prepend a 00 byte for the actual data passed into the YubiKey.
+        // Send the given report to the FIDO device. All FIDO messages are
+        // exactly 64 bytes long.
         public void SetReport(byte[] report)
         {
-            if (report.Length != YubiKeyFeatureReportSize)
+            if (report.Length != YubiKeyIOReportSize)
             {
                 throw new InvalidOperationException(
                     string.Format(
@@ -60,24 +59,10 @@ namespace Yubico.Core.Devices.Hid
                         ExceptionMessages.InvalidReportBufferLength));
             }
 
-            byte[] reportToSend = new byte[report.Length + 1];
-            Array.Copy(report, 0, reportToSend, 1, report.Length);
-
-            long ioctlFlag = NativeMethods.HIDIOCSFEATURE | ((long)(report.Length + 1) << 16);
-            IntPtr setReportData = Marshal.AllocHGlobal(report.Length + 1);
-
-            try
+            int bytesWritten = NativeMethods.write(_handle, report, report.Length);
+            if (bytesWritten >= 0)
             {
-                Marshal.Copy(reportToSend, 0, setReportData, reportToSend.Length);
-                int bytesSent = NativeMethods.ioctl(_handle, ioctlFlag, setReportData);
-                if (bytesSent >= 0)
-                {
-                    return;
-                }
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(setReportData);
+                return;
             }
 
             throw new PlatformApiException(
@@ -86,34 +71,16 @@ namespace Yubico.Core.Devices.Hid
                     ExceptionMessages.HidrawFailed));
         }
 
-        // Get the feature report that is waiting on the device.
+        // Get the response that is waiting on the device. It will be 64 bytes.
         public byte[] GetReport()
         {
-            long ioctlFlag = NativeMethods.HIDIOCGFEATURE | ((long)NativeMethods.MaxFeatureBufferSize << 16);
-            IntPtr getReportData = Marshal.AllocHGlobal(NativeMethods.MaxFeatureBufferSize);
-
-            try
+            // The return value is either < 0 for error, or the number of
+            // bytes placed into the provided buffer.
+            byte[] outputBuffer = new byte[YubiKeyIOReportSize];
+            int bytesRead = NativeMethods.read(_handle, outputBuffer, YubiKeyIOReportSize);
+            if (bytesRead >= 0)
             {
-                // The return value is either < 0 for error, or the number of
-                // bytes placed into the provided buffer.
-                int bytesReturned = NativeMethods.ioctl(_handle, ioctlFlag, getReportData);
-                if (bytesReturned >= 0)
-                {
-                    // A YubiKey "has a usable payload of 8 bytes". Hence,
-                    // if we receive something longer than 8, just return the
-                    // last 8.
-                    byte[] outputBuffer = new byte[bytesReturned];
-                    Marshal.Copy(getReportData, outputBuffer, 0, bytesReturned);
-                    if (bytesReturned > YubiKeyFeatureReportSize)
-                    {
-                        outputBuffer = (byte[])outputBuffer.Skip(bytesReturned - YubiKeyFeatureReportSize);
-                    }
-                    return outputBuffer;
-                }
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(getReportData);
+                return outputBuffer;
             }
 
             throw new PlatformApiException(

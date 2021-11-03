@@ -83,5 +83,21 @@ namespace Yubico.PlatformInterop
         [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "ioctl")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int ioctl(LinuxFileSafeHandle handle, long request, IntPtr result);
+
+        // Read count bytes. Place them into outputBuffer.
+        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "read")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern int read(
+            LinuxFileSafeHandle handle,
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)]byte[] outputBuffer,
+            int count);
+
+        // Write the count bytes in inputBuffer.
+        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "write")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern int write(
+            LinuxFileSafeHandle handle,
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)]byte[] inputBuffer,
+            int count);
     }
 }

@@ -19,4 +19,21 @@ limitations under the License. -->
 
 # How to delete a slot's configuration
 
-Content coming soon.
+Deleting the configuration stored in a [slot](xref:OtpSlots) via the ```DeleteSlot()``` method is a simple operation. The only parameters that must be provided are the slot name and the slot access code (if applicable). Therefore, ```DeleteSlot()``` executes the operation directly instead of constructing an object.
+
+## DeleteSlot example
+
+In the following example, the configuration of the [long-press](xref:Yubico.YubiKey.Otp.Slot.LongPress) slot of the OTP application will be deleted, assuming the correct access code is given:
+
+```C#
+using (OtpSession otp = new OtpSession(yKey))
+{
+  otp.DeleteSlot(Slot.LongPress)
+    .UseCurrentAccessCode(_currentAccessCode)
+    .ExecuteOperation();
+}
+
+```
+
+> [!NOTE]
+> This method will fail if the slot you are trying to delete is not currently configured.

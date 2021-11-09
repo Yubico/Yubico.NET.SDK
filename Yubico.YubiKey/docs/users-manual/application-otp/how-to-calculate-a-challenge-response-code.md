@@ -19,4 +19,58 @@ limitations under the License. -->
 
 # How to calculate a response code for a challenge-response credential
 
-Content coming soon.
+To calculate a response code for a [challenge-response](xref:OtpChallengeResponse) credential, you must use a [CalculateChallengeResponse](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse) instance. It is instantiated by calling the factory method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
+
+As with [programming a challenge-response credential](xref:OtpProgramChallengeResponse), you can calculate an OTP for both the Yubico OTP and the HMAC-SHA1 algorithms. In this case, HMAC-SHA1 is the default algorithm; to use Yubico OTP, you must specify ```UseYubiOtp()``` in your code.
+
+## Touch
+
+An important consideration when calculating a challenge-response code is that you must handle the possibility that the key was programmed to require the user to touch the YubiKey button to execute a challenge-response operation. Although your program doesn’t have to process the button-touch, you do need to alert the user to touch the button. This is handled by calling the [UseTouchNotifier()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseTouchNotifier(System.Action)) method, which takes an Action delegate as a parameter.
+
+When the YubiKey requires a touch, the SDK spawns your handler as a Task. There are two important considerations:
+
+1. Your handler executes on a different thread. This means that you should not try to access the YubiKey from that thread — the handler is strictly for alerting the user. If you have a GUI app, it must marshal itself to the proper thread.
+
+1. Your handler is executed asynchronously. The SDK does not wait for your handler to execute, and it doesn’t care when or if it completes.
+
+## CalculateChallengeResponse example
+
+The following is an example of calculating an OTP. This operation will send ```hmacChal``` to the key, notify the user through a message printed to the console, and then receive the response as a six-digit string object.
+
+```C#
+using (OtpSession otp = new OtpSession(yKey))
+{
+  // The challenge, hmacChal, has been set elsewhere.
+  string result = otp.CalculateChallengeResponse(Slot.ShortPress)
+    .UseChallenge(hmacChal)
+    .UseTouchNotifier(() => Console.WriteLine("Touch the key."))
+    .GetCode(6);
+}
+```
+
+In this example, we send ```yOtpChal``` to the key and get the result as [ModHex](xref:OtpModhex):
+
+```C#
+using (OtpSession otp = new OtpSession(key))
+{
+  // The challenge, yOtpChal, has been set elsewhere.
+  ReadOnlyMemory<byte> resp = otp.CalculateChallengeResponse(Slot.ShortPress)
+    .UseChallenge(yOtpChal)
+    .UseTouchNotifier(() => Console.WriteLine("Touch the key."))
+    .GetDataBytes();
+  string result = ModHex.EncodeBytes(resp.Span);
+}
+```
+
+In the final example, we generate a [TOTP](https://www.yubico.com/resources/glossary/oath-totp/) code by sending a time-based challenge to the key and get the result as an eight-digit code:
+
+```C#
+using (OtpSession otp = new OtpSession(yKey))
+{
+  // The challenge, hmacChal, has been set elsewhere.
+  string result = otp.CalculateChallengeResponse(Slot.ShortPress)
+    .UseTotp()
+    .UseTouchNotifier(() => Console.WriteLine("Touch the key."))
+    .GetCode(8);
+}
+```

@@ -19,7 +19,7 @@ limitations under the License. -->
 
 # How to update slot settings
 
-Some [slot](xref:OtpSlots) settings can be updated via the [UpdateSlot](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot) method without completely reconfiguring an OTP application slot. These settings involve behaviors not related to encryption or other sensitive information.
+Some [slot](xref:OtpSlots) settings can be updated via [UpdateSlot](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot) without completely reconfiguring an OTP application slot. These settings involve behaviors not related to encryption or other sensitive information.
 
 The slot settings that can be updated include the following:
 

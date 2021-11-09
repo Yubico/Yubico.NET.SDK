@@ -25,15 +25,15 @@ The slot settings that can be updated include the following:
 
 | Settings |          |
 |----------|----------|
-| ```SetDormant()``` | ```SetAppendDelayToFixed()``` |
-| ```SetSerialNumberApiVisible()``` | ```SetUse10msPacing()``` |
-| ```SetUseNumericKeypad()``` | ```ProtectLongPressSlot()``` |
-| ```SetAppendTabToOtp()``` | ```SetInvertLed()``` |
-| ```SetAppendCarriageReturn()``` | ```SetSerialNumberUsbVisible()``` |
-| ```SetAllowUpdate()``` | ```SetAppendTabToFixed()``` |
-| ```SetFastTrigger()``` | ```SetAppendDelayToOtp()``` |
-| ```SetSerialNumberButtonVisible()``` | ```SetUse20msPacing()``` |
-| ```SetSendTabFirst()``` | |
+| [```SetAllowUpdate()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAllowUpdate*) | [```SetAppendDelayToFixed()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendDelayToFixed*) |
+| [```SetSerialNumberApiVisible()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetSerialNumberApiVisible*) | [```SetUse10msPacing()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetUse10msPacing*) |
+| [```SetUseNumericKeypad()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetUseNumericKeypad*) | [```SetUse20msPacing()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetUse20msPacing*) |
+| [```SetAppendTabToOtp()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendTabToOtp*) | [```SetInvertLed()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetInvertLed*) |
+| [```SetAppendCarriageReturn()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendCarriageReturn*) | [```SetSerialNumberUsbVisible()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetSerialNumberUsbVisible*) |
+| [```SetSendTabFirst()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetSendTabFirst*) | [```SetAppendTabToFixed()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendTabToFixed*) |
+| [```SetFastTrigger()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetFastTrigger*) | [```SetAppendDelayToOtp()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetAppendDelayToOtp*) |
+| [```SetSerialNumberButtonVisible()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetSerialNumberButtonVisible*) | [```ProtectLongPressSlot()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.ProtectLongPressSlot*) |
+| [```SetDormant()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetDormant*) | |
 
 > [!NOTE]
 > There is no way to retrieve the settings of an OTP slot configuration. Therefore, when you use ```UpdateSlot```, you’re resetting every setting. For example, if you intend to add a carriage return to the slot configuration and only call ```SetAppendCarriageReturn()```, all other settings will revert to their default states.

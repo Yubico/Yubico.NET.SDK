@@ -29,4 +29,4 @@ using (OtpSession otp = new OtpSession(yKey))
 ```
 
 > [!NOTE]
-> This method will fail if at least one of the slots is not currently configured.
+> This method will fail if at least one of the slots is not currently configured. Also, if one or both of the slots is protected with an access code, this method will fail.

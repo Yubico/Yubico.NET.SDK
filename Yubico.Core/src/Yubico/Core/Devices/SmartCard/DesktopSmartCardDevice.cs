@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+// Copyright 2021 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using Yubico.Core.Iso7816;
+using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.SmartCard
@@ -24,10 +25,15 @@ namespace Yubico.Core.Devices.SmartCard
     internal class DesktopSmartCardDevice : SmartCardDevice
     {
         private readonly string _readerName;
+        private readonly Logger _log = Log.GetLogger();
 
         public static IReadOnlyList<ISmartCardDevice> GetList()
         {
+            Logger log = Log.GetLogger();
+            using IDisposable logScope = log.BeginScope("SmartCardDevice.GetList()");
+
             uint result = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);
+            log.SCardApiCall(nameof(SCard.EstablishContext), result);
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {
@@ -39,13 +45,17 @@ namespace Yubico.Core.Devices.SmartCard
             try
             {
                 result = PlatformLibrary.Instance.SCard.ListReaders(context, null, out string[] readerNames);
+                log.SCardApiCall(nameof(SCard.ListReaders), result);
 
                 // It's OK if there are no readers on the system. Treat this the same as if we
                 // didn't find any devices.
                 if (result == ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
                 {
+                    log.LogInformation("No smart card devices found.");
                     return new List<ISmartCardDevice>();
                 }
+
+                log.LogInformation("Found {NumSmartCards} smart card devices.", readerNames.Length);
 
                 if (result != ErrorCode.SCARD_S_SUCCESS)
                 {
@@ -68,6 +78,8 @@ namespace Yubico.Core.Devices.SmartCard
                     context,
                     timeoutMs,
                     readerStates);
+                log.SCardApiCall(nameof(SCard.GetStatusChange), result);
+                log.LogInformation("Updated SCard reader states: {ReaderStates}", readerStates);
 
                 if (result != ErrorCode.SCARD_S_SUCCESS)
                 {
@@ -98,11 +110,13 @@ namespace Yubico.Core.Devices.SmartCard
             base(readerName, atr)
         {
             _readerName = readerName;
+            _log = Log.GetLogger();
         }
 
         public override ISmartCardConnection Connect()
         {
             uint result = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext? context);
+            _log.SCardApiCall(nameof(SCard.EstablishContext), result);
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {
@@ -122,6 +136,7 @@ namespace Yubico.Core.Devices.SmartCard
                     SCARD_PROTOCOL.Tx,
                     out cardHandle,
                     out SCARD_PROTOCOL activeProtocol);
+                _log.SCardApiCall(nameof(SCard.Connect), result);
 
                 if (result != ErrorCode.SCARD_S_SUCCESS)
                 {
@@ -132,6 +147,11 @@ namespace Yubico.Core.Devices.SmartCard
                             Path),
                         result);
                 }
+
+                _log.LogInformation(
+                    "Connected to smart card [{ReaderName}]. Active protocol is [{ActiveProtocol}]",
+                    _readerName,
+                    activeProtocol);
 
                 var connection = new DesktopSmartCardConnection(
                     context,
@@ -148,6 +168,7 @@ namespace Yubico.Core.Devices.SmartCard
             {
                 context?.Dispose();
                 cardHandle?.Dispose();
+                _log.LogInformation("Disposed of context and cardHandle.");
             }
         }
     }

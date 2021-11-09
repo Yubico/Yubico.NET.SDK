@@ -366,7 +366,7 @@ MigrationBackup/
 **/docs/**/bin/
 **/docs/**/obj/
 **/docs/_site/
-**/docs/log.txt
+**/log.txt
 
 #####################
 #  DocFX: docs/api  #

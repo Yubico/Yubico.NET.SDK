@@ -141,6 +141,9 @@
   <data name="SCardError" xml:space="preserve">
     <value>Encountered an error communicating with the smart card subsystem.</value>
   </data>
+  <data name="LinuxUdevError" xml:space="preserve">
+    <value>Encountered an error in the Linux udev library.</value>
+  </data>
   <data name="TlvUnexpectedEndOfBuffer" xml:space="preserve">
     <value>Unexpected end of buffer when trying to parse a TLV data structure.</value>
   </data>
@@ -221,6 +224,12 @@
   </data>
   <data name="WrongIOKitRunLoopMode" xml:space="preserve">
     <value>The runloop used for the IOKit operation did not complete successfully. Result was [{0}].</value>
+  </data>
+  <data name="LinuxHidOpenFailed" xml:space="preserve">
+    <value>Could not open HID node on Linux.</value>
+  </data>
+  <data name="HidrawFailed" xml:space="preserve">
+    <value>A HIDRAW operation failed.</value>
   </data>
   <data name="InvalidSafeFileHandle" xml:space="preserve">
     <value>The file handle cannot be null.</value>

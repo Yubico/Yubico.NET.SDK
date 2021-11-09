@@ -47,7 +47,8 @@ namespace Yubico.YubiKey.TestApp
                 ["hidcodetablegenerator"] = (output) => new HidCodeTablePlugin(output),
                 ["validatehotp"] = (output) => new ValidateHotp(output),
                 ["jamie"] = (output) => new JamiePlugin(output),
-                ["greg"] = (output) => new GregPlugin(output)
+                ["greg"] = (output) => new GregPlugin(output),
+                ["scard"] = (output) => new SCardListenerPlugin(output)
             };
 
         static int Main(string[] args)

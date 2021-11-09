@@ -151,6 +151,15 @@ namespace Yubico.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A HIDRAW operation failed..
+        /// </summary>
+        internal static string HidrawFailed {
+            get {
+                return ResourceManager.GetString("HidrawFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to [{0}] is not a supported HID class. Only generic HidClass and Keyboard are supported at this time..
         /// </summary>
         internal static string HidUnsupportedDeviceClass {
@@ -264,6 +273,24 @@ namespace Yubico.Core {
         internal static string LibraryLoadFailed {
             get {
                 return ResourceManager.GetString("LibraryLoadFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Could not open HID node on Linux..
+        /// </summary>
+        internal static string LinuxHidOpenFailed {
+            get {
+                return ResourceManager.GetString("LinuxHidOpenFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Encountered an error in the Linux udev library..
+        /// </summary>
+        internal static string LinuxUdevError {
+            get {
+                return ResourceManager.GetString("LinuxUdevError", resourceCulture);
             }
         }
         

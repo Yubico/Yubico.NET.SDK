@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using Yubico.Core.Iso7816;
 using Yubico.PlatformInterop;
+using Yubico.Core.Logging;
 
 namespace Yubico.Core.Devices.SmartCard
 {
@@ -24,6 +25,8 @@ namespace Yubico.Core.Devices.SmartCard
     /// </summary>
     public abstract class SmartCardDevice : ISmartCardDevice
     {
+        private readonly Logger _log = Log.GetLogger();
+
         /// <summary>
         /// Gets the path to the smart card device.
         /// </summary>
@@ -69,6 +72,8 @@ namespace Yubico.Core.Devices.SmartCard
         {
             Path = path;
             Atr = atr;
+
+            _log.LogInformation("SmartCardDevice instance created [path = {Path}, atr = {Atr}]", path, atr);
         }
 
         /// <summary>

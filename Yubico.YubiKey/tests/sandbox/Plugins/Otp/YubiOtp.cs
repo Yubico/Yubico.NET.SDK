@@ -310,7 +310,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             var yubiOtp = (YubiOtpResponse)JsonSerializer.Deserialize(
                 response.Content.ReadAsStringAsync().Result,
-                typeof(YubiOtpResponse));
+                typeof(YubiOtpResponse))!;
 
             if (!response.IsSuccessStatusCode)
             {

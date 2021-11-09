@@ -34,7 +34,7 @@ limitations under the License. -->
 
     <!-- XML Documentation -->
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    
+
     <!-- NuGet properties -->
     <Description>
       Yubico.Core is a support library used by other .NET Yubico libraries. You should likely never need to consume this package directly, as it will be included with other libraries.
@@ -44,6 +44,8 @@ limitations under the License. -->
     <!-- StrongName signing -->
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
+
+    <DefineConstants Condition="'$(Configuration)' == 'Debug'">$(DefineConstants);ENABLE_SENSITIVE_LOG</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Label="Resource file definition">
@@ -96,6 +98,7 @@ limitations under the License. -->
 
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
     <ProjectReference Include="..\..\Yubico.DotNetPolyfills\src\Yubico.DotNetPolyfills.csproj" />
   </ItemGroup>

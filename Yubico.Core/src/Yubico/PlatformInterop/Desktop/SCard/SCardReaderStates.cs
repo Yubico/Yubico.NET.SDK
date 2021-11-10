@@ -26,6 +26,12 @@ namespace Yubico.PlatformInterop
 
         public int Count { get; }
 
+        private SCardReaderStates(byte[] buffer)
+        {
+            Count = buffer.Length / Entry.Size;
+            Buffer = buffer;
+        }
+
         public SCardReaderStates(int numberOfStates)
         {
             Count = numberOfStates;
@@ -268,16 +274,25 @@ namespace Yubico.PlatformInterop
 
         public object Clone()
         {
-            var newStates = new SCardReaderStates(Count);
+            byte[] buffer = (byte[])Buffer.Clone();
+
+            // Writing zeros so that reader names in the original states
+            // won't be deallocated when we copy them to the new list.
+            for (int i = 0; i < Count; i++)
+            {
+                byte[] raw = BitConverter.GetBytes(
+                    IntPtr.Size == sizeof(int)
+                        ? IntPtr.Zero.ToInt32()
+                        : IntPtr.Zero.ToInt64());
+                System.Buffer.BlockCopy(raw, 0, buffer, i * Entry.Size, raw.Length);
+            }
+
+            var newStates = new SCardReaderStates(buffer);
 
             for (int i = 0; i < Count; i++)
             {
                 SCardReaderStates.Entry state = this[i];
                 newStates[i].ReaderName = state.ReaderName;
-                newStates[i].CurrentState = state.CurrentState;
-                newStates[i].CurrentSequence = state.CurrentSequence;
-                newStates[i].EventState = state.EventState;
-                newStates[i].EventSequence = state.EventSequence;
             }
 
             return newStates;

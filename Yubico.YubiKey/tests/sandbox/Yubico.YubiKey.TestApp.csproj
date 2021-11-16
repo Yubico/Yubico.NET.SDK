@@ -31,6 +31,7 @@ limitations under the License. -->
          be strong named, since it uses InternalsVisibleTo. -->
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
+    <StartupObject>Yubico.YubiKey.TestApp.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>

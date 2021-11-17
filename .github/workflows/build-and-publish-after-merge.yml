@@ -29,7 +29,7 @@ jobs:
     # Even though we build for multiple platforms, we only need to run
     # on a single host operating system. This is because we utilize cross-
     # build functionality of the dotnet build system.
-    runs-on: windows-latest
+    runs-on: windows-2022
 
     steps:
       # Checkout the local repository

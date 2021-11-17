@@ -208,6 +208,90 @@ namespace Yubico.YubiKey
         }
 
         [Fact]
+        public void TryCreateConnectionOverload_NoOpenConnections_ReturnsTrueAndConnection()
+        {
+            var cm = new ConnectionManager();
+
+            _ = _smartCardDeviceMock
+                .Setup(x => x.Connect()).Returns(_smartCardConnectionMock.Object);
+            _ = _smartCardConnectionMock
+                .Setup(x => x.Transmit(It.IsAny<CommandApdu>()))
+                .Returns(new ResponseApdu(Array.Empty<byte>(), SWConstants.Success));
+
+            bool result = cm.TryCreateConnection(
+                _yubiKeyDeviceMock.Object,
+                _smartCardDeviceMock.Object,
+                new byte[] { 1, 2, 3, 4 },
+                out IYubiKeyConnection? connection);
+
+            Assert.True(result);
+            Assert.NotNull(connection);
+        }
+
+        [Fact]
+        public void TryCreateConnectionOverload_OpenConnectionToSameYubiKey_ReturnsFalseAndNull()
+        {
+            var cm = new ConnectionManager();
+
+            _ = _yubiKeyDeviceMock
+                .Setup(x => x.Equals(It.IsAny<IYubiKeyDevice>()))
+                .Returns(true);
+            _ = _smartCardDeviceMock
+                .Setup(x => x.Connect()).Returns(_smartCardConnectionMock.Object);
+            _ = _smartCardConnectionMock
+                .Setup(x => x.Transmit(It.IsAny<CommandApdu>()))
+                .Returns(new ResponseApdu(Array.Empty<byte>(), SWConstants.Success));
+
+            _ = cm.TryCreateConnection(
+                _yubiKeyDeviceMock.Object,
+                _smartCardDeviceMock.Object,
+                new byte[] { 1, 2, 3, 4 },
+                out _);
+
+            bool result = cm.TryCreateConnection(
+                _yubiKeyDeviceMock.Object,
+                _smartCardDeviceMock.Object,
+                new byte[] { 1, 2, 3, 4 },
+                out IYubiKeyConnection? connection);
+
+            Assert.False(result);
+            Assert.Null(connection);
+        }
+
+        [Fact]
+        public void TryCreateConnectionOverload_OpenConnectionToDifferentYubiKey_ReturnsTrueAndConnection()
+        {
+            var cm = new ConnectionManager();
+
+            _ = _yubiKeyDeviceMock
+                .Setup(x => x.Equals(It.IsAny<IYubiKeyDevice>()))
+                .Returns(false);
+            _ = _smartCardDeviceMock
+                .Setup(x => x.Connect()).Returns(_smartCardConnectionMock.Object);
+            _ = _smartCardConnectionMock
+                .Setup(x => x.Transmit(It.IsAny<CommandApdu>()))
+                .Returns(new ResponseApdu(Array.Empty<byte>(), SWConstants.Success));
+
+            bool result = cm.TryCreateConnection(
+                _yubiKeyDeviceMock.Object,
+                _smartCardDeviceMock.Object,
+                new byte[] { 1, 2, 3, 4 },
+                out IYubiKeyConnection? connection1);
+
+            Assert.True(result);
+            Assert.NotNull(connection1);
+
+            result = cm.TryCreateConnection(
+                _yubiKeyDeviceMock.Object,
+                _smartCardDeviceMock.Object,
+                new byte[] { 1, 2, 3, 4 },
+                out IYubiKeyConnection? connection2);
+
+            Assert.True(result);
+            Assert.NotNull(connection2);
+        }
+
+        [Fact]
         public void EndConnection_NoOpenConnections_ThrowsNotFoundException()
         {
             var cm = new ConnectionManager();

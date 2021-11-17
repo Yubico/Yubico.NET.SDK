@@ -26,11 +26,23 @@ namespace Yubico.YubiKey
     /// A service class that tracks open connections to the YubiKeys on the device.
     /// </summary>
     /// <remarks>
-    ///
+    /// <para>
+    /// The YubiKey is fundamentally a single threaded device. Even if you are connecting through different USB interfaces,
+    /// such as Smart Card and HID Keyboard, the YubiKey can still only process a single request at a time. Device event
+    /// notifications now introduces implicit multi-threading into the SDK. We now need to be more aware of the active
+    /// connection state of any particular YubiKey. Even an enumeration can be disruptive, since we need to interrogate
+    /// the device in order to find its device properties.
+    /// </para>
+    /// <para>
+    /// This class is meant to be used as a service / singleton within the SDK. Whenever you need to create a connection
+    /// to a YubiKey, call the <see cref="TryCreateConnection(Yubico.YubiKey.IYubiKeyDevice,Yubico.Core.Devices.IDevice,Yubico.YubiKey.YubiKeyApplication,out Yubico.YubiKey.IYubiKeyConnection)"/>
+    /// method. Usage of this class should avoid the creation of more than one connection to a single physical YubiKey.
+    /// Connecting to different YubiKeys at once is fine, just not to a single key.
+    /// </para>
     /// </remarks>
-    // JUSTIFICATION: This class is a singleton, which means its lifetime can span the process lifetime. It contains
+    // JUSTIFICATION: This class is a singleton, which means its lifetime will span the process lifetime. It contains
     // a lock which is disposable, so we must call its Dispose method at some point. The only reasonable time to do that
-    // is in this class's finalizer. This analyzer doesn't see this and still warns.
+    // is in this class's finalizer. This analyzer doesn't seem to see this and still warns.
     #pragma warning disable CA1001
     internal class ConnectionManager
     #pragma warning restore CA1001
@@ -90,7 +102,8 @@ namespace Yubico.YubiKey
         }
 
         /// <summary>
-        /// Tries to connect to a known application on the YubiKey, failing if a connection already exists.
+        /// Tries to connect to a known application on the YubiKey, failing if a connection to that YubiKey (regardless
+        /// of the application) already exists.
         /// </summary>
         /// <param name="yubiKeyDevice">
         /// The YubiKey that we are attempting to connect to.
@@ -124,7 +137,7 @@ namespace Yubico.YubiKey
             if (!DeviceSupportsApplication(device, application))
             {
                 throw new ArgumentException(
-                    "The specified device does not support this application.",
+                    ExceptionMessages.DeviceDoesNotSupportApplication,
                     nameof(application));
             }
 
@@ -166,7 +179,7 @@ namespace Yubico.YubiKey
                     IHidDevice { UsagePage: HidUsagePage.Fido } d => new FidoConnection(d),
                     IHidDevice { UsagePage: HidUsagePage.Keyboard } d => new KeyboardConnection(d),
                     ISmartCardDevice d => new CcidConnection(d, application),
-                    _ => throw new NotSupportedException("Device type not recognized.")
+                    _ => throw new NotSupportedException(ExceptionMessages.DeviceTypeNotRecognized)
                 };
 
                 _ = _openConnections.Add(yubiKeyDevice);
@@ -180,14 +193,29 @@ namespace Yubico.YubiKey
         }
 
         /// <summary>
-        /// Tries to connect to an arbitrary application on the YubiKey, failing if a connection already exists.
+        /// Tries to connect to an arbitrary application on the YubiKey, failing if a connection to that YubiKey already
+        /// exists.
         /// </summary>
-        /// <param name="yubiKeyDevice"></param>
-        /// <param name="device"></param>
-        /// <param name="applicationId"></param>
-        /// <param name="connection"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
+        /// <param name="yubiKeyDevice">
+        /// The YubiKey that we are attempting to connect to.
+        /// </param>
+        /// <param name="device">
+        /// The actual physical device exposed by the YubiKey that we're attempting to connect to.
+        /// </param>
+        /// <param name="applicationId">
+        /// The smart card application ID (AID) to connect to.
+        /// </param>
+        /// <param name="connection">
+        /// The connection, if established. `null` otherwise.
+        /// </param>
+        /// <returns>
+        /// 'true' if the connection was established, 'false' if there is already an outstanding connection to this
+        /// device. Note that this method throws exceptions for all other failure modes.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// The platform device specified in <paramref name="device"/> is not a smart-card based, or is not a device
+        /// capable of selecting arbitrary applications.
+        /// </exception>
         public bool TryCreateConnection(
             IYubiKeyDevice yubiKeyDevice,
             IDevice device,
@@ -200,7 +228,7 @@ namespace Yubico.YubiKey
             if (smartCardDevice == null)
             {
                 throw new ArgumentException(
-                    "The specified device does not support this application.",
+                    ExceptionMessages.DeviceDoesNotSupportApplication,
                     nameof(applicationId));
             }
 
@@ -238,6 +266,7 @@ namespace Yubico.YubiKey
                 }
 
                 connection = new CcidConnection(smartCardDevice, applicationId);
+                _ = _openConnections.Add(yubiKeyDevice);
             }
             finally
             {
@@ -247,6 +276,15 @@ namespace Yubico.YubiKey
             return true;
         }
 
+        /// <summary>
+        /// Ends the tracking of a YubiKey connection.
+        /// </summary>
+        /// <param name="yubiKeyDevice">
+        /// The YubiKey to disconnect from.
+        /// </param>
+        /// <exception cref="KeyNotFoundException">
+        /// Thrown if the specified YubiKey does not have any active connections.
+        /// </exception>
         public void EndConnection(IYubiKeyDevice yubiKeyDevice)
         {
             // Since taking a write lock is potentially very expensive, let's try and make a best effort to see if the
@@ -257,7 +295,7 @@ namespace Yubico.YubiKey
             {
                 if (!_openConnections.Contains(yubiKeyDevice))
                 {
-                    throw new KeyNotFoundException("No active connections for that YubiKey were found.");
+                    throw new KeyNotFoundException(ExceptionMessages.NoActiveConnections);
                 }
             }
             finally
@@ -271,7 +309,7 @@ namespace Yubico.YubiKey
             {
                 if (!_openConnections.Remove(yubiKeyDevice))
                 {
-                    throw new KeyNotFoundException("No active connections for that YubiKey were found.");
+                    throw new KeyNotFoundException(ExceptionMessages.NoActiveConnections);
                 }
             }
             finally

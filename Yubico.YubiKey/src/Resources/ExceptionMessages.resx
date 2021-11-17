@@ -688,4 +688,13 @@
   <data name="ValueMustBeBetweenXandY" xml:space="preserve">
     <value>The value must be between {0} and {1}, and the first value must be less than the second.</value>
   </data>
+  <data name="DeviceDoesNotSupportApplication" xml:space="preserve">
+    <value>The specified device does not support this application.</value>
+  </data>
+  <data name="DeviceTypeNotRecognized" xml:space="preserve">
+    <value>Device type not recognized.</value>
+  </data>
+  <data name="NoActiveConnections" xml:space="preserve">
+    <value>No active connections for that YubiKey were found.</value>
+  </data>
 </root>

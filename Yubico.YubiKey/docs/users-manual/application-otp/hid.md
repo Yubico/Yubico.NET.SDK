@@ -27,15 +27,53 @@ In order for the OTP application on the YubiKey to submit passwords ([Yubico OTP
 
 The YubiKey essentially emulates a HID keyboard; each key on a keyboard is represented by a HID [usage ID](https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf#page=53) (in decimal and hexadecimal), which is collected into a HID usage report (sometimes referred to as a message). The YubiKey generates these usage reports to simulate keystrokes, and the usage reports are decoded by the host into the characters of a password.  
 
-With HID, a key is only a key. There is no concept of a shifted or otherwise modified key; pressing a shift button is a separate operation with a unique usage ID. To simulate an upper-case “A” key-press, the YubiKey must send usage reports for the following:
+### HID reports
 
-1. A shift-button press (e.g. left shift): 225 (0xe1).
+A HID report consists of eight bytes: the first byte represents a set of modifier key flags, the second byte is unused, and the final six bytes represent keys that are currently being pressed, sorted in the order they were pressed.
 
-1. The “A” button-press: 4 (0x04).
+With HID, modifier key flags (e.g. the left-shift button) are used to, you guessed it, modify the keys included in the final six bytes of the HID report. If modifier key flags are not included in the report, the keys will be sent in their default format (letter keys are lowercase by default).
 
-1. A notification that the “A” button was released.
+The following tables represent the bytes of a HID report and the bits in the modifier key flags byte:
 
-1. A notification that the shift button was released.
+<table>
+<tr><th>HID Report Bytes</th><th></th><th>Modifier Key Flags</th></tr>
+<tr><td>
+
+| Byte | Description |
+| --- | --- |
+| 0 | Modifier Key Flags |
+| 1 | Reserved Byte |
+| 2 | Keypress #1 |
+| 3 | Keypress #2 |
+| 4 | Keypress #3 |
+| 5 | Keypress #4 |
+| 6 | Keypress #5 |
+| 7 | Keypress #6 |
+</td><td>&nbsp;&nbsp;&nbsp;&nbsp;</td><td>
+
+| Bit | Description |
+| --- | --- |
+| 0 | Left [Ctrl] |
+| 1 | Left [Shift] |
+| 2 | Left [Alt] |
+| 3 | Left GUI<sup>*</sup> |
+| 4 | Right [Ctrl] |
+| 5 | Right [Shift] |
+| 6 | Right [Alt] |
+| 7 | Right GUI<sup>*</sup> |
+</table>
+
+<sup>*</sup> On Windows systems, this is the Windows key.
+
+To send an uppercase "A" to a host device, the YubiKey must send the following usage report:
+
+| Byte | Value | Description |
+| --- | --- | --- |
+| 0 | 0x02 | The left shift (modifier key flag bit 1) is pressed. |
+| 1 | 0x00 | (reserved) |
+| 2 | 0xe1 | Usage ID for the left shift key. |
+| 3 | 0x04 | Usage ID for the "A" key. |
+| 4 - 7 | 0x00 | Unused bytes (no more keys pressed). |
 
 ### HID keyboard layout challenges
 

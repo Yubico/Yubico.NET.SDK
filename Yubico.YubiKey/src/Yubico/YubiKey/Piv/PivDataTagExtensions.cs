@@ -193,7 +193,7 @@ namespace Yubico.YubiKey.Piv
                     expectedFormat = new int[] {
                         0xC1, 0, 1,
                         0xC2, 0, 1,
-                        0xBF3, 118, 0,
+                        0xF3, 118, 0,
                         0xFE, 0, 0
                     };
                     break;

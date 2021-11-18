@@ -1086,7 +1086,7 @@ Some tags require PIN authentication as well. The tags that do are listed in tab
 
 ### Output
 
-Data elements based on the input tag. Th SDK returns the data as a byte array. It is the
+Data elements based on the input tag. The SDK returns the data as a byte array. It is the
 responsibility of the caller to further parse that result.
 
 Table 4A lists PIV standard elements that the YubiKey will possess upon manufacture (as
@@ -1097,29 +1097,29 @@ Requesting these elements using GET DATA will return "NoData". If you want these
 to contain data, you will have to load them using PUT DATA.
 
 #### Table 4A: PIV GET DATA elements available upon manufacture
-|    Name    |   Tag    |                  Meaning                  | Authentication<br/>Required |              Data Returned              |
-| :--------: | :------: | :---------------------------------------: | :-------------------------: | :-------------------------------------: |
-|   CHUID    | 5F C1 02 |     Cardholder Unique<br/>Identifier      |           (none)            |     [Encoded CHUID](#encoded-chuid)     |
-| CAPABILITY | 5F C1 07 | Cardholder Capability<br/>Container (CCC) |           (none)            |       [Encoded CCC](#encoded-ccc)       |
-| DISCOVERY  |    7E    |     PIV AID plus<br/>PIN usage policy     |           (none)            | [Encoded discovery](#encoded-discovery) |
+|    Name    |   Tag    |                  Meaning                  |   Authentication<br/>Required  |              Data Returned              |
+| :--------: | :------: | :---------------------------------------: | :----------------------------: | :-------------------------------------: |
+| DISCOVERY  |    7E    |     PIV AID plus<br/>PIN usage policy     | PUT: not allowed<br/>GET: none | [Encoded discovery](#encoded-discovery) |
 
 #### Table 4B: PIV GET DATA elements empty upon manufacture
 |           Name            |                Tag                |                 Meaning                  | Authentication<br/>Required |                   Data Returned                   |
 | :-----------------------: | :-------------------------------: | :--------------------------------------: | :-------------------------: | :-----------------------------------------------: |
-|      AUTHENTICATION       |             5F C1 05              |         Cert for key in slot 9A          |           (none)            |    [Encoded certificate](#encoded-certificate)    |
-|         SIGNATURE         |             5F C1 0A              |         Cert for key in slot 9C          |           (none)            |    [Encoded certificate](#encoded-certificate)    |
-|      KEY MANAGEMENT       |             5F C1 0B              |         Cert for key in slot 9D          |           (none)            |    [Encoded certificate](#encoded-certificate)    |
-|         CARD AUTH         |             5F C1 01              |         Cert for key in slot 9E          |           (none)            |    [Encoded certificate](#encoded-certificate)    |
-| RETIRED1 to<br/>RETIRED20 | 5F C1 0D<br/>through<br/>5F C1 20 |              Retired certs               |           (none)            |    [Encoded certificate](#encoded-certificate)    |
-|          PRINTED          |             5F C1 09              |   Information printed<br/>on the card    |             PIN             |        [Encoded printed](#encoded-printed)        |
-|         SECURITY          |             5F C1 06              |             Security object              |           (none)            |   [Encoded security](#encoded-security-object)    |
-|        KEY HISTORY        |             5F C1 0C              |         Info about retired keys          |           (none)            |    [Encoded key history](#encoded-key-history)    |
-|           IRIS            |             5F C1 21              |          Cardholder iris images          |             PIN             |    [Encoded iris images](#encoded-iris-images)    |
-|       FACIAL IMAGE        |             5F C1 08              |         Cardholder facial image          |             PIN             |   [Encoded facial image](#encoded-facial-image)   |
-|       FINGERPRINTS        |             5F C1 03              |         Cardholder fingerprints          |             PIN             |   [Encoded fingerprints](#encoded-fingerprints)   |
-|           BITGT           |               7F 61               | Biometric Information<br/>Group Template |           (none)            |          [Encoded BITGT](#encoded-bitgt)          |
-|         SM SIGNER         |             5F C1 22              | Secure Messaging<br/>Certificate Signer  |  (management key for PUT)   | [Encoded SM cert signer](#encoded-sm-cert-signer) |
-|        PC REF DATA        |             5F C1 23              |     Pairing Code<br/>Reference Data      |           (none)            |         [Encoded PC Ref](#encoded-pc-ref)         |
+|      AUTHENTICATION       |             5F C1 05              |         Cert for key in slot 9A          | PUT: mgmt key<br/>GET: none |    [Encoded certificate](#encoded-certificate)    |
+|         SIGNATURE         |             5F C1 0A              |         Cert for key in slot 9C          | PUT: mgmt key<br/>GET: none |    [Encoded certificate](#encoded-certificate)    |
+|      KEY MANAGEMENT       |             5F C1 0B              |         Cert for key in slot 9D          | PUT: mgmt key<br/>GET: none |    [Encoded certificate](#encoded-certificate)    |
+|         CARD AUTH         |             5F C1 01              |         Cert for key in slot 9E          | PUT: mgmt key<br/>GET: none |    [Encoded certificate](#encoded-certificate)    |
+| RETIRED1 to<br/>RETIRED20 | 5F C1 0D<br/>through<br/>5F C1 20 |              Retired certs               | PUT: mgmt key<br/>GET: none |    [Encoded certificate](#encoded-certificate)    |
+|           CHUID           |             5F C1 02              |    Cardholder Unique<br/>Identifier      | PUT: mgmt key<br/>GET: none |     [Encoded CHUID](#encoded-chuid)               |
+|         CAPABILITY        |             5F C1 07              |    Card Capability<br/>Container (CCC)   | PUT: mgmt key<br/>GET: none |       [Encoded CCC](#encoded-ccc)       |
+|          PRINTED          |             5F C1 09              |   Information printed<br/>on the card    | PUT: mgmt key<br/>GET: PIN  |        [Encoded printed](#encoded-printed)        |
+|         SECURITY          |             5F C1 06              |             Security object              | PUT: mgmt key<br/>GET: none |   [Encoded security](#encoded-security-object)    |
+|        KEY HISTORY        |             5F C1 0C              |         Info about retired keys          | PUT: mgmt key<br/>GET: none |    [Encoded key history](#encoded-key-history)    |
+|           IRIS            |             5F C1 21              |          Cardholder iris images          | PUT: mgmt key<br/>GET: PIN  |    [Encoded iris images](#encoded-iris-images)    |
+|       FACIAL IMAGE        |             5F C1 08              |         Cardholder facial image          | PUT: mgmt key<br/>GET: PIN  |   [Encoded facial image](#encoded-facial-image)   |
+|       FINGERPRINTS        |             5F C1 03              |         Cardholder fingerprints          | PUT: mgmt key<br/>GET: PIN  |   [Encoded fingerprints](#encoded-fingerprints)   |
+|           BITGT           |               7F 61               | Biometric Information<br/>Group Template | PUT: not supported<br/>GET: none |          [Encoded BITGT](#encoded-bitgt)          |
+|         SM SIGNER         |             5F C1 22              | Secure Messaging<br/>Certificate Signer  | PUT: mgmt key<br/>GET: none | [Encoded SM cert signer](#encoded-sm-cert-signer) |
+|        PC REF DATA        |             5F C1 23              |     Pairing Code<br/>Reference Data      | PUT: mgmt key<br/>GET: none |         [Encoded PC Ref](#encoded-pc-ref)         |
 
 All the tags supported are one, two, or three bytes long. The APDU data contains the tag,
 each constructed as a TLV itself. That is, there is a DER TLV with a T of `5C`, and a V of
@@ -1199,7 +1199,7 @@ As specified in the PIV standard:
 53 33
    F0 15 (card identifier, fixed at 21 bytes)
       A0 00 00 01 16 FF 02
-      --16 random bytes--
+      --14 random bytes--
    F1 01
       21 (container version number)
    F2 01
@@ -1464,16 +1464,16 @@ encoded following the PIV specification.
 This feature, however, is not publicly available. It is only callable from inside the SDK.
 
 #### Table 5A: Yubico-defined GET DATA elements available upon manufacture
-|    Name     |   Tag    |    Meaning     | Authentication<br/>Required |                Data Returned                |
-| :---------: | :------: | :------------: | :-------------------------: | :-----------------------------------------: |
-| ATTESTATION | 5F FF 01 | Attestation cert |           (none)            | [Encoded certificate](#encoded-certificate) |
+|    Name     |   Tag    |    Meaning       | Authentication<br/>Required |                Data Returned                |
+| :---------: | :------: | :--------------: | :-------------------------: | :-----------------------------------------: |
+| ATTESTATION | 5F FF 01 | Attestation cert | PUT: mgmt key<br/>GET: none | [Encoded certificate](#encoded-certificate) |
 
 #### Table 5B: Yubico-defined GET DATA elements empty upon manufacture
-|           Name           |                Tag                |                     Meaning                     | Authentication<br/>Required |               Data Returned               |
-| :----------------------: | :-------------------------------: | :---------------------------------------------: | :-------------------------: | :---------------------------------------: |
-|        ADMIN DATA        |             5F FF 00              | PIV manager application<br/>administrative data |           (none)            | [Encoded admin data](#encoded-admin-data) |
-|          MSCMAP          |             5F FF 10              |             Microsoft container map             |           (none)            |             [MSCMAP](#mscmap)             |
-| MSROOTS1 to<br/>MSROOTS5 | 5F FF 11<br/>through<br/>5F FF 15 |              Microsoft root certs               |  management key to PUT</br> (none) to GET |            [MSROOTS](#msroots)            |
+|           Name           |                Tag                |                     Meaning                     | Authentication<br/>Required  |               Data Returned               |
+| :----------------------: | :-------------------------------: | :---------------------------------------------: | :--------------------------: | :---------------------------------------: |
+|        ADMIN DATA        |             5F FF 00              | PIV manager application<br/>administrative data |  PUT: mgmt key</br>GET: none | [Encoded admin data](#encoded-admin-data) |
+|          MSCMAP          |             5F FF 10              |             Microsoft container map             |  PUT: mgmt key</br>GET: none |             [MSCMAP](#mscmap)             |
+| MSROOTS1 to<br/>MSROOTS5 | 5F FF 11<br/>through<br/>5F FF 15 |              Microsoft root certs               |  PUT: mgmt key</br>GET: none |            [MSROOTS](#msroots)            |
 
 #### Encoded Admin Data
 

@@ -26,6 +26,12 @@ namespace Yubico.PlatformInterop
     // Use this class to find all the HIDs attached.
     // If we later on need libudev to do more than just find HIDs, we can update
     // this and/or add other classes.
+    // To use this class...
+    //  1. Instantiate
+    //  2. Call EnumerateAddMatchSubsystem (what are we looking for?)
+    //  3. Call EnumerateScanDevices (Scan for all the devices that match the
+    //  subsystem[s] specified in the AddMatch call)
+    //  4. Call GetLinuxHidDeviceList (what was found?)
     internal class LinuxUdevScan : LinuxUdev
     {
         private readonly LinuxUdevEnumerateSafeHandle _enumerateObject;
@@ -47,8 +53,8 @@ namespace Yubico.PlatformInterop
         public LinuxUdevScan()
             : base()
         {
-            _enumerateObject = (LinuxUdevEnumerateSafeHandle)ThrowIfFailedNull(
-                NativeMethods.udev_enumerate_new(_udevObject));
+            _enumerateObject = NativeMethods.udev_enumerate_new(_udevObject);
+            _ = ThrowIfFailedNull(_enumerateObject);
         }
 
         // C# version of udev_enumerate_add_match_subsystem
@@ -75,60 +81,35 @@ namespace Yubico.PlatformInterop
         public IEnumerable<LinuxHidDevice> GetLinuxHidDeviceList()
         {
             var returnValue = new List<LinuxHidDevice>();
-            IntPtr currentEntry = EnumerateListEntry();
+
+            // Get the first entry in the list.
+            // The return is a reference to an object that belongs to the
+            // udevEnumerateObject. We don't destroy it.
+            // A null return is valid.
+            IntPtr currentEntry = NativeMethods.udev_enumerate_get_list_entry(_enumerateObject);
 
             while (currentEntry != IntPtr.Zero)
             {
-                string currentPath = GetEntryName(currentEntry);
-                using LinuxUdevDeviceSafeHandle currentDevice = DeviceNewFromPath(currentPath);
-                string devnode = DeviceGetDevnode(currentDevice);
+                // Get the name associated with this entry. It is the path.
+                IntPtr namePtr = NativeMethods.udev_list_entry_get_name(currentEntry);
 
-                var linuxHid = new LinuxHidDevice(currentPath, devnode);
+                // Get a Device object based on the path.
+                using LinuxUdevDeviceSafeHandle currentDevice =
+                    NativeMethods.udev_device_new_from_syspath(_udevObject, Marshal.PtrToStringAnsi(namePtr));
+                _ = ThrowIfFailedNull(currentDevice);
+
+                var linuxHid = new LinuxHidDevice(currentDevice);
                 returnValue.Add(linuxHid);
 
-                currentEntry = GetNextEntry(currentEntry);
+                // Get the next entry in the list. As with a link list, it is
+                // possible to get the next entry from the previous.
+                // The return is a reference to an object that belongs to the
+                // udevEnumerateObject. We don't destroy it.
+                // A null return is valid.
+                currentEntry = NativeMethods.udev_list_entry_get_next(currentEntry);
             }
 
             return returnValue;
-        }
-
-        // Get the first entry in the list.
-        // The return is a reference to an object that belongs to the
-        // udevEnumerateObject. We don't destroy it.
-        // A null return is valid.
-        private IntPtr EnumerateListEntry() =>
-            NativeMethods.udev_enumerate_get_list_entry(_enumerateObject);
-
-        // Get the next entry in the list. As with a link list, it is possible to
-        // get the next entry from the previous.
-        // The return is a reference to an object that belongs to the
-        // udevEnumerateObject. We don't destroy it.
-        // A null return is valid.
-        private static IntPtr GetNextEntry(IntPtr previousEntry) =>
-            NativeMethods.udev_list_entry_get_next(previousEntry);
-
-        // Get the name associated with this entry. It is the path.
-        private static string GetEntryName(IntPtr currentEntry)
-        {
-            IntPtr namePtr = NativeMethods.udev_list_entry_get_name(currentEntry);
-            return Marshal.PtrToStringAnsi(namePtr);
-        }
-
-        // Build a new Device object from the path.
-        // This is a new object and the caller must destroy it. Hence, it is
-        // returned as a SafeHandle.
-        private LinuxUdevDeviceSafeHandle DeviceNewFromPath(string path)
-        {
-            return (LinuxUdevDeviceSafeHandle)ThrowIfFailedNull(
-                NativeMethods.udev_device_new_from_syspath(_udevObject, path));
-        }
-
-        // Get the devnode from the device.
-        // This is what will be used by the HIDRAW library.
-        private static string DeviceGetDevnode(LinuxUdevDeviceSafeHandle udevDevice)
-        {
-            IntPtr devnodePtr = NativeMethods.udev_device_get_devnode(udevDevice);
-            return Marshal.PtrToStringAnsi(devnodePtr);
         }
 
         protected override void Dispose(bool disposing)

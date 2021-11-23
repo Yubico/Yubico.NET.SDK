@@ -46,5 +46,6 @@ The SDK is designed to enable developers to accomplish common YubiKey OTP applic
 - [Program a slot with an HMAC-SHA1 OATH-HOTP credential](xref:OtpProgramHOTP)
 - [Retrieve a slot’s status](xref:OtpRetrieveSlotStatus)
 - [Configure NDEF to use a slot to generate an OTP](xref:OtpConfigureNDEF)
+- [Read information from an NDEF tag](xref:OtpReadNDEF)
 - [Update slot settings](xref:OtpUpdateSlot)
 - [Swap slot configurations](xref:OtpSwapSlot)

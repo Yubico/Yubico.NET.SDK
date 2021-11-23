@@ -295,6 +295,15 @@ namespace Yubico.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to It is not possible to restart listening for device updates after stopping..
+        /// </summary>
+        internal static string ListenRestartNotAllowed {
+            get {
+                return ResourceManager.GetString("ListenRestartNotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Unable to open connection to NFC device. The tag may have been removed..
         /// </summary>
         internal static string NfcConnectionFailed {

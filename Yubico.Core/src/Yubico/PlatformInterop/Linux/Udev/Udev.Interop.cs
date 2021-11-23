@@ -19,6 +19,9 @@ namespace Yubico.PlatformInterop
 {
     internal static partial class NativeMethods
     {
+        internal const string UdevSubsystemName = "hidraw";
+        internal const string UdevMonitorName = "udev";
+
         // Returns a new SafeHandle. If it fails, the returnValue.IsInvalid will
         // be true.
         // The C function returns a new object that is the responsibility of the
@@ -40,7 +43,7 @@ namespace Yubico.PlatformInterop
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr udev_unref(IntPtr udevObject);
 
-        // Returns a new Ptr. If it fails, the returnValue.IsInvalid will
+        // Returns a new Handle. If it fails, the returnValue.IsInvalid will
         // be true.
         // The input is a LinuxUdevSafeHandle, which was the return value from
         // udev_new.
@@ -52,7 +55,7 @@ namespace Yubico.PlatformInterop
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern LinuxUdevEnumerateSafeHandle udev_enumerate_new(LinuxUdevSafeHandle udevObject);
 
-        // "Destroy" the object.This function always returns null, so it is
+        // "Destroy" the object. This function always returns null, so it is
         // possible to call
         //   enumerateObject = udev_enumerate_unref(enumerateObject);
         // This will be called from within the SafeHandle class, but should be
@@ -158,5 +161,79 @@ namespace Yubico.PlatformInterop
         [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_get_devnode")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr udev_device_get_devnode(LinuxUdevDeviceSafeHandle deviceObject);
+
+        // Get the path from the device.
+        // This is what will be used by the HIDRAW library.
+        // The return value is a string, but in the form of a pointer to ASCII
+        // bytes. Hence, to convert the result into a C# string object, use
+        //   Marshal.PtrToStringAnsi
+        // The return is a reference to an object that belongs to the
+        // deviceObject. We don't destroy it. Hence, it is an IntPtr, not a
+        // SafeHandle.
+        // The C signature is
+        //   const char *udev_device_get_syspath(struct udev_device *udev_device);
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_get_syspath")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern IntPtr udev_device_get_syspath(LinuxUdevDeviceSafeHandle deviceObject);
+
+        // Gets a string specifying what the latest action was: "add", "remove",
+        // and others.
+        // The C signature is
+        //   const char *udev_device_get_action(struct udev_device *udev_device);
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_device_get_action")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern IntPtr udev_device_get_action(LinuxUdevDeviceSafeHandle deviceObject);
+
+        // Returns a new Handle. If it fails, the returnValue.IsInvalid will
+        // be true.
+        // The input is a LinuxUdevSafeHandle, which was the return value from
+        // udev_new.
+        // The C function returns a new object that is the responsibility of the
+        // caller to destroy, which is why this is returned as a SafeHandle.
+        // The C signature is
+        //   struct udev_monitor * udev_monitor_new_from_netlink(
+        //       struct udev *udev, const char *name);
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_monitor_new_from_netlink")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern LinuxUdevMonitorSafeHandle udev_monitor_new_from_netlink(
+            LinuxUdevSafeHandle udevObject, string name);
+
+        // "Destroy" the object.
+        // This will be called from within the SafeHandle class, but should be
+        // called by no one else.
+        // The C signature is
+        //   void udev_monitor_unref(struct udev_monitor *udev_monitor);
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_unref")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern void udev_monitor_unref(IntPtr monitorObject);
+
+        // Set the object to monitor devices of the given subsystem and devtype
+        // (devtype can be NULL). This only says, "When you monitor for devices,
+        // you will monitor for this type of device."
+        // If the result is < 0, error.
+        // The C signature is
+        //   int udev_monitor_filter_add_match_subsystem_devtype(
+        //       struct udev_monitor *udev_monitor, const char *subsystem, const char *devtype);
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_monitor_filter_add_match_subsystem_devtype")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern int udev_monitor_filter_add_match_subsystem_devtype(
+            LinuxUdevMonitorSafeHandle monitorObject, string subsystem, string? devtype);
+
+        // Set the monitor object to be able to receive reports.
+        // If the result is < 0, error.
+        // The C signature is
+        //   int udev_monitor_enable_receiving(struct udev_monitor *udev_monitor);
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_enable_receiving")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern int udev_monitor_enable_receiving(LinuxUdevMonitorSafeHandle monitorObject);
+
+        // Get the latest report. If there has been a change, the function will
+        // return a new Device, the device that has changed. If there has been no
+        // change, this will return NULL.
+        // The C signature is
+        //   struct udev_device *udev_monitor_receive_device(struct udev_monitor *udev_monitor);
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_receive_device")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern LinuxUdevDeviceSafeHandle udev_monitor_receive_device (LinuxUdevMonitorSafeHandle monitorObject);
     }
 }

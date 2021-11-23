@@ -20,3 +20,14 @@ limitations under the License. -->
 # Smart card transport
 
 Content coming soon.
+
+## Linux smart card support
+
+In order to use the SDK to contact a YubiKey on a Linux device, you need to install the
+"pcsclite" library. This is an Open Source implementation of PC/SC (personal computers/
+smart card), a specification for integrating smart cards into computer environments. If it
+is not already installed on your Linux device, you will likely run a command such as
+
+```
+$ apt-get install libpcsclite1
+```

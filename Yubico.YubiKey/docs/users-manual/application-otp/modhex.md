@@ -37,22 +37,23 @@ For Yubico OTPs and OATH-HOTPs, the ciphertext generated post-password encryptio
 
 To send the password to a host device over USB/Lightning, the ModHex characters are then translated into their corresponding HID usage IDs so they can be handled by the host device as keyboard input.
 
-Yubico OTPs use ModHex encoding by default. OATH-HOTPs can be configured so that the [first byte](xref:Yubico.YubiKey.Otp.OtpSettings-1.OathFixedModhex1), [first two bytes](xref:Yubico.YubiKey.Otp.OtpSettings-1.UseOathFixedModhex2), or [all bytes](xref:Yubico.YubiKey.Otp.OtpSettings-1.UseOathFixedModhex.html#Yubico_YubiKey_Otp_OtpSettings_1_UseOathFixedModhex_System_Boolean_) of the token identifier use ModHex encoding.
+Yubico OTPs use ModHex encoding by default. OATH-HOTPs can be configured so that the [first byte](xref:Yubico.YubiKey.Otp.OtpSettings-1.OathFixedModhex1), [first two bytes](xref:Yubico.YubiKey.Otp.OtpSettings-1.UseOathFixedModhex2), or [all bytes](xref:Yubico.YubiKey.Otp.OtpSettings-1.UseOathFixedModhex) of the token identifier use ModHex encoding.
 
 ## ModHex as a static password keyboard layout
 
 When [configuring an OTP application slot with a static password](xref:OtpProgramStaticPassword), you have two options:
 
-1. Generate a random password of a specified length to be used as the static password. Or,
+1. [Generate](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.GeneratePassword) a random password of a specified length to be used as the static password.
 
-1. Manually set the static password to something of your choosing.
+1. [Set](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.SetPassword) the static password to something of your choosing.
 
-In either situation, the [keyboard layout](xref:Yubico.Core.Devices.Hid.KeyboardLayout) must be specified. 
+Generated passwords use ModHex characters by default. User-defined passwords must specify the [keyboard layout](xref:Yubico.Core.Devices.Hid.KeyboardLayout) that the host device is configured with (e.g. English, German, etc) when they are set so the YubiKey sends the correct HID usage IDs.
 
+If you can’t be certain which keyboard layout will be configured on all devices that the YubiKey will be used with, you will want to create a password that only contains ModHex characters *and* select the ModHex layout.
 
-When [configuring an OTP application slot with a static password](xref:OtpProgramStaticPassword), the YubiKey must be told which [keyboard layout](xref:Yubico.Core.Devices.Hid.KeyboardLayout) the host device is configured with (e.g. English, German, etc) so that it translates the characters of the password into the correct HID usage IDs.
+But what does the ModHex layout actually do if the password is manually set using ModHex characters? Couldn't you use any of the keyboard layouts since the HID usage IDs for ModHex characters will be the same across all layouts?
 
-If you can’t be certain which keyboard layout will be configured on all devices that the YubiKey will be used with, ModHex is the safest layout to use. The downside of using the ModHex layout is that you will be limited to passwords containing upper and lower case versions of the ModHex characters.
+Technically, yes, you could select a non-ModHex layout. However, setting a static password is not immune to user error. The ModHex layout is useful in that it essentially acts as a filter. If the user-defined password contains non-ModHex characters, and the layout is set to ModHex, a System.InvalidOperationException will be thrown.
 
 ## ModHex encoding example
 

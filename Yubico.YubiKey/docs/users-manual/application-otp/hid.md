@@ -79,7 +79,7 @@ To send an uppercase "A" to a host device, the YubiKey must send the following u
 
 A major challenge is that HID usage IDs correspond to physical locations on a keyboard, not the characters themselves. For example, on an English language keyboard, the top row of keys spells QWERTY, and on a German language keyboard, those same keys spell QWERTZ. However, the "Y" key on the English keyboard and the "Z" key on the German keyboard are represented by the same HID usage ID of 28 (0x1c).
 
-Therefore, when [programming a YubiKey slot with a static password](xref:OtpProgramStaticPassword), the YubiKey must be told which [keyboard layout](xref:Yubico.Core.Devices.Hid.KeyboardLayout) the host device is configured with in order to send the correct HID usage IDs for your static password characters.
+Therefore, when [programming a YubiKey slot with a static password](xref:OtpProgramStaticPassword), the SDK must be told which [keyboard layout](xref:Yubico.Core.Devices.Hid.KeyboardLayout) the host device is configured with in order to send the correct HID usage IDs for your static password characters.
 
 > [!NOTE]
 > You can configure your keyboard layout in Windows regardless of the actual keyboard you have.

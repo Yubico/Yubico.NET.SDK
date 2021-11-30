@@ -76,7 +76,7 @@ namespace Yubico.Core.Devices.Hid
             int deviceEntry = 0;
             try
             {
-                IntPtr matchingDictionary = IORegistryEntryIDMatching(_entryId);
+                IntPtr matchingDictionary = IORegistryEntryIDMatching((ulong)_entryId);
                 deviceEntry = IOServiceGetMatchingService(0, matchingDictionary);
 
                 if (deviceEntry == 0)

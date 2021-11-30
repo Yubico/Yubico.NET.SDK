@@ -30,16 +30,21 @@ namespace Yubico.PlatformInterop
                         @link kIOHIDManagerOptionNone @/link (or 0).
             @result     Returns a new IOHIDManagerRef.
         */
+        // Note that the DefaultDllImportSearchPaths attribute is a security best
+        // practice on the Windows platform (and required by our analyzer
+        // settings). It does not currently have any effect on platforms other
+        // than Windows, but is included because of the analyzer and in the hope
+        // that it will be supported by these platforms in the future.
         [DllImport(Libraries.IOKitFramework)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         internal static extern IntPtr IOHIDManagerCreate(IntPtr allocator, int options); /* OS >= 10.5 */
 
         /*! @function   IOHIDManagerSetDeviceMatching
             @abstract   Sets matching criteria for device enumeration.
-            @discussion Matching keys are prefixed by kIOHIDDevice and declared in 
+            @discussion Matching keys are prefixed by kIOHIDDevice and declared in
                         <IOKit/hid/IOHIDKeys.h>.  Passing a NULL dictionary will result
                         in all devices being enumerated. Any subsequent calls will cause
-                        the hid manager to release previously enumerated devices and 
+                        the hid manager to release previously enumerated devices and
                         restart the enumerate process using the revised criteria.  If
                         interested in multiple, specific device classes, please defer to
                         using IOHIDManagerSetDeviceMatchingMultiple.
@@ -63,7 +68,7 @@ namespace Yubico.PlatformInterop
         /*!
 	        @function   IOHIDDeviceCreate
 	        @abstract   Creates an element from an io_service_t.
-            @discussion The io_service_t passed in this method must reference an object 
+            @discussion The io_service_t passed in this method must reference an object
                         in the kernel of type IOHIDDevice.
             @param      allocator Allocator to be used during creation.
             @param      service Reference to service object in the kernel.
@@ -162,7 +167,7 @@ namespace Yubico.PlatformInterop
             @discussion If the IOHIDDevice references an object in the kernel, this is
                         used to get the io_service_t for that object.
             @param      device Reference to an IOHIDDevice.
-            @result     Returns the io_service_t if the IOHIDDevice has one, or 
+            @result     Returns the io_service_t if the IOHIDDevice has one, or
                         MACH_PORT_NULL if it does not.
          */
         [DllImport(Libraries.IOKitFramework)]
@@ -190,16 +195,16 @@ namespace Yubico.PlatformInterop
             long reportLength);
 
         /*! @function   IOHIDDeviceRegisterInputReportCallback
-            @abstract   Registers a callback to be used when an input report is issued 
+            @abstract   Registers a callback to be used when an input report is issued
                         by the device.
-            @discussion An input report is an interrupt driver report issued by the 
+            @discussion An input report is an interrupt driver report issued by the
                         device.
                         If a dispatch queue is set, this call must occur before activation.
             @param      device Reference to an IOHIDDevice.
             @param      report Pointer to pre-allocated buffer in which to copy inbound
                         report data.
             @param      reportLength Length of pre-allocated buffer.
-            @param      callback Pointer to a callback method of type 
+            @param      callback Pointer to a callback method of type
                         IOHIDReportCallback.
             @param      context Pointer to data to be passed to the callback.
         */
@@ -219,9 +224,9 @@ namespace Yubico.PlatformInterop
                         this device with the run loop is necessary before making use of
                         any asynchronous APIs.
             @param      device Reference to an IOHIDDevice.
-            @param      runLoop RunLoop to be used when scheduling any asynchronous 
+            @param      runLoop RunLoop to be used when scheduling any asynchronous
                         activity.
-            @param      runLoopMode Run loop mode to be used when scheduling any 
+            @param      runLoopMode Run loop mode to be used when scheduling any
                         asynchronous activity.
         */
         [DllImport(Libraries.IOKitFramework)]
@@ -235,9 +240,9 @@ namespace Yubico.PlatformInterop
             @abstract   Unschedules HID device with run loop.
             @discussion Formally disassociates device with client's run loop.
             @param      device Reference to an IOHIDDevice.
-            @param      runLoop RunLoop to be used when unscheduling any asynchronous 
+            @param      runLoop RunLoop to be used when unscheduling any asynchronous
                         activity.
-            @param      runLoopMode Run loop mode to be used when unscheduling any 
+            @param      runLoopMode Run loop mode to be used when unscheduling any
                         asynchronous activity.
         */
         [DllImport(Libraries.IOKitFramework)]

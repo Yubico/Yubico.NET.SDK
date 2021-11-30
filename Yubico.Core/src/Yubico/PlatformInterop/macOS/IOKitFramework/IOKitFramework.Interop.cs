@@ -145,6 +145,11 @@ namespace Yubico.PlatformInterop
             @discussion All objects returned by IOKitLib should be released with this function when access to them is no longer needed. Using the object after it has been released may or may not return an error, depending on how many references the task has to the same object in the kernel.
             @param object The IOKit object to release.
             @result A kern_return_t error code. */
+        // Note that the DefaultDllImportSearchPaths attribute is a security best
+        // practice on the Windows platform (and required by our analyzer
+        // settings). It does not currently have any effect on platforms other
+        // than Windows, but is included because of the analyzer and in the hope
+        // that it will be supported by these platforms in the future.
         [DllImport(Libraries.IOKitFramework)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         internal static extern kern_return_t IOObjectRelease(int self);
@@ -166,7 +171,7 @@ namespace Yubico.PlatformInterop
             @result The matching dictionary created, is returned on success, or zero on failure. The dictionary is commonly passed to IOServiceGetMatchingServices or IOServiceAddNotification which will consume a reference, otherwise it should be released with CFRelease by the caller. */
         [DllImport(Libraries.IOKitFramework)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        internal static extern IntPtr IORegistryEntryIDMatching(long entryID); /* Returns retained */
+        internal static extern IntPtr IORegistryEntryIDMatching(ulong entryID); /* Returns retained */
 
         /*!
             @function IOServiceGetMatchingService

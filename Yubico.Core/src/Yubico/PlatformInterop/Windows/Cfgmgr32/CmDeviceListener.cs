@@ -45,21 +45,37 @@ namespace Yubico.PlatformInterop
         {
             InterfaceClass = classGuid;
 
-            var pFilter = new CM_NOTIFY_FILTER
-            {
-                cbSize = 416, // Magic number from C land
-                ClassGuid = classGuid,
-                FilterType = CM_NOTIFY_FILTER_TYPE.DEVINTERFACE
-            };
+            byte[] zeroBytes = new byte[NativeMethods.CmNotifyFilterSize];
+            byte[] guidBytes = classGuid.ToByteArray();
 
-            CmErrorCode errorCode = CM_Register_Notification(ref pFilter, IntPtr.Zero, OnEventReceived, out _notificationContext);
-            if (errorCode != CmErrorCode.CR_SUCCESS)
+            IntPtr pFilter = Marshal.AllocHGlobal(NativeMethods.CmNotifyFilterSize);
+
+            try
             {
-                throw new PlatformApiException(
-                    "CONFIG_RET",
-                    (int)errorCode,
-                    $"Failed to register for notifications on the device interface class {classGuid}."
-                    );
+                // Set all the bytes to zero.
+                Marshal.Copy(zeroBytes, 0, pFilter, zeroBytes.Length);
+                Marshal.WriteInt32(pFilter, NativeMethods.OffsetCbSize, NativeMethods.CmNotifyFilterSize);
+                Marshal.WriteInt32(pFilter, NativeMethods.OffsetFlags, 0);
+                Marshal.WriteInt32(pFilter, NativeMethods.OffsetFilterType, (int)CM_NOTIFY_FILTER_TYPE.DEVINTERFACE);
+                Marshal.WriteInt32(pFilter, NativeMethods.OffsetReserved, 0);
+                for (int index = 0; index < guidBytes.Length; index++)
+                {
+                    Marshal.WriteByte(pFilter, NativeMethods.OffsetGuidData1 + index, guidBytes[index]);
+                }
+
+                CmErrorCode errorCode = CM_Register_Notification(pFilter, IntPtr.Zero, OnEventReceived, out _notificationContext);
+                if (errorCode != CmErrorCode.CR_SUCCESS)
+                {
+                    throw new PlatformApiException(
+                        "CONFIG_RET",
+                        (int)errorCode,
+                        $"Failed to register for notifications on the device interface class {classGuid}."
+                        );
+                }
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(pFilter);
             }
         }
 

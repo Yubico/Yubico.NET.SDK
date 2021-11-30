@@ -83,6 +83,33 @@ namespace Yubico.PlatformInterop
             _output.WriteLine("    eventArgs.Path = " + eventArgs.Device.Path);
         }
 
+        [Fact]
+        public void CmListen_Succeeds()
+        {
+            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
+            Assert.NotNull(devices);
+
+            using var cmListener = new CmDeviceListener(CmInterfaceGuid.Hid);
+            Assert.NotNull(cmListener);
+            cmListener.DeviceArrived += HandleEventFromCm;
+            cmListener.DeviceRemoved += HandleEventFromCm;
+
+            int choice;
+            do
+            {
+                choice = RunMenu();
+                _output.WriteLine("  choice = " + choice);
+            } while (choice != 0);
+
+            devices = HidDevice.GetHidDevices();
+            Assert.NotNull(devices);
+        }
+
+        private void HandleEventFromCm(object? sender, CmDeviceEventArgs eventArgs)
+        {
+            _output.WriteLine("    eventArgs.Path = " + eventArgs.DeviceInterfacePath);
+        }
+
         // This simulates a menu. There's no ReadLine (or some such) in XUnit, so
         // run this in debug mode to be able to pause execution so we can insert
         // and remove YubiKeys to watch what happens.

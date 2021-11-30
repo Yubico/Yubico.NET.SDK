@@ -60,6 +60,11 @@ namespace Yubico.PlatformInterop
             O_NONBLOCK = 0x800,
         }
 
+        // Note that the DefaultDllImportSearchPaths attribute is a security best
+        // practice on the Windows platform (and required by our analyzer
+        // settings). It does not currently have any effect on platforms other
+        // than Windows, but is included because of the analyzer and in the hope
+        // that it will be supported by these platforms in the future.
         [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "open")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern LinuxFileSafeHandle open(string filename, OpenFlags flag);

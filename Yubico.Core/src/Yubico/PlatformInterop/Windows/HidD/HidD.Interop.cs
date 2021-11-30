@@ -61,6 +61,11 @@ namespace Yubico.PlatformInterop
 
         #region P/Invoke DLL Imports
 
+        // Note that the DefaultDllImportSearchPaths attribute is a security best
+        // practice on the Windows platform (and required by our analyzer
+        // settings). It does not currently have any effect on platforms other
+        // than Windows, but is included because of the analyzer and in the hope
+        // that it will be supported by these platforms in the future.
         [DllImport(Libraries.Hid, SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern bool HidD_FreePreparsedData(

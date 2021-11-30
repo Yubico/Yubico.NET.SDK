@@ -28,6 +28,11 @@ namespace Yubico.PlatformInterop
         // caller to destroy, which is why this is returned as a SafeHandle.
         // The C signature is
         //   struct udev *udev_new(void);
+        // Note that the DefaultDllImportSearchPaths attribute is a security best
+        // practice on the Windows platform (and required by our analyzer
+        // settings). It does not currently have any effect on platforms other
+        // than Windows, but is included because of the analyzer and in the hope
+        // that it will be supported by these platforms in the future.
         [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_new")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern LinuxUdevSafeHandle udev_new();

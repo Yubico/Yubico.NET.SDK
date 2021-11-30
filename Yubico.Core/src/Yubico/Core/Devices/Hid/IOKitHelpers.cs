@@ -55,8 +55,8 @@ namespace Yubico.Core.Devices.Hid
 
                 IntPtr propertyRef = IOHIDDeviceGetProperty(device, stringRef);
 
-                long propertyType = CFGetTypeID(propertyRef);
-                long numberType = CFNumberGetTypeID();
+                ulong propertyType = CFGetTypeID(propertyRef);
+                ulong numberType = CFNumberGetTypeID();
                 if (propertyType != numberType)
                 {
                     throw new PlatformApiException(

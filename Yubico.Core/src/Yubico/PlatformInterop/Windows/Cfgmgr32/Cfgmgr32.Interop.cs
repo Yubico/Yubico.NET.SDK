@@ -165,6 +165,19 @@ namespace Yubico.PlatformInterop
 
         #region Structures
 
+        // These are the values that define the CM_NOTIFY_FILTER in the Windows
+        // cfgmgr32 library.
+        internal const int CmNotifyFilterSize = 416;
+        internal const int OffsetCbSize = 0;
+        internal const int OffsetFlags = 4;
+        internal const int OffsetFilterType = 8;
+        internal const int OffsetReserved = 12;
+        internal const int OffsetGuidData1 = 16;
+        internal const int OffsetGuidData2 = 20;
+        internal const int OffsetGuidData3 = 22;
+        internal const int OffsetGuidData4 = 24;
+        internal const int LengthGuidData4 = 8;
+
         [StructLayout(LayoutKind.Sequential)] // May need to be Explicit
         internal struct CM_NOTIFY_FILTER
         {
@@ -194,6 +207,11 @@ namespace Yubico.PlatformInterop
 
         #region P/Invoke DLL Imports
 
+        // Note that the DefaultDllImportSearchPaths attribute is a security best
+        // practice on the Windows platform (and required by our analyzer
+        // settings). It does not currently have any effect on platforms other
+        // than Windows, but is included because of the analyzer and in the hope
+        // that it will be supported by these platforms in the future.
         [DllImport(Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Get_Child")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         private static extern CmErrorCode CM_Get_Child(
@@ -319,7 +337,7 @@ namespace Yubico.PlatformInterop
         [DllImport(Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Register_Notification")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern CmErrorCode CM_Register_Notification(
-            ref CM_NOTIFY_FILTER pFilter,
+            IntPtr pFilter,
             IntPtr pContext,
             CM_NOTIFY_CALLBACK pCM_NOTIFY_CALLBACK,
             out IntPtr pNotifyContext

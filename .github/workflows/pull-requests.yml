@@ -30,7 +30,6 @@ jobs:
     # on a single host operating system. This is because we utilize cross-
     # build functionality of the dotnet build system.
     runs-on: windows-latest
-
     # Build both Debug and ReleaseWithDocs configurations. Most people are probably building 'Debug' the most often. We
     # should be sure that Release also builds, and that our documentation also compiles successfully.
     strategy:

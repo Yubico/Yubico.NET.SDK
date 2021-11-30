@@ -26,7 +26,10 @@ namespace Yubico.PlatformInterop
 
     internal sealed class SafeWindowsLibraryHandle : SafeLibraryHandle
     {
-        private SafeWindowsLibraryHandle() : base()
+        // CA1419: Provide a parameterless constructor that is as visible as the
+        // containing type for concrete types derived from
+        // 'System.Runtime.InteropServices.SafeHandle'
+        public SafeWindowsLibraryHandle() : base()
         {
 
         }
@@ -36,7 +39,10 @@ namespace Yubico.PlatformInterop
 
     internal sealed class SafeMacOSLibraryHandle : SafeLibraryHandle
     {
-        private SafeMacOSLibraryHandle() : base()
+        // CA1419: Provide a parameterless constructor that is as visible as the
+        // containing type for concrete types derived from
+        // 'System.Runtime.InteropServices.SafeHandle'
+        public SafeMacOSLibraryHandle() : base()
         {
 
         }
@@ -46,7 +52,10 @@ namespace Yubico.PlatformInterop
 
     internal sealed class SafeLinuxLibraryHandle : SafeLibraryHandle
     {
-        private SafeLinuxLibraryHandle() : base()
+        // CA1419: Provide a parameterless constructor that is as visible as the
+        // containing type for concrete types derived from
+        // 'System.Runtime.InteropServices.SafeHandle'
+        public SafeLinuxLibraryHandle() : base()
         {
 
         }

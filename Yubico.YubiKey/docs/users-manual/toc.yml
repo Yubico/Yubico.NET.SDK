@@ -58,7 +58,7 @@
       items:
       - name: Slots
         href: application-otp/slots.md
-      - name: HID
+      - name: YubiKey-host device communication
         href: application-otp/hid.md
       - name: Modified hexadecimal encoding (ModHex)
         href: application-otp/modhex.md

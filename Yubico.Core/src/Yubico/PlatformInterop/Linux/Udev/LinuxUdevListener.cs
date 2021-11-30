@@ -202,14 +202,14 @@ namespace Yubico.PlatformInterop
             // not, ignore this change.
             IntPtr actionPtr = NativeMethods.udev_device_get_action(udevDevice);
             string action = Marshal.PtrToStringAnsi(actionPtr);
-            if (string.Compare(action, "add", StringComparison.Ordinal) == 0)
+            if (string.Equals(action, "add", StringComparison.Ordinal))
             {
                 if (CardArrival != null)
                 {
                     CardArrival.Invoke(this, eventArg);
                 }
             }
-            else if (string.Compare(action, "remove", StringComparison.Ordinal) == 0)
+            else if (string.Equals(action, "remove", StringComparison.Ordinal))
             {
                 if (CardRemoval != null)
                 {

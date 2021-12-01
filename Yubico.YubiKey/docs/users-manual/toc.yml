@@ -144,6 +144,8 @@
     href: application-piv/attestation.md
   - name: Building a cert request
     href: application-piv/cert-request.md
+  - name: Maximum certificate sizes
+    href: application-piv/cert-size.md
   - name: ECDSA signatures
     href: application-piv/ecdsa-signatures.md
   - name: EC Diffie-Hellman Key Agreement

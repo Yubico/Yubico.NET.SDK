@@ -102,20 +102,10 @@ limitations under the License. -->
 
   <ItemGroup Label="Package references specific to Yubico.YubiKey.dll">
 
-    <PackageReference
-      Include="docfx.console"
-      Condition="$(Configuration.Contains('WithDocs'))"
-      Version="$(DocFxVersion)"
-      PrivateAssets="all"
-      IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
+    <PackageReference Include="docfx.console" Condition="$(Configuration.Contains('WithDocs'))" Version="$(DocFxVersion)" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
 
     <!-- This is a DocFX plugin and tempate separates class and struct members into their own documentation pages. -->
-    <PackageReference
-      Include="memberpage"
-      Version="$(DocFxVersion)"
-      PrivateAssets="all"
-      IncludeAssets="contentfiles"
-      GeneratePathProperty="true" />
+    <PackageReference Include="memberpage" Version="$(DocFxVersion)" PrivateAssets="all" IncludeAssets="contentfiles" GeneratePathProperty="true" />
 
     <PackageReference Include="Nullable" Version="1.3.0">
       <PrivateAssets>all</PrivateAssets>

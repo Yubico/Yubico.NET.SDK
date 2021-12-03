@@ -16,6 +16,25 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.1.x Releases
+
+### 1.1.0
+
+Release date: December 3rd, 2021
+
+This release marks the beginning of support for Linux platforms. The primary target for testing has been
+against Ubuntu Linux 20.04 LTS and 21.10. Other Ubuntu-based distributions should work as well. Additional Linux
+platforms may work based on their [ABI](https://en.wikipedia.org/wiki/Application_binary_interface) compatibility
+with Ubuntu. Further distributions will be added to the supported list once thorough testing on those platforms
+has been completed.
+
+Limited smart card only support may be present for additional distributions, as they depend on the
+PCSC-lite library.
+
+Some symlinks may need to be present in order for the .NET runtime to find the appropriate system
+libraries (such as pcsc-lite, udev, etc.) Information about how to create these links can be found
+on [this page](xref:YubiKeyTransportHIDKeyboard).
+
 ## 1.0.x Releases
 
 ### 1.0.2

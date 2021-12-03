@@ -48,5 +48,15 @@ namespace Yubico.YubiKey
         /// The YubiKey is a dual-port USB-C and Apple Lightning connector device.
         /// </summary>
         UsbCLightning = 5,
+
+        /// <summary>
+        /// The YubiKey is a USB-A key-chain device with a biometric (fingerprint) sensor.
+        /// </summary>
+        UsbABiometricKeychain = 6,
+
+        /// <summary>
+        /// The YubiKey is a USB-C key-chain device with a biometric (fingerprint) sensor.
+        /// </summary>
+        UsbCBiometricKeychain = 7,
     }
 }

@@ -35,12 +35,12 @@ Static passwords can be either randomly generated or manually set by a user. Bot
 
 ### Generated passwords
 
-The [GeneratePassword()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.GeneratePassword(System.Memory<System.Char>)) method allows you to generate a random password of a specified length (up to 38 characters) when configuring a slot with `ConfigureStaticPassword()`. Generated passwords use the [ModHex](xref:OtpModhex) character set, meaning that each character of the static password will be one of the 16 ModHex characters. This ensures that the generated password will be interpreted correctly by host devices, regardless of which keyboard layout they are configured with (e.g. English, German, etc).
+The [GeneratePassword()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.GeneratePassword%28System.Memory%7BSystem.Char%7D%29) method allows you to generate a random password of a specified length (up to 38 characters) when configuring a slot with `ConfigureStaticPassword()`. Generated passwords use the [ModHex](xref:OtpModhex) character set, meaning that each character of the static password will be one of the 16 ModHex characters. This ensures that the generated password will be interpreted correctly by host devices, regardless of which keyboard layout they are configured with (e.g. English, German, etc).
 
 If a slot has already been configured with a generated static password, the password may be updated to a new randomly generated password without having to use client software (as long as the [AllowManualUpdate()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.AllowManualUpdate(System.Boolean)) boolean is set to `True`). For more information, see [How to manually update a generated static password](xref:OtpUpdateStaticPassword).
 
 ### Set passwords
 
-The [SetPassword()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.SetPassword(System.ReadOnlyMemory<System.Char>)) method allows you to set the static password to anything of your choosing (up to 38 characters in length).
+The [SetPassword()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.SetPassword%28System.ReadOnlyMemory%7BSystem.Char%7D%29) method allows you to set the static password to anything of your choosing (up to 38 characters in length).
 
 Unlike `GeneratePassword()`, any key may be used as part of the password (including uppercase letters or other modified characters). However, you must specify the host device's [keyboard layout](xref:Yubico.Core.Devices.Hid.KeyboardLayout), as that determines which HID usage IDs will be stored on the YubiKey (HID usage IDs for some characters can vary across different keyboard layouts). If your password contains characters that are not present in your chosen keyboard layout, a `System.InvalidOperationException` will be thrown.

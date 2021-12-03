@@ -14,7 +14,8 @@
 
 using System;
 using Yubico.Core.Iso7816;
-
+// Feature hold-back
+#if false
 namespace Yubico.PlatformInterop
 {
     /// <summary>
@@ -50,3 +51,4 @@ namespace Yubico.PlatformInterop
         }
     }
 }
+#endif

@@ -18,6 +18,9 @@ using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
 using System;
 
+// Feature hold-back
+#if false
+
 namespace Yubico.YubiKey
 {
     /// <summary>
@@ -69,3 +72,4 @@ namespace Yubico.YubiKey
         private static void OnDeviceRemoved(YubiKeyDeviceEventArgs e) => DeviceRemovedEvent?.Invoke(typeof(YubiKeyDevice), e);
     }
 }
+#endif

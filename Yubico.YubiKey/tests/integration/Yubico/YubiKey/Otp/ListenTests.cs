@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Feature hold-back
+#if false
 using System;
 using System.Collections.Generic;
 using Yubico.Core.Devices.Hid;
@@ -132,3 +134,4 @@ namespace Yubico.PlatformInterop
         }
     }
 }
+#endif

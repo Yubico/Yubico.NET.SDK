@@ -21,6 +21,8 @@ using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Iso7816;
 
+// Feature hold-back
+#if false
 namespace Yubico.YubiKey
 {
     internal class TestSmartCardDevice : ISmartCardDevice
@@ -334,3 +336,4 @@ namespace Yubico.YubiKey
         }
     }
 }
+#endif

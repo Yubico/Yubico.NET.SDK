@@ -15,9 +15,6 @@
 using System;
 using Yubico.PlatformInterop;
 
-// Feature hold-back
-#if false
-
 namespace Yubico.YubiKey.TestApp.Plugins
 {
     internal class SCardListenerPlugin : PluginBase
@@ -54,5 +51,3 @@ namespace Yubico.YubiKey.TestApp.Plugins
         }
     }
 }
-
-#endif

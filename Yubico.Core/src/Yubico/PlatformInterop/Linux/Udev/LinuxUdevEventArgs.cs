@@ -14,8 +14,7 @@
 
 using System;
 using Yubico.Core.Devices.Hid;
-// Feature hold-back
-#if false
+
 namespace Yubico.PlatformInterop
 {
     /// <summary>
@@ -35,4 +34,3 @@ namespace Yubico.PlatformInterop
         }
     }
 }
-#endif

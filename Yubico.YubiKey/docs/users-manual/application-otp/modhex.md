@@ -37,7 +37,7 @@ For Yubico OTPs and OATH-HOTPs, the ciphertext generated post-password encryptio
 
 To send the password to a host device over USB/Lightning, the ModHex characters are then translated into their corresponding HID usage IDs so they can be handled by the host device as keyboard input.
 
-Yubico OTPs use ModHex encoding by default. OATH-HOTPs can be configured so that the [first byte](xref:Yubico.YubiKey.Otp.OtpSettings-1.OathFixedModhex1), [first two bytes](xref:Yubico.YubiKey.Otp.OtpSettings-1.UseOathFixedModhex2), or [all bytes](xref:Yubico.YubiKey.Otp.OtpSettings-1.UseOathFixedModhex) of the token identifier use ModHex encoding.
+Yubico OTPs use ModHex encoding by default. OATH-HOTPs can be configured so that the [first byte](xref:Yubico.YubiKey.Otp.OtpSettings`1.OathFixedModhex1%28System.Boolean%29), [first two bytes](xref:Yubico.YubiKey.Otp.OtpSettings`1.UseOathFixedModhex2%28System.Boolean%29), or [all bytes](xref:Yubico.YubiKey.Otp.OtpSettings-1.UseOathFixedModhex.html%23Yubico_YubiKey_Otp_OtpSettings_1_UseOathFixedModhex_System_Boolean_) of the token identifier use ModHex encoding.
 
 ## ModHex as a static password keyboard layout
 

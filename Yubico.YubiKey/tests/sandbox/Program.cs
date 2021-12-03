@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.TestApp
                 ["validatehotp"] = (output) => new ValidateHotp(output),
                 ["jamie"] = (output) => new JamiePlugin(output),
                 ["greg"] = (output) => new GregPlugin(output),
-                // ["scard"] = (output) => new SCardListenerPlugin(output) // Feature hold-back
+                ["scard"] = (output) => new SCardListenerPlugin(output)
             };
 
         static int Main(string[] args)

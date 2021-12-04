@@ -56,14 +56,10 @@ namespace Yubico.YubiKey
 
         public static bool operator >(FirmwareVersion left, FirmwareVersion right)
         {
+            // CA1065, these operators shouldn't throw exceptions.
             if (left is null)
             {
-                throw new ArgumentNullException(nameof(left));
-            }
-
-            if (right is null)
-            {
-                throw new ArgumentNullException(nameof(right));
+                return false;
             }
 
             return left.CompareTo(right) > 0;
@@ -71,29 +67,21 @@ namespace Yubico.YubiKey
 
         public static bool operator <(FirmwareVersion left, FirmwareVersion right)
         {
-            if (left is null)
-            {
-                throw new ArgumentNullException(nameof(left));
-            }
-
+            // CA1065, these operators shouldn't throw exceptions.
             if (right is null)
             {
-                throw new ArgumentNullException(nameof(right));
+                return !(left is null);
             }
 
-            return left.CompareTo(right) < 0;
+            return left is null ? false : left.CompareTo(right) < 0;
         }
 
         public static bool operator >=(FirmwareVersion left, FirmwareVersion right)
         {
+            // CA1065, these operators shouldn't throw exceptions.
             if (left is null)
             {
-                throw new ArgumentNullException(nameof(left));
-            }
-
-            if (right is null)
-            {
-                throw new ArgumentNullException(nameof(right));
+                return right is null;
             }
 
             return left.CompareTo(right) >= 0;
@@ -101,17 +89,13 @@ namespace Yubico.YubiKey
 
         public static bool operator <=(FirmwareVersion left, FirmwareVersion right)
         {
-            if (left is null)
-            {
-                throw new ArgumentNullException(nameof(left));
-            }
-
+            // CA1065, these operators shouldn't throw exceptions.
             if (right is null)
             {
-                throw new ArgumentNullException(nameof(right));
+                return !(left is null);
             }
 
-            return left.CompareTo(right) <= 0;
+            return left is null ? false : left.CompareTo(right) <= 0;
         }
 
         public static bool operator ==(FirmwareVersion left, FirmwareVersion right)

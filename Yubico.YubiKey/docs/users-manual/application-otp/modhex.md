@@ -17,6 +17,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
+
 # Modified hexadecimal encoding (ModHex)
 
 As detailed in the section on [USB device communication](xref:OtpHID#usb-communication) via the [HID (Human Interface Device)](https://www.usb.org/hid) communication protocol, in order to submit a password ([Yubico OTP](xref:OtpYubicoOtp), [OATH-HOTP](xref:OtpHotp), or [static password](xref:OtpStaticPassword)) from the YubiKey to a host device over USB (or Lightning), the characters of the password must be sent as HID usage IDs so they can be handled as keyboard input by the host device. Unfortunately, these usage IDs represent physical locations on a keyboard, not the keys themselves. This can become a problem when sending HID usage IDs to host devices that are configured with different keyboard layouts.

@@ -17,39 +17,38 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 
-using static Yubico.PlatformInterop.NativeMethods;
-
 namespace Yubico.PlatformInterop
 {
-
-#if false
-
-    internal class SCardCardEventArgs : EventArgs
+    /// <summary>
+    /// A listener class for smart card related events.
+    /// </summary>
+    public class SCardListener : IDisposable
     {
-        public SCardReader Reader { get; private set; }
-        public IList<byte> CardAtr { get; private set; }
+        // The resource manager context.
+        private SCardContext _context;
 
-        public SCardCardEventArgs(string readerName, IList<byte> cardAtr)
-        {
-            Reader = new SCardReader(readerName);
-            CardAtr = cardAtr;
-        }
-    }
-
-    internal class SCardListener : IDisposable
-    {
-        private readonly IntPtr _context;
-        private SCARD_READERSTATE[] _readerStates;
+        // The active smart card readers.
+        private SCardReaderStates _readerStates;
         private readonly Thread _listenerThread;
 
-        public event EventHandler<SCardCardEventArgs>? CardArrival;
-        public event EventHandler<SCardCardEventArgs>? CardRemoval;
+        /// <summary>
+        /// Event for card arrival.
+        /// </summary>
+        public event EventHandler<SCardEventArgs>? CardArrival;
 
+        /// <summary>
+        /// Event for card removal.
+        /// </summary>
+        public event EventHandler<SCardEventArgs>? CardRemoval;
+
+        /// <summary>
+        /// Constructs a <see cref="SCardListener"/>.
+        /// </summary>
         public SCardListener()
         {
-            ErrorCode errorCode = SCardEstablishContext(SCARD_SCOPE.USER, out _context);
-            ThrowIfFailed(errorCode);
+            uint result = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);
 
+            _context = context;
             _readerStates = GetReaderStateList();
 
             _listenerThread = new Thread(() =>
@@ -66,20 +65,22 @@ namespace Yubico.PlatformInterop
 
     #region IDisposable Support
 
-        private bool disposedValue; // To detect redundant calls
+        private bool _disposedValue; // To detect redundant calls
 
+        /// <summary>
+        /// Disposes the objects.
+        /// </summary>
+        /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
-                    // TODO: dispose managed state (managed objects).
+                    _context.Dispose();
+                    _readerStates.Dispose();
                 }
-
-                _ = SCardReleaseContext(_context); // TODO: Error handling
-
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 
@@ -90,6 +91,9 @@ namespace Yubico.PlatformInterop
         }
 
         // This code added to correctly implement the disposable pattern.
+        /// <summary>
+        /// Calls Dispose(true).
+        /// </summary>
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
@@ -97,125 +101,275 @@ namespace Yubico.PlatformInterop
             GC.SuppressFinalize(this);
         }
 
-    #endregion
+        #endregion
 
+        /// <summary>
+        /// Stops listening for all actions within a certain resource context.
+        /// manager context.
+        /// </summary>
         public void StopListening()
         {
-            ThrowIfFailed(SCardCancel(_context));
+            uint result = PlatformLibrary.Instance.SCard.Cancel(_context);
+            ThrowIfFailed(result);
             _listenerThread.Join();
         }
 
         private bool ListenForReaderChanges(int timeout)
         {
-            var arrivalEvents = new List<SCardCardEventArgs>();
-            var removalEvents = new List<SCardCardEventArgs>();
+            var arrivalEvents = new List<SCardEventArgs>();
+            var removalEvents = new List<SCardEventArgs>();
             bool sendEvents = timeout != 0;
 
-            var newStates = (SCARD_READERSTATE[])_readerStates.Clone();
-
-            ErrorCode code = SCardGetStatusChange(
-                _context,
-                timeout,
-                newStates,
-                newStates.Length
-                );
-
-            if (code == ErrorCode.SCARD_E_CANCELLED)
+            SCardReaderStates? newStates = null;
+            try
             {
-                return false;
-            }
+                newStates = (SCardReaderStates)_readerStates.Clone();
 
-            ThrowIfFailed(code);
+                uint getStatusChangeResult = PlatformLibrary.Instance.SCard.GetStatusChange(_context, timeout, newStates);
 
-            while (ReaderListChangeDetected(newStates))
-            {
-                SCARD_READERSTATE[] eventStateList = GetReaderStateList();
-
-                IEnumerable<SCARD_READERSTATE> addedReaderStates = eventStateList.Except(newStates, new ReaderStateComparer());
-                IEnumerable<SCARD_READERSTATE> removedReaderStates = newStates.Except(eventStateList, new ReaderStateComparer());
-
-                var readerStateList = newStates.ToList();
-                readerStateList.AddRange(addedReaderStates);
-
-                newStates = readerStateList.Except(removedReaderStates, new ReaderStateComparer()).ToArray();
-
-                // Special handle readers with cards in them
-                if (sendEvents)
+                if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
                 {
-                    foreach (SCARD_READERSTATE removedReader in removedReaderStates.Where(r => r.dwCurrentState.HasFlag(SCARD_STATE.PRESENT)))
+                    return false;
+                }
+
+                if (UpdateContextIfNonCritical(getStatusChangeResult))
+                {
+                    return true;
+                }
+
+                ThrowIfFailed(getStatusChangeResult);
+
+                while (ReaderListChangeDetected(newStates))
+                {
+                    using SCardReaderStates eventStateList = GetReaderStateList();
+                    IEnumerable<SCardReaderStates.Entry> addedReaderStates = eventStateList.Except(newStates, new ReaderStateComparer());
+                    IEnumerable<SCardReaderStates.Entry> removedReaderStates = newStates.Except(eventStateList, new ReaderStateComparer());
+
+                    // Don't get status changes if there are no updates in state list.
+                    if (!addedReaderStates.Any() && !removedReaderStates.Any())
                     {
-                        removalEvents.Add(new SCardCardEventArgs(removedReader.szReader, removedReader.Atr));
+                        break;
+                    }
+
+                    var readerStateList = newStates.ToList();
+                    readerStateList.AddRange(addedReaderStates);
+
+                    SCardReaderStates? updatedStates = null;
+                    try
+                    {
+                        updatedStates = CreateReaderStates(readerStateList.Except(removedReaderStates, new ReaderStateComparer()).ToArray());
+
+                        // Special handle readers with cards in them
+                        if (sendEvents)
+                        {
+                            foreach (SCardReaderStates.Entry removedReader in removedReaderStates.Where(r =>
+                                r.CurrentState.HasFlag(SCARD_STATE.PRESENT)))
+                            {
+                                removalEvents.Add(new SCardEventArgs(removedReader.ReaderName, removedReader.Atr));
+                            }
+                        }
+
+                        // Only call get status change if a new reader was added. If nothing was added,
+                        // we would otherwise hang / timeout here because all changes (in SCard's mind)
+                        // have been dealt with.
+                        if (addedReaderStates.Any())
+                        {
+                            getStatusChangeResult = PlatformLibrary.Instance.SCard.GetStatusChange(_context, 0, updatedStates);
+
+                            if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
+                            {
+                                return false;
+                            }
+
+                            if (UpdateContextIfNonCritical(getStatusChangeResult))
+                            {
+                                return true;
+                            }
+
+                            ThrowIfFailed(getStatusChangeResult);
+                        }
+
+                        // Swap states to allow correct dispose of unmanaged objects.
+                        (newStates, updatedStates) = (updatedStates, newStates);
+                    }
+                    finally
+                    {
+                        updatedStates?.Dispose();
                     }
                 }
 
-                // Only call get status change if a new reader was added. If nothing was added,
-                // we would otherwise hang / timeout here because all changes (in SCard's mind)
-                // have been dealt with.
-                if (addedReaderStates.Any())
+                if (RelevantChangesDetected(newStates))
                 {
-                    code = SCardGetStatusChange(
-                        _context,
-                        0,
-                        newStates,
-                        newStates.Length
-                        );
-
-                    if (code == ErrorCode.SCARD_E_CANCELLED)
+                    getStatusChangeResult = PlatformLibrary.Instance.SCard.GetStatusChange(_context, 0, newStates);
+                    if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
                     {
                         return false;
                     }
 
-                    ThrowIfFailed(code);
+                    if (UpdateContextIfNonCritical(getStatusChangeResult))
+                    {
+                        return true;
+                    }
+
+                    ThrowIfFailed(getStatusChangeResult);
                 }
-            }
 
-            if (sendEvents)
+                if (sendEvents)
+                {
+                    DetectRelevantChanges(_readerStates, newStates, arrivalEvents, removalEvents);
+                }
+
+                UpdateCurrentlyKnownState(newStates);
+
+                (_readerStates, newStates) = (newStates, _readerStates);
+
+                FireEvents(arrivalEvents, removalEvents);
+            }
+            finally
             {
-                DetectRelevantChanges(newStates, arrivalEvents, removalEvents);
+                newStates?.Dispose();
             }
-
-            UpdateCurrentlyKnownState(newStates);
-
-            FireEvents(arrivalEvents, removalEvents);
 
             return true;
         }
 
-        private static bool ReaderListChangeDetected(SCARD_READERSTATE[] newStates)
+        /// <summary>
+        /// Checks if reader state list contains any changes.
+        /// </summary>
+        /// <param name="newStates">Reader states to check.</param>
+        /// <returns>True if changes are detected.</returns>
+        private static bool ReaderListChangeDetected(SCardReaderStates newStates)
         {
             if (newStates[0].EventState.HasFlag(SCARD_STATE.CHANGED))
             {
-                newStates[0].dwCurrentState = newStates[0].dwEventState & ~SCARD_STATE.CHANGED;
-                newStates[0].dwEventState = 0;
-
+                newStates[0].CurrentState = newStates[0].EventState & ~SCARD_STATE.CHANGED;
+                newStates[0].EventState = 0;
                 return true;
             }
-
             return false;
         }
 
-        private void DetectRelevantChanges(SCARD_READERSTATE[] newStates, List<SCardCardEventArgs> arrivalEvents, List<SCardCardEventArgs> removalEvents)
+        /// <summary>
+        /// Determines whether the relevant changes in state list detected.
+        /// </summary>
+        /// <param name="newStates">States to check.</param>
+        /// <returns>True if changes detected in states.</returns>
+        private static bool RelevantChangesDetected(SCardReaderStates newStates)
         {
-            for (int i = 0; i < newStates.Length; i++)
+            for (int i = 0; i < newStates.Count; i++)
             {
                 SCARD_STATE diffState = newStates[i].CurrentState ^ newStates[i].EventState;
 
                 if (diffState.HasFlag(SCARD_STATE.PRESENT) && newStates[i].CurrentState.HasFlag(SCARD_STATE.PRESENT))
                 {
-                    removalEvents.Add(new SCardCardEventArgs(newStates[i].szReader, _readerStates[i].Atr)); // Use of _readerStates here so that we can get the old ATR
+                    return true;
                 }
-                else if (diffState.HasFlag(SCARD_STATE.PRESENT) && newStates[i].EventState.HasFlag(SCARD_STATE.PRESENT))
+                if (diffState.HasFlag(SCARD_STATE.PRESENT) && newStates[i].EventState.HasFlag(SCARD_STATE.PRESENT))
                 {
-                    arrivalEvents.Add(new SCardCardEventArgs(newStates[i].szReader, newStates[i].Atr));
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines whether the relevant changes in state list detected and creates arrival and removal events.
+        /// </summary>
+        /// <param name="originalStates">Original states used to get Atr values for removal events.</param>
+        /// <param name="newStates">State list to check for changes.</param>
+        /// <param name="arrivalEvents">List where new arrival events will be added.</param>
+        /// <param name="removalEvents">List where new removal events will be added.</param>
+        private static void DetectRelevantChanges(SCardReaderStates originalStates, SCardReaderStates newStates, List<SCardEventArgs> arrivalEvents, List<SCardEventArgs> removalEvents)
+        {
+            foreach (SCardReaderStates.Entry entry in newStates)
+            {
+                SCARD_STATE diffState = entry.CurrentState ^ entry.EventState;
+
+                if (diffState.HasFlag(SCARD_STATE.PRESENT) && entry.CurrentState.HasFlag(SCARD_STATE.PRESENT))
+                {
+                    IEnumerable<SCardReaderStates.Entry> states = originalStates.Where((e) => e.ReaderName == entry.ReaderName);
+                    removalEvents.Add(new SCardEventArgs(entry.ReaderName, states.FirstOrDefault()?.Atr ?? entry.Atr));
+                }
+                else if (diffState.HasFlag(SCARD_STATE.PRESENT) && entry.EventState.HasFlag(SCARD_STATE.PRESENT))
+                {
+                    arrivalEvents.Add(new SCardEventArgs(entry.ReaderName, entry.Atr));
                 }
             }
         }
 
-        private void FireEvents(List<SCardCardEventArgs> arrivalEvents, List<SCardCardEventArgs> removalEvents)
+        /// <summary>
+        /// Creates new <see cref="SCardReaderStates"/> from array of SCardReaderStates.Entry objects.
+        /// </summary>
+        /// <param name="newStateList">Array of SCardReaderStates.Entry objects</param>
+        /// <returns>New <see cref="SCardReaderStates"/> object.</returns>
+        private static SCardReaderStates CreateReaderStates(SCardReaderStates.Entry[] newStateList)
+        {
+            var newStates = new SCardReaderStates(newStateList.Length);
+
+            for (int i = 0; i < newStateList.Length; i++)
+            {
+                SCardReaderStates.Entry state = newStateList[i];
+                newStates[i].ReaderName = state.ReaderName;
+                newStates[i].CurrentState = state.CurrentState;
+                newStates[i].CurrentSequence = state.CurrentSequence;
+                newStates[i].EventState = state.EventState;
+                newStates[i].EventSequence = state.EventSequence;
+            }
+
+            return newStates;
+        }
+
+        /// <summary>
+        /// Updates the current status and event status if reader's event status has changed.
+        /// </summary>
+        /// <param name="newStates">State list to check for changes.</param>
+        private static void UpdateCurrentlyKnownState(SCardReaderStates newStates)
+        {
+            foreach (SCardReaderStates.Entry entry in newStates)
+            {
+                if (entry.EventState.HasFlag(SCARD_STATE.CHANGED))
+                {
+                    entry.CurrentState = entry.EventState & ~SCARD_STATE.CHANGED;
+                    entry.EventState = 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Updates the current context.
+        /// </summary>
+        private void UpdateCurrentContext()
+        {
+            uint _ = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);
+
+            _context = context;
+            _readerStates = GetReaderStateList();
+        }
+
+        /// <summary>
+        /// Gets readers within the current context. 
+        /// </summary>
+        /// <returns><see cref="SCardReaderStates"/></returns>
+        private SCardReaderStates GetReaderStateList()
+        {
+            uint _ = PlatformLibrary.Instance.SCard.ListReaders(_context, null, out string[] readerNames);
+
+            var readerStates = new SCardReaderStates(readerNames.Prepend("\\\\?PnP?\\Notification").ToArray());
+
+            return readerStates;
+        }
+
+        /// <summary>
+        /// Fires all created events.
+        /// </summary>
+        /// <param name="arrivalEvents">List of arrival events to fire.</param>
+        /// <param name="removalEvents">List of removal events to fire.</param>
+        private void FireEvents(List<SCardEventArgs> arrivalEvents, List<SCardEventArgs> removalEvents)
         {
             if (CardArrival != null)
             {
-                foreach (SCardCardEventArgs arrival in arrivalEvents)
+                foreach (SCardEventArgs arrival in arrivalEvents)
                 {
                     CardArrival.Invoke(this, arrival);
                 }
@@ -223,56 +377,45 @@ namespace Yubico.PlatformInterop
 
             if (CardRemoval != null)
             {
-                foreach (SCardCardEventArgs removal in removalEvents)
+                foreach (SCardEventArgs removal in removalEvents)
                 {
                     CardRemoval.Invoke(this, removal);
                 }
             }
         }
 
-        private void UpdateCurrentlyKnownState(SCARD_READERSTATE[] newStates)
+        /// <summary>
+        /// Checks if context need to be updated.
+        /// </summary>
+        /// <param name="errorCode"></param>
+        /// <returns>true if context updated</returns>
+        private bool UpdateContextIfNonCritical(uint errorCode)
         {
-            _readerStates = newStates;
-
-            for (int i = 0; i < _readerStates.Length; i++)
+            switch (errorCode)
             {
-                if (_readerStates[i].dwEventState.HasFlag(SCARD_STATE.CHANGED))
-                {
-                    _readerStates[i].dwCurrentState = _readerStates[i].dwEventState & ~SCARD_STATE.CHANGED;
-                    _readerStates[i].dwEventState = 0;
-                }
+                case ErrorCode.SCARD_E_SERVICE_STOPPED:
+                case ErrorCode.SCARD_E_NO_READERS_AVAILABLE:
+                case ErrorCode.SCARD_E_NO_SERVICE:
+                    UpdateCurrentContext();
+                    return true;
+                default:
+                    return false;
             }
         }
 
-        private static SCARD_READERSTATE[] GetReaderStateList() =>
-            SCardReader
-                .GetList()
-                .Select(r => new SCARD_READERSTATE()
-                {
-                    szReader = r.Name,
-                    dwCurrentState = SCARD_STATE.UNAWARE
-                })
-                .Prepend(new SCARD_READERSTATE()
-                {
-                    szReader = "\\\\?PnP?\\Notification"
-                })
-                .ToArray();
-
-        private class ReaderStateComparer : IEqualityComparer<SCARD_READERSTATE>
-        {
-            public bool Equals(SCARD_READERSTATE x, SCARD_READERSTATE y) => x.szReader == y.szReader;
-
-            public int GetHashCode(SCARD_READERSTATE obj) =>
-                obj.szReader.GetHashCode();
-        }
-
-        private static void ThrowIfFailed(ErrorCode errorCode)
+        private static void ThrowIfFailed(uint errorCode)
         {
             if (errorCode != ErrorCode.SCARD_S_SUCCESS)
             {
                 throw new PlatformApiException();
             }
         }
+
+        private class ReaderStateComparer : IEqualityComparer<SCardReaderStates.Entry>
+        {
+            public bool Equals(SCardReaderStates.Entry x, SCardReaderStates.Entry y) => x.ReaderName == y.ReaderName;
+
+            public int GetHashCode(SCardReaderStates.Entry obj) => obj.ReaderName.GetHashCode();
+        }
     }
-#endif
 }

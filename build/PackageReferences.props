@@ -21,26 +21,6 @@ take effect across all (or specialized subsets) of projects.
 <Project>
 
   <!--
-  Common package references across all types of projects.
-  -->
-  <ItemGroup Label="Common package references">
-
-    <!-- The FxCop and Roslyn static code analzers. -->
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers"
-                      Version="5.0.3"
-                      PrivateAssets="all"
-                      IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-
-    <!-- As of 10 August 2021, these packages are needed by the build. -->
-    <PackageReference Include="Microsoft.CodeAnalysis.Compilers" Version="3.11.0" />
-    <PackageReference Include="Microsoft.Net.Compilers.Toolset"
-                      Version="3.11.0"
-                      PrivateAssets="all"
-                      IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-
-  </ItemGroup>
-
-  <!--
   Package references used by unit test projects.
   -->
   <ItemGroup Label="Unit test project references" Condition="'$(IsTestProject)'=='true'">

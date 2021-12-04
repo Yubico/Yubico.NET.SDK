@@ -20,16 +20,33 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.PlatformInterop
 {
-    internal class SCardReaderStates : IDisposable, IEnumerable<SCardReaderStates.Entry>
+    internal class SCardReaderStates : IDisposable, IEnumerable<SCardReaderStates.Entry>, ICloneable
     {
-        public byte[] Buffer { get; }
+        public byte[] Buffer { get; private set; }
 
         public int Count { get; }
+
+        private SCardReaderStates(byte[] buffer)
+        {
+            Count = buffer.Length / Entry.Size;
+            Buffer = buffer;
+        }
 
         public SCardReaderStates(int numberOfStates)
         {
             Count = numberOfStates;
             Buffer = new byte[Entry.Size * numberOfStates];
+        }
+
+        public SCardReaderStates(string[] readerNames)
+        {
+            Count = readerNames.Length;
+            Buffer = new byte[Entry.Size * readerNames.Length];
+
+            for (int i = 0; i < readerNames.Length; i++)
+            {
+                this[i].ReaderName = readerNames[i];
+            }
         }
 
         public Entry this[int index]
@@ -128,11 +145,32 @@ namespace Yubico.PlatformInterop
                 }
             }
 
-            public int CurrentSequence => (int)(ReadInt32(_currentStateOffset) & SequenceMask) >> 16;
-            public SCARD_STATE CurrentState => (SCARD_STATE)(ReadInt32(_currentStateOffset) & StateMask);
-            public int EventSequence => (int)(ReadInt32(_eventStateOffset) & SequenceMask) >> 16;
-            public SCARD_STATE EventState => (SCARD_STATE)(ReadInt32(_eventStateOffset) & StateMask);
+            public SCARD_STATE CurrentState
+            {
+                get => (SCARD_STATE)(ReadInt32(_currentStateOffset) & StateMask);
+                set => WriteUInt32(_currentStateOffset, ((uint)CurrentSequence << 16) | ((uint)value & StateMask));
+            }
+
+            public SCARD_STATE EventState
+            {
+                get => (SCARD_STATE)(ReadInt32(_eventStateOffset) & StateMask);
+                set => WriteUInt32(_eventStateOffset, ((uint)EventSequence << 16) | ((uint)value & StateMask));
+            }
+
+            public int CurrentSequence
+            {
+                get => (int)(ReadInt32(_currentStateOffset) & SequenceMask) >> 16;
+                set => WriteUInt32(_currentStateOffset, (((uint)value << 16) & SequenceMask) | (uint)CurrentState);
+            }
+
+            public int EventSequence
+            {
+                get => (int)(ReadInt32(_eventStateOffset) & SequenceMask) >> 16;
+                set => WriteUInt32(_eventStateOffset, (((uint)value << 16) & SequenceMask) | (uint)EventState);
+            }
+
             private int AtrDynamicSize => ReadInt32(_atrSizeOffset);
+
             public AnswerToReset Atr => new AnswerToReset(_bufferSlice.Slice(_atrOffset, AtrDynamicSize).Span);
 
             private static string MarshalToString(IntPtr readerNamePtr)
@@ -165,11 +203,23 @@ namespace Yubico.PlatformInterop
 
             private IntPtr ReadIntPtr(int offset)
             {
-                long ptr =  IntPtr.Size == sizeof(int)
+                long ptr = IntPtr.Size == sizeof(int)
                     ? BitConverter.ToInt32(_bufferSlice.Span.Slice(offset, 4).ToArray(), 0)
                     : BitConverter.ToInt64(_bufferSlice.Span.Slice(offset, 8).ToArray(), 0);
 
                 return new IntPtr(ptr);
+            }
+
+            private void WriteInt32(int offset, int value)
+            {
+                byte[] raw = BitConverter.GetBytes(value);
+                raw.AsMemory().CopyTo(_bufferSlice.Slice(offset, raw.Length));
+            }
+
+            private void WriteUInt32(int offset, uint value)
+            {
+                byte[] raw = BitConverter.GetBytes(value);
+                raw.AsMemory().CopyTo(_bufferSlice.Slice(offset, raw.Length));
             }
 
             private void WriteIntPtr(int offset, IntPtr ptr)
@@ -220,6 +270,32 @@ namespace Yubico.PlatformInterop
         ~SCardReaderStates()
         {
             ReleaseUnmanagedResources();
+        }
+
+        public object Clone()
+        {
+            byte[] buffer = (byte[])Buffer.Clone();
+
+            // Writing zeros so that reader names in the original states
+            // won't be deallocated when we copy them to the new list.
+            for (int i = 0; i < Count; i++)
+            {
+                byte[] raw = BitConverter.GetBytes(
+                    IntPtr.Size == sizeof(int)
+                        ? IntPtr.Zero.ToInt32()
+                        : IntPtr.Zero.ToInt64());
+                System.Buffer.BlockCopy(raw, 0, buffer, i * Entry.Size, raw.Length);
+            }
+
+            var newStates = new SCardReaderStates(buffer);
+
+            for (int i = 0; i < Count; i++)
+            {
+                SCardReaderStates.Entry state = this[i];
+                newStates[i].ReaderName = state.ReaderName;
+            }
+
+            return newStates;
         }
 
         public IEnumerator<Entry> GetEnumerator()

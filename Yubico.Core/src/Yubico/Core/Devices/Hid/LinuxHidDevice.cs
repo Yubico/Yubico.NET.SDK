@@ -22,7 +22,6 @@ namespace Yubico.Core.Devices.Hid
 {
     internal class LinuxHidDevice : HidDevice
     {
-        private const string UdevSubsystemName = "hidraw";
         private const int UsagePageTag = 4;
         private const int UsageTag = 8;
         private const int UsagePageGeneric = 1;
@@ -37,10 +36,16 @@ namespace Yubico.Core.Devices.Hid
         {
             // Build an object to search for "hidraw" devices.
             using var scanObject = new LinuxUdevScan();
-            scanObject.EnumerateAddMatchSubsystem(UdevSubsystemName);
+            scanObject.EnumerateAddMatchSubsystem(NativeMethods.UdevSubsystemName);
             scanObject.EnumerateScanDevices();
 
             return scanObject.GetLinuxHidDeviceList();
+        }
+
+        // Build a new LinuxHidDevice from a device handle.
+        public LinuxHidDevice(LinuxUdevDeviceSafeHandle deviceHandle)
+            : this(DeviceGetPath(deviceHandle), DeviceGetDevnode(deviceHandle))
+        {
         }
 
         public LinuxHidDevice(string path, string devnode) :
@@ -59,6 +64,20 @@ namespace Yubico.Core.Devices.Hid
 
             GetVendorProductIds(handle);
             GetUsageProperties(handle);
+        }
+
+        // Get the path from the device.
+        private static string DeviceGetPath(LinuxUdevDeviceSafeHandle udevDevice)
+        {
+            IntPtr pathPtr = NativeMethods.udev_device_get_syspath(udevDevice);
+            return Marshal.PtrToStringAnsi(pathPtr);
+        }
+
+        // Get the devnode from the device.
+        private static string DeviceGetDevnode(LinuxUdevDeviceSafeHandle udevDevice)
+        {
+            IntPtr devnodePtr = NativeMethods.udev_device_get_devnode(udevDevice);
+            return Marshal.PtrToStringAnsi(devnodePtr);
         }
 
         // Get the devinfo out of the handle. The VendorId and ProductId are in

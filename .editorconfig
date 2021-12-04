@@ -288,6 +288,20 @@ dotnet_diagnostic.CA1027.severity = none
 # CA1028: Enum storage should be Int32
 dotnet_diagnostic.CA1028.severity = none
 
+# Not going to use LoggerMessage delegates.
+dotnet_diagnostic.CA1848.severity = none
+
+# This is a .NET bug.
+# https://github.com/dotnet/roslyn-analyzers/issues/5626
+dotnet_diagnostic.CA2254.severity = none
+
+# This is a .NET bug.
+# https://github.com/dotnet/roslyn-analyzers/issues/5479
+dotnet_diagnostic.CA2101.severity = none
+
+# Hitting a weird CA1508 issue.
+dotnet_diagnostic.CA1508.severity = none
+
 # CA2244: Redundant element initialization at index '''. Object initializer
 # has another element initializer with the same index that overwrites this value
 dotnet_diagnostic.CA2244.severity = none

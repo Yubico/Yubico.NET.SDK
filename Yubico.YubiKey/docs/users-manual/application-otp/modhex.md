@@ -47,13 +47,13 @@ When [configuring an OTP application slot with a static password](xref:OtpProgra
 
 1. [Set](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.SetPassword) the static password to something of your choosing.
 
-Generated passwords use ModHex characters by default. User-defined passwords must specify the [keyboard layout](xref:Yubico.Core.Devices.Hid.KeyboardLayout) that the host device is configured with (e.g. English, German, etc) when they are set so the YubiKey sends the correct HID usage IDs.
+For static passwords, the [keyboard layout](xref:Yubico.Core.Devices.Hid.KeyboardLayout) determines which HID usage IDs are used to represent the password characters. For example, if the keyboard layout is set to English, the SDK will use the HID usage IDs corresponding to the location of the password characters on an English keyboard.
 
-If you can’t be certain which keyboard layout will be configured on all devices that the YubiKey will be used with, you will want to create a password that only contains ModHex characters *and* select the ModHex layout.
+Additionally, for generated passwords, the keyboard layout determines which characters are used during generation (e.g. if the keyboard layout is set to English, the password will only contain characters that are included on the English keyboard). For set passwords, the keyboard layout acts as a filter; if the user-defined password contains characters that are not found in the keyboard layout, a `System.InvalidOperationException` will be thrown.
 
-But what does the ModHex layout actually do if the password is manually set using ModHex characters? Couldn't you use any of the keyboard layouts since the HID usage IDs for ModHex characters will be the same across all layouts?
+For both types of static passwords, the keyboard layout is set to ModHex by default. This means that generated passwords will only contain ModHex characters, and a `System.InvalidOperationException` will be thrown for set passwords that contain non-ModHex characters.
 
-Technically, yes, you could select a non-ModHex layout. However, setting a static password is not immune to user error. The ModHex layout is useful in that it essentially acts as a filter. If the user-defined password contains non-ModHex characters, and the layout is set to ModHex, a System.InvalidOperationException will be thrown.
+If you can’t be certain which keyboard layout will be configured on all devices that the YubiKey will be used with, you will want to create a password that only contains ModHex characters. As a best practice, we recommend explicitly setting the keyboard layout to ModHex even though it is the default layout.
 
 ## ModHex encoding example
 

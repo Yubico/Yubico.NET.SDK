@@ -137,8 +137,6 @@ namespace Yubico.PlatformInterop
                     return true;
                 }
 
-                ThrowIfFailed(getStatusChangeResult);
-
                 while (ReaderListChangeDetected(newStates))
                 {
                     using SCardReaderStates eventStateList = GetReaderStateList();
@@ -186,7 +184,6 @@ namespace Yubico.PlatformInterop
                                 return true;
                             }
 
-                            ThrowIfFailed(getStatusChangeResult);
                         }
 
                         // Swap states to allow correct dispose of unmanaged objects.
@@ -211,7 +208,6 @@ namespace Yubico.PlatformInterop
                         return true;
                     }
 
-                    ThrowIfFailed(getStatusChangeResult);
                 }
 
                 if (sendEvents)

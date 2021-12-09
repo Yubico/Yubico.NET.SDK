@@ -14,6 +14,7 @@
 
 using System; 
 using System.Diagnostics.CodeAnalysis;
+using Yubico.Core.Devices;
 using MgmtCmd = Yubico.YubiKey.Management.Commands;
 
 namespace Yubico.YubiKey
@@ -40,11 +41,18 @@ namespace Yubico.YubiKey
         IYubiKeyConnection Connect(byte[] applicationId);
 
         /// <summary>
+        /// Checks whether a IYubiKeyDevice instance contains a particular platform <see cref="IDevice" />. 
+        /// </summary>
+        /// <param name="other">The device to check.</param>
+        /// <returns>True, if the IYubiKeyDevice contains the platform device.</returns>
+        internal bool Contains(IDevice other);
+
+        /// <summary>
         /// Attempt to connect to the YubiKey device.
         /// </summary>
         /// <param name="application">The application to reference on the device.</param>
         /// <param name="connection">Out parameter containing the <see cref="IYubiKeyConnection"/> instance.</param>
-        /// <returns>Boolean indiciating whether the call was successful.</returns>
+        /// <returns>Boolean indicating whether the call was successful.</returns>
         bool TryConnect(
             YubiKeyApplication application,
             [MaybeNullWhen(returnValue: false)]
@@ -55,7 +63,7 @@ namespace Yubico.YubiKey
         /// </summary>
         /// <param name="applicationId">A byte pattern representing the application to reference.</param>
         /// <param name="connection">Out parameter containing the <see cref="IYubiKeyConnection"/> instance.</param>
-        /// <returns>Boolean indiciating whether the call was successful.</returns>
+        /// <returns>Boolean indicating whether the call was successful.</returns>
         bool TryConnect(
             byte[] applicationId,
             [MaybeNullWhen(returnValue: false)]

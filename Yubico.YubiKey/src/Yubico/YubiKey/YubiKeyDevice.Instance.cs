@@ -15,6 +15,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.YubiKey.DeviceExtensions;
@@ -519,6 +520,16 @@ namespace Yubico.YubiKey
                 return SerialNumber.Equals(other.SerialNumber);
             }
         }
+
+        /// <inheritdoc/>
+        bool IYubiKeyDevice.Contains(IDevice other) =>
+            other switch
+            {
+                ISmartCardDevice scDevice => scDevice.Path == _smartCardDevice?.Path,
+                IHidDevice hidDevice => hidDevice.Path == _hidKeyboardDevice?.Path ||
+                                        hidDevice.Path == _hidFidoDevice?.Path,
+                _ => false
+            };
 
         /// <inheritdoc/>
         public int CompareTo(IYubiKeyDevice other)

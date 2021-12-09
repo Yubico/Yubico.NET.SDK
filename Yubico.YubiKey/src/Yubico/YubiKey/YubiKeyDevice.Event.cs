@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKey.DeviceExtensions;
-using Yubico.Core.Devices;
-using Yubico.Core.Devices.Hid;
-using Yubico.Core.Devices.SmartCard;
 using System;
 
 namespace Yubico.YubiKey
@@ -23,7 +19,7 @@ namespace Yubico.YubiKey
     /// <summary>
     /// This partial class provides events for device arrival and removal.
     /// </summary>
-    public partial class YubiKeyDevice
+    public sealed partial class YubiKeyDevice
     {
         /// <summary>
         /// Event for device arrival.
@@ -35,28 +31,7 @@ namespace Yubico.YubiKey
         /// </summary>
         public static event EventHandler<YubiKeyDeviceEventArgs>? DeviceRemovedEvent;
 
-        /// <summary>
-        /// Constructor for subscribing to events in Core.
-        /// </summary>
-        static YubiKeyDevice()
-        {
-            // this is prototype code for the future implementation
-            //Yubico.Core.DeviceArrived += CoreDeviceArrived;
-            //Yubico.Core.DeviceRemoved += CoreDeviceRemoved;
-        }
-
-        // this is prototype code for the future implementation
-        //private static void CoreDeviceArrived(object sender, CoreDeviceEventArgs e)
-        //{
-        //    var deviceEventArgs = new YubiKeyDeviceEventArgs(e.device);
-        //    OnDeviceArrived(deviceEventArgs);
-        //}
-
-        //private static void CoreDeviceRemoved(object sender, CoreDeviceEventArgs e)
-        //{
-        //    var deviceEventArgs = new YubiKeyDeviceEventArgs(e.device);
-        //    OnDeviceRemoved(deviceEventArgs);
-        //}
+        internal static readonly YubiKeyEventManager yubiKeyEventManager = new YubiKeyEventManager(OnDeviceArrived, OnDeviceRemoved);
 
         /// <summary>
         /// Raises event on device arrival.

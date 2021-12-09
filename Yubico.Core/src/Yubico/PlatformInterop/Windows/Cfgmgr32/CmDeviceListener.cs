@@ -14,33 +14,39 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices;
-
+using Yubico.Core;
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.PlatformInterop
 {
-
-    public class CmDeviceEventArgs : EventArgs
-    {
-        public string DeviceInterfacePath { get; private set; }
-
-        public CmDeviceEventArgs(string deviceInterfacePath)
-        {
-            DeviceInterfacePath = deviceInterfacePath;
-        }
-        public CmDevice GetDevice() => new CmDevice(DeviceInterfacePath);
-    }
-
+    /// <summary>
+    /// A listener class for Windows HID related events.
+    /// </summary>
     public class CmDeviceListener : IDisposable
     {
         private readonly IntPtr _notificationContext;
 
-        public Guid InterfaceClass { get; private set; }
+        /// <summary>
+        /// A global unique identifier for HID device.
+        /// </summary>
+        public Guid InterfaceClass { get; }
 
+        /// <summary>
+        /// Event for card arrival.
+        /// </summary>
         public event EventHandler<CmDeviceEventArgs>? DeviceArrived;
+
+        /// <summary>
+        /// Event for card removal.
+        /// </summary>
         public event EventHandler<CmDeviceEventArgs>? DeviceRemoved;
 
+        /// <summary>
+        /// Constructs a <see cref="CmDeviceListener"/>.
+        /// </summary>
+        /// <param name="classGuid">A global unique identifier for HID device.</param>
         public CmDeviceListener(Guid classGuid)
         {
             InterfaceClass = classGuid;
@@ -64,14 +70,7 @@ namespace Yubico.PlatformInterop
                 }
 
                 CmErrorCode errorCode = CM_Register_Notification(pFilter, IntPtr.Zero, OnEventReceived, out _notificationContext);
-                if (errorCode != CmErrorCode.CR_SUCCESS)
-                {
-                    throw new PlatformApiException(
-                        "CONFIG_RET",
-                        (int)errorCode,
-                        $"Failed to register for notifications on the device interface class {classGuid}."
-                        );
-                }
+                ThrowIfFailed(errorCode);
             }
             finally
             {
@@ -83,6 +82,9 @@ namespace Yubico.PlatformInterop
 
         private bool disposedValue; // To detect redundant calls
 
+        /// <summary>
+        /// Disposes the objects.
+        /// </summary>
         protected virtual void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -105,6 +107,9 @@ namespace Yubico.PlatformInterop
         }
 
         // This code added to correctly implement the disposable pattern.
+        /// <summary>
+        /// Calls Dispose(true).
+        /// </summary>
         public void Dispose()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
@@ -120,7 +125,7 @@ namespace Yubico.PlatformInterop
             {
                 CM_NOTIFY_ACTION.DEVICEINTERFACEARRIVAL => DeviceArrived,
                 CM_NOTIFY_ACTION.DEVICEINTERFACEREMOVAL => DeviceRemoved,
-                _ => throw new InvalidOperationException($"Received an unexpected device event of type {Action}"),
+                _ => null,
             };
 
             if (handler is null)
@@ -145,19 +150,26 @@ namespace Yubico.PlatformInterop
             return 0;
         }
 
-        private void StopListening()
+        /// <summary>
+        /// Stops listening for all actions within a certain context.
+        /// </summary>
+        public void StopListening()
         {
             if (_notificationContext != IntPtr.Zero)
             {
                 CmErrorCode errorCode = CM_Unregister_Notification(_notificationContext);
-                if (errorCode != CmErrorCode.CR_SUCCESS)
-                {
-                    throw new PlatformApiException(
-                        "CONFIG_RET",
-                        (int)errorCode,
-                        $"Unexpected error occured when attempting to unregister for notifications. InterfaceClass = {InterfaceClass}."
-                        );
-                }
+                ThrowIfFailed(errorCode);
+            }
+        }
+
+        private static void ThrowIfFailed(CmErrorCode errorCode)
+        {
+            if (errorCode != CmErrorCode.CR_SUCCESS)
+            {
+                throw new PlatformApiException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.CmError));
             }
         }
     }

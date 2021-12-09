@@ -70,6 +70,15 @@ namespace Yubico.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Encountered an error in the CM library..
+        /// </summary>
+        internal static string CmError {
+            get {
+                return ResourceManager.GetString("CmError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The specified device property is not in the set of supported properties for this API..
         /// </summary>
         internal static string CmPropertyNotSupported {

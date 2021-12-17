@@ -15,7 +15,6 @@
 using System;
 using System.Linq;
 using Yubico.Core.Devices.SmartCard;
-using Yubico.PlatformInterop;
 using Yubico.YubiKey.DeviceExtensions;
 
 namespace Yubico.YubiKey
@@ -29,11 +28,6 @@ namespace Yubico.YubiKey
         private readonly Action<YubiKeyDeviceEventArgs> _removalAction;
 
         /// <summary>
-        /// Listener for smart card related events.
-        /// </summary>
-        private readonly SCardListener _sCardListener;
-
-        /// <summary>
         /// Constructs a <see cref="YubiKeyEventManager"/>.
         /// </summary>
         public YubiKeyEventManager(Action<YubiKeyDeviceEventArgs> arrivalAction, Action<YubiKeyDeviceEventArgs> removalAction)
@@ -43,9 +37,7 @@ namespace Yubico.YubiKey
 
             var yubiKeyDevices = YubiKeyDevice.FindAll().ToList(); // todo: avoid enumerating yubikeys that already have a connection. 
 
-            _sCardListener = new SCardListener();
-
-            _sCardListener.CardArrival += (s, e) =>
+            SmartCardDevice.SmartCardArrived += (s, e) =>
             {
                 ISmartCardDevice newSmartCardDevice = SmartCardDevice.Create(e.ReaderName, e.Atr);
 
@@ -63,7 +55,7 @@ namespace Yubico.YubiKey
                 }
             };
 
-            _sCardListener.CardRemoval += (s, e) =>
+            SmartCardDevice.SmartCardRemoved += (s, e) =>
             {
                 ISmartCardDevice newSmartCardDevice = SmartCardDevice.Create(e.ReaderName, e.Atr);
 
@@ -106,7 +98,7 @@ namespace Yubico.YubiKey
             {
                 if (disposing)
                 {
-                    _sCardListener.Dispose();
+
                 }
                 _disposedValue = true;
             }

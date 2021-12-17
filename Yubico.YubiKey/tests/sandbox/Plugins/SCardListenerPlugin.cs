@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using Yubico.Core.Devices.SmartCard;
 using Yubico.PlatformInterop;
 
 namespace Yubico.YubiKey.TestApp.Plugins
@@ -26,9 +27,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         public override bool Execute()
         {
-            SCardListener sCardListener = new SCardListener();
-
-            sCardListener.CardArrival += (s, e) =>
+            SmartCardDevice.SmartCardArrived += (s, e) =>
             {
                 Console.WriteLine("Card arrived:");
                 Console.WriteLine(e.ReaderName);
@@ -36,7 +35,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
             };
 
 
-            sCardListener.CardRemoval += (s, e) =>
+            SmartCardDevice.SmartCardRemoved += (s, e) =>
             {
                 Console.WriteLine("Card removed:");
                 Console.WriteLine(e.ReaderName);
@@ -44,8 +43,6 @@ namespace Yubico.YubiKey.TestApp.Plugins
             };
 
             _ = Console.ReadLine();
-
-            sCardListener.StopListening();
 
             return true;
         }

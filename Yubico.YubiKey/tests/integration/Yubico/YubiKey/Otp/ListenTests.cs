@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using Yubico.Core.Devices.Hid;
 using Xunit;
 using Xunit.Abstractions;
+using Yubico.Core.Devices.SmartCard;
 
 namespace Yubico.PlatformInterop
 {
@@ -34,8 +35,7 @@ namespace Yubico.PlatformInterop
         [Fact]
         public void SCardListen_Succeeds()
         {
-            using var scardListener = new SCardListener();
-            scardListener.CardArrival += HandleEventFromSCard;
+            SmartCardDevice.SmartCardArrived += HandleEventFromSCard;
 
             int choice;
             do

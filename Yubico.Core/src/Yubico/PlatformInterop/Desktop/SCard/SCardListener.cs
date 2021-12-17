@@ -22,48 +22,63 @@ namespace Yubico.PlatformInterop
     /// <summary>
     /// A listener class for smart card related events.
     /// </summary>
-    public class SCardListener : IDisposable
+    internal class SCardListener : IDisposable
     {
         // The resource manager context.
         private SCardContext _context;
 
         // The active smart card readers.
         private SCardReaderStates _readerStates;
-        private readonly Thread _listenerThread;
 
-        /// <summary>
-        /// Event for card arrival.
-        /// </summary>
-        public event EventHandler<SCardEventArgs>? CardArrival;
+        private bool _isListening;
+        private Thread? _listenerThread;
 
-        /// <summary>
-        /// Event for card removal.
-        /// </summary>
-        public event EventHandler<SCardEventArgs>? CardRemoval;
+        private readonly Action<SCardEventArgs> _arrivalAction;
+        private readonly Action<SCardEventArgs> _removalAction;
 
         /// <summary>
         /// Constructs a <see cref="SCardListener"/>.
         /// </summary>
-        public SCardListener()
+        public SCardListener(Action<SCardEventArgs> arrivalAction, Action<SCardEventArgs> removalAction)
         {
-            uint result = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);
+            _arrivalAction = arrivalAction;
+            _removalAction = removalAction;
+
+            _ = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);
 
             _context = context;
             _readerStates = GetReaderStateList();
 
-            _listenerThread = new Thread(() =>
-            {
-                while (ListenForReaderChanges(-1))
-                {
-                    ;
-                }
-            }
-            );
-
-            _listenerThread.Start();
+            StartListening();
         }
 
-    #region IDisposable Support
+        /// <summary>
+        /// Starts listening for all actions within a certain manager context.
+        /// </summary>
+        private void StartListening()
+        {
+            if (!_isListening)
+            {
+                _listenerThread = new Thread(new ThreadStart(ListenForReaderChanges));
+                _isListening = true;
+                _listenerThread.Start();
+            }
+        }
+
+        // This method is the delegate sent to the new Thread.
+        // Once the new Thread is started, this method will execute. As long as
+        // the _isListening field is true, it will keep checking for updates.
+        // Once _isListening is false, it will quit the loop and return, which
+        // will terminate the thread.
+        private void ListenForReaderChanges()
+        {
+            while (_isListening && CheckForUpdates(-1))
+            {
+                
+            }
+        }
+
+        #region IDisposable Support
 
         private bool _disposedValue; // To detect redundant calls
 
@@ -77,8 +92,10 @@ namespace Yubico.PlatformInterop
             {
                 if (disposing)
                 {
+                    uint _ = PlatformLibrary.Instance.SCard.Cancel(_context);
                     _context.Dispose();
                     _readerStates.Dispose();
+                    StopListening();
                 }
                 _disposedValue = true;
             }
@@ -104,17 +121,18 @@ namespace Yubico.PlatformInterop
         #endregion
 
         /// <summary>
-        /// Stops listening for all actions within a certain resource context.
-        /// manager context.
+        /// Stops listening for all actions within a certain manager context.
         /// </summary>
-        public void StopListening()
+        private void StopListening()
         {
-            uint result = PlatformLibrary.Instance.SCard.Cancel(_context);
-            ThrowIfFailed(result);
-            _listenerThread.Join();
+            if (!(_listenerThread is null))
+            {
+                _isListening = false;
+                _listenerThread.Join();
+            }
         }
 
-        private bool ListenForReaderChanges(int timeout)
+        private bool CheckForUpdates(int timeout)
         {
             var arrivalEvents = new List<SCardEventArgs>();
             var removalEvents = new List<SCardEventArgs>();
@@ -363,22 +381,32 @@ namespace Yubico.PlatformInterop
         /// <param name="removalEvents">List of removal events to fire.</param>
         private void FireEvents(List<SCardEventArgs> arrivalEvents, List<SCardEventArgs> removalEvents)
         {
-            if (CardArrival != null)
+            if (_arrivalAction != null)
             {
                 foreach (SCardEventArgs arrival in arrivalEvents)
                 {
-                    CardArrival.Invoke(this, arrival);
+                    OnSCardArrived(arrival);
                 }
             }
 
-            if (CardRemoval != null)
+            if (_removalAction != null)
             {
                 foreach (SCardEventArgs removal in removalEvents)
                 {
-                    CardRemoval.Invoke(this, removal);
+                    OnSCardRemoved(removal);
                 }
             }
         }
+
+        /// <summary>
+        /// Raises event on smart card arrival.
+        /// </summary>
+        private void OnSCardArrived(SCardEventArgs e) => _arrivalAction(e);
+
+        /// <summary>
+        /// Raises event on smart card removal.
+        /// </summary>
+        private void OnSCardRemoved(SCardEventArgs e) => _removalAction(e);
 
         /// <summary>
         /// Checks if context need to be updated.
@@ -396,14 +424,6 @@ namespace Yubico.PlatformInterop
                     return true;
                 default:
                     return false;
-            }
-        }
-
-        private static void ThrowIfFailed(uint errorCode)
-        {
-            if (errorCode != ErrorCode.SCARD_S_SUCCESS)
-            {
-                throw new PlatformApiException();
             }
         }
 

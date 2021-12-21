@@ -21,13 +21,16 @@ namespace Yubico.PlatformInterop
     /// Event arguments for Linux HID events using monitor function in the udev
     /// library.
     /// </summary>
-    internal class LinuxUdevEventArgs : EventArgs
+    public class LinuxUdevEventArgs : EventArgs
     {
         /// <summary>
         /// The HidDevice that changed.
         /// </summary>
         public LinuxHidDevice Device { get; private set; }
 
+        /// <summary>
+        /// Constructs an instance of the <see cref="LinuxUdevEventArgs"/> class. 
+        /// </summary>
         public LinuxUdevEventArgs(LinuxHidDevice device)
         {
             Device = device;

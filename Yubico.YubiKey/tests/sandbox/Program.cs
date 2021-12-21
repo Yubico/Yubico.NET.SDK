@@ -50,7 +50,8 @@ namespace Yubico.YubiKey.TestApp
                 ["greg"] = (output) => new GregPlugin(output),
                 ["scard"] = (output) => new SCardListenerPlugin(output),
                 ["eventmgmt"] = (output) => new EventManagerPlugin(output),
-                ["hidw"] = (output) => new HidWindowsListenerPlugin(output)
+                ["hidw"] = (output) => new HidWindowsListenerPlugin(output),
+                ["hidl"] = (output) => new HidLinuxListenerPlugin(output)
             };
 
         static int Main(string[] args)

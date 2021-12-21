@@ -56,11 +56,8 @@ namespace Yubico.PlatformInterop
             IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
             Assert.NotNull(devices);
 
-            using var udevListener = new LinuxUdevListener();
-            Assert.NotNull(udevListener);
-            udevListener.CardArrival += HandleEventFromUdev;
-            udevListener.CardRemoval += HandleEventFromUdev;
-            udevListener.StartListening();
+            LinuxHidDevice.UdevDeviceArrival += HandleEventFromUdev;
+            LinuxHidDevice.UdevDeviceRemoval += HandleEventFromUdev;
 
             int choice;
             do
@@ -68,11 +65,6 @@ namespace Yubico.PlatformInterop
                 choice = RunMenu();
                 _output.WriteLine("  choice = " + choice);
             } while (choice != 0);
-
-            udevListener.StartListening();
-            udevListener.StopListening();
-            udevListener.StopListening();
-            udevListener.StartListening();
 
             devices = HidDevice.GetHidDevices();
             Assert.NotNull(devices);

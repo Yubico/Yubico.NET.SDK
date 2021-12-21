@@ -50,6 +50,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 ChangeSecret.RunResetPivPinWithPuk(_yubiKeyChosen, _keyCollector.SampleKeyCollectorDelegate),
             PivMainMenuItem.ChangePivManagementKey =>
                 ChangeSecret.RunChangePivManagementKey(_yubiKeyChosen, _keyCollector.SampleKeyCollectorDelegate),
+            PivMainMenuItem.PinProtectMgmtKey => RunSetMgmtKeyPinProtected(),
+            PivMainMenuItem.PinDeriveMgmtKey => RunSetMgmtKeyPinDerived(),
             PivMainMenuItem.GenerateKeyPair => RunGenerateKeyPair(),
             PivMainMenuItem.ImportPrivateKey => RunImportPrivateKey(),
             PivMainMenuItem.ImportCertificate => WriteImportCertMessage(),
@@ -96,6 +98,36 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             return false;
+        }
+
+        public bool RunSetMgmtKeyPinProtected()
+        {
+            WriteSpecialMgmtKeyMessage("PIN-Protected");
+
+            using (var pivSession = new PivSession(_yubiKeyChosen))
+            {
+                pivSession.KeyCollector = _keyCollector.SampleKeyCollectorDelegate;
+                return SpecialMgmtKey.RunSetMgmtKeyPinProtected(pivSession);
+            }
+        }
+
+        public bool RunSetMgmtKeyPinDerived()
+        {
+            WriteSpecialMgmtKeyMessage("PIN-Derived");
+            using (var pivSession = new PivSession(_yubiKeyChosen))
+            {
+                pivSession.KeyCollector = _keyCollector.SampleKeyCollectorDelegate;
+                return SpecialMgmtKey.RunSetMgmtKeyPinDerived(pivSession);
+            }
+        }
+
+        private static void WriteSpecialMgmtKeyMessage(string pinType)
+        {
+            SampleMenu.WriteMessage(MessageType.Title, 0, "This will set the PIV application on this YubiKey to have a");
+            SampleMenu.WriteMessage(MessageType.Title, 0, pinType + " management key.");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "All PIV sessions on this YubiKey (until the PIV application");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "is reset) must set the mgmt key to be " + pinType + " first.");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "This sample code will do so automatically.");
         }
 
         public bool RunGenerateKeyPair()

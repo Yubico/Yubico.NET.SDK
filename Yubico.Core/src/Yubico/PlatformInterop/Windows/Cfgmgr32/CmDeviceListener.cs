@@ -24,7 +24,7 @@ namespace Yubico.PlatformInterop
     /// <summary>
     /// A listener class for Windows HID related events.
     /// </summary>
-    public class CmDeviceListener : IDisposable
+    internal class CmDeviceListener : IDisposable
     {
         private readonly IntPtr _notificationContext;
 
@@ -33,23 +33,20 @@ namespace Yubico.PlatformInterop
         /// </summary>
         public Guid InterfaceClass { get; }
 
-        /// <summary>
-        /// Event for card arrival.
-        /// </summary>
-        public event EventHandler<CmDeviceEventArgs>? DeviceArrived;
-
-        /// <summary>
-        /// Event for card removal.
-        /// </summary>
-        public event EventHandler<CmDeviceEventArgs>? DeviceRemoved;
+        private readonly Action<CmDeviceEventArgs> _arrivalAction;
+        private readonly Action<CmDeviceEventArgs> _removalAction;
 
         /// <summary>
         /// Constructs a <see cref="CmDeviceListener"/>.
         /// </summary>
-        /// <param name="classGuid">A global unique identifier for HID device.</param>
-        public CmDeviceListener(Guid classGuid)
+        /// <param name="classGuid">A global unique identifier for Windows HID device.</param>
+        /// <param name="arrivalAction">An action for Windows HID device device arrival.</param>
+        /// <param name="removalAction">An action for Windows HID device device removal.</param>
+        public CmDeviceListener(Guid classGuid, Action<CmDeviceEventArgs> arrivalAction, Action<CmDeviceEventArgs> removalAction)
         {
             InterfaceClass = classGuid;
+            _arrivalAction = arrivalAction;
+            _removalAction = removalAction;
 
             byte[] zeroBytes = new byte[NativeMethods.CmNotifyFilterSize];
             byte[] guidBytes = classGuid.ToByteArray();
@@ -121,18 +118,6 @@ namespace Yubico.PlatformInterop
 
         private int OnEventReceived(IntPtr hNotify, IntPtr Context, CM_NOTIFY_ACTION Action, IntPtr EventData, int EventDataSize)
         {
-            EventHandler<CmDeviceEventArgs>? handler = Action switch
-            {
-                CM_NOTIFY_ACTION.DEVICEINTERFACEARRIVAL => DeviceArrived,
-                CM_NOTIFY_ACTION.DEVICEINTERFACEREMOVAL => DeviceRemoved,
-                _ => null,
-            };
-
-            if (handler is null)
-            {
-                return 0;
-            }
-
             CM_NOTIFY_EVENT_DATA eventData = Marshal.PtrToStructure<CM_NOTIFY_EVENT_DATA>(EventData);
             Debug.Assert(eventData.ClassGuid == InterfaceClass);
             Debug.Assert(eventData.FilterType == CM_NOTIFY_FILTER_TYPE.DEVINTERFACE);
@@ -145,10 +130,28 @@ namespace Yubico.PlatformInterop
 
             var eventArgs = new CmDeviceEventArgs(System.Text.Encoding.Unicode.GetString(buffer));
 
-            handler.Invoke(this, eventArgs);
+            if (Action == CM_NOTIFY_ACTION.DEVICEINTERFACEARRIVAL)
+            {
+                OnCmDeviceArrived(eventArgs);
+            }
+
+            if (Action == CM_NOTIFY_ACTION.DEVICEINTERFACEREMOVAL)
+            {
+                OnCmDeviceRemoved(eventArgs);
+            }
 
             return 0;
         }
+
+        /// <summary>
+        /// Raises event on Windows HID device arrival.
+        /// </summary>
+        private void OnCmDeviceArrived(CmDeviceEventArgs e) => _arrivalAction(e);
+
+        /// <summary>
+        /// Raises event on Windows HID device removal.
+        /// </summary>
+        private void OnCmDeviceRemoved(CmDeviceEventArgs e) => _removalAction(e);
 
         /// <summary>
         /// Stops listening for all actions within a certain context.

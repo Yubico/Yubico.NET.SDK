@@ -20,8 +20,38 @@ using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid
 {
-    internal class WindowsHidDevice : HidDevice
+    /// <summary>
+    /// This class represents Windows HID device.
+    /// </summary>
+    public class WindowsHidDevice : HidDevice
     {
+        /// <summary>
+        /// Event for Windows HID device arrival.
+        /// </summary>
+        public static event EventHandler<CmDeviceEventArgs>? HidDeviceArrived;
+
+        /// <summary>
+        /// Event for Windows HID device removal.
+        /// </summary>
+        public static event EventHandler<CmDeviceEventArgs>? HidDeviceRemoved;
+
+        internal static readonly CmDeviceListener cmListener = 
+            new CmDeviceListener(CmInterfaceGuid.Hid, OnDeviceArrived, OnDeviceRemoved);
+
+        /// <summary>
+        /// Raises event on Windows HID device arrival.
+        /// </summary>
+        private static void OnDeviceArrived(CmDeviceEventArgs e) => HidDeviceArrived?.Invoke(typeof(WindowsHidDevice), e);
+
+        /// <summary>
+        /// Raises event on Windows HID device removal.
+        /// </summary>
+        private static void OnDeviceRemoved(CmDeviceEventArgs e) => HidDeviceRemoved?.Invoke(typeof(WindowsHidDevice), e);
+
+        /// <summary>
+        /// Gets the list of Windows HID devices available to the system.
+        /// </summary>
+        /// <returns>List of <see cref="HidDevice"/> objects.</returns>
         public static IEnumerable<HidDevice> GetList() => CmDevice
             .GetList(CmInterfaceGuid.Hid)
             .Where(cmDevice => cmDevice.InterfacePath != null)
@@ -30,7 +60,7 @@ namespace Yubico.Core.Devices.Hid
                 cmDevice.HidUsageId,
                 (HidUsagePage)cmDevice.HidUsagePage));
 
-        public WindowsHidDevice(string instancePath, short usage, HidUsagePage usagePage) :
+        private WindowsHidDevice(string instancePath, short usage, HidUsagePage usagePage) :
             base(instancePath)
         {
             ResolveIdsFromInstancePath(instancePath);
@@ -65,9 +95,17 @@ namespace Yubico.Core.Devices.Hid
         private static bool TryGetHexShort(string s, int offset, int length, out ushort result) =>
             ushort.TryParse(s.Substring(offset, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out result);
 
+        /// <summary>
+        /// Opens an active connection to the Windows HID device.
+        /// </summary>
+        /// <returns>An open <see cref="IHidConnection"/>.</returns>
         public override IHidConnection ConnectToFeatureReports() =>
             new WindowsHidFeatureReportConnection(Path);
 
+        /// <summary>
+        /// Opens an active connection to the Windows HID device.
+        /// </summary>
+        /// <returns>An open <see cref="IHidConnection"/>.</returns>
         public override IHidConnection ConnectToIOReports() =>
             new WindowsHidIOReportConnection(Path);
     }

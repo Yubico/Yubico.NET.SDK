@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System;
-using Yubico.PlatformInterop;
+using Yubico.Core.Devices.Hid;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
@@ -26,24 +26,20 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         public override bool Execute()
         {
-            CmDeviceListener cmListener = new CmDeviceListener(CmInterfaceGuid.Hid);
-
-            cmListener.DeviceArrived += (s, e) =>
+            WindowsHidDevice.HidDeviceArrived += (s, e) =>
             {
                 Console.WriteLine("HID device arrived:");
                 Console.WriteLine(e.DeviceInterfacePath);
             
             };
 
-            cmListener.DeviceRemoved += (s, e) =>
+            WindowsHidDevice.HidDeviceRemoved += (s, e) =>
             {
                 Console.WriteLine("HID device removed:");
                 Console.WriteLine(e.DeviceInterfacePath);
             };
 
             _ = Console.ReadLine();
-
-            cmListener.StopListening();
 
             return true;
         }

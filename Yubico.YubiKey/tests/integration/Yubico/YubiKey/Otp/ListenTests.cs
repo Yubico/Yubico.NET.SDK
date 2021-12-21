@@ -81,10 +81,8 @@ namespace Yubico.PlatformInterop
             IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
             Assert.NotNull(devices);
 
-            using var cmListener = new CmDeviceListener(CmInterfaceGuid.Hid);
-            Assert.NotNull(cmListener);
-            cmListener.DeviceArrived += HandleEventFromCm;
-            cmListener.DeviceRemoved += HandleEventFromCm;
+            WindowsHidDevice.HidDeviceArrived += HandleEventFromCm;
+            WindowsHidDevice.HidDeviceRemoved += HandleEventFromCm;
 
             int choice;
             do

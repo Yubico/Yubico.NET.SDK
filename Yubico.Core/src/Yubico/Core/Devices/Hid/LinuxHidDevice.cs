@@ -13,14 +13,16 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid
 {
-    internal class LinuxHidDevice : HidDevice
+    /// <summary>
+    /// This class represents Linux HID device.
+    /// </summary>
+    public class LinuxHidDevice : HidDevice
     {
         private const int UsagePageTag = 4;
         private const int UsageTag = 8;
@@ -31,7 +33,32 @@ namespace Yubico.Core.Devices.Hid
 
         private readonly string _devnode;
 
-        // Return a List of all the HIDs we can find (not just YubiKeys).
+        /// <summary>
+        /// Event for Linux HID device arrival.
+        /// </summary>
+        public static event EventHandler<LinuxUdevEventArgs>? UdevDeviceArrival;
+
+        /// <summary>
+        /// Event for Linux HID device removal.
+        /// </summary>
+        public static event EventHandler<LinuxUdevEventArgs>? UdevDeviceRemoval;
+
+        internal static readonly LinuxUdevListener udevListener = new LinuxUdevListener(OnDeviceArrived, OnDeviceRemoved);
+
+        /// <summary>
+        /// Raises event on Linux HID device arrival.
+        /// </summary>
+        private static void OnDeviceArrived(LinuxUdevEventArgs e) => UdevDeviceArrival?.Invoke(typeof(LinuxHidDevice), e);
+
+        /// <summary>
+        /// Raises event on Linux HID device removal.
+        /// </summary>
+        private static void OnDeviceRemoved(LinuxUdevEventArgs e) => UdevDeviceRemoval?.Invoke(typeof(LinuxHidDevice), e);
+
+        /// <summary>
+        /// Gets a list of all the HIDs on the system (not just YubiKeys).
+        /// </summary>
+        /// <returns>A list of <see cref="HidDevice"/> objects.</returns>
         public static IEnumerable<HidDevice> GetList()
         {
             // Build an object to search for "hidraw" devices.
@@ -43,12 +70,12 @@ namespace Yubico.Core.Devices.Hid
         }
 
         // Build a new LinuxHidDevice from a device handle.
-        public LinuxHidDevice(LinuxUdevDeviceSafeHandle deviceHandle)
+        internal LinuxHidDevice(LinuxUdevDeviceSafeHandle deviceHandle)
             : this(DeviceGetPath(deviceHandle), DeviceGetDevnode(deviceHandle))
         {
         }
 
-        public LinuxHidDevice(string path, string devnode) :
+        internal LinuxHidDevice(string path, string devnode) :
             base(path)
         {
             VendorId = 0;
@@ -253,13 +280,21 @@ namespace Yubico.Core.Devices.Hid
             return newOffset;
         }
 
-        // Return an implementation of IHidConnection that will already have a
-        // connection to the HID, and will be able to Get and Set Feature Reports.
+        
+        /// <summary>
+        /// Return an implementation of IHidConnection that will already have a
+        /// connection to the Linux HID device, and will be able to Get and Set Feature Reports.
+        /// </summary>
+        /// <returns>An open <see cref="IHidConnection"/>.</returns>
         public override IHidConnection ConnectToFeatureReports()
         {
             return new LinuxHidFeatureReportConnection(_devnode);
         }
 
+        /// <summary>
+        /// Opens an active connection to the Linux HID device.
+        /// </summary>
+        /// <returns>An open <see cref="IHidConnection"/>.</returns>
         public override IHidConnection ConnectToIOReports()
         {
             return new LinuxHidIOReportConnection(_devnode);

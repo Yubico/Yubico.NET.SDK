@@ -15,8 +15,6 @@
 using System;
 using System.Threading;
 using System.Runtime.InteropServices;
-using System.Globalization;
-using Yubico.Core;
 using Yubico.Core.Devices.Hid;
 
 namespace Yubico.PlatformInterop
@@ -30,18 +28,6 @@ namespace Yubico.PlatformInterop
     /// <code>
     ///   using var listener = new LinuxUdevListener();
     /// </code>
-    /// <para>
-    /// To use this class follow these steps.
-    /// <list type="number">
-    /// <item>Instantiate this class</item>
-    /// <item>Add your EventHandlers to the Arrival and Removal properties.</item>
-    /// <item>Call the StartListening method.</item>
-    /// <item>When done, call the StopListening method, or else call the Dispose
-    /// method, or if your code uses the using keyword, the Dispose will be
-    /// called automatically when the object goes out of scope and it will stop
-    /// listening.</item>
-    /// </list>
-    /// </para>
     /// <para>
     /// Do not share an object of this class among threads. That is, an object of
     /// this type is not to be used in more than one thread. Note that a YubiKey
@@ -75,23 +61,19 @@ namespace Yubico.PlatformInterop
         internal LinuxUdevMonitorSafeHandle _monitorObject;
         private bool _isDisposed;
 
-        /// <summary>
-        /// Event for card arrival.
-        /// </summary>
-        public event EventHandler<LinuxUdevEventArgs>? CardArrival;
-
-        /// <summary>
-        /// Event for card removal.
-        /// </summary>
-        public event EventHandler<LinuxUdevEventArgs>? CardRemoval;
+        private readonly Action<LinuxUdevEventArgs> _arrivalAction;
+        private readonly Action<LinuxUdevEventArgs> _removalAction;
 
         /// <summary>
         /// Create a new instance of the class that can listen for changes to
         /// HIDs.
         /// </summary>
-        public LinuxUdevListener()
+        public LinuxUdevListener(Action<LinuxUdevEventArgs> arrivalAction, Action<LinuxUdevEventArgs> removalAction)
             : base()
         {
+            _arrivalAction = arrivalAction;
+            _removalAction = removalAction;
+
             _monitorObject = (LinuxUdevMonitorSafeHandle)ThrowIfFailedNull(
                 NativeMethods.udev_monitor_new_from_netlink(_udevObject, NativeMethods.UdevMonitorName));
 
@@ -103,6 +85,8 @@ namespace Yubico.PlatformInterop
 
             _isListening = false;
             _listenerThread = null;
+
+            StartListening();
         }
 
         ~LinuxUdevListener()
@@ -124,7 +108,7 @@ namespace Yubico.PlatformInterop
         /// again.
         /// </para>
         /// </remarks>
-        public void StartListening()
+        private void StartListening()
         {
             // We don't need to lock because if there is a separate thread that
             // has access to _isListening, it does not change it.
@@ -148,7 +132,7 @@ namespace Yubico.PlatformInterop
         /// If the object has already stopped listening, this method will do
         /// nothing.
         /// </remarks>
-        public void StopListening()
+        private void StopListening()
         {
             // If someone creates an instance of this class and then immediately
             // calls Stop, we don't want to do anything. Hence, check for null
@@ -204,19 +188,29 @@ namespace Yubico.PlatformInterop
             string action = Marshal.PtrToStringAnsi(actionPtr);
             if (string.Equals(action, "add", StringComparison.Ordinal))
             {
-                if (CardArrival != null)
+                if (_arrivalAction != null)
                 {
-                    CardArrival.Invoke(this, eventArg);
+                    OnDeviceArrived(eventArg);
                 }
             }
             else if (string.Equals(action, "remove", StringComparison.Ordinal))
             {
-                if (CardRemoval != null)
+                if (_removalAction != null)
                 {
-                    CardRemoval.Invoke(this, eventArg);
+                    OnDeviceRemoved(eventArg);
                 }
             }
         }
+
+        /// <summary>
+        /// Raises event on Linux HID device arrival.
+        /// </summary>
+        private void OnDeviceArrived(LinuxUdevEventArgs e) => _arrivalAction(e);
+
+        /// <summary>
+        /// Raises event on Linux HID device removal.
+        /// </summary>
+        private void OnDeviceRemoved(LinuxUdevEventArgs e) => _removalAction(e);
 
         protected override void Dispose(bool disposing)
         {

@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Piv.Commands
         private const byte PivGetDataParameter1 = 0x3F;
         private const byte PivGetDataParameter2 = 0xFF;
         private const byte PivGetDataTlvTag = 0x5C;
-        private const int MinimumVendorTag = 0x00010000;
+        private const int MinimumVendorTag = 0x005F0000;
         private const int MaximumVendorTag = 0x00ffffff;
         private const int DiscoveryTag = 0x0000007E;
         private const int BiometricGroupTemplateTag = 0x00007F61;

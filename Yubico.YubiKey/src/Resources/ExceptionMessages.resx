@@ -288,6 +288,15 @@
   <data name="InvalidDataEncoding" xml:space="preserve">
     <value>The data provided does not match the expected encoding.</value>
   </data>
+  <data name="CannotUseDataTagAsAlternate" xml:space="preserve">
+    <value>The data tag {0} is not available as an alternate.</value>
+  </data>
+  <data name="NoDataToEncode" xml:space="preserve">
+    <value>There is no data to encode.</value>
+  </data>
+  <data name="InvalidPivDataObjectLength" xml:space="preserve">
+    <value>The supplied data for a PIV Data Object was an invalid length.</value>
+  </data>
   <data name="OperationPriorToLoadInitializeUpdate" xml:space="preserve">
     <value>Attempted to perform command encoding or response decoding prior to loading the response to initialize update.</value>
   </data>

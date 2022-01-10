@@ -22,13 +22,13 @@ limitations under the License. -->
 The OTP application [slots](xref:OtpSlots) on the YubiKey are capable of storing static passwords in place of other configurations. As the name implies, a static password is an unchanging string of characters, much like the passwords you create for various online accounts. When a slot containing a static password is touch-activated, the password characters are sent to the host device as keyboard input (more specifically, as [USB HID reports](xref:OtpHID)).
 
 > [!NOTE]
-> Because static password characters are stored on the YubiKey as their corresponding HID usage IDs, sometimes referred to as "scan codes," static passwords can only be communicated correctly when the YubiKey is connected to a host device over USB or Lightning. NFC-enabled YubiKeys use the [NDEF](xref:OtpNdef) communication protocol to submit passwords wirelessly to host devices, and HID usage IDs are not compatible with NDEF.
+> Because static password characters are stored on the YubiKey as their corresponding HID usage IDs, sometimes referred to as "scan codes," they can only be communicated correctly when the YubiKey is connected to a host device over USB or Lightning. In this case, a host device will translate the HID usage IDs to characters according to the HID communication protocol. NFC-enabled YubiKeys use the [NDEF](xref:OtpNdef) communication protocol to submit passwords wirelessly to host devices as ASCII/UTF characters. Because NDEF expects input (the password) to already be in ASCII/UTF characters, it will send the HID usage IDs to the host device as-is, and the host will not translate them from HID to ASCII/UTF.
 
 As you can imagine, static passwords are not as secure as other configurations, such as [Yuibco OTPs](xref:OtpYubicoOtp), but their length and complexity still make them resistant to guessing. For this reason, we do NOT recommend using static passwords unless they are required for use with legacy systems for which other configurations would not be compatible.
 
 ## Static password configuration
 
-Static passwords can be either randomly generated or manually set by a user. Both options require configuration via the API's [ConfigureStaticPassword()](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureStaticPassword(Yubico.YubiKey.Otp.Slot)) method. Please see [How to program a slot with a static password](xref:OtpProgramStaticPassword) for examples.
+Static passwords can be either randomly generated or manually set by a developer. Both options require configuration via the API's [ConfigureStaticPassword()](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureStaticPassword(Yubico.YubiKey.Otp.Slot)) method. Please see [How to program a slot with a static password](xref:OtpProgramStaticPassword) for examples.
 
 > [!NOTE]
 > Each OTP application slot may store one generated or user-defined password. If you try to configure a slot with both, you will receive a `System.InvalidOperationException`.

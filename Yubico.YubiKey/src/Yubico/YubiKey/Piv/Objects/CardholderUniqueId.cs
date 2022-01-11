@@ -66,6 +66,10 @@ namespace Yubico.YubiKey.Piv.Objects
     /// on the YubiKey, if there is one. Because that might not be something you
     /// want to do, this is the most dangerous option.
     /// </para>
+    /// <para>
+    /// See also the user's manual entry on
+    /// <xref href="UsersManualPivObjects"> PIV data objects</xref>.
+    /// </para>
     /// </remarks>
     public sealed class CardholderUniqueId : PivDataObject
     {
@@ -116,7 +120,7 @@ namespace Yubico.YubiKey.Piv.Objects
         /// </summary>
         public CardholderUniqueId()
         {
-            _log.LogInformation("Creating a new instance of CardholderUniqueId.");
+            _log.LogInformation("Create a new instance of CardholderUniqueId.");
             _disposed = false;
             DataTag = ChuidDefinedDataTag;
 

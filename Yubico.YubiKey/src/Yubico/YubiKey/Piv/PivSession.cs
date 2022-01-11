@@ -18,6 +18,7 @@ using System.Globalization;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.InterIndustry.Commands;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -142,6 +143,7 @@ namespace Yubico.YubiKey.Piv
     public sealed partial class PivSession : IDisposable
     {
         private bool _disposed;
+        private readonly Logger _log = Log.GetLogger();
         private readonly IYubiKeyDevice _yubiKeyDevice;
 
         /// <summary>
@@ -205,6 +207,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public PivSession(IYubiKeyDevice yubiKey)
         {
+            _log.LogInformation("Create a new instance of PivSession.");
             if (yubiKey is null)
             {
                 throw new ArgumentNullException(nameof(yubiKey));
@@ -269,6 +272,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public PivMetadata GetMetadata(byte slotNumber)
         {
+            _log.LogInformation("GetMetadata for slot number {0:X2}.", slotNumber);
             if (_yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0)
             {
                 var metadataCommand = new GetMetadataCommand(slotNumber);
@@ -323,6 +327,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ResetApplication()
         {
+            _log.LogInformation("Reset the PIV application.");
             // To reset, both the PIN and PUK must be blocked.
             if (BlockPinOrPuk(PivSlot.Pin) == true)
             {
@@ -358,6 +363,7 @@ namespace Yubico.YubiKey.Piv
         // PivSlot.Puk, block the PUK.
         private bool BlockPinOrPuk(byte slotNumber)
         {
+            _log.LogInformation($"Block the {(slotNumber == 80 ? "PIN" : "PUK")}.");
             int retriesRemaining;
             do
             {

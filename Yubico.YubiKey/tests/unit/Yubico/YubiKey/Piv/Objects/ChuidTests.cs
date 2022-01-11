@@ -50,16 +50,16 @@ namespace Yubico.YubiKey.Piv.Objects
         public void SetTag_DataTag_Correct()
         {
             using var chuid = new CardholderUniqueId();
-            chuid.SetDataTag(0x005FFF10);
+            chuid.DataTag = 0x005F0010;
 
-            Assert.Equal(0x005FFF10, chuid.DataTag);
+            Assert.Equal(0x005F0010, chuid.DataTag);
         }
 
         [Fact]
         public void SetTag_DefinedDataTag_Correct()
         {
             using var chuid = new CardholderUniqueId();
-            chuid.SetDataTag(0x005FFF10);
+            chuid.DataTag = 0x005F0010;
 
             int definedTag = chuid.GetDefinedDataTag();
             Assert.Equal(0x005FC102, definedTag);
@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var chuid = new CardholderUniqueId();
 
-            _ = Assert.Throws<ArgumentException>(() => chuid.SetDataTag(newTag));
+            _ = Assert.Throws<ArgumentException>(() => chuid.DataTag = newTag);
         }
 
         [Fact]

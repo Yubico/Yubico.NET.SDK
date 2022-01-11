@@ -29,11 +29,11 @@ namespace Yubico.YubiKey.Piv.Objects
     /// <see cref="PivSession.WriteObject"/>.
     /// <para>
     /// Note that if there is no data on the YubiKey stored under the given
-    /// object, then after calling <c>ReadObject</c>, the resulting PivDataObject
-    /// will be "empty".
+    /// object, then after calling <c>ReadObject</c>, the resulting
+    /// <c>PivDataObject</c> will be "empty" (<see cref="IsEmpty"/>)
     /// </para>
     /// <para>
-    /// You can also create a new instance of a PivDataObject (call the
+    /// You can also create a new instance of a <c>PivDataObject</c> (call the
     /// constructor directly, rather than getting the YubiKey's contents), set
     /// it, and store it. However, when you store data (by calling
     /// <c>WriteObject</c>), you overwrite any data already there. Hence, you
@@ -42,24 +42,22 @@ namespace Yubico.YubiKey.Piv.Objects
     /// unseen.
     /// </para>
     /// <para>
-    /// This class (and all its subclasses) implements <c>IDisposable</c> because
-    /// the data might be sensitive. Upon disposal, any stored data is
-    /// overwritten.
+    /// This class (and each subclass) implements <c>IDisposable</c> because the
+    /// data might be sensitive. Upon disposal, any stored data is overwritten.
+    /// </para>
+    /// <para>
+    /// See also the user's manual entry on
+    /// <xref href="UsersManualPivObjects"> PIV data objects</xref>.
     /// </para>
     /// </remarks>
     public abstract class PivDataObject : IDisposable
     {
-        private const int MinPivDataTag = 0x005FC102;
-        private const int MaxPivDataTag = 0x005FC123;
-        private const int MinRetiredDataTag = 0x005FC10D;
-        private const int MaxRetiredDataTag = 0x005FC120;
-        private const int MinVendorDataTag = 0x005FFF02;
+        private const int MinVendorDataTag = 0x005F0000;
         private const int MaxVendorDataTag = 0x005FFFFF;
-        private const int AttestCertDataTag = 0x005FFF01;
-        private const int UnusedDataTag = 0x005FC104;
-        private const int AuthCertDataTag = 0x005FC105;
-        private const int SigCertDataTag = 0x005FC10A;
-        private const int MgmtCertDataTag = 0x005FC10B;
+        private const int MinPivDataTag = 0x005FC101;
+        private const int MaxPivDataTag = 0x005FC123;
+        private const int MinYubicoDataTag = 0x005FFF00;
+        private const int MaxYubicoDataTag = 0x005FFF15;
 
         /// <summary>
         /// Indicates whether there is any data or not. If this is true, then the
@@ -77,136 +75,62 @@ namespace Yubico.YubiKey.Piv.Objects
         /// <para>
         /// There are some tag values defined by the PIV standard, and there are
         /// others defined by Yubico (see the User's Manual entry on
-        /// <xref href="UsersManualPivCommands#get-data"> GET DATA</xref> and
-        /// <xref href="UsersManualPivCommands#get-and-put-vendor-data"> GET vendor data</xref>).
+        /// <xref href="UsersManualPivCommands#getdatatable"> GET DATA</xref> and
+        /// <xref href="UsersManualPivCommands#getvendordatatable"> GET vendor data</xref>).
+        /// In addition, some numbers are accepted by a YubiKey even though no
+        /// one has defined their use or contents. These are the numbers
+        /// <c>0x005F0000</c> through <c>0x005FFFFF</c> (inclusive) not already
+        /// specified.
         /// </para>
         /// <para>
         /// When you instantiate an object that is a subclass of this abstract
         /// class, this property will be set with the defined (or sometimes it's
         /// called the default) <c>DataTag</c>. However, it is possible to change
-        /// that tag. See <see cref="SetDataTag"/>. This is not recommended, but
-        /// it is possible because there are some applications that have a use
-        /// case for such a change.
+        /// that tag. See the User's manual entry on
+        /// <xref href="UsersManualPivObjects#changing-the-datatag"> PIV data objects</xref>
+        /// for more information on what valid data tags are possible. If you try
+        /// to change to an unsupported tag, the SDK will throw an exception.
+        /// </para>
+        /// <para>
+        /// Note that changing the <c>DataTag</c> is not recommended, but it is
+        /// possible because there are some applications that have a use case for
+        /// such a feature. See the User's Manual entry on
+        /// <xref href="UsersManualPivObjects#changing-the-datatag"> PIV data objects</xref>.
+        /// for a more detailed description of this topic.
         /// </para>
         /// </remarks>
-        public int DataTag { get; protected set; }
-
-        /// <summary>
-        /// Set the <c>DataTag</c> to the new value, using this new value as an
-        /// alternate to the defined.
-        /// </summary>
-        /// <remarks>
-        /// Changing the <c>DataTag</c> means storing the data under an alternate
-        /// tag. That is, there are specific tags defined for specific data
-        /// constructions. For example, there is a tag for CHUID
-        /// (<c>0x005FC102</c>), and specific data formatted following a specific
-        /// TLV construction. However, if you want to store CHUID data under an
-        /// alternate tag (it will still be the CHUID data formatted following
-        /// the CHUID definition), you can set the <c>DataTag</c>.
-        /// <para>
-        /// You will likely never have a use case in your application for using
-        /// an alternate <c>DataTag</c> but this feature is available for those
-        /// rare cases when it can be useful.
-        /// </para>
-        /// <para>
-        /// Note that it can be dangerous to change the <c>DataTag</c> as well,
-        /// because some tags require the PIN to read and others do not. For
-        /// example, if you store some sensitive data in the PRINTED storage
-        /// area, PIN verification is required to retrieve it. But suppose you
-        /// change the <c>DataTag</c> to, say, SECURITY (<c>0x005FC106</c>). That
-        /// storage area does not require the PIN to retrieve the data.
-        /// </para>
-        /// <para>
-        /// It is also possible some other application wants to use a storage
-        /// area for its intended purpose, but using an alternate <c>DataTag</c>
-        /// might overwrite existing data, or the other application ecpects to be
-        /// able to read data in a particular format but cannot.
-        /// </para>
-        /// <para>
-        /// It is not possible to change the <c>DataTag</c> to just any integer
-        /// value. The new tag must either be an existing defined tag (see the
-        /// User's Manual entries on
-        /// <xref href="UsersManualPivCommands#get-data"> GET DATA</xref> and
-        /// <xref href="UsersManualPivCommands#get-and-put-vendor-data"> GET vendor data</xref>),
-        /// that is, a number between <c>0x005FC100</c> and <c>0x005FC123</c> or
-        /// a value between <c>0x005FFF00</c> and <c>0x005FFFFF</c> (inclusive).
-        /// In addition, there are some values still not allowed. For example,
-        /// the YubiKey does not allow storing data in the DISCOVERY storage area
-        /// (<c>DataTag = 0x7E</c>). Also, only certificates are allowed in the
-        /// ATTESTATION CERT storage area (<c>DataTag = 0x005FFF01</c>) and there
-        /// is a <c>PivSession</c> method dedicated to this data object (see
-        /// <see cref="PivSession.ReplaceAttestationKeyAndCertificate"/>) for
-        /// this operation. Hence, this method will not allow using that data tag.
-        /// </para>
-        /// <para>
-        /// These are the data tags that this method will not allow.
-        /// <list type="bullet">
-        /// <item><description><c>0x0000007E</c></description></item>
-        /// <item><description><c>0x00007F61</c></description></item>
-        /// <item><description><c>0x005FC101</c></description></item>
-        /// <item><description><c>0x005FC104</c></description></item>
-        /// <item><description><c>0x005FC105</c></description></item>
-        /// <item><description><c>0x005FC10A</c></description></item>
-        /// <item><description><c>0x005FC10B</c></description></item>
-        /// <item><description><c>0x005FC10D through 0x005FC120</c></description></item>
-        /// <item><description><c>0x005FFF01</c></description></item>
-        /// </list>
-        /// </para>
-        /// <para>
-        /// If you change the <c>DataTag</c>, then the data specified in the
-        /// object, including its format, will be stored under a different tag.
-        /// For example, if you build a <see cref="CardholderUniqueId"/> object
-        /// and leave the <c>DataTag</c> alone, then when you store the data it
-        /// will be stored in the YubiKey's CHUID storage area. But if you build
-        /// the object and then change the <c>DataTag</c> to, say,
-        /// <c>0x005FC103</c> (Fingerprints), when you store the data, it will be
-        /// the CHUID data formatted according to the PIV specification for
-        /// CHUID, but stored in the Fingerprints storage area.
-        /// </para>
-        /// </remarks>
-        /// <param name="newDataTag">
-        /// The alternate data tag under which the data is to be stored or
-        /// retrieved.
-        /// </param>
-        /// <exception cref="ArgumentException">
-        /// The <c>newDataTag</c> in not allowed to be an alternate tag.
-        /// </exception>
-        public void SetDataTag(int newDataTag)
+        public int DataTag
         {
-            if (!IsValidAlternateTag(newDataTag))
+            get => _dataTag;
+            set
             {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.CannotUseDataTagAsAlternate,
-                        newDataTag));
-            }
+                if (!IsValidAlternateTag(value))
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.CannotUseDataTagAsAlternate,
+                            value));
+                }
 
-            DataTag = newDataTag;
+                _dataTag = value;
+            }
         }
 
+        private int _dataTag;
+
         // Is the given dataTag valid as an alternate?
-        private static bool IsValidAlternateTag(int dataTag)
+        // The defined tag is a valid "alternate".
+        private bool IsValidAlternateTag(int dataTag)
         {
-            if ((dataTag < MinPivDataTag) || (dataTag > MaxVendorDataTag))
+            if (dataTag != GetDefinedDataTag())
             {
-                return false;
-            }
-            if ((dataTag > MaxPivDataTag) && (dataTag < MinVendorDataTag))
-            {
-                return false;
-            }
-            if ((dataTag >= MinRetiredDataTag) && (dataTag <= MaxRetiredDataTag))
-            {
-                return false;
-            }
-            if ((dataTag == AttestCertDataTag) ||
-                (dataTag == UnusedDataTag) ||
-                (dataTag == AuthCertDataTag) ||
-                (dataTag == SigCertDataTag) ||
-                (dataTag == MgmtCertDataTag))
-            {
-                return false;
+                if ((dataTag < MinVendorDataTag) || (dataTag > MaxVendorDataTag)
+                   || ((dataTag >= MinPivDataTag) && (dataTag <= MaxPivDataTag))
+                   || ((dataTag >= MinYubicoDataTag) && (dataTag <= MaxYubicoDataTag)))
+                {
+                    return false;
+                }
             }
 
             return true;
@@ -219,10 +143,8 @@ namespace Yubico.YubiKey.Piv.Objects
         /// <remarks>
         /// This is also called the default data tag. This method will always
         /// return the defined tag, regardless of what the <c>DataTag</c>
-        /// property returns. That is, if you call <c>SetDataTag</c> to change
-        /// the tag under which the data is to be stored, the <c>DataTag</c>
-        /// property will reflect that change. But this method will still return
-        /// the original, defined tag.
+        /// property returns. That is, even if you change the <c>DataTag</c> this
+        /// method will still return the original, defined tag.
         /// </remarks>
         /// <returns>
         /// The data tag defined for the data object.
@@ -234,8 +156,8 @@ namespace Yubico.YubiKey.Piv.Objects
         /// </summary>
         /// <remarks>
         /// Each data object has a defined format. See the User's Manual entry on
-        /// <xref href="UsersManualPivCommands#get-data"> GET DATA</xref> and
-        /// <xref href="UsersManualPivCommands#get-and-put-vendor-data"> GET vendor data</xref>
+        /// <xref href="UsersManualPivCommands#getdatatable"> GET DATA</xref> and
+        /// <xref href="UsersManualPivCommands#getvendordatatable"> GET vendor data</xref>
         /// for descriptions of the formats. This method will build a new byte
         /// array containing the data set in the object. This data will generally
         /// then be stored on the YubiKey.

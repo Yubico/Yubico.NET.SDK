@@ -38,15 +38,15 @@ For Yubico OTPs and OATH-HOTPs, the ciphertext generated post-password encryptio
 
 To send the password to a host device over USB/Lightning, the ModHex characters are then translated into their corresponding HID usage IDs so they can be handled by the host device as keyboard input.
 
-Yubico OTPs use ModHex encoding by default. OATH-HOTPs can be configured so that the [first byte](xref:Yubico.YubiKey.Otp.OtpSettings`1.OathFixedModhex1%28System.Boolean%29), [first two bytes](xref:Yubico.YubiKey.Otp.OtpSettings`1.UseOathFixedModhex2%28System.Boolean%29), or [all bytes](xref:Yubico.YubiKey.Otp.OtpSettings-1.UseOathFixedModhex.html%23Yubico_YubiKey_Otp_OtpSettings_1_UseOathFixedModhex_System_Boolean_) of the token identifier use ModHex encoding.
+Yubico OTPs use ModHex encoding by default. OATH-HOTPs can be configured so that the [first byte](xref:Yubico.YubiKey.Otp.OtpSettings`1.OathFixedModhex1%28System.Boolean%29), [first two bytes](xref:Yubico.YubiKey.Otp.OtpSettings`1.UseOathFixedModhex2%28System.Boolean%29), or [all bytes](xref:Yubico.YubiKey.Otp.OtpSettings`1.UseOathFixedModhex%28System.Boolean%29) of the token identifier use ModHex encoding.
 
 ## ModHex as a static password keyboard layout
 
 When [configuring an OTP application slot with a static password](xref:OtpProgramStaticPassword), you have two options:
 
-1. [Generate](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.GeneratePassword) a random password of a specified length to be used as the static password.
+1. [Generate](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.GeneratePassword%28System.Memory%7BSystem.Char%7D%29) a random password of a specified length to be used as the static password.
 
-1. [Set](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.SetPassword) the static password to something of your choosing.
+1. [Set](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.SetPassword%28System.ReadOnlyMemory%7BSystem.Char%7D%29) the static password to something of your choosing.
 
 For static passwords, the [keyboard layout](xref:Yubico.Core.Devices.Hid.KeyboardLayout) determines which HID usage IDs are used to represent the password characters. For example, if the keyboard layout is set to English, the SDK will use the HID usage IDs corresponding to the location of the password characters on an English keyboard.
 

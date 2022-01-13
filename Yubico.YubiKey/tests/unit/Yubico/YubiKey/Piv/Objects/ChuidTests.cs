@@ -115,7 +115,9 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void SetGuid_Valid_NotEmpty()
         {
-            byte[] newGuid = GetRandomBytes(16, false);
+            RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
+            byte[] newGuid = new byte[16];
+            random.GetBytes(newGuid);
 
             using var chuid = new CardholderUniqueId();
 
@@ -129,7 +131,7 @@ namespace Yubico.YubiKey.Piv.Objects
             var expectedValue = new Span<byte>(new byte[] {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
             });
-            byte[] newGuid = GetRandomBytes(16, true);
+            byte[] newGuid = GetFixedGuidBytes();
 
             using var chuid = new CardholderUniqueId();
 
@@ -142,7 +144,9 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void SetGuid_BadLength_Throws()
         {
-            byte[] newGuid = GetRandomBytes(15, true);
+            byte[] newGuid = new byte[] {
+                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E
+            };
 
             using var chuid = new CardholderUniqueId();
 
@@ -158,7 +162,7 @@ namespace Yubico.YubiKey.Piv.Objects
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x35,
                 0x08, 0x32, 0x30, 0x33, 0x30, 0x30, 0x31, 0x30, 0x31, 0x3e, 0x00, 0xfe, 0x00
             });
-            byte[] newGuid = GetRandomBytes(16, true);
+            byte[] newGuid = GetFixedGuidBytes();
 
             using var chuid = new CardholderUniqueId();
 
@@ -278,25 +282,9 @@ namespace Yubico.YubiKey.Piv.Objects
             _ = Assert.Throws<ArgumentException>(() => chuid.Decode(encodedValue));
         }
 
-        private byte[] GetRandomBytes(int count, bool isFixed)
-        {
-            byte[] fixedBytes = new byte[] {
-                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F,
-                0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22
+        private byte[] GetFixedGuidBytes() =>
+            new byte[] {
+                0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
             };
-
-            byte[] returnValue = new byte[count];
-
-            byte[]? inputArg = null;
-            if (isFixed)
-            {
-                inputArg = fixedBytes;
-            }
-
-            using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(inputArg);
-            random.GetBytes(returnValue);
-
-            return returnValue;
-        }
     }
 }

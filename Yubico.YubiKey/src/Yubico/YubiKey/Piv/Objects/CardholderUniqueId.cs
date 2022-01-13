@@ -118,6 +118,10 @@ namespace Yubico.YubiKey.Piv.Objects
         /// Build a new object. This will not get a CHUID from any YubiKey, it
         /// will only build an "empty" object.
         /// </summary>
+        /// <remarks>
+        /// To read the CHUID data out of a YubiKey, call the
+        /// <see cref="PivSession.ReadObject{PivObject}()"/> method.
+        /// </remarks>
         public CardholderUniqueId()
         {
             _log.LogInformation("Create a new instance of CardholderUniqueId.");
@@ -225,7 +229,9 @@ namespace Yubico.YubiKey.Piv.Objects
                 tlvWriter.WriteValue(LrcTag, emptySpan);
             }
 
-            return tlvWriter.Encode();
+            byte[] returnValue = tlvWriter.Encode();
+            tlvWriter.Clear();
+            return returnValue;
         }
 
         /// <inheritdoc />
@@ -339,7 +345,7 @@ namespace Yubico.YubiKey.Piv.Objects
                 {
                     if ((signature.Length == 0) && tlvReader.TryReadValue(out ReadOnlyMemory<byte> lrc, LrcTag))
                     {
-                        if (lrc.Length == 0)
+                        if ((lrc.Length == 0) && !tlvReader.HasData)
                         {
                             return true;
                         }

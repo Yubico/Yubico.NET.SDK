@@ -862,6 +862,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The supplied data for a PIV Data Object was invalid..
+        /// </summary>
+        internal static string InvalidPivDataObjectValue {
+            get {
+                return ResourceManager.GetString("InvalidPivDataObjectValue", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The length of input to a Put Data operation, {0}, was invalid, the maximum is {1}..
         /// </summary>
         internal static string InvalidPivPutDataLength {

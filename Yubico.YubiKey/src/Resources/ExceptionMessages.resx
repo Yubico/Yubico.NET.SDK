@@ -297,6 +297,9 @@
   <data name="InvalidPivDataObjectLength" xml:space="preserve">
     <value>The supplied data for a PIV Data Object was an invalid length.</value>
   </data>
+  <data name="InvalidPivDataObjectValue" xml:space="preserve">
+    <value>The supplied data for a PIV Data Object was invalid.</value>
+  </data>
   <data name="OperationPriorToLoadInitializeUpdate" xml:space="preserve">
     <value>Attempted to perform command encoding or response decoding prior to loading the response to initialize update.</value>
   </data>

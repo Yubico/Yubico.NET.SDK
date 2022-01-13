@@ -363,7 +363,7 @@ namespace Yubico.YubiKey.Piv
         // PivSlot.Puk, block the PUK.
         private bool BlockPinOrPuk(byte slotNumber)
         {
-            _log.LogInformation($"Block the {(slotNumber == 80 ? "PIN" : "PUK")}.");
+            _log.LogInformation($"Block the {(slotNumber == 0x80 ? "PIN" : "PUK")}.");
             int retriesRemaining;
             do
             {

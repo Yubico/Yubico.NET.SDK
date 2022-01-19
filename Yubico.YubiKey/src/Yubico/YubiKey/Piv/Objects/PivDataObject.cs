@@ -60,9 +60,30 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int MaxYubicoDataTag = 0x005FFF15;
 
         /// <summary>
-        /// Indicates whether there is any data or not. If this is true, then the
-        /// object is empty and the contents of any property are meaningless.
+        /// Indicates whether there is any data or not. If this is false, then
+        /// the contents of any property are meaningless.
         /// </summary>
+        /// <remarks>
+        /// Note that is it possible for some Data Objects to contain data, but
+        /// all that data is "default" or "nothing". For example, the
+        /// <see cref="KeyHistory"/> class contains numbers of certs and a URL.
+        /// It is possible a YubiKey contains and encoded Key History in the Key
+        /// History data location, but that data includes no certs and no URL.
+        /// <para>
+        /// Suppose you build a <c>KeyHistory</c> object using the
+        /// <see cref="PivSession.ReadObject{PivObject}()"/> method, and the
+        /// YubiKey contains data in the Key History storage area, but that data
+        /// indicates there are no certs and no URL. The resulting object will
+        /// not be empty (the <c>IsEmpty</c> field will be <c>false</c>).
+        /// However, the properties describing the contents will be zero and
+        /// NULL.
+        /// </para>
+        /// <para>
+        /// If you build the <c>KeyHistory</c> object using the constructor, it
+        /// will begin as empty, but if you set any properties, even to zero or
+        /// null, the object will become not empty.
+        /// </para>
+        /// </remarks>
         public bool IsEmpty { get; protected set; }
 
         /// <summary>
@@ -237,6 +258,11 @@ namespace Yubico.YubiKey.Piv.Objects
         /// fixed values. That is, there are some values in some data objects
         /// that are fixed for every YubiKey, and this method will expect the
         /// contents of the <c>encodedData</c> to contain those fixed values.
+        /// </para>
+        /// <para>
+        /// If the input is encoded as expected, yet the data in that encoding is
+        /// invalid (e.g. some element is too long), this method will throw an
+        /// exception.
         /// </para>
         /// </remarks>
         /// <param name="encodedData">

@@ -60,7 +60,7 @@
         href: application-otp/slots.md
       - name: YubiKey-host device communication
         href: application-otp/hid.md
-      - name: ModHex
+      - name: Modified hexadecimal encoding (ModHex)
         href: application-otp/modhex.md
     - name: Configurations
       href: application-otp/configuration-concepts-overview.md

@@ -192,3 +192,31 @@ the PUK to reset the PIN.
 You changed the PIN and PUK when you first got the YubiKey. Now, you decide you want to
 change the PIN again. This is certainly allowed, simply call the
 [Change Reference Data command](commands.md#change-reference-data).
+
+## PIN only
+
+It is possible to set a YubiKey to be PIN only. This means the YubiKey is configured to
+require he PIN only when performing operations, even those functions that normally require
+management key authentication.
+
+> [!Warning]
+> A YubiKey in PIN only mode is less secure than one that requires the management
+> key. However, there are applications for which entering a management key is simply not
+> possible, so this feature is offered.
+
+There are two ways to achieve this: PIN-protected and PIN-derived. It is possible to have
+both methods active for a YubiKey.
+
+> [!Warning]
+> PIN-derived mode is not secure. You should not use this technique. It is offered only
+> for backwards compatibility.
+
+Yubico recommends that if you must set a YubiKey to PIN only, you set it to use only
+PIN-protected.
+
+### Minidriver compatibility
+
+The Yubico minidriver will configure a YubiKey to PIN-protected mode. Hence, if you know
+that your application will be running alongside Microsoft Windows machines using the
+YubiKey Minidriver, you should strongly consider adding support for setting YubiKeys to
+PIN-protected mode.

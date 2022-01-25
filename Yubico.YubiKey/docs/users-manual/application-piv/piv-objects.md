@@ -23,6 +23,11 @@ certificates. Most of these elements are defined by the PIV standard, but there 
 Yubico-defined items. It is also possible for an app to store its own data in its own
 locations.
 
+A data object is made up of a tag and data. The tag is simply a number and the data is
+different for each tag. That is, a particular number will be defined as a PIV Data Tag,
+and associated with it is a set of elements that are combined into a single blob of data
+following a specific encoding.
+
 ## The DataTags
 
 There are three classes of DataTag in the YubiKey:
@@ -88,6 +93,38 @@ under an undefined DataTag. However, there are space limitations. It is possible
 at most approximately 3,052 bytes under any single undefined DataTag, and the total space
 on a YubiKey for all storage is about 51,000 bytes.
 
+## The Data
+
+Associated with each DataTag is a specified set of elements that make up the data, along
+with a definition of its encoding. The encoding is a TLV structure. TLV stands for
+"tag-length-value". So there is a DataTag for the data itself, specifying where, in the
+YubiKey, the object will be stored. Then there are tags used to encode the data itself. 
+
+The YubiKey itself will enforce only one part of the encoding, the initial tag and length.
+Most elements are encoded as
+
+```
+  53 length
+     something
+
+```
+
+There are two exceptions: Discovery and BITGT, see the
+[entry on commands](commands.md#getdatatable).
+
+The YubiKey verifies that the data for a data object sent in has the leading `53` tag (or
+the two exceptions) with a correct length, but other than that, it does not check the
+encoding. However, the SDK itself makes sure any input data follows the defined encoding.
+For example, if you want to store CHUID data in the CHUID storage area, the SDK can
+encode it for you if you use the
+[CHUID class](xref:Yubico.YubiKey.Piv.Objects.CardholderUniqueId)). But if you use the
+[GetDataCommand](xref:Yubico.YubiKey.Piv.Commands.GetDataCommand), you must make sure the
+data is properly encoded. If you want to store some other data in the CHUID area, not
+encoded as defined, you will have to use a different tool.
+
+The encoding definitions are specified in the
+[table of PIV tags](commands.md#getdatatable).
+
 ## Changing the DataTag
 
 Changing the DataTag means storing the data under an alternate tag. That is, there are
@@ -98,11 +135,11 @@ CHUID data formatted following the CHUID definition), you can set the DataTag.
 
 See the [DataTag](xref:Yubico.YubiKey.Piv.Objects.PivDataObject.DataTag%2a) property.
 
-You will likely never have a use case in your application for using an alternate
-DataTag, but this feature is available for those rare cases when it can be useful. For
-example, someone might want to use a specific CHUID for one application, and a different
-CHUID for a second application. Hence, there could be two CHUIDs stored on a single
-YubiKey, one under the CHUID DataTag and one under an alternate tag.
+You will likely never have a use case in your application for an alternate DataTag, but
+this feature is available for those rare cases when it can be useful. For example, someone
+might want to use a specific CHUID for one application, and a different CHUID for a second
+application. Hence, there could be two CHUIDs stored on a single YubiKey, one under the
+CHUID DataTag and one under an alternate tag.
 
 Note that it can be dangerous to store data under an alternate DataTag, because some tags
 require the PIN to read and others do not. For example, if you store some sensitive data

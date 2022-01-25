@@ -308,7 +308,7 @@ namespace Yubico.YubiKey.Piv.Commands
             encoding[3] = (byte)(_tag >> 8);
             encoding[4] = (byte)_tag;
             var encodingMemory = new Memory<byte>(encoding);
-            encodingMemory = encodingMemory.Slice(PivPutDataTlvTagLength);
+            encodingMemory = encodingMemory[PivPutDataTlvTagLength..];
             _encodedData.CopyTo(encodingMemory);
 
             return encoding;

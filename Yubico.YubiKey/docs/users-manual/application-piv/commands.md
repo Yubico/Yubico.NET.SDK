@@ -1495,9 +1495,25 @@ It is safe to ignore this element.
       --bit field, PUK blocked, Mgmt Key stored in protected data--
    82 L2 (optional)
       --salt, deprecated--
-   83 02 (optional)
-      --timestamp, time the PIN was last changed--
+   83 L3 (optional)
+      --time the PIN was last updated--
 ```
+
+The bit field contains up to two bits: 1 is PUK blocked and 2 is PIN-protected.
+
+It is permissible to have no salt (either no TLV for tag 82, or `82 00` as the TLV) or a
+16-byte value.
+
+The "PIN last updated" field is the UNIX time of seconds since 1970, in little endian
+order. For example, some time in Jan. 14, 2022 is 0x61E1B870. It would be encoded as
+
+```
+   83 04
+      70 B8 E1 61
+```
+
+It will generally be a 4-byte value until sometime in January, 2038, when it will be 5
+bytes.
 
 #### MSROOTS
 

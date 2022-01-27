@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
@@ -28,17 +27,17 @@ namespace Yubico.Core.Devices.Hid
     /// </summary>
     internal class MacOSHidDevice : HidDevice
     {
-        private readonly long _entryId;
+        private readonly IntPtr _deviceRef;
         private readonly Logger _log = Log.GetLogger();
 
-        private MacOSHidDevice(long entryId) :
-            base(entryId.ToString(CultureInfo.InvariantCulture))
+        public MacOSHidDevice(IntPtr deviceRef) :
+            base(deviceRef.ToString())
         {
             _log.LogInformation(
-                "Creating new instance of MacOSHidDevice based on device with Entry ID [{EntryId}]",
-                entryId);
+                "Creating new instance of MacOSHidDevice based on device [{DeviceRef}]",
+                deviceRef);
 
-            _entryId = entryId;
+            _deviceRef = deviceRef;
         }
 
         /// <summary>
@@ -70,7 +69,7 @@ namespace Yubico.Core.Devices.Hid
                 CFSetGetValues(deviceSet, devices);
 
                 return devices
-                    .Select(device => new MacOSHidDevice(GetEntryId(device))
+                    .Select(device => new MacOSHidDevice(device)
                     {
                         VendorId = (short)IOKitHelpers.GetIntPropertyValue(device, IOKitHidConstants.DevicePropertyVendorId),
                         ProductId = (short)IOKitHelpers.GetIntPropertyValue(device, IOKitHidConstants.DevicePropertyProductId),
@@ -102,7 +101,7 @@ namespace Yubico.Core.Devices.Hid
         /// An active connection object.
         /// </returns>
         public override IHidConnection ConnectToFeatureReports() =>
-            new MacOSHidFeatureReportConnection(_entryId);
+            new MacOSHidFeatureReportConnection(GetEntryId(_deviceRef));
 
         /// <summary>
         /// Establishes a connection capable of transmitting IO reports to a FIDO device.
@@ -111,7 +110,7 @@ namespace Yubico.Core.Devices.Hid
         /// An active connection object.
         /// </returns>
         public override IHidConnection ConnectToIOReports() =>
-            new MacOSHidIOReportConnection(_entryId);
+            new MacOSHidIOReportConnection(GetEntryId(_deviceRef));
 
         private static long GetEntryId(IntPtr device)
         {

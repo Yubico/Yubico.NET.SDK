@@ -25,14 +25,14 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         public override bool Execute()
         {
-            YubiKeyDevice.DeviceArrivedEvent += (s,e) =>
+            YubiKeyDeviceListener.Instance.Arrived += (s, e) =>
             {
                 Console.WriteLine("YubiKey arrived:");
                 Console.WriteLine(e.Device.FirmwareVersion);
                 Console.WriteLine(e.Device.SerialNumber);
             };
 
-            YubiKeyDevice.DeviceRemovedEvent += (s, e) =>
+            YubiKeyDeviceListener.Instance.Removed += (s, e) =>
             {
                 Console.WriteLine("YubiKey removed:");
                 Console.WriteLine(e.Device.FirmwareVersion);

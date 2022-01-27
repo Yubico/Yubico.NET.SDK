@@ -65,9 +65,83 @@ namespace Yubico.PlatformInterop
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         internal static extern IntPtr IOHIDManagerCopyDevices(IntPtr manager); /* OS >= 10.5 */
 
+        public delegate void IOHIDDeviceCallback(IntPtr context, int result, IntPtr sender, IntPtr device);
+
+        /*! @function   IOHIDManagerRegisterDeviceMatchingCallback
+            @abstract   Registers a callback to be used a device is enumerated.
+            @discussion Only device matching the set criteria will be enumerated.
+                        If a dispatch queue is set, this call must occur before activation.
+                        Devices provided in the callback will be scheduled with the same
+                        runloop/dispatch queue as the IOHIDManagerRef, and should not be
+                        rescheduled.
+            @param      manager Reference to an IOHIDManagerRef.
+            @param      callback Pointer to a callback method of type
+                        IOHIDDeviceCallback.
+            @param      context Pointer to data to be passed to the callback.
+        */
+        [DllImport(Libraries.IOKitFramework)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        internal static extern void IOHIDManagerRegisterDeviceMatchingCallback(
+            IntPtr manager,
+            IOHIDDeviceCallback callback,
+            IntPtr context); /* OS >= 10.5 */
+
+        /*! @function   IOHIDManagerRegisterDeviceRemovalCallback
+            @abstract   Registers a callback to be used when any enumerated device is
+                        removed.
+            @discussion In most cases this occurs when a device is unplugged.
+                        If a dispatch queue is set, this call must occur before activation.
+            @param      manager Reference to an IOHIDManagerRef.
+            @param      callback Pointer to a callback method of type
+                        IOHIDDeviceCallback.
+            @param      context Pointer to data to be passed to the callback.
+        */
+        [DllImport(Libraries.IOKitFramework)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        internal static extern void IOHIDManagerRegisterDeviceRemovalCallback(
+            IntPtr manager,
+            IOHIDDeviceCallback callback,
+            IntPtr context); /* OS >= 10.5 */
+
+        /*! @function   IOHIDManagerScheduleWithRunLoop
+            @abstract   Schedules HID manager with run loop.
+            @discussion Formally associates manager with client's run loop. Scheduling
+                        this device with the run loop is necessary before making use of
+                        any asynchronous APIs.  This will propagate to current and
+                        future devices that are enumerated.
+            @param      manager Reference to an IOHIDManager.
+            @param      runLoop RunLoop to be used when scheduling any asynchronous
+                        activity.
+            @param      runLoopMode Run loop mode to be used when scheduling any
+                        asynchronous activity.
+        */
+        [DllImport(Libraries.IOKitFramework)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        internal static extern void IOHIDManagerScheduleWithRunLoop(
+            IntPtr manager,
+            IntPtr runLoop,
+            IntPtr runLoopMode); /* OS >= 10.5 */
+
+        /*! @function   IOHIDManagerUnscheduleFromRunLoop
+            @abstract   Unschedules HID manager with run loop.
+            @discussion Formally disassociates device with client's run loop. This will
+                        propagate to current devices that are enumerated.
+            @param      manager Reference to an IOHIDManager.
+            @param      runLoop RunLoop to be used when unscheduling any asynchronous
+                        activity.
+            @param      runLoopMode Run loop mode to be used when unscheduling any
+                        asynchronous activity.
+        */
+        [DllImport(Libraries.IOKitFramework)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        internal static extern void IOHIDManagerUnscheduleFromRunLoop(
+            IntPtr manager,
+            IntPtr runLoop,
+            IntPtr runLoopMode); /* OS >= 10.5 */
+
         /*!
-	        @function   IOHIDDeviceCreate
-	        @abstract   Creates an element from an io_service_t.
+            @function   IOHIDDeviceCreate
+            @abstract   Creates an element from an io_service_t.
             @discussion The io_service_t passed in this method must reference an object
                         in the kernel of type IOHIDDevice.
             @param      allocator Allocator to be used during creation.

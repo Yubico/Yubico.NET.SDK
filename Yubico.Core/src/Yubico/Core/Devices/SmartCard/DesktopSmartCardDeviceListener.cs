@@ -16,13 +16,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Yubico.PlatformInterop;
 
-namespace Yubico.PlatformInterop
+namespace Yubico.Core.Devices.SmartCard
 {
     /// <summary>
     /// A listener class for smart card related events.
     /// </summary>
-    internal class SCardListener : IDisposable
+    internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener, IDisposable
     {
         // The resource manager context.
         private SCardContext _context;
@@ -33,17 +34,11 @@ namespace Yubico.PlatformInterop
         private bool _isListening;
         private Thread? _listenerThread;
 
-        private readonly Action<SCardEventArgs> _arrivalAction;
-        private readonly Action<SCardEventArgs> _removalAction;
-
         /// <summary>
-        /// Constructs a <see cref="SCardListener"/>.
+        /// Constructs a <see cref="SmartCardDeviceListener"/>.
         /// </summary>
-        public SCardListener(Action<SCardEventArgs> arrivalAction, Action<SCardEventArgs> removalAction)
+        public DesktopSmartCardDeviceListener()
         {
-            _arrivalAction = arrivalAction;
-            _removalAction = removalAction;
-
             _ = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);
 
             _context = context;
@@ -101,7 +96,7 @@ namespace Yubico.PlatformInterop
             }
         }
 
-        ~SCardListener()
+        ~DesktopSmartCardDeviceListener()
         {
             // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
             Dispose(false);
@@ -127,6 +122,7 @@ namespace Yubico.PlatformInterop
         {
             if (!(_listenerThread is null))
             {
+                ClearEventHandlers();
                 _isListening = false;
                 _listenerThread.Join();
             }
@@ -134,8 +130,8 @@ namespace Yubico.PlatformInterop
 
         private bool CheckForUpdates(int timeout)
         {
-            var arrivalEvents = new List<SCardEventArgs>();
-            var removalEvents = new List<SCardEventArgs>();
+            var arrivedDevices = new List<ISmartCardDevice>();
+            var removedDevices = new List<ISmartCardDevice>();
             bool sendEvents = timeout != 0;
 
             SCardReaderStates? newStates = null;
@@ -181,7 +177,9 @@ namespace Yubico.PlatformInterop
                             foreach (SCardReaderStates.Entry removedReader in removedReaderStates.Where(r =>
                                 r.CurrentState.HasFlag(SCARD_STATE.PRESENT)))
                             {
-                                removalEvents.Add(new SCardEventArgs(removedReader.ReaderName, removedReader.Atr));
+                                ISmartCardDevice smartCardDevice =
+                                    SmartCardDevice.Create(removedReader.ReaderName, removedReader.Atr);
+                                removedDevices.Add(smartCardDevice);
                             }
                         }
 
@@ -230,14 +228,14 @@ namespace Yubico.PlatformInterop
 
                 if (sendEvents)
                 {
-                    DetectRelevantChanges(_readerStates, newStates, arrivalEvents, removalEvents);
+                    DetectRelevantChanges(_readerStates, newStates, arrivedDevices, removedDevices);
                 }
 
                 UpdateCurrentlyKnownState(newStates);
 
                 (_readerStates, newStates) = (newStates, _readerStates);
 
-                FireEvents(arrivalEvents, removalEvents);
+                FireEvents(arrivedDevices, removedDevices);
             }
             finally
             {
@@ -288,13 +286,13 @@ namespace Yubico.PlatformInterop
         }
 
         /// <summary>
-        /// Determines whether the relevant changes in state list detected and creates arrival and removal events.
+        /// Determines whether the relevant changes in state list detected and creates arrived and removed devices.
         /// </summary>
         /// <param name="originalStates">Original states used to get Atr values for removal events.</param>
         /// <param name="newStates">State list to check for changes.</param>
-        /// <param name="arrivalEvents">List where new arrival events will be added.</param>
-        /// <param name="removalEvents">List where new removal events will be added.</param>
-        private static void DetectRelevantChanges(SCardReaderStates originalStates, SCardReaderStates newStates, List<SCardEventArgs> arrivalEvents, List<SCardEventArgs> removalEvents)
+        /// <param name="arrivedDevices">List where new arrived devices will be added.</param>
+        /// <param name="removedDevices">List where new removed devices will be added.</param>
+        private static void DetectRelevantChanges(SCardReaderStates originalStates, SCardReaderStates newStates, List<ISmartCardDevice> arrivedDevices, List<ISmartCardDevice> removedDevices)
         {
             foreach (SCardReaderStates.Entry entry in newStates)
             {
@@ -303,11 +301,15 @@ namespace Yubico.PlatformInterop
                 if (diffState.HasFlag(SCARD_STATE.PRESENT) && entry.CurrentState.HasFlag(SCARD_STATE.PRESENT))
                 {
                     IEnumerable<SCardReaderStates.Entry> states = originalStates.Where((e) => e.ReaderName == entry.ReaderName);
-                    removalEvents.Add(new SCardEventArgs(entry.ReaderName, states.FirstOrDefault()?.Atr ?? entry.Atr));
+                    ISmartCardDevice smartCardDevice =
+                        SmartCardDevice.Create(entry.ReaderName, states.FirstOrDefault()?.Atr ?? entry.Atr);
+                    removedDevices.Add(smartCardDevice);
                 }
                 else if (diffState.HasFlag(SCARD_STATE.PRESENT) && entry.EventState.HasFlag(SCARD_STATE.PRESENT))
                 {
-                    arrivalEvents.Add(new SCardEventArgs(entry.ReaderName, entry.Atr));
+                    ISmartCardDevice smartCardDevice =
+                        SmartCardDevice.Create(entry.ReaderName, entry.Atr);
+                    arrivedDevices.Add(smartCardDevice);
                 }
             }
         }
@@ -377,36 +379,20 @@ namespace Yubico.PlatformInterop
         /// <summary>
         /// Fires all created events.
         /// </summary>
-        /// <param name="arrivalEvents">List of arrival events to fire.</param>
-        /// <param name="removalEvents">List of removal events to fire.</param>
-        private void FireEvents(List<SCardEventArgs> arrivalEvents, List<SCardEventArgs> removalEvents)
+        /// <param name="arrivedDevices">List of arrival devices.</param>
+        /// <param name="removedDevices">List of removal devices.</param>
+        private void FireEvents(List<ISmartCardDevice> arrivedDevices, List<ISmartCardDevice> removedDevices)
         {
-            if (_arrivalAction != null)
+            foreach (ISmartCardDevice arrivedDevice in arrivedDevices)
             {
-                foreach (SCardEventArgs arrival in arrivalEvents)
-                {
-                    OnSCardArrived(arrival);
-                }
+                OnArrived(arrivedDevice);
             }
 
-            if (_removalAction != null)
-            {
-                foreach (SCardEventArgs removal in removalEvents)
-                {
-                    OnSCardRemoved(removal);
-                }
+            foreach (ISmartCardDevice removedDevice in removedDevices)
+            { 
+                OnRemoved(removedDevice);
             }
         }
-
-        /// <summary>
-        /// Raises event on smart card arrival.
-        /// </summary>
-        private void OnSCardArrived(SCardEventArgs e) => _arrivalAction(e);
-
-        /// <summary>
-        /// Raises event on smart card removal.
-        /// </summary>
-        private void OnSCardRemoved(SCardEventArgs e) => _removalAction(e);
 
         /// <summary>
         /// Checks if context need to be updated.

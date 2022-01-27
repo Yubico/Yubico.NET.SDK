@@ -23,7 +23,7 @@ using MgmtCmd = Yubico.YubiKey.Management.Commands;
 
 namespace Yubico.YubiKey
 {
-    public partial class YubiKeyDevice : IYubiKeyDevice
+    public sealed partial class YubiKeyDevice : IYubiKeyDevice
     {
         #region IYubiKeyDeviceInfo
         /// <inheritdoc />
@@ -71,12 +71,12 @@ namespace Yubico.YubiKey
         internal bool HasHidFido => !(_hidFidoDevice is null);
         internal bool HasHidKeyboard => !(_hidKeyboardDevice is null);
 
-        internal bool IsNfcDevice { get; }
+        internal bool IsNfcDevice { get; private set; }
 
-        private readonly ISmartCardDevice? _smartCardDevice;
-        private readonly IHidDevice? _hidFidoDevice;
-        private readonly IHidDevice? _hidKeyboardDevice;
-        private readonly IYubiKeyDeviceInfo _yubiKeyInfo;
+        private ISmartCardDevice? _smartCardDevice;
+        private IHidDevice? _hidFidoDevice;
+        private IHidDevice? _hidKeyboardDevice;
+        private IYubiKeyDeviceInfo _yubiKeyInfo;
 
         /// <summary>
         /// Construct a <see cref="YubiKeyDevice"/> instance.
@@ -97,6 +97,33 @@ namespace Yubico.YubiKey
             _yubiKeyInfo = yubiKeyDeviceInfo;
             IsNfcDevice = smartCardDevice?.IsNfcTransport() ?? false;
         }
+
+        /// <summary>
+        /// Updates current <see cref="YubiKeyDevice"/> with new info from SmartCard device or HID device.
+        /// </summary>
+        /// <param name="smartCardDevice"><see cref="ISmartCardDevice"/> for the YubiKey.</param>
+        /// <param name="hidKeyboardDevice"><see cref="IHidDevice"/> for normal HID interaction with the YubiKey.</param>
+        /// <param name="hidFidoDevice"><see cref="IHidDevice"/> for FIDO interaction with the YubiKey.</param>
+        /// <param name="yubiKeyDeviceInfo"><see cref="IYubiKeyDeviceInfo"/> with remaining properties of the YubiKey.</param>
+        public void Merge(ISmartCardDevice? smartCardDevice,
+                          IHidDevice? hidKeyboardDevice,
+                          IHidDevice? hidFidoDevice,
+                          IYubiKeyDeviceInfo yubiKeyDeviceInfo)
+        {
+            _smartCardDevice ??= smartCardDevice;
+            _hidKeyboardDevice ??= hidKeyboardDevice;
+            _hidFidoDevice ??= hidFidoDevice;
+
+            _yubiKeyInfo = (_smartCardDevice != null || _hidKeyboardDevice != null || _hidFidoDevice != null)
+                ? yubiKeyDeviceInfo
+                : _yubiKeyInfo;
+
+            if (smartCardDevice != null)
+            {
+                IsNfcDevice = smartCardDevice?.IsNfcTransport() ?? false;
+            }
+        }
+
 
         /// <inheritdoc />
         public IYubiKeyConnection Connect(YubiKeyApplication yubikeyApplication)

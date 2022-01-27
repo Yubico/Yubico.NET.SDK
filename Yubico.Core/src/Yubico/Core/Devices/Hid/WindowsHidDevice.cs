@@ -23,31 +23,8 @@ namespace Yubico.Core.Devices.Hid
     /// <summary>
     /// This class represents Windows HID device.
     /// </summary>
-    public class WindowsHidDevice : HidDevice
+    internal class WindowsHidDevice : HidDevice
     {
-        /// <summary>
-        /// Event for Windows HID device arrival.
-        /// </summary>
-        public static event EventHandler<CmDeviceEventArgs>? HidDeviceArrived;
-
-        /// <summary>
-        /// Event for Windows HID device removal.
-        /// </summary>
-        public static event EventHandler<CmDeviceEventArgs>? HidDeviceRemoved;
-
-        internal static readonly CmDeviceListener cmListener = 
-            new CmDeviceListener(CmInterfaceGuid.Hid, OnDeviceArrived, OnDeviceRemoved);
-
-        /// <summary>
-        /// Raises event on Windows HID device arrival.
-        /// </summary>
-        private static void OnDeviceArrived(CmDeviceEventArgs e) => HidDeviceArrived?.Invoke(typeof(WindowsHidDevice), e);
-
-        /// <summary>
-        /// Raises event on Windows HID device removal.
-        /// </summary>
-        private static void OnDeviceRemoved(CmDeviceEventArgs e) => HidDeviceRemoved?.Invoke(typeof(WindowsHidDevice), e);
-
         /// <summary>
         /// Gets the list of Windows HID devices available to the system.
         /// </summary>
@@ -67,6 +44,23 @@ namespace Yubico.Core.Devices.Hid
 
             Usage = usage;
             UsagePage = usagePage;
+        }
+
+        /// <summary>
+        /// Constructs a <see cref="WindowsHidDevice"/>.
+        /// </summary>
+        internal WindowsHidDevice(CmDevice device) :
+            base(device.InterfacePath!)
+        {
+            if (device is null)
+            {
+                throw new ArgumentNullException(nameof(device));
+            }
+
+            ResolveIdsFromInstancePath(device.InterfacePath!);
+
+            Usage = device.HidUsageId;
+            UsagePage = (HidUsagePage)device.HidUsagePage;
         }
 
         private void ResolveIdsFromInstancePath(string instancePath)

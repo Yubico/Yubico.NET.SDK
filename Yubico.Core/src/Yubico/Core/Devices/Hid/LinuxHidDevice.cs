@@ -22,7 +22,7 @@ namespace Yubico.Core.Devices.Hid
     /// <summary>
     /// This class represents Linux HID device.
     /// </summary>
-    public class LinuxHidDevice : HidDevice
+    internal class LinuxHidDevice : HidDevice
     {
         private const int UsagePageTag = 4;
         private const int UsageTag = 8;
@@ -32,28 +32,6 @@ namespace Yubico.Core.Devices.Hid
         private const int UsageU2FDevice = 1;
 
         private readonly string _devnode;
-
-        /// <summary>
-        /// Event for Linux HID device arrival.
-        /// </summary>
-        public static event EventHandler<LinuxUdevEventArgs>? UdevDeviceArrival;
-
-        /// <summary>
-        /// Event for Linux HID device removal.
-        /// </summary>
-        public static event EventHandler<LinuxUdevEventArgs>? UdevDeviceRemoval;
-
-        internal static readonly LinuxUdevListener udevListener = new LinuxUdevListener(OnDeviceArrived, OnDeviceRemoved);
-
-        /// <summary>
-        /// Raises event on Linux HID device arrival.
-        /// </summary>
-        private static void OnDeviceArrived(LinuxUdevEventArgs e) => UdevDeviceArrival?.Invoke(typeof(LinuxHidDevice), e);
-
-        /// <summary>
-        /// Raises event on Linux HID device removal.
-        /// </summary>
-        private static void OnDeviceRemoved(LinuxUdevEventArgs e) => UdevDeviceRemoval?.Invoke(typeof(LinuxHidDevice), e);
 
         /// <summary>
         /// Gets a list of all the HIDs on the system (not just YubiKeys).

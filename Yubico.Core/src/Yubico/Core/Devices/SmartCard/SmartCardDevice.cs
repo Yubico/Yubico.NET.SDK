@@ -52,28 +52,6 @@ namespace Yubico.Core.Devices.SmartCard
         public SmartCardConnectionKind Kind { get; private set; }
 
         /// <summary>
-        /// Event for smart card arrival.
-        /// </summary>
-        public static event EventHandler<SCardEventArgs>? SmartCardArrived;
-
-        /// <summary>
-        /// Event for smart card removal.
-        /// </summary>
-        public static event EventHandler<SCardEventArgs>? SmartCardRemoved;
-
-        internal static readonly SCardListener sCardListener = new SCardListener(OnDeviceArrived, OnDeviceRemoved);
-
-        /// <summary>
-        /// Raises event on smart card arrival.
-        /// </summary>
-        private static void OnDeviceArrived(SCardEventArgs e) => SmartCardArrived?.Invoke(typeof(SmartCardDevice), e);
-
-        /// <summary>
-        /// Raises event on smart card removal.
-        /// </summary>
-        private static void OnDeviceRemoved(SCardEventArgs e) => SmartCardRemoved?.Invoke(typeof(SmartCardDevice), e);
-
-        /// <summary>
         /// Returns the set of smart card reader devices available to the system.
         /// </summary>
         /// <returns>A read-only list of <see cref="SmartCardDevice"/> objects.</returns>

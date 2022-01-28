@@ -67,7 +67,9 @@ namespace Yubico.Core.Devices.SmartCard
         // will terminate the thread.
         private void ListenForReaderChanges()
         {
-            while (_isListening && CheckForUpdates(-1))
+            bool usePnpWorkaround = UsePnpWorkaround();
+
+            while (_isListening && CheckForUpdates(-1, usePnpWorkaround))
             {
                 
             }
@@ -128,7 +130,7 @@ namespace Yubico.Core.Devices.SmartCard
             }
         }
 
-        private bool CheckForUpdates(int timeout)
+        private bool CheckForUpdates(int timeout, bool usePnpWorkaround)
         {
             var arrivedDevices = new List<ISmartCardDevice>();
             var removedDevices = new List<ISmartCardDevice>();
@@ -151,7 +153,7 @@ namespace Yubico.Core.Devices.SmartCard
                     return true;
                 }
 
-                while (ReaderListChangeDetected(newStates))
+                while (ReaderListChangeDetected(newStates, usePnpWorkaround))
                 {
                     using SCardReaderStates eventStateList = GetReaderStateList();
                     IEnumerable<SCardReaderStates.Entry> addedReaderStates = eventStateList.Except(newStates, new ReaderStateComparer());
@@ -245,13 +247,36 @@ namespace Yubico.Core.Devices.SmartCard
             return true;
         }
 
+        // So apparently not all platforms implement the virtual pnp reader semantics the same. They will still wait on
+        // GetStatusChange, returning when a new reader is added, they just don't mark the CHANGED flag all the time.
+        // Weird. Anyways, it seems like a reasonable workaround is to detect the type of system (by seeing if it returns
+        // STATE_UNKNOWN when asked about the virtual reader). If it does, any time GetStatusChange returns, we should
+        // make an additional call to ListReaders and compare the count to the current reader state count (subtracting
+        // the virtual reader). If they are different, then we should treat that the same as if the virtual reader informed
+        // us of the change.
+        private bool UsePnpWorkaround()
+        {
+            using var testState = new SCardReaderStates(new string[] { "\\\\?\\Pnp\\Notifications" });
+            _ = PlatformLibrary.Instance.SCard.GetStatusChange(_context, 0, testState);
+            bool usePnpWorkaround = testState[0].EventState.HasFlag(SCARD_STATE.UNKNOWN);
+            return usePnpWorkaround;
+        }
+
         /// <summary>
         /// Checks if reader state list contains any changes.
         /// </summary>
         /// <param name="newStates">Reader states to check.</param>
+        /// <param name="usePnpWorkaround">Use ListReaders instead of relying on the \\?\Pnp\Notifications device.</param>
         /// <returns>True if changes are detected.</returns>
-        private static bool ReaderListChangeDetected(SCardReaderStates newStates)
+        private bool ReaderListChangeDetected(SCardReaderStates newStates, bool usePnpWorkaround)
         {
+            if (usePnpWorkaround)
+            {
+                _ = PlatformLibrary.Instance.SCard.ListReaders(_context, null, out string[] readerNames);
+
+                return readerNames.Length != newStates.Count - 1;
+            }
+
             if (newStates[0].EventState.HasFlag(SCARD_STATE.CHANGED))
             {
                 newStates[0].CurrentState = newStates[0].EventState & ~SCARD_STATE.CHANGED;

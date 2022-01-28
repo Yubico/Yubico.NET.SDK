@@ -96,7 +96,10 @@ namespace Yubico.Core.Devices.Hid
             // set to true before starting the thread.
             if (!_isListening)
             {
-                _listenerThread = new Thread(ListenForReaderChanges);
+                _listenerThread = new Thread(ListenForReaderChanges)
+                {
+                    IsBackground = true
+                };
                 _isListening = true;
                 _listenerThread.Start();
             }

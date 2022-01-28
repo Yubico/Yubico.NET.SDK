@@ -54,12 +54,12 @@ The NDEF record header includes the following fields:
 - Payload type: variable.
 - Payload ID: variable.
 
-The header fields that are most important to the YubiKey are the TNF and Payload Type. The YubiKey sends OTPs and HOTPs over NFC as part of text strings or URIs, which are pre-defined by the NDEF Record Type Definition (RTD) specifications. To send this type of data, the TNF has to be set to 0x01 (Well-Known). From there, the payload type can be set to "T" for text strings or "U" for URIs.
+The header fields that are most important to the YubiKey are the TNF and payload type. The YubiKey sends OTPs and HOTPs over NFC as part of text strings or URIs, which are pre-defined by the NDEF Record Type Definition (RTD) specifications. To send this type of data, the TNF has to be set to 0x01 (Well-Known). From there, the payload type can be set to "T" for text strings or "U" for URIs.
 
 To send a text payload, the payload field must include a status byte followed by the text, with each character represented by their UTF code (in byte form). The status byte specifies the UTF encoding type (0 for UTF-8 or 1 for UTF-16) and the length of the language code (the encoding type and language type tell the receiving party how to interpret the text bytes correctly). The text field begins with the language code (e.g. en-US for United States English) followed by the actual payload (the OTP or HOTP).
 
 > [!NOTE]
-> The YubiKey uses UTF-8 encoding by default, but the encoding type can be changed to UTF-16 via the API's [UseUtf16Encoding()](xref:Yubico.YubiKey.Otp.Operations.ConfigureNdef.UseUtf16Encoding%28System.Boolean%29%0D%0A) method if you wish. Similarly, the key uses the en-US language code by default, but this can also be changed with the [WithLanguage()](xref:Yubico.YubiKey.Otp.Operations.ConfigureNdef.WithLanguage%28System.String%29) method.
+> The YubiKey uses UTF-8 encoding by default, but the encoding type can be changed to UTF-16 via the API's [UseUtf16Encoding()](xref:Yubico.YubiKey.Otp.Operations.ConfigureNdef.UseUtf16Encoding%28System.Boolean%29) method if you wish. Similarly, the key uses the en-US language code by default, but this can also be changed with the [WithLanguage()](xref:Yubico.YubiKey.Otp.Operations.ConfigureNdef.WithLanguage%28System.String%29) method.
 
 To send a URI payload, the payload field must include a URI ID code (1 byte) followed by the rest of the URI as a UTF-8 byte string (receiving parties expect URIs to be in UTF-8 format only). The ID code is used to represent commonly used addresses in order to reduce the size of the URI record. For example, "https://www." is represented by the ID code of 0x02. The YubiKey uses the ID code of 0x00 by default, which means no address is prepended to the URI string. This is not configurable via the API.
 
@@ -71,7 +71,7 @@ Only Yubico OTPs and OATH HOTPs can be communicated successfully over NFC.
 
 You can still point the NDEF tag to a slot that is configured with a [static password](xref:OtpStaticPassword) or [challenge-response](xref:OtpChallengeResponse), but the YubiKey will not be able to communicate these configurations properly using the NDEF protocol.
 
-For static passwords, the YubiKey will send the static text or URI followed by the HID usage IDs of the password characters. HID usage IDs cannot be interpreted correctly over NFC since the host expects to receive UTF characters. For example, the letter "a" is represented by the binary string "0000 0100" in HID and by the binary string "0110 0001" in UTF-8/ASCII. These binary code differences, along with the fact that upper case letters are signaled through the modifier key state in HID usage reports, mean that a passord in HID form cannot be easily translated to UTF form. The YubiKey firmware does not have this translation capability, and the SDK does not include the functionality to configure the key with both the HID and UTF representations of a static password during configuration. 
+For static passwords, the YubiKey will send the static text or URI followed by the HID usage IDs of the password characters. HID usage IDs cannot be interpreted correctly over NFC since the host expects to receive UTF characters. For example, the letter "a" is represented by the binary string "0000 0100" in HID and by the binary string "0110 0001" in UTF-8/ASCII. These binary code differences, along with the fact that upper case letters are signaled through the modifier key state in HID usage reports, mean that a passord in HID form cannot be easily translated to UTF form. The YubiKey firmware does not have this translation capability, and the SDK does not include the functionality to configure the key with both the HID and UTF representations of a static password during configuration.
 
 For challenge-response, the YubiKey will send the static text or URI with nothing after.
 
@@ -86,9 +86,9 @@ The SDK provides the following major classes/methods related to NDEF:
 
 The [ConfigureNdef() method](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureNdef%28Yubico.YubiKey.Otp.Slot%29) allows you to point the NDEF tag to one of the two OTP application slots. When the YubiKey is scanned by an NFC reader, the slot that is pointed to by the NDEF tag will activate, causing the generation of whichever password type was configured for that slot.
 
-In addition, the [ConfigureNdef class](xref:Yubico.YubiKey.Otp.Operations.ConfigureNdef) allows you to prepend static text or a URI to the generated password with the [AsText()](xref:Yubico.YubiKey.Otp.Operations.ConfigureNdef.AsText%28System.String%29) and [AsUri()](xref:Yubico.YubiKey.Otp.Operations.ConfigureNdef.AsUri%28System.Uri%29) methods, respectively.
+In addition, the [ConfigureNdef class](xref:Yubico.YubiKey.Otp.Operations.ConfigureNdef) allows you to send the OTP/HOTP as static text or a URI via the [AsText()](xref:Yubico.YubiKey.Otp.Operations.ConfigureNdef.AsText%28System.String%29) and [AsUri()](xref:Yubico.YubiKey.Otp.Operations.ConfigureNdef.AsUri%28System.Uri%29) methods, respectively.
 
-With AsUri(), the intended usage is to emit the address for an OTP validation server, such as YubiCloud.
+AsText() and AsUri() essentially allow you to toggle the payload type of the NDEF record to "T" or "U". They also provide the option to prepend text or an address to the OTP, which all becomes part of the NDEF record payload. With AsUri(), the intended usage is to prepend the address for an OTP validation server, such as YubiCloud.
 
 For an example of how to use these methods, please see the [ConfigureNdef() how-to guide](xref:OtpConfigureNDEF).
 

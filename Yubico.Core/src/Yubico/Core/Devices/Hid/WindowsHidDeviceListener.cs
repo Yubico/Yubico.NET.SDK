@@ -38,24 +38,24 @@ namespace Yubico.Core.Devices.Hid
 
         private void StartListening()
         {
-            Guid interfaceClass = CmClassGuid.HidClass;
+            Guid interfaceClass = CmInterfaceGuid.Hid;
 
-            byte[] zeroBytes = new byte[NativeMethods.CmNotifyFilterSize];
+            byte[] zeroBytes = new byte[CmNotifyFilterSize];
             byte[] guidBytes = interfaceClass.ToByteArray();
 
-            IntPtr pFilter = Marshal.AllocHGlobal(NativeMethods.CmNotifyFilterSize);
+            IntPtr pFilter = Marshal.AllocHGlobal(CmNotifyFilterSize);
 
             try
             {
                 // Set all the bytes to zero.
                 Marshal.Copy(zeroBytes, 0, pFilter, zeroBytes.Length);
-                Marshal.WriteInt32(pFilter, NativeMethods.OffsetCbSize, NativeMethods.CmNotifyFilterSize);
-                Marshal.WriteInt32(pFilter, NativeMethods.OffsetFlags, 0);
-                Marshal.WriteInt32(pFilter, NativeMethods.OffsetFilterType, (int)CM_NOTIFY_FILTER_TYPE.DEVINTERFACE);
-                Marshal.WriteInt32(pFilter, NativeMethods.OffsetReserved, 0);
+                Marshal.WriteInt32(pFilter, OffsetCbSize, CmNotifyFilterSize);
+                Marshal.WriteInt32(pFilter, OffsetFlags, 0);
+                Marshal.WriteInt32(pFilter, OffsetFilterType, (int)CM_NOTIFY_FILTER_TYPE.DEVINTERFACE);
+                Marshal.WriteInt32(pFilter, OffsetReserved, 0);
                 for (int index = 0; index < guidBytes.Length; index++)
                 {
-                    Marshal.WriteByte(pFilter, NativeMethods.OffsetGuidData1 + index, guidBytes[index]);
+                    Marshal.WriteByte(pFilter, OffsetGuidData1 + index, guidBytes[index]);
                 }
 
                 CmErrorCode errorCode = CM_Register_Notification(pFilter, IntPtr.Zero, OnEventReceived, out _notificationContext);
@@ -90,7 +90,7 @@ namespace Yubico.Core.Devices.Hid
         private int OnEventReceived(IntPtr hNotify, IntPtr context, CM_NOTIFY_ACTION action, IntPtr eventDataPtr, int eventDataSize)
         {
             CM_NOTIFY_EVENT_DATA eventData = Marshal.PtrToStructure<CM_NOTIFY_EVENT_DATA>(eventDataPtr);
-            Debug.Assert(eventData.ClassGuid == CmClassGuid.HidClass);
+            Debug.Assert(eventData.ClassGuid == CmInterfaceGuid.Hid);
             Debug.Assert(eventData.FilterType == CM_NOTIFY_FILTER_TYPE.DEVINTERFACE);
 
             int stringOffset = 24; // Magic number from C land
@@ -99,16 +99,16 @@ namespace Yubico.Core.Devices.Hid
 
             Marshal.Copy(eventDataPtr + stringOffset, buffer, 0, stringSize);
 
-            string instancePath = System.Text.Encoding.Unicode.GetString(buffer);
-            var device = new WindowsHidDevice(new CmDevice(instancePath));
-
             if (action == CM_NOTIFY_ACTION.DEVICEINTERFACEARRIVAL)
             {
+                string instancePath = System.Text.Encoding.Unicode.GetString(buffer);
+                var cmDevice = new CmDevice(instancePath);
+                var device = new WindowsHidDevice(cmDevice);
                 OnArrived(device);
             }
             else if (action == CM_NOTIFY_ACTION.DEVICEINTERFACEREMOVAL)
             {
-                OnRemoved(device);
+                OnRemoved(null);
             }
 
             return 0;

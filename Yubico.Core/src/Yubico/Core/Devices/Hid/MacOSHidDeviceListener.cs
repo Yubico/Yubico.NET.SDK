@@ -102,7 +102,7 @@ namespace Yubico.Core.Devices.Hid
                 // This is essentially an infinite loop (hence running this on its own thread). This can be broken if
                 // an error is encountered, or if someone calls CFRunLoopStop as is done in StopListening/Finalizer.
                 _log.LogInformation("Beginning run loop polling.");
-                while (runLoopResult == kCFRunLoopRunHandledSource)
+                while (runLoopResult == kCFRunLoopRunHandledSource || runLoopResult == kCFRunLoopRunTimedOut)
                 {
                     runLoopResult = CFRunLoopRunInMode(runLoopMode, runLoopTimeout, true);
                 }
@@ -133,9 +133,9 @@ namespace Yubico.Core.Devices.Hid
         }
 
         private void ArrivedCallback(IntPtr context, int result, IntPtr sender, IntPtr device) =>
-            OnArrived(new MacOSHidDevice(device));
+            OnArrived(new MacOSHidDevice(MacOSHidDevice.GetEntryId(device)));
 
         private void RemovedCallback(IntPtr context, int result, IntPtr sender, IntPtr device) =>
-            OnRemoved(new MacOSHidDevice(device));
+            OnRemoved(null);
     }
 }

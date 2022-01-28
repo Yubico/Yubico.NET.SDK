@@ -54,7 +54,10 @@ namespace Yubico.Core.Devices.SmartCard
         {
             if (!_isListening)
             {
-                _listenerThread = new Thread(new ThreadStart(ListenForReaderChanges));
+                _listenerThread = new Thread(ListenForReaderChanges)
+                {
+                    IsBackground = true
+                };
                 _isListening = true;
                 _listenerThread.Start();
             }

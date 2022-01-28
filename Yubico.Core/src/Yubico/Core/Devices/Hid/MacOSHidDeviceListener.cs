@@ -45,7 +45,10 @@ namespace Yubico.Core.Devices.Hid
 
         private void StartListening()
         {
-            _listenerThread = new Thread(ListeningThread);
+            _listenerThread = new Thread(ListeningThread)
+            {
+                IsBackground = true
+            };
             _listenerThread.Start();
         }
 

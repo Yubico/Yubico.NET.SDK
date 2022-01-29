@@ -24,7 +24,6 @@ namespace Yubico.YubiKey.DeviceExtensions
         {
             try
             {
-                using ISmartCardConnection smartCardConnection = device.Connect();
                 return ProductAtrs.AllYubiKeys.Contains(device.Atr!);
             }
             catch (PlatformInterop.SCardException e)

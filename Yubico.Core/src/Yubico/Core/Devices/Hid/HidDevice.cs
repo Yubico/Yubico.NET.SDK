@@ -182,5 +182,7 @@ namespace Yubico.Core.Devices.Hid
         /// please call <see cref="IDisposable.Dispose"/> when you are finished with this object.
         /// </returns>
         public abstract IHidConnection ConnectToIOReports();
+
+        public override string ToString() => $"HID:{VendorId:X4}:{ProductId:X4} Usage:{UsagePage} {Path}";
     }
 }

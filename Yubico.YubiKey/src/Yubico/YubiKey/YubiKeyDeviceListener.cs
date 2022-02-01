@@ -19,6 +19,7 @@ using System.Threading;
 using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey
 {
@@ -42,6 +43,8 @@ namespace Yubico.YubiKey
         /// </summary>
         public static YubiKeyDeviceListener Instance => _lazyInstance.Value;
 
+        private readonly Logger _log = Log.GetLogger();
+
         private static readonly Lazy<YubiKeyDeviceListener> _lazyInstance =
             new Lazy<YubiKeyDeviceListener>(() => new YubiKeyDeviceListener());
 
@@ -53,27 +56,56 @@ namespace Yubico.YubiKey
 
         private YubiKeyDeviceListener()
         {
+            _log.LogInformation("Creating YubiKeyDeviceListener instance.");
+
             var hidDeviceListener = HidDeviceListener.Create();
             var smartCardListener = SmartCardDeviceListener.Create();
 
-            smartCardListener.Arrived += (s, e) => Update();
-            smartCardListener.Removed += (s, e) => Update();
+            smartCardListener.Arrived += (s, e) =>
+            {
+                _log.LogInformation("Arrival of smart card {SmartCard} is triggering update.", e.Device);
+                Update();
+            };
 
-            hidDeviceListener.Arrived += (s, e) => Update();
-            hidDeviceListener.Removed += (s, e) => Update();
+            smartCardListener.Removed += (s, e) =>
+            {
+                _log.LogInformation("Removal of smart card {SmartCard} is triggering update.", e.Device);
+                Update();
+            };
 
+            hidDeviceListener.Arrived += (s, e) =>
+            {
+                _log.LogInformation("Arrival of HID {HidDevice} is triggering update.", e.Device);
+                Update();
+            };
+
+            hidDeviceListener.Removed += (s, e) =>
+            {
+                _log.LogInformation("Removal of HID {HidDevice} is triggering update.", e.Device);
+                Update();
+            };
+
+            _log.LogInformation("Performing initial cache population.");
             Update();
         }
 
         private void Update()
         {
             _rw.EnterWriteLock();
+            _log.LogInformation("Entering write-lock.");
 
+            _log.LogInformation("Cache currently aware of {Count} YubiKeys.", internalCache.Count);
             List<IYubiKeyDevice> addedDevices = new List<IYubiKeyDevice>();
             List<IYubiKeyDevice> removedDevices = GetAll();
 
-            IEnumerable<IDevice>? allDevices = YubiKeyDevice.GetFilteredHidDevices(Transport.All)
-                .Union(YubiKeyDevice.GetFilteredSmartCardDevices(Transport.All));
+            IEnumerable<IDevice> hidDevices = YubiKeyDevice.GetFilteredHidDevices(Transport.All);
+            IEnumerable<IDevice> smartCardDevices = YubiKeyDevice.GetFilteredSmartCardDevices(Transport.All);
+            _log.LogInformation(
+                "Found {HidCount} HID devices and {SCardCount} Smart Card devices for processing.",
+                hidDevices.Count(),
+                smartCardDevices.Count());
+
+            IEnumerable<IDevice> allDevices = hidDevices.Union(smartCardDevices);
 
             foreach (IYubiKeyDevice yubiKey in GetAll())
             {
@@ -82,7 +114,10 @@ namespace Yubico.YubiKey
 
             foreach (IDevice device in allDevices)
             {
+                _log.LogInformation("Processing device {Device}.", device);
+
                 IYubiKeyDevice? newYubiKey = internalCache.Keys.FirstOrDefault(d => d.Contains(device));
+                _log.LogInformation("Device was " + (newYubiKey is null ? "not " : "") + "found in the cache.");
 
                 if (newYubiKey != null)
                 {
@@ -92,9 +127,13 @@ namespace Yubico.YubiKey
 
                 var yubiKeyWithInfo = new YubiKeyDevice.YubicoDeviceWithInfo(device);
                 int? serialNumber = yubiKeyWithInfo.Info.SerialNumber;
+                _log.LogInformation("Device {Device} is YubiKey with serial number {SerialNumber}.", device, serialNumber);
 
                 YubiKeyDevice? existingYubiKey =
                     internalCache.Keys.FirstOrDefault(d => d.SerialNumber == serialNumber) as YubiKeyDevice;
+                _log.LogInformation(
+                    "YubiKey [{SerialNumber}] was " + (existingYubiKey is null ? "not " : "") + "found in the cache.",
+                    serialNumber);
 
                 if (existingYubiKey is null)
                 {
@@ -107,11 +146,7 @@ namespace Yubico.YubiKey
                 }
                 else
                 {
-                    _ = internalCache.Remove(existingYubiKey);
-                    if (YubiKeyDevice.TryMergeYubiKey(existingYubiKey, yubiKeyWithInfo))
-                    {
-                        internalCache[existingYubiKey] = true;
-                    }
+                    _ = YubiKeyDevice.TryMergeYubiKey(existingYubiKey, yubiKeyWithInfo);
                 }
             }
 

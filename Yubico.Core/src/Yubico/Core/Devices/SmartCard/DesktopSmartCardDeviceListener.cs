@@ -397,6 +397,8 @@ namespace Yubico.Core.Devices.SmartCard
                 {
                     entry.CurrentState = entry.EventState & ~SCARD_STATE.CHANGED;
                     entry.EventState = 0;
+                    entry.CurrentSequence = entry.EventSequence;
+                    entry.EventSequence = 0;
                 }
             }
         }

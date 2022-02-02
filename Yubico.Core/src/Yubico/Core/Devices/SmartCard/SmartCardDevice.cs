@@ -95,5 +95,7 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         /// <returns>An already opened connection to the smart card reader.</returns>
         public abstract ISmartCardConnection Connect();
+
+        public override string ToString() => $"Smart Card: {Path}";
     }
 }

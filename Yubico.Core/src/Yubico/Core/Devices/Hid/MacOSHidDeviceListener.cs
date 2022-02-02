@@ -33,6 +33,7 @@ namespace Yubico.Core.Devices.Hid
         // Start listening as soon as this object is constructed.
         public MacOSHidDeviceListener()
         {
+            _log.LogInformation("Creating MacOSHidDeviceListener.");
             StartListening();
         }
 
@@ -68,6 +69,8 @@ namespace Yubico.Core.Devices.Hid
         {
             const int runLoopTimeout = 10; // 10 seconds is arbitrary, pulled from Apple sample code
             using IDisposable logScope = _log.BeginScope("MacOSHidDeviceListener.StartListening()");
+
+            _log.LogInformation("Listener thread started. ThreadID is {ThreadID}.", Thread.CurrentThread.ManagedThreadId);
 
             IntPtr manager = IntPtr.Zero;
             IntPtr runLoopMode = IntPtr.Zero;

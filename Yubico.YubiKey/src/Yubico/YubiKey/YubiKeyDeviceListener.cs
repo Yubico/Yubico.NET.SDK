@@ -43,58 +43,84 @@ namespace Yubico.YubiKey
         /// </summary>
         public static YubiKeyDeviceListener Instance => _lazyInstance.Value;
 
-        private readonly Logger _log = Log.GetLogger();
-
         private static readonly Lazy<YubiKeyDeviceListener> _lazyInstance =
             new Lazy<YubiKeyDeviceListener>(() => new YubiKeyDeviceListener());
 
-        private static ReaderWriterLockSlim _rw = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+        private static readonly ReaderWriterLockSlim RwLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
-        private Dictionary<IYubiKeyDevice, bool> internalCache = new Dictionary<IYubiKeyDevice, bool>();
+        private readonly Logger _log = Log.GetLogger();
+        private readonly Dictionary<IYubiKeyDevice, bool> _internalCache = new Dictionary<IYubiKeyDevice, bool>();
+        private readonly HidDeviceListener _hidListener = HidDeviceListener.Create();
+        private readonly SmartCardDeviceListener _smartCardListener = SmartCardDeviceListener.Create();
 
-        internal List<IYubiKeyDevice> GetAll() => internalCache.Keys.ToList();
+        private readonly Thread? _listenerThread;
+        private bool _isListening;
 
         private YubiKeyDeviceListener()
         {
             _log.LogInformation("Creating YubiKeyDeviceListener instance.");
 
-            var hidDeviceListener = HidDeviceListener.Create();
-            var smartCardListener = SmartCardDeviceListener.Create();
-
-            smartCardListener.Arrived += (s, e) =>
-            {
-                _log.LogInformation("Arrival of smart card {SmartCard} is triggering update.", e.Device);
-                Update();
-            };
-
-            smartCardListener.Removed += (s, e) =>
-            {
-                _log.LogInformation("Removal of smart card {SmartCard} is triggering update.", e.Device);
-                Update();
-            };
-
-            hidDeviceListener.Arrived += (s, e) =>
-            {
-                _log.LogInformation("Arrival of HID {HidDevice} is triggering update.", e.Device);
-                Update();
-            };
-
-            hidDeviceListener.Removed += (s, e) =>
-            {
-                _log.LogInformation("Removal of HID {HidDevice} is triggering update.", e.Device);
-                Update();
-            };
+            _listenerThread = new Thread(ListenForChanges) { IsBackground = true };
+            _isListening = true;
 
             _log.LogInformation("Performing initial cache population.");
             Update();
+
+            _listenerThread.Start();
+        }
+
+        internal List<IYubiKeyDevice> GetAll() => _internalCache.Keys.ToList();
+
+        private void ListenForChanges()
+        {
+            using var updateEvent = new ManualResetEvent(false);
+
+            _log.LogInformation("YubiKey device listener thread started. ThreadID is {ThreadID}.", Thread.CurrentThread.ManagedThreadId);
+
+            _smartCardListener.Arrived += (s, e) =>
+            {
+                _log.LogInformation("Arrival of smart card {SmartCard} is triggering update.", e.Device);
+                _ = updateEvent.Set();
+            };
+
+            _smartCardListener.Removed += (s, e) =>
+            {
+                _log.LogInformation("Removal of smart card {SmartCard} is triggering update.", e.Device);
+                _ = updateEvent.Set();
+            };
+
+            _hidListener.Arrived += (s, e) =>
+            {
+                _log.LogInformation("Arrival of HID {HidDevice} is triggering update.", e.Device);
+                _ = updateEvent.Set();
+            };
+
+            _hidListener.Removed += (s, e) =>
+            {
+                _log.LogInformation("Removal of HID {HidDevice} is triggering update.", e.Device);
+                _ = updateEvent.Set();
+            };
+
+            while (_isListening)
+            {
+                _ = updateEvent.WaitOne();
+                Thread.Sleep(200); // I really dislike sleeps, but here, it does seem like a good idea to give the
+                                   // system some time to quiet down in terms of PnP activity.
+                _ = updateEvent.Reset();
+                Update();
+            }
+
+            // KeepAlive seems to be necessary here as the collector doesn't know that it shouldn't dispose the
+            // event until the very end of this function/thread.
+            GC.KeepAlive(updateEvent);
         }
 
         private void Update()
         {
-            _rw.EnterWriteLock();
+            RwLock.EnterWriteLock();
             _log.LogInformation("Entering write-lock.");
 
-            _log.LogInformation("Cache currently aware of {Count} YubiKeys.", internalCache.Count);
+            _log.LogInformation("Cache currently aware of {Count} YubiKeys.", _internalCache.Count);
             List<IYubiKeyDevice> addedDevices = new List<IYubiKeyDevice>();
             List<IYubiKeyDevice> removedDevices = GetAll();
 
@@ -105,18 +131,18 @@ namespace Yubico.YubiKey
                 hidDevices.Count(),
                 smartCardDevices.Count());
 
-            IEnumerable<IDevice> allDevices = hidDevices.Union(smartCardDevices);
+            IEnumerable<IDevice> allDevices = smartCardDevices.Union(hidDevices);
 
             foreach (IYubiKeyDevice yubiKey in GetAll())
             {
-                internalCache[yubiKey] = false;
+                _internalCache[yubiKey] = false;
             }
 
             foreach (IDevice device in allDevices)
             {
                 _log.LogInformation("Processing device {Device}.", device);
 
-                IYubiKeyDevice? newYubiKey = internalCache.Keys.FirstOrDefault(d => d.Contains(device));
+                IYubiKeyDevice? newYubiKey = _internalCache.Keys.FirstOrDefault(d => d.Contains(device));
                 _log.LogInformation("Device was " + (newYubiKey is null ? "not " : "") + "found in the cache.");
 
                 if (newYubiKey != null)
@@ -130,19 +156,15 @@ namespace Yubico.YubiKey
                 _log.LogInformation("Device {Device} is YubiKey with serial number {SerialNumber}.", device, serialNumber);
 
                 YubiKeyDevice? existingYubiKey =
-                    internalCache.Keys.FirstOrDefault(d => d.SerialNumber == serialNumber) as YubiKeyDevice;
+                    _internalCache.Keys.FirstOrDefault(d => d.SerialNumber == serialNumber) as YubiKeyDevice;
                 _log.LogInformation(
                     "YubiKey [{SerialNumber}] was " + (existingYubiKey is null ? "not " : "") + "found in the cache.",
                     serialNumber);
 
                 if (existingYubiKey is null)
                 {
-                    if (YubiKeyDevice.TryBuildYubiKey(
-                        new List<YubiKeyDevice.YubicoDeviceWithInfo>() { yubiKeyWithInfo },
-                        out YubiKeyDevice? yubiKey))
-                    {
-                        internalCache[yubiKey] = true;
-                    }
+                    var yubiKey = new YubiKeyDevice(yubiKeyWithInfo.Device, yubiKeyWithInfo.Info);
+                    _internalCache[yubiKey] = true;
                 }
                 else
                 {
@@ -152,12 +174,12 @@ namespace Yubico.YubiKey
 
             foreach (IYubiKeyDevice removedDevice in removedDevices)
             {
-                _ = internalCache.Remove(removedDevice);
+                _ = _internalCache.Remove(removedDevice);
             }
 
             foreach (IYubiKeyDevice yubiKeyDevice in GetAll())
             {
-                if (internalCache[yubiKeyDevice])
+                if (_internalCache[yubiKeyDevice])
                 {
                     addedDevices.Add(yubiKeyDevice);
                 }
@@ -173,7 +195,7 @@ namespace Yubico.YubiKey
                 OnDeviceArrived(new YubiKeyDeviceEventArgs(addedDevice));
             }
 
-            _rw.ExitWriteLock();
+            RwLock.ExitWriteLock();
         }
 
         /// <summary>
@@ -200,7 +222,7 @@ namespace Yubico.YubiKey
             {
                 if (disposing)
                 {
-                    _rw.Dispose();
+                    RwLock.Dispose();
                 }
                 _disposedValue = true;
             }

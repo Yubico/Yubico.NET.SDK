@@ -16,6 +16,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
 using static Yubico.PlatformInterop.NativeMethods;
@@ -25,9 +26,14 @@ namespace Yubico.Core.Devices.Hid
     internal class WindowsHidDeviceListener : HidDeviceListener
     {
         private IntPtr _notificationContext;
+        private GCHandle? _marshalableThisPtr;
+        private CM_NOTIFY_CALLBACK? _callbackDelegate;
+
+        private readonly Logger _log = Log.GetLogger();
 
         public WindowsHidDeviceListener()
         {
+            _log.LogInformation("Creating WindowsHidDeviceListener.");
             StartListening();
         }
 
@@ -58,7 +64,10 @@ namespace Yubico.Core.Devices.Hid
                     Marshal.WriteByte(pFilter, OffsetGuidData1 + index, guidBytes[index]);
                 }
 
-                CmErrorCode errorCode = CM_Register_Notification(pFilter, IntPtr.Zero, OnEventReceived, out _notificationContext);
+                _marshalableThisPtr = GCHandle.Alloc(this);
+                _callbackDelegate = OnEventReceived;
+                CmErrorCode errorCode = CM_Register_Notification(pFilter, GCHandle.ToIntPtr(_marshalableThisPtr.Value), _callbackDelegate, out _notificationContext);
+                _log.LogInformation("Registered callback with ConfigMgr32.");
                 ThrowIfFailed(errorCode);
             }
             finally
@@ -72,7 +81,14 @@ namespace Yubico.Core.Devices.Hid
             if (_notificationContext != IntPtr.Zero)
             {
                 CmErrorCode errorCode = CM_Unregister_Notification(_notificationContext);
+                _log.LogInformation("Unregistered callback with ConfigMgr32.");
                 ThrowIfFailed(errorCode);
+            }
+
+            if (_marshalableThisPtr.HasValue)
+            {
+                _marshalableThisPtr.Value.Free();
+                _marshalableThisPtr = null;
             }
         }
 
@@ -87,8 +103,12 @@ namespace Yubico.Core.Devices.Hid
             }
         }
 
-        private int OnEventReceived(IntPtr hNotify, IntPtr context, CM_NOTIFY_ACTION action, IntPtr eventDataPtr, int eventDataSize)
+        private static int OnEventReceived(IntPtr hNotify, IntPtr context, CM_NOTIFY_ACTION action, IntPtr eventDataPtr, int eventDataSize)
         {
+            GCHandle thisPtr = GCHandle.FromIntPtr(context);
+            var thisObj = thisPtr.Target as WindowsHidDeviceListener;
+            thisObj?._log.LogInformation("ConfigMgr callback received.");
+
             CM_NOTIFY_EVENT_DATA eventData = Marshal.PtrToStructure<CM_NOTIFY_EVENT_DATA>(eventDataPtr);
             Debug.Assert(eventData.ClassGuid == CmInterfaceGuid.Hid);
             Debug.Assert(eventData.FilterType == CM_NOTIFY_FILTER_TYPE.DEVINTERFACE);
@@ -104,11 +124,11 @@ namespace Yubico.Core.Devices.Hid
                 string instancePath = System.Text.Encoding.Unicode.GetString(buffer);
                 var cmDevice = new CmDevice(instancePath);
                 var device = new WindowsHidDevice(cmDevice);
-                OnArrived(device);
+                thisObj?.OnArrived(device);
             }
             else if (action == CM_NOTIFY_ACTION.DEVICEINTERFACEREMOVAL)
             {
-                OnRemoved(null);
+                thisObj?.OnRemoved(null);
             }
 
             return 0;

@@ -79,6 +79,32 @@ namespace Yubico.YubiKey
         private IYubiKeyDeviceInfo _yubiKeyInfo;
 
         /// <summary>
+        /// Constructs a <see cref="YubiKeyDevice"/> instance.
+        /// </summary>
+        /// <param name="device">A valid device; either a smart card, keyboard, or FIDO device.</param>
+        /// <param name="info">The YubiKey device information that describes the device.</param>
+        /// <exception cref="ArgumentException">An unrecognized device type was given.</exception>
+        public YubiKeyDevice(IDevice device, IYubiKeyDeviceInfo info)
+        {
+            switch (device)
+            {
+                case ISmartCardDevice scardDevice:
+                    _smartCardDevice = scardDevice;
+                    break;
+                case IHidDevice hidDevice when hidDevice.IsKeyboard():
+                    _hidKeyboardDevice = hidDevice;
+                    break;
+                case IHidDevice hidDevice when hidDevice.IsFido():
+                    _hidFidoDevice = hidDevice;
+                    break;
+                default:
+                    throw new ArgumentException(ExceptionMessages.DeviceTypeNotRecognized, nameof(device));
+            }
+
+            _yubiKeyInfo = info;
+        }
+
+        /// <summary>
         /// Construct a <see cref="YubiKeyDevice"/> instance.
         /// </summary>
         /// <param name="smartCardDevice"><see cref="ISmartCardDevice"/> for the YubiKey.</param>
@@ -101,27 +127,27 @@ namespace Yubico.YubiKey
         /// <summary>
         /// Updates current <see cref="YubiKeyDevice"/> with new info from SmartCard device or HID device.
         /// </summary>
-        /// <param name="smartCardDevice"><see cref="ISmartCardDevice"/> for the YubiKey.</param>
-        /// <param name="hidKeyboardDevice"><see cref="IHidDevice"/> for normal HID interaction with the YubiKey.</param>
-        /// <param name="hidFidoDevice"><see cref="IHidDevice"/> for FIDO interaction with the YubiKey.</param>
-        /// <param name="yubiKeyDeviceInfo"><see cref="IYubiKeyDeviceInfo"/> with remaining properties of the YubiKey.</param>
-        public void Merge(ISmartCardDevice? smartCardDevice,
-                          IHidDevice? hidKeyboardDevice,
-                          IHidDevice? hidFidoDevice,
-                          IYubiKeyDeviceInfo yubiKeyDeviceInfo)
+        /// <param name="device"></param>
+        /// <param name="info"></param>
+        public void Merge(IDevice device, IYubiKeyDeviceInfo info)
         {
-            _smartCardDevice ??= smartCardDevice;
-            _hidKeyboardDevice ??= hidKeyboardDevice;
-            _hidFidoDevice ??= hidFidoDevice;
-
-            _yubiKeyInfo = (_smartCardDevice != null || _hidKeyboardDevice != null || _hidFidoDevice != null)
-                ? yubiKeyDeviceInfo
-                : _yubiKeyInfo;
-
-            if (smartCardDevice != null)
+            switch (device)
             {
-                IsNfcDevice = smartCardDevice?.IsNfcTransport() ?? false;
+                case ISmartCardDevice scardDevice:
+                    _smartCardDevice = scardDevice;
+                    IsNfcDevice = scardDevice.IsNfcTransport();
+                    break;
+                case IHidDevice hidDevice when hidDevice.IsKeyboard():
+                    _hidKeyboardDevice = hidDevice;
+                    break;
+                case IHidDevice hidDevice when hidDevice.IsFido():
+                    _hidFidoDevice = hidDevice;
+                    break;
+                default:
+                    throw new ArgumentException(ExceptionMessages.DeviceTypeNotRecognized, nameof(device));
             }
+
+            _yubiKeyInfo = info;
         }
 
 

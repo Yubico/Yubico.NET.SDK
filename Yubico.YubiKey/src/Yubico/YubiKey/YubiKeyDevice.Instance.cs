@@ -699,9 +699,9 @@ namespace Yubico.YubiKey
             return !(SerialNumber is null)
                 ? SerialNumber!.GetHashCode()
                 : HashCode.Combine(
-                    _smartCardDevice!.Path,
-                    _hidFidoDevice!.Path,
-                    _hidKeyboardDevice!.Path);
+                    _smartCardDevice?.Path,
+                    _hidFidoDevice?.Path,
+                    _hidKeyboardDevice?.Path);
         }
 
         private static readonly string EOL = Environment.NewLine;

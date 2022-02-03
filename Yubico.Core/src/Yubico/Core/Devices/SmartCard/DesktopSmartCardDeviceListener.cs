@@ -76,7 +76,7 @@ namespace Yubico.Core.Devices.SmartCard
         // will terminate the thread.
         private void ListenForReaderChanges()
         {
-            _log.LogInformation("Listener thread started. ThreadID is {ThreadID}.", Thread.CurrentThread.ManagedThreadId);
+            _log.LogInformation("Smart card listener thread started. ThreadID is {ThreadID}.", Thread.CurrentThread.ManagedThreadId);
 
             bool usePnpWorkaround = UsePnpWorkaround();
 
@@ -167,6 +167,7 @@ namespace Yubico.Core.Devices.SmartCard
                 }
 
                 _log.SCardApiCall(nameof(SCard.GetStatusChange), getStatusChangeResult);
+                _log.LogInformation("Reader states:\n{States}", newStates);
 
                 while (ReaderListChangeDetected(newStates, usePnpWorkaround))
                 {
@@ -205,6 +206,7 @@ namespace Yubico.Core.Devices.SmartCard
                         // have been dealt with.
                         if (addedReaderStates.Any())
                         {
+                            _log.LogInformation("Additional smart card readers were found. Calling GetStatusChange for more information.");
                             getStatusChangeResult = PlatformLibrary.Instance.SCard.GetStatusChange(_context, 0, updatedStates);
 
                             if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
@@ -220,7 +222,7 @@ namespace Yubico.Core.Devices.SmartCard
                             }
 
                             _log.SCardApiCall(nameof(SCard.GetStatusChange), getStatusChangeResult);
-
+                            _log.LogInformation("Reader states:\n{States}", newStates);
                         }
 
                         // Swap states to allow correct dispose of unmanaged objects.
@@ -248,7 +250,7 @@ namespace Yubico.Core.Devices.SmartCard
                     }
 
                     _log.SCardApiCall(nameof(SCard.GetStatusChange), getStatusChangeResult);
-
+                    _log.LogInformation("Reader states:\n{States}", newStates);
                 }
 
                 if (sendEvents)

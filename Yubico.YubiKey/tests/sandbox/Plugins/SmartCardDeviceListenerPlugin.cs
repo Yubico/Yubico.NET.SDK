@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
             listener.Arrived += (sender, args) =>
             {
                 using var connection = args.Device.Connect();
-
+                Console.WriteLine("Device arrived!");
                 _ = connection.Transmit(new SelectApplicationCommand(YubiKeyApplication.Management).CreateCommandApdu());
             };
             listener.Removed += (sender, args) => Console.WriteLine("Device removed!");

@@ -142,6 +142,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Getting Started", "Getting 
 		Yubico.YubiKey\docs\users-manual\getting-started\overview-of-sdk.md = Yubico.YubiKey\docs\users-manual\getting-started\overview-of-sdk.md
 		Yubico.YubiKey\docs\users-manual\getting-started\what-is-a-yubikey.md = Yubico.YubiKey\docs\users-manual\getting-started\what-is-a-yubikey.md
 		Yubico.YubiKey\docs\users-manual\getting-started\whats-new.md = Yubico.YubiKey\docs\users-manual\getting-started\whats-new.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\device-notifications.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\device-notifications.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk Programming Guide", "Sdk Programming Guide", "{749DAF15-E6A8-44DC-906E-BE3FC8DE3983}"

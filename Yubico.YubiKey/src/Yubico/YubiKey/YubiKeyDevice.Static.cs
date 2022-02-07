@@ -13,14 +13,13 @@
 // limitations under the License.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Yubico.YubiKey.DeviceExtensions;
 using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
-using System.Diagnostics.CodeAnalysis;
 using System;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey
 {
@@ -145,94 +144,16 @@ namespace Yubico.YubiKey
             return yubicoSmartCardDevices;
         }
 
-        internal static bool TryBuildYubiKey(
-            IEnumerable<YubicoDeviceWithInfo> deviceGroup,
-            [NotNullWhen(true)] out YubiKeyDevice? yubiKey)
-        {
-            var deviceList = deviceGroup.ToList();
-
-            if (!IsValidYubiKeyDeviceGroup(deviceList))
-            {
-                yubiKey = null;
-                return false;
-            }
-
-            YubicoDeviceWithInfo? smartCardDevice = deviceList
-                .FirstOrDefault(d => d.Device is SmartCardDevice);
-
-            YubicoDeviceWithInfo? hidKeyboardDevice = deviceList
-                .FirstOrDefault(d => d.Device is HidDevice hd && hd.IsKeyboard());
-
-            YubicoDeviceWithInfo? hidFidoDevice = deviceList
-                .FirstOrDefault(d => d.Device is HidDevice hd && hd.IsFido());
-
-            // Merge device information.
-            var mergedDeviceInfo = new YubiKeyDeviceInfo();
-            var deviceTypes = new List<YubicoDeviceWithInfo>()
-            {
-                smartCardDevice,
-                hidKeyboardDevice,
-                hidFidoDevice
-            };
-            foreach (YubicoDeviceWithInfo? deviceWithInfo in deviceTypes)
-            {
-                mergedDeviceInfo = mergedDeviceInfo.Merge(deviceWithInfo?.Info);
-            }
-
-            yubiKey = new YubiKeyDevice(
-                (ISmartCardDevice?)smartCardDevice?.Device,
-                (IHidDevice?)hidKeyboardDevice?.Device,
-                (IHidDevice?)hidFidoDevice?.Device,
-                mergedDeviceInfo);
-            return true;
-        }
-
         internal static bool TryMergeYubiKey(
             YubiKeyDevice originalDevice,
-            YubicoDeviceWithInfo device)
+            YubicoDeviceWithInfo newDevice)
         {
-            if (!IsValidYubiKeyDevice(device))
+            if (!IsValidYubiKeyDevice(newDevice))
             {
                 return false;
             }
 
-            YubicoDeviceWithInfo? smartCardDevice = originalDevice._smartCardDevice != null
-                ? new YubicoDeviceWithInfo(originalDevice._smartCardDevice)
-                : device.Device is SmartCardDevice
-                    ? device
-                    : null;
-
-            YubicoDeviceWithInfo? hidKeyboardDevice = originalDevice._hidKeyboardDevice != null
-                ? new YubicoDeviceWithInfo(originalDevice._hidKeyboardDevice)
-                : (device.Device is HidDevice hdKeyboard && hdKeyboard.IsKeyboard())
-                    ? device
-                    : null;
-
-            YubicoDeviceWithInfo? hidFidoDevice = originalDevice._hidFidoDevice != null
-                ? new YubicoDeviceWithInfo(originalDevice._hidFidoDevice)
-                : (device.Device is HidDevice hdFido && hdFido.IsKeyboard())
-                    ? device
-                    : null;
-
-            // Merge device information.
-            var mergedDeviceInfo = new YubiKeyDeviceInfo();
-            var deviceTypes = new List<YubicoDeviceWithInfo?>()
-            {
-                smartCardDevice,
-                hidKeyboardDevice,
-                hidFidoDevice
-            };
-
-            foreach (YubicoDeviceWithInfo? deviceWithInfo in deviceTypes)
-            {
-                mergedDeviceInfo = mergedDeviceInfo.Merge(deviceWithInfo?.Info);
-            }
-
-            originalDevice.Merge(
-                (ISmartCardDevice?)smartCardDevice?.Device,
-                (IHidDevice?)hidKeyboardDevice?.Device,
-                (IHidDevice?)hidFidoDevice?.Device,
-                mergedDeviceInfo);
+            originalDevice.Merge(newDevice.Device, newDevice.Info);
 
             return true;
         }
@@ -297,6 +218,6 @@ namespace Yubico.YubiKey
         }
 
         private static void ErrorHandler(Exception exception) =>
-            Debug.WriteLine($"Exception caught: {exception}\n");
+            Log.GetLogger().LogWarning($"Exception caught: {exception}");
     }
 }

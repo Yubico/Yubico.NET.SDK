@@ -16,6 +16,7 @@ using System;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.InterIndustry.Commands;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
@@ -43,7 +44,12 @@ namespace Yubico.YubiKey.TestApp.Plugins
             Console.WriteLine("Create listener");
             var listener = SmartCardDeviceListener.Create();
 
-            listener.Arrived += (sender, args) => Console.WriteLine("Device arrived!");
+            listener.Arrived += (sender, args) =>
+            {
+                using var connection = args.Device.Connect();
+                Console.WriteLine("Device arrived!");
+                _ = connection.Transmit(new SelectApplicationCommand(YubiKeyApplication.Management).CreateCommandApdu());
+            };
             listener.Removed += (sender, args) => Console.WriteLine("Device removed!");
             Console.WriteLine("Subscribed");
 

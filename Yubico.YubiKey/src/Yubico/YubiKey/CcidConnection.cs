@@ -14,15 +14,19 @@
 
 using System;
 using System.Globalization;
+using Yubico.Core.Buffers;
 using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.YubiKey.Pipelines;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Iso7816;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey
 {
     internal class CcidConnection : IYubiKeyConnection
     {
+        private readonly Logger _log = Log.GetLogger();
+
         private readonly byte[]? _applicationId;
         private readonly IApduTransform _apduPipeline;
         private readonly ISmartCardConnection _smartCardConnection;
@@ -118,6 +122,8 @@ namespace Yubico.YubiKey
                 YubiKeyApplication.Unknown => new SelectApplicationCommand(_applicationId!),
                 _ => new SelectApplicationCommand(_yubiKeyApplication),
             };
+
+            _log.LogInformation("Selecting smart card application [{AID}]", Hex.BytesToHex(_applicationId ?? _yubiKeyApplication.GetIso7816ApplicationId()));
             ResponseApdu responseApdu = _smartCardConnection.Transmit(selectApplicationCommand.CreateCommandApdu());
 
             if (responseApdu.SW != SWConstants.Success)

@@ -49,7 +49,7 @@ namespace Yubico.Core.Devices.SmartCard
 
                 // It's OK if there are no readers on the system. Treat this the same as if we
                 // didn't find any devices.
-                if (result == ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
+                if (result == ErrorCode.SCARD_E_NO_READERS_AVAILABLE || readerNames.Length == 0)
                 {
                     log.LogInformation("No smart card devices found.");
                     return new List<ISmartCardDevice>();
@@ -159,6 +159,7 @@ namespace Yubico.Core.Devices.SmartCard
                     activeProtocol);
 
                 // We are transferring ownership to SmartCardConnection
+                _log.LogInformation("Transferred context and cardHandle to connection instance.");
                 context = null;
                 cardHandle = null;
 
@@ -166,9 +167,17 @@ namespace Yubico.Core.Devices.SmartCard
             }
             finally
             {
-                context?.Dispose();
-                cardHandle?.Dispose();
-                _log.LogInformation("Disposed of context and cardHandle.");
+                if (context != null)
+                {
+                    context?.Dispose();
+                    _log.LogInformation("Context disposed.");
+                }
+
+                if (cardHandle != null)
+                {
+                    cardHandle?.Dispose();
+                    _log.LogInformation("CardHandle disposed.");
+                }
             }
         }
     }

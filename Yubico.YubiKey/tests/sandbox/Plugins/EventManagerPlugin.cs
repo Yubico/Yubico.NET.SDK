@@ -13,9 +13,23 @@
 // limitations under the License.
 
 using System;
+using System.Threading;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
+    class ThreadIdEnricher : ILogEventEnricher
+    {
+        public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
+        {
+            logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
+                "ThreadId", Thread.CurrentThread.ManagedThreadId));
+        }
+    }
+
     internal class EventManagerPlugin : PluginBase
     {
         public override string Name => "EventManager";
@@ -25,18 +39,27 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         public override bool Execute()
         {
+            using var log = new LoggerConfiguration()
+                .Enrich.With(new ThreadIdEnricher())
+                .WriteTo.Console(
+                    outputTemplate: "[{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
+                .CreateLogger();
+
+            Core.Logging.Log.LoggerFactory = LoggerFactory.Create(
+                builder => builder
+                    .AddSerilog(log)
+                    .AddFilter(level => level >= LogLevel.Information));
+
             YubiKeyDeviceListener.Instance.Arrived += (s, e) =>
             {
                 Console.WriteLine("YubiKey arrived:");
-                Console.WriteLine(e.Device.FirmwareVersion);
-                Console.WriteLine(e.Device.SerialNumber);
+                Console.WriteLine(e.Device);
             };
 
             YubiKeyDeviceListener.Instance.Removed += (s, e) =>
             {
                 Console.WriteLine("YubiKey removed:");
-                Console.WriteLine(e.Device.FirmwareVersion);
-                Console.WriteLine(e.Device.SerialNumber);
+                Console.WriteLine(e.Device);
             };
 
             _ = Console.ReadLine();

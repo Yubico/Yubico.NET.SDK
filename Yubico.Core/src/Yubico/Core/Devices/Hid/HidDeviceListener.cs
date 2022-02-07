@@ -75,7 +75,7 @@ namespace Yubico.Core.Devices.Hid
         /// </param>
         protected void OnArrived(IHidDevice device)
         {
-            _log.LogInformation("IOHIDDevice {Device} arrived.", device);
+            _log.LogInformation("HID {Device} arrived.", device);
             Arrived?.Invoke(this, new HidDeviceEventArgs(device));
         }
 
@@ -88,7 +88,7 @@ namespace Yubico.Core.Devices.Hid
         /// </param>
         protected void OnRemoved(IHidDevice? device)
         {
-            _log.LogInformation("IOHIDDevice {Device} removed.", device);
+            _log.LogInformation("HID {Device} removed.", device);
             Removed?.Invoke(this, new HidDeviceEventArgs(device));
         }
 

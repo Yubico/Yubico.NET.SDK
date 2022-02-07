@@ -15,7 +15,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.PlatformInterop
@@ -173,6 +175,8 @@ namespace Yubico.PlatformInterop
 
             public AnswerToReset Atr => new AnswerToReset(_bufferSlice.Slice(_atrOffset, AtrDynamicSize).Span);
 
+            public override string ToString() => $"{ReaderName}: [{CurrentSequence} : {CurrentState}] => [{EventSequence} : {EventState}]";
+
             private static string MarshalToString(IntPtr readerNamePtr)
             {
                 string? value = SdkPlatformInfo.OperatingSystem switch
@@ -307,5 +311,15 @@ namespace Yubico.PlatformInterop
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+        public override string ToString()
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (Entry? e in this.AsEnumerable())
+            {
+                _ = sb.AppendLine(e.ToString());
+            }
+            return sb.ToString();
+        }
     }
 }

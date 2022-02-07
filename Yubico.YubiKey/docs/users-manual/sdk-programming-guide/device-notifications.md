@@ -79,4 +79,4 @@ The device listener was implemented with two primary design goals in mind:
    a command over each of the available interfaces to the key. If sent to a YubiKey that was
    already present and engaged in a stateful operation, this command could disrupt that key and
    cause the other active thread to start failing unexpectedly. The implementation of events
-   in the SDK avoid this by only communicating with keys that the SDK has never seen before.
+   in the SDK avoids this by only communicating with keys that the SDK has never seen before.

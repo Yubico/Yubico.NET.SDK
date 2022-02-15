@@ -22,58 +22,76 @@ namespace Yubico.YubiKey.Piv.Commands
 {
     public class PutDataCommandTests
     {
-        [Fact]
-        public void ClassType_DerivedFromPivCommand_IsTrue()
-        {
-            byte[] data = new byte[] {
-                0x53, 0x06, 0xbc, 0x02, 0x31, 0x32, 0xFE, 0x00
-            };
-            var command = new PutDataCommand(PivDataTag.IrisImages, data);
-
-            Assert.True(command is IYubiKeyCommand<PutDataResponse>);
-        }
-
-        [Fact]
-        public void ProtectedConstructor_ValidObject()
-        {
-            byte[] data = new byte[] { 0x53, 0x03, 0x31, 0x32, 0x33 };
-            var command = new PutDataCommand(0x005fff0A, data);
-
-            Assert.True(command is IYubiKeyCommand<PutDataResponse>);
-        }
-
-        [Fact]
-        public void NoArgConstructor_DerivedFromPivCommand_IsTrue()
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void ClassType_DerivedFromPivCommand_IsTrue(int constructorToUse)
         {
             byte[] data = PivCommandResponseTestData.PutDataEncoding(PivDataTag.IrisImages, true);
-            var command = new PutDataCommand()
-            {
-                Tag = PivDataTag.IrisImages,
-                EncodedData = data,
-            };
+            PutDataCommand command = GetPutDataCommandObject(constructorToUse, PivDataTag.IrisImages, 0, data);
 
             Assert.True(command is IYubiKeyCommand<PutDataResponse>);
         }
 
-        [Fact]
-        public void Constructor_Application_Piv()
+        [Theory]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void Constructor_IntTag_ValidObject(int constructorToUse)
         {
-            byte[] data = new byte[] { 0x53, 0x03, 0xA1, 0xA2, 0xA3 };
-            var command = new PutDataCommand(0x5FC109, data);
+            byte[] data = new byte[] { 0x53, 0x03, 0x31, 0x32, 0x33 };
+            PutDataCommand command = GetPutDataCommandObject(constructorToUse, PivDataTag.Unknown, 0x005fff0A, data);
+
+            Assert.True(command is IYubiKeyCommand<PutDataResponse>);
+        }
+
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        public void Constructor_Application_Piv(int constructorToUse)
+        {
+            byte[] data = PivCommandResponseTestData.PutDataEncoding(PivDataTag.Chuid, true);
+            PutDataCommand command = GetPutDataCommandObject(constructorToUse, PivDataTag.Chuid, 0, data);
 
             YubiKeyApplication application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
 
+        [Fact]
+        public void SetProperties_Old_MatchesNew()
+        {
+            var command = new PutDataCommand();
+
+            command.DataTag = (int)PivDataTag.Capability;
+
+#pragma warning disable CS0618 // Testing an obsolete feature
+            Assert.Equal(PivDataTag.Capability, command.Tag);
+#pragma warning restore CS0618
+        }
+
+        [Fact]
+        public void SetProperties_New_MatchesOld()
+        {
+            var command = new PutDataCommand();
+
+#pragma warning disable CS0618 // Testing an obsolete feature
+            command.Tag = PivDataTag.SecurityObject;
+#pragma warning restore CS0618
+
+            Assert.Equal((int)PivDataTag.SecurityObject, command.DataTag);
+        }
+
         [Theory]
-        [InlineData(PivDataTag.Discovery)]
-        [InlineData(PivDataTag.Printed)]
-        public void DisallowedTag_ThrowsException(PivDataTag tag)
+        [InlineData(1, PivDataTag.Discovery)]
+        [InlineData(2, PivDataTag.Discovery)]
+        [InlineData(3, PivDataTag.Discovery)]
+        public void DisallowedTag_ThrowsException(int constructorToUse, PivDataTag tag)
         {
             byte[] encoding = new byte[] { 0x53, 0x03, 0x39, 0x38, 0x37 };
 
-            _ = Assert.Throws<ArgumentException>(() => new PutDataCommand(tag, encoding));
+            _ = Assert.Throws<ArgumentException>(() => GetPutDataCommandObject(constructorToUse, tag, 0, encoding));
         }
 
         [Fact]
@@ -89,7 +107,7 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             var command = new PutDataCommand()
             {
-                Tag = PivDataTag.Retired12,
+                DataTag = (int)PivDataTag.Retired12,
             };
 
             _ = Assert.Throws<InvalidOperationException>(() => command.CreateCommandApdu());
@@ -117,42 +135,41 @@ namespace Yubico.YubiKey.Piv.Commands
             byte[] encoding = PivCommandResponseTestData.PutDataEncoding(tag, true);
             var command = new PutDataCommand()
             {
+#pragma warning disable CS0618 // testing an obsolete feature
                 Tag = tag,
-                EncodedData = encoding
+                EncodedData = encoding,
+#pragma warning restore CS0618
             };
 
-            PivDataTag getTag = command.Tag;
+            int getTag = command.DataTag;
 
-            Assert.Equal(tag, getTag);
+            Assert.Equal((int)tag, getTag);
         }
 
         [Theory]
-        [InlineData(PivDataTag.Signature)]
-        [InlineData(PivDataTag.Retired1)]
-        [InlineData(PivDataTag.KeyHistory)]
-        [InlineData(PivDataTag.PairingCodeReferenceData)]
-        public void Constructor_Property_EncodedData(PivDataTag tag)
+        [InlineData(1, PivDataTag.Signature)]
+        [InlineData(2, PivDataTag.Signature)]
+        [InlineData(3, PivDataTag.Signature)]
+        [InlineData(1, PivDataTag.Retired1)]
+        [InlineData(2, PivDataTag.Retired1)]
+        [InlineData(3, PivDataTag.Retired1)]
+        [InlineData(1, PivDataTag.KeyHistory)]
+        [InlineData(2, PivDataTag.KeyHistory)]
+        [InlineData(3, PivDataTag.KeyHistory)]
+        [InlineData(1, PivDataTag.PairingCodeReferenceData)]
+        [InlineData(2, PivDataTag.PairingCodeReferenceData)]
+        [InlineData(3, PivDataTag.PairingCodeReferenceData)]
+        public void Constructor_Property_EncodedData(int constructorToUse, PivDataTag tag)
         {
             byte[] encoding = PivCommandResponseTestData.PutDataEncoding(tag, true);
             var expectedResult = new Span<byte>(encoding);
-            var command = new PutDataCommand(tag, encoding);
+            PutDataCommand command = GetPutDataCommandObject(constructorToUse, tag, 0, encoding);
 
-            ReadOnlyMemory<byte> encodedData = command.EncodedData;
+            ReadOnlyMemory<byte> encodedData = command.Data;
 
             bool compareResult = expectedResult.SequenceEqual(encodedData.Span);
 
             Assert.True(compareResult);
-        }
-
-        [Theory]
-        [InlineData(0)]
-        [InlineData(0x0000007F)]
-        [InlineData(0x00001111)]
-        [InlineData(0x015fff01)]
-        public void ProtectedConstructor_InvalidTag_Exception(int tag)
-        {
-            byte[] encoding = new byte[] { 0x61, 0x62, 0x63 };
-            _ = Assert.Throws<InvalidOperationException>(() => new PutDataCommand(tag, encoding));
         }
 
         [Theory]
@@ -199,14 +216,15 @@ namespace Yubico.YubiKey.Piv.Commands
 
             expected.AddRange(encoding);
 
-            var command = new PutDataCommand(tag, encoding);
-            CommandApdu cmdApdu = command.CreateCommandApdu();
+            for (int index = 1; index <= 3; index++)
+            {
+                PutDataCommand command = GetPutDataCommandObject(index, tag, 0, encoding);
+                CommandApdu cmdApdu = command.CreateCommandApdu();
+                ReadOnlyMemory<byte> data = cmdApdu.Data;
+                bool compareResult = expected.SequenceEqual(data.ToArray());
 
-            ReadOnlyMemory<byte> data = cmdApdu.Data;
-
-            bool compareResult = expected.SequenceEqual(data.ToArray());
-
-            Assert.True(compareResult);
+                Assert.True(compareResult);
+            }
         }
 
         [Theory]
@@ -228,6 +246,34 @@ namespace Yubico.YubiKey.Piv.Commands
             bool compareResult = expected.SequenceEqual(data.ToArray());
 
             Assert.True(compareResult);
+        }
+
+        // The constructorToUse is either 1, 2, or 3
+        // 1: use obsolete constructor
+        // 2: use constructor with int and data
+        // 3: use no-arg constructor and set properties
+        private static PutDataCommand GetPutDataCommandObject(
+            int constructorToUse, PivDataTag pivDataTag, int dataTag, byte[] data)
+        {
+            int dataTagInt = dataTag;
+            if (pivDataTag != PivDataTag.Unknown)
+            {
+                dataTagInt = (int)pivDataTag;
+            }
+
+            return constructorToUse switch
+            {
+
+#pragma warning disable CS0618 // Testing an obsolete feature
+                1 => new PutDataCommand(pivDataTag, data),
+#pragma warning restore CS0618
+                2 => new PutDataCommand(dataTagInt, data),
+                _ => new PutDataCommand()
+                {
+                    DataTag = dataTagInt,
+                    Data = data,
+                },
+            };
         }
     }
 }

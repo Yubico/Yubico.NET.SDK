@@ -1,6 +1,5 @@
 ---
 uid: UsersManualPivGetAndPutData
-summary: *content
 ---
 
 <!-- Copyright 2021 Yubico AB
@@ -41,13 +40,9 @@ replace the data currently in an element.
 
 # Vendor-Defined Get and Put Data
 
-The PIV standard defines a set of tags for a smart card to implement in order to be
-compliant. It also allows vendors to define their own tags. The YubiKey has a set of
-vendor-defined tags. The SDK has the ability to get and put these elements, but the API
-to do so directly is not public. That is, it is not possible for an application outside
-the SDK to directly get or put data using these tags. However, there are "upper-layer"
-classes that will store and retrieve the data. The calling application will have access
-to these data elements, just not directly through the GET DATA and PUT DATA classes.
+In addition to the PIV-defined Data Tags, the YubiKey has a set of defined and undefined
+Data Tags. The Yubico-defined Data Tags specify data specific to YubiKey operations, and
+the undefined Data Tags allow an application to store its own data.
 
 ## Data format
 
@@ -69,13 +64,17 @@ of every tag and the format of data.
 
 The vendor-defined elements also have specified formats.
 
-If you execute the PUT DATA command through the SDK, then the data must follow this
-format. The YubiKey does not enforce the format of the input data based on the tag,
-although it does enforce size limitations. The reason is to reduce the size of the code on
-the space-constrained processor that powers a YubiKey. Because of this, it is possible to
-put "arbitrary" data into many elements. That cannot be done using the SDK's public API,
-but it is possible that other software packages will place non-standard data onto a
-YubiKey.
+If you execute the PUT DATA command through the SDK, then the data need not follow this
+format. That is, the YubiKey does not enforce the format of the input data based on the
+tag, although it does enforce size limitations. The reason is to reduce the size of the
+code on the space-constrained processor that powers a YubiKey. Because of this, it is
+possible to put "arbitrary" data into many elements. See the section on
+[overloaded elements](#overloaded-elements) for a more detailed discussion.
+
+It is possible to verify that data does indeed follow the defined formats. See the
+[PivDataTagExtensions](xref:Yubico.YubiKey.Piv.PivDataTagExtensions). Hence, if you
+want to use the PUT DATA command and allow only data that follows the formats defined,
+then validate the data first.
 
 When called upon to GET DATA, the YubiKey will return whatever data was loaded. If
 non-specified data was put into an element, the GET DATA will return that non-specified
@@ -96,11 +95,17 @@ returns the loaded data exactly as it was put.
 Note that you should never overwrite the information in the Printed tag. If you do, it
 could make your YubiKey unusable.
 
+Also, [as described below](#undefined-tags), there is an alternative to overloading a
+DataTag, namely, use an undefined number as the DataTag.
+
 ### Recommendation
 
 It almost goes without saying that Yubico does not recommend doing this. If you do
 overload a data object and store some non-specified data on the YubiKey, the behavior of
 the YubiKey itself is not defined.
+
+It is better to store any undefined or application-specific data in an
+[undefined DataTag](#undefined-tags).
 
 If you feel there is no way to build your application without loading non-specified data
 into one of the data objects, at the very least do NOT overload these elements:
@@ -147,6 +152,33 @@ Provider (CSP). There will likely never be a scenario where an application will 
 use the data the SDK will PUT into and GET from these objects. If your application uses
 the Base CSP, and you use a YubiKey, any necessary operations with the MSCMAP will be
 handled by the SDK.
+
+## Undefined tags
+
+The YubiKey will store data in a storage location as long as the DataTag is a number
+between `0x005F0000` and `0x005FFFFF` (inclusive). Only 45 of those numbers are defined to
+hold specific data. Hence, if you want to store data other than what is defined, pick one
+of the undefined numbers, there are over 12 million of them. The
+[User's Manual Entry](piv-objects.md) on PIV Data Objects has tables listing the defined
+tags ([PIV-defined](piv-objects.md#datatagtables) and
+[Yubico-defined](piv-objects.md#datatagtable2)), along with a table listing the
+[undefined numbers](piv-objects.md#datatagtable3).
+
+You can use the PUT DATA and GET DATA commands to store any data you like under those
+numbers, so there is no need to overload an existing defined Data Tag.
+
+The only possible exception would be if you want to store some data PIN-protected. Any
+data stored under the tags Fingerprints (`0x005FC103`), Facial Image (`0x005FC108`),
+Printed (`0x005FC109`), and Iris (`0x005FC121`) is retrievable only in a session where the
+PIN has been verified. Hence, we say the data stored under these numbers is PIN-protected.
+Data stored under any other Data Tag, including all undefined numbers, is available to
+anyone who has access to the YubiKey itself.
+
+If you want to store data PIN-protected, you will have to overload one of the
+PIN-protected Data Tags.
+
+However, you should not store any data under the Printed Data Tag, Yubico already uses
+that Data Tag to store specific PIN-protected data.
 
 ## Parsing the response
 

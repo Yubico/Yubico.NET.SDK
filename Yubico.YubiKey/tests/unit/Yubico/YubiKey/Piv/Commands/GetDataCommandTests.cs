@@ -22,10 +22,14 @@ namespace Yubico.YubiKey.Piv.Commands
 {
     public class GetDataCommandTests
     {
-        [Fact]
-        public void ClassType_DerivedFromPivCommand_IsTrue()
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(3)]
+        [InlineData(4)]
+        public void ClassType_DerivedFromPivCommand_IsTrue(int cStyle)
         {
-            var command = new GetDataCommand(PivDataTag.Chuid);
+            GetDataCommand command = GetCommandObject(cStyle, PivDataTag.Chuid);
 
             Assert.True(command is IYubiKeyCommand<GetDataResponse>);
         }
@@ -56,9 +60,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivDataTag.BiometricGroupTemplate)]
         public void Constructor_Property_Tag(PivDataTag tag)
         {
+#pragma warning disable CS0618 // Testing an obsolete feature
             var command = new GetDataCommand(tag);
 
             PivDataTag getTag = command.Tag;
+#pragma warning restore CS0618 // Type or member is obsolete
 
             Assert.Equal(tag, getTag);
         }
@@ -67,6 +73,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(1, PivDataTag.SecurityObject)]
         [InlineData(2, PivDataTag.Signature)]
         [InlineData(3, PivDataTag.Retired1)]
+        [InlineData(4, PivDataTag.Retired10)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(int cStyle, PivDataTag tag)
         {
             CommandApdu cmdApdu = GetDataCommandApdu(cStyle, tag);
@@ -80,6 +87,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(1, PivDataTag.Retired2)]
         [InlineData(2, PivDataTag.Capability)]
         [InlineData(3, PivDataTag.SecureMessageSigner)]
+        [InlineData(4, PivDataTag.Retired10)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHexCB(int cStyle, PivDataTag tag)
         {
             CommandApdu cmdApdu = GetDataCommandApdu(cStyle, tag);
@@ -93,6 +101,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(1, PivDataTag.Fingerprints)]
         [InlineData(2, PivDataTag.Signature)]
         [InlineData(3, PivDataTag.Printed)]
+        [InlineData(4, PivDataTag.Capability)]
         public void CreateCommandApdu_GetP1Property_ReturnsHex3F(int cStyle, PivDataTag tag)
         {
             CommandApdu cmdApdu = GetDataCommandApdu(cStyle, tag);
@@ -106,6 +115,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(1, PivDataTag.KeyManagement)]
         [InlineData(2, PivDataTag.Retired4)]
         [InlineData(3, PivDataTag.Discovery)]
+        [InlineData(4, PivDataTag.CardAuthentication)]
         public void CreateCommandApdu_GetP2Property_ReturnsHexFF(int cStyle, PivDataTag tag)
         {
             CommandApdu cmdApdu = GetDataCommandApdu(cStyle, tag);
@@ -119,6 +129,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(1, PivDataTag.Discovery, 3)]
         [InlineData(2, PivDataTag.CardAuthentication, 5)]
         [InlineData(3, PivDataTag.KeyManagement, 5)]
+        [InlineData(4, PivDataTag.Retired3, 5)]
         public void CreateCommandApdu_GetLc_ReturnsCorrect(int cStyle, PivDataTag tag, int expectedLength)
         {
             CommandApdu cmdApdu = GetDataCommandApdu(cStyle, tag);
@@ -132,6 +143,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(1, PivDataTag.Discovery)]
         [InlineData(2, PivDataTag.CardAuthentication)]
         [InlineData(3, PivDataTag.KeyManagement)]
+        [InlineData(4, PivDataTag.Chuid)]
         public void CreateCommandApdu_GetLe_ReturnsZero(int cStyle, PivDataTag tag)
         {
             CommandApdu cmdApdu = GetDataCommandApdu(cStyle, tag);
@@ -180,7 +192,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivDataTag.PairingCodeReferenceData)]
         public void GetCommandApdu_Data_Correct(PivDataTag tag)
         {
-            CommandApdu cmdApdu = GetDataCommandApdu(1, tag);
+            CommandApdu cmdApdu = GetDataCommandApdu(4, tag);
             List<byte> expected = PivCommandResponseTestData.GetDataCommandExpectedApduData(tag);
 
             ReadOnlyMemory<byte> data = cmdApdu.Data;
@@ -210,7 +222,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void CreateResponseForApdu_ReturnsCorrectType()
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var command = new GetDataCommand(PivDataTag.Signature);
+            var command = new GetDataCommand((int)PivDataTag.Signature);
 
             GetDataResponse response = command.CreateResponseForApdu(responseApdu);
 
@@ -221,6 +233,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(1)]
         [InlineData(2)]
         [InlineData(3)]
+        [InlineData(4)]
         public void Constructor_BadTag_CorrectException(int cStyle)
         {
             _ = Assert.Throws<ArgumentException>(() => GetCommandObject(cStyle, 0));
@@ -233,22 +246,14 @@ namespace Yubico.YubiKey.Piv.Commands
             _ = Assert.Throws<InvalidOperationException>(() => command.CreateCommandApdu());
         }
 
-        [Fact]
-        public void ProtectedConstructor_ValidObject()
-        {
-            var command = new GetDataCommand(0x005fff01);
-
-            Assert.True(command is IYubiKeyCommand<GetDataResponse>);
-        }
-
         [Theory]
         [InlineData(0)]
         [InlineData(0x0000007F)]
         [InlineData(0x00001111)]
         [InlineData(0x015fff01)]
-        public void ProtectedConstructor_InvalidTag_Exception(int tag)
+        public void IntTag_InvalidTag_Exception(int tag)
         {
-            _ = Assert.Throws<InvalidOperationException>(() => new GetDataCommand(tag));
+            _ = Assert.Throws<ArgumentException>(() => new GetDataCommand(tag));
         }
 
         [Theory]
@@ -262,7 +267,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(0x005FFF13)]
         [InlineData(0x005FFF14)]
         [InlineData(0x005FFF15)]
-        public void ProtectedConstructor_CmdApdu_Correct(int tag)
+        [InlineData(0x005F0000)]
+        [InlineData(0x005FFFFF)]
+        public void IntTag_CmdApdu_Correct(int tag)
         {
             var command = new GetDataCommand(tag);
             CommandApdu cmdApdu = command.CreateCommandApdu();
@@ -293,21 +300,29 @@ namespace Yubico.YubiKey.Piv.Commands
             switch (cStyle)
             {
                 default:
+#pragma warning disable CS0618 // Testing an obsolete feature
                     cmd = new GetDataCommand(tag);
+#pragma warning restore CS0618 // Type or member is obsolete
                     break;
 
                 case 2:
                     cmd = new GetDataCommand()
                     {
-                        Tag = tag,
+                        DataTag = (int)tag,
                     };
                     break;
 
 #pragma warning disable IDE0017 // specifically testing this code model
                 case 3:
                     cmd = new GetDataCommand();
+#pragma warning disable CS0618 // Testing an obsolete feature
                     cmd.Tag = tag;
+#pragma warning restore CS0618 // Type or member is obsolete
 #pragma warning restore IDE0017
+                    break;
+
+                case 4:
+                    cmd = new GetDataCommand((int)tag);
                     break;
             }
 

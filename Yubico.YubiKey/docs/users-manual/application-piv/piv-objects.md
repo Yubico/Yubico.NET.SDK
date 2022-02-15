@@ -40,6 +40,7 @@ On a YubiKey, any number between `0x005F0000` and `0x005FFFFF` (inclusive) can b
 DataTag. In addition, there are two numbers not in that range that are valid DataTags:
 `0x0000007E` and `0x00007F61`.
 
+<a name="datatagtables"></a>
 The following table lists the numbers the PIV standard defines as DataTags (see also the
 [table of PIV tags](commands.md#getdatatable) in the article on PIV commands).
 
@@ -65,6 +66,7 @@ The following table lists the numbers the PIV standard defines as DataTags (see 
 | 0x005FC122 | SM Signer (cert) | No |
 | 0x005FC123 | PC Ref Data | No |
 
+<a name="datatagtable2"></a>
 This next table lists the numbers Yubico defines as DataTags (see also the
 [table of Yubico tags](commands.md#getvendordatatable) in the article on PIV commands).
 
@@ -76,6 +78,7 @@ This next table lists the numbers Yubico defines as DataTags (see also the
 | 0x005FFF10 | MSCMAP | No |
 | 0x005FFF11 - 0x005FFF15 | MSROOTS | No |
 
+<a name="datatagtable3"></a>
 Finally, these are the numbers a YubiKey will accept as a DataTag, but currently have no
 specific meaning or data assigned to them. None of them require PIN verification in order
 to read the contents.
@@ -375,7 +378,7 @@ data formatted according to the PIV specification for CHUID, but stored in the
 ## `PinProtectedData`
 
 This is an unusual `PivDataObject` because there is no specified Data Object called
-"PIN-Protected Data". It is used to store a specific set ot elements in the PRINTED
+"PIN-Protected Data". It is used to store a specific set of elements in the PRINTED
 storage area. Currently, only the YubiKey's management key is included in the set.
 
 It would be possible to create a `PivDataObject` for PRINTED, just as there are classes
@@ -474,7 +477,7 @@ retrieved.
     pivSession.WriteObject(pinProtect);
 
 
-    PinProtectedData getPinProtect = pivSession.ReadObject<PibnProtectedData>();
+    PinProtectedData getPinProtect = pivSession.ReadObject<PinProtectedData>();
     if (!(getPinProtect.ManagementKey is null))
     {
         // process mgmt key.

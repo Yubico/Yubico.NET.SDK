@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int MaxYubicoDataTag = 0x005FFF15;
 
         /// <summary>
-        /// Indicates whether there is any data or not. If this is false, then
+        /// Indicates whether there is any data or not. If this is true, then
         /// the contents of any property are meaningless.
         /// </summary>
         /// <remarks>
@@ -108,7 +108,7 @@ namespace Yubico.YubiKey.Piv.Objects
         /// class, this property will be set with the defined (or sometimes it's
         /// called the default) <c>DataTag</c>. However, it is possible to change
         /// that tag. See the User's manual entry on
-        /// <xref href="UsersManualPivObjects#changing-the-datatag"> PIV data objects</xref>
+        /// <xref href="UsersManualPivObjects#using-an-alternate-datatag"> PIV data objects</xref>
         /// for more information on what valid data tags are possible. If you try
         /// to change to an unsupported tag, the SDK will throw an exception.
         /// </para>
@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.Piv.Objects
         /// Note that changing the <c>DataTag</c> is not recommended, but it is
         /// possible because there are some applications that have a use case for
         /// such a feature. See the User's Manual entry on
-        /// <xref href="UsersManualPivObjects#changing-the-datatag"> PIV data objects</xref>.
+        /// <xref href="UsersManualPivObjects#using-an-alternate-datatag"> PIV data objects</xref>.
         /// for a more detailed description of this topic.
         /// </para>
         /// </remarks>
@@ -140,9 +140,17 @@ namespace Yubico.YubiKey.Piv.Objects
 
         private int _dataTag;
 
-        // Is the given dataTag valid as an alternate?
-        // The defined tag is a valid "alternate".
-        private bool IsValidAlternateTag(int dataTag)
+        /// <summary>
+        /// Is the given tag valid as an alternate?
+        /// </summary>
+        /// <param name="dataTag">
+        /// The data tag the caller wants to use as an alternate.
+        /// </param>
+        /// <returns>
+        /// A boolean, <c>true</c> is the given tag can be used as an alternate,
+        /// <c>false</c> otherwise.
+        /// </returns>
+        protected virtual bool IsValidAlternateTag(int dataTag)
         {
             if (dataTag != GetDefinedDataTag())
             {
@@ -182,6 +190,11 @@ namespace Yubico.YubiKey.Piv.Objects
         /// for descriptions of the formats. This method will build a new byte
         /// array containing the data set in the object. This data will generally
         /// then be stored on the YubiKey.
+        /// <para>
+        /// Note that this method returns a new byte array, not a reference to an
+        /// array inside the object. If this array contains any sensitive data,
+        /// make sure you overwrite it when done with it.
+        /// </para>
         /// <para>
         /// If the object is empty (<c>IsEmpty</c> is <c>true</c>), then this
         /// method will throw an exception.

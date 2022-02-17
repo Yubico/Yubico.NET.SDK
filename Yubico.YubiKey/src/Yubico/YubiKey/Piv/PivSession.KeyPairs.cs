@@ -343,7 +343,7 @@ namespace Yubico.YubiKey.Piv
             }
             byte[] encodedCert = tlvWriter.Encode();
 
-            var putCommand = new PutDataCommand(dataTag, encodedCert);
+            var putCommand = new PutDataCommand((int)dataTag, encodedCert);
             PutDataResponse putResponse = Connection.SendCommand(putCommand);
             if (putResponse.Status != ResponseStatus.Success)
             {
@@ -392,7 +392,7 @@ namespace Yubico.YubiKey.Piv
         {
             PivDataTag dataTag = GetCertDataTagFromSlotNumber(slotNumber);
 
-            var getCommand = new GetDataCommand(dataTag);
+            var getCommand = new GetDataCommand((int)dataTag);
             GetDataResponse getResponse = Connection.SendCommand(getCommand);
             ReadOnlyMemory<byte> encodedCertData = getResponse.GetData();
 

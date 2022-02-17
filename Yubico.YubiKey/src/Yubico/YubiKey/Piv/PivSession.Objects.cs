@@ -25,9 +25,6 @@ namespace Yubico.YubiKey.Piv
     public sealed partial class PivSession : IDisposable
     {
         /// <summary>
-        /// <list type="table">
-        /// <item><term><b>ReadObject&lt;T&gt;()</b></term></item>
-        /// </list>
         /// Read the data at the storage location specified by the defined data
         /// tag for the <see cref="Objects.PivDataObject"/> <c>T</c>, storing and
         /// returning this data in a new object of type <c>T</c>.
@@ -79,9 +76,6 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// <list type="table">
-        /// <item><term><b>ReadObject&lt;T&gt;(int)</b></term></item>
-        /// </list>
         /// Read the data at the storage location specified by the given
         /// <c>dataTag</c>, storing and returning this data in a new object of
         /// type <c>T</c>.
@@ -148,7 +142,7 @@ namespace Yubico.YubiKey.Piv
 
             // If GetDataCommand requires the PIN and it had not been verified,
             // verify it now and run it again.
-            if (getDataResponse.Status != ResponseStatus.AuthenticationRequired)
+            if (getDataResponse.Status == ResponseStatus.AuthenticationRequired)
             {
                 VerifyPin();
                 getDataCommand = new GetDataCommand(pivDataObject.DataTag);

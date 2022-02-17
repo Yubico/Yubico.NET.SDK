@@ -103,6 +103,7 @@ namespace Yubico.Core.Devices.SmartCard
             // a transaction. We should automatically handle this case.
             if (result == ErrorCode.SCARD_W_RESET_CARD)
             {
+                _log.LogWarning("Card needs to be reset.");
                 _log.CardReset();
                 Reconnect();
 

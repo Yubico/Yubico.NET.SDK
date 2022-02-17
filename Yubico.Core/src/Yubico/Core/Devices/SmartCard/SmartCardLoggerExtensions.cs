@@ -19,7 +19,7 @@ namespace Yubico.Core.Devices.SmartCard
             }
             else
             {
-                logger.LogError("{ApiName} called and FAILED. Result = {Result}", apiName, result);
+                logger.LogError("{ApiName} called and FAILED. Result = {Result:X}", apiName, result);
             }
         }
 

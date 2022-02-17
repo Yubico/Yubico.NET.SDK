@@ -106,7 +106,7 @@ namespace Yubico.Core.Devices.Hid
                     Marshal.Copy(getReportData, outputBuffer, 0, bytesReturned);
                     if (bytesReturned > YubiKeyFeatureReportSize)
                     {
-                        outputBuffer = (byte[])outputBuffer.Skip(bytesReturned - YubiKeyFeatureReportSize);
+                        outputBuffer = outputBuffer.Skip(bytesReturned - YubiKeyFeatureReportSize).ToArray();
                     }
                     return outputBuffer;
                 }

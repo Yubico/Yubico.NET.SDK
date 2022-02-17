@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.SmartCard
@@ -25,6 +26,8 @@ namespace Yubico.Core.Devices.SmartCard
     /// </summary>
     internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener, IDisposable
     {
+        private readonly Logger _log = Log.GetLogger();
+
         // The resource manager context.
         private SCardContext _context;
 
@@ -39,7 +42,10 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         public DesktopSmartCardDeviceListener()
         {
-            _ = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);
+            _log.LogInformation("Creating DesktopSmartCardDeviceListener.");
+
+            uint result = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);
+            _log.SCardApiCall(nameof(SCard.EstablishContext), result);
 
             _context = context;
             _readerStates = GetReaderStateList();
@@ -54,7 +60,10 @@ namespace Yubico.Core.Devices.SmartCard
         {
             if (!_isListening)
             {
-                _listenerThread = new Thread(new ThreadStart(ListenForReaderChanges));
+                _listenerThread = new Thread(ListenForReaderChanges)
+                {
+                    IsBackground = true
+                };
                 _isListening = true;
                 _listenerThread.Start();
             }
@@ -67,7 +76,11 @@ namespace Yubico.Core.Devices.SmartCard
         // will terminate the thread.
         private void ListenForReaderChanges()
         {
-            while (_isListening && CheckForUpdates(-1))
+            _log.LogInformation("Smart card listener thread started. ThreadID is {ThreadID}.", Thread.CurrentThread.ManagedThreadId);
+
+            bool usePnpWorkaround = UsePnpWorkaround();
+
+            while (_isListening && CheckForUpdates(-1, usePnpWorkaround))
             {
                 
             }
@@ -128,7 +141,7 @@ namespace Yubico.Core.Devices.SmartCard
             }
         }
 
-        private bool CheckForUpdates(int timeout)
+        private bool CheckForUpdates(int timeout, bool usePnpWorkaround)
         {
             var arrivedDevices = new List<ISmartCardDevice>();
             var removedDevices = new List<ISmartCardDevice>();
@@ -143,15 +156,20 @@ namespace Yubico.Core.Devices.SmartCard
 
                 if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
                 {
+                    _log.LogInformation("GetStatusChange indicated SCARD_E_CANCELLED.");
                     return false;
                 }
 
                 if (UpdateContextIfNonCritical(getStatusChangeResult))
                 {
+                    _log.LogInformation("GetStatusChange indicated non-critical status {Status:X}.", getStatusChangeResult);
                     return true;
                 }
 
-                while (ReaderListChangeDetected(newStates))
+                _log.SCardApiCall(nameof(SCard.GetStatusChange), getStatusChangeResult);
+                _log.LogInformation("Reader states:\n{States}", newStates);
+
+                while (ReaderListChangeDetected(newStates, usePnpWorkaround))
                 {
                     using SCardReaderStates eventStateList = GetReaderStateList();
                     IEnumerable<SCardReaderStates.Entry> addedReaderStates = eventStateList.Except(newStates, new ReaderStateComparer());
@@ -188,18 +206,23 @@ namespace Yubico.Core.Devices.SmartCard
                         // have been dealt with.
                         if (addedReaderStates.Any())
                         {
+                            _log.LogInformation("Additional smart card readers were found. Calling GetStatusChange for more information.");
                             getStatusChangeResult = PlatformLibrary.Instance.SCard.GetStatusChange(_context, 0, updatedStates);
 
                             if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
                             {
+                                _log.LogInformation("GetStatusChange indicated SCARD_E_CANCELLED.");
                                 return false;
                             }
 
                             if (UpdateContextIfNonCritical(getStatusChangeResult))
                             {
+                                _log.LogInformation("GetStatusChange indicated non-critical status {Status:X}.", getStatusChangeResult);
                                 return true;
                             }
 
+                            _log.SCardApiCall(nameof(SCard.GetStatusChange), getStatusChangeResult);
+                            _log.LogInformation("Reader states:\n{States}", newStates);
                         }
 
                         // Swap states to allow correct dispose of unmanaged objects.
@@ -216,14 +239,18 @@ namespace Yubico.Core.Devices.SmartCard
                     getStatusChangeResult = PlatformLibrary.Instance.SCard.GetStatusChange(_context, 0, newStates);
                     if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
                     {
+                        _log.LogInformation("GetStatusChange indicated SCARD_E_CANCELLED.");
                         return false;
                     }
 
                     if (UpdateContextIfNonCritical(getStatusChangeResult))
                     {
+                        _log.LogInformation("GetStatusChange indicated non-critical status {Status:X}.", getStatusChangeResult);
                         return true;
                     }
 
+                    _log.SCardApiCall(nameof(SCard.GetStatusChange), getStatusChangeResult);
+                    _log.LogInformation("Reader states:\n{States}", newStates);
                 }
 
                 if (sendEvents)
@@ -245,13 +272,37 @@ namespace Yubico.Core.Devices.SmartCard
             return true;
         }
 
+        // So apparently not all platforms implement the virtual pnp reader semantics the same. They will still wait on
+        // GetStatusChange, returning when a new reader is added, they just don't mark the CHANGED flag all the time.
+        // Weird. Anyways, it seems like a reasonable workaround is to detect the type of system (by seeing if it returns
+        // STATE_UNKNOWN when asked about the virtual reader). If it does, any time GetStatusChange returns, we should
+        // make an additional call to ListReaders and compare the count to the current reader state count (subtracting
+        // the virtual reader). If they are different, then we should treat that the same as if the virtual reader informed
+        // us of the change.
+        private bool UsePnpWorkaround()
+        {
+            using var testState = new SCardReaderStates(new string[] { "\\\\?\\Pnp\\Notifications" });
+            _ = PlatformLibrary.Instance.SCard.GetStatusChange(_context, 0, testState);
+            bool usePnpWorkaround = testState[0].EventState.HasFlag(SCARD_STATE.UNKNOWN);
+            return usePnpWorkaround;
+        }
+
         /// <summary>
         /// Checks if reader state list contains any changes.
         /// </summary>
         /// <param name="newStates">Reader states to check.</param>
+        /// <param name="usePnpWorkaround">Use ListReaders instead of relying on the \\?\Pnp\Notifications device.</param>
         /// <returns>True if changes are detected.</returns>
-        private static bool ReaderListChangeDetected(SCardReaderStates newStates)
+        private bool ReaderListChangeDetected(SCardReaderStates newStates, bool usePnpWorkaround)
         {
+            if (usePnpWorkaround)
+            {
+                uint result = PlatformLibrary.Instance.SCard.ListReaders(_context, null, out string[] readerNames);
+                _log.SCardApiCall(nameof(SCard.ListReaders), result);
+
+                return readerNames.Length != newStates.Count - 1;
+            }
+
             if (newStates[0].EventState.HasFlag(SCARD_STATE.CHANGED))
             {
                 newStates[0].CurrentState = newStates[0].EventState & ~SCARD_STATE.CHANGED;
@@ -348,6 +399,8 @@ namespace Yubico.Core.Devices.SmartCard
                 {
                     entry.CurrentState = entry.EventState & ~SCARD_STATE.CHANGED;
                     entry.EventState = 0;
+                    entry.CurrentSequence = entry.EventSequence;
+                    entry.EventSequence = 0;
                 }
             }
         }
@@ -357,7 +410,8 @@ namespace Yubico.Core.Devices.SmartCard
         /// </summary>
         private void UpdateCurrentContext()
         {
-            uint _ = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);
+            uint result = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);
+            _log.SCardApiCall(nameof(SCard.EstablishContext), result);
 
             _context = context;
             _readerStates = GetReaderStateList();
@@ -369,7 +423,8 @@ namespace Yubico.Core.Devices.SmartCard
         /// <returns><see cref="SCardReaderStates"/></returns>
         private SCardReaderStates GetReaderStateList()
         {
-            uint _ = PlatformLibrary.Instance.SCard.ListReaders(_context, null, out string[] readerNames);
+            uint result = PlatformLibrary.Instance.SCard.ListReaders(_context, null, out string[] readerNames);
+            _log.SCardApiCall(nameof(SCard.ListReaders), result);
 
             var readerStates = new SCardReaderStates(readerNames.Prepend("\\\\?PnP?\\Notification").ToArray());
 

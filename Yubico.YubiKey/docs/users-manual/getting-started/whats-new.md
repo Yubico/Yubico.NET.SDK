@@ -1,4 +1,4 @@
-<!-- Copyright 2021 Yubico AB
+<!-- Copyright 2022 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,6 +15,18 @@ limitations under the License. -->
 # What's new in the SDK?
 
 Here you can find all of the updates and release notes for published versions of the SDK.
+
+## 1.2.x Releases
+
+### 1.2.0
+
+Release date: February 7th, 2022
+
+This release adds support for device notifications. Now, applications can be notified in real-time that a
+YubiKey has been inserted or removed from the computer. Read more about how device notifications work and
+how to use them on [this page](xref:DeviceNotifications).
+
+Device notifications are supported on all currently supported platforms.
 
 ## 1.1.x Releases
 

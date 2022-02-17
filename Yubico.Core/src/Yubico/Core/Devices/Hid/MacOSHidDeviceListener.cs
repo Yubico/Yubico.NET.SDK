@@ -33,6 +33,7 @@ namespace Yubico.Core.Devices.Hid
         // Start listening as soon as this object is constructed.
         public MacOSHidDeviceListener()
         {
+            _log.LogInformation("Creating MacOSHidDeviceListener.");
             StartListening();
         }
 
@@ -45,7 +46,10 @@ namespace Yubico.Core.Devices.Hid
 
         private void StartListening()
         {
-            _listenerThread = new Thread(ListeningThread);
+            _listenerThread = new Thread(ListeningThread)
+            {
+                IsBackground = true
+            };
             _listenerThread.Start();
         }
 
@@ -65,6 +69,8 @@ namespace Yubico.Core.Devices.Hid
         {
             const int runLoopTimeout = 10; // 10 seconds is arbitrary, pulled from Apple sample code
             using IDisposable logScope = _log.BeginScope("MacOSHidDeviceListener.StartListening()");
+
+            _log.LogInformation("HID listener thread started. ThreadID is {ThreadID}.", Thread.CurrentThread.ManagedThreadId);
 
             IntPtr manager = IntPtr.Zero;
             IntPtr runLoopMode = IntPtr.Zero;
@@ -99,7 +105,7 @@ namespace Yubico.Core.Devices.Hid
                 // This is essentially an infinite loop (hence running this on its own thread). This can be broken if
                 // an error is encountered, or if someone calls CFRunLoopStop as is done in StopListening/Finalizer.
                 _log.LogInformation("Beginning run loop polling.");
-                while (runLoopResult == kCFRunLoopRunHandledSource)
+                while (runLoopResult == kCFRunLoopRunHandledSource || runLoopResult == kCFRunLoopRunTimedOut)
                 {
                     runLoopResult = CFRunLoopRunInMode(runLoopMode, runLoopTimeout, true);
                 }
@@ -130,9 +136,9 @@ namespace Yubico.Core.Devices.Hid
         }
 
         private void ArrivedCallback(IntPtr context, int result, IntPtr sender, IntPtr device) =>
-            OnArrived(new MacOSHidDevice(device));
+            OnArrived(new MacOSHidDevice(MacOSHidDevice.GetEntryId(device)));
 
         private void RemovedCallback(IntPtr context, int result, IntPtr sender, IntPtr device) =>
-            OnRemoved(new MacOSHidDevice(device));
+            OnRemoved(null);
     }
 }

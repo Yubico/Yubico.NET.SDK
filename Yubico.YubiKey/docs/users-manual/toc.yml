@@ -152,12 +152,12 @@
     href: application-piv/ecdsa-signatures.md
   - name: EC Diffie-Hellman Key Agreement
     href: application-piv/key-agreement.md
-  - name: Reading and writing objects
-    href: application-piv/get-and-put-data.md
   - name: Public keys
     href: application-piv/public-keys.md
   - name: Private keys
     href: application-piv/private-keys.md
+  - name: GET and PUT DATA
+    href: application-piv/get-and-put-data.md
   - name: Data objects
     href: application-piv/piv-objects.md
   - name: Migrating from SmartCard.NET/Minidriver

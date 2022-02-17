@@ -78,8 +78,7 @@ For challenge-response, the YubiKey will send the static text or URI with nothin
 ## .NET SDK NDEF functionality
 
 The SDK provides the following major classes/methods related to NDEF:
-
-- ConfigureNdef [class](xref:Yubico.YubiKey.Otp.Operations.ConfigureNdef) and [method](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureNdef%28Yubico.YubiKey.Otp.Slot%29)
+- [ConfigureNdef](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureNdef%28Yubico.YubiKey.Otp.Slot%29)
 - [ReadNdefTag()](xref:Yubico.YubiKey.Otp.OtpSession.ReadNdefTag) method
 
 ### ConfigureNdef()

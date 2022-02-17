@@ -67,7 +67,7 @@ For more information on NDEF messages, please see this [book chapter](https://ww
 
 ## Slot configuration compatibility
 
-Only Yubico OTPs and OATH HOTPs can be communicated successfully over NFC.
+Only Yubico OTPs and OATH HOTPs can be communicated successfully over NDEF.
 
 You can still point the NDEF tag to a slot that is configured with a [static password](xref:OtpStaticPassword) or [challenge-response](xref:OtpChallengeResponse), but the YubiKey will not be able to communicate these configurations properly using the NDEF protocol.
 

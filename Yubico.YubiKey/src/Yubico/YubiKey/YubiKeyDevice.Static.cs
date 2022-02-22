@@ -13,14 +13,13 @@
 // limitations under the License.
 
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using Yubico.YubiKey.DeviceExtensions;
 using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
-using System.Diagnostics.CodeAnalysis;
 using System;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey
 {
@@ -81,24 +80,7 @@ namespace Yubico.YubiKey
                 throw new NotImplementedException(ExceptionMessages.NotImplementedHidFidoEnumeration);
             }
 
-            var defaultFirmwareVersion = new FirmwareVersion();
-
-            // Gather Yubico devices, filtering out devices without a Firmware Version
-            IEnumerable<IEnumerable<YubicoDeviceWithInfo>> matchedYubicoDevices =
-                GetFilteredHidDevices(transport)
-                    .Union(GetFilteredSmartCardDevices(transport))
-                    .Select(d => new YubicoDeviceWithInfo(d))
-                    .Where(deviceWithInfo => deviceWithInfo.Info.FirmwareVersion != defaultFirmwareVersion)
-                    .GroupBy(d => d);
-
-            // Create and return YubiKeys
-            foreach (IEnumerable<YubicoDeviceWithInfo> group in matchedYubicoDevices)
-            {
-                if (TryBuildYubiKey(group, out YubiKeyDevice? yubiKey))
-                {
-                    yield return yubiKey;
-                }
-            }
+            return YubiKeyDeviceListener.Instance.GetAll();
         }
 
         /// <summary>
@@ -114,12 +96,11 @@ namespace Yubico.YubiKey
         public static bool TryGetYubiKey(int serialNumber, out IYubiKeyDevice yubiKey)
         {
             yubiKey = FindAll()
-                .Where(k => k.SerialNumber == serialNumber)
-                .FirstOrDefault();
+                .FirstOrDefault(k => k.SerialNumber == serialNumber);
             return yubiKey != default;
         }
 
-        private static IEnumerable<IDevice> GetFilteredHidDevices(Transport transport)
+        internal static IEnumerable<IDevice> GetFilteredHidDevices(Transport transport)
         {
             IEnumerable<IDevice> yubicoHidDevices = Enumerable.Empty<IDevice>();
 
@@ -141,7 +122,7 @@ namespace Yubico.YubiKey
             return yubicoHidDevices;
         }
 
-        private static IEnumerable<IDevice> GetFilteredSmartCardDevices(Transport transport)
+        internal static IEnumerable<IDevice> GetFilteredSmartCardDevices(Transport transport)
         {
             IEnumerable<IDevice> yubicoSmartCardDevices = Enumerable.Empty<IDevice>();
 
@@ -163,47 +144,23 @@ namespace Yubico.YubiKey
             return yubicoSmartCardDevices;
         }
 
-        private static bool TryBuildYubiKey(
-            IEnumerable<YubicoDeviceWithInfo> deviceGroup,
-            [NotNullWhen(true)] out YubiKeyDevice? yubiKey)
+        internal static bool TryMergeYubiKey(
+            YubiKeyDevice originalDevice,
+            YubicoDeviceWithInfo newDevice)
         {
-            var deviceList = deviceGroup.ToList();
-
-            if (!IsValidYubiKeyDeviceGroup(deviceList))
+            if (!IsValidYubiKeyDevice(newDevice))
             {
-                yubiKey = null;
                 return false;
             }
 
-            YubicoDeviceWithInfo? smartCardDevice = deviceList
-                .FirstOrDefault(d => d.Device is SmartCardDevice);
+            originalDevice.Merge(newDevice.Device, newDevice.Info);
 
-            YubicoDeviceWithInfo? hidKeyboardDevice = deviceList
-                .FirstOrDefault(d => d.Device is HidDevice hd && hd.IsKeyboard());
-
-            YubicoDeviceWithInfo? hidFidoDevice = deviceList
-                .FirstOrDefault(d => d.Device is HidDevice hd && hd.IsFido());
-
-            // Merge device information.
-            var mergedDeviceInfo = new YubiKeyDeviceInfo();
-            var deviceTypes = new List<YubicoDeviceWithInfo>()
-            {
-                smartCardDevice,
-                hidKeyboardDevice,
-                hidFidoDevice
-            };
-            foreach (YubicoDeviceWithInfo? deviceWithInfo in deviceTypes)
-            {
-                mergedDeviceInfo = mergedDeviceInfo.Merge(deviceWithInfo?.Info);
-            }
-
-            yubiKey = new YubiKeyDevice(
-                (ISmartCardDevice?)smartCardDevice?.Device,
-                (IHidDevice?)hidKeyboardDevice?.Device,
-                (IHidDevice?)hidFidoDevice?.Device,
-                mergedDeviceInfo);
             return true;
         }
+
+        private static bool IsValidYubiKeyDevice(YubicoDeviceWithInfo device) =>
+            device.Device is SmartCardDevice ||
+            (device.Device is HidDevice hidDevice && (hidDevice.IsKeyboard() || hidDevice.IsFido()));
 
         private static bool IsValidYubiKeyDeviceGroup(ICollection<YubicoDeviceWithInfo> devices) =>
             devices.Count > 0 && devices.Count <= 3
@@ -211,7 +168,7 @@ namespace Yubico.YubiKey
             && devices.Count(d => d.Device is HidDevice hd && hd.IsKeyboard()) <= 1
             && devices.Count(d => d.Device is HidDevice hd && hd.IsFido()) <= 1;
 
-        private class YubicoDeviceWithInfo
+        internal class YubicoDeviceWithInfo
         {
             /// <summary>
             /// Device information synthesized from various commands.
@@ -261,6 +218,6 @@ namespace Yubico.YubiKey
         }
 
         private static void ErrorHandler(Exception exception) =>
-            Debug.WriteLine($"Exception caught: {exception}\n");
+            Log.GetLogger().LogWarning($"Exception caught: {exception}");
     }
 }

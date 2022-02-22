@@ -13,46 +13,16 @@
 // limitations under the License.
 
 using System;
-using System.Threading;
-using System.Runtime.InteropServices;
 using System.Globalization;
-using Yubico.Core;
-using Yubico.Core.Devices.Hid;
+using System.Runtime.InteropServices;
+using System.Threading;
+using Yubico.PlatformInterop;
 
-// Feature hold-back
-#if false
+using static Yubico.PlatformInterop.NativeMethods;
 
-namespace Yubico.PlatformInterop
+namespace Yubico.Core.Devices.Hid
 {
-    /// <summary>
-    /// This class lists the HIDs and listens for changes (arrivals and removals).
-    /// </summary>
-    /// <remarks>
-    /// This class implements IDisposable, so it's best to use the using
-    /// keyword.
-    /// <code>
-    ///   using var listener = new LinuxUdevListener();
-    /// </code>
-    /// <para>
-    /// To use this class follow these steps.
-    /// <list type="number">
-    /// <item>Instantiate this class</item>
-    /// <item>Add your EventHandlers to the Arrival and Removal properties.</item>
-    /// <item>Call the StartListening method.</item>
-    /// <item>When done, call the StopListening method, or else call the Dispose
-    /// method, or if your code uses the using keyword, the Dispose will be
-    /// called automatically when the object goes out of scope and it will stop
-    /// listening.</item>
-    /// </list>
-    /// </para>
-    /// <para>
-    /// Do not share an object of this class among threads. That is, an object of
-    /// this type is not to be used in more than one thread. Note that a YubiKey
-    /// is essentially a "single-threaded device", so your application will
-    /// likely have only one thread that deals with the YubiKey.
-    /// </para>
-    /// </remarks>
-    internal class LinuxUdevListener : LinuxUdev
+    internal class LinuxHidDeviceListener : HidDeviceListener
     {
         // Note that both the main thread and the created thread (sub-thread)
         // will have access to _isListening. That seems like we will have race
@@ -75,44 +45,27 @@ namespace Yubico.PlatformInterop
         private bool _isListening;
         private Thread? _listenerThread;
 
-        internal LinuxUdevMonitorSafeHandle _monitorObject;
-        private bool _isDisposed;
+        private readonly LinuxUdevMonitorSafeHandle _monitorObject;
+        private readonly LinuxUdevSafeHandle _udevObject;
 
-        /// <summary>
-        /// Event for card arrival.
-        /// </summary>
-        public event EventHandler<LinuxUdevEventArgs>? CardArrival;
-
-        /// <summary>
-        /// Event for card removal.
-        /// </summary>
-        public event EventHandler<LinuxUdevEventArgs>? CardRemoval;
-
-        /// <summary>
-        /// Create a new instance of the class that can listen for changes to
-        /// HIDs.
-        /// </summary>
-        public LinuxUdevListener()
-            : base()
+        public LinuxHidDeviceListener()
         {
-            _monitorObject = (LinuxUdevMonitorSafeHandle)ThrowIfFailedNull(
-                NativeMethods.udev_monitor_new_from_netlink(_udevObject, NativeMethods.UdevMonitorName));
+            _udevObject = udev_new();
+            _monitorObject = ThrowIfFailedNull(udev_monitor_new_from_netlink(_udevObject, UdevMonitorName));
 
-            _ = ThrowIfFailedNegative(
-                NativeMethods.udev_monitor_filter_add_match_subsystem_devtype(
-                    _monitorObject, NativeMethods.UdevSubsystemName, null));
-            _ = ThrowIfFailedNegative(
-                NativeMethods.udev_monitor_enable_receiving(_monitorObject));
-
-            _isListening = false;
-            _listenerThread = null;
+            StartListening();
         }
 
-        ~LinuxUdevListener()
+        // We're declaring an explicit finalizer because there are resources that need to be cleaned.
+        // I'd like to avoid forcing this class to be disposable, based on its expected usage. None
+        // of the resources acquired by this class have any critical time constraints that would
+        // necessitate deterministic cleanup (Dispose). Letting the garbage collector clean up this
+        // class should be fine, so long as this finalizer is called.
+        ~LinuxHidDeviceListener()
         {
-            // Do not change this code. Put cleanup code in
-            //   Dispose(bool disposing).
-            Dispose(false);
+            StopListening();
+            _monitorObject.Dispose();
+            _udevObject.Dispose();
         }
 
         /// <summary>
@@ -127,8 +80,13 @@ namespace Yubico.PlatformInterop
         /// again.
         /// </para>
         /// </remarks>
-        public void StartListening()
+        private void StartListening()
         {
+            _ = ThrowIfFailedNegative(udev_monitor_filter_add_match_subsystem_devtype(
+                    _monitorObject, UdevSubsystemName, null));
+
+            _ = ThrowIfFailedNegative(udev_monitor_enable_receiving(_monitorObject));
+
             // We don't need to lock because if there is a separate thread that
             // has access to _isListening, it does not change it.
             // If there is a sub-thread running, _isListening will be true and we
@@ -138,7 +96,10 @@ namespace Yubico.PlatformInterop
             // set to true before starting the thread.
             if (!_isListening)
             {
-                _listenerThread = new Thread(new ThreadStart(ListenForReaderChanges));
+                _listenerThread = new Thread(ListenForReaderChanges)
+                {
+                    IsBackground = true
+                };
                 _isListening = true;
                 _listenerThread.Start();
             }
@@ -151,7 +112,7 @@ namespace Yubico.PlatformInterop
         /// If the object has already stopped listening, this method will do
         /// nothing.
         /// </remarks>
-        public void StopListening()
+        private void StopListening()
         {
             // If someone creates an instance of this class and then immediately
             // calls Stop, we don't want to do anything. Hence, check for null
@@ -180,7 +141,7 @@ namespace Yubico.PlatformInterop
         // will terminate the thread.
         private void ListenForReaderChanges()
         {
-            while(_isListening)
+            while (_isListening)
             {
                 CheckForUpdates();
             }
@@ -193,48 +154,57 @@ namespace Yubico.PlatformInterop
         private void CheckForUpdates()
         {
             // If this call returns NULL, there was no update.
-            using LinuxUdevDeviceSafeHandle udevDevice = NativeMethods.udev_monitor_receive_device(_monitorObject);
+            using LinuxUdevDeviceSafeHandle udevDevice = udev_monitor_receive_device(_monitorObject);
             if (udevDevice.IsInvalid)
             {
                 return;
             }
 
-            var eventArg = new LinuxUdevEventArgs(new LinuxHidDevice(udevDevice));
+            var device = new LinuxHidDevice(udevDevice);
 
             // Was this an add or remove? If so, call the appropriate handler. If
             // not, ignore this change.
-            IntPtr actionPtr = NativeMethods.udev_device_get_action(udevDevice);
-            string action = Marshal.PtrToStringAnsi(actionPtr);
+            IntPtr actionPtr = udev_device_get_action(udevDevice);
+            string action = Marshal.PtrToStringAnsi(actionPtr) ?? string.Empty;
             if (string.Equals(action, "add", StringComparison.Ordinal))
             {
-                if (CardArrival != null)
-                {
-                    CardArrival.Invoke(this, eventArg);
-                }
+                OnArrived(device);
             }
             else if (string.Equals(action, "remove", StringComparison.Ordinal))
             {
-                if (CardRemoval != null)
-                {
-                    CardRemoval.Invoke(this, eventArg);
-                }
+                OnRemoved(device);
             }
         }
 
-        protected override void Dispose(bool disposing)
+        // Throw the PlatformApiException(LinuxUdevError) if the value is NULL.
+        // Otherwise, just return value.
+        private static T ThrowIfFailedNull<T>(T value) where T : SafeHandle
         {
-            if (_isDisposed)
+            if (!value.IsInvalid)
             {
-                return;
+                return value;
             }
 
-            StopListening();
+            throw new PlatformApiException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.LinuxUdevError));
+        }
 
-            _monitorObject.Dispose();
-            base.Dispose(disposing);
-            _isDisposed = true;
+
+        // Throw the PlatformApiException(LinuxUdevError) if the value is < 0.
+        // Otherwise, just return.
+        private static int ThrowIfFailedNegative(int value)
+        {
+            if (value >= 0)
+            {
+                return value;
+            }
+
+            throw new PlatformApiException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.LinuxUdevError));
         }
     }
 }
-
-#endif

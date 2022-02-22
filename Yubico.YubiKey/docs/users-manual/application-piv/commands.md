@@ -1,6 +1,5 @@
 ---
 uid: UsersManualPivCommands
-summary: *content
 ---
 
 <!-- Copyright 2021 Yubico AB
@@ -1089,6 +1088,7 @@ Some tags require PIN authentication as well. The tags that do are listed in tab
 Data elements based on the input tag. The SDK returns the data as a byte array. It is the
 responsibility of the caller to further parse that result.
 
+<a name="getdatatable"></a>
 Table 4A lists PIV standard elements that the YubiKey will possess upon manufacture (as
 long as the PIV application is initialized).
 
@@ -1432,10 +1432,9 @@ authenticate with the management key for commands. See also the section in this 
 [Authenticate: management key](#authenticate-management-key).
 
 The input data will be a "tag" specifying where the data is to go, along with the data to
-PUT. [Tables 4x](#table-4a-piv-get-data-elements-available-upon-manufacture) in the Get
-Data command section above lists all possible tags. The "Data Returned" in that table is
-the data to put. Note that the SDK requires the data be formatted as defined in the PIV
-standard, described above.
+PUT. [Tables 4x](#getdatatable) in the Get Data command section above lists all possible
+tags. The "Data Returned" in that table is the data to put. Note that the SDK requires the
+data be formatted as defined in the PIV standard, described above.
 
 Note that the YubiKey will not allow putting data for the following tags.
 
@@ -1463,6 +1462,14 @@ encoded following the PIV specification.
 
 This feature, however, is not publicly available. It is only callable from inside the SDK.
 
+<a name="getvendordatatable"></a>
+Table 5A lists Yubico-defined elements that the YubiKey will possess upon manufacture (as
+long as the PIV application is initialized).
+
+Table 5B lists Yubico-defined elements that the YubiKey will not possess upon manufacture.
+Requesting these elements using GET DATA will return "NoData". If you want these elements
+to contain data, you will have to load them using PUT DATA.
+
 #### Table 5A: Yubico-defined GET DATA elements available upon manufacture
 |    Name     |   Tag    |    Meaning       | Authentication<br/>Required |                Data Returned                |
 | :---------: | :------: | :--------------: | :-------------------------: | :-----------------------------------------: |
@@ -1488,9 +1495,25 @@ It is safe to ignore this element.
       --bit field, PUK blocked, Mgmt Key stored in protected data--
    82 L2 (optional)
       --salt, deprecated--
-   83 02 (optional)
-      --timestamp, time the PIN was last changed--
+   83 L3 (optional)
+      --time the PIN was last updated--
 ```
+
+The bit field contains up to two bits: 1 is PUK blocked and 2 is PIN-protected.
+
+It is permissible to have no salt (either no TLV for tag 82, or `82 00` as the TLV) or a
+16-byte value.
+
+The "PIN last updated" field is the UNIX time of seconds since 1970, in little endian
+order. For example, some time in Jan. 14, 2022 is 0x61E1B870. It would be encoded as
+
+```
+   83 04
+      70 B8 E1 61
+```
+
+It will generally be a 4-byte value until sometime in January, 2038, when it will be 5
+bytes.
 
 #### MSROOTS
 

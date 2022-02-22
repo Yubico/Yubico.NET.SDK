@@ -31,11 +31,11 @@ namespace Yubico.Core.Devices.Hid
         private readonly long _entryId;
         private readonly Logger _log = Log.GetLogger();
 
-        private MacOSHidDevice(long entryId) :
+        public MacOSHidDevice(long entryId) :
             base(entryId.ToString(CultureInfo.InvariantCulture))
         {
             _log.LogInformation(
-                "Creating new instance of MacOSHidDevice based on device with Entry ID [{EntryId}]",
+                $"Creating new instance of MacOSHidDevice based on device with EntryID [{entryId}]",
                 entryId);
 
             _entryId = entryId;
@@ -113,7 +113,7 @@ namespace Yubico.Core.Devices.Hid
         public override IHidConnection ConnectToIOReports() =>
             new MacOSHidIOReportConnection(_entryId);
 
-        private static long GetEntryId(IntPtr device)
+        internal static long GetEntryId(IntPtr device)
         {
             Logger log = Log.GetLogger();
 

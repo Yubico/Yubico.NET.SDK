@@ -15,6 +15,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.YubiKey.DeviceExtensions;
@@ -22,7 +23,7 @@ using MgmtCmd = Yubico.YubiKey.Management.Commands;
 
 namespace Yubico.YubiKey
 {
-    public partial class YubiKeyDevice : IYubiKeyDevice
+    public sealed partial class YubiKeyDevice : IYubiKeyDevice
     {
         #region IYubiKeyDeviceInfo
         /// <inheritdoc />
@@ -70,12 +71,38 @@ namespace Yubico.YubiKey
         internal bool HasHidFido => !(_hidFidoDevice is null);
         internal bool HasHidKeyboard => !(_hidKeyboardDevice is null);
 
-        internal bool IsNfcDevice { get; }
+        internal bool IsNfcDevice { get; private set; }
 
-        private readonly ISmartCardDevice? _smartCardDevice;
-        private readonly IHidDevice? _hidFidoDevice;
-        private readonly IHidDevice? _hidKeyboardDevice;
-        private readonly IYubiKeyDeviceInfo _yubiKeyInfo;
+        private ISmartCardDevice? _smartCardDevice;
+        private IHidDevice? _hidFidoDevice;
+        private IHidDevice? _hidKeyboardDevice;
+        private IYubiKeyDeviceInfo _yubiKeyInfo;
+
+        /// <summary>
+        /// Constructs a <see cref="YubiKeyDevice"/> instance.
+        /// </summary>
+        /// <param name="device">A valid device; either a smart card, keyboard, or FIDO device.</param>
+        /// <param name="info">The YubiKey device information that describes the device.</param>
+        /// <exception cref="ArgumentException">An unrecognized device type was given.</exception>
+        public YubiKeyDevice(IDevice device, IYubiKeyDeviceInfo info)
+        {
+            switch (device)
+            {
+                case ISmartCardDevice scardDevice:
+                    _smartCardDevice = scardDevice;
+                    break;
+                case IHidDevice hidDevice when hidDevice.IsKeyboard():
+                    _hidKeyboardDevice = hidDevice;
+                    break;
+                case IHidDevice hidDevice when hidDevice.IsFido():
+                    _hidFidoDevice = hidDevice;
+                    break;
+                default:
+                    throw new ArgumentException(ExceptionMessages.DeviceTypeNotRecognized, nameof(device));
+            }
+
+            _yubiKeyInfo = info;
+        }
 
         /// <summary>
         /// Construct a <see cref="YubiKeyDevice"/> instance.
@@ -96,6 +123,33 @@ namespace Yubico.YubiKey
             _yubiKeyInfo = yubiKeyDeviceInfo;
             IsNfcDevice = smartCardDevice?.IsNfcTransport() ?? false;
         }
+
+        /// <summary>
+        /// Updates current <see cref="YubiKeyDevice"/> with new info from SmartCard device or HID device.
+        /// </summary>
+        /// <param name="device"></param>
+        /// <param name="info"></param>
+        public void Merge(IDevice device, IYubiKeyDeviceInfo info)
+        {
+            switch (device)
+            {
+                case ISmartCardDevice scardDevice:
+                    _smartCardDevice = scardDevice;
+                    IsNfcDevice = scardDevice.IsNfcTransport();
+                    break;
+                case IHidDevice hidDevice when hidDevice.IsKeyboard():
+                    _hidKeyboardDevice = hidDevice;
+                    break;
+                case IHidDevice hidDevice when hidDevice.IsFido():
+                    _hidFidoDevice = hidDevice;
+                    break;
+                default:
+                    throw new ArgumentException(ExceptionMessages.DeviceTypeNotRecognized, nameof(device));
+            }
+
+            _yubiKeyInfo = info;
+        }
+
 
         /// <inheritdoc />
         public IYubiKeyConnection Connect(YubiKeyApplication yubikeyApplication)
@@ -521,6 +575,16 @@ namespace Yubico.YubiKey
         }
 
         /// <inheritdoc/>
+        bool IYubiKeyDevice.Contains(IDevice other) =>
+            other switch
+            {
+                ISmartCardDevice scDevice => scDevice.Path == _smartCardDevice?.Path,
+                IHidDevice hidDevice => hidDevice.Path == _hidKeyboardDevice?.Path ||
+                                        hidDevice.Path == _hidFidoDevice?.Path,
+                _ => false
+            };
+
+        /// <inheritdoc/>
         public int CompareTo(IYubiKeyDevice other)
         {
             if (other is null)
@@ -635,9 +699,9 @@ namespace Yubico.YubiKey
             return !(SerialNumber is null)
                 ? SerialNumber!.GetHashCode()
                 : HashCode.Combine(
-                    _smartCardDevice!.Path,
-                    _hidFidoDevice!.Path,
-                    _hidKeyboardDevice!.Path);
+                    _smartCardDevice?.Path,
+                    _hidFidoDevice?.Path,
+                    _hidKeyboardDevice?.Path);
         }
 
         private static readonly string EOL = Environment.NewLine;

@@ -12,14 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKey.DeviceExtensions;
-using Yubico.Core.Devices;
-using Yubico.Core.Devices.Hid;
-using Yubico.Core.Devices.SmartCard;
 using System;
-
-// Feature hold-back
-#if false
 
 namespace Yubico.YubiKey
 {
@@ -29,35 +22,17 @@ namespace Yubico.YubiKey
     public class YubiKeyDeviceEventArgs : EventArgs
     {
         /// <summary>
-        /// A YubiKey details and capabilities information.
-        /// </summary>
-        public YubiKeyDeviceInfo Info { get; }
-
-        /// <summary>
         /// A YubiKey arrived or removed.
         /// </summary>
-        public IDevice Device { get; }
+        public IYubiKeyDevice Device { get; }
 
         /// <summary>
         /// Constructs an event arguments.
         /// </summary>
         /// <param name="device">A YubiKey device</param>
-        public YubiKeyDeviceEventArgs(IDevice device)
+        public YubiKeyDeviceEventArgs(IYubiKeyDevice device)
         {
             Device = device;
-            Info = GetDeviceInfo();
         }
-
-        private YubiKeyDeviceInfo GetDeviceInfo() =>
-            Device switch
-            {
-                ISmartCardDevice scDevice => SmartCardDeviceInfoFactory.GetDeviceInfo(scDevice),
-                IHidDevice keyboardDevice when keyboardDevice.IsKeyboard() =>
-                KeyboardDeviceInfoFactory.GetDeviceInfo(keyboardDevice),
-                IHidDevice fidoDevice when fidoDevice.IsFido() =>
-                FidoDeviceInfoFactory.GetDeviceInfo(fidoDevice),
-                _ => new YubiKeyDeviceInfo(),
-            };
     }
 }
-#endif

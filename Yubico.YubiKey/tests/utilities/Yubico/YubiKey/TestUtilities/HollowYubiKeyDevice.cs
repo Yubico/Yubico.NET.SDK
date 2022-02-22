@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using Yubico.Core.Devices;
 
 namespace Yubico.YubiKey.TestUtilities
 {
@@ -147,6 +148,11 @@ namespace Yubico.YubiKey.TestUtilities
         }
 
         public bool Equals(IYubiKeyDevice? other)
+        {
+            return false;
+        }
+
+        bool IYubiKeyDevice.Contains(IDevice other)
         {
             return false;
         }

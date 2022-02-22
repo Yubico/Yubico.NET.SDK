@@ -22,26 +22,95 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// Get PIV standard information from the YubiKey.
+    /// Get a Data Object from the YubiKey.
     /// </summary>
     /// <remarks>
     /// The partner Response class is <see cref="GetDataResponse"/>.
     /// <para>
-    /// It is possible to get a variety of data elements from a YubiKey using
-    /// this command. Specify which data is requested using the
-    /// <see cref="PivDataTag"/> enum, then examine the return from the
-    /// <c>GetDataResponse</c>.
+    /// See also the User's Manual entries on
+    /// <xref href="UsersManualPivGetAndPutData"> Get and Put Data</xref> and
+    /// <xref href="UsersManualPivObjects"> PIV objects</xref>, along with the
+    /// documentation for the <see cref="PutDataCommand"/>.
+    /// </para>
+    /// <para>
+    /// Note that for some Data Objects there are higher-level APIs that are
+    /// easier to use. An application that needs to retrieve information often
+    /// will not need to use this command. For example, if you want to get a
+    /// certificate from a YubiKey, use <see cref="PivSession.GetCertificate"/>.
+    /// Or if you want to store/retrieve Key History, use
+    /// <see cref="PivSession.ReadObject()"/> and <see cref="PivSession.WriteObject"/>
+    /// along with the <see cref="Piv.Objects.KeyHistory"/> class. Under the
+    /// covers, these APIs will ultimately call this command. But the application
+    /// that uses the SDK can simply make the specific API calls, rather than use
+    /// Get Data.
+    /// </para>
+    /// <para>
+    /// There are a number of ways to use this command. The old, obsolete way is
+    /// to provide the DataTag using the <c>PivDataTag</c> enum. The constructor
+    /// <c>GetDataCommand(PivDataTag)</c> and the property <c>Tag</c> require
+    /// using PIV-defined DataTags. This constructor and that property are marked
+    /// "Obsolete" and will be removed from the SDK in the future. However, it
+    /// will still be possible to get the same functionality using the updated
+    /// API.
+    /// </para>
+    /// <para>
+    /// The API you should use are the constructors <c>GetDataCommand()</c>, and
+    /// <c>GetDataCommand(int)</c>, along with the property <c>DataTag</c>. Using
+    /// these will allow you to use any DataTag (not just those defined by PIV).
+    /// </para>
+    /// <para>
+    /// While you can retrieve any data under a PIV-defined DataTag, if you want to
+    /// use only PIV-defined DataTags, you can use the <c>PivDataTag</c> class.
+    /// For example,
+    /// <code>
+    ///    // Retrieve IrisImages
+    ///    var getCmd = new GetDataCommand((int)PivDataTag.IrisImages);
+    ///    GetDataResponse getRsp = connection.SendCommand(getCmd);
+    ///    ReadOnlyMemory&lt;byte&gt; encodedData = getRsp.GetData();
+    ///    if (!PivDataTag.IrisImages.IsValidEncodingForPut(encodedData))
+    ///    {
+    ///        // handle error case.
+    ///    }
+    /// </code>
+    /// </para>
+    /// <para>
+    /// Note that when you set an object with the DataTag using either the old
+    /// constructor/property or the new versions, when you get it (using either
+    /// old or new), you are getting the same thing. For example,
+    /// <code>
+    ///     // Use the old, obsolete API to set the tag.
+    ///     var getCmd = new GetDataCommand()
+    ///     {
+    ///         Tag = PivDataTag.KeyHistory,
+    ///     }<br/>
+    ///     PivDataTag pivDataTag = getCmd.Tag;
+    ///     int dataTag = getCmd.DataTag;
+    ///     // At this point pivDataTag will equal PivDataTag.KeyHistory = 0x005FC10C
+    ///     // dataTag will equal 0x005FC10C
+    ///     // Even though the code used the old API to set the Tag property
+    ///     // the new API DataTag property will return the same value.
+    /// </code>
+    /// </para>
+    /// <para>
+    /// The data returned will begin with the tag <c>0x53</c>. For example,
+    /// <code>
+    ///    Suppose the data is
+    ///      04 02 55 44 02 01 7F
+    ///    It will be retruned by the GetDataCommand as
+    ///      53 07
+    ///         04 02 55 44 02 01 7F
+    /// </code>
     /// </para>
     /// <para>
     /// Example:
     /// </para>
     /// <code>
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
-    ///   GetDataCommand getDataCommand = new GetDataCommand(PivDataTag.Chuid);
+    ///   GetDataCommand getDataCommand = new GetDataCommand((int)PivDataTag.Chuid);
     ///   GetDataResponse getDataResponse = connection.SendCommand(getDataCommand);<br/>
     ///   if (getDataResponse.StatusWord == SWConstants.Success)
     ///   {
-    ///       byte[] getChuid = getDataResponse.GetData();
+    ///       ReadOnlyMemory&lt;byte&gt; getChuid = getDataResponse.GetData();
     ///   }
     /// </code>
     /// </remarks>
@@ -51,7 +120,7 @@ namespace Yubico.YubiKey.Piv.Commands
         private const byte PivGetDataParameter1 = 0x3F;
         private const byte PivGetDataParameter2 = 0xFF;
         private const byte PivGetDataTlvTag = 0x5C;
-        private const int MinimumVendorTag = 0x00010000;
+        private const int MinimumVendorTag = 0x005F0000;
         private const int MaximumVendorTag = 0x00ffffff;
         private const int DiscoveryTag = 0x0000007E;
         private const int BiometricGroupTemplateTag = 0x00007F61;
@@ -68,11 +137,42 @@ namespace Yubico.YubiKey.Piv.Commands
         private int _tag;
 
         /// <summary>
+        /// The tag specifying from where the data is to be retrieved.
+        /// </summary>
+        /// <exception cref="ArgumentException">
+        /// The DataTag specified is not a number between <c>0x005F0000</c> and
+        /// <c>0x005FFFFF</c> (inclusive), or 0x0000007E or 0x00007F61.
+        /// </exception>
+        public int DataTag
+        {
+            get => _tag;
+            set
+            {
+                if ((value < MinimumVendorTag) || (value > MaximumVendorTag))
+                {
+                    if ((value != DiscoveryTag) && (value != BiometricGroupTemplateTag))
+                    {
+                        throw new ArgumentException(
+                            string.Format(
+                                CultureInfo.CurrentCulture,
+                                ExceptionMessages.InvalidDataTag,
+                                value));
+                    }
+                }
+                _tag = value;
+            }
+        }
+
+        /// <summary>
+        /// &gt; [!WARNING]
+        /// &gt; This property is obsolete, use <c>DataTag</c> instead.
+        ///
         /// The tag specifying which data to get.
         /// </summary>
         /// <exception cref="ArgumentException">
         /// The data tag specified is not valid for getting data.
         /// </exception>
+        [ObsoleteAttribute("This property is obsolete. Use DataTag instead", false)]
         public PivDataTag Tag
         {
             get => (PivDataTag)_tag;
@@ -100,17 +200,20 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <code>
         ///   var getDataCommand = new GetDataCommand()
         ///   {
-        ///       Tag = PivDataTag.Authentication,
+        ///       DataTag = (int)PivDataTag.Authentication,
         ///   };
         /// </code>
         /// <para>
         /// There is no default data tag, hence, for this command to be valid,
         /// the tag must be specified. So if you create an object using this
-        /// constructor, you must set the Tag property at some time before using
-        /// it. Otherwise you will get an exception when you do use it.
+        /// constructor, you must set the <c>DataTag</c> property at some time
+        /// before using it. Otherwise you will get an exception when you do use
+        /// it.
         /// </para>
         /// <para>
-        /// The valid data tags are in the enum <c>PivDataTag</c>.
+        /// The valid data tags are numbers from <c>0x005F0000</c> to
+        /// <c>0x005FFFFF</c> inclusive, along with <c>0x0000007E</c> and
+        /// <c>0x00007F61</c>.
         /// </para>
         /// </remarks>
         public GetDataCommand()
@@ -119,50 +222,44 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
+        /// &gt; [!WARNING]
+        /// &gt; This constructor is obsolete, use <c>GetDataComand()</c> or
+        /// &gt; <c>GetDataCommand(int)</c> instead.
+        ///
         /// Initializes a new instance of the <c>GetDataCommand</c> class. This
         /// command takes in a tag indicating which data element to get.
         /// </summary>
+        /// <remarks>
+        /// Note that this constructor is Obsolete.
+        /// </remarks>
         /// <param name="tag">
         /// The tag indicating which data to get.
         /// </param>
+        [ObsoleteAttribute("This constructor is obsolete. Use GetDataCommand(int) instead", false)]
         public GetDataCommand(PivDataTag tag)
         {
             Tag = tag;
         }
 
-        // This constructor is internal so that is is available only to the SDK.
-        // This is intended to be used to get the vendor-defined elements, those
-        // that are defined as 0x5fffxx.
-        // The caller can pass in any int as a tag, and the command will get that
-        // data object. There are limitations. If the tag is one byte, it still
-        // must be 0x7E (Discovery), if it is two bytes, it still must be 0x7f61
-        // (Biometric Group Template), and if not those values, it must be 3
-        // bytes. Note that 0 is not a valid tag for this class.
-        // Currently we have vendor-defined tags of 0x005fff00, 01, and 10 - 15.
-        internal GetDataCommand(int tag)
+        /// <summary>
+        /// Initializes a new instance of the <c>GetDataCommand</c> class.
+        /// </summary>
+        /// <remarks>
+        /// Note that this constructor requires using a DataTag that is a number
+        /// from <c>0x005F0000</c> to <c>0x005FFFFF</c> inclusive, along with
+        /// <c>0x0000007E</c> and <c>0x00007F61</c>.
+        /// </remarks>
+        /// <param name="dataTag">
+        /// The DataTag indicating from where the data will be retrieved.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// The DataTag specified is not a number between <c>0x005F0000</c> and
+        /// <c>0x005FFFFF</c> (inclusive), or <c>0x0000007E</c> or
+        /// <c>0x00007F61</c>.
+        /// </exception>
+        public GetDataCommand(int dataTag)
         {
-            _tag = tag;
-
-            if (tag < MinimumVendorTag)
-            {
-                if ((tag != DiscoveryTag) && (tag != BiometricGroupTemplateTag))
-                {
-                    _tag = 0;
-                }
-            }
-            if (tag > MaximumVendorTag)
-            {
-                _tag = 0;
-            }
-
-            if (_tag == 0)
-            {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidDataTag,
-                        tag));
-            }
+            DataTag = dataTag;
         }
 
         /// <inheritdoc />

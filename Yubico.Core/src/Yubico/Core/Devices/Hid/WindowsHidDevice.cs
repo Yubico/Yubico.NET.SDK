@@ -20,8 +20,15 @@ using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid
 {
+    /// <summary>
+    /// This class represents Windows HID device.
+    /// </summary>
     internal class WindowsHidDevice : HidDevice
     {
+        /// <summary>
+        /// Gets the list of Windows HID devices available to the system.
+        /// </summary>
+        /// <returns>List of <see cref="HidDevice"/> objects.</returns>
         public static IEnumerable<HidDevice> GetList() => CmDevice
             .GetList(CmInterfaceGuid.Hid)
             .Where(cmDevice => cmDevice.InterfacePath != null)
@@ -30,13 +37,30 @@ namespace Yubico.Core.Devices.Hid
                 cmDevice.HidUsageId,
                 (HidUsagePage)cmDevice.HidUsagePage));
 
-        public WindowsHidDevice(string instancePath, short usage, HidUsagePage usagePage) :
+        private WindowsHidDevice(string instancePath, short usage, HidUsagePage usagePage) :
             base(instancePath)
         {
             ResolveIdsFromInstancePath(instancePath);
 
             Usage = usage;
             UsagePage = usagePage;
+        }
+
+        /// <summary>
+        /// Constructs a <see cref="WindowsHidDevice"/>.
+        /// </summary>
+        internal WindowsHidDevice(CmDevice device) :
+            base(device.InterfacePath!)
+        {
+            if (device is null)
+            {
+                throw new ArgumentNullException(nameof(device));
+            }
+
+            ResolveIdsFromInstancePath(device.InterfacePath!);
+
+            Usage = device.HidUsageId;
+            UsagePage = (HidUsagePage)device.HidUsagePage;
         }
 
         private void ResolveIdsFromInstancePath(string instancePath)
@@ -65,9 +89,17 @@ namespace Yubico.Core.Devices.Hid
         private static bool TryGetHexShort(string s, int offset, int length, out ushort result) =>
             ushort.TryParse(s.Substring(offset, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out result);
 
+        /// <summary>
+        /// Opens an active connection to the Windows HID device.
+        /// </summary>
+        /// <returns>An open <see cref="IHidConnection"/>.</returns>
         public override IHidConnection ConnectToFeatureReports() =>
             new WindowsHidFeatureReportConnection(Path);
 
+        /// <summary>
+        /// Opens an active connection to the Windows HID device.
+        /// </summary>
+        /// <returns>An open <see cref="IHidConnection"/>.</returns>
         public override IHidConnection ConnectToIOReports() =>
             new WindowsHidIOReportConnection(Path);
     }

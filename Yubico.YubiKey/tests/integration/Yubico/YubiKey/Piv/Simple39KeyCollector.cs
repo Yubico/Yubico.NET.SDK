@@ -26,6 +26,8 @@ namespace Yubico.YubiKey.Piv
     // changed to 0x39.
     public class Simple39KeyCollector
     {
+        private static bool _setKeyFlagOnChange;
+
         // If KeyFlag is set to 0, the current PIN, PUK, or key returned will be
         // the default and the new PIN, PUK, or key will be the alternate.
         // The alternate is the same except the first byte is different: 0x39.
@@ -39,10 +41,16 @@ namespace Yubico.YubiKey.Piv
         // PUK. This way we can block the PIN or PUK for testing purposes.
         public int RetryFlag { get; set; }
 
-        public Simple39KeyCollector()
+        // If the caller sets the input arg to true, then when the call asks for
+        // Change, return the old and new, then set KeyFlag to the opposite of
+        // what it currently is.
+        // For false, then this returns old and new, but does nothing to KeyFlag.
+        // If there is no arg, that's false.
+        public Simple39KeyCollector(bool setKeyFlagOnChange = false)
         {
             KeyFlag = 0;
             RetryFlag = 0;
+            _setKeyFlagOnChange = setKeyFlagOnChange;
         }
 
         public bool Simple39KeyCollectorDelegate(KeyEntryData keyEntryData)
@@ -63,6 +71,7 @@ namespace Yubico.YubiKey.Piv
                 }
             }
 
+            bool isChange = false;
             byte[] currentValue;
             byte[]? newValue = null;
 
@@ -72,7 +81,10 @@ namespace Yubico.YubiKey.Piv
                     return false;
 
                 case KeyEntryRequest.Release:
-                    KeyFlag = 0;
+                    if (!_setKeyFlagOnChange)
+                    {
+                        KeyFlag = 0;
+                    }
                     return true;
 
                 case KeyEntryRequest.VerifyPivPin:
@@ -82,16 +94,19 @@ namespace Yubico.YubiKey.Piv
                 case KeyEntryRequest.ChangePivPin:
                     currentValue = CollectPin();
                     newValue = CollectPin();
+                    isChange = true;
                     break;
 
                 case KeyEntryRequest.ChangePivPuk:
                     currentValue = CollectPuk();
                     newValue = CollectPuk();
+                    isChange = true;
                     break;
 
                 case KeyEntryRequest.ResetPivPinWithPuk:
                     currentValue = CollectPuk();
                     newValue = CollectPin();
+                    isChange = true;
                     break;
 
                 case KeyEntryRequest.AuthenticatePivManagementKey:
@@ -109,6 +124,7 @@ namespace Yubico.YubiKey.Piv
                     }
                     currentValue = CollectMgmtKey();
                     newValue = CollectMgmtKey();
+                    isChange = true;
                     break;
             }
 
@@ -131,6 +147,18 @@ namespace Yubico.YubiKey.Piv
                     newValue[0] = 0x39;
                 }
                 keyEntryData.SubmitValues(currentValue, newValue);
+            }
+
+            if (_setKeyFlagOnChange && isChange)
+            {
+                if (KeyFlag == 0)
+                {
+                    KeyFlag = 1;
+                }
+                else
+                {
+                    KeyFlag = 1;
+                }
             }
 
             return true;

@@ -76,13 +76,13 @@ namespace Yubico.Core.Devices.SmartCard
         // will terminate the thread.
         private void ListenForReaderChanges()
         {
-            _log.LogInformation("Smart card listener thread started. ThreadID is {ThreadID}.", Thread.CurrentThread.ManagedThreadId);
+            _log.LogInformation("Smart card listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
 
             bool usePnpWorkaround = UsePnpWorkaround();
 
             while (_isListening && CheckForUpdates(-1, usePnpWorkaround))
             {
-                
+
             }
         }
 
@@ -418,7 +418,7 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         /// <summary>
-        /// Gets readers within the current context. 
+        /// Gets readers within the current context.
         /// </summary>
         /// <returns><see cref="SCardReaderStates"/></returns>
         private SCardReaderStates GetReaderStateList()
@@ -444,7 +444,7 @@ namespace Yubico.Core.Devices.SmartCard
             }
 
             foreach (ISmartCardDevice removedDevice in removedDevices)
-            { 
+            {
                 OnRemoved(removedDevice);
             }
         }

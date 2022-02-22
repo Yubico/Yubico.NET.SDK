@@ -40,7 +40,7 @@ Authenticating with a YubiKey over NFC involves the following major steps:
 1. The OTP (as part of a text string or URI in an NDEF message) is transmitted through the YubiKey's integrated NFC antenna to the host device via the NFC reader's electromagnetic field.
 
    > [!NOTE]
-   > More specifically, the OTP is prepended to the text string or URI that was configured when the YubiKey's NDEF tag was pointed to a [slot](xref:OtpSlots) with the SDK's [ConfigureNdef() method](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureNdef%28Yubico.YubiKey.Otp.Slot%29). See the [SDK functionality](#net-sdk-ndef-functionality) section below for more details.
+   > More specifically, the OTP is appended to the text string or URI that was configured when the YubiKey's NDEF tag was pointed to a [slot](xref:OtpSlots) with the SDK's [ConfigureNdef() method](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureNdef%28Yubico.YubiKey.Otp.Slot%29). See the [SDK functionality](#net-sdk-ndef-functionality) section below for more details.
 
 1. The application on the host device receives and decodes the NDEF message and validates the OTP.
 

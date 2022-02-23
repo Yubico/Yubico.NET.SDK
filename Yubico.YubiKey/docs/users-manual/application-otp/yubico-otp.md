@@ -28,11 +28,14 @@ The OTP is made up of various YubiKey device fields and encrypted with a unique 
 
 ccccccjlkgjlevtdernkbbnrrvhcvdbljgchbgbdbvgk
 
-You'll notice that the example OTP above only includes a subset of Latin alphabet characters. This is because Yubico OTPs are only represented by the 16 [ModHex](xref:OtpModhex) characters. When YubiKeys are connected to a host device over USB or Lightning, OTPs are communicated to the host via the HID communication protocol. ModHex allows Yubico OTPs to be intrepreted correctly by hosts, regardless of the host's keyboard language configuration. For more information on how this works and why it's important, please see the articles on [HID communication](xref:OtpHID) and [ModHex](xref:OtpModhex).
+You'll notice that the example OTP above only includes a subset of Latin alphabet characters. This is because Yubico OTPs are only represented by the 16 [ModHex](xref:OtpModhex) characters. When YubiKeys are connected to a host device over USB or Lightning, OTPs are communicated to the host via the HID communication protocol. The YubiKey acts like a keyboard, with the characters of the OTP being sent to the host as key presses. ModHex allows Yubico OTPs to be intrepreted correctly by hosts, regardless of the host's keyboard language configuration. For more information on how this works and why it's important, please see the articles on [HID communication](xref:OtpHID) and [ModHex](xref:OtpModhex).
 
 Yubico OTPs can be used for user authentication in single-factor and two-factor authentication scenarios. In order to authenticate a user with a Yubico OTP, the OTP must be checked to confirm that it is both associated with the user account in question *and* valid. Verifying OTPs is the job of the validation server, which stores the YubiKey's AES key and uses it to decrypt and validate OTPs.
 
-Off-the-shelf YubiKeys are preconfigured with a Yubico OTP in the short-press slot (for NFC-enabled YubiKeys, the NDEF tag is also pointed to the short-press slot). The OTP secrets are uploaded to Yubico's validation server (YubiCloud), which enables out-of-the-box OTP validation functionality over USB/Lightning and NFC. If you have an off-the-shelf YubiKey and would like to demo the two-factor OTP authentication experience, check out the [Yubico Playground](https://demo.yubico.com/).
+Off-the-shelf YubiKeys are preconfigured with a Yubico OTP in the short-press slot (for NFC-enabled YubiKeys, the NDEF tag is also pointed to the short-press slot). The OTP secrets are uploaded to Yubico's validation server (YubiCloud) at the time of manufacturing, which enables out-of-the-box OTP validation functionality over USB/Lightning and NFC. If you have an off-the-shelf YubiKey and would like to demo the two-factor OTP authentication experience, check out the [Yubico Playground](https://demo.yubico.com/).
+
+> [!NOTE]
+> If you reconfigure the short-press slot of an off-the-shelf key, you will not be able to revert back to the original Yubico OTP configuration that was set up during manufacturing. OTP secrets cannot be extracted from the device.
 
 The .NET SDK provides developers with the resources to build Yubico OTP configuration functionality into their applications. More specifically, the API includes functions that allow you to configure either slot with a Yubico OTP and customize how the OTP is sent to host devices.
 
@@ -67,11 +70,13 @@ When the YubiKey is powered up (either through a physical connection to a host o
 
 If two OTPs are generated during the same session, the second OTP received by the validation server should have a higher session usage counter than the previous OTP. If not, the second OTP will be rejected.
 
+Each OTP application slot has its own session usage counter. This means that if you configure both slots with a Yubico OTP, their session usage will be tracked separately. For example, if you were to generate an OTP from the short-press slot, the session usage counter for that slot would increment by 1, but the long-press slot's session usage counter would not change.
+
 ### Usage counter
 
-The usage counter (2 bytes/16 bits) keeps track of how many times the YubiKey has been powered on or reset. It is non-volatile, meaning its value is preserved even when the YubiKey is powered off. The first time the YubiKey is used after a power-up or reset, this value is incremented by 1, and the session usage counter is reset to zero. If a validation server receives an OTP that has a lower usage counter than the previously recorded counter, the OTP will be rejected.
+The usage counter (2 bytes/16 bits) keeps track of how many times the YubiKey has been powered on. It is non-volatile, meaning its value is preserved even when the YubiKey is powered off. The first time the YubiKey is used after a power-up, this value is incremented by 1, and the session usage counter is reset to zero. If a validation server receives an OTP that has a lower usage counter than the previously recorded counter, the OTP will be rejected.
 
-This field has a usable range of 1 – 0x7fff. When this counter reaches 0x7fff, it stops. However, this does not render the YubiKey useless; the OTP application slot can simply be reconfigured with new Yubico OTP secrets (which need to be shared with the validation server). Every time a slot is reconfigured, the usage counter will be reset.
+This field has a usable range of 1 – 0x7fff. When this counter reaches 0x7fff, it stops. However, this does not render the YubiKey useless; the OTP application slot can simply be reconfigured with new Yubico OTP secrets (which need to be shared with the validation server). Every time a slot is reconfigured, the usage counter will be reset. Each OTP application slot has its own usage counter.
 
 The usage counter is also stored in little-endian format.
 
@@ -79,17 +84,20 @@ The usage counter is also stored in little-endian format.
 
 The timestamp is a 3-byte/24-bit field incremented at a rate of approximately 8 Hz. After powering on, the key's internal random number generator sets the timestamp to a random value. Therefore, the timestamp does not reflect the current time. However, it can be used by the validation server to check how much time has elapsed between two OTPs received during a single session. For example, if one password is supposed to have been generated just a few seconds after the previous one, the timestamps should reflect that. But what if the timestamps show that the "first" one was generated four days after the "second" one? That is a red flag indicating the possibility of a replay attack.
 
-The timestamp wraps from 0xffffff to 0 without any further action. If the timestamp is used by the validation server, this condition must be taken into account. Given an 8 Hz rate, the timestamp will wrap approximately every 24 days. The field is stored in little-endian format.
+The timestamp wraps from 0xffffff to 0 without any further action. If the timestamp is used by the validation server, this condition must be taken into account. Given an 8 Hz rate, the timestamp will wrap approximately every 24 days (given the key is continuously powered on). The field is stored in little-endian format.
 
 ### Random number
 
-The random number is a 2-byte/16-bit field that is generated by the key's random number generator for each OTP. The goal of the random number is to help guarantee that the OTP's binary ciphertext is always unique. This field is also stored in little-endian format.
+The random number is a 2-byte/16-bit field that is generated by the key's random number generator for each OTP. The goal of the random number is to help guarantee that the OTP's binary ciphertext is always unique and to ensure that the OTP block size is 128 bits. This field is also stored in little-endian format.
+
+> [!NOTE]
+> The 128-bit AES encryption key that Yubico OTPs use requires a 128-bit block size (the block is the data being encrypted). So in a sense, the random number functions as padding that brings the block size to the necessary 128-bits.
 
 ### Checksum
 
-Once all other OTP fields have been set, a 2-byte/16-bit ISO 13239 one's complement checksum is computed over the binary data from the public ID to the random number and added to the end of the OTP string (in little-endian format). This checksum allows the validation server to confirm that an OTP was decrypted properly during authentication.
+Once all other OTP fields have been set, a 2-byte/16-bit ISO 13239 one's complement checksum is computed over the binary passcode data from the private ID to the random number and added to the end of the OTP string (in little-endian format). This checksum allows the validation server to confirm that an OTP was decrypted properly during authentication.
 
-To verify decryption, the validation server calculates another checksum over all bytes of the OTP, including the original checksum field. If decryption was successful, this will give a fixed residual of 0xf0b8.
+To verify decryption, the validation server calculates another checksum over all bytes of the OTP, including the original checksum field. If decryption was successful, this will give a fixed residual of 0xf0b8. If a different residual is computed by the validation server, the OTP will be rejected.
 
 ## Yubico OTP generation
 
@@ -109,7 +117,7 @@ Now that we've covered the Yubico OTP components, let's look at the typical OTP 
 
 1. The key generates the random number.
 
-1. The key computes the checksum over all OTP fields (public ID through random number).
+1. The key computes the checksum over all OTP passcode fields (private ID through random number).
 
 1. The private ID, session usage counter, usage counter, timestamp, random number, and checksum are concatenated into a 128-bit string and encrypted by the 128-bit AES encryption key.
 
@@ -175,7 +183,7 @@ Once a YubiKey's private ID and AES key have been shared with a validation serve
 
 1. The KSM uses the AES key to decrypt the OTP.
 
-1. The KSM calculates a checksum over all bytes of the OTP, including the original checksum field. If decryption was successful, this will give a fixed residual of 0xf0b8.
+1. The KSM calculates a checksum over all bytes of the OTP, including the original checksum field. If decryption was successful, this will give a fixed residual of 0xf0b8. If a different residual is computed, the OTP is rejected.
 
 1. The KSM checks that the private ID of the OTP matches the private ID in the KSM. If they do not match, the OTP is rejected.
 
@@ -217,14 +225,14 @@ To protect against this scenario, we recommend regularly "burning" OTPs, meaning
 
 ## SDK functionality
 
-The SDK's Yubico OTP functionality is rooted in the [ConfigureYubicoOtp](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp) method. This method allows you to configure one of the OTP application slots with a Yubico OTP. After configuration, that slot will generate a Yubico OTP every time it is activated.
+The SDK's Yubico OTP functionality is rooted in the [ConfigureYubicoOtp](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureYubicoOtp%28Yubico.YubiKey.Otp.Slot%29) method. This method allows you to configure one of the OTP application slots with a Yubico OTP. After configuration, that slot will generate a Yubico OTP every time it is activated.
 
 With ConfigureYubicoOtp, you have the ability to provide your own AES key and private ID via [UseKey()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.UseKey%28System.Memory%7BSystem.Byte%7D%29) and [UsePrivateId()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.UsePrivateId%28System.ReadOnlyMemory%7BSystem.Byte%7D%29) or randomly generate those credentials via [GenerateKey()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.GenerateKey%28System.Memory%7BSystem.Byte%7D%29) and [GeneratePrivateId()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.GeneratePrivateId%28System.Memory%7BSystem.Byte%7D%29). Similarly, you may set the public ID to an explicit value of your choosing with [UsePublicId()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.UsePublicId%28System.ReadOnlyMemory%7BSystem.Byte%7D%29) or use your YubiKey's serial number as the public ID with [UseSerialNumberAsPublicId()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.UseSerialNumberAsPublicId%28System.Nullable%7BSystem.Memory%7BSystem.Byte%7D%7D%29).
 
 > [!NOTE]
 > Generated credentials will need to be shared with the validation server before they are cleared from memory. There is no way to extract credentials from the YubiKey after configuration. If using YubiCloud, you can upload secrets using [this form](https://upload.yubico.com/). Note that credentials will need to be converted from bytes to ASCII characters before they can be submitted through the key upload form. If your private ID has already been registered with YubiCloud, you will need to redo the configuration with a new ID (this is uncommon).
 
-The SDK also allows you to control how the OTP is sent to a host, depending on the intended use case. You can set a time delay between characters of the OTP as they are sent to a host device with [Us10msPacing()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.Use10msPacing%28System.Boolean%29) and [Use20msPacing()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.Use20msPacing%28System.Boolean%29). Similarly, you can add a 500ms delay after sending the fixed part of the OTP (the 12-character public ID of the key) and/or the 32-character unique passcode of the OTP with [AppendDelayToFixed()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.AppendDelayToFixed%28System.Boolean%29) and [AppendDelayToOtp()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.AppendDelayToOtp%28System.Boolean%29), respectively.
+The YubiKey also allows you to control how the OTP is sent to a host, depending on the intended use case. You can set a time delay between characters of the OTP as they are sent to a host device with [Us10msPacing()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.Use10msPacing%28System.Boolean%29) and [Use20msPacing()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.Use20msPacing%28System.Boolean%29). Similarly, you can add a 500ms delay after sending the fixed part of the OTP (the 12-character public ID of the key) and/or the 32-character unique passcode of the OTP with [AppendDelayToFixed()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.AppendDelayToFixed%28System.Boolean%29) and [AppendDelayToOtp()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.AppendDelayToOtp%28System.Boolean%29), respectively.
 
 You can also add additional keystrokes as needed for your intended application with [SendTabFirst()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.SendTabFirst%28System.Boolean%29) (sends a tab before the OTP characters), [AppendTabToFixed()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.AppendTabToFixed%28System.Boolean%29) (sends a tab after the public ID of the OTP), and [AppendCarriageReturn()](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp.AppendCarriageReturn%28System.Boolean%29) (sends an **Enter** key after the full OTP has been sent to a device).
 

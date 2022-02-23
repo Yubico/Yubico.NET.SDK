@@ -75,7 +75,7 @@ namespace Yubico.YubiKey
         {
             using var updateEvent = new ManualResetEvent(false);
 
-            _log.LogInformation("YubiKey device listener thread started. ThreadID is {ThreadID}.", Thread.CurrentThread.ManagedThreadId);
+            _log.LogInformation("YubiKey device listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
 
             _smartCardListener.Arrived += (s, e) =>
             {

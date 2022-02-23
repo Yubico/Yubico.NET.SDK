@@ -16,7 +16,8 @@ using System;
 using System.Security;
 using System.Globalization;
 using Yubico.YubiKey.Piv.Commands;
-using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Piv.Objects;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -118,6 +119,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryVerifyPin()
         {
+            _log.LogInformation("Try to verify the PIV PIN.");
             if (KeyCollector is null)
             {
                 throw new InvalidOperationException(
@@ -197,6 +199,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void VerifyPin()
         {
+            _log.LogInformation("Verify the PIV PIN.");
             if (TryVerifyPin() == false)
             {
                 throw new OperationCanceledException(
@@ -307,6 +310,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangePinAndPukRetryCounts(byte newRetryCountPin, byte newRetryCountPuk)
         {
+            _log.LogInformation("Change the PIV PIN and PUK retry counts: {PinCount}, {PukCount}.", newRetryCountPin, newRetryCountPuk);
             // This will validate the input.
             var setRetriesCommand = new SetPinRetriesCommand(newRetryCountPin, newRetryCountPuk);
 
@@ -325,6 +329,8 @@ namespace Yubico.YubiKey.Piv
             {
                 throw new InvalidOperationException(setRetriesResponse.StatusMessage);
             }
+
+            UpdateAdminData();
         }
 
         /// <summary>
@@ -424,7 +430,11 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="SecurityException">
         /// The remaining retries count indicates the PIN is blocked.
         /// </exception>
-        public bool TryChangePin() => TryChangeReference(KeyEntryRequest.ChangePivPin, ChangePinOrPuk);
+        public bool TryChangePin()
+        {
+            _log.LogInformation("Try to change the PIV PIN.");
+            return TryChangeReference(KeyEntryRequest.ChangePivPin, ChangePinOrPuk);
+        }
 
         /// <summary>
         /// Change the PIN, throw an exception if the user cancels.
@@ -450,6 +460,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangePin()
         {
+            _log.LogInformation("Change the PIV PIN.");
             if (TryChangeReference(KeyEntryRequest.ChangePivPin, ChangePinOrPuk) == false)
             {
                 throw new OperationCanceledException(
@@ -541,7 +552,11 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="SecurityException">
         /// The remaining retries count indicates the PUK is blocked.
         /// </exception>
-        public bool TryChangePuk() => TryChangeReference(KeyEntryRequest.ChangePivPuk, ChangePinOrPuk);
+        public bool TryChangePuk()
+        {
+            _log.LogInformation("Try to change the PIV PUK.");
+            return TryChangeReference(KeyEntryRequest.ChangePivPuk, ChangePinOrPuk);
+        }
 
         /// <summary>
         /// Change the PUK (PIN Unblocking Key), throw an exception if the user cancels.
@@ -567,6 +582,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangePuk()
         {
+            _log.LogInformation("Change the PIV PUK.");
             if (TryChangeReference(KeyEntryRequest.ChangePivPuk, ChangePinOrPuk) == false)
             {
                 throw new OperationCanceledException(
@@ -676,7 +692,11 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="SecurityException">
         /// The remaining retries count indicates the PUK is blocked.
         /// </exception>
-        public bool TryResetPin() => TryChangeReference(KeyEntryRequest.ResetPivPinWithPuk, ResetPin);
+        public bool TryResetPin()
+        {
+            _log.LogInformation("Try to reset the PIV PIN using the PIV PUK.");
+            return TryChangeReference(KeyEntryRequest.ResetPivPinWithPuk, ResetPin);
+        }
 
         /// <summary>
         /// Reset the PIN, using the PUK (PIN Unblocking Key), throw an
@@ -703,6 +723,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ResetPin()
         {
+            _log.LogInformation("Reset the PIV PIN using the PIV PUK.");
             if (TryChangeReference(KeyEntryRequest.ResetPivPinWithPuk, ResetPin) == false)
             {
                 throw new OperationCanceledException(
@@ -747,6 +768,10 @@ namespace Yubico.YubiKey.Piv
 
                     if (status == ResponseStatus.Success)
                     {
+                        if (request != KeyEntryRequest.ChangePivPuk)
+                        {
+                            UpdateAdminData();
+                        }
                         return true;
                     }
 
@@ -808,6 +833,38 @@ namespace Yubico.YubiKey.Piv
             keyEntryData.RetriesRemaining = resetResponse.GetData();
 
             return resetResponse.Status;
+        }
+
+        // If the PIN has been changed, updata the AdminData element
+        // PinLastUpdated.
+        // This method is called by those operations that change the PIN,
+        // ChangePin, ResetPin, and ChangePinAndPukRetryCounts.
+        // This will check to see if there is AdminData stored on this YubiKey.
+        // If so, it will update the date in the PinLastUpdated property with the
+        // current time and store the new AdminData.
+        // If there is currently no AdminData in this YubiKey, this method will
+        // do nothing. That is, it will not create a new AdminData with the
+        // current time.
+        private void UpdateAdminData()
+        {
+            try
+            {
+                AdminData adminData = ReadObject<AdminData>();
+                if (adminData.IsEmpty)
+                {
+                    return;
+                }
+                adminData.PinLastUpdated = DateTime.UtcNow;
+
+                WriteObject(adminData);
+            }
+            catch(ArgumentException)
+            {
+                // This exception happens when there is data in ADMIN DATA, but
+                // it is not the expected encoding. We're treating this as the
+                // same as no data. Hence, catch the exception and do nothing.
+                _log.LogInformation("UpdateAdminData: contents of ADMIN DATA unexpected.");
+            }
         }
     }
 }

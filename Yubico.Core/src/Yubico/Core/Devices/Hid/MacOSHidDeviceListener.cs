@@ -70,14 +70,14 @@ namespace Yubico.Core.Devices.Hid
             const int runLoopTimeout = 10; // 10 seconds is arbitrary, pulled from Apple sample code
             using IDisposable logScope = _log.BeginScope("MacOSHidDeviceListener.StartListening()");
 
-            _log.LogInformation("HID listener thread started. ThreadID is {ThreadID}.", Thread.CurrentThread.ManagedThreadId);
+            _log.LogInformation("HID listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
 
             IntPtr manager = IntPtr.Zero;
             IntPtr runLoopMode = IntPtr.Zero;
 
             try
             {
-                byte[] cstr = Encoding.UTF8.GetBytes($"default-runloop-{Thread.CurrentThread.ManagedThreadId}");
+                byte[] cstr = Encoding.UTF8.GetBytes($"default-runloop-{Environment.CurrentManagedThreadId}");
                 runLoopMode = CFStringCreateWithCString(IntPtr.Zero, cstr, 0);
 
                 manager = IOHIDManagerCreate(IntPtr.Zero, 0);

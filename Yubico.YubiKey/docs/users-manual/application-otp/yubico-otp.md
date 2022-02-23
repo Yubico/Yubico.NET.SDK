@@ -125,7 +125,7 @@ Now that we've covered the Yubico OTP components, let's look at the typical OTP 
 
 In order to validate Yubico OTPs, a central validation server is needed. Validation servers store the OTP configuration secrets (private ID and AES key) and keep track of the usage counter and session usage counter from previous valid OTPs.
 
-When a Yubico OTP is submitted during the user authentication process, the OTP is routed to the validation server, which uses the appropriate AES key to decrypt the OTP. After decrypting, the private ID, usage counter, and session usage counter are used to check the OTP's validity.
+When a Yubico OTP is submitted during the user authentication process, the OTP is routed to the validation server by your application, which uses the appropriate AES key to decrypt the OTP. After decrypting, the private ID, usage counter, and session usage counter are used to check the OTP's validity.
 
 When a key's OTP application slot is configured with a Yubico OTP, the OTP secrets must be shared with the validation server *and* the configuration's public ID must be registered with a user account of an application the user wishes to authenticate to.
 

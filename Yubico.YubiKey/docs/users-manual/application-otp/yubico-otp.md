@@ -101,7 +101,7 @@ Now that we've covered the Yubico OTP components, let's look at the typical OTP 
 
 1. The session usage counter is reset to 0, and the usage counter is incremented by 1.
 
-1. The key's random number generator sets the timestamp to a random value and begins incrementing it at a rate of 8 Hz.
+1. The key's random number generator initializes the timestamp to a random value and begins incrementing it at a rate of 8 Hz.
 
 1. A [slot](xref:OtpSlots) containing a Yubico OTP configuration is activated, prompting OTP generation.
 

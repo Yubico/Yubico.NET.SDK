@@ -26,6 +26,7 @@ namespace Yubico.YubiKey.Piv
             var yubiKey = new HollowYubiKeyDevice();
             yubiKey.FirmwareVersion.Major = 5;
             yubiKey.FirmwareVersion.Minor = 3;
+            yubiKey.AvailableUsbCapabilities = YubiKeyCapabilities.Piv;
 
             using (var pivSession = new PivSession(yubiKey))
             {

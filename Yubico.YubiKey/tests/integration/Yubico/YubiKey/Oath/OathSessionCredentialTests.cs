@@ -194,7 +194,7 @@ namespace Yubico.YubiKey.Oath
             Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
             Assert.NotNull(_connection);
 
-            if (_yubiKeyDevice.FirmwareVersion < FirmwareVersion.V4_3_1)
+            if (!_yubiKeyDevice.HasFeature(YubiKeyFeature.OathTouchCredential))
             {
                 _ = Assert.Throws<InvalidOperationException>(() => _oathSession.AddCredential(_fixture.TotpWithTouchCredential));
             }
@@ -214,7 +214,7 @@ namespace Yubico.YubiKey.Oath
             Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
             Assert.NotNull(_connection);
 
-            if (_yubiKeyDevice.FirmwareVersion < FirmwareVersion.V4_2_4)
+            if (!_yubiKeyDevice.HasFeature(YubiKeyFeature.OathSha512))
             {
                 _ = Assert.Throws<InvalidOperationException>(() => _oathSession.AddCredential(_fixture.TotpWithSha512Credential));
             }
@@ -326,7 +326,7 @@ namespace Yubico.YubiKey.Oath
             Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
             Assert.NotNull(_connection);
 
-            if (_yubiKeyDevice.FirmwareVersion < FirmwareVersion.V5_3_0)
+            if (!_yubiKeyDevice.HasFeature(YubiKeyFeature.OathRenameCredential))
             {
                 _ = Assert.Throws<InvalidOperationException>(()
                     => _oathSession.RenameCredential(
@@ -365,7 +365,7 @@ namespace Yubico.YubiKey.Oath
             Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
             Assert.NotNull(_connection);
 
-            if (_yubiKeyDevice.FirmwareVersion < FirmwareVersion.V5_3_0)
+            if (!_yubiKeyDevice.HasFeature(YubiKeyFeature.OathRenameCredential))
             {
                 _ = Assert.Throws<InvalidOperationException>(()
                     => _oathSession.RenameCredential(
@@ -396,7 +396,7 @@ namespace Yubico.YubiKey.Oath
             Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
             Assert.NotNull(_connection);
 
-            if (_yubiKeyDevice.FirmwareVersion < FirmwareVersion.V5_3_0)
+            if (!_yubiKeyDevice.HasFeature(YubiKeyFeature.OathRenameCredential))
             {
                 _ = Assert.Throws<InvalidOperationException>(()
                     => _oathSession.RenameCredential(
@@ -440,7 +440,7 @@ namespace Yubico.YubiKey.Oath
             Assert.DoesNotContain(_fixture.TotpWithTouchCredential, data);
             Assert.DoesNotContain(_fixture.TotpWithSha512Credential, data);
 
-            if (_yubiKeyDevice.FirmwareVersion < FirmwareVersion.V5_3_0)
+            if (!_yubiKeyDevice.HasFeature(YubiKeyFeature.OathRenameCredential))
             {
                 _oathSession.RemoveCredential(_fixture.TotpCredentialWithDefaultPeriod);
                 _oathSession.RemoveCredential(_fixture.TotpCredential);
@@ -472,7 +472,7 @@ namespace Yubico.YubiKey.Oath
             Assert.DoesNotContain(gitHubCredential, data);
             Assert.DoesNotContain(appleCredential, data);
 
-            if (_yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0)
+            if (_yubiKeyDevice.HasFeature(YubiKeyFeature.OathRenameCredential))
             {
                 Credential emptyIssuerCredential = _oathSession.RemoveCredential("", "test@example.com");
                 Credential renamedCredential = _oathSession.RemoveCredential(

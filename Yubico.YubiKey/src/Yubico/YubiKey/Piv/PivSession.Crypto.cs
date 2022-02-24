@@ -406,7 +406,7 @@ namespace Yubico.YubiKey.Piv
 
             // Metadata will give us our answer, but that feature is
             // available only on YubiKeys beginning with version 5.3.
-            if (_yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0)
+            if (_yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))
             {
                 var metadataCommand = new GetMetadataCommand(slotNumber);
                 GetMetadataResponse metadataResponse = Connection.SendCommand(metadataCommand);

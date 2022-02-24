@@ -135,7 +135,7 @@ namespace Yubico.YubiKey.Oath
             Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
             Assert.NotNull(_connection);
 
-            if (_yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0)
+            if (_yubiKeyDevice.HasFeature(YubiKeyFeature.OathRenameCredential))
             {
                 var renameCommand = new RenameCommand(_fixture.TotpCredential, "Test", "test@example.com");
                 OathResponse response = _connection.SendCommand(renameCommand);
@@ -151,7 +151,7 @@ namespace Yubico.YubiKey.Oath
             Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
             Assert.NotNull(_connection);
 
-            if (_yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0)
+            if (_yubiKeyDevice.HasFeature(YubiKeyFeature.OathRenameCredential))
             {
                 _fixture.TotpCredential.Issuer = "Test";
                 _fixture.TotpCredential.AccountName = "test@example.com";
@@ -170,7 +170,7 @@ namespace Yubico.YubiKey.Oath
             Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
             Assert.NotNull(_connection);
 
-            if (_yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0)
+            if (_yubiKeyDevice.HasFeature(YubiKeyFeature.OathRenameCredential))
             {
                 _fixture.TotpCredential.Issuer = "";
                 _fixture.TotpCredential.AccountName = "test@example.com";

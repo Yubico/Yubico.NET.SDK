@@ -709,4 +709,7 @@
   <data name="NoActiveConnections" xml:space="preserve">
     <value>No active connections for that YubiKey were found.</value>
   </data>
+  <data name="UnknownYubiKeyFeature" xml:space="preserve">
+    <value>Unknown YubiKey feature.</value>
+  </data>
 </root>

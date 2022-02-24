@@ -1708,6 +1708,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unknown YubiKey feature..
+        /// </summary>
+        internal static string UnknownYubiKeyFeature {
+            get {
+                return ResourceManager.GetString("UnknownYubiKeyFeature", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The requested algorithm is not supported..
         /// </summary>
         internal static string UnsupportedAlgorithm {

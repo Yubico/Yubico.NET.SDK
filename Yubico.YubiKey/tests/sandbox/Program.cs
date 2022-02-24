@@ -51,6 +51,7 @@ namespace Yubico.YubiKey.TestApp
                 ["eventmgmt"] = (output) => new EventManagerPlugin(output),
                 ["hidevents"] = (output) => new HidDeviceListenerPlugin(output),
                 ["smartcardevents"] = (output) => new SmartCardDeviceListenerPlugin(output),
+                ["feature"] = (output) => new YubiKeyFeaturePlugin(output)
             };
 
         static int Main(string[] args)

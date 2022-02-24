@@ -273,7 +273,7 @@ namespace Yubico.YubiKey.Piv
         public PivMetadata GetMetadata(byte slotNumber)
         {
             _log.LogInformation("GetMetadata for slot number {0:X2}.", slotNumber);
-            if (_yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0)
+            if (_yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))
             {
                 var metadataCommand = new GetMetadataCommand(slotNumber);
                 GetMetadataResponse metadataResponse = Connection.SendCommand(metadataCommand);

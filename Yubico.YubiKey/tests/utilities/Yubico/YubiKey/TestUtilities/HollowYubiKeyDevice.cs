@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         #region IYubiKeyDeviceInfo
         /// <inheritdoc />
-        public YubiKeyCapabilities AvailableUsbCapabilities { get; private set; }
+        public YubiKeyCapabilities AvailableUsbCapabilities { get; set; }
 
         /// <inheritdoc />
         public YubiKeyCapabilities EnabledUsbCapabilities { get; private set; }

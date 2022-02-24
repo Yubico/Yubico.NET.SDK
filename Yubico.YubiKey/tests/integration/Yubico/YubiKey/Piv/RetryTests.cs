@@ -97,7 +97,7 @@ namespace Yubico.YubiKey.Piv
             IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
 
             // If the YubiKey is 5.3 or later, don't bother with this test.
-            if (yubiKey.FirmwareVersion >= FirmwareVersion.V5_3_0)
+            if (yubiKey.HasFeature(YubiKeyFeature.PivMetadata))
             {
                 return;
             }

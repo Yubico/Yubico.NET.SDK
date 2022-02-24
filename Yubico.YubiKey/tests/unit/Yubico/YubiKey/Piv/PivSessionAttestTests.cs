@@ -32,6 +32,7 @@ namespace Yubico.YubiKey.Piv
             var yubiKey = new HollowYubiKeyDevice();
             yubiKey.FirmwareVersion.Major = 4;
             yubiKey.FirmwareVersion.Minor = 3;
+            yubiKey.AvailableUsbCapabilities = YubiKeyCapabilities.Piv;
 
             using (var pivSession = new PivSession(yubiKey))
             {
@@ -86,6 +87,7 @@ namespace Yubico.YubiKey.Piv
             var yubiKey = new HollowYubiKeyDevice();
             yubiKey.FirmwareVersion.Major = 4;
             yubiKey.FirmwareVersion.Minor = 3;
+            yubiKey.AvailableUsbCapabilities = YubiKeyCapabilities.Piv;
             bool isValid = SampleKeyPairs.GetMatchingKeyAndCert(out X509Certificate2 cert, out _);
             Assert.True(isValid);
 
@@ -103,6 +105,7 @@ namespace Yubico.YubiKey.Piv
             var yubiKey = new HollowYubiKeyDevice();
             yubiKey.FirmwareVersion.Major = 4;
             yubiKey.FirmwareVersion.Minor = 3;
+            yubiKey.AvailableUsbCapabilities = YubiKeyCapabilities.Piv;
             bool isValid = SampleKeyPairs.GetMatchingKeyAndCert(out _, out PivPrivateKey privateKey);
             Assert.True(isValid);
 
@@ -120,6 +123,7 @@ namespace Yubico.YubiKey.Piv
             var yubiKey = new HollowYubiKeyDevice(true);
             yubiKey.FirmwareVersion.Major = 4;
             yubiKey.FirmwareVersion.Minor = 3;
+            yubiKey.AvailableUsbCapabilities = YubiKeyCapabilities.Piv;
 
             BadAttestationPairs.GetPair(
                 BadAttestationPairs.KeyRsa1024CertValid, out string privateKeyPem, out string certPem);
@@ -149,6 +153,7 @@ namespace Yubico.YubiKey.Piv
             var yubiKey = new HollowYubiKeyDevice(true);
             yubiKey.FirmwareVersion.Major = 4;
             yubiKey.FirmwareVersion.Minor = 3;
+            yubiKey.AvailableUsbCapabilities = YubiKeyCapabilities.Piv;
 
             BadAttestationPairs.GetPair(whichPair, out string privateKeyPem, out string certPem);
 
@@ -174,6 +179,7 @@ namespace Yubico.YubiKey.Piv
             var yubiKey = new HollowYubiKeyDevice(true);
             yubiKey.FirmwareVersion.Major = 4;
             yubiKey.FirmwareVersion.Minor = 3;
+            yubiKey.AvailableUsbCapabilities = YubiKeyCapabilities.Piv;
 
             BadAttestationPairs.GetPair(
                 BadAttestationPairs.KeyRsa2048CertBigName, out string privateKeyPem, out string certPem);

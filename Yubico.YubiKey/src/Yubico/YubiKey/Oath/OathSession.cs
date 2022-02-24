@@ -65,7 +65,7 @@ namespace Yubico.YubiKey.Oath
         /// For example,
         /// <code>
         ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
-        ///     using (var piv = new OathSession(yubiKeyToUse))
+        ///     using (var oath = new OathSession(yubiKeyToUse))
         ///     {
         ///         /* Perform OATH operations. */
         ///     }

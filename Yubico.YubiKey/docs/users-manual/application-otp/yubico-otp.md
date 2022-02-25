@@ -154,14 +154,14 @@ To integrate YubiCloud validation into your application, you must add calls to Y
 
 ### Self-hosted validation servers
 
-If you prefer not to use YubiCloud with your application, you may host your own validation server.
+Yubico strongly recommends using YubiCloud. If for some reason YubiCloud is not suitable for your application, you may host your own validation server.
 
 Validation servers are composed of two major components:
 
 - verification server
 - key storage module (KSM)
 
-The KSM stores OTP secrets (AES keys and private IDs) and performs OTP decryption. The verification server validates decrypted OTPs. Yubico provides a [reference architecture](https://developers.yubico.com/Software_Projects/Yubico_OTP/YubiCloud_Validation_Servers/) for these components. Please note that these architectures have been deprecated and are no longer supported.
+The KSM stores OTP secrets (AES keys and private IDs) and performs OTP decryption. The verification server validates decrypted OTPs. Yubico provides a [reference architecture](https://developers.yubico.com/Software_Projects/Yubico_OTP/YubiCloud_Validation_Servers/) for the [validation server](https://github.com/YubicoLabs/yubikey-val) and [KSM](https://github.com/YubicoLabs/yubikey-ksm) in the YubicoLabs GitHub repository. Please note that these architectures have been deprecated and are no longer supported. At this time, Yubico does not offer an on-premises service. 
 
 If you are interested in hosting your own validation server to use within your company, please reach out to customer support. Yubico has the ability to manufacture company-specific keys with a different public ID prefix (off-the-shelf YubiKeys use the "cccc" prefix). These keys can be pre-configured with Yubico OTPs, and the secrets will be provided to you for uploading to your self-hosted server.
 

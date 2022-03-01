@@ -29,7 +29,7 @@ namespace Yubico.YubiKey.DeviceExtensions
             }
             catch (PlatformInterop.SCardException e)
             {
-                Log.GetLogger().LogWarning($"Exception caught: {e}\n");
+                Log.GetLogger().LogWarning(e, "Exception encountered when attempting to read device ATR.");
             }
 
             return false;

@@ -15,6 +15,7 @@
 using System;
 using System.Diagnostics;
 using Yubico.Core.Devices.SmartCard;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.DeviceExtensions
 {
@@ -28,7 +29,7 @@ namespace Yubico.YubiKey.DeviceExtensions
             }
             catch (PlatformInterop.SCardException e)
             {
-                Debug.WriteLine($"Exception caught: {e}\n");
+                Log.GetLogger().LogWarning($"Exception caught: {e}\n");
             }
 
             return false;

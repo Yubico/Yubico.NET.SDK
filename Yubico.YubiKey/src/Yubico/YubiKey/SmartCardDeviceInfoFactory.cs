@@ -17,6 +17,7 @@ using Yubico.YubiKey.DeviceExtensions;
 using System.Diagnostics.CodeAnalysis;
 using System;
 using System.Diagnostics;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey
 {
@@ -193,6 +194,7 @@ namespace Yubico.YubiKey
             return false;
         }
 
-        private static void ErrorHandler(Exception exception) => Debug.WriteLine($"Exception caught: {exception}\n");
+        private static void ErrorHandler(Exception exception)
+            => Log.GetLogger().LogWarning($"Exception caught: {exception}\n");
     }
 }

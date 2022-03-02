@@ -146,7 +146,7 @@ namespace Yubico.YubiKey
             }
             catch (NotImplementedException e)
             {
-                ErrorHandler(e, "MacOSHidDevice.ConnectToFeatureReports, not implemented on MacOS.");
+                ErrorHandler(e, "MacOSHidDevice.ConnectToFeatureReports was not implemented on MacOS.");
             }
             catch (KeyboardConnectionException e)
             {

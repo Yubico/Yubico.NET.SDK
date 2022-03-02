@@ -72,8 +72,10 @@ namespace Yubico.YubiKey
             }
             catch (MalformedYubiKeyResponseException e)
             {
-                ErrorHandler(e, "nonce didn't match in FidoTransform.AcquireCtapHidChannel " +
-                    "or reponse data length is too long.");
+                // FidoTransform.AcquireCtapHidChannel, nonce did not match
+                // FidoTransform.ReceiveResponse, response data length too long
+                // Response.GetData, response data length too long
+                ErrorHandler(e, "Exception encountered when trying to get device info over FIDO.");
             }
             catch (UnauthorizedAccessException e)
             {
@@ -104,8 +106,10 @@ namespace Yubico.YubiKey
             }
             catch (MalformedYubiKeyResponseException e)
             {
-                ErrorHandler(e, "nonce didn't match in FidoTransform.AcquireCtapHidChannel " +
-                    "or reponse data length too long.");
+                // FidoTransform.AcquireCtapHidChannel, nonce did not match
+                // FidoTransform.ReceiveResponse, response data length too long
+                // Response.GetData, response data length too long
+                ErrorHandler(e, "Exception encountered when trying to get device info over FIDO.");
             }
             catch (UnauthorizedAccessException e)
             {

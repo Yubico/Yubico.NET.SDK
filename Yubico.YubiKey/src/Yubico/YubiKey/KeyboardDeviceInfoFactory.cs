@@ -17,6 +17,7 @@ using Yubico.YubiKey.DeviceExtensions;
 using System.Diagnostics;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey
 {
@@ -73,8 +74,7 @@ namespace Yubico.YubiKey
             }
             catch (NotImplementedException e)
             {
-                // MacOSHidDevice.ConnectToFeatureReports, not implemented on MacOS
-                ErrorHandler(e);
+                ErrorHandler(e, "The MacOSHidDevice.ConnectToFeatureReport was not implemented on MacOS.");
             }
             catch (KeyboardConnectionException e)
             {
@@ -82,13 +82,12 @@ namespace Yubico.YubiKey
                 // KeyboardTransform.HandleSlotRequestInstruction, expected to read next report but reached unexpected end of buffer
                 // KeyboardTransform.WaitFor, timeout waiting for YubiKey to ack a write to the interface
                 // KeyboardTransform.WaitFor, timeout waiting for user interaction
-                ErrorHandler(e);
+                ErrorHandler(e, "Exception encountered when trying to get device info from keyboard.");
             }
             catch (MalformedYubiKeyResponseException e)
             {
-                // KeyboardTransform.HandleStatusInstruction, invalid StatusReport format
-                // GetDeviceInfoResponse.GetData, response data length too long
-                ErrorHandler(e);
+                ErrorHandler(e, "The KeyboardTransform.HandleStatusInstruction has invalid StatusReport format " +
+                    "or The GetDeviceInfoResponse.GetData response data length is too long.");
             }
 
             yubiKeyDeviceInfo = null;
@@ -111,8 +110,7 @@ namespace Yubico.YubiKey
             }
             catch (NotImplementedException e)
             {
-                // MacOSHidDevice.ConnectToFeatureReports, not implemented on MacOS
-                ErrorHandler(e);
+                ErrorHandler(e, "MacOSHidDevice.ConnectToFeatureReports was not implemented on MacOS.");
             }
             catch (KeyboardConnectionException e)
             {
@@ -121,12 +119,11 @@ namespace Yubico.YubiKey
                 // KeyboardTransform.HandleSlotRequestInstruction, expected to read next report but reached unexpected end of buffer
                 // KeyboardTransform.WaitFor, timeout waiting for YubiKey to ack a write to the interface
                 // KeyboardTransform.WaitFor, timeout waiting for user interaction
-                ErrorHandler(e);
+                ErrorHandler(e, "Exception encountered when trying to get serial number from keyboard.");
             }
             catch (MalformedYubiKeyResponseException e)
             {
-                // GetSerialNumberResponse.GetData, response data length too short
-                ErrorHandler(e);
+                ErrorHandler(e, "The GetSerialNumberResponse.GetData response data length is too short.");
             }
 
             serialNumber = null;
@@ -149,8 +146,7 @@ namespace Yubico.YubiKey
             }
             catch (NotImplementedException e)
             {
-                // MacOSHidDevice.ConnectToFeatureReports, not implemented on MacOS
-                ErrorHandler(e);
+                ErrorHandler(e, "MacOSHidDevice.ConnectToFeatureReports was not implemented on MacOS.");
             }
             catch (KeyboardConnectionException e)
             {
@@ -159,18 +155,18 @@ namespace Yubico.YubiKey
                 // KeyboardTransform.HandleSlotRequestInstruction, expected to read next report but reached unexpected end of buffer
                 // KeyboardTransform.WaitFor, timeout waiting for YubiKey to ack a write to the interface
                 // KeyboardTransform.WaitFor, timeout waiting for user interaction
-                ErrorHandler(e);
+                ErrorHandler(e, "Exception encountered when trying to get firmware version from keyboard.");
             }
             catch (MalformedYubiKeyResponseException e)
             {
-                // GetSerialNumberResponse.GetData, response data invalid length
-                ErrorHandler(e);
+                ErrorHandler(e, "The length of GetSerialNumberResponse.GetData response data is invalid.");
             }
 
             firmwareVersion = null;
             return false;
         }
 
-        private static void ErrorHandler(Exception exception) => Debug.WriteLine($"Exception caught: {exception}\n");
+        private static void ErrorHandler(Exception exception, string message)
+            => Log.GetLogger().LogWarning(exception, message);
     }
 }

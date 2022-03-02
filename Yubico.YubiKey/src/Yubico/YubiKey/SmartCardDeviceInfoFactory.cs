@@ -17,6 +17,7 @@ using Yubico.YubiKey.DeviceExtensions;
 using System.Diagnostics.CodeAnalysis;
 using System;
 using System.Diagnostics;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey
 {
@@ -82,7 +83,7 @@ namespace Yubico.YubiKey
             }
             catch (Core.Iso7816.ApduException e)
             {
-                ErrorHandler(e);
+                ErrorHandler(e, "An ISO 7816 application has encountered an error when trying to get device info from management.");
             }
 
             yubiKeyDeviceInfo = null;
@@ -106,12 +107,11 @@ namespace Yubico.YubiKey
             }
             catch (Core.Iso7816.ApduException e)
             {
-                ErrorHandler(e);
+                ErrorHandler(e, "An ISO 7816 application has encountered an error when trying to get firmware version from OTP.");
             }
             catch (MalformedYubiKeyResponseException e)
             {
-                // GetSerialNumberResponse.GetData, response data invalid length
-                ErrorHandler(e);
+                ErrorHandler(e, "The length of GetSerialNumberResponse.GetData reponse data is invalid.");
             }
 
             firmwareVersion = null;
@@ -135,7 +135,7 @@ namespace Yubico.YubiKey
             }
             catch (Core.Iso7816.ApduException e)
             {
-                ErrorHandler(e);
+                ErrorHandler(e, "An ISO 7816 application has encountered an error when trying to get firmware version from PIV.");
             }
 
             firmwareVersion = null;
@@ -158,12 +158,12 @@ namespace Yubico.YubiKey
             }
             catch (Core.Iso7816.ApduException e)
             {
-                ErrorHandler(e);
+                ErrorHandler(e, "An ISO 7816 application has encountered an error when trying to get serial number from OTP.");
             }
             catch (MalformedYubiKeyResponseException e)
             {
                 // GetSerialNumberResponse.GetData, response data length too short
-                ErrorHandler(e);
+                ErrorHandler(e, "The GetSerialNumberResponse.GetData response data length is too short.");
             }
 
             serialNumber = null;
@@ -186,13 +186,14 @@ namespace Yubico.YubiKey
             }
             catch (Core.Iso7816.ApduException e)
             {
-                ErrorHandler(e);
+                ErrorHandler(e, "An ISO 7816 application has encountered an error when trying to get serial number from PIV.");
             }
 
             serialNumber = null;
             return false;
         }
 
-        private static void ErrorHandler(Exception exception) => Debug.WriteLine($"Exception caught: {exception}\n");
+        private static void ErrorHandler(Exception exception, string message)
+            => Log.GetLogger().LogWarning(exception, message);
     }
 }

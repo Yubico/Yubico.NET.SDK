@@ -17,6 +17,7 @@ using Yubico.YubiKey.DeviceExtensions;
 using System.Diagnostics;
 using System;
 using System.Diagnostics.CodeAnalysis;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey
 {
@@ -67,20 +68,18 @@ namespace Yubico.YubiKey
             }
             catch (NotImplementedException e)
             {
-                // MacOSHidDevice.ConnectToIOReports(), not implemented on MacOS
-                ErrorHandler(e);
+                ErrorHandler(e, "MacOSHidDevice.ConnectToIOReports() was not implemented on MacOS.");
             }
             catch (MalformedYubiKeyResponseException e)
             {
                 // FidoTransform.AcquireCtapHidChannel, nonce did not match
                 // FidoTransform.ReceiveResponse, response data length too long
                 // Response.GetData, response data length too long
-                ErrorHandler(e);
+                ErrorHandler(e, "Exception encountered when trying to get device info over FIDO.");
             }
             catch (UnauthorizedAccessException e)
             {
-                // Must have elevated privileges in Windows to access FIDO device directly
-                ErrorHandler(e);
+                ErrorHandler(e, "Must have elevated privileges in Windows to access FIDO device directly.");
             }
 
             yubiKeyDeviceInfo = null;
@@ -103,26 +102,25 @@ namespace Yubico.YubiKey
             }
             catch (NotImplementedException e)
             {
-                // MacOSHidDevice.ConnectToIOReports(), not implemented on MacOS
-                ErrorHandler(e);
+                ErrorHandler(e, "MacOSHidDevice.ConnectToIOReports() was not implemented on MacOS.");
             }
             catch (MalformedYubiKeyResponseException e)
             {
                 // FidoTransform.AcquireCtapHidChannel, nonce did not match
                 // FidoTransform.ReceiveResponse, response data length too long
-                // Response.GetData, response data invalid length
-                ErrorHandler(e);
+                // Response.GetData, response data length too long
+                ErrorHandler(e, "Exception encountered when trying to get device info over FIDO.");
             }
             catch (UnauthorizedAccessException e)
             {
-                // Must have elevated privileges in Windows to access FIDO device directly
-                ErrorHandler(e);
+                ErrorHandler(e, "Must have elevated privileges in Windows to access FIDO device directly.");
             }
 
             firmwareVersion = null;
             return false;
         }
 
-        private static void ErrorHandler(Exception exception) => Debug.WriteLine($"Exception caught: {exception}\n");
+        private static void ErrorHandler(Exception exception, string message)
+            => Log.GetLogger().LogWarning(exception, message);
     }
 }

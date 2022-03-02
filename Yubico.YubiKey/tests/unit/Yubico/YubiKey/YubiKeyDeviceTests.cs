@@ -98,6 +98,19 @@ namespace Yubico.YubiKey
         }
 
         [Fact]
+        public void IsSkySeries_SetGet_ReturnsSetValue()
+        {
+            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            {
+                IsSkySeries = true,
+            };
+
+            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+
+            Assert.Equal(ykDeviceInfo.IsSkySeries, ykDevice.IsSkySeries);
+        }
+
+        [Fact]
         public void FormFactor_SetGet_ReturnsSetValue()
         {
             var ykDeviceInfo = new YubiKeyDeviceInfo()

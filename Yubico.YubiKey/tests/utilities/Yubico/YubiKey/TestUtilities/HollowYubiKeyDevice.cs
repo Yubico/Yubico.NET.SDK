@@ -54,6 +54,9 @@ namespace Yubico.YubiKey.TestUtilities
         public bool IsFipsSeries { get; private set; }
 
         /// <inheritdoc />
+        public bool IsSkySeries { get; private set; }
+
+        /// <inheritdoc />
         public FormFactor FormFactor { get; private set; }
 
         /// <inheritdoc />

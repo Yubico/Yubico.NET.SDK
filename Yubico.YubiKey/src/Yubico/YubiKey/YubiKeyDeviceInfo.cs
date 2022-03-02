@@ -42,7 +42,8 @@ namespace Yubico.YubiKey
         private const byte IapDetectionTag = 0x0f;
 
         private const byte FipsMask = 0b1000_0000;
-        private const byte FormFactorMask = unchecked((byte)~FipsMask);
+        private const byte SkyMask = 0b0100_0000;
+        private const byte FormFactorMask = unchecked((byte)~(FipsMask | SkyMask));
 
         private static readonly FirmwareVersion _fipsInclusiveLowerBound =
             FirmwareVersion.V4_4_0;
@@ -70,6 +71,9 @@ namespace Yubico.YubiKey
 
         /// <inheritdoc />
         public bool IsFipsSeries { get; set; }
+
+        /// <inheritdoc />
+        public bool IsSkySeries { get; set; }
 
         /// <inheritdoc />
         public FormFactor FormFactor { get; set; }
@@ -137,6 +141,7 @@ namespace Yubico.YubiKey
 
             deviceInfo = new YubiKeyDeviceInfo();
             bool fipsSeriesFlag = false;
+            bool skySeriesFlag = false;
 
             while (tlvReader.HasData)
             {
@@ -159,8 +164,8 @@ namespace Yubico.YubiKey
                     case FormFactorTag:
                         byte formFactorValue = tlvReader.ReadByte(FormFactorTag);
                         deviceInfo.FormFactor = (FormFactor)(formFactorValue & FormFactorMask);
-
                         fipsSeriesFlag = (formFactorValue & FipsMask) == FipsMask;
+                        skySeriesFlag = (formFactorValue & SkyMask) == SkyMask;
                         break;
 
                     case FirmwareVersionTag:
@@ -218,6 +223,8 @@ namespace Yubico.YubiKey
                 deviceInfo.FirmwareVersion >= _fipsFlagInclusiveLowerBound
                 ? fipsSeriesFlag
                 : deviceInfo.IsFipsVersion;
+
+            deviceInfo.IsSkySeries |= skySeriesFlag;
 
             return true;
         }

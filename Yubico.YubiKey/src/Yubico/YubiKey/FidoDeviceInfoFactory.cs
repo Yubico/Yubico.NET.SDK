@@ -40,6 +40,8 @@ namespace Yubico.YubiKey
                 ykDeviceInfo = new YubiKeyDeviceInfo();
             }
 
+            ykDeviceInfo.IsSkySeries |= device.ProductId == ProductIdentifiers.SecurityKey;
+
             // Manually fill in gaps, if necessary
             var defaultDeviceInfo = new YubiKeyDeviceInfo();
 

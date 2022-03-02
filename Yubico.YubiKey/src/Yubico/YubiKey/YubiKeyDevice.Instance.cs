@@ -45,6 +45,9 @@ namespace Yubico.YubiKey
         public bool IsFipsSeries => _yubiKeyInfo.IsFipsSeries;
 
         /// <inheritdoc />
+        public bool IsSkySeries => _yubiKeyInfo.IsSkySeries;
+
+        /// <inheritdoc />
         public FormFactor FormFactor => _yubiKeyInfo.FormFactor;
 
         /// <inheritdoc />
@@ -712,6 +715,7 @@ namespace Yubico.YubiKey
                 + "- Serial Number: " + SerialNumber + EOL
                 + "- Form Factor: " + FormFactor + EOL
                 + "- FIPS: " + IsFipsSeries + EOL
+                + "- SKY: " + IsSkySeries + EOL
                 + "- Has SmartCard: " + HasSmartCard + EOL
                 + "- Has HID FIDO: " + HasHidFido + EOL
                 + "- Has HID Keyboard: " + HasHidKeyboard + EOL

@@ -57,6 +57,15 @@ namespace Yubico.YubiKey
         public bool IsFipsSeries { get; }
 
         /// <summary>
+        /// Indicates whether or not this device is a "Security Key by Yubico" series device.
+        /// </summary>
+        /// <remarks>
+        /// Security Key Series devices only support the U2F and FIDO2 applications. This property helps differentiate
+        /// these devices from a standard YubiKey that only has these two applications enabled.
+        /// </remarks>
+        public bool IsSkySeries { get; }
+
+        /// <summary>
         /// The form-factor of the YubiKey.
         /// </summary>
         public FormFactor FormFactor { get; }

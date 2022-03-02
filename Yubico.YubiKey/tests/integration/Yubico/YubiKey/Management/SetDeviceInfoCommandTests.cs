@@ -102,6 +102,7 @@ namespace Yubico.YubiKey.Management
             Assert.Equal(expectedDeviceInfo.EnabledNfcCapabilities, actualDeviceInfo.EnabledNfcCapabilities);
             Assert.Equal(expectedDeviceInfo.SerialNumber, actualDeviceInfo.SerialNumber);
             Assert.Equal(expectedDeviceInfo.IsFipsSeries, actualDeviceInfo.IsFipsSeries);
+            Assert.Equal(expectedDeviceInfo.IsSkySeries, actualDeviceInfo.IsSkySeries);
             Assert.Equal(expectedDeviceInfo.FormFactor, actualDeviceInfo.FormFactor);
             Assert.Equal(expectedDeviceInfo.FirmwareVersion, actualDeviceInfo.FirmwareVersion);
             Assert.Equal(expectedDeviceInfo.AutoEjectTimeout, actualDeviceInfo.AutoEjectTimeout);

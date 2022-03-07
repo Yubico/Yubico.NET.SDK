@@ -19,4 +19,18 @@ limitations under the License. -->
 
 # Configuration concepts
 
-Content coming soon.
+The articles in this section cover the four OTP application configurations, as well as the [NDEF (NFC Data Exchange Format) tag](xref:OtpNdef):
+
+- [Yubico OTP](xref:OtpYubicoOtp)
+- [Initiative for Open Authentication HMAC-based OTP (OATH HOTP)](xref:OtpHotp)
+- [Static password](xref:OtpStaticPassword)
+- [Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)](xref:OtpChallengeResponse)
+
+The purpose of these articles is to convey the following information:
+
+- what each configuration is and how it works
+- YubiKey nuances related to each configuration
+- an overview of the SDK functionality in each area
+- intended applications and limitations of each configuration
+
+These articles build on the topics discussed in the [OTP application concepts section](xref:OtpAppConcepts). You may find it helpful to refer back to that section as you develop an understanding of the configurations.

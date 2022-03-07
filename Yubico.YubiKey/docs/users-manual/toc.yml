@@ -51,7 +51,6 @@
   homepage: application-otp/otp-overview.md
   items:
   - name: Concepts
-    href: application-otp/concepts-overview.md
     items:
     - name: OTP application
       href: application-otp/application-concepts-overview.md

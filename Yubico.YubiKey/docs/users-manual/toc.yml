@@ -137,6 +137,8 @@
     href: application-piv/pin-puk-mgmt-key.md
   - name: Access control
     href: application-piv/access-control.md
+  - name: PIN-only mode
+    href: application-piv/pin-only.md
   - name: PIN and touch policy
     href: application-piv/pin-touch-policies.md
   - name: Keeping track of slot contents

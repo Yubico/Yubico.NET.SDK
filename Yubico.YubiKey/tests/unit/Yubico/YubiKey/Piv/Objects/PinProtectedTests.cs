@@ -112,11 +112,14 @@ namespace Yubico.YubiKey.Piv.Objects
         }
 
         [Fact]
-        public void Encode_Empty_Exception()
+        public void Encode_Empty_Correct()
         {
+            var expected = new Span<byte>(new byte[] { 0x53, 0x00 });
             using var pinProtect = new PinProtectedData();
 
-            _ = Assert.Throws<InvalidOperationException>(() => pinProtect.Encode());
+            byte[] encoding = pinProtect.Encode();
+            bool isValid = MemoryExtensions.SequenceEqual(expected, encoding);
+            Assert.True(isValid);
         }
 
         [Fact]

@@ -871,6 +871,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid PIN-only mode to set a YubiKey. Only None, PinProtected, or PinDerived are allowed..
+        /// </summary>
+        internal static string InvalidPivPinOnlyMode {
+            get {
+                return ResourceManager.GetString("InvalidPivPinOnlyMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The length of input to a Put Data operation, {0}, was invalid, the maximum is {1}..
         /// </summary>
         internal static string InvalidPivPutDataLength {
@@ -1083,6 +1092,15 @@ namespace Yubico.YubiKey {
         internal static string ManagementApplicationUnavailable {
             get {
                 return ResourceManager.GetString("ManagementApplicationUnavailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The YubiKey is configured for PIN-only, so the management key cannot be changed..
+        /// </summary>
+        internal static string MgmtKeyCannotBeChanged {
+            get {
+                return ResourceManager.GetString("MgmtKeyCannotBeChanged", resourceCulture);
             }
         }
         
@@ -1479,6 +1497,15 @@ namespace Yubico.YubiKey {
         internal static string PasswordNotSetYet {
             get {
                 return ResourceManager.GetString("PasswordNotSetYet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The YubiKey is configured for something incompatible with PIN-only..
+        /// </summary>
+        internal static string PinOnlyNotPossible {
+            get {
+                return ResourceManager.GetString("PinOnlyNotPossible", resourceCulture);
             }
         }
         

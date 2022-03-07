@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Piv.Objects
     /// <para>
     /// If the YubiKey is PIN-derived, the PUK should be blocked, and there will
     /// be a salt. Hence, the <c>PukBlocked</c> property should be <c>true</c>
-    /// and the <c>Salt</c> should contain the salt used to derive the managment
+    /// and the <c>Salt</c> should contain the salt used to derive the management
     /// key.
     /// </para>
     /// <para>
@@ -233,6 +233,7 @@ namespace Yubico.YubiKey.Piv.Objects
             IsEmpty = true;
         }
 
+
         /// <inheritdoc />
         public override int GetDefinedDataTag() => AdminDataDefinedDataTag;
 
@@ -292,10 +293,7 @@ namespace Yubico.YubiKey.Piv.Objects
             _log.LogInformation("Encode AdminData.");
             if (IsEmpty)
             {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.NoDataToEncode));
+                return new byte[] { 0x53, 0x00 };
             }
 
             // We're encoding
@@ -339,7 +337,7 @@ namespace Yubico.YubiKey.Piv.Objects
         /// <inheritdoc />
         public override bool TryDecode(ReadOnlyMemory<byte> encodedData)
         {
-            _log.LogInformation("Decode into AdminData.");
+            _log.LogInformation("Try to decode into AdminData.");
 
             Clear();
             if (encodedData.Length == 0)
@@ -366,13 +364,8 @@ namespace Yubico.YubiKey.Piv.Objects
             {
                 isValid = tlvReader.TryReadNestedTlv(out tlvReader, AdminDataTag);
             }
-            while (isValid)
+            while (tlvReader.HasData)
             {
-                if (!tlvReader.HasData)
-                {
-                    break;
-                }
-
                 int nextTag = tlvReader.PeekTag();
                 isValid = nextTag switch
                 {
@@ -381,6 +374,12 @@ namespace Yubico.YubiKey.Piv.Objects
                     DateTag => ReadDate(tlvReader, ref elementsRead),
                     _ => false,
                 };
+
+                if (!isValid)
+                {
+                    Clear();
+                    break;
+                }
             }
 
             // If isValid is true, then we successfully decoded, so the object is
@@ -430,8 +429,19 @@ namespace Yubico.YubiKey.Piv.Objects
             bool isValid = tlvReader.TryReadValue(out ReadOnlyMemory<byte> salt, SaltTag);
             if (isValid)
             {
-                SetSalt(salt);
+                if (salt.Length == 0)
+                {
+                    Salt = null;
+                    return true;
+                }
 
+                if (salt.Length != SaltLength)
+                {
+                    return false;
+                }
+
+                salt.CopyTo(_salt);
+                Salt = _salt;
                 isValid = (elementsRead & SaltRead) != 0;
             }
 
@@ -480,7 +490,6 @@ namespace Yubico.YubiKey.Piv.Objects
             return buffer;
         }
 
-        // Set everything to the initial state.
         private void Clear()
         {
             CryptographicOperations.ZeroMemory(_salt.Span);

@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Piv.Objects
     /// Data Object.
     /// </summary>
     /// <remarks>
-    /// Generally you will use one of the <see cref="PivSession.ReadObject"/> methods to
+    /// Generally you will use one of the <see cref="PivSession.ReadObject()"/> methods to
     /// get the specified data out of a YubiKey. The formatted data will be
     /// parsed and the resulting object will present the data in a more readable
     /// form. You can then update the data and call
@@ -197,15 +197,12 @@ namespace Yubico.YubiKey.Piv.Objects
         /// </para>
         /// <para>
         /// If the object is empty (<c>IsEmpty</c> is <c>true</c>), then this
-        /// method will throw an exception.
+        /// method will return the encoding of no data, which is <c>0x53 00</c>.
         /// </para>
         /// </remarks>
         /// <returns>
         /// A new byte array containing the encoded data object.
         /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// The object is empty (there is no data to encode).
-        /// </exception>
         public abstract byte[] Encode();
 
         /// <summary>
@@ -274,8 +271,8 @@ namespace Yubico.YubiKey.Piv.Objects
         /// </para>
         /// <para>
         /// If the input is encoded as expected, yet the data in that encoding is
-        /// invalid (e.g. some element is too long), this method will throw an
-        /// exception.
+        /// invalid (e.g. some element is not the correct length), this method
+        /// will return <c>false</c>.
         /// </para>
         /// </remarks>
         /// <param name="encodedData">
@@ -285,6 +282,9 @@ namespace Yubico.YubiKey.Piv.Objects
         /// A boolean, <c>true</c> if the method successfully decodes,
         /// <c>false</c> otherwise.
         /// </returns>
+        /// <exception cref="ArgumentException">
+        /// The data is not properly encoded for the data object.
+        /// </exception>
         public abstract bool TryDecode(ReadOnlyMemory<byte> encodedData);
 
         /// <summary>

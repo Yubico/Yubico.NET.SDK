@@ -16,7 +16,8 @@ using System;
 using System.Security;
 using System.Globalization;
 using Yubico.YubiKey.Piv.Commands;
-using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Piv.Objects;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -79,9 +80,19 @@ namespace Yubico.YubiKey.Piv
         /// current state of management key authentication.
         /// </para>
         /// <para>
-        /// This method will collect the management key using the
-        /// <c>KeyCollector</c> delegate. If no such delegate has been set, this
-        /// method will throw an exception.
+        /// This method will determine if the YubiKey is set for PIN-only. If so,
+        /// it will collect the management key using the PIN and authenticate. If
+        /// not, it will use the <c>KeyCollector</c> to obtain the management key.
+        /// The ADMIN DATA and PRINTED storage locations contain information
+        /// about PIN-only (PIN-protected, PIN-derived, or both). If that
+        /// information is inaccurate (some other application overwrote the data
+        /// in one or both locations, PIN-only authentication might fail and this
+        /// method will use the <c>KeyCollector</c>.
+        /// </para>
+        /// <para>
+        /// If the YubiKey is not set for PIN-only, this method will collect the
+        /// management key using the <c>KeyCollector</c> delegate. If no such
+        /// delegate has been set, this method will throw an exception.
         /// </para>
         /// <para>
         /// The <c>KeyCollector</c> has an option to cancel the operation. That
@@ -208,14 +219,25 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryAuthenticateManagementKey(bool mutualAuthentication = true)
         {
-            if (KeyCollector is null)
+            _log.LogInformation($"Try to authenticate the management key: {(mutualAuthentication == true ? "mutual" : "single")} auth.");
+
+            PivPinOnlyMode currentMode = TryAuthenticatePinOnly(true);
+            if (currentMode.HasFlag(PivPinOnlyMode.PinProtected) || currentMode.HasFlag(PivPinOnlyMode.PinDerived))
             {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.MissingKeyCollector));
+                return true;
             }
 
+            return TryAuthenticateWithKeyCollector(mutualAuthentication);
+        }
+
+        // This tries to authenticate the management key using the KeyCollector.
+        // Call this if the YubiKey is not PIN-only.
+        // Think of it as the actual implementation of
+        // TryAuthenticateManagementKey. That method checks to see if the YubiKey
+        // is PIN-only, and if so, performs that auth. If not, it calls this
+        // method.
+        private bool TryAuthenticateWithKeyCollector(bool mutualAuthentication)
+        {
             var keyEntryData = new KeyEntryData()
             {
                 Request = KeyEntryRequest.AuthenticatePivManagementKey,
@@ -223,14 +245,17 @@ namespace Yubico.YubiKey.Piv
 
             try
             {
-                return TryAuthenticateManagementKey(mutualAuthentication, keyEntryData);
+                return TryAuthenticateWithKeyCollector(mutualAuthentication, keyEntryData);
             }
             finally
             {
                 keyEntryData.Clear();
 
-                keyEntryData.Request = KeyEntryRequest.Release;
-                _ = KeyCollector(keyEntryData);
+                if (!(KeyCollector is null))
+                {
+                    keyEntryData.Request = KeyEntryRequest.Release;
+                    _ = KeyCollector(keyEntryData);
+                }
             }
         }
 
@@ -242,9 +267,8 @@ namespace Yubico.YubiKey.Piv
         /// method will throw an exception if the <c>KeyCollecter</c> indicates
         /// user cancellation.
         /// <para>
-        /// See the <see cref="TryAuthenticateManagementKey(bool)"/> or
-        /// <see cref="TryAuthenticateManagementKey(bool, KeyEntryData)"/> method for further
-        /// documentation on this method.
+        /// See the <see cref="TryAuthenticateManagementKey(bool)"/> method for
+        /// further documentation on this method.
         /// </para>
         /// </remarks>
         /// <exception cref="InvalidOperationException">
@@ -265,6 +289,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void AuthenticateManagementKey(bool mutualAuthentication = true)
         {
+            _log.LogInformation($"Authenticate the management key: {(mutualAuthentication == true ? "mutual" : "single")} auth.");
             if (TryAuthenticateManagementKey(mutualAuthentication) == false)
             {
                 throw new OperationCanceledException(
@@ -284,6 +309,10 @@ namespace Yubico.YubiKey.Piv
         /// This method changes it. Note that this method can be run at any time,
         /// either during the initial YubiKey setup to change from the default
         /// management key, or later, to change it again.
+        /// <para>
+        /// If the YubiKey is set for PIN-only, this method will throw an
+        /// exception.
+        /// </para>
         /// <para>
         /// The management key is a Triple-DES key, so it is 24 byte long, no
         /// more, no less. It is binary. That's 192 bits. But note that because
@@ -380,12 +409,14 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryChangeManagementKey(PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
         {
-            if (KeyCollector is null)
+            _log.LogInformation("Try to change the management key, touch policy = {0}.", touchPolicy.ToString());
+
+            if (GetPinOnlyMode() != PivPinOnlyMode.None)
             {
                 throw new InvalidOperationException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.MissingKeyCollector));
+                        ExceptionMessages.MgmtKeyCannotBeChanged));
             }
 
             var keyEntryData = new KeyEntryData()
@@ -395,7 +426,7 @@ namespace Yubico.YubiKey.Piv
 
             try
             {
-                if (TryAuthenticateManagementKey(true, keyEntryData) == false)
+                if (TryAuthenticateWithKeyCollector(true, keyEntryData) == false)
                 {
                     return false;
                 }
@@ -419,7 +450,10 @@ namespace Yubico.YubiKey.Piv
                 keyEntryData.Clear();
 
                 keyEntryData.Request = KeyEntryRequest.Release;
-                _ = KeyCollector(keyEntryData);
+                if (!(KeyCollector is null))
+                {
+                    _ = KeyCollector(keyEntryData);
+                }
             }
         }
 
@@ -453,6 +487,7 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangeManagementKey(PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
         {
+            _log.LogInformation("Change the management key, touch policy = {0}.", touchPolicy.ToString());
             if (TryChangeManagementKey(touchPolicy) == false)
             {
                 throw new OperationCanceledException(
@@ -476,7 +511,7 @@ namespace Yubico.YubiKey.Piv
         // This method will set the appropriate properties of this class and
         // return the result, but it will not catch exceptions, clear the
         // keyEntryData, nor call the KeyCollector with Release.
-        private bool TryAuthenticateManagementKey(bool mutualAuthentication, KeyEntryData keyEntryData)
+        private bool TryAuthenticateWithKeyCollector(bool mutualAuthentication, KeyEntryData keyEntryData)
         {
             if (KeyCollector is null)
             {

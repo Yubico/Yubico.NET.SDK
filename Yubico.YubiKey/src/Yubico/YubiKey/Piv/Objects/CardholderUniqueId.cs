@@ -198,13 +198,10 @@ namespace Yubico.YubiKey.Piv.Objects
         /// <inheritdoc />
         public override byte[] Encode()
         {
-            _log.LogInformation("Encode the data of CardholderUniqueId.");
+            _log.LogInformation("Encode CardholderUniqueId.");
             if (IsEmpty)
             {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.NoDataToEncode));
+                return new byte[] { 0x53, 0x00 };
             }
 
             // We're encoding
@@ -356,7 +353,6 @@ namespace Yubico.YubiKey.Piv.Objects
             return false;
         }
 
-        // Set everything to the initial state.
         private void Clear()
         {
             CryptographicOperations.ZeroMemory(_guidValue);

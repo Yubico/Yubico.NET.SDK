@@ -118,6 +118,14 @@ namespace Yubico.YubiKey.TestUtilities
                 return yubiKeyCommand.CreateResponseForApdu(responseApdu);
             }
 
+            if (yubiKeyCommand is GetDataCommand)
+            {
+                byte[]? sw = new byte[sizeof(short)];
+                BinaryPrimitives.WriteInt16BigEndian(sw, SWConstants.DataNotFound);
+                var responseApdu = new ResponseApdu(new byte[] { sw[0], sw[1] });
+                return yubiKeyCommand.CreateResponseForApdu(responseApdu);
+            }
+
             throw new NotImplementedException();
         }
 

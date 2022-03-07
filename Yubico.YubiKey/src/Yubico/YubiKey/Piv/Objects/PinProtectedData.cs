@@ -156,13 +156,10 @@ namespace Yubico.YubiKey.Piv.Objects
         /// <inheritdoc />
         public override byte[] Encode()
         {
-            _log.LogInformation("Encode PinProtectedManagementKey.");
+            _log.LogInformation("Encode AdminData.");
             if (IsEmpty)
             {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.NoDataToEncode));
+                return new byte[] { 0x53, 0x00 };
             }
 
             // If there is a management key, we're encoding
@@ -201,7 +198,7 @@ namespace Yubico.YubiKey.Piv.Objects
                 return true;
             }
 
-            // We're looking for Admin data that is encoded as
+            // We're looking for PIN-protected data that is encoded as
             //   53 02 88 00
             // or
             //   53 1C
@@ -210,25 +207,43 @@ namespace Yubico.YubiKey.Piv.Objects
             //            --management key--
             ReadOnlyMemory<byte> mgmtKey = ReadOnlyMemory<byte>.Empty;
             var tlvReader = new TlvReader(encodedData);
-            bool isValid = tlvReader.TryReadNestedTlv(out tlvReader, EncodingTag);
-            if (isValid && tlvReader.HasData)
+
+            bool isValid = true;
+            int count = 0;
+            while (isValid && tlvReader.HasData)
             {
-                isValid = tlvReader.TryReadNestedTlv(out tlvReader, PinProtectedTag);
+                isValid = count switch
+                {
+                    0 => tlvReader.TryReadNestedTlv(out tlvReader, EncodingTag),
+                    1 => tlvReader.TryReadNestedTlv(out tlvReader, PinProtectedTag),
+                    2 => tlvReader.TryReadValue(out mgmtKey, MgmtKeyTag),
+                    _ => false,
+                };
+
+                count++;
             }
-            if (isValid && tlvReader.HasData)
+
+            if (mgmtKey.Length == MgmtKeyLength)
             {
-                isValid = tlvReader.TryReadValue(out mgmtKey, MgmtKeyTag);
+                mgmtKey.CopyTo(_mgmtKey);
+                ManagementKey = _mgmtKey;
+            }
+            else
+            {
+                if (mgmtKey.Length != 0)
+                {
+                    isValid = false;
+                }
             }
 
             if (isValid)
             {
-                SetManagementKey(mgmtKey);
+                IsEmpty = false;
             }
 
             return isValid;
         }
 
-        // Set everything to the initial state.
         private void Clear()
         {
             CryptographicOperations.ZeroMemory(_mgmtKey.Span);

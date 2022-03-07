@@ -260,7 +260,7 @@ namespace Yubico.YubiKey.Piv
         /// <para>
         /// In order to perform this operation, the management key must be
         /// authenticated and the PIN must be verified during this session. If
-        /// the have not been authenticated/verified, this method will call
+        /// they have not been authenticated/verified, this method will call
         /// <see cref="AuthenticateManagementKey"/> and <see cref="VerifyPin"/>.
         /// That is, your application does not need to authenticate the
         /// management key and verify the PIN separately, this method will
@@ -282,8 +282,7 @@ namespace Yubico.YubiKey.Piv
         /// method noting the cancellation. In that case, this method will throw
         /// an exception. If you want the authentication to return <c>false</c>
         /// on user cancellation, you must call
-        /// <see cref="TryAuthenticateManagementKey(bool)"/> or
-        /// <see cref="TryAuthenticateManagementKey(bool, KeyEntryData)"/> and
+        /// <see cref="TryAuthenticateManagementKey(bool)"/> and
         /// <see cref="TryVerifyPin"/> directly before calling this method.
         /// </para>
         /// </remarks>

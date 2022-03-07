@@ -207,8 +207,9 @@ namespace Yubico.YubiKey.Piv
 
                     var adminData = new AdminData
                     {
-                        PinProtected = true
+                        PinLastUpdated = new DateTime(2000, 2, 29)
                     };
+
                     pivSession.WriteObject(adminData);
 
                     pivSession.ChangeManagementKey();
@@ -216,8 +217,14 @@ namespace Yubico.YubiKey.Piv
                     adminData = pivSession.ReadObject<AdminData>();
 
                     Assert.False(adminData.IsEmpty);
-                    Assert.True(adminData.PinProtected);
-                    Assert.Null(adminData.PinLastUpdated);
+                    Assert.NotNull(adminData.PinLastUpdated);
+                    if (!(adminData.PinLastUpdated is null))
+                    {
+                        var check = (DateTime)adminData.PinLastUpdated;
+                        Assert.Equal(29, check.Day);
+                        Assert.Equal(2, check.Month);
+                        Assert.Equal(2000, check.Year);
+                    }
                 }
                 finally
                 {

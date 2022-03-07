@@ -256,13 +256,10 @@ namespace Yubico.YubiKey.Piv.Objects
         /// <inheritdoc />
         public override byte[] Encode()
         {
-            _log.LogInformation("Encode the data of CardCapabilityContainer.");
+            _log.LogInformation("Encode CardCapabilityContainer.");
             if (IsEmpty)
             {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.NoDataToEncode));
+                return new byte[] { 0x53, 0x00 };
             }
 
             // We're encoding
@@ -447,7 +444,6 @@ namespace Yubico.YubiKey.Piv.Objects
                 new Tuple<int, int, byte>(UnusedTag8, 0, 0)
             };
 
-        // Set everything to the initial state.
         private void Clear()
         {
             var dataAsSpan = new Span<byte>(_uniqueCardIdentifier);

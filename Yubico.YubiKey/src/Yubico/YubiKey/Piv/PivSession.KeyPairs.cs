@@ -87,8 +87,7 @@ namespace Yubico.YubiKey.Piv
         /// <c>KeyCollector</c> will return to the authentication method noting
         /// the cancellation. In that case, it will throw an exception. If you
         /// want the authentication to return <c>false</c> on user cancellation,
-        /// you must call <see cref="TryAuthenticateManagementKey(bool)"/> or
-        /// <see cref="TryAuthenticateManagementKey(bool, KeyEntryData)"/> directly
+        /// you must call <see cref="TryAuthenticateManagementKey(bool)"/> directly
         /// before calling this method.
         /// </para>
         /// </remarks>
@@ -193,8 +192,7 @@ namespace Yubico.YubiKey.Piv
         /// <c>KeyCollector</c> will return to the authentication method noting
         /// the cancellation. In that case, it will throw an exception. If you
         /// want the authentication to return <c>false</c> on user cancellation,
-        /// you must call <see cref="TryAuthenticateManagementKey(bool)"/> or
-        /// <see cref="TryAuthenticateManagementKey(bool, KeyEntryData)"/> directly
+        /// you must call <see cref="TryAuthenticateManagementKey(bool)"/> directly
         /// before calling this method.
         /// </para>
         /// </remarks>
@@ -290,8 +288,7 @@ namespace Yubico.YubiKey.Piv
         /// <c>KeyCollector</c> will return to the authentication method noting
         /// the cancellation. In that case, it will throw an exception. If you
         /// want the authentication to return <c>false</c> on user cancellation,
-        /// you must call <see cref="TryAuthenticateManagementKey(bool)"/> or
-        /// <see cref="TryAuthenticateManagementKey(bool, KeyEntryData)"/> directly
+        /// you must call <see cref="TryAuthenticateManagementKey(bool)"/> directly
         /// before calling this method.
         /// </para>
         /// </remarks>

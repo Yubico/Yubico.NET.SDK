@@ -87,10 +87,10 @@ namespace Yubico.YubiKey.Piv
                     };
 
                     PutDataCommand putCmd;
-                    _ = Assert.Throws<InvalidOperationException>(() => putCmd = new PutDataCommand(0x005EFFFF, arbitraryData));
+                    _ = Assert.Throws<ArgumentException>(() => putCmd = new PutDataCommand(0x005EFFFF, arbitraryData));
 
                     GetDataCommand getCmd;
-                    _ = Assert.Throws<InvalidOperationException>(() => getCmd = new GetDataCommand(0x005EFFFF));
+                    _ = Assert.Throws<ArgumentException>(() => getCmd = new GetDataCommand(0x005EFFFF));
                 }
                 finally
                 {

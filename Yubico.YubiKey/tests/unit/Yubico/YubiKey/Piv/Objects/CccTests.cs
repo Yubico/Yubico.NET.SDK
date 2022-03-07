@@ -169,11 +169,14 @@ namespace Yubico.YubiKey.Piv.Objects
         }
 
         [Fact]
-        public void Encode_Empty_Exception()
+        public void Encode_Empty_Correct()
         {
+            var expected = new Span<byte>(new byte[] { 0x53, 0x00 });
             using var ccc = new CardCapabilityContainer();
 
-            _ = Assert.Throws<InvalidOperationException>(() => ccc.Encode());
+            byte[] encoding = ccc.Encode();
+            bool isValid = MemoryExtensions.SequenceEqual(expected, encoding);
+            Assert.True(isValid);
         }
 
         [Fact]
@@ -296,7 +299,7 @@ namespace Yubico.YubiKey.Piv.Objects
             newEncoded.Span[1] = 0x34;
             newEncoded.Span[offset] = 0x01;
             newEncoded.Span[offset + 1] = 0x01;
-            encodedValue.Slice(offset + 1).CopyTo(newEncoded.Slice(offset + 2));
+            encodedValue[(offset + 1)..].CopyTo(newEncoded[(offset + 2)..]);
 
             using var ccc = new CardCapabilityContainer();
             _ = Assert.Throws<ArgumentException>(() => ccc.Decode(newEncoded));

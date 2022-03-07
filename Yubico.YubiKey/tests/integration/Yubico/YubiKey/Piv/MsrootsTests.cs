@@ -262,12 +262,12 @@ namespace Yubico.YubiKey.Piv
 
                     byte[] putData = new byte[bufferSize];
                     rng.GetBytes(putData, 0, putData.Length);
-                    int dataLength = bufferSize - 8;
+                    int dataLength = bufferSize - 4;
                     putData[0] = 0x53;
                     putData[1] = 0x82;
                     putData[2] = (byte)(dataLength >> 8);
                     putData[3] = (byte)dataLength;
-                    dataLength = bufferSize - 4;
+                    dataLength = bufferSize - 8;
                     putData[4] = 0x83;
                     putData[5] = 0x82;
                     putData[6] = (byte)(dataLength >> 8);

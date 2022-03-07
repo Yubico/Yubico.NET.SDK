@@ -14,6 +14,7 @@
 
 using System;
 using Yubico.YubiKey.TestUtilities;
+using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Piv.Objects;
 using Xunit;
 
@@ -160,11 +161,9 @@ namespace Yubico.YubiKey.Piv
                     // Now write an empty object.
                     pivSession.WriteObject(emptyChuid);
 
-                    // Make sure the contents were unchanged.
+                    // Make sure the contents are empty.
                     chuid = pivSession.ReadObject<CardholderUniqueId>();
-                    Assert.False(chuid.IsEmpty);
-                    isValid = MemoryExtensions.SequenceEqual<byte>(expected, chuid.GuidValue.Span);
-                    Assert.True(isValid);
+                    Assert.True(chuid.IsEmpty);
                 }
             }
             finally
@@ -198,6 +197,74 @@ namespace Yubico.YubiKey.Piv
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                 _ = Assert.Throws<ArgumentException>(() => pivSession.ReadObject<CardholderUniqueId>(newTag));
+            }
+        }
+
+        [Fact]
+        public void WriteEmptyObject_DataEmpty()
+        {
+            var keyData = new ReadOnlyMemory<byte>(new byte[] {
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+                0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
+                0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
+            });
+
+            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+                pivSession.ResetApplication();
+
+                using var pinProtect = new PinProtectedData();
+                pinProtect.SetManagementKey(keyData);
+
+                pivSession.WriteObject(pinProtect);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+                pivSession.VerifyPin();
+                pivSession.AuthenticateManagementKey();
+
+                var getDataCommand = new GetDataCommand((int)PivDataTag.Printed);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+
+                Assert.Equal (ResponseStatus.Success, getDataResponse.Status);
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
+
+                Assert.Equal(0x53, getData.Span[0]);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+                using var pinProtect = new PinProtectedData();
+                pinProtect.SetManagementKey(ReadOnlyMemory<byte>.Empty);
+
+                pivSession.WriteObject(pinProtect);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+                pivSession.VerifyPin();
+                pivSession.AuthenticateManagementKey();
+
+                var getDataCommand = new GetDataCommand((int)PivDataTag.Printed);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
+
+                Assert.Equal (4, getData.Length);
             }
         }
 

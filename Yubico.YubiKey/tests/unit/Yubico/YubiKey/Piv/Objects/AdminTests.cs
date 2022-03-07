@@ -187,11 +187,14 @@ namespace Yubico.YubiKey.Piv.Objects
         }
 
         [Fact]
-        public void Encode_Empty_Exception()
+        public void Encode_Empty_Correct()
         {
-            using var admin = new AdminData();
+            var expected = new Span<byte>(new byte[] { 0x53, 0x00 });
+            using var adminData = new AdminData();
 
-            _ = Assert.Throws<InvalidOperationException>(() => admin.Encode());
+            byte[] encoding = adminData.Encode();
+            bool isValid = MemoryExtensions.SequenceEqual(expected, encoding);
+            Assert.True(isValid);
         }
 
         [Fact]

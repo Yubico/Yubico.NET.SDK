@@ -85,11 +85,14 @@ namespace Yubico.YubiKey.Piv.Objects
         }
 
         [Fact]
-        public void Constructor_Encode_Exception()
+        public void Encode_Empty_Correct()
         {
+            var expected = new Span<byte>(new byte[] { 0x53, 0x00 });
             using var chuid = new CardholderUniqueId();
 
-            _ = Assert.Throws<InvalidOperationException>(() => chuid.Encode());
+            byte[] encoding = chuid.Encode();
+            bool isValid = MemoryExtensions.SequenceEqual(expected, encoding);
+            Assert.True(isValid);
         }
 
         [Fact]

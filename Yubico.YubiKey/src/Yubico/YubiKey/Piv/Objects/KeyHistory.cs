@@ -183,13 +183,10 @@ namespace Yubico.YubiKey.Piv.Objects
         /// <inheritdoc />
         public override byte[] Encode()
         {
-            _log.LogInformation("Encode the data of KeyHistory.");
+            _log.LogInformation("Encode KeyHistory.");
             if (IsEmpty)
             {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.NoDataToEncode));
+                return new byte[] { 0x53, 0x00 };
             }
 
             if ((_onCardCerts == 0) && (_offCardCerts == 0) && (!(OffCardCertificateUrl is null)))
@@ -324,7 +321,6 @@ namespace Yubico.YubiKey.Piv.Objects
             }
         }
 
-        // Set everything to the initial state.
         private void Clear()
         {
             _onCardCerts = 0;

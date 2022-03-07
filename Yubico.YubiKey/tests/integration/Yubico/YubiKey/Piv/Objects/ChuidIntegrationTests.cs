@@ -162,9 +162,7 @@ namespace Yubico.YubiKey.Piv
 
                     // Make sure the contents were unchanged.
                     chuid = pivSession.ReadObject<CardholderUniqueId>();
-                    Assert.False(chuid.IsEmpty);
-                    isValid = MemoryExtensions.SequenceEqual<byte>(expected, chuid.GuidValue.Span);
-                    Assert.True(isValid);
+                    Assert.True(chuid.IsEmpty);
                 }
             }
             finally

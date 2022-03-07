@@ -150,7 +150,7 @@ namespace Yubico.YubiKey.Piv
                     CardCapabilityContainer ccc = pivSession.ReadObject<CardCapabilityContainer>();
                     Assert.True(ccc.IsEmpty);
 
-                    // Now write a CHUID with data.
+                    // Now write a CCC with data.
                     ccc.SetCardId(expected);
                     pivSession.WriteObject(ccc);
 
@@ -163,11 +163,9 @@ namespace Yubico.YubiKey.Piv
                     // Now write an empty object.
                     pivSession.WriteObject(emptyCcc);
 
-                    // Make sure the contents were unchanged.
+                    // Make sure the contents were emptied.
                     ccc = pivSession.ReadObject<CardCapabilityContainer>();
-                    Assert.False(ccc.IsEmpty);
-                    isValid = MemoryExtensions.SequenceEqual<byte>(expected, ccc.CardIdentifier.Span);
-                    Assert.True(isValid);
+                    Assert.True(ccc.IsEmpty);
                 }
             }
             finally

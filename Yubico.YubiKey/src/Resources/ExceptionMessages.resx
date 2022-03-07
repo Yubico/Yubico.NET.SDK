@@ -276,6 +276,15 @@
   <data name="InvalidPivPutDataLength" xml:space="preserve">
     <value>The length of input to a Put Data operation, {0}, was invalid, the maximum is {1}.</value>
   </data>
+  <data name="InvalidPivPinOnlyMode" xml:space="preserve">
+    <value>Invalid PIN-only mode to set a YubiKey. Only None, PinProtected, or PinDerived are allowed.</value>
+  </data>
+  <data name="PinOnlyNotPossible" xml:space="preserve">
+    <value>The YubiKey is configured for something incompatible with PIN-only.</value>
+  </data>
+  <data name="MgmtKeyCannotBeChanged" xml:space="preserve">
+    <value>The YubiKey is configured for PIN-only, so the management key cannot be changed.</value>
+  </data>
   <data name="InvalidPinPukRetryCount" xml:space="preserve">
     <value>A PIN or PUK retry count must be greater than 0 and less than 256.</value>
   </data>

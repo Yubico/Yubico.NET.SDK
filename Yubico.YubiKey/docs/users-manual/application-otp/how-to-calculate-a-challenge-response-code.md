@@ -19,7 +19,7 @@ limitations under the License. -->
 
 # How to calculate a response code for a challenge-response credential
 
-To calculate a response code for a [challenge-response](xref:OtpChallengeResponse) credential, you must use a [CalculateChallengeResponse](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse) instance. It is instantiated by calling the factory method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
+To calculate a response code for a challenge-response credential, you must use a [CalculateChallengeResponse](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse) instance. It is instantiated by calling the factory method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
 
 As with [programming a challenge-response credential](xref:OtpProgramChallengeResponse), you can calculate an OTP for both the Yubico OTP and the HMAC-SHA1 algorithms. In this case, HMAC-SHA1 is the default algorithm; to use Yubico OTP, you must specify ```UseYubiOtp()``` in your code.
 

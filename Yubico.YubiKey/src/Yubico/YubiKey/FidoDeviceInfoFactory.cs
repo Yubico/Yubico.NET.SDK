@@ -51,6 +51,11 @@ namespace Yubico.YubiKey
                 ykDeviceInfo.FirmwareVersion = firmwareVersion;
             }
 
+            if (ykDeviceInfo.FirmwareVersion < FirmwareVersion.V4_0_0 && ykDeviceInfo.AvailableUsbCapabilities == YubiKeyCapabilities.None)
+            {
+                ykDeviceInfo.AvailableUsbCapabilities = YubiKeyCapabilities.FidoU2f;
+            }
+
             return ykDeviceInfo;
         }
 

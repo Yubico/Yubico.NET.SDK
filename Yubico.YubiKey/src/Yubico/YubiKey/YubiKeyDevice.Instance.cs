@@ -150,7 +150,14 @@ namespace Yubico.YubiKey
                     throw new ArgumentException(ExceptionMessages.DeviceTypeNotRecognized, nameof(device));
             }
 
-            _yubiKeyInfo = info;
+            if (_yubiKeyInfo is YubiKeyDeviceInfo first && info is YubiKeyDeviceInfo second)
+            {
+                _yubiKeyInfo = first.Merge(second);
+            }
+            else
+            {
+                _yubiKeyInfo = info;
+            }
         }
 
 

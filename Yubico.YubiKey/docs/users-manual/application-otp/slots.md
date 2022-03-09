@@ -22,9 +22,9 @@ limitations under the License. -->
 The OTP application on the YubiKey contains two configurable slots: the "long press" slot and the "short press" slot. Each slot may be programmed with one of the following configurations:
 
 - [Yubico OTP](xref:OtpYubicoOtp)
-- [Initiative for Open Authentication HMAC-based OTP (OATH HOTP)](xref:OtpHotp)
+- Initiative for Open Authentication HMAC-based OTP (OATH HOTP)
 - [Static password](xref:OtpStaticPassword)
-- [Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)](xref:OtpChallengeResponse)
+- Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)
 
 ## Slot activation
 

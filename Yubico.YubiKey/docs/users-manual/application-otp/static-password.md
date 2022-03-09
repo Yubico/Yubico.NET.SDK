@@ -40,7 +40,7 @@ The [GeneratePassword()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassw
 > [!NOTE]
 > `GeneratePassword()` can be configured to use a different keyboard layout (e.g. English) during password generation if desired.
 
-If a slot has already been configured with a generated static password, the password may be updated to a new randomly generated password without having to use client software (as long as the [AllowManualUpdate()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.AllowManualUpdate(System.Boolean)) boolean is set to `True`). For more information, see [How to manually update a generated static password](xref:OtpUpdateStaticPassword).
+If a slot has already been configured with a generated static password, the password may be updated to a new randomly generated password without having to use client software (as long as the [AllowManualUpdate()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.AllowManualUpdate(System.Boolean)) boolean is set to `True`). For more information, see How to manually update a generated static password.
 
 ### Set passwords
 

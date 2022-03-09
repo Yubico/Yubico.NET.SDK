@@ -21,7 +21,7 @@ limitations under the License. -->
 
 NDEF, or NFC Data Exchange Format, is the communication protocol used by NFC (Near-Field Communication) devices. NFC-compatible YubiKeys contain an integrated NFC antenna, which allows them to wirelessly communicate with NFC readers via the NDEF protocol when both devices are within a few centimeters of each other.
 
-NFC readers generate an electromagnetic field, which is capable of powering the YubiKey and transferring data between the devices. This allows the YubiKey to generate and submit [Yubico OTPs](xref:OtpYubicoOtp) and [OATH HOTPs](xref:OtpHotp) without being physically connected to a host.
+NFC readers generate an electromagnetic field, which is capable of powering the YubiKey and transferring data between the devices. This allows the YubiKey to generate and submit [Yubico OTPs](xref:OtpYubicoOtp) and OATH HOTPs without being physically connected to a host.
 
 Tapping an NFC reader with a YubiKey is similar to touching the key when it's plugged into a host over USB/Lightning; the action triggers whichever operation the activated OTP application [slot](xref:OtpSlots) is configured with. Unlike USB/Lightning connections, which provide the option to activate either slot based on duration of touch, only one slot may be activated over NFC.
 
@@ -75,7 +75,7 @@ For more information on NDEF messages, please see this [book chapter](https://ww
 
 Only Yubico OTPs and OATH HOTPs can be communicated successfully over NDEF.
 
-You can still point the NDEF tag to a slot that is configured with a [static password](xref:OtpStaticPassword) or [challenge-response](xref:OtpChallengeResponse), but the YubiKey will not be able to communicate these configurations properly using the NDEF protocol.
+You can still point the NDEF tag to a slot that is configured with a [static password](xref:OtpStaticPassword) or challenge-response, but the YubiKey will not be able to communicate these configurations properly using the NDEF protocol.
 
 For static passwords, the YubiKey will send the static text or URI followed by the HID usage IDs of the password characters. HID usage IDs cannot be interpreted correctly over NFC since the host expects to receive UTF characters. For example, the letter "a" is represented by the binary string "0000 0100" in HID and by the binary string "0110 0001" in UTF-8/ASCII. These binary code differences, along with the fact that upper case letters are signaled through the modifier key state in HID usage reports, mean that a password in HID form cannot be easily translated to UTF form. The YubiKey firmware does not have this translation capability, and the SDK does not include the functionality to configure the key with both the HID and UTF representations of a static password during configuration.
 

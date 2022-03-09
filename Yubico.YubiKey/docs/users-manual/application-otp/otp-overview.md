@@ -25,9 +25,9 @@ The OTP application on the YubiKey allows developers to program the device with 
 "OTP application" is a bit of a misnomer. While OTP (one-time password) functionality is the focus of the application, the slots may be programmed with other configurations. Supported configurations include:
 
 - [Yubico OTP](xref:OtpYubicoOtp)
-- [Initiative for Open Authentication HMAC-based OTP (OATH HOTP)](xref:OtpHotp)
+- Initiative for Open Authentication HMAC-based OTP (OATH HOTP)
 - [Static password](xref:OtpStaticPassword)
-- [Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)](xref:OtpChallengeResponse)
+- Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)
 
 YubiKeys that support NFC also include a configurable [NDEF](xref:OtpNdef) (NFC Data Exchange Format) tag. This tag can be configured to point to a slot that is programmed with a Yubico OTP or an OATH HOTP in order to make the OTP easily readable in NFC authentication scenarios.
 
@@ -43,7 +43,7 @@ The SDK is designed to enable developers to accomplish common YubiKey OTP applic
 - [Program a slot with a challenge-response credential](xref:OtpProgramChallengeResponse)
 - [Calculate a response code for a challenge-response credential](xref:OtpCalcChallengeResponseCode)
 - [Delete a slot’s configuration](xref:OtpDeleteSlotConfig)
-- [Program a slot with an HMAC-SHA1 OATH-HOTP credential](xref:OtpProgramHOTP)
+- Program a slot with an HMAC-SHA1 OATH-HOTP credential
 - [Retrieve a slot’s status](xref:OtpRetrieveSlotStatus)
 - [Configure NDEF to use a slot to generate an OTP](xref:OtpConfigureNDEF)
 - [Read information from an NDEF tag](xref:OtpReadNDEF)

@@ -22,13 +22,9 @@
     href: getting-started/how-to-install.md
   - name: What's new in the SDK?
     href: getting-started/whats-new.md
-  - name: Roadmap
-    href: getting-started/roadmap.md
 
 - name: YubiKey reference
   items:
-  - name: Hardware
-    href: yubikey-reference/hardware.md
   - name: Transports
     href: yubikey-reference/transports/overview.md
   - name: APDUs
@@ -66,29 +62,20 @@
       items:
       - name: Yubico OTP
         href: application-otp/yubico-otp.md
-      - name: OATH-HOTP
-        href: application-otp/hotp.md
-      - name: Challenge-Response
-        href: application-otp/challenge-response.md
       - name: Static passwords
         href: application-otp/static-password.md
       - name: NDEF
         href: application-otp/ndef.md
   - name: How-to Guides
-    href: application-otp/how-to-guides-overview.md
     items:
     - name: How to program a slot with a Yubico OTP credential
       href: application-otp/how-to-program-a-yubico-otp-credential.md
-    - name: How to program a slot with an HMAC-SHA1 OATH-HOTP credential
-      href: application-otp/how-to-program-an-oath-hotp-credential.md
     - name: How to program a slot with a challenge-response credential
       href: application-otp/how-to-program-a-challenge-response-credential.md
     - name: How to calculate a response code for a challenge-response credential
       href: application-otp/how-to-calculate-a-challenge-response-code.md
     - name: How to program a slot with a static password
       href: application-otp/how-to-program-a-static-password.md
-    - name: How to manually update a generated static password
-      href: application-otp/how-to-manually-update-static-password.md
     - name: How to configure NDEF to use a slot to generate an OTP
       href: application-otp/how-to-configure-ndef.md
     - name: How to read NDEF information

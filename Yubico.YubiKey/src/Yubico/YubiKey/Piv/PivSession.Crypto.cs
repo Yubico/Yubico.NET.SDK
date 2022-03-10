@@ -97,7 +97,7 @@ namespace Yubico.YubiKey.Piv
         /// </para>
         /// <para>
         /// If a PIN is required, this method will call the necessary
-        /// routines to verify the PIN. See <see cref="VerifyPin"/> for more
+        /// routines to verify the PIN. See <see cref="VerifyPin()"/> for more
         /// information on PIN verification. If the user cancels, this method
         /// will throw an exception.
         /// </para>
@@ -203,7 +203,7 @@ namespace Yubico.YubiKey.Piv
         /// </para>
         /// <para>
         /// If a PIN is required, this method will call the necessary
-        /// routines to verify the PIN. See <see cref="VerifyPin"/> for more
+        /// routines to verify the PIN. See <see cref="VerifyPin()"/> for more
         /// information on PIN verification. If the user cancels, this method
         /// will throw an exception.
         /// </para>
@@ -298,7 +298,7 @@ namespace Yubico.YubiKey.Piv
         /// </para>
         /// <para>
         /// If a PIN is required, this method will call the necessary
-        /// routines to verify the PIN. See <see cref="VerifyPin"/> for more
+        /// routines to verify the PIN. See <see cref="VerifyPin()"/> for more
         /// information on PIN verification. If the user cancels, this method
         /// will throw an exception.
         /// </para>

@@ -26,7 +26,7 @@ This is a requirement specified by the PIV standard.
 However, the management key is a Triple-DES key, which is 24 binary bytes. While it is
 easy for someone to enter a six to eight character PIN using a keyboard, how does one
 enter 24 binary bytes? Can anyone remember 24 binary bytes? And how does one enter them
-using a keyboard? As characters `'2' '9' 'A' ' 7' '0' 'B'` for `0x29A70B` and so on?
+using a keyboard? As characters `'2' '9' 'A' ' 7' '0' 'B'` for `0x29 A7 0B` and so on?
 
 To help address these concerns, developers that build applications that use the PIV
 capabilities of a YubiKey can determine how the management key is managed. One possibility
@@ -46,6 +46,9 @@ While this improves usability, there is a tradeoff. When the SDK sets a YubiKey 
 PIN-only, it blocks the PUK as well (this is discussed below). This means it becomes much
 more likely a YubiKey becomes unusable if a PIN is forgotten. If you use the PIN-only
 feature, make sure everyone is aware that recovering from a lost PIN is likely impossible.
+
+In addition, this adds another way a YubiKey's PIV application can become unusable. This
+is discussed below in the section [Failures and recovery](#failures-and-recovery).
 
 ## Management key authentication
 
@@ -107,7 +110,9 @@ PIN-derived and the SDK will support them.
 In this mode, the SDK stores the management key in the PRINTED data object. For
 background, see the User's Manual entries on
 [Data Objects](xref:UsersManualPivObjects) and
-[GET and PUT DATA](xref:UsersManualPivCommands#get-data).
+[GET and PUT DATA](xref:UsersManualPivCommands#get-data). In this mode, there is also
+information stored in ADMIN DATA. It is simply a bit indicating whether the YubiKey is
+configured for PIN-protected or not.
 
 If the SDK encounters an operation that requires management key authentication, it will
 collect the management key from the PRINTED data object and authenticate. That operation
@@ -132,6 +137,10 @@ from the PIN and salt. It will store the salt in the ADMIN DATA object.
 
 If management key authentication is needed, the SDK collects the ADMIN DATA and the PIN.
 It can then derive the management key and authenticate.
+
+Note that in this mode, if a PIN has already been verified, the SDK will need to retrieve
+the PIN again in order to derive the management key. This is because in normal PIN
+verification, the PIN is collected and verified, but not saved.
 
 ### PUK blocked
 
@@ -165,6 +174,11 @@ That call requires you to specify the mode, `PinProtected`, `PinDerived`, or bot
         pivSession.SetYubiKeyPivPinOnly(PivPinOnlyMode.PinProtected);
     }
 ```
+
+Remember, it is not a good idea to set a YubiKey to PIN-derived, either alone or with
+PIN-protected. That is, unless you have an older YubiKey that works with an older
+application that supports only PIN-derived, you should not set a YubiKey to either
+`PinDerived` or `PinDerived | PinProtected`.
 
 In order to set a YubiKey to PIN-only the management key must be authenticated. This is
 necessary even if it has already been authenticated. The `SetYubiKeyPivPinOnly` method
@@ -200,7 +214,7 @@ management key using the PIN only in each new `PivSession`. For example,
     }
 ```
 
-The `ImporeCertificate` method requires management key authentication in order to execute.
+The `ImportCertificate` method requires management key authentication in order to execute.
 Under the covers it will call the `PivSession.AuthenticateManagementKey` method. That
 method will determine that the YubiKey is PIN-only, will request the PIN, obtain the
 management key, and authenticate. While the `KeyCollector` must obtain the PIN, it will
@@ -210,18 +224,67 @@ Note that if a YubiKey is set for PIN-derived, each time the management key is
 authenticated, PIN entry is required. That is, even if the PIN has already been verified,
 in order to authenticate the management key, the PIN must be entered again.
 
-## Exceptions and other failures
+## ADMIN DATA
 
-The code is written to generally try something, and if that doesn't work, try something
-else. For example, when authenticating a management key, the code will check to see if the
-YubiKey is PIN-only. If not, perform regular authentication. Or if the YubiKey has data
-indicating it is PIN-only, the SDK will try to authenticate using PIN-only, but if that
-does not work, perform regular authentication.
+One of the many PIV data objects on the YubiKey is known as ADMIN DATA. See also the
+documentation on [GET DATA and PUT DATA](commands.md#getvendordatatable) and
+[YubiKey-specific data](commands.md#getvendordatatable).
 
-However, it is possible the SDK will throw an exception if something goes wrong, rather
-than trying something else. This generally happens if the data in the ADMIN DATA and/or
-PRINTED storage areas is malformed. And even then, it has to be malformed in a particular
-way.
+This is where information about PIN-only is stored. It contains a field that indicates
+whether a YubiKey is configured for PIN-protected or not. It also contains a field that
+holds a salt. If there is no salt there, the YubiKey is not configured for PIN-derived. If
+there is a salt, then the YubiKey's management key is PIN-derived.
+
+## Getting the PIN-only mode
+
+If you want to know to which mode a YubiKey is configured, call
+[PivSession.GetPinOnlyMode](xref:Yubico.YubiKey.Piv.PivSession.GetPinOnlyMode%2a). This
+method looks at ADMIN DATA to determine the mode. It will return an enum
+([PivPinOnlyMode](xref:Yubico.YubiKey.Piv.PivPinOnlyMode)) indicating the mode.
+
+If it returns `PivPinOnlyMode.None`, then the YubiKey is not set to PIN-only. If the mode
+is `PivPinOnlyMode.PinProtected`, then the YubiKey has already been configured to
+PIN-protected.
+
+The enum is a bit field, so it is possible to get `PinProtected | PinDerived`, because it
+is possible to set a YubiKey to both PIN-protected and PIN-derived.
+
+It is also possible to get the value `PinProtectedUnavailable | PinDerivedUnavailable`.
+This means that it is not possible to set this YubiKey to PIN-only because some other
+application has written incompatible data to the storage locations. This might not be
+accurate, however, because the `GetPinOnlyMode` method returns a value based on the
+contents of ADMIN DATA only, it never looks inside PRINTED. The next section discusses
+failures, including `Unavailable`, and how to recover.
+
+## Failures and recovery
+
+The PIN-only system will break down if some application overwrites the contents of ADMIN
+DATA and/or PRINTED. It has been documented that one should never write data to these
+objects, and alternative storage locations are provided. It is very unlikely that any
+application will write to either of these objects, but it is possible. This section
+outlines what can go wrong and how to recover.
+
+First of all, the SDK is written to generally try something, and if that doesn't work, try
+something else. For example, when authenticating a management key, the code will check to
+see if the YubiKey is PIN-only. If it is not, the SDK will perform regular authentication.
+Or if the YubiKey has data indicating it is PIN-only, the SDK will try to authenticate
+using PIN-only, but if that does not work, it will again fall back and perform regular
+authentication.
+
+If nothing works, the SDK will throw an exception, or in the case of
+`TryAuthenticateManagementKey`, return `false`.
+
+This generally happens if one application sets a YubiKey to PIN-only, and another
+application overwrites the information in ADMIN DATA and/or PRINTED. If this happens, it
+is possible an application will no longer be able to perform PIV operations that require
+management key authentication, such as generating a key pair or importing a certificate,
+because the management key is lost.
+
+However, it is also possible that recovery from some of these failuress is achievable,
+using the method
+[PivSession.TryRecoverPinOnlyMode](xref:Yubico.YubiKey.Piv.PivSession.TryRecoverPinOnlyMode%2a).
+
+### ADMIN DATA contents
 
 The data in ADMIN DATA is supposed to be encoded as follows.
 
@@ -244,26 +307,14 @@ Suppose some application stores some other information in there and it looks lik
           --something--
 ```
 
-The SDK will assume the YubiKey is not PIN-only and move on, no exception thrown.
+If the mode was PIN-derived, then the salt has been lost and there is no way to recover.
 
-But suppose the data is the following.
+However, suppose the YubiKey had been configured for PIN-protected. The management key
+might still be in PRINTED, and it will be possible to recover.
 
-```text
-    53 len
-       80 L1
-          81 01
-             03
-          82 20
-             --32 random bytes--
-```
+### PRINTED contents
 
-That seems to be correct, but it isn't. The salt, if there is one, must be 16 bytes, no
-more no less. In this case, the data says the YubiKey is PIN-derived, but the data for
-PIN-derived is wrong. The SDK might be able to move on, but it is possible it will throw
-an `ArgumentException`. It will not try to authenticate using some other method.
-
-Similarly, if the ADMIN DATA indicates that the YubiKey is PIN-protected, it expects the
-data in PRINTED to be encoded as follows.
+If a YubiKey is configured for PIN-protected, then the contents of PRINTED will be
 
 ```text
     53 1C
@@ -272,51 +323,69 @@ data in PRINTED to be encoded as follows.
              <24 bytes>
 ```
 
-If the data is encoded like this (the PIV-specified encoding of PRINTED)
+If someone overwrites those contents, the management key is lost.
 
-```text
-    53 L1
-       01 len
-          --Name, ASCII text, up to 125 bytes--
-       02 len
-          --Employee afiliation, ASCII text, up to 20 bytes--
-       04 len
-          --Expiration date, ASCII numbers YYYYMMMDD, fixed at 9 bytes--
-       05 len
-          --Agency Card Serial Number, ASCII text, up to 20 bytes--
-       06 len
-          --Issuer Id, ASCII text, up to 15 bytes--
-       07 len
-          --Org affiliation, line 1, ASCII text, up to 20 bytes--
-       08 len
-          --Org affiliation, line 2, ASCII text, up to 20 bytes--
-       FE 00 (LRC, unused in PIV)
-```
+In this case, you can call `GetPinOnlyMode`, and it might return `PinProtected`, yet
+authenticating the management key fails because the SDK cannot find the key data. The SDK
+will call on the `KeyCollector` to retrieve the key.
 
-Then the SDK will not try to authenticate using PIN-protected and will try something else,
-such as authenticating using the Key Collector.
+### The Recover method
 
-But if the data is encoded like this
+If you believe a YubiKey is configured for PIN-only, but `GetPinOnlyMode` returns
+`Unavailable` or the SDK is unable to authenticate the management key, call
+`TryRecoverPinOnlyMode`. This will read the contents of ADMIN DATA and PRINTED, and try to
+determine if it is still possible to authenticate using one of the PIN-only techniques. If
+so, it will authenticate the management key using that technique.
 
-```
-    53 1E
-       88 1C
-          89 1A
-             <26 bytes>
-```
+The return of this method is the enum `PivPinOnlyMode`. This will report the result of the
+recovery effort.
 
-The SDK might throw `ArgumentException` rather than try something else.
+First of all, if you call the `Recover` method for a YubiKey that has not been configured
+for PIN-only, the return will likely be `None`. There is nothing to recover and the
+management key will not be authenticated. Or if the YubiKey has been configured for
+PIN-only and ADMIN DATA and PRINTED have not been overwritten, they contain the
+appropriate data, then the method will authenticate the management key and return the mode
+or modes.
 
-Another possibility is you call `GetPinOnlyMode`, it returns `PinProtected`, yet when the
-`AuthenticateManagementKey` method is called, that fails and the Key Collector is
-contacted. This can happen if the ADMIN DATA says a YubiKey is PIN-protected, but the data
-in PRINTED is malformed.
+If recovery is needed, and if this method is able to recover, it will also overwrite the
+contents of ADMIN DATA and/or PRINTED. This means that your call will overwrite some other
+application's data. That is, some other application wrote that data to one or both of the
+data objects for a reason and is possibly dependent on the information currently in there.
+The `Recover` method will, if it is able to recover, remove that data and the other
+application will experience failures.
 
-Generally, if some other application is using ADMIN DATA and/or PRINTED, then you will
-not be able to set a YubiKey to be PIN-only. It is also possible that you set a YubiKey to
-PIN-only, but some other application mangles the stored data, and when your application
-performs some action that requires management key authentication, the result could be
-either an exception or a call to the Key Collector.
+Note that in order to set the objects ADMIN DATA and PRINTED, the management key must be
+authenticated. If the data in the two storage locations is such that the method just can't
+recover, it will not be able to set them and, they will remain unchanged.
+
+This method will try to authenticate using the PIN-only methods, and if they fail, it will
+try the default management key, and if that fails, it will try to collect the management
+key using the `KeyCollector`. If it is able to authenticate using the default or the
+collected key, it will clear the contents of ADMIN DATA and PRINTED.
+
+To know the result of the recovery process, check the return value.
+
+* `None`: One possibility is that no data was found in ADMIN DATA and PRINTED.
+* `None`: Another possibility is that invalid data was found in ADMIN DATA and/or PRINTED,
+the management key was authenticated using the default key or the `KeyCollector`, and the
+storage locations were cleared of any data.
+* `PinProtected`: The method was able to find the management key in PRINTED and
+authenticate. ADMIN DATA is now set with the correct information (there will be no salt).
+* `PinDerived`: it was able to authenticate the management key using a value derived
+from the PIN and salt. PRINTED is now empty, ADMIN DATA indicates the YubiKey is
+PIN-derived (with the correct sale) but not PIN-protected.
+* `PinProtected | PinDerived`: The method was able to find the management key in PRINTED
+and authenticate. The ADMIN DATA contained a salt and the key derived was the same one
+found in PRINTED. Both are set with the correct information.
+* `PinProtectedUnavailable`: ADMIN DATA had indicated the YubiKey was PIN-protected but
+not PIN-derived. The data in PRINTED was incorrect, the management key is not
+authenticated. The data in ADMIN DATA and PRINTED was not changed.
+* `PinDerivedUnavailable`: ADMIN DATA had indicated the YubiKey was PIN-derived, but the
+key derived from the PIN and salt did not authenticate. There was no data in PRINTED. The
+method could not authenticate using the default key or the `KeyCollector`. The contents
+were not changed.
+* `PinProtectedUnavailable | PinDerivedUnavailable`: The information in both was
+incorrect, the management key was not authenticated, the contents were not changed.
 
 ## PIN-protected vs. PIN-derived
 

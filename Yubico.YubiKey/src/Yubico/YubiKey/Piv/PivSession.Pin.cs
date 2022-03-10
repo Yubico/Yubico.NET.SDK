@@ -183,7 +183,7 @@ namespace Yubico.YubiKey.Piv
         /// throw an exception if the <c>KeyCollecter</c> indicates user
         /// cancellation.
         /// <para>
-        /// See the <see cref="TryVerifyPin"/> method for further documentation
+        /// See the <see cref="TryVerifyPin()"/> method for further documentation
         /// on this method.
         /// </para>
         /// </remarks>
@@ -207,6 +207,98 @@ namespace Yubico.YubiKey.Piv
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.IncompleteCommandInput));
             }
+        }
+
+        /// <summary>
+        /// Try to verify the PIN. This method will use the PIN provided, rather
+        /// than the <c>KeyCollector</c>.
+        /// </summary>
+        /// <remarks>
+        /// Normally, an application will not call any <c>VerifyPin</c> method.
+        /// Under the covers, the SDK determines when the PIN needs to be
+        /// verified and calls the <c>KeyCollector</c>. It is only at that point
+        /// the application needs to supply the PIN. The SDK will call the
+        /// application-supplied <c>KeyCollector</c>, indicating what it needs
+        /// (PIN, PUK, management key), and the <c>KeyCollector</c> does what it
+        /// needs to obtain the value requested. This system also contains a
+        /// mechanism to report if the previous value was incorrect and how many
+        /// retries remain before the value is blocked. If the PIN is never needed,
+        /// the PIN is never provided.
+        /// <para>
+        /// See the User's Manual entry on the
+        /// <xref href="UsersManualKeyCollector"> Key Collector </xref> for a
+        /// more detailed explanation of this process.
+        /// </para>
+        /// <para>
+        /// With this method, the caller provides the PIN and the
+        /// <c>KeyCollector</c> is never contacted.
+        /// </para>
+        /// <para>
+        /// Generally, it is necessary to verify a PIN once per session. Once the
+        /// PIN is verified, any operation that required the PIN in order to
+        /// execute, called during that session, will work. The exceptions include
+        /// performing a private key operation using a key that was generated or
+        /// imported with the PIN policy of always, changing or resetting a PIN,
+        /// and setting a YubiKey or session to PIN-derived (note that you should
+        /// never set a YubiKey to PIN-derived, that feature is provided only for
+        /// backwards compatibility).
+        /// </para>
+        /// <para>
+        /// Some applications would like to avoid using a <c>KeyCollector</c>.
+        /// For such situations, this method is provided. As long as the
+        /// application does not perform an operation that requires the PIN even
+        /// if it has been verified in the session, the <c>KeyCollector</c> is
+        /// not needed.
+        /// </para>
+        /// <para>
+        /// Note that if the PIN is needed during the session even after the PIN
+        /// is verified using this method (see exceptions above), and no
+        /// <c>KeyCollector</c> is provided, the SDK will throw an exception.
+        /// </para>
+        /// <para>
+        /// The PIN is provided to this method as a
+        /// <c>ReadOnlyMemory&lt;byte&gt;</c>. It is possible to pass a
+        /// <c>byte[]</c>, because it will be automatically cast. Most PINs will
+        /// be six to eight numbers, but the YubiKey allows any binary data. For
+        /// example, if the PIN is "123456" (the default value), what is actually
+        /// supplied to the YubiKey are the six bytes <c>0x31 32 33 34 35 36</c>,
+        /// the ASCII representation of the numerals '1' through '6'. If the PIN
+        /// is "ABCDefg", then the value to send to the YubiKey is the byte array
+        /// <c>0x41 42 43 44 65 66 67</c>. But a PIN could also be
+        /// <c>0xE7 05 3F 81 1C C9</c>. Those are not ASCII characters, but a
+        /// YubiKey would accept them.
+        /// </para>
+        /// <para>
+        /// If the wrong PIN is provided, this method will return <c>false</c>.
+        /// </para>
+        /// </remarks>
+        /// <param name="pin">
+        /// The PIN to verify.
+        /// </param>
+        /// <returns>
+        /// A boolean, <c>true</c> if the PIN verifies, <c>false</c> if not.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// The YubiKey had some error, such as unreliable connection.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The wrong PIN was provided.
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// The remaining retries count indicates the PIN is blocked.
+        /// </exception>
+        public bool TryVerifyPin(ReadOnlyMemory<byte> pin)
+        {
+            PinVerified = false;
+            var verifyCommand = new VerifyPinCommand(pin);
+            VerifyPinResponse verifyResponse = Connection.SendCommand(verifyCommand);
+
+            if (verifyResponse.Status == ResponseStatus.Success)
+            {
+                PinVerified = true;
+            }
+
+            return PinVerified;
         }
 
         /// <summary>
@@ -245,14 +337,14 @@ namespace Yubico.YubiKey.Piv
         /// After resetting the retry counts, the PIN and PUK will be reset to
         /// their default values (PIN: "123456", PUK: "12345678"). Even though
         /// you never reset the application (<see cref="ResetApplication"/>) or
-        /// explicitly changed the PIN and PUK (<see cref="TryChangePin"/> and
-        /// <see cref="TryChangePuk"/>), after changing the retry counts, the PIN
+        /// explicitly changed the PIN and PUK (<see cref="TryChangePin()"/> and
+        /// <see cref="TryChangePuk()"/>), after changing the retry counts, the PIN
         /// and PUK will be the defaults.
         /// </para>
         /// <para>
         /// You will likely want to write your application to immediately follow
         /// changing the retry counts with setting the PIN and PUK:
-        /// (<see cref="TryChangePin"/> and <see cref="TryChangePuk"/>. Another
+        /// (<see cref="TryChangePin()"/> and <see cref="TryChangePuk()"/>. Another
         /// option is to change these counts during the initial user setup before
         /// changing the PIN and PUK from their defaults, then never offer the
         /// user the option of changing the retry counts again.
@@ -260,8 +352,8 @@ namespace Yubico.YubiKey.Piv
         /// <para>
         /// In order to perform this operation, the management key must be
         /// authenticated and the PIN must be verified during this session. If
-        /// they have not been authenticated/verified, this method will call
-        /// <see cref="AuthenticateManagementKey"/> and <see cref="VerifyPin"/>.
+        /// the have not been authenticated/verified, this method will call
+        /// <see cref="AuthenticateManagementKey"/> and <see cref="VerifyPin()"/>.
         /// That is, your application does not need to authenticate the
         /// management key and verify the PIN separately, this method will
         /// determine if they have been authenticated/verified or not, and if
@@ -282,8 +374,8 @@ namespace Yubico.YubiKey.Piv
         /// method noting the cancellation. In that case, this method will throw
         /// an exception. If you want the authentication to return <c>false</c>
         /// on user cancellation, you must call
-        /// <see cref="TryAuthenticateManagementKey(bool)"/> and
-        /// <see cref="TryVerifyPin"/> directly before calling this method.
+        /// <see cref="TryAuthenticateManagementKey(bool)"/> or
+        /// <see cref="TryVerifyPin()"/> directly before calling this method.
         /// </para>
         /// </remarks>
         /// <param name="newRetryCountPin">
@@ -330,6 +422,79 @@ namespace Yubico.YubiKey.Piv
             }
 
             UpdateAdminData();
+        }
+
+        /// <summary>
+        /// Try to change the retry counts for both the PIN and PUK. This method
+        /// will use the <c>managementKey</c> and <c>pin</c> provided.
+        /// &gt; [!WARNING]
+        /// &gt; This will reset the PIN and PUK to their default values as well as
+        /// &gt; set the retry counts.
+        /// </summary>
+        /// <remarks>
+        /// Normally, an application would call the
+        /// <c>ChangePinAndPukRetryCounts(int, int)</c> method and the SDK would
+        /// call on the loaded <c>KeyCollector</c> to retrieve the management key
+        /// and PIN. With this method, the caller provides the management key and
+        /// PIN and the <c>KeyCollector</c> is never contacted.
+        /// <para>
+        /// Some applications would like to avoid using a <c>KeyCollector</c>.
+        /// For such situations, this method is provided.
+        /// </para>
+        /// <para>
+        /// See the <see cref="ChangePinAndPukRetryCounts(byte, byte)"/> method
+        /// for further documentation on this method.
+        /// </para>
+        /// <para>
+        /// If the wrong management key or PIN is provided, this method will
+        /// return <c>false</c>.
+        /// </para>
+        /// <para>
+        /// This method will authenticate the management key provided and verify
+        /// the PIN provided, even if one or both have already been
+        /// authenticated/verified.
+        /// </para>
+        /// </remarks>
+        /// <param name="managementKey">
+        /// The current management key.
+        /// </param>
+        /// <param name="pin">
+        /// The current PIN.
+        /// </param>
+        /// <param name="newRetryCountPin">
+        /// The PIN's new retry count.
+        /// </param>
+        /// <param name="newRetryCountPuk">
+        /// The PUK's new retry count.
+        /// </param>
+        /// <returns>
+        /// A boolean, <c>true</c> if the retru counts are changed, <c>false</c>
+        /// if not.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// The YubiKey had some error, such as unreliable connection.
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// The remaining retries count indicates the PIN is blocked.
+        /// </exception>
+        public bool TryChangePinAndPukRetryCounts(
+            ReadOnlyMemory<byte> managementKey,
+            ReadOnlyMemory<byte> pin,
+            byte newRetryCountPin,
+            byte newRetryCountPuk)
+        {
+            if (TryAuthenticateManagementKey(managementKey, true))
+            {
+                if (TryVerifyPin(pin))
+                {
+                    var setRetriesCommand = new SetPinRetriesCommand(newRetryCountPin, newRetryCountPuk);
+                    SetPinRetriesResponse setRetriesResponse = Connection.SendCommand(setRetriesCommand);
+
+                    return setRetriesResponse.Status == ResponseStatus.Success;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -443,7 +608,7 @@ namespace Yubico.YubiKey.Piv
         /// throw an exception if the <c>KeyCollecter</c> indicates user
         /// cancellation.
         /// <para>
-        /// See the <see cref="TryChangePin"/> method for further documentation
+        /// See the <see cref="TryChangePin()"/> method for further documentation
         /// on this method.
         /// </para>
         /// </remarks>
@@ -467,6 +632,64 @@ namespace Yubico.YubiKey.Piv
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.IncompleteCommandInput));
             }
+        }
+
+        /// <summary>
+        /// Try to change the PIN. This method will use the <c>currentPin</c> and
+        /// <c>newPin</c> provided.
+        /// </summary>
+        /// <remarks>
+        /// Normally, an application would call the <c>TryChangePin()</c> method
+        /// (no arguments) and the SDK would call on the loaded
+        /// <c>KeyCollector</c> to retrieve the PINs. With this method, the
+        /// caller provides the PIN and the <c>KeyCollector</c> is never
+        /// contacted.
+        /// <para>
+        /// Some applications would like to avoid using a <c>KeyCollector</c>.
+        /// For such situations, this method is provided.
+        /// </para>
+        /// <para>
+        /// See the <see cref="TryChangePin()"/> method for further documentation
+        /// on this method.
+        /// </para>
+        /// <para>
+        /// If the wrong current PIN is provided, this method will return
+        /// <c>false</c>.
+        /// </para>
+        /// <para>
+        /// Changing the PIN does not affect the status of the Session's PIN
+        /// verification. That is, the <c>PinVerified</c> property will not change
+        /// after this method completes. If the status is <c>false</c>
+        /// (unverified), and the PIN is successfully changed, the PIN will still
+        /// be unverified and any operation that requires the PIN (such as
+        /// signing), will need the PIN verified (with the new PIN). If the
+        /// status is <c>true</c> (verified) and this method succeeds, the PIN will
+        /// still be considered verified (the previous PIN), even though there is
+        /// a new PIN. If the status is <c>true</c> (verified) and this method
+        /// fails, the PIN will still be considered verified (the current PIN).
+        /// </para>
+        /// </remarks>
+        /// <param name="currentPin">
+        /// The current PIN, the PIN that is to be changed.
+        /// </param>
+        /// <param name="newPin">
+        /// The new PIN, what the PIN will be changed to.
+        /// </param>
+        /// <returns>
+        /// A boolean, <c>true</c> if the PIN is changed, <c>false</c> if not.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// The YubiKey had some error, such as unreliable connection.
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// The remaining retries count indicates the PIN is blocked.
+        /// </exception>
+        public bool TryChangePin(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin)
+        {
+            var changeCommand = new ChangeReferenceDataCommand(PivSlot.Pin, currentPin, newPin);
+            ChangeReferenceDataResponse changeResponse = Connection.SendCommand(changeCommand);
+
+            return changeResponse.Status == ResponseStatus.Success;
         }
 
         /// <summary>
@@ -565,7 +788,7 @@ namespace Yubico.YubiKey.Piv
         /// throw an exception if the <c>KeyCollecter</c> indicates user
         /// cancellation.
         /// <para>
-        /// See the <see cref="TryChangePuk"/> method for further documentation
+        /// See the <see cref="TryChangePuk()"/> method for further documentation
         /// on this method.
         /// </para>
         /// </remarks>
@@ -589,6 +812,52 @@ namespace Yubico.YubiKey.Piv
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.IncompleteCommandInput));
             }
+        }
+
+        /// <summary>
+        /// Try to change the PUK. This method will use the <c>currentPuk</c> and
+        /// <c>newPuk</c> provided.
+        /// </summary>
+        /// <remarks>
+        /// Normally, an application would call the <c>TryChangePuk()</c> method
+        /// (no arguments) and the SDK would call on the loaded
+        /// <c>KeyCollector</c> to retrieve the PUKs. With this method, the
+        /// caller provides the current and new PUKs and the <c>KeyCollector</c>
+        /// is never contacted.
+        /// <para>
+        /// Some applications would like to avoid using a <c>KeyCollector</c>.
+        /// For such situations, this method is provided.
+        /// </para>
+        /// <para>
+        /// See the <see cref="TryChangePuk()"/> method for further documentation
+        /// on this method.
+        /// </para>
+        /// <para>
+        /// If the wrong current PUK is provided, this method will return
+        /// <c>false</c>.
+        /// </para>
+        /// </remarks>
+        /// <param name="currentPuk">
+        /// The current PUK, the PUK that is to be changed.
+        /// </param>
+        /// <param name="newPuk">
+        /// The new PUK, what the PUK will be changed to.
+        /// </param>
+        /// <returns>
+        /// A boolean, <c>true</c> if the PUK is changed, <c>false</c> if not.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// The YubiKey had some error, such as unreliable connection.
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// The remaining retries count indicates the PUK is blocked.
+        /// </exception>
+        public bool TryChangePuk(ReadOnlyMemory<byte> currentPuk, ReadOnlyMemory<byte> newPuk)
+        {
+            var changeCommand = new ChangeReferenceDataCommand(PivSlot.Puk, currentPuk, newPuk);
+            ChangeReferenceDataResponse changeResponse = Connection.SendCommand(changeCommand);
+
+            return changeResponse.Status == ResponseStatus.Success;
         }
 
         /// <summary>
@@ -706,7 +975,7 @@ namespace Yubico.YubiKey.Piv
         /// throw an exception if the <c>KeyCollecter</c> indicates user
         /// cancellation.
         /// <para>
-        /// See the <see cref="TryResetPin"/> method for further documentation
+        /// See the <see cref="TryResetPin()"/> method for further documentation
         /// on this method.
         /// </para>
         /// </remarks>
@@ -730,6 +999,63 @@ namespace Yubico.YubiKey.Piv
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.IncompleteCommandInput));
             }
+        }
+
+        /// <summary>
+        /// Try to reset the PIN using the PUK (PIN Unblocking Key). This method
+        /// will use the <c>puk</c> and <c>pin</c> provided.
+        /// </summary>
+        /// <remarks>
+        /// Normally, an application would call the <c>TryResetPin()</c> method
+        /// (no arguments) and the SDK would call on the loaded
+        /// <c>KeyCollector</c> to retrieve the PUK and new PIN. With this
+        /// method, the caller provides the PUK and new PIN and the
+        /// <c>KeyCollector</c> is never contacted.
+        /// <para>
+        /// Some applications would like to avoid using a <c>KeyCollector</c>.
+        /// For such situations, this method is provided.
+        /// </para>
+        /// <para>
+        /// See the <see cref="TryResetPin()"/> method for further documentation
+        /// on this method.
+        /// </para>
+        /// <para>
+        /// If the wrong PUK is provided, this method will return <c>false</c>.
+        /// </para>
+        /// <para>
+        /// Changing the PIN does not affect the status of the Session's PIN
+        /// verification. That is, the <c>PinVerified</c> property will not change
+        /// after this method completes. If the status is <c>false</c>
+        /// (unverified), and the PIN is successfully changed, the PIN will still
+        /// be unverified and any operation that requires the PIN (such as
+        /// signing), will need the PIN verified (with the new PIN). If the
+        /// status is <c>true</c> (verified) and this method succeeds, the PIN will
+        /// still be considered verified (the previous PIN), even though there is
+        /// a new PIN. If the status is <c>true</c> (verified) and this method
+        /// fails, the PIN will still be considered verified (the current PIN).
+        /// </para>
+        /// </remarks>
+        /// <param name="puk">
+        /// The PIN Unblocking Key.
+        /// </param>
+        /// <param name="newPin">
+        /// The new PIN, what the PIN will be changed to.
+        /// </param>
+        /// <returns>
+        /// A boolean, <c>true</c> if the PIN is changed, <c>false</c> if not.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// The YubiKey had some error, such as unreliable connection.
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// The remaining retries count indicates the PIN is blocked.
+        /// </exception>
+        public bool TryResetPin(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin)
+        {
+            var resetCommand = new ResetRetryCommand(puk, newPin);
+            ResetRetryResponse resetResponse = Connection.SendCommand(resetCommand);
+
+            return resetResponse.Status == ResponseStatus.Success;
         }
 
         // Common code to change a PIN or PUK by either ChangeReferenceData or
@@ -812,7 +1138,7 @@ namespace Yubico.YubiKey.Piv
 
             // If success, GetData returns null.
             // If wrong PIN/PUK, returns count.
-            // If error, throwse exception.
+            // If error, throws exception.
             keyEntryData.RetriesRemaining = changeResponse.GetData();
 
             return changeResponse.Status;

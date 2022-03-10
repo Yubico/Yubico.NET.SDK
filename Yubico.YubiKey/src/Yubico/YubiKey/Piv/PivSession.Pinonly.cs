@@ -49,9 +49,12 @@ namespace Yubico.YubiKey.Piv
         /// the data to make it inaccurate. That is unlikely, however, if all
         /// applications follow good programming practices outlined by the SDK
         /// documentation. This method will not actually verify the management
-        /// key in order to ensure the return value is correct. There is another
-        /// method, <see cref="TryAuthenticatePinOnly()"/>, that will determine
-        /// definitively the state of PIN-only.
+        /// key in order to ensure the return value is correct.
+        /// </para>
+        /// <para>
+        /// If the ADMIN DATA is overwritten, it is possible to call
+        /// <see cref="TryRecoverPinOnlyMode()"/> to restore the YubiKey to a
+        /// proper PIN-only state.
         /// </para>
         /// <para>
         /// Note that the return is a bit field and the return can be one or more
@@ -96,29 +99,70 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Try to authenticate the management key using the PIN-only mechanisms.
-        /// Return a value indicating the state of PIN-only on the YubiKey.
+        /// Try to recover the PIN-only state. If successful, this will
+        /// authenticate the management key and reset the ADMIN DATA and or
+        /// PRINTED storage locations.
+        /// &gt; [!WARNING]
+        /// &gt; This can overwrite the contents of ADMIN DATA and/or PRINTED. If
+        /// &gt; some other application relies on that data it will be lost.
         /// </summary>
         /// <remarks>
+        /// See the User's Manual entry on
+        /// <xref href="UsersManualPivPinOnlyMode"> PIV PIN-only mode</xref> for
+        /// a deeper discussion of this operation.
+        /// <para>
         /// The ADMIN DATA contains information about PIN-only. The PIN-protected
-        /// management key is stored in PRINTED. However, it is possible for a
-        /// different application to overwrite the contents of one or both of
-        /// these storage locations, making the PIN-only data inaccurate. This
-        /// method will obtain the data stored in the two storage locations,
+        /// management key is stored in PRINTED. Applications should never store
+        /// information in those locations, only Yubico-supplied products should
+        /// use them. However, it is possible for an application to overwrite the
+        /// contents of one or both of these storage locations, making the
+        /// PIN-only data inaccurate.
+        /// </para>
+        /// <para>
+        /// This method will obtain the data stored in the two storage locations,
         /// and determine if they contain PIN-only data that can be used to
-        /// authenticate the management key.
+        /// authenticate the management key. If it can't, it will return
+        /// <c>PivPinOnlyMode.None</c> or <c>Unavailable</c>. If it can, it will
+        /// authenticate and set the ADMIN DATA and PRINTED to contain data
+        /// compatible with correct PIN-only modes. It will return a
+        /// <c>PivPinOnlyMode</c> value indicating which mode is set.
+        /// </para>
         /// <para>
         /// For example, suppose the data in both is correct, and it indicates
-        /// the management key is PIN-only. After calling this method, the
-        /// management key will be authenticated and the return will indicate how
-        /// it is PIN-only, either PIN-protected, PIN-derived, or both.
+        /// the management key is PIN-protected. After calling this method, the
+        /// management key will be authenticated, the storage locations will not
+        /// be changed, and the return will be <c>PivPinOnlyMode.PinProtected</c>.
         /// </para>
         /// <para>
         /// Another possibility is the ADMIN DATA was overwritten by some
         /// application so it is inaccurate, but the PIN-protected data is still
         /// in PRINTED. This method will be able to authenticate the management
-        /// key using that data and the return will indicate that the YubiKey is
-        /// PIN-protected and unavailable for PIN-derived.
+        /// key using that data. It will replace the contents of ADMIN DATA with
+        /// correct PIN-only information and return
+        /// <c>PivPinOnlyMode.PinProtected</c>.
+        /// </para>
+        /// <para>
+        /// If ADMIN DATA and PRINTED contain no data, or if ADMIN DATA contains
+        /// correct information that indicates the YubiKey is not set to PIN-only
+        /// mode, then this method will not authenticate the management key, it
+        /// will not put any data into the storage locations, and it will return
+        /// <c>PivPinOnlyMode.None</c>.
+        /// </para>
+        /// <para>
+        /// It is possible this method is not able to recover. For example,
+        /// suppose the ADMIN DATA is correct and indicates the YubiKey is
+        /// PIN-protected, but not PIN-derived (there is no salt to use to derive
+        /// a key), but the data in PRINTED is not correct. In this case, the
+        /// method will not be able to authenticate the management key as
+        /// PIN-protected. It will try to authenticate using the default
+        /// management key, and if that does not work, it will call on the
+        /// <c>KeyCollector</c> to obtain the it. If that does succeeds, it will
+        /// set ADMIN DATA to indicate the YubiKey is not PIN-protected, it will
+        /// clear the contents of PRINTED, and it will return
+        /// <c>PivPinOnlyMode.None</c>. If the <c>KeyColletor</c> is not able to
+        /// provide the management key, this method will not be able to reset the
+        /// ADMIN DATA nor PRINTED (management key authentication is necessary to
+        /// set a storage location), and will return <c>Unavailable</c>.
         /// </para>
         /// <para>
         /// This method will require the PIN to be verified. It is possible that
@@ -126,30 +170,124 @@ namespace Yubico.YubiKey.Piv
         /// again. If it needs to verify the PIN, it will call on the
         /// <c>KeyCollector</c> to obtain it.
         /// </para>
-        /// <para>
-        /// In order to determine if a YubiKey is PIN-only, this method might
-        /// authenticate the management key. That is, if the method finds the
-        /// data that says the YubiKey is PIN-protected or PIN-derived, or both,
-        /// it will determine if that data is correct. In order to do so, it must
-        /// authenticate the management key. If there is data indicating
-        /// PIN-only, but that data does not work, then the YubiKey is
-        /// unavailable.
-        /// </para>
-        /// <para>
-        /// Note that it is possible the return is "None" or "Unavailable" for
-        /// one or both modes. In that case, the management key was not
-        /// authenticated.
-        /// </para>
         /// </remarks>
         /// <returns>
         /// A <c>PivPinOnlyMode</c>, which is an enum indicating the mode or
-        /// modes.
+        /// modes the YubiKey is in.
         /// </returns>
-        public PivPinOnlyMode TryAuthenticatePinOnly()
+        public PivPinOnlyMode TryRecoverPinOnlyMode()
         {
             _log.LogInformation("Try to authenticate using PIN-only.");
 
-            return TryAuthenticatePinOnly(false);
+            PivPinOnlyMode returnValue = TryAuthenticatePinOnly(false);
+
+            // If the result is None, or PinProtected, or PinDerived, or
+            // PinProtected | PinDerived, then everythng is fine, just return.
+            // In orther words, if it does not contain an Unavailable.
+            if (!returnValue.HasFlag(PivPinOnlyMode.PinProtectedUnavailable) &&
+                !returnValue.HasFlag(PivPinOnlyMode.PinDerivedUnavailable))
+            {
+                return returnValue;
+            }
+
+            // If we reach this point, either PinProtectedUnavailable or
+            // PinDerivedUnavailable is (or both are) set.
+            // If the returnValue contains PinProtected, then we know the PRINTED
+            // data is correct and the mgmt key has been authenticated. But we
+            // also know that PinDerivedUnavailable is set. That means the ADMIN
+            // DATA is wrong. We need to reset it.
+            if (returnValue.HasFlag(PivPinOnlyMode.PinProtected))
+            {
+                // Make sure the PUK is blocked. It probably is, but we're going
+                // to set the PukBlocked field in adminData to true, so make sure
+                // it is indeed true.
+                _ = BlockPinOrPuk(PivSlot.Puk);
+                using var adminData = new AdminData
+                {
+                    PukBlocked = true,
+                    PinProtected = true
+                };
+                WriteObject(adminData);
+
+                return PivPinOnlyMode.PinProtected;
+            }
+
+            // If we reach this point, either PinProtectedUnavailable or
+            // PinDerivedUnavailable is (or both are) set.
+            // If the returnValue contains PinDeriveed, then we know the ADMIN
+            // DATA is "correct", and the mgmt key was authenticated. But PRINTED
+            // is incorrect.
+            // Reset PRINTED to empty, and make sure ADMIN DATA indicates PUK
+            // blocked and PinProtected is false.
+            if (returnValue.HasFlag(PivPinOnlyMode.PinDerived))
+            {
+                // Read the AdminData to get the salt.
+                AdminData adminData = ReadObject<AdminData>();
+
+                // Make sure the PUK is blocked. It probably is, but we're going
+                // to set the PukBlocked field in adminData to true, so make sure
+                // it is indeed true.
+                _ = BlockPinOrPuk(PivSlot.Puk);
+                adminData.PukBlocked = true;
+                adminData.PinProtected = false;
+                WriteObject(adminData);
+
+                using var pinProtect = new PinProtectedData();
+                WriteObject(pinProtect);
+
+                return PivPinOnlyMode.PinDerived;
+            }
+
+            // At this point, neither PinProtected nor PinDerived is set. That
+            // means the mgmt key is not authenticated.
+            // If we can authenticate the mgmt key, then set ADMIN DATA and
+            // PRINTED.
+            Func<KeyEntryData, bool>? UserKeyCollector = KeyCollector;
+            using var specialKeyCollector = new SpecialKeyCollector();
+
+            try
+            {
+                specialKeyCollector.AuthMgmtKeyAndSave(this, UserKeyCollector);
+
+                // If the PinDerivedUnavailable bit is not set, that means either
+                // there was no ADMIN DATA, or it was "correct". If it was
+                // "correct, we want to leave it as is, except make sure the
+                // PinProtected property is false and the Salt is null.
+                // If that bit is set, then we want to clear ADMIN DATA.
+                using AdminData adminData = returnValue.HasFlag(PivPinOnlyMode.PinDerivedUnavailable) ?
+                    new AdminData() : ReadObject<AdminData>();
+                if (!adminData.IsEmpty)
+                {
+                    adminData.PinProtected = false;
+                }
+                adminData.SetSalt(ReadOnlyMemory<byte>.Empty);
+                WriteObject(adminData);
+
+                // If the PinProtectedUnavailable bit is not set, that means
+                // there was no PRINTED data (if there was data we would see
+                // either the PinProtected or the PinProtectedUnavailable bit
+                // set, and if we reach this point we know the PinProtected bit
+                // is not set). Just leave it. If it was set, clear PRINTED.
+                if (returnValue.HasFlag(PivPinOnlyMode.PinProtectedUnavailable))
+                {
+                    using var pinProtect = new PinProtectedData();
+                    WriteObject(pinProtect);
+                }
+
+                return PivPinOnlyMode.None;
+            }
+            catch (InvalidOperationException)
+            {
+                return returnValue;
+            }
+            catch (OperationCanceledException)
+            {
+                return returnValue;
+            }
+            finally
+            {
+                KeyCollector = UserKeyCollector;
+            }
         }
 
         // Shared code.

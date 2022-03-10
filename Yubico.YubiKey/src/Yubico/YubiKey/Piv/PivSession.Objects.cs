@@ -128,7 +128,7 @@ namespace Yubico.YubiKey.Piv
         /// </para>
         /// <para>
         /// If there is data and it is formatted as expected, the method will
-        /// return build a new object set with the data and return <c>true</c>.
+        /// build a new object set with the data and return <c>true</c>.
         /// </para>
         /// <para>
         /// If there is data stored under the specified data tag, but it is not
@@ -269,7 +269,7 @@ namespace Yubico.YubiKey.Piv
         /// </para>
         /// <para>
         /// If there is data and it is formatted as expected, the method will
-        /// return build a new object set with the data and return <c>true</c>.
+        /// build a new object set with the data and return <c>true</c>.
         /// </para>
         /// <para>
         /// If there is data stored under the specified data tag, and it is not

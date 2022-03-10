@@ -300,6 +300,94 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
+        /// Try to authenticate the management key. This method will use the key
+        /// data provided, rather than the <c>KeyCollector</c>.
+        /// </summary>
+        /// <remarks>
+        /// Normally, an application will not call any
+        /// <c>AuthenticateManagementKey</c> method. Under the covers, the SDK
+        /// determines when the management key needs to be verified and calls the
+        /// <c>KeyCollector</c>. It is only at that point the application needs
+        /// to supply the key. The SDK will call the application-supplied
+        /// <c>KeyCollector</c>, indicating what it needs (PIN, PUK, management
+        /// key), and the <c>KeyCollector</c> does what it needs to obtain the
+        /// value requested. This system also contains a mechanism to report if
+        /// the previous value was incorrect. If the management key is never
+        /// needed, the key is never provided.
+        /// <para>
+        /// See the User's Manual entry on the
+        /// <xref href="UsersManualKeyCollector"> Key Collector </xref> for a
+        /// more detailed explanation of this process.
+        /// </para>
+        /// <para>
+        /// With this method, the caller provides the PIN and the
+        /// <c>KeyCollector</c> is never contacted.
+        /// </para>
+        /// <para>
+        /// See the <see cref="TryAuthenticateManagementKey(bool)"/> method for
+        /// further documentation on this method.
+        /// </para>
+        /// <para>
+        /// Generally, it is necessary to authenticate a management key once per
+        /// session. Once the key is authenticated, any operation that required
+        /// the key in order to execute, called during that session, will work.
+        /// The exceptions include changing the management key, and setting a
+        /// YubiKey to PIN-only.
+        /// </para>
+        /// <para>
+        /// Some applications would like to avoid using a <c>KeyCollector</c>.
+        /// For such situations, this method is provided. As long as the
+        /// application does not perform an operation that requires the
+        /// management key even if it has been authenticated in the session, the
+        /// <c>KeyCollector</c> is not needed.
+        /// </para>
+        /// <para>
+        /// Note that if the management key is needed during the session even
+        /// after the key is authenticated using this method (see exceptions
+        /// above), and no <c>KeyCollector</c> is provided, the SDK will throw an
+        /// exception.
+        /// </para>
+        /// <para>
+        /// The management key is provided to this method as a
+        /// <c>ReadOnlyMemory&lt;byte&gt;</c>. It is possible to pass a
+        /// <c>byte[]</c>, because it will be automatically cast. The management
+        /// key is 24 bytes, no more, no less.
+        /// </para>
+        /// <para>
+        /// If the wrong key is provided, this method will return <c>false</c>.
+        /// </para>
+        /// </remarks>
+        /// <param name="managementKey">
+        /// The key to authenticate.
+        /// </param>
+        /// <param name="mutualAuthentication">
+        /// If <c>true</c> the method will perform mutual authentication, if
+        /// <c>false</c>, only the application will authenticate to the YubiKey.
+        /// The default is <c>true</c>.
+        /// </param>
+        /// <returns>
+        /// A boolean, <c>true</c> if the management key authenticates,
+        /// <c>false</c> if it does not.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// The key provided was not a valid Triple-DES key, or the YubiKey had
+        /// some other error, such as unreliable connection.
+        /// </exception>
+        /// <exception cref="MalformedYubiKeyResponseException">
+        /// The YubiKey returned malformed data and authentication, either single
+        /// or double, could not be performed.
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// Mutual authentication was performed and the YubiKey was not
+        /// authenticated.
+        /// </exception>
+        public bool TryAuthenticateManagementKey(ReadOnlyMemory<byte> managementKey, bool mutualAuthentication = true)
+        {
+            ManagementKeyAuthenticated = false;
+            return TryAuthenticateManagementKey(mutualAuthentication, managementKey.Span);
+        }
+
+        /// <summary>
         /// Try to change the management key.
         /// </summary>
         /// <remarks>
@@ -465,8 +553,8 @@ namespace Yubico.YubiKey.Piv
         /// will throw an exception if the <c>KeyCollecter</c> indicates user
         /// cancellation.
         /// <para>
-        /// See the <see cref="TryChangeManagementKey"/> method for further
-        /// documentation on this method.
+        /// See the <see cref="TryChangeManagementKey(PivTouchPolicy)"/> method for
+        /// further documentation on this method.
         /// </para>
         /// </remarks>
         /// <exception cref="InvalidOperationException">
@@ -495,6 +583,75 @@ namespace Yubico.YubiKey.Piv
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.IncompleteCommandInput));
             }
+        }
+
+        /// <summary>
+        /// Try to change the management key. This method will use the
+        /// <c>currentKey</c> and <c>newKey</c> provided.
+        /// </summary>
+        /// <remarks>
+        /// Normally, an application would call the
+        /// <c>TryChangeManagementKey(PivTouchPolicy)</c> method and the SDK
+        /// would call on the loaded <c>KeyCollector</c> to retrieve the current
+        /// and new keys. With this method, the caller provides the keys and the
+        /// <c>KeyCollector</c> is never contacted.
+        /// <para>
+        /// Some applications would like to avoid using a <c>KeyCollector</c>.
+        /// For such situations, this method is provided.
+        /// </para>
+        /// <para>
+        /// See the <see cref="TryChangeManagementKey(PivTouchPolicy)"/> method
+        /// for further documentation
+        /// on this method.
+        /// </para>
+        /// <para>
+        /// If the wrong current key is provided, this method will return
+        /// <c>false</c>.
+        /// </para>
+        /// </remarks>
+        /// <param name="currentKey">
+        /// The current management key.
+        /// </param>
+        /// <param name="newKey">
+        /// What the management key will be changed to.
+        /// </param>
+        /// <param name="touchPolicy">
+        /// The touch policy for the new management key. If no argument is given,
+        /// the policy will be <c>PivTouchPolicy.Default</c>.
+        /// </param>
+        /// <returns>
+        /// A boolean, <c>true</c> if the management key is changed, <c>false</c>
+        /// if not.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// One of the keys provided was not a valid Triple-DES key, or the
+        /// YubiKey had some other error, such as unreliable connection.
+        /// </exception>
+        /// <exception cref="MalformedYubiKeyResponseException">
+        /// The YubiKey returned malformed data and authentication, either single
+        /// or double, could not be performed.
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// Mutual authentication was performed and the YubiKey was not
+        /// authenticated.
+        /// </exception>
+        public bool TryChangeManagementKey(
+            ReadOnlyMemory<byte> currentKey,
+            ReadOnlyMemory<byte> newKey,
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
+        {
+            if (TryAuthenticateManagementKey(currentKey, true))
+            {
+                var setCommand = new SetManagementKeyCommand(newKey, touchPolicy);
+                SetManagementKeyResponse setResponse = Connection.SendCommand(setCommand);
+
+                if (setResponse.Status == ResponseStatus.Success)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // This is the actual Try code, shared by both TryAuth and TryChange.
@@ -526,35 +683,51 @@ namespace Yubico.YubiKey.Piv
 
             while (KeyCollector(keyEntryData) == true)
             {
-                var initCommand = new InitializeAuthenticateManagementKeyCommand(mutualAuthentication);
-                InitializeAuthenticateManagementKeyResponse initResponse = Connection.SendCommand(initCommand);
-
-                var completeCommand = new CompleteAuthenticateManagementKeyCommand(
-                    initResponse, keyEntryData.GetCurrentValue().Span);
-                CompleteAuthenticateManagementKeyResponse completeResponse = Connection.SendCommand(completeCommand);
-
-                ManagementKeyAuthenticationResult = completeResponse.GetData();
-                if (completeResponse.Status == ResponseStatus.Success)
+                if (ManagementKeyAuthenticated = TryAuthenticateManagementKey(
+                    mutualAuthentication, keyEntryData.GetCurrentValue().Span))
                 {
-                    // If Success, there are three possibilities, (1) this is
-                    // single auth and it succeeded, (2) this is mutual auth
-                    // and it succeeded, or (3) this is mutual auth and the
-                    // off-card app authenticated, but the YubiKey itself did
-                    // not.
-                    // If case (3), throw an exception.
-                    if (ManagementKeyAuthenticationResult != AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed)
-                    {
-                        ManagementKeyAuthenticated = true;
-                        return true;
-                    }
+                    return true;
+                }
 
+                keyEntryData.IsRetry = true;
+            }
+
+            return false;
+        }
+
+        // Perform one auth attempt.
+        // This method assumes ManagementKeyAuthenticationResult was init to
+        // Unauthenticated, and ManagementKeyAuthenticated was init to false.
+        // Set ManagementKeyAuthenticationResult and ManagementKeyAuthenticated
+        // if the auth succeeds.
+        // If auth works, return true, otherwise, return false.
+        // Throw an exception if the YubiKey fails to auth.
+        private bool TryAuthenticateManagementKey(bool mutualAuthentication, ReadOnlySpan<byte> mgmtKey)
+        {
+            var initCommand = new InitializeAuthenticateManagementKeyCommand(mutualAuthentication);
+            InitializeAuthenticateManagementKeyResponse initResponse = Connection.SendCommand(initCommand);
+
+            var completeCommand = new CompleteAuthenticateManagementKeyCommand(initResponse, mgmtKey);
+            CompleteAuthenticateManagementKeyResponse completeResponse = Connection.SendCommand(completeCommand);
+
+            ManagementKeyAuthenticationResult = completeResponse.GetData();
+            if (completeResponse.Status == ResponseStatus.Success)
+            {
+                // If Success, there are three possibilities, (1) this is
+                // single auth and it succeeded, (2) this is mutual auth
+                // and it succeeded, or (3) this is mutual auth and the
+                // off-card app authenticated, but the YubiKey itself did
+                // not.
+                // If case (3), throw an exception.
+                if (ManagementKeyAuthenticationResult == AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed)
+                {
                     throw new SecurityException(
                         string.Format(
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.YubiKeyNotAuthenticatedInPiv));
                 }
 
-                keyEntryData.IsRetry = true;
+                ManagementKeyAuthenticated = true;
             }
 
             return ManagementKeyAuthenticated;

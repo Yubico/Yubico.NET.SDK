@@ -1,0 +1,16 @@
+{
+    global:
+        Native_SCardEstablishContext;
+        Native_SCardReleaseContext;
+        Native_SCardConnect;
+        Native_SCardReconnect;
+        Native_SCardDisconnect;
+        Native_SCardBeginTransaction;
+        Native_SCardEndTransaction;
+        Native_SCardGetStatusChange;
+        Native_SCardTransmit;
+        Native_SCardListReaders;
+        Native_SCardCancel;
+    local:
+        *;
+};

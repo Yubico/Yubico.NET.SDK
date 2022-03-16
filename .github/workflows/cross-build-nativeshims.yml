@@ -15,11 +15,18 @@
 name: Build Yubico.NativeShims Package
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-      - feature/637-native-shim/*
+  workflow_dispatch:
+    inputs:
+      push-to-dev:
+        description: 'Push to internal NuGet'
+        required: true
+        default: false
+        type: boolean
+      version-suffix:
+        description: 'Suffix to append to version'
+        required: true
+        default: "-prerelease.${{github.run_number}}.${{github.run_attempt}}"
+        type: string
 
 jobs:
   build-windows:
@@ -99,7 +106,7 @@ jobs:
           $repo.SetAttribute("url","https://github.com/${{github.repository}}")
           $repo.SetAttribute("type","git")
           $nuspec.package.metadata.AppendChild($repo)
-          $nuspec.package.metadata.version += "-prerelease.${{github.run_number}}.${{github.run_attempt}}"
+          $nuspec.package.metadata.version += "${{inputs.version-suffix}}"
           $nuspec.Save("Yubico.NativeShims.nuspec")
           cat Yubico.NativeShims.nuspec
       - run: nuget pack Yubico.NativeShims.nuspec
@@ -112,6 +119,7 @@ jobs:
     name: Publish to internal NuGet
     runs-on: windows-2019
     needs: pack
+    if: inputs.push-to-dev == true
     environment: Internal NuGet feed
     steps:
       - uses: actions/download-artifact@v3

@@ -67,7 +67,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Now use a 2108-byte extension, to get a 3053-byte cert.
-            extensionSize++;
+            extensionSize += 3;//extensionSize++;
             extensionData = new byte[extensionSize];
             rng.GetBytes(extensionData, 0, extensionData.Length);
 
@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.ResetApplication();
 
                 pivSession.ImportPrivateKey(leafSlotNumber, pivPrivateKey);
-                _ = Assert.Throws<ArgumentException>(() => pivSession.ImportCertificate(leafSlotNumber, newCert));
+                _ = Assert.Throws<InvalidOperationException>(() => pivSession.ImportCertificate(leafSlotNumber, newCert));
             }
         }
 

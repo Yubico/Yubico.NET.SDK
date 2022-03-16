@@ -38,6 +38,8 @@
     href: sdk-programming-guide/threads.md
   - name: Delegates (callbacks) in the SDK
     href: sdk-programming-guide/delegates-in-sdk.md
+  - name: The KeyCollector and alternatives
+    href: sdk-programming-guide/key-collector.md
   - name: Providing alternate cryptographic implementations
     href: sdk-programming-guide/alternate-crypto.md
   - name: Sensitive data

@@ -87,7 +87,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Fact]
-        public void AdminData_ResetPin_Updated()
+        public void AdminData_ResetPin_NotUpdated()
         {
             IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
 
@@ -112,7 +112,7 @@ namespace Yubico.YubiKey.Piv
 
                     Assert.False(adminData.IsEmpty);
                     Assert.True(adminData.PinProtected);
-                    Assert.NotNull(adminData.PinLastUpdated);
+                    Assert.Null(adminData.PinLastUpdated);
                 }
                 finally
                 {

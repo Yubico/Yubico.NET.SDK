@@ -625,6 +625,33 @@ namespace Yubico.YubiKey.Piv
         {
             _log.LogInformation("Set a YubiKey to PIV PIN-only mode: {0}.", pinOnlyMode.ToString());
 
+            using var specialKeyCollector = new SpecialKeyCollector();
+            SetPinOnlyMode(specialKeyCollector, pinOnlyMode);
+        }
+
+        // Set the YubiKey to the PIN-only mode specified, using the given pin.
+        // If the pin is Empty, use the default PIN.
+        private void SetPinOnlyMode(ReadOnlyMemory<byte> pin, PivPinOnlyMode pinOnlyMode, out int? retriesRemaining)
+        {
+            ReadOnlyMemory<byte> pinToUse = pin;
+            if (pin.Length == 0)
+            {
+                pinToUse = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
+            }
+
+            using var specialKeyCollector = new SpecialKeyCollector();
+            if (specialKeyCollector.TrySetPin(this, pinToUse, out retriesRemaining))
+            {
+                SetPinOnlyMode(specialKeyCollector, pinOnlyMode);
+            }
+        }
+
+        // Shared code.
+        // The caller might have already collected the PIN and placed it into the
+        // specialKeyCollector. If not, this method will call on the User's
+        // KeyCollector to obtain it.
+        private void SetPinOnlyMode(SpecialKeyCollector specialKeyCollector, PivPinOnlyMode pinOnlyMode)
+        {
             if (pinOnlyMode.HasFlag(PivPinOnlyMode.PinProtectedUnavailable)
                 || pinOnlyMode.HasFlag(PivPinOnlyMode.PinDerivedUnavailable))
             {
@@ -635,7 +662,6 @@ namespace Yubico.YubiKey.Piv
             }
 
             Func<KeyEntryData, bool>? UserKeyCollector = KeyCollector;
-            using var specialKeyCollector = new SpecialKeyCollector();
 
             try
             {
@@ -711,8 +737,8 @@ namespace Yubico.YubiKey.Piv
                 {
                     throw new InvalidOperationException(
                         string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.PinOnlyNotPossible));
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.PinOnlyNotPossible));
                 }
 
                 // If the mgmt key has not yet been authenticated (by
@@ -886,6 +912,111 @@ namespace Yubico.YubiKey.Piv
             WriteObject(pinProtect);
         }
 
+        // Someone wants to change the PIN. Get the mode we're going to set the
+        // YubiKey to after changing the PIN. That is, this is not the current
+        // mode, it is the "Change PIN mode", the mode we will set the YubiKey
+        // after the PIN has been changed.
+        // If the Change PIN mode includes PinDerived, this method will clear the
+        // PIN-only data and set the mgmt key to default.
+        // If the YubiKey is not PinDerived, set mode to None and return true.
+        // Note that if the YubiKey is PinProtected only, we're still setting the
+        // mode to None.
+        // If it is PinDerived, verify the PIN.
+        // If it does not verify, return false.
+        // If it does verify, derive the mgmt key and authenticate.
+        // If it authenticates, check to see if the YubiKey is also PinProtected.
+        // If so, OR in PinProtected to the mode.
+        // If the derived mgmt key does not authenticate, set mode to None and
+        // return true. This is because we're saying that although the ADMIN DATA
+        // says PinDerived, because the PIN-derived key does not authenticate, it
+        // really is not PIN-derived.
+        // The only way to get a false retun is if the PIN does not verify, and
+        // even then, only if the ADMIN DATA says the mgmt key is PinDerived.
+        private bool TryGetChangePinMode(ReadOnlyMemory<byte>pin, out PivPinOnlyMode mode, out int? retriesRemaining)
+        {
+            retriesRemaining = null;
+
+            mode = PivPinOnlyMode.None;
+            Func<KeyEntryData, bool>? UserKeyCollector = KeyCollector;
+            using var specialKeyCollector = new SpecialKeyCollector();
+
+            bool isValid = TryReadObject<AdminData>(out AdminData adminData);
+
+            try
+            {
+                if (!isValid || (adminData.Salt is null))
+                {
+                    return true;
+                }
+
+                // If AdminData says PinDerived, then derive the mgmt key and
+                // authenticate it.
+                // In order to do that we need to verify the PIN.
+                isValid = pin.Length switch
+                {
+                    0 => specialKeyCollector.TryVerifyPinAndSave(this, UserKeyCollector, out retriesRemaining),
+                    _ => specialKeyCollector.TrySetPin(this, pin, out retriesRemaining),
+                };
+
+                if (!isValid)
+                {
+                    return false;
+                }
+
+                var salt = (ReadOnlyMemory<byte>)adminData.Salt;
+
+                _ = specialKeyCollector.DeriveKeyData(salt, false);
+                specialKeyCollector.SetKeyData(SpecialKeyCollector.SetKeyDataDefault, ReadOnlyMemory<byte>.Empty, true);
+
+                // If this fails, then the mgmt key is not PIN-derived from the
+                // PIN and salt, so we'll say it is not PIN-derived.
+                if (!TryChangeManagementKey(specialKeyCollector.GetCurrentMgmtKey(), specialKeyCollector.GetNewMgmtKey()))
+                {
+                    return true;
+                }
+
+                // We now know we are going to set the mgmt key to PIN-derived
+                // after changing the PIN.
+                mode = PivPinOnlyMode.PinDerived;
+
+                // Will we need to set the YubiKey to PIN-protected as well?
+                // If there is data in PRINTED, and it contains the same mgmt key
+                // that was derived from the PIN and Salt, then yes.
+                isValid = TryReadObject<PinProtectedData>(out PinProtectedData pinProtect);
+                using (pinProtect)
+                {
+                    if (isValid && (!(pinProtect.ManagementKey is null)))
+                    {
+                        var mgmtKey = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
+                        if (MemoryExtensions.SequenceEqual(
+                            specialKeyCollector.GetCurrentMgmtKey().Span,
+                            mgmtKey.Span))
+                        {
+                            mode |= PivPinOnlyMode.PinProtected;
+                        }
+                    }
+                }
+
+                // Clear appropriate storage locations.
+                if (mode.HasFlag(PivPinOnlyMode.PinProtected))
+                {
+                    PutEmptyData((int)PivDataTag.Printed);
+                }
+
+                if (mode.HasFlag(PivPinOnlyMode.PinDerived))
+                {
+                    PutEmptyData(adminData.DataTag);
+                }
+            }
+            finally
+            {
+                adminData.Dispose();
+                KeyCollector = UserKeyCollector;
+            }
+
+            return true;
+        }
+
         private sealed class SpecialKeyCollector : IDisposable
         {
             public const int SetKeyDataBuffer = 1;
@@ -1016,6 +1147,8 @@ namespace Yubico.YubiKey.Piv
             {
                 ReadOnlyMemory<byte> returnValue = salt;
 
+                byte[] derivedKey = isNewKey ? _newKeyData : _currentKeyData;
+
                 if (salt.Length != PinDerivedSaltLength)
                 {
                     byte[] saltData = new byte[PinDerivedSaltLength];
@@ -1025,41 +1158,49 @@ namespace Yubico.YubiKey.Piv
                     do
                     {
                         randomObject.GetBytes(saltData, 0, PinDerivedSaltLength);
-                        PerformKeyDerive(saltData, isNewKey);
+                        PerformKeyDerive(_pinMemory, _pinLength, saltData, derivedKey);
                     } while (IsKeyDataWeak(isNewKey));
                 }
                 else
                 {
-                    PerformKeyDerive(salt.ToArray(), isNewKey);
+                    PerformKeyDerive(_pinMemory, _pinLength, salt.ToArray(), derivedKey);
                 }
 
                 return returnValue;
             }
 
             // Derive a key from the PIN and salt (iteration count = 10,000).
-            // If isNewKey is true, place the result in _newKey
-            // If isNewKey is false, place the result in _currentKey
-            private void PerformKeyDerive(byte[] saltData, bool isNewKey)
+            // Place the result into the derivedKey buffer. The result will be 24
+            // bytes, the derivedKey buffer must be of Length 24, no more no less.
+            public static void PerformKeyDerive(ReadOnlyMemory<byte> pin, int pinLength, byte[] saltData, byte[] derivedKey)
             {
-                byte[] dest = isNewKey ? _newKeyData : _currentKeyData;
-                byte[] derivedKey = Array.Empty<byte>();
-                byte[] pin = Array.Empty<byte>();
+                if (derivedKey.Length != MgmtKeyLength)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.IncorrectDerivationLength));
+                }
+
+                byte[] result = Array.Empty<byte>();
+                byte[] pinData = Array.Empty<byte>();
                 try
                 {
-                    pin = new byte[_pinLength];
-                    Array.Copy(_pinData, 0, pin, 0, _pinLength);
+                    pinData = new byte[pinLength];
+                    var pinDataMemory = new Memory<byte>(pinData);
+                    pin.Slice(0, pinLength).CopyTo(pinDataMemory);
 
                     // This will use PBKDF2, with the PRF of HMAC with SHA-1.
 #pragma warning disable CA5379, CA5387 // These warnings complain about SHA-1 and <100,000 iterations, but we use it to be backwards-compatible.
-                    using var kdf = new Rfc2898DeriveBytes(pin, saltData, 10000);
-                    derivedKey = kdf.GetBytes(MgmtKeyLength);
+                    using var kdf = new Rfc2898DeriveBytes(pinData, saltData, 10000);
+                    result = kdf.GetBytes(MgmtKeyLength);
 #pragma warning restore CA5379, CA5387
-                    Array.Copy(derivedKey, dest, MgmtKeyLength);
+                    Array.Copy(result, derivedKey, MgmtKeyLength);
                 }
                 finally
                 {
-                    CryptographicOperations.ZeroMemory(derivedKey);
-                    CryptographicOperations.ZeroMemory(pin);
+                    CryptographicOperations.ZeroMemory(result);
+                    CryptographicOperations.ZeroMemory(pinData);
                 }
             }
 
@@ -1158,9 +1299,28 @@ namespace Yubico.YubiKey.Piv
                 PivSession pivSession,
                 Func<KeyEntryData, bool>? UserKeyCollector)
             {
+                if (!TryVerifyPinAndSave(pivSession, UserKeyCollector, out _))
+                {
+                    // If the user cancels, throw the canceled exception.
+                    throw new OperationCanceledException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.IncompleteCommandInput));
+                }
+            }
+
+            // Verify the PIN and save it in this.
+            // If the user cancels, return false.
+            public bool TryVerifyPinAndSave(
+                PivSession pivSession,
+                Func<KeyEntryData, bool>? UserKeyCollector,
+                out int? retriesRemaining)
+            {
+                retriesRemaining = null;
+
                 if (PinCollected)
                 {
-                    return;
+                    return true;
                 }
 
                 if (UserKeyCollector is null)
@@ -1181,15 +1341,13 @@ namespace Yubico.YubiKey.Piv
                 {
                     while (UserKeyCollector(keyEntryData) == true)
                     {
-                        SetPin(keyEntryData.GetCurrentValue());
-
-                        if (pivSession.TryVerifyPin())
+                        if (TrySetPin(pivSession, keyEntryData.GetCurrentValue(), out retriesRemaining))
                         {
-                            PinCollected = true;
-                            return;
+                            return true;
                         }
 
                         keyEntryData.IsRetry = true;
+                        keyEntryData.RetriesRemaining = retriesRemaining;
                     }
                 }
                 finally
@@ -1200,18 +1358,20 @@ namespace Yubico.YubiKey.Piv
                     _ = UserKeyCollector(keyEntryData);
                 }
 
-                // If the user cancels, throw the canceled exception.
-                throw new OperationCanceledException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.IncompleteCommandInput));
+                // We reach this point if the user cancels.
+                return false;
             }
 
             // Set the PIN data in this object to the input data.
-            public void SetPin(ReadOnlyMemory<byte> pin)
+            // Verify it. If it verifies, then the PIN has been collected.
+            public bool TrySetPin(PivSession pivSession, ReadOnlyMemory<byte> pin, out int? retriesRemaining)
             {
                 pin.CopyTo(_pinMemory);
                 _pinLength = pin.Length;
+
+                PinCollected = pivSession.TryVerifyPin(pin, out retriesRemaining);
+
+                return PinCollected;
             }
 
             // This is the KeyCollector delegate.

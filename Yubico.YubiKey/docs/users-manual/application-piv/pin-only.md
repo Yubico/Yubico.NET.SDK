@@ -142,6 +142,15 @@ Note that in this mode, if a PIN has already been verified, the SDK will need to
 the PIN again in order to derive the management key. This is because in normal PIN
 verification, the PIN is collected and verified, but not saved.
 
+If an application calls one of the Change PIN methods, the SDK will update the management
+key. However, if some other application has overwritten the contents of ADMIN DATA and/or
+PRINTED, the SDK will not be able to perform an update. It is a good idea to call the
+[PivSession.TryRecoverPinOnlyMode](xref:Yubico.YubiKey.Piv.PivSession.TryRecoverPinOnlyMode%2a).
+method before changing the PIN.
+
+See the section below ["Failures and recovery"](#failures-and-recovery) for more
+information on possible failures and how to recover.
+
 ### PUK blocked
 
 The SDK code that implements these modes will also block the PUK. The reason is so that it
@@ -280,7 +289,7 @@ is possible an application will no longer be able to perform PIV operations that
 management key authentication, such as generating a key pair or importing a certificate,
 because the management key is lost.
 
-However, it is also possible that recovery from some of these failuress is achievable,
+However, it is also possible that recovery from some of these failures is achievable,
 using the method
 [PivSession.TryRecoverPinOnlyMode](xref:Yubico.YubiKey.Piv.PivSession.TryRecoverPinOnlyMode%2a).
 
@@ -356,7 +365,7 @@ application will experience failures.
 
 Note that in order to set the objects ADMIN DATA and PRINTED, the management key must be
 authenticated. If the data in the two storage locations is such that the method just can't
-recover, it will not be able to set them and, they will remain unchanged.
+recover, it will not be able to set them and they will remain unchanged.
 
 This method will try to authenticate using the PIN-only methods, and if they fail, it will
 try the default management key, and if that fails, it will try to collect the management

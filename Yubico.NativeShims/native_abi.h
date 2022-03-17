@@ -1,22 +1,23 @@
-#ifndef _NATIVE_ABI_H_
-#define _NATIVE_ABI_H_
+#pragma once
 
 #include <stddef.h>
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
 
+#include "Yubico.NativeShims.h"
+
 typedef char* u8str_t;
 
-#ifdef WINDOWS
+#ifdef PLATFORM_WINDOWS
 
 #define NATIVEAPI __stdcall
 
-#elif MACOS
+#elif PLATFORM_MACOS
 
 #define NATIVEAPI __attribute((cdecl))
 
-#elif LINUX
+#elif PLATFORM_LINUX
 
 #define NATIVEAPI __attribute((cdecl))
 
@@ -26,4 +27,3 @@ typedef char* u8str_t;
 
 #endif
 
-#endif

@@ -27,6 +27,7 @@ typedef struct
 #pragma pack()
 
 int32_t
+NATIVEAPI
 Native_SCardEstablishContext(
     uint32_t dwScope,
     LPSCARDCONTEXT phContext
@@ -41,6 +42,7 @@ Native_SCardEstablishContext(
 }
 
 int32_t
+NATIVEAPI
 Native_SCardReleaseContext(
     SCARDCONTEXT hContext
 )
@@ -49,6 +51,7 @@ Native_SCardReleaseContext(
 }
 
 int32_t
+NATIVEAPI
 Native_SCardConnect(
     SCARDCONTEXT hContext,
     u8str_t szReader,
@@ -69,6 +72,7 @@ Native_SCardConnect(
 }
 
 int32_t
+NATIVEAPI
 Native_SCardReconnect(
     SCARDHANDLE hCard,
     uint32_t dwShareMode,
@@ -87,6 +91,7 @@ Native_SCardReconnect(
 }
 
 int32_t
+NATIVEAPI
 Native_SCardDisconnect(
     SCARDHANDLE hCard,
     uint32_t dwDisposition
@@ -99,6 +104,7 @@ Native_SCardDisconnect(
 }
 
 int32_t
+NATIVEAPI
 Native_SCardBeginTransaction(
     SCARDHANDLE hCard
 )
@@ -107,6 +113,7 @@ Native_SCardBeginTransaction(
 }
 
 int32_t
+NATIVEAPI
 Native_SCardEndTransaction(
     SCARDHANDLE hCard,
     uint32_t dwDisposition
@@ -119,6 +126,7 @@ Native_SCardEndTransaction(
 }
 
 int32_t
+NATIVEAPI
 Native_SCardGetStatusChange(
     SCARDCONTEXT hContext,
     uint32_t dwTimeout,
@@ -127,14 +135,15 @@ Native_SCardGetStatusChange(
 )
 {
     SCARD_READERSTATE* readerStates = (SCARD_READERSTATE*)malloc(cReaders * sizeof(SCARD_READERSTATE));
-    memset(readerStates, 0, cReaders * sizeof(SCARD_READERSTATE));
 
     if (readerStates == NULL)
     {
         return SCARD_E_NO_MEMORY;
     }
 
-    for (int i = 0; i < cReaders; i++)
+    memset(readerStates, 0, cReaders * sizeof(SCARD_READERSTATE));
+
+    for (uint32_t i = 0; i < cReaders; i++)
     {
         readerStates[i].szReader = rgReaderStates[i].szReader;
         readerStates[i].dwCurrentState = rgReaderStates[i].dwCurrentState;
@@ -150,7 +159,7 @@ Native_SCardGetStatusChange(
         cReaders
     );
 
-    for (int i = 0; i < cReaders; i++)
+    for (uint32_t i = 0; i < cReaders; i++)
     {
         rgReaderStates[i].dwCurrentState = readerStates[i].dwCurrentState;
         rgReaderStates[i].dwEventState = readerStates[i].dwEventState;
@@ -164,6 +173,7 @@ Native_SCardGetStatusChange(
 }
 
 int32_t
+NATIVEAPI
 Native_SCardTransmit(
     SCARDHANDLE hCard,
     const SCARD_IO_REQUEST* pioSendPci,
@@ -186,6 +196,7 @@ Native_SCardTransmit(
 }
 
 int32_t
+NATIVEAPI
 Native_SCardListReaders(
     SCARDCONTEXT hContext,
     const u8str_t mszGroups,
@@ -202,6 +213,7 @@ Native_SCardListReaders(
 }
 
 int32_t
+NATIVEAPI
 Native_SCardCancel(
     SCARDCONTEXT hContext
 )

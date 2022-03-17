@@ -4,11 +4,14 @@ project(Yubico.NativeShims VERSION 1.3.0)
 
 
 if (APPLE)
+    set(PLATFORM_MACOS true)
     set(BACKEND "macscard")
 elseif(UNIX)
+    set(PLATFORM_LINUX true)
     set(BACKEND "pcsc")
     find_package(PkgConfig REQUIRED)
 elseif(WIN32)
+    set(PLATFORM_WINDOWS true)
     set(BACKEND "winscard")
 endif()
 

@@ -28,9 +28,17 @@
  *
  */
 
-#ifndef _YUBICO_NATIVESHIMS_H_
-#define _YUBICO_NATIVESHIMS_H_
+#pragma once
 
+    /**
+     * Platform definitions.
+     *
+     * Use these macros in your C file to detect the current platform the
+     * build is configured for.
+     */
+#cmakedefine PLATFORM_LINUX @PLATFORM_LINUX@
+#cmakedefine PLATFORM_MACOS @PLATFORM_MACOS@
+#cmakedefine PLATFORM_WINDOWS @PLATFORM_WINDOWS@
 
     /**
      * _WIN32
@@ -54,6 +62,3 @@
      * exists on the system or not.
      */
 #cmakedefine HAVE_PCSC_WINSCARD_H @HAVE_PCSC_WINSCARD_H@
-
-
-#endif

@@ -1,0 +1,11 @@
+_Native_SCardEstablishContext
+_Native_SCardReleaseContext
+_Native_SCardConnect
+_Native_SCardReconnect
+_Native_SCardDisconnect
+_Native_SCardBeginTransaction
+_Native_SCardEndTransaction
+_Native_SCardGetStatusChange
+_Native_SCardTransmit
+_Native_SCardListReaders
+_Native_SCardCancel

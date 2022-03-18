@@ -1,0 +1,130 @@
+# Copyright 2021 Yubico AB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Build Yubico.NativeShims Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      push-to-dev:
+        description: 'Push to internal NuGet'
+        required: true
+        default: false
+        type: boolean
+      version-suffix:
+        description: 'Suffix to append to version'
+        required: true
+        default: "-prerelease.${{github.run_number}}.${{github.run_attempt}}"
+        type: string
+
+jobs:
+  build-windows:
+    name: Build Windows
+    runs-on: windows-2019
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          cd Yubico.NativeShims
+          ./build-windows.cmd
+      - uses: actions/upload-artifact@v3
+        with:
+          name: win-x64
+          path: Yubico.NativeShims/win-x64/**
+      - uses: actions/upload-artifact@v3
+        with:
+          name: win-x86
+          path: Yubico.NativeShims/win-x86/**
+      - uses: actions/upload-artifact@v3
+        with:
+          name: win-arm64
+          path: Yubico.NativeShims/win-arm64/**
+      - uses: actions/upload-artifact@v3
+        with:
+          name: nuspec
+          path: Yubico.NativeShims/*.nuspec
+
+  build-ubuntu:
+    name: Build Ubuntu
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          cd Yubico.NativeShims
+          sh ./build-ubuntu.sh
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-x64
+          path: Yubico.NativeShims/ubuntu-x64/**
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-x86
+          path: Yubico.NativeShims/ubuntu-x86/**
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ubuntu-arm64
+          path: Yubico.NativeShims/ubuntu-arm64/**
+
+  build-macos:
+    name: Build macOS
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - run: |
+          cd Yubico.NativeShims
+          sh ./build-macOS.sh
+      - uses: actions/upload-artifact@v3
+        with:
+          name: osx-x64
+          path: Yubico.NativeShims/osx-x64/**
+      - uses: actions/upload-artifact@v3
+        with:
+          name: osx-arm64
+          path: Yubico.NativeShims/osx-arm64/**
+
+  pack:
+    name: Package artifacts
+    runs-on: windows-2019
+    needs: [build-windows, build-ubuntu, build-macos]
+    steps:
+      - uses: actions/download-artifact@v3
+      - run: |
+          mv nuspec/*.nuspec .
+          del nuspec
+          $nuspec = [xml](gc Yubico.NativeShims.nuspec)
+          $repo = $nuspec.CreateElement("repository")
+          $repo.SetAttribute("url","https://github.com/${{github.repository}}")
+          $repo.SetAttribute("type","git")
+          $nuspec.package.metadata.AppendChild($repo)
+          $nuspec.package.metadata.version += "${{inputs.version-suffix}}"
+          $nuspec.Save("Yubico.NativeShims.nuspec")
+          cat Yubico.NativeShims.nuspec
+      - run: nuget pack Yubico.NativeShims.nuspec
+      - uses: actions/upload-artifact@v3
+        with:
+          name: Yubico.NativeShims.nupkg
+          path: Yubico.NativeShims.*.nupkg
+
+  publish-internal:
+    name: Publish to internal NuGet
+    runs-on: windows-2019
+    needs: pack
+    if: inputs.push-to-dev == true
+    environment: Internal NuGet feed
+    steps:
+      - uses: actions/download-artifact@v3
+        with:
+          name: Yubico.NativeShims.nupkg
+      - run: |
+          dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+          dotnet nuget push Yubico.NativeShims.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}

@@ -143,7 +143,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             Assert.Equal(hid.SupportedCharactersString, decoded);
         }
 
-        [IgnoreOnLinuxAndmacOSTheory]
+#if Windows
+        [Theory]
         [MemberData(nameof(GetTestData))]
         public void GetChar_GivenHidCode_ReturnsCorrectChar(KeyboardLayout layout, (char, byte)[] testData)
         {
@@ -153,18 +154,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
                 Assert.Equal(item.ch, hid[item.code]);
             }
         }
+#endif
 
-        public sealed class IgnoreOnLinuxAndmacOSTheory : TheoryAttribute
-        {
-        public IgnoreOnLinuxAndmacOSTheory() {
-            if(RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
-                Skip = "Ignore on Linux";
-            }
-            if(RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) {
-                Skip = "Ignore on macOS";
-            }
-        }
-        }
         private static IEnumerable<object> GetTestData()
         {
             // Originally, I hard-coded these, but I decided that it should do

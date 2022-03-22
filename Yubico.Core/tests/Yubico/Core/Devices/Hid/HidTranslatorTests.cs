@@ -143,6 +143,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             Assert.Equal(hid.SupportedCharactersString, decoded);
         }
 
+#if Windows
         [Theory]
         [MemberData(nameof(GetTestData))]
         public void GetChar_GivenHidCode_ReturnsCorrectChar(KeyboardLayout layout, (char, byte)[] testData)
@@ -153,6 +154,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
                 Assert.Equal(item.ch, hid[item.code]);
             }
         }
+#endif
 
         private static IEnumerable<object> GetTestData()
         {

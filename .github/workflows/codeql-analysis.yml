@@ -32,9 +32,6 @@ jobs:
     runs-on: windows-2019
 
     steps:
-      - name: Add local NuGet repository
-        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
-
       - name: Checkout repository
         uses: actions/checkout@v2
 
@@ -45,6 +42,9 @@ jobs:
           languages: csharp
 
       # Build the project
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+
       - name: Build Yubico.NET.SDK.sln
         run: dotnet build --configuration Release --nologo --verbosity normal Yubico.NET.SDK.sln
 

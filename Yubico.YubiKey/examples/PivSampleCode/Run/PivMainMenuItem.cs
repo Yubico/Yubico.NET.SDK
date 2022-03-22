@@ -26,26 +26,28 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         ChangePivManagementKey = 5,
         ResetPivPinWithPuk = 6,
 
-        PinProtectMgmtKey = 7,
-        PinDeriveMgmtKey = 8,
+        GetPinOnlyMode = 7,
+        SetPinOnlyMode = 8,
+        SetPinOnlyNoKeyCollector = 9,
+        RecoverPinOnlyMode = 10,
 
-        GenerateKeyPair = 9,
-        ImportPrivateKey = 10,
-        ImportCertificate = 11,
+        GenerateKeyPair = 11,
+        ImportPrivateKey = 12,
+        ImportCertificate = 13,
 
-        Sign = 12,
-        Decrypt = 13,
-        KeyAgree = 14,
+        Sign = 14,
+        Decrypt = 15,
+        KeyAgree = 16,
 
-        GetCertRequest = 15,
-        BuildSelfSignedCert = 16,
-        BuildCert = 17,
-        RetrieveCert = 18,
+        GetCertRequest = 17,
+        BuildSelfSignedCert = 18,
+        BuildCert = 19,
+        RetrieveCert = 20,
 
-        CreateAttestationStatement = 19,
-        GetAttestationCertificate = 20,
+        CreateAttestationStatement = 21,
+        GetAttestationCertificate = 22,
 
-        ResetPiv = 21,
-        Exit = 22,
+        ResetPiv = 23,
+        Exit = 24,
     }
 }

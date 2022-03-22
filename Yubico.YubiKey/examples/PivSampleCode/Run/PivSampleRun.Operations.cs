@@ -50,8 +50,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 ChangeSecret.RunResetPivPinWithPuk(_yubiKeyChosen, _keyCollector.SampleKeyCollectorDelegate),
             PivMainMenuItem.ChangePivManagementKey =>
                 ChangeSecret.RunChangePivManagementKey(_yubiKeyChosen, _keyCollector.SampleKeyCollectorDelegate),
-            PivMainMenuItem.PinProtectMgmtKey => RunSetMgmtKeyPinProtected(),
-            PivMainMenuItem.PinDeriveMgmtKey => RunSetMgmtKeyPinDerived(),
+            PivMainMenuItem.GetPinOnlyMode => RunGetPinOnlyMode(),
+            PivMainMenuItem.SetPinOnlyMode => RunSetPinOnlyMode(),
+            PivMainMenuItem.SetPinOnlyNoKeyCollector => RunSetPinOnlyNoKeyCollector(),
+            PivMainMenuItem.RecoverPinOnlyMode => RunRecoverPinOnlyMode(),
             PivMainMenuItem.GenerateKeyPair => RunGenerateKeyPair(),
             PivMainMenuItem.ImportPrivateKey => RunImportPrivateKey(),
             PivMainMenuItem.ImportCertificate => WriteImportCertMessage(),
@@ -100,34 +102,89 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             return false;
         }
 
-        public bool RunSetMgmtKeyPinProtected()
+        public bool RunGetPinOnlyMode()
         {
-            WriteSpecialMgmtKeyMessage("PIN-Protected");
-
-            using (var pivSession = new PivSession(_yubiKeyChosen))
+            if (PinOnlyMode.RunGetPivPinOnlyMode(_yubiKeyChosen, out PivPinOnlyMode mode))
             {
-                pivSession.KeyCollector = _keyCollector.SampleKeyCollectorDelegate;
-                return SpecialMgmtKey.RunSetMgmtKeyPinProtected(pivSession);
+                SampleMenu.WriteMessage(MessageType.Title, 0, "PIN-only mode: " + mode.ToString() + "\n");
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool RunSetPinOnlyMode()
+        {
+            if (!GetRequestedPinOnlyMode(out PivPinOnlyMode mode))
+            {
+                return RunInvalidEntry();
+            }
+
+            return PinOnlyMode.RunSetPivPinOnlyMode(_yubiKeyChosen, _keyCollector.SampleKeyCollectorDelegate, mode);
+        }
+
+        public bool RunSetPinOnlyNoKeyCollector()
+        {
+            SampleMenu.WriteMessage(MessageType.Title, 0, "It is possible to set a YubiKey to PIN-only mode without a");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "KeyCollector under two conditions:");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "1. The mgmt key is currently set to the default, and");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "2. The mode to set is PinProtected.");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "You must verify the PIN in the session first, how you obtain");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "the PIN is up to you.\n");
+
+            int response;
+
+            do
+            {
+                if (DoSetPinOnlyNoKeyCollector(_yubiKeyChosen, out int? retriesRemaining))
+                {
+                    return true;
+                }
+
+                string retryString = retriesRemaining is null ? "(unknown)" : retriesRemaining.ToString();
+                SampleMenu.WriteMessage(MessageType.Title, 0, "\nWrong PIN, retries remaining: " + retryString);
+                string[] menuItems = new string[] {
+                    "yes",
+                    "no",
+                };
+
+                response = _menuObject.RunMenu("Try again?", menuItems);
+            } while (response == 0);
+
+            return false;
+        }
+
+        private static bool DoSetPinOnlyNoKeyCollector(
+            IYubiKeyDevice yubiKey,
+            out int? retriesRemaining)
+        {
+            byte[] pinData = Array.Empty<byte>();
+            try
+            {
+                pinData = SampleKeyCollector.CollectValue("123456", "PIN");
+                var pin = new ReadOnlyMemory<byte>(pinData);
+                return PinOnlyMode.RunSetPinOnlyNoKeyCollector(yubiKey, pin, out retriesRemaining);
+            }
+            finally
+            {
+                Array.Fill<byte>(pinData, 0);
             }
         }
 
-        public bool RunSetMgmtKeyPinDerived()
+        public bool RunRecoverPinOnlyMode()
         {
-            WriteSpecialMgmtKeyMessage("PIN-Derived");
-            using (var pivSession = new PivSession(_yubiKeyChosen))
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Recover PIN-only mode will try to restore the PIN-only mode");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "if the ADMIN DATA and/or PRINTED storage areas were improperly");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "overwritten. The result is the PivPinOnly mode of the YubiKey");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "after recovery.\n");
+            if (PinOnlyMode.RunRecoverPivPinOnlyMode(
+                _yubiKeyChosen,  _keyCollector.SampleKeyCollectorDelegate, out PivPinOnlyMode mode))
             {
-                pivSession.KeyCollector = _keyCollector.SampleKeyCollectorDelegate;
-                return SpecialMgmtKey.RunSetMgmtKeyPinDerived(pivSession);
+                SampleMenu.WriteMessage(MessageType.Title, 0, "PIN-only mode: " + mode.ToString() + "\n");
+                return true;
             }
-        }
 
-        private static void WriteSpecialMgmtKeyMessage(string pinType)
-        {
-            SampleMenu.WriteMessage(MessageType.Title, 0, "This will set the PIV application on this YubiKey to have a");
-            SampleMenu.WriteMessage(MessageType.Title, 0, pinType + " management key.");
-            SampleMenu.WriteMessage(MessageType.Title, 0, "All PIV sessions on this YubiKey (until the PIV application");
-            SampleMenu.WriteMessage(MessageType.Title, 0, "is reset) must set the mgmt key to be " + pinType + " first.");
-            SampleMenu.WriteMessage(MessageType.Title, 0, "This sample code will do so automatically.");
+            return false;
         }
 
         public bool RunGenerateKeyPair()
@@ -671,6 +728,33 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             };
 
             return algorithm != PivAlgorithm.None;
+        }
+
+        // Ask the user to specify a PIN-only mode. Offer and accept only valid
+        // PivPinOnlyMode values.
+        private bool GetRequestedPinOnlyMode(out PivPinOnlyMode mode)
+        {
+            mode = PivPinOnlyMode.None;
+            string[] menuItems = new string[] {
+                "None",
+                "PinProtected",
+                "PinDerived",
+                "Both PinProtected and PinDerived"
+            };
+
+            int response = _menuObject.RunMenu(
+                "Which PIN-only mode?\nNote that Yubico recommends NOT setting a YubiKey to PIN-Derived.", menuItems);
+
+            mode = response switch
+            {
+                0 => PivPinOnlyMode.None,
+                1 => PivPinOnlyMode.PinProtected,
+                2 => PivPinOnlyMode.PinDerived,
+                3 => PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived,
+                _ => PivPinOnlyMode.PinProtectedUnavailable,
+            };
+
+            return mode != PivPinOnlyMode.PinProtectedUnavailable;
         }
 
         // Ask the user to specify the new retry counts

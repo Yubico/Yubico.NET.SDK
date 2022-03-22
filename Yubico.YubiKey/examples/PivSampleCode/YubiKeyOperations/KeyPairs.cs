@@ -33,23 +33,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 pivSession.KeyCollector = KeyCollectorDelegate;
 
-                // OPTIONAL
-                // This operation requires mgmt key authentication.
-                // If you want to always check to see if the mgmt key is
-                // PIN-Protected or PIN-Derived, and if so, set the session, call
-                // this method. It will require you to enter the PIN, even if the
-                // PIN has already been verified, even if the YubiKey operation
-                // does not require the PIN, and even if the YubiKey is not
-                // PIN-Protected or PIN-Derived.
-                // You don't have to make this check, in which case, the SDK will
-                // behave normally. Don't make the check if you know your
-                // application will never use a PIN-based mgmt key.
-                // However, if the mgmt key is PIN-based, it might not be
-                // possible for your KeyCollector to obtain the mgmt key (the
-                // user won't know what it is) in which case this call will be
-                // useful.
-                SpecialMgmtKey.SetSessionIfMgmtKeyPinBased(pivSession);
-
                 PivPublicKey pivPublicKey = pivSession.GenerateKeyPair(slotNumber, algorithm, pinPolicy, touchPolicy);
 
                 // At this point you will likely want to save the public key and
@@ -90,23 +73,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = KeyCollectorDelegate;
-
-                // OPTIONAL
-                // This operation requires mgmt key authentication.
-                // If you want to always check to see if the mgmt key is
-                // PIN-Protected or PIN-Derived, and if so, set the session, call
-                // this method. It will require you to enter the PIN, even if the
-                // PIN has already been verified, even if the YubiKey operation
-                // does not require the PIN, and even if the YubiKey is not
-                // PIN-Protected or PIN-Derived.
-                // You don't have to make this check, in which case, the SDK will
-                // behave normally. Don't make the check if you know your
-                // application will never use a PIN-based mgmt key.
-                // However, if the mgmt key is PIN-based, it might not be
-                // possible for your KeyCollector to obtain the mgmt key (the
-                // user won't know what it is) in which case this call will be
-                // useful.
-                SpecialMgmtKey.SetSessionIfMgmtKeyPinBased(pivSession);
 
                 pivSession.ImportPrivateKey(slotNumber, privateKey, pinPolicy, touchPolicy);
 

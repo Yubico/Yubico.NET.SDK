@@ -17,6 +17,8 @@ using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
+using static Yubico.PlatformInterop.NativeMethods;
+
 namespace Yubico.Core.Devices.SmartCard
 {
     public class DesktopSmartCardConnection : ISmartCardConnection
@@ -44,11 +46,11 @@ namespace Yubico.Core.Devices.SmartCard
             {
                 if (!_disposedValue)
                 {
-                    uint result = PlatformLibrary.Instance.SCard.EndTransaction(
+                    uint result = SCardEndTransaction(
                         _thisConnection._cardHandle,
                         SCARD_DISPOSITION.LEAVE_CARD);
 
-                    _log.SCardApiCall(nameof(PlatformLibrary.Instance.SCard.EndTransaction), result);
+                    _log.SCardApiCall(nameof(SCardEndTransaction), result);
 
                     _disposedValue = true;
                 }
@@ -96,8 +98,8 @@ namespace Yubico.Core.Devices.SmartCard
         public IDisposable BeginTransaction(out bool cardWasReset)
         {
             cardWasReset = false;
-            uint result = PlatformLibrary.Instance.SCard.BeginTransaction(_cardHandle);
-            _log.SCardApiCall(nameof(PlatformLibrary.Instance.SCard.BeginTransaction), result);
+            uint result = SCardBeginTransaction(_cardHandle);
+            _log.SCardApiCall(nameof(SCardBeginTransaction), result);
 
             // Sometime the smart card is left in a state where it needs to be reset prior to beginning
             // a transaction. We should automatically handle this case.
@@ -107,9 +109,9 @@ namespace Yubico.Core.Devices.SmartCard
                 _log.CardReset();
                 Reconnect();
 
-                result = PlatformLibrary.Instance.SCard.BeginTransaction(_cardHandle);
+                result = SCardBeginTransaction(_cardHandle);
                 cardWasReset = true;
-                _log.SCardApiCall(nameof(PlatformLibrary.Instance.SCard.BeginTransaction), result);
+                _log.SCardApiCall(nameof(SCardBeginTransaction), result);
             }
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
@@ -142,7 +144,7 @@ namespace Yubico.Core.Devices.SmartCard
             // using response chaining.
             byte[] outputBuffer = new byte[512];
 
-            uint result = PlatformLibrary.Instance.SCard.Transmit(
+            uint result = SCardTransmit(
                 _cardHandle,
                 new SCARD_IO_REQUEST(_activeProtocol),
                 commandApdu.AsByteArray(),
@@ -150,7 +152,7 @@ namespace Yubico.Core.Devices.SmartCard
                 outputBuffer,
                 out int outputBufferSize
                 );
-            _log.SCardApiCall(nameof(PlatformLibrary.Instance.SCard.Transmit), result);
+            _log.SCardApiCall(nameof(SCardTransmit), result);
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {
@@ -164,13 +166,13 @@ namespace Yubico.Core.Devices.SmartCard
 
         public void Reconnect()
         {
-            uint result = PlatformLibrary.Instance.SCard.Reconnect(
+            uint result = SCardReconnect(
                 _cardHandle,
                 SCARD_SHARE.SHARED,
                 SCARD_PROTOCOL.T1,
                 SCARD_DISPOSITION.RESET_CARD,
                 out SCARD_PROTOCOL updatedActiveProtocol);
-            _log.SCardApiCall(nameof(PlatformLibrary.Instance.SCard.Reconnect), result);
+            _log.SCardApiCall(nameof(SCardReconnect), result);
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {

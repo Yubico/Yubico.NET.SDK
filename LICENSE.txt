@@ -235,6 +235,7 @@ SOFTWARE.
 The following license applies to
 \CONTRIBUTING.md
 \Yubico.DotNetPolyfills\src\System.Security.Cryptography\CryptographicOperations.cs
+\Yubico.YubiKey\src\Yubico\YubiKey\Cryptography\RandomNumberGeneratorExt.cs
 
 This license also applies to the source files (as noted) which are located in
 the following directories:

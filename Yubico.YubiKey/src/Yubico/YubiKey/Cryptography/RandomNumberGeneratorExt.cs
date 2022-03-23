@@ -12,6 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// Portions of this file have been adopted from the .NET runtime under the following license:
+// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+
+// Original source: https://github.com/dotnet/runtime/blob/main/src/libraries/System.Security.Cryptography/src/System/Security/Cryptography/RandomNumberGenerator.cs
+
 using System;
 using System.Globalization;
 using System.Security.Cryptography;

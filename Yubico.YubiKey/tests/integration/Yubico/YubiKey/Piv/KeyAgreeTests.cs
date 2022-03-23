@@ -24,11 +24,11 @@ namespace Yubico.YubiKey.Piv
     public class KeyAgreeTests
     {
         [Theory]
-        [InlineData(PivAlgorithm.EccP256, PivPinPolicy.Always)]
-        [InlineData(PivAlgorithm.EccP256, PivPinPolicy.Never)]
-        [InlineData(PivAlgorithm.EccP384, PivPinPolicy.Always)]
-        [InlineData(PivAlgorithm.EccP384, PivPinPolicy.Never)]
-        public void KeyAgree_Succeeds(PivAlgorithm algorithm, PivPinPolicy pinPolicy)
+        [InlineData(PivAlgorithm.EccP256, PivPinPolicy.Always, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccP256, PivPinPolicy.Never, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccP384, PivPinPolicy.Always, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccP384, PivPinPolicy.Never, StandardTestDevice.Fw5)]
+        public void KeyAgree_Succeeds(PivAlgorithm algorithm, PivPinPolicy pinPolicy, StandardTestDevice testDeviceType)
         {
             // Get the correspondent public key.
             SampleKeyPairs.GetPemKeyPair(algorithm, out string publicKeyPem, out _);
@@ -42,9 +42,9 @@ namespace Yubico.YubiKey.Piv
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -57,15 +57,15 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.EccP256, 0x8a, RsaFormat.Sha1)]
-        [InlineData(PivAlgorithm.EccP256, 0x8a, RsaFormat.Sha256)]
-        [InlineData(PivAlgorithm.EccP256, 0x8a, RsaFormat.Sha384)]
-        [InlineData(PivAlgorithm.EccP256, 0x8a, RsaFormat.Sha512)]
-        [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha1)]
-        [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha256)]
-        [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha384)]
-        [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha512)]
-        public void KeyAgree_MatchesCSharp(PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm)
+        [InlineData(PivAlgorithm.EccP256, 0x8a, RsaFormat.Sha1, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccP256, 0x8a, RsaFormat.Sha256, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccP256, 0x8a, RsaFormat.Sha384, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccP256, 0x8a, RsaFormat.Sha512, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha1, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha256, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha384, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha512, StandardTestDevice.Fw5)]
+        public void KeyAgree_MatchesCSharp(PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm, StandardTestDevice testDeviceType)
         {
             // Build the correspondent objects.
             bool isValid = SampleKeyPairs.GetKeyAndCertPem(algorithm, true, out _, out string privateKeyPem);
@@ -101,10 +101,10 @@ namespace Yubico.YubiKey.Piv
             // The correspondent computes the digest of the shared secret.
             byte[] correspondentSecret = correspondentObject.DeriveKeyFromHash(eccObject.PublicKey, hashAlgorithm);
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             // The YubiKey computes the shared secret.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -122,15 +122,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void NoKeyInSlot_KeyAgree_Exception()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void NoKeyInSlot_KeyAgree_Exception(StandardTestDevice testDeviceType)
         {
             SampleKeyPairs.GetPemKeyPair(PivAlgorithm.EccP384, out string publicKeyPem, out _);
             var publicKey = new KeyConverter(publicKeyPem.ToCharArray());
             PivPublicKey pivPublicKey = publicKey.GetPivPublicKey();
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
-            using (var pivSession = new PivSession(yubiKey))
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;

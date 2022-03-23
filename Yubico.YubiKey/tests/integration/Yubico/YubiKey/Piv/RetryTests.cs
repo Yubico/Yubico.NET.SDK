@@ -20,14 +20,15 @@ namespace Yubico.YubiKey.Piv
 {
     public class RetryTests
     {
-        [Fact]
-        public void ChangeRetry_Succeeds()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ChangeRetry_Succeeds(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            bool isOld = yubiKey.FirmwareVersion < FirmwareVersion.V5_3_0;
+            bool isOld = testDevice.FirmwareVersion < FirmwareVersion.V5_3_0;
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -47,14 +48,15 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void ChangeRetry_SetsToDefault()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ChangeRetry_SetsToDefault(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            bool isOld = yubiKey.FirmwareVersion < FirmwareVersion.V5_3_0;
+            bool isOld = testDevice.FirmwareVersion < FirmwareVersion.V5_3_0;
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
@@ -91,18 +93,19 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Metadata_OldYubiKey_ThrowsException()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Metadata_OldYubiKey_ThrowsException(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             // If the YubiKey is 5.3 or later, don't bother with this test.
-            if (yubiKey.HasFeature(YubiKeyFeature.PivMetadata))
+            if (testDevice.HasFeature(YubiKeyFeature.PivMetadata))
             {
                 return;
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 _ = Assert.Throws<InvalidOperationException>(() => pivSession.GetMetadata(PivSlot.Authentication));
             }

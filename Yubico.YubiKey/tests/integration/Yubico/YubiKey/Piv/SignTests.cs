@@ -25,23 +25,22 @@ namespace Yubico.YubiKey.Piv
     public class SignTests
     {
         [Theory]
-        [InlineData(PivPinPolicy.Always)]
-        [InlineData(PivPinPolicy.Never)]
-        public void Sign_EccP256_Succeeds(PivPinPolicy pinPolicy)
+        [InlineData(PivPinPolicy.Always, StandardTestDevice.Fw5)]
+        [InlineData(PivPinPolicy.Never, StandardTestDevice.Fw5)]
+        public void Sign_EccP256_Succeeds(PivPinPolicy pinPolicy, StandardTestDevice testDeviceType)
         {
             byte[] dataToSign = new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20
             };
 
-            bool isValid = LoadKey(PivAlgorithm.EccP256, 0x89, pinPolicy, PivTouchPolicy.Never);
-            Assert.True(isValid);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKey);
+            bool isValid = LoadKey(PivAlgorithm.EccP256, 0x89, pinPolicy, PivTouchPolicy.Never, testDevice);
             Assert.True(isValid);
-            Assert.True(yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -55,11 +54,11 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024, 0x86)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x87)]
-        [InlineData(PivAlgorithm.EccP256, 0x88)]
-        [InlineData(PivAlgorithm.EccP384, 0x89)]
-        public void Sign_RandomData_Succeeds(PivAlgorithm algorithm, byte slotNumber)
+        [InlineData(PivAlgorithm.Rsa1024, 0x86, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa2048, 0x87, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccP256, 0x88, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccP384, 0x89, StandardTestDevice.Fw5)]
+        public void Sign_RandomData_Succeeds(PivAlgorithm algorithm, byte slotNumber, StandardTestDevice testDeviceType)
         {
             byte[] dataToSign = algorithm switch
             {
@@ -72,14 +71,13 @@ namespace Yubico.YubiKey.Piv
             GetArbitraryData(dataToSign);
             dataToSign[0] &= 0x7F;
 
-            bool isValid = LoadKey(algorithm, slotNumber, PivPinPolicy.Always, PivTouchPolicy.Never);
-            Assert.True(isValid);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKey);
+            bool isValid = LoadKey(algorithm, slotNumber, PivPinPolicy.Always, PivTouchPolicy.Never, testDevice);
             Assert.True(isValid);
-            Assert.True(yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var command = new AuthenticateSignCommand(dataToSign, slotNumber);
                 AuthenticateSignResponse response = pivSession.Connection.SendCommand(command);
@@ -100,21 +98,21 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha1, 1)]
-        [InlineData(PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha256, 1)]
-        [InlineData(PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha384, 1)]
-        [InlineData(PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha1, 2)]
-        [InlineData(PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha256, 2)]
-        [InlineData(PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha384, 2)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha1, 1)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha256, 1)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha384, 1)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha512, 1)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha1, 2)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha256, 2)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha384, 2)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha512, 2)]
-        public void SignRsa_VerifyCSharp_Correct(PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm, int paddingScheme)
+        [InlineData(PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha1, 1, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha256, 1, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha384, 1, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha1, 2, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha256, 2, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha384, 2, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha1, 1, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha256, 1, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha384, 1, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha512, 1, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha1, 2, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha256, 2, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha384, 2, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha512, 2, StandardTestDevice.Fw5)]
+        public void SignRsa_VerifyCSharp_Correct(PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm, int paddingScheme, StandardTestDevice testDeviceType)
         {
             int keySizeBits = RsaFormat.KeySizeBits1024;
             if (algorithm != PivAlgorithm.Rsa1024)
@@ -161,11 +159,10 @@ namespace Yubico.YubiKey.Piv
 
             try
             {
-                bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKey);
-                Assert.True(isValid);
-                Assert.True(yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+                IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+                Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-                using (var pivSession = new PivSession(yubiKey))
+                using (var pivSession = new PivSession(testDevice))
                 {
                     var collectorObj = new Simple39KeyCollector();
                     pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -186,9 +183,9 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.EccP256, 0x94)]
-        [InlineData(PivAlgorithm.EccP384, 0x95)]
-        public void SignEcc_VerifyCSharp_Correct(PivAlgorithm algorithm, byte slotNumber)
+        [InlineData(PivAlgorithm.EccP256, 0x94, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.EccP384, 0x95, StandardTestDevice.Fw5)]
+        public void SignEcc_VerifyCSharp_Correct(PivAlgorithm algorithm, byte slotNumber, StandardTestDevice testDeviceType)
         {
             byte[] dataToSign = new byte[128];
             GetArbitraryData(dataToSign);
@@ -213,11 +210,10 @@ namespace Yubico.YubiKey.Piv
 
             try
             {
-                bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKey);
-                Assert.True(isValid);
-                Assert.True(yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+                IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+                Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-                using (var pivSession = new PivSession(yubiKey))
+                using (var pivSession = new PivSession(testDevice))
                 {
                     var collectorObj = new Simple39KeyCollector();
                     pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -226,7 +222,7 @@ namespace Yubico.YubiKey.Piv
 
                     byte[] signature = pivSession.Sign(slotNumber, digester.Hash);
 
-                    isValid = ConvertEcdsaSignature(signature, digester.Hash.Length, out byte[] rsSignature);
+                    bool isValid = ConvertEcdsaSignature(signature, digester.Hash.Length, out byte[] rsSignature);
                     Assert.True(isValid);
 
                     using ECDsa eccPublic = pubKey.GetEccObject();
@@ -240,16 +236,18 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void NoKeyInSlot_Sign_Exception()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void NoKeyInSlot_Sign_Exception(StandardTestDevice testDeviceType)
         {
             byte[] dataToSign = new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20
             };
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
-            using (var pivSession = new PivSession(yubiKey))
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -260,13 +258,13 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        public static bool LoadKey(PivAlgorithm algorithm, byte slotNumber, PivPinPolicy pinPolicy, PivTouchPolicy touchPolicy)
+        public static bool LoadKey(PivAlgorithm algorithm, byte slotNumber, PivPinPolicy pinPolicy, PivTouchPolicy touchPolicy, IYubiKeyDevice testDevice)
         {
-            if (SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKey) == true)
+            if (testDevice != null)
             {
-                if (yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv) == true)
+                if (testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv) == true)
                 {
-                    using (var pivSession = new PivSession(yubiKey))
+                    using (var pivSession = new PivSession(testDevice))
                     {
                         var collectorObj = new Simple39KeyCollector();
                         pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;

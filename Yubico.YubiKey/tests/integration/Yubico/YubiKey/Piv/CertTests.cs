@@ -12,11 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Yubico.Core.Tlv;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
 using Xunit;
@@ -25,8 +22,9 @@ namespace Yubico.YubiKey.Piv
 {
     public class CertTests
     {
-        [Fact]
-        public void GetCert_Succeeds()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void GetCert_Succeeds(StandardTestDevice testDeviceType)
         {
             bool isValid = SampleKeyPairs.GetKeyAndCertPem(
                 PivAlgorithm.EccP256, true, out string certPem, out string privateKeyPem);
@@ -37,9 +35,9 @@ namespace Yubico.YubiKey.Piv
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -53,8 +51,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void GetCert_NoAuth_Succeeds()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void GetCert_NoAuth_Succeeds(StandardTestDevice testDeviceType)
         {
             bool isValid = SampleKeyPairs.GetKeyAndCertPem(
                 PivAlgorithm.EccP256, true, out string certPem, out string privateKeyPem);
@@ -66,11 +65,10 @@ namespace Yubico.YubiKey.Piv
             PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
 
             byte slotNumber = 0x8B;
-            LoadKeyAndCert (slotNumber, pivPrivateKey, certObj);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            LoadKeyAndCert (slotNumber, pivPrivateKey, certObj, testDevice);
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
-
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Try to generate a key pair. This should not succeed because
                 // the mgmt key has not been authenticated.
@@ -127,11 +125,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        private static void LoadKeyAndCert(byte slotNumber, PivPrivateKey privateKey, X509Certificate2 certObject)
+        private static void LoadKeyAndCert(byte slotNumber, PivPrivateKey privateKey, X509Certificate2 certObject, IYubiKeyDevice testDevice)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
-
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;

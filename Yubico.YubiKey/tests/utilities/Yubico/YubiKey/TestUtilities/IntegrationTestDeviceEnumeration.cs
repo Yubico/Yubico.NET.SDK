@@ -72,5 +72,17 @@ namespace Yubico.YubiKey.TestUtilities
 
             return testYubiKeys.ToList();
         }
+
+        /// <summary>
+        /// Get YubiKey test device of specified type available on a system.
+        /// </summary>
+        /// <param name="testDeviceType">The type of the device.</param>
+        /// <returns>A YubiKey that was found.</returns>
+        public static IYubiKeyDevice GetTestDevice(StandardTestDevice testDeviceType)
+        {
+            return GetTestDevices()
+                .Where(d => d.SerialNumber.HasValue)
+                .SelectRequiredTestDevice(testDeviceType);
+        }
     }
 }

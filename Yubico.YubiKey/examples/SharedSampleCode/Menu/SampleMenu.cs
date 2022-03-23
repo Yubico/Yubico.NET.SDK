@@ -14,6 +14,7 @@
 
 using System;
 using System.Globalization;
+using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Sample.SharedCode
 {
@@ -198,7 +199,6 @@ namespace Yubico.YubiKey.Sample.SharedCode
             } while (true);
 
             char[] result = ResizeResult(inputData, dataLength);
-
             if (int.TryParse(result, out responseAsInt) == false)
             {
                 responseAsInt = -1;
@@ -227,7 +227,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
             {
                 char[] newBuffer = new char[inputData.Length + 8];
                 Array.Copy(inputData, newBuffer, inputData.Length);
-                Array.Fill<char>(inputData, '0');
+                Array.Clear(inputData, 0, inputData.Length);
                 currentBuffer = newBuffer;
             }
 
@@ -255,7 +255,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
 
             char[] returnValue = new char[dataLength];
             Array.Copy(inputData, returnValue, dataLength);
-            Array.Fill<char>(inputData, '0');
+            Array.Clear(inputData, 0, inputData.Length);
 
             return returnValue;
         }

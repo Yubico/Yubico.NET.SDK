@@ -22,8 +22,9 @@ namespace Yubico.YubiKey.Piv
 {
     public class PssTests
     {
-        [Fact]
-        public void Parse_FromRsaClass()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Parse_FromRsaClass(StandardTestDevice testDeviceType)
         {
             SampleKeyPairs.GetPemKeyPair(PivAlgorithm.Rsa1024, out string publicKeyPem, out string privateKeyPem);
 
@@ -59,11 +60,11 @@ namespace Yubico.YubiKey.Piv
             Assert.True(isVerified);
             Assert.Equal(104, mPrimePlusH.Length);
 
-            isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKey);
-            Assert.True(isValid);
-            Assert.True(yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;

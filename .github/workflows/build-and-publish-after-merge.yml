@@ -139,7 +139,7 @@ jobs:
           docker build -t "${IMAGE_NAME}:${{ github.sha }}" .
 
       # Connect to our GCloud instance
-      - uses: google-github-actions/setup-gcloud@master
+      - uses: google-github-actions/setup-gcloud@v0
         with:
           service_account_key: ${{ secrets.IMAGE_REPO_GCP_SA_KEY }}
 

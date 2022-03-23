@@ -13,23 +13,21 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Piv.Objects;
-using Yubico.Core.Tlv;
 using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
     public class ChangePinTests
     {
-        [Fact]
-        public void NoAdminData_ChangePin_NoUpdate()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void NoAdminData_ChangePin_NoUpdate(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
@@ -51,12 +49,13 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void AdminData_ChangePin_Updated()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void AdminData_ChangePin_Updated(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
@@ -86,12 +85,13 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void AdminData_ResetPin_NotUpdated()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void AdminData_ResetPin_NotUpdated(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
@@ -121,12 +121,13 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void AdminData_ResetRetry_Updated()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void AdminData_ResetRetry_Updated(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
@@ -156,12 +157,13 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void AdminData_ChangePuk_NoUpdate()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void AdminData_ChangePuk_NoUpdate(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
@@ -191,12 +193,13 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void AdminData_ChangeMgmtKey_NoUpdate()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void AdminData_ChangeMgmtKey_NoUpdate(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {

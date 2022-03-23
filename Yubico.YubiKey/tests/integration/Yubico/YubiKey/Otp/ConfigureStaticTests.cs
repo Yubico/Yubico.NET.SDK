@@ -22,12 +22,14 @@ namespace Yubico.YubiKey.Otp
 {
     public class ConfigureStaticTests
     {
-        [Fact]
-        public void ConfigureStaticPassword_Succeeds()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void ConfigureStaticPassword_Succeeds(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.HidKeyboard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var otpSession = new OtpSession(yubiKey))
+            using (var otpSession = new OtpSession(testDevice))
             {
                 if (otpSession.IsLongPressConfigured)
                 {

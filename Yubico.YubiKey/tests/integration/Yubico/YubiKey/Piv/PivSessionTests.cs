@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Linq;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
@@ -22,222 +21,226 @@ using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
-    public class PivSessionTests : IDisposable
+    public class PivSessionTests
     {
-        private bool _isValid;
-        private readonly IYubiKeyDevice _yubiKeyDevice;
-        private readonly PivSession _pivSession;
-        private readonly Simple39KeyCollector _collectorObj;
-        private bool disposedValue;
-
-        // Shared setup for every test that is run.
-        public PivSessionTests()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void VerifyPin(StandardTestDevice testDeviceType)
         {
-           _isValid = SelectSupport.TrySelectYubiKey(out _yubiKeyDevice);
-           _pivSession = new PivSession(_yubiKeyDevice);
-           _collectorObj = new Simple39KeyCollector();
-        }
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-        // Shared cleanup for every test that is run.
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!disposedValue)
+            using (var pivSession = new PivSession(testDevice))
             {
-                if (disposing)
-                {
-                    _pivSession.Dispose();
-                }
-                disposedValue = true;
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+                Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+
+                bool isVerified = pivSession.TryVerifyPin();
+
+                Assert.True(isVerified);
+                Assert.True(pivSession.PinVerified);
             }
         }
 
-        public void Dispose()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void VerifyPin_WrongPin(StandardTestDevice testDeviceType)
         {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            using (var pivSession = new PivSession(testDevice))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+                Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+                
+                collectorObj.KeyFlag = 1;
+                bool isVerified = pivSession.TryVerifyPin();
+
+                Assert.False(isVerified);
+                Assert.False(pivSession.PinVerified);
+
+                collectorObj.KeyFlag = 0;
+                isVerified = pivSession.TryVerifyPin();
+
+                Assert.True(isVerified);
+                Assert.True(pivSession.PinVerified);
+            }
         }
 
-        [Fact]
-        public void Constructor_Success()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void AuthenticateMgmtKey_Single(StandardTestDevice testDeviceType)
         {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-            Assert.NotNull(_pivSession.Connection);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            using (var pivSession = new PivSession(testDevice))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+                
+                Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+
+                bool isAuthenticated = pivSession.TryAuthenticateManagementKey(false);
+
+                Assert.True(isAuthenticated);
+                Assert.Equal(
+                    AuthenticateManagementKeyResult.SingleAuthenticated, pivSession.ManagementKeyAuthenticationResult);
+            }
         }
 
-        [Fact]
-        public void VerifyPin()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void AuthenticateMgmtKey_Mutual(StandardTestDevice testDeviceType)
         {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-            Assert.NotNull(_pivSession.Connection);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            _pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
-            bool isVerified = _pivSession.TryVerifyPin();
+            using (var pivSession = new PivSession(testDevice))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            Assert.True(isVerified);
-            Assert.True(_pivSession.PinVerified);
+                Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+
+                bool isAuthenticated = pivSession.TryAuthenticateManagementKey();
+
+                Assert.True(isAuthenticated);
+                Assert.Equal(
+                    AuthenticateManagementKeyResult.MutualFullyAuthenticated,
+                    pivSession.ManagementKeyAuthenticationResult);
+            }
         }
 
-        [Fact]
-        public void VerifyPin_WrongPin()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ChangeMgmtKey(StandardTestDevice testDeviceType)
         {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-            Assert.NotNull(_pivSession.Connection);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            _pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
-            _collectorObj.KeyFlag = 1;
-            bool isVerified = _pivSession.TryVerifyPin();
+            using (var pivSession = new PivSession(testDevice))
+            {
+                var collectorObj = new Simple39KeyCollector();
 
-            Assert.False(isVerified);
-            Assert.False(_pivSession.PinVerified);
+                Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            _collectorObj.KeyFlag = 0;
-            isVerified = _pivSession.TryVerifyPin();
+                // This should fail, the mgmt key is not authenticated.
+                var genPairCommand = new GenerateKeyPairCommand(
+                    0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                GenerateKeyPairResponse genPairResponse =
+                    pivSession.Connection.SendCommand(genPairCommand);
+                Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
 
-            Assert.True(isVerified);
-            Assert.True(_pivSession.PinVerified);
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+                bool isChanged = pivSession.TryChangeManagementKey();
+
+                Assert.True(isChanged);
+                Assert.Equal(
+                    AuthenticateManagementKeyResult.MutualFullyAuthenticated,
+                    pivSession.ManagementKeyAuthenticationResult);
+
+                genPairCommand = new GenerateKeyPairCommand(
+                    0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                genPairResponse = pivSession.Connection.SendCommand(genPairCommand);
+
+                collectorObj.KeyFlag = 1;
+                isChanged = pivSession.TryChangeManagementKey();
+
+                Assert.True(isChanged);
+            }
         }
 
-        [Fact]
-        public void AuthenticateMgmtKey_Single()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Auth_ThenWrongKey(StandardTestDevice testDeviceType)
         {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-            Assert.NotNull(_pivSession.Connection);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            _pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
-            bool isAuthenticated = _pivSession.TryAuthenticateManagementKey(false);
+            using (var pivSession = new PivSession(testDevice))
+            {
+                var collectorObj = new Simple39KeyCollector();
 
-            Assert.True(isAuthenticated);
-            Assert.Equal(
-                AuthenticateManagementKeyResult.SingleAuthenticated, _pivSession.ManagementKeyAuthenticationResult);
+                Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+
+                // This should fail, the mgmt key is not authenticated.
+                var genPairCommand = new GenerateKeyPairCommand(
+                    0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                GenerateKeyPairResponse genPairResponse =
+                    pivSession.Connection.SendCommand(genPairCommand);
+                Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
+
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+                bool isAuthenticated = pivSession.TryAuthenticateManagementKey();
+                Assert.True(isAuthenticated);
+                Assert.Equal(
+                    AuthenticateManagementKeyResult.MutualFullyAuthenticated,
+                    pivSession.ManagementKeyAuthenticationResult);
+
+                genPairCommand = new GenerateKeyPairCommand(
+                    0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                genPairResponse = pivSession.Connection.SendCommand(genPairCommand);
+                Assert.Equal(ResponseStatus.Success, genPairResponse.Status);
+
+                collectorObj.KeyFlag = 1;
+                isAuthenticated = pivSession.TryAuthenticateManagementKey(false);
+
+                Assert.False(isAuthenticated);
+                Assert.Equal(
+                    AuthenticateManagementKeyResult.SingleAuthenticationFailed,
+                    pivSession.ManagementKeyAuthenticationResult);
+
+                genPairCommand = new GenerateKeyPairCommand(
+                    0x87, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                genPairResponse = pivSession.Connection.SendCommand(genPairCommand);
+
+                Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
+            }
         }
 
-        [Fact]
-        public void AuthenticateMgmtKey_Mutual()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ChangePin(StandardTestDevice testDeviceType)
         {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-            Assert.NotNull(_pivSession.Connection);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            _pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
-            bool isAuthenticated = _pivSession.TryAuthenticateManagementKey();
+            using (var pivSession = new PivSession(testDevice))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            Assert.True(isAuthenticated);
-            Assert.Equal(
-                AuthenticateManagementKeyResult.MutualFullyAuthenticated, _pivSession.ManagementKeyAuthenticationResult);
-        }
+                Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-        [Fact]
-        public void ChangeMgmtKey()
-        {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-            Assert.NotNull(_pivSession.Connection);
+                bool isValid = pivSession.TryAuthenticateManagementKey();
+                Assert.True(isValid);
 
-            // This should fail, the mgmt key is not authenticated.
-            var genPairCommand = new GenerateKeyPairCommand(
-                0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
-            GenerateKeyPairResponse genPairResponse =
-                _pivSession.Connection.SendCommand(genPairCommand);
-            Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
+                isValid = TryGenerate(pivSession, 0x86, ResponseStatus.Success);
+                Assert.True(isValid);
+            }
 
-            _pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
-            bool isChanged = _pivSession.TryChangeManagementKey();
-
-            Assert.True(isChanged);
-            Assert.Equal(
-                AuthenticateManagementKeyResult.MutualFullyAuthenticated, _pivSession.ManagementKeyAuthenticationResult);
-
-            genPairCommand = new GenerateKeyPairCommand(
-                0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
-            genPairResponse = _pivSession.Connection.SendCommand(genPairCommand);
-
-            _collectorObj.KeyFlag = 1;
-            isChanged = _pivSession.TryChangeManagementKey();
-
-            Assert.True(isChanged);
-        }
-
-        [Fact]
-        public void Auth_ThenWrongKey()
-        {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-            Assert.NotNull(_pivSession.Connection);
-
-            // This should fail, the mgmt key is not authenticated.
-            var genPairCommand = new GenerateKeyPairCommand(
-                0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
-            GenerateKeyPairResponse genPairResponse =
-                _pivSession.Connection.SendCommand(genPairCommand);
-            Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
-
-            _pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
-            bool isAuthenticated = _pivSession.TryAuthenticateManagementKey();
-            Assert.True(isAuthenticated);
-            Assert.Equal(
-                AuthenticateManagementKeyResult.MutualFullyAuthenticated, _pivSession.ManagementKeyAuthenticationResult);
-
-            genPairCommand = new GenerateKeyPairCommand(
-                0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
-            genPairResponse = _pivSession.Connection.SendCommand(genPairCommand);
-            Assert.Equal(ResponseStatus.Success, genPairResponse.Status);
-
-            _collectorObj.KeyFlag = 1;
-            isAuthenticated = _pivSession.TryAuthenticateManagementKey(false);
-
-            Assert.False(isAuthenticated);
-            Assert.Equal(
-                AuthenticateManagementKeyResult.SingleAuthenticationFailed, _pivSession.ManagementKeyAuthenticationResult);
-
-            genPairCommand = new GenerateKeyPairCommand(
-                0x87, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
-            genPairResponse = _pivSession.Connection.SendCommand(genPairCommand);
-
-            Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
-        }
-
-        [Fact]
-        public void ChangePin()
-        {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-            Assert.NotNull(_pivSession.Connection);
-
-            _pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
-            _isValid = _pivSession.TryAuthenticateManagementKey();
-            Assert.True(_isValid);
-
-            _isValid = TryGenerate(_pivSession, 0x86, ResponseStatus.Success);
-            Assert.True(_isValid);
-
-            using (var pivSession = new PivSession(_yubiKeyDevice))
+            using (var pivSession = new PivSession(testDevice))
             {
                 Assert.NotNull(pivSession.Connection);
 
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                _isValid = TrySign(pivSession, 0x86, ResponseStatus.AuthenticationRequired);
-                Assert.True(_isValid);
+                bool isValid = TrySign(pivSession, 0x86, ResponseStatus.AuthenticationRequired);
+                Assert.True(isValid);
 
                 bool isChanged = pivSession.TryChangePin();
                 Assert.True(isChanged);
                 Assert.False(pivSession.PinVerified);
 
-                _isValid = TrySign(pivSession, 0x86, ResponseStatus.AuthenticationRequired);
-                Assert.True(_isValid);
+                isValid = TrySign(pivSession, 0x86, ResponseStatus.AuthenticationRequired);
+                Assert.True(isValid);
 
                 collectorObj.KeyFlag = 1;
                 bool isVerified = pivSession.TryVerifyPin();
                 Assert.True(isVerified);
 
-                _isValid = TrySign(pivSession, 0x86, ResponseStatus.Success);
-                Assert.True(_isValid);
+                isValid = TrySign(pivSession, 0x86, ResponseStatus.Success);
+                Assert.True(isValid);
 
                 collectorObj.KeyFlag = 1;
                 isChanged = pivSession.TryChangePin();
@@ -246,140 +249,160 @@ namespace Yubico.YubiKey.Piv
                 isVerified = pivSession.TryVerifyPin();
                 Assert.True(isVerified);
 
-                _isValid = TrySign(pivSession, 0x86, ResponseStatus.Success);
-                Assert.True(_isValid);
+                isValid = TrySign(pivSession, 0x86, ResponseStatus.Success);
+                Assert.True(isValid);
             }
         }
 
-        [Fact]
-        public void ChangePuk()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ChangePuk(StandardTestDevice testDeviceType)
         {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-            Assert.NotNull(_pivSession.Connection);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            _pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
+            using (var pivSession = new PivSession(testDevice))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            bool isChanged = _pivSession.TryChangePuk();
-            Assert.True(isChanged);
+                Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            _collectorObj.KeyFlag = 1;
-            isChanged = _pivSession.TryChangePuk();
-            Assert.True(isChanged);
+                bool isChanged = pivSession.TryChangePuk();
+                Assert.True(isChanged);
+
+                collectorObj.KeyFlag = 1;
+                isChanged = pivSession.TryChangePuk();
+                Assert.True(isChanged);
+            }
         }
 
-        [Fact]
-        public void ResetPin()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ResetPin(StandardTestDevice testDeviceType)
         {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-            Assert.NotNull(_pivSession.Connection);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            _pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
+            using (var pivSession = new PivSession(testDevice))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            bool isChanged = _pivSession.TryResetPin();
-            Assert.True(isChanged);
+                Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            isChanged = _pivSession.TryChangePuk();
-            Assert.True(isChanged);
+                bool isChanged = pivSession.TryResetPin();
+                Assert.True(isChanged);
 
-            _collectorObj.KeyFlag = 1;
-            isChanged = _pivSession.TryResetPin();
-            Assert.True(isChanged);
+                isChanged = pivSession.TryChangePuk();
+                Assert.True(isChanged);
 
-            _collectorObj.KeyFlag = 1;
-            isChanged = _pivSession.TryChangePuk();
-            Assert.True(isChanged);
+                collectorObj.KeyFlag = 1;
+                isChanged = pivSession.TryResetPin();
+                Assert.True(isChanged);
+
+                collectorObj.KeyFlag = 1;
+                isChanged = pivSession.TryChangePuk();
+                Assert.True(isChanged);
+            }
         }
 
-        [Fact]
-        public void ResetPin_WrongPuk()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ResetPin_WrongPuk(StandardTestDevice testDeviceType)
         {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-            Assert.NotNull(_pivSession.Connection);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            _pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
+            using (var pivSession = new PivSession(testDevice))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            _collectorObj.KeyFlag = 1;
-            bool isChanged = _pivSession.TryResetPin();
-            Assert.False(isChanged);
+                Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            _collectorObj.KeyFlag = 0;
-            isChanged = _pivSession.TryResetPin();
-            Assert.True(isChanged);
+                collectorObj.KeyFlag = 1;
+                bool isChanged = pivSession.TryResetPin();
+                Assert.False(isChanged);
 
-            _collectorObj.KeyFlag = 0;
-            isChanged = _pivSession.TryChangePuk();
-            Assert.True(isChanged);
+                collectorObj.KeyFlag = 0;
+                isChanged = pivSession.TryResetPin();
+                Assert.True(isChanged);
 
-            _collectorObj.KeyFlag = 1;
-            isChanged = _pivSession.TryResetPin();
-            Assert.True(isChanged);
+                collectorObj.KeyFlag = 0;
+                isChanged = pivSession.TryChangePuk();
+                Assert.True(isChanged);
 
-            _collectorObj.KeyFlag = 1;
-            isChanged = _pivSession.TryChangePuk();
-            Assert.True(isChanged);
+                collectorObj.KeyFlag = 1;
+                isChanged = pivSession.TryResetPin();
+                Assert.True(isChanged);
+
+                collectorObj.KeyFlag = 1;
+                isChanged = pivSession.TryChangePuk();
+                Assert.True(isChanged);
+            }
         }
 
-        [Fact]
-        public void ResetPiv()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ResetPiv(StandardTestDevice testDeviceType)
         {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-            Assert.NotNull(_pivSession.Connection);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            _pivSession.KeyCollector = _collectorObj.Simple39KeyCollectorDelegate;
+            using (var pivSession = new PivSession(testDevice))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            _isValid = _pivSession.TryAuthenticateManagementKey();
-            Assert.True(_isValid);
+                Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            _isValid = TryGenerate(_pivSession, 0x86, ResponseStatus.Success);
-            Assert.True(_isValid);
+                bool isValid = pivSession.TryAuthenticateManagementKey();
+                Assert.True(isValid);
 
-            bool isVerified = _pivSession.TryVerifyPin();
-            Assert.True(isVerified);
+                isValid = TryGenerate(pivSession, 0x86, ResponseStatus.Success);
+                Assert.True(isValid);
 
-            _isValid = TrySign(_pivSession, 0x86, ResponseStatus.Success);
-            Assert.True(_isValid);
+                bool isVerified = pivSession.TryVerifyPin();
+                Assert.True(isVerified);
 
-            bool isChanged = _pivSession.TryChangePin();
-            Assert.True(isChanged);
-            Assert.True(_pivSession.PinVerified);
+                isValid = TrySign(pivSession, 0x86, ResponseStatus.Success);
+                Assert.True(isValid);
 
-            _pivSession.ResetApplication();
+                bool isChanged = pivSession.TryChangePin();
+                Assert.True(isChanged);
+                Assert.True(pivSession.PinVerified);
 
-            Assert.Equal(
-                AuthenticateManagementKeyResult.Unauthenticated,
-                _pivSession.ManagementKeyAuthenticationResult);
-            Assert.False(_pivSession.ManagementKeyAuthenticated);
-            Assert.False(_pivSession.PinVerified);
+                pivSession.ResetApplication();
 
-            _isValid = TryGenerate(_pivSession, 0x87, ResponseStatus.AuthenticationRequired);
-            Assert.True(_isValid);
+                Assert.Equal(
+                    AuthenticateManagementKeyResult.Unauthenticated,
+                    pivSession.ManagementKeyAuthenticationResult);
+                Assert.False(pivSession.ManagementKeyAuthenticated);
+                Assert.False(pivSession.PinVerified);
 
-            _isValid = _pivSession.TryAuthenticateManagementKey();
-            Assert.True(_isValid);
+                isValid = TryGenerate(pivSession, 0x87, ResponseStatus.AuthenticationRequired);
+                Assert.True(isValid);
 
-            _isValid = TryGenerate(_pivSession, 0x87, ResponseStatus.Success);
-            Assert.True(_isValid);
+                isValid = pivSession.TryAuthenticateManagementKey();
+                Assert.True(isValid);
 
-            _isValid = TrySign(_pivSession, 0x87, ResponseStatus.AuthenticationRequired);
-            Assert.True(_isValid);
+                isValid = TryGenerate(pivSession, 0x87, ResponseStatus.Success);
+                Assert.True(isValid);
 
-            _collectorObj.KeyFlag = 1;
-            isVerified = _pivSession.TryVerifyPin();
-            Assert.False(isVerified);
+                isValid = TrySign(pivSession, 0x87, ResponseStatus.AuthenticationRequired);
+                Assert.True(isValid);
 
-            _collectorObj.KeyFlag = 0;
-            isVerified = _pivSession.TryVerifyPin();
-            Assert.True(isVerified);
+                collectorObj.KeyFlag = 1;
+                isVerified = pivSession.TryVerifyPin();
+                Assert.False(isVerified);
 
-            _isValid = TrySign(_pivSession, 0x86, ResponseStatus.Failed);
-            Assert.True(_isValid);
+                collectorObj.KeyFlag = 0;
+                isVerified = pivSession.TryVerifyPin();
+                Assert.True(isVerified);
 
-            _isValid = TrySign(_pivSession, 0x87, ResponseStatus.Success);
-            Assert.True(_isValid);
+                isValid = TrySign(pivSession, 0x86, ResponseStatus.Failed);
+                Assert.True(isValid);
+
+                isValid = TrySign(pivSession, 0x87, ResponseStatus.Success);
+                Assert.True(isValid);
+            }
         }
 
         [Fact]

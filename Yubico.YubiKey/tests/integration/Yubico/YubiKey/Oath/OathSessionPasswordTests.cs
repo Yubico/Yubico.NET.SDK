@@ -12,102 +12,99 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath
 {
     [TestCaseOrderer(PriorityOrderer.TypeName, PriorityOrderer.AssembyName)]
-    public sealed class OathSessionPasswordTests : IDisposable
+    public sealed class OathSessionPasswordTests
     {
-        private readonly bool _isValid;
-        private readonly IYubiKeyDevice _yubiKeyDevice;
-        private IYubiKeyConnection? _connection;
-        private readonly OathSession _oathSession;
-        private readonly SimpleOathKeyCollector _collectorObj;
-
-        public OathSessionPasswordTests()
+        [Theory, TestPriority(0)]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void SetPassword(StandardTestDevice testDeviceType)
         {
-            _isValid = SelectSupport.TrySelectYubiKey(out _yubiKeyDevice);
-            
-            if (_isValid)
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            using (var oathSession = new OathSession(testDevice))
             {
-                _connection = _yubiKeyDevice.Connect(YubiKeyApplication.Oath);
+                var collectorObj = new SimpleOathKeyCollector();
+                oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
+
+                oathSession.SetPassword();
+
+                Assert.False(oathSession._oathData.Challenge.IsEmpty);
             }
-
-            _oathSession = new OathSession(_yubiKeyDevice);
-            _collectorObj = new SimpleOathKeyCollector();
-            _oathSession.KeyCollector = _collectorObj.SimpleKeyCollectorDelegate;
         }
 
-        [Fact, TestPriority(0)]
-        public void SetPassword()
+        [Theory, TestPriority(1)]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void VerifyCorrectPassword(StandardTestDevice testDeviceType)
         {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
-            Assert.NotNull(_connection);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            _oathSession.SetPassword();
+            using (var oathSession = new OathSession(testDevice))
+            {
+                var collectorObj = new SimpleOathKeyCollector();
+                oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-            Assert.False(_oathSession._oathData.Challenge.IsEmpty);
+                bool isVerified = oathSession.TryVerifyPassword();
+                Assert.True(isVerified);
+            }
         }
 
-        [Fact, TestPriority(1)]
-        public void VerifyCorrectPassword()
+        [Theory, TestPriority(2)]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void VerifyWrongPassword(StandardTestDevice testDeviceType)
         {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
-            Assert.NotNull(_connection);
-            
-            bool isVerified = _oathSession.TryVerifyPassword();
-            Assert.True(isVerified);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            using (var oathSession = new OathSession(testDevice))
+            {
+                var collectorObj = new SimpleOathKeyCollector();
+                oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
+
+                collectorObj.KeyFlag = 1;
+
+                bool isVerified = oathSession.TryVerifyPassword();
+                Assert.False(isVerified);
+            }
         }
 
-        [Fact, TestPriority(2)]
-        public void VerifyWrongPassword()
+        [Theory, TestPriority(3)]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ChangePassword(StandardTestDevice testDeviceType)
         {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
-            Assert.NotNull(_connection);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            _collectorObj.KeyFlag = 1;
+            using (var oathSession = new OathSession(testDevice))
+            {
+                var collectorObj = new SimpleOathKeyCollector();
+                oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-            bool isVerified = _oathSession.TryVerifyPassword();
-            Assert.False(isVerified);
+                collectorObj.KeyFlag = 1;
+                oathSession.SetPassword();
+
+                Assert.False(oathSession._oathData.Challenge.IsEmpty);
+            }
         }
 
-        [Fact, TestPriority(3)]
-        public void ChangePassword()
+        [Theory, TestPriority(4)]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void UnsetPassword(StandardTestDevice testDeviceType)
         {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
-            Assert.NotNull(_connection);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            _collectorObj.KeyFlag = 1;
-            _oathSession.SetPassword();
+            using (var oathSession = new OathSession(testDevice))
+            {
+                var collectorObj = new SimpleOathKeyCollector();
+                oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-            Assert.False(_oathSession._oathData.Challenge.IsEmpty);
-        }
+                collectorObj.KeyFlag = 1;
+                oathSession.UnsetPassword();
 
-        [Fact, TestPriority(4)]
-        public void UnsetPassword()
-        {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
-            Assert.NotNull(_connection);
-
-            _collectorObj.KeyFlag = 1;
-            _oathSession.UnsetPassword();
-
-            Assert.True(_oathSession._oathData.Challenge.IsEmpty);
-        }
-
-        public void Dispose()
-        {
-            _connection?.Dispose();
-            _oathSession.Dispose();
-            _connection = null;
+                Assert.True(oathSession._oathData.Challenge.IsEmpty);
+            }
         }
     }
 }

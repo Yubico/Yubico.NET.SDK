@@ -20,12 +20,13 @@ namespace Yubico.YubiKey.Piv
 {
     public class AuthTests
     {
-        [Fact]
-        public void VerifyPin_Blocked_ThrowsSecurityException()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void VerifyPin_Blocked_ThrowsSecurityException(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
@@ -45,12 +46,13 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void ChangePin_Blocked_ThrowsSecurityException()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ChangePin_Blocked_ThrowsSecurityException(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
@@ -70,12 +72,13 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void ChangePuk_Blocked_ThrowsSecurityException()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ChangePuk_Blocked_ThrowsSecurityException(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
@@ -95,12 +98,13 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void ResetPin_Blocked_ThrowsSecurityException()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ResetPin_Blocked_ThrowsSecurityException(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {

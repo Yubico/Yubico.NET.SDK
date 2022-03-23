@@ -15,7 +15,6 @@
 using Yubico.YubiKey.Management.Commands;
 using Yubico.YubiKey.TestUtilities;
 using Xunit;
-using System.Linq;
 
 namespace Yubico.YubiKey.Management
 {
@@ -26,10 +25,7 @@ namespace Yubico.YubiKey.Management
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetDeviceInfo_NoData_ResponseStatusSuccess(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Management);
 
@@ -44,10 +40,7 @@ namespace Yubico.YubiKey.Management
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetDeviceInfo_NoChanges_DeviceInfoNotChanged(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice beginningTestDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice beginningTestDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             int testDeviceSerialNumber = beginningTestDevice.SerialNumber!.Value;
 
@@ -70,10 +63,7 @@ namespace Yubico.YubiKey.Management
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetDeviceInfo_SameAsCurrentDeviceInfo_NoChange(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice beginningTestDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice beginningTestDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             int testDeviceSerialNumber = beginningTestDevice.SerialNumber!.Value;
 

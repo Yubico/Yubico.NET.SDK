@@ -12,48 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.YubiKey.TestUtilities;
 using Xunit;
 
 namespace Yubico.YubiKey.Oath
 {
-    public sealed class SelectApplicationTests : IDisposable
+    public sealed class SelectApplicationTests
     {
-        private readonly bool _isValid;
-        private readonly IYubiKeyDevice _yubiKeyDevice;
-        private IYubiKeyConnection? _connection;
-
-        public SelectApplicationTests()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ConnectOathHasData(StandardTestDevice testDeviceType)
         {
-            _isValid = SelectSupport.TrySelectYubiKey(out _yubiKeyDevice);
-            if (_isValid)
-            {
-                _connection = _yubiKeyDevice.Connect(YubiKeyApplication.Oath);
-            }
-        }
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-        [Fact]
-        public void ConnectOathHasData()
-        {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
-            Assert.NotNull(_connection);
+            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Oath);
 
-            // Connect does not actually select the app.  We need a command for this.  It can be anything.
-            _ = _connection!.SendCommand(new Commands.ListCommand());
-
-            Assert.NotNull(_connection!.SelectApplicationData);
-            var data = Assert.IsType<OathApplicationData>(_connection!.SelectApplicationData);
+            Assert.NotNull(connection!.SelectApplicationData);
+            OathApplicationData data = Assert.IsType<OathApplicationData>(connection!.SelectApplicationData);
 
             Assert.False(data.Salt.IsEmpty);
             Assert.True(data.Salt.Length >= 8);
-        }
-
-        public void Dispose()
-        {
-            _connection?.Dispose();
-            _connection = null;
         }
     }
 }

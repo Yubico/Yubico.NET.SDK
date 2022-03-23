@@ -13,23 +13,21 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKey.TestUtilities;
 using Yubico.YubiKey.Piv.Commands;
-using Yubico.YubiKey.Piv.Objects;
-using Yubico.Core.Tlv;
 using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
     public class TagTests
     {
-        [Fact]
-        public void AlternateTag_Minimum_Succeeds()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void AlternateTag_Minimum_Succeeds(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
@@ -66,12 +64,13 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void AlternateTag_Invalid_Error()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void AlternateTag_Invalid_Error(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {

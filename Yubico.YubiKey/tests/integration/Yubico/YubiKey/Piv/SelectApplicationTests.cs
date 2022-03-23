@@ -12,47 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.YubiKey.TestUtilities;
 using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
-    public sealed class SelectApplicationTests : IDisposable
+    public sealed class SelectApplicationTests
     {
-        private readonly bool _isValid;
-        private readonly IYubiKeyDevice _yubiKeyDevice;
-        private IYubiKeyConnection? _pivConnection;
-
-        public SelectApplicationTests()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ConnectOathHasData(StandardTestDevice testDeviceType)
         {
-            _isValid = SelectSupport.TrySelectYubiKey(out _yubiKeyDevice);
-            if (_isValid)
-            {
-                _pivConnection = _yubiKeyDevice.Connect(YubiKeyApplication.Piv);
-            }
-        }
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-        [Fact]
-        public void ConnectOathHasData()
-        {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
-            Assert.NotNull(_pivConnection);
+            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Piv);
+            Assert.NotNull(connection);
 
             // Connect does not actually select the app.  We need a command for this.  It can be anything.
-            _ = _pivConnection!.SendCommand(new Piv.Commands.GetSerialNumberCommand());
+            _ = connection!.SendCommand(new Piv.Commands.GetSerialNumberCommand());
 
-            Assert.NotNull(_pivConnection!.SelectApplicationData);
-            var data = Assert.IsType<InterIndustry.Commands.GenericSelectApplicationData>(_pivConnection.SelectApplicationData);
+            Assert.NotNull(connection!.SelectApplicationData);
+            var data = Assert.IsType<InterIndustry.Commands.GenericSelectApplicationData>(connection.SelectApplicationData);
 
             Assert.False(data!.RawData.IsEmpty);
-        }
-
-        public void Dispose()
-        {
-            _pivConnection?.Dispose();
-            _pivConnection = null;
         }
     }
 }

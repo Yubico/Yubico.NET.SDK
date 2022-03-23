@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Security;
-using System.Security.Cryptography;
 using Yubico.YubiKey.Piv.Objects;
 using Yubico.YubiKey.TestUtilities;
 using Xunit;
@@ -33,7 +31,7 @@ namespace Yubico.YubiKey.Piv
 
         public ChangePinWithDerivedTests()
         {
-            yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            yubiKey = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
             ResetPiv(yubiKey);
         }
 

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
@@ -32,10 +31,7 @@ namespace Yubico.YubiKey
         public void SetEnabledNfcCapabilities_DisableFido2_OnlyFido2Disabled(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -54,10 +50,7 @@ namespace Yubico.YubiKey
         public void SetEnabledUsbCapabilities_EnableFido2OverOtp_Fido2AndOtpEnabled(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -82,10 +75,7 @@ namespace Yubico.YubiKey
         public void SetEnabledUsbCapabilities_DisableFido2_OnlyFido2Disabled(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -104,10 +94,7 @@ namespace Yubico.YubiKey
         public void SetChallengeResponseTimeout_255seconds_ValueSetTo255(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -124,10 +111,7 @@ namespace Yubico.YubiKey
         public void SetChallengeResponseTimeout_ZeroSeconds_DefaultValueSet(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -148,10 +132,7 @@ namespace Yubico.YubiKey
             StandardTestDevice testDeviceType,
             int expectedTimeout)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -171,10 +152,7 @@ namespace Yubico.YubiKey
         public void SetDeviceFlags_RemoteWakeupAndTouchEject_BothFlagsSet(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -190,10 +168,7 @@ namespace Yubico.YubiKey
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void LockConfiguration_ValidLockCode_DeviceIsLocked(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -209,10 +184,7 @@ namespace Yubico.YubiKey
         public void LockConfiguration_SetLockCodeOnLockedDevice_ThrowsException(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -233,10 +205,7 @@ namespace Yubico.YubiKey
         public void UnlockConfiguration_CorrectLockCode_DeviceNotLocked(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
             testDevice.LockConfiguration(TestLockCode);
@@ -258,10 +227,7 @@ namespace Yubico.YubiKey
         public void UnlockConfiguration_IncorrectLockCode_ThrowsException(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
             testDevice.LockConfiguration(TestLockCode);
@@ -281,10 +247,7 @@ namespace Yubico.YubiKey
         public void UnlockConfiguration_AllZeroLockCodeOnUnlockedDevice_CommandSuccessful(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -297,10 +260,7 @@ namespace Yubico.YubiKey
         public void UnlockConfiguration_NonZeroLockCodeOnUnlockedDevice_ThrowsException(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -315,10 +275,7 @@ namespace Yubico.YubiKey
         public void SetLegacyDeviceConfig_DisableFidoInterface_OnlyFidoDisabled(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -340,10 +297,7 @@ namespace Yubico.YubiKey
         public void SetLegacyDeviceConfig_ChallengeResponse255Seconds_TimeoutSetTo255(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 
@@ -361,10 +315,7 @@ namespace Yubico.YubiKey
         public void SetLegacyDeviceConfig_ChallengeResponseZeroSeconds_DefaultValueSet(
             StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice =
-                IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
-                .SelectRequiredTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             testDevice = ResetDeviceInfo(testDevice);
 

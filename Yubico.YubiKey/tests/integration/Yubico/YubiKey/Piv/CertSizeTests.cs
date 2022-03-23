@@ -17,22 +17,21 @@ using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKey.TestUtilities;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Yubico.YubiKey.Piv
 {
     public class CertSizeTests
     {
-//        private readonly ITestOutputHelper _output;
-//
-//        public CertSizeTests (ITestOutputHelper output)
-//        {
-//            _output = output;
-//        }
+        //        private readonly ITestOutputHelper _output;
+        //
+        //        public CertSizeTests (ITestOutputHelper output)
+        //        {
+        //            _output = output;
+        //        }
 
-        // This test is currently set for 5.x YubiKeys.
-        [Fact]
-        public void SingleCertSize_3052()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void SingleCertSize_3052(StandardTestDevice testDeviceType)
         {
             byte leafSlotNumber = 0x83;
             int extensionSize = 2107;
@@ -45,7 +44,7 @@ namespace Yubico.YubiKey.Piv
             var convertPrivate = new KeyConverter(priKey.ToCharArray());
             PivPrivateKey pivPrivateKey = convertPrivate.GetPivPrivateKey();
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             // With an extension of 2107 bytes, the cert should be 3052 bytes.
             byte[] extensionData = new byte[extensionSize];
@@ -55,7 +54,7 @@ namespace Yubico.YubiKey.Piv
 //            _output.WriteLine ("cert size: {0} from extension = {1}", newCert.RawData.Length, extensionSize);
 
             // A 3052-byte cert should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -75,7 +74,7 @@ namespace Yubico.YubiKey.Piv
 //            _output.WriteLine ("cert size: {0} from extension = {1}", newCert.RawData.Length, extensionSize);
 
             // A 3053-byte cert should throw an exception.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -87,9 +86,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        // This test is currently set for 5.x YubiKeys.
-        [Fact]
-        public void MultipleCerts_3052()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void MultipleCerts_3052(StandardTestDevice testDeviceType)
         {
             int extensionSize = 2107;
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
@@ -101,7 +100,7 @@ namespace Yubico.YubiKey.Piv
             var convertPrivate = new KeyConverter(priKey.ToCharArray());
             PivPrivateKey pivPrivateKey = convertPrivate.GetPivPrivateKey();
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             // With an extension of 2107 bytes, the cert should be 3052 bytes.
             byte[] extensionData = new byte[extensionSize];
@@ -109,7 +108,7 @@ namespace Yubico.YubiKey.Piv
 
             X509Certificate2 newCert = GetCertWithRandomExtension(caCert, dotNetPublicKey, extensionData);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -131,9 +130,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        // This test is currently set for 5.x YubiKeys.
-        [Fact]
-        public void AllSlot_2079()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void AllSlot_2079(StandardTestDevice testDeviceType)
         {
             int extensionSize = 1134;
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
@@ -145,7 +144,7 @@ namespace Yubico.YubiKey.Piv
             var convertPrivate = new KeyConverter(priKey.ToCharArray());
             PivPrivateKey pivPrivateKey = convertPrivate.GetPivPrivateKey();
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             // With an extension of 1134 bytes, the cert should be 2079 bytes.
             byte[] extensionData = new byte[extensionSize];
@@ -154,7 +153,7 @@ namespace Yubico.YubiKey.Piv
             X509Certificate2 newCert = GetCertWithRandomExtension(caCert, dotNetPublicKey, extensionData);
 //            _output.WriteLine ("cert size: {0} from extension = {1}", newCert.RawData.Length, extensionSize);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;

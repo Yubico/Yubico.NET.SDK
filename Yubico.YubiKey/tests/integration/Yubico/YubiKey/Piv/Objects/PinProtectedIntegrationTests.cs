@@ -21,12 +21,13 @@ namespace Yubico.YubiKey.Piv
 {
     public class PinProtectedIntegrationTests
     {
-        [Fact]
-        public void ReadPinProtect_IsEmpty_Correct()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ReadPinProtect_IsEmpty_Correct(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -39,17 +40,18 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void WriteMgmtKey_Read_NotEmpty()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteMgmtKey_Read_NotEmpty(StandardTestDevice testDeviceType)
         {
             Memory<byte> mgmtKey = GetArbitraryMgmtKey();
 
             using var pinProtect = new PinProtectedData();
             pinProtect.SetManagementKey(mgmtKey);
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
@@ -69,17 +71,18 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void WriteMgmtKey_Read_Correct()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteMgmtKey_Read_Correct(StandardTestDevice testDeviceType)
         {
             Memory<byte> mgmtKey = GetArbitraryMgmtKey();
 
             using var pinProtect = new PinProtectedData();
             pinProtect.SetManagementKey(mgmtKey);
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {

@@ -13,26 +13,26 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Yubico.YubiKey.Piv
 {
     public class MgmtKeyNoCollectorTests
     {
-        [Fact]
-        public void Authenticate_Succeeds()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Authenticate_Succeeds(StandardTestDevice testDeviceType)
         {
             var mgmtKey = new ReadOnlyMemory<byte>(new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
 
-            using (var pivSession = new PivSession(yubiKey))
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
                 bool isValid = pivSession.TryAuthenticateManagementKey(mgmtKey);
@@ -46,8 +46,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void ChangeKey_Succeeds()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ChangeKey_Succeeds(StandardTestDevice testDeviceType)
         {
             var mgmtKey = new ReadOnlyMemory<byte>(new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -59,9 +60,10 @@ namespace Yubico.YubiKey.Piv
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
 
-            using (var pivSession = new PivSession(yubiKey))
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
                 bool isValid = pivSession.TryAuthenticateManagementKey(mgmtKey);
@@ -74,7 +76,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 bool isValid = pivSession.TryChangeManagementKey(mgmtKey, newKey);
                 Assert.True(isValid);
@@ -83,7 +85,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(isValid);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 bool isValid = pivSession.TryAuthenticateManagementKey(newKey);
                 Assert.True(isValid);

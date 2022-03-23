@@ -32,18 +32,19 @@ namespace Yubico.YubiKey.Piv
             _output = output;
         }
 
-        [Fact]
-        public void SimplePutDataCommand()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void SimplePutDataCommand(StandardTestDevice testDeviceType)
         {
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKey);
-            Assert.True(isValid);
-            Assert.True(yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-                isValid = pivSession.TryAuthenticateManagementKey();
+                bool isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
                 pivSession.ResetApplication();
@@ -85,14 +86,15 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void WriteDataSession()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteDataSession(StandardTestDevice testDeviceType)
         {
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKey);
-            Assert.True(isValid);
-            Assert.True(yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -112,16 +114,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void WriteDataSessionBig()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteDataSessionBig(StandardTestDevice testDeviceType)
         {
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKey);
-            Assert.True(isValid);
-            Assert.True(yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var versionCommand = new VersionCommand();
                 VersionResponse versionResponse = pivSession.Connection.SendCommand(versionCommand);
@@ -159,16 +162,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void WriteReadMsroots_ByteArray()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteReadMsroots_ByteArray(StandardTestDevice testDeviceType)
         {
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKey);
-            Assert.True(isValid);
-            Assert.True(yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 Assert.NotNull(pivSession.Connection);
 
@@ -196,16 +200,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void WriteReadMsroots_Stream()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteReadMsroots_Stream(StandardTestDevice testDeviceType)
         {
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKey);
-            Assert.True(isValid);
-            Assert.True(yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 Assert.NotNull(pivSession.Connection);
 
@@ -235,16 +240,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void WriteMsroots_Commands()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteMsroots_Commands(StandardTestDevice testDeviceType)
         {
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKey);
-            Assert.True(isValid);
-            Assert.True(yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 Assert.NotNull(pivSession.Connection);
 
@@ -257,7 +263,7 @@ namespace Yubico.YubiKey.Piv
 
                     pivSession.ResetApplication();
 
-                    isValid = pivSession.TryAuthenticateManagementKey();
+                    bool isValid = pivSession.TryAuthenticateManagementKey();
                     Assert.True(isValid);
 
                     byte[] putData = new byte[bufferSize];

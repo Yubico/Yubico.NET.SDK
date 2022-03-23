@@ -21,12 +21,13 @@ namespace Yubico.YubiKey.Piv
 {
     public class AdminIntegrationTests
     {
-        [Fact]
-        public void ReadAdmin_IsEmpty_Correct()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ReadAdmin_IsEmpty_Correct(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -39,8 +40,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void WriteAdminData_Read_NotEmpty()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteAdminData_Read_NotEmpty(StandardTestDevice testDeviceType)
         {
             byte[] salt = new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -53,9 +55,9 @@ namespace Yubico.YubiKey.Piv
             admin.SetSalt(salt);
             admin.PinLastUpdated = DateTime.UtcNow;
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
@@ -75,8 +77,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void WriteAdminData_Read_Correct()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteAdminData_Read_Correct(StandardTestDevice testDeviceType)
         {
             byte[] salt = new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -89,9 +92,9 @@ namespace Yubico.YubiKey.Piv
             admin.SetSalt(salt);
             admin.PinLastUpdated = DateTime.UtcNow;
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {

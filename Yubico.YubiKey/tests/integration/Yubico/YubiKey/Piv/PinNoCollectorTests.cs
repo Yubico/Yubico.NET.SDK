@@ -21,12 +21,13 @@ namespace Yubico.YubiKey.Piv
 {
     public class PinNoCollectorTests
     {
-        [Fact]
-        public void VerifyPin_Sign_Succeeds()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void VerifyPin_Sign_Succeeds(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var pin = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
 
@@ -42,12 +43,13 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void VerifyPin_WrongPin_ReturnsFalse()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void VerifyPin_WrongPin_ReturnsFalse(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var pin = new ReadOnlyMemory<byte>(new byte[] { 0x41, 0x32, 0x33, 0x34, 0x35, 0x36 });
 
@@ -62,15 +64,16 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void ChangePin_Succeeds()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ChangePin_Succeeds(StandardTestDevice testDeviceType)
         {
             var oldPin = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
             var newPin = new ReadOnlyMemory<byte>(new byte[] { 0x41, 0x42, 0x43, 0x44, 0x45, 0x46 });
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
                 bool isValid = pivSession.TryVerifyPin(oldPin, out int? retriesRemaining);
@@ -78,7 +81,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Null(retriesRemaining);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 bool isValid = pivSession.TryChangePin(oldPin, newPin, out int? retriesRemaining);
                 Assert.True(isValid);
@@ -95,17 +98,18 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void ChangePuk_Succeeds()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ChangePuk_Succeeds(StandardTestDevice testDeviceType)
         {
             var oldPuk = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 });
             var newPuk = new ReadOnlyMemory<byte>(new byte[] { 0x70, 0xE4, 0x82, 0x7D, 0x5C, 0xA1, 0x04 });
 
             var newPin = new ReadOnlyMemory<byte>(new byte[] { 0xE4, 0x82, 0x7D, 0x5C, 0xA1, 0x04, 0x70 });
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
                 bool isValid = pivSession.TryChangePuk(oldPuk, newPuk, out int? retriesRemaining);
@@ -113,7 +117,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Null(retriesRemaining);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 bool isValid = pivSession.TryResetPin(newPuk, newPin, out int? retriesRemaining);
                 Assert.True(isValid);
@@ -130,8 +134,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void ChangeRetryCounts_Succeeds()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ChangeRetryCounts_Succeeds(StandardTestDevice testDeviceType)
         {
             var mgmtKey = new ReadOnlyMemory<byte>(new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -142,9 +147,10 @@ namespace Yubico.YubiKey.Piv
             var newPin = new ReadOnlyMemory<byte>(new byte[] { 0xE4, 0x82, 0x7D, 0x5C, 0xA1, 0x04, 0x70 });
             var oldPuk = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 });
             var newPuk = new ReadOnlyMemory<byte>(new byte[] { 0x70, 0xE4, 0x82, 0x7D, 0x5C, 0xA1, 0x04 });
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
 
-            using (var pivSession = new PivSession(yubiKey))
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
@@ -157,7 +163,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(isValid);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 bool isValid = pivSession.TryVerifyPin(newPin, out int? retriesRemaining);
                 Assert.True(isValid);
@@ -168,7 +174,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Null(retriesRemaining);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 bool isValid = pivSession.TryVerifyPin(oldPin, out int? retriesRemaining);
                 Assert.True(isValid);
@@ -183,7 +189,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(isValid);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 bool isValid = pivSession.TryChangePinAndPukRetryCounts(mgmtKey, newPin, 7, 8, out int? retriesRemaining);
                 Assert.True(isValid);

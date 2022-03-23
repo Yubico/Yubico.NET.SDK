@@ -12,51 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Collections.Generic;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath
 {
-    public sealed class OathSessionTests : IDisposable
+    public sealed class OathSessionTests
     {
-        private readonly bool _isValid;
-        private readonly IYubiKeyDevice _yubiKeyDevice;
-        private IYubiKeyConnection? _connection;
-        private readonly OathSession _oathSession;
-
-        public OathSessionTests()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ResetOathApplication(StandardTestDevice testDeviceType)
         {
-            _isValid = SelectSupport.TrySelectYubiKey(out _yubiKeyDevice);
-            
-            if (_isValid)
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            using (var oathSession = new OathSession(testDevice))
             {
-                _connection = _yubiKeyDevice.Connect(YubiKeyApplication.Oath);
+                oathSession.ResetApplication();
+                IList<Credential> data = oathSession.GetCredentials();
+
+                Assert.True(oathSession._oathData.Challenge.IsEmpty);
+                Assert.Empty(data);
             }
-
-            _oathSession = new OathSession(_yubiKeyDevice);
-        }
-
-        [Fact]
-        public void ResetOathApplication()
-        {
-            Assert.True(_isValid);
-            Assert.True(_yubiKeyDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Oath));
-            Assert.NotNull(_connection);
-
-            _oathSession.ResetApplication();
-            IList<Credential> data = _oathSession.GetCredentials();
-
-            Assert.True(_oathSession._oathData.Challenge.IsEmpty);
-            Assert.Empty(data);
-        }
-
-        public void Dispose()
-        {
-            _connection?.Dispose();
-            _oathSession.Dispose();
-            _connection = null;
         }
     }
 }

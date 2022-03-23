@@ -21,12 +21,13 @@ namespace Yubico.YubiKey.Piv
 {
     public class ChuidIntegrationTests
     {
-        [Fact]
-        public void ReadChuid_IsEmpty_Correct()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void ReadChuid_IsEmpty_Correct(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -39,17 +40,19 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void WriteThenReadChuid_Data_Correct()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteThenReadChuid_Data_Correct(StandardTestDevice testDeviceType)
         {
             var expected = new ReadOnlySpan<byte>(new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01
             });
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             try
             {
-                using (var pivSession = new PivSession(yubiKey))
+                using (var pivSession = new PivSession(testDevice))
                 {
                     var collectorObj = new Simple39KeyCollector();
                     pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -72,24 +75,26 @@ namespace Yubico.YubiKey.Piv
             }
             finally
             {
-                using (var pivSession = new PivSession(yubiKey))
+                using (var pivSession = new PivSession(testDevice))
                 {
                     pivSession.ResetApplication();
                 }
             }
         }
 
-        [Fact]
-        public void AltTag_WriteThenReadChuid_Data_Correct()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void AltTag_WriteThenReadChuid_Data_Correct(StandardTestDevice testDeviceType)
         {
             var expected = new ReadOnlySpan<byte>(new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01
             });
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             try
             {
-                using (var pivSession = new PivSession(yubiKey))
+                using (var pivSession = new PivSession(testDevice))
                 {
                     var collectorObj = new Simple39KeyCollector();
                     pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -113,24 +118,26 @@ namespace Yubico.YubiKey.Piv
             }
             finally
             {
-                using (var pivSession = new PivSession(yubiKey))
+                using (var pivSession = new PivSession(testDevice))
                 {
                     pivSession.ResetApplication();
                 }
             }
         }
 
-        [Fact]
-        public void WriteEmpty_Correct()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void WriteEmpty_Correct(StandardTestDevice testDeviceType)
         {
             var expected = new ReadOnlySpan<byte>(new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01
             });
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             try
             {
-                using (var pivSession = new PivSession(yubiKey))
+                using (var pivSession = new PivSession(testDevice))
                 {
                     var collectorObj = new Simple39KeyCollector();
                     pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -167,7 +174,7 @@ namespace Yubico.YubiKey.Piv
             }
             finally
             {
-                using (var pivSession = new PivSession(yubiKey))
+                using (var pivSession = new PivSession(testDevice))
                 {
                     pivSession.ResetApplication();
                 }
@@ -175,22 +182,22 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(0x015FFF10)]
-        [InlineData(0x0000007E)]
-        [InlineData(0x00007F61)]
-        [InlineData(0x005FC101)]
-        [InlineData(0x005FC104)]
-        [InlineData(0x005FC105)]
-        [InlineData(0x005FC10A)]
-        [InlineData(0x005FC10B)]
-        [InlineData(0x005FC10D)]
-        [InlineData(0x005FC120)]
-        [InlineData(0x005FFF01)]
-        public void Read_InvalidTag_Throws(int newTag)
+        [InlineData(0x015FFF10, StandardTestDevice.Fw5)]
+        [InlineData(0x0000007E, StandardTestDevice.Fw5)]
+        [InlineData(0x00007F61, StandardTestDevice.Fw5)]
+        [InlineData(0x005FC101, StandardTestDevice.Fw5)]
+        [InlineData(0x005FC104, StandardTestDevice.Fw5)]
+        [InlineData(0x005FC105, StandardTestDevice.Fw5)]
+        [InlineData(0x005FC10A, StandardTestDevice.Fw5)]
+        [InlineData(0x005FC10B, StandardTestDevice.Fw5)]
+        [InlineData(0x005FC10D, StandardTestDevice.Fw5)]
+        [InlineData(0x005FC120, StandardTestDevice.Fw5)]
+        [InlineData(0x005FFF01, StandardTestDevice.Fw5)]
+        public void Read_InvalidTag_Throws(int newTag, StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -199,12 +206,13 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Write_NullArg_Throws()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Write_NullArg_Throws(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;

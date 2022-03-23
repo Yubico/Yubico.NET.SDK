@@ -41,55 +41,54 @@ namespace Yubico.YubiKey.Piv
             };
         }
 
-        [Fact]
-        public void RandomKey_Authenticates()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void RandomKey_Authenticates(StandardTestDevice testDeviceType)
         {
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
             int count = 10;
 
             bool isValid = false;
             for (int index = 0; index < count; index++)
             {
                 GetRandomMgmtKey();
-                isValid = ChangeMgmtKey();
+                isValid = ChangeMgmtKey(testDevice);
                 if (isValid == false)
                 {
                     break;
                 }
 
-                isValid = VerifyMgmtKey(false);
+                isValid = VerifyMgmtKey(false, testDevice);
                 if (isValid == false)
                 {
                     break;
                 }
 
-                isValid = VerifyMgmtKey(true);
+                isValid = VerifyMgmtKey(true, testDevice);
                 if (isValid == false)
                 {
                     break;
                 }
             }
 
-            ResetPiv();
+            ResetPiv(testDevice);
 
             Assert.True(isValid);
         }
 
-        private bool VerifyMgmtKey(bool isMutual)
+        private bool VerifyMgmtKey(bool isMutual, IYubiKeyDevice testDevice)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
-
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.KeyCollector = TestKeyCollectorDelegate;
                 return pivSession.TryAuthenticateManagementKey(isMutual);
             }
         }
 
-        private bool ChangeMgmtKey()
+        private bool ChangeMgmtKey(IYubiKeyDevice testDevice)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
-
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.KeyCollector = TestKeyCollectorDelegate;
                 bool isChanged = pivSession.TryChangeManagementKey();
@@ -102,11 +101,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        private static void ResetPiv()
+        private static void ResetPiv(IYubiKeyDevice testDevice)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
-
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
             }

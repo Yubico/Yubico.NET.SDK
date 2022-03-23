@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Piv
 
         public RecoverPinOnlyTests()
         {
-            yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            yubiKey = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
             ResetPiv(yubiKey);
         }
 

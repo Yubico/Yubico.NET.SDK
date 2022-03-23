@@ -23,8 +23,9 @@ namespace Yubico.YubiKey.Piv
 {
     public class GetPutDataTests
     {
-        [Fact]
-        public void Cert_Auth_Req()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Cert_Auth_Req(StandardTestDevice testDeviceType)
         {
             bool isValid = SampleKeyPairs.GetMatchingKeyAndCert(
                 out X509Certificate2 cert, out PivPrivateKey privateKey);
@@ -42,9 +43,9 @@ namespace Yubico.YubiKey.Piv
             byte[] certData = tlvWriter.Encode();
             tlvWriter.Clear();
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
@@ -53,7 +54,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.ImportPrivateKey(PivSlot.Authentication, privateKey, PivPinPolicy.Never, PivTouchPolicy.Never);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // There should be no data.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Authentication);
@@ -77,7 +78,7 @@ namespace Yubico.YubiKey.Piv
 
             // Create a new session so the PIN is no longer verified.
             // PUT DATA again, but this time with only the mgmt key authenticated.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
@@ -87,7 +88,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // There should be data this time.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Authentication);
@@ -99,8 +100,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Chuid_Auth_Req()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Chuid_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] chuidData = new byte[] {
                 0x53, 0x3b, 0x30, 0x19, 0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83,
@@ -109,9 +111,9 @@ namespace Yubico.YubiKey.Piv
                 0x08, 0x32, 0x30, 0x33, 0x30, 0x30, 0x31, 0x30, 0x31, 0x3e, 0x00, 0xfe, 0x00
             };
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
@@ -137,7 +139,7 @@ namespace Yubico.YubiKey.Piv
 
             // Create a new session so the PIN is no longer verified.
             // PUT DATA again, but this time with only the mgmt key authenticated.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
@@ -149,7 +151,7 @@ namespace Yubico.YubiKey.Piv
 
             // Now try to read the CHUID without authenicating the mgmt key, nor
             // verifying the PIN. It should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Chuid);
                 GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
@@ -160,8 +162,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Capability_Auth_Req()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Capability_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] capabilityData = new byte[] {
                 0x53, 0x33, 0xF0, 0x15, 0xA0, 0x00, 0x00, 0x01, 0x16, 0xFF, 0x02, 0x21, 0x08, 0x42, 0x10, 0x84,
@@ -170,9 +173,9 @@ namespace Yubico.YubiKey.Piv
                 0x00, 0xFD, 0x00, 0xFE, 0x00
             };
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
@@ -200,7 +203,7 @@ namespace Yubico.YubiKey.Piv
 
             // Create a new session so the PIN is no longer verified.
             // PUT DATA again, but this time with only the mgmt key authenticated.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
@@ -214,7 +217,7 @@ namespace Yubico.YubiKey.Piv
 
             // Now try to read the CCC without authenicating the mgmt key, nor
             // verifying the PIN. It should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
 #pragma warning disable CS0618 // Testing an obsolete feature
                 var getDataCommand = new GetDataCommand(PivDataTag.Capability);
@@ -227,17 +230,18 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Discovery_Auth_Req()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Discovery_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] discoveryData = new byte[] {
                 0x7E, 0x12, 0x4F, 0x0B, 0xA0, 0x00, 0x00, 0x03, 0x08, 0x00, 0x00, 0x10, 0x00, 0x01, 0x00, 0x5F,
                 0x2F, 0x02, 0x40, 0x00,
             };
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
@@ -256,16 +260,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Printed_Auth_Req()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Printed_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] printedData = new byte[] {
                 0x53, 0x04, 0x04, 0x02, 0xd4, 0xe7
             };
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
@@ -283,7 +288,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.AuthenticationRequired, getDataResponse.Status);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Verify the PIN
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -296,7 +301,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Use the internal constructor to build the PutDataCommand. Then
                 // put data into Printed.
@@ -314,7 +319,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Now put after authenticating the mgmt key. This should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
@@ -326,7 +331,7 @@ namespace Yubico.YubiKey.Piv
 
             // Now try to get the data with neither PIN nor mgmt key, then only the
             // mgmt key authenticated. These should fail.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Printed);
                 GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
@@ -340,7 +345,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Now get with the PIN. This should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Verify the PIN
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -355,16 +360,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Security_Auth_Req()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Security_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] securityData = new byte[] {
                 0x53, 0x08, 0xBA, 0x01, 0x11, 0xBB, 0x01, 0x22, 0xFE, 0x00
             };
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
@@ -390,7 +396,7 @@ namespace Yubico.YubiKey.Piv
 
             // Create a new session so the PIN is no longer verified.
             // PUT DATA again, but this time with only the mgmt key authenticated.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
@@ -402,7 +408,7 @@ namespace Yubico.YubiKey.Piv
 
             // Now try to read the SecurityObject without authenicating the mgmt key, nor
             // verifying the PIN. It should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.SecurityObject);
                 GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
@@ -413,16 +419,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void KeyHistory_Auth_Req()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void KeyHistory_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] keyHistoryData = new byte[] {
                 0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
             };
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
@@ -448,7 +455,7 @@ namespace Yubico.YubiKey.Piv
 
             // Create a new session so the PIN is no longer verified.
             // PUT DATA again, but this time with only the mgmt key authenticated.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
@@ -460,7 +467,7 @@ namespace Yubico.YubiKey.Piv
 
             // Now try to read the KeyHistory without authenicating the mgmt key, nor
             // verifying the PIN. It should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.KeyHistory);
                 GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
@@ -471,16 +478,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Iris_Auth_Req()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Iris_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] irisData = new byte[] {
                 0x53, 0x05, 0xBC, 0x01, 0x11, 0xFE, 0x00
             };
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
@@ -498,7 +506,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.AuthenticationRequired, getDataResponse.Status);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Verify the PIN
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -511,7 +519,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Try to PUT some data into the space.
                 // With no PIN nor mgmt key, or with only the PIN, this should
@@ -528,7 +536,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Now put after authenticating the mgmt key. This should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
@@ -540,7 +548,7 @@ namespace Yubico.YubiKey.Piv
 
             // Now try to get the data with neither PIN nor mgmt key, then only the
             // mgmt key authenticated. These should fail.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.IrisImages);
                 GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
@@ -554,7 +562,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Now get with the PIN. This should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Verify the PIN
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -569,16 +577,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Facial_Auth_Req()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Facial_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] facialData = new byte[] {
                 0x53, 0x05, 0xBC, 0x01, 0x11, 0xFE, 0x00
             };
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
@@ -596,7 +605,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.AuthenticationRequired, getDataResponse.Status);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Verify the PIN
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -609,7 +618,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Try to PUT some data into the space.
                 // With no PIN nor mgmt key, or with only the PIN, this should
@@ -626,7 +635,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Now put after authenticating the mgmt key. This should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
@@ -638,7 +647,7 @@ namespace Yubico.YubiKey.Piv
 
             // Now try to get the data with neither PIN nor mgmt key, then only the
             // mgmt key authenticated. These should fail.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.FacialImage);
                 GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
@@ -652,7 +661,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Now get with the PIN. This should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Verify the PIN
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -667,16 +676,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Fingerprint_Auth_Req()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Fingerprint_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] fingerprintData = new byte[] {
                 0x53, 0x05, 0xBC, 0x01, 0x11, 0xFE, 0x00
             };
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
@@ -694,7 +704,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.AuthenticationRequired, getDataResponse.Status);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Verify the PIN
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -707,7 +717,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Try to PUT some data into the space.
                 // With no PIN nor mgmt key, or with only the PIN, this should
@@ -724,7 +734,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Now put after authenticating the mgmt key. This should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
@@ -736,7 +746,7 @@ namespace Yubico.YubiKey.Piv
 
             // Now try to get the data with neither PIN nor mgmt key, then only the
             // mgmt key authenticated. These should fail.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Fingerprints);
                 GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
@@ -750,7 +760,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Now get with the PIN. This should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Verify the PIN
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -765,16 +775,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Bitgt_Auth_Req()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Bitgt_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] bitgtData = new byte[] {
                 0x7F, 0x61, 0x07, 0x02, 0x01, 0x01, 0x7F, 0x60, 0x01, 0x01
             };
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
@@ -794,16 +805,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void SMSigner_Auth_Req()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void SMSigner_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] smSignerData = new byte[] {
                 0x53, 0x08, 0x70, 0x01, 0x11, 0x71, 0x01, 0x00, 0xFE, 0x00
             };
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
@@ -814,7 +826,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Try to PUT some data into the space.
                 // With no PIN nor mgmt key, or with only the PIN, this should
@@ -831,7 +843,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Now put after authenticating the mgmt key. This should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
@@ -843,7 +855,7 @@ namespace Yubico.YubiKey.Piv
 
             // Now try to get the data with neither PIN nor mgmt key. It should
             // work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.SecureMessageSigner);
                 GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
@@ -854,16 +866,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void PCRef_Auth_Req()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void PCRef_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] pcRefData = new byte[] {
                 0x53, 0x0C, 0x99, 0x08, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0xFE, 0x00
             };
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
@@ -874,7 +887,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // Try to PUT some data into the space.
                 // With no PIN nor mgmt key, or with only the PIN, this should
@@ -891,7 +904,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Now put after authenticating the mgmt key. This should work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
@@ -903,7 +916,7 @@ namespace Yubico.YubiKey.Piv
 
             // Now try to get the data with neither PIN nor mgmt key. It should
             // work.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.PairingCodeReferenceData);
                 GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
@@ -914,16 +927,17 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void AdminData_Auth_Req()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void AdminData_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] adminData = new byte[] {
                 0x53, 0x09, 0x80, 0x07, 0x81, 0x01, 0x00, 0x03, 0x02, 0x5C, 0x29
             };
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // There should be no data.
                 var getDataCommand = new GetDataCommand(0x5FFF00);
@@ -947,7 +961,7 @@ namespace Yubico.YubiKey.Piv
 
             // Create a new session so the PIN is no longer verified.
             // PUT DATA again, but this time with only the mgmt key authenticated.
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
@@ -957,7 +971,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 // There should be data this time.
                 var getDataCommand = new GetDataCommand(0x5FFF00);

@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Linq;
 using Yubico.YubiKey.TestUtilities;
 using Xunit;
@@ -21,13 +20,15 @@ namespace Yubico.YubiKey.Piv
 {
     public class PinAlwaysTests
     {
-        [Fact]
-        public void PinAlways_Sign_Succeeds()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void PinAlways_Sign_Succeeds(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
             byte slotNumber = 0x9A;
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -53,13 +54,15 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Slot9C_Default_Sign_Succeeds()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Slot9C_Default_Sign_Succeeds(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
             byte slotNumber = 0x9C;
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;

@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.Piv
 
             replacement = RandomObjectUtility.SetRandomProviderFixedBytes(randomBytes);
 
-            yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            yubiKey = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
             ResetPiv(yubiKey);
         }
 

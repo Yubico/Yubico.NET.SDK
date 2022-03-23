@@ -20,14 +20,15 @@ namespace Yubico.YubiKey.Piv
 {
     public class GenerateTests
     {
-        [Fact]
-        public void SimpleGenerate()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void SimpleGenerate(StandardTestDevice testDeviceType)
         {
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKey);
-            Assert.True(isValid);
-            Assert.True(yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -39,23 +40,24 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void GenerateAndSign()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void GenerateAndSign(StandardTestDevice testDeviceType)
         {
             PivAlgorithm algorithm = PivAlgorithm.Rsa2048;
 
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKey);
-            Assert.True(isValid);
-            Assert.True(yubiKey.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            isValid = DoGenerate(
-                yubiKey, 0x86, algorithm, PivPinPolicy.Once, PivTouchPolicy.Never);
+            Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+
+            bool isValid = DoGenerate(
+                testDevice, 0x86, algorithm, PivPinPolicy.Once, PivTouchPolicy.Never);
             Assert.True(isValid);
 
-            isValid = DoSignNoPin(yubiKey, 0x86, algorithm);
+            isValid = DoSignNoPin(testDevice, 0x86, algorithm);
             Assert.False(isValid);
 
-            isValid = DoSignWithPin(yubiKey, 0x86, algorithm);
+            isValid = DoSignWithPin(testDevice, 0x86, algorithm);
             Assert.True(isValid);
         }
 

@@ -24,9 +24,9 @@ namespace Yubico.YubiKey.Piv
     public class DecryptTests
     {
         [Theory]
-        [InlineData(PivPinPolicy.Always)]
-        [InlineData(PivPinPolicy.Never)]
-        public void Decrypt_1024_Succeeds(PivPinPolicy pinPolicy)
+        [InlineData(PivPinPolicy.Always, StandardTestDevice.Fw5)]
+        [InlineData(PivPinPolicy.Never, StandardTestDevice.Fw5)]
+        public void Decrypt_1024_Succeeds(PivPinPolicy pinPolicy, StandardTestDevice testDeviceType)
         {
             byte[] dataToDecrypt = new byte[] {
                 0x64, 0x92, 0xd1, 0x38, 0x24, 0x8a, 0x78, 0xe5, 0x64, 0x68, 0x92, 0xe7, 0x13, 0xc6, 0x81, 0xa0,
@@ -43,9 +43,9 @@ namespace Yubico.YubiKey.Piv
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -57,9 +57,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
         [Theory]
-        [InlineData(PivPinPolicy.Always)]
-        [InlineData(PivPinPolicy.Never)]
-        public void Decrypt_2048_Succeeds(PivPinPolicy pinPolicy)
+        [InlineData(PivPinPolicy.Always, StandardTestDevice.Fw5)]
+        [InlineData(PivPinPolicy.Never, StandardTestDevice.Fw5)]
+        public void Decrypt_2048_Succeeds(PivPinPolicy pinPolicy, StandardTestDevice testDeviceType)
         {
             byte[] dataToDecrypt = new byte[] {
                 0x64, 0x92, 0xd1, 0x38, 0x24, 0x8a, 0x78, 0xe5, 0x64, 0x68, 0x92, 0xe7, 0x13, 0xc6, 0x81, 0xa0,
@@ -84,9 +84,9 @@ namespace Yubico.YubiKey.Piv
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -99,16 +99,16 @@ namespace Yubico.YubiKey.Piv
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024, 0x94, RsaFormat.Sha1, 1)]
-        [InlineData(PivAlgorithm.Rsa1024, 0x94, RsaFormat.Sha1, 2)]
-        [InlineData(PivAlgorithm.Rsa1024, 0x94, RsaFormat.Sha256, 2)]
-        [InlineData(PivAlgorithm.Rsa1024, 0x94, RsaFormat.Sha384, 2)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x95, RsaFormat.Sha1, 1)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x95, RsaFormat.Sha1, 2)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x95, RsaFormat.Sha256, 2)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x95, RsaFormat.Sha384, 2)]
-        [InlineData(PivAlgorithm.Rsa2048, 0x95, RsaFormat.Sha512, 2)]
-        public void EncryptCSharp_Decrypt_Correct(PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm, int paddingScheme)
+        [InlineData(PivAlgorithm.Rsa1024, 0x94, RsaFormat.Sha1, 1, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa1024, 0x94, RsaFormat.Sha1, 2, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa1024, 0x94, RsaFormat.Sha256, 2, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa1024, 0x94, RsaFormat.Sha384, 2, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa2048, 0x95, RsaFormat.Sha1, 1, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa2048, 0x95, RsaFormat.Sha1, 2, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa2048, 0x95, RsaFormat.Sha256, 2, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa2048, 0x95, RsaFormat.Sha384, 2, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa2048, 0x95, RsaFormat.Sha512, 2, StandardTestDevice.Fw5)]
+        public void EncryptCSharp_Decrypt_Correct(PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm, int paddingScheme, StandardTestDevice testDeviceType)
         {
             RSAEncryptionPadding rsaPadding = RSAEncryptionPadding.Pkcs1;
             if (paddingScheme != 1)
@@ -134,9 +134,9 @@ namespace Yubico.YubiKey.Piv
 
             PivPrivateKey pivPrivateKey = priKey.GetPivPrivateKey();
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(yubiKey))
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -162,14 +162,16 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void NoKeyInSlot_Decrypt_Exception()
+        [Theory]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void NoKeyInSlot_Decrypt_Exception(StandardTestDevice testDeviceType)
         {
             byte[] dataToDecrypt = new byte[256];
             GetArbitraryData(dataToDecrypt);
 
-            IYubiKeyDevice yubiKey = SelectSupport.GetFirstYubiKey(Transport.UsbSmartCard);
-            using (var pivSession = new PivSession(yubiKey))
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+
+            using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;

@@ -17,11 +17,6 @@ name: Build Yubico.NativeShims Package
 on:
   workflow_dispatch:
     inputs:
-      push-to-dev:
-        description: 'Push to internal NuGet'
-        required: true
-        default: false
-        type: boolean
       version-suffix:
         description: 'Suffix to append to version'
         required: true
@@ -119,7 +114,6 @@ jobs:
     name: Publish to internal NuGet
     runs-on: windows-2019
     needs: pack
-    if: ${{ inputs.push-to-dev == 'true' }}
     environment: Internal NuGet feed
     steps:
       - uses: actions/download-artifact@v3

@@ -33,6 +33,7 @@ Use this method in OathSession class to set the password:
 
 ```csharp
 oathSession.SetPassword();
+```
 
 ## Verifying the password
 

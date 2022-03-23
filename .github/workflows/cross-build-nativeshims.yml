@@ -119,7 +119,7 @@ jobs:
     name: Publish to internal NuGet
     runs-on: windows-2019
     needs: pack
-    if: inputs.push-to-dev == true
+    if: ${{ inputs.push-to-dev == true }}
     environment: Internal NuGet feed
     steps:
       - uses: actions/download-artifact@v3

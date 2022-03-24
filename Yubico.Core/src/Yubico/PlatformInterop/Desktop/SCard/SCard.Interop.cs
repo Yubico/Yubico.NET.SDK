@@ -91,7 +91,7 @@ namespace Yubico.PlatformInterop
 
             if (!(groups is null))
             {
-                rawGroups = MultiString.GetBytes(groups, SdkPlatformInfo.Encoding);
+                rawGroups = MultiString.GetBytes(groups, System.Text.Encoding.ASCII);
             }
 
             int readerNamesLength = 0;
@@ -109,7 +109,7 @@ namespace Yubico.PlatformInterop
                     throw new PlatformApiException(ExceptionMessages.SCardListReadersUnexpectedLength);
                 }
 
-                byte[] rawReaderNames = new byte[readerNamesLength * SdkPlatformInfo.CharSize];
+                byte[] rawReaderNames = new byte[readerNamesLength];
 
                 result = SCardListReaders(
                     context,
@@ -117,7 +117,7 @@ namespace Yubico.PlatformInterop
                     rawReaderNames,
                     ref readerNamesLength);
 
-                readerNames = MultiString.GetStrings(rawReaderNames, SdkPlatformInfo.Encoding);
+                readerNames = MultiString.GetStrings(rawReaderNames, System.Text.Encoding.ASCII);
             }
 
             return result;

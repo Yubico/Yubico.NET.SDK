@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+// Copyright 2021 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -12,21 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Yubico.PlatformInterop
 {
-    internal class PlatformLibrary
+    internal static partial class Libraries
     {
-        private PlatformLibrary()
-        {
-
-        }
-
-        private static readonly Lazy<PlatformLibrary> _instance = new Lazy<PlatformLibrary>(() => new PlatformLibrary());
-
-        public static PlatformLibrary Instance => _instance.Value;
-
-        public virtual ISCard SCard => PlatformInterop.SCard.Instance;
+        internal const string NativeShims = "Yubico.NativeShims";
     }
 }

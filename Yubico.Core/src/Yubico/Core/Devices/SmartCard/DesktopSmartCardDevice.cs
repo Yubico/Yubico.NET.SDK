@@ -20,6 +20,8 @@ using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
+using static Yubico.PlatformInterop.NativeMethods;
+
 namespace Yubico.Core.Devices.SmartCard
 {
     internal class DesktopSmartCardDevice : SmartCardDevice
@@ -32,8 +34,8 @@ namespace Yubico.Core.Devices.SmartCard
             Logger log = Log.GetLogger();
             using IDisposable logScope = log.BeginScope("SmartCardDevice.GetList()");
 
-            uint result = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext context);
-            log.SCardApiCall(nameof(SCard.EstablishContext), result);
+            uint result = SCardEstablishContext(SCARD_SCOPE.USER, out SCardContext context);
+            log.SCardApiCall(nameof(SCardEstablishContext), result);
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {
@@ -44,8 +46,8 @@ namespace Yubico.Core.Devices.SmartCard
 
             try
             {
-                result = PlatformLibrary.Instance.SCard.ListReaders(context, null, out string[] readerNames);
-                log.SCardApiCall(nameof(SCard.ListReaders), result);
+                result = SCardListReaders(context, null, out string[] readerNames);
+                log.SCardApiCall(nameof(SCardListReaders), result);
 
                 // It's OK if there are no readers on the system. Treat this the same as if we
                 // didn't find any devices.
@@ -64,21 +66,14 @@ namespace Yubico.Core.Devices.SmartCard
                         result);
                 }
 
-                // We could probably get away with zero, however this small delay can help us
-                // be resilient to race conditions with device arrival.
-                int timeoutMs = 100;
+                SCARD_READER_STATE[] readerStates = SCARD_READER_STATE.CreateFromReaderNames(readerNames);
 
-                using var readerStates = new SCardReaderStates(readerNames.Length);
-                for (int i = 0; i < readerStates.Count; i++)
-                {
-                    readerStates[i].ReaderName = readerNames[i];
-                }
-
-                result = PlatformLibrary.Instance.SCard.GetStatusChange(
+                result = SCardGetStatusChange(
                     context,
-                    timeoutMs,
-                    readerStates);
-                log.SCardApiCall(nameof(SCard.GetStatusChange), result);
+                    0,
+                    readerStates,
+                    readerStates.Length);
+                log.SCardApiCall(nameof(SCardGetStatusChange), result);
                 log.LogInformation("Updated SCard reader states: {ReaderStates}", readerStates);
 
                 if (result != ErrorCode.SCARD_S_SUCCESS)
@@ -100,7 +95,7 @@ namespace Yubico.Core.Devices.SmartCard
 
         private static ISmartCardDevice NewSmartCardDevice(string readerName, AnswerToReset? atr) => SdkPlatformInfo.OperatingSystem switch
         {
-            SdkPlatform.Windows => new WindowsSmartCardDevice(readerName, atr),
+            SdkPlatform.Windows => new DesktopSmartCardDevice(readerName, atr),
             SdkPlatform.MacOS => new DesktopSmartCardDevice(readerName, atr),
             SdkPlatform.Linux => new DesktopSmartCardDevice(readerName, atr),
             _ => throw new PlatformNotSupportedException()
@@ -115,8 +110,8 @@ namespace Yubico.Core.Devices.SmartCard
 
         public override ISmartCardConnection Connect()
         {
-            uint result = PlatformLibrary.Instance.SCard.EstablishContext(SCARD_SCOPE.USER, out SCardContext? context);
-            _log.SCardApiCall(nameof(SCard.EstablishContext), result);
+            uint result = SCardEstablishContext(SCARD_SCOPE.USER, out SCardContext? context);
+            _log.SCardApiCall(nameof(SCardEstablishContext), result);
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {
@@ -129,14 +124,14 @@ namespace Yubico.Core.Devices.SmartCard
 
             try
             {
-                result = PlatformLibrary.Instance.SCard.Connect(
+                result = SCardConnect(
                     context,
                     _readerName,
                     SCARD_SHARE.SHARED,
                     SCARD_PROTOCOL.Tx,
                     out cardHandle,
                     out SCARD_PROTOCOL activeProtocol);
-                _log.SCardApiCall(nameof(SCard.Connect), result);
+                _log.SCardApiCall(nameof(SCardConnect), result);
 
                 if (result != ErrorCode.SCARD_S_SUCCESS)
                 {

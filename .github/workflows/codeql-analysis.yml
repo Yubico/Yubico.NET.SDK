@@ -32,18 +32,21 @@ jobs:
     runs-on: windows-2019
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-    # Initializes the CodeQL tools for scanning.
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
-      with:
-        languages: csharp
+      # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v1
+        with:
+          languages: csharp
 
-    # Build the project
-    - name: Build Yubico.NET.SDK.sln
-      run: dotnet build --configuration Release --nologo --verbosity normal Yubico.NET.SDK.sln
+      # Build the project
+      - name: Add local NuGet repository
+        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+      - name: Build Yubico.NET.SDK.sln
+        run: dotnet build --configuration Release --nologo --verbosity normal Yubico.NET.SDK.sln
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v1

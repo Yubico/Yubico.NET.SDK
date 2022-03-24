@@ -23,6 +23,12 @@ namespace Yubico.PlatformInterop
     /// </summary>
     internal class SCardContext : SafeHandleZeroOrMinusOneIsInvalid
     {
+        public SCardContext() :
+            base(true)
+        {
+
+        }
+
         public SCardContext(IntPtr handle) :
             base(true)
         {
@@ -31,6 +37,6 @@ namespace Yubico.PlatformInterop
 
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         protected override bool ReleaseHandle() =>
-            PlatformLibrary.Instance.SCard.ReleaseContext(handle) == ErrorCode.SCARD_S_SUCCESS;
+            NativeMethods.SCardReleaseContext(handle) == ErrorCode.SCARD_S_SUCCESS;
     }
 }

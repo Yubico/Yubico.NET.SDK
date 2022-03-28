@@ -29,6 +29,13 @@ namespace Yubico.YubiKey.Oath
         internal OathApplicationData _oathData;
 
         /// <summary>
+        /// Indicates whether the OATH application on the YubiKey is
+        /// password-protected or not, whether password verification is required
+        /// before operations can be executed.
+        /// </summary>
+        public bool IsPasswordProtected => !_oathData.Challenge.IsEmpty;
+
+        /// <summary>
         /// The object that represents the connection to the YubiKey.
         /// </summary>
         public IYubiKeyConnection Connection { get; private set; }
@@ -42,7 +49,7 @@ namespace Yubico.YubiKey.Oath
         /// <c>true</c> for success or <c>false</c> for "cancel". A cancel will usually happen when the user
         /// has clicked a "Cancel" button.
         /// <p>
-        /// Note that the SDK will call the <c>KeyCollector</c> with a <c>Request</c> of <c>Release</c> 
+        /// Note that the SDK will call the <c>KeyCollector</c> with a <c>Request</c> of <c>Release</c>
         /// when the process completes. In this case, the <c>KeyCollector</c> MUST NOT throw an exception.
         /// The <c>Release</c> is called from inside a <c>finally</c> block, and it is a bad idea to throw
         /// exceptions from inside <c>finally</c>.
@@ -95,8 +102,9 @@ namespace Yubico.YubiKey.Oath
             {
                 throw new InvalidOperationException(nameof(Connection.SelectApplicationData));
             }
-           
+
             _oathData = (Connection.SelectApplicationData as OathApplicationData)!;
+
             _disposed = false;
         }
 
@@ -136,7 +144,7 @@ namespace Yubico.YubiKey.Oath
         }
 
         /// <summary>
-        /// When the OathSession object goes out of scope, this method is called. It will close the session. 
+        /// When the OathSession object goes out of scope, this method is called. It will close the session.
         /// </summary>
         // Note that .NET recommends a Dispose method call Dispose(true) and GC.SuppressFinalize(this).
         // The actual disposal is in the Dispose(bool) method.

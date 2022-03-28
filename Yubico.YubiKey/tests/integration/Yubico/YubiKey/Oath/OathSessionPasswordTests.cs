@@ -97,13 +97,24 @@ namespace Yubico.YubiKey.Oath
 
             using (var oathSession = new OathSession(testDevice))
             {
+                oathSession.ResetApplication();
+
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-                collectorObj.KeyFlag = 1;
+                oathSession.SetPassword();
+
+                Assert.True(oathSession.IsPasswordProtected);
+            }
+
+            using (var oathSession = new OathSession(testDevice))
+            {
+                var collectorObj = new SimpleOathKeyCollector();
+                oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
+
                 oathSession.UnsetPassword();
 
-                Assert.True(oathSession._oathData.Challenge.IsEmpty);
+                Assert.False(oathSession.IsPasswordProtected);
             }
         }
     }

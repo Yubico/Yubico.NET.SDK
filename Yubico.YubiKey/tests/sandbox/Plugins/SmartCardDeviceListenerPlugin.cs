@@ -48,6 +48,8 @@ namespace Yubico.YubiKey.TestApp.Plugins
             {
                 using var connection = args.Device.Connect();
                 Console.WriteLine("Device arrived!");
+
+                using var transaction = connection.BeginTransaction(out bool cardWasReset);
                 _ = connection.Transmit(new SelectApplicationCommand(YubiKeyApplication.Management).CreateCommandApdu());
             };
             listener.Removed += (sender, args) => Console.WriteLine("Device removed!");

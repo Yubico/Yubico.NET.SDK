@@ -288,7 +288,6 @@ namespace Yubico.Core.Devices.SmartCard
 
             if (newStates[0].EventState.HasFlag(SCARD_STATE.CHANGED))
             {
-                newStates[0].AcknowledgeChanges();
                 return true;
             }
 

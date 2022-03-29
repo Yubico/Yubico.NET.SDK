@@ -281,7 +281,10 @@ namespace Yubico.Core.Devices.SmartCard
             if (usePnpWorkaround)
             {
                 uint result = SCardListReaders(_context, null, out string[] readerNames);
-                _log.SCardApiCall(nameof(SCardListReaders), result);
+                if (result != ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
+                {
+                    _log.SCardApiCall(nameof(SCardListReaders), result);
+                }
 
                 return readerNames.Length != newStates.Length - 1;
             }
@@ -378,7 +381,10 @@ namespace Yubico.Core.Devices.SmartCard
         private SCARD_READER_STATE[] GetReaderStateList()
         {
             uint result = SCardListReaders(_context, null, out string[] readerNames);
-            _log.SCardApiCall(nameof(SCardListReaders), result);
+            if (result != ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
+            {
+                _log.SCardApiCall(nameof(SCardListReaders), result);
+            }
 
             return SCARD_READER_STATE.CreateFromReaderNames(readerNames.Prepend("\\\\?PnP?\\Notification"));
         }

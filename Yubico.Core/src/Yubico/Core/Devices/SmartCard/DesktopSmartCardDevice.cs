@@ -47,8 +47,12 @@ namespace Yubico.Core.Devices.SmartCard
             try
             {
                 result = SCardListReaders(context, null, out string[] readerNames);
-                log.SCardApiCall(nameof(SCardListReaders), result);
 
+                if (result != ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
+                {
+                    log.SCardApiCall(nameof(SCardListReaders), result);
+                }
+                
                 // It's OK if there are no readers on the system. Treat this the same as if we
                 // didn't find any devices.
                 if (result == ErrorCode.SCARD_E_NO_READERS_AVAILABLE || readerNames.Length == 0)

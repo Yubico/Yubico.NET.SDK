@@ -27,8 +27,10 @@ This release brings enhancements across the SDK.
 Features:
 
 - **PIV Objects**. There is now a new namespace, `Yubico.YubiKey.Piv.Objects` that contains high level
-  representations of common PIV objects such as CHUID, CCC, and KeyHistory. These objects, paired
-  with two new methods [ReadObject](xref:Yubico.YubiKey.Piv.PivSession.ReadObject``1) and
+  representations of common PIV objects such as [CHUID](xref:Yubico.YubiKey.Piv.Objects.CardholderUniqueId),
+  [CCC](xref:Yubico.YubiKey.Piv.Objects.CardCapabilityContainer), and
+  [KeyHistory](xref:Yubico.YubiKey.Piv.Objects.KeyHistory). These objects, paired
+  with two new methods [ReadObject](xref:Yubico.YubiKey.Piv.PivSession.ReadObject*) and
   [WriteObject](xref:Yubico.YubiKey.Piv.PivSession.WriteObject(Yubico.YubiKey.Piv.Objects.PivDataObject))
   provide a much easier mechanism for interacting with common PIV objects.
 - **Direct credential gathering**. Some applications, such as PIV and OATH, require a user to authenticate using
@@ -36,11 +38,11 @@ Features:
   for gathering credentials. Supplying a key collector will mean that your application will always be notified
   for the right credential at the right time. Sometimes, though, you may not want to use a key collector, and
   supplying the credential directly to the session is preferable. For this, we've added overloads to
-  the most common credential gathering routines (e.g. TryVerifyPin) that allow you to provide the
-  credential directly, without the need for a key collector.
+  the most common credential gathering routines (e.g. [TryVerifyPin](xref:Yubico.YubiKey.Piv.PivSession.TryVerifyPin(System.ReadOnlyMemory{System.Byte},System.Nullable{System.Int32}@)))
+  that allow you to provide the credential directly, without the need for a key collector.
 - **Feature queries**. Rather than keeping track of YubiKey firmware versions and other properties, your
   application can now directly [query a YubiKey](xref:Yubico.YubiKey.YubiKeyFeatureExtensions.HasFeature(Yubico.YubiKey.IYubiKeyDevice,Yubico.YubiKey.YubiKeyFeature))
-  to see whether it supports a particular feature or not.
+  to see whether it supports a particular feature.
 - **Protected PIV management keys**. Some applications, such as YubiKey Manager or the YubiKey Smart
   Card Mini-Driver, may opt to [only use the PIV PIN](xref:UsersManualPivPinOnlyMode). It does this by
   storing the PIV management key in a PIN protected object and using the PIN to unlock the smart card. The SDK
@@ -49,7 +51,7 @@ Features:
   for keys that are configured in this way. No extra handling is required by your application.
 - **Yubico.NativeShims**. A new internal-use library has been introduced to help facilitate better
   interoperability with the underlying native platform libraries. No functional changes should have
-  occured as a result of this change. This will instead open the door to broader support of platforms,
+  occurred as a result of this change. This will instead open the door to broader support of platforms,
   specifically with regards to Linux distributions.
 
 

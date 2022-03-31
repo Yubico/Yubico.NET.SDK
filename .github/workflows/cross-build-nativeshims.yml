@@ -23,7 +23,7 @@ on:
         type: boolean
       version-suffix:
         description: 'Suffix to append to version'
-        required: true
+        required: false
         default: "-prerelease."
         type: string
 

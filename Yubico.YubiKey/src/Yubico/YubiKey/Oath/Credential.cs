@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Specialized;
+using System.Diagnostics.CodeAnalysis;
 using System.Web;
 using System.Globalization;
 using System.Linq;
@@ -574,6 +575,7 @@ namespace Yubico.YubiKey.Oath
             return (defaultIssuer, tempPath);
         }
 
+        [SuppressMessage("Globalization", "CA1307:Specify StringComparison for clarity", Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
         public override int GetHashCode()
         {
             int hash = base.GetHashCode();

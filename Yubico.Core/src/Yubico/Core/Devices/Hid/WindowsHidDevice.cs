@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using Yubico.PlatformInterop;
@@ -63,6 +64,7 @@ namespace Yubico.Core.Devices.Hid
             UsagePage = (HidUsagePage)device.HidUsagePage;
         }
 
+        [SuppressMessage("Globalization", "CA1307:Specify StringComparison for clarity", Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
         private void ResolveIdsFromInstancePath(string instancePath)
         {
             // \\?\HID#VID_1050&PID_0407&MI_00#7

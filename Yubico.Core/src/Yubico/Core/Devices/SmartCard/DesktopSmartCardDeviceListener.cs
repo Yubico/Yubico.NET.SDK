@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using Yubico.Core.Logging;
@@ -430,6 +431,7 @@ namespace Yubico.Core.Devices.SmartCard
         {
             public bool Equals(SCARD_READER_STATE x, SCARD_READER_STATE y) => x.ReaderName == y.ReaderName;
 
+            [SuppressMessage("Globalization", "CA1307:Specify StringComparison for clarity", Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
             public int GetHashCode(SCARD_READER_STATE obj) => obj.ReaderName.GetHashCode();
         }
     }

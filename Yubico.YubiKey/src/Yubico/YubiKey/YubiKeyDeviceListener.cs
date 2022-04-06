@@ -179,7 +179,7 @@ namespace Yubico.YubiKey
 
             foreach (IYubiKeyDevice yubiKeyDevice in GetAll())
             {
-                if (_internalCache[yubiKeyDevice])
+                if (_internalCache.ContainsKey(yubiKeyDevice))
                 {
                     addedDevices.Add(yubiKeyDevice);
                 }

@@ -137,7 +137,7 @@ namespace Yubico.YubiKey
 
                 if (existingEntry != null)
                 {
-                    AcknowledgeExistingYubiKey(existingEntry);
+                    MarkExistingYubiKey(existingEntry);
 
                     continue;
                 }
@@ -146,7 +146,7 @@ namespace Yubico.YubiKey
 
                 if (deviceWithInfo.Info.SerialNumber is null)
                 {
-                    CreateAndAcknowledgeNewYubiKey(deviceWithInfo, addedYubiKeys);
+                    CreateAndMarkNewYubiKey(deviceWithInfo, addedYubiKeys);
 
                     continue;
                 }
@@ -156,12 +156,12 @@ namespace Yubico.YubiKey
 
                 if (existingEntry is YubiKeyDevice mergeTarget)
                 {
-                    MergeAndAcknowledgeExistingYubiKey(mergeTarget, deviceWithInfo);
+                    MergeAndMarkExistingYubiKey(mergeTarget, deviceWithInfo);
 
                     continue;
                 }
 
-                CreateAndAcknowledgeNewYubiKey(deviceWithInfo, addedYubiKeys);
+                CreateAndMarkNewYubiKey(deviceWithInfo, addedYubiKeys);
             }
 
             IEnumerable<IYubiKeyDevice> removedYubiKeys = _internalCache
@@ -209,7 +209,7 @@ namespace Yubico.YubiKey
             }
         }
 
-        private void MergeAndAcknowledgeExistingYubiKey(YubiKeyDevice mergeTarget, YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo)
+        private void MergeAndMarkExistingYubiKey(YubiKeyDevice mergeTarget, YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo)
         {
             _log.LogInformation(
                 "Device was not found in the cache, but appears to be YubiKey {Serial}. Merging devices.",
@@ -219,7 +219,7 @@ namespace Yubico.YubiKey
             _internalCache[mergeTarget] = true;
         }
 
-        private void AcknowledgeExistingYubiKey(IYubiKeyDevice existingEntry)
+        private void MarkExistingYubiKey(IYubiKeyDevice existingEntry)
         {
             _log.LogInformation(
                 "Device was found in the cache and appears to be YubiKey {Serial}.",
@@ -228,7 +228,7 @@ namespace Yubico.YubiKey
             _internalCache[existingEntry] = true;
         }
 
-        private void CreateAndAcknowledgeNewYubiKey(YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo, List<IYubiKeyDevice> addedYubiKeys)
+        private void CreateAndMarkNewYubiKey(YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo, List<IYubiKeyDevice> addedYubiKeys)
         {
             _log.LogInformation(
                 "Device appears to be a brand new YubiKey with serial {Serial}",

@@ -16,7 +16,6 @@ using Yubico.Core.Devices.SmartCard;
 using Yubico.YubiKey.DeviceExtensions;
 using System.Diagnostics.CodeAnalysis;
 using System;
-using System.Diagnostics;
 using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey

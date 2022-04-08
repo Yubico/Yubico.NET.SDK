@@ -19,6 +19,7 @@ using Yubico.YubiKey.Otp;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
 using System.Diagnostics;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.Pipelines
 {
@@ -29,6 +30,8 @@ namespace Yubico.YubiKey.Pipelines
     internal class KeyboardTransform : IApduTransform
     {
         private readonly IHidConnection _hidConnection;
+
+        private readonly Logger _log = Log.GetLogger();
 
         /// <summary>
         /// An event which is fired if the YubiKey indicates it is waiting for touch. Event handlers
@@ -71,10 +74,12 @@ namespace Yubico.YubiKey.Pipelines
             switch (commandApdu.Ins)
             {
                 case Otp.OtpConstants.ReadStatusInstruction:
+                    _log.LogInformation("Reading the OTP status.");
                     frameReader.AddStatusReport(new KeyboardReport(_hidConnection.GetReport()));
                     break;
                 case Otp.OtpConstants.RequestSlotInstruction:
                     bool configInstruction = responseType.IsAssignableFrom(typeof(Otp.Commands.ReadStatusResponse));
+                    _log.LogInformation($"Handling an OTP slot request {commandApdu.P1}. Configuring = {configInstruction}");
                     HandleSlotRequestInstruction(commandApdu, frameReader, configInstruction);
                     break;
                 default:
@@ -115,7 +120,13 @@ namespace Yubico.YubiKey.Pipelines
             KeyboardReport? report = null;
             foreach (KeyboardReport featureReport in apdu.GetHidReports())
             {
+                _log.LogInformation("Wait for write pending...");
+
                 report = WaitForWriteResponse();
+
+                _log.LogInformation("Got write response [{Report}]", report);
+                _log.SensitiveLogInformation("Sending report [{Report}]", featureReport);
+
                 _hidConnection.SetReport(featureReport.ToArray());
             }
 
@@ -127,10 +138,12 @@ namespace Yubico.YubiKey.Pipelines
             if (!configInstruction)
             {
                 // This is the point we will also detect touch.
+                _log.LogInformation("Wait for read pending...");
                 report = WaitForReadPending();
 
                 do
                 {
+                    _log.SensitiveLogInformation("Adding feature report [{Report}]", report);
                     if (!frameReader.TryAddFeatureReport(report))
                     {
                         ResetReadMode();
@@ -209,6 +222,7 @@ namespace Yubico.YubiKey.Pipelines
                 sleepDurationMs *= growthFactor;
 
                 var report = new KeyboardReport(_hidConnection.GetReport());
+                _log.SensitiveLogInformation("Received report [{Report}]", report);
 
                 if (checkForTouch && report.TouchPending)
                 {
@@ -225,12 +239,13 @@ namespace Yubico.YubiKey.Pipelines
 
                 if (stopCondition(report))
                 {
+                    _log.SensitiveLogInformation("Stop condition encountered: [{Report}]", report);
                     return report;
                 }
             }
 
             ResetReadMode();
-            Debug.WriteLine($"Timed out after {stopwatch.ElapsedMilliseconds}ms.");
+            _log.LogWarning($"Timed out after {stopwatch.ElapsedMilliseconds}ms.");
             throw new KeyboardConnectionException(timeoutMessage);
         }
 
@@ -242,6 +257,7 @@ namespace Yubico.YubiKey.Pipelines
                 SequenceNumber = 0xF,
             };
 
+            _log.LogInformation("Reset read mode [{Report}]", resetReport);
             _hidConnection.SetReport(resetReport.ToArray());
 
             // Not strictly necessary, but it's in the spec, so here it is.

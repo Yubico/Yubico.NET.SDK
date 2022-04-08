@@ -101,6 +101,7 @@ limitations under the License. -->
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
+    <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
     <PackageReference Include="Yubico.NativeShims" Version="1.3.0-prerelease.36.1">
       <IncludeAssets>native</IncludeAssets>
     </PackageReference>

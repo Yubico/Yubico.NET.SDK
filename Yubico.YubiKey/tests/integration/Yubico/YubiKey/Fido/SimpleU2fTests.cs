@@ -12,8 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using Yubico.Core.Devices.Hid;
+using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
 using Xunit;
 
@@ -22,8 +25,35 @@ namespace Yubico.YubiKey.U2f
     public class SimpleU2FTests
     {
         [Fact]
+        public void GetList_Succeeds()
+        {
+            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
+            {
+                if (!SdkPlatformInfo.IsElevated)
+                {
+                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
+                    return;
+                }
+            }
+
+            IEnumerable<IYubiKeyDevice> yubiKeys = YubiKeyDevice.FindByTransport(Transport.HidFido);
+            var yubiKeyList = yubiKeys.ToList();
+
+            Assert.NotEmpty(yubiKeyList);
+        }
+
+        [Fact]
         public void U2fCommand_Succeeds()
         {
+            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
+            {
+                if (!SdkPlatformInfo.IsElevated)
+                {
+                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
+                    return;
+                }
+            }
+
             IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
             Assert.NotNull(devices);
 

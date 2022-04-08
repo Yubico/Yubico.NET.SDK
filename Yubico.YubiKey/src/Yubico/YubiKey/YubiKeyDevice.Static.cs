@@ -14,10 +14,12 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Globalization;
 using Yubico.YubiKey.DeviceExtensions;
 using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
+using Yubico.PlatformInterop;
 using System;
 using Yubico.Core.Logging;
 
@@ -54,8 +56,8 @@ namespace Yubico.YubiKey
         /// </remarks>
         /// <param name="transport">
         /// Argument controls which devices are searched for. Values <see cref="Transport.None"/>
-        /// and <see cref="Transport.HidFido"/> will result in exceptions being thrown.
-        /// <see cref="FindAll"/> is a convenience function to find <see cref="Transport.All"/>.
+        /// will result in exceptions being thrown. <see cref="FindAll"/> is a
+        /// convenience function to find <see cref="Transport.All"/>.
         /// </param>
         /// <returns>
         /// A collection of YubiKeys that were found, as <see cref="IYubiKeyDevice"/>s.
@@ -73,11 +75,21 @@ namespace Yubico.YubiKey
                 throw new ArgumentException(ExceptionMessages.InvalidConnectionTypeNone, nameof(transport));
             }
 
-            // FIDO enumeration suppressed until we can provide a non-throwing
-            // code path for common situations such as UnauthorizedAccessException.
-            if (transport.HasFlag(Transport.HidFido))
+            // If the caller is looking only for HidFido, and this is Windows,
+            // and the process is not running elevated, we can't use the YubiKey,
+            // so throw an exception.
+            if (transport == Transport.HidFido)
             {
-                throw new NotImplementedException(ExceptionMessages.NotImplementedHidFidoEnumeration);
+                if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
+                {
+                    if (!SdkPlatformInfo.IsElevated)
+                    {
+                        throw new UnauthorizedAccessException(
+                            string.Format(
+                                CultureInfo.CurrentCulture,
+                                ExceptionMessages.HidFidoWindowsNotElevated));
+                    }
+                }
             }
 
             return YubiKeyDeviceListener.Instance.GetAll();

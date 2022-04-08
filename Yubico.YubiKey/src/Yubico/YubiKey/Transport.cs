@@ -56,12 +56,6 @@ namespace Yubico.YubiKey
         /// <summary>
         /// A convenience member that combines all flags.
         /// </summary>
-        /// <remarks>
-        /// This value excludes <see cref="HidFido"/> since it is not yet fully supported
-        /// in this version of the SDK.
-        /// </remarks>
-        // FIDO enumeration suppressed until we can provide a non-throwing
-        // code path for common situations such as UnauthorizedAccessException.
-        All = SmartCard | HidKeyboard,
+        All = SmartCard | HidKeyboard | HidFido,
     }
 }

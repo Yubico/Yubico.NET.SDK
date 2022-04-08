@@ -517,6 +517,9 @@
   <data name="NotImplementedHidFidoEnumeration" xml:space="preserve">
     <value>Enumeration of ConnectionType.HidFido devices is not implemented.</value>
   </data>
+  <data name="HidFidoWindowsNotElevated" xml:space="preserve">
+    <value>HidFido is not available on Windows if the process is not elevated.</value>
+  </data>
   <data name="InvalidDeviceNotFido" xml:space="preserve">
     <value>Device must be a FIDO device.</value>
   </data>

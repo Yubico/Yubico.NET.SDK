@@ -358,6 +358,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to HidFido is not available on Windows if the process is not elevated..
+        /// </summary>
+        internal static string HidFidoWindowsNotElevated {
+            get {
+                return ResourceManager.GetString("HidFidoWindowsNotElevated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The keyboard interface is not supported on this YubiKey..
         /// </summary>
         internal static string HidKeyboardNotSupported {

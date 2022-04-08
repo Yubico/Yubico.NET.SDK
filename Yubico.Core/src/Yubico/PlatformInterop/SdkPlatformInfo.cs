@@ -15,6 +15,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Security.Principal;
 
 namespace Yubico.PlatformInterop
 {
@@ -60,6 +61,19 @@ namespace Yubico.PlatformInterop
                 {
                     return SdkPlatform.Unknown;
                 }
+            }
+        }
+
+        public static bool IsElevated
+        {
+            get
+            {
+                if (OperatingSystem == SdkPlatform.Windows)
+                {
+                    return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+                }
+
+                return false;
             }
         }
     }

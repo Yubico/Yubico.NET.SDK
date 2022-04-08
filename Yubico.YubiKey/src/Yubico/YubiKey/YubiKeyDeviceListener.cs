@@ -20,6 +20,7 @@ using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.DeviceExtensions;
 
 namespace Yubico.YubiKey
 {
@@ -54,7 +55,7 @@ namespace Yubico.YubiKey
         private readonly SmartCardDeviceListener _smartCardListener = SmartCardDeviceListener.Create();
 
         private readonly Thread? _listenerThread;
-        private bool _isListening;
+        private readonly bool _isListening;
 
         private YubiKeyDeviceListener()
         {
@@ -120,82 +121,123 @@ namespace Yubico.YubiKey
             RwLock.EnterWriteLock();
             _log.LogInformation("Entering write-lock.");
 
+            ResetCacheMarkers();
+
+            List<IDevice> devicesToProcess = GetDevices();
+
             _log.LogInformation("Cache currently aware of {Count} YubiKeys.", _internalCache.Count);
-            List<IYubiKeyDevice> addedDevices = new List<IYubiKeyDevice>();
-            List<IYubiKeyDevice> removedDevices = GetAll();
 
-            IEnumerable<IDevice> hidDevices = YubiKeyDevice.GetFilteredHidDevices(Transport.All);
-            IEnumerable<IDevice> smartCardDevices = YubiKeyDevice.GetFilteredSmartCardDevices(Transport.All);
-            _log.LogInformation(
-                "Found {HidCount} HID devices and {SCardCount} Smart Card devices for processing.",
-                hidDevices.Count(),
-                smartCardDevices.Count());
+            var addedYubiKeys = new List<IYubiKeyDevice>();
 
-            IEnumerable<IDevice> allDevices = smartCardDevices.Union(hidDevices);
-
-            foreach (IYubiKeyDevice yubiKey in GetAll())
+            foreach (IDevice device in devicesToProcess)
             {
-                _internalCache[yubiKey] = false;
-            }
+                _log.LogInformation("Processing device {Device}", device);
 
-            foreach (IDevice device in allDevices)
-            {
-                _log.LogInformation("Processing device {Device}.", device);
+                IYubiKeyDevice? existingEntry = _internalCache.Keys.FirstOrDefault(k => k.Contains(device));
 
-                IYubiKeyDevice? newYubiKey = _internalCache.Keys.FirstOrDefault(d => d.Contains(device));
-                _log.LogInformation("Device was " + (newYubiKey is null ? "not " : "") + "found in the cache.");
-
-                if (newYubiKey != null)
+                if (existingEntry != null)
                 {
-                    _ = removedDevices.Remove(newYubiKey);
+                    MarkExistingYubiKey(existingEntry);
+
                     continue;
                 }
 
-                var yubiKeyWithInfo = new YubiKeyDevice.YubicoDeviceWithInfo(device);
-                int? serialNumber = yubiKeyWithInfo.Info.SerialNumber;
-                _log.LogInformation("Device {Device} is YubiKey with serial number {SerialNumber}.", device, serialNumber);
+                var deviceWithInfo = new YubiKeyDevice.YubicoDeviceWithInfo(device);
 
-                YubiKeyDevice? existingYubiKey =
-                    _internalCache.Keys.FirstOrDefault(d => d.SerialNumber == serialNumber) as YubiKeyDevice;
-                _log.LogInformation(
-                    "YubiKey [{SerialNumber}] was " + (existingYubiKey is null ? "not " : "") + "found in the cache.",
-                    serialNumber);
-
-                if (existingYubiKey is null)
+                if (deviceWithInfo.Info.SerialNumber is null)
                 {
-                    var yubiKey = new YubiKeyDevice(yubiKeyWithInfo.Device, yubiKeyWithInfo.Info);
-                    _internalCache[yubiKey] = true;
+                    CreateAndMarkNewYubiKey(deviceWithInfo, addedYubiKeys);
+
+                    continue;
                 }
-                else
+
+                existingEntry =
+                    _internalCache.Keys.FirstOrDefault(k => k.SerialNumber == deviceWithInfo.Info.SerialNumber);
+
+                if (existingEntry is YubiKeyDevice mergeTarget)
                 {
-                    _ = YubiKeyDevice.TryMergeYubiKey(existingYubiKey, yubiKeyWithInfo);
+                    MergeAndMarkExistingYubiKey(mergeTarget, deviceWithInfo);
+
+                    continue;
                 }
+
+                CreateAndMarkNewYubiKey(deviceWithInfo, addedYubiKeys);
             }
 
-            foreach (IYubiKeyDevice removedDevice in removedDevices)
+            IEnumerable<IYubiKeyDevice> removedYubiKeys = _internalCache
+                .Where(e => e.Value == false)
+                .Select(e => e.Key);
+
+            foreach (IYubiKeyDevice removedKey in removedYubiKeys)
             {
-                _ = _internalCache.Remove(removedDevice);
+                OnDeviceRemoved(new YubiKeyDeviceEventArgs(removedKey));
+                _ = _internalCache.Remove(removedKey);
             }
 
-            foreach (IYubiKeyDevice yubiKeyDevice in GetAll())
+            foreach (IYubiKeyDevice addedKey in addedYubiKeys)
             {
-                if (_internalCache[yubiKeyDevice])
-                {
-                    addedDevices.Add(yubiKeyDevice);
-                }
-            }
-
-            foreach (IYubiKeyDevice removedDevice in removedDevices)
-            {
-                OnDeviceRemoved(new YubiKeyDeviceEventArgs(removedDevice));
-            }
-
-            foreach (IYubiKeyDevice addedDevice in addedDevices)
-            {
-                OnDeviceArrived(new YubiKeyDeviceEventArgs(addedDevice));
+                OnDeviceArrived(new YubiKeyDeviceEventArgs(addedKey));
             }
 
             RwLock.ExitWriteLock();
+        }
+
+        private List<IDevice> GetDevices()
+        {
+            var devicesToProcess = new List<IDevice>();
+
+            IList<IDevice> hidDevices = GetFilteredHidDevices(Transport.All);
+            IList<IDevice> smartCardDevices = GetFilteredSmartCardDevices(Transport.All);
+
+            _log.LogInformation(
+                "Found {HidCount} HID devices and {SCardCount} Smart Card devices for processing.",
+                hidDevices.Count,
+                smartCardDevices.Count);
+
+            devicesToProcess.AddRange(hidDevices);
+            devicesToProcess.AddRange(smartCardDevices);
+
+            return devicesToProcess;
+        }
+
+        private void ResetCacheMarkers()
+        {
+            // Copy the list of keys as changing a dictionary's value will invalidate any enumerators (i.e. the loop).
+            foreach (IYubiKeyDevice cacheDevice in _internalCache.Keys.ToList())
+            {
+                _internalCache[cacheDevice] = false;
+            }
+        }
+
+        private void MergeAndMarkExistingYubiKey(YubiKeyDevice mergeTarget, YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo)
+        {
+            _log.LogInformation(
+                "Device was not found in the cache, but appears to be YubiKey {Serial}. Merging devices.",
+                mergeTarget.SerialNumber);
+
+            mergeTarget.Merge(deviceWithInfo.Device, deviceWithInfo.Info);
+            _internalCache[mergeTarget] = true;
+        }
+
+        private void MarkExistingYubiKey(IYubiKeyDevice existingEntry)
+        {
+            _log.LogInformation(
+                "Device was found in the cache and appears to be YubiKey {Serial}.",
+                existingEntry.SerialNumber);
+
+            _internalCache[existingEntry] = true;
+        }
+
+        private void CreateAndMarkNewYubiKey(YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo, List<IYubiKeyDevice> addedYubiKeys)
+        {
+            _log.LogInformation(
+                "Device appears to be a brand new YubiKey with serial {Serial}",
+                deviceWithInfo.Info.SerialNumber
+                );
+
+            var newYubiKey = new YubiKeyDevice(deviceWithInfo.Device, deviceWithInfo.Info);
+            addedYubiKeys.Add(newYubiKey);
+            _internalCache[newYubiKey] = true;
         }
 
         /// <summary>
@@ -207,6 +249,60 @@ namespace Yubico.YubiKey
         /// Raises event on device removal.
         /// </summary>
         private void OnDeviceRemoved(YubiKeyDeviceEventArgs e) => Removed?.Invoke(typeof(YubiKeyDevice), e);
+
+        private static IList<IDevice> GetFilteredHidDevices(Transport transport)
+        {
+            var yubicoHidDevices = new List<IDevice>();
+
+            bool fidoFlag = transport.HasFlag(Transport.HidFido);
+            bool keyboardFlag = transport.HasFlag(Transport.HidKeyboard);
+
+            if (!fidoFlag && !keyboardFlag)
+            {
+                return yubicoHidDevices;
+            }
+
+            try
+            {
+                yubicoHidDevices.AddRange(
+                    HidDevice
+                        .GetHidDevices()
+                        .Where(d => d.IsYubicoDevice())
+                        .Where(d => (fidoFlag && d.IsFido()) || (keyboardFlag && d.IsKeyboard())));
+            }
+            catch (PlatformInterop.PlatformApiException e) { ErrorHandler(e); }
+
+            return yubicoHidDevices;
+        }
+
+        private static IList<IDevice> GetFilteredSmartCardDevices(Transport transport)
+        {
+            var yubicoSmartCardDevices = new List<IDevice>();
+
+            bool usbSmartCardFlag = transport.HasFlag(Transport.UsbSmartCard);
+            bool nfcSmartCardFlag = transport.HasFlag(Transport.NfcSmartCard);
+
+            if (!usbSmartCardFlag && !nfcSmartCardFlag)
+            {
+                return yubicoSmartCardDevices;
+            }
+
+            try
+            {
+                yubicoSmartCardDevices.AddRange(
+                    SmartCardDevice
+                        .GetSmartCardDevices()
+                        .Where(d => d.IsYubicoDevice())
+                        .Where(d =>
+                            (usbSmartCardFlag && d.IsUsbTransport()) || (nfcSmartCardFlag && d.IsNfcTransport())));
+            }
+            catch (PlatformInterop.SCardException e) { ErrorHandler(e); }
+
+            return yubicoSmartCardDevices;
+        }
+
+        private static void ErrorHandler(Exception exception) =>
+            Log.GetLogger().LogWarning($"Exception caught: {exception}");
 
         #region IDisposable Support
 

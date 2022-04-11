@@ -65,6 +65,6 @@ using (OtpSession otp = new OtpSession(_yubiKey))
     .SetUse20msPacing(_use20msPacing)
     .SetAllowUpdate(_allowUpdate)
     .ProtectLongPressSlot(_protectLongPressSlot)
-    .ExecuteOperation();
+    .Execute();
 }
 ```

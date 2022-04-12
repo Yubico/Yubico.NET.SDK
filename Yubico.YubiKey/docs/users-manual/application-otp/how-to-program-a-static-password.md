@@ -34,7 +34,7 @@ using (OtpSession otp = new OtpSession(yKey))
     .WithKeyboard(KeyboardLayout.en_US)
     .AppendCarriageReturn()
     .SetPassword("You'll never guess this!".ToCharArray())
-    .ExecuteOperation();
+    .Execute();
 }
 ```
 
@@ -50,7 +50,7 @@ using (OtpSession otp = new OtpSession(yKey))
     operation = operation.AppendCarriageReturn();
   }
   operation.SetPassword("You'll never guess this!".ToCharArray())
-    .ExecuteOperation();
+    .Execute();
 }
 ```
 
@@ -63,7 +63,7 @@ using (OtpSession otp = new OtpSession(yKey))
     .WithKeyboard(KeyboardLayout.en_US)
     .AppendCarriageReturn(addCR)
     .SetPassword("You'll never guess this!".ToCharArray())
-    .ExecuteOperation();
+    .Execute();
 }
 ```
 

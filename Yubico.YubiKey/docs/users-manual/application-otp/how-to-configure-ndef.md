@@ -50,10 +50,10 @@ using (OtpSession otp = new OtpSession(yKey))
     .UseInitialMovingFactor(4096)
     .Use8Digits()
     .UseKey(_key)
-    .ExecuteOperation();
+    .Execute();
   otp.ConfigureNdef(Slot.LongPress)
     .AsText("AgentSmith:")
-    .ExecuteOperation();
+    .Execute();
 }
 ```
 

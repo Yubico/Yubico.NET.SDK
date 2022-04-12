@@ -56,6 +56,6 @@ using (OtpSession otp = new OtpSession(yKey))
     .UseHmacSha1()
     .UseKey(hmacKey)
     .UseButton()
-    .ExecuteOperation();
+    .Execute();
 }
 ```

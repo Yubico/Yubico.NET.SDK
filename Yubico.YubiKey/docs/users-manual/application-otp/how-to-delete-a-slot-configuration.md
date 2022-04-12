@@ -30,7 +30,7 @@ using (OtpSession otp = new OtpSession(yKey))
 {
   otp.DeleteSlot(Slot.LongPress)
     .UseCurrentAccessCode(_currentAccessCode)
-    .ExecuteOperation();
+    .Execute();
 }
 
 ```

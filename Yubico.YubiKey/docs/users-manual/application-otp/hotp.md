@@ -29,7 +29,7 @@ In order to verify the authenticity of HOTPs, a validation server is needed. Whe
 
 The SDK provides the [functionality](#sdk-functionality) to configure an OTP application slot with an HOTP and control how HOTPs are communicated from a YubiKey to a host device.
 
-You may have noticed that the YubiKey also has an [OATH application](xref:application-oath/OathOverview), and the SDK provides the ability to configure the OATH application with both HOTPs and TOTPs (time-based OTPs). So why include OATH functionality in the OTP application if an OATH application exists? Early versions of the YubiKey (YubiKey 1 and 2) only had the OTP application. Providing SDK functionality for OATH within the OTP application is therefore a form of legacy support. **For the average SDK user, we recommend using the OATH application instead of the OTP application for any OATH functionality needs.**
+You may have noticed that the YubiKey also has an [OATH application](https://docs.yubico.com/yesdk/users-manual/application-oath/oath-overview.html), and the SDK provides the ability to configure the OATH application with both HOTPs and TOTPs (time-based OTPs). So why include OATH functionality in the OTP application if an OATH application exists? Early versions of the YubiKey (YubiKey 1 and 2) only had the OTP application. Providing SDK functionality for OATH within the OTP application is therefore a form of legacy support. **For the average SDK user, we recommend using the OATH application instead of the OTP application for any OATH functionality needs.**
 
 ## OATH HOTP components and algorithm
 

@@ -21,7 +21,7 @@ limitations under the License. -->
 
 NDEF, or NFC Data Exchange Format, is the communication protocol used by NFC (Near-Field Communication) devices. NFC-compatible YubiKeys contain an integrated NFC antenna, which allows them to wirelessly communicate with NFC readers via the NDEF protocol when both devices are within a few centimeters of each other.
 
-NFC readers generate an electromagnetic field, which is capable of powering the YubiKey and transferring data between the devices. This allows the YubiKey to generate and submit [Yubico OTPs](xref:OtpYubicoOtp) and OATH HOTPs without being physically connected to a host.
+NFC readers generate an electromagnetic field, which is capable of powering the YubiKey and transferring data between the devices. This allows the YubiKey to generate and submit [Yubico OTPs](xref:OtpYubicoOtp) and [OATH HOTPs](xref:OtpHotp) without being physically connected to a host.
 
 Tapping an NFC reader with a YubiKey is similar to touching the key when it's plugged into a host over USB/Lightning; the action triggers whichever operation the activated OTP application [slot](xref:OtpSlots) is configured with. Unlike USB/Lightning connections, which provide the option to activate either slot based on duration of touch, only one slot may be activated over NFC.
 

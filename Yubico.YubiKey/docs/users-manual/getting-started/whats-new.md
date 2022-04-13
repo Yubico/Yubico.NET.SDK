@@ -18,6 +18,20 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.3.x Releases
 
+### 1.3.1
+
+Release date: April 13th, 2022
+
+Bug fixes:
+
+- Applications targeting .NET Core 3.x, .NET 5, or higher would encounter an exception that said
+  `Microsoft.BCL.HashCode` could not be found. Adding that NuGet reference manually would work around
+  the issue. This issue has now been addressed and a work around is no longer required.
+- An exception would be thrown if a YubiKey with a non-visible serial number was plugged in. This was
+  a regression in behavior and has now been fixed.
+- The reference to the newly introduced assembly `Yubico.NativeShims` was pinned to a pre-release version. This
+  has been fixed and now points to the latest publicly listed package.
+
 ### 1.3.0
 
 Release date: March 31st, 2022

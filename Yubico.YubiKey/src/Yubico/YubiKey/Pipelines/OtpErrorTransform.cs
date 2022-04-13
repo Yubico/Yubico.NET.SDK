@@ -15,6 +15,7 @@
 using System;
 using Yubico.YubiKey.Otp.Commands;
 using Yubico.Core.Iso7816;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.Pipelines
 {
@@ -22,6 +23,8 @@ namespace Yubico.YubiKey.Pipelines
     // be available over FIDO.
     internal class OtpErrorTransform : IApduTransform
     {
+        private readonly Logger _log = Log.GetLogger();
+
         private readonly IApduTransform _nextTransform;
 
         public OtpErrorTransform(IApduTransform nextTransform)
@@ -50,15 +53,24 @@ namespace Yubico.YubiKey.Pipelines
                 .GetData()
                 .SequenceNumber;
 
-            ResponseApdu response = _nextTransform.Invoke(command, commandType, responseType);
-            int afterSequence = new ReadStatusResponse(response).GetData().SequenceNumber;
-            int expectedSequence = (beforeSequence + 1) % 0x100;
+            try
+            {
+                ResponseApdu response = _nextTransform.Invoke(command, commandType, responseType);
+                int afterSequence = new ReadStatusResponse(response).GetData().SequenceNumber;
+                int expectedSequence = (beforeSequence + 1) % 0x100;
 
-            // If we see the sequence number change, we can assume that the configuration was applied successfully. Otherwise
-            // we just invent an error in the response.
-            return afterSequence != expectedSequence
-                ? new ResponseApdu(response.Data.ToArray(), SWConstants.WarningNvmUnchanged)
-                : response;
+                // If we see the sequence number change, we can assume that the configuration was applied successfully. Otherwise
+                // we just invent an error in the response.
+                return afterSequence != expectedSequence
+                    ? new ResponseApdu(response.Data.ToArray(), SWConstants.WarningNvmUnchanged)
+                    : response;
+            }
+            catch (KeyboardConnectionException e)
+            {
+                _log.LogWarning(e, "Handling keyboard connection exception. Translating to APDU response.");
+
+                return new ResponseApdu(Array.Empty<byte>(), SWConstants.WarningNvmUnchanged);
+            }
         }
 
         public void Setup() => _nextTransform.Setup();

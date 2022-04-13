@@ -14,7 +14,6 @@
 
 using Yubico.Core.Devices.Hid;
 using Yubico.YubiKey.DeviceExtensions;
-using System.Diagnostics;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using Yubico.Core.Logging;
@@ -77,10 +76,6 @@ namespace Yubico.YubiKey
                     return true;
                 }
             }
-            catch (NotImplementedException e)
-            {
-                ErrorHandler(e, "The MacOSHidDevice.ConnectToFeatureReport was not implemented on MacOS.");
-            }
             catch (KeyboardConnectionException e)
             {
                 // KeyboardTransform.HandleSlotRequestInstruction, unexpected no reply after writing report
@@ -113,10 +108,6 @@ namespace Yubico.YubiKey
                     return true;
                 }
             }
-            catch (NotImplementedException e)
-            {
-                ErrorHandler(e, "MacOSHidDevice.ConnectToFeatureReports was not implemented on MacOS.");
-            }
             catch (KeyboardConnectionException e)
             {
                 // KeyboardTransform.HandleStatusInstruction, failed to read keyboard status report
@@ -148,10 +139,6 @@ namespace Yubico.YubiKey
                     firmwareVersion = response.GetData().FirmwareVersion;
                     return true;
                 }
-            }
-            catch (NotImplementedException e)
-            {
-                ErrorHandler(e, "MacOSHidDevice.ConnectToFeatureReports was not implemented on MacOS.");
             }
             catch (KeyboardConnectionException e)
             {

@@ -19,7 +19,7 @@ limitations under the License. -->
     <RootNamespace></RootNamespace>
 
     <!-- Multi-target build -->
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 
     <!-- Suppressed warnings-->
@@ -101,7 +101,8 @@ limitations under the License. -->
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
-    <PackageReference Include="Yubico.NativeShims" Version="1.3.0-prerelease.36.1">
+    <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
+    <PackageReference Include="Yubico.NativeShims" Version="1.3.1">
       <IncludeAssets>native</IncludeAssets>
     </PackageReference>
     <ProjectReference Include="..\..\Yubico.DotNetPolyfills\src\Yubico.DotNetPolyfills.csproj" />

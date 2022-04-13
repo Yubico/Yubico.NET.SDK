@@ -49,7 +49,7 @@ using (OtpSession otp = new OtpSession(yKey))
     .UseSerialNumberAsPublicId()
     .UsePrivateId(privateId)
     .UseKey(aesKey)
-    .ExecuteOperation();
+    .Execute();
 }
 ```
 
@@ -67,7 +67,7 @@ using (OtpSession otp = new OtpSession(yKey))
     .UseSerialNumberAsPublicId()
     .GeneratePrivateId(privateId)
     .GenerateKey(aesKey)
-    .ExecuteOperation();
+    .Execute();
 
   // Do whatever is needed with privateId and aesKey, and clear them.
 }

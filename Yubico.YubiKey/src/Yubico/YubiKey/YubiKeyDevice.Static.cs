@@ -100,74 +100,6 @@ namespace Yubico.YubiKey
             return yubiKey != default;
         }
 
-        internal static IEnumerable<IDevice> GetFilteredHidDevices(Transport transport)
-        {
-            IEnumerable<IDevice> yubicoHidDevices = Enumerable.Empty<IDevice>();
-
-            bool fidoFlag = transport.HasFlag(Transport.HidFido);
-            bool keyboardFlag = transport.HasFlag(Transport.HidKeyboard);
-
-            if (fidoFlag || keyboardFlag)
-            {
-                try
-                {
-                    yubicoHidDevices = HidDevice.GetHidDevices()
-                        .Where(d => d.IsYubicoDevice())
-                        .Where(d => (fidoFlag && d.IsFido()) || (keyboardFlag && d.IsKeyboard()));
-                }
-                catch (PlatformInterop.PlatformApiException e) { ErrorHandler(e); }
-                catch (NotImplementedException e) { ErrorHandler(e); }
-            }
-
-            return yubicoHidDevices;
-        }
-
-        internal static IEnumerable<IDevice> GetFilteredSmartCardDevices(Transport transport)
-        {
-            IEnumerable<IDevice> yubicoSmartCardDevices = Enumerable.Empty<IDevice>();
-
-            bool usbSmartCardFlag = transport.HasFlag(Transport.UsbSmartCard);
-            bool nfcSmartCardFlag = transport.HasFlag(Transport.NfcSmartCard);
-
-            if (usbSmartCardFlag || nfcSmartCardFlag)
-            {
-                try
-                {
-                    yubicoSmartCardDevices = SmartCardDevice.GetSmartCardDevices()
-                        .Where(d => d.IsYubicoDevice())
-                        .Where(d => (usbSmartCardFlag && d.IsUsbTransport())
-                            || (nfcSmartCardFlag && d.IsNfcTransport()));
-                }
-                catch (PlatformInterop.SCardException e) { ErrorHandler(e); }
-            }
-
-            return yubicoSmartCardDevices;
-        }
-
-        internal static bool TryMergeYubiKey(
-            YubiKeyDevice originalDevice,
-            YubicoDeviceWithInfo newDevice)
-        {
-            if (!IsValidYubiKeyDevice(newDevice))
-            {
-                return false;
-            }
-
-            originalDevice.Merge(newDevice.Device, newDevice.Info);
-
-            return true;
-        }
-
-        private static bool IsValidYubiKeyDevice(YubicoDeviceWithInfo device) =>
-            device.Device is SmartCardDevice ||
-            (device.Device is HidDevice hidDevice && (hidDevice.IsKeyboard() || hidDevice.IsFido()));
-
-        private static bool IsValidYubiKeyDeviceGroup(ICollection<YubicoDeviceWithInfo> devices) =>
-            devices.Count > 0 && devices.Count <= 3
-            && devices.Count(d => d.Device is SmartCardDevice) <= 1
-            && devices.Count(d => d.Device is HidDevice hd && hd.IsKeyboard()) <= 1
-            && devices.Count(d => d.Device is HidDevice hd && hd.IsFido()) <= 1;
-
         internal class YubicoDeviceWithInfo
         {
             /// <summary>
@@ -216,8 +148,5 @@ namespace Yubico.YubiKey
                     _ => new YubiKeyDeviceInfo(),
                 };
         }
-
-        private static void ErrorHandler(Exception exception) =>
-            Log.GetLogger().LogWarning($"Exception caught: {exception}");
     }
 }

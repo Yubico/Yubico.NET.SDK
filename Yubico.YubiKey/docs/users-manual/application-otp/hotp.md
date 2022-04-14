@@ -33,7 +33,7 @@ You may have noticed that the YubiKey also has an [OATH application](https://doc
 
 ## OATH HOTP components and algorithm
 
-OATH HOTPs are much simpler than [Yubico OTPs](xref:OtpYubicoOtp). To generate an HOTP, you need the following components:
+OATH HOTPs are much simpler than [Yubico OTPs](xref:OtpYubicoOtp). To generate an HOTP, the YubiKey uses the following elements:
 
 - A counter (8 bytes)
 - A unique secret key (20 bytes)

@@ -1,6 +1,5 @@
 ---
 uid: Yubico.YubiKey
-summary: *content
 ---
 
 <!-- Copyright 2021 Yubico AB

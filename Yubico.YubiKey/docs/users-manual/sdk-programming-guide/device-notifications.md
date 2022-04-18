@@ -1,6 +1,5 @@
 ---
 uid: DeviceNotifications
-summary: *content
 ---
 
 <!-- Copyright 2022 Yubico AB

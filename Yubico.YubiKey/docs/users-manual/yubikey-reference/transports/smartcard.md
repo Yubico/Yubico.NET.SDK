@@ -1,6 +1,5 @@
 ---
 uid: YubiKeyTransportSmartCard
-summary: *content
 ---
 
 <!-- Copyright 2021 Yubico AB

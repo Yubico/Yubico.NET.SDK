@@ -1,6 +1,5 @@
 ---
 uid: YubiKeyApiIndexPage
-summary: *content
 ---
 
 # .NET YubiKey SDK: YubiKey API reference

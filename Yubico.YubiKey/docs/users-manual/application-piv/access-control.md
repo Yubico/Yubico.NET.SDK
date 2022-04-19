@@ -1,6 +1,5 @@
 ---
 uid: UsersManualPivAccessControl
-summary: *content
 ---
 
 <!-- Copyright 2021 Yubico AB
@@ -22,7 +21,7 @@ limitations under the License. -->
 There are some PIV commands or operations that require management key authentication or
 PIN verification to execute. Furthermore, the auth/verification will be valid only during
 a session. Which commands and operations require which access control element? How does
-one write code to perform the auth/verification.?
+one write code to perform the auth/verification?
 
 ## PIV Session
 

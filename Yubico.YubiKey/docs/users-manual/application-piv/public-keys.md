@@ -1,6 +1,5 @@
 ---
 uid: UsersManualPublicKeys
-summary: *content
 ---
 
 <!-- Copyright 2021 Yubico AB

@@ -182,38 +182,6 @@ namespace Yubico.YubiKey.Piv.Commands
             Assert.True(response is SetManagementKeyResponse);
         }
 
-        [Fact]
-        public void ClassType_NullKey_correctException()
-        {
-            _ = Assert.Throws<ArgumentException>(() => new SetManagementKeyCommand(null, PivTouchPolicy.Always));
-        }
-
-        [Fact]
-        public void InitConstructor_NullKey_correctException()
-        {
-            _ = Assert.Throws<ArgumentException>(() => new SetManagementKeyCommand(null));
-        }
-
-        [Theory]
-        [InlineData(23)]
-        [InlineData(25)]
-        public void Constructor_BadLength_CorrectException(int keyLength)
-        {
-            byte[] keyBytes = new byte[keyLength];
-
-            _ = Assert.Throws<ArgumentException>(() => new SetManagementKeyCommand(keyBytes, PivTouchPolicy.Always));
-        }
-
-        [Theory]
-        [InlineData(23)]
-        [InlineData(25)]
-        public void InitConstructor_BadLength_CorrectException(int keyLength)
-        {
-            byte[] keyBytes = new byte[keyLength];
-
-            _ = Assert.Throws<ArgumentException>(() => new SetManagementKeyCommand(keyBytes));
-        }
-
         private static CommandApdu GetSetManagementKeyCommandApdu(int cStyle, PivTouchPolicy touchPolicy)
         {
             SetManagementKeyCommand cmd = GetCommandObject(cStyle, touchPolicy);

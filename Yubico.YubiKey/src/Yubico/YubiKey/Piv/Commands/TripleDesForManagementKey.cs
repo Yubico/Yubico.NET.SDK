@@ -97,7 +97,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// </para>
     /// </remarks>
     [Obsolete("This should only be used for PIV management key operations and nowhere else.")]
-    internal sealed class TripleDesForManagementKey : IDisposable
+    internal sealed class TripleDesForManagementKey : ISymmetricForManagementKey
     {
         // Byte length of the key data
         private const int ValidTripleDesKeyLength = 24;
@@ -105,6 +105,8 @@ namespace Yubico.YubiKey.Piv.Commands
         private const int KeyOffsetFirst  = 0;
         private const int KeyOffsetSecond = 8;
         private const int KeyOffsetThird  = 16;
+
+        private const int TripleDesBlockSize = 8;
 
         // What the CheckForEqualKeys method can return.
         private const int NoEqualKey = 0;
@@ -135,11 +137,11 @@ namespace Yubico.YubiKey.Piv.Commands
         private ICryptoTransform? _cryptoTransformB;
         private bool _disposed;
 
-        /// <summary>
-        /// Indicates whether the class was instantiated to encrypt (<c>true</c>)
-        /// or decrypt (<c>false</c>).
-        /// </summary>
+        /// <inheritdoc/>
         public bool IsEncrypting { get; }
+
+        /// <inheritdoc/>
+        public int BlockSize { get; }
 
         /// <summary>
         /// Create a new instance of <c>TripleDesForManagementKey</c> using the
@@ -164,6 +166,9 @@ namespace Yubico.YubiKey.Piv.Commands
         public TripleDesForManagementKey(ReadOnlySpan<byte> managementKey, bool isEncrypting)
         {
             IsEncrypting = isEncrypting;
+            BlockSize = TripleDesBlockSize;
+            _disposed = false;
+
             if (managementKey.Length != ValidTripleDesKeyLength)
             {
                 throw new ArgumentException(
@@ -171,8 +176,6 @@ namespace Yubico.YubiKey.Piv.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.IncorrectTripleDesKeyLength));
             }
-
-            _disposed = false;
 
             // Set parity so that we can compare keys.
             byte[] keyData = SetParity(managementKey);
@@ -192,44 +195,7 @@ namespace Yubico.YubiKey.Piv.Commands
             }
         }
 
-        /// <summary>
-        /// Encrypt or decrypt the block, depending on whether
-        /// <c>IsEncrypting</c> is true or not.
-        /// </summary>
-        /// <remarks>
-        /// The length of the input must be a multiple of 8, and cannot be 0. The
-        /// length of the result will be the length of the input. It is possible
-        /// to process more than one block, but the <c>outputBuffer</c> (starting
-        /// at <c>outputOffset</c>) must be big enough to accept the the result.
-        /// </remarks>
-        /// <param name="inputBuffer">
-        /// The buffer containing the data to process.
-        /// </param>
-        /// <param name="inputOffset">
-        /// The offset into the <c>inputBuffer</c> where the data to process
-        /// begins.
-        /// </param>
-        /// <param name="inputCount">
-        /// The number of bytes to process.
-        /// </param>
-        /// <param name="outputBuffer">
-        /// The buffer where the result will be deposited.
-        /// </param>
-        /// <param name="outputOffset">
-        /// The offset into the <c>outputBuffer</c> where the method will begin
-        /// depositing the result.
-        /// </param>
-        /// <returns>
-        /// The number of bytes placed into the output buffer.
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// The <c>inputBuffer</c> or <c>outputBuffer</c> argument is null.
-        /// </exception>
-        /// <exception cref="ArgumentException">
-        /// The <c>inputCount</c> is not a multiple of 8 (note that 0 is not a
-        /// valid input), the input or output buffers are not big enough for the
-        /// specified offset and length.
-        /// </exception>
+        /// <inheritdoc/>
         public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
         {
             if (inputBuffer is null)

@@ -13,10 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
-using System.Linq;
-using System.Collections.Generic;
 using Yubico.Core.Iso7816;
+using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -44,11 +42,26 @@ namespace Yubico.YubiKey.Piv.Commands
     /// or to change it again later on.
     /// </para>
     /// <para>
-    /// The management key is a Triple-DES key, so it is 24 byte long, no more,
-    /// no less. It is binary. That's 192 bits. But note that because of "parity"
-    /// bits, the actual bit strength of a Triple-DES key is 124 bits. And then
-    /// further, there are attacks on Triple-DES that leave its effective bit
-    /// strength at 112 bits.
+    /// For YubiKeys before version 5.4.2, the management key is a Triple-DES
+    /// key, so it is 24 byte long, no more, no less. It is binary. That's 192
+    /// bits. But note that because of "parity" bits, the actual bit strength of
+    /// a Triple-DES key is 124 bits. And then further, there are attacks on
+    /// Triple-DES that leave its effective bit strength at 112 bits.
+    /// </para>
+    /// <para>
+    /// Starting with YubiKey 5.4.2, it is possible to use an AES key as the
+    /// management key. An AES key can be 128, 192, or 256 bits (16, 24, and 32
+    /// bytes respectively). If the YubiKey is version 5.4.2 or later, you can
+    /// use this command to set the management key to any valid size of an AES
+    /// key.
+    /// </para>
+    /// <para>
+    /// To determine if the YubiKey being set can have an AES management key, use
+    /// <c>HasFeature</c>:
+    /// <code>
+    ///    IYubiKeyDevice yubiKeyDevice;<br/>
+    ///    bool aesCapable = yubiKeyDevice.HasFeature(YubiKeyFeature.PivManagementKeyAes);
+    /// </code>
     /// </para>
     /// <para>
     /// Along with the key data itself, a management key has a touch policy.
@@ -68,7 +81,8 @@ namespace Yubico.YubiKey.Piv.Commands
     /// That is, touch for an operation, and if a second operation requires the
     /// management key, and it is executing less than 15 seconds after the first,
     /// touch is not required. <c>Default</c> will use the YubiKey's default
-    /// touch policy.
+    /// touch policy. Currently, for all YubiKeys, the default touch policy of
+    /// management keys is <c>Never</c>.
     /// </para>
     /// <para>
     /// When you pass the new management key to this class, it will copy a
@@ -91,7 +105,7 @@ namespace Yubico.YubiKey.Piv.Commands
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   mgmtKey = CollectMgmtKey();
     ///   var setManagementKeyCommand =
-    ///       new SetManagementKeyCommand(PivTouchPolicy.Never, mgmtKey);
+    ///       new SetManagementKeyCommand(mgmtKey, PivTouchPolicy.Never, PivAlgorithm.AES192);
     ///   SetManagementKeyResponse setManagementKeyResponse =
     ///        connection.SendCommand(setManagementKeyCommand);<br/>
     ///   if (setManagementKeyResponse != ResponseStatus.Success)
@@ -110,10 +124,6 @@ namespace Yubico.YubiKey.Piv.Commands
         private const byte TouchPolicyP2Always = 0xFE;
         private const byte TouchPolicyP2Cached = 0xFD;
 
-        private const int PrefixLength = 3;
-        private const int ManagementKeyLength = 24;
-        private static readonly byte[] EncodedKeyPrefix = new byte[] { 0x03, 0x9B, 0x18 };
-
         private readonly ReadOnlyMemory<byte> _newKey;
 
         /// <summary>
@@ -121,6 +131,15 @@ namespace Yubico.YubiKey.Piv.Commands
         /// to Never.
         /// </summary>
         public PivTouchPolicy TouchPolicy { get; set; }
+
+        /// <summary>
+        /// The algorithm of the management key. On YubiKeys before version
+        /// 5.4.2, only Triple-DES (<c>PivAlgorithm.TripleDes</c>) is supported.
+        /// Beginning with 5.4.2, the Algorithm can be <c>Aes128</c>,
+        /// <c>Aes192</c>, <c>Aes256</c>, or <c>TripleDes</c>. The default is
+        /// <c>TripleDes</c>.
+        /// </summary>
+        public PivAlgorithm Algorithm { get; set; }
 
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs. For this
@@ -143,7 +162,8 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <summary>
         /// Initializes a new instance of the <c>SetManagementKeyCommand</c> class.
         /// This command takes the new management key as input and will set the
-        /// <c>TouchPolicy</c> to the default.
+        /// <c>TouchPolicy</c> and <c>Algorithm</c> properties to their
+        /// respective defaults.
         /// </summary>
         /// <remarks>
         /// This constructor is provided for those developers who want to use the
@@ -152,8 +172,16 @@ namespace Yubico.YubiKey.Piv.Commands
         ///   var command = new SetManagementKeyCommand(keyData)
         ///   {
         ///       TouchPolicy = PivTouchPolicy.Cached,
+        ///       Algorithm = PivAlgorithm.AES192,
         ///   };
         /// </code>
+        /// <para>
+        /// The default algorithm is <c>TripleDes</c>. If you do not set the
+        /// <c>Algorithm</c> property after instantiating with this constructor,
+        /// the SDK will expect the key to be TripleDES. Valid algorithms are
+        /// <c>PivAlgorithm.TripleDes</c>, <c>PivAlgorithm.Aes128</c>,
+        /// <c>PivAlgorithm.Aes192</c>, and <c>PivAlgorithm.Aes256</c>.
+        /// </para>
         /// <para>
         /// Note that you need to authenticate the current PIV management key before
         /// setting it to a new value with this command.
@@ -162,56 +190,73 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <param name="newKey">
         /// The bytes that make up the new management key.
         /// </param>
-        /// <exception cref="ArgumentException">
-        /// The Triple-DES key is an invalid length.
-        /// </exception>
         public SetManagementKeyCommand(ReadOnlyMemory<byte> newKey)
+            : this (newKey, PivTouchPolicy.Default, PivAlgorithm.TripleDes)
         {
-            if (newKey.Length != ManagementKeyLength)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.IncorrectTripleDesKeyLength));
-            }
-
-            TouchPolicy = PivTouchPolicy.Default;
-            _newKey = newKey;
         }
 
         /// <summary>
         /// Initializes a new instance of the SetManagementKeyCommand class. This
-        /// command takes the touch policy and the new management key as input.
+        /// command takes the new management key and the touch policy as input.
         /// </summary>
         /// <remarks>
         /// Note that a <c>touchPolicy</c> of <c>PivTouchPolicy.Default</c> or
         /// <c>None</c> is equivalent to <c>Never</c>.
         /// <para>
+        /// The default algorithm is <c>TripleDes</c>. If you do not set the
+        /// <c>Algorithm</c> property after instantiating with this constructor,
+        /// the SDK will expect the key to be TripleDES. Valid algorithms are
+        /// <c>PivAlgorithm.TripleDes</c>, <c>PivAlgorithm.Aes128</c>,
+        /// <c>PivAlgorithm.Aes192</c>, and <c>PivAlgorithm.Aes256</c>.
+        /// </para>
+        /// <para>
         /// Note also that you need to authenticate the current PIV management
         /// key before setting it to a new value with this command.
         /// </para>
         /// </remarks>
-        /// <param name="touchPolicy">
-        /// The touch policy for the management key.
-        /// </param>
         /// <param name="newKey">
         /// The bytes that make up the new management key.
         /// </param>
-        /// <exception cref="ArgumentException">
-        /// The Triple-DES key is an invalid length.
-        /// </exception>
+        /// <param name="touchPolicy">
+        /// The touch policy for the management key.
+        /// </param>
         public SetManagementKeyCommand(ReadOnlyMemory<byte> newKey, PivTouchPolicy touchPolicy)
+            : this (newKey, touchPolicy, PivAlgorithm.TripleDes)
         {
-            if (newKey.Length != ManagementKeyLength)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.IncorrectTripleDesKeyLength));
-            }
+        }
 
-            TouchPolicy = touchPolicy;
+        /// <summary>
+        /// Initializes a new instance of the SetManagementKeyCommand class. This
+        /// command takes the new management key, the touch policy, and the
+        /// algorithm as input.
+        /// </summary>
+        /// <remarks>
+        /// Note that a <c>touchPolicy</c> of <c>PivTouchPolicy.Default</c> or
+        /// <c>None</c> is equivalent to <c>Never</c>.
+        /// <para>
+        /// Valid algorithms are <c>PivAlgorithm.TripleDes</c>,
+        /// <c>PivAlgorithm.Aes128</c>, <c>PivAlgorithm.Aes192</c>, and
+        /// <c>PivAlgorithm.Aes256</c>,
+        /// </para>
+        /// <para>
+        /// Note also that you need to authenticate the current PIV management
+        /// key before setting it to a new value with this command.
+        /// </para>
+        /// </remarks>
+        /// <param name="newKey">
+        /// The bytes that make up the new management key.
+        /// </param>
+        /// <param name="touchPolicy">
+        /// The touch policy for the management key.
+        /// </param>
+        /// <param name="algorithm">
+        /// The algorithm of the new management key.
+        /// </param>
+        public SetManagementKeyCommand(ReadOnlyMemory<byte> newKey, PivTouchPolicy touchPolicy, PivAlgorithm algorithm)
+        {
             _newKey = newKey;
+            TouchPolicy = touchPolicy;
+            Algorithm = algorithm;
         }
 
         /// <inheritdoc />
@@ -229,12 +274,16 @@ namespace Yubico.YubiKey.Piv.Commands
         };
 
         // Build a byte array that contains the data portion of the APDU.
-        // It should be prefix || new key.
+        // It should be Alg 9B Len key
+        // To generalize the encoding, treat the Alg 9B as a 2-byte tag, then
+        // encode the value.
         private byte[] BuildSetManagementKeyApduData()
         {
-            byte[] returnValue = new byte[PrefixLength + ManagementKeyLength];
-            Array.Copy(EncodedKeyPrefix, returnValue, PrefixLength);
-            _newKey.CopyTo(returnValue.AsMemory(PrefixLength, ManagementKeyLength));
+            int tag = ((int)Algorithm << 8) + ((int)PivSlot.Management & 0xFF);
+            var tlvWriter = new TlvWriter();
+            tlvWriter.WriteValue(tag, _newKey.Span);
+            byte[] returnValue = tlvWriter.Encode();
+            tlvWriter.Clear();
 
             return returnValue;
         }

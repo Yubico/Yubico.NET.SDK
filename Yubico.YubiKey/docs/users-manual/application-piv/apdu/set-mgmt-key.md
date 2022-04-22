@@ -21,8 +21,8 @@ CLA | INS | P1 | P2 | Lc | Data | Le
 :---: | :---: | :---: | :---: | :---: | :---:
 00 | FF | FF | *touch policy* | 1B | *new key data* | (absent)
 
-The touch policy is either `FF` (no touch required) or `FE` (touch required) or `??`
-for cached.
+The touch policy is either `FF` (no touch required) or `FE` (touch
+required) or `FD` for cached.
 
 The new key data is formatted as follows
 

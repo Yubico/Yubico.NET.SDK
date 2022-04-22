@@ -274,10 +274,10 @@ This section discusses authenticating the management key. See
 [Authenticate: key agreement](#authenticate-key-agreement)
 for information on signing, decrypting, and key agreement.
 
-The primary purpose of this command is to authenticate the client application (off-card application) to the
-YubiKey. That is, before the YubiKey is willing to perform some operations, it must know
-that the caller has access to the management key. This section will refer to this action
-as <b>Client Authentication</b>.
+The primary purpose of this command is to authenticate the client application (off-card
+application) to the YubiKey. That is, before the YubiKey is able to perform some
+operations, it must know that the caller has access to the management key. This section
+will refer to this action as <b>Client Authentication</b>.
 
 It is also possible to authenticate the YubiKey to the client application, so that the
 app knows it is communicating with the appropriate YubiKey. Maybe the app wants to be sure
@@ -330,6 +330,8 @@ The process is the following:
 
 All YubiKeys with the PIV application.
 
+Beginning with YubiKey 5.4.2, the management key can be an AES key.
+
 ### SDK Classes
 
 [InitializeAuthenticateManagementKeyCommand](xref:Yubico.YubiKey.Piv.Commands.InitializeAuthenticateManagementKeyCommand)
@@ -343,9 +345,8 @@ All YubiKeys with the PIV application.
 ### Input
 
 Authenticating with the management key requires two calls (send two APDUs). It will be a
-challenge-response process. The first call will take no input, the second will take in the
-response APDU from the first call, the management key, a Triple-DES object, and a random
-number generator.
+challenge-response process. The first call will take the algorithm, the second will take
+in the response APDU from the first call, the management key, and the algorithm.
 
 ### Output
 
@@ -538,8 +539,8 @@ You can use this to change the PIN and touch policies as well. If you supply the
 as before, just new PIN and/or touch policies, this will leave the key the same and change
 only the PIN and touch policies.
 
-Before the YubiKey can set the management, the caller must have authenticated the current
-management key. See the User's Manual entry on
+Before the YubiKey can set the management key, the caller must have authenticated the
+current management key. See the User's Manual entry on
 [PIV commands access control](access-control.md) for information on how to
 authenticate with the management key for commands. See also the section in this page on
 [Authenticate: management key](#authenticate-management-key).
@@ -547,6 +548,8 @@ authenticate with the management key for commands. See also the section in this 
 ### Available
 
 All YubiKeys with the PIV application, although require touch is available on only 4 and 5.
+
+Beginning with YubiKey 5.4.2, the management key can be an AES key.
 
 ### SDK Classes
 
@@ -556,19 +559,23 @@ All YubiKeys with the PIV application, although require touch is available on on
 
 ### Input
 
-The new key and a touch policy. This command must be used in conjunction with the
-Authenticate command. See
+The new key, a touch policy, and the algorithm. This command must be used in conjunction
+with the Authenticate command. See
 ["Authenticate: Management Key"](#authenticate-management-key).
 
-The new key is 24 bytes, no more, no less. The touch policy is one of three values:
-always, cached, or never.
+For YubiKeys prior to 5.4.2, the new key must be a Triple-DES key. Beginning with 5.4.2,
+the managment key can be AES.
+
+If the key is Triple-DES, the new key must be 24 bytes, no more, no less. If the key is
+AES-128, the new key must be 16 bytes, if AES-192, 24 bytes, and if AES-256, 32 bytes. The
+touch policy is one of three values: always, cached, or never.
 
 ### Output
 
 There is no data output, only the status.
 
 If the command was not successful, it will almost certainly be because the current
-management key supplied was not correct. This command will return an error indicating
+management key was not authenticated. This command will return an error indicating
 authentication is required. Generally you will not call this command until you have
 successfully authenticated the management key.
 

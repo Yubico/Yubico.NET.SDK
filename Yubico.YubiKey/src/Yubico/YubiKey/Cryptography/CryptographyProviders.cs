@@ -247,6 +247,44 @@ namespace Yubico.YubiKey.Cryptography
 
         /// <summary>
         /// This property is a delegate (function pointer). The method loaded
+        /// will return an instance of <c>AES</c>.
+        /// </summary>
+        /// <remarks>
+        /// When an SDK operation needs to encrypt or decrypt data using
+        /// AES, it will do so using an implementation of the
+        /// <c>System.Security.Cryptography.AES</c> abstract class.
+        /// However, when it needs the AES class, it will ask this delegate to
+        /// build an object, rather than ask for an object itself. This has to do
+        /// with the fact that the <c>AES</c> class implements
+        /// <c>IDisposable</c>. In order to avoid the complex problem of
+        /// ownership of an object that will be disposed once it goes out of
+        /// scope, the SDK will create a new object each time one is needed. This
+        /// new object will be in scope only for the duration of its use in the
+        /// SDK, and will be disposed immediately when the SDK is done with it.
+        /// <para>
+        /// The method loaded will return an object. This class is initialized
+        /// with a method that will build and return an instance of the C#
+        /// default implementation. For example, it could be used as follows.
+        /// <code>
+        ///   AES aesObject = CryptographyProviders.AesCreator();
+        /// </code>
+        /// </para>
+        /// <para>
+        /// If you want to replace the implementation, you will likely do
+        /// something like this in your application.
+        /// <code>
+        ///     CryptographyProviders.AesCreator = () =>
+        ///     {
+        ///         Handle aesHandle = GetHandle();
+        ///         return AesImpl.GetAesObject(aesHandle);
+        ///     };
+        /// </code>
+        /// </para>
+        /// </remarks>
+        public static Func<Aes> AesCreator { get; set; } = Aes.Create;
+
+        /// <summary>
+        /// This property is a delegate (function pointer). The method loaded
         /// will return an instance of <c>TripleDES</c>.
         /// </summary>
         /// <remarks>

@@ -14,10 +14,10 @@
 
 using System;
 using System.Globalization;
-using System.Linq;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 using Yubico.Core.Iso7816;
+using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -40,32 +40,57 @@ namespace Yubico.YubiKey.Piv.Commands
     /// lengthy discussion of the process of authenticating the management key,
     /// including descriptions of the challenges and responses.
     /// </para>
+    /// <para>
+    /// When you pass a management key to this class (the management key to
+    /// authenticate), the class will copy it, use it immediately, and overwrite
+    /// the local buffer. The class will not keep a reference to your key data.
+    /// Because of this, you can overwrite the management key data immediately
+    /// upon return from the constructor if you want. See the User's Manual
+    /// <xref href="UsersManualSensitive"> entry on sensitive data</xref>
+    /// for more information on this topic.
+    /// </para>
+    /// <para>
+    /// This class will need a random number generator and either a triple-DES or
+    /// AES object. It will get them from the
+    /// <see cref="Yubico.YubiKey.Cryptography.CryptographyProviders"/>
+    /// class. That class will build default implementations. It is possible to
+    /// change that class to build alternate versions. See the user's manual
+    /// entry on <xref href="UsersManualAlternateCrypto"> alternate crypto </xref>
+    /// for information on how to do so.
+    /// </para>
     /// </remarks>
     public sealed class CompleteAuthenticateManagementKeyCommand
         : IYubiKeyCommand<CompleteAuthenticateManagementKeyResponse>
     {
         private const byte AuthMgmtKeyInstruction = 0x87;
-        private const byte AuthMgmtKeyParameter1 = 0x03;
         private const byte AuthMgmtKeyParameter2 = 0x9B;
 
-        private const int ManagementKeyLength = 24;
-        private const int ChallengeLength = 8;
-        private const int Step2SingleLength = 12;
-        private const int Step2MutualLength = 24;
-        private const int ResponseOffset = 4;
-        private const int ChallengeOffset = 14;
-        private const int L0Index = 1;
-        private const byte L0Single = 10;
-        private const int T1Index = 2;
-        private const byte T1Single = 0x82;
+        private const int Aes128KeyLength = 16;
+        private const int Aes192KeyLength = 24;
+        private const int Aes256KeyLength = 32;
 
-        private readonly byte[] _data = new byte[Step2MutualLength] {
-            0x7C, 0x16, 0x80, 0x08, 0x00, 0x00, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x81, 0x08, 0x00, 0x00,
-            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x82, 0x00
-        };
-        private readonly int _dataLength;
-        private readonly byte[] _yubiKeyAuthenticationExpectedResponse;
+        private const int CommandTag = 0x7C;
+        private const int ClientResponseTagSingle = 0x82;
+        private const int ClientResponseTag = 0x80;
+        private const int YubiKeyChallengeTag = 0x81;
+        private const int EmptyTag = 0x82;
+
+        private readonly bool _isMutual;
+        private readonly int _blockSize;
+
+        private readonly byte[] _buffer;
+        private readonly Memory<byte> _dataMemory;
+        private readonly ReadOnlyMemory<byte> _expectedResponse;
+        private const int BlockCount = 4;
+        private const int ClientResponseOffset = 0;
+        private const int YubiKeyChallengeOffset = 1;
+        private const int ExpectedResponseOffset = 2;
+        private const int ClientChallengeOffset = 3;
+
+        /// <summary>
+        /// Which algorithm is the management key.
+        /// </summary>
+        public PivAlgorithm Algorithm { get; private set; }
 
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs. For this
@@ -86,17 +111,19 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        /// Build a new instance of the CompleteAuthenticateManagementKeyCommand class.
+        /// Build a new instance of the
+        /// <c>CompleteAuthenticateManagementKeyCommand</c> class for the
+        /// algorithm specified in <c>initializeAuthenticationResponse</c>.
         /// </summary>
         /// <remarks>
         /// The input Response Object is the successful Response from step 1. The
         /// response has information on whether the process was initiated for
-        /// single or mutual authentication. The object created using this
-        /// constructor will therefore be able to perform the appropriate
-        /// operations and build the appropriate APDU based on how the process
-        /// was initiated.
+        /// single or mutual authentication, along with the management key's
+        /// algorithm. The object created using this constructor will therefore
+        /// be able to perform the appropriate operations and build the
+        /// appropriate APDU based on how the process was initiated.
         /// <para>
-        /// This class will use the random number generator and Triple-DES
+        /// This class will use the random number generator and Triple-DES or AES
         /// classes from <see cref="CryptographyProviders"/>. If you want this
         /// class to use classes other than the defaults, change them. See also
         /// the user's manual entry on
@@ -118,10 +145,11 @@ namespace Yubico.YubiKey.Piv.Commands
         /// represent a complete response.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// The <c>managementKey</c> argument is not a valid Triple-DES key.
+        /// The <c>managementKey</c> argument is not a valid key, or the
+        /// <c>algorithm</c> is not valid or does not match the data.
         /// </exception>
         /// <exception cref="CryptographicException">
-        /// The Triple-DES operation failed.
+        /// The Triple-DES or AES operation failed.
         /// </exception>
         public CompleteAuthenticateManagementKeyCommand(
             InitializeAuthenticateManagementKeyResponse initializeAuthenticationResponse,
@@ -138,38 +166,51 @@ namespace Yubico.YubiKey.Piv.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidApduResponseData));
             }
-            if (managementKey.Length != ManagementKeyLength)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.IncorrectTripleDesKeyLength));
-            }
 
-            _yubiKeyAuthenticationExpectedResponse = Array.Empty<byte>();
+            Algorithm = initializeAuthenticationResponse.Algorithm;
 
-            (bool isMutual, ReadOnlyMemory<byte> ClientAuthenticationChallenge) = initializeAuthenticationResponse.GetData();
-
-            int bytesWritten = 0;
-            int expectedWritten = ChallengeLength;
+            (bool isMutual, ReadOnlyMemory<byte> clientAuthenticationChallenge) = initializeAuthenticationResponse.GetData();
+            _isMutual = isMutual;
 
             // With single auth, encrypt the challenge. Mutual decrypts.
-            // Note that the constructor for the TDES object takes in an arg
+            // Note that the constructors for the ISym objects take in an arg
             // "isEncrypting". If true, encrypt. We want to decrypt for mutual
-            // auth, so when isMutual is true, we want to pass false to the TDES
+            // auth, so when _isMutual is true, we want to pass false to the ISym
             // constructor. And vice versa.
 
-            // JUSTIFICATION: We are using the TripleDesForManagementKey class in the way it was intended.
+            // JUSTIFICATION (disable 618): We are using the
+            // *ForManagementKey classes in the way they were intended.
 #pragma warning disable 618
-            using var tripleDes = new TripleDesForManagementKey(managementKey, !isMutual);
+            using ISymmetricForManagementKey symObject = Algorithm switch
+            {
+                PivAlgorithm.TripleDes => new TripleDesForManagementKey(managementKey, !_isMutual),
+                PivAlgorithm.Aes128 => new AesForManagementKey(managementKey, Aes128KeyLength, !_isMutual),
+                PivAlgorithm.Aes192 => new AesForManagementKey(managementKey, Aes192KeyLength, !_isMutual),
+                PivAlgorithm.Aes256 => new AesForManagementKey(managementKey, Aes256KeyLength, !_isMutual),
+                _ => throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidAlgorithm)),
+            };
 #pragma warning restore 618
 
-            if (isMutual == true)
+            _blockSize = symObject.BlockSize;
+            _buffer = new byte[BlockCount * symObject.BlockSize];
+            _dataMemory = new Memory<byte>(_buffer);
+
+            int copyCount = clientAuthenticationChallenge.Length >= _blockSize ?
+                _blockSize : clientAuthenticationChallenge.Length;
+
+            clientAuthenticationChallenge.CopyTo(_dataMemory.Slice(ClientChallengeOffset * _blockSize, copyCount));
+
+            int bytesWritten = 0;
+            int expectedWritten = _blockSize;
+
+            if (_isMutual)
             {
                 // For mutual auth, we will decrypt the witness
                 using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
-                _yubiKeyAuthenticationExpectedResponse = new byte[ChallengeLength];
-                randomObject.GetBytes(_yubiKeyAuthenticationExpectedResponse, 0, ChallengeLength);
+                randomObject.GetBytes(_buffer, ExpectedResponseOffset * _blockSize, _blockSize);
 
                 // The app will send the YubiKey a challenge in the clear. The
                 // YubiKey will encrypt it. So we want to verify that what the
@@ -181,22 +222,21 @@ namespace Yubico.YubiKey.Piv.Commands
                 // produce the challenge.
                 // Decrypt the YubiKey Authentication Expected Response
                 // to get YubiKey Authentication Challenge.
-                // The (Triple-)DES API needs the key data in a byte array.
+                // The ISym API needs the key data in a byte array.
 
-                bytesWritten += tripleDes.TransformBlock(
-                    _yubiKeyAuthenticationExpectedResponse,
-                    0,
-                    ChallengeLength,
-                    _data,
-                    ChallengeOffset);
-                expectedWritten += ChallengeLength;
-                _dataLength = Step2MutualLength;
+                bytesWritten += symObject.TransformBlock(
+                    _buffer,
+                    ExpectedResponseOffset * _blockSize,
+                    _blockSize,
+                    _buffer,
+                    YubiKeyChallengeOffset * _blockSize);
+                expectedWritten += _blockSize;
+
+                _expectedResponse = new ReadOnlyMemory<byte>(_buffer, ExpectedResponseOffset * _blockSize, _blockSize);
             }
             else
             {
-                _data[L0Index] = L0Single;
-                _data[T1Index] = T1Single;
-                _dataLength = Step2SingleLength;
+                _expectedResponse = ReadOnlyMemory<byte>.Empty;
             }
 
             // (Mutual auth) Decrypt Client Authentication Challenge to generate
@@ -204,12 +244,12 @@ namespace Yubico.YubiKey.Piv.Commands
             // - or -
             // (Single auth) Encrypt Client Authentication Witness to generate
             // Client Authentication Response.
-            bytesWritten += tripleDes.TransformBlock(
-                ClientAuthenticationChallenge.ToArray(),
+            bytesWritten += symObject.TransformBlock(
+                _dataMemory.Slice(ClientChallengeOffset * _blockSize, _blockSize).ToArray(),
                 0,
-                ChallengeLength,
-                _data,
-                ResponseOffset);
+                _blockSize,
+                _buffer,
+                ClientResponseOffset * _blockSize);
 
             if (bytesWritten != expectedWritten)
             {
@@ -221,16 +261,37 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
+        public CommandApdu CreateCommandApdu()
         {
-            Ins = AuthMgmtKeyInstruction,
-            P1 = AuthMgmtKeyParameter1,
-            P2 = AuthMgmtKeyParameter2,
-            Data = _data.Take(_dataLength).ToArray(),
-        };
+            var tlvWriter = new TlvWriter();
+            using (tlvWriter.WriteNestedTlv(CommandTag))
+            {
+                if (_isMutual)
+                {
+                    tlvWriter.WriteValue(ClientResponseTag, _dataMemory.Slice(ClientResponseOffset * _blockSize, _blockSize).Span);
+                    tlvWriter.WriteValue(YubiKeyChallengeTag, _dataMemory.Slice(YubiKeyChallengeOffset * _blockSize, _blockSize).Span);
+                    tlvWriter.WriteValue(EmptyTag, ReadOnlySpan<byte>.Empty);
+                }
+                else
+                {
+                    tlvWriter.WriteValue(
+                        ClientResponseTagSingle, _dataMemory.Slice(ClientResponseOffset * _blockSize, _blockSize).Span);
+                }
+            }
+
+            byte[] encoding = tlvWriter.Encode();
+
+            return new CommandApdu
+            {
+                Ins = AuthMgmtKeyInstruction,
+                P1 = (byte)Algorithm,
+                P2 = AuthMgmtKeyParameter2,
+                Data = encoding,
+            };
+        }
 
         /// <inheritdoc />
         public CompleteAuthenticateManagementKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
+            new CompleteAuthenticateManagementKeyResponse(responseApdu, _expectedResponse);
     }
 }

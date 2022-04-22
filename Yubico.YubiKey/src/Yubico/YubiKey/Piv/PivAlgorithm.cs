@@ -27,9 +27,27 @@ namespace Yubico.YubiKey.Piv
 
         /// <summary>
         /// Indicates that the algorithm is Triple-DES (Slot 9B). The key size is
-        /// 192 bits.
+        /// 192 bits (24 bytes).
         /// </summary>
         TripleDes = 0x03,
+
+        /// <summary>
+        /// Indicates that the algorithm is AES-128 (Slot 9B). The key size is
+        /// 128 bits (16 bytes).
+        /// </summary>
+        Aes128 = 0x08,
+
+        /// <summary>
+        /// Indicates that the algorithm is AES-192 (Slot 9B). The key size is
+        /// 192 bits (24 bytes).
+        /// </summary>
+        Aes192 = 0x0A,
+
+        /// <summary>
+        /// Indicates that the algorithm is AES-256 (Slot 9B). The key size is
+        /// 256 bits (32 bytes).
+        /// </summary>
+        Aes256 = 0x0C,
 
         /// <summary>
         /// Indicates that the algorithm is RSA and the key size (modulus size) is

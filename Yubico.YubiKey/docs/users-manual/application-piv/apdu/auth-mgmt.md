@@ -19,19 +19,13 @@ limitations under the License. -->
 
 CLA | INS | P1 | P2 | Lc | Data | Le
 :---: | :---: | :---: | :---: | :---: | :---:
-00 | 87 | 00 | 9B | 04 | 7C 02 81 00 | (absent)
+00 | 87 | xx | 9B | 04 | 7C 02 81 00 | (absent)
 
-Note that the standard specifies that P1 holds the "Algorithm reference". That implies the
-value should be 03 for Triple-DES. However, in another part of the standard, the value of
-P1 when performing management key authentication is 00. The value of P1 as algorithm most
-likely is only for performing the other authentication operations
-([Authenticate: sign](../commands.md#authenticate-sign),
-[Authenticate: decrypt](../commands.md#authenticate-decrypt), and
-[Authenticate: key agreement](../commands.md#authenticate-key-agreement))
-to specify ECC or RSA.
+Note that the standard specifies that P1 holds the "Algorithm reference". That means the
+value should be 03 for Triple-DES, 08 for AES-128, 0A for AES-192, or 0C
+for AES-256.
 
-If the value in P2 is 9B (the slot for the management key), the YubiKey will accept either
-00 or 03 in P1.
+The value in P2 is 9B, the slot for the management key.
 
 ### Response APDU Info (First Response)
 
@@ -46,7 +40,7 @@ Data | SW1 | SW2
 
 CLA | INS | P1 | P2 | Lc | Data | Le
 :---: | :---: | :---: | :---: | :---: | :---:
-00 | 87 | 00 | 9B | 0C | 7C 0A 82 08 \<*Client Authentication Response (8 bytes)*\> | (absent)
+00 | 87 | xx | 9B | 0C | 7C 0A 82 08 \<*Client Authentication Response (8 bytes)*\> | (absent)
 
 ### Response APDU Info (Second Response)
 
@@ -93,7 +87,7 @@ Received (SW1=0x69, SW2=0x82)
 
 CLA | INS | P1 | P2 | Lc | Data | Le
 :---: | :---: | :---: | :---: | :---: | :---:
-00 | 87 | 00 | 9B | 04 | 7C 02 80 00 | (absent)
+00 | 87 | xx | 9B | 04 | 7C 02 80 00 | (absent)
 
 Note that the difference between this APDU and the single authentication APDU is the third
 data byte (the byte at index 2). In single authentication it is 81, in mutual
@@ -112,7 +106,7 @@ Data | SW1 | SW2
 
 CLA | INS | P1 | P2 | Lc | Data | Le
 :---: | :---: | :---: | :---: | :---: | :---:
-00 | 87 | 00 | 9B | 18 | 7C 16 80 08 \<*Client Authentication Response (8 bytes)*\> 81 08 \<*YubiKey Authentication Challenge (8 bytes)*\> 82 00 | (absent)
+00 | 87 | xx | 9B | 18 | 7C 16 80 08 \<*Client Authentication Response (8 bytes)*\> 81 08 \<*YubiKey Authentication Challenge (8 bytes)*\> 82 00 | (absent)
 
 ### Response APDU Info (Second Response)
 

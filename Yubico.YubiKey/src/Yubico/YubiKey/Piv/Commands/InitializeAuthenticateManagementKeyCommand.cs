@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// information on how to use this authentication.
     /// </para>
     /// <para>
-    /// The management key is a Triple-DES key and upon manufacturing a YubiKey,
+    /// Upon manufacture of a YubiKey, the management key is a Triple-DES key and
     /// it starts out as a default value:
     /// </para>
     /// <code>
@@ -48,6 +48,11 @@ namespace Yubico.YubiKey.Piv.Commands
     /// </code>
     /// <para>
     /// You will likely change it using the <see cref="SetManagementKeyCommand"/>.
+    /// </para>
+    /// <para>
+    /// Starting with YubiKey 5.4.2, it is possible to use an AES key as the
+    /// management key. An AES key can be 128, 192, or 256 bits (16, 24, and 32
+    /// bytes respectively).
     /// </para>
     /// <para>
     /// Authentication is a challenge-response process involving two or three
@@ -240,24 +245,6 @@ namespace Yubico.YubiKey.Piv.Commands
     /// determined that the management key was not correct.
     /// </para>
     /// <para>
-    /// When you pass a management key to this class (the management key to
-    /// authenticate), the class will copy it, use it immediately, and overwrite
-    /// the local buffer. The class will not keep a reference to your key data.
-    /// Because of this, you can overwrite the management key data immediately
-    /// upon return from the constructor if you want. See the User's Manual
-    /// <xref href="UsersManualSensitive"> entry on sensitive data</xref>
-    /// for more information on this topic.
-    /// </para>
-    /// <para>
-    /// This class will need a random number generator and a triple-DES object.
-    /// It will get them from the
-    /// <see cref="Yubico.YubiKey.Cryptography.CryptographyProviders"/>
-    /// class. That class will build default implementations. It is possible to
-    /// change that class to build alternate versions. See the user's manual
-    /// entry on <xref href="UsersManualAlternateCrypto"> alternate crypto </xref>
-    /// for information on how to do so.
-    /// </para>
-    /// <para>
     /// Example:
     /// </para>
     /// <code>
@@ -266,7 +253,8 @@ namespace Yubico.YubiKey.Piv.Commands
     ///    */
     ///   byte[] mgmtKey;<br/>
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
-    ///   var initAuthMgmtKeyCommand = new InitializeAuthenticateManagementKeyCommand(true);
+    ///   var initAuthMgmtKeyCommand =
+    ///       new InitializeAuthenticateManagementKeyCommand(true, PivAlgorithm.Aes192);
     ///   InitializeAuthenticateManagementKeyResponse initAuthMgmtKeyResponse =
     ///       connection.SendCommand(initAuthMgmtKeyCommand);<br/>
     ///   if (initAuthMgmtKeyResponse != ResponseStatus.Success)
@@ -275,7 +263,7 @@ namespace Yubico.YubiKey.Piv.Commands
     ///   }
     ///   mgmtKey = CollectMgmtKey();
     ///   var completeAuthMgmtKeyCommand = new CompleteAuthenticateManagementKeyCommand(
-    ///       initAuthMgmtKeyResponse, mgmtKey);
+    ///       initAuthMgmtKeyResponse, mgmtKey, PivAlgorithm.Aes192);
     ///   CompleteAuthenticateManagementKeyResponse completeAuthMgmtKeyResponse =
     ///       connection.SendCommand(completeAuthMgmtKeyCommand);<br/>
     ///   if (completeAuthMgmtKeyResponse.Status == ResponseStatus.AuthenticationRequired)
@@ -298,7 +286,6 @@ namespace Yubico.YubiKey.Piv.Commands
     public sealed class InitializeAuthenticateManagementKeyCommand : IYubiKeyCommand<InitializeAuthenticateManagementKeyResponse>
     {
         private const byte AuthMgmtKeyInstruction = 0x87;
-        private const byte AuthMgmtKeyParameter1 = 0x03;
         private const byte AuthMgmtKeyParameter2 = 0x9B;
 
         private const int Step1Length = 4;
@@ -306,6 +293,11 @@ namespace Yubico.YubiKey.Piv.Commands
         private const byte Step1T2MutualAuth = 0x80;
 
         private readonly byte[] _data;
+
+        /// <summary>
+        /// Which algorithm is the management key.
+        /// </summary>
+        public PivAlgorithm Algorithm { get; set; }
 
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs. For this
@@ -318,7 +310,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
         /// <summary>
         /// Initializes a new instance of the InitializeAuthenticateManagementKeyCommand class for
-        /// Mutual Authentication.
+        /// Mutual Authentication, and a Triple-DES management key.
         /// </summary>
         /// <remarks>
         /// Using this constructor is equivalent to
@@ -326,13 +318,15 @@ namespace Yubico.YubiKey.Piv.Commands
         ///  new InitializeAuthenticateManagementKeyCommand(true);
         /// </code>
         /// </remarks>
-        public InitializeAuthenticateManagementKeyCommand() :
-            this(true)
+        public InitializeAuthenticateManagementKeyCommand()
+            : this(true)
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the InitializeAuthenticateManagementKeyCommand class.
+        /// Initializes a new instance of the
+        /// InitializeAuthenticateManagementKeyCommand class for the specified
+        /// mutual or single autherntication, and a Triple-DES management key.
         /// </summary>
         /// <remarks>
         /// This will build a Command object that can initiate the authentication
@@ -344,7 +338,39 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <c>True</c> for mutual authentication, <c>false</c> for single.
         /// </param>
         public InitializeAuthenticateManagementKeyCommand(bool mutualAuthentication)
+            : this(mutualAuthentication, PivAlgorithm.TripleDes)
         {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the
+        /// InitializeAuthenticateManagementKeyCommand class for the specified
+        /// mutual or single autherntication, and a management key of the
+        /// specified algorithm.
+        /// </summary>
+        /// <remarks>
+        /// This will build a Command object that can initiate the authentication
+        /// process. If you want to initiate for mutual authentication, pass in
+        /// <c>true</c> for the <c>mutualAuthentication</c> argument. To initiate
+        /// single authentication, pass in <c>false</c>.
+        /// <para>
+        /// Note that you must know the management key's algorithm before calling
+        /// this constructor. If the YubiKey's version is before 5.4.2, the
+        /// algorithm is <c>TripleDes</c>. For 5.4.2 and later YubiKeys, the
+        /// algorithm can be ascertained by getting the metadata.
+        /// </para>
+        /// </remarks>
+        /// <param name="mutualAuthentication">
+        /// <c>True</c> for mutual authentication, <c>false</c> for single.
+        /// </param>
+        /// <param name="algorithm">
+        /// The algorithm of the management key. It must be <c>TripleDes</c>,
+        /// <c>Aes128</c>, <c>Aes192</c>, or <c>Aes256</c>,
+        /// </param>
+        public InitializeAuthenticateManagementKeyCommand(bool mutualAuthentication, PivAlgorithm algorithm)
+        {
+            Algorithm = algorithm;
+
             // The step 1 mutual auth data is this
             // Total len =  4: 7C 02 80 00
             //
@@ -354,7 +380,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 0x7C, 0x02, 0x81, 0x00
             };
 
-            if (mutualAuthentication == true)
+            if (mutualAuthentication)
             {
                 _data[T2Offset] = Step1T2MutualAuth;
             }
@@ -364,13 +390,13 @@ namespace Yubico.YubiKey.Piv.Commands
         public CommandApdu CreateCommandApdu() => new CommandApdu
         {
             Ins = AuthMgmtKeyInstruction,
-            P1 = AuthMgmtKeyParameter1,
+            P1 = (byte)Algorithm,
             P2 = AuthMgmtKeyParameter2,
             Data = _data,
         };
 
         /// <inheritdoc />
         public InitializeAuthenticateManagementKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new InitializeAuthenticateManagementKeyResponse(responseApdu);
+          new InitializeAuthenticateManagementKeyResponse(responseApdu, Algorithm);
     }
 }

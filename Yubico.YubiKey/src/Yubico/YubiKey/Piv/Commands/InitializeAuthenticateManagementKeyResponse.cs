@@ -47,7 +47,13 @@ namespace Yubico.YubiKey.Piv.Commands
         private const int NestedTag = 0x7C;
         private const int MutualAuthTag = 0x80;
         private const int SingleAuthTag = 0x81;
-        private const int AuthDataLength = 8;
+        private const int TDesDataLength = 8;
+        private const int AesDataLength = 16;
+
+        /// <summary>
+        /// Which algorithm is the management key.
+        /// </summary>
+        public PivAlgorithm Algorithm { get; private set; }
 
         private readonly int _tag1;
 
@@ -57,7 +63,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
         /// <summary>
         /// Constructs an InitializeAuthenticateManagementKeyResponse based on a ResponseApdu
-        /// received from the YubiKey.
+        /// received from the YubiKey for the Triple-DES algorithm.
         /// </summary>
         /// <param name="responseApdu">
         /// The object containing the Response APDU<br/>returned by the YubiKey.
@@ -65,9 +71,30 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="MalformedYubiKeyResponseException">
         /// Thrown when the data provided does not meet the expectations, and cannot be parsed.
         /// </exception>
-        public InitializeAuthenticateManagementKeyResponse(ResponseApdu responseApdu) :
+        public InitializeAuthenticateManagementKeyResponse(ResponseApdu responseApdu)
+            : this(responseApdu, PivAlgorithm.TripleDes)
+        {
+        }
+
+        /// <summary>
+        /// Constructs an InitializeAuthenticateManagementKeyResponse based on a ResponseApdu
+        /// received from the YubiKey for the specified algorithm.
+        /// </summary>
+        /// <param name="responseApdu">
+        /// The object containing the Response APDU<br/>returned by the YubiKey.
+        /// </param>
+        /// <param name="algorithm">
+        /// The algorithm of the management key. It must be <c>TripleDes</c>,
+        /// <c>Aes128</c>, <c>Aes192</c>, or <c>Aes256</c>,
+        /// </param>
+        /// <exception cref="MalformedYubiKeyResponseException">
+        /// Thrown when the data provided does not meet the expectations, and cannot be parsed.
+        /// </exception>
+        public InitializeAuthenticateManagementKeyResponse(ResponseApdu responseApdu, PivAlgorithm algorithm) :
             base(responseApdu)
         {
+            Algorithm = algorithm;
+
             // If Status is not Success, then there is no data to parse.
             if (Status != ResponseStatus.Success)
             {
@@ -75,9 +102,11 @@ namespace Yubico.YubiKey.Piv.Commands
             }
 
             // Verify the data is correct.
-            // The data is either
+            // The data is one of the following four.
             //  7C 0A 80 08 <C1 (8 bytes)>,
             //  7C 0A 81 08 <C1 (8 bytes)>,
+            //  7C 12 80 10 <C1 (16 bytes)>,
+            //  7C 12 81 10 <C1 (16 bytes)>,
             // If the data tag is 80, this is mutual auth, if it is 81 this is single
             // auth.
             // We will not indicate Failed if there is "too much" data, we'll
@@ -95,21 +124,23 @@ namespace Yubico.YubiKey.Piv.Commands
                     ResponseClass = nameof(InitializeAuthenticateManagementKeyResponse),
                 };
             }
-            if (value.Length < AuthDataLength)
+            if (value.Length < TDesDataLength)
             {
                 throw new MalformedYubiKeyResponseException()
                 {
                     ResponseClass = nameof(InitializeAuthenticateManagementKeyResponse),
-                    ExpectedDataLength = AuthDataLength,
+                    ExpectedDataLength = TDesDataLength,
                     ActualDataLength = value.Length,
                 };
             }
 
+            int dataLength = value.Length < AesDataLength ? TDesDataLength : AesDataLength;
+
             _tag1 = authTag;
 
-            // Get the 8 bytes of V in the TLV for tag1. This ignores any
+            // Get the 8 or 16 bytes of V in the TLV for tag1. This ignores any
             // extraneous trailing bytes.
-            _clientAuthenticationChallenge = value.Slice(0, AuthDataLength).ToArray();
+            _clientAuthenticationChallenge = value.Slice(0, dataLength).ToArray();
         }
 
         /// <summary>

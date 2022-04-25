@@ -30,7 +30,7 @@ namespace Yubico.YubiKey.U2f.Commands
     /// See <see cref="RegisterCommand"/> for more details.
     /// </p>
     /// </remarks>
-    internal class RegisterResponse : U2fResponse, IYubiKeyResponseWithData<RegistrationData>
+    public class RegisterResponse : U2fResponse, IYubiKeyResponseWithData<RegistrationData>
     {
         private const byte ReservedResponseValue = 0x05;
         private const int KeyHandleOffset = 67;
@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.U2f.Commands
         /// Gets the registration data from the response.
         /// </summary>
         /// <remarks>
-        /// If the status of the response is not 'Success', this method will fail. If the 
+        /// If the status of the response is not 'Success', this method will fail. If the
         /// status of the response is <see cref="ResponseStatus.ConditionsNotSatisfied"/> then
         /// clients should retry the command until it succeeds (when user presence is confirmed,
         /// generally through touch).
@@ -116,7 +116,8 @@ namespace Yubico.YubiKey.U2f.Commands
 
             ReadOnlySpan<byte> signature = certificateAndSignatureBytes.Slice(attestationCertificate.RawData.Length);
 
-            return new RegistrationData(userPublicKey, keyHandle, attestationCertificate, signature);
+            // TODO: Span -> Memory here to avoid the .ToArray calls
+            return new RegistrationData(userPublicKey, keyHandle.ToArray(), attestationCertificate, signature.ToArray());
         }
 
         private static void ThrowMalformedResponse() =>

@@ -13,9 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Tlv;
@@ -26,9 +24,11 @@ namespace Yubico.YubiKey.U2f
     /// Represents a single U2F registration.
     /// </summary>
     /// <remarks>
-    /// This class is useful for storing registration data, in scenarios like U2F preregistration.
+    /// This represents the registration data returned by the YubiKey when registering a new U2F credential. The information
+    /// stored in this structure can be sent back to the relying party to store for future validation (authentication)
+    /// attempts.
     /// </remarks>
-    internal class RegistrationData
+    public class RegistrationData
     {
         private const int EcP256PublicKeyCoordinateLength = 32;
         private const int EncodedEcPublicKeyLength = 1 +  (2 * EcP256PublicKeyCoordinateLength);
@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.U2f
         public ECPoint UserPublicKey
         {
             get => _userPublicKey;
-            private set
+            set
             {
                 if (value.X.Length != EcP256PublicKeyCoordinateLength)
                 {
@@ -73,24 +73,30 @@ namespace Yubico.YubiKey.U2f
             }
         }
 
-        private readonly byte[] _keyHandle;
-
         /// <summary>
         /// The key handle of the created public key credential.
         /// </summary>
-        public IReadOnlyList<byte> KeyHandle => _keyHandle;
+        public ReadOnlyMemory<byte> KeyHandle { get; set; }
 
-        public X509Certificate2 AttestationCertificate { get; }
+        public X509Certificate2 AttestationCertificate { get; set; }
 
-        private readonly byte[] _signature;
-        public IReadOnlyList<byte> Signature => _signature;
+        public ReadOnlyMemory<byte> Signature { get; set; }
 
-        public RegistrationData(ECPoint userPublicKey, ReadOnlySpan<byte> keyHandle, X509Certificate2 attestationCertificate, ReadOnlySpan<byte> signature)
+        public RegistrationData()
+        {
+            AttestationCertificate = new X509Certificate2();
+        }
+
+        public RegistrationData(
+            ECPoint userPublicKey,
+            ReadOnlyMemory<byte> keyHandle,
+            X509Certificate2 attestationCertificate,
+            ReadOnlyMemory<byte> signature)
         {
             UserPublicKey = userPublicKey;
-            _keyHandle = keyHandle.ToArray();
+            KeyHandle = keyHandle;
             AttestationCertificate = attestationCertificate;
-            _signature = signature.ToArray();
+            Signature = signature;
         }
 
         /// <summary>
@@ -125,7 +131,7 @@ namespace Yubico.YubiKey.U2f
 
             using ECDsa ecdsa = AttestationCertificate.GetECDsaPublicKey();
 
-            int dataToVerifyLength = 1 + AppIdLength + ClientDataHashLength + KeyHandle.Count + EncodedEcPublicKeyLength;
+            int dataToVerifyLength = 1 + AppIdLength + ClientDataHashLength + KeyHandle.Length + EncodedEcPublicKeyLength;
             byte[] dataToVerify = new byte[dataToVerifyLength];
 
             appId.CopyTo(dataToVerify.AsSpan(1));
@@ -133,7 +139,7 @@ namespace Yubico.YubiKey.U2f
 
             KeyHandle.ToArray().CopyTo(dataToVerify.AsSpan(KeyHandleOffset));
 
-            int userPublicKeyOffset = KeyHandleOffset + KeyHandle.Count;
+            int userPublicKeyOffset = KeyHandleOffset + KeyHandle.Length;
             dataToVerify[userPublicKeyOffset] = EcPublicKeyTag;
             UserPublicKey.X.CopyTo(dataToVerify.AsSpan(userPublicKeyOffset + 1));
             UserPublicKey.Y.CopyTo(dataToVerify.AsSpan(userPublicKeyOffset + EcP256PublicKeyCoordinateLength + 1));
@@ -154,9 +160,9 @@ namespace Yubico.YubiKey.U2f
         // If an input value is > valueLength, strip leading byte(s) (it should
         // be no more than one 00 leading byte).
         // If an input value is < valueLength, prepend 00 bytes to the result.
-        private static byte[] ConvertDerToIeeeP1393(IEnumerable<byte> data, int valueLength)
+        private static byte[] ConvertDerToIeeeP1393(ReadOnlyMemory<byte> data, int valueLength)
         {
-            var tlvReader = new TlvReader(data.ToArray<byte>());
+            var tlvReader = new TlvReader(data);
             tlvReader = tlvReader.ReadNestedTlv(0x30);
 
             byte[] result = new byte[2 * valueLength];

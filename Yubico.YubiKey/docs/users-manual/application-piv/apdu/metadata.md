@@ -1,3 +1,7 @@
+---
+uid: UsersManualMetadata
+---
+
 <!-- Copyright 2021 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +41,7 @@ rules. The values (V of TLV) are dependent on the tags, described in the table b
 #### Table 1: List of Metadata Elements
 Tag | Name | Meaning | Data | Slots
 :---: | :---: | :---: | :---:
-01 | Algorithm| Algorithm/Type of the key | ff (PIN or PUK), 03 (Triple DES),<br/> 06 (RSA-1024), 07 (RSA-2048),<br/> 11 (ECC-P256), or 14 (ECC-P384) | all slots
+01 | Algorithm| Algorithm/Type of the key | ff (PIN or PUK), 03 (Triple DES), 08 (AES-128),<br/>0A (AES-192), 0C (AES-256),<br/>06 (RSA-1024), 07 (RSA-2048),<br/>11 (ECC-P256), or 14 (ECC-P384) | all slots
 02 | Policy| PIN and touch policy | PIN: 0 (Default), 1 (Never),<br/>2 (Once), 3 (Always)<br/>Touch: 0 (Default), 1 (Never),<br/>2 (Always), 3 (Cached) | 9a, 9b, 9c, 9d, 9e, f9, 82 - 95
 03 | Origin| Imported or generated | 1 (generated), 2 (imported) | 9a, 9c, 9d, 9e, f9, 82 - 95
 04 | Public| Pub key partner to the pri key | DER encoding of public key  | 9a, 9c, 9d, 9e, f9, 82 - 95

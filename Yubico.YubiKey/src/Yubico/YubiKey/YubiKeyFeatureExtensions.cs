@@ -152,6 +152,10 @@ namespace Yubico.YubiKey
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V4_3_0
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
 
+                YubiKeyFeature.PivAesManagementKey =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_4_2
+                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
+
                 YubiKeyFeature.PivMetadata =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),

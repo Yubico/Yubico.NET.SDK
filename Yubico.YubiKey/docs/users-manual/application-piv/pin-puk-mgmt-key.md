@@ -39,29 +39,32 @@ to ASCII characters, but the YubiKey will accept any byte value in the PUK. In a
 the YubiKey will allow the PUK to be 6, 7, or 8 bytes long.
 
 The management key is used to authenticate the entity allowed to perform many YubiKey
-management operations, such as generating a key pair. It is a Triple-DES key, which means
-it is 24 bytes long. It is also binary (each byte is a value from 0x00 to 0xFF). Although
-the key data is 192 bits long, because of the "parity bits" in a Triple-DES key, only 168
-bits supply the key's strength. In addition, because of certain attacks on Triple-DES, the
-actual effective bit strength of a key is 112.
+management operations, such as generating a key pair. On YubiKeys before version 5.4.2, it
+is a Triple-DES key, which means it is 24 bytes long. Beginning with 5.4.2, the management
+key can be an AES key, either 128, 192, or 256 bits (16, 24, or 32 bytes). The management
+key is binary (each byte is a value from 0x00 to 0xFF). If it is a Triple-DES key, the key
+data is 192 bits long, but because of the "parity bits", only 168 bits supply the key's
+strength. In addition, because of certain attacks on Triple-DES, the actual effective bit
+strength of a key is 112.
 
 The YubiKey is manufactured with the standard default PIN, PUK, and managment key values:
 
 * PIN: "123456"
 * PUK: "12345678"
-* Management Key: 0x010203040506070801020304050607080102030405060708\
+* Management Key: Triple-DES, 0x010203040506070801020304050607080102030405060708\
 0102030405060708 three times
 
-Note that the PIV standard specifies these default/initial values.
+Note that the PIV standard specifies these default/initial values and that even on
+YubiKeys that allow AES, the default managment key is Triple-DES.
 
 Upon receipt of the YubiKey, it is a good idea to change them from the default values. See
-[Change Reference Data](commands.md#change-reference-data) and
-[Set Management Key](commands.md#set-management-key)
+[PivSession.TryChangePin](xref:Yubico.YubiKey.Piv.PivSession.TryChangePin%2a) and
+[PivSession.TryChangeManagementKey](xref:Yubico.YubiKey.Piv.PivSession.TryChangeManagementKey%2a).
 
 ### Entering binary data
 
 If your application takes PIN, PUK, and management key input from the user typing on a
-keyboard, how do they enter binary data? If the PIN is "90TFmv" that's easy to enter at a
+keyboard, how do they enter binary data? If the PIN is "stG83C" that's easy to enter at a
 keyboard. But if the PUK is 0x8F2B00CA716A, how does one type that at a keyboard?
 
 The byte 0x2B is '+', 0x71 is 'q' and 0x6A is 'j', but what about 0x8F, 0x00, and 0xCA?
@@ -115,8 +118,10 @@ defaults. Note that this has no effect on the other YubiKey applications (OTP, F
 etc.).
 
 The management key cannot be blocked. If an attacker wants to try to break your management
-key, they can try the Triple-DES modified brute-force attacks (try every possible key
-until "stumbling" onto the correct one). That will take thousands of years.
+key, they can try a brute-force attack (with a Triple-DES it is a modified brute-force
+attack), which means trying every possible key until "stumbling" onto the correct one.
+That will take thousands of years for a Triple-DES key and trillions of years with an AES
+key.
 
 ## Changing the retry counts
 
@@ -218,4 +223,4 @@ PIN-protected.
 The Yubico minidriver will configure a YubiKey to PIN-protected mode. Hence, if you know
 that your application will be running alongside Microsoft Windows machines using the
 YubiKey Minidriver, you should strongly consider adding support for setting YubiKeys to
-PIN-protected mode.
+PIN-protected mode. See the User's manual [entry on PIN-only](pin-only.md).

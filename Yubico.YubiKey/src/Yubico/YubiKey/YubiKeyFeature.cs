@@ -140,6 +140,11 @@ namespace Yubico.YubiKey
         PivAttestation,
 
         /// <summary>
+        /// Ability to use an AES key as the PIV management key.
+        /// </summary>
+        PivAesManagementKey,
+
+        /// <summary>
         /// Ability to get data about the key in a slot.
         /// </summary>
         PivMetadata,

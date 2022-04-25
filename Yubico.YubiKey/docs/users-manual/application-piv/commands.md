@@ -143,14 +143,14 @@ PIV slots.
 ### Output
 
 #### Table 1: List of Metadata Elements
-|   Name    |                  Meaning                   |                                    Data                                     | Slots                           |
-| :-------: | :----------------------------------------: | :-------------------------------------------------------------------------: |
-| Algorithm |            Algorithm of the key            |       PIN, PUK, Triple DES, RSA-1024, RSA-2048, ECC-P256, or ECC-P384       | all slots                       |
-|  Policy   |            PIN and touch policy            | PIN: Default, Never, Once, Always<br/>Touch: Default, Never, Always, Cached | 9A, 9B, 9C, 9D, 9E, F9, 82 - 95 |
-|  Origin   |           Imported or generated            |                             imported/generated                              | 9A, 9C, 9D, 9E, F9, 82 - 95     |
-|  Public   |       Pub key partner to the pri key       |                         DER encoding of public key                          | 9A, 9C, 9D, 9E, F9, 82 - 95     |
-|  Default  | Whether PIN/PUK/Mgmt Key has default value |                           Default or Not Default                            | 80, 81, 9B                      |
-|  Retries  |    Retry count and retries remaining       |                               two numbers                                   | 80, 81                          |
+|   Name    |                  Meaning                   |                                    Data                                                                     | Slots                           |
+| :-------: | :----------------------------------------: | :---------------------------------------------------------------------------------------------------------: | :-----------------------------: |
+| Algorithm |            Algorithm of the key            |       PIN, PUK, Triple DES, AES-128, AES-192, AES-256, <br/>RSA-1024, RSA-2048, ECC-P256, or ECC-P384       | all slots                       |
+|  Policy   |            PIN and touch policy            | PIN: Default, Never, Once, Always<br/>Touch: Default, Never, Always, Cached                                 | 9A, 9B, 9C, 9D, 9E, F9, 82 - 95 |
+|  Origin   |           Imported or generated            |                             imported/generated                                                              | 9A, 9C, 9D, 9E, F9, 82 - 95     |
+|  Public   |       Pub key partner to the pri key       |                         DER encoding of public key                                                          | 9A, 9C, 9D, 9E, F9, 82 - 95     |
+|  Default  | Whether PIN/PUK/Mgmt Key has default value |                           Default or Not Default                                                            | 80, 81, 9B                      |
+|  Retries  |    Retry count and retries remaining       |                               two numbers                                                                   | 80, 81                          |
 
 Another way to look at what is returned is the following table that lists which data
 elements are returned for each slot.

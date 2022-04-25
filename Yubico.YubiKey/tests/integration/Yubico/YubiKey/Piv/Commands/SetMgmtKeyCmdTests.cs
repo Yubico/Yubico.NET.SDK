@@ -20,10 +20,6 @@ namespace Yubico.YubiKey.Piv.Commands
 {
     // All these tests will reset the PIV application, run, then reset the PIV
     // application again.
-    // All these tests will also use a random number generator with a specified
-    // set of bytes, followed by 2048 random bytes. If you want to get only
-    // random bytes, skip the first SpecifiedStart bytes (get a random object and
-    // generate that many bytes).
     public class SetMgmtKeyCmdTests : IDisposable
     {
         private readonly IYubiKeyDevice yubiKey;

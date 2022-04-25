@@ -50,7 +50,8 @@ namespace Yubico.YubiKey.Piv
         public const byte Puk = 0x81;
 
         /// <summary>
-        /// Management Key slot, number 0x9B, a Triple-DES key.
+        /// Management Key slot, number 0x9B, before YubiKey 5.4.2, it can only
+        /// be a Triple-DES key. Beginning with 5.4.2 it can be Triple-DES or AES.
         /// <br/>This is a valid slot only with the command
         /// <see cref="Commands.GetMetadataCommand"/>.
         /// <br/>There is no cert in this slot.

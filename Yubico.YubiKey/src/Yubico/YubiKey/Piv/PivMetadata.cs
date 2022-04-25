@@ -242,6 +242,7 @@ namespace Yubico.YubiKey.Piv
                         // One byte, no more, no less.
                         ThrowIfNotLength(value, 1);
                         Debug.Assert((value.Span[0] == 0xFF) || (value.Span[0] == 0x03)
+                            || (value.Span[0] == 0x08) || (value.Span[0] == 0x0A) || (value.Span[0] == 0x0C)
                             || (value.Span[0] == 0x06) || (value.Span[0] == 0x07)
                             || (value.Span[0] == 0x11) || (value.Span[0] == 0x14));
 

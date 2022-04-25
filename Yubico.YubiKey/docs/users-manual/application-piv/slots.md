@@ -50,7 +50,7 @@ keys.
 | :---: | :---: | :---: | :---: |
 | 80 | PIN | 5.3 | Not a standard slot, used by the [Get metadata command](xref:Yubico.YubiKey.Piv.Commands.GetMetadataCommand) |
 | 81 | PUK | 5.3 | Not a standard slot, used by the [Get metadata command](xref:Yubico.YubiKey.Piv.Commands.GetMetadataCommand) |
-| 9B | Management | all | Triple-DES key, no cert |
+| 9B | Management | all | Triple-DES key or, beginning 5.4.2, AES 128, 192, 256, no cert |
 | 9A | PIV Authentication | all | RSA or ECC key and cert,<br/>authenticate the user, usually for system login |
 | 9C | Digital Signature | all | RSA or ECC key and cert,<br/>signing email, files, executables, etc. |
 | 9D | Key Management | all | RSA or ECC key and cert,<br/>encryption for confidentiality, e.g. decrypting email |

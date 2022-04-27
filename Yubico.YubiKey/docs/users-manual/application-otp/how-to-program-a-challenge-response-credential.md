@@ -19,7 +19,7 @@ limitations under the License. -->
 
 # How to program a slot with a challenge-response credential
 
-To program a [slot](xref:OtpSlots) with a challenge-response credential, you must use a [ConfigureChallengeResponse](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse) instance. It is instantiated by calling the factory method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
+To program a [slot](xref:OtpSlots) with a [challenge-response](xref:OtpChallengeResponse) credential, you must use a [ConfigureChallengeResponse](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse) instance. It is instantiated by calling the factory method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
 
 The challenge-response credential, unlike the other configurations, is passive. It only responds when it is queried with challenge data.
 

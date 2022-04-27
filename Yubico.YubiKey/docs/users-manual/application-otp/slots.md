@@ -24,7 +24,7 @@ The OTP application on the YubiKey contains two configurable slots: the "long pr
 - [Yubico OTP](xref:OtpYubicoOtp)
 - Initiative for Open Authentication HMAC-based OTP (OATH HOTP)
 - [Static password](xref:OtpStaticPassword)
-- Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)
+- [Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)](xref:OtpChallengeResponse)
 
 ## Slot activation
 

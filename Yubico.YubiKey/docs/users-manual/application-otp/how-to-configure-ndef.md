@@ -34,7 +34,7 @@ The most likely use case for this is to configure the YubiKey with a specific Yu
 
 NDEF should only be configured to work with a [Yubico OTP](xref:OtpYubicoOtp) or HOTP slot. Nothing will prevent you from configuring NDEF to use a slot with any other configuration, but it will not emit anything useful.
 
-For example, if a slot is configured for challenge-response, presenting the YubiKey to an NFC reader and issuing a NDEF read command will result in the static text or URI with nothing after. If a slot is configured with a [static password](xref:OtpStaticPassword), the password will come through NDEF as the raw [HID](xref:OtpHID) bytes, which are not recognizable as characters.
+For example, if a slot is configured for [challenge-response](xref:OtpChallengeResponse), presenting the YubiKey to an NFC reader and issuing a NDEF read command will result in the static text or URI with nothing after. If a slot is configured with a [static password](xref:OtpStaticPassword), the password will come through NDEF as the raw [HID](xref:OtpHID) bytes, which are not recognizable as characters.
 (Static passwords need to be communicated through a USB port using HID messages.)
 
 ## ConfigureNdef example

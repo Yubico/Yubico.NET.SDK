@@ -19,7 +19,7 @@ limitations under the License. -->
 
 # Challenge-response
 
-The other OTP application configurations ([Yubico OTP](xref:OtpYubicoOtp), OATH HOTP, and [static password](xref:OtpStaticPassword)) require the user to activate the configured [slot](xref:) (by touching the YubiKey or scanning it with an [NFC reader](xref:OtpNdef)) in order to generate and submit the password from the YubiKey to a host device. Challenge-response, on the other hand, begins with a “challenge” that a host sends to the YubiKey. The YubiKey receives the challenge (as a byte array) and “responds” by encrypting the challenge with a stored secret key and sending it back to the host for authentication.
+The other OTP application configurations ([Yubico OTP](xref:OtpYubicoOtp), OATH HOTP, and [static password](xref:OtpStaticPassword)) require the user to activate the configured [slot](xref:OtpSlots) (by touching the YubiKey or scanning it with an [NFC reader](xref:OtpNdef)) in order to generate and submit the password from the YubiKey to a host device. Challenge-response, on the other hand, begins with a “challenge” that a host sends to the YubiKey. The YubiKey receives the challenge (as a byte array) and “responds” by encrypting the challenge with a stored secret key and sending it back to the host for authentication.
 
 Challenge-response authentication is primarily used in situations where the host cannot connect to an external validation service. In these cases, the host itself or a server on an internal network will handle the validation of the responses.
 
@@ -27,28 +27,30 @@ To implement challenge-response authentication with a .NET application, the foll
 
 * A slot on the YubiKey must be [configured](#sdk-functionality) with a secret key and encryption algorithm.
 
-* The application must be able to [send and receive responses](#calculate-challenge-response()) from a YubiKey.
+* The application must be able to [send challenges to and receive responses](#sdk-functionality) from a YubiKey.
 
 * A copy of the secret key must be shared with the validating party.
 
-* The validating party must be set up to decrypt responses from the YubiKey, validate them, and pass the result back to the application.
+* The validating party must be able to decrypt responses from the YubiKey, validate them, and pass the result back to the application.
 
 > [!NOTE]  
 > All YubiKey-host communication for challenge-response is done via the [HID communication protocol](xref:OtpHID). Therefore, challenge-response authentication will only work when a YubiKey is physically plugged into a host over USB or Lightning. Challenges and responses cannot be communicated wirelessly with NFC.
 
 ## Supported challenge-response algorithms
 
-The .NET SDK and the YubiKey support the following algorithms for challenge-response:
+The .NET SDK and the YubiKey support the following encryption algorithms for challenge-response:
 
 * [Yubico OTP](xref:OtpYubicoOtp)
 
 * HMAC SHA1 as defined in [RFC2104](https://datatracker.ietf.org/doc/html/rfc2104)
 
-For Yubico OTP challenge-response, the key will receive a 6-byte challenge. The YubiKey will then create a 16-byte string by concatenating the challenge with 10 bytes of unique device fields. For Yubico OTP challenge-response, these 10 bytes of additional data are not important. They are merely added as padding so that the challenge may be encrypted with a 16-byte key using the AES encryption algorithm. (AES requires that data be encrypted in blocks of the same size as the encryption key–16 bytes.)
+For Yubico OTP challenge-response, the key will receive a 6-byte challenge. The YubiKey will then create a 16-byte string by concatenating the challenge with 10 bytes of unique device fields. For Yubico OTP challenge-response, these 10 bytes of additional data are not important. They are merely added as padding so that the challenge may be encrypted with a 16-byte key using the AES encryption algorithm. (AES requires that data be encrypted in blocks of the same size as the encryption key.)
 
 For HMAC SHA1 challenge-response, the key will receive a challenge of up to 64 bytes in size, which will be encrypted with a 20-byte secret key.
 
 ## Challenge initiation and authentication
+
+The challenge-response process works as follows:
 
 1. The YubiKey is plugged into the host.
 
@@ -101,9 +103,9 @@ In order for a host to send a challenge to a YubiKey and receive a response, an 
 * receive the response from the YubiKey. The response can be received as a string of numeric digits via [GetCode()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetCode%28System.Int32%29) (for HMAC SHA1 challenges), as a byte string via [GetDataBytes()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetDataBytes) (for Yubico OTP challenges), or as a single integer via [GetDataInt()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetDataInt) (for HMAC SHA1 challenges).
 
 > [!NOTE]  
-> The size of the challenge sent to the YubiKey with UseChallenge() must correspond to the configuration of the YubiKey slot. If the slot is configured to perform Yubico OTP, the challenge must be [6 bytes](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.YubicoOtpChallengeSize) long. If the slot is configured for HMAC SHA1, the challenge must be [64 bytes](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.MaxHmacChallengeSize) long. However, if the slot has been configured with UseSmallChallenge() (applies to HMAC SHA1 only), a challenge smaller than 64 bytes is acceptable.
+> The size of the challenge sent to the YubiKey with UseChallenge() must correspond to the configuration of the YubiKey slot. If the slot is configured to perform Yubico OTP, the challenge must be [6 bytes](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.YubicoOtpChallengeSize) long. If the slot is configured for HMAC SHA1, the challenge must be [64 bytes](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.MaxHmacChallengeSize) long. However, if the slot has been configured with UseSmallChallenge(), an HMAC SHA1 challenge smaller than 64 bytes is acceptable.
 
-Alternatively, the application can send a TOTP challenge to the YubiKey with [UseTotp()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseTotp) and receive the response with GetCode(). The time period of the TOTP challenge can be set with [WithPeriod()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.WithPeriod%28System.Int32%29).
+Alternatively, the application can send a TOTP challenge to the YubiKey with [UseTotp()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseTotp) and receive the response with GetCode(). The time period of the TOTP challenge can be set via [WithPeriod()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.WithPeriod%28System.Int32%29).
 
 For a full list of the methods in the CalculateChallengeResponse class, please see the [API documentation](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse).
 

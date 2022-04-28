@@ -67,6 +67,27 @@ namespace Yubico.YubiKey.Piv
         /// </remarks>
         public AuthenticateManagementKeyResult ManagementKeyAuthenticationResult { get; private set; }
 
+        // If the YubiKey is 5.4.2 or later, get the metadata to see what the
+        // algorithm is.
+        // Before 5.4.2 and it is 3DES.
+        // If we can't get the metadata, just return 3DES.
+        private PivAlgorithm GetManagementKeyAlgorithm()
+        {
+            if (_yubiKeyDevice.HasFeature(YubiKeyFeature.PivAesManagementKey))
+            {
+                var getMetadataCmd = new GetMetadataCommand(PivSlot.Management);
+                GetMetadataResponse getMetadataRsp = Connection.SendCommand(getMetadataCmd);
+
+                if (getMetadataRsp.Status == ResponseStatus.Success)
+                {
+                    PivMetadata metadata = getMetadataRsp.GetData();
+                    return metadata.Algorithm;
+                }
+            }
+
+            return PivAlgorithm.TripleDes;
+        }
+
         /// <summary>
         /// Try to authenticate the management key.
         /// </summary>
@@ -93,6 +114,23 @@ namespace Yubico.YubiKey.Piv
         /// If the YubiKey is not set for PIN-only, this method will collect the
         /// management key using the <c>KeyCollector</c> delegate. If no such
         /// delegate has been set, this method will throw an exception.
+        /// </para>
+        /// <para>
+        /// Beginning with YubiKey 5.4.2, the management key can be AES as well
+        /// as Triple-DES. When the SDK calls the <c>KeyCollector</c> delegate,
+        /// it will not specify the expected algorithm or length of the
+        /// management key. Your app can determine if an AES management key is a
+        /// supported feature on a YubiKey, and if so, get the metadata for the
+        /// management key slot to determine the algorithm (and hence the size)
+        /// of the key needed. For example,
+        /// <code>
+        ///    KeyCollectorClass.Algorithm = PivAlgorithm.TripleDes;
+        ///    if (yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey)
+        ///    {
+        ///        PivMetadata metadata = pivSession.GetMetadata(PivSlot.Management);
+        ///        KeyCollectorClass.Algorithm = metadata.Algorithm;
+        ///    }
+        /// </code>
         /// </para>
         /// <para>
         /// The <c>KeyCollector</c> has an option to cancel the operation. That
@@ -206,8 +244,8 @@ namespace Yubico.YubiKey.Piv
         /// </returns>
         /// <exception cref="InvalidOperationException">
         /// There is no <c>KeyCollector</c> loaded, the key provided was not a
-        /// valid Triple-DES key, or the YubiKey had some other error, such as
-        /// unreliable connection.
+        /// valid key, or the YubiKey had some other error, such as unreliable
+        /// connection.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
         /// The YubiKey returned malformed data and authentication, either single
@@ -320,8 +358,8 @@ namespace Yubico.YubiKey.Piv
         /// more detailed explanation of this process.
         /// </para>
         /// <para>
-        /// With this method, the caller provides the PIN and the
-        /// <c>KeyCollector</c> is never contacted.
+        /// With this method, however, the caller provides the management key and
+        /// the <c>KeyCollector</c> is never contacted.
         /// </para>
         /// <para>
         /// See the <see cref="TryAuthenticateManagementKey(bool)"/> method for
@@ -384,11 +422,14 @@ namespace Yubico.YubiKey.Piv
         public bool TryAuthenticateManagementKey(ReadOnlyMemory<byte> managementKey, bool mutualAuthentication = true)
         {
             ManagementKeyAuthenticated = false;
-            return TryAuthenticateManagementKey(mutualAuthentication, managementKey.Span);
+            PivAlgorithm algorithm = GetManagementKeyAlgorithm();
+
+            return TryAuthenticateManagementKey(mutualAuthentication, managementKey.Span, algorithm);
         }
 
         /// <summary>
-        /// Try to change the management key.
+        /// Try to change the management key. This will assume the new key is to
+        /// be Triple-DES.
         /// </summary>
         /// <remarks>
         /// Upon manufacture of a YubiKey, the PIV application begins with a
@@ -402,11 +443,21 @@ namespace Yubico.YubiKey.Piv
         /// exception.
         /// </para>
         /// <para>
-        /// The management key is a Triple-DES key, so it is 24 byte long, no
-        /// more, no less. It is binary. That's 192 bits. But note that because
-        /// of "parity" bits, the actual bit strength of a Triple-DES key is 124
-        /// bits. And then further, there are attacks on Triple-DES that leave
-        /// its effective bit strength at 112 bits.
+        /// Beginning with YubiKey 5.4.2, the management key can be either
+        /// Triple-DES or AES. When changing the management key, the SDK can
+        /// obtain the metadata for the management key slot to determine the
+        /// algorithm of the current key. However, the caller must supply the
+        /// algorithm of the new key (if it is 24 bytes, is it Triple-DES or
+        /// AES-192?). There is a <c>Try</c> method for changing the management
+        /// key that has an input argument for the algorithm. This method does
+        /// not have such an arg. This one will set the new key to Triple-DES.
+        /// </para>
+        /// <para>
+        /// The Triple-DES management key is 24 byte long, no more, no less. It
+        /// is binary. That's 192 bits. But note that because of "parity" bits,
+        /// the actual bit strength of a Triple-DES key is 124 bits. And then
+        /// further, there are attacks on Triple-DES that leave its effective bit
+        /// strength at 112 bits.
         /// </para>
         /// <para>
         /// In order to change it, the current management key must be
@@ -495,9 +546,129 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
         /// </exception>
-        public bool TryChangeManagementKey(PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
+        public bool TryChangeManagementKey(PivTouchPolicy touchPolicy = PivTouchPolicy.Default) =>
+            TryChangeManagementKey(touchPolicy, PivAlgorithm.TripleDes);
+
+        /// <summary>
+        /// Try to change the management key. The new key will be the specified
+        /// algorithm.
+        /// </summary>
+        /// <remarks>
+        /// Upon manufacture of a YubiKey, the PIV application begins with a
+        /// default management key (see the User's Manual entry on
+        /// <xref href="UsersManualPinPukMgmtKey"> the management key</xref>).
+        /// This method changes it. Note that this method can be run at any time,
+        /// either during the initial YubiKey setup to change from the default
+        /// management key, or later, to change it again.
+        /// <para>
+        /// If the YubiKey is set for PIN-only, this method will throw an
+        /// exception.
+        /// </para>
+        /// <para>
+        /// Beginning with YubiKey 5.4.2, the management key can be either
+        /// Triple-DES or AES. When changing the management key, the SDK can
+        /// obtain the metadata for the management key slot to determine the
+        /// algorithm of the current key. However, the caller must supply the
+        /// algorithm of the new key (if it is 24 bytes, is it Triple-DES or
+        /// AES-192?).
+        /// </para>
+        /// <para>
+        /// Note that a Triple-DES key is 24 byte long, no more, no less. It is
+        /// binary. That's 192 bits. But because of "parity" bits, the actual bit
+        /// strength of a Triple-DES key is 124 bits. Furthermore, there are
+        /// attacks on Triple-DES that leave its effective bit strength at 112
+        /// bits.
+        /// </para>
+        /// <para>
+        /// In order to change it, the current management key must be
+        /// authenticated. If it has already been authenticated in this session,
+        /// this method will still make the appropriate calls to authenticate (it
+        /// will perform mutual authentication). That is, if you want to change
+        /// the management key, it is not necessary to call
+        /// <c>TryAuthenticateManagementKey</c> or
+        /// <c>AuthenticateManagementKey</c> first. You can, but it doesn't
+        /// matter, because this method will call it again.
+        /// </para>
+        /// <para>
+        /// This method will collect the current and new management keys using
+        /// the <c>KeyCollector</c> delegate. If no such delegate has been set,
+        /// this method will throw an exception.
+        /// </para>
+        /// <para>
+        /// The <c>KeyCollector</c> has an option to cancel the operation. That
+        /// is, this <c>TryAuthenticateManagementKey</c> method will call the
+        /// <c>KeyCollector</c> requesting the current management key, and it is
+        /// possible that during the collection operations, the user cancels. The
+        /// <c>KeyCollector</c> will return to this method noting the
+        /// cancellation. In that case, this method will return <c>false</c>.
+        /// </para>
+        /// <para>
+        /// Note that this is the only way to get a <c>false</c> return. Any
+        /// other error and this method will throw an exception. In other words,
+        /// a <c>false</c> return from this method means the user canceled.
+        /// </para>
+        /// <para>
+        /// Along with the key data itself, a management key has a touch policy.
+        /// See the User's Manual entry on the
+        /// <xref href="UsersManualPivPinTouchPolicy"> PIV touch policy</xref>.
+        /// This method requires a touch policy argument, it does not have a
+        /// default.
+        /// </para>
+        /// <para>
+        /// Note: touch policy for the management key is available only on
+        /// YubiKey 4 and later. A YubiKey prior to 4 will ignore the touch
+        /// policy and simply set the touch policy of the management key to the
+        /// default.
+        /// </para>
+        /// <para>
+        /// The touch policy refers to whether use of the management key will
+        /// require touch or not, and if so, always or cached. The policy is
+        /// specified using the <c>PivTouchPolicy</c> enum. If the input is
+        /// <c>None</c> or <c>Never</c>, the YubiKey will not require touch to
+        /// complete an operation that requires the management key. <c>Always</c>
+        /// means every operation requires touch, even if the YubiKey had been
+        /// touched for an operation shortly before. If <c>Cached</c>, one touch
+        /// will last for 15 seconds. That is, touch for an operation, and if a
+        /// second operation requires the management key, and it is executing
+        /// less than 15 seconds after the first, touch is not required.
+        /// <c>Default</c> will use the YubiKey's default touch policy.
+        /// </para>
+        /// <para>
+        /// After this method is called, the management key will be authenticated
+        /// for this session. That is, in order to change the key, the current
+        /// management key must be authenticated. After changing, the new
+        /// management key will be considered authenticated, and any subsequent
+        /// operation that requires management key authentication in order to
+        /// execute (e.g. generate a key pair) will work.
+        /// </para>
+        /// </remarks>
+        /// <param name="touchPolicy">
+        /// The touch policy for the new management key.
+        /// </param>
+        /// <param name="newKeyAlgorithm">
+        /// The new management key's algorithm.
+        /// </param>
+        /// <returns>
+        /// A boolean, <c>true</c> if the management key is changed, <c>false</c>
+        /// if not.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// There is no <c>KeyCollector</c> loaded, one of the keys provided was
+        /// not a valid key for the specified algorithm, or the YubiKey had some
+        /// other error, such as unreliable connection.
+        /// </exception>
+        /// <exception cref="MalformedYubiKeyResponseException">
+        /// The YubiKey returned malformed data and authentication, either single
+        /// or double, could not be performed.
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// Mutual authentication was performed and the YubiKey was not
+        /// authenticated.
+        /// </exception>
+        public bool TryChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            _log.LogInformation("Try to change the management key, touch policy = {0}.", touchPolicy.ToString());
+            _log.LogInformation("Try to change the management key, touch policy = {0}, algorithm = {1}.",
+                touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
             if (GetPinOnlyMode() != PivPinOnlyMode.None)
             {
@@ -519,7 +690,7 @@ namespace Yubico.YubiKey.Piv
                     return false;
                 }
 
-                var setCommand = new SetManagementKeyCommand(keyEntryData.GetNewValue(), touchPolicy);
+                var setCommand = new SetManagementKeyCommand(keyEntryData.GetNewValue(), touchPolicy, newKeyAlgorithm);
                 SetManagementKeyResponse setResponse = Connection.SendCommand(setCommand);
 
                 if (setResponse.Status == ResponseStatus.Success)
@@ -547,11 +718,12 @@ namespace Yubico.YubiKey.Piv
 
         /// <summary>
         /// Change the management key, throw an exception if the user cancels.
+        /// The new key will be Triple-DES.
         /// </summary>
         /// <remarks>
-        /// This is the same as <c>TryChangeManagementKey</c>, except this method
-        /// will throw an exception if the <c>KeyCollecter</c> indicates user
-        /// cancellation.
+        /// This is the same as <c>TryChangeManagementKey(PivTouchPolicy)</c>,
+        /// except this method will throw an exception if the <c>KeyCollecter</c>
+        /// indicates user cancellation.
         /// <para>
         /// See the <see cref="TryChangeManagementKey(PivTouchPolicy)"/> method for
         /// further documentation on this method.
@@ -573,10 +745,46 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
         /// </exception>
-        public void ChangeManagementKey(PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
+        public void ChangeManagementKey(PivTouchPolicy touchPolicy = PivTouchPolicy.Default) =>
+            ChangeManagementKey(touchPolicy, PivAlgorithm.TripleDes);
+
+        /// <summary>
+        /// Change the management key, throw an exception if the user cancels.
+        /// The new key will be of the specified algorithm.
+        /// </summary>
+        /// <remarks>
+        /// This is the same as
+        /// <c>TryChangeManagementKey(PivTouchPolicy,PivAlgorithm)</c>,
+        /// except this method will throw an exception if the <c>KeyCollecter</c>
+        /// indicates user cancellation.
+        /// <para>
+        /// See the <see
+        /// cref="TryChangeManagementKey(PivTouchPolicy,PivAlgorithm)"/> method for
+        /// further documentation on this method.
+        /// </para>
+        /// </remarks>
+        /// <exception cref="InvalidOperationException">
+        /// There is no <c>KeyCollector</c> loaded, the key provided was not a
+        /// valid Triple-DES key, or the YubiKey had some other error, such as
+        /// unreliable connection.
+        /// </exception>
+        /// <exception cref="MalformedYubiKeyResponseException">
+        /// The YubiKey returned malformed data and authentication, either single
+        /// or double, could not be performed.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The user canceled management key collection.
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// Mutual authentication was performed and the YubiKey was not
+        /// authenticated.
+        /// </exception>
+        public void ChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            _log.LogInformation("Change the management key, touch policy = {0}.", touchPolicy.ToString());
-            if (TryChangeManagementKey(touchPolicy) == false)
+            _log.LogInformation("Change the management key, touch policy = {0}, algorithm = {1}.",
+                touchPolicy.ToString(), newKeyAlgorithm.ToString());
+
+            if (TryChangeManagementKey(touchPolicy, newKeyAlgorithm) == false)
             {
                 throw new OperationCanceledException(
                     string.Format(
@@ -587,7 +795,8 @@ namespace Yubico.YubiKey.Piv
 
         /// <summary>
         /// Try to change the management key. This method will use the
-        /// <c>currentKey</c> and <c>newKey</c> provided.
+        /// <c>currentKey</c> and <c>newKey</c> provided. The new key's algorithm
+        /// will be Triple-DES.
         /// </summary>
         /// <remarks>
         /// Normally, an application would call the
@@ -638,11 +847,94 @@ namespace Yubico.YubiKey.Piv
         public bool TryChangeManagementKey(
             ReadOnlyMemory<byte> currentKey,
             ReadOnlyMemory<byte> newKey,
-            PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Default) =>
+            TryChangeManagementKey(currentKey, newKey, touchPolicy, PivAlgorithm.TripleDes);
+
+        /// <summary>
+        /// Try to change the management key. This method will use the
+        /// <c>currentKey</c> and <c>newKey</c> provided. The new key's algorithm
+        /// will be as specified.
+        /// </summary>
+        /// <remarks>
+        /// Normally, an application would call the
+        /// <c>TryChangeManagementKey(PivTouchPolicy)</c> method and the SDK
+        /// would call on the loaded <c>KeyCollector</c> to retrieve the current
+        /// and new keys. With this method, the caller provides the keys and the
+        /// <c>KeyCollector</c> is never contacted.
+        /// <para>
+        /// Some applications would like to avoid using a <c>KeyCollector</c>.
+        /// For such situations, this method is provided.
+        /// </para>
+        /// <para>
+        /// See the <see
+        /// cref="TryChangeManagementKey(PivTouchPolicy,PivAlgorithm)"/> method
+        /// for further documentation on this method.
+        /// </para>
+        /// <para>
+        /// Note that with this method, a touch policy argument is required,
+        /// there is no default value.
+        /// </para>
+        /// <para>
+        /// If the wrong current key is provided, this method will return
+        /// <c>false</c>.
+        /// </para>
+        /// </remarks>
+        /// <param name="currentKey">
+        /// The current management key.
+        /// </param>
+        /// <param name="newKey">
+        /// What the management key will be changed to.
+        /// </param>
+        /// <param name="touchPolicy">
+        /// The touch policy for the new management key.
+        /// </param>
+        /// <param name="newKeyAlgorithm">
+        /// The algorithm the new management key will be.
+        /// </param>
+        /// <returns>
+        /// A boolean, <c>true</c> if the management key is changed, <c>false</c>
+        /// if not.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// One of the keys provided was not a valid Triple-DES key, or the
+        /// YubiKey had some other error, such as unreliable connection.
+        /// </exception>
+        /// <exception cref="MalformedYubiKeyResponseException">
+        /// The YubiKey returned malformed data and authentication, either single
+        /// or double, could not be performed.
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// Mutual authentication was performed and the YubiKey was not
+        /// authenticated.
+        /// </exception>
+        public bool TryChangeManagementKey(
+            ReadOnlyMemory<byte> currentKey,
+            ReadOnlyMemory<byte> newKey,
+            PivTouchPolicy touchPolicy,
+            PivAlgorithm newKeyAlgorithm)
+        {
+            if (GetPinOnlyMode() != PivPinOnlyMode.None)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.MgmtKeyCannotBeChanged));
+            }
+
+            return TryForcedChangeManagementKey(currentKey, newKey, touchPolicy, newKeyAlgorithm);
+        }
+
+        // Try to change the management key, even if the YubiKey is set to
+        // PIN-derived.
+        private bool TryForcedChangeManagementKey(
+            ReadOnlyMemory<byte> currentKey,
+            ReadOnlyMemory<byte> newKey,
+            PivTouchPolicy touchPolicy,
+            PivAlgorithm newKeyAlgorithm)
         {
             if (TryAuthenticateManagementKey(currentKey, true))
             {
-                var setCommand = new SetManagementKeyCommand(newKey, touchPolicy);
+                var setCommand = new SetManagementKeyCommand(newKey, touchPolicy, newKeyAlgorithm);
                 SetManagementKeyResponse setResponse = Connection.SendCommand(setCommand);
 
                 if (setResponse.Status == ResponseStatus.Success)
@@ -681,10 +973,12 @@ namespace Yubico.YubiKey.Piv
             ManagementKeyAuthenticationResult = AuthenticateManagementKeyResult.Unauthenticated;
             ManagementKeyAuthenticated = false;
 
+            PivAlgorithm algorithm = GetManagementKeyAlgorithm();
+
             while (KeyCollector(keyEntryData) == true)
             {
                 if (ManagementKeyAuthenticated = TryAuthenticateManagementKey(
-                    mutualAuthentication, keyEntryData.GetCurrentValue().Span))
+                    mutualAuthentication, keyEntryData.GetCurrentValue().Span, algorithm))
                 {
                     return true;
                 }
@@ -702,9 +996,12 @@ namespace Yubico.YubiKey.Piv
         // if the auth succeeds.
         // If auth works, return true, otherwise, return false.
         // Throw an exception if the YubiKey fails to auth.
-        private bool TryAuthenticateManagementKey(bool mutualAuthentication, ReadOnlySpan<byte> mgmtKey)
+        private bool TryAuthenticateManagementKey(
+            bool mutualAuthentication,
+            ReadOnlySpan<byte> mgmtKey,
+            PivAlgorithm algorithm)
         {
-            var initCommand = new InitializeAuthenticateManagementKeyCommand(mutualAuthentication);
+            var initCommand = new InitializeAuthenticateManagementKeyCommand(mutualAuthentication, algorithm);
             InitializeAuthenticateManagementKeyResponse initResponse = Connection.SendCommand(initCommand);
 
             var completeCommand = new CompleteAuthenticateManagementKeyCommand(initResponse, mgmtKey);

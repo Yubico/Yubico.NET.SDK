@@ -14,8 +14,8 @@
 
 using System;
 using System.Globalization;
-using System.Linq;
 using Yubico.Core.Iso7816;
+using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -39,18 +39,8 @@ namespace Yubico.YubiKey.Piv.Commands
     public sealed class CompleteAuthenticateManagementKeyResponse
         : PivResponse, IYubiKeyResponseWithData<AuthenticateManagementKeyResult>
     {
-        private const int MutualAuthResponseLength = 12;
-        private const int ChallengeLength = 8;
-
-        private const int T0Index = 0;
-        private const int L0Index = 1;
-        private const int T1Index = 2;
-        private const int L1Index = 3;
-        private const byte T0Byte = 0x7C;
-        private const byte L0Byte = 0x0A;
-        private const byte T1Byte = 0x82;
-        private const byte L1Byte = 0x08;
-        private const int ResponseOffset = 4;
+        private const int EncodingTag = 0x7C;
+        private const int ResponseTag = 0x82;
 
         private ReadOnlyMemory<byte> YubiKeyAuthenticationExpectedResponse { get; }
 
@@ -123,6 +113,7 @@ namespace Yubico.YubiKey.Piv.Commands
             // auth.
             // If the data is
             //  7C 0A 82 08 <R2 (8 bytes)>, 90 00
+            //  7C 12 82 10 <R2 (16 bytes)>, 90 00
             // the value is mutual auth.
             // If the StatusWord is 9000 (Success) and there is no data, this is
             // single auth.
@@ -158,25 +149,21 @@ namespace Yubico.YubiKey.Piv.Commands
                     // app. Init the result to YubiKeyAuthenticationFailed, which
                     // means the OffCard authenticated. If the expected response
                     // is correct, change it to fully authenticated.
-                    ReadOnlySpan<byte> responseApduData = ResponseApdu.Data.Span;
-
-                    if ((ResponseApdu.Data.Length < MutualAuthResponseLength)
-                        || (responseApduData[T0Index] != T0Byte)
-                        || (responseApduData[L0Index] != L0Byte)
-                        || (responseApduData[T1Index] != T1Byte)
-                        || (responseApduData[L1Index] != L1Byte)
-                        || (YubiKeyAuthenticationExpectedResponse.Length != ChallengeLength))
+                    var tlvReader = new TlvReader(ResponseApdu.Data);
+                    if (tlvReader.TryReadNestedTlv(out tlvReader, EncodingTag))
                     {
-                        throw new MalformedYubiKeyResponseException(
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                ExceptionMessages.InvalidApduResponseData));
+                        if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> responseValue, ResponseTag))
+                        {
+                            return MemoryExtensions.SequenceEqual(responseValue.Span, YubiKeyAuthenticationExpectedResponse.Span)
+                                ? AuthenticateManagementKeyResult.MutualFullyAuthenticated
+                                : AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed;
+                        }
                     }
 
-                    ReadOnlySpan<byte> YubiKeyAuthenticationResponse = responseApduData.Slice(ResponseOffset, ChallengeLength);
-                    return MemoryExtensions.SequenceEqual(YubiKeyAuthenticationResponse, YubiKeyAuthenticationExpectedResponse.Span)
-                        ? AuthenticateManagementKeyResult.MutualFullyAuthenticated
-                        : AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed;
+                    throw new MalformedYubiKeyResponseException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidApduResponseData));
             }
         }
     }

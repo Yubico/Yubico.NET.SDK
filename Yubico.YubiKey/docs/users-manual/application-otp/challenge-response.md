@@ -19,34 +19,37 @@ limitations under the License. -->
 
 # Challenge-response
 
-The other OTP application configurations ([Yubico OTP](xref:OtpYubicoOtp), OATH HOTP, and [static password](xref:OtpStaticPassword)) require the user to activate the configured [slot](xref:OtpSlots) (by touching the YubiKey or scanning it with an [NFC reader](xref:OtpNdef)) in order to generate and submit the password from the YubiKey to a host device. Challenge-response, on the other hand, begins with a “challenge” that a host sends to the YubiKey. The YubiKey receives the challenge (as a byte array) and “responds” by encrypting the challenge with a stored secret key and sending it back to the host for authentication.
+The other OTP application configurations ([Yubico OTP](xref:OtpYubicoOtp), [OATH HOTP](xref:OtpHotp), and [static password](xref:OtpStaticPassword)) require the user to activate the configured [slot](xref:OtpSlots) (by touching the YubiKey or scanning it with an [NFC reader](xref:OtpNdef)) in order to generate and submit the password from the YubiKey to a host device. Challenge-response, on the other hand, begins with a “challenge” that a host sends to the YubiKey. The YubiKey receives the challenge (as a byte array) and “responds” by encrypting or digesting (hashing) the challenge with a stored secret key and sending it back to the host for authentication.
 
 Challenge-response authentication is primarily used in situations where the host cannot connect to an external validation service. In these cases, the host itself or a server on an internal network will handle the validation of the responses.
 
 To implement challenge-response authentication with a .NET application, the following must occur:
 
-* A slot on the YubiKey must be [configured](#sdk-functionality) with a secret key and encryption algorithm.
+* A slot on the YubiKey must be [configured](#sdk-functionality) with a secret key and encryption/hashing algorithm.
 
 * The application must be able to [send challenges to and receive responses](#sdk-functionality) from a YubiKey.
 
 * A copy of the secret key must be shared with the validating party.
 
-* The validating party must be able to decrypt responses from the YubiKey, validate them, and pass the result back to the application.
+* The validating party must be able to validate responses and pass the result back to the application.
 
 > [!NOTE]  
 > All YubiKey-host communication for challenge-response is done via the [HID communication protocol](xref:OtpHID). Therefore, challenge-response authentication will only work when a YubiKey is physically plugged into a host over USB or Lightning. Challenges and responses cannot be communicated wirelessly with NFC.
 
 ## Supported challenge-response algorithms
 
-The .NET SDK and the YubiKey support the following encryption algorithms for challenge-response:
+The .NET SDK and the YubiKey support the following encryption and hashing algorithms for challenge-response:
 
-* [Yubico OTP](xref:OtpYubicoOtp)
+* [Yubico OTP](xref:OtpYubicoOtp) (encryption)
 
-* HMAC SHA1 as defined in [RFC2104](https://datatracker.ietf.org/doc/html/rfc2104)
+* HMAC SHA1 as defined in [RFC2104](https://datatracker.ietf.org/doc/html/rfc2104) (hashing)
 
 For Yubico OTP challenge-response, the key will receive a 6-byte challenge. The YubiKey will then create a 16-byte string by concatenating the challenge with 10 bytes of unique device fields. For Yubico OTP challenge-response, these 10 bytes of additional data are not important. They are merely added as padding so that the challenge may be encrypted with a 16-byte key using the AES encryption algorithm. (AES requires that data be encrypted in blocks of the same size as the encryption key.)
 
-For HMAC SHA1 challenge-response, the key will receive a challenge of up to 64 bytes in size, which will be encrypted with a 20-byte secret key.
+For HMAC SHA1 challenge-response, the key will receive a challenge of up to 64 bytes in size, which will be digested (hashed) with a 20-byte secret key.
+
+> [!NOTE]  
+> Hashing/digesting is a one-way operation, meaning that once a block of data is hashed, it cannot be converted back into its original form. Encryption, on the other hand, is a two-way operation. When a block of data is encrypted, it can be decrypted back into its original form at any time. This is an important distinction because the validating party will have to respond differently to Yubico OTP responses (encrypted) and HMAC SHA1 responses (hashed). For Yubico OTP, the validating party will have to decrypt the response and compare the result with the original challenge. For HMAC SHA1, the validating party will have to perform the same hashing operation with the original challenge and compare the result to the response received from the YubiKey.
 
 ## Challenge initiation and authentication
 
@@ -56,13 +59,13 @@ The challenge-response process works as follows:
 
 1. The application on the host sends a challenge to a specific slot of the YubiKey via the SDK.
 
-1. The YubiKey receives the challenge and encrypts it with the secret key and encryption algorithm that the slot was configured with.
+1. The YubiKey receives the challenge and encrypts/digests it with the secret key and encryption/hashing algorithm that the slot was configured with.
 
 1. The YubiKey sends the response back to the host, and the application receives it as a string of numeric digits, a byte string, or a single integer (as determined by the SDK).
 
-1. The application sends the response to the validating party, which decrypts it using the YubiKey’s unique secret key.
+1. The application sends the response to the validating party. For Yubico OTP challenge-response, the response must be decrypted using the YubiKey’s unique secret key. For HMAC SHA1 challenge-response, the validating party must digest the challenge with the secret key using the same HMAC SHA1 algorithm.
 
-1. If the decrypted response matches the original challenge that was sent to the YubiKey, authentication was successful, and the user is logged in. (For Yubico OTP challenge-response, the 6-byte challenge must match the first 6 bytes of the decrypted response–the other bytes are ignored.)
+1. For Yubico OTP, if the decrypted response matches the original challenge that was sent to the YubiKey, authentication was successful, and the user is logged in. (For Yubico OTP challenge-response, the 6-byte challenge must match the first 6 bytes of the decrypted response–the other bytes are ignored.) For HMAC SHA1, if the response matches the server's digested challenge, authentication was successful, and the user is logged in.
 
 > [!NOTE]  
 > For the authentication process to succeed, the size of the challenge must align with the algorithm that the YubiKey was configured with. Similarly, the validating party must decrypt the response using the same algorithm that the challenge was encrypted with.

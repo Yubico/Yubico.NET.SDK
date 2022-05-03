@@ -41,6 +41,23 @@ namespace Yubico.YubiKey.Piv
             };
         }
 
+        [Fact]
+        public void HasFeature_ReturnsCorrect()
+        {
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
+
+            bool expectedResult = false;
+            if (testDevice.FirmwareVersion >= new FirmwareVersion(5, 4, 2))
+            {
+
+                expectedResult = true;
+            }
+
+            bool hasFeature = testDevice.HasFeature(YubiKeyFeature.PivAesManagementKey);
+
+            Assert.Equal(hasFeature, expectedResult);
+        }
+
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
         public void RandomKey_Authenticates(StandardTestDevice testDeviceType)

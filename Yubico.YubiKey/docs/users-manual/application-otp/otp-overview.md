@@ -24,7 +24,7 @@ The OTP application on the YubiKey allows developers to program the device with 
 "OTP application" is a bit of a misnomer. While OTP (one-time password) functionality is the focus of the application, the slots may be programmed with other configurations. Supported configurations include:
 
 - [Yubico OTP](xref:OtpYubicoOtp)
-- Initiative for Open Authentication HMAC-based OTP (OATH HOTP)
+- [Initiative for Open Authentication HMAC-based OTP (OATH HOTP)](xref:OtpHotp)
 - [Static password](xref:OtpStaticPassword)
 - [Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)](xref:OtpChallengeResponse)
 

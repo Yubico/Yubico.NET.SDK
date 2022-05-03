@@ -22,7 +22,7 @@ limitations under the License. -->
 The articles in this section cover the four OTP application configurations, as well as the [NDEF (NFC Data Exchange Format) tag](xref:OtpNdef):
 
 - [Yubico OTP](xref:OtpYubicoOtp)
-- Initiative for Open Authentication HMAC-based OTP (OATH HOTP)
+- [Initiative for Open Authentication HMAC-based OTP (OATH HOTP)](xref:OtpHotp)
 - [Static password](xref:OtpStaticPassword)
 - [Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)](xref:OtpChallengeResponse)
 

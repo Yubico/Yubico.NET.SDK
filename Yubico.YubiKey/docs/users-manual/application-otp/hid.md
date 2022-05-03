@@ -23,7 +23,7 @@ YubiKeys can, depending on their components, communicate with host devices over 
 
 ## USB communication
 
-In order for the OTP application on the YubiKey to submit passwords ([Yubico OTPs](xref:OtpYubicoOtp), OATH HOTPs, and [static passwords](xref:OtpStaticPassword)) through a host device over USB, it must utilize the [USB HID (Human Interface Device)](https://www.usb.org/hid) communication protocol. The HID standard allows compliant hosts and USB peripherals, like keyboards and mice, to communicate without the need for specialized drivers.
+In order for the OTP application on the YubiKey to submit passwords ([Yubico OTPs](xref:OtpYubicoOtp), [OATH HOTPs](xref:OtpHotp), and [static passwords](xref:OtpStaticPassword)) through a host device over USB, it must utilize the [USB HID (Human Interface Device)](https://www.usb.org/hid) communication protocol. The HID standard allows compliant hosts and USB peripherals, like keyboards and mice, to communicate without the need for specialized drivers.
 
 The YubiKey essentially emulates a HID keyboard; each key on a keyboard is represented by a HID [usage ID](https://www.usb.org/sites/default/files/documents/hut1_12v2.pdf#page=53) (in decimal and hexadecimal), which is collected into a HID usage report (sometimes referred to as a message). The YubiKey generates these usage reports to simulate keystrokes, and the usage reports are decoded by the host into the characters of a password.  
 

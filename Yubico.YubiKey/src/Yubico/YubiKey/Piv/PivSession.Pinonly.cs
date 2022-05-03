@@ -970,7 +970,11 @@ namespace Yubico.YubiKey.Piv
 
                 // If this fails, then the mgmt key is not PIN-derived from the
                 // PIN and salt, so we'll say it is not PIN-derived.
-                if (!TryChangeManagementKey(specialKeyCollector.GetCurrentMgmtKey(), specialKeyCollector.GetNewMgmtKey()))
+                if (!TryForcedChangeManagementKey(
+                    specialKeyCollector.GetCurrentMgmtKey(),
+                    specialKeyCollector.GetNewMgmtKey(),
+                    PivTouchPolicy.Never,
+                    PivAlgorithm.TripleDes))
                 {
                     return true;
                 }

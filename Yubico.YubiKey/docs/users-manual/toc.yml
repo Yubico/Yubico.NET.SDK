@@ -64,6 +64,8 @@
       items:
       - name: Yubico OTP
         href: application-otp/yubico-otp.md
+      - name: OATH HOTP
+        href: application-otp/hotp.md
       - name: Static passwords
         href: application-otp/static-password.md
       - name: NDEF

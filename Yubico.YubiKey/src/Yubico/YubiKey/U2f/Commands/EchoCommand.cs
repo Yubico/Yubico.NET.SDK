@@ -30,7 +30,7 @@ namespace Yubico.YubiKey.U2f.Commands
     /// Behavior for <see cref="Data"/> larger than 1024 bytes is undefined.
     /// </para>
     /// </remarks>
-    internal sealed class EchoCommand : IYubiKeyCommand<EchoResponse>
+    public sealed class EchoCommand : IYubiKeyCommand<EchoResponse>
     {
         private const byte Ctap1MessageInstruction = 0x03;
         private const byte EchoInstruction = 0x40;

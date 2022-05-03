@@ -74,7 +74,42 @@ namespace Yubico.YubiKey.U2f
             YubiKeyDeviceInfo deviceInfo = rsp.GetData();
             Assert.False(deviceInfo.ConfigurationLocked);
         }
+        
+        [Theory]
+        [InlineData(new byte[]{ })]
+        [InlineData(new byte[]{ 0x01, 0x02, 0x03 })]
+        public void EchoCommand_GetCorrectData(ReadOnlyMemory<byte> sendData)
+        {
+            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
+            {
+                if (!SdkPlatformInfo.IsElevated)
+                {
+                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
+                    return;
+                }
+            }
 
+            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
+            Assert.NotNull(devices);
+
+            HidDevice? deviceToUse = GetFidoHid(devices);
+            Assert.NotNull(deviceToUse);
+            if (deviceToUse is null)
+            {
+                return;
+            }
+
+            IYubiKeyConnection connection = new FidoConnection(deviceToUse);
+            Assert.NotNull(connection);
+            
+            EchoCommand echoCommand = new EchoCommand(sendData);
+
+            EchoResponse echoResponse = connection.SendCommand(echoCommand);
+            ReadOnlyMemory<byte> echoData = echoResponse.GetData();
+            
+            Assert.True(echoCommand.Data.Span.SequenceEqual(echoData.Span));
+        }
+        
         private static HidDevice? GetFidoHid(IEnumerable<HidDevice> devices)
         {
             foreach (HidDevice currentDevice in devices)

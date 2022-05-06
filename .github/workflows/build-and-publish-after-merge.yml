@@ -20,6 +20,17 @@ on:
     branches:
       - main
       - develop
+  workflow_dispatch:
+    inputs:
+      push-to-dev:
+        description: 'Push to internal NuGet'
+        required: true
+        type: boolean
+      version-suffix:
+        description: 'Suffix to append to version'
+        required: false
+        default: "-prerelease."
+        type: string
 
 jobs:
   build:
@@ -44,7 +55,12 @@ jobs:
       # save some time and use the pre-installed version rather than downloading a fresh copy.
 
       - name: Build Yubico.NET.SDK.sln
-        run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity normal Yubico.NET.SDK.sln
+        if: ${{ github.event.input.version-suffix == false }}
+        run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity normal Yubico.NET.SDK.sln --version-suffix ${{ github.event.input.version-suffix }}
+
+      - name: Build Yubico.NET.SDK.sln with version suffix
+        if: ${{ github.event.input.version-suffix }}
+        run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity normal Yubico.NET.SDK.sln --version-suffix ${{ github.event.input.version-suffix }}
 
       # Upload artifacts
 
@@ -151,3 +167,18 @@ jobs:
           docker tag "${IMAGE_NAME}:${{ github.sha }}" "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
           docker push "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
           echo "New image tag: ${{ github.sha }}"
+
+  publish-internal:
+    name: Publish to internal NuGet
+    runs-on: windows-2019
+    needs: build
+    environment: Internal NuGet feed
+    if: ${{ github.event.inputs.push-to-dev == 'true' }}
+    steps:
+      - uses: actions/download-artifact@v3
+        id: download
+      - run: |
+          dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+          dotnet nuget push ${{steps.download.outputs.download-path}}/Yubico.DotnetPolyfills.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+          dotnet nuget push ${{steps.download.outputs.download-path}}/Yubico.Core.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+          dotnet nuget push ${{steps.download.outputs.download-path}}/Yubico.YubiKey.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}

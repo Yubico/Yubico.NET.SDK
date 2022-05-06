@@ -88,6 +88,7 @@ namespace Yubico.Core.Devices.Hid
             }
         }
 
+        [SuppressMessage("Performance", "CA1846:Prefer \'AsSpan\' over \'Substring\'")]
         private static bool TryGetHexShort(string s, int offset, int length, out ushort result) =>
             ushort.TryParse(s.Substring(offset, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out result);
 

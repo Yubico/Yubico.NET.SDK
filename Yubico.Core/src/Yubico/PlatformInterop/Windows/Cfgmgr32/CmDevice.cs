@@ -15,6 +15,7 @@
 using Microsoft.Win32.SafeHandles;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -179,6 +180,7 @@ namespace Yubico.PlatformInterop
 
         public CmDevice FindFirstChild(Guid classGuid) => Children().Where(d => d.ClassGuid == classGuid).First();
 
+        [SuppressMessage("Performance", "CA1846:Prefer \'AsSpan\' over \'Substring\'")]
         private static short GetHexShort(string s, int offset, int length)
         {
             ushort temp = ushort.Parse(s.Substring(offset, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture);

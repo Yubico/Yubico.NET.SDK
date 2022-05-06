@@ -21,7 +21,7 @@ limitations under the License. -->
 
 The other OTP application configurations ([Yubico OTP](xref:OtpYubicoOtp), [OATH HOTP](xref:OtpHotp), and [static password](xref:OtpStaticPassword)) require the user to activate the configured [slot](xref:OtpSlots) (by touching the YubiKey or scanning it with an [NFC reader](xref:OtpNdef)) in order to generate and submit the password from the YubiKey to a host device. Challenge-response, on the other hand, begins with a “challenge” that a host sends to the YubiKey. The YubiKey receives the challenge (as a byte array) and “responds” by encrypting or digesting (hashing) the challenge with a stored secret key and sending it back to the host for authentication.
 
-Challenge-response authentication is primarily used in situations where the host cannot connect to an external validation service. In these cases, the host itself or a server on an internal network will handle the validation of the responses.
+Challenge-response is flexible. It can be used in single and multi-factor authentication for logging into applications or devices, and validation can take place on a host device itself or on a validation server on an internal or external network. The SDK supports all of these scenarios.
 
 To implement challenge-response authentication with a .NET application, the following must occur:
 

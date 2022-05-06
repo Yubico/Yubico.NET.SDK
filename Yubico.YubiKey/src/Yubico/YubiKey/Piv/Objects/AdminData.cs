@@ -233,7 +233,6 @@ namespace Yubico.YubiKey.Piv.Objects
             IsEmpty = true;
         }
 
-
         /// <inheritdoc />
         public override int GetDefinedDataTag() => AdminDataDefinedDataTag;
 

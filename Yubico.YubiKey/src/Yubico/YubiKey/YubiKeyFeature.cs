@@ -140,7 +140,9 @@ namespace Yubico.YubiKey
         PivAttestation,
 
         /// <summary>
-        /// Ability to use an AES key as the PIV management key.
+        /// Ability to use an AES key as the PIV management key. A YubiKey
+        /// that can set the management key to AES, can still set it to
+        /// Triple-DES.
         /// </summary>
         PivAesManagementKey,
 

@@ -61,7 +61,7 @@ namespace Yubico.YubiKey.Piv.Objects
     public sealed class PinProtectedData : PivDataObject
     {
         private const int PinProtectedDefinedDataTag = 0x005FC109;
-        private const int MgmtKeyLength = 24;
+        private const int MaxKeyLength = 32;
         private const int EncodingTag = 0x53;
         private const int PinProtectedTag = 0x88;
         private const int MgmtKeyTag = 0x89;
@@ -75,8 +75,10 @@ namespace Yubico.YubiKey.Piv.Objects
         /// </summary>
         public ReadOnlyMemory<byte>? ManagementKey { get; private set; }
 
-        private readonly byte[] _keyBuffer = new byte[MgmtKeyLength];
+        private readonly byte[] _keyBuffer = new byte[MaxKeyLength];
         private readonly Memory<byte> _mgmtKey;
+
+        private readonly int[] _validKeyLengths = new int[] { 16, 24, 32 };
 
         /// <summary>
         /// Build a new object. This will not get the PIN-protected data from the
@@ -112,8 +114,8 @@ namespace Yubico.YubiKey.Piv.Objects
         /// Set the <c>ManagementKey</c> property with the specified value.
         /// </summary>
         /// <remarks>
-        /// The caller supplies an argument of Length zero or 24. Any other input
-        /// will cause an exception.
+        /// The caller supplies an argument of Length zero, 16, 24, or 32. Any
+        /// other input will cause an exception.
         /// <para>
         /// An empty array (Length = zero) means there is no management key
         /// stored in the PRINTED object on the given YubiKey. A caller can set
@@ -130,16 +132,16 @@ namespace Yubico.YubiKey.Piv.Objects
         /// </para>
         /// </remarks>
         /// <exception cref="ArgumentException">
-        /// The data Length is not 0 or 24 bytes.
+        /// The data Length is not 0, 16, 24, or 32 bytes.
         /// </exception>
         public void SetManagementKey(ReadOnlyMemory<byte> managementKey)
         {
             _log.LogInformation("Set ManagementKey in PinProtectedManagementKey.");
             IsEmpty = false;
-            if (managementKey.Length == MgmtKeyLength)
+            if (IsValidKeyLength(managementKey.Length))
             {
                 managementKey.CopyTo(_mgmtKey);
-                ManagementKey = _mgmtKey;
+                ManagementKey = _mgmtKey.Slice(0, managementKey.Length);
                 return;
             }
 
@@ -153,6 +155,19 @@ namespace Yubico.YubiKey.Piv.Objects
             }
         }
 
+        private bool IsValidKeyLength(int keyLength)
+        {
+            for (int index = 0; index < _validKeyLengths.Length; index++)
+            {
+                if (keyLength == _validKeyLengths[index])
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         /// <inheritdoc />
         public override byte[] Encode()
         {
@@ -164,9 +179,9 @@ namespace Yubico.YubiKey.Piv.Objects
 
             // If there is a management key, we're encoding
             //   53 1C
-            //      88 1A
-            //         89 18
-            //            <24 bytes>
+            //      88 1A              (or 12 or 22)
+            //         89 18           (or 10 or 20)
+            //            <24 bytes>   (or 16 or 32 bytes)
             // If there is no management key, we're encoding
             //   53 02
             //      88 00
@@ -175,9 +190,9 @@ namespace Yubico.YubiKey.Piv.Objects
             {
                 using (tlvWriter.WriteNestedTlv(PinProtectedTag))
                 {
-                    if (!(ManagementKey is null))
+                    if (ManagementKey.HasValue)
                     {
-                        tlvWriter.WriteValue(MgmtKeyTag, _mgmtKey.Span);
+                        tlvWriter.WriteValue(MgmtKeyTag, ManagementKey.Value.Span);
                     }
                 }
             }
@@ -202,8 +217,8 @@ namespace Yubico.YubiKey.Piv.Objects
             //   53 02 88 00
             // or
             //   53 1C
-            //      88 1A
-            //         89 18
+            //      88 1A                       (or 12 or 22)
+            //         89 18                    (or 10 or 20)
             //            --management key--
             ReadOnlyMemory<byte> mgmtKey = ReadOnlyMemory<byte>.Empty;
             var tlvReader = new TlvReader(encodedData);
@@ -223,10 +238,10 @@ namespace Yubico.YubiKey.Piv.Objects
                 count++;
             }
 
-            if (mgmtKey.Length == MgmtKeyLength)
+            if (IsValidKeyLength(mgmtKey.Length))
             {
                 mgmtKey.CopyTo(_mgmtKey);
-                ManagementKey = _mgmtKey;
+                ManagementKey = _mgmtKey.Slice(0, mgmtKey.Length);
             }
             else
             {

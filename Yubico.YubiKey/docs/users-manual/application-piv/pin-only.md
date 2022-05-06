@@ -23,10 +23,12 @@ to execute, such as generating a key pair or importing a certificate (complete l
 [here](xref:UsersManualPinPukMgmtKey#operations-that-require-the-management-key)).
 This is a requirement specified by the PIV standard.
 
-However, the management key is a Triple-DES key, which is 24 binary bytes. While it is
-easy for someone to enter a six to eight character PIN using a keyboard, how does one
-enter 24 binary bytes? Can anyone remember 24 binary bytes? And how does one enter them
-using a keyboard? As characters `'2' '9' 'A' ' 7' '0' 'B'` for `0x29 A7 0B` and so on?
+However, the management key is a Triple-DES key, which is 24 binary bytes, or (beginning
+with YubiKey 5.4.2) an AES key, which can be 16, 24, or 32 binary bytes. While it is easy
+for someone to enter a six to eight character PIN using a keyboard, how does one enter 16,
+24, or 32 binary bytes? Can anyone remember that many binary bytes? And how does one enter
+them using a keyboard? As characters `'2' '9' 'A' ' 7' '0' 'B'` for `0x29 A7 0B` and so
+on?
 
 To help address these concerns, developers that build applications that use the PIV
 capabilities of a YubiKey can determine how the management key is managed. One possibility
@@ -208,6 +210,37 @@ key, it won't change it, and it will store it in PRINTED.
 
 If the mode is PIN-derived, this method will change the management key, whether it is the
 default or not.
+
+### The management key's algorithm
+
+Even though the YubiKey is PIN-only, there still is a management key, it is either stored
+in PRINTED or derived from the PIN. Before version 5.4.2 of the YubiKey, a management key
+was Triple-DES. Beginning with 5.4.2, though, it is possible to use either a Triple-DES or
+an AES management key.
+
+For a YubiKey before 5.4.2, to set it PIN-only will mean the management key will be
+Triple-DES. But if the YubiKey is 5.4.2 or later, if you set it to PIN-only, you can
+specify the management key's algorithm as well.
+
+Suppose you specify the algorithm to be AES-128. If PIN-protected, the SDK will possibly
+generate a new, 16-byte, random key, change the management key to this new value, then
+store it in PRINTED. If PIN-derived, the SDK will generate a salt, derive a 16-byte value
+from that salt and the PIN, change the management key to this new value, then store the
+salt in ADMIN DATA.
+
+If you want to set a YubiKey to PIN-only, and want to use AES if possible, but Tiple-DES
+otherwise, then you will likely use code that looks something like this.
+
+```csharp
+    using (var pivSession = new PivSession(yubiKey))
+    {
+        pivSession.KeyCollector = SomeKeyCollector;
+
+        PivAlgorithm mgmtKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey) ?
+            PivAlgorithm.Aes128 : PivAlgorithm.TripleDes;
+        pivSession.SetYubiKeyPivPinOnly(PivPinOnlyMode.PinProtected, mgmtKeyAlgorithm);
+    }
+```
 
 ## Authenticating the management key in subsequent sessions
 

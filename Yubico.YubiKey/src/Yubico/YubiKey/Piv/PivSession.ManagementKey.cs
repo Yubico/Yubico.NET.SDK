@@ -26,6 +26,11 @@ namespace Yubico.YubiKey.Piv
     public sealed partial class PivSession : IDisposable
     {
         /// <summary>
+        /// This specifies the algorithm of the management key.
+        /// </summary>
+        public PivAlgorithm ManagementKeyAlgorithm { get; private set; }
+
+        /// <summary>
         /// This indicates whether the management key is authenticated or not.
         /// </summary>
         /// <remarks>
@@ -67,27 +72,6 @@ namespace Yubico.YubiKey.Piv
         /// </remarks>
         public AuthenticateManagementKeyResult ManagementKeyAuthenticationResult { get; private set; }
 
-        // If the YubiKey is 5.4.2 or later, get the metadata to see what the
-        // algorithm is.
-        // Before 5.4.2 and it is 3DES.
-        // If we can't get the metadata, just return 3DES.
-        private PivAlgorithm GetManagementKeyAlgorithm()
-        {
-            if (_yubiKeyDevice.HasFeature(YubiKeyFeature.PivAesManagementKey))
-            {
-                var getMetadataCmd = new GetMetadataCommand(PivSlot.Management);
-                GetMetadataResponse getMetadataRsp = Connection.SendCommand(getMetadataCmd);
-
-                if (getMetadataRsp.Status == ResponseStatus.Success)
-                {
-                    PivMetadata metadata = getMetadataRsp.GetData();
-                    return metadata.Algorithm;
-                }
-            }
-
-            return PivAlgorithm.TripleDes;
-        }
-
         /// <summary>
         /// Try to authenticate the management key.
         /// </summary>
@@ -119,17 +103,15 @@ namespace Yubico.YubiKey.Piv
         /// Beginning with YubiKey 5.4.2, the management key can be AES as well
         /// as Triple-DES. When the SDK calls the <c>KeyCollector</c> delegate,
         /// it will not specify the expected algorithm or length of the
-        /// management key. Your app can determine if an AES management key is a
-        /// supported feature on a YubiKey, and if so, get the metadata for the
-        /// management key slot to determine the algorithm (and hence the size)
-        /// of the key needed. For example,
+        /// management key. If you need to know which algorithm the management
+        /// keys is, look at the property
+        /// <c>PivSession.ManagementKeyAlgorithm</c>. Maybe your Key Collector is
+        /// an object and you can let it know which algorithm the management key
+        /// is so when the management key is requested, the user will know how
+        /// many bytes to provide. For example,
         /// <code>
-        ///    KeyCollectorClass.Algorithm = PivAlgorithm.TripleDes;
-        ///    if (yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey)
-        ///    {
-        ///        PivMetadata metadata = pivSession.GetMetadata(PivSlot.Management);
-        ///        KeyCollectorClass.Algorithm = metadata.Algorithm;
-        ///    }
+        ///    KeyCollectorClass.ManagementKeyAlgorithm = pivSession.ManagementKeyAlgorithm;
+        ///    pivSession.KeyCollector = KeyCollectorClass.KeyCollectorDelegate;
         /// </code>
         /// </para>
         /// <para>
@@ -422,9 +404,8 @@ namespace Yubico.YubiKey.Piv
         public bool TryAuthenticateManagementKey(ReadOnlyMemory<byte> managementKey, bool mutualAuthentication = true)
         {
             ManagementKeyAuthenticated = false;
-            PivAlgorithm algorithm = GetManagementKeyAlgorithm();
 
-            return TryAuthenticateManagementKey(mutualAuthentication, managementKey.Span, algorithm);
+            return TryAuthenticateManagementKey(mutualAuthentication, managementKey.Span, ManagementKeyAlgorithm);
         }
 
         /// <summary>
@@ -670,13 +651,7 @@ namespace Yubico.YubiKey.Piv
             _log.LogInformation("Try to change the management key, touch policy = {0}, algorithm = {1}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
-            if (GetPinOnlyMode() != PivPinOnlyMode.None)
-            {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.MgmtKeyCannotBeChanged));
-            }
+            CheckManagementKeyAlgorithm(newKeyAlgorithm, true);
 
             var keyEntryData = new KeyEntryData()
             {
@@ -695,6 +670,7 @@ namespace Yubico.YubiKey.Piv
 
                 if (setResponse.Status == ResponseStatus.Success)
                 {
+                    ManagementKeyAlgorithm = newKeyAlgorithm;
                     return true;
                 }
 
@@ -913,13 +889,7 @@ namespace Yubico.YubiKey.Piv
             PivTouchPolicy touchPolicy,
             PivAlgorithm newKeyAlgorithm)
         {
-            if (GetPinOnlyMode() != PivPinOnlyMode.None)
-            {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.MgmtKeyCannotBeChanged));
-            }
+            CheckManagementKeyAlgorithm(newKeyAlgorithm, true);
 
             return TryForcedChangeManagementKey(currentKey, newKey, touchPolicy, newKeyAlgorithm);
         }
@@ -939,11 +909,64 @@ namespace Yubico.YubiKey.Piv
 
                 if (setResponse.Status == ResponseStatus.Success)
                 {
+                    ManagementKeyAlgorithm = newKeyAlgorithm;
                     return true;
                 }
             }
 
             return false;
+        }
+
+        // Verify that and that the given algorithm is allowed.
+        // If checkMode is true, also check that the PIN-only mode is None.
+        // This is called by methods that set PIN-only mode or change the mgmt
+        // key.
+        // The algorithm can only be 3DES or AES, and it can only be AES if the
+        // YubiKey is 5.4.2 or later.
+        // It is not allowed to change the mgmt key if it is PIN-only, so those
+        // methods that change, will check the mode as well (they will pass true
+        // as the checkMode arg).
+        // If setting PIN-only, then the mode is not an issue, so don't check
+        // (pass false as the checkMode arg).
+        // If everything is fine, return, otherwise throw an exception.
+        private void CheckManagementKeyAlgorithm(PivAlgorithm algorithm, bool checkMode)
+        {
+            if (checkMode)
+            {
+                PivPinOnlyMode mode = GetPinOnlyMode();
+                if (mode.HasFlag(PivPinOnlyMode.PinProtected) || mode.HasFlag(PivPinOnlyMode.PinDerived))
+                {
+                    throw new InvalidOperationException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.MgmtKeyCannotBeChanged));
+                }
+            }
+
+            bool isValid = false;
+            switch (algorithm)
+            {
+                case PivAlgorithm.TripleDes:
+                    isValid = true;
+                    break;
+
+                case PivAlgorithm.Aes128:
+                case PivAlgorithm.Aes192:
+                case PivAlgorithm.Aes256:
+                    isValid = _yubiKeyDevice.HasFeature(YubiKeyFeature.PivAesManagementKey);
+                    break;
+
+                default:
+                    break;
+            }
+
+            if (!isValid)
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.UnsupportedAlgorithm));
+            }
         }
 
         // This is the actual Try code, shared by both TryAuth and TryChange.
@@ -973,12 +996,10 @@ namespace Yubico.YubiKey.Piv
             ManagementKeyAuthenticationResult = AuthenticateManagementKeyResult.Unauthenticated;
             ManagementKeyAuthenticated = false;
 
-            PivAlgorithm algorithm = GetManagementKeyAlgorithm();
-
             while (KeyCollector(keyEntryData) == true)
             {
                 if (ManagementKeyAuthenticated = TryAuthenticateManagementKey(
-                    mutualAuthentication, keyEntryData.GetCurrentValue().Span, algorithm))
+                    mutualAuthentication, keyEntryData.GetCurrentValue().Span, ManagementKeyAlgorithm))
                 {
                     return true;
                 }

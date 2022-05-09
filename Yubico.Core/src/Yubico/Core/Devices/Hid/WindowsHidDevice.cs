@@ -88,8 +88,12 @@ namespace Yubico.Core.Devices.Hid
             }
         }
 
+#pragma warning disable CA1846 // Prefer 'AsSpan' over 'Substring'
+        // The overload required by this preference is not available
+        // for our .NETStandard 2.0 targets.
         private static bool TryGetHexShort(string s, int offset, int length, out ushort result) =>
             ushort.TryParse(s.Substring(offset, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out result);
+#pragma warning restore CA1846 // Prefer 'AsSpan' over 'Substring'
 
         /// <summary>
         /// Opens an active connection to the Windows HID device.

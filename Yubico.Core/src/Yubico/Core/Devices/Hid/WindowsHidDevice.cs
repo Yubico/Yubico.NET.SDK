@@ -88,7 +88,7 @@ namespace Yubico.Core.Devices.Hid
             }
         }
 
-        [SuppressMessage("Performance", "CA1846:Prefer \'AsSpan\' over \'Substring\'")]
+        [SuppressMessage("Performance", "CA1846:Prefer \'AsSpan\' over \'Substring\'", Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
         private static bool TryGetHexShort(string s, int offset, int length, out ushort result) =>
             ushort.TryParse(s.Substring(offset, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out result);
 

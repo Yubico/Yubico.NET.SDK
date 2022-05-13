@@ -215,6 +215,20 @@ namespace Yubico.YubiKey.Piv
 
             Connection = yubiKey.Connect(YubiKeyApplication.Piv);
             ResetAuthenticationStatus();
+
+            ManagementKeyAlgorithm = PivAlgorithm.TripleDes;
+            if (yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey))
+            {
+                var getMetadataCmd = new GetMetadataCommand(PivSlot.Management);
+                GetMetadataResponse getMetadataRsp = Connection.SendCommand(getMetadataCmd);
+
+                if (getMetadataRsp.Status == ResponseStatus.Success)
+                {
+                    PivMetadata metadata = getMetadataRsp.GetData();
+                    ManagementKeyAlgorithm = metadata.Algorithm;
+                }
+            }
+
             _yubiKeyDevice = yubiKey;
             _disposed = false;
         }

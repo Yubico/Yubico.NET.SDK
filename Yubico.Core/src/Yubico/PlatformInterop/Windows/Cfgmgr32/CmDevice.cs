@@ -183,7 +183,11 @@ namespace Yubico.PlatformInterop
         [SuppressMessage("Performance", "CA1846:Prefer \'AsSpan\' over \'Substring\'")]
         private static short GetHexShort(string s, int offset, int length)
         {
+#pragma warning disable CA1846 // Prefer 'AsSpan' over 'Substring'
+            // The overload required by this preference is not available
+            // for our .NETStandard 2.0 targets.
             ushort temp = ushort.Parse(s.Substring(offset, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture);
+#pragma warning restore CA1846 // Prefer 'AsSpan' over 'Substring'
             return unchecked((short)temp);
         }
 

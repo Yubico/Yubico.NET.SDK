@@ -185,11 +185,11 @@ namespace Yubico.YubiKey.Piv
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                 PivPinOnlyMode mode = pivSession.TryRecoverPinOnlyMode();
-                Assert.Equal(PivPinOnlyMode.PinDerived, mode);
+                Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated, pivSession.ManagementKeyAuthenticationResult);
                 mode = pivSession.GetPinOnlyMode();
-                Assert.Equal(PivPinOnlyMode.PinDerived, mode);
+                Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
             }
 
             using (var pivSession = new PivSession(yubiKey))
@@ -198,7 +198,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                 using PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
-                Assert.True(pinProtect.IsEmpty);
+                Assert.False(pinProtect.IsEmpty);
             }
         }
 

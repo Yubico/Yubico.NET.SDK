@@ -421,6 +421,285 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
+        [Theory]
+        [InlineData(PivAlgorithm.Aes128, PivPinOnlyMode.PinProtected, 0x83)]
+        [InlineData(PivAlgorithm.Aes128, PivPinOnlyMode.PinDerived, 0x84)]
+        [InlineData(PivAlgorithm.Aes128, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x85)]
+        [InlineData(PivAlgorithm.Aes192, PivPinOnlyMode.PinProtected, 0x86)]
+        [InlineData(PivAlgorithm.Aes192, PivPinOnlyMode.PinDerived, 0x87)]
+        [InlineData(PivAlgorithm.Aes192, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x88)]
+        [InlineData(PivAlgorithm.Aes256, PivPinOnlyMode.PinProtected, 0x89)]
+        [InlineData(PivAlgorithm.Aes256, PivPinOnlyMode.PinDerived, 0x8A)]
+        [InlineData(PivAlgorithm.Aes256, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x8B)]
+        [InlineData(PivAlgorithm.TripleDes, PivPinOnlyMode.PinProtected, 0x8C)]
+        [InlineData(PivAlgorithm.TripleDes, PivPinOnlyMode.PinDerived, 0x8D)]
+        [InlineData(PivAlgorithm.TripleDes, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x8E)]
+        public void SetPinOnly_Algorithms_Success(PivAlgorithm algorithm, PivPinOnlyMode mode, byte slotNumber)
+        {
+            var specifiedCollector = new SpecifiedKeyCollector(
+                new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 },
+                new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 },
+                new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+            );
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+                Assert.False(pivSession.PinVerified);
+                Assert.False(pivSession.ManagementKeyAuthenticated);
+
+                pivSession.SetPinOnlyMode(mode, algorithm);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+
+                Assert.Equal(mode, currentMode);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+                Assert.False(pivSession.PinVerified);
+                Assert.False(pivSession.ManagementKeyAuthenticated);
+
+                pivSession.AuthenticateManagementKey();
+
+                Assert.True(pivSession.PinVerified);
+                Assert.True(pivSession.ManagementKeyAuthenticated);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+                Assert.False(pivSession.PinVerified);
+                Assert.False(pivSession.ManagementKeyAuthenticated);
+
+                PivPublicKey publicKey = pivSession.GenerateKeyPair(
+                    slotNumber, PivAlgorithm.EccP256);
+
+                Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
+            }
+        }
+
+        [Theory]
+        [InlineData(PivAlgorithm.Aes128, PivPinOnlyMode.PinProtected, 0x82)]
+        [InlineData(PivAlgorithm.Aes192, PivPinOnlyMode.PinDerived, 0x83)]
+        public void SetPinOnly_ThenBoth_Success(PivAlgorithm algorithm, PivPinOnlyMode mode, byte slotNumber)
+        {
+            var specifiedCollector = new SpecifiedKeyCollector(
+                new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 },
+                new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 },
+                new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+            );
+
+            PivPinOnlyMode newMode = mode == PivPinOnlyMode.PinProtected ?
+                PivPinOnlyMode.PinDerived : PivPinOnlyMode.PinProtected;
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+                Assert.False(pivSession.PinVerified);
+                Assert.False(pivSession.ManagementKeyAuthenticated);
+                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+
+                pivSession.SetPinOnlyMode(mode, algorithm);
+                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+
+                Assert.Equal(mode, currentMode);
+                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+                pivSession.SetPinOnlyMode(newMode, algorithm);
+
+                Assert.True(pivSession.PinVerified);
+                Assert.True(pivSession.ManagementKeyAuthenticated);
+                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+
+                Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, currentMode);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+                Assert.False(pivSession.PinVerified);
+                Assert.False(pivSession.ManagementKeyAuthenticated);
+
+                PivPublicKey publicKey = pivSession.GenerateKeyPair(
+                    slotNumber, PivAlgorithm.EccP256);
+
+                Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
+            }
+        }
+
+        [Theory]
+        [InlineData(PivAlgorithm.Aes128, PivPinOnlyMode.PinProtected, 0x8F)]
+        [InlineData(PivAlgorithm.Aes192, PivPinOnlyMode.PinDerived, 0x90)]
+        [InlineData(PivAlgorithm.Aes256, PivPinOnlyMode.PinProtected, 0x91)]
+        [InlineData(PivAlgorithm.TripleDes, PivPinOnlyMode.PinDerived, 0x92)]
+        public void SetPinOnly_ThenNewAlg_Success(PivAlgorithm algorithm, PivPinOnlyMode mode, byte slotNumber)
+        {
+            var specifiedCollector = new SpecifiedKeyCollector(
+                new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 },
+                new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 },
+                new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+            );
+
+            PivAlgorithm newAlg = algorithm switch
+            {
+                PivAlgorithm.Aes128 => PivAlgorithm.Aes192,
+                PivAlgorithm.Aes192 => PivAlgorithm.Aes256,
+                PivAlgorithm.Aes256 => PivAlgorithm.TripleDes,
+                _ => PivAlgorithm.Aes128,
+            };
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+                Assert.False(pivSession.PinVerified);
+                Assert.False(pivSession.ManagementKeyAuthenticated);
+                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+
+                pivSession.SetPinOnlyMode(mode, algorithm);
+                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+
+                Assert.Equal(mode, currentMode);
+                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+                pivSession.SetPinOnlyMode(mode, newAlg);
+
+                Assert.True(pivSession.PinVerified);
+                Assert.True(pivSession.ManagementKeyAuthenticated);
+                Assert.Equal(newAlg, pivSession.ManagementKeyAlgorithm);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+
+                Assert.Equal(mode, currentMode);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+                Assert.False(pivSession.PinVerified);
+                Assert.False(pivSession.ManagementKeyAuthenticated);
+
+                PivPublicKey publicKey = pivSession.GenerateKeyPair(
+                    slotNumber, PivAlgorithm.EccP256);
+
+                Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
+            }
+        }
+
+        [Theory]
+        [InlineData(PivAlgorithm.Aes128, PivPinOnlyMode.PinProtected, 0x84)]
+        [InlineData(PivAlgorithm.Aes192, PivPinOnlyMode.PinDerived, 0x85)]
+        [InlineData(PivAlgorithm.Aes256, PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, 0x86)]
+        public void SetPinOnly_ThenNone_Success(PivAlgorithm algorithm, PivPinOnlyMode mode, byte slotNumber)
+        {
+            var specifiedCollector = new SpecifiedKeyCollector(
+                new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 },
+                new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 },
+                new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
+            );
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                var collectorObj = new Simple39KeyCollector();
+                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+
+                Assert.False(pivSession.PinVerified);
+                Assert.False(pivSession.ManagementKeyAuthenticated);
+                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+
+                pivSession.SetPinOnlyMode(mode, algorithm);
+                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+
+                Assert.Equal(mode, currentMode);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+                Assert.False(pivSession.PinVerified);
+                Assert.False(pivSession.ManagementKeyAuthenticated);
+
+                PivPublicKey publicKey = pivSession.GenerateKeyPair(
+                    slotNumber, PivAlgorithm.EccP256);
+
+                Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
+                Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
+
+                pivSession.SetPinOnlyMode(PivPinOnlyMode.None, algorithm);
+
+                Assert.True(pivSession.PinVerified);
+                Assert.True(pivSession.ManagementKeyAuthenticated);
+                Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
+            }
+
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+
+                Assert.Equal(PivPinOnlyMode.None, currentMode);
+
+                var mgmtKey = new ReadOnlyMemory<byte>(new byte[] {
+                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+                    0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+                });
+                bool isValid = pivSession.TryAuthenticateManagementKey(mgmtKey, true);
+            }
+        }
+
         private Span<byte> GetSpecifiedSpan(int offset, int length) =>
             new Span<byte>(specifiedBytes, offset, length);
 

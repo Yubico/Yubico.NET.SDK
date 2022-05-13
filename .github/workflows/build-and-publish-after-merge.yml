@@ -29,7 +29,7 @@ on:
       version-suffix:
         description: 'Suffix to append to version'
         required: false
-        default: "-prerelease."
+        default: "-prerelease.0"
         type: string
 
 jobs:
@@ -55,11 +55,11 @@ jobs:
       # save some time and use the pre-installed version rather than downloading a fresh copy.
 
       - name: Build Yubico.NET.SDK.sln
-        if: ${{ github.event.input.version-suffix == false }}
+        if: ${{ github.event.inputs.version-suffix == '' }}
         run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity normal Yubico.NET.SDK.sln --version-suffix ${{ github.event.input.version-suffix }}
 
       - name: Build Yubico.NET.SDK.sln with version suffix
-        if: ${{ github.event.input.version-suffix }}
+        if: ${{ github.event.inputs.version-suffix != '' }}
         run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity normal Yubico.NET.SDK.sln --version-suffix ${{ github.event.input.version-suffix }}
 
       # Upload artifacts
@@ -173,7 +173,7 @@ jobs:
     runs-on: windows-2019
     needs: build
     environment: Internal NuGet feed
-    if: ${{ github.event.inputs.push-to-dev == 'true' }}
+    if: ${{ github.event.inputs.push-to-dev == true }}
     steps:
       - uses: actions/download-artifact@v3
         id: download

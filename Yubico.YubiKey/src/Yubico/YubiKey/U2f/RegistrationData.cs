@@ -107,9 +107,9 @@ namespace Yubico.YubiKey.U2f
         /// a signature over the registration data using the public key in the <see cref="AttestationCertificate"/>.
         /// </remarks>
         /// <param name="clientDataHash">The original clientDataHash that was provided to create this registration.</param>
-        /// <param name="appId">The original appId that was provided to create this registration.</param>
+        /// <param name="applicationId">The original appId that was provided to create this registration.</param>
         /// <returns></returns>
-        public bool IsSignatureValid(ReadOnlySpan<byte> clientDataHash, ReadOnlySpan<byte> appId)
+        public bool IsSignatureValid(ReadOnlySpan<byte> applicationId, ReadOnlySpan<byte> clientDataHash)
         {
             if (clientDataHash.Length != ClientDataHashLength)
             {
@@ -120,13 +120,13 @@ namespace Yubico.YubiKey.U2f
                         nameof(clientDataHash), 32, clientDataHash.Length));
             }
 
-            if (appId.Length != AppIdLength)
+            if (applicationId.Length != AppIdLength)
             {
                 throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidPropertyLength,
-                        nameof(appId), 32, appId.Length));
+                        nameof(applicationId), 32, applicationId.Length));
             }
 
             using ECDsa ecdsa = AttestationCertificate.GetECDsaPublicKey();
@@ -134,7 +134,7 @@ namespace Yubico.YubiKey.U2f
             int dataToVerifyLength = 1 + AppIdLength + ClientDataHashLength + KeyHandle.Length + EncodedEcPublicKeyLength;
             byte[] dataToVerify = new byte[dataToVerifyLength];
 
-            appId.CopyTo(dataToVerify.AsSpan(1));
+            applicationId.CopyTo(dataToVerify.AsSpan(1));
             clientDataHash.CopyTo(dataToVerify.AsSpan(1 + AppIdLength));
 
             KeyHandle.ToArray().CopyTo(dataToVerify.AsSpan(KeyHandleOffset));

@@ -16,6 +16,9 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Security;
+using System.Security.Cryptography;
+using System.Text;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.U2f.Commands;
 
 namespace Yubico.YubiKey.U2f
@@ -276,27 +279,53 @@ namespace Yubico.YubiKey.U2f
         {
             var command = new RegisterCommand(clientDataHash, applicationId);
 
-            if (_yubiKeyDevice.IsFipsSeries)
-            {
-                // TODO: Extra FIPS handling?
-            }
-
             RegisterResponse response = Connection.SendCommand(command);
 
-            if (response.Status == ResponseStatus.AuthenticationRequired)
+            // This should only apply to FIPS series devices. If user presence was not provided, the YubiKey will
+            // return ConditionsNotSatisfied instead.
+            while (response.Status == ResponseStatus.AuthenticationRequired)
             {
+                // TODO: This will be addressed once FIPS support is added.
                 registrationData = null;
                 return false;
-            }
-            else if (response.Status != ResponseStatus.Success)
-            {
-                // TODO: throw
-                throw new InvalidOperationException();
             }
 
             registrationData = response.GetData();
 
             return true;
+        }
+
+        /// <summary>
+        /// Helper function that takes a string and computes the SHA-256 hash of the UTF-8 encoding.
+        /// </summary>
+        /// <param name="data">
+        /// The string to encode.
+        /// </param>
+        /// <returns>
+        /// The SHA-256 hash of the string encoded as UTF-8.
+        /// </returns>
+        /// <remarks>
+        /// <para>
+        /// Use this helper function to simplify calling other U2F functions such as <see cref="Register"/> and
+        /// Authenticate. This function will take the provided string, encode it into a byte array using the UTF-8
+        /// encoding style, and then pass those bytes into a SHA256 hash function. This transformation can be used for
+        /// things like the <c>applicationId</c> and the <c>clientDataHash</c>.
+        /// </para>
+        /// <para>
+        /// This function uses the SHA256 cryptographic function. By default, this will rely on the implementation
+        /// provided by the .NET base class library. If you wish to override this implementation with your own, you
+        /// can do so by setting a SHA256 creator on the <see cref="CryptographyProviders"/> class. See the User's
+        /// manual page on <xref href="UsersManualAlternateCrypto">providing alternate cryptographic implementations
+        /// </xref> for more information.
+        /// </para>
+        /// </remarks>
+        public static byte[] EncodeAndHashString(string data)
+        {
+            using (SHA256 sha = CryptographyProviders.Sha256Creator())
+            {
+                byte[] encodedString = Encoding.UTF8.GetBytes(data);
+                return sha.ComputeHash(encodedString);
+            }
         }
 
         /// <inheritdoc />

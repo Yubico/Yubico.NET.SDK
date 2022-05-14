@@ -60,7 +60,7 @@ jobs:
 
       - name: Build Yubico.NET.SDK.sln with version suffix
         if: ${{ github.event.inputs.version-suffix != '' }}
-        run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity normal Yubico.NET.SDK.sln --version-suffix ${{ github.event.inputs.version-suffix }}
+        run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity normal Yubico.NET.SDK.sln --version-suffix "${{ github.event.inputs.version-suffix }}"
 
       # Upload artifacts
 

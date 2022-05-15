@@ -18,7 +18,6 @@ using System.Runtime.Serialization;
 
 namespace Yubico.PlatformInterop
 {
-    /// <inheritdoc />
     [Serializable]
     public class SCardException : Exception
     {

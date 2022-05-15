@@ -173,7 +173,7 @@ jobs:
     runs-on: windows-2019
     needs: build
     environment: Internal NuGet feed
-    if: ${{ github.event.inputs.push-to-dev == true }}
+    if: ${{ github.event.inputs.push-to-dev }}
     steps:
       - uses: actions/download-artifact@v3
         id: download

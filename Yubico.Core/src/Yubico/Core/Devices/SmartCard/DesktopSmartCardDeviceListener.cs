@@ -387,7 +387,15 @@ namespace Yubico.Core.Devices.SmartCard
                 _log.SCardApiCall(nameof(SCardListReaders), result);
             }
 
-            return SCARD_READER_STATE.CreateFromReaderNames(readerNames.Prepend("\\\\?PnP?\\Notification"));
+            // We use this workaround as .NET 4.6.1 doesn't really support .NET Standard 2.0
+            var allReaders = new List<string>(readerNames.Length + 1)
+            {
+                "\\\\?PnP?\\Notification"
+            };
+
+            allReaders.AddRange(readerNames);
+
+            return SCARD_READER_STATE.CreateFromReaderNames(allReaders);
         }
 
         /// <summary>

@@ -56,7 +56,8 @@ namespace Yubico.Core.Logging
         /// Writes an entry to the log.
         /// </summary>
         /// <param name="logLevel">
-        /// The severity or log level for this log entry. See <see cref="LogLevel"/> for more information.
+        /// The severity or log level for this log entry. See <see cref="Microsoft.Extensions.Logging.LogLevel"/> for
+        /// more information.
         /// </param>
         /// <param name="eventId">
         /// An optional event identifier. Use this field if you want the event to be easily consumable by automated tooling.

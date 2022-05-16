@@ -177,6 +177,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v3
         id: download
+        name: Nuget Packages
       - run: |
           dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
           dotnet nuget push ${{steps.download.outputs.download-path}}/Yubico.DotnetPolyfills.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}

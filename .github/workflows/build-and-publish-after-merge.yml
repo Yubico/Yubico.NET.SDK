@@ -180,7 +180,8 @@ jobs:
         with:
           name: Nuget Packages
       - run: |
+          dir -Recurse
           dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
-          dotnet nuget push ${{steps.download.outputs.download-path}}/Yubico.DotnetPolyfills.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
-          dotnet nuget push ${{steps.download.outputs.download-path}}/Yubico.Core.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
-          dotnet nuget push ${{steps.download.outputs.download-path}}/Yubico.YubiKey.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+          dotnet nuget push Yubico.DotnetPolyfills.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+          dotnet nuget push Yubico.Core.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+          dotnet nuget push Yubico.YubiKey.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}

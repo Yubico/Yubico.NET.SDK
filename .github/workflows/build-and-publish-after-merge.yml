@@ -180,8 +180,10 @@ jobs:
         with:
           name: Nuget Packages
       - run: |
-          dir -Recurse
+          $polyfills = (Get-ChildItem -Recurse Yubico.DotnetPolyfills/*.nupkg)[0].FullName
+          $core = (Get-ChildItem -Recurse Yubico.Core/*.nupkg)[0].FullName
+          $yubikey = (Get-ChildItem -Recurse Yubico.YubiKey/*.nupkg)[0].FullName
           dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
-          dotnet nuget push Yubico.DotnetPolyfills/src/bin/ReleaseWithDocs/Yubico.DotnetPolyfills.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
-          dotnet nuget push Yubico.Core/src/bin/ReleaseWithDocs/Yubico.Core.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
-          dotnet nuget push Yubico.YubiKey/src/bin/ReleaseWithDocs/Yubico.YubiKey.*.nupkg --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+          dotnet nuget push $polyfills --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+          dotnet nuget push $core --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
+          dotnet nuget push $yubikey --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}

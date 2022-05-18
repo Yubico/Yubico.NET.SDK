@@ -54,14 +54,14 @@ namespace Yubico.PlatformInterop
             SCARD_DISPOSITION disposition
             );
 
-        [DllImport("Yubico.NativeShims", EntryPoint = "Native_SCardEstablishContext", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardEstablishContext", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint SCardEstablishContext(
             SCARD_SCOPE scope,
             out SCardContext context
             );
 
-        [DllImport("Yubico.NativeShims", EntryPoint = "Native_SCardGetStatusChange", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardGetStatusChange", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint SCardGetStatusChange(
             SCardContext context,
@@ -71,7 +71,7 @@ namespace Yubico.PlatformInterop
             );
 
 
-        [DllImport("Yubico.NativeShims", EntryPoint = "Native_SCardListReaders", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardListReaders", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern uint SCardListReaders(
             SCardContext context,
@@ -123,7 +123,7 @@ namespace Yubico.PlatformInterop
             return result;
         }
 
-        [DllImport("Yubico.NativeShims", EntryPoint = "Native_SCardReconnect", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardReconnect", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint SCardReconnect(
             SCardCardHandle cardHandle,
@@ -133,11 +133,11 @@ namespace Yubico.PlatformInterop
             out SCARD_PROTOCOL activeProtocol
             );
 
-        [DllImport("Yubico.NativeShims", EntryPoint = "Native_SCardReleaseContext", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardReleaseContext", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern uint SCardReleaseContext(IntPtr context);
 
-        [DllImport("Yubico.NativeShims", EntryPoint = "Native_SCardTransmit", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_SCardTransmit", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern uint SCardTransmit(
             SCardCardHandle cardHandle,

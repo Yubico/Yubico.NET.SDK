@@ -21,7 +21,7 @@ limitations under the License. -->
     As of 2020, netstandard2.0 allows us to reach the widest audience while providing a large
     enough set of the .NET library to be productive.
     -->
-    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net47</TargetFrameworks>
 
     <RootNamespace></RootNamespace>
 
@@ -122,6 +122,10 @@ limitations under the License. -->
 
     <ProjectReference Include="..\..\Yubico.Core\src\Yubico.Core.csproj" />
 
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
+    <Reference Include="System.Web" />
   </ItemGroup>
 
   <ItemGroup Label="Expose internal test hooks to Unit Test projects">

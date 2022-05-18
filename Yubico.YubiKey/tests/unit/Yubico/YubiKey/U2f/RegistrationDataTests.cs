@@ -87,7 +87,7 @@ namespace Yubico.YubiKey.U2f
         {
             RegistrationData registrationData = GetGoodRegistrationData();
 
-            _ = Assert.Throws<ArgumentException>(() => registrationData.IsSignatureValid(new byte[10], new byte[32]));
+            _ = Assert.Throws<ArgumentException>(() => registrationData.IsSignatureValid(new byte[32], new byte[10]));
         }
 
         [Fact]
@@ -95,7 +95,7 @@ namespace Yubico.YubiKey.U2f
         {
             RegistrationData registrationData = GetGoodRegistrationData();
 
-            _ = Assert.Throws<ArgumentException>(() => registrationData.IsSignatureValid(new byte[32], new byte[10]));
+            _ = Assert.Throws<ArgumentException>(() => registrationData.IsSignatureValid(new byte[10], new byte[32]));
         }
 
         [Fact]
@@ -117,7 +117,7 @@ namespace Yubico.YubiKey.U2f
                 Hex.HexToBytes("3045022041F99B6316E03F4C6541C1C917A52C316C66233EB0C23614D1B83C8CF097DCFA022100B4133CCED9FD16ED229FA65B7CA833FE2F2981A7F195A13BFDDA00891DD049A3")
             );
 
-            Assert.True(registrationData.IsSignatureValid(clientDataHash, appId));
+            Assert.True(registrationData.IsSignatureValid(appId, clientDataHash));
         }
 
         [Fact]
@@ -139,7 +139,7 @@ namespace Yubico.YubiKey.U2f
                 Hex.HexToBytes("3045022041F99B6316E03F4C6541C1C917A52C316C66233EB0C23614D1B83C8CF097DCFA022100B4133CCED9FD16ED229FA65B7CA833FE2F2981A7F195A13BFDDA00891DD049A3")
             );
 
-            Assert.False(registrationData.IsSignatureValid(clientDataHash, appId));
+            Assert.False(registrationData.IsSignatureValid(appId, clientDataHash));
         }
 
         [Theory]
@@ -164,7 +164,7 @@ namespace Yubico.YubiKey.U2f
                 Hex.HexToBytes(derHex)
             );
 
-            Assert.True(registrationData.IsSignatureValid(clientDataHash, appId));
+            Assert.True(registrationData.IsSignatureValid(appId, clientDataHash));
         }
     }
 }

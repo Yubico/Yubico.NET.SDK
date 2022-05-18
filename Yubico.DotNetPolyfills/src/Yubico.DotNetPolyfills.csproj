@@ -18,7 +18,7 @@ limitations under the License. -->
 
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <PackageId>Yubico.DotNetPolyfills</PackageId>
-    <Version>$(YubicoDotNetPolyfillsVersion)</Version>
+    <VersionPrefix>$(YubicoDotNetPolyfillsVersion)</VersionPrefix>
 
     <!-- TODO: Adjust in .editorconfig -->
     <EnableNETAnalyzers>false</EnableNETAnalyzers>

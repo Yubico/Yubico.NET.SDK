@@ -29,7 +29,7 @@ on:
       version-suffix:
         description: 'Suffix to append to version'
         required: false
-        default: "-prerelease.0"
+        default: "prerelease.0"
         type: string
 
 jobs:

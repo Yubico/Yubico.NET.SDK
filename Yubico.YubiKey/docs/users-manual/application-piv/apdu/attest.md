@@ -21,7 +21,8 @@ CLA | INS | P1 | P2 | Lc | Data | Le
 :---: | :---: | :---: | :---: | :---: | :---:
 00 | F9 | *slot number* | 00 | (absent) | (absent) | (absent)
 
-The slot number can be one of the following (hex values): `9A, 9C, 9D, 9E`.
+The slot number can be one of the following (hex values): `9A, 9C, 9D, 9E, 82, 93, 84, 85, 86, 87, 88, 89, 8A, 8B, 8C, 8D, 8E, 8F,
+90, 91, 92, 93, 94, 95`.
 
 ### Response APDU Info
 

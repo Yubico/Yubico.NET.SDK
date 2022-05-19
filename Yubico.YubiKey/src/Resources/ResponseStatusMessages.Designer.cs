@@ -19,7 +19,7 @@ namespace Yubico.YubiKey {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class ResponseStatusMessages {
@@ -66,6 +66,15 @@ namespace Yubico.YubiKey {
         internal static string BaseAuthenticationMethodBlocked {
             get {
                 return ResourceManager.GetString("BaseAuthenticationMethodBlocked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Class value either not supported or invalid..
+        /// </summary>
+        internal static string BaseClaNotSupported {
+            get {
+                return ResourceManager.GetString("BaseClaNotSupported", resourceCulture);
             }
         }
         
@@ -250,6 +259,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Instruction value either not supported or invalid..
+        /// </summary>
+        internal static string BaseInsNotSupported {
+            get {
+                return ResourceManager.GetString("BaseInsNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Incorrect parameters in the command data field..
         /// </summary>
         internal static string BaseInvalidCommandDataParameter {
@@ -430,6 +448,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Wrong length..
+        /// </summary>
+        internal static string BaseWrongLength {
+            get {
+                return ResourceManager.GetString("BaseWrongLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Authentication is not enabled..
         /// </summary>
         internal static string OathAuthNotEnabled {
@@ -507,6 +534,24 @@ namespace Yubico.YubiKey {
         internal static string PivSecurityStatusNotSatisfied {
             get {
                 return ResourceManager.GetString("PivSecurityStatusNotSatisfied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request was rejected due to test-of-user-presence being required..
+        /// </summary>
+        internal static string U2fConditionsNotSatisfied {
+            get {
+                return ResourceManager.GetString("U2fConditionsNotSatisfied", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request was rejected due to an invalid key handle..
+        /// </summary>
+        internal static string U2fWrongData {
+            get {
+                return ResourceManager.GetString("U2fWrongData", resourceCulture);
             }
         }
     }

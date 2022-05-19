@@ -282,4 +282,19 @@ limitations under the License. -->
   <data name="OathSecurityStatusNotSatisfied" xml:space="preserve">
     <value>Authentication with a password is required to access the OATH application.</value>
   </data>
+  <data name="BaseClaNotSupported" xml:space="preserve">
+    <value>Class value either not supported or invalid.</value>
+  </data>
+  <data name="BaseInsNotSupported" xml:space="preserve">
+    <value>Instruction value either not supported or invalid.</value>
+  </data>
+  <data name="BaseWrongLength" xml:space="preserve">
+    <value>Wrong length.</value>
+  </data>
+  <data name="U2fConditionsNotSatisfied" xml:space="preserve">
+    <value>The request was rejected due to test-of-user-presence being required.</value>
+  </data>
+  <data name="U2fWrongData" xml:space="preserve">
+    <value>The request was rejected due to an invalid key handle.</value>
+  </data>
 </root>

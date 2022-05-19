@@ -31,7 +31,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
 		.github\workflows\build-and-publish-after-merge.yml = .github\workflows\build-and-publish-after-merge.yml
 		.github\workflows\pull-requests.yml = .github\workflows\pull-requests.yml
-		..\dotnet-enterprisesdk copy\.github\workflows\cross-build-nativeshims.yml = ..\dotnet-enterprisesdk copy\.github\workflows\cross-build-nativeshims.yml
+		.github\workflows\cross-build-nativeshims.yml = .github\workflows\cross-build-nativeshims.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.Core", "Yubico.Core", "{45D2A3BE-5111-4890-8898-2D43DB658A40}"

@@ -18,6 +18,7 @@ using System.Globalization;
 using System.Security;
 using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.U2f.Commands;
 
@@ -290,6 +291,32 @@ namespace Yubico.YubiKey.U2f
                 return false;
             }
 
+            // Notify caller via the KeyCollector that we're expecting touch. Run this on a different thread so
+            // that we don't block polling of the YubiKey, which could cause the touch request to time out.
+            if (response.Status == ResponseStatus.ConditionsNotSatisfied)
+            {
+                Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
+
+                new Thread(() =>
+                    {
+                        var keyEntryData = new KeyEntryData()
+                        {
+                            Request = KeyEntryRequest.TouchRequest
+                        };
+
+                        _ = keyCollector(keyEntryData);
+                    }
+                    ).Start();
+            }
+
+            // The YubiKey will return immediately to indicate that it's waiting for user presence (UP). We should poll
+            // at regular intervals to check if the touch condition has been met.
+            while (response.Status == ResponseStatus.ConditionsNotSatisfied)
+            {
+                Thread.Sleep(100);
+                response = Connection.SendCommand(command);
+            }
+
             registrationData = response.GetData();
 
             return true;
@@ -341,7 +368,7 @@ namespace Yubico.YubiKey.U2f
             _disposed = true;
         }
 
-        private void EnsureKeyCollector()
+        private Func<KeyEntryData, bool> EnsureKeyCollector()
         {
             if (KeyCollector is null)
             {
@@ -350,6 +377,8 @@ namespace Yubico.YubiKey.U2f
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.MissingKeyCollector));
             }
+
+            return KeyCollector;
         }
     }
 }

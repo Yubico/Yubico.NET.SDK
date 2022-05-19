@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
@@ -27,6 +28,12 @@ namespace Yubico.YubiKey.U2f
 
             using (var u2fSession = new U2fSession(testDevice))
             {
+                u2fSession.KeyCollector = (k) => k.Request switch
+                {
+                    KeyEntryRequest.TouchRequest => true,
+                    _ => throw new NotSupportedException("Test requested a key that is not supported by this test case.")
+                };
+
                 byte[] applicationId = U2fSession.EncodeAndHashString("https://fido.example.com/app");
                 // This is not a well-formed challenge. That's OK - we're not really trying to log in here.
                 byte[] clientDataHash = U2fSession.EncodeAndHashString("FakeChallenge");

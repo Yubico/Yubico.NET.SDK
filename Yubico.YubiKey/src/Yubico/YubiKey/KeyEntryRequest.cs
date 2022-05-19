@@ -237,5 +237,24 @@ namespace Yubico.YubiKey
         /// </p>
         /// </remarks>
         SetOathPassword = 8,
+
+        /// <summary>
+        /// The YubiKey is requesting touch for user presence verification.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// When the <c>Request</c> is this value, the delegate does not need to collect
+        /// any passwords or keys. This is simply used as a means to alert the application
+        /// that the YubiKey is awaiting a touch. Typically, you will want to respond to
+        /// this request by alerting your user that they need to physically touch the
+        /// YubiKey.
+        /// </para>
+        /// <para>
+        /// Ideally, you should not block this call. However, to ensure the proper function
+        /// of the SDK, this request will be issued on a separate thread from the one that
+        /// originated this call.
+        /// </para>
+        /// </remarks>
+        TouchRequest = 9,
     }
 }

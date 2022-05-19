@@ -38,6 +38,8 @@ namespace Yubico.Core.Iso7816
         public const short ErrorNvmChanged = 0x6500;
         public const short MemoryFailure = 0x6581;
 
+        public const short WrongLength = 0x6700;
+
         public const short FunctionError = 0x6800;
         public const short LogicalChannelNotSupported = 0x6881;
         public const short SecureMessagingNotSupported = 0x6882;
@@ -66,5 +68,9 @@ namespace Yubico.Core.Iso7816
         public const short DataNotFound = 0x6A88;
         public const short FileAlreadyExists = 0x6A89;
         public const short DFNameAlreadyExists = 0x6A8A;
+
+        public const short InsNotSupported = 0x6D00;
+
+        public const short ClaNotSupported = 0x6E00;
     }
 }

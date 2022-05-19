@@ -105,6 +105,8 @@ namespace Yubico.YubiKey
                 SWConstants.ErrorNvmChanged => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseErrorNvmChanged),
                 SWConstants.MemoryFailure => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseMemoryFailure),
 
+                SWConstants.WrongLength => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseWrongLength),
+
                 SWConstants.FunctionError => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseFunctionError),
                 SWConstants.LogicalChannelNotSupported => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseLogicalChannelNotSupported),
                 SWConstants.SecureMessagingNotSupported => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseSecureMessagingNotSupported),
@@ -133,6 +135,10 @@ namespace Yubico.YubiKey
                 SWConstants.DataNotFound => new ResponseStatusPair(ResponseStatus.NoData, ResponseStatusMessages.BaseDataNotFound),
                 SWConstants.FileAlreadyExists => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseFileAlreadyExists),
                 SWConstants.DFNameAlreadyExists => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseDFNameAlreadyExists),
+
+                SWConstants.InsNotSupported => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseInsNotSupported),
+
+                SWConstants.ClaNotSupported => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseClaNotSupported),
 
                 // Default
                 _ => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseFailed),

@@ -25,17 +25,24 @@ namespace Yubico.YubiKey.U2f.Commands
     /// <seealso cref="Yubico.YubiKey.IYubiKeyResponse" />
     public class U2fResponse : YubiKeyResponse
     {
+        // Overridden to modify the messages associated with certain
+        // status words. The messages match the status words' meanings
+        // as described in the U2F specification.
+        protected override ResponseStatusPair StatusCodeMap =>
+            StatusWord switch
+            {
+                SWConstants.ConditionsNotSatisfied => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.U2fConditionsNotSatisfied),
+                SWConstants.InvalidCommandDataParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fWrongData),
+                _ => base.StatusCodeMap,
+            };
+
         public U2fResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
 
         }
 
-        public virtual new ResponseStatus Status => StatusWord switch
-        {
-            SWConstants.ConditionsNotSatisfied => ResponseStatus.ConditionsNotSatisfied,
-            _ => _Status
-        };
+        public virtual new ResponseStatus Status => base.Status;
 
         public virtual void ThrowIfFailed()
         {
@@ -46,12 +53,6 @@ namespace Yubico.YubiKey.U2f.Commands
                     break;
             }
         }
-
-        private ResponseStatus _Status => StatusWord switch
-        {
-            SWConstants.Success => ResponseStatus.Success,
-            _ => ResponseStatus.Failed
-        };
 
         private void _ThrowIfFailed()
         {

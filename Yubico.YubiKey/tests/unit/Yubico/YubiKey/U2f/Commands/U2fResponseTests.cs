@@ -34,5 +34,26 @@ namespace Yubico.YubiKey.U2f.Commands
             var response = new U2fResponse(new ResponseApdu(Array.Empty<byte>(), SWConstants.ConditionsNotSatisfied));
             Assert.Equal(ResponseStatus.ConditionsNotSatisfied, response.Status);
         }
+
+        [Fact]
+        public void Constructor_GivenConditionsNotSatisfiedStatusWord_SetsStatusMessage()
+        {
+            var response = new U2fResponse(new ResponseApdu(Array.Empty<byte>(), SWConstants.ConditionsNotSatisfied));
+            Assert.Equal(ResponseStatusMessages.U2fConditionsNotSatisfied, response.StatusMessage);
+        }
+
+        [Fact]
+        public void Constructor_GivenInvalidCommandDataParameterStatusWord_SetsResponseStatus()
+        {
+            var response = new U2fResponse(new ResponseApdu(Array.Empty<byte>(), SWConstants.InvalidCommandDataParameter));
+            Assert.Equal(ResponseStatus.Failed, response.Status);
+        }
+
+        [Fact]
+        public void Constructor_GivenInvalidCommandDataParameterStatusWord_SetsStatusMessage()
+        {
+            var response = new U2fResponse(new ResponseApdu(Array.Empty<byte>(), SWConstants.InvalidCommandDataParameter));
+            Assert.Equal(ResponseStatusMessages.U2fWrongData, response.StatusMessage);
+        }
     }
 }

@@ -31,8 +31,16 @@ namespace Yubico.YubiKey.U2f.Commands
         protected override ResponseStatusPair StatusCodeMap =>
             StatusWord switch
             {
+                // U2F raw message status codes - U2F Raw Message Formats section 3.3
                 SWConstants.ConditionsNotSatisfied => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.U2fConditionsNotSatisfied),
                 SWConstants.InvalidCommandDataParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fWrongData),
+
+                // U2FHID_ERROR
+                SWConstants.CommandNotAllowed => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidCommand),
+                SWConstants.InvalidParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidParameter),
+                SWConstants.WrongLength => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidLength),
+                SWConstants.NoPreciseDiagnosis => GetU2fHidErrorStatusPair(),
+
                 _ => base.StatusCodeMap,
             };
 
@@ -64,6 +72,34 @@ namespace Yubico.YubiKey.U2f.Commands
                 default:
                     throw new Exception(); 
             }
+        }
+
+        private ResponseStatusPair GetU2fHidErrorStatusPair()
+        {
+            if (ResponseApdu.Data.Length != 1)
+            {
+                throw new MalformedYubiKeyResponseException(
+                    string.Format(
+                        System.Globalization.CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidU2fHidErrorCodeLength,
+                        ResponseApdu.Data.Length));
+            }
+
+            byte errorCode = ResponseApdu.Data.Span[0];
+
+            string responseMessage =
+                errorCode switch
+                {
+                    (byte)U2fHidStatus.Ctap1ErrInvalidSequencing => ResponseStatusMessages.U2fHidErrorInvalidSequence,
+                    (byte)U2fHidStatus.Ctap1ErrTimeout => ResponseStatusMessages.U2fHidErrorMessageTimeout,
+                    (byte)U2fHidStatus.Ctap1ErrChannelBusy => ResponseStatusMessages.U2fHidErrorChannelBusy,
+                    _ => string.Format(
+                            System.Globalization.CultureInfo.CurrentCulture,
+                            ResponseStatusMessages.U2fHidErrorUnknown,
+                            errorCode),
+                };
+
+            return new ResponseStatusPair(ResponseStatus.Failed, responseMessage);
         }
     }
 }

@@ -58,11 +58,14 @@ namespace Yubico.YubiKey.Pipelines
 
         public void Setup() => AcquireCtapHidChannel();
 
+        // In the case where we received a U2FHID error, the response APDU's data field will contain
+        // the error code (1 byte long), and the Status Word will be the closest equivalent ISO7816
+        // status word (or 0x6F00 if there isn't a good fit)
         public ResponseApdu Invoke(CommandApdu commandApdu, Type commandType, Type responseType)
         {
             if (!IsChannelIdAcquired)
             {
-                throw new InvalidOperationException(ExceptionMessages.InvalidChannelId);  
+                throw new InvalidOperationException(ExceptionMessages.InvalidChannelId);
             }
 
             byte ctapCmd = commandApdu.Ins;
@@ -73,11 +76,18 @@ namespace Yubico.YubiKey.Pipelines
                 throw new ArgumentException(ExceptionMessages.Ctap2CommandTooLarge, nameof(commandApdu));
             }
 
-            byte[] responseData = TransmitCommand(_channelId!.Value, ctapCmd, ctapData);
+            byte[] responseCommandAndData = TransmitCommand(_channelId!.Value, ctapCmd, ctapData);
 
-            ResponseApdu responseApdu = ctapCmd == (byte)CtapHidCommand.Ctap1Message
-                ? new ResponseApdu(responseData)
-                : new ResponseApdu(responseData, SWConstants.Success);
+            byte responseCommandIdentifier = responseCommandAndData[0];
+            byte[] responseData = responseCommandAndData.AsSpan(1).ToArray();
+
+            ResponseApdu responseApdu =
+                responseCommandIdentifier switch
+                {
+                    (byte)CtapHidCommand.Ctap1Message   => new ResponseApdu(responseData),
+                    (byte)CtapHidCommand.Error          => GetU2fHidErrorResponseApdu(responseData),
+                    _                                   => new ResponseApdu(responseData, SWConstants.Success),
+                };
 
             return responseApdu;
         }
@@ -115,6 +125,10 @@ namespace Yubico.YubiKey.Pipelines
             return packet;
         }
 
+        // This function applies a mask to remove the initial frame identifier (0x80)
+        private static byte GetPacketCmd(byte[] packet) =>
+            (byte)(packet[4] & ~0x80);
+
         private static int GetPacketBcnt(byte[] packet) =>
             (packet[5] << 8) | (packet[6]);
 
@@ -122,9 +136,9 @@ namespace Yubico.YubiKey.Pipelines
         {
             SendRequest(channelId, commandByte, data);
 
-            byte[] responseData = ReceiveResponse();
+            byte[] responseCommandAndData = ReceiveResponse();
 
-            return responseData;
+            return responseCommandAndData;
         }
 
         private void SendRequest(uint channelId, byte commandByte, ReadOnlySpan<byte> data)
@@ -150,6 +164,11 @@ namespace Yubico.YubiKey.Pipelines
             }
         }
 
+        /// <summary>
+        /// Returns the response message formatted as [command identifier][data].
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="MalformedYubiKeyResponseException"></exception>
         private byte[] ReceiveResponse()
         {
             // get init response packet 
@@ -165,9 +184,13 @@ namespace Yubico.YubiKey.Pipelines
                 throw new MalformedYubiKeyResponseException(ExceptionMessages.Ctap2MalformedResponse);
             }
 
+            byte responseCommand = GetPacketCmd(responseInitPacket);
+
             // allocate space for the result
-            byte[] responseData = new byte[responseDataLength + PacketSize];
-            responseInitPacket.AsSpan(InitHeaderSize).CopyTo(responseData);
+            // data formatted as [responseCommand][responseData]
+            byte[] responseData = new byte[1 + responseDataLength + PacketSize];
+            responseData[0] = responseCommand;
+            responseInitPacket.AsSpan(InitHeaderSize).CopyTo(responseData.AsSpan(1));
 
             // get continuation response packets if necessary
             if (responseDataLength > InitDataSize)
@@ -183,7 +206,7 @@ namespace Yubico.YubiKey.Pipelines
                 lastContinuationPacket.AsSpan(ContinuationHeaderSize).CopyTo(responseData.AsSpan(bytesRead));
             }
 
-            return responseData.Take(responseDataLength).ToArray();
+            return responseData.Take(1 + responseDataLength).ToArray();
         }
 
         /// <summary>
@@ -198,16 +221,47 @@ namespace Yubico.YubiKey.Pipelines
             rng.GetBytes(nonce);
             byte[] response = TransmitCommand(CtapHidBroadcastChannelId, CtapHidInitCmd, nonce);
 
-            Span<byte> receivedNonce = response.AsSpan(0, 8);
+            // Get the data by skipping the command identifier
+            Span<byte> receivedData = response.AsSpan(1);
+
+            Span<byte> receivedNonce = receivedData.Slice(0, 8);
 
             if (!nonce.AsSpan().SequenceEqual(receivedNonce))
             {
                 throw new MalformedYubiKeyResponseException(ExceptionMessages.Ctap2MalformedResponse);
             }
 
-            uint cid = BinaryPrimitives.ReadUInt32BigEndian(response.AsSpan(8, 4));
+            uint cid = BinaryPrimitives.ReadUInt32BigEndian(receivedData.Slice(8, 4));
 
             _channelId = cid;
+        }
+
+        // Takes in the "data" field of a U2FHID_ERROR response, and returns a
+        // response APDU where the data field contains the original error code,
+        // and the status word is the closest matching ISO7816 status word.
+        //
+        // Supports error codes defined in FIDO U2Fv1.0 section 4.1.4. For all
+        // other error codes, the status word will be set to 0x6F00 (no precise
+        // diagnosis).
+        private static ResponseApdu GetU2fHidErrorResponseApdu(Span<byte> responseData)
+        {
+            if (responseData.Length != 1)
+            {
+                throw new MalformedYubiKeyResponseException(ExceptionMessages.Ctap2MalformedResponse);
+            }
+
+            byte errorCode = responseData[0];
+
+            short statusWord =
+                errorCode switch
+                {
+                    (byte)U2f.U2fHidStatus.Ctap1ErrInvalidCommand => SWConstants.CommandNotAllowed,
+                    (byte)U2f.U2fHidStatus.Ctap1ErrInvalidParameter => SWConstants.InvalidParameter,
+                    (byte)U2f.U2fHidStatus.Ctap1ErrInvalidLength => SWConstants.WrongLength,
+                    _ => SWConstants.NoPreciseDiagnosis,
+                };
+
+            return new ResponseApdu(responseData.ToArray(), statusWord);
         }
     }
 }

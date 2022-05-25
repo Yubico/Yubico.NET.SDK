@@ -19,6 +19,7 @@ using Yubico.Core.Devices.Hid;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
 using Xunit;
+using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -73,6 +74,46 @@ namespace Yubico.YubiKey.U2f
 
             YubiKeyDeviceInfo deviceInfo = rsp.GetData();
             Assert.False(deviceInfo.ConfigurationLocked);
+        }
+
+        [Fact]
+        public void U2fHid_CommandIns0x77_ReturnsInvalidCommand()
+        {
+            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices() ?? throw new InvalidOperationException();
+            HidDevice deviceToUse = GetFidoHid(devices) ?? throw new InvalidOperationException();
+            FidoConnection connection = new FidoConnection(deviceToUse) ?? throw new InvalidOperationException();
+
+            CommandApdu cmdApdu = new CommandApdu()
+            {
+                Ins = 0x77,
+            };
+
+            var cmd = new U2fHidTestingCommand(cmdApdu);
+            U2fHidTestingResponse rsp = connection.SendCommand(cmd);
+            Assert.Equal(ResponseStatus.Failed, rsp.Status);
+            Assert.Equal(SWConstants.CommandNotAllowed, rsp.StatusWord);
+            Assert.Equal(1, rsp.rspApdu.Data.Length);
+            Assert.Equal((byte)U2fHidStatus.Ctap1ErrInvalidCommand, rsp.rspApdu.Data.Span[0]);
+        }
+
+        [Fact]
+        public void U2fHid_U2fInitNoData_ReturnsInvalidDataLength()
+        {
+            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices() ?? throw new InvalidOperationException();
+            HidDevice deviceToUse = GetFidoHid(devices) ?? throw new InvalidOperationException();
+            FidoConnection connection = new FidoConnection(deviceToUse) ?? throw new InvalidOperationException();
+
+            CommandApdu cmdApdu = new CommandApdu()
+            {
+                Ins = 0x06,
+            };
+
+            var cmd = new U2fHidTestingCommand(cmdApdu);
+            U2fHidTestingResponse rsp = connection.SendCommand(cmd);
+            Assert.Equal(ResponseStatus.Failed, rsp.Status);
+            Assert.Equal(SWConstants.WrongLength, rsp.StatusWord);
+            Assert.Equal(1, rsp.rspApdu.Data.Length);
+            Assert.Equal((byte)U2fHidStatus.Ctap1ErrInvalidLength, rsp.rspApdu.Data.Span[0]);
         }
 
         [Fact]
@@ -155,6 +196,32 @@ namespace Yubico.YubiKey.U2f
             }
 
             return null;
+        }
+
+        private class U2fHidTestingResponse : U2fResponse
+        {
+            public U2fHidTestingResponse(ResponseApdu responseApdu) :
+                base(responseApdu)
+            { }
+
+            public ResponseApdu rspApdu => ResponseApdu;
+        }
+
+        private class U2fHidTestingCommand : IYubiKeyCommand<U2fHidTestingResponse>
+        {
+            public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
+
+            public CommandApdu CommandApdu { get; set; }
+
+            public U2fHidTestingCommand(CommandApdu commandApdu)
+            {
+                CommandApdu = commandApdu;
+            }
+
+            public CommandApdu CreateCommandApdu() => CommandApdu;
+
+            public U2fHidTestingResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+                new U2fHidTestingResponse(responseApdu);
         }
     }
 }

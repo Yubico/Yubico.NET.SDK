@@ -27,15 +27,15 @@ namespace Yubico.YubiKey.U2f.Commands
     {
         // Overridden to modify the messages associated with certain
         // status words. The messages match the status words' meanings
-        // as described in the U2F specification.
+        // as described in the FIDO U2F specifications.
         protected override ResponseStatusPair StatusCodeMap =>
             StatusWord switch
             {
-                // U2F raw message status codes - U2F Raw Message Formats section 3.3
+                // U2F raw message status codes - FIDO U2F Raw Message Formats, section 3.3
                 SWConstants.ConditionsNotSatisfied => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.U2fConditionsNotSatisfied),
                 SWConstants.InvalidCommandDataParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fWrongData),
 
-                // U2FHID_ERROR
+                // U2FHID_ERROR - FIDO U2F HID Protocol, section 4.1.4
                 SWConstants.CommandNotAllowed => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidCommand),
                 SWConstants.InvalidParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidParameter),
                 SWConstants.WrongLength => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidLength),
@@ -74,8 +74,50 @@ namespace Yubico.YubiKey.U2f.Commands
             }
         }
 
+        /// <summary>
+        /// For response APDUs where the Status Word is
+        /// <see cref="SWConstants.NoPreciseDiagnosis"/>, this method
+        /// translates the U2F HID errors into an appropriate status and
+        /// message.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// When <see cref="Pipelines.FidoTransform"/> receives
+        /// a U2F HID error, it will transform it into a response APDU where
+        /// <see cref="ResponseApdu.Data"/> contains the original one-byte
+        /// error code, and <see cref="ResponseApdu.SW"/> is set to the most
+        /// similar valud in <see cref="SWConstants"/>. If there isn't a
+        /// good match, then the Status Word will be set to
+        /// <see cref="SWConstants.NoPreciseDiagnosis"/>.
+        /// </para>
+        /// <para>
+        /// This method examines the original U2F HID error code, and returns
+        /// the appropriate status and message which best describe the error.
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// A status and message which best describe the U2F HID error.
+        /// </returns>
+        /// <seealso cref="Pipelines.FidoTransform.Invoke(CommandApdu, Type, Type)"/>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="YubiKeyResponse.StatusWord"/> is not set
+        /// to <see cref="SWConstants.NoPreciseDiagnosis"/>.
+        /// </exception>
+        /// <exception cref="MalformedYubiKeyResponseException">
+        /// Thrown when the <see cref="YubiKeyResponse.ResponseApdu"/>'s
+        /// data field does not contain exactly one byte.
+        /// </exception>
         private ResponseStatusPair GetU2fHidErrorStatusPair()
         {
+            if (StatusWord != SWConstants.NoPreciseDiagnosis)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        System.Globalization.CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidStatusWordMustBeNoPreciseDiagnosis,
+                        StatusWord));
+            }
+
             if (ResponseApdu.Data.Length != 1)
             {
                 throw new MalformedYubiKeyResponseException(

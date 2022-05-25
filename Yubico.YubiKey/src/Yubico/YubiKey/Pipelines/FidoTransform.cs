@@ -58,9 +58,10 @@ namespace Yubico.YubiKey.Pipelines
 
         public void Setup() => AcquireCtapHidChannel();
 
-        // In the case where we received a U2FHID error, the response APDU's data field will contain
-        // the error code (1 byte long), and the Status Word will be the closest equivalent ISO7816
-        // status word (or 0x6F00 if there isn't a good fit)
+        // In the case where we received a U2F HID error, the response APDU's
+        // data field will contain the error code (1 byte long), and the Status
+        // Word will be the closest equivalent ISO7816 status word (or 0x6F00
+        // "NoPreciseDiagnosis" if there isn't a good fit).
         public ResponseApdu Invoke(CommandApdu commandApdu, Type commandType, Type responseType)
         {
             if (!IsChannelIdAcquired)
@@ -165,9 +166,22 @@ namespace Yubico.YubiKey.Pipelines
         }
 
         /// <summary>
-        /// Returns the response message formatted as [command identifier][data].
+        /// Receives the FIDO U2F HID response message.
         /// </summary>
-        /// <returns></returns>
+        /// <remarks>
+        /// The important information in a U2F HID response message are the
+        /// command identifier (1 byte), and the payload data (0-7609 bytes),
+        /// and this method will return both items. The command identifier
+        /// describes what the message is about. Most of the time it will match
+        /// the command identifier sent in the request. However, it's also
+        /// possible for a U2FHID_ERROR to be returned when certain failure
+        /// modes are encountered. This behavior is described in the
+        /// specification document FIDO U2F HID Protocol.
+        /// </remarks>
+        /// <returns>
+        /// A byte array where the first byte is the U2F HID command identifier,
+        /// and any following bytes are the payload data.
+        /// </returns>
         /// <exception cref="MalformedYubiKeyResponseException"></exception>
         private byte[] ReceiveResponse()
         {
@@ -187,12 +201,12 @@ namespace Yubico.YubiKey.Pipelines
             byte responseCommand = GetPacketCmd(responseInitPacket);
 
             // allocate space for the result
-            // data formatted as [responseCommand][responseData]
+            // data formatted as [command identifier][payload data]
             byte[] responseData = new byte[1 + responseDataLength + PacketSize];
             responseData[0] = responseCommand;
             responseInitPacket.AsSpan(InitHeaderSize).CopyTo(responseData.AsSpan(1));
 
-            // get continuation response packets if necessary
+            // get continuation response packets, if necessary
             if (responseDataLength > InitDataSize)
             {
                 int bytesRead = InitDataSize;
@@ -206,6 +220,7 @@ namespace Yubico.YubiKey.Pipelines
                 lastContinuationPacket.AsSpan(ContinuationHeaderSize).CopyTo(responseData.AsSpan(bytesRead));
             }
 
+            // [command identifier][payload data]
             return responseData.Take(1 + responseDataLength).ToArray();
         }
 
@@ -221,7 +236,7 @@ namespace Yubico.YubiKey.Pipelines
             rng.GetBytes(nonce);
             byte[] response = TransmitCommand(CtapHidBroadcastChannelId, CtapHidInitCmd, nonce);
 
-            // Get the data by skipping the command identifier
+            // Get the data payload by skipping the command identifier
             Span<byte> receivedData = response.AsSpan(1);
 
             Span<byte> receivedNonce = receivedData.Slice(0, 8);
@@ -236,13 +251,32 @@ namespace Yubico.YubiKey.Pipelines
             _channelId = cid;
         }
 
-        // Takes in the "data" field of a U2FHID_ERROR response, and returns a
-        // response APDU where the data field contains the original error code,
-        // and the status word is the closest matching ISO7816 status word.
-        //
-        // Supports error codes defined in FIDO U2Fv1.0 section 4.1.4. For all
-        // other error codes, the status word will be set to 0x6F00 (no precise
-        // diagnosis).
+        /// <summary>
+        /// Converts a U2FHID_ERROR response into a ResponseApdu.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Takes in the "data" field of a U2FHID_ERROR response, and returns a
+        /// response APDU where the data field contains the original error code,
+        /// and the status word is the closest matching ISO7816 status word.
+        /// </para>
+        /// <para>
+        /// Supports error codes defined in FIDO U2Fv1.0 section 4.1.4. For all
+        /// other error codes, the status word will be set to 0x6F00 (no precise
+        /// diagnosis).
+        /// </para>
+        /// </remarks>
+        /// <param name="responseData">
+        /// The "data" field of the U2FHID_ERROR response message.
+        /// </param>
+        /// <returns>
+        /// A <see cref="ResponseApdu"/> where <see cref="ResponseApdu.Data"/>
+        /// contains the original one-byte U2FHID error code, and
+        /// <see cref="ResponseApdu.SW"/> is set to the most appropriate ISO7816
+        /// status word (or 0x6F00 "NoPreciseDiagnosis" if there isn't a close
+        /// match).
+        /// </returns>
+        /// <exception cref="MalformedYubiKeyResponseException"></exception>
         private static ResponseApdu GetU2fHidErrorResponseApdu(Span<byte> responseData)
         {
             if (responseData.Length != 1)

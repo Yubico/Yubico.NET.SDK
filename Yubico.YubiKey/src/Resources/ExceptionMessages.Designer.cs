@@ -952,6 +952,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid status word &quot;{0}&quot;. For this method, the status word must be NoPreciseDiagnosis (0x6F 00)..
+        /// </summary>
+        internal static string InvalidStatusWordMustBeNoPreciseDiagnosis {
+            get {
+                return ResourceManager.GetString("InvalidStatusWordMustBeNoPreciseDiagnosis", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The U2F HID error code should be 1 byte long. The supplied error code contains {0} bytes..
         /// </summary>
         internal static string InvalidU2fHidErrorCodeLength {

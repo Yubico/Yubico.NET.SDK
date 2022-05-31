@@ -109,7 +109,7 @@ namespace Yubico.YubiKey.U2f
         /// <param name="clientDataHash">The original clientDataHash that was provided to create this registration.</param>
         /// <param name="applicationId">The original appId that was provided to create this registration.</param>
         /// <returns></returns>
-        public bool IsSignatureValid(ReadOnlySpan<byte> applicationId, ReadOnlySpan<byte> clientDataHash)
+        public bool VerifySignature(ReadOnlySpan<byte> applicationId, ReadOnlySpan<byte> clientDataHash)
         {
             if (clientDataHash.Length != ClientDataHashLength)
             {

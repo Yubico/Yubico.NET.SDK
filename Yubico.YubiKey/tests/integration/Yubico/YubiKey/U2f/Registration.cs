@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.U2f
 
                 RegistrationData registrationData = u2fSession.Register(applicationId, clientDataHash);
 
-                Assert.True(registrationData.IsSignatureValid(applicationId, clientDataHash));
+                Assert.True(registrationData.VerifySignature(applicationId, clientDataHash));
             }
         }
     }

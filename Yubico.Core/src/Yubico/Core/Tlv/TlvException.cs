@@ -40,7 +40,7 @@ namespace Yubico.Core.Tlv
         protected TlvException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
             base(serializationInfo, streamingContext)
         {
-            throw new NotImplementedException();
+
         }
     }
 }

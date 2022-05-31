@@ -89,7 +89,7 @@ namespace Yubico.YubiKey
         protected MalformedYubiKeyResponseException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
             base(serializationInfo, streamingContext)
         {
-            throw new NotImplementedException();
+
         }
     }
 }

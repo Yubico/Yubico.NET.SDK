@@ -95,7 +95,9 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_ResponseApduFailed_ThrowsInvalidOperationException()
         {
-            var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
+            byte sw1 = unchecked((byte)(SWConstants.ExecutionError >> 8));
+            byte sw2 = unchecked((byte)SWConstants.ExecutionError);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
             var getDeviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
 
             void action() => _ = getDeviceInfoResponse.GetData();

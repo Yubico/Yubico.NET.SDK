@@ -72,5 +72,7 @@ namespace Yubico.Core.Iso7816
         public const short InsNotSupported = 0x6D00;
 
         public const short ClaNotSupported = 0x6E00;
+
+        public const short NoPreciseDiagnosis = 0x6F00;
     }
 }

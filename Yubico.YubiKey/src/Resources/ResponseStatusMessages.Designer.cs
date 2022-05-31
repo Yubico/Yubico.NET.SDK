@@ -547,6 +547,69 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The device is busy for the requesting channel..
+        /// </summary>
+        internal static string U2fHidErrorChannelBusy {
+            get {
+                return ResourceManager.GetString("U2fHidErrorChannelBusy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The command in the request is invalid..
+        /// </summary>
+        internal static string U2fHidErrorInvalidCommand {
+            get {
+                return ResourceManager.GetString("U2fHidErrorInvalidCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The length field is invalid for the request..
+        /// </summary>
+        internal static string U2fHidErrorInvalidLength {
+            get {
+                return ResourceManager.GetString("U2fHidErrorInvalidLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The parameter(s) in the request is invalid..
+        /// </summary>
+        internal static string U2fHidErrorInvalidParameter {
+            get {
+                return ResourceManager.GetString("U2fHidErrorInvalidParameter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The packet sequence does not match the expected value..
+        /// </summary>
+        internal static string U2fHidErrorInvalidSequence {
+            get {
+                return ResourceManager.GetString("U2fHidErrorInvalidSequence", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The message has timed out..
+        /// </summary>
+        internal static string U2fHidErrorMessageTimeout {
+            get {
+                return ResourceManager.GetString("U2fHidErrorMessageTimeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An unknown error occurred (U2F HID error code {0})..
+        /// </summary>
+        internal static string U2fHidErrorUnknown {
+            get {
+                return ResourceManager.GetString("U2fHidErrorUnknown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The request was rejected due to an invalid key handle..
         /// </summary>
         internal static string U2fWrongData {

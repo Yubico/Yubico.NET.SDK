@@ -18,7 +18,7 @@ limitations under the License. -->
 
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <PackageId>Yubico.DotNetPolyfills</PackageId>
-    <Version>$(YubicoDotNetPolyfillsVersion)</Version>
+    <VersionPrefix>$(YubicoDotNetPolyfillsVersion)</VersionPrefix>
 
     <!-- TODO: Adjust in .editorconfig -->
     <EnableNETAnalyzers>false</EnableNETAnalyzers>
@@ -30,6 +30,10 @@ limitations under the License. -->
 
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
     <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
     <!-- DocFX will throw a warning (which we set as an error) if it doesn't find a reference assembly. -->
     <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
@@ -37,6 +41,10 @@ limitations under the License. -->
     <!-- StrongName signing -->
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
   </PropertyGroup>
 
   <ItemGroup Label="Resource file definitions">
@@ -48,6 +56,10 @@ limitations under the License. -->
   <Target Name="CopyPackage" AfterTargets="Pack">
     <Copy SourceFiles="$(PackageOutputPath)$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(MSBuildProjectDirectory)\..\..\build\latestpackages" />
   </Target>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
+  </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
 

@@ -15,6 +15,6 @@ limitations under the License. -->
 <Project>
   <Import Project="..\build\Directory.Build.props"/>
   <PropertyGroup>
-    <Version>$(YubicoCoreVersion)</Version>
+    <VersionPrefix>$(YubicoCoreVersion)</VersionPrefix>
   </PropertyGroup>
 </Project>

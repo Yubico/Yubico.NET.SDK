@@ -1,19 +1,4 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-
-<!-- Copyright 2021 Yubico AB
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License. -->
-
 <root>
   <!-- 
     Microsoft ResX Schema 
@@ -296,5 +281,26 @@ limitations under the License. -->
   </data>
   <data name="U2fWrongData" xml:space="preserve">
     <value>The request was rejected due to an invalid key handle.</value>
+  </data>
+  <data name="U2fHidErrorChannelBusy" xml:space="preserve">
+    <value>The device is busy on the requested channel.</value>
+  </data>
+  <data name="U2fHidErrorInvalidSequence" xml:space="preserve">
+    <value>The packet contained an invalid or out of order sequence number.</value>
+  </data>
+  <data name="U2fHidErrorMessageTimeout" xml:space="preserve">
+    <value>The message has timed out.</value>
+  </data>
+  <data name="U2fHidErrorUnknown" xml:space="preserve">
+    <value>An unknown error occurred (U2F HID error code {0}).</value>
+  </data>
+  <data name="U2fHidErrorInvalidCommand" xml:space="preserve">
+    <value>The command in the request is invalid.</value>
+  </data>
+  <data name="U2fHidErrorInvalidLength" xml:space="preserve">
+    <value>The length field is invalid for the request.</value>
+  </data>
+  <data name="U2fHidErrorInvalidParameter" xml:space="preserve">
+    <value>The parameter(s) in the request is invalid.</value>
   </data>
 </root>

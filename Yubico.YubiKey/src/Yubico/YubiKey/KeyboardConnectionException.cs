@@ -13,9 +13,11 @@
 // limitations under the License.
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Yubico.YubiKey
 {
+    [Serializable]
     public class KeyboardConnectionException : Exception
     {
         public KeyboardConnectionException()
@@ -29,6 +31,12 @@ namespace Yubico.YubiKey
 
         public KeyboardConnectionException(string message, Exception innerException) : base(message, innerException)
         {
+        }
+
+        protected KeyboardConnectionException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
+            base(serializationInfo, streamingContext)
+        {
+
         }
     }
 }

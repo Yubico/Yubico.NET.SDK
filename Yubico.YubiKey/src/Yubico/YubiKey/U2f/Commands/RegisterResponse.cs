@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f.Commands
@@ -30,14 +28,11 @@ namespace Yubico.YubiKey.U2f.Commands
     /// See <see cref="RegisterCommand"/> for more details.
     /// </p>
     /// </remarks>
-    internal class RegisterResponse : U2fResponse, IYubiKeyResponseWithData<RegistrationData>
+    public class RegisterResponse : U2fResponse, IYubiKeyResponseWithData<RegistrationData>
     {
         private const byte ReservedResponseValue = 0x05;
         private const int KeyHandleOffset = 67;
         private const int MinDataLength = KeyHandleOffset;
-        private const int EcPublicKeyLength = 65;
-        private const int EcPublicKeyTag = 0x04;
-        private const int EcCoordinateLength = 32;
 
         /// <summary>
         /// Constructs a RegisterResponse from the given ResponseApdu.
@@ -53,7 +48,7 @@ namespace Yubico.YubiKey.U2f.Commands
         /// Gets the registration data from the response.
         /// </summary>
         /// <remarks>
-        /// If the status of the response is not 'Success', this method will fail. If the 
+        /// If the status of the response is not 'Success', this method will fail. If the
         /// status of the response is <see cref="ResponseStatus.ConditionsNotSatisfied"/> then
         /// clients should retry the command until it succeeds (when user presence is confirmed,
         /// generally through touch).
@@ -77,46 +72,7 @@ namespace Yubico.YubiKey.U2f.Commands
                 ThrowMalformedResponse();
             }
 
-            ReadOnlySpan<byte> data = ResponseApdu.Data.Span;
-            ReadOnlySpan<byte> userPublicKeyBytes = data.Slice(1, EcPublicKeyLength);
-
-            if (userPublicKeyBytes[0] != EcPublicKeyTag)
-            {
-                ThrowMalformedResponse();
-            }
-
-            var userPublicKey = new ECPoint
-            {
-                X = userPublicKeyBytes.Slice(1, EcCoordinateLength).ToArray(),
-                Y = userPublicKeyBytes.Slice(1 + EcCoordinateLength, EcCoordinateLength).ToArray()
-            };
-
-            byte keyHandleLength = data[66];
-
-            if (keyHandleLength == 0 || data.Length < KeyHandleOffset + keyHandleLength)
-            {
-                ThrowMalformedResponse();
-            }
-
-            ReadOnlySpan<byte> keyHandle = data.Slice(KeyHandleOffset, keyHandleLength);
-
-            int certificateOffset = KeyHandleOffset + keyHandleLength;
-            ReadOnlySpan<byte> certificateAndSignatureBytes = data.Slice(certificateOffset);
-
-            X509Certificate2 attestationCertificate;
-
-            try
-            {
-                attestationCertificate = new X509Certificate2(certificateAndSignatureBytes.ToArray());
-            }
-            catch (CryptographicException cryptoException)
-            {
-                throw new MalformedYubiKeyResponseException(ExceptionMessages.FailedParsingCertificate, cryptoException);
-            }
-
-            ReadOnlySpan<byte> signature = certificateAndSignatureBytes.Slice(attestationCertificate.RawData.Length);
-
-            return new RegistrationData(userPublicKey, keyHandle, attestationCertificate, signature);
+            return new RegistrationData(ResponseApdu.Data);
         }
 
         private static void ThrowMalformedResponse() =>

@@ -14,11 +14,10 @@
 
 using System.Collections.Generic;
 using Yubico.Core.Devices.Hid;
-using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Fido2.Commands;
 using Xunit;
 
-namespace Yubico.YubiKey.U2f
+namespace Yubico.YubiKey.Fido2
 {
     public class SimpleFido2Tests
     {

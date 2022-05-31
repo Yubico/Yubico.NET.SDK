@@ -70,7 +70,7 @@ namespace Yubico.YubiKey.U2f.Commands
                     Debug.Assert(Status == ResponseStatus.Success);
                     return;
                 default:
-                    throw new Exception(); 
+                    throw new Exception();
             }
         }
 

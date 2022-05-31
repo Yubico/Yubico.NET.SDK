@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             RegisterCommand command = GetRegisterCommand();
 
-            _ = Assert.Throws<ArgumentException>(() => command.SetClientDataHash(new byte[16]));
+            _ = Assert.Throws<ArgumentException>(() => command.ClientDataHash = new byte[16]);
         }
 
         [Fact]
@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             RegisterCommand command = GetRegisterCommand();
 
-            _ = Assert.Throws<ArgumentException>(() => command.SetAppId(new byte[16]));
+            _ = Assert.Throws<ArgumentException>(() => command.ApplicationId = new byte[16]);
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             string clientDataHashHex = "000102030405060708090A0B0C0D0E0F000102030405060708090A0B0C0D0E0F";
             RegisterCommand command = GetRegisterCommand();
-            command.SetClientDataHash(Hex.HexToBytes(clientDataHashHex));
+            command.ClientDataHash = Hex.HexToBytes(clientDataHashHex);
 
             Assert.Equal(clientDataHashHex, Hex.BytesToHex(command.CreateCommandApdu().Data.Slice(7, 32).ToArray()));
         }
@@ -61,7 +61,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             string appIdHex = "000102030405060708090A0B0C0D0E0F000102030405060708090A0B0C0D0E0F";
             RegisterCommand command = GetRegisterCommand();
-            command.SetAppId(Hex.HexToBytes(appIdHex));
+            command.ApplicationId = Hex.HexToBytes(appIdHex);
 
             Assert.Equal(appIdHex, Hex.BytesToHex(command.CreateCommandApdu().Data.Slice(39, 32).ToArray()));
         }

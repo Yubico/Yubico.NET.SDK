@@ -197,6 +197,12 @@
       - name: "Get firmware version"
         href: application-piv/apdu/version.md
 
+- name: "Application: FIDO U2F"
+  homepage: application-fido-u2f/fido-u2f-overview.md
+  items:
+  - name: How FIDO U2F works
+    href: application-fido-u2f/how-u2f-works.md
+
 - name: "Supporting routines"
   homepage: support/support-overview.md
   items:

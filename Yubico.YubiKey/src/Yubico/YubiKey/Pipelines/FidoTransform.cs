@@ -77,13 +77,10 @@ namespace Yubico.YubiKey.Pipelines
                 throw new ArgumentException(ExceptionMessages.Ctap2CommandTooLarge, nameof(commandApdu));
             }
 
-            byte[] responseCommandAndData = TransmitCommand(_channelId!.Value, ctapCmd, ctapData);
-
-            byte responseCommandIdentifier = responseCommandAndData[0];
-            byte[] responseData = responseCommandAndData.AsSpan(1).ToArray();
+            byte[] responseData = TransmitCommand(_channelId!.Value, ctapCmd, ctapData, out byte responseByte);
 
             ResponseApdu responseApdu =
-                responseCommandIdentifier switch
+                responseByte switch
                 {
                     (byte)CtapHidCommand.Ctap1Message   => new ResponseApdu(responseData),
                     (byte)CtapHidCommand.Error          => GetU2fHidErrorResponseApdu(responseData),
@@ -133,13 +130,13 @@ namespace Yubico.YubiKey.Pipelines
         private static int GetPacketBcnt(byte[] packet) =>
             (packet[5] << 8) | (packet[6]);
 
-        private byte[] TransmitCommand(uint channelId, byte commandByte, byte[] data)
+        private byte[] TransmitCommand(uint channelId, byte commandByte, byte[] data, out byte responseByte)
         {
             SendRequest(channelId, commandByte, data);
 
-            byte[] responseCommandAndData = ReceiveResponse();
+            byte[] responseData = ReceiveResponse(out responseByte);
 
-            return responseCommandAndData;
+            return responseData;
         }
 
         private void SendRequest(uint channelId, byte commandByte, ReadOnlySpan<byte> data)
@@ -178,14 +175,19 @@ namespace Yubico.YubiKey.Pipelines
         /// modes are encountered. This behavior is described in the
         /// specification document FIDO U2F HID Protocol.
         /// </remarks>
+        /// <param name="responseCommand">
+        /// An output parameter containing the command identifier returned by
+        /// the CTAP response.
+        /// </param>
         /// <returns>
-        /// A byte array where the first byte is the U2F HID command identifier,
-        /// and any following bytes are the payload data.
+        /// A byte array containing the response data.
         /// </returns>
-        /// <exception cref="MalformedYubiKeyResponseException"></exception>
-        private byte[] ReceiveResponse()
+        /// <exception cref="MalformedYubiKeyResponseException">
+        /// Thrown when the response payload size is larger than expected.
+        /// </exception>
+        private byte[] ReceiveResponse(out byte responseCommand)
         {
-            // get init response packet 
+            // get init response packet
             byte[] responseInitPacket = _hidConnection.GetReport();
             while (responseInitPacket[4] == (CtapHidKeepAliveCmd | 0b1000_0000))
             {
@@ -198,13 +200,12 @@ namespace Yubico.YubiKey.Pipelines
                 throw new MalformedYubiKeyResponseException(ExceptionMessages.Ctap2MalformedResponse);
             }
 
-            byte responseCommand = GetPacketCmd(responseInitPacket);
+            responseCommand = GetPacketCmd(responseInitPacket);
 
             // allocate space for the result
             // data formatted as [command identifier][payload data]
-            byte[] responseData = new byte[1 + responseDataLength + PacketSize];
-            responseData[0] = responseCommand;
-            responseInitPacket.AsSpan(InitHeaderSize).CopyTo(responseData.AsSpan(1));
+            byte[] responseData = new byte[responseDataLength + PacketSize];
+            responseInitPacket.AsSpan(InitHeaderSize).CopyTo(responseData);
 
             // get continuation response packets, if necessary
             if (responseDataLength > InitDataSize)
@@ -220,8 +221,7 @@ namespace Yubico.YubiKey.Pipelines
                 lastContinuationPacket.AsSpan(ContinuationHeaderSize).CopyTo(responseData.AsSpan(bytesRead));
             }
 
-            // [command identifier][payload data]
-            return responseData.Take(1 + responseDataLength).ToArray();
+            return responseData.Take(responseDataLength).ToArray();
         }
 
         /// <summary>
@@ -234,19 +234,16 @@ namespace Yubico.YubiKey.Pipelines
             using var rng = RandomNumberGenerator.Create();
             byte[] nonce = new byte[8];
             rng.GetBytes(nonce);
-            byte[] response = TransmitCommand(CtapHidBroadcastChannelId, CtapHidInitCmd, nonce);
+            byte[] response = TransmitCommand(CtapHidBroadcastChannelId, CtapHidInitCmd, nonce, out _);
 
-            // Get the data payload by skipping the command identifier
-            Span<byte> receivedData = response.AsSpan(1);
-
-            Span<byte> receivedNonce = receivedData.Slice(0, 8);
+            Span<byte> receivedNonce = response.AsSpan(0, 8);
 
             if (!nonce.AsSpan().SequenceEqual(receivedNonce))
             {
                 throw new MalformedYubiKeyResponseException(ExceptionMessages.Ctap2MalformedResponse);
             }
 
-            uint cid = BinaryPrimitives.ReadUInt32BigEndian(receivedData.Slice(8, 4));
+            uint cid = BinaryPrimitives.ReadUInt32BigEndian(response.AsSpan(8, 4));
 
             _channelId = cid;
         }

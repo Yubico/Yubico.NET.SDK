@@ -34,7 +34,8 @@ namespace Yubico.YubiKey.U2f
         private const int EncodedEcPublicKeyLength = 1 +  (2 * EcP256PublicKeyCoordinateLength);
         private const int AppIdLength = 32;
         private const int ClientDataHashLength = 32;
-        private const int KeyHandleOffset = 1 + AppIdLength + ClientDataHashLength;
+        private const int VerifyKeyHandleOffset = 1 + AppIdLength + ClientDataHashLength;
+        private const int ResponseKeyHandleOffset = 67;
         private const int EcPublicKeyTag = 0x04;
         private const int EcPublicKeyLength = 65;
         private const int EcCoordinateLength = 32;
@@ -107,14 +108,14 @@ namespace Yubico.YubiKey.U2f
 
             byte keyHandleLength = dataBuffer.Span[66];
 
-            if (keyHandleLength == 0 || dataBuffer.Length < KeyHandleOffset + keyHandleLength)
+            if (keyHandleLength == 0 || dataBuffer.Length < ResponseKeyHandleOffset + keyHandleLength)
             {
                 throw new MalformedYubiKeyResponseException();
             }
 
-            ReadOnlyMemory<byte> keyHandle = dataBuffer.Slice(KeyHandleOffset, keyHandleLength);
+            ReadOnlyMemory<byte> keyHandle = dataBuffer.Slice(ResponseKeyHandleOffset, keyHandleLength);
 
-            int certificateOffset = KeyHandleOffset + keyHandleLength;
+            int certificateOffset = ResponseKeyHandleOffset + keyHandleLength;
             ReadOnlyMemory<byte> certificateAndSignatureBytes = dataBuffer.Slice(certificateOffset);
 
             X509Certificate2 attestationCertificate;
@@ -186,9 +187,9 @@ namespace Yubico.YubiKey.U2f
             applicationId.CopyTo(dataToVerify.AsSpan(1));
             clientDataHash.CopyTo(dataToVerify.AsSpan(1 + AppIdLength));
 
-            KeyHandle.ToArray().CopyTo(dataToVerify.AsSpan(KeyHandleOffset));
+            KeyHandle.ToArray().CopyTo(dataToVerify.AsSpan(VerifyKeyHandleOffset));
 
-            int userPublicKeyOffset = KeyHandleOffset + KeyHandle.Length;
+            int userPublicKeyOffset = VerifyKeyHandleOffset + KeyHandle.Length;
             dataToVerify[userPublicKeyOffset] = EcPublicKeyTag;
             UserPublicKey.X.CopyTo(dataToVerify.AsSpan(userPublicKeyOffset + 1));
             UserPublicKey.Y.CopyTo(dataToVerify.AsSpan(userPublicKeyOffset + EcP256PublicKeyCoordinateLength + 1));

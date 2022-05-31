@@ -19,6 +19,7 @@ using Yubico.Core;
 
 namespace Yubico.PlatformInterop
 {
+    [Serializable]
     public class PlatformApiException : Exception
     {
         public PlatformApiException() :

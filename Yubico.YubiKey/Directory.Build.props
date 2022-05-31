@@ -31,7 +31,7 @@ limitations under the License. -->
     Set the version for all Yubico.YubiKey components (assembly, NuGet package, tests, etc.)
     to use the version specified in .\build\Versions.props
     -->
-    <Version>$(YubicoYubiKeyVersion)</Version>
+    <VersionPrefix>$(YubicoYubiKeyVersion)</VersionPrefix>
 
   </PropertyGroup>
 </Project>

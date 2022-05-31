@@ -16,6 +16,10 @@ namespace Yubico.PlatformInterop
 {
     internal static partial class Libraries
     {
+#if NET47
+        internal const string NativeShims = "Yubico.NativeShims.dll";
+#else
         internal const string NativeShims = "Yubico.NativeShims";
+#endif
     }
 }

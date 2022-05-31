@@ -13,9 +13,11 @@
 // limitations under the License.
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Yubico.Core.Tlv
 {
+    [Serializable]
     public class TlvException : InvalidOperationException
     {
         public TlvException()
@@ -31,6 +33,12 @@ namespace Yubico.Core.Tlv
 
         public TlvException(string message, Exception innerException) :
             base(message, innerException)
+        {
+
+        }
+
+        protected TlvException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
+            base(serializationInfo, streamingContext)
         {
 
         }

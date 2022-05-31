@@ -13,12 +13,14 @@
 // limitations under the License.
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Yubico.Core.Iso7816
 {
     /// <summary>
     /// The exception that is thrown when an ISO 7816 application has encountered an error.
     /// </summary>
+    [Serializable]
     public class ApduException : Exception
     {
         /// <summary>
@@ -92,6 +94,13 @@ namespace Yubico.Core.Iso7816
         /// is specified.</param>
         public ApduException(string message, Exception innerException) :
             base(message, innerException)
+        {
+
+        }
+
+        /// <inheritdoc />
+        protected ApduException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
+            base(serializationInfo, streamingContext)
         {
 
         }

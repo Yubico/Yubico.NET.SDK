@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f.Commands
@@ -35,9 +33,6 @@ namespace Yubico.YubiKey.U2f.Commands
         private const byte ReservedResponseValue = 0x05;
         private const int KeyHandleOffset = 67;
         private const int MinDataLength = KeyHandleOffset;
-        private const int EcPublicKeyLength = 65;
-        private const int EcPublicKeyTag = 0x04;
-        private const int EcCoordinateLength = 32;
 
         /// <summary>
         /// Constructs a RegisterResponse from the given ResponseApdu.
@@ -77,47 +72,7 @@ namespace Yubico.YubiKey.U2f.Commands
                 ThrowMalformedResponse();
             }
 
-            ReadOnlySpan<byte> data = ResponseApdu.Data.Span;
-            ReadOnlySpan<byte> userPublicKeyBytes = data.Slice(1, EcPublicKeyLength);
-
-            if (userPublicKeyBytes[0] != EcPublicKeyTag)
-            {
-                ThrowMalformedResponse();
-            }
-
-            var userPublicKey = new ECPoint
-            {
-                X = userPublicKeyBytes.Slice(1, EcCoordinateLength).ToArray(),
-                Y = userPublicKeyBytes.Slice(1 + EcCoordinateLength, EcCoordinateLength).ToArray()
-            };
-
-            byte keyHandleLength = data[66];
-
-            if (keyHandleLength == 0 || data.Length < KeyHandleOffset + keyHandleLength)
-            {
-                ThrowMalformedResponse();
-            }
-
-            ReadOnlySpan<byte> keyHandle = data.Slice(KeyHandleOffset, keyHandleLength);
-
-            int certificateOffset = KeyHandleOffset + keyHandleLength;
-            ReadOnlySpan<byte> certificateAndSignatureBytes = data.Slice(certificateOffset);
-
-            X509Certificate2 attestationCertificate;
-
-            try
-            {
-                attestationCertificate = new X509Certificate2(certificateAndSignatureBytes.ToArray());
-            }
-            catch (CryptographicException cryptoException)
-            {
-                throw new MalformedYubiKeyResponseException(ExceptionMessages.FailedParsingCertificate, cryptoException);
-            }
-
-            ReadOnlySpan<byte> signature = certificateAndSignatureBytes.Slice(attestationCertificate.RawData.Length);
-
-            // TODO: Span -> Memory here to avoid the .ToArray calls
-            return new RegistrationData(userPublicKey, keyHandle.ToArray(), attestationCertificate, signature.ToArray());
+            return new RegistrationData(ResponseApdu.Data);
         }
 
         private static void ThrowMalformedResponse() =>

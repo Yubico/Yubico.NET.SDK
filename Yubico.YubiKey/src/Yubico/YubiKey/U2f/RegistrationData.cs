@@ -36,6 +36,9 @@ namespace Yubico.YubiKey.U2f
         private const int ClientDataHashLength = 32;
         private const int KeyHandleOffset = 1 + AppIdLength + ClientDataHashLength;
         private const int EcPublicKeyTag = 0x04;
+        private const int EcPublicKeyLength = 65;
+        private const int EcCoordinateLength = 32;
+
 
         private ECPoint _userPublicKey;
 
@@ -85,6 +88,52 @@ namespace Yubico.YubiKey.U2f
         public RegistrationData()
         {
             AttestationCertificate = new X509Certificate2();
+        }
+
+        public RegistrationData(ReadOnlyMemory<byte> dataBuffer)
+        {
+            ReadOnlyMemory<byte> userPublicKeyBytes = dataBuffer.Slice(1, EcPublicKeyLength);
+
+            if (userPublicKeyBytes.Span[0] != EcPublicKeyTag)
+            {
+                throw new MalformedYubiKeyResponseException();
+            }
+
+            var userPublicKey = new ECPoint
+            {
+                X = userPublicKeyBytes.Slice(1, EcCoordinateLength).ToArray(),
+                Y = userPublicKeyBytes.Slice(1 + EcCoordinateLength, EcCoordinateLength).ToArray()
+            };
+
+            byte keyHandleLength = dataBuffer.Span[66];
+
+            if (keyHandleLength == 0 || dataBuffer.Length < KeyHandleOffset + keyHandleLength)
+            {
+                throw new MalformedYubiKeyResponseException();
+            }
+
+            ReadOnlyMemory<byte> keyHandle = dataBuffer.Slice(KeyHandleOffset, keyHandleLength);
+
+            int certificateOffset = KeyHandleOffset + keyHandleLength;
+            ReadOnlyMemory<byte> certificateAndSignatureBytes = dataBuffer.Slice(certificateOffset);
+
+            X509Certificate2 attestationCertificate;
+
+            try
+            {
+                attestationCertificate = new X509Certificate2(certificateAndSignatureBytes.ToArray());
+            }
+            catch (CryptographicException cryptoException)
+            {
+                throw new MalformedYubiKeyResponseException(ExceptionMessages.FailedParsingCertificate, cryptoException);
+            }
+
+            ReadOnlyMemory<byte> signature = certificateAndSignatureBytes.Slice(attestationCertificate.RawData.Length);
+
+            UserPublicKey = userPublicKey;
+            KeyHandle = keyHandle;
+            AttestationCertificate = attestationCertificate;
+            Signature = signature;
         }
 
         public RegistrationData(

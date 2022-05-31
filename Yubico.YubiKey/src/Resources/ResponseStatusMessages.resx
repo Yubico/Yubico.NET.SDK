@@ -283,10 +283,10 @@
     <value>The request was rejected due to an invalid key handle.</value>
   </data>
   <data name="U2fHidErrorChannelBusy" xml:space="preserve">
-    <value>The device is busy for the requesting channel.</value>
+    <value>The device is busy on the requested channel.</value>
   </data>
   <data name="U2fHidErrorInvalidSequence" xml:space="preserve">
-    <value>The packet sequence does not match the expected value.</value>
+    <value>The packet contained an invalid or out of order sequence number.</value>
   </data>
   <data name="U2fHidErrorMessageTimeout" xml:space="preserve">
     <value>The message has timed out.</value>

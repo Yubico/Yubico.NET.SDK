@@ -32,6 +32,7 @@ namespace Yubico.YubiKey
             { Kind = SmartCardConnectionKind.Nfc };
 
         public string Path { get; } = string.Empty;
+        public string? ParentDeviceId { get; } = null;
         public AnswerToReset? Atr { get; }
         public SmartCardConnectionKind Kind { get; private set; }
         public ISmartCardConnection Connect()
@@ -46,6 +47,7 @@ namespace Yubico.YubiKey
         public readonly static IHidDevice KeyboardInstance = new TestHidDevice() { UsagePage = HidUsagePage.Keyboard };
 
         public string Path { get; } = string.Empty;
+        public string? ParentDeviceId { get; } = null;
         public short VendorId { get; }
         public short ProductId { get; }
         public short Usage { get; }

@@ -21,6 +21,7 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
     class FakeSmartCardDevice : ISmartCardDevice
     {
         public string Path { get; } = string.Empty;
+        public string? ParentDeviceId { get; } = null;
         public AnswerToReset? Atr { get; }
         public SmartCardConnectionKind Kind { get; }
         public ISmartCardConnection Connect() => throw new NotImplementedException();

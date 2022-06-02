@@ -27,24 +27,19 @@ namespace Yubico.Core.Devices.SmartCard
     {
         private readonly Logger _log = Log.GetLogger();
 
-        /// <summary>
-        /// Gets the path to the smart card device.
-        /// </summary>
-        /// <value>
-        /// A platform defined path to the device.
-        /// </value>
-        public string Path { get; private set; }
+        /// <inheritdoc />
+        public string Path { get; }
+
+        /// <inheritdoc />
+        public string? ParentDeviceId { get; protected set; }
 
         /// <summary>
         /// The "answer to reset" (ATR) for the smart card.
         /// </summary>
-        /// <value>
-        /// The ATR.
-        /// </value>
         /// <remarks>
         /// The ATR for a smart card can act as an identifier for the type of card that is inserted.
         /// </remarks>
-        public AnswerToReset? Atr { get; private set; }
+        public AnswerToReset? Atr { get; }
 
         /// <summary>
         /// Gets the smart card's connection type.

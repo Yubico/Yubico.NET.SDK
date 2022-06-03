@@ -151,7 +151,7 @@ namespace Yubico.Core.Devices.Hid
 
                 IOHIDDeviceScheduleWithRunLoop(_deviceHandle, runLoop, _loopId);
 
-                int runLoopResult = CFRunLoopRunInMode(_loopId, 4, true);
+                int runLoopResult = CFRunLoopRunInMode(_loopId, 6, true);
                 if (runLoopResult != kCFRunLoopRunHandledSource)
                 {
                     throw new PlatformApiException(

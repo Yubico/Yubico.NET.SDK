@@ -198,9 +198,9 @@ namespace Yubico.YubiKey
         {
             var devicesToProcess = new List<IDevice>();
 
-            IList<IDevice> hidKeyboardDevices = GetFilteredHidDevices(Transport.HidKeyboard);
-            IList<IDevice> smartCardDevices = GetFilteredSmartCardDevices(Transport.All);
-            IList<IDevice> hidFidoDevices = GetFilteredHidDevices(Transport.HidFido);
+            IList<IDevice> hidKeyboardDevices = GetHidKeyboardDevices().ToList();
+            IList<IDevice> smartCardDevices = GetSmartCardDevices().ToList();
+            IList<IDevice> hidFidoDevices = GetHidFidoDevices().ToList();
 
             _log.LogInformation(
                 "Found {HidCount} HID Keyboard devices, {FidoCount} HID FIDO devices, and {SCardCount} Smart Card devices for processing.",
@@ -276,55 +276,43 @@ namespace Yubico.YubiKey
         /// </summary>
         private void OnDeviceRemoved(YubiKeyDeviceEventArgs e) => Removed?.Invoke(typeof(YubiKeyDevice), e);
 
-        private static IList<IDevice> GetFilteredHidDevices(Transport transport)
+        private static IEnumerable<IDevice> GetHidFidoDevices()
         {
-            var yubicoHidDevices = new List<IDevice>();
-
-            bool fidoFlag = transport.HasFlag(Transport.HidFido);
-            bool keyboardFlag = transport.HasFlag(Transport.HidKeyboard);
-
-            if (!fidoFlag && !keyboardFlag)
-            {
-                return yubicoHidDevices;
-            }
-
             try
             {
-                yubicoHidDevices.AddRange(
-                    HidDevice
-                        .GetHidDevices()
-                        .Where(d => d.IsYubicoDevice())
-                        .Where(d => (fidoFlag && d.IsFido()) || (keyboardFlag && d.IsKeyboard())));
+                return HidDevice
+                    .GetHidDevices()
+                    .Where(d => d.IsYubicoDevice() && d.IsFido());
             }
             catch (PlatformInterop.PlatformApiException e) { ErrorHandler(e); }
 
-            return yubicoHidDevices;
+            return Enumerable.Empty<IDevice>();
         }
 
-        private static IList<IDevice> GetFilteredSmartCardDevices(Transport transport)
+        private static IEnumerable<IDevice> GetHidKeyboardDevices()
         {
-            var yubicoSmartCardDevices = new List<IDevice>();
-
-            bool usbSmartCardFlag = transport.HasFlag(Transport.UsbSmartCard);
-            bool nfcSmartCardFlag = transport.HasFlag(Transport.NfcSmartCard);
-
-            if (!usbSmartCardFlag && !nfcSmartCardFlag)
-            {
-                return yubicoSmartCardDevices;
-            }
-
             try
             {
-                yubicoSmartCardDevices.AddRange(
-                    SmartCardDevice
+                return HidDevice
+                    .GetHidDevices()
+                    .Where(d => d.IsYubicoDevice() && d.IsKeyboard());
+            }
+            catch (PlatformInterop.PlatformApiException e) { ErrorHandler(e); }
+
+            return Enumerable.Empty<IDevice>();
+        }
+
+        private static IEnumerable<IDevice> GetSmartCardDevices()
+        {
+            try
+            {
+                return SmartCardDevice
                         .GetSmartCardDevices()
-                        .Where(d => d.IsYubicoDevice())
-                        .Where(d =>
-                            (usbSmartCardFlag && d.IsUsbTransport()) || (nfcSmartCardFlag && d.IsNfcTransport())));
+                        .Where(d => d.IsYubicoDevice());
             }
             catch (PlatformInterop.SCardException e) { ErrorHandler(e); }
 
-            return yubicoSmartCardDevices;
+            return Enumerable.Empty<IDevice>();
         }
 
         private static void ErrorHandler(Exception exception) =>

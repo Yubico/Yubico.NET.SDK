@@ -133,6 +133,7 @@ namespace Yubico.YubiKey
             {
                 _log.LogInformation("Processing device {Device}", device);
 
+                // First check if we've already seen this device (very fast)
                 IYubiKeyDevice? existingEntry = _internalCache.Keys.FirstOrDefault(k => k.Contains(device));
 
                 if (existingEntry != null)
@@ -142,6 +143,17 @@ namespace Yubico.YubiKey
                     continue;
                 }
 
+                // Next, see if the device has any information about its parent, and if we can match that way (fast)
+                existingEntry = _internalCache.Keys.FirstOrDefault(k => k.HasSameParentDevice(device));
+
+                if (existingEntry is YubiKeyDevice parentDevice)
+                {
+                    MergeAndMarkExistingYubiKey(parentDevice, device);
+
+                    continue;
+                }
+
+                // Lastly, let's talk to the YubiKey to get its device info and see if we match via serial number (slow)
                 var deviceWithInfo = new YubiKeyDevice.YubicoDeviceWithInfo(device);
 
                 if (deviceWithInfo.Info.SerialNumber is null)
@@ -186,16 +198,19 @@ namespace Yubico.YubiKey
         {
             var devicesToProcess = new List<IDevice>();
 
-            IList<IDevice> hidDevices = GetFilteredHidDevices(Transport.All);
+            IList<IDevice> hidKeyboardDevices = GetFilteredHidDevices(Transport.HidKeyboard);
             IList<IDevice> smartCardDevices = GetFilteredSmartCardDevices(Transport.All);
+            IList<IDevice> hidFidoDevices = GetFilteredHidDevices(Transport.HidFido);
 
             _log.LogInformation(
-                "Found {HidCount} HID devices and {SCardCount} Smart Card devices for processing.",
-                hidDevices.Count,
+                "Found {HidCount} HID Keyboard devices, {FidoCount} HID FIDO devices, and {SCardCount} Smart Card devices for processing.",
+                hidKeyboardDevices.Count,
+                hidFidoDevices.Count,
                 smartCardDevices.Count);
 
-            devicesToProcess.AddRange(hidDevices);
+            devicesToProcess.AddRange(hidKeyboardDevices);
             devicesToProcess.AddRange(smartCardDevices);
+            devicesToProcess.AddRange(hidFidoDevices);
 
             return devicesToProcess;
         }
@@ -216,6 +231,17 @@ namespace Yubico.YubiKey
                 mergeTarget.SerialNumber);
 
             mergeTarget.Merge(deviceWithInfo.Device, deviceWithInfo.Info);
+            _internalCache[mergeTarget] = true;
+        }
+
+        private void MergeAndMarkExistingYubiKey(YubiKeyDevice mergeTarget, IDevice newChildDevice)
+        {
+            _log.LogInformation(
+                "Device was not found in the cache, but appears to share the same composite device as YubiKey {Serial}."
+                + " Merging devices.",
+                mergeTarget.SerialNumber);
+
+            mergeTarget.Merge(newChildDevice);
             _internalCache[mergeTarget] = true;
         }
 

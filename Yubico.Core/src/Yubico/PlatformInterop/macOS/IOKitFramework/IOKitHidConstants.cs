@@ -18,6 +18,7 @@ namespace Yubico.PlatformInterop
     {
         public const string DevicePropertyVendorId = "VendorID";
         public const string DevicePropertyProductId = "ProductID";
+        public const string DevicePropertyLocationId = "LocationID";
         public const string DevicePropertyPrimaryUsage = "PrimaryUsage";
         public const string DevicePropertyPrimaryUsagePage = "PrimaryUsagePage";
         public const string MaxInputReportSize = "MaxInputReportSize";

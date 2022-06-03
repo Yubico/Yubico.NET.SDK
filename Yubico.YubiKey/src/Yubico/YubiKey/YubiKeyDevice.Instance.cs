@@ -128,11 +128,47 @@ namespace Yubico.YubiKey
         }
 
         /// <summary>
+        /// Updates current <see cref="YubiKeyDevice" /> with a newly found device.
+        /// </summary>
+        /// <param name="device">
+        /// A new operating system device that is known to belong to this YubiKey.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// The device does not have the same ParentDeviceId, or
+        /// The device is not of a recognizable type.
+        /// </exception>
+        public void Merge(IDevice device)
+        {
+            if (!((IYubiKeyDevice)this).HasSameParentDevice(device))
+            {
+                throw new ArgumentException(ExceptionMessages.CannotMergeDifferentParents);
+            }
+
+            MergeDevice(device);
+        }
+
+        /// <summary>
         /// Updates current <see cref="YubiKeyDevice"/> with new info from SmartCard device or HID device.
         /// </summary>
         /// <param name="device"></param>
         /// <param name="info"></param>
         public void Merge(IDevice device, IYubiKeyDeviceInfo info)
+        {
+            // First merge the devices
+            MergeDevice(device);
+
+            // Then merge the YubiKey device information / metadata
+            if (_yubiKeyInfo is YubiKeyDeviceInfo first && info is YubiKeyDeviceInfo second)
+            {
+                _yubiKeyInfo = first.Merge(second);
+            }
+            else
+            {
+                _yubiKeyInfo = info;
+            }
+        }
+
+        private void MergeDevice(IDevice device)
         {
             switch (device)
             {
@@ -149,17 +185,25 @@ namespace Yubico.YubiKey
                 default:
                     throw new ArgumentException(ExceptionMessages.DeviceTypeNotRecognized, nameof(device));
             }
-
-            if (_yubiKeyInfo is YubiKeyDeviceInfo first && info is YubiKeyDeviceInfo second)
-            {
-                _yubiKeyInfo = first.Merge(second);
-            }
-            else
-            {
-                _yubiKeyInfo = info;
-            }
         }
 
+        bool IYubiKeyDevice.HasSameParentDevice(IDevice device)
+        {
+            if (device is null)
+            {
+                throw new ArgumentNullException(nameof(device));
+            }
+
+            // Never match on a missing parent ID
+            if (device.ParentDeviceId is null)
+            {
+                return false;
+            }
+
+            return _smartCardDevice?.ParentDeviceId == device.ParentDeviceId
+                || _hidFidoDevice?.ParentDeviceId == device.ParentDeviceId
+                || _hidKeyboardDevice?.ParentDeviceId == device.ParentDeviceId;
+        }
 
         /// <inheritdoc />
         public IYubiKeyConnection Connect(YubiKeyApplication yubikeyApplication)

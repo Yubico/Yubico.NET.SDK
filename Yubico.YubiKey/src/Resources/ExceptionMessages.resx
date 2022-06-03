@@ -730,4 +730,7 @@
   <data name="InvalidStatusWordMustBeNoPreciseDiagnosis" xml:space="preserve">
     <value>Invalid status word "{0}". For this method, the status word must be NoPreciseDiagnosis (0x6F 00).</value>
   </data>
+  <data name="CannotMergeDifferentParents" xml:space="preserve">
+    <value>The device specified has a different parent from the one it is being merged with.</value>
+  </data>
 </root>

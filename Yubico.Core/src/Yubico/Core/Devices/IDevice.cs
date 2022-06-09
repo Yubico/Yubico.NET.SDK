@@ -36,7 +36,7 @@ namespace Yubico.Core.Devices
         /// <para>
         /// Certain devices that this SDK works with, like the YubiKey, are presented to the operating system as a
         /// composite device. This means that, to the operating system, multiple devices may be detected even though
-        /// you have only plugged in a physical device. OSes that do this still expose a single "composite" device
+        /// you have only plugged in one physical device. OSes that do this still expose a single "composite" device
         /// in their device tree. This is the common parent across all of the sub-devices.
         /// </para>
         /// <para>
@@ -44,7 +44,7 @@ namespace Yubico.Core.Devices
         /// to reconstruct the single, composite device out of all of the sub-devices. This isn't always possible,
         /// however, as the OS services that we use to enumerate the sub-devices don't always provide much information
         /// about its parent device. macOS and Windows 7, for example, cannot provide parent information for smart card
-        /// devices. In those cases, we'll have to make due and attempt to match these devices some other way.
+        /// devices. In those cases, we'll have to make do and attempt to match these devices some other way.
         /// </para>
         /// </remarks>
         string? ParentDeviceId { get; }

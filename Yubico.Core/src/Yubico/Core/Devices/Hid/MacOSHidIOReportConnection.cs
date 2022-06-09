@@ -151,7 +151,11 @@ namespace Yubico.Core.Devices.Hid
 
                 IOHIDDeviceScheduleWithRunLoop(_deviceHandle, runLoop, _loopId);
 
-                int runLoopResult = CFRunLoopRunInMode(_loopId, 4, true);
+                // The YubiKey has a reclaim timeout of 3 seconds. This can cause the SDK some trouble if we just
+                // switched out of a different USB interface (like Keyboard or CCID). We previously used a fairly
+                // tight timeout of 4 seconds, but that seemed to not always work. 6 seconds (double the timeout)
+                // seems like a more reasonable timeout for the operating system.
+                int runLoopResult = CFRunLoopRunInMode(_loopId, 6, true);
                 if (runLoopResult != kCFRunLoopRunHandledSource)
                 {
                     throw new PlatformApiException(

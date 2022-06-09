@@ -29,10 +29,11 @@ namespace Yubico.Core.Devices.Hid
     /// </remarks>
     public abstract class HidDevice : IHidDevice
     {
-        /// <summary>
-        /// The operating system defined path to the device.
-        /// </summary>
-        public string Path { get; private set; }
+        /// <inheritdoc />
+        public string Path { get; }
+
+        /// <inheritdoc />
+        public string? ParentDeviceId { get; protected set; }
 
         /// <summary>
         /// A hardware identifier indicating the vendor of this device.

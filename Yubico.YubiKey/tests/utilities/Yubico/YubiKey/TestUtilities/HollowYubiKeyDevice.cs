@@ -122,6 +122,12 @@ namespace Yubico.YubiKey.TestUtilities
             throw new NotImplementedException();
         }
 
+        /// <inheritdoc />
+        bool IYubiKeyDevice.HasSameParentDevice(IDevice other)
+        {
+            return false;
+        }
+
         bool IYubiKeyDevice.TryConnect(
             YubiKeyApplication application,
             out IYubiKeyConnection connection)

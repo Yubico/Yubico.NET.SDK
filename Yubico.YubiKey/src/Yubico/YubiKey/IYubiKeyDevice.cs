@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System; 
+using System;
 using System.Diagnostics.CodeAnalysis;
 using Yubico.Core.Devices;
 using MgmtCmd = Yubico.YubiKey.Management.Commands;
@@ -41,11 +41,19 @@ namespace Yubico.YubiKey
         IYubiKeyConnection Connect(byte[] applicationId);
 
         /// <summary>
-        /// Checks whether a IYubiKeyDevice instance contains a particular platform <see cref="IDevice" />. 
+        /// Checks whether a IYubiKeyDevice instance contains a particular platform <see cref="IDevice" />.
         /// </summary>
         /// <param name="other">The device to check.</param>
         /// <returns>True, if the IYubiKeyDevice contains the platform device.</returns>
         internal bool Contains(IDevice other);
+
+        /// <summary>
+        /// Checks whether a IYubiKeyDevice instance contains another <see cref="IDevice" /> with the same
+        /// <see cref="IDevice.ParentDeviceId" />.
+        /// </summary>
+        /// <param name="other">The device to check against.</param>
+        /// <returns>True, if the IYubiKeyDevice contains a platform device that shares the same parent.</returns>
+        internal bool HasSameParentDevice(IDevice other);
 
         /// <summary>
         /// Attempt to connect to the YubiKey device.
@@ -76,14 +84,14 @@ namespace Yubico.YubiKey
         /// <para>
         /// Requires firmware version &gt;= 5.0.0.
         /// </para>
-        /// 
+        ///
         /// <para>
         /// Modifies the value of <see cref="IYubiKeyDeviceInfo.EnabledNfcCapabilities"/>. This
         /// requires the YubiKey's configuration to be unlocked (see
         /// <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/> and
         /// <see cref="UnlockConfiguration(ReadOnlySpan{byte})"/>.
         /// </para>
-        /// 
+        ///
         /// <para>
         /// The YubiKey will reboot as part of this change. This will cause
         /// this <c>IYubiKeyDevice</c> object to become stale, and future connection
@@ -91,12 +99,12 @@ namespace Yubico.YubiKey
         /// <c>IYubiKeys</c>, use the YubiKey enumeration functions such as
         /// <see cref="YubiKeyDevice.FindAll"/> and <see cref="YubiKeyDevice.FindByTransport(Transport)"/>.
         /// </para>
-        /// 
+        ///
         /// <para>
         /// To see which NFC features are available on the YubiKey,
         /// see <see cref="IYubiKeyDeviceInfo.AvailableNfcCapabilities"/>.
         /// </para>
-        /// 
+        ///
         /// <example>
         /// This example shows how to enable only the <see cref="YubiKeyCapabilities.Piv"/>
         /// capability over NFC on all YubiKeys where <c>Piv</c> is available. All other
@@ -106,20 +114,20 @@ namespace Yubico.YubiKey
         /// IEnumerable&lt;IYubiKeyDevice&gt; yubiKeys =
         ///     YubiKey.FindAll()
         ///     .Where(d => d.AvailableNfcCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-        /// 
+        ///
         /// foreach (IYubiKeyDevice yubiKey in yubiKeys)
         /// {
         ///     device.SetEnabledNfcCapabilities(YubiKeyCapabilities.Piv);
         /// }
-        /// 
+        ///
         /// // The devices may need a little time to finish rebooting
         /// sleep(100);
-        /// 
+        ///
         /// // Get fresh IYubiKeys
         /// IEnumerable&lt;IYubiKeyDevice&gt; freshYubiKeys =
         ///     YubiKey.FindAll()
         ///     .Where(d => d.AvailableNfcCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-        /// 
+        ///
         /// int i = 1;
         /// foreach (IYubiKeyDevice yubiKey in freshYubiKeys)
         /// {
@@ -127,21 +135,21 @@ namespace Yubico.YubiKey
         /// }
         /// </code>
         /// </example>
-        /// 
+        ///
         /// <example>
         /// To change the state of some capabilities without affecting the others, you
         /// can do something like the following:
         /// <code>
         /// IYubiKeyDevice yubiKey = YubiKey.FindAll().First();
-        /// 
+        ///
         /// YubiKeyCapabilities desiredNfcCapabilities = yubiKey.EnabledNfcCapabilities;
-        /// 
+        ///
         /// // Selectively enable Piv
         /// desiredNfcCapabilities |= YubiKeyCapabilities.Piv;
-        /// 
+        ///
         /// // Selectively disable Otp
         /// desiredNfcCapabilities &amp;= ~YubiKeyCapabilities.Otp;
-        /// 
+        ///
         /// yubiKey.SetEnabledNfcCapabilities(desiredNfcCapabilities);
         /// </code>
         /// </example>
@@ -168,14 +176,14 @@ namespace Yubico.YubiKey
         /// YubiKeys prior to firmware version 5 must use
         /// <see cref="SetLegacyDeviceConfiguration(YubiKeyCapabilities, byte, bool, int)"/>.
         /// </para>
-        /// 
+        ///
         /// <para>
         /// Modifies the value of <see cref="IYubiKeyDeviceInfo.EnabledUsbCapabilities"/>. This
         /// requires the YubiKey's configuration to be unlocked (see
         /// <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/> and
         /// <see cref="UnlockConfiguration(ReadOnlySpan{byte})"/>.
         /// </para>
-        /// 
+        ///
         /// <para>
         /// The YubiKey will reboot as part of this change. This will cause
         /// this <c>IYubiKeyDevice</c> object to become stale, and future connection
@@ -183,13 +191,13 @@ namespace Yubico.YubiKey
         /// <c>IYubiKeys</c>, use the YubiKey enumeration functions such as
         /// <see cref="YubiKeyDevice.FindAll"/> and <see cref="YubiKeyDevice.FindByTransport(Transport)"/>.
         /// </para>
-        /// 
+        ///
         /// <para>
         /// To see which USB features are available on the YubiKey,
         /// see <see cref="IYubiKeyDeviceInfo.AvailableUsbCapabilities"/>. At least
         /// one of these capabilities must be enabled.
         /// </para>
-        /// 
+        ///
         /// <example>
         /// This example shows how to enable only the <see cref="YubiKeyCapabilities.Piv"/>
         /// capability over USB on all YubiKeys where <c>Piv</c> is available. All other
@@ -199,20 +207,20 @@ namespace Yubico.YubiKey
         /// IEnumerable&lt;IYubiKeyDevice&gt; yubiKeys =
         ///     YubiKey.FindAll()
         ///     .Where(d => d.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-        /// 
+        ///
         /// foreach (IYubiKeyDevice yubiKey in yubiKeys)
         /// {
         ///     device.SetEnabledUsbCapabilities(YubiKeyCapabilities.Piv);
         /// }
-        /// 
+        ///
         /// // The devices may need a little time to finish rebooting
         /// sleep(100);
-        /// 
+        ///
         /// // Get fresh IYubiKeys
         /// IEnumerable&lt;IYubiKeyDevice&gt; freshYubiKeys =
         ///     YubiKey.FindAll()
         ///     .Where(d => d.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-        /// 
+        ///
         /// int i = 1;
         /// foreach (IYubiKeyDevice yubiKey in freshYubiKeys)
         /// {
@@ -220,21 +228,21 @@ namespace Yubico.YubiKey
         /// }
         /// </code>
         /// </example>
-        /// 
+        ///
         /// <example>
         /// To change the state of some capabilities without affecting the others, you
         /// can do something like the following:
         /// <code>
         /// IYubiKeyDevice yubiKey = YubiKey.FindAll().First();
-        /// 
+        ///
         /// YubiKeyCapabilities desiredUsbCapabilities = yubiKey.EnabledUsbCapabilities;
-        /// 
+        ///
         /// // Selectively enable Piv
         /// desiredUsbCapabilities |= YubiKeyCapabilities.Piv;
-        /// 
+        ///
         /// // Selectively disable Otp
         /// desiredUsbCapabilities &amp;= ~YubiKeyCapabilities.Otp;
-        /// 
+        ///
         /// yubiKey.SetEnabledUsbCapabilities(desiredUsbCapabilities);
         /// </code>
         /// </example>
@@ -263,7 +271,7 @@ namespace Yubico.YubiKey
         /// YubiKeys prior to firmware version 5 must use
         /// <see cref="SetLegacyDeviceConfiguration(YubiKeyCapabilities, byte, bool, int)"/>.
         /// </para>
-        /// 
+        ///
         /// <para>
         /// Modifies the value of <see cref="IYubiKeyDeviceInfo.ChallengeResponseTimeout"/>. This
         /// requires the YubiKey's configuration to be unlocked (see
@@ -295,7 +303,7 @@ namespace Yubico.YubiKey
         /// YubiKeys prior to firmware version 5 must use
         /// <see cref="SetLegacyDeviceConfiguration(YubiKeyCapabilities, byte, bool, int)"/>.
         /// </para>
-        /// 
+        ///
         /// <para>
         /// Modifies the value of <see cref="IYubiKeyDeviceInfo.AutoEjectTimeout"/>. This
         /// requires the YubiKey's configuration to be unlocked (see
@@ -334,7 +342,7 @@ namespace Yubico.YubiKey
         /// <see cref="SetLegacyDeviceConfiguration(YubiKeyCapabilities, byte, bool, int)"/> to enable
         /// <see cref="DeviceFlags.TouchEject"/>.
         /// </para>
-        /// 
+        ///
         /// <para>
         /// This operation requires the YubiKey's configuration to be unlocked (see
         /// <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/> and
@@ -362,7 +370,7 @@ namespace Yubico.YubiKey
         /// <para>
         /// Requires firmware version &gt;= 5.0.0.
         /// </para>
-        /// 
+        ///
         /// <para>
         /// See <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/>.
         /// </para>
@@ -399,7 +407,7 @@ namespace Yubico.YubiKey
         /// <para>
         /// Requires firmware version &gt;= 5.0.0.
         /// </para>
-        /// 
+        ///
         /// <remarks>
         /// <para>
         /// See <see cref="IYubiKeyDeviceInfo.ConfigurationLocked"/>.
@@ -449,7 +457,7 @@ namespace Yubico.YubiKey
         /// <item><see cref="IYubiKeyDeviceInfo.AutoEjectTimeout"/></item>
         /// </list>
         /// </para>
-        /// 
+        ///
         /// <para>
         /// Interfaces are a subset of the <see cref="YubiKeyCapabilities"/>:
         /// <inheritdoc
@@ -458,7 +466,7 @@ namespace Yubico.YubiKey
         /// />
         /// These interfaces enable or disable access to all applications that are dependent on it.
         /// </para>
-        /// 
+        ///
         /// <para>
         /// For YubiKeys with at least firmware version 5, it is recommended to use the other
         /// configuration operations in <see cref="IYubiKeyDevice"/> since they provide more fine control.
@@ -470,7 +478,7 @@ namespace Yubico.YubiKey
         /// are ignored. A set flag means that the related interface is enabled. Otherwise, the
         /// interface is disabled. At least one available USB interface must be enabled.
         /// </para>
-        /// 
+        ///
         /// <para>
         /// If <paramref name="touchEjectEnabled"/> is <see langword="true"/>, then only the
         /// <see cref="YubiKeyCapabilities.Ccid"/> interface can be enabled.

@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f.Commands
@@ -28,12 +30,8 @@ namespace Yubico.YubiKey.U2f.Commands
     /// See <see cref="RegisterCommand"/> for more details.
     /// </p>
     /// </remarks>
-    public class RegisterResponse : U2fResponse, IYubiKeyResponseWithData<RegistrationData>
+    public sealed class RegisterResponse : U2fResponse, IYubiKeyResponseWithData<RegistrationData>
     {
-        private const byte ReservedResponseValue = 0x05;
-        private const int KeyHandleOffset = 67;
-        private const int MinDataLength = KeyHandleOffset;
-
         /// <summary>
         /// Constructs a RegisterResponse from the given ResponseApdu.
         /// </summary>
@@ -41,7 +39,6 @@ namespace Yubico.YubiKey.U2f.Commands
         public RegisterResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
 
         /// <summary>
@@ -53,32 +50,20 @@ namespace Yubico.YubiKey.U2f.Commands
         /// clients should retry the command until it succeeds (when user presence is confirmed,
         /// generally through touch).
         /// <p>
-        /// Throws a <see cref="MalformedYubiKeyResponseException"/> in the event of an error
+        /// Throws a <see cref="ArgumentException"/> in the event of an error
         /// parsing the device response.
         /// </p>
         /// </remarks>
         /// <returns>
         /// The data in the response APDU, presented as a <see cref="RegistrationData"/> object.
         /// </returns>
-        public RegistrationData GetData()
-        {
-            if (Status != ResponseStatus.Success)
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
+        /// </exception>
+            public RegistrationData GetData() => Status switch
             {
-                throw new InvalidOperationException(ExceptionMessages.NoResponseDataApduFailed);
-            }
-
-            if (ResponseApdu.Data.Length < MinDataLength || ResponseApdu.Data.Span[0] != ReservedResponseValue)
-            {
-                ThrowMalformedResponse();
-            }
-
-            return new RegistrationData(ResponseApdu.Data);
-        }
-
-        private static void ThrowMalformedResponse() =>
-            throw new MalformedYubiKeyResponseException()
-            {
-                ResponseClass = nameof(RegisterResponse)
+                ResponseStatus.Success => new RegistrationData(ResponseApdu.Data),
+                    _ => throw new InvalidOperationException(StatusMessage),
             };
     }
 }

@@ -50,8 +50,6 @@ namespace Yubico.YubiKey.U2f.Commands
 
         }
 
-        public virtual new ResponseStatus Status => base.Status;
-
         public virtual void ThrowIfFailed()
         {
             switch (StatusWord)

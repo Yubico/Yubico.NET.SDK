@@ -20,7 +20,7 @@ namespace Yubico.YubiKey.U2f.Commands
     /// <summary>
     /// Verifies a user-supplied PIN.
     /// </summary>
-    internal sealed class VerifyPinCommand : IYubiKeyCommand<U2fResponse>
+    public sealed class VerifyPinCommand : IYubiKeyCommand<U2fResponse>
     {
         private const byte Ctap1MessageInstruction = 0x03;
         private const byte VerifyPinInstruction = 0x43;
@@ -82,7 +82,7 @@ namespace Yubico.YubiKey.U2f.Commands
                 Ins = VerifyPinInstruction,
                 Data = Pin.ToArray(),
             };
-            
+
             return new CommandApdu()
             {
                 Ins = Ctap1MessageInstruction,

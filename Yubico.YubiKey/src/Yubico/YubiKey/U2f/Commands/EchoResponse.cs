@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.U2f.Commands
     /// <remarks>
     /// This is the partner response class to <see cref="EchoCommand"/>.
     /// </remarks>
-    public class EchoResponse : U2fResponse, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
+    public sealed class EchoResponse : U2fResponse, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
     {
         /// <summary>
         /// Constructs an EchoResponse from the given <see cref="ResponseApdu"/>.

@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.U2f.Commands
     /// or one of its derived classes to retrieve the full response.
     /// </summary>
     /// <seealso cref="Yubico.YubiKey.IYubiKeyResponse" />
-    internal class U2fHidResponse : YubiKeyResponse
+    public class U2fHidResponse : YubiKeyResponse
     {
         public U2fHidResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -70,7 +70,7 @@ namespace Yubico.YubiKey.U2f.Commands
                     Debug.Assert(Status == ResponseStatus.Success);
                     return;
                 default:
-                    throw new Exception(); 
+                    throw new Exception();
             }
         }
     }

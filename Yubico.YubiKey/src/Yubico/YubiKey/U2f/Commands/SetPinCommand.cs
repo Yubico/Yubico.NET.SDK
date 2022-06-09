@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.U2f.Commands
     /// <remarks>
     /// This command is only available on the YubiKey FIPS series.
     /// </remarks>
-    internal sealed class SetPinCommand : IYubiKeyCommand<U2fResponse>
+    public sealed class SetPinCommand : IYubiKeyCommand<U2fResponse>
     {
         private const byte Ctap1MessageInstruction = 0x03;
         private const byte SetPinInstruction = 0x44;
@@ -105,7 +105,7 @@ namespace Yubico.YubiKey.U2f.Commands
         public CommandApdu CreateCommandApdu()
         {
             byte[] payload = new byte[1 + CurrentPin.Length + NewPin.Length];
-            
+
             payload[0] = (byte)NewPin.Length;
             Array.Copy(CurrentPin.ToArray(), 0, payload, 1, CurrentPin.Length);
             Array.Copy(NewPin.ToArray(), 0, payload, CurrentPin.Length + 1, NewPin.Length);

@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
                         RegistrationData registrationData = registerResponse.GetData();
 
-                        Output.WriteLine($"verifies?: {registrationData.VerifySignature(appId, challenge)}");
+                        Output.WriteLine($"verifies?: {registrationData.VerifySignature(challenge, appId)}");
                     }
                 }
             }

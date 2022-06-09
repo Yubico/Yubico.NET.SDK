@@ -19,7 +19,7 @@ namespace Yubico.YubiKey.U2f.Commands
     /// <summary>
     /// The response to the <see cref="VerifyFipsModeCommand"/> command, containing the response from the YubiKey.
     /// </summary>
-    internal class VerifyFipsModeResponse : U2fResponse, IYubiKeyResponseWithData<bool>
+    public sealed class VerifyFipsModeResponse : U2fResponse, IYubiKeyResponseWithData<bool>
     {
         /// <summary>
         /// Constructs a VerifyFipsModeResponse based on a ResponseApdu received from the YubiKey.
@@ -30,8 +30,14 @@ namespace Yubico.YubiKey.U2f.Commands
         public VerifyFipsModeResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
+
+        /// <inheritdoc/>
+        protected override ResponseStatusPair StatusCodeMap => StatusWord switch
+        {
+            SWConstants.FunctionNotSupported => new ResponseStatusPair(ResponseStatus.Success, ResponseStatusMessages.BaseSuccess),
+            _ => base.StatusCodeMap,
+        };
 
         /// <summary>
         /// Gets the response data, presented as a boolean value.
@@ -45,14 +51,6 @@ namespace Yubico.YubiKey.U2f.Commands
 
             return StatusWord == SWConstants.Success;
         }
-
-        /// <inheritdoc />
-        public override ResponseStatus Status => StatusWord switch
-        {
-            SWConstants.Success => ResponseStatus.Success,
-            SWConstants.FunctionNotSupported => ResponseStatus.Success,
-            _ => ResponseStatus.Failed
-        };
 
         /// <inheritdoc />
         public override void ThrowIfFailed()

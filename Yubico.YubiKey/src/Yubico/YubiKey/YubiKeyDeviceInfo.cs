@@ -122,7 +122,7 @@ namespace Yubico.YubiKey
             // Certain transports (such as OTP keyboard) may return a buffer that is larger than the
             // overall TLV size. We want to make sure we're only parsing over real TLV data here, so
             // check the first byte to get the overall TLV length and slice accordingly.
-            
+
             if (responseApduData.IsEmpty)
             {
                 deviceInfo = null;
@@ -260,7 +260,7 @@ namespace Yubico.YubiKey
                         ? FirmwareVersion
                         : second.FirmwareVersion,
 
-                    AutoEjectTimeout = 
+                    AutoEjectTimeout =
                         DeviceFlags.HasFlag(DeviceFlags.TouchEject)
                         ? AutoEjectTimeout
                         : second.DeviceFlags.HasFlag(DeviceFlags.TouchEject)

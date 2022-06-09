@@ -26,8 +26,8 @@ namespace Yubico.YubiKey.U2f.Commands
         private const string appIdHex = "000102030405060708090A0B0C0D0E0F000102030405060708090A0B0C0D0E0F";
 
         private static RegisterCommand GetRegisterCommand() => new RegisterCommand(
-            Hex.HexToBytes(clientDataHashHex),
-            Hex.HexToBytes(appIdHex)
+            Hex.HexToBytes(appIdHex),
+            Hex.HexToBytes(clientDataHashHex)
         );
 
         [Fact]

@@ -24,232 +24,167 @@ namespace Yubico.YubiKey.U2f
     /// Represents a single U2F registration.
     /// </summary>
     /// <remarks>
-    /// This represents the registration data returned by the YubiKey when registering a new U2F credential. The information
-    /// stored in this structure can be sent back to the relying party to store for future validation (authentication)
-    /// attempts.
+    /// This represents the registration data returned by the YubiKey when
+    /// registering a new U2F credential. The information stored in this
+    /// structure can be sent back to the relying party to store for future
+    /// validation (authentication) attempts.
+    /// <para>
+    /// This class is useful for storing registration data, in scenarios like U2F
+    /// preregistration.
+    /// </para>
     /// </remarks>
-    public class RegistrationData
+    public class RegistrationData : U2fSignedData
     {
-        private const int EcP256PublicKeyCoordinateLength = 32;
-        private const int EncodedEcPublicKeyLength = 1 +  (2 * EcP256PublicKeyCoordinateLength);
-        private const int AppIdLength = 32;
-        private const int ClientDataHashLength = 32;
-        private const int VerifyKeyHandleOffset = 1 + AppIdLength + ClientDataHashLength;
-        private const int ResponseKeyHandleOffset = 67;
-        private const int EcPublicKeyTag = 0x04;
-        private const int EcPublicKeyLength = 65;
-        private const int EcCoordinateLength = 32;
+        private const int CertTag = 0x30;
 
+        // The encoding is
+        // (05 || pub key || len || keyHandle || cert || sig)
+        // The cert is not a specified length (at the very least the signature is
+        // variable length), plus the signature can be 70, 71, or 72 bytes long,
+        // which means that is is really a min length of 75 and a max length of
+        // 77. We're just going to set the min total length to a value that says
+        // there must be at least two bytes beyond the keyHandle.
+        private const int MinEncodedLength = 133;
+        private const int MsgReservedOffset = 0;
+        private const byte MsgReservedValue = 0x05;
+        private const int MsgPublicKeyOffset = 1;
+        private const int MsgKeyHandleOffset = MsgPublicKeyOffset + PublicKeyLength;
+        private const int MsgCertOffset = MsgKeyHandleOffset + KeyHandleLength + 1;
 
-        private ECPoint _userPublicKey;
+        // The data to verify is
+        // (00 || appId || clientData || keyHandle || publicKey)
+        // where the challenge is in the client data.
+        // We're also going to place the BER version of the signature onto the
+        // end of the data.
+        // (00 || appId || clientData || keyHandle || publicKey || berSignature)
+        private const int ReservedOffset = 0;
+        private const byte ReservedValue = 0x00;
+        private const int AppIdOffset = 1;
+        private const int ClientDataOffset = AppIdOffset + AppIdHashLength;
+        private const int KeyHandleOffset = ClientDataOffset + ClientDataHashLength;
+        private const int PublicKeyOffset = KeyHandleOffset + KeyHandleLength;
+        private const int SignatureOffset = PublicKeyOffset + PublicKeyLength;
+        private const int PayloadLength = AppIdHashLength + ClientDataHashLength + KeyHandleLength + PublicKeyLength + MaxBerSignatureLength + 1;
 
         /// <summary>
-        /// The ECDSA public key for this user. Each coordinate must be 32 bytes and the point must be on the P256 curve.
+        /// The ECDSA public key for this user credential. Each coordinate must
+        /// be 32 bytes and the point must be on the P256 curve.
         /// </summary>
         /// <remarks>
+        /// This is the public key that will be used to verify an authentication.
+        /// Save this key and pass it into the <see cref="VerifySignature"/> method
+        /// when verifying for authentication.
+        /// <para>
         /// This is a public key for ECDSA using the NIST P256 curve and SHA256,
         /// per the FIDO specifications.
+        /// </para>
+        /// <para>
+        /// If you want to get the public key as an instance of <c>ECPoint</c>,
+        /// do this.
+        /// <code language="csharp">
+        ///   var pubKeyPoint = new ECPoint
+        ///   {
+        ///       X = UserPublicKey.Slice(1, 32).ToArray(),
+        ///       Y = UserPublicKey.Slice(33, 32).ToArray(),
+        ///   };
+        /// </code>
+        /// </para>
         /// </remarks>
-        public ECPoint UserPublicKey
+        public ReadOnlyMemory<byte> UserPublicKey
         {
-            get => _userPublicKey;
-            set
-            {
-                if (value.X.Length != EcP256PublicKeyCoordinateLength)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPropertyLength,
-                            nameof(value), EcP256PublicKeyCoordinateLength, value.X.Length));
-                }
-
-                if (value.Y.Length != EcP256PublicKeyCoordinateLength)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPropertyLength,
-                            nameof(value), EcP256PublicKeyCoordinateLength, value.Y.Length));
-                }
-
-                _userPublicKey = value;
-            }
+            get => _bufferMemory.Slice(PublicKeyOffset, PublicKeyLength);
+            set => SetBufferData(value, PublicKeyLength, PublicKeyOffset, nameof(UserPublicKey));
         }
 
         /// <summary>
-        /// The key handle of the created public key credential.
+        /// The private key handle created by the YubiKey. Save this value and
+        /// use it when authenticating.
         /// </summary>
-        public ReadOnlyMemory<byte> KeyHandle { get; set; }
-
-        public X509Certificate2 AttestationCertificate { get; set; }
-
-        public ReadOnlyMemory<byte> Signature { get; set; }
-
-        public RegistrationData()
+        public ReadOnlyMemory<byte> KeyHandle
         {
-            AttestationCertificate = new X509Certificate2();
-        }
-
-        public RegistrationData(ReadOnlyMemory<byte> dataBuffer)
-        {
-            ReadOnlyMemory<byte> userPublicKeyBytes = dataBuffer.Slice(1, EcPublicKeyLength);
-
-            if (userPublicKeyBytes.Span[0] != EcPublicKeyTag)
-            {
-                throw new MalformedYubiKeyResponseException();
-            }
-
-            var userPublicKey = new ECPoint
-            {
-                X = userPublicKeyBytes.Slice(1, EcCoordinateLength).ToArray(),
-                Y = userPublicKeyBytes.Slice(1 + EcCoordinateLength, EcCoordinateLength).ToArray()
-            };
-
-            byte keyHandleLength = dataBuffer.Span[66];
-
-            if (keyHandleLength == 0 || dataBuffer.Length < ResponseKeyHandleOffset + keyHandleLength)
-            {
-                throw new MalformedYubiKeyResponseException();
-            }
-
-            ReadOnlyMemory<byte> keyHandle = dataBuffer.Slice(ResponseKeyHandleOffset, keyHandleLength);
-
-            int certificateOffset = ResponseKeyHandleOffset + keyHandleLength;
-            ReadOnlyMemory<byte> certificateAndSignatureBytes = dataBuffer.Slice(certificateOffset);
-
-            X509Certificate2 attestationCertificate;
-
-            try
-            {
-                attestationCertificate = new X509Certificate2(certificateAndSignatureBytes.ToArray());
-            }
-            catch (CryptographicException cryptoException)
-            {
-                throw new MalformedYubiKeyResponseException(ExceptionMessages.FailedParsingCertificate, cryptoException);
-            }
-
-            ReadOnlyMemory<byte> signature = certificateAndSignatureBytes.Slice(attestationCertificate.RawData.Length);
-
-            UserPublicKey = userPublicKey;
-            KeyHandle = keyHandle;
-            AttestationCertificate = attestationCertificate;
-            Signature = signature;
-        }
-
-        public RegistrationData(
-            ECPoint userPublicKey,
-            ReadOnlyMemory<byte> keyHandle,
-            X509Certificate2 attestationCertificate,
-            ReadOnlyMemory<byte> signature)
-        {
-            UserPublicKey = userPublicKey;
-            KeyHandle = keyHandle;
-            AttestationCertificate = attestationCertificate;
-            Signature = signature;
+            get => _bufferMemory.Slice(KeyHandleOffset, KeyHandleLength);
+            set => SetBufferData(value, KeyHandleLength, KeyHandleOffset, nameof(KeyHandle));
         }
 
         /// <summary>
-        /// Returns whether the signature in this registration was valid for the given client parameters.
+        /// The Attestation cert used to verify a newly-registered credential.
         /// </summary>
         /// <remarks>
-        /// Specifically, this checks that the <see cref="Signature"/> property contains
-        /// a signature over the registration data using the public key in the <see cref="AttestationCertificate"/>.
+        /// There is a <see cref="VerifySignature"/> method that will use the public key
+        /// inside the <c>AttestationCert</c> to verify the signature on the
+        /// registration response. That verifies that the newly-generated public
+        /// key was indeed generated on the device. However, the SDK has no
+        /// classes or methods to verify the <c>AttestationCert</c> itself. The
+        /// relying party app that performs verification must obtain any root and
+        /// CA certs necessary and perform certificate verification using some
+        /// other means.
         /// </remarks>
-        /// <param name="clientDataHash">The original clientDataHash that was provided to create this registration.</param>
-        /// <param name="applicationId">The original appId that was provided to create this registration.</param>
-        /// <returns></returns>
-        public bool VerifySignature(ReadOnlySpan<byte> applicationId, ReadOnlySpan<byte> clientDataHash)
+        public X509Certificate2 AttestationCert { get; private set; }
+
+        /// <summary>
+        /// Build a new <c>RegistrationData</c> object from the encoded
+        /// response, which is the data portion of the value returned by the
+        /// YubiKey.
+        /// </summary>
+        public RegistrationData(ReadOnlyMemory<byte> encodedResponse)
+            : base(PayloadLength, AppIdOffset, ClientDataOffset, SignatureOffset)
         {
-            if (clientDataHash.Length != ClientDataHashLength)
+            bool isValid = false;
+            int certLength = 1;
+            if (encodedResponse.Length > MinEncodedLength)
+            {
+                if ((encodedResponse.Span[MsgReservedOffset] == MsgReservedValue)
+                    && (encodedResponse.Span[MsgKeyHandleOffset] == KeyHandleLength)
+                    && (encodedResponse.Span[MsgPublicKeyOffset] == PublicKeyTag))
+                {
+                    ReadOnlyMemory<byte> certAndSig = encodedResponse.Slice(MsgCertOffset);
+                    var tlvReader = new TlvReader(certAndSig);
+                    if (tlvReader.TryReadEncoded(out ReadOnlyMemory<byte> cert, CertTag))
+                    {
+                        certLength = cert.Length;
+                        isValid = true;
+                    }
+                }
+            }
+
+            if (!isValid)
             {
                 throw new ArgumentException(
                     string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPropertyLength,
-                        nameof(clientDataHash), 32, clientDataHash.Length));
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.InvalidDataEncoding));
             }
 
-            if (applicationId.Length != AppIdLength)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPropertyLength,
-                        nameof(applicationId), 32, applicationId.Length));
-            }
+            _buffer[ReservedOffset] = ReservedValue;
 
-            using ECDsa ecdsa = AttestationCertificate.GetECDsaPublicKey();
-
-            int dataToVerifyLength = 1 + AppIdLength + ClientDataHashLength + KeyHandle.Length + EncodedEcPublicKeyLength;
-            byte[] dataToVerify = new byte[dataToVerifyLength];
-
-            applicationId.CopyTo(dataToVerify.AsSpan(1));
-            clientDataHash.CopyTo(dataToVerify.AsSpan(1 + AppIdLength));
-
-            KeyHandle.ToArray().CopyTo(dataToVerify.AsSpan(VerifyKeyHandleOffset));
-
-            int userPublicKeyOffset = VerifyKeyHandleOffset + KeyHandle.Length;
-            dataToVerify[userPublicKeyOffset] = EcPublicKeyTag;
-            UserPublicKey.X.CopyTo(dataToVerify.AsSpan(userPublicKeyOffset + 1));
-            UserPublicKey.Y.CopyTo(dataToVerify.AsSpan(userPublicKeyOffset + EcP256PublicKeyCoordinateLength + 1));
-
-            return ecdsa.VerifyData(dataToVerify, ConvertDerToIeeeP1393(Signature, EcP256PublicKeyCoordinateLength), HashAlgorithmName.SHA256);
+            UserPublicKey = encodedResponse.Slice(MsgPublicKeyOffset, PublicKeyLength);
+            KeyHandle = encodedResponse.Slice(MsgKeyHandleOffset + 1, KeyHandleLength);
+            AttestationCert = new X509Certificate2(encodedResponse.Slice(MsgCertOffset, certLength).ToArray());
+            Signature = encodedResponse.Slice(MsgCertOffset + certLength);
+            _berSignatureLength = encodedResponse.Length - (MsgCertOffset + certLength);
         }
 
         /// <summary>
-        /// Converts DER-endcoded ECDSA signatures to the 'raw' IEEE P1393 format expected by the runtime.
+        /// Verify the signature using the public key in the attestation
+        /// cert returned by the YubiKey in the registration command/response.
+        /// Use the given Client Data Hash and Application ID to build the data
+        /// to verify.
         /// </summary>
-        // The input will be
-        //   30 length
-        //      02 length  rValue
-        //      02 length  sValue
-        // The result will be
-        //    rValue || sValue
-        // where each value must be exactly valueLength bytes long.
-        // If an input value is > valueLength, strip leading byte(s) (it should
-        // be no more than one 00 leading byte).
-        // If an input value is < valueLength, prepend 00 bytes to the result.
-        private static byte[] ConvertDerToIeeeP1393(ReadOnlyMemory<byte> data, int valueLength)
+        /// <param name="applicationId">
+        /// The appId (origin data or hash of origin) that was provided to create
+        /// this registration.
+        /// </param>
+        /// <param name="clientDataHash">
+        /// The `clientDataHash` (challenge data) that was provided to create
+        /// this registration.
+        /// </param>
+        /// <returns>
+        /// A `bool`, `true` if the signature verifies, `false` otherwise.
+        /// </returns>
+        public bool VerifySignature(ReadOnlyMemory<byte> applicationId, ReadOnlyMemory<byte> clientDataHash)
         {
-            var tlvReader = new TlvReader(data);
-            tlvReader = tlvReader.ReadNestedTlv(0x30);
-
-            byte[] result = new byte[2 * valueLength];
-
-            ReadOnlyMemory<byte> value = tlvReader.ReadValue(0x02);
-            CopySignatureValue(value, result, 0, valueLength);
-
-            value = tlvReader.ReadValue(0x02);
-            CopySignatureValue(value, result, valueLength, valueLength);
-
-            return result;
+            using ECDsa ecdsaObject = AttestationCert.GetECDsaPublicKey();
+            return VerifySignature(ecdsaObject, applicationId, clientDataHash);
         }
-
-        // Copy from source to destination.
-        // Copy length bytes.
-        // If the source is too long, skip the first byte(s) of source.
-        // If the source is too short, skip the first byte(s) of destination.
-        // Copy the bytes into destination beginning at offset.
-        private static void CopySignatureValue(
-            ReadOnlyMemory<byte> source,
-            Memory<byte> destination,
-            int offset,
-            int length)
-        {
-            int offsetSource = 0;
-            int offsetDestination = offset;
-            if (source.Length > length)
-            {
-                offsetSource = source.Length - length;
-            }
-            else if (source.Length < length)
-            {
-                offsetDestination += length - source.Length;
-            }
-
-            _ = source.Slice(offsetSource).TryCopyTo(destination.Slice(offsetDestination));
-        }
-
     }
 }

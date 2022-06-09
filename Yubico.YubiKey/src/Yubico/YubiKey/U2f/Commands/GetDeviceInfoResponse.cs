@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.U2f.Commands
     /// The response to the <see cref="GetDeviceInfoCommand"/> command, containing the YubiKey's
     /// device configuration details.
     /// </summary>
-    internal class GetDeviceInfoResponse : U2fResponse, IYubiKeyResponseWithData<YubiKeyDeviceInfo>
+    public sealed class GetDeviceInfoResponse : U2fResponse, IYubiKeyResponseWithData<YubiKeyDeviceInfo>
     {
 
         /// <summary>

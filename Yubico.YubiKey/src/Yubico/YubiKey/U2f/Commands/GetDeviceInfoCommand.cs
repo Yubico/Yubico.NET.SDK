@@ -19,7 +19,7 @@ namespace Yubico.YubiKey.U2f.Commands
     /// <summary>
     /// Gets detailed information about the YubiKey and its current configuration.
     /// </summary>
-    internal class GetDeviceInfoCommand : IYubiKeyCommand<GetDeviceInfoResponse>
+    public sealed class GetDeviceInfoCommand : IYubiKeyCommand<GetDeviceInfoResponse>
     {
         private const byte GetDeviceInfoInstruction = 0xC2;
 

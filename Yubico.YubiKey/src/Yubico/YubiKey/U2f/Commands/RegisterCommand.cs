@@ -49,119 +49,47 @@ namespace Yubico.YubiKey.U2f.Commands
     ///   RegistrationData data = registerResponse.GetData();
     /// </code>
     /// </remarks>
-    public class RegisterCommand : IYubiKeyCommand<RegisterResponse>
+    public sealed class RegisterCommand : U2fBufferCommand, IYubiKeyCommand<RegisterResponse>
     {
-        private const byte Ctap1MessageInstruction = 0x03;
         private const byte U2fRegisterCommandInstruction = 0x01;
-        private const int ClientDataHashLength = 32;
-        private const int ApplicationIdHashLength = 32;
 
-        private readonly byte[] _dataPayload = new byte[ClientDataHashLength + ApplicationIdHashLength];
-
-        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
+        // For registration, the payload is
+        //  (clientDataHash || appIdHash)
+        private const int ClientDataOffset = 0;
+        private const int AppIdOffset = ClientDataOffset + ClientDataHashLength;
+        private const int PayloadLength = ClientDataHashLength + AppIdHashLength;
 
         /// <summary>
-        /// A 32-byte challenge sent by the client application.
+        /// Creates an instance of the command.
         /// </summary>
-        /// <exception cref="ArgumentException"></exception>
         /// <remarks>
+        /// This constructor is provided for those developers who want to use the
+        /// object initializer pattern.
         /// <para>
-        /// The FIDO Client is the application that facilitates the interaction between the authenticator (YubiKey) and
-        /// the relying party (the website or service the user is authenticating against). The client is likely the
-        /// software that is calling this API.
+        /// Set the <c>ApplicationId</c> and <c>ClientDataHash</c> properties
+        /// before sending the command to the YubiKey.
         /// </para>
         /// </remarks>
-        public ReadOnlyMemory<byte> ClientDataHash
-        {
-            get => _dataPayload.AsMemory(0, ClientDataHashLength);
-            set
-            {
-                if (value.Length != ClientDataHashLength)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPropertyLength,
-                            nameof(value),
-                            ClientDataHashLength,
-                            value.Length));
-                }
-
-                value.CopyTo(_dataPayload.AsMemory(0, ClientDataHashLength));
-            }
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        /// <exception cref="ArgumentException"></exception>
-        public ReadOnlyMemory<byte> ApplicationId
-        {
-            get => _dataPayload.AsMemory(ClientDataHashLength, ApplicationIdHashLength);
-            set
-            {
-                if (value.Length != ApplicationIdHashLength)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPropertyLength,
-                            nameof(value),
-                            ApplicationIdHashLength,
-                            value.Length));
-                }
-
-                value.CopyTo(_dataPayload.AsMemory(ClientDataHashLength, ApplicationIdHashLength));
-            }
-        }
-
-        /// <summary>
-        /// Initializes an instance of the <see cref="RegisterCommand"/> class.
-        /// </summary>
-        /// <remarks>
-        /// Use the <see cref="ClientDataHash"/> and <see cref="ApplicationId"/> properties to set the appropriate
-        /// input data for this command. Failure to do so may register a default or empty credential, which would
-        /// needlessly take up a credential slot from other real credentials. The only way to remove this credential would
-        /// be to reset the entire FIDO application.
-        /// </remarks>
         public RegisterCommand()
+            : base(U2fRegisterCommandInstruction, PayloadLength, AppIdOffset, ClientDataOffset)
         {
-
         }
 
         /// <summary>
-        /// Initializes an instance of the command with the given client data hash and app ID.
+        /// Creates an instance of the command with the given client data hash and app ID.
         /// </summary>
         /// <remarks>
-        /// The app ID is specifically the SHA256 hash of the site origin's 'effective domain'. For example, it is the
-        /// SHA256 hash of "acme.org" if the origin is 'https://acme.org:8443'.
+        /// The app ID is specifically the SHA256 hash of the site origin's 'effective domain'.
+        /// For example, it is the SHA256 hash of "acme.org" if the origin is 'https://acme.org:8443'.
         /// </remarks>
-        /// <param name="clientDataHash">
-        /// The <c>clientDataHash</c> or "challenge" in the CTAP2 and U2F specifications. Must be 32 bytes long.
-        /// </param>
-        /// <param name="applicationId">
-        /// The SHA256 hash of the Relying Party ID. Must be 32 bytes long.
-        /// </param>
-        public RegisterCommand(ReadOnlyMemory<byte> clientDataHash, ReadOnlyMemory<byte> applicationId)
+        /// <param name="applicationId">The SHA256 hash of the Relying Party ID.
+        /// Must be 32 bytes long. This is the hash of the origin data.</param>
+        /// <param name="clientDataHash">The <c>clientDataHash</c> or "challenge" in the CTAP2 and U2F specifications. Must be 32 bytes long.</param>
+        public RegisterCommand(ReadOnlyMemory<byte> applicationId, ReadOnlyMemory<byte> clientDataHash)
+            : this()
         {
-            ClientDataHash = clientDataHash;
             ApplicationId = applicationId;
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu()
-        {
-            var innerEchoCommand = new CommandApdu()
-            {
-                Ins = U2fRegisterCommandInstruction,
-                Data = _dataPayload,
-            };
-
-            return new CommandApdu()
-            {
-                Ins = Ctap1MessageInstruction,
-                Data = innerEchoCommand.AsByteArray(ApduEncoding.ExtendedLength),
-            };
+            ClientDataHash = clientDataHash;
         }
 
         /// <inheritdoc />

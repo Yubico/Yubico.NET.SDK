@@ -20,11 +20,11 @@ namespace Yubico.YubiKey.U2f.Commands
     /// Determines if the YubiKey is in a FIPS-approved operating mode.
     /// </summary>
     /// <remarks>
-    /// For the YubiKey FIPS U2F sub-module to be in a FIPS approved mode of operation, an Admin PIN must be set. 
+    /// For the YubiKey FIPS U2F sub-module to be in a FIPS approved mode of operation, an Admin PIN must be set.
     /// By default, no Admin PIN is set. Further, if the YubiKey FIPS U2F sub-module has been reset,
     /// it cannot be set into a FIPS approved mode of operation, even with the Admin PIN set.
     /// </remarks>
-    internal class VerifyFipsModeCommand : IYubiKeyCommand<VerifyFipsModeResponse>
+    public sealed class VerifyFipsModeCommand : IYubiKeyCommand<VerifyFipsModeResponse>
     {
         private const byte Ctap1MessageInstruction = 0x03;
         private const byte VerifyFipsModeInstruction = 0x46;

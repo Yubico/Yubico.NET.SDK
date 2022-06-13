@@ -120,15 +120,17 @@ The following is the message sent by the client to the YubiKey, initiating regis
 
 ```txt
     challenge parameter || application parameter
+```
 
- The "challenge parameter" is also known as "client data hash".
- The client computes the SHA-256 digest of the challenge, origin, and other information.
+The "challenge parameter" is also known as "client data hash". The client computes the
+SHA-256 digest of the challenge, origin, and other information.
 
- The "application parameter" is also known as "hash of the origin", or "appIdHash", or "origin data".
- The client computes the SHA-256 digest of the origin it computed.
+The "application parameter" is also known as "hash of the origin", or "appIdHash", or
+"origin data". The client computes the SHA-256 digest of the origin it computed.
 
- For example, in hex
+For example, in hex
 
+```txt
   A76CF9A4BDA5D0596D56612E71CDD954C38168954541522F7DCD9433666BA0F008D71B87CC11BF231245CC8C0A1B653FB5A47C2D9D66A8B94154AAB26C2FF670
 
  The challenge data is  A76CF9A4BDA5D0596D56612E71CDD954C38168954541522F7DCD9433666BA0F0
@@ -168,9 +170,11 @@ attestation private key.
 
 ```txt
     marker byte || public key || key handle || attestation cert || signature
+```
 
- For example, in hex
+For example, in hex
 
+```txt
     05 045827...A4 86149D...7B 308202D8...19 30440220...2C
         pub key   |  handle   |     cert    |   signature |
 ```
@@ -211,17 +215,19 @@ to the authenticator.
 
 ```txt
     control byte || challenge parameter || application parameter || key handle
+```
 
- For example, in hex
+For example, in hex
 
+```txt
     03 50F2A8...37 08D71B...70 86149D...7B
       | challenge |origin data|  handle   |
-
- The challenge parameter is not the same one from registration.
-  It is the digest of a new challenge, along with much of the same data used during registration,
- The origin data (application parameter) is the same from registration.
- The handle is the same from registration.
 ```
+
+The challenge parameter is not the same one from registration. It is the digest of a new
+challenge, along with much of the same data used during registration. The origin data
+(application parameter) is the same from registration. The handle is the same from
+registration.
 
 ### Step 3
 

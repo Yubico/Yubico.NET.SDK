@@ -151,8 +151,8 @@ namespace Yubico.YubiKey.U2f
             {
                 throw new ArgumentException(
                     string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.InvalidDataEncoding));
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidDataEncoding));
             }
 
             _buffer[ReservedOffset] = ReservedValue;

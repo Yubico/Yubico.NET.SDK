@@ -198,10 +198,38 @@
         href: application-piv/apdu/version.md
 
 - name: "Application: FIDO U2F"
-  homepage: application-fido-u2f/fido-u2f-overview.md
+  homepage: application-u2f/fido-u2f-overview.md
   items:
   - name: How FIDO U2F works
-    href: application-fido-u2f/how-u2f-works.md
+    href: application-u2f/how-u2f-works.md
+  - name: Commands
+    items:
+    - name: FIDO U2F commands
+      href: application-u2f/u2f-commands.md
+    - name: APDU reference
+      items:
+      - name: Echo
+        href: application-u2f/apdu/echo-cmd.md
+      - name: Get device info
+        href: application-u2f/apdu/get-device-info.md
+      - name: Set device info
+        href: application-u2f/apdu/set-device-info.md
+      - name: Set legacy device config
+        href: application-u2f/apdu/set-legacy-device-config.md
+      - name: Get protocol version
+        href: application-u2f/apdu/get-protocol-version.md
+      - name: Verify FIPS mode
+        href: application-u2f/apdu/verify-fips.md
+      - name: Set PIN
+        href: application-u2f/apdu/set-pin.md
+      - name: Verify PIN
+        href: application-u2f/apdu/verify-pin.md
+      - name: Register
+        href: application-u2f/apdu/register.md
+      - name: Authenticate
+        href: application-u2f/apdu/authenticate.md
+      - name: Reset
+        href: application-u2f/apdu/reset.md
 
 - name: "Supporting routines"
   homepage: support/support-overview.md

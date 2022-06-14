@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   var setPinRetriesCommand = new SetPinRetriesCommand (5, 5);
     ///   SetPinRetriesResponse setPinRetriesResponse =

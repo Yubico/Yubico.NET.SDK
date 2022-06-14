@@ -40,7 +40,7 @@ namespace Yubico.YubiKey
         /// <example>
         /// Get the number of total tries a user has to enter the PIN of the PIV application:
         ///
-        /// <code>
+        /// <code language="csharp">
         /// public int GetPinTries(YubiKeyDevice yubiKeyDevice)
         /// {
         ///   if (!yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))

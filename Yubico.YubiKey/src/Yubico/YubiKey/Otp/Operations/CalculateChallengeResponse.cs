@@ -284,7 +284,7 @@ namespace Yubico.YubiKey.Otp.Operations
         /// <example>
         /// Here is a very simple example of performing a challenge-response
         /// operation on a YubiKey.
-        /// <code>
+        /// <code language="csharp">
         /// using (var otpSess = new OtpSession(_yubiKey))
         /// {
         ///     string otp = otp.CalculateChallengeResponse(_slot)
@@ -296,7 +296,7 @@ namespace Yubico.YubiKey.Otp.Operations
         /// As mentioned in the remarks section, showing a prompt in a GUI
         /// application requires a little bit more work. Here is an example of
         /// calling a notifier method.
-        /// <code>
+        /// <code language="csharp">
         /// using (var otpSess = new OtpSession(_yubiKey))
         /// {
         ///     string otp = otpSess.CalculateChallengeResponse(_slot)
@@ -308,7 +308,7 @@ namespace Yubico.YubiKey.Otp.Operations
         /// </code>
         /// Here is how the notifier would handle making sure the notification
         /// is handled on the correct thread.
-        /// <code>
+        /// <code language="csharp">
         /// public void AlertUser()
         /// {
         ///     if (!Dispatcher.CheckAccess())

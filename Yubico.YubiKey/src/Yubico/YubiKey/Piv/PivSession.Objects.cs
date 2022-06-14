@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Piv
         /// </summary>
         /// <remarks>
         /// For example,
-        /// <code>
+        /// <code language="csharp">
         ///    using CardholderUniqueId chuid = pivSession.ReadObject&lt;CardholderUniqueId&gt;();
         /// </code>
         /// <para>
@@ -90,7 +90,7 @@ namespace Yubico.YubiKey.Piv
         /// </summary>
         /// <remarks>
         /// For example,
-        /// <code>
+        /// <code language="csharp">
         ///    bool isValid = pivSession.TryReadObject&lt;PinProtectedData&gt;(out PinProtectedData pinProtect);
         ///    if (isValid)
         ///    {
@@ -99,7 +99,7 @@ namespace Yubico.YubiKey.Piv
         ///    pinProtect.Dispose();
         /// </code>
         /// or alternatively,
-        /// <code>
+        /// <code language="csharp">
         ///    bool isValid = pivSession.ReadObject(out PinProtectedData pinProtect);
         ///    using (pinProtect)
         ///    {
@@ -165,7 +165,7 @@ namespace Yubico.YubiKey.Piv
         /// </summary>
         /// <remarks>
         /// For example,
-        /// <code>
+        /// <code language="csharp">
         ///    using CardholderUniqueId chuid = pivSession.ReadObject&lt;CardholderUniqueId&gt;(0x005FFF55);
         /// </code>
         /// <para>
@@ -231,7 +231,7 @@ namespace Yubico.YubiKey.Piv
         /// </summary>
         /// <remarks>
         /// For example,
-        /// <code>
+        /// <code language="csharp">
         ///    bool isValid = pivSession.TryReadObject&lt;KeyHistory&gt;(out KeyHistory keyHistory);
         ///    if (isValid)
         ///    {
@@ -240,7 +240,7 @@ namespace Yubico.YubiKey.Piv
         ///    keyHistory.Dispose();
         /// </code>
         /// or alternatively,
-        /// <code>
+        /// <code language="csharp">
         ///    bool isValid = pivSession.ReadObject&lt;KeyHistory&gt;(out KeyHistory keyHistory);
         ///    using (keyHistory)
         ///    {

@@ -255,7 +255,7 @@ namespace Yubico.YubiKey.Oath
         /// </para>
         /// <para>
         /// For example,
-        /// <code>
+        /// <code language="csharp">
         ///    bool isSetToNewPassword = false;
         ///    if (oathSession.IsPasswordProtected)
         ///    {
@@ -276,7 +276,7 @@ namespace Yubico.YubiKey.Oath
         /// Note that if the OATH application is password-protected, and the
         /// password has already been verified, it is still necessary to pass in
         /// the current password. For example,
-        /// <code>
+        /// <code language="csharp">
         ///    if (!oathSession.TryVerifyPassword(currentPassword))
         ///    {
         ///        // Some error handling code, maybe exit.
@@ -429,7 +429,7 @@ namespace Yubico.YubiKey.Oath
         /// </para>
         /// <para>
         /// For example,
-        /// <code>
+        /// <code language="csharp">
         ///    if (oathSession.IsPasswordProtected)
         ///    {
         ///        // The OATH application is set to password-Protected,
@@ -442,7 +442,7 @@ namespace Yubico.YubiKey.Oath
         /// Note that if the OATH application is password-protected, and the
         /// password has already been verified, then it is not necessary to pass
         /// in the current password. For example,
-        /// <code>
+        /// <code language="csharp">
         ///    if (oathSession.TryVerifyPassword(currentPassword)
         ///    {
         ///        bool isUnset =

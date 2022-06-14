@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.Piv
         /// buffer for signing). You can look at the <c>Algorithm</c> property to
         /// learn the algorithm and key size. However, if all you want is the key
         /// size, use this extension:
-        /// <code>
+        /// <code language="csharp">
         ///    PivPublicKey publicKey = SomeClass.GetPublicKey(someSearchParam);
         ///    byte[] buffer = new byte[publicKey.Algorithm.KeySizeBits() / 8];
         /// </code>
@@ -118,12 +118,12 @@ namespace Yubico.YubiKey.Piv
         /// The PivAlgorithm enum contains <c>Rsa1024</c> and <c>Rsa2048</c>. But
         /// sometimes you just want to know if an algorithm is RSA or not. It
         /// would seem you would have to write code such as the following.
-        /// <code>
+        /// <code language="csharp">
         ///     if ((algorithm == PivAlgorith.Rsa1024) || (algorithm == PivAlgorithm.Rsa2048))
         /// </code>
         /// <para>
         /// With this extension, you can simply write.
-        /// <code>
+        /// <code language="csharp">
         ///     if (algorithm.IsRsa())
         /// </code>
         /// </para>
@@ -148,12 +148,12 @@ namespace Yubico.YubiKey.Piv
         /// The PivAlgorithm enum contains <c>EccP256</c> and <c>EccP384</c>. But
         /// sometimes you just want to know if an algorithm is ECC or not. It
         /// would seem you would have to write code such as the following.
-        /// <code>
+        /// <code language="csharp">
         ///     if ((algorithm == PivAlgorith.EccP256) || (algorithm == PivAlgorithm.ECCP384))
         /// </code>
         /// <para>
         /// With this extension, you can simply write.
-        /// <code>
+        /// <code language="csharp">
         ///     if (algorithm.IsEcc())
         /// </code>
         /// </para>

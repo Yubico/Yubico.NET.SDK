@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// While you can retrieve any data under a PIV-defined DataTag, if you want to
     /// use only PIV-defined DataTags, you can use the <c>PivDataTag</c> class.
     /// For example,
-    /// <code>
+    /// <code language="csharp">
     ///    // Retrieve IrisImages
     ///    var getCmd = new GetDataCommand((int)PivDataTag.IrisImages);
     ///    GetDataResponse getRsp = connection.SendCommand(getCmd);
@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// Note that when you set an object with the DataTag using either the old
     /// constructor/property or the new versions, when you get it (using either
     /// old or new), you are getting the same thing. For example,
-    /// <code>
+    /// <code language="csharp">
     ///     // Use the old, obsolete API to set the tag.
     ///     var getCmd = new GetDataCommand()
     ///     {
@@ -104,7 +104,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   GetDataCommand getDataCommand = new GetDataCommand((int)PivDataTag.Chuid);
     ///   GetDataResponse getDataResponse = connection.SendCommand(getDataCommand);<br/>
@@ -197,7 +197,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <remarks>
         /// This constructor is provided for those developers who want to use the
         /// object initializer pattern. For example:
-        /// <code>
+        /// <code language="csharp">
         ///   var getDataCommand = new GetDataCommand()
         ///   {
         ///       DataTag = (int)PivDataTag.Authentication,

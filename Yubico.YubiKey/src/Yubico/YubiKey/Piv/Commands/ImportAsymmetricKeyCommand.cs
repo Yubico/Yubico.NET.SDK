@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   var privateKey = new PivEccPrivateKey(privateValue);
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   var importKeyCommand = new ImportAsymmetricKeyCommand(
@@ -246,7 +246,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <remarks>
         /// This constructor is provided for those developers who want to use the
         /// object initializer pattern. For example:
-        /// <code>
+        /// <code language="csharp">
         ///   var command = new ImportAsymmetricKeyCommand(privateKey)
         ///   {
         ///       SlotNumber = PivSlots.Authentication,

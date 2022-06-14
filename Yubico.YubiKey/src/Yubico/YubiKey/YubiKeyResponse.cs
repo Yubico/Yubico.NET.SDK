@@ -34,7 +34,7 @@ namespace Yubico.YubiKey
     /// For example:
     /// </para>
     /// <para>
-    /// <code>
+    /// <code language="csharp">
     /// public class MyResponse : YubiKeyResponse
     /// {
     ///     // MyResponse has custom definitions for what certain StatusWord

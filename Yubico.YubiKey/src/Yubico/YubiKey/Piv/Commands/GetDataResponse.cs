@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   GetDataCommand getDataCommand = new GetDataCommand(PivDataTag.Chuid);
     ///   GetDataResponse getDataResponse = connection.SendCommand(getDataCommand);<br/>

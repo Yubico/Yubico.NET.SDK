@@ -70,7 +70,7 @@ namespace Yubico.YubiKey.Oath
         /// <remarks>
         /// Because this class implements <c>IDisposable</c>, use the <c>using</c> keyword.
         /// For example,
-        /// <code>
+        /// <code language="csharp">
         ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
         ///     using (var oath = new OathSession(yubiKeyToUse))
         ///     {

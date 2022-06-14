@@ -42,7 +42,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   using System.Security.Cryptography.X509Certificates;<br/>
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   var createAttestationStatementCommand = new CreateAttestationStatementCommand (0x9A);
@@ -127,7 +127,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <remarks>
         /// This constructor is provided for those developers who want to use the
         /// object initializer pattern. For example:
-        /// <code>
+        /// <code language="csharp">
         ///   var command = new CreateAttestationStatementCommand()
         ///   {
         ///       SlotNumber = PivSlot.Signing,

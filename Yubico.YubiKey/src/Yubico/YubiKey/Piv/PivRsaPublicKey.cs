@@ -42,7 +42,7 @@ namespace Yubico.YubiKey.Piv
     /// The YubiKey supports only F4 (0x010001 = decimal 65,537) as the public
     /// exponent. Note that if you have the public exponent as an int, you can
     /// convert it to a byte array by using <c>BinaryPrimitives</c>.
-    /// <code>
+    /// <code language="csharp">
     ///   var exponentAsArray = new byte[4];
     ///   BinaryPrimitives.WriteInt32BigEndian(exponentAsArray, exponentAsInt);
     /// </code>

@@ -183,7 +183,7 @@ namespace Yubico.YubiKey.Piv.Objects
         /// </summary>
         /// <remarks>
         /// To set this property to the current time, use <c>DateTime.UtcNow</c>.
-        /// <code>
+        /// <code language="csharp">
         ///    var adminData = new AdminData();
         ///    adminData.PinLastUpdated = DateTime.UtcNow;
         /// </code>

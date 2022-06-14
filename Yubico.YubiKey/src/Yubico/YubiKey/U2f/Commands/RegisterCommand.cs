@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.U2f.Commands
     /// <p>
     /// Example:
     /// </p>
-    /// <code>
+    /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.FidoU2f);
     ///   byte[] challenge = new byte[32];
     ///   RandomNumberGenerator.Fill(challenge);

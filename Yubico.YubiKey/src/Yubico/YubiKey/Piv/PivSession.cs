@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Piv
     /// <para>
     /// Generally you will choose the YubiKey to use by building an instance of
     /// <see cref="IYubiKeyDevice"/>. This object will represent the actual hardware.
-    /// <code>
+    /// <code language="csharp">
     ///   IYubiKeyDevice SelectYubiKey()
     ///   {
     ///       IEnumerable&lt;IYubiKeyDevice&gt; yubiKeyList = YubiKey.FindAll();
@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Piv
     /// <c>PivSession</c> class to represent the PIV application on the hardware.
     /// Because this class implements <c>IDisposable</c>, use the <c>using</c>
     /// keyword. For example,
-    /// <code>
+    /// <code language="csharp">
     ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
     ///     using (var piv = new PivSession(yubiKeyToUse))
     ///     {
@@ -95,7 +95,7 @@ namespace Yubico.YubiKey.Piv
     /// any useful application will almost certainly call one or more methods
     /// that do need it. You will need to set the appropriate property after
     /// instantiating this class.
-    /// <code>
+    /// <code language="csharp">
     ///   using (var pivSession = new PivSession(yubiKeyToUse))
     ///   {
     ///       KeyCollector = SomeCollectorDelegate;
@@ -190,7 +190,7 @@ namespace Yubico.YubiKey.Piv
         /// <remarks>
         /// Because this class implements <c>IDisposable</c>, use the <c>using</c>
         /// keyword. For example,
-        /// <code>
+        /// <code language="csharp">
         ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
         ///     using (var piv = new PivSession(yubiKeyToUse))
         ///     {
@@ -249,7 +249,7 @@ namespace Yubico.YubiKey.Piv
         /// This feature is available only on YubiKeys 5.3 and later. If you call
         /// this method on an earlier YubiKey, it will throw an exception. A good
         /// idea is to verify that the version number is valid before calling.
-        /// <code>
+        /// <code language="csharp">
         ///     IEnumerable&lt;IYubiKeyDevice&gt; list = YubiKey.FindByTransport(Transport.UsbSmartCard);
         ///     IYubiKeyDevice yubiKey = list.First();
         ///

@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   using System.Security.Cryptography.X509Certificates;<br/>
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   var createAttestationStatementCommand = new CreateAttestationStatementCommand (0x9A);

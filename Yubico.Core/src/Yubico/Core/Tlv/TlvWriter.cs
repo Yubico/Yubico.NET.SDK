@@ -70,7 +70,7 @@ namespace Yubico.Core.Tlv
         /// <remarks>
         /// The way the caller is supposed to build Nested schemas using TlvWriter is
         /// as follows.
-        /// <code>
+        /// <code language="csharp">
         ///   var writer = new TlvWriter();
         ///   using (writer.WriteNestedTlv(tag0))
         ///   {
@@ -209,7 +209,7 @@ namespace Yubico.Core.Tlv
         /// </para>
         /// <para>
         /// For example:
-        /// <code>
+        /// <code language="csharp">
         ///    string someString = "ABCD";
         ///    writer.WriteString(0x81, someString, Encoding.ASCII);
         /// </code>
@@ -218,7 +218,7 @@ namespace Yubico.Core.Tlv
         /// A string with non-ASCII characters will be stored internally with the
         /// 16-bit version of that character. For example, look at a string with
         /// the "plus-minus" character.
-        /// <code>
+        /// <code language="csharp">
         ///    string someString = "A\u00B1B"; // this is A +or- B
         ///    represented internally as 00 41 00 B1 00 42
         /// </code>
@@ -493,7 +493,7 @@ namespace Yubico.Core.Tlv
         /// <remarks>
         /// The way the caller is supposed to build Nested schemas using TlvWriter is
         /// as follows.
-        /// <code>
+        /// <code language="csharp">
         ///   var writer = new TlvWriter();
         ///   using (writer.WriteNestedTlv(tag0))
         ///   {
@@ -544,7 +544,7 @@ namespace Yubico.Core.Tlv
         /// </code>
         /// Code following the pattern that uses "using" and TlvWriter.TlvScope
         /// would look something like this.
-        /// <code>
+        /// <code language="csharp">
         ///   var writer = new TlvWriter();
         ///   using (writer.WriteNestedTlv(0x7C))
         ///   {

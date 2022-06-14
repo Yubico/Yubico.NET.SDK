@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);
     ///   SerialCommand serialCommand = new GetSerialNumberCommand();
     ///   GetSerialNumberResponse serialResponse = connection.SendCommand(serialCommand);<br/>

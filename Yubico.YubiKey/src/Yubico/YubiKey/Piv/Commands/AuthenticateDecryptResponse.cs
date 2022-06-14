@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   var decryptCommand = new AuthenticateDecryptCommand(dataToDecrypt, PivSlot.KeyManagement);
     ///   AuthenticateDecryptResponse decryptResponse = connection.SendCommand(decryptCommand);<br/>

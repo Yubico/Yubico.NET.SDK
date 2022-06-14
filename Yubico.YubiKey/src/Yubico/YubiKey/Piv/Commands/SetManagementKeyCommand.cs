@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// To determine if the YubiKey being set can have an AES management key, use
     /// <c>HasFeature</c>:
-    /// <code>
+    /// <code language="csharp">
     ///    IYubiKeyDevice yubiKeyDevice;<br/>
     ///    bool aesCapable = yubiKeyDevice.HasFeature(YubiKeyFeature.PivManagementKeyAes);
     /// </code>
@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   /* This example assumes the application has a method to collect a
     ///    * management key.
     ///    */
@@ -168,7 +168,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <remarks>
         /// This constructor is provided for those developers who want to use the
         /// object initializer pattern. For example:
-        /// <code>
+        /// <code language="csharp">
         ///   var command = new SetManagementKeyCommand(keyData)
         ///   {
         ///       TouchPolicy = PivTouchPolicy.Cached,

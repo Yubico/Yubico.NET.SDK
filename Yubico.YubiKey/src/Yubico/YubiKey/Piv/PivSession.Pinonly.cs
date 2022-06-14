@@ -596,7 +596,7 @@ namespace Yubico.YubiKey.Piv
         /// <c>mgmtKeyAlgorithm</c> arg to an AES algorithm, make sure it is
         /// allowed on the YubiKey. You can use the <c>HasFeature</c> call. For
         /// example,
-        /// <code>
+        /// <code language="csharp">
         ///   PivAlgorithm mgmtKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey) ?
         ///       PivAlgorithm.Aes128 : PivAlgorithm.TripleDes;
         ///   pivSession.SetYubiKeyPivPinOnly(PivPinOnlyMode.PinProtected, mgmtKeyAlgorithm);

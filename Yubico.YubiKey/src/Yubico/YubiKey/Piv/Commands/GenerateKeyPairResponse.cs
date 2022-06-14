@@ -72,7 +72,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   var generateKeyPairCommand = new GenerateKeyPairCommand(
     ///       PivSlot.Signing, PivAlgorithm.EccP384, PivPinPolicy.Default, PivTouchPolicy.Default);

@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   /* This example assumes there is some code that will digest the data. */
     ///   byte[] sha384Digest = DigestDataToSign(SHA384, dataToSign);<br/>
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>

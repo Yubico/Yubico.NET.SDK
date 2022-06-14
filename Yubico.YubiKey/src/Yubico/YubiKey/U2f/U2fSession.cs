@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.U2f
     /// <para>
     /// Generally, you will choose the YubiKey to use by building an instance of <see cref="IYubiKeyDevice" />. This
     /// object will represent the actual YubiKey hardware.
-    /// <code>
+    /// <code language="csharp">
     ///   IYubiKeyDevice SelectYubiKey()
     ///   {
     ///       IEnumerable&lt;IYubiKeyDevice&gt; yubiKeyList = YubiKey.FindAll();
@@ -54,7 +54,7 @@ namespace Yubico.YubiKey.U2f
     /// Once you have the YubiKey to use, you will build an instance of this U2fSession class to represent the U2F
     /// application on the hardware. Because this class implements <c>IDisposable</c>, use the <c>using</c> keyword.
     /// For example,
-    /// <code>
+    /// <code language="csharp">
     ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
     ///     using (var u2f = new U2fSession(yubiKeyToUse))
     ///     {
@@ -111,7 +111,7 @@ namespace Yubico.YubiKey.U2f
         /// </summary>
         /// <remarks>
         /// Because this class implements <c>IDisposable</c>, use the <c>using</c> keyword. For example,
-        /// <code>
+        /// <code language="csharp">
         ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
         ///     using (var u2f = new U2fSession(yubiKeyToUse))
         ///     {

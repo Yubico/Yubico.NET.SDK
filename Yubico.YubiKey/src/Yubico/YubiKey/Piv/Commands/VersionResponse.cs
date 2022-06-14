@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   IList&lt;IYubiKeyDevice&gt; keys = YubiKey.GetList();
     ///   foreach (IYubiKeyDevice key in keys)
     ///   {

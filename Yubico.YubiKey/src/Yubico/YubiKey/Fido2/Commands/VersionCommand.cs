@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <p>
     /// Example:
     /// </p>
-    /// <code>
+    /// <code language="csharp">
     /// IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Fido2);
     /// VersionCommand versionCmd = new VersionCommand();
     /// VersionResponse versionRsp = connection.SendCommand(versionCmd);

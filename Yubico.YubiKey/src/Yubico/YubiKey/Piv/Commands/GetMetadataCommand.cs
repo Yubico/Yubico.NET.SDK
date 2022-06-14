@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   GetMetadataCommand metadataCommand = new GetMetadataCommand(0x9A);
     ///   GetMetadataResponse metadataResponse = connection.SendCommand(metadataCommand);<br/>
@@ -98,7 +98,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// names and numbers.
         /// <para>
         /// For example, the following two are equivalent.
-        /// <code>
+        /// <code language="csharp">
         /// var getMetadata = new GetMetadataCommand(0x9C);
         /// var getMetadata = new GetMetadataCommand(PivSlot.Signing);
         /// </code>
@@ -118,7 +118,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <remarks>
         /// This constructor is provided for those developers who want to use the
         /// object initializer pattern. For example:
-        /// <code>
+        /// <code language="csharp">
         ///   var getMetadataCommand = new GetMetadataCommand()
         ///   {
         ///       SlotNumber = PivSlot.Authentication,

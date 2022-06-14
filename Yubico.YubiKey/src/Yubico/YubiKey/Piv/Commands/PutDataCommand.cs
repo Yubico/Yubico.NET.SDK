@@ -97,7 +97,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// use only PIV-defined DataTags, and want to verify that the encoding
     /// follows the PIV standard (as happens using the old, obsolete API), you
     /// can use the <c>PivDataTag</c> class. For example,
-    /// <code>
+    /// <code language="csharp">
     ///    // Store IrisImages
     ///    if (PivDataTag.IrisImages.IsValidEncodingForPut(encodedDataToStore))
     ///    {
@@ -142,7 +142,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// Note that when you set an object with the DataTag or Data using either
     /// the old constructor/properties or the new versions, when you get it
     /// (using either old or new), you are getting the same thing. For example,
-    /// <code>
+    /// <code language="csharp">
     ///     // Use the old, obsolete API to set the tag and data.
     ///     var putCmd = new PutDataCommand()
     ///     {
@@ -165,7 +165,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   /* This example assumes there is some code that will build an encoded
     ///      certificate from an X509Certificate2 object. */
     ///   byte[] encodedCertificate = PivPutDataEncodeCertificate(certObject);<br/>
@@ -312,7 +312,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <remarks>
         /// This constructor is provided for those developers who want to use the
         /// object initializer pattern. For example:
-        /// <code>
+        /// <code language="csharp">
         ///   var command = new PutDataCommand()
         ///   {
         ///       DataTag = (int)PivDataTag.Authentication;
@@ -375,7 +375,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// be anything but it must be encoded as <c>53 length data</c>
         /// <para>
         /// To encode, you can use the <c>TlvWriter</c> class.
-        /// <code>
+        /// <code language="csharp">
         ///    var tlvWriter = new TlvWriter();
         ///    tlvWriter.WriteValue(0x53, dataToStore);
         ///    byte[] encoding = tlvWriter.Encode();

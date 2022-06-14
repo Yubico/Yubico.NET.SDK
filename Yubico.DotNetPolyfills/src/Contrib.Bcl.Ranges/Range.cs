@@ -15,7 +15,7 @@ namespace System
     /// <summary>Represent a range has start and end indexes.</summary>
     /// <remarks>
     /// Range is used by the C# compiler to support the range syntax.
-    /// <code>
+    /// <code language="csharp">
     /// int[] someArray = new int[5] { 1, 2, 3, 4, 5 };
     /// int[] subArray1 = someArray[0..2]; // { 1, 2 }
     /// int[] subArray2 = someArray[1..^0]; // { 2, 3, 4, 5 }

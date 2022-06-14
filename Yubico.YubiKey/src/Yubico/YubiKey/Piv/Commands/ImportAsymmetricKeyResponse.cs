@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   var privateKey = new PivEccPrivateKey(privateValue);
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   var importKeyCommand = new ImportAsymmetricKeyCommand(

@@ -63,7 +63,7 @@ namespace Yubico.Core.Logging
         /// <para>
         /// Send SDK log messages to the console:
         /// </para>
-        /// <code>
+        /// <code language="csharp">
         /// using Microsoft.Extensions.Logging;
         /// using Yubico.Core.Logging;
         ///
@@ -95,7 +95,7 @@ namespace Yubico.Core.Logging
         /// <para>
         /// Now, you can add the following code to your application:
         /// </para>
-        /// <code>
+        /// <code language="csharp">
         /// using Microsoft.Extensions.Logging;
         /// using Serilog;
         /// using Yubico.Core.Logging;
@@ -136,7 +136,7 @@ namespace Yubico.Core.Logging
         /// <para>
         /// Write some information to the log.
         /// </para>
-        /// <code>
+        /// <code language="csharp">
         /// using Yubico.Core.Logging;
         ///
         /// public class Example

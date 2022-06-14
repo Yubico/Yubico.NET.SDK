@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.Otp
     /// <example>
     /// This is an example of using the fluent builder pattern to configure a
     /// YubiKey OTP slot to emit a static password.
-    /// <code>
+    /// <code language="csharp">
     /// ReadOnlyMemory&lt;char&gt; password = "Shhhh!Don'tTell!".ToCharArray();
     /// using (OtpSession otp = new OtpSession(yubiKey))
     /// {

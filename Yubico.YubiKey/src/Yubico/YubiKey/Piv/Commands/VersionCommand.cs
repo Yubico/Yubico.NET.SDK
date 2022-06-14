@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);
     ///   VersionCommand versionCmd = new VersionCommand();
     ///   VersionResponse versionRsp = connection.SendCommand(versionCmd);<br/>

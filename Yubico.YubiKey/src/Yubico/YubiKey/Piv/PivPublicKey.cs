@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.Piv
     /// class, but will really be an instance of one of the subclasses. You can
     /// know which class it is by either looking at the <c>Algorithm</c> property
     /// or using "is":
-    /// <code>
+    /// <code language="csharp">
     ///   PivPublicKey publicKey = response.GetData();
     ///   if (publicKey is PivRsaPublicKey)
     ///   {

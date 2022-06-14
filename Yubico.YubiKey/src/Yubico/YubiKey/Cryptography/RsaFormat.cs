@@ -800,7 +800,7 @@ namespace Yubico.YubiKey.Cryptography
         /// Because this method creates a new byte array, and it contains
         /// sensitive data, it is a good idea to overwrite the buffer when done
         /// with it.
-        /// <code>
+        /// <code language="csharp">
         ///   CryptographicOperations.ZeroMemory(formattedData);
         /// </code>
         /// </para>
@@ -881,7 +881,7 @@ namespace Yubico.YubiKey.Cryptography
         /// Because this method creates a new byte array, and it contains
         /// sensitive data, it is a good idea to overwrite the buffer when done
         /// with it.
-        /// <code>
+        /// <code language="csharp">
         ///   CryptographicOperations.ZeroMemory(outputData);
         /// </code>
         /// </para>
@@ -1042,7 +1042,7 @@ namespace Yubico.YubiKey.Cryptography
         /// Because this method creates a new byte array, and it contains
         /// sensitive data, it is a good idea to overwrite the buffer when done
         /// with it.
-        /// <code>
+        /// <code language="csharp">
         ///   CryptographicOperations.ZeroMemory(formattedData);
         /// </code>
         /// </para>
@@ -1154,7 +1154,7 @@ namespace Yubico.YubiKey.Cryptography
         /// Because this method creates a new byte array, and it contains
         /// sensitive data, it is a good idea to overwrite the buffer when done
         /// with it.
-        /// <code>
+        /// <code language="csharp">
         ///   CryptographicOperations.ZeroMemory(outputData);
         /// </code>
         /// </para>

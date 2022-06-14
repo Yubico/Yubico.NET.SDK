@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.Piv.Commands
     ///
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   using System.Security.Cryptography;<br/>
     ///   /* This example assumes the application has a method to collect a
     ///    * PIN/PUK.

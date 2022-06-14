@@ -110,7 +110,7 @@ namespace Yubico.YubiKey
         /// capability over NFC on all YubiKeys where <c>Piv</c> is available. All other
         /// capabilities will be disabled. The new set of enabled NFC capabilities will be
         /// printed to the console, showing that only <c>Piv</c> is enabled over NFC.
-        /// <code>
+        /// <code language="csharp">
         /// IEnumerable&lt;IYubiKeyDevice&gt; yubiKeys =
         ///     YubiKey.FindAll()
         ///     .Where(d => d.AvailableNfcCapabilities.HasFlag(YubiKeyCapabilities.Piv));
@@ -139,7 +139,7 @@ namespace Yubico.YubiKey
         /// <example>
         /// To change the state of some capabilities without affecting the others, you
         /// can do something like the following:
-        /// <code>
+        /// <code language="csharp">
         /// IYubiKeyDevice yubiKey = YubiKey.FindAll().First();
         ///
         /// YubiKeyCapabilities desiredNfcCapabilities = yubiKey.EnabledNfcCapabilities;
@@ -203,7 +203,7 @@ namespace Yubico.YubiKey
         /// capability over USB on all YubiKeys where <c>Piv</c> is available. All other
         /// capabilities will be disabled. The new set of enabled USB capabilities will be
         /// printed to the console, showing that only <c>Piv</c> is enabled over USB.
-        /// <code>
+        /// <code language="csharp">
         /// IEnumerable&lt;IYubiKeyDevice&gt; yubiKeys =
         ///     YubiKey.FindAll()
         ///     .Where(d => d.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
@@ -232,7 +232,7 @@ namespace Yubico.YubiKey
         /// <example>
         /// To change the state of some capabilities without affecting the others, you
         /// can do something like the following:
-        /// <code>
+        /// <code language="csharp">
         /// IYubiKeyDevice yubiKey = YubiKey.FindAll().First();
         ///
         /// YubiKeyCapabilities desiredUsbCapabilities = yubiKey.EnabledUsbCapabilities;

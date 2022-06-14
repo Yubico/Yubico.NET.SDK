@@ -87,7 +87,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// To use this class, create an instance, then call the
     /// <c>TransformBlock</c> method.
-    /// <code>
+    /// <code language="csharp">
     ///    var tdes = new TripleDesForManagementKey(mgmtKey, true);
     ///    int bytesWritten = tdes.TransformBlock(
     ///      plaintext, offsetP, 8, encryptedData, offsetE);

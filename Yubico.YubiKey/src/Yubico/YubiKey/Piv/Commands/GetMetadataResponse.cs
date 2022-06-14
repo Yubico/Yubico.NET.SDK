@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   GetMetadataCommand metadataCommand = new GetMetadataCommand(0x9A);
     ///   GetMetadataResponse metadataResponse = connection.SendCommand(metadataCommand);<br/>

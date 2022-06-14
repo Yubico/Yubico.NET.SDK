@@ -109,7 +109,7 @@ namespace Yubico.YubiKey.Piv
         /// an object and you can let it know which algorithm the management key
         /// is so when the management key is requested, the user will know how
         /// many bytes to provide. For example,
-        /// <code>
+        /// <code language="csharp">
         ///    KeyCollectorClass.ManagementKeyAlgorithm = pivSession.ManagementKeyAlgorithm;
         ///    pivSession.KeyCollector = KeyCollectorClass.KeyCollectorDelegate;
         /// </code>

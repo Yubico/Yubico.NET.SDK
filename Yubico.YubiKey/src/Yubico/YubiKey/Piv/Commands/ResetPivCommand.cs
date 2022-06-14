@@ -54,7 +54,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);
     ///   Command resetPivCmd = new ResetPivCommand();
     ///   ResetPivResponse resetPivRsp = connection.SendCommand(resetPivCmd);<b/>

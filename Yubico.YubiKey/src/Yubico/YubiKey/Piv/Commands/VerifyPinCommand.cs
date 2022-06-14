@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   /* This example assumes the application has a method to collect a PIN.
     ///    */
     ///   byte[] pin;<br/>

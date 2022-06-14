@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// Example:
     /// </para>
-    /// <code>
+    /// <code language="csharp">
     ///   /* This example assumes there is some code that will build an encoded
     ///      certificate from an X509Certificate2 object. */
     ///   byte[] encodedCertificate = PivPutDataEncodeCertificate(certObject);<br/>

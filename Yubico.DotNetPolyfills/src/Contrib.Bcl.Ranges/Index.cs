@@ -15,7 +15,7 @@ namespace System
     /// <summary>Represent a type can be used to index a collection either from the start or the end.</summary>
     /// <remarks>
     /// Index is used by the C# compiler to support the new index syntax
-    /// <code>
+    /// <code language="csharp">
     /// int[] someArray = new int[5] { 1, 2, 3, 4, 5 } ;
     /// int lastElement = someArray[^1]; // lastElement = 5
     /// </code>

@@ -74,7 +74,7 @@ namespace Yubico.YubiKey.Cryptography
         /// The method loaded will return an object. This class is initialized
         /// with a method that will build and return an instance of the C#
         /// default implementation. For example, it could be used as follows.
-        /// <code>
+        /// <code language="csharp">
         ///   RandomNumberGenerator randomObject =
         ///   CryptographyProviders.RngCreator();
         /// </code>
@@ -82,7 +82,7 @@ namespace Yubico.YubiKey.Cryptography
         /// <para>
         /// If you want to replace the implementation, you will likely do
         /// something like this in your application.
-        /// <code>
+        /// <code language="csharp">
         ///     CryptographyProviders.RngCreator = () =>
         ///     {
         ///         Handle rngHandle = RngImpl.GetRngHandle();
@@ -113,14 +113,14 @@ namespace Yubico.YubiKey.Cryptography
         /// The method loaded will return an object. This class is initialized
         /// with a method that will build and return an instance of the C#
         /// default implementation. For example, it could be used as follows.
-        /// <code>
+        /// <code language="csharp">
         ///   SHA1 sha1Object = CryptographyProviders.Sha1Creator();
         /// </code>
         /// </para>
         /// <para>
         /// If you want to replace the implementation, you will likely do
         /// something like this in your application.
-        /// <code>
+        /// <code language="csharp">
         ///     CryptographyProviders.Sha1Creator = () =>
         ///     {
         ///         Handle sha1Handle = Sha1Impl.GetSha1Handle();
@@ -151,14 +151,14 @@ namespace Yubico.YubiKey.Cryptography
         /// The method loaded will return an object. This class is initialized
         /// with a method that will build and return an instance of the C#
         /// default implementation. For example, it could be used as follows.
-        /// <code>
+        /// <code language="csharp">
         ///   SHA256 sha256Object = CryptographyProviders.Sha256Creator();
         /// </code>
         /// </para>
         /// <para>
         /// If you want to replace the implementation, you will likely do
         /// something like this in your application.
-        /// <code>
+        /// <code language="csharp">
         ///     CryptographyProviders.Sha256Creator = () =>
         ///     {
         ///         Handle sha256Handle = Sha256Impl.GetSha256Handle();
@@ -189,14 +189,14 @@ namespace Yubico.YubiKey.Cryptography
         /// The method loaded will return an object. This class is initialized
         /// with a method that will build and return an instance of the C#
         /// default implementation. For example, it could be used as follows.
-        /// <code>
+        /// <code language="csharp">
         ///   SHA384 sha384Object = CryptographyProviders.Sha384Creator();
         /// </code>
         /// </para>
         /// <para>
         /// If you want to replace the implementation, you will likely do
         /// something like this in your application.
-        /// <code>
+        /// <code language="csharp">
         ///     CryptographyProviders.Sha384Creator = () =>
         ///     {
         ///         Handle sha384Handle = Sha384Impl.GetSha384Handle();
@@ -227,14 +227,14 @@ namespace Yubico.YubiKey.Cryptography
         /// The method loaded will return an object. This class is initialized
         /// with a method that will build and return an instance of the C#
         /// default implementation. For example, it could be used as follows.
-        /// <code>
+        /// <code language="csharp">
         ///   SHA512 sha512Object = CryptographyProviders.Sha512Creator();
         /// </code>
         /// </para>
         /// <para>
         /// If you want to replace the implementation, you will likely do
         /// something like this in your application.
-        /// <code>
+        /// <code language="csharp">
         ///     CryptographyProviders.Sha512Creator = () =>
         ///     {
         ///         Handle sha512Handle = Sha512Impl.GetSha512Handle();
@@ -265,14 +265,14 @@ namespace Yubico.YubiKey.Cryptography
         /// The method loaded will return an object. This class is initialized
         /// with a method that will build and return an instance of the C#
         /// default implementation. For example, it could be used as follows.
-        /// <code>
+        /// <code language="csharp">
         ///   AES aesObject = CryptographyProviders.AesCreator();
         /// </code>
         /// </para>
         /// <para>
         /// If you want to replace the implementation, you will likely do
         /// something like this in your application.
-        /// <code>
+        /// <code language="csharp">
         ///     CryptographyProviders.AesCreator = () =>
         ///     {
         ///         Handle aesHandle = GetHandle();
@@ -303,14 +303,14 @@ namespace Yubico.YubiKey.Cryptography
         /// The method loaded will return an object. This class is initialized
         /// with a method that will build and return an instance of the C#
         /// default implementation. For example, it could be used as follows.
-        /// <code>
+        /// <code language="csharp">
         ///   TripleDES tripleDesObject = CryptographyProviders.TripleDesCreator();
         /// </code>
         /// </para>
         /// <para>
         /// If you want to replace the implementation, you will likely do
         /// something like this in your application.
-        /// <code>
+        /// <code language="csharp">
         ///     CryptographyProviders.TripleDesCreator = () =>
         ///     {
         ///         Handle tripleDesHandle = GetHandle();
@@ -343,14 +343,14 @@ namespace Yubico.YubiKey.Cryptography
         /// The method loaded will return an object. This class is initialized
         /// with a method that will build and return an instance of the C#
         /// default implementation. For example, it could be used as follows.
-        /// <code>
+        /// <code language="csharp">
         ///   DES desObject = CryptographyProviders.DesCreator();
         /// </code>
         /// </para>
         /// <para>
         /// If you want to replace the implementation, you will likely do
         /// something like this in your application.
-        /// <code>
+        /// <code language="csharp">
         ///     CryptographyProviders.DesCreator = () =>
         ///     {
         ///         Handle desHandle = GetHandle();

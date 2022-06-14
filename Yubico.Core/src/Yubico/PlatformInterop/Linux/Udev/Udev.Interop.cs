@@ -167,6 +167,16 @@ namespace Yubico.PlatformInterop
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr udev_device_get_devnode(LinuxUdevDeviceSafeHandle deviceObject);
 
+        // Get the parent device from the current device.
+        // The return value is another UDEV device handle which is ref counted,
+        // hence this function returns a disposable safe handle so that we
+        // are careful to reliably release this resource when we are done with it.
+        // The C signature is
+        //   struct udev_device *udev_device_get_parent(struct udev_device *udev_device);
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_get_parent")]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern LinuxUdevDeviceSafeHandle udev_device_get_parent(LinuxUdevDeviceSafeHandle deviceObject);
+
         // Get the path from the device.
         // This is what will be used by the HIDRAW library.
         // The return value is a string, but in the form of a pointer to ASCII

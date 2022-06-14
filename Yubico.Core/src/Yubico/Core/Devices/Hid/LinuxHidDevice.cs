@@ -49,11 +49,11 @@ namespace Yubico.Core.Devices.Hid
 
         // Build a new LinuxHidDevice from a device handle.
         internal LinuxHidDevice(LinuxUdevDeviceSafeHandle deviceHandle)
-            : this(DeviceGetPath(deviceHandle), DeviceGetDevnode(deviceHandle))
+            : this(DeviceGetPath(deviceHandle), DeviceGetDevnode(deviceHandle), GetParentDevicePath(deviceHandle))
         {
         }
 
-        internal LinuxHidDevice(string path, string devnode) :
+        internal LinuxHidDevice(string path, string devnode, string parentPath) :
             base(path)
         {
             VendorId = 0;
@@ -61,6 +61,7 @@ namespace Yubico.Core.Devices.Hid
             Usage = 0;
             UsagePage = HidUsagePage.Unknown;
             _devnode = devnode;
+            ParentDeviceId = parentPath;
 
             // If this call fails, the handle will be < 0. If so, the following
             // function calls will do nothing.
@@ -83,6 +84,13 @@ namespace Yubico.Core.Devices.Hid
         {
             IntPtr devnodePtr = NativeMethods.udev_device_get_devnode(udevDevice);
             return Marshal.PtrToStringAnsi(devnodePtr);
+        }
+
+        private static string GetParentDevicePath(LinuxUdevDeviceSafeHandle udevDevice)
+        {
+            using LinuxUdevDeviceSafeHandle parentDev = NativeMethods.udev_device_get_parent(udevDevice);
+
+            return DeviceGetPath(parentDev);
         }
 
         // Get the devinfo out of the handle. The VendorId and ProductId are in
@@ -258,7 +266,7 @@ namespace Yubico.Core.Devices.Hid
             return newOffset;
         }
 
-        
+
         /// <summary>
         /// Return an implementation of IHidConnection that will already have a
         /// connection to the Linux HID device, and will be able to Get and Set Feature Reports.

@@ -35,13 +35,15 @@ namespace Yubico.Core.Devices.Hid
             .Where(cmDevice => cmDevice.InterfacePath != null)
             .Select(cmDevice => new WindowsHidDevice(
                 cmDevice.InterfacePath!, // Null forgiveness as compiler isn't aware of previous null check
+                cmDevice.ContainerId,
                 cmDevice.HidUsageId,
                 (HidUsagePage)cmDevice.HidUsagePage));
 
-        private WindowsHidDevice(string instancePath, short usage, HidUsagePage usagePage) :
+        private WindowsHidDevice(string instancePath, Guid containerId, short usage, HidUsagePage usagePage) :
             base(instancePath)
         {
             ResolveIdsFromInstancePath(instancePath);
+            ParentDeviceId = containerId.ToString();
 
             Usage = usage;
             UsagePage = usagePage;

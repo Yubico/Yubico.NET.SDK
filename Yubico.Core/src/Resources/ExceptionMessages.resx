@@ -171,9 +171,6 @@
   <data name="UsbInterfaceOutOfRange" xml:space="preserve">
     <value>Attempted to access interface index [{0}]. The interface list only contains [{1}] elements.</value>
   </data>
-  <data name="ValueConversionFailed" xml:space="preserve">
-    <value>Cannot convert the data to the requested type. Expected only [{0}] byte(s) of data, but [{1}] byte(s) were present.</value>
-  </data>
   <data name="CommandApduFieldOutOfRangeEncoding" xml:space="preserve">
     <value>CommandApdu field [{0}] out of range for [{1}] APDU encoding.</value>
   </data>

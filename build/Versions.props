@@ -55,7 +55,7 @@ for external milestones.
 
     This project can, and should, use pre-release suffixes for development milestones.
     -->
-    <YubicoCoreVersion>1.3.1</YubicoCoreVersion>
+    <YubicoCoreVersion>1.3.2</YubicoCoreVersion>
 
     <!--
     Yubico.Authenticator project

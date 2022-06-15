@@ -108,6 +108,25 @@ namespace Yubico.YubiKey
         }
 
         [Fact]
+        public void CheckScp03s()
+        {
+            var yubiKey = new HollowYubiKeyDevice
+            {
+                AvailableUsbCapabilities = YubiKeyCapabilities.Piv
+            };
+
+            yubiKey.FirmwareVersion.Major = 5;
+            yubiKey.FirmwareVersion.Minor = 3;
+
+            Assert.True(yubiKey.HasFeature(YubiKeyFeature.Scp03));
+
+            yubiKey.FirmwareVersion.Major = 5;
+            yubiKey.FirmwareVersion.Minor = 2;
+
+            Assert.False(yubiKey.HasFeature(YubiKeyFeature.Scp03));
+        }
+
+        [Fact]
         public void CheckOathFeatures()
         {
             var yubiKey = new HollowYubiKeyDevice

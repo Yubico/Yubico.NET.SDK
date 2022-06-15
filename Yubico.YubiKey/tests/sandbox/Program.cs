@@ -48,6 +48,7 @@ namespace Yubico.YubiKey.TestApp
                 ["validatehotp"] = (output) => new ValidateHotp(output),
                 ["jamie"] = (output) => new JamiePlugin(output),
                 ["greg"] = (output) => new GregPlugin(output),
+                ["scp03"] = (output) => new Scp03Plugin(output),
                 ["eventmgmt"] = (output) => new EventManagerPlugin(output),
                 ["hidevents"] = (output) => new HidDeviceListenerPlugin(output),
                 ["smartcardevents"] = (output) => new SmartCardDeviceListenerPlugin(output),
@@ -125,18 +126,18 @@ namespace Yubico.YubiKey.TestApp
 
             int returnValue;
             // Nothing to it but to do it.
-            try
-            {
+            //try
+            //{
                 WriteLine("Calling plugins Execute() method.");
                 bool result = _plugin?.Execute() ?? false;
                 WriteLine($"Plugin's Execute() method returned [{ result }]", OutputLevel.Verbose);
                 returnValue = result ? 0 : -1;
-            }
-            catch (Exception ex)
-            {
-                WriteLine($"Exception in plugin [{ _plugin.Name }]: { ex.Message }.", OutputLevel.Error);
-                returnValue = -1;
-            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    WriteLine($"Exception in plugin [{ _plugin.Name }]: { ex.Message }.", OutputLevel.Error);
+            //    returnValue = -1;
+            //}
             Write($"Returning [{ returnValue }] to command shell.", OutputLevel.Verbose);
             return returnValue;
         }

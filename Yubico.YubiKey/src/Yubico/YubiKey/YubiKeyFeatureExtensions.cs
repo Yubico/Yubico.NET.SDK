@@ -80,6 +80,12 @@ namespace Yubico.YubiKey
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V2_2_0
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Otp),
 
+                YubiKeyFeature.Scp03 =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0
+                    && (HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv)
+                        || HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath)
+                        || HasApplication(yubiKeyDevice, YubiKeyCapabilities.OpenPgp)),
+
                 // OTP application features
 
                 YubiKeyFeature.OtpOathHotpMode =>

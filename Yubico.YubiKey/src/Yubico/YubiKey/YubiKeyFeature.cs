@@ -47,6 +47,11 @@ namespace Yubico.YubiKey
         /// </summary>
         SerialNumberVisibilityControls,
 
+        /// <summary>
+        /// The ability to communicate using Secure Channel Protocol 3 (SCP03).
+        /// </summary>
+        Scp03,
+
         // OTP application features
 
         /// <summary>

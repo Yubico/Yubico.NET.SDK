@@ -23,7 +23,7 @@ using MgmtCmd = Yubico.YubiKey.Management.Commands;
 
 namespace Yubico.YubiKey
 {
-    public sealed partial class YubiKeyDevice : IYubiKeyDevice
+    public partial class YubiKeyDevice : IYubiKeyDevice
     {
         #region IYubiKeyDeviceInfo
         /// <inheritdoc />
@@ -80,6 +80,8 @@ namespace Yubico.YubiKey
         private IHidDevice? _hidFidoDevice;
         private IHidDevice? _hidKeyboardDevice;
         private IYubiKeyDeviceInfo _yubiKeyInfo;
+
+        internal ISmartCardDevice GetSmartCardDevice() => _smartCardDevice!;
 
         /// <summary>
         /// Constructs a <see cref="YubiKeyDevice"/> instance.
@@ -187,7 +189,9 @@ namespace Yubico.YubiKey
             }
         }
 
-        bool IYubiKeyDevice.HasSameParentDevice(IDevice device)
+        bool IYubiKeyDevice.HasSameParentDevice(IDevice device) => HasSameParentDevice(device);
+
+        internal protected bool HasSameParentDevice(IDevice device) 
         {
             if (device is null)
             {
@@ -228,7 +232,7 @@ namespace Yubico.YubiKey
         }
 
         /// <inheritdoc />
-        public bool TryConnect(
+        public virtual bool TryConnect(
             YubiKeyApplication application,
             [MaybeNullWhen(returnValue: false)]
             out IYubiKeyConnection connection)
@@ -257,11 +261,12 @@ namespace Yubico.YubiKey
             }
 
             connection = new CcidConnection(_smartCardDevice, application);
+
             return true;
         }
 
         /// <inheritdoc />
-        public bool TryConnect(
+        public virtual bool TryConnect(
             byte[] applicationId,
             [MaybeNullWhen(returnValue: false)]
             out IYubiKeyConnection connection)
@@ -274,7 +279,7 @@ namespace Yubico.YubiKey
 
             connection = new CcidConnection(_smartCardDevice, applicationId);
 
-            return false;
+            return true;
         }
 
         /// <inheritdoc/>
@@ -629,7 +634,10 @@ namespace Yubico.YubiKey
         }
 
         /// <inheritdoc/>
-        bool IYubiKeyDevice.Contains(IDevice other) =>
+        bool IYubiKeyDevice.Contains(IDevice other) => Contains(other);
+
+        /// <inheritdoc/>
+        internal protected bool Contains(IDevice other) =>
             other switch
             {
                 ISmartCardDevice scDevice => scDevice.Path == _smartCardDevice?.Path,

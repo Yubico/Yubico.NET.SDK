@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 
 namespace Yubico.YubiKey.Scp03
 {
@@ -25,22 +24,24 @@ namespace Yubico.YubiKey.Scp03
     /// 
     /// Systems often derive and assign these keys using a diversification function keyed with a 'master key' and run on the 'DivData' of each device.
     /// </remarks>
-    internal class StaticKeys
+    public class StaticKeys
     {
         /// <summary>
         /// AES128 shared secret key used to calculate the Session-MAC key. Also called the 'DMK' or 'Key-MAC' in some specifications.
         /// </summary>
-        public IReadOnlyCollection<byte> ChannelMacKey { get; private set; }
+        public ReadOnlyMemory<byte> ChannelMacKey { get; private set; }
         /// <summary>
         /// AES128 shared secret key used to calculate the Session-ENC key. Also called the 'DAK' or 'Key-ENC' in some specifications.
         /// </summary>
-        public IReadOnlyCollection<byte> ChannelEncryptionKey { get; private set; }
+        public ReadOnlyMemory<byte> ChannelEncryptionKey { get; private set; }
         /// <summary>
         /// AES128 shared secret key used to wrap secrets. Also called the 'DEK' in some specifications.
         /// </summary>
-        public IReadOnlyCollection<byte> DataEncryptionKey { get; private set; }
+        public ReadOnlyMemory<byte> DataEncryptionKey { get; private set; }
 
-        public static readonly byte[] DefaultKey = new byte[] { 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f };
+        internal static readonly byte[] DefaultKey = new byte[] { 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f };
+
+        private const int KeySizeBytes = 16;
 
         /// <summary>
         /// Constructs an instance given the supplied keys.
@@ -48,29 +49,19 @@ namespace Yubico.YubiKey.Scp03
         /// <param name="channelMacKey">16-byte AES128 shared secret key</param>
         /// <param name="channelEncryptionKey">16-byte AES128 shared secret key</param>
         /// <param name="dataEncryptionKey">16-byte AES128 shared secret key</param>
-        public StaticKeys(byte[] channelMacKey, byte[] channelEncryptionKey, byte[] dataEncryptionKey)
+        public StaticKeys(ReadOnlyMemory<byte> channelMacKey, ReadOnlyMemory<byte> channelEncryptionKey, ReadOnlyMemory<byte> dataEncryptionKey)
         {
-            if (channelMacKey is null)
-            {
-                throw new ArgumentNullException(nameof(channelMacKey));
-            }
-            if (channelEncryptionKey is null)
-            {
-                throw new ArgumentNullException(nameof(channelEncryptionKey));
-            }
-            if (dataEncryptionKey is null)
-            {
-                throw new ArgumentNullException(nameof(dataEncryptionKey));
-            }
-            if (channelMacKey.Length != 16)
+            if (channelMacKey.Length != KeySizeBytes)
             {
                 throw new ArgumentException(ExceptionMessages.IncorrectStaticKeyLength, nameof(channelMacKey));
             }
-            if (channelEncryptionKey.Length != 16)
+
+            if (channelEncryptionKey.Length != KeySizeBytes)
             {
                 throw new ArgumentException(ExceptionMessages.IncorrectStaticKeyLength, nameof(channelEncryptionKey));
             }
-            if (dataEncryptionKey.Length != 16)
+
+            if (dataEncryptionKey.Length != KeySizeBytes)
             {
                 throw new ArgumentException(ExceptionMessages.IncorrectStaticKeyLength, nameof(dataEncryptionKey));
             }
@@ -79,6 +70,7 @@ namespace Yubico.YubiKey.Scp03
             ChannelEncryptionKey = channelEncryptionKey;
             DataEncryptionKey = dataEncryptionKey;
         }
+
         /// <summary>
         /// Constructs an instance of the well-known default values; using these provides no security.
         /// </summary>

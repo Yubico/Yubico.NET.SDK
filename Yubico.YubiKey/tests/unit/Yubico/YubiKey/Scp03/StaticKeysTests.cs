@@ -20,30 +20,6 @@ namespace Yubico.YubiKey.Scp03
     public class StaticKeysTests
     {
         [Fact]
-        public void Constructor_GivenNullChannelMacKey_ThrowsArgumentNullException()
-        {
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new StaticKeys(null, StaticKeys.DefaultKey, StaticKeys.DefaultKey));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
-        }
-
-        [Fact]
-        public void Constructor_GivenNullChannelEncryptionKey_ThrowsArgumentNullException()
-        {
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new StaticKeys(StaticKeys.DefaultKey, null, StaticKeys.DefaultKey));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
-        }
-
-        [Fact]
-        public void Constructor_GivenNullDataEncryptionKey_ThrowsArgumentNullException()
-        {
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new StaticKeys(StaticKeys.DefaultKey, StaticKeys.DefaultKey, null));
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
-        }
-
-        [Fact]
         public void Constructor_GivenChannelMacKeyWrongLength_ThrowsArgumentException()
         {
             _ = Assert.Throws<ArgumentException>(() => new StaticKeys(new byte[9], StaticKeys.DefaultKey, StaticKeys.DefaultKey));

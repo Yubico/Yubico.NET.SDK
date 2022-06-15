@@ -75,7 +75,7 @@ namespace Yubico.YubiKey
 
         public CcidConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication yubiKeyApplication, Scp03.StaticKeys staticKeys)
         {
-            if (yubiKeyApplication != YubiKeyApplication.Piv)
+            if (yubiKeyApplication == YubiKeyApplication.Unknown)
             {
                 throw new NotSupportedException();
             }
@@ -94,6 +94,30 @@ namespace Yubico.YubiKey
             // state of the smart card when connecting, we should always send down a connection
             // request.
             SelectApplication();
+
+            _apduPipeline.Setup();
+        }
+
+        public CcidConnection(ISmartCardDevice smartCardDevice, byte[] applicationId, Scp03.StaticKeys staticKeys)
+        {
+            _applicationId = applicationId;
+
+            _smartCardConnection = smartCardDevice.Connect();
+
+            _apduPipeline = new SmartCardTransform(_smartCardConnection);
+            _apduPipeline = new Scp03ApduTransform(_apduPipeline, staticKeys);
+            _apduPipeline = new ResponseChainingTransform(_apduPipeline);
+            _apduPipeline = new CommandChainingTransform(_apduPipeline);
+            _apduPipeline = new OtpErrorTransform(_apduPipeline);
+
+            _yubiKeyApplication = YubiKeyApplication.Unknown;
+
+            // CCID has the concept of multiple applications. Since we cannot guarantee the
+            // state of the smart card when connecting, we should always send down a connection
+            // request.
+            SelectApplication();
+
+            _apduPipeline.Setup();
         }
 
         public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand) where TResponse : IYubiKeyResponse

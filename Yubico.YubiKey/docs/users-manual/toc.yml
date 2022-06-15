@@ -44,6 +44,8 @@
     href: sdk-programming-guide/alternate-crypto.md
   - name: Sensitive data
     href: sdk-programming-guide/sensitive-data.md
+  - name: Secure Channel Protocol 3 (SCP03)
+    href: sdk-programming-guide/secure-channel-protocol-3.md
 
 - name: "Application: OTP"
   homepage: application-otp/otp-overview.md

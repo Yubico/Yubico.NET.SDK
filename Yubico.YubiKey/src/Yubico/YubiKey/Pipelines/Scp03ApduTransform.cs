@@ -86,6 +86,13 @@ namespace Yubico.YubiKey.Pipelines
             // Pass along the encoded command
             ResponseApdu response = _pipeline.Invoke(encodedCommand, commandType, responseType);
             // Decode response and return it
+            
+            // Special carve out for SelectApplication here, since there will be nothing to decode
+            if (commandType == typeof(InterIndustry.Commands.SelectApplicationCommand))
+            {
+                return response;
+            }
+
             return _session.DecodeResponse(response);
         }
 

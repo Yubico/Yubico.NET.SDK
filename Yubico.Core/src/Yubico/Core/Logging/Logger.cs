@@ -89,8 +89,8 @@ namespace Yubico.Core.Logging
             LogLevel logLevel,
             EventId eventId,
             TState state,
-            Exception exception,
-            Func<TState, Exception, string> formatter) =>
+            Exception? exception,
+            Func<TState, Exception?, string> formatter) =>
             _logger.Log(logLevel, eventId, state, exception, formatter);
 
         /// <summary>

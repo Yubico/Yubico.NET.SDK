@@ -15,6 +15,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
+using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid
@@ -32,6 +33,8 @@ namespace Yubico.Core.Devices.Hid
         private const int UsageU2FDevice = 1;
 
         private readonly string _devnode;
+
+        private readonly Logger _log = Log.GetLogger();
 
         /// <summary>
         /// Gets a list of all the HIDs on the system (not just YubiKeys).
@@ -56,6 +59,10 @@ namespace Yubico.Core.Devices.Hid
         internal LinuxHidDevice(string path, string devnode, string parentPath) :
             base(path)
         {
+            _log.LogInformation(
+                "Creating new instance of LinuxHidDevice based on path [{Path}], devnode [{DevNode}]",
+                path, devnode);
+
             VendorId = 0;
             ProductId = 0;
             Usage = 0;
@@ -67,6 +74,13 @@ namespace Yubico.Core.Devices.Hid
             // function calls will do nothing.
             using LinuxFileSafeHandle handle = NativeMethods.open(
                 devnode, NativeMethods.OpenFlags.O_RDWR | NativeMethods.OpenFlags.O_NONBLOCK);
+
+            if (handle.IsInvalid)
+            {
+                _log.LogWarning(
+                    "Could not open [{Path}]. Errno = {errno} {errorstring}",
+                    path, Marshal.GetLastWin32Error(), LibcHelpers.GetErrnoString());
+            }
 
             GetVendorProductIds(handle);
             GetUsageProperties(handle);
@@ -105,6 +119,10 @@ namespace Yubico.Core.Devices.Hid
                 VendorId = Marshal.ReadInt16(infoStructData, NativeMethods.OffsetInfoVendor);
                 ProductId = Marshal.ReadInt16(infoStructData, NativeMethods.OffsetInfoProduct);
             }
+            else
+            {
+                _log.LogWarning("IOCTL failed. {error}", LibcHelpers.GetErrnoString());
+            }
 
             Marshal.FreeHGlobal(infoStructData);
         }
@@ -126,6 +144,10 @@ namespace Yubico.Core.Devices.Hid
                 Marshal.Copy(descriptorStructData, descriptor, 0, NativeMethods.DescriptorSize);
                 ParseUsageProperties(descriptor, NativeMethods.OffsetDescValue, descriptorLength);
             }
+            else
+            {
+                _log.LogWarning("IOCTL failed {error}", LibcHelpers.GetErrnoString());
+            }
             Marshal.FreeHGlobal(descriptorStructData);
         }
 
@@ -138,6 +160,10 @@ namespace Yubico.Core.Devices.Hid
             if (status >= 0)
             {
                 returnValue = Marshal.ReadInt32(descSize, NativeMethods.OffsetDescSize);
+            }
+            else
+            {
+                Log.GetLogger().LogWarning("IOCTL failed {error}", LibcHelpers.GetErrnoString());
             }
 
             Marshal.FreeHGlobal(descSize);

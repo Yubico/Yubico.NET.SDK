@@ -13,9 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 using System.Globalization;
-using System.Runtime.InteropServices;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid
@@ -74,6 +72,17 @@ namespace Yubico.Core.Devices.Hid
         // Get the response that is waiting on the device. It will be 64 bytes.
         public byte[] GetReport()
         {
+            var fds = new NativeMethods.PollFd[1]
+            {
+                new NativeMethods.PollFd
+                {
+                    fd = _handle,
+                    events = 1
+                }
+            };
+
+            _ = NativeMethods.poll(fds, fds.Length, 100);
+
             // The return value is either < 0 for error, or the number of
             // bytes placed into the provided buffer.
             byte[] outputBuffer = new byte[YubiKeyIOReportSize];

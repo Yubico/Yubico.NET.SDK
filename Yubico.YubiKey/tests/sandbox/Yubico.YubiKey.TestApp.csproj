@@ -20,7 +20,7 @@ limitations under the License. -->
     <AnalysisLevel>5.0</AnalysisLevel>
     <AnalysisMode>AllDisabledByDefault</AnalysisMode>
     <AssemblyName>YubiKeyTestApp</AssemblyName>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6</TargetFramework>
     <OutputType>Exe</OutputType>
     <RootNamespace>Yubico.YubiKey.TestApp</RootNamespace>
     <Configurations>Debug;Release;ReleaseWithDocs</Configurations>

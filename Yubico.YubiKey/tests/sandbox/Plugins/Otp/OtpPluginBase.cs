@@ -440,12 +440,12 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         internal static IYubiKeyDevice GetYubiKey(int? serialNumber, Transport transport = Transport.HidKeyboard)
         {
             IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(transport);
-            IYubiKeyDevice key = keys.FirstOrDefault();
+            IYubiKeyDevice key = keys.FirstOrDefault() ?? throw new InvalidOperationException();
             if (serialNumber.HasValue)
             {
                 key = keys
                     .Where(k => k.SerialNumber == serialNumber)
-                    .FirstOrDefault();
+                    .FirstOrDefault() ?? throw new InvalidOperationException();
                 if (key is null)
                 {
                     string message = "YubiKey with serial number {0} was not found.{1}";
@@ -500,7 +500,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                     // Outputing a prompt to type "yes" to a file would be worse
                     // than useless.
                     Console.WriteLine(message);
-                    if (Console.ReadLine().ToLower() != "yes")
+                    if (Console.ReadLine()?.ToLower() != "yes")
                     {
                         Output.WriteLine("Aborted.", OutputLevel.Error);
                         return false;

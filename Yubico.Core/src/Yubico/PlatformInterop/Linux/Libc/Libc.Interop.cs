@@ -107,7 +107,7 @@ namespace Yubico.PlatformInterop
 
         public struct PollFd
         {
-            public LinuxFileSafeHandle fd;
+            public int fd;
             public short events;
             public short revents;
         }

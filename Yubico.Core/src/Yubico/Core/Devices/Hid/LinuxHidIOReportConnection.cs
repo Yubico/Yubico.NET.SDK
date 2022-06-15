@@ -76,12 +76,12 @@ namespace Yubico.Core.Devices.Hid
             {
                 new NativeMethods.PollFd
                 {
-                    fd = _handle,
+                    fd = _handle.DangerousGetHandle().ToInt32(),
                     events = 1
                 }
             };
 
-            _ = NativeMethods.poll(fds, fds.Length, 100);
+            _ = NativeMethods.poll(fds, fds.Length, -1);
 
             // The return value is either < 0 for error, or the number of
             // bytes placed into the provided buffer.

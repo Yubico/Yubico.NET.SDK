@@ -198,7 +198,7 @@ namespace Yubico.YubiKey
         {
             var devicesToProcess = new List<IDevice>();
 
-            IList<IDevice> hidKeyboardDevices = GetHidKeyboardDevices().ToList();
+            IList<IDevice> hidKeyboardDevices = new List<IDevice>();// GetHidKeyboardDevices().ToList();
             IList<IDevice> smartCardDevices = GetSmartCardDevices().ToList();
             IList<IDevice> hidFidoDevices = GetHidFidoDevices().ToList();
 

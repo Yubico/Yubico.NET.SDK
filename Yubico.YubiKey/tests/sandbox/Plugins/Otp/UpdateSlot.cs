@@ -267,7 +267,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             }
             Output.WriteLine("Type \"Yes\" and press [Enter] to proceed.");
             Output.WriteLine("Type anything else or hit [Ctrl] + [C] to abort.");
-            return Console.ReadLine().ToLower() == "yes";
+            return Console.ReadLine()?.ToLower() == "yes";
 
             static string Val(bool val) => val ? "true " : "false";
         }

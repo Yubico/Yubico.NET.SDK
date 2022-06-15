@@ -161,18 +161,6 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         [Fact]
-        public void CreateCommandApdu_CurrentPinIsEmpty_ThrowsArgumentException()
-        {
-            _ = Assert.Throws<ArgumentException>(() => new SetPinCommand(Array.Empty<byte>(), NewPin));
-        }
-
-        [Fact]
-        public void CreateCommandApdu_CurrentPinIsNull_ThrowsArgumentException()
-        {
-            _ = Assert.Throws<ArgumentException>(() => new SetPinCommand(null, NewPin));
-        }
-
-        [Fact]
         public void CreateCommandApdu_NewPinIsEmpty_ThrowsArgumentException()
         {
             _ = Assert.Throws<ArgumentException>(() => new SetPinCommand(CurrentPin, Array.Empty<byte>()));
@@ -187,7 +175,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void CreateCommandApdu_CurrentPinLengthLessThan6_ThrowsArgumentException()
         {
-            var currentPin = new byte[] { 1, 2, 3, 4 };
+            byte[] currentPin = new byte[] { 1, 2, 3, 4 };
 
             _ = Assert.Throws<ArgumentException>(() => new SetPinCommand(currentPin, NewPin));
         }
@@ -195,7 +183,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void CreateCommandApdu_CurrentPinLengthMoreThan32_ThrowsArgumentException()
         {
-            var currentPin = new byte[33];
+            byte[] currentPin = new byte[33];
 
             _ = Assert.Throws<ArgumentException>(() => new SetPinCommand(currentPin, NewPin));
         }
@@ -203,7 +191,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void CreateCommandApdu_NewPinLengthLessThan6_ThrowsArgumentException()
         {
-            var newPin = new byte[] { 1, 2, 3, 4 };
+            byte[] newPin = new byte[] { 1, 2, 3, 4 };
 
             _ = Assert.Throws<ArgumentException>(() => new SetPinCommand(CurrentPin, newPin));
         }
@@ -211,7 +199,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void CreateCommandApdu_NewPinLengthMoreThan32_ThrowsArgumentException()
         {
-            var newPin = new byte[33];
+            byte[] newPin = new byte[33];
 
             _ = Assert.Throws<ArgumentException>(() => new SetPinCommand(CurrentPin, newPin));
         }
@@ -221,9 +209,11 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new SetPinCommand(CurrentPin, NewPin);
+#pragma warning disable IDE0008 // Use explicit type
             var response = command.CreateResponseForApdu(responseApdu);
+#pragma warning restore IDE0008 // Justification: testing the type
 
-            _ = Assert.IsType<U2fResponse>(response);
+            _ = Assert.IsType<SetPinResponse>(response);
         }
     }
 }

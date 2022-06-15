@@ -18,7 +18,7 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <inheritdoc/>
-    public sealed class SetLegacyDeviceConfigCommand : SetLegacyDeviceConfigBase, IYubiKeyCommand<YubiKeyResponse>
+    public sealed class SetLegacyDeviceConfigCommand : SetLegacyDeviceConfigBase, IYubiKeyCommand<SetLegacyDeviceConfigResponse>
     {
         private const byte DeviceConfigurationInstruction = 0x40;
 
@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.U2f.Commands
             };
 
         /// <inheritdoc/>
-        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new YubiKeyResponse(responseApdu);
+        public SetLegacyDeviceConfigResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new SetLegacyDeviceConfigResponse(responseApdu);
     }
 }

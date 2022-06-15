@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.U2f.Commands
     /// preventing the device from being able to be in FIPS-mode again.
     /// This reset behavior is specific to U2F on FIPS.
     /// </remarks>
-    public sealed class ResetCommand : IYubiKeyCommand<U2fResponse>
+    public sealed class ResetCommand : IYubiKeyCommand<ResetResponse>
     {
         private const byte Ctap1MessageInstruction = 0x03;
         private const byte ResetInstruction = 0x45;
@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <inheritdoc />
-        public U2fResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new U2fResponse(responseApdu);
+        public ResetResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new ResetResponse(responseApdu);
     }
 }

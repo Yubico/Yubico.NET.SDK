@@ -165,7 +165,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void CreateCommandApdu_PinLengthLessThan6_ThrowsArgumentException()
         {
-            var pin = new byte[] { 1, 2, 3, 4 };
+            byte[] pin = new byte[] { 1, 2, 3, 4 };
 
             _ = Assert.Throws<ArgumentException>(() => new VerifyPinCommand(pin));
         }
@@ -173,7 +173,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void CreateCommandApdu_PinLengthMoreThan32_ThrowsArgumentException()
         {
-            var pin = new byte[33];
+            byte[] pin = new byte[33];
 
             _ = Assert.Throws<ArgumentException>(() => new VerifyPinCommand(pin));
         }
@@ -183,9 +183,11 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new VerifyPinCommand(Pin);
+#pragma warning disable IDE0008 // Use explicit type
             var response = command.CreateResponseForApdu(responseApdu);
+#pragma warning restore IDE0008 // Justification: testing the type
 
-            _ = Assert.IsType<U2fResponse>(response);
+            _ = Assert.IsType<VerifyPinResponse>(response);
         }
     }
 }

@@ -146,9 +146,11 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new ResetCommand();
+#pragma warning disable IDE0008 // Use explicit type
             var response = command.CreateResponseForApdu(responseApdu);
+#pragma warning restore IDE0008 // Justification: testing the type
 
-            _ = Assert.IsType<U2fResponse>(response);
+            _ = Assert.IsType<ResetResponse>(response);
         }
     }
 }

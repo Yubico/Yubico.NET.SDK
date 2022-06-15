@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Globalization;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f.Commands
@@ -20,29 +21,43 @@ namespace Yubico.YubiKey.U2f.Commands
     /// <summary>
     /// Verifies a user-supplied PIN.
     /// </summary>
-    public sealed class VerifyPinCommand : IYubiKeyCommand<U2fResponse>
+    /// <remarks>
+    /// Some U2F documentation may describe this as "unlocking" the U2F
+    /// application.
+    /// </remarks>
+    public sealed class VerifyPinCommand : IYubiKeyCommand<VerifyPinResponse>
     {
         private const byte Ctap1MessageInstruction = 0x03;
         private const byte VerifyPinInstruction = 0x43;
         private const int MinimumPinLength = 6;
         private const int MaximumPinLength = 32;
 
-        private ReadOnlyMemory<byte> _pin;
+        private ReadOnlyMemory<byte> _pin = ReadOnlyMemory<byte>.Empty;
 
+        /// <summary>
+        /// The PIN needed to perform U2F operations on a FIPS YubiKey.
+        /// </summary>
+        /// <remarks>
+        /// The PIN must be from 6 to 32 bytes long (inclusive). It is binary
+        /// data.
+        /// <para>
+        /// This class will copy a reference to the PIN provided. Do not
+        /// overwrite the data until after the command has executed. After it has
+        /// executed, overwrite the buffer for security reasons.
+        /// </para>
+        /// </remarks>
         public ReadOnlyMemory<byte> Pin
         {
             get => _pin;
 
             set
             {
-                if (value.IsEmpty)
-                {
-                    throw new ArgumentException(ExceptionMessages.InvalidPin);
-                }
-
                 if ((value.Length < MinimumPinLength) || (value.Length > MaximumPinLength))
                 {
-                    throw new ArgumentException(ExceptionMessages.InvalidPinLength);
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidPinLength));
                 }
 
                 _pin = value;
@@ -57,10 +72,21 @@ namespace Yubico.YubiKey.U2f.Commands
         /// </value>
         public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
 
-        // We explicitly do not want a default constructor for this command.
+        /// <summary>
+        /// Constructs an instance of the <see cref="VerifyPinCommand" /> class.
+        /// </summary>
+        /// <remarks>
+        /// This constructor is provided for those developers who want to use the
+        /// object initializer pattern. For example,:
+        /// <code>
+        ///   var command = new VerifyPinCommand()
+        ///   {
+        ///       Pin = somePinValue;
+        ///   };
+        /// </code>
+        /// </remarks>
         private VerifyPinCommand()
         {
-            throw new NotImplementedException();
         }
 
         /// <summary>
@@ -80,7 +106,7 @@ namespace Yubico.YubiKey.U2f.Commands
             var innerCommand = new CommandApdu()
             {
                 Ins = VerifyPinInstruction,
-                Data = Pin.ToArray(),
+                Data = Pin,
             };
 
             return new CommandApdu()
@@ -91,7 +117,7 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <inheritdoc />
-        public U2fResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new U2fResponse(responseApdu);
+        public VerifyPinResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new VerifyPinResponse(responseApdu);
     }
 }

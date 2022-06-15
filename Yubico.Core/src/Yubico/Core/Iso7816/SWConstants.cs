@@ -30,6 +30,7 @@ namespace Yubico.Core.Iso7816
 
         public const short WarningNvmChanged = 0x6300;
         public const short NoMoreSpaceInFile = 0x6381;
+        public const short VerifyFail = 0x63C0;
 
         // Error
         public const short ExecutionError = 0x6400;

@@ -470,7 +470,7 @@ namespace Yubico.YubiKey.U2f.Commands
             IYubiKeyResponse response = command.CreateResponseForApdu(responseApdu);
 
             // Assert
-            Assert.True(response is U2fHidResponse);
+            Assert.True(response is SetDeviceInfoResponse);
         }
     }
 }

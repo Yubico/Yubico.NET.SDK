@@ -13,60 +13,89 @@
 // limitations under the License.
 
 using System;
+using System.Globalization;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
-    /// Sets the new PIN.
+    /// Sets the PIN or changes the PIN to a new value.
     /// </summary>
     /// <remarks>
     /// This command is only available on the YubiKey FIPS series.
     /// </remarks>
-    public sealed class SetPinCommand : IYubiKeyCommand<U2fResponse>
+    public sealed class SetPinCommand : IYubiKeyCommand<SetPinResponse>
     {
         private const byte Ctap1MessageInstruction = 0x03;
         private const byte SetPinInstruction = 0x44;
         private const int MinimumPinLength = 6;
         private const int MaximumPinLength = 32;
 
-        private ReadOnlyMemory<byte> _currentPin;
-        private ReadOnlyMemory<byte> _newPin;
+        private ReadOnlyMemory<byte> _currentPin = ReadOnlyMemory<byte>.Empty;
+        private ReadOnlyMemory<byte> _newPin = ReadOnlyMemory<byte>.Empty;
 
+        /// <summary>
+        /// The PIN needed to perform U2F operations on a FIPS YubiKey. If this is
+        /// empty, then the caller expects that there is no PIN yet set.
+        /// </summary>
+        /// <remarks>
+        /// If there is a PIN, it must be from 6 to 32 bytes long (inclusive). It
+        /// is binary data.
+        /// <para>
+        /// This class will copy a reference to the PIN provided. Do not
+        /// overwrite the data until after the command has executed. After it has
+        /// executed, overwrite the buffer for security reasons.
+        /// </para>
+        /// <para>
+        /// If there is no current PIN (this command is being called to set the
+        /// PIN for the first time), there is no need to set this property.
+        /// </para>
+        /// </remarks>
         public ReadOnlyMemory<byte> CurrentPin
         {
             get => _currentPin;
 
             set
             {
-                if (value.IsEmpty)
+                if ((value.Length != 0) && ((value.Length < MinimumPinLength) || (value.Length > MaximumPinLength)))
                 {
-                    throw new ArgumentException(ExceptionMessages.InvalidPin);
-                }
-
-                if ((value.Length < MinimumPinLength) || (value.Length > MaximumPinLength))
-                {
-                    throw new ArgumentException(ExceptionMessages.InvalidPinLength);
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidPinLength));
                 }
 
                 _currentPin = value;
             }
         }
 
+        /// <summary>
+        /// The PIN that will replace the current PIN.
+        /// </summary>
+        /// <remarks>
+        /// The PIN must be from 6 to 32 bytes long (inclusive). It is binary
+        /// data. It is not possible to pass in an Empty PIN (changing a YubiKey
+        /// from PIN required to no PIN). Once a PIN is set, the U2F application
+        /// on that YubiKey must always have a PIN. The only way to remove a PIN
+        /// is to reset the application.
+        /// <para>
+        /// This class will copy a reference to the PIN provided. Do not
+        /// overwrite the data until after the command has executed. After it has
+        /// executed, overwrite the buffer for security reasons.
+        /// </para>
+        /// </remarks>
         public ReadOnlyMemory<byte> NewPin
         {
             get => _newPin;
 
             set
             {
-                if (value.IsEmpty)
-                {
-                    throw new ArgumentException(ExceptionMessages.InvalidPin);
-                }
-
                 if ((value.Length < MinimumPinLength) || (value.Length > MaximumPinLength))
                 {
-                    throw new ArgumentException(ExceptionMessages.InvalidPinLength);
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidPinLength));
                 }
 
                 _newPin = value;
@@ -80,17 +109,31 @@ namespace Yubico.YubiKey.U2f.Commands
         /// </value>
         public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
 
-        // We explicitly do not want a default constructor for this command.
+        /// <summary>
+        /// Constructs an instance of the <see cref="SetPinCommand" /> class.
+        /// </summary>
+        /// <remarks>
+        /// This constructor is provided for those developers who want to use the
+        /// object initializer pattern. For example, to set the PIN on a YubiKey
+        /// with no current PIN:
+        /// <code>
+        ///   var command = new SetPinCommand()
+        ///   {
+        ///       NewPin = somePinValue;
+        ///   };
+        /// </code>
+        /// </remarks>
         private SetPinCommand()
         {
-            throw new NotImplementedException();
         }
 
         /// <summary>
         /// Constructs an instance of the <see cref="SetPinCommand" /> class.
         /// </summary>
         /// <param name="currentPin">
-        /// The current PIN set, represented as bytes.
+        /// The PIN currently required to use the U2F application on this
+        /// YubiKey, represented as bytes. If there is no current PIN, pass in an
+        /// Empty value.
         /// </param>
         /// <param name="newPin">
         /// The new PIN to set, represented as bytes.
@@ -124,7 +167,7 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <inheritdoc />
-        public U2fResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new U2fResponse(responseApdu);
+        public SetPinResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new SetPinResponse(responseApdu);
     }
 }

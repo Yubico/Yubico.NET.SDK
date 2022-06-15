@@ -70,26 +70,14 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         [Fact]
-        [SuppressMessage("Design", "CA1031:Do not catch general exception types", Justification = "Unit test")]
-        public void Constructor_SuccessResponseApdu_NoThrowIfFailed()
+        public void Constructor_MalformedResponse_Throw()
         {
-            bool isThrow = false;
             byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var deviceInfoResponse = new GetDeviceInfoResponse(responseApdu);
-
-            try
-            {
-                deviceInfoResponse.ThrowIfFailed();
-            }
-            catch (Exception)
-            {
-                isThrow = true;
-            }
-
-            Assert.False(isThrow);
+            _ = Assert.Throws<MalformedYubiKeyResponseException>(() => deviceInfoResponse.GetData());
         }
 
         [Fact]

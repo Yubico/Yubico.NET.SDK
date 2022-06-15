@@ -20,7 +20,7 @@ namespace Yubico.YubiKey.U2f.Commands
     /// <summary>
     /// Configures device-wide settings on the YubiKey.
     /// </summary>
-    public sealed class SetDeviceInfoCommand : SetDeviceInfoBaseCommand, IYubiKeyCommand<U2fHidResponse>
+    public sealed class SetDeviceInfoCommand : SetDeviceInfoBaseCommand, IYubiKeyCommand<SetDeviceInfoResponse>
     {
         private const byte SetDeviceInfoInstruction = 0xC3;
 
@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.U2f.Commands
         };
 
         /// <inheritdoc />
-        public U2fHidResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new U2fHidResponse(responseApdu);
+        public SetDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new SetDeviceInfoResponse(responseApdu);
     }
 }

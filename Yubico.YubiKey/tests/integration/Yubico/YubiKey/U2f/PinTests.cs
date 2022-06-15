@@ -22,11 +22,11 @@ using Xunit;
 
 namespace Yubico.YubiKey.U2f
 {
-    public class CommandTests : IDisposable
+    public class PinTests : IDisposable
     {
         private readonly FidoConnection _fidoConnection;
 
-        public CommandTests()
+        public PinTests()
         {
             if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
             {
@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.U2f
             IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
             Assert.NotNull(devices);
 
-            HidDevice? deviceToUse = GetFidoHid(devices);
+            HidDevice? deviceToUse = CommandTests.GetFidoHid(devices);
             Assert.NotNull(deviceToUse);
 
             if (deviceToUse is null)
@@ -57,8 +57,15 @@ namespace Yubico.YubiKey.U2f
         }
 
         [Fact]
-        public void RunGetDeviceInfo()
+        public void SetPin_Succeeds()
         {
+            byte[] currentPin = new byte[] {
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36
+            };
+            byte[] newPin = new byte[] {
+                0x41, 0x42, 0x43, 0x44, 0x45, 0x46
+            };
+
             if (_fidoConnection is null)
             {
                 return;
@@ -69,55 +76,62 @@ namespace Yubico.YubiKey.U2f
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
             YubiKeyDeviceInfo getData = rsp.GetData();
-            Assert.False(getData.IsFipsSeries);
+            if (!getData.IsFipsSeries)
+            {
+                return;
+            }
+
+            var vfyCmd = new VerifyFipsModeCommand();
+            VerifyFipsModeResponse vfyRsp = _fidoConnection.SendCommand(vfyCmd);
+            Assert.Equal(ResponseStatus.Success, vfyRsp.Status);
+            bool isFipsMode = vfyRsp.GetData();
+            Assert.True(isFipsMode);
+
+            var setCmd = new SetPinCommand(currentPin, newPin);
+            SetPinResponse setRsp = _fidoConnection.SendCommand(setCmd);
+            Assert.Equal(ResponseStatus.Success, setRsp.Status);
+
+            setCmd = new SetPinCommand(newPin, currentPin);
+            setRsp = _fidoConnection.SendCommand(setCmd);
+            Assert.Equal(ResponseStatus.Success, setRsp.Status);
+
+            setCmd = new SetPinCommand(newPin, currentPin);
+            setRsp = _fidoConnection.SendCommand(setCmd);
+            Assert.Equal(ResponseStatus.ConditionsNotSatisfied, setRsp.Status);
         }
 
         [Fact]
-        public void RunSetDeviceInfo()
+        public void VerifyPin_Succeeds()
         {
+            byte[] correctPin = new byte[] {
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36
+            };
+            byte[] wrongPin = new byte[] {
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37
+            };
+
             if (_fidoConnection is null)
             {
                 return;
             }
 
-            var cmd = new SetDeviceInfoCommand();
-            Assert.Null(cmd.DeviceFlags);
-//            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
-//            Assert.Equal(ResponseStatus.Success, rsp.Status);
-
-//            YubiKeyDeviceInfo getData = rsp.GetData();
-//            Assert.False(getData.IsFipsSeries);
-        }
-
-        [Fact]
-        public void VerifyFipsMode()
-        {
-            if (_fidoConnection is null)
-            {
-                return;
-            }
-
-            var cmd = new VerifyFipsModeCommand();
-            VerifyFipsModeResponse rsp = _fidoConnection.SendCommand(cmd);
+            var cmd = new GetDeviceInfoCommand();
+            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            bool getData = rsp.GetData();
-            Assert.False(getData);
-        }
-
-        public static HidDevice? GetFidoHid(IEnumerable<HidDevice> devices)
-        {
-            foreach (HidDevice currentDevice in devices)
+            YubiKeyDeviceInfo getData = rsp.GetData();
+            if (!getData.IsFipsSeries)
             {
-                if ((currentDevice.VendorId == 0x1050) &&
-                    (currentDevice.UsagePage == HidUsagePage.Fido))
-                {
-                    return currentDevice;
-                }
+                return;
             }
 
-            return null;
+            var vfyCmd = new VerifyPinCommand(correctPin);
+            VerifyPinResponse vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
+            Assert.Equal(ResponseStatus.Success, vfyRsp.Status);
+
+            vfyCmd = new VerifyPinCommand(wrongPin);
+            vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
+            Assert.Equal(ResponseStatus.Failed, vfyRsp.Status);
         }
     }
 }
-

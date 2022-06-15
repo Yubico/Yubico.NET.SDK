@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f.Commands

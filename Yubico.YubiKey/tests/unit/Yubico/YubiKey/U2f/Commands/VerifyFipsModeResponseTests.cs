@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.U2f.Commands
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new VerifyFipsModeResponse(responseApdu);
-            void action() => response.ThrowIfFailed();
+            void action() => response.GetData();
 
             Exception? ex = Record.Exception(action);
             Assert.Null(ex);
@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.U2f.Commands
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new VerifyFipsModeResponse(responseApdu);
-            void action() => response.ThrowIfFailed();
+            void action() => response.GetData();
 
             Exception? ex = Record.Exception(action);
             Assert.Null(ex);
@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.U2f.Commands
 
             var response = new VerifyFipsModeResponse(responseApdu);
 
-            _ = Assert.Throws<Exception>(() => response.GetData());
+            _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
         }
 
         [Fact]

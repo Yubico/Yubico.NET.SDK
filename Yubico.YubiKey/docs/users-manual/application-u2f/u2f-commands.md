@@ -192,7 +192,7 @@ YubiKey 5 and later.
 
 [SetDeviceInfoCommand](xref:Yubico.YubiKey.U2f.Commands.SetDeviceInfoCommand)
 
-[U2fHidResponse](xref:Yubico.YubiKey.U2f.Commands.U2fHidResponse)
+[SetDeviceInfoResponse](xref:Yubico.YubiKey.U2f.Commands.SetDeviceInfoResponse)
 
 ### Input
 
@@ -237,7 +237,7 @@ YubiKey version 4 and prior.
 
 [SetLegacyDeviceConfigCommand](xref:Yubico.YubiKey.U2f.Commands.SetLegacyDeviceConfigCommand)
 
-[YubiKeyResponse](xref:Yubico.YubiKey.YubiKeyResponse)
+[SetLegacyDeviceConfigResponse](xref:Yubico.YubiKey.U2f.Commands.SetLegacyDeviceConfigResponse)
 
 ### Input
 
@@ -347,7 +347,7 @@ All FIPS YubiKeys with the FIDO U2F application.
 
 [SetPinCommand](xref:Yubico.YubiKey.U2f.Commands.SetPinCommand)
 
-[U2fResponse](xref:Yubico.YubiKey.U2f.Commands.U2fResponse)
+[SetPinResponse](xref:Yubico.YubiKey.U2f.Commands.SetPinResponse)
 
 ### Input
 
@@ -381,7 +381,7 @@ All FIPS YubiKeys with the FIDO U2F application.
 
 [VerifyPinCommand](xref:Yubico.YubiKey.U2f.Commands.VerifyPinCommand)
 
-[U2fResponse](xref:Yubico.YubiKey.U2f.Commands.U2fResponse)
+[VerifyPinResponse](xref:Yubico.YubiKey.U2f.Commands.VerifyPinResponse)
 
 ### Input
 
@@ -505,7 +505,7 @@ All YubiKeys with the FIDO U2F application.
 
 [ResetCommand](xref:Yubico.YubiKey.U2f.Commands.ResetCommand)
 
-[U2fResponse](xref:Yubico.YubiKey.U2f.Commands.U2fResponse)
+[ResetResponse](xref:Yubico.YubiKey.U2f.Commands.ResetResponse)
 
 ### Input
 

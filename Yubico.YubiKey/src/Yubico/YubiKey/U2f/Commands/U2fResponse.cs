@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f.Commands
@@ -25,51 +24,35 @@ namespace Yubico.YubiKey.U2f.Commands
     /// <seealso cref="Yubico.YubiKey.IYubiKeyResponse" />
     public class U2fResponse : YubiKeyResponse
     {
-        // Overridden to modify the messages associated with certain
-        // status words. The messages match the status words' meanings
-        // as described in the FIDO U2F specifications.
-        protected override ResponseStatusPair StatusCodeMap =>
-            StatusWord switch
-            {
-                // U2F raw message status codes - FIDO U2F Raw Message Formats, section 3.3
-                SWConstants.ConditionsNotSatisfied => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.U2fConditionsNotSatisfied),
-                SWConstants.InvalidCommandDataParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fWrongData),
+        /// <summary>
+        /// Overridden to modify the messages associated with certain
+        /// status words. The messages match the status words' meanings
+        /// as described in the FIDO U2F specifications.
+        /// </summary>
+        protected override ResponseStatusPair StatusCodeMap => StatusWord switch
+        {
+            // U2F raw message status codes - FIDO U2F Raw Message Formats, section 3.3
+            SWConstants.ConditionsNotSatisfied => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.U2fConditionsNotSatisfied),
+            SWConstants.InvalidCommandDataParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fWrongData),
 
-                // U2FHID_ERROR - FIDO U2F HID Protocol, section 4.1.4
-                SWConstants.CommandNotAllowed => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidCommand),
-                SWConstants.InvalidParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidParameter),
-                SWConstants.WrongLength => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidLength),
-                SWConstants.NoPreciseDiagnosis => GetU2fHidErrorStatusPair(),
+            // U2FHID_ERROR - FIDO U2F HID Protocol, section 4.1.4
+            SWConstants.CommandNotAllowed => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidCommand),
+            SWConstants.InvalidParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidParameter),
+            SWConstants.WrongLength => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidLength),
+            SWConstants.NoPreciseDiagnosis => GetU2fHidErrorStatusPair(),
 
-                _ => base.StatusCodeMap,
-            };
+            _ => base.StatusCodeMap,
+        };
 
+        /// <summary>
+        /// Buind a new instance of U2FResponse from the given response APDU
+        /// </summary>
+        /// <param name="responseApdu">
+        /// The response from the YubiKey to the partner Command.
+        /// </param>
         public U2fResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
-        }
-
-        public virtual void ThrowIfFailed()
-        {
-            switch (StatusWord)
-            {
-                default:
-                    _ThrowIfFailed();
-                    break;
-            }
-        }
-
-        private void _ThrowIfFailed()
-        {
-            switch (StatusWord)
-            {
-                case SWConstants.Success:
-                    Debug.Assert(Status == ResponseStatus.Success);
-                    return;
-                default:
-                    throw new Exception();
-            }
         }
 
         /// <summary>
@@ -84,7 +67,7 @@ namespace Yubico.YubiKey.U2f.Commands
         /// a U2F HID error, it will transform it into a response APDU where
         /// <see cref="ResponseApdu.Data"/> contains the original one-byte
         /// error code, and <see cref="ResponseApdu.SW"/> is set to the most
-        /// similar valud in <see cref="SWConstants"/>. If there isn't a
+        /// similar value in <see cref="SWConstants"/>. If there isn't a
         /// good match, then the Status Word will be set to
         /// <see cref="SWConstants.NoPreciseDiagnosis"/>.
         /// </para>

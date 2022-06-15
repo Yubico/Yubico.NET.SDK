@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+// Copyright 2021 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -18,17 +18,28 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
-    /// The response to the <see cref="VerifyFipsModeCommand"/> command, containing the response from the YubiKey.
+    /// The response to the <see cref="SetPinCommand"/> command, containing the
+    /// response from the YubiKey.
     /// </summary>
-    public sealed class VerifyFipsModeResponse : U2fResponse, IYubiKeyResponseWithData<bool>
+    /// <remarks>
+    /// This is the partner response class to <see cref="SetPinCommand"/>.
+    /// <para>
+    /// After executing the <c>SetPinCommand</c>, the result is an
+    /// instance of this class. There is no data to return. Simply check the
+    /// <c>Status</c> property. If it is <c>ResponseStatus.Success</c> the
+    /// PIN was changed. If it is <c>ResponseStatus.ConditionsNotSatisfied</c>,
+    /// then the current PIN was incorrect.
+    /// </para>
+    /// </remarks>
+    public sealed class SetPinResponse : U2fResponse, IYubiKeyResponse
     {
         /// <summary>
-        /// Constructs a VerifyFipsModeResponse based on a ResponseApdu received from the YubiKey.
+        /// Constructs a SetPinResponse based on a ResponseApdu received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
         /// The object containing the response APDU returned by the YubiKey.
         /// </param>
-        public VerifyFipsModeResponse(ResponseApdu responseApdu) :
+        public SetPinResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
         }
@@ -36,21 +47,8 @@ namespace Yubico.YubiKey.U2f.Commands
         /// <inheritdoc/>
         protected override ResponseStatusPair StatusCodeMap => StatusWord switch
         {
-            SWConstants.FunctionNotSupported => new ResponseStatusPair(ResponseStatus.Success, ResponseStatusMessages.BaseSuccess),
+            SWConstants.VerifyFail => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.BaseConditionsNotSatisfied),
             _ => base.StatusCodeMap,
-        };
-
-        /// <summary>
-        /// Gets the response data, presented as a boolean value.
-        /// </summary>
-        /// <returns>
-        /// Returns true if (and only if) the YubiKey U2F application is currently in "FIPS Approved mode".
-        /// </returns>
-        public bool GetData() => StatusWord switch
-        {
-            SWConstants.Success => true,
-            SWConstants.FunctionNotSupported => false,
-            _ => throw new InvalidOperationException(StatusMessage),
         };
     }
 }

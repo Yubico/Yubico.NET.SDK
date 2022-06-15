@@ -75,7 +75,7 @@ namespace Yubico.YubiKey.U2f.Commands
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new EchoResponse(responseApdu);
-            void action() => response.ThrowIfFailed();
+            void action() => response.GetData();
 
             Exception? ex = Record.Exception(action);
             Assert.Null(ex);
@@ -89,9 +89,9 @@ namespace Yubico.YubiKey.U2f.Commands
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new EchoResponse(responseApdu);
-            void action() => response.ThrowIfFailed();
+            void action() => response.GetData();
 
-            _ = Assert.Throws<Exception>(action);
+            _ = Assert.Throws<InvalidOperationException>(action);
         }
 
         [Fact]
@@ -140,7 +140,7 @@ namespace Yubico.YubiKey.U2f.Commands
             var response = new EchoResponse(responseApdu);
             void action() => response.GetData();
 
-            _ = Assert.Throws<Exception>(action);
+            _ = Assert.Throws<InvalidOperationException>(action);
         }
     }
 }

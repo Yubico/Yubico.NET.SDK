@@ -101,19 +101,8 @@ namespace Yubico.PlatformInterop
         [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "write", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int write(
-            LinuxFileSafeHandle handle,
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)]byte[] inputBuffer,
+            int handle,
+            [MarshalAs(UnmanagedType.LPArray)]byte[] inputBuffer,
             int count);
-
-        public struct PollFd
-        {
-            public int fd;
-            public short events;
-            public short revents;
-        }
-
-        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "poll", SetLastError = true)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern int poll(PollFd[] fds, int nfds, int timeout);
     }
 }

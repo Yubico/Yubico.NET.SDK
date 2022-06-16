@@ -14,6 +14,8 @@
 
 using System;
 using System.Globalization;
+using System.Security.Cryptography;
+using Yubico.Core.Buffers;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
@@ -38,8 +40,7 @@ namespace Yubico.Core.Devices.Hid
             InputReportSize = YubiKeyIOReportSize;
             OutputReportSize = YubiKeyIOReportSize;
 
-            _handle = NativeMethods.open(
-                devnode, NativeMethods.OpenFlags.O_RDWR | NativeMethods.OpenFlags.O_NONBLOCK);
+            _handle = NativeMethods.open(devnode, NativeMethods.OpenFlags.O_RDWR);
 
             if (_handle.IsInvalid)
             {
@@ -56,6 +57,7 @@ namespace Yubico.Core.Devices.Hid
         // exactly 64 bytes long.
         public void SetReport(byte[] report)
         {
+            _log.SensitiveLogInformation("Sending IO report> {report}, Length = {length}", Hex.BytesToHex(report), report.Length);
             if (report.Length != YubiKeyIOReportSize)
             {
                 throw new InvalidOperationException(
@@ -64,7 +66,14 @@ namespace Yubico.Core.Devices.Hid
                         ExceptionMessages.InvalidReportBufferLength));
             }
 
-            int bytesWritten = NativeMethods.write(_handle, report, report.Length);
+            // HIDRAW expects the first byte to be the frame number - or in cases where a frame number is not used,
+            // like with the YubiKey, the first byte should be zero.
+            byte[] paddedBuffer = new byte[YubiKeyIOReportSize + 1];
+            report.CopyTo(paddedBuffer.AsSpan(1)); // Leave the first byte as 00
+
+            int bytesWritten = NativeMethods.write(_handle.DangerousGetHandle().ToInt32(), paddedBuffer, paddedBuffer.Length);
+            CryptographicOperations.ZeroMemory(paddedBuffer);
+
             if (bytesWritten >= 0)
             {
                 return;
@@ -81,29 +90,13 @@ namespace Yubico.Core.Devices.Hid
         // Get the response that is waiting on the device. It will be 64 bytes.
         public byte[] GetReport()
         {
-            var fds = new NativeMethods.PollFd[1]
-            {
-                new NativeMethods.PollFd
-                {
-                    fd = _handle.DangerousGetHandle().ToInt32(),
-                    events = 1
-                }
-            };
-
-            int result = NativeMethods.poll(fds, fds.Length, -1);
-
-            if (result < 0)
-            {
-                _log.LogError("Poll failed with: {error}", LibcHelpers.GetErrnoString());
-                throw new PlatformApiException();
-            }
-
             // The return value is either < 0 for error, or the number of
             // bytes placed into the provided buffer.
             byte[] outputBuffer = new byte[YubiKeyIOReportSize];
             int bytesRead = NativeMethods.read(_handle, outputBuffer, YubiKeyIOReportSize);
             if (bytesRead >= 0)
             {
+                _log.SensitiveLogInformation("Receiving IO report< {report}", Hex.BytesToHex(outputBuffer));
                 return outputBuffer;
             }
 

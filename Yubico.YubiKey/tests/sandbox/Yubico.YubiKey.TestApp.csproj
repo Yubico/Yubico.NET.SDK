@@ -20,9 +20,7 @@ limitations under the License. -->
     <AnalysisLevel>5.0</AnalysisLevel>
     <AnalysisMode>AllDisabledByDefault</AnalysisMode>
     <AssemblyName>YubiKeyTestApp</AssemblyName>
-    <!-- Linux requires a newer .NET version than .NET Core 3.1. -->
-    <TargetFramework Condition="!$([MSBuild]::IsOSPlatform('Linux'))">netcoreapp3.1</TargetFramework>
-    <TargetFramework Condition="$([MSBuild]::IsOSPlatform('Linux'))">net6</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <OutputType>Exe</OutputType>
     <RootNamespace>Yubico.YubiKey.TestApp</RootNamespace>
     <Configurations>Debug;Release;ReleaseWithDocs</Configurations>

@@ -168,14 +168,17 @@ namespace Yubico.PlatformInterop
         public static extern IntPtr udev_device_get_devnode(LinuxUdevDeviceSafeHandle deviceObject);
 
         // Get the parent device from the current device.
-        // The return value is another UDEV device handle which is ref counted,
-        // hence this function returns a disposable safe handle so that we
-        // are careful to reliably release this resource when we are done with it.
+        // The return value is another UDEV device handle which, while refcounted,
+        // is owned by the original (child) udev device. Do not call unref on this
+        // pointer.
         // The C signature is
         //   struct udev_device *udev_device_get_parent(struct udev_device *udev_device);
         [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_get_parent")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern LinuxUdevDeviceSafeHandle udev_device_get_parent(LinuxUdevDeviceSafeHandle deviceObject);
+        public static extern IntPtr udev_device_get_parent(IntPtr deviceObject);
+
+        public static IntPtr udev_device_get_parent(LinuxUdevDeviceSafeHandle deviceObject) =>
+            udev_device_get_parent(deviceObject.DangerousGetHandle());
 
         // Get the path from the device.
         // This is what will be used by the HIDRAW library.
@@ -187,9 +190,16 @@ namespace Yubico.PlatformInterop
         // SafeHandle.
         // The C signature is
         //   const char *udev_device_get_syspath(struct udev_device *udev_device);
+
+        // The actual P/Invoke import uses IntPtr here so that we can pass
+        // non-refcounted udev objects.
         [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_get_syspath", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern IntPtr udev_device_get_syspath(LinuxUdevDeviceSafeHandle deviceObject);
+        public static extern IntPtr udev_device_get_syspath(IntPtr deviceObject);
+
+        // This overload is for refcounted udev devices.
+        public static IntPtr udev_device_get_syspath(LinuxUdevDeviceSafeHandle deviceObject) =>
+            udev_device_get_syspath(deviceObject.DangerousGetHandle());
 
         // Gets a string specifying what the latest action was: "add", "remove",
         // and others.

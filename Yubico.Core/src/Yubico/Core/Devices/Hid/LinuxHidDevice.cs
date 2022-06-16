@@ -56,7 +56,7 @@ namespace Yubico.Core.Devices.Hid
         {
         }
 
-        internal LinuxHidDevice(string path, string devnode, string parentPath) :
+        internal LinuxHidDevice(string path, string devnode, string? parentPath) :
             base(path)
         {
             _log.LogInformation(
@@ -86,7 +86,12 @@ namespace Yubico.Core.Devices.Hid
             GetUsageProperties(handle);
         }
 
-        // Get the path from the device.
+        private static string DeviceGetPath(IntPtr udevDevice)
+        {
+            IntPtr pathPtr = NativeMethods.udev_device_get_syspath(udevDevice);
+            return Marshal.PtrToStringAnsi(pathPtr);
+        }
+
         private static string DeviceGetPath(LinuxUdevDeviceSafeHandle udevDevice)
         {
             IntPtr pathPtr = NativeMethods.udev_device_get_syspath(udevDevice);
@@ -100,9 +105,19 @@ namespace Yubico.Core.Devices.Hid
             return Marshal.PtrToStringAnsi(devnodePtr);
         }
 
-        private static string GetParentDevicePath(LinuxUdevDeviceSafeHandle udevDevice)
+        private static string? GetParentDevicePath(LinuxUdevDeviceSafeHandle udevDevice)
         {
-            using LinuxUdevDeviceSafeHandle parentDev = NativeMethods.udev_device_get_parent(udevDevice);
+            // It's quite a few hops to the composite device parent that we're looking for. I'm no udev expert,
+            // but my guess is that we start with the HIDRAW device, we then get the USB endpoint (parent1),
+            // then the USB interface (parent2), and then finally the composite device (parent3).
+            IntPtr parentDev = NativeMethods.udev_device_get_parent(udevDevice);
+            parentDev = NativeMethods.udev_device_get_parent(parentDev);
+            parentDev = NativeMethods.udev_device_get_parent(parentDev);
+
+            if (parentDev == IntPtr.Zero)
+            {
+                return null;
+            }
 
             return DeviceGetPath(parentDev);
         }

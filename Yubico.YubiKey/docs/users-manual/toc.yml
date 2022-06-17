@@ -204,6 +204,10 @@
   items:
   - name: How FIDO U2F works
     href: application-u2f/how-u2f-works.md
+  - name: The FIDO U2F PIN
+    href: application-u2f/u2f-pin.md
+  - name: FIDO U2F and FIPS
+    href: application-u2f/fips-mode.md
   - name: Commands
     items:
     - name: FIDO U2F commands

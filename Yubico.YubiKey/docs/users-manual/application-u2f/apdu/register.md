@@ -46,7 +46,7 @@ where the encoded response is
 05 || public key || key handle length || key handle || cert || signature)
 ```
 
-#### Response APDU for incorrect data length.
+#### Response APDU for incorrect data length
 
 Total Length: 2\
 Data Length: 0
@@ -54,3 +54,21 @@ Data Length: 0
 Data | SW1 | SW2
 :---: | :---: | :---:
 (no data) | 67 | 00
+
+#### Response APDU for PIN required
+
+Total Length: 2\
+Data Length: 0
+
+Data | SW1 | SW2
+:---: | :---: | :---:
+(no data) | 63 | C0
+
+#### Response APDU for touch required
+
+Total Length: 2\
+Data Length: 0
+
+Data | SW1 | SW2
+:---: | :---: | :---:
+(no data) | 69 | 85

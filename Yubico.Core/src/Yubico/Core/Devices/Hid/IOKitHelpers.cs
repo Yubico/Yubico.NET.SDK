@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Buffers.Binary;
 using System.Globalization;
 using System.Text;
 using Yubico.PlatformInterop;
@@ -44,6 +43,33 @@ namespace Yubico.Core.Devices.Hid
         /// </exception>
         public static int GetIntPropertyValue(IntPtr device, string propertyName)
         {
+            int? propertyValue = GetNullableIntPropertyValue(device, propertyName);
+
+            if (propertyValue is null)
+            {
+                throw new InvalidOperationException("Property does not exist.");
+            }
+
+            return propertyValue.Value;
+        }
+
+        /// <summary>
+        /// Gets an integer-typed property value from a device.
+        /// </summary>
+        /// <param name="device">
+        /// The previously opened device against which the property should be queried.
+        /// </param>
+        /// <param name="propertyName">
+        /// The name of the property to query for.
+        /// </param>
+        /// <returns>
+        /// The value of the property.
+        /// </returns>
+        /// <exception cref="PlatformApiException">
+        /// The type requested and the type returned by IOKit do not match.
+        /// </exception>
+        public static int? GetNullableIntPropertyValue(IntPtr device, string propertyName)
+        {
             const int kCFNumberTypeSignedInt = 3;
 
             IntPtr stringRef = IntPtr.Zero;
@@ -54,6 +80,11 @@ namespace Yubico.Core.Devices.Hid
                 stringRef = CFStringCreateWithCString(IntPtr.Zero, cstr, 0);
 
                 IntPtr propertyRef = IOHIDDeviceGetProperty(device, stringRef);
+
+                if (propertyRef == IntPtr.Zero)
+                {
+                    return null;
+                }
 
                 ulong propertyType = CFGetTypeID(propertyRef);
                 ulong numberType = CFNumberGetTypeID();

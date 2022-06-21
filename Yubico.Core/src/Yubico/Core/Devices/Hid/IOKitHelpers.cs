@@ -41,20 +41,23 @@ namespace Yubico.Core.Devices.Hid
         /// <exception cref="PlatformApiException">
         /// The type requested and the type returned by IOKit do not match.
         /// </exception>
+        /// <exception cref="NullReferenceException">
+        /// An attempt was made to dereference the property, even though it was null.
+        /// </exception>
         public static int GetIntPropertyValue(IntPtr device, string propertyName)
         {
             int? propertyValue = GetNullableIntPropertyValue(device, propertyName);
 
-            if (propertyValue is null)
-            {
-                throw new InvalidOperationException("Property does not exist.");
-            }
-
+            // We want to rely on Nullable<T>'s null checking and subsequent exception.
+            // Rather than duplicate the messaging and exception ourselves, let's just
+            // use theirs.
+            #pragma warning disable CS8629
             return propertyValue.Value;
+            #pragma warning restore CS8629
         }
 
         /// <summary>
-        /// Gets an integer-typed property value from a device.
+        /// Gets an nullable integer-typed property value from a device.
         /// </summary>
         /// <param name="device">
         /// The previously opened device against which the property should be queried.

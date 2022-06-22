@@ -15,6 +15,7 @@
 using System;
 using System.Runtime.InteropServices;
 using System.Collections.Generic;
+using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid
@@ -32,6 +33,8 @@ namespace Yubico.Core.Devices.Hid
         private const int UsageU2FDevice = 1;
 
         private readonly string _devnode;
+
+        private readonly Logger _log = Log.GetLogger();
 
         /// <summary>
         /// Gets a list of all the HIDs on the system (not just YubiKeys).
@@ -53,9 +56,13 @@ namespace Yubico.Core.Devices.Hid
         {
         }
 
-        internal LinuxHidDevice(string path, string devnode, string parentPath) :
+        internal LinuxHidDevice(string path, string devnode, string? parentPath) :
             base(path)
         {
+            _log.LogInformation(
+                "Creating new instance of LinuxHidDevice based on path [{Path}], devnode [{DevNode}]",
+                path, devnode);
+
             VendorId = 0;
             ProductId = 0;
             Usage = 0;
@@ -68,11 +75,23 @@ namespace Yubico.Core.Devices.Hid
             using LinuxFileSafeHandle handle = NativeMethods.open(
                 devnode, NativeMethods.OpenFlags.O_RDWR | NativeMethods.OpenFlags.O_NONBLOCK);
 
+            if (handle.IsInvalid)
+            {
+                _log.LogWarning(
+                    "Could not open [{Path}]. Errno = {errno} {errorstring}",
+                    path, Marshal.GetLastWin32Error(), LibcHelpers.GetErrnoString());
+            }
+
             GetVendorProductIds(handle);
             GetUsageProperties(handle);
         }
 
-        // Get the path from the device.
+        private static string DeviceGetPath(IntPtr udevDevice)
+        {
+            IntPtr pathPtr = NativeMethods.udev_device_get_syspath(udevDevice);
+            return Marshal.PtrToStringAnsi(pathPtr);
+        }
+
         private static string DeviceGetPath(LinuxUdevDeviceSafeHandle udevDevice)
         {
             IntPtr pathPtr = NativeMethods.udev_device_get_syspath(udevDevice);
@@ -86,9 +105,19 @@ namespace Yubico.Core.Devices.Hid
             return Marshal.PtrToStringAnsi(devnodePtr);
         }
 
-        private static string GetParentDevicePath(LinuxUdevDeviceSafeHandle udevDevice)
+        private static string? GetParentDevicePath(LinuxUdevDeviceSafeHandle udevDevice)
         {
-            using LinuxUdevDeviceSafeHandle parentDev = NativeMethods.udev_device_get_parent(udevDevice);
+            // It's quite a few hops to the composite device parent that we're looking for. I'm no udev expert,
+            // but my guess is that we start with the HIDRAW device, we then get the USB endpoint (parent1),
+            // then the USB interface (parent2), and then finally the composite device (parent3).
+            IntPtr parentDev = NativeMethods.udev_device_get_parent(udevDevice);
+            parentDev = NativeMethods.udev_device_get_parent(parentDev);
+            parentDev = NativeMethods.udev_device_get_parent(parentDev);
+
+            if (parentDev == IntPtr.Zero)
+            {
+                return null;
+            }
 
             return DeviceGetPath(parentDev);
         }
@@ -104,6 +133,10 @@ namespace Yubico.Core.Devices.Hid
             {
                 VendorId = Marshal.ReadInt16(infoStructData, NativeMethods.OffsetInfoVendor);
                 ProductId = Marshal.ReadInt16(infoStructData, NativeMethods.OffsetInfoProduct);
+            }
+            else
+            {
+                _log.LogWarning("IOCTL failed. {error}", LibcHelpers.GetErrnoString());
             }
 
             Marshal.FreeHGlobal(infoStructData);
@@ -126,6 +159,10 @@ namespace Yubico.Core.Devices.Hid
                 Marshal.Copy(descriptorStructData, descriptor, 0, NativeMethods.DescriptorSize);
                 ParseUsageProperties(descriptor, NativeMethods.OffsetDescValue, descriptorLength);
             }
+            else
+            {
+                _log.LogWarning("IOCTL failed. {error}", LibcHelpers.GetErrnoString());
+            }
             Marshal.FreeHGlobal(descriptorStructData);
         }
 
@@ -138,6 +175,10 @@ namespace Yubico.Core.Devices.Hid
             if (status >= 0)
             {
                 returnValue = Marshal.ReadInt32(descSize, NativeMethods.OffsetDescSize);
+            }
+            else
+            {
+                Log.GetLogger().LogWarning("IOCTL failed. {error}", LibcHelpers.GetErrnoString());
             }
 
             Marshal.FreeHGlobal(descSize);

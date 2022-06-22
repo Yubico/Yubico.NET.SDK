@@ -13,9 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 using System.Globalization;
-using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using Yubico.Core.Buffers;
+using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid
@@ -27,19 +28,24 @@ namespace Yubico.Core.Devices.Hid
         private readonly LinuxFileSafeHandle _handle;
         private bool _isDisposed;
 
+        private readonly Logger _log = Log.GetLogger();
+
         public int InputReportSize { get; private set; }
         public int OutputReportSize { get; private set; }
 
         public LinuxHidIOReportConnection(string devnode)
         {
+            _log.LogInformation("Creating new IO report connection for device [{DevNode}]", devnode);
+
             InputReportSize = YubiKeyIOReportSize;
             OutputReportSize = YubiKeyIOReportSize;
 
-            _handle = NativeMethods.open(
-                devnode, NativeMethods.OpenFlags.O_RDWR | NativeMethods.OpenFlags.O_NONBLOCK);
+            _handle = NativeMethods.open(devnode, NativeMethods.OpenFlags.O_RDWR);
 
             if (_handle.IsInvalid)
             {
+                _log.LogError("Could not open device for IO reports: {error}", LibcHelpers.GetErrnoString());
+
                 throw new PlatformApiException(
                     string.Format(
                         CultureInfo.CurrentCulture,
@@ -51,6 +57,7 @@ namespace Yubico.Core.Devices.Hid
         // exactly 64 bytes long.
         public void SetReport(byte[] report)
         {
+            _log.SensitiveLogInformation("Sending IO report> {report}, Length = {length}", Hex.BytesToHex(report), report.Length);
             if (report.Length != YubiKeyIOReportSize)
             {
                 throw new InvalidOperationException(
@@ -59,11 +66,20 @@ namespace Yubico.Core.Devices.Hid
                         ExceptionMessages.InvalidReportBufferLength));
             }
 
-            int bytesWritten = NativeMethods.write(_handle, report, report.Length);
+            // HIDRAW expects the first byte to be the frame number - or in cases where a frame number is not used,
+            // like with the YubiKey, the first byte should be zero.
+            byte[] paddedBuffer = new byte[YubiKeyIOReportSize + 1];
+            report.CopyTo(paddedBuffer.AsSpan(1)); // Leave the first byte as 00
+
+            int bytesWritten = NativeMethods.write(_handle.DangerousGetHandle().ToInt32(), paddedBuffer, paddedBuffer.Length);
+            CryptographicOperations.ZeroMemory(paddedBuffer);
+
             if (bytesWritten >= 0)
             {
                 return;
             }
+
+            _log.LogError("Write failed with: {error}", LibcHelpers.GetErrnoString());
 
             throw new PlatformApiException(
                 string.Format(
@@ -80,9 +96,11 @@ namespace Yubico.Core.Devices.Hid
             int bytesRead = NativeMethods.read(_handle, outputBuffer, YubiKeyIOReportSize);
             if (bytesRead >= 0)
             {
+                _log.SensitiveLogInformation("Receiving IO report< {report}", Hex.BytesToHex(outputBuffer));
                 return outputBuffer;
             }
 
+            _log.LogError("Read failed with: {error}", LibcHelpers.GetErrnoString());
             throw new PlatformApiException(
                 string.Format(
                     CultureInfo.CurrentCulture,

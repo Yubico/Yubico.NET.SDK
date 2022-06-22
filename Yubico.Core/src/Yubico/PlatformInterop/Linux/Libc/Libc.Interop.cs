@@ -65,13 +65,13 @@ namespace Yubico.PlatformInterop
         // settings). It does not currently have any effect on platforms other
         // than Windows, but is included because of the analyzer and in the hope
         // that it will be supported by these platforms in the future.
-        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "open")]
+        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "open", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern LinuxFileSafeHandle open(string filename, OpenFlags flag);
 
         // This will be called from within the SafeHandle class, but should be
         // called by no one else.
-        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "close")]
+        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "close", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int close(IntPtr handle);
 
@@ -85,12 +85,12 @@ namespace Yubico.PlatformInterop
         // Parse the bytes after the call to extract the information, using the
         // Offset const values to find the locations of the data in the buffer
         // where the targets are located.
-        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "ioctl")]
+        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "ioctl", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int ioctl(LinuxFileSafeHandle handle, long request, IntPtr result);
 
         // Read count bytes. Place them into outputBuffer.
-        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "read")]
+        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "read", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int read(
             LinuxFileSafeHandle handle,
@@ -98,11 +98,11 @@ namespace Yubico.PlatformInterop
             int count);
 
         // Write the count bytes in inputBuffer.
-        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "write")]
+        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "write", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int write(
-            LinuxFileSafeHandle handle,
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)]byte[] inputBuffer,
+            int handle,
+            [MarshalAs(UnmanagedType.LPArray)]byte[] inputBuffer,
             int count);
     }
 }

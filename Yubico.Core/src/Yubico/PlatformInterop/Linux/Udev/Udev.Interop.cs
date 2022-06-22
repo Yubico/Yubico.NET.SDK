@@ -33,7 +33,7 @@ namespace Yubico.PlatformInterop
         // settings). It does not currently have any effect on platforms other
         // than Windows, but is included because of the analyzer and in the hope
         // that it will be supported by these platforms in the future.
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_new")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_new", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern LinuxUdevSafeHandle udev_new();
 
@@ -44,7 +44,7 @@ namespace Yubico.PlatformInterop
         // called by no one else.
         // The C signature is
         //   struct udev *udev_unref(struct udev *udev);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_unref")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_unref", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr udev_unref(IntPtr udevObject);
 
@@ -56,7 +56,7 @@ namespace Yubico.PlatformInterop
         // caller to destroy, which is why this is returned as a SafeHandle.
         // The C signature is
         //   struct udev_enumerate *udev_enumerate_new(struct udev *udev);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_new")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_new", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern LinuxUdevEnumerateSafeHandle udev_enumerate_new(LinuxUdevSafeHandle udevObject);
 
@@ -67,7 +67,7 @@ namespace Yubico.PlatformInterop
         // called by no one else.
         // The C signature is
         //   struct udev_enumerate *udev_enumerate_unref(struct udev_enumerate *udev_enumerate);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_unref")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_unref", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr udev_enumerate_unref(IntPtr enumerateObject);
 
@@ -77,7 +77,7 @@ namespace Yubico.PlatformInterop
         // The C signature is
         //   int udev_enumerate_add_match_subsystem(
         //       struct udev_enumerate *udev_enumerate, const char *subsystem);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_enumerate_add_match_subsystem")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_enumerate_add_match_subsystem", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int udev_enumerate_add_match_subsystem(
             LinuxUdevEnumerateSafeHandle enumerateObject, string subsystem);
@@ -88,7 +88,7 @@ namespace Yubico.PlatformInterop
         // If the result is < 0, error.
         // The C signature is
         //   int udev_enumerate_scan_devices(struct udev_enumerate *udev_enumerate);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_scan_devices")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_scan_devices", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int udev_enumerate_scan_devices(LinuxUdevEnumerateSafeHandle enumerateObject);
 
@@ -99,7 +99,7 @@ namespace Yubico.PlatformInterop
         // A null return is valid.
         // The C signature is
         //   struct udev_list_entry *udev_enumerate_get_list_entry(struct udev_enumerate *udev_enumerate);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_get_list_entry")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_enumerate_get_list_entry", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr udev_enumerate_get_list_entry(LinuxUdevEnumerateSafeHandle enumerateObject);
 
@@ -111,7 +111,7 @@ namespace Yubico.PlatformInterop
         // A null return is valid.
         // The C signature is
         //   struct udev_list_entry *udev_list_entry_get_next(struct udev_list_entry *list_entry);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_list_entry_get_next")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_list_entry_get_next", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr udev_list_entry_get_next(IntPtr previousEntry);
 
@@ -124,7 +124,7 @@ namespace Yubico.PlatformInterop
         // SafeHandle.
         // The C signature is
         //   const char *udev_list_entry_get_name(struct udev_list_entry *list_entry);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_list_entry_get_name")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_list_entry_get_name", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr udev_list_entry_get_name(IntPtr currentEntry);
 
@@ -138,7 +138,7 @@ namespace Yubico.PlatformInterop
         // The C signature is
         //   struct udev_device *udev_device_new_from_syspath(
         //       struct udev *udev, const char *syspath);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_device_new_from_syspath")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_device_new_from_syspath", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern LinuxUdevDeviceSafeHandle udev_device_new_from_syspath(
             LinuxUdevSafeHandle udevObject, string path);
@@ -149,7 +149,7 @@ namespace Yubico.PlatformInterop
         // called by no one else.
         // The C signature is
         //   struct udev_device *udev_device_unref(struct udev_device *udev_device);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_unref")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_unref", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr udev_device_unref(IntPtr deviceObject);
 
@@ -163,19 +163,22 @@ namespace Yubico.PlatformInterop
         // SafeHandle.
         // The C signature is
         //   const char *udev_device_get_devnode(struct udev_device *udev_device);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_get_devnode")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_get_devnode", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr udev_device_get_devnode(LinuxUdevDeviceSafeHandle deviceObject);
 
         // Get the parent device from the current device.
-        // The return value is another UDEV device handle which is ref counted,
-        // hence this function returns a disposable safe handle so that we
-        // are careful to reliably release this resource when we are done with it.
+        // The return value is another UDEV device handle which, while refcounted,
+        // is owned by the original (child) udev device. Do not call unref on this
+        // pointer.
         // The C signature is
         //   struct udev_device *udev_device_get_parent(struct udev_device *udev_device);
         [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_get_parent")]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern LinuxUdevDeviceSafeHandle udev_device_get_parent(LinuxUdevDeviceSafeHandle deviceObject);
+        public static extern IntPtr udev_device_get_parent(IntPtr deviceObject);
+
+        public static IntPtr udev_device_get_parent(LinuxUdevDeviceSafeHandle deviceObject) =>
+            udev_device_get_parent(deviceObject.DangerousGetHandle());
 
         // Get the path from the device.
         // This is what will be used by the HIDRAW library.
@@ -187,15 +190,22 @@ namespace Yubico.PlatformInterop
         // SafeHandle.
         // The C signature is
         //   const char *udev_device_get_syspath(struct udev_device *udev_device);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_get_syspath")]
+
+        // The actual P/Invoke import uses IntPtr here so that we can pass
+        // non-refcounted udev objects.
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_device_get_syspath", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern IntPtr udev_device_get_syspath(LinuxUdevDeviceSafeHandle deviceObject);
+        public static extern IntPtr udev_device_get_syspath(IntPtr deviceObject);
+
+        // This overload is for refcounted udev devices.
+        public static IntPtr udev_device_get_syspath(LinuxUdevDeviceSafeHandle deviceObject) =>
+            udev_device_get_syspath(deviceObject.DangerousGetHandle());
 
         // Gets a string specifying what the latest action was: "add", "remove",
         // and others.
         // The C signature is
         //   const char *udev_device_get_action(struct udev_device *udev_device);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_device_get_action")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_device_get_action", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr udev_device_get_action(LinuxUdevDeviceSafeHandle deviceObject);
 
@@ -208,7 +218,7 @@ namespace Yubico.PlatformInterop
         // The C signature is
         //   struct udev_monitor * udev_monitor_new_from_netlink(
         //       struct udev *udev, const char *name);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_monitor_new_from_netlink")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_monitor_new_from_netlink", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern LinuxUdevMonitorSafeHandle udev_monitor_new_from_netlink(
             LinuxUdevSafeHandle udevObject, string name);
@@ -218,7 +228,7 @@ namespace Yubico.PlatformInterop
         // called by no one else.
         // The C signature is
         //   void udev_monitor_unref(struct udev_monitor *udev_monitor);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_unref")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_unref", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern void udev_monitor_unref(IntPtr monitorObject);
 
@@ -229,7 +239,7 @@ namespace Yubico.PlatformInterop
         // The C signature is
         //   int udev_monitor_filter_add_match_subsystem_devtype(
         //       struct udev_monitor *udev_monitor, const char *subsystem, const char *devtype);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_monitor_filter_add_match_subsystem_devtype")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "udev_monitor_filter_add_match_subsystem_devtype", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int udev_monitor_filter_add_match_subsystem_devtype(
             LinuxUdevMonitorSafeHandle monitorObject, string subsystem, string? devtype);
@@ -238,7 +248,7 @@ namespace Yubico.PlatformInterop
         // If the result is < 0, error.
         // The C signature is
         //   int udev_monitor_enable_receiving(struct udev_monitor *udev_monitor);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_enable_receiving")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_enable_receiving", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int udev_monitor_enable_receiving(LinuxUdevMonitorSafeHandle monitorObject);
 
@@ -247,7 +257,7 @@ namespace Yubico.PlatformInterop
         // change, this will return NULL.
         // The C signature is
         //   struct udev_device *udev_monitor_receive_device(struct udev_monitor *udev_monitor);
-        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_receive_device")]
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_receive_device", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern LinuxUdevDeviceSafeHandle udev_monitor_receive_device (LinuxUdevMonitorSafeHandle monitorObject);
     }

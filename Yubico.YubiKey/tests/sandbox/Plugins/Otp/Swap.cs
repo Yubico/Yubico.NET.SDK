@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 Output.WriteLine("Do you really want to swap slots?");
                 Output.WriteLine("Type \"Yes\" and press [Enter] to swap");
-                if (Console.ReadLine().ToLower() != "yes")
+                if (Console.ReadLine()?.ToLower() != "yes")
                 {
                     Output.WriteLine("Aborted.", OutputLevel.Error);
                     return false;

@@ -76,7 +76,7 @@ namespace Yubico.Core.Devices.Hid
                         ProductId = (short)IOKitHelpers.GetIntPropertyValue(device, IOKitHidConstants.DevicePropertyProductId),
                         Usage = (short)IOKitHelpers.GetIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsage),
                         UsagePage = (HidUsagePage)IOKitHelpers.GetIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsagePage),
-                        ParentDeviceId = IOKitHelpers.GetIntPropertyValue(device, IOKitHidConstants.DevicePropertyLocationId).ToString(CultureInfo.InvariantCulture)
+                        ParentDeviceId = IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyLocationId)?.ToString(CultureInfo.InvariantCulture)
                     })
                     .ToList();
             }

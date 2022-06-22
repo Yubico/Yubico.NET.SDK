@@ -161,7 +161,7 @@ namespace Yubico.Core.Devices.Hid
             }
             else
             {
-                _log.LogWarning("IOCTL failed {error}", LibcHelpers.GetErrnoString());
+                _log.LogWarning("IOCTL failed. {error}", LibcHelpers.GetErrnoString());
             }
             Marshal.FreeHGlobal(descriptorStructData);
         }
@@ -178,7 +178,7 @@ namespace Yubico.Core.Devices.Hid
             }
             else
             {
-                Log.GetLogger().LogWarning("IOCTL failed {error}", LibcHelpers.GetErrnoString());
+                Log.GetLogger().LogWarning("IOCTL failed. {error}", LibcHelpers.GetErrnoString());
             }
 
             Marshal.FreeHGlobal(descSize);

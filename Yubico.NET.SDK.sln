@@ -98,6 +98,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Otp", "Otp", "{BA01E787-FF0
 	ProjectSection(SolutionItems) = preProject
 		Yubico.YubiKey\docs\users-manual\application-otp\otp-commands.md = Yubico.YubiKey\docs\users-manual\application-otp\otp-commands.md
 		Yubico.YubiKey\docs\users-manual\application-otp\otp-overview.md = Yubico.YubiKey\docs\users-manual\application-otp\otp-overview.md
+		Yubico.YubiKey\docs\users-manual\application-otp\application-concepts-overview.md = Yubico.YubiKey\docs\users-manual\application-otp\application-concepts-overview.md
+		Yubico.YubiKey\docs\users-manual\application-otp\configuration-concepts-overview.md = Yubico.YubiKey\docs\users-manual\application-otp\configuration-concepts-overview.md
+		Yubico.YubiKey\docs\users-manual\application-otp\hid.md = Yubico.YubiKey\docs\users-manual\application-otp\hid.md
+		Yubico.YubiKey\docs\users-manual\application-otp\hotp.md = Yubico.YubiKey\docs\users-manual\application-otp\hotp.md
+		Yubico.YubiKey\docs\users-manual\application-otp\how-to-calculate-a-challenge-response-code.md = Yubico.YubiKey\docs\users-manual\application-otp\how-to-calculate-a-challenge-response-code.md
+		Yubico.YubiKey\docs\users-manual\application-otp\how-to-configure-ndef.md = Yubico.YubiKey\docs\users-manual\application-otp\how-to-configure-ndef.md
+		Yubico.YubiKey\docs\users-manual\application-otp\how-to-delete-a-slot-configuration.md = Yubico.YubiKey\docs\users-manual\application-otp\how-to-delete-a-slot-configuration.md
+		Yubico.YubiKey\docs\users-manual\application-otp\how-to-program-a-challenge-response-credential.md = Yubico.YubiKey\docs\users-manual\application-otp\how-to-program-a-challenge-response-credential.md
+		Yubico.YubiKey\docs\users-manual\application-otp\how-to-program-a-static-password.md = Yubico.YubiKey\docs\users-manual\application-otp\how-to-program-a-static-password.md
+		Yubico.YubiKey\docs\users-manual\application-otp\how-to-program-a-yubico-otp-credential.md = Yubico.YubiKey\docs\users-manual\application-otp\how-to-program-a-yubico-otp-credential.md
+		Yubico.YubiKey\docs\users-manual\application-otp\how-to-read-ndef-information.md = Yubico.YubiKey\docs\users-manual\application-otp\how-to-read-ndef-information.md
+		Yubico.YubiKey\docs\users-manual\application-otp\how-to-retrieve-slot-status.md = Yubico.YubiKey\docs\users-manual\application-otp\how-to-retrieve-slot-status.md
+		Yubico.YubiKey\docs\users-manual\application-otp\how-to-swap-slot-configs.md = Yubico.YubiKey\docs\users-manual\application-otp\how-to-swap-slot-configs.md
+		Yubico.YubiKey\docs\users-manual\application-otp\how-to-update-slot-settings.md = Yubico.YubiKey\docs\users-manual\application-otp\how-to-update-slot-settings.md
+		Yubico.YubiKey\docs\users-manual\application-otp\modhex.md = Yubico.YubiKey\docs\users-manual\application-otp\modhex.md
+		Yubico.YubiKey\docs\users-manual\application-otp\ndef.md = Yubico.YubiKey\docs\users-manual\application-otp\ndef.md
+		Yubico.YubiKey\docs\users-manual\application-otp\slots.md = Yubico.YubiKey\docs\users-manual\application-otp\slots.md
+		Yubico.YubiKey\docs\users-manual\application-otp\static-password.md = Yubico.YubiKey\docs\users-manual\application-otp\static-password.md
+		Yubico.YubiKey\docs\users-manual\application-otp\yubico-otp.md = Yubico.YubiKey\docs\users-manual\application-otp\yubico-otp.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Piv", "Piv", "{DBCBCAC7-DDB0-4062-A6FF-4386702F9D4F}"
@@ -142,7 +161,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Getting Started", "Getting 
 		Yubico.YubiKey\docs\users-manual\getting-started\overview-of-sdk.md = Yubico.YubiKey\docs\users-manual\getting-started\overview-of-sdk.md
 		Yubico.YubiKey\docs\users-manual\getting-started\what-is-a-yubikey.md = Yubico.YubiKey\docs\users-manual\getting-started\what-is-a-yubikey.md
 		Yubico.YubiKey\docs\users-manual\getting-started\whats-new.md = Yubico.YubiKey\docs\users-manual\getting-started\whats-new.md
-		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\device-notifications.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\device-notifications.md
+		Yubico.YubiKey\docs\users-manual\getting-started\running-on-linux.md = Yubico.YubiKey\docs\users-manual\getting-started\running-on-linux.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk Programming Guide", "Sdk Programming Guide", "{749DAF15-E6A8-44DC-906E-BE3FC8DE3983}"
@@ -153,6 +172,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk Programming Guide", "Sd
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\making-a-connection.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\making-a-connection.md
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\sensitive-data.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\sensitive-data.md
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\threads.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\threads.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\device-notifications.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\device-notifications.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\key-collector.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\key-collector.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\secure-channel-protocol-3.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\secure-channel-protocol-3.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{BA394A0D-B336-4B6E-83B8-B41FC165D6D9}"

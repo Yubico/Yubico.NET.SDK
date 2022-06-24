@@ -46,6 +46,10 @@
     href: sdk-programming-guide/sensitive-data.md
   - name: Secure Channel Protocol 3 (SCP03)
     href: sdk-programming-guide/secure-channel-protocol-3.md
+  - name: Commands
+    href: sdk-programming-guide/commands.md
+  - name: Device notifications
+    href: sdk-programming-guide/device-notifications.md
 
 - name: "Application: OTP"
   homepage: application-otp/otp-overview.md

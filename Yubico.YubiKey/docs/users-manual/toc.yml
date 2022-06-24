@@ -20,6 +20,8 @@
     href: getting-started/overview-of-sdk.md
   - name: How to install
     href: getting-started/how-to-install.md
+  - name: Running the SDK on Linux
+    href: getting-started/running-on-linux.md
   - name: What's new in the SDK?
     href: getting-started/whats-new.md
 

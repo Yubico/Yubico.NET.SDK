@@ -25,27 +25,31 @@ You can learn more about this process on the [how to install the SDK](how-to-ins
 
 ## Supported platforms
 
-Modern .NET supports more than just Microsoft Windows, and so do we. Support for macOS is built in
+Modern .NET supports more than just Microsoft Windows, and so do we. Support for macOS is built in,
 and has been tested on both Intel and Apple Silicon (i.e. M1) platforms. (Apple Silicon is supported
-through Rosetta 2. The .NET 6 runtime will add native support, but it is not ready at the time
-of this writing.)
+through Rosetta 2.) We also support common Linux distributions such as Debian, Ubuntu, RHEL, and CentOS.
+Other distros may still work, but have not been tested by the SDK team.
 
-Future platform support will be driven by customer interest.
+Future distribution and platform support will be driven by customer interest.
 
 This SDK targets .NET Standard 2.0, allowing for a wide reach of .NET platforms.
 See [this page](https://docs.microsoft.com/en-us/dotnet/standard/net-standard) for more
 information on what .NET implementations support .NET Standard 2.0. Note that while this SDK may build
 with Xamarin and Mono, only the Windows and macOS operating systems are supported at this time.
+Additionally, while .NET Framework 4.6.x is listed as implementing Standard 2.0, this is not
+entirely true. The SDK relies on certain cryptographic functionality that is defined
+in the standard, but not actually implemented in Framework 4.6.x.
 
 | Platform | Architecture | Version |
 | ---- | ---- | ---- |
 | macOS | x64, arm64 | Catalina, Big Sur |
 | Windows | x86, x64, arm64 | Windows 10, Windows 11 |
+| Linux | x86, x64, arm64 | Debian, Ubuntu, RHEL, CentOS |
 
 ## Supported YubiKey applications
 
 The YubiKey is a versatile security key that supports numerous standards and protocols. This SDK offers
-full support for integrating with Yubico OTP, along with OATH and PIV standards.
+full support for integrating with Yubico OTP, along with the OATH, PIV, and FIDO U2F standards.
 
 ### OTP
 
@@ -72,6 +76,18 @@ can be used on macOS as well.
 
 Read more about PIV [here](xref:PivOverview).
 
+### FIDO U2F
+
+Fast IDentity Online - Universal 2nd Factor (FIDO U2F) is a modern second factor technology
+built on strong public-key based cryptography. It is meant to provide a simple, easy-to-use
+alternative to SMS and OTP based second factors, while offering superior security.
+
+U2F is primarily used for web-based services and applications, but is not necessarily
+limited to this use case. Non-web applications are supported, and will likely be the main
+use-case for developers interested in integrating with this feature of the SDK.
+
+Read more about FIDO U2F [here](xref:FidoU2fOverview).
+
 ## SDK components
 
 The YubiKey SDK is comprised of three managed assemblies:
@@ -86,6 +102,8 @@ The YubiKey SDK is comprised of three managed assemblies:
   features needed by the SDK. Types in this assembly are subject to change and are not meant for
   general public consumption. If you wish to use the newest features of .NET, you should target
   the .NET implementation that contains those features directly.
+- **Yubico.NativeShims** is an internal un-managed library that provides a stable Application
+  Binary Interface (ABI) to the P/Invoke Foreign Function Interface (FFI) in Yubico.Core.
   
 All components of the SDK are built to the .NET Standard 2.0 specification. This means that either
 .NET Framework, .NET Core, or Mono can be used as the underlying runtime, so long as the runtime version implements .NET Standard 2.0 or higher.

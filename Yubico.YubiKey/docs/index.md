@@ -31,20 +31,23 @@ The documentation for the .NET YubiKey SDK is split into two main sections:
 
 Modern .NET supports more than just Microsoft Windows, and so do we. Support for macOS is built in,
 and has been tested on both Intel and Apple Silicon (i.e. M1) platforms. (Apple Silicon is supported
-through Rosetta 2. The .NET 6 runtime will add native support, however it is not ready at the time
-of this writing.)
+through Rosetta 2.) We also support common Linux distributions such as Debian, Ubuntu, RHEL, and CentOS.
+Other distros may still work, but have not been tested by the SDK team.
 
-Future platform support will be driven by customer interest.
+Future distribution and platform support will be driven by customer interest.
 
 This SDK targets .NET Standard 2.0, allowing for a wide reach of .NET platforms.
 See [this page](https://docs.microsoft.com/en-us/dotnet/standard/net-standard) for more
 information on what .NET implementations support .NET Standard 2.0. Note that while this SDK may build
 with Xamarin and Mono, only the Windows and macOS operating systems are supported at this time.
+Additionally, while .NET Framework 4.6.x is listed as implementing Standard 2.0, this is not
+entirely true. The SDK relies on certain cryptographic functionality that is defined
+in the standard, but not actually implemented in Framework 4.6.x.
 
 ## Supported YubiKey applications
 
 The YubiKey is a versatile security key that supports numerous standards and protocols. This SDK offers
-full support for integrating with Yubico OTP, along with OATH and PIV standards.
+full support for integrating with Yubico OTP, along with the OATH, PIV, and FIDO U2F standards.
 
 ### OTP
 
@@ -70,3 +73,15 @@ PIV is primarily used for non-web applications. It has built-in support under Wi
 can be used on macOS as well.
 
 Read more about PIV [here](users-manual/application-piv/piv-overview.md).
+
+### FIDO U2F
+
+Fast IDentity Online - Universal 2nd Factor (FIDO U2F) is a modern second factor technology
+built on strong public-key based cryptography. It is meant to provide a simple, easy-to-use
+alternative to SMS and OTP based second factors, while offering superior security.
+
+U2F is primarily used for web-based services and applications, but is not necessarily
+limited to this use case. Non-web applications are supported, and will likely be the main
+use-case for developers interested in integrating with this feature of the SDK.
+
+Read more about FIDO U2F [here](users-manual/application-u2f/fido-u2f-overview.md).

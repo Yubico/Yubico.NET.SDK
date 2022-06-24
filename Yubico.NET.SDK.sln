@@ -237,6 +237,10 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "U2f", "U2f", "{2C7EFA92-1B47-4F5B-91B5-C130BDB19D93}"
 ProjectSection(SolutionItems) = preProject
 	Yubico.YubiKey\docs\users-manual\application-u2f\u2f-commands.md = Yubico.YubiKey\docs\users-manual\application-u2f\u2f-commands.md
+	Yubico.YubiKey\docs\users-manual\application-u2f\fido-u2f-overview.md = Yubico.YubiKey\docs\users-manual\application-u2f\fido-u2f-overview.md
+	Yubico.YubiKey\docs\users-manual\application-u2f\fips-mode.md = Yubico.YubiKey\docs\users-manual\application-u2f\fips-mode.md
+	Yubico.YubiKey\docs\users-manual\application-u2f\how-u2f-works.md = Yubico.YubiKey\docs\users-manual\application-u2f\how-u2f-works.md
+	Yubico.YubiKey\docs\users-manual\application-u2f\u2f-pin.md = Yubico.YubiKey\docs\users-manual\application-u2f\u2f-pin.md
 EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "contributordocs", "contributordocs", "{522DEBA9-211E-425A-916D-30F5636F5646}"

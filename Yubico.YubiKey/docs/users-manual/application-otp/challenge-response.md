@@ -91,6 +91,9 @@ You must also set the algorithm that will be used to respond to challenges by ca
 
 The ConfigureChallengeResponse class also provides optional methods for requiring users to touch the YubiKey to initiate the challenge-response operation ([UseButton()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseButton%28System.Boolean%29)) or enabling the key to process HMAC SHA1 challenges of less than 64 bytes ([UseSmallChallenge()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseSmallChallenge%28System.Boolean%29)).
 
+> [!NOTE]  
+> UseSmallChallenge() is included for compatibility with legacy systems whose implementations break data sets into multiple blocks, which often results in the last element being smaller than 64 bytes.
+
 For a full list of the methods in the ConfigureChallengeResponse class, please see the [API documentation](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse).
 
 For an example of how to use ConfigureChallengeResponse(), please see [How to program a slot with a challenge-response credential](xref:OtpProgramChallengeResponse).
@@ -103,7 +106,7 @@ In order for a host to send a challenge to a YubiKey and receive a response, an 
 
 * send a message to the user to notify them to touch the YubiKey to initiate the challenge-response operation with [UseTouchNotifier()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseTouchNotifier%28System.Action%29). This is only needed if the YubiKey slot is configured to require the button touch with UseButton().
 
-* receive the response from the YubiKey. The response can be received as a string of numeric digits via [GetCode()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetCode%28System.Int32%29) (for HMAC SHA1 challenges), as a byte string via [GetDataBytes()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetDataBytes) (for Yubico OTP challenges), or as a single integer via [GetDataInt()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetDataInt) (for HMAC SHA1 challenges).
+* receive the response from the YubiKey. The response can be received as a string of numeric digits via [GetCode()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetCode%28System.Int32%29) (for HMAC SHA1 challenges), as a byte string via [GetDataBytes()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetDataBytes) (for Yubico OTP challenges), or as a single 32-bit integer via [GetDataInt()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetDataInt) (for HMAC SHA1 challenges).
 
 > [!NOTE]  
 > The size of the challenge sent to the YubiKey with UseChallenge() must correspond to the configuration of the YubiKey slot. If the slot is configured to perform Yubico OTP, the challenge must be [6 bytes](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.YubicoOtpChallengeSize) long. If the slot is configured for HMAC SHA1, the challenge must be [64 bytes](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.MaxHmacChallengeSize) long. However, if the slot has been configured with UseSmallChallenge(), an HMAC SHA1 challenge smaller than 64 bytes is acceptable.

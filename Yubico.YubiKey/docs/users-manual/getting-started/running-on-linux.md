@@ -1,4 +1,4 @@
-<!-- Copyright 2021 Yubico AB
+<!-- Copyright 2022 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ A distribution is officially supported after our team has run through our
 acceptance tests on that distro. This is not the exhaustive suite of tests
 for the SDK, but enough that it gives us confidence that the platform-specific
 device discovery and communication logic are working properly. Any abnormalities
-observed should be reported to our [GitHub repo](https://github.com/Yubico/Yubico.NET.SDK).
+observed should be reported to our [GitHub repo](https://github.com/Yubico/Yubico.NET.SDK/issues).
 
 At this time, the SDK has been tested to work on the following Linux distributions:
 
@@ -36,10 +36,10 @@ At this time, the SDK has been tested to work on the following Linux distributio
 
 ### Other distros
 
-While there are plenty of popular distros that are *not* on this list, don't fret! There
-is a high likelihood that the SDK can work on these distros. The instructions below will
-likely be identical, or very similar to what you will need to do to get started with
-your distribution of choice.
+There are plenty of popular distros that are *not* on this list. Though not official supported,
+there is a high likelihood that the SDK will still work on these distros. The instructions
+below will likely be identical, or very similar to what you will need to do to get started
+with your distribution of choice.
 
 ## Dependencies
 
@@ -75,13 +75,13 @@ UDev should typically already be installed on your system. If it is not, that ma
 mean that your Linux distro uses an alternate device management system. Swapping
 your current device manager with UDev is likely not a viable option, and is not
 recommended. If you are running a distro that is not running UDev and you are interested
-in using this SDK, please open an issue on our [GitHub repo](https://github.com/Yubico/Yubico.NET.SDK)
-and we will take it under advisement.
+in using this SDK, please open an issue on our [GitHub repo](https://github.com/Yubico/Yubico.NET.SDK/issues).
+If there is broad interest, we will evaluate adding support to our roadmap.
 
 #### Making sure the SDK can find UDev
 
-The SDK current P/Invokes UDev's shared library `libudev.so`. This this can have
-multiple names (usually including a version number, e.g. `libudev.so.1`), we target
+As of SDK 1.4.0, the SDK P/Invokes UDev's shared library `libudev.so`. This library can have
+multiple names (usually including a version number, e.g. `libudev.so.1`), so we target
 the lowest common denominator name: `libudev`. .NET's library resolver is currently
 not capable of automatically resolving the full path / name of this dependency.
 
@@ -96,9 +96,6 @@ sudo ln -s /usr/lib/linux-x86_64/libudev.so.1 /usr/lib/libudev.so
 
 Note that the exact file name and location may change based on your distribution and
 the version of libudev installed.
-
-We are investigating ways to improve the SDK so that this step is no longer required,
-however at the time of the `1.4.0` release, this step is still required.
 
 ### .NET and OpenSSL / libcrypto
 

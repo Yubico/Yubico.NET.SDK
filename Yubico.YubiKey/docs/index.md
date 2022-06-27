@@ -81,7 +81,7 @@ built on strong public-key based cryptography. It is meant to provide a simple, 
 alternative to SMS and OTP based second factors, while offering superior security.
 
 U2F is primarily used for web-based services and applications, but is not necessarily
-limited to this use case. Non-web applications are supported, and will likely be the main
+limited to this use case. Non-web applications are supported and will likely be the main
 use-case for developers interested in integrating with this feature of the SDK.
 
 Read more about FIDO U2F [here](users-manual/application-u2f/fido-u2f-overview.md).

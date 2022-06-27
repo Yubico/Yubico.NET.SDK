@@ -28,7 +28,7 @@ You can learn more about this process on the [how to install the SDK](how-to-ins
 Modern .NET supports more than just Microsoft Windows, and so do we. Support for macOS is built in,
 and has been tested on both Intel and Apple Silicon (i.e. M1) platforms. (Apple Silicon is supported
 through Rosetta 2.) We also support common Linux distributions such as Debian, Ubuntu, RHEL, and CentOS.
-Other distros may still work, but have not been tested by the SDK team.
+Other distros may still work, but they have not been tested by the SDK team.
 
 Future distribution and platform support will be driven by customer interest.
 
@@ -38,7 +38,7 @@ information on what .NET implementations support .NET Standard 2.0. Note that wh
 with Xamarin and Mono, only the Windows and macOS operating systems are supported at this time.
 Additionally, while .NET Framework 4.6.x is listed as implementing Standard 2.0, this is not
 entirely true. The SDK relies on certain cryptographic functionality that is defined
-in the standard, but not actually implemented in Framework 4.6.x.
+in the standard but not actually implemented in Framework 4.6.x.
 
 | Platform | Architecture | Version |
 | ---- | ---- | ---- |
@@ -78,13 +78,13 @@ Read more about PIV [here](xref:PivOverview).
 
 ### FIDO U2F
 
-Fast IDentity Online - Universal 2nd Factor (FIDO U2F) is a modern second factor technology
-built on strong public-key based cryptography. It is meant to provide a simple, easy-to-use
-alternative to SMS and OTP based second factors, while offering superior security.
-
-U2F is primarily used for web-based services and applications, but is not necessarily
-limited to this use case. Non-web applications are supported, and will likely be the main
-use-case for developers interested in integrating with this feature of the SDK.
+U2F is an open authentication standard that enables keychain devices, mobile phones and other
+devices to securely access any number of web-based services - instantly and with no drivers or
+client software needed. U2F was created by Google and Yubico, with contribution from NXP, and is
+today hosted by the open-authentication industry consortium [FIDO Alliance](https://fidoalliance.org/).
+The technical specifications were launched in late 2014, including native support in Google
+Accounts and Chrome, and have since resulted in a thriving ecosystem of hardware, software
+and service providers.
 
 Read more about FIDO U2F [here](xref:FidoU2fOverview).
 
@@ -102,7 +102,7 @@ The YubiKey SDK is comprised of three managed assemblies:
   features needed by the SDK. Types in this assembly are subject to change and are not meant for
   general public consumption. If you wish to use the newest features of .NET, you should target
   the .NET implementation that contains those features directly.
-- **Yubico.NativeShims** is an internal un-managed library that provides a stable Application
+- **Yubico.NativeShims** is an internal unmanaged library that provides a stable Application
   Binary Interface (ABI) to the P/Invoke Foreign Function Interface (FFI) in Yubico.Core.
   
 All components of the SDK are built to the .NET Standard 2.0 specification. This means that either

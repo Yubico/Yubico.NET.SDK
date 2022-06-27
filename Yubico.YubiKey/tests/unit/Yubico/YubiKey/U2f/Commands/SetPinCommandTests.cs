@@ -160,51 +160,7 @@ namespace Yubico.YubiKey.U2f.Commands
             Assert.True(actualInnerCommandData.SequenceEqual(data));
         }
 
-        [Fact]
-        public void CreateCommandApdu_NewPinIsEmpty_ThrowsArgumentException()
-        {
-            _ = Assert.Throws<ArgumentException>(() => new SetPinCommand(CurrentPin, Array.Empty<byte>()));
-        }
-
-        [Fact]
-        public void CreateCommandApdu_NewPinIsNull_ThrowsArgumentException()
-        {
-            _ = Assert.Throws<ArgumentException>(() => new SetPinCommand(CurrentPin, null));
-        }
-
-        [Fact]
-        public void CreateCommandApdu_CurrentPinLengthLessThan6_ThrowsArgumentException()
-        {
-            byte[] currentPin = new byte[] { 1, 2, 3, 4 };
-
-            _ = Assert.Throws<ArgumentException>(() => new SetPinCommand(currentPin, NewPin));
-        }
-
-        [Fact]
-        public void CreateCommandApdu_CurrentPinLengthMoreThan32_ThrowsArgumentException()
-        {
-            byte[] currentPin = new byte[33];
-
-            _ = Assert.Throws<ArgumentException>(() => new SetPinCommand(currentPin, NewPin));
-        }
-
-        [Fact]
-        public void CreateCommandApdu_NewPinLengthLessThan6_ThrowsArgumentException()
-        {
-            byte[] newPin = new byte[] { 1, 2, 3, 4 };
-
-            _ = Assert.Throws<ArgumentException>(() => new SetPinCommand(CurrentPin, newPin));
-        }
-
-        [Fact]
-        public void CreateCommandApdu_NewPinLengthMoreThan32_ThrowsArgumentException()
-        {
-            byte[] newPin = new byte[33];
-
-            _ = Assert.Throws<ArgumentException>(() => new SetPinCommand(CurrentPin, newPin));
-        }
-
-        [Fact]
+         [Fact]
         public void CreateResponseApdu_ReturnsCorrectType()
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });

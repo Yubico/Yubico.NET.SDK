@@ -35,7 +35,7 @@ handle length is one byte.
 
 ### Response APDU info
 
-#### Response APDU for successful registration
+#### Response APDU for successful authentication
 
 Total Length: 2\
 Data Length: 0
@@ -50,6 +50,24 @@ where the encoded response is
 user presence || counter || signature
 ```
 
+#### Response APDU for user presence required
+
+Total Length: 2\
+Data Length: 0
+
+Data | SW1 | SW2
+:---: | :---: | :---:
+(no data) | 69 | 85
+
+#### Response APDU for invalid key handle
+
+Total Length: 2\
+Data Length: 0
+
+Data | SW1 | SW2
+:---: | :---: | :---:
+(no data) | 6A | 80
+
 #### Response APDU for incorrect data length.
 
 Total Length: 2\
@@ -58,4 +76,3 @@ Data Length: 0
 Data | SW1 | SW2
 :---: | :---: | :---:
 (no data) | 67 | 00
-

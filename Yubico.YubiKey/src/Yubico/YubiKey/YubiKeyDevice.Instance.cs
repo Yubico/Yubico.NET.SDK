@@ -192,7 +192,7 @@ namespace Yubico.YubiKey
 
         bool IYubiKeyDevice.HasSameParentDevice(IDevice device) => HasSameParentDevice(device);
 
-        internal protected bool HasSameParentDevice(IDevice device) 
+        internal protected bool HasSameParentDevice(IDevice device)
         {
             if (device is null)
             {
@@ -251,7 +251,7 @@ namespace Yubico.YubiKey
             if ((application == YubiKeyApplication.Fido2 || application == YubiKeyApplication.FidoU2f)
                 && HasHidFido)
             {
-                connection = new FidoConnection(_hidKeyboardDevice!);
+                connection = new FidoConnection(_hidFidoDevice!);
                 return true;
             }
 

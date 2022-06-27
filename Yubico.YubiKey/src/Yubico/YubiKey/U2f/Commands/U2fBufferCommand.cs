@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.U2f.Commands
         /// </summary>
         public CommandApdu CreateCommandApdu()
         {
-            var innerEchoCommand = new CommandApdu()
+            var innerCommand = new CommandApdu()
             {
                 Ins = _instruction,
                 P1 = Parameter1,
@@ -67,7 +67,7 @@ namespace Yubico.YubiKey.U2f.Commands
             return new CommandApdu()
             {
                 Ins = Ctap1MessageInstruction,
-                Data = innerEchoCommand.AsByteArray(ApduEncoding.ExtendedLength),
+                Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength),
             };
         }
     }

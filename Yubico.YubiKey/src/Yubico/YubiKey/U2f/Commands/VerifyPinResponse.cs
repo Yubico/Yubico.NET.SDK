@@ -43,12 +43,5 @@ namespace Yubico.YubiKey.U2f.Commands
             base(responseApdu)
         {
         }
-
-        /// <inheritdoc/>
-        protected override ResponseStatusPair StatusCodeMap => StatusWord switch
-        {
-            SWConstants.VerifyFail => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseConditionsNotSatisfied),
-            _ => base.StatusCodeMap,
-        };
     }
 }

@@ -90,13 +90,13 @@ namespace Yubico.YubiKey.U2f.Commands
 
             set
             {
-                if ((value.Length < MinimumPinLength) || (value.Length > MaximumPinLength))
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPinLength));
-                }
+                //if ((value.Length < MinimumPinLength) || (value.Length > MaximumPinLength))
+                //{
+                //    throw new ArgumentException(
+                //        string.Format(
+                //            CultureInfo.CurrentCulture,
+                //            ExceptionMessages.InvalidPinLength));
+                //}
 
                 _newPin = value;
             }

@@ -52,6 +52,24 @@ Data | SW1 | SW2
 :---: | :---: | :---:
 (no data) | 63 | C0
 
+#### Response APDU for blocked PIN
+
+Total Length: 2\
+Data Length: 0
+
+Data | SW1 | SW2
+:---: | :---: | :---:
+(no data) | 69 | 83
+
+#### Response APDU for new PIN invalid length
+
+Total Length: 2\
+Data Length: 0
+
+Data | SW1 | SW2
+:---: | :---: | :---:
+(no data) | 67 | 00
+
 #### Response APDU for PIN not supported
 
 If you try to set a U2F PIN on a non-FIPS YubiKey, a version 5 YubiKey

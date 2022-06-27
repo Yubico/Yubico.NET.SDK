@@ -250,11 +250,35 @@ namespace Yubico.YubiKey
         /// YubiKey.
         /// </para>
         /// <para>
+        /// In addition, when the SDK calls a KeyCollector with this request, it
+        /// will ignore the return value. That is, it is not possible to cancel
+        /// this request.
+        /// </para>
+        /// <para>
         /// Ideally, you should not block this call. However, to ensure the proper function
         /// of the SDK, this request will be issued on a separate thread from the one that
         /// originated this call.
         /// </para>
         /// </remarks>
         TouchRequest = 9,
+
+        /// <summary>
+        /// Indicates that the SDK is setting the FIDO U2F PIN. The YubiKey is
+        /// not set with a U2F PIN yet, so collect only a new PIN.
+        /// </summary>
+        SetU2fPin = 10,
+
+        /// <summary>
+        /// Indicates that the SDK is requesting the current FIDO U2F PIN and a
+        /// new PIN, in order to change the PIN from the current to the new.
+        /// Collect both both the current and a new PIN.
+        /// </summary>
+        ChangeU2fPin = 11,
+
+        /// <summary>
+        /// Indicates that the SDK is verifying the FIDO U2F PIN. Collect the
+        /// current PIN.
+        /// </summary>
+        VerifyU2fPin = 12,
     }
 }

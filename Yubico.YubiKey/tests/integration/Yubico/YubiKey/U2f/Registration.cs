@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.U2f
                 // This is not a well-formed challenge. That's OK - we're not really trying to log in here.
                 byte[] clientDataHash = U2fSession.EncodeAndHashString("FakeChallenge");
 
-                RegistrationData registrationData = u2fSession.Register(applicationId, clientDataHash);
+                RegistrationData registrationData = u2fSession.Register(applicationId, clientDataHash, new TimeSpan(0, 0, 5));
 
                 Assert.True(registrationData.VerifySignature(applicationId, clientDataHash));
             }

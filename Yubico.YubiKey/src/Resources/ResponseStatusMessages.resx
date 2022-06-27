@@ -276,6 +276,9 @@
   <data name="BaseWrongLength" xml:space="preserve">
     <value>Wrong length.</value>
   </data>
+  <data name="U2fPinNotVerified" xml:space="preserve">
+    <value>The request was rejected because the PIN was not verified.</value>
+  </data>
   <data name="U2fConditionsNotSatisfied" xml:space="preserve">
     <value>The request was rejected due to test-of-user-presence being required.</value>
   </data>

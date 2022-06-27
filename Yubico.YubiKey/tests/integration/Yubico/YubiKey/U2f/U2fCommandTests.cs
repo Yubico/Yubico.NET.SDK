@@ -24,11 +24,11 @@ namespace Yubico.YubiKey.U2f
 {
     // These tests all reset the U2F application on the YubiKey, then run the
     // test, then Reset the application again.
-    public class U2fTestsWithReset : IDisposable
+    public class U2fCommandTests
     {
         private readonly FidoConnection _fidoConnection;
 
-        public U2fTestsWithReset()
+        public U2fCommandTests()
         {
             if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
             {
@@ -51,13 +51,6 @@ namespace Yubico.YubiKey.U2f
 
             _fidoConnection = new FidoConnection(deviceToUse);
             Assert.NotNull(_fidoConnection);
-
-            ResetU2f();
-        }
-
-        public void Dispose()
-        {
-            ResetU2f();
         }
 
         [Fact]
@@ -67,6 +60,11 @@ namespace Yubico.YubiKey.U2f
             {
                 return;
             }
+
+            byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            var vfyPinCmd = new VerifyPinCommand(pin);
+            VerifyPinResponse vfyPinRsp = _fidoConnection.SendCommand(vfyPinCmd);
+            Assert.Equal(ResponseStatus.Success, vfyPinRsp.Status);
 
             byte[] appId = RegistrationDataTests.GetAppIdArray(true);
             byte[] clientDataHash = RegistrationDataTests.GetClientDataHashArray(true);
@@ -137,15 +135,6 @@ namespace Yubico.YubiKey.U2f
             }
 
             return null;
-        }
-
-        private void ResetU2f()
-        {
-            if (!(_fidoConnection is null))
-            {
-                var resetCmd = new ResetCommand();
-                _ = _fidoConnection.SendCommand(resetCmd);
-            }
         }
     }
 }

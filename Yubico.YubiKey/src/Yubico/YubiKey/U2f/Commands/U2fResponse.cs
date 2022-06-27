@@ -34,6 +34,7 @@ namespace Yubico.YubiKey.U2f.Commands
             // U2F raw message status codes - FIDO U2F Raw Message Formats, section 3.3
             SWConstants.ConditionsNotSatisfied => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.U2fConditionsNotSatisfied),
             SWConstants.InvalidCommandDataParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fWrongData),
+            SWConstants.VerifyFail => new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.U2fPinNotVerified),
 
             // U2FHID_ERROR - FIDO U2F HID Protocol, section 4.1.4
             SWConstants.CommandNotAllowed => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidCommand),

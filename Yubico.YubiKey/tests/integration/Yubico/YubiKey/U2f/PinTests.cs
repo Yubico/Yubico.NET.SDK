@@ -100,6 +100,27 @@ namespace Yubico.YubiKey.U2f
             Assert.Equal(ResponseStatus.ConditionsNotSatisfied, setRsp.Status);
         }
 
+
+        [Fact]
+        public void InvalidPin_CorrectError()
+        {
+            byte[] currentPin = new byte[] {
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36
+            };
+            byte[] badPin = new byte[] {
+                0x41, 0x42, 0x43, 0x44
+            };
+
+            if (_fidoConnection is null)
+            {
+                return;
+            }
+
+            var setCmd = new SetPinCommand(currentPin, badPin);
+            SetPinResponse setRsp = _fidoConnection.SendCommand(setCmd);
+            Assert.NotEqual(ResponseStatus.Success, setRsp.Status);
+        }
+
         [Fact]
         public void VerifyPin_Succeeds()
         {

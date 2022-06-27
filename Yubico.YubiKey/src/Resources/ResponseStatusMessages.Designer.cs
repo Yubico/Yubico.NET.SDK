@@ -19,7 +19,7 @@ namespace Yubico.YubiKey {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class ResponseStatusMessages {
@@ -547,7 +547,7 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The device is busy for the requesting channel..
+        ///   Looks up a localized string similar to The device is busy on the requested channel..
         /// </summary>
         internal static string U2fHidErrorChannelBusy {
             get {
@@ -583,7 +583,7 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The packet sequence does not match the expected value..
+        ///   Looks up a localized string similar to The packet contained an invalid or out of order sequence number..
         /// </summary>
         internal static string U2fHidErrorInvalidSequence {
             get {
@@ -606,6 +606,15 @@ namespace Yubico.YubiKey {
         internal static string U2fHidErrorUnknown {
             get {
                 return ResourceManager.GetString("U2fHidErrorUnknown", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request was rejected because the PIN was not verified..
+        /// </summary>
+        internal static string U2fPinNotVerified {
+            get {
+                return ResourceManager.GetString("U2fPinNotVerified", resourceCulture);
             }
         }
         

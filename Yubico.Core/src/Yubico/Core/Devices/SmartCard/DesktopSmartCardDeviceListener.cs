@@ -50,6 +50,15 @@ namespace Yubico.Core.Devices.SmartCard
             uint result = SCardEstablishContext(SCARD_SCOPE.USER, out SCardContext context);
             _log.SCardApiCall(nameof(SCardEstablishContext), result);
 
+            // If we failed to establish context to the smart card subsystem, something substantially wrong
+            // has occured. We should not continue, and the device listener should remain dormant.
+            if (result != ErrorCode.SCARD_S_SUCCESS)
+            {
+                _context = new SCardContext(IntPtr.Zero);
+                _readerStates = Array.Empty<SCARD_READER_STATE>();
+                return;
+            }
+
             _context = context;
             _readerStates = GetReaderStateList();
 

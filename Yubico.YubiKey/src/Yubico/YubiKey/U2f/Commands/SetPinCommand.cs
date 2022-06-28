@@ -28,11 +28,6 @@ namespace Yubico.YubiKey.U2f.Commands
     {
         private const byte Ctap1MessageInstruction = 0x03;
         private const byte SetPinInstruction = 0x44;
-        private const int MinimumPinLength = 6;
-        private const int MaximumPinLength = 32;
-
-        private ReadOnlyMemory<byte> _currentPin = ReadOnlyMemory<byte>.Empty;
-        private ReadOnlyMemory<byte> _newPin = ReadOnlyMemory<byte>.Empty;
 
         /// <summary>
         /// The PIN needed to perform U2F operations on a FIPS YubiKey. If this is
@@ -40,7 +35,9 @@ namespace Yubico.YubiKey.U2f.Commands
         /// </summary>
         /// <remarks>
         /// If there is a PIN, it must be from 6 to 32 bytes long (inclusive). It
-        /// is binary data.
+        /// is binary data. This command class will use whatever PIN you supply,
+        /// so if it is an incorrect length, you will get the error when trying
+        /// to execute the command.
         /// <para>
         /// This class will copy a reference to the PIN provided. Do not
         /// overwrite the data until after the command has executed. After it has
@@ -51,56 +48,29 @@ namespace Yubico.YubiKey.U2f.Commands
         /// PIN for the first time), there is no need to set this property.
         /// </para>
         /// </remarks>
-        public ReadOnlyMemory<byte> CurrentPin
-        {
-            get => _currentPin;
-
-            set
-            {
-                if ((value.Length != 0) && ((value.Length < MinimumPinLength) || (value.Length > MaximumPinLength)))
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPinLength));
-                }
-
-                _currentPin = value;
-            }
-        }
+        public ReadOnlyMemory<byte> CurrentPin { get; set; }
 
         /// <summary>
         /// The PIN that will replace the current PIN.
         /// </summary>
         /// <remarks>
-        /// The PIN must be from 6 to 32 bytes long (inclusive). It is binary
-        /// data. It is not possible to pass in an Empty PIN (changing a YubiKey
-        /// from PIN required to no PIN). Once a PIN is set, the U2F application
-        /// on that YubiKey must always have a PIN. The only way to remove a PIN
-        /// is to reset the application.
+        /// The PIN must be from 6 to 32 bytes long (inclusive). This command
+        /// class will use whatever PIN you supply, so if it is an incorrect
+        /// length, you will get the error when trying to execute the command.
+        /// <para>
+        /// It is binary data. It is not possible to pass in an Empty PIN
+        /// (changing a YubiKey from PIN required to no PIN). Once a PIN is set,
+        /// the U2F application on that YubiKey must always have a PIN. The only
+        /// way to remove a PIN is to reset the application.
+        /// </para>
         /// <para>
         /// This class will copy a reference to the PIN provided. Do not
         /// overwrite the data until after the command has executed. After it has
         /// executed, overwrite the buffer for security reasons.
         /// </para>
         /// </remarks>
-        public ReadOnlyMemory<byte> NewPin
-        {
-            get => _newPin;
+        public ReadOnlyMemory<byte> NewPin { get; set; }
 
-            set
-            {
-                //if ((value.Length < MinimumPinLength) || (value.Length > MaximumPinLength))
-                //{
-                //    throw new ArgumentException(
-                //        string.Format(
-                //            CultureInfo.CurrentCulture,
-                //            ExceptionMessages.InvalidPinLength));
-                //}
-
-                _newPin = value;
-            }
-        }
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs.
         /// </summary>
@@ -125,6 +95,8 @@ namespace Yubico.YubiKey.U2f.Commands
         /// </remarks>
         private SetPinCommand()
         {
+            CurrentPin = ReadOnlyMemory<byte>.Empty;
+            NewPin = ReadOnlyMemory<byte>.Empty;
         }
 
         /// <summary>

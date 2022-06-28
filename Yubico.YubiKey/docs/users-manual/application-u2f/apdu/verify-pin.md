@@ -24,7 +24,7 @@ The data is the PIN itself, there is no further encoding.
 
 ### Response APDU info
 
-#### Response APDU for successful verifying PIN
+#### Response APDU for successfully verifying PIN
 
 Total Length: 2\
 Data Length: 0

@@ -724,6 +724,12 @@
   <data name="UnknownYubiKeyFeature" xml:space="preserve">
     <value>Unknown YubiKey feature.</value>
   </data>
+  <data name="YubiKeyNotFips" xml:space="preserve">
+    <value>The requested operation is not available on non-FIPS YubiKeys.</value>
+  </data>
+  <data name="AlreadySet" xml:space="preserve">
+    <value>The YubiKey is already set with the attribute specified.</value>
+  </data>
   <data name="InvalidU2fHidErrorCodeLength" xml:space="preserve">
     <value>The U2F HID error code should be 1 byte long. The supplied error code contains {0} bytes.</value>
   </data>

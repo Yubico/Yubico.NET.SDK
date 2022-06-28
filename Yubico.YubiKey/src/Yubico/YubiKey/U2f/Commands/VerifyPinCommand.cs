@@ -29,40 +29,22 @@ namespace Yubico.YubiKey.U2f.Commands
     {
         private const byte Ctap1MessageInstruction = 0x03;
         private const byte VerifyPinInstruction = 0x43;
-        private const int MinimumPinLength = 6;
-        private const int MaximumPinLength = 32;
-
-        private ReadOnlyMemory<byte> _pin = ReadOnlyMemory<byte>.Empty;
 
         /// <summary>
         /// The PIN needed to perform U2F operations on a FIPS YubiKey.
         /// </summary>
         /// <remarks>
         /// The PIN must be from 6 to 32 bytes long (inclusive). It is binary
-        /// data.
+        /// data. This command class will use whatever PIN you supply, so if it
+        /// is an incorrect length, you will get the error when trying to
+        /// execute tht command.
         /// <para>
         /// This class will copy a reference to the PIN provided. Do not
         /// overwrite the data until after the command has executed. After it has
         /// executed, overwrite the buffer for security reasons.
         /// </para>
         /// </remarks>
-        public ReadOnlyMemory<byte> Pin
-        {
-            get => _pin;
-
-            set
-            {
-                if ((value.Length < MinimumPinLength) || (value.Length > MaximumPinLength))
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPinLength));
-                }
-
-                _pin = value;
-            }
-        }
+        public ReadOnlyMemory<byte> Pin { get; set; }
 
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs.

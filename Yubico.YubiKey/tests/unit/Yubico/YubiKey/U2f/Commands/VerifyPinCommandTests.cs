@@ -151,34 +151,6 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         [Fact]
-        public void CreateCommandApdu_PinIsEmpty_ThrowsArgumentException()
-        {
-            _ = Assert.Throws<ArgumentException>(() => new VerifyPinCommand(Array.Empty<byte>()));
-        }
-
-        [Fact]
-        public void CreateCommandApdu_PinIsNull_ThrowsArgumentException()
-        {
-            _ = Assert.Throws<ArgumentException>(() => new VerifyPinCommand(null));
-        }
-
-        [Fact]
-        public void CreateCommandApdu_PinLengthLessThan6_ThrowsArgumentException()
-        {
-            byte[] pin = new byte[] { 1, 2, 3, 4 };
-
-            _ = Assert.Throws<ArgumentException>(() => new VerifyPinCommand(pin));
-        }
-
-        [Fact]
-        public void CreateCommandApdu_PinLengthMoreThan32_ThrowsArgumentException()
-        {
-            byte[] pin = new byte[33];
-
-            _ = Assert.Throws<ArgumentException>(() => new VerifyPinCommand(pin));
-        }
-
-        [Fact]
         public void CreateResponseApdu_ReturnsCorrectType()
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });

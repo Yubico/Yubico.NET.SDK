@@ -117,6 +117,28 @@ end user at the keyboard, which would make it a normal password.
 Once you set the password, the YubiKey will be in FIPS mode and the
 `VerifyFipsModeCommand` will return true.
 
+## Retries
+
+If a caller wants to verify or change a PIN, the current PIN must be entered. If a wrong
+value is provided, the PIN won't be verified or changed and the caller can try again.
+However, there are limits to how many times a wrong value can be entered.
+
+If an incorrect PIN is entered three times in a row, the U2F application is temporarily
+blocked. To unblock it, remove the YubiKey and reinsert it.
+
+If an incorrect PIN is entered eight times in a row (three times, reinserted, three times,
+reinserted, two times), the U2F application is permanently blocked. At this point, to be
+able to use the U2F application on that YubiKey again, it must be reset. Of course, after
+resetting, the YubiKey can no longer be put into FIPS mode.
+
+If the correct PIN is verified before the U2F application is blocked, the retries
+remaining count returns to eight.
+
+Unfortunately in the version 4 FIPS series YubiKey, it is not possible to know how many
+U2F PIN retries are remaining. That is, if the wrong PIN has been entered, the SDK will
+return to the caller indicating that the wrong PIN was entered, but will not be able to
+report the number of retries remaining.
+
 ## Removing the PIN
 
 Once a PIN is set on the U2F application, it is not possible to remove it with the

@@ -54,8 +54,10 @@ namespace Yubico.Core.Devices.SmartCard
             // has occured. We should not continue, and the device listener should remain dormant.
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {
+                context.Dispose(); // Needed to satisfy analyzer (even though it should be null already)
                 _context = new SCardContext(IntPtr.Zero);
                 _readerStates = Array.Empty<SCARD_READER_STATE>();
+                _log.LogWarning("SmartCardDeviceListener dormant as SDK was unable to establish a context to the PCSC service.");
                 return;
             }
 

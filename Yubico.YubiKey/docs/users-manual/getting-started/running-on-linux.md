@@ -83,7 +83,7 @@ If there is broad interest, we will evaluate adding support to our roadmap.
 As of SDK 1.4.0, the SDK P/Invokes UDev's shared library `libudev.so`. This library can have
 multiple names (usually including a version number, e.g. `libudev.so.1`), so we target
 the lowest common denominator name: `libudev`. As of .NET 7, the .NET library resolver is
-currently not capable of automatically resolving the full path / name of this dependency.
+not capable of automatically resolving the full path / name of this dependency.
 
 As such, it will likely be required that you create a symbolic link from your shared
 library directory, typically `/usr/lib`, to the real location of libudev.

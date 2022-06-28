@@ -26,7 +26,7 @@ The OTP application on the YubiKey allows developers to program the device with 
 - [Yubico OTP](xref:OtpYubicoOtp)
 - [Initiative for Open Authentication HMAC-based OTP (OATH HOTP)](xref:OtpHotp)
 - [Static password](xref:OtpStaticPassword)
-- Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)
+- [Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)](xref:OtpChallengeResponse)
 
 YubiKeys that support NFC also include a configurable [NDEF](xref:OtpNdef) (NFC Data Exchange Format) tag. This tag can be configured to point to a slot that is programmed with a Yubico OTP or an OATH HOTP in order to make the OTP easily readable in NFC authentication scenarios.
 

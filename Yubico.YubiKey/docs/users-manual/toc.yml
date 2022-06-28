@@ -76,6 +76,8 @@
         href: application-otp/hotp.md
       - name: Static passwords
         href: application-otp/static-password.md
+      - name: Challenge-response
+        href: application-otp/challenge-response.md
       - name: NDEF
         href: application-otp/ndef.md
   - name: How-to Guides

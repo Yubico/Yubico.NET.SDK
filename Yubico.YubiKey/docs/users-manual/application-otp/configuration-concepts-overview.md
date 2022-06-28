@@ -24,7 +24,7 @@ The articles in this section cover the four OTP application configurations, as w
 - [Yubico OTP](xref:OtpYubicoOtp)
 - [Initiative for Open Authentication HMAC-based OTP (OATH HOTP)](xref:OtpHotp)
 - [Static password](xref:OtpStaticPassword)
-- Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)
+- [Challenge-response (using the HMAC-SHA1 or Yubico OTP algorithms)](xref:OtpChallengeResponse)
 
 The purpose of these articles is to convey the following information:
 

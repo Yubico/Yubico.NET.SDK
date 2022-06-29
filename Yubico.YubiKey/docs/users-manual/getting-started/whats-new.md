@@ -27,9 +27,9 @@ Features:
 - **AES-based PIV management keys**. Newer versions of the YubiKey (firmware 5.4.2 and above) have the ability
   to use AES-based encryption for the management key. This is in addition to the existing Triple-DES based
   management keys. Read the updated [PIN, PUK, and Management Key](xref:UsersManualPinPukMgmtKey) article for
-  more inforamtion.
+  more information.
 - **FIDO U2F**. Applications using this SDK can now use the YubiKey's FIDO U2F application. This means that
-  the SDK is now also enumerating the HID FIDO device, in addition to the HID Keyboard and Smart Card devices
+  the SDK is now also enumerating the HID FIDO device, in addition to the HID keyboard and smart card devices
   exposed by the YubiKey. Use this feature if your application wants to handle U2F registration or authentication.
   Note that on Microsoft Windows, applications must run with elevated privileges in order to talk to FIDO devices.
   This is a requirement set in place by Microsoft. See [FIDO U2F overview](xref:FidoU2fOverview) for more information.

@@ -46,9 +46,22 @@ namespace Yubico.Core.Devices.SmartCard
         public DesktopSmartCardDeviceListener()
         {
             _log.LogInformation("Creating DesktopSmartCardDeviceListener.");
+            Status = DeviceListenerStatus.Stopped;
 
             uint result = SCardEstablishContext(SCARD_SCOPE.USER, out SCardContext context);
             _log.SCardApiCall(nameof(SCardEstablishContext), result);
+
+            // If we failed to establish context to the smart card subsystem, something substantially wrong
+            // has occured. We should not continue, and the device listener should remain dormant.
+            if (result != ErrorCode.SCARD_S_SUCCESS)
+            {
+                context.Dispose(); // Needed to satisfy analyzer (even though it should be null already)
+                _context = new SCardContext(IntPtr.Zero);
+                _readerStates = Array.Empty<SCARD_READER_STATE>();
+                Status = DeviceListenerStatus.Error;
+                _log.LogWarning("SmartCardDeviceListener dormant as SDK was unable to establish a context to the PCSC service.");
+                return;
+            }
 
             _context = context;
             _readerStates = GetReaderStateList();
@@ -68,6 +81,7 @@ namespace Yubico.Core.Devices.SmartCard
                     IsBackground = true
                 };
                 _isListening = true;
+                Status = DeviceListenerStatus.Started;
                 _listenerThread.Start();
             }
         }
@@ -142,6 +156,7 @@ namespace Yubico.Core.Devices.SmartCard
 
             ClearEventHandlers();
             _isListening = false;
+            Status = DeviceListenerStatus.Stopped;
             _listenerThread.Join();
         }
 

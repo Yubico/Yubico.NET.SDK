@@ -48,6 +48,11 @@ namespace Yubico.Core.Devices.SmartCard
         public event EventHandler<SmartCardDeviceEventArgs>? Removed;
 
         /// <summary>
+        /// A status that indicates the state of the device listener.
+        /// </summary>
+        public DeviceListenerStatus Status { get; set; }
+
+        /// <summary>
         /// Creates an instance of a <see cref="SmartCardDeviceListener"/>.
         /// </summary>
         /// <returns>

@@ -16,6 +16,42 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.4.x Releases
+
+### 1.4.0
+
+Release date: June 30th, 2022
+
+Features:
+
+- **AES-based PIV management keys**. Newer versions of the YubiKey (firmware 5.4.2 and above) have the ability
+  to use AES-based encryption for the management key. This is in addition to the existing Triple-DES based
+  management keys. Read the updated [PIN, PUK, and Management Key](xref:UsersManualPinPukMgmtKey) article for
+  more information.
+- **FIDO U2F**. Applications using this SDK can now use the YubiKey's FIDO U2F application. This means that
+  the SDK is now also enumerating the HID FIDO device, in addition to the HID keyboard and smart card devices
+  exposed by the YubiKey. Use this feature if your application wants to handle U2F registration or authentication.
+  Note that on Microsoft Windows, applications must run with elevated privileges in order to talk to FIDO devices.
+  This is a requirement set in place by Microsoft. See [FIDO U2F overview](xref:FidoU2fOverview) for more information.
+- **SCP03**. Secure Channel Protocol 03 (also referred to as SCP03) is a Global Platform specification that
+  allows clients of smart cards to encrypt all traffic to and from the card. Since the YubiKey can act as a smart
+  card, this means that it is now possible to encrypt all traffic for the OATH, PIV, and OpenPGP applications.
+  In order for this to work, however, your YubiKey must be pre-configured for this feature. Read more about
+  [SCP03 here](xref:UsersManualScp03).
+- **Debian, RHEL, and CentOS support**. Our testing of Linux platforms has expanded to include the Debian,
+  Red Hat Enterprise Linux (RHEL), and CentOS distributions. Please read [running on Linux](xref:RunningOnLinux)
+  for more details.
+
+Bug fixes:
+
+- High CPU usage when the SDK can't connect to the smart card subsystem.
+- Yubico.NativeShims DLL not found when using .NET Framework 4.x. Note that there is an additional issue
+  with `packages.config` that is not able to be resolved. Developers are urged to upgrade to the newer
+  `<PackageReferences>` method if at all possible. Manual installation of the Yubico.NativeShims library
+  will be necessary if you are stuck on `packages.config`.
+- "Duplicate resource" error when compiling for UWP applications.
+
+
 ## 1.3.x Releases
 
 ### 1.3.1

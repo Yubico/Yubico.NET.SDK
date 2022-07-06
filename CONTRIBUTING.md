@@ -144,7 +144,7 @@ The following file header is used for the SDK. Please add it to all new files, u
 comment syntax.
 
 ```
-Copyright 2021 Yubico AB
+Copyright 2022 Yubico AB
 
 Licensed under the Apache License, Version 2.0 (the "License").
 You may not use this file except in compliance with the License.

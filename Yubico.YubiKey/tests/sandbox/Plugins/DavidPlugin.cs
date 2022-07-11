@@ -50,18 +50,28 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
             if (keys.Any())
             {
-                IYubiKeyDevice key = keys.First();
-                Output.WriteLine($"Using YubiKey v{key.FirmwareVersion} S/N {key.SerialNumber}...");
-
-                result = key.TryConnect(YubiKeyApplication.YubiHsmAuth, out _);
-
-                if (result)
+                foreach (IYubiKeyDevice device in keys)
                 {
-                    Output.WriteLine($"Successfully connected to YubiHSM Auth");
-                }
-                else
-                {
-                    Output.WriteLine($"Failed to connect to YubiHSM Auth");
+                    Output.WriteLine($"Using YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
+
+                    bool yubiHsmAuthCapable = device.HasFeature(YubiKeyFeature.YubiHsmAuthApplication);
+                    bool yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
+
+                    Output.WriteLine($"YubiHSM Auth app, has feature: {yubiHsmAuthCapable}");
+                    Output.WriteLine($"YubiHSM Auth app, is enabled: {yubiHsmAuthEnabled}");
+
+                    result = yubiHsmAuthEnabled ? device.TryConnect(YubiKeyApplication.YubiHsmAuth, out _) : false;
+
+                    if (result)
+                    {
+                        Output.WriteLine($"Successfully connected to YubiHSM Auth");
+                    }
+                    else
+                    {
+                        Output.WriteLine($"Failed to connect to YubiHSM Auth");
+                    }
+
+                    Output.WriteLine();
                 }
             }
 

@@ -70,6 +70,11 @@ namespace Yubico.YubiKey
         Oath = 0b0010_0000,
 
         /// <summary>
+        /// The YubiHSM Auth application is enabled.
+        /// </summary>
+        YubiHsmAuth = 0b0001_0000_0000,
+
+        /// <summary>
         /// The FIDO2 (CTAP2) application is enabled.
         /// </summary>
         Fido2 = 0b0010_0000_0000,

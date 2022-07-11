@@ -213,6 +213,14 @@ namespace Yubico.YubiKey
         /// <summary>
         /// Support for SHA-512 based OTP credentials.
         /// </summary>
-        OathSha512
+        OathSha512,
+
+        // YubiHSM Auth application
+
+        /// <summary>
+        /// The YubiHSM Auth application. Corresponds to the functionality located in the
+        /// Yubico.YubiKey.YubiHsmAuth namespace.
+        /// </summary>
+        YubiHsmAuthApplication,
     }
 }

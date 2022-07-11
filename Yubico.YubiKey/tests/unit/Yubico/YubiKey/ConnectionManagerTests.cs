@@ -82,6 +82,7 @@ namespace Yubico.YubiKey
                 new object[] { TestSmartCardDevice.AnyInstance, YubiKeyApplication.FidoU2f },
                 new object[] { TestSmartCardDevice.AnyInstance, YubiKeyApplication.Fido2 },
                 new object[] { TestSmartCardDevice.AnyInstance, YubiKeyApplication.Management },
+                new object[] { TestSmartCardDevice.AnyInstance, YubiKeyApplication.YubiHsmAuth },
                 new object[] { TestSmartCardDevice.NfcInstance, YubiKeyApplication.OtpNdef }
             };
 
@@ -101,11 +102,13 @@ namespace Yubico.YubiKey
                 new object[] { TestHidDevice.FidoInstance, YubiKeyApplication.Piv },
                 new object[] { TestHidDevice.FidoInstance, YubiKeyApplication.OpenPgp },
                 new object[] { TestHidDevice.FidoInstance, YubiKeyApplication.Management },
+                new object[] { TestHidDevice.FidoInstance, YubiKeyApplication.YubiHsmAuth },
                 new object[] { TestHidDevice.KeyboardInstance, YubiKeyApplication.OtpNdef },
                 new object[] { TestHidDevice.KeyboardInstance, YubiKeyApplication.Oath },
                 new object[] { TestHidDevice.KeyboardInstance, YubiKeyApplication.Piv },
                 new object[] { TestHidDevice.KeyboardInstance, YubiKeyApplication.OpenPgp },
                 new object[] { TestHidDevice.KeyboardInstance, YubiKeyApplication.Management },
+                new object[] { TestHidDevice.KeyboardInstance, YubiKeyApplication.YubiHsmAuth },
             };
 
         [Theory]

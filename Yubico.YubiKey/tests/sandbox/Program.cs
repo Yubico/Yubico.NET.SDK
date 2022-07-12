@@ -42,7 +42,6 @@ namespace Yubico.YubiKey.TestApp
                 ["update"] = (output) => new UpdateSlot(output),
                 ["yubiotp"] = (output) => new YubiOtp(output),
                 ["enumeration"] = (output) => new EnumeratePlugin(output),
-                ["fido"] = (output) => new FidoPlugin(output),
                 ["u2f"] = (output) => new U2fPlugin(output),
                 ["hidcodetablegenerator"] = (output) => new HidCodeTablePlugin(output),
                 ["validatehotp"] = (output) => new ValidateHotp(output),

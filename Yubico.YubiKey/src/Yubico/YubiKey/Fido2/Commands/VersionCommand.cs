@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             return new CommandApdu()
             {
-                Ins = (byte)CtapHidCommand.InitializeChannel,
+                Ins = (byte)0x06,
                 Data = payload
             };
         }

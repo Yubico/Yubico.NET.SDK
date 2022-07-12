@@ -42,4 +42,8 @@ limitations under the License. -->
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Yubico\YubiKey\Fido2" />
+  </ItemGroup>
 </Project>

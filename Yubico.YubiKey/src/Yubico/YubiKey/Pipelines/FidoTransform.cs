@@ -18,6 +18,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Fido2;
 
 namespace Yubico.YubiKey.Pipelines
 {
@@ -29,6 +30,7 @@ namespace Yubico.YubiKey.Pipelines
     {
         private const int Ctap1Message = 0x03;
         private const int CtapError = 0x3F;
+        private const int CtapHidCbor = 0x10;
 
         private const int PacketSize = 64;
         private const int MaxPayloadSize = 7609; // 64 - 7 + 128 * (64 - 5)
@@ -85,6 +87,7 @@ namespace Yubico.YubiKey.Pipelines
                 responseByte switch
                 {
                     Ctap1Message   => new ResponseApdu(responseData),
+                    CtapHidCbor    => new ResponseApdu(responseData.AsSpan(1).ToArray(), SWConstants.Success), // TODO
                     CtapError      => GetU2fHidErrorResponseApdu(responseData),
                     _              => new ResponseApdu(responseData, SWConstants.Success),
                 };
@@ -296,5 +299,30 @@ namespace Yubico.YubiKey.Pipelines
 
             return new ResponseApdu(responseData.ToArray(), statusWord);
         }
+
+        private static ResponseApdu GetCtap2ResponseApdu(Span<byte> responseData)
+        {
+            if (responseData.Length == 1)
+            {
+                return new ResponseApdu(Array.Empty<byte>(), GetSwForCtapError((CtapError)responseData[0]));
+            }
+
+            if (responseData[0] != 0)
+            {
+                throw new Exception("This is a temporary exception to monitor this assumption."); // TODO
+            }
+
+            return new ResponseApdu(responseData[1..].ToArray(), SWConstants.Success);
+        }
+
+        private static short GetSwForCtapError(CtapError ctapError) =>
+            ctapError switch
+            {
+                Fido2.CtapError.Ok => SWConstants.Success,
+                Fido2.CtapError.InvalidCommand => SWConstants.CommandNotAllowed,
+                Fido2.CtapError.InvalidParameter => SWConstants.InvalidParameter,
+                Fido2.CtapError.InvalidLength => SWConstants.WrongLength,
+                _ => unchecked((short)((SW1Constants.NoPreciseDiagnosis << 8) | (byte)ctapError))
+            };
     }
 }

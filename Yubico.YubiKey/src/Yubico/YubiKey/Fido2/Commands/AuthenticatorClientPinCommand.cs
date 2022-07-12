@@ -18,23 +18,6 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    public enum PinUvAuthProtocol
-    {
-        ProtocolOne,
-        ProtocolTwo,
-    }
-
-    [Flags]
-    public enum PinUvAuthTokenPermissions
-    {
-        MakeCredential = 0x01,
-        GetAssertion = 0x02,
-        CredentialManagement = 0x04,
-        BioEnrollment = 0x08,
-        LargeBlobWrite = 0x10,
-        AuthenticatorConfiguration = 0x20,
-    }
-
     public class AuthenticatorClientPinCommand : IYubiKeyCommand<IYubiKeyResponse>
     {
         // Command constants
@@ -86,39 +69,39 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             if (PinUvAuthProtocol is { })
             {
-                WriteMapEntry(cbor, TagPinUvAuthProtocol, (uint)PinUvAuthProtocol.Value);
+                CborHelpers.WriteMapEntry(cbor, TagPinUvAuthProtocol, (uint)PinUvAuthProtocol.Value);
             }
 
-            WriteMapEntry(cbor, TagSubCommand, (uint)SubCommand);
+            CborHelpers.WriteMapEntry(cbor, TagSubCommand, (uint)SubCommand);
 
             if (KeyAgreement is { })
             {
-                WriteMapEntry(cbor, TagKeyAgreement, KeyAgreement.Value);
+                CborHelpers.WriteMapEntry(cbor, TagKeyAgreement, KeyAgreement.Value);
             }
 
             if (PinUvAuthParam is { })
             {
-                WriteMapEntry(cbor, TagPinUvAuthParam, PinUvAuthParam.Value);
+                CborHelpers.WriteMapEntry(cbor, TagPinUvAuthParam, PinUvAuthParam.Value);
             }
 
             if (NewPinEnc is { })
             {
-                WriteMapEntry(cbor, TagNewPinEnc, NewPinEnc.Value);
+                CborHelpers.WriteMapEntry(cbor, TagNewPinEnc, NewPinEnc.Value);
             }
 
             if (PinHashEnc is { })
             {
-                WriteMapEntry(cbor, TagPinHashEnc, PinHashEnc.Value);
+                CborHelpers.WriteMapEntry(cbor, TagPinHashEnc, PinHashEnc.Value);
             }
 
             if (Permissions is { })
             {
-                WriteMapEntry(cbor, TagPermissions, (uint)Permissions.Value);
+                CborHelpers.WriteMapEntry(cbor, TagPermissions, (uint)Permissions.Value);
             }
 
             if (RpId is { })
             {
-                WriteMapEntry(cbor, TagRpId, RpId);
+                CborHelpers.WriteMapEntry(cbor, TagRpId, RpId);
             }
 
             cbor.WriteEndMap();
@@ -135,28 +118,12 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             return new CommandApdu()
             {
-                Ins = (byte)CtapHidCommand.Cbor,
-                Data = cbor.Encode()
+                Ins = CtapConstants.CtapHidCbor,
+                Data = data
             };
         }
 
-        private static void WriteMapEntry(CborWriter cbor, uint key, string value)
-        {
-            cbor.WriteUInt32(key);
-            cbor.WriteTextString(value);
-        }
 
-        private static void WriteMapEntry(CborWriter cbor, uint key, uint value)
-        {
-            cbor.WriteUInt32(key);
-            cbor.WriteUInt32(value);
-        }
-
-        private static void WriteMapEntry(CborWriter cbor, uint key, ReadOnlyMemory<byte> value)
-        {
-            cbor.WriteUInt32(key);
-            cbor.WriteByteString(value.Span);
-        }
 
         /// <inheritdoc />
         public IYubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => throw new System.NotImplementedException();

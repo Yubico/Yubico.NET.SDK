@@ -16,28 +16,35 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    public class GetPinRetriesCommand : IYubiKeyCommand<GetPinRetriesResponse>
+    public class GetPinRetriesResponse : IYubiKeyResponseWithData<int>
     {
-        private readonly AuthenticatorClientPinCommand _command;
+        private readonly AuthenticatorClientPinResponse _response;
 
-        private const int SubCmdGetPinRetries = 0x01;
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
-
-        public GetPinRetriesCommand()
+        public GetPinRetriesResponse(ResponseApdu responseApdu)
         {
-            _command = new AuthenticatorClientPinCommand()
-            {
-                SubCommand = SubCmdGetPinRetries
-            };
+            _response = new AuthenticatorClientPinResponse(responseApdu);
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
+        public int GetData()
+        {
+            int? pinRetries = _response.GetData().PinRetries;
+
+            if (pinRetries is null)
+            {
+                throw new Ctap2DataException(); // TODO
+            }
+
+            return pinRetries.Value;
+        }
 
         /// <inheritdoc />
-        public GetPinRetriesResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetPinRetriesResponse(responseApdu);
+        public ResponseStatus Status => _response.Status;
+
+        /// <inheritdoc />
+        public short StatusWord => _response.StatusWord;
+
+        /// <inheritdoc />
+        public string StatusMessage => _response.StatusMessage;
     }
 }

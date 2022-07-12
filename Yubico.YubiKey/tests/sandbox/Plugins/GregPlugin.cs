@@ -14,9 +14,9 @@
 
 using System;
 using System.Linq;
+using System.Threading;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
-using Yubico.YubiKey.Otp;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
@@ -39,23 +39,15 @@ namespace Yubico.YubiKey.TestApp.Plugins
                         })
                     .AddFilter(level => level >= LogLevel.Information));
 
-            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
+            var yubiKey = YubiKeyDevice.FindAll().First();
 
-            using (var otp = new OtpSession(yubiKey))
+            Thread.Sleep(3000);
+
+            using (var connection = yubiKey.Connect(YubiKeyApplication.Fido2))
             {
-                otp.ConfigureNdef(Slot.ShortPress)
-                    .AsText("foo")
-                    .Execute();
+                var response = connection.SendCommand(new Fido2.Commands.GetPinRetriesCommand());
 
-                NdefDataReader ndefValue = otp.ReadNdefTag();
-                if (ndefValue.Type == NdefDataType.Text)
-                {
-                    Console.WriteLine(ndefValue.ToText().Text);
-                }
-                else
-                {
-                    Console.WriteLine(ndefValue.ToUri());
-                }
+                Console.WriteLine($"FIDO2 PIN retries: {response.GetData()}");
             }
 
             return true;

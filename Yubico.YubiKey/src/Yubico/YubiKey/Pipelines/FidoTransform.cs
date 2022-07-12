@@ -16,7 +16,6 @@ using System;
 using System.Buffers.Binary;
 using System.Linq;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
 
@@ -28,6 +27,9 @@ namespace Yubico.YubiKey.Pipelines
     /// </summary>
     internal class FidoTransform : IApduTransform
     {
+        private const int Ctap1Message = 0x03;
+        private const int CtapError = 0x3F;
+
         private const int PacketSize = 64;
         private const int MaxPayloadSize = 7609; // 64 - 7 + 128 * (64 - 5)
 
@@ -82,9 +84,9 @@ namespace Yubico.YubiKey.Pipelines
             ResponseApdu responseApdu =
                 responseByte switch
                 {
-                    (byte)CtapHidCommand.Ctap1Message   => new ResponseApdu(responseData),
-                    (byte)CtapHidCommand.Error          => GetU2fHidErrorResponseApdu(responseData),
-                    _                                   => new ResponseApdu(responseData, SWConstants.Success),
+                    Ctap1Message   => new ResponseApdu(responseData),
+                    CtapError      => GetU2fHidErrorResponseApdu(responseData),
+                    _              => new ResponseApdu(responseData, SWConstants.Success),
                 };
 
             return responseApdu;

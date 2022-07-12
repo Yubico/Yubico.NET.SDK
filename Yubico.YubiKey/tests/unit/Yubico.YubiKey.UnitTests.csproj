@@ -34,4 +34,8 @@ limitations under the License. -->
     <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
     <ProjectReference Include="..\utilities\Yubico.YubiKey.TestUtilities.csproj" />
   </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="Yubico\YubiKey\Fido2" />
+  </ItemGroup>
 </Project>

@@ -69,19 +69,6 @@ limitations under the License. -->
   </ItemGroup>
 
   <ItemGroup>
-
-    <Compile Update="Resources\CborExceptionMessages.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>CborExceptionMessages.resx</DependentUpon>
-    </Compile>
-
-    <EmbeddedResource Update="Resources\CborExceptionMessages.resx">
-      <Generator>PublicResXFileCodeGenerator</Generator>
-      <LastGenOutput>CborExceptionMessages.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>System.Formats.Cbor</CustomToolNamespace>
-    </EmbeddedResource>
-
     <None Include="..\..\LICENSE.txt" Pack="true" PackagePath="" />
   </ItemGroup>
 

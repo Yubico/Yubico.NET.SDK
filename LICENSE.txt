@@ -237,11 +237,6 @@ The following license applies to
 \Yubico.DotNetPolyfills\src\System.Security.Cryptography\CryptographicOperations.cs
 \Yubico.YubiKey\src\Yubico\YubiKey\Cryptography\RandomNumberGeneratorExt.cs
 
-This license also applies to the source files (as noted) which are located in
-the following directories:
-\Yubico.DotNetPolyfills\src\System.Formats.Cbor\
-\Yubico.DotNetPolyfills\tests\System.Formats.Cbor\
-
 The MIT License (MIT)
 
 Copyright (c) .NET Foundation and Contributors

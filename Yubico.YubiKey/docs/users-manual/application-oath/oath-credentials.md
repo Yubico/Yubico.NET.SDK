@@ -16,9 +16,9 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# OATH Credentials overview
+# OATH credentials overview
 
-An OATH credential can be a TOTP (Time-based One-time Password) or a HOTP (HMAC-based One-time Password). 
+An OATH credential can be a TOTP (Time-based One-time Password) or a HOTP (HMAC-based One-time Password).
 
 The credential has a set of parameters.
 
@@ -53,7 +53,7 @@ Also, if Issuer is not specified, the format will be:
 "period/account"
 ```
 
-Or just an Account Name for TOTP with default period or HOTP credentials: 
+Or just an Account Name for TOTP with default period or HOTP credentials:
 
 ```
 "account"
@@ -132,7 +132,7 @@ var credential = new Credential {
     Period = 30,
     Digits = 6,
     Secret = "HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ",
-    RequireTouch = false 
+    RequireTouch = false
 }
 
 // create HOTP credential
@@ -142,8 +142,8 @@ var credential = new Credential {
     Type = Hotp,
     Period = 0,
     Digits = 6,
-    Counter = 
+    Counter =
     Secret = "HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ",
-    RequireTouch = false 
+    RequireTouch = false
 }
 ```

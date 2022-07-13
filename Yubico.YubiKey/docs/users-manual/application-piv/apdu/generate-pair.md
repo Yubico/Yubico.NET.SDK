@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License. -->
 
 
-## Generate Asymmetric
+## Generate asymmetric key pair
 
 ### Command APDU Info
 

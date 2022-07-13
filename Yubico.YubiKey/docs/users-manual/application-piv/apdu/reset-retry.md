@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License. -->
 
 
-## Reset Retry (Recover the PIN)
+## Reset retry (recover the PIN)
 
 ### Command APDU Info
 
@@ -73,4 +73,3 @@ Received (SW1=0x90, SW2=0x00):
 Sending: 00 2C 00 80 10 31 32 33 34 35 36 37 38 31 32 33 34 35 36 37 FF
 Received (SW1=0x90, SW2=0x00)
 ```
-

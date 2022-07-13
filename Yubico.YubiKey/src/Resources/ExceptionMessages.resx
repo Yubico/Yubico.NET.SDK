@@ -748,4 +748,7 @@
   <data name="CborUnexpectedMapTag" xml:space="preserve">
     <value>Encountered an unexpected tag while processing a CBOR map.</value>
   </data>
+  <data name="Ctap2MissingRequiredField" xml:space="preserve">
+    <value>A required field was missing from the CTAP2 CBOR response.</value>
+  </data>
 </root>

@@ -19,7 +19,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <summary>
     /// This is the partner response class to the <see cref="GetPinRetriesCommand" /> command class.
     /// </summary>
-    public class GetPinRetriesResponse : IYubiKeyResponseWithData<int>
+    public class GetPinRetriesResponse : IYubiKeyResponseWithData<(int retriesRemaining, bool? powerCycleRequired)>
     {
         private readonly ClientPinResponse _response;
 
@@ -37,18 +37,23 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// Returns the number of PIN retries remaining for this YubiKey's FIDO application.
+        /// Returns the number of PIN retries remaining for this YubiKey's FIDO application, and if a reboot of the
+        /// YubiKey is required.
         /// </summary>
-        public int GetData()
+        /// <remarks>
+        /// The `powerCycleRequired` value returned can have three states: `true` if the YubiKey needs to be power-
+        /// cycled (rebooted), `false` if it does not, and `null` if this information could not be determined.
+        /// </remarks>
+        public (int retriesRemaining, bool? powerCycleRequired) GetData()
         {
-            int? pinRetries = _response.GetData().PinRetries;
+            ClientPinData data = _response.GetData();
 
-            if (pinRetries is null)
+            if (data.PinRetries is null)
             {
-                throw new Ctap2DataException(); // TODO
+                throw new Ctap2DataException(ExceptionMessages.Ctap2MissingRequiredField);
             }
 
-            return pinRetries.Value;
+            return (data.PinRetries.Value, data.PowerCycleState);
         }
 
         /// <inheritdoc />

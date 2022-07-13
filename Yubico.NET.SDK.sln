@@ -269,6 +269,11 @@ ProjectSection(SolutionItems) = preProject
 	contributordocs\documentation-system\setup.md = contributordocs\documentation-system\setup.md
 EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fido2", "Fido2", "{8CE9438B-FEE8-47BF-B2DB-B5BA7A896774}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\application-fido2\pin-uv-auth-protocols.md = Yubico.YubiKey\docs\users-manual\application-fido2\pin-uv-auth-protocols.md
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -364,6 +369,7 @@ Global
 		{522DEBA9-211E-425A-916D-30F5636F5646} = {A487E6E9-6E7D-47CF-B1D2-70B558DFC4F7}
 		{B7A8A40E-4191-4520-ACE6-2550B1D272B5} = {522DEBA9-211E-425A-916D-30F5636F5646}
 		{BB9E350C-E4C8-4902-84B6-29957554B330} = {522DEBA9-211E-425A-916D-30F5636F5646}
+		{8CE9438B-FEE8-47BF-B2DB-B5BA7A896774} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DF71DF2-3B6F-4855-8BC4-35B9714F3B0F}

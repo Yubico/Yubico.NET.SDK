@@ -1298,5 +1298,11 @@ namespace Yubico.YubiKey {
                 return ResourceManager.GetString("CborUnexpectedMapTag", resourceCulture);
             }
         }
+        
+        internal static string Ctap2MissingRequiredField {
+            get {
+                return ResourceManager.GetString("Ctap2MissingRequiredField", resourceCulture);
+            }
+        }
     }
 }

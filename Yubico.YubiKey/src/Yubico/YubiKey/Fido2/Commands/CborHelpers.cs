@@ -19,22 +19,78 @@ namespace Yubico.YubiKey.Fido2.Commands
 {
     internal static class CborHelpers
     {
-        public static void WriteMapEntry(CborWriter cbor, uint key, string value)
+        public class MapWriter
         {
-            cbor.WriteUInt32(key);
-            cbor.WriteTextString(value);
+            private readonly CborWriter _cbor;
+
+            public MapWriter(CborWriter cbor)
+            {
+                if (cbor.ConvertIndefiniteLengthEncodings == false)
+                {
+                    throw new ArgumentException(ExceptionMessages.CborWriterMustConvertIdenfiteLengths);
+                }
+
+                _cbor = cbor;
+                _cbor.WriteStartMap(null);
+            }
+
+            public MapWriter Entry(uint key, string value)
+            {
+                _cbor.WriteUInt32(key);
+                _cbor.WriteTextString(value);
+
+                return this;
+            }
+
+            public MapWriter Entry(uint key, uint value)
+            {
+                _cbor.WriteUInt32(key);
+                _cbor.WriteUInt32(value);
+
+                return this;
+            }
+
+            public MapWriter Entry(uint key, ReadOnlyMemory<byte> value)
+            {
+                _cbor.WriteUInt32(key);
+                _cbor.WriteByteString(value.Span);
+
+                return this;
+            }
+
+            public MapWriter OptionalEntry(uint key, string? value)
+            {
+                if (value is { })
+                {
+                    return Entry(key, value);
+                }
+
+                return this;
+            }
+
+            public MapWriter OptionalEntry(uint key, uint? value)
+            {
+                if (value.HasValue)
+                {
+                    return Entry(key, value.Value);
+                }
+
+                return this;
+            }
+
+            public MapWriter OptionalEntry(uint key, ReadOnlyMemory<byte>? value)
+            {
+                if (value.HasValue)
+                {
+                    return Entry(key, value.Value);
+                }
+
+                return this;
+            }
+
+            public void EndMap() => _cbor.WriteEndMap();
         }
 
-        public static void WriteMapEntry(CborWriter cbor, uint key, uint value)
-        {
-            cbor.WriteUInt32(key);
-            cbor.WriteUInt32(value);
-        }
-
-        public static void WriteMapEntry(CborWriter cbor, uint key, ReadOnlyMemory<byte> value)
-        {
-            cbor.WriteUInt32(key);
-            cbor.WriteByteString(value.Span);
-        }
+        public static MapWriter BeginMap(CborWriter cbor) => new MapWriter(cbor);
     }
 }

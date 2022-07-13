@@ -17,21 +17,37 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    public class AuthenticatorClientPinResponse : YubiKeyResponse, IYubiKeyResponseWithData<AuthenticatorClientPinData>
+    /// <summary>
+    /// The response partner to <see cref="ClientPinCommand"/>.
+    /// </summary>
+    /// <remarks>
+    /// Like <see cref="ClientPinCommand"/>, this response represents all of the possible outputs of all sub-commands
+    /// supported by `authenticatorClientPin`. It is recommended that you use the command class that corresponds with
+    /// the particular sub-command you care about. Doing so will return a more specific response partner class that will
+    /// only contain the information relevant to that sub-command.
+    /// </remarks>
+    public class ClientPinResponse : YubiKeyResponse, IYubiKeyResponseWithData<ClientPinData>
     {
+        // Response constants
         private const int TagKeyAgreement = 0x01;
         private const int TagPinUvAuthToken = 0x02;
         private const int TagPinRetries = 0x03;
         private const int TagPowerCycleState = 0x04;
         private const int TagUvRetries = 0x05;
 
-        public AuthenticatorClientPinResponse(ResponseApdu responseApdu) : base(responseApdu)
+        /// <summary>
+        /// Constructs a new instance of <see cref="ClientPinResponse"/> based on a response APDU provided by the YubiKey.
+        /// </summary>
+        /// <param name="responseApdu">
+        /// A response APDU containing the CBOR response data for the `authenticatorClientPin` command.
+        /// </param>
+        public ClientPinResponse(ResponseApdu responseApdu) : base(responseApdu)
         {
 
         }
 
         /// <inheritdoc />
-        public AuthenticatorClientPinData GetData()
+        public ClientPinData GetData()
         {
             var cbor = new CborReader(ResponseApdu.Data, CborConformanceMode.Ctap2Canonical);
 
@@ -39,10 +55,12 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             if (entries is null)
             {
-                throw new Ctap2DataException(); // TODO
+                throw new Ctap2DataException(ExceptionMessages.CborMapEntriesExpected);
             }
 
-            var data = new AuthenticatorClientPinData();
+            // Any of the output parameters may be present. We know how many map entries there are, so iterate through
+            // them and pull out the tags that are known to us.
+            var data = new ClientPinData();
             for (int entry = entries.Value; entry > 0; entry--)
             {
                 uint key = cbor.ReadUInt32();
@@ -70,7 +88,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         break;
 
                     default:
-                        throw new Ctap2DataException(); // TODO
+                        throw new Ctap2DataException(ExceptionMessages.CborUnexpectedMapTag);
                 }
             }
 

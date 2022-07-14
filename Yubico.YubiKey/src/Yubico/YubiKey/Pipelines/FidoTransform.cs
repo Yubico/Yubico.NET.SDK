@@ -87,7 +87,7 @@ namespace Yubico.YubiKey.Pipelines
                 responseByte switch
                 {
                     Ctap1Message   => new ResponseApdu(responseData),
-                    CtapHidCbor    => new ResponseApdu(responseData.AsSpan(1).ToArray(), SWConstants.Success), // TODO
+                    CtapHidCbor    => GetCtap2ResponseApdu(responseData),
                     CtapError      => GetU2fHidErrorResponseApdu(responseData),
                     _              => new ResponseApdu(responseData, SWConstants.Success),
                 };
@@ -309,7 +309,8 @@ namespace Yubico.YubiKey.Pipelines
 
             if (responseData[0] != 0)
             {
-                throw new Exception("This is a temporary exception to monitor this assumption."); // TODO
+                // This should be removed prior to releasing FIDO2 in 1.5
+                throw new Exception("This is a temporary exception to monitor this assumption.");
             }
 
             return new ResponseApdu(responseData[1..].ToArray(), SWConstants.Success);

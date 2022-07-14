@@ -17,6 +17,9 @@ using System.Formats.Cbor;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
+    /// <summary>
+    /// Some helpers to make working with CBOR a little easier.
+    /// </summary>
     internal static class CborHelpers
     {
         public class MapWriter
@@ -91,6 +94,24 @@ namespace Yubico.YubiKey.Fido2.Commands
             public void EndMap() => _cbor.WriteEndMap();
         }
 
+        /// <summary>
+        /// Use this method to write CBOR maps (which is mostly what CTAP2 uses). This uses a builder-like pattern
+        /// where you can chain calls to add additional entries.
+        /// </summary>
+        /// <param name="cbor">
+        /// An instance of a CborWriter. It must have the `ConvertIndefiniteLengthEncodings` option enabled.
+        /// </param>
+        /// <returns>
+        /// An instance of the `MapWriter` builder class. You should not need to store this value anywhere. The intended
+        /// use is to chain calls to its method like the following:
+        /// <code language="C#">
+        /// CborHelper.BeginMap(cborWriter)
+        ///     .Entry(123, "abc")
+        ///     .Entry(456, "def")
+        ///     .OptionalEntry(2, maybeNullVariable)
+        ///     .EndMap();
+        /// </code>
+        /// </returns>
         public static MapWriter BeginMap(CborWriter cbor) => new MapWriter(cbor);
     }
 }

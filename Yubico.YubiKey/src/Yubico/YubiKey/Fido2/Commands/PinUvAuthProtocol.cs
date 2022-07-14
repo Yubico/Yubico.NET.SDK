@@ -30,15 +30,17 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// </remarks>
     public enum PinUvAuthProtocol
     {
+        None = 0,
+
         /// <summary>
         /// Identifier for PIN/UV auth protocol 1.
         /// </summary>
-        ProtocolOne,
+        ProtocolOne = 1,
 
         /// <summary>
         /// Identifier for PIN/UV auth protocol 2. This protocol contains certain provisions that make it more applicable
         /// to FIPS certified YubiKeys.
         /// </summary>
-        ProtocolTwo,
+        ProtocolTwo = 2,
     }
 }

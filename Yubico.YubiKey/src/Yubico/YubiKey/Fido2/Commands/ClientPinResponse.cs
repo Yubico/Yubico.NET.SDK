@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             int? entries = cbor.ReadStartMap();
 
-            if (entries is null)
+            if (entries is null || entries.Value == 0)
             {
                 throw new Ctap2DataException(ExceptionMessages.CborMapEntriesExpected);
             }

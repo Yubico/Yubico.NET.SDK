@@ -192,6 +192,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public IYubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => throw new System.NotImplementedException();
+        public IYubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new ClientPinResponse(responseApdu);
     }
 }

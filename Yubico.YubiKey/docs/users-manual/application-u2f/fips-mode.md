@@ -83,6 +83,8 @@ programmatically determine if a YubiKey is in FIPS mode or not with
         {
             // If the return from GetData is true, then this is
             // YubiKey 4 FIPS series in FIPS mode.
+            // If the return is false, then the YubiKey is version 4
+            // FIPS series, but it is not in FIPS mode.
         }
         // Note that if the YubiKey is not version 4 FIPS series, the
         // VerifyFipsModeCommand is undefined. A call to VerifyFipsModeResponse.GetData
@@ -93,8 +95,10 @@ programmatically determine if a YubiKey is in FIPS mode or not with
 ### Setting FIPS mode
 
 To put the U2F application of a YubiKey 4 FIPS Series key into FIPS mode, you must set the
-U2F PIN. Call the [SetPinCommand](u2f-commands.md#set-pin). Its input is the current PIN
-and the new PIN. If there is no current PIN yet, simply pass in an `Empty`.
+U2F PIN. Call [U2fSession.SetPin](xref:Yubico.YubiKey.U2f.U2fSession.SetPin%2a), which
+obtains the PIN from the `KeyCollector`, or the
+[U2fSession.TrySetPin](xref:Yubico.YubiKey.U2f.U2fSession.TrySetPin%2a) method that takes
+in the PIN (no `KeyCollector`).
 
 ```c#
     // This is the ASCII PIN "123456".
@@ -102,20 +106,20 @@ and the new PIN. If there is no current PIN yet, simply pass in an `Empty`.
         0x31, 0x32, 0x33, 0x34, 0x35, 0x36
     };
 
-    // To set the PIN the first time, pass in an Empty currentPin.
-    var setPinCmd = new SetPinCommand(ReadOnlyMemory<byte>.Empty, newPin);
-    SetPinResponse setPinRsp = connection.SendCommand(setPinCmd);
-    if (setPinRsp.Status != ResponseStatus.Success)
+    using (var u2fSession = new U2fSession(yubiKey))
     {
-        // handle error here
+        if (!u2fSession.TrySetPin(newPin))
+        {
+            // If this fails, call some error handling code.
+        }
     }
 ```
 
 The U2F PIN can be any binary data from 6 to 32 bytes long. It will likely be input by the
-end user at the keyboard, which would make it a normal password.
+end user at the keyboard, which would make it similar to a normal password.
 
-Once you set the password, the YubiKey will be in FIPS mode and the
-`VerifyFipsModeCommand` will return true.
+Once you set the PIN, the YubiKey will be in FIPS mode and the `VerifyFipsModeCommand`
+will return true.
 
 ## Retries
 
@@ -123,16 +127,16 @@ If a caller wants to verify or change a PIN, the current PIN must be entered. If
 value is provided, the PIN won't be verified or changed and the caller can try again.
 However, there are limits to how many times a wrong value can be entered.
 
-If an incorrect PIN is entered three times in a row, the U2F application is temporarily
-blocked. To unblock it, remove the YubiKey and reinsert it.
+If an incorrect PIN is entered three times in a row, the U2F application is blocked. The
+only way to unblock it is to reset it. It is important to know that after resetting, the
+YubiKey can no longer be put into FIPS mode.
 
-If an incorrect PIN is entered eight times in a row (three times, reinserted, three times,
-reinserted, two times), the U2F application is permanently blocked. At this point, to be
-able to use the U2F application on that YubiKey again, it must be reset. Of course, after
-resetting, the YubiKey can no longer be put into FIPS mode.
+Note that with the FIDO2 application on the YubiKey 5 FIPS series, the PIN retry count is
+eight. However, that is FIDO2 on YubiKey 5. The total retry count fo the U2F application
+on YubiKey 4 FIPS series is three.
 
 If the correct PIN is verified before the U2F application is blocked, the retries
-remaining count returns to eight.
+remaining count returns to three.
 
 Unfortunately in the version 4 FIPS series YubiKey, it is not possible to know how many
 U2F PIN retries are remaining. That is, if the wrong PIN has been entered, the SDK will
@@ -141,16 +145,17 @@ report the number of retries remaining.
 
 ## Removing the PIN
 
-Once a PIN is set on the U2F application, it is not possible to remove it with the
-`SetPinCommand`. If you send the SetPin command to the YubiKey with an "Empty" new PIN,
-the YubiKey will not reset the PIN, instead it will return an error. The SDK will throw an
-exception.
+Once a PIN is set on the U2F application, it is not possible to remove it. That is, if
+you call `U2fSession.TrySetPin` (or the SetPin command) with an "Empty" PIN, the YubiKey
+will not reset the PIN, instead it will return an error. The SDK will throw an exception.
 
 The only way to remove a U2F PIN is to reset the key's U2F application. A reset generally
 restores the application to its original factory settings. However, with YubiKey 4 FIPS
-series, the reset also deletes the attestation key and cert and the U2F application will
-no longer be able to be set to FIPS mode. At this point, if you try to set the PIN, the
-YubiKey will return an error.
+series, the reset also deletes the attestation key and cert (they are replaced with a
+"reset" key and cert) and the U2F application will no longer be able to be set to FIPS
+mode. At this point, if you try to set the PIN, the YubiKey will set the PIN, but it will
+not be in FIPS mode. The YubiKey will still be able to register new U2F credentials, but
+they will not be "FIPS" credentials.
 
 Note also that when you reset the U2F application, the master secret is changed, so all
 previous U2F registrations will be lost.

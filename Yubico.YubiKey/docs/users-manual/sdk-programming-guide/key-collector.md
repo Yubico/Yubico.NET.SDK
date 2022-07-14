@@ -16,7 +16,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# The `KeyCollector`
+# The `KeyCollector` and alternatives 
 
 > [!NOTE]
 > The sample code contains sample key collectors. One sample key collector can be found at
@@ -251,7 +251,7 @@ For example, here is a possibility.
         finally
         {
             CryptographicOperations.ZeroMemory(pinData.Span);
-        } 
+        }
     }
 ```
 
@@ -437,7 +437,7 @@ property. You can let the user know how many retries they have before the PIN is
    the PIN is blocked.
 
    PIN:_______________
-   
+
    OK        CANCEL
 ```
 
@@ -477,7 +477,7 @@ using Yubico.YubiKey;
 
                 case KeyEntryRequest.VerifyPivPin:
                     // The CollectValue method will collect the PIN and store
-                    // it in the CurrentValue property. 
+                    // it in the CurrentValue property.
                     isCollected = CollectValue(
                         "PIN", keyEntryData.IsRetry, keyEntryData.RetriesRemaining);
                     if (isCollected)
@@ -504,4 +504,3 @@ Most `KeyCollector` delegates will likely be written to never throw an exception
 situation (just return `false` if something goes wrong), but it is vitally important that
 it never throw an exception when the request is `Release`. The `Release` is called from
 inside a `finally` block, and it is a bad idea to throw exceptions from inside `finally`.
-

@@ -27,7 +27,7 @@
 
 - name: YubiKey reference
   items:
-  - name: Transports
+  - name: Physical interfaces
     href: yubikey-reference/transports/overview.md
   - name: APDUs
     href: yubikey-reference/apdu.md
@@ -114,15 +114,15 @@
     href: application-oath/oath-overview.md
   - name: OATH credentials
     href: application-oath/oath-credentials.md
-  - name: OATH session
+  - name: OATH session APIs
     href: application-oath/oath-session.md
-  - name: Protecting OATH application with a password
+  - name: Protecting the OATH application with a password
     href: application-oath/oath-password.md
   - name: Building a basic authenticator
     href: application-oath/oath-use-case.md
   - name: URI string format
     href: application-oath/uri-string-format.md
-  - name: How to backup credentials
+  - name: How to back up credentials
     href: application-oath/oath-backup-credentials.md
   - name: Commands
     items:
@@ -152,7 +152,7 @@
     href: application-piv/cert-size.md
   - name: ECDSA signatures
     href: application-piv/ecdsa-signatures.md
-  - name: EC Diffie-Hellman Key Agreement
+  - name: EC Diffie-Hellman key agreement
     href: application-piv/key-agreement.md
   - name: Public keys
     href: application-piv/public-keys.md
@@ -162,7 +162,7 @@
     href: application-piv/get-and-put-data.md
   - name: Data objects
     href: application-piv/piv-objects.md
-  - name: Migrating from SmartCard.NET/Minidriver
+  - name: Migrating from SmartCard.NET
     href: application-piv/migrate-smartcardnet.md
   - name: Commands
     items:
@@ -172,13 +172,13 @@
       items:
       - name: Attest
         href: application-piv/apdu/attest.md
-      - name: "Authenticate: Decrypt"
+      - name: "Authenticate: decrypt"
         href: application-piv/apdu/auth-decrypt.md
-      - name: "Authenticate: Key agreement"
+      - name: "Authenticate: key agreement"
         href: application-piv/apdu/auth-key-agree.md
-      - name: "Authenticate: Management key"
+      - name: "Authenticate: management key"
         href: application-piv/apdu/auth-mgmt.md
-      - name: "Authenticate: Sign"
+      - name: "Authenticate: sign"
         href: application-piv/apdu/auth-sign.md
       - name: "Change ref"
         href: application-piv/apdu/change-ref.md
@@ -194,7 +194,7 @@
         href: application-piv/apdu/put-data.md
       - name: "Reset"
         href: application-piv/apdu/reset-piv.md
-      - name: "Reset retry count"
+      - name: "Reset retry (recover the PIN)"
         href: application-piv/apdu/reset-retry.md
       - name: "Get serial number"
         href: application-piv/apdu/serial.md
@@ -250,5 +250,5 @@
   items:
   - name: TLV
     href: support/support-tlv.md
-  - name: RSA padding
+  - name: Attacks on RSA decryption and mitigation
     href: support/rsa-unpad.md

@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License. -->
 
 
-## Reset the PIV Application
+## Reset the PIV application
 
 ### Command APDU Info
 

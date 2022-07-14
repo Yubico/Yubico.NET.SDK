@@ -16,10 +16,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# Elliptic Curve Diffie-Hellman Key Agreement
+# Elliptic Curve Diffie-Hellman key agreement
 
 If a slot contains an ECC key (<c>PivAlgorithm.EccP256</c>, <c>PivAlgorithm.EccP384</c>),
-there are two operations it can perform: signing (ECDSA) and Key Agreement (EC
+there are two operations it can perform: signing (ECDSA) and key agreement (EC
 Diffie-Hellman, or ECDH).
 
 An ECDH operation does not encrypt data. Rather, it generates a shared secret.

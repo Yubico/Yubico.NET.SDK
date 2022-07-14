@@ -16,7 +16,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# OATH commands
+# OATH commands and APDUs 
 
 For each possible OATH command, there will be a class that knows how to build the
 command [APDU](xref:UsersManualApdu) and parse the data in the response APDU. Each class will know

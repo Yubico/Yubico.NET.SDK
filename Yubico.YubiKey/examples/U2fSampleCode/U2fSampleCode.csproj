@@ -15,11 +15,13 @@ limitations under the License. -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Yubico.YubiKey" Version="1.4.0" />
+    <ProjectReference Include="..\SharedSampleCode\SharedSampleCode.csproj" />
   </ItemGroup>
 
 </Project>

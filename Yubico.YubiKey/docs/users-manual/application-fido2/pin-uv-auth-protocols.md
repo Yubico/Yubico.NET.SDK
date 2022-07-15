@@ -18,7 +18,7 @@ limitations under the License. -->
 
 # CTAP2 PIN/UV authentication protocols
 
-FIDO2 (sometimes more specifically referred to as CTAP2 in this document) has been design in such
+CTAP2 (the Client To Authenticator Protocol defined as part of the FIDO2 specification) has been designed in such
 a way that plaintext PINs are never sent to the authenticator (the YubiKey). This is to prevent unwanted
 eavesdropping between applications and the YubiKey - whether that be a software hook, or someone monitoring
 USB traffic with hardware.
@@ -28,10 +28,12 @@ data to and from the YubiKey. It ensures that the PIN is encrypted in such a way
 and the YubiKey have the necessary knowledge to decrypt the PIN. This is done using a secure key-agreement and
 key-exchange defined by the protocol.
 
-Encrypted PINs are exchanged for a `pinUvAuthToken` that can then be used to authenticate to subsequent CTAP2
-commands on the YubiKey. Similarly, user verification methods such as fingerprint verification used by the
-YubiKey Bio Series can also use these auth protocols to obtain a `pinUvAuthToken` - emphasis on the "UV" in
-that case.
+If the application provides the correct PIN, the YubiKey will return a `pinUvAuthToken`, which can be used to
+authenticate subsequent CTAP2 commands on the YubiKey. Similarly, user verification methods such as fingerprint
+verification used by the YubiKey Bio Series can also use these auth protocols to obtain a `pinUvAuthToken`.
+As fingerprints are securely matched and verified on the YubiKey itself, this form of user verification is
+sufficient enough to not require an additional PIN. The YubiKey will, however, fall back to requiring a PIN
+if too many failed fingerprint matches have occured.
 
 A `pinUvAuthToken`, referred to simply as "authentication token" in the rest of this document, is a randomly-
 generated, opaque sequence of bytes that acts as a stand-in for the PIN. The authentication token is long

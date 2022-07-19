@@ -36,7 +36,7 @@ The slot settings that can be updated include the following:
 | [```SetDormant()```](xref:Yubico.YubiKey.Otp.Operations.UpdateSlot.SetDormant*) | |
 
 
-There is no way to retrieve the settings of an OTP slot configuration. Therefore, when you use ```UpdateSlot```, you’re resetting every setting. For example, if you intend to add a carriage return to the slot configuration and only call ```SetAppendCarriageReturn()```, all other settings will revert to their default states.
+There is no way to retrieve the settings of an OTP slot configuration. Therefore, when you use ```UpdateSlot```, you’re resetting every updatable setting. For example, if you intend to add a carriage return to the slot configuration and only call ```SetAppendCarriageReturn()```, all other settings will revert to their default states.
 
 > [!NOTE]
 > If you call `UpdateSlot` and turn on/off serial number visibility on the USB device descriptor (via `SetSerialNumberUsbVisible()`), you must reboot the YubiKey before the changes will take effect. This is most easily accomplished by unplugging the key and plugging it back in.

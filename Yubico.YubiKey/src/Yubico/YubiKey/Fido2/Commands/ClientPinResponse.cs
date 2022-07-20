@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Formats.Cbor;
 using Yubico.Core.Iso7816;
 
@@ -49,6 +50,11 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <inheritdoc />
         public ClientPinData GetData()
         {
+            if (Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(StatusMessage);
+            }
+
             var cbor = new CborReader(ResponseApdu.Data, CborConformanceMode.Ctap2Canonical);
 
             int? entries = cbor.ReadStartMap();

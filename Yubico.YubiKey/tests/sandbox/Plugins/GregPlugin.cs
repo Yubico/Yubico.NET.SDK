@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
             {
                 var response = connection.SendCommand(new Fido2.Commands.GetUvRetriesCommand());
 
-                Console.WriteLine($"FIDO2 PIN retries: {response.GetData()}");
+                Console.WriteLine($"FIDO2 UV retries: {response.GetData()}");
             }
 
             return true;

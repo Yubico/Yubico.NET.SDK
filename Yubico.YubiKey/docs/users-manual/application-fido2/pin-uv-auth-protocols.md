@@ -76,3 +76,19 @@ unplug the key and plug it back in. This is to further protect the YubiKey again
 on the PIN.
 
 ### Getting the number of user verification (UV) retries
+
+User Verification (UV) refers to the act of authenticating oneself directly on the YubiKey. The only
+YubiKey that supports UV is the YubiKey Bio Series - with the onboard fingerprint sensor. No other
+version of the YubiKey supports UV, only PIN.
+
+UV is implemented in addition to the device PIN. It is typically the preferred authentication method,
+but in certain circumstances, the device can use PIN authentication instead. In order to set up UV
+on a YubiKey, the device must first have a PIN set and a fingerprint registered.
+
+Like the PIN, a user has only a few attempts to successfully authenticate using this method. After
+several consecutive failed attempts, the YubiKey will disable the UV authentication method and fall
+back to PIN authentication. Once the PIN has been entered successfully, UV will be re-enabled and
+its retry counter reset.
+
+The YubiKey allows developers to query the number of UV retries left so that they can indicate to
+the user how many attempts are left.

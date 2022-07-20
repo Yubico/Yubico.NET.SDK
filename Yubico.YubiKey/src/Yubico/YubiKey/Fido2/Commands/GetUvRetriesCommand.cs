@@ -27,6 +27,10 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// YubiKey, and does not involve any outside computation or verification.
     /// </para>
     /// <para>
+    /// In order to read the UV retries, the YubiKey must already be configured with a PIN and at least one registered
+    /// fingerprint. If either of these are not present, the response to this command will represent an error state.
+    /// </para>
+    /// <para>
     /// The number of UV attempts remaining may vary based the configured maximum and the number of failed attempts since
     /// the last successful verification. Use this command to query for the current number of retires remaining for this
     /// specific YubiKey.

@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2022 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -15,11 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography;
-using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Otp;
-using Yubico.YubiKey.Otp.Commands;
-using Yubico.Core.Devices.Hid;
+using Yubico.YubiKey.YubiHsmAuth;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {

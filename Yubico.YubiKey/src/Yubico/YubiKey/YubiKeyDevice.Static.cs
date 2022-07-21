@@ -92,7 +92,11 @@ namespace Yubico.YubiKey
                 }
             }
 
-            return YubiKeyDeviceListener.Instance.GetAll();
+            // Return any key that has at least one overlapping available transport with the requested transports.
+            return YubiKeyDeviceListener
+                .Instance
+                .GetAll()
+                .Where(k => (k.AvailableTransports & transport) != 0);
         }
 
         /// <summary>

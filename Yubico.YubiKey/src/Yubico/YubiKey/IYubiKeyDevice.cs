@@ -25,6 +25,25 @@ namespace Yubico.YubiKey
     public interface IYubiKeyDevice : IYubiKeyDeviceInfo, IEquatable<IYubiKeyDevice>, IComparable<IYubiKeyDevice>
     {
         /// <summary>
+        /// Indicates which logical device transports are available to this YubiKey device.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// A YubiKey can be connected to a computer in multiple ways: physically connected via USB or Lightning, or by
+        /// being present in an NFC reader's field. Further, when connected through USB, the YubiKey appears to the
+        /// computer as multiple devices. It can look like a HID Keyboard, a HID FIDO device, and a smart card reader.
+        /// This property shows which of these connections are present.
+        /// </para>
+        /// <para>
+        /// For example: if this YubiKey instance is connected through an NFC reader, this value will be
+        /// <see cref="Transport.NfcSmartCard" />. If it is connected through USB and all of the three USB interfaces
+        /// are available, it will contain the set <see cref="Transport.HidKeyboard" />, <see cref="Transport.HidFido" />,
+        /// and <see cref="Transport.UsbSmartCard" />.
+        /// </para>
+        /// </remarks>
+        Transport AvailableTransports { get; }
+
+        /// <summary>
         /// Initiate a connection to the specified application on a YubiKey device.
         /// </summary>
         /// <param name="yubikeyApplication">The application to reference on the device.</param>

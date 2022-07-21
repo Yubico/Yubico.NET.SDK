@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using Yubico.Core.Devices;
@@ -116,6 +117,7 @@ namespace Yubico.YubiKey
             GC.KeepAlive(updateEvent);
         }
 
+        [SuppressMessage("Microsoft.Design", "CA1031:DisallowedSymbolNames", Justification = "This method is meant to be best effort")]
         private void Update()
         {
             RwLock.EnterWriteLock();
@@ -154,7 +156,23 @@ namespace Yubico.YubiKey
                 }
 
                 // Lastly, let's talk to the YubiKey to get its device info and see if we match via serial number (slow)
-                var deviceWithInfo = new YubiKeyDevice.YubicoDeviceWithInfo(device);
+                YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo;
+
+                // This sort of call can fail for a number of reasons. Probably the most common will be when some other
+                // application is using one of the device interfaces exclusively - GPG is an example of this. It tends
+                // to take the smart card reader USB interface and not let go of it. So, for those of us that use GPG
+                // with YubiKeys for commit signing, the SDK is unlikely to be able to connect. There's not much we can
+                // do about that other than skip, and log a message that this has happened.
+                try
+                {
+                    deviceWithInfo = new YubiKeyDevice.YubicoDeviceWithInfo(device);
+                }
+                catch (Exception)
+                {
+                    _log.LogError("Encountered a YubiKey but was unable to connect to it. This interface will be ignored.");
+
+                    continue;
+                }
 
                 if (deviceWithInfo.Info.SerialNumber is null)
                 {

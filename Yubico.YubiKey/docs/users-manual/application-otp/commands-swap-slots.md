@@ -35,7 +35,7 @@ YubiKey firmware 2.3.2 and later
 
 |  Lr   |                 Data                  |  SW1  |  SW1  |
 | :---: | :-----------------------------------: | :---: | :---: |
-| 0x06  | [Status structure](#status-structure) | 0x90  | 0x00  |
+| 0x06  | [Status structure](xref:OtpCommands#status-structure) | 0x90  | 0x00  |
 
 ## Examples
 

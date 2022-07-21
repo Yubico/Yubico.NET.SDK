@@ -46,3 +46,17 @@ The response data is in the following form:
 |      1       | Patch Version | The minor and/or bug-fix revision of the firmware.                    |
 |      1       |  Sequence #   | Configuration sequence number. `0` if no valid configuration present. |
 |      2       |  Touch Level  | The touch level currently detected by the key's button.               |
+
+## Commands
+
+- [Configure slot](xref:OtpCommandConfigureSlot)
+- [Update slot](xref:OtpCommandUpdateSlot)
+- [Swap slot configurations](xref:OtpCommandSwapSlot)
+- [Program NDEF](xref:OtpCommandProgramNdef)
+- [Get serial number](xref:OtpCommandGetSerial)
+- [Update scan-code map](xref:OtpCommandUpdateScanCodeMap)
+- [Get device information](xref:OtpCommandGetDeviceInfo)
+- [Query FIPS mode](xref:OtpCommandQueryFipsMode)
+- [Challenge-response](xref:OtpCommandChallengeResponse)
+- [Read status](xref:OtpCommandReadStatus)
+- [Read NDEF payload](xref:OtpCommandReadNdef)

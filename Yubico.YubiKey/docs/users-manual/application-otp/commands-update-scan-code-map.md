@@ -51,7 +51,7 @@ This is represented by the following array of bytes:
 
 |  Lr   |                 Data                  |  SW1  |  SW1  |
 | :---: | :-----------------------------------: | :---: | :---: |
-| 0x06  | [Status structure](#status-structure) | 0x90  | 0x00  |
+| 0x06  | [Status structure](xref:OtpCommands#status-structure) | 0x90  | 0x00  |
 
 ## Examples
 

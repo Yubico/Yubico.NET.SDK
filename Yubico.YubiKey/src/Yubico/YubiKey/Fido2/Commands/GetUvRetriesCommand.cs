@@ -21,18 +21,8 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Although PINs can be considered a form of "user verification" in a general sense, User Verification (UV) in the
-    /// context of a FIDO authenticator like a YubiKey refers specifically to on-board UV methods. The only YubiKey that
-    /// supports onboard-UV is the YubiKey Bio Series. The fingerprint sensor and verification is performed within the
-    /// YubiKey, and does not involve any outside computation or verification.
-    /// </para>
-    /// <para>
-    /// In order to read the UV retries, the YubiKey must already be configured with a PIN and at least one registered
-    /// fingerprint. If either of these are not present, the response to this command will represent an error state.
-    /// </para>
-    /// <para>
     /// The number of UV attempts remaining may vary based the configured maximum and the number of failed attempts since
-    /// the last successful verification. Use this command to query for the current number of retires remaining for this
+    /// the last successful verification. Use this command to query for the current number of retries remaining for this
     /// specific YubiKey.
     /// </para>
     /// <para>
@@ -41,6 +31,10 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// attempts. When the number of UV retries reaches 0, the authenticator will no longer attempt UV with the on-board
     /// sensor, and will instead require PIN entry. Once the PIN has been successfully entered, the UV retry count will
     /// be reset - even if it was previous blocked.
+    /// </para>
+    /// <para>
+    /// See the user manual entry on <xref href="Fido2PinProtocol">PIN protocols</xref> for a much more in depth
+    /// guide to working with user verification within FIDO2.
     /// </para>
     /// </remarks>
     public class GetUvRetriesCommand : IYubiKeyCommand<GetUvRetriesResponse>

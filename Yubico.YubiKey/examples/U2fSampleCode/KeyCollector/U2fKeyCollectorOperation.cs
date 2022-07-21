@@ -16,12 +16,12 @@ using System;
 
 namespace Yubico.YubiKey.Sample.U2fSampleCode
 {
-    class StartProgram
+    public enum U2fKeyCollectorOperation
     {
-        static void Main()
-        {
-            var u2fSampleRun = new U2fSampleRun(maxInvalidCount: 2);
-            u2fSampleRun.RunSample();
-        }
+        None = 0,
+        Register = 1,
+        Authenticate = 2,
+        Reset = 3,
+        Verify = 4,
     }
 }

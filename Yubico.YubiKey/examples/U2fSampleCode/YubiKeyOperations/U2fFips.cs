@@ -1,4 +1,4 @@
-// Copyright 2021 Yubico AB
+// Copyright 2022 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -66,6 +66,20 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                 u2fSession.KeyCollector = KeyCollectorDelegate;
                 return u2fSession.TryVerifyPin();
             }
+        }
+
+        // Reset the U2F application for the YubiKey with the given serial number.
+        public static bool RunReset(int? serialNumber, Func<KeyEntryData, bool> KeyCollectorDelegate)
+        {
+            // To reset the U2F application, one must call the reset command
+            // within a short time limit after the YubiKey has been "rebooted".
+            // In order to obtain an IYubiKeyDevice quickly after reinserting
+            // we're going to listen for the event.
+            // This means we need to worry about asynchronous operations, and the
+            // EventHandler delegates must have access to the serial number.
+            // So we're going to use a separate class to handle this.
+            var u2fReset = new U2fReset(serialNumber);
+            return u2fReset.RunU2fReset(KeyCollectorDelegate);
         }
     }
 }

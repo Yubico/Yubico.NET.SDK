@@ -1,4 +1,4 @@
-// Copyright 2021 Yubico AB
+// Copyright 2022 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             U2fMainMenuItem.RegisterCredential => RunRegisterCredential(),
             U2fMainMenuItem.ListCredentials => RunListCredentials(),
             U2fMainMenuItem.AuthenticateCredential => RunAuthenticateCredential(),
+            U2fMainMenuItem.Reset => RunReset(),
             _ => RunUnimplementedOperation(),
         };
 
@@ -129,7 +130,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             }
             else
             {
-                _keyCollector.IsRegistering = false;
+                _keyCollector.Operation = U2fKeyCollectorOperation.Verify;
                 bool isVerified = U2fFips.VerifyPin(_yubiKeyChosen, _keyCollector.U2fSampleKeyCollectorDelegate);
                 WritePinMessage("Verify PIN", isVerified);
             }
@@ -180,7 +181,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             // We now have the data necessary to get the registration data from
             // the YubiKey.
             // The SDK's U2fSession class calls the origin data "applicationId"
-            _keyCollector.IsRegistering = true;
+            _keyCollector.Operation = U2fKeyCollectorOperation.Register;
             if (!U2fProtocol.Register(
                 _yubiKeyChosen, _keyCollector.U2fSampleKeyCollectorDelegate,
                 applicationId, clientDataHash, out RegistrationData registrationData))
@@ -242,7 +243,8 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
 
             if (!isVerified)
             {
-                SampleMenu.WriteMessage(MessageType.Title, 0, "Credential did not authenticate: key handle did not match");
+                SampleMenu.WriteMessage(MessageType.Title, 0, "Credential did not authenticate: key handle did not match.\n");
+                return true;
             }
 
             // Now that we know we have a vaild key handle, call on the YubiKey
@@ -253,7 +255,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             // something went wrong and we can't determine if the the
             // credential authenticates or not.
             // If it is able to compute a signature, we'll verify it below.
-            _keyCollector.IsRegistering = false;
+            _keyCollector.Operation = U2fKeyCollectorOperation.Authenticate;
             if (!U2fProtocol.Authenticate(
                 _yubiKeyChosen, _keyCollector.U2fSampleKeyCollectorDelegate,
                 regData.ApplicationId, regData.ClientDataHash, regData.KeyHandle,
@@ -280,6 +282,77 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             }
 
             return true;
+        }
+
+        public bool RunReset()
+        {
+            string versionNumber = _yubiKeyChosen.FirmwareVersion.ToString();
+
+            if ((_yubiKeyChosen.FirmwareVersion >= new FirmwareVersion(5, 0, 0))
+                || (_yubiKeyChosen.FirmwareVersion < new FirmwareVersion(4, 0, 0))
+                || (!_yubiKeyChosen.IsFipsSeries))
+            {
+                SampleMenu.WriteMessage(MessageType.Title, 0, "It is possible to reset the U2F application on only version 4");
+                SampleMenu.WriteMessage(MessageType.Title, 0, "FIPS series YubiKeys.");
+                if (_yubiKeyChosen.IsFipsSeries)
+                {
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "Although this is a FIPS series YubiKey, the version is");
+                    SampleMenu.WriteMessage(MessageType.Title, 0, versionNumber + "\n");
+                }
+                else
+                {
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "This YubiKey is version " + _yubiKeyChosen.FirmwareVersion.ToString());
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "and is not FIPS series.\n");
+                }
+
+                return true;
+            }
+
+            SampleMenu.WriteMessage(MessageType.Title, 0, "DANGER!!!");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Resetting the U2F application will mean losing all U2F credentials");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "on this YubiKey, taking the U2F application out of FIPS mode, and");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "preventing this YubiKey's U2F application from ever being put into");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "FIPS mode again.\n");
+
+            string[] menuItems = new string[] {
+                "Yes",
+                "No",
+            };
+
+            int response = _menuObject.RunMenu("Do you want to continue?", menuItems);
+            if (response != 0)
+            {
+                return true;
+            }
+
+            SampleMenu.WriteMessage(MessageType.Title, 0, "This is the YubiKey for which the U2F application will be reset.\n");
+
+            int? serial = _yubiKeyChosen.SerialNumber;
+            if (serial is null)
+            {
+                SampleMenu.WriteMessage(MessageType.Title, 0, "Unknown serial number : version = " + versionNumber);
+            }
+            else
+            {
+                SampleMenu.WriteMessage(MessageType.Title, 0, serial.ToString() + " : version = " + versionNumber);
+            }
+
+            response = _menuObject.RunMenu("\nIs this correct?", menuItems);
+            if (response != 0)
+            {
+                return true;
+            }
+
+            SampleMenu.WriteMessage(MessageType.Title, 0, "To reset, when prompted, you will need to remove, then re-insert");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "the YubiKey, then, when prompted, touch the YubiKey's contact.\n");
+            response = _menuObject.RunMenu("Do you want to continue?", menuItems);
+            if (response != 0)
+            {
+                return true;
+            }
+
+            _keyCollector.Operation = U2fKeyCollectorOperation.Reset;
+            return U2fFips.RunReset(_yubiKeyChosen.SerialNumber, _keyCollector.U2fSampleKeyCollectorDelegate);
         }
 
         private static string GetRelyingPartyName()

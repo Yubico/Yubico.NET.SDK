@@ -1,4 +1,4 @@
-// Copyright 2021 Yubico AB
+// Copyright 2022 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -24,16 +24,14 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
     // not allow for retries.
     public class U2fSampleKeyCollector
     {
-        // If this is true, we have called the Register method and any contact
-        // from the SDK will be during a registration operation.
-        // If false, we have called the Authenticate method.
-        // The sample code will set IsRegistering to true before calling Register
-        // and set it to false before calling Authenticate.
-        public bool IsRegistering { get; set; }
+        // This allows the caller to specify what the operation is.
+        // Before calling an SDK method that will call the KeyCollector. Set this
+        // property so the KeyCollector knows what message to report.
+        public U2fKeyCollectorOperation Operation { get; set; }
 
         public U2fSampleKeyCollector()
         {
-            IsRegistering = true;
+            Operation = U2fKeyCollectorOperation.None;
         }
 
         public bool U2fSampleKeyCollectorDelegate(KeyEntryData keyEntryData)
@@ -60,15 +58,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                     return true;
 
                 case KeyEntryRequest.TouchRequest:
-                    if (IsRegistering)
-                    {
-                        SampleMenu.WriteMessage(MessageType.Title, 0, "The YubiKey is trying to register a U2F credential,");
-                    }
-                    else
-                    {
-                        SampleMenu.WriteMessage(MessageType.Title, 0, "The YubiKey is trying to authenticate a U2F credential,");
-                    }
-
+                    ReportOperation();
                     SampleMenu.WriteMessage(MessageType.Title, 0, "touch the YubiKey's contact to complete the operation.\n");
                     return true;
 
@@ -82,7 +72,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                     break;
 
                 case KeyEntryRequest.VerifyU2fPin:
-                    if (IsRegistering)
+                    if (Operation == U2fKeyCollectorOperation.Register)
                     {
                         SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the PIN in order to complete registration.");
                     }
@@ -113,6 +103,27 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             }
 
             return true;
+        }
+
+        private void ReportOperation()
+        {
+            switch (Operation)
+            {
+                default:
+                    break;
+
+                case U2fKeyCollectorOperation.Register:
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "The YubiKey is trying to register a U2F credential,");
+                    break;
+
+                case U2fKeyCollectorOperation.Authenticate:
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "The YubiKey is trying to authenticate a U2F credential,");
+                    break;
+
+                case U2fKeyCollectorOperation.Reset:
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "The YubiKey is trying to reset the U2F application,");
+                    break;
+            }
         }
 
         private static byte[] ConvertCharArrayToByteArray(char[] valueChars)

@@ -21,6 +21,7 @@ using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Logging;
+using Yubico.PlatformInterop;
 using Yubico.YubiKey.DeviceExtensions;
 
 namespace Yubico.YubiKey
@@ -117,7 +118,6 @@ namespace Yubico.YubiKey
             GC.KeepAlive(updateEvent);
         }
 
-        [SuppressMessage("Microsoft.Design", "CA1031:DisallowedSymbolNames", Justification = "This method is meant to be best effort")]
         private void Update()
         {
             RwLock.EnterWriteLock();
@@ -167,7 +167,7 @@ namespace Yubico.YubiKey
                 {
                     deviceWithInfo = new YubiKeyDevice.YubicoDeviceWithInfo(device);
                 }
-                catch (Exception)
+                catch (Exception ex) when (ex is SCardException || ex is PlatformApiException)
                 {
                     _log.LogError("Encountered a YubiKey but was unable to connect to it. This interface will be ignored.");
 

@@ -72,10 +72,10 @@ namespace Yubico.Core.Devices.Hid
                 return devices
                     .Select(device => new MacOSHidDevice(GetEntryId(device))
                     {
-                        VendorId = (short)IOKitHelpers.GetIntPropertyValue(device, IOKitHidConstants.DevicePropertyVendorId),
-                        ProductId = (short)IOKitHelpers.GetIntPropertyValue(device, IOKitHidConstants.DevicePropertyProductId),
-                        Usage = (short)IOKitHelpers.GetIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsage),
-                        UsagePage = (HidUsagePage)IOKitHelpers.GetIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsagePage),
+                        VendorId = (short)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyVendorId) ?? 0),
+                        ProductId = (short)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyProductId) ?? 0),
+                        Usage = (short)(IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsage) ?? 0),
+                        UsagePage = (HidUsagePage?)IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyPrimaryUsagePage) ?? HidUsagePage.Unknown,
                         ParentDeviceId = IOKitHelpers.GetNullableIntPropertyValue(device, IOKitHidConstants.DevicePropertyLocationId)?.ToString(CultureInfo.InvariantCulture)
                     })
                     .ToList();

@@ -102,10 +102,31 @@
       href: application-otp/how-to-delete-a-slot-configuration.md
     - name: How to swap slot configurations
       href: application-otp/how-to-swap-slot-configs.md
-  - name: Commands
+  - name: OTP commands and APDUs
+    href: application-otp/otp-commands.md
     items:
-    - name: OTP commands and APDUs
-      href: application-otp/otp-commands.md
+    - name: Configure slot
+      href: application-otp/commands-configure-slot.md
+    - name: Update slot
+      href: application-otp/commands-update-slot.md
+    - name: Swap slot configurations
+      href: application-otp/commands-swap-slots.md
+    - name: Program NDEF
+      href: application-otp/commands-program-ndef.md
+    - name: Get serial number
+      href: application-otp/commands-get-serial.md
+    - name: Update scan-code map
+      href: application-otp/commands-update-scan-code-map.md
+    - name: Get device information
+      href: application-otp/commands-get-device-info.md
+    - name: Query FIPS mode
+      href: application-otp/commands-query-fips-mode.md
+    - name: Challenge-response
+      href: application-otp/commands-challenge-response.md
+    - name: Read status
+      href: application-otp/commands-read-status.md
+    - name: Read NDEF payload
+      href: application-otp/commands-read-ndef.md
 
 - name: "Application: OATH"
   homepage: application-oath/oath-overview.md

@@ -237,6 +237,8 @@
     href: application-u2f/u2f-pin.md
   - name: FIDO U2F and FIPS
     href: application-u2f/fips-mode.md
+  - name: Resetting the FIDO U2F application
+    href: application-u2f/u2f-reset.md
   - name: Commands
     items:
     - name: FIDO U2F commands

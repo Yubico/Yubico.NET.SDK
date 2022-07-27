@@ -748,6 +748,12 @@
   <data name="Ctap2MissingRequiredField" xml:space="preserve">
     <value>A required field was missing from the CTAP2 CBOR response.</value>
   </data>
+  <data name="InvalidCredentialRetryDataLength" xml:space="preserve">
+    <value>Invalid size of credential and retry data.</value>
+  </data>
+  <data name="RetryCountNegative" xml:space="preserve">
+    <value>The retry count must be non-negative.</value>
+  </data>
   <data name="InvalidStringLength" xml:space="preserve">
     <value>The string must have a minimum length of {0}, and a maximum of {1}. Actual length: {2}.</value>
   </data>

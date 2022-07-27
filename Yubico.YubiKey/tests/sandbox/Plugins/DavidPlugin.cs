@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Yubico.YubiKey.YubiHsmAuth;
+using Yubico.YubiKey.YubiHsmAuth.Commands;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
@@ -35,6 +36,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
             return Command.ToLower() switch
             {
                 "connectyha" => ConnectYubiHsmAuth(),
+                "listcreds" => ListCredentials(),
                 _ => throw new ArgumentException($"Invalid command [{ Command }] specified")
             };
         }
@@ -69,6 +71,56 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
                     Output.WriteLine();
                 }
+            }
+
+            return result;
+        }
+
+        private bool ListCredentials()
+        {
+            bool result = default;
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
+
+            if (keys.Any())
+            {
+                int deviceCount = 1;
+                foreach (IYubiKeyDevice device in keys)
+                {
+                    bool yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
+                    if (!yubiHsmAuthEnabled)
+                    {
+                        continue;
+                    }
+
+                    Output.WriteLine($"\n{deviceCount++}) Using YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
+
+                    using (IYubiKeyConnection hsmAuthConnection = device.Connect(YubiKeyApplication.YubiHsmAuth))
+                    {
+                        ListCredentialsCommand cmd = new ListCredentialsCommand();
+                        ListCredentialsResponse response = hsmAuthConnection.SendCommand(cmd);
+                        if (response.Status != ResponseStatus.Success)
+                        {
+                            Output.WriteLine($"Failed, response status: {response.Status}");
+                            continue;
+                        }
+
+                        List<CredentialRetryPair> credRetryPairs = response.GetData();
+
+                        Output.WriteLine($"Credential count: {credRetryPairs.Count}");
+                        int credentialIndex = 1;
+                        foreach (CredentialRetryPair credRetryPair in credRetryPairs)
+                        {
+                            Output.WriteLine($"Credential {credentialIndex++}");
+                            Output.WriteLine($"\tLabel: {credRetryPair.Credential.Label}");
+                            Output.WriteLine($"\tAlgorithm: {credRetryPair.Credential.KeyType}");
+                            Output.WriteLine($"\tTouch: {credRetryPair.Credential.TouchRequired}");
+                            Output.WriteLine($"\tRetries: {credRetryPair.Retries}");
+                            Output.WriteLine();
+                        }
+                    }
+                }
+
+                result = true;
             }
 
             return result;

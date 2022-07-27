@@ -718,6 +718,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid size of credential and retry data..
+        /// </summary>
+        internal static string InvalidCredentialRetryDataLength {
+            get {
+                return ResourceManager.GetString("InvalidCredentialRetryDataLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A credential secret can only contain the characters &apos;a-z&apos;, &apos;A-Z&apos;, &apos;2-7&apos;, or &apos;=&apos;..
         /// </summary>
         internal static string InvalidCredentialSecret {
@@ -1659,6 +1668,15 @@ namespace Yubico.YubiKey {
         internal static string RequiresNfc {
             get {
                 return ResourceManager.GetString("RequiresNfc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The retry count must be non-negative..
+        /// </summary>
+        internal static string RetryCountNegative {
+            get {
+                return ResourceManager.GetString("RetryCountNegative", resourceCulture);
             }
         }
         

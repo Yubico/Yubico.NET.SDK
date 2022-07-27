@@ -291,9 +291,6 @@
   <data name="NotSupportedByYubiKeyVersion" xml:space="preserve">
     <value>This operation is not supported by this version of YubiKey.</value>
   </data>
-  <data name="InvalidDataTag" xml:space="preserve">
-    <value>The value {0} is not a data tag supported by the YubiKey application.</value>
-  </data>
   <data name="InvalidDataEncoding" xml:space="preserve">
     <value>The data provided does not match the expected encoding.</value>
   </data>
@@ -753,5 +750,8 @@
   </data>
   <data name="InvalidStringLength" xml:space="preserve">
     <value>The string must have a minimum length of {0}, and a maximum of {1}. Actual length: {2}.</value>
+  </data>
+  <data name="InvalidDataTag" xml:space="preserve">
+    <value>The value {0} is not a data tag supported by the YubiKey application.</value>
   </data>
 </root>

@@ -626,5 +626,41 @@ namespace Yubico.YubiKey {
                 return ResourceManager.GetString("U2fWrongData", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong password or authentication key. Retries remaining: {0}..
+        /// </summary>
+        internal static string YubiHsmAuthAuthenticationRequired {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthAuthenticationRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid authentication data..
+        /// </summary>
+        internal static string YubiHsmAuthInvalidAuthData {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthInvalidAuthData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The entry is invalid..
+        /// </summary>
+        internal static string YubiHsmAuthInvalidEntry {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthInvalidEntry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The device was not touched..
+        /// </summary>
+        internal static string YubiHsmAuthTouchRequired {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthTouchRequired", resourceCulture);
+            }
+        }
     }
 }

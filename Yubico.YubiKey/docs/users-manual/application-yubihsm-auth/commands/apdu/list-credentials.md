@@ -20,15 +20,15 @@ limitations under the License. -->
 
 ## Command APDU
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 05 | 00 | 00 | (absent) | (absent) | (absent)
+| CLA | INS | P1 | P2 | Lc | Data | Le |
+| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| 00 | 05 | 00 | 00 | (absent) | (absent) | (absent) |
 
 ## Response APDU
 
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-*data* | 90 | 00
+| Data | SW1 | SW2 |
+| :---: | :---: | :---: |
+| *data* | 90 | 00 |

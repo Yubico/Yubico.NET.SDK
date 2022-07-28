@@ -88,6 +88,14 @@ and service providers.
 
 Read more about FIDO U2F [here](xref:FidoU2fOverview).
 
+### YubiHSM Auth
+
+YubiHSM Auth is a YubiKey CCID application that stores the long-lived credentials used to establish secure sessions to a YubiHSM 2. The secure session protocol is based on Secure Channel Protocol 3 (SCP03). YubiHSM Auth is supported by YubiKey firmware version 5.4.3.
+
+YubiHSM Auth uses hardware to protect the long-lived credentials for accessing a YubiHSM 2. This increases the security of the authentication credentials, as compared to the authentication solution for the YubiHSM 2 based on software credentials derived from the Password-Based Key Derivation Function 2 (PBKDF2) algorithm with a password as input.
+
+Read more about YubiHSM Auth [here](xref:YubiHsmAuthOverview)
+
 ## SDK components
 
 The YubiKey SDK is comprised of three managed assemblies:

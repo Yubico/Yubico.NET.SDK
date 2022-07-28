@@ -36,7 +36,7 @@ All YubiKeys with the YubiHSM Auth application.
 ### SDK classes
 
 [ListCredentialsCommand](xref:Yubico.YubiKey.YubiHsmAuth.Commands.ListCredentialsCommand)
-[ListCredentialsResponse](xref:Yubico.YubiKey.YubiHsmAuth.Response.ListCredentialsResponse)
+[ListCredentialsResponse](xref:Yubico.YubiKey.YubiHsmAuth.Commands.ListCredentialsResponse)
 
 ### Input
 

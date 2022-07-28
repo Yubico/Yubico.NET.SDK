@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.30711.63
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yubico.DotNetPolyfills", "Yubico.DotNetPolyfills\src\Yubico.DotNetPolyfills.csproj", "{469432E1-A0C7-4E16-9DE5-56E46312F542}"
 EndProject
@@ -16,22 +16,22 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.editorconfig = .editorconfig
 		.gitattributes = .gitattributes
 		.gitignore = .gitignore
+		CONTRIBUTING.md = CONTRIBUTING.md
 		docker-compose.yaml = docker-compose.yaml
 		Dockerfile = Dockerfile
 		LICENSE.txt = LICENSE.txt
 		nginx.conf = nginx.conf
 		README.md = README.md
-		CONTRIBUTING.md = CONTRIBUTING.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{8FFE6A2D-4DC1-4CC0-8B96-E6CE11F29B3E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{14C2FBE2-2204-46A5-9FE8-A770CB5A0261}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
 		.github\workflows\build-and-publish-after-merge.yml = .github\workflows\build-and-publish-after-merge.yml
-		.github\workflows\pull-requests.yml = .github\workflows\pull-requests.yml
+		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
 		.github\workflows\cross-build-nativeshims.yml = .github\workflows\cross-build-nativeshims.yml
+		.github\workflows\pull-requests.yml = .github\workflows\pull-requests.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.Core", "Yubico.Core", "{45D2A3BE-5111-4890-8898-2D43DB658A40}"
@@ -47,11 +47,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.YubiKey", "Yubico.Yu
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Documentation", "Documentation", "{350719F2-9981-4D55-9B0D-5814A4389085}"
-ProjectSection(SolutionItems) = preProject
-	Yubico.YubiKey\docs\index.md = Yubico.YubiKey\docs\index.md
-	Yubico.YubiKey\docs\filterConfig.yml = Yubico.YubiKey\docs\filterConfig.yml
-	Yubico.YubiKey\docs\toc.yml = Yubico.YubiKey\docs\toc.yml
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\filterConfig.yml = Yubico.YubiKey\docs\filterConfig.yml
+		Yubico.YubiKey\docs\index.md = Yubico.YubiKey\docs\index.md
+		Yubico.YubiKey\docs\toc.yml = Yubico.YubiKey\docs\toc.yml
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Namespaces", "Namespaces", "{6BDF31A9-ABB4-4895-81C1-19EE259EA3BD}"
 	ProjectSection(SolutionItems) = preProject
@@ -96,8 +96,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Oath", "Oath", "{54B401F4-1
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Otp", "Otp", "{BA01E787-FF01-4C14-A929-9135D0B97752}"
 	ProjectSection(SolutionItems) = preProject
-		Yubico.YubiKey\docs\users-manual\application-otp\otp-commands.md = Yubico.YubiKey\docs\users-manual\application-otp\otp-commands.md
-		Yubico.YubiKey\docs\users-manual\application-otp\otp-overview.md = Yubico.YubiKey\docs\users-manual\application-otp\otp-overview.md
 		Yubico.YubiKey\docs\users-manual\application-otp\application-concepts-overview.md = Yubico.YubiKey\docs\users-manual\application-otp\application-concepts-overview.md
 		Yubico.YubiKey\docs\users-manual\application-otp\configuration-concepts-overview.md = Yubico.YubiKey\docs\users-manual\application-otp\configuration-concepts-overview.md
 		Yubico.YubiKey\docs\users-manual\application-otp\hid.md = Yubico.YubiKey\docs\users-manual\application-otp\hid.md
@@ -114,6 +112,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Otp", "Otp", "{BA01E787-FF0
 		Yubico.YubiKey\docs\users-manual\application-otp\how-to-update-slot-settings.md = Yubico.YubiKey\docs\users-manual\application-otp\how-to-update-slot-settings.md
 		Yubico.YubiKey\docs\users-manual\application-otp\modhex.md = Yubico.YubiKey\docs\users-manual\application-otp\modhex.md
 		Yubico.YubiKey\docs\users-manual\application-otp\ndef.md = Yubico.YubiKey\docs\users-manual\application-otp\ndef.md
+		Yubico.YubiKey\docs\users-manual\application-otp\otp-commands.md = Yubico.YubiKey\docs\users-manual\application-otp\otp-commands.md
+		Yubico.YubiKey\docs\users-manual\application-otp\otp-overview.md = Yubico.YubiKey\docs\users-manual\application-otp\otp-overview.md
 		Yubico.YubiKey\docs\users-manual\application-otp\slots.md = Yubico.YubiKey\docs\users-manual\application-otp\slots.md
 		Yubico.YubiKey\docs\users-manual\application-otp\static-password.md = Yubico.YubiKey\docs\users-manual\application-otp\static-password.md
 		Yubico.YubiKey\docs\users-manual\application-otp\yubico-otp.md = Yubico.YubiKey\docs\users-manual\application-otp\yubico-otp.md
@@ -159,9 +159,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Getting Started", "Getting 
 	ProjectSection(SolutionItems) = preProject
 		Yubico.YubiKey\docs\users-manual\getting-started\how-to-install.md = Yubico.YubiKey\docs\users-manual\getting-started\how-to-install.md
 		Yubico.YubiKey\docs\users-manual\getting-started\overview-of-sdk.md = Yubico.YubiKey\docs\users-manual\getting-started\overview-of-sdk.md
+		Yubico.YubiKey\docs\users-manual\getting-started\running-on-linux.md = Yubico.YubiKey\docs\users-manual\getting-started\running-on-linux.md
 		Yubico.YubiKey\docs\users-manual\getting-started\what-is-a-yubikey.md = Yubico.YubiKey\docs\users-manual\getting-started\what-is-a-yubikey.md
 		Yubico.YubiKey\docs\users-manual\getting-started\whats-new.md = Yubico.YubiKey\docs\users-manual\getting-started\whats-new.md
-		Yubico.YubiKey\docs\users-manual\getting-started\running-on-linux.md = Yubico.YubiKey\docs\users-manual\getting-started\running-on-linux.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk Programming Guide", "Sdk Programming Guide", "{749DAF15-E6A8-44DC-906E-BE3FC8DE3983}"
@@ -169,12 +169,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk Programming Guide", "Sd
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\alternate-crypto.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\alternate-crypto.md
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\commands.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\commands.md
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\delegates-in-sdk.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\delegates-in-sdk.md
-		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\making-a-connection.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\making-a-connection.md
-		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\sensitive-data.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\sensitive-data.md
-		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\threads.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\threads.md
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\device-notifications.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\device-notifications.md
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\key-collector.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\key-collector.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\making-a-connection.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\making-a-connection.md
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\secure-channel-protocol-3.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\secure-channel-protocol-3.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\sensitive-data.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\sensitive-data.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\threads.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\threads.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{BA394A0D-B336-4B6E-83B8-B41FC165D6D9}"
@@ -211,67 +211,82 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Yubico.YubiKey", "Yubico.YubiKey\src\Yubico.YubiKey.csproj", "{B6C9FB57-AF94-4170-AE17-020809E5CED2}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiKey Reference", "YubiKey Reference", "{E7B994D1-AB44-4799-B98B-00515A9C63CE}"
-ProjectSection(SolutionItems) = preProject
-	Yubico.YubiKey\docs\users-manual\yubikey-reference\apdu.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\apdu.md
-	Yubico.YubiKey\docs\users-manual\yubikey-reference\hardware.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\hardware.md
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\yubikey-reference\apdu.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\apdu.md
+		Yubico.YubiKey\docs\users-manual\yubikey-reference\hardware.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\hardware.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transports", "Transports", "{FEE624EE-2E54-4E02-9492-C646D6FB3C68}"
-ProjectSection(SolutionItems) = preProject
-	Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\hidfido.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\hidfido.md
-	Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\hidkeyboard.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\hidkeyboard.md
-	Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\overview.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\overview.md
-	Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\smartcard.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\smartcard.md
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\hidfido.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\hidfido.md
+		Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\hidkeyboard.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\hidkeyboard.md
+		Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\overview.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\overview.md
+		Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\smartcard.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\transports\smartcard.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiKey-API", "YubiKey-API", "{13F7E3CF-C909-40EC-A376-EC278CEC632D}"
-ProjectSection(SolutionItems) = preProject
-	Yubico.YubiKey\docs\yubikey-api\index.md = Yubico.YubiKey\docs\yubikey-api\index.md
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\yubikey-api\index.md = Yubico.YubiKey\docs\yubikey-api\index.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core-API", "Core-API", "{C0575667-4479-4446-B883-A6D4F3B99457}"
-ProjectSection(SolutionItems) = preProject
-	Yubico.YubiKey\docs\core-api\index.md = Yubico.YubiKey\docs\core-api\index.md
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\core-api\index.md = Yubico.YubiKey\docs\core-api\index.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "U2f", "U2f", "{2C7EFA92-1B47-4F5B-91B5-C130BDB19D93}"
-ProjectSection(SolutionItems) = preProject
-	Yubico.YubiKey\docs\users-manual\application-u2f\u2f-commands.md = Yubico.YubiKey\docs\users-manual\application-u2f\u2f-commands.md
-	Yubico.YubiKey\docs\users-manual\application-u2f\fido-u2f-overview.md = Yubico.YubiKey\docs\users-manual\application-u2f\fido-u2f-overview.md
-	Yubico.YubiKey\docs\users-manual\application-u2f\fips-mode.md = Yubico.YubiKey\docs\users-manual\application-u2f\fips-mode.md
-	Yubico.YubiKey\docs\users-manual\application-u2f\how-u2f-works.md = Yubico.YubiKey\docs\users-manual\application-u2f\how-u2f-works.md
-	Yubico.YubiKey\docs\users-manual\application-u2f\u2f-pin.md = Yubico.YubiKey\docs\users-manual\application-u2f\u2f-pin.md
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\application-u2f\fido-u2f-overview.md = Yubico.YubiKey\docs\users-manual\application-u2f\fido-u2f-overview.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\fips-mode.md = Yubico.YubiKey\docs\users-manual\application-u2f\fips-mode.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\how-u2f-works.md = Yubico.YubiKey\docs\users-manual\application-u2f\how-u2f-works.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\u2f-commands.md = Yubico.YubiKey\docs\users-manual\application-u2f\u2f-commands.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\u2f-pin.md = Yubico.YubiKey\docs\users-manual\application-u2f\u2f-pin.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "contributordocs", "contributordocs", "{522DEBA9-211E-425A-916D-30F5636F5646}"
-ProjectSection(SolutionItems) = preProject
-	contributordocs\allowed-dotnet-things-and-versions.md = contributordocs\allowed-dotnet-things-and-versions.md
-	contributordocs\code-flow-and-pull-requests.md = contributordocs\code-flow-and-pull-requests.md
-	contributordocs\getting-started.md = contributordocs\getting-started.md
-	contributordocs\polyfills.md = contributordocs\polyfills.md
-	contributordocs\README.md = contributordocs\README.md
-	contributordocs\testing.md = contributordocs\testing.md
-	contributordocs\useful-links.md = contributordocs\useful-links.md
-	contributordocs\versioning.md = contributordocs\versioning.md
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		contributordocs\allowed-dotnet-things-and-versions.md = contributordocs\allowed-dotnet-things-and-versions.md
+		contributordocs\code-flow-and-pull-requests.md = contributordocs\code-flow-and-pull-requests.md
+		contributordocs\getting-started.md = contributordocs\getting-started.md
+		contributordocs\polyfills.md = contributordocs\polyfills.md
+		contributordocs\README.md = contributordocs\README.md
+		contributordocs\testing.md = contributordocs\testing.md
+		contributordocs\useful-links.md = contributordocs\useful-links.md
+		contributordocs\versioning.md = contributordocs\versioning.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "coding-guidelines", "coding-guidelines", "{B7A8A40E-4191-4520-ACE6-2550B1D272B5}"
-ProjectSection(SolutionItems) = preProject
-	contributordocs\coding-guidelines\exception-usage.md = contributordocs\coding-guidelines\exception-usage.md
-	contributordocs\coding-guidelines\README.md = contributordocs\coding-guidelines\README.md
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		contributordocs\coding-guidelines\exception-usage.md = contributordocs\coding-guidelines\exception-usage.md
+		contributordocs\coding-guidelines\README.md = contributordocs\coding-guidelines\README.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation-system", "documentation-system", "{BB9E350C-E4C8-4902-84B6-29957554B330}"
-ProjectSection(SolutionItems) = preProject
-	contributordocs\documentation-system\building-docs-and-running.md = contributordocs\documentation-system\building-docs-and-running.md
-	contributordocs\documentation-system\comments-in-code.md = contributordocs\documentation-system\comments-in-code.md
-	contributordocs\documentation-system\README.md = contributordocs\documentation-system\README.md
-	contributordocs\documentation-system\setup.md = contributordocs\documentation-system\setup.md
-EndProjectSection
+	ProjectSection(SolutionItems) = preProject
+		contributordocs\documentation-system\building-docs-and-running.md = contributordocs\documentation-system\building-docs-and-running.md
+		contributordocs\documentation-system\comments-in-code.md = contributordocs\documentation-system\comments-in-code.md
+		contributordocs\documentation-system\README.md = contributordocs\documentation-system\README.md
+		contributordocs\documentation-system\setup.md = contributordocs\documentation-system\setup.md
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fido2", "Fido2", "{8CE9438B-FEE8-47BF-B2DB-B5BA7A896774}"
 	ProjectSection(SolutionItems) = preProject
 		Yubico.YubiKey\docs\users-manual\application-fido2\pin-uv-auth-protocols.md = Yubico.YubiKey\docs\users-manual\application-fido2\pin-uv-auth-protocols.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiHSM Auth", "YubiHSM Auth", "{4176F4C2-3A9E-4C89-96B6-48CF41DD98C2}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\yubihsm-auth-overview.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\yubihsm-auth-overview.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Commands", "Commands", "{9FED027A-6330-407B-99F5-2DDC54B52213}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\yubihsm-auth-commands.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\yubihsm-auth-commands.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{84204A2E-3368-4BCC-948E-D6A474FF9091}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\apdu\list-credentials.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\apdu\list-credentials.md
 	EndProjectSection
 EndProject
 Global
@@ -370,6 +385,9 @@ Global
 		{B7A8A40E-4191-4520-ACE6-2550B1D272B5} = {522DEBA9-211E-425A-916D-30F5636F5646}
 		{BB9E350C-E4C8-4902-84B6-29957554B330} = {522DEBA9-211E-425A-916D-30F5636F5646}
 		{8CE9438B-FEE8-47BF-B2DB-B5BA7A896774} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
+		{4176F4C2-3A9E-4C89-96B6-48CF41DD98C2} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
+		{9FED027A-6330-407B-99F5-2DDC54B52213} = {4176F4C2-3A9E-4C89-96B6-48CF41DD98C2}
+		{84204A2E-3368-4BCC-948E-D6A474FF9091} = {9FED027A-6330-407B-99F5-2DDC54B52213}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DF71DF2-3B6F-4855-8BC4-35B9714F3B0F}

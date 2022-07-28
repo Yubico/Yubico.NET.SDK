@@ -46,36 +46,36 @@ export DOCKER_BUILDKIT=1
 
 # Distro: Ubuntu
 # Arch: amd64/x64
-# Output: ./artifacts/ubuntu/linux/amd64/libYubico.NativeShims.so
+# Output: ./ubuntu-x64/libYubico.NativeShims.so
 docker buildx build \
     --tag yubico/nativeshims-ubuntu:1.0 \
     --file docker/Ubuntu/Dockerfile \
     --platform=linux/amd64 \
     --build-arg USER_ID=`id -u` \
     --build-arg GROUP_ID=`id -g` \
-    --output type=local,dest=artifacts/ubuntu \
+    --output type=local,dest=ubuntu-x64 \
     .
 
 # Distro: Ubuntu
 # Arch: i386/x86
-# Output: ./artifacts/ubuntu/linux/386/libYubico.NativeShims.so
+# Output: ./ubuntu-x86/libYubico.NativeShims.so
 docker buildx build \
     --tag yubico/nativeshims-ubuntu:1.0 \
     --file docker/Ubuntu/Dockerfile \
     --platform=linux/386 \
     --build-arg USER_ID=`id -u` \
     --build-arg GROUP_ID=`id -g` \
-    --output type=local,dest=artifacts/ubuntu \
+    --output type=local,dest=ubuntu-x86 \
     .
 
 # Distro: Ubuntu
 # Arch: arm64
-# Output: ./artifacts/ubuntu/linux/arm64/libYubico.NativeShims.so
+# Output: ./ubuntu-arm64/libYubico.NativeShims.so
 docker buildx build \
     --tag yubico/nativeshims-ubuntu:1.0 \
     --file docker/Ubuntu/Dockerfile \
     --platform=linux/arm64 \
     --build-arg USER_ID=`id -u` \
     --build-arg GROUP_ID=`id -g` \
-    --output type=local,dest=artifacts/ubuntu \
+    --output type=local,dest=ubuntu-arm64 \
     .

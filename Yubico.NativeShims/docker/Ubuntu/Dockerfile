@@ -4,11 +4,12 @@
 FROM ubuntu:bionic AS env
 
 # These arguments are passed in from the console or by Docker-CLI itself. User/Group ID
-# is used to run the shell as the host's user identity. TargetPlatform is set by Docker
-# itself, and is used to identify which architecture we're currently building.
+# is used to run the shell as the host's user identity. Artifact_dir should be set to
+# the NuGet runtime-id for this platform (e.g. ubuntu-x64) to aid in artifact discovery
+# in the GitHub Action workflow.
 ARG USER_ID
 ARG GROUP_ID
-ARG TARGETPLATFORM
+ARG ARTIFACT_DIR
 
 # Set up basic environment variables such as the path.
 ENV PATH=/usr/local/bin:$PATH
@@ -62,6 +63,7 @@ WORKDIR /home/build
 # that invokes Docker to see the other end of specifying the context. Copies all of the
 # host context (recursively) into the current working dir in the Docker image.
 COPY . .
+RUN rm -rf artifacts
 
 # Build the Yubico.NativeShims shared object
 # Now we take the `devel` target, and fork another image for building. This way, we can
@@ -72,8 +74,8 @@ COPY . .
 FROM devel AS build
 RUN cmake -S . -B build_out -DCMAKE_BUILD_TYPE=Release
 RUN cmake --build build_out --target all -v
-RUN mkdir -p /home/build/artifacts/$TARGETPLATFORM \
-&& cp /home/build/build_out/*.so /home/build/artifacts/$TARGETPLATFORM
+RUN mkdir -p /home/build/artifacts/$ARTIFACT_DIR \
+&& cp /home/build/build_out/*.so /home/build/artifacts/$ARTIFACT_DIR
 
 # Copy over the build artifacts to a blank image. This way we can easily retrieve the
 # build results without copying all of the previous image's filesystem. `Scratch` is
@@ -81,4 +83,4 @@ RUN mkdir -p /home/build/artifacts/$TARGETPLATFORM \
 # we care about into this blank space. The `--output` argument to the `docker` command
 # specifies what we do with this result.
 FROM scratch AS build_install
-COPY --from=build /home/build/artifacts .
+COPY --from=build /home/build/artifacts/$ARTIFACT_DIR/ .

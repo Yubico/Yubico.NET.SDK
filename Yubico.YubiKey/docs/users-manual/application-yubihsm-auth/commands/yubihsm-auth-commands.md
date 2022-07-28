@@ -46,10 +46,12 @@ None.
 
 A byte array formatted as a series of TLVs, where each element is a Credential and its number of remaining retries. Each element in the series begins with the Tag 0x72 (known as LabelList). The data is formatted in the following order:
 
-1. Cryptographic key type (1 byte)
-2. Touch required (1 byte)
-3. Label (1-64 bytes)
-4. Retries remaining (1 byte)
+| Order | Meaning | Size (bytes) | Comments |
+| :---: | :---: | :---: | :---: |
+| 1 | Cryptographic key type | 1 | See [CryptographicKeyType](xref:Yubico.YubiKey.YubiHsmAuth.CryptographicKeyType) |
+| 2 | Touch required | 1 | Boolean |
+| 3 | Label | 1-64 | ASCII string |
+| 4 | Retries remaining | 1 | Positive integer |
 
 For example, for a YubiKey with two credentials stored in the YubiHSM Auth application, the response data might look like (in hexadecimal):
 

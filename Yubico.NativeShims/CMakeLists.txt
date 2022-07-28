@@ -38,6 +38,7 @@ endif()
 include(${CMAKE_SOURCE_DIR}/cmake/pcscd.cmake)
 find_pcscd()
 
+find_package(OpenSSL REQUIRED)
 
 #
 # Build definition
@@ -62,6 +63,7 @@ target_sources(
     Yubico.NativeShims
     PRIVATE
         pcsc.c
+        ssl.bignum.c
         )
 
 # Linker
@@ -71,4 +73,6 @@ target_link_libraries(
         ${PCSC_WIN_LIBS}
         ${PCSC_MACOSX_LIBS}
         ${PCSC_CUSTOM_LIBS}
+        OpenSSL::SSL
+        OpenSSL::Crypto
         )

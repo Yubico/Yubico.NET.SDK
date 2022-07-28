@@ -1,16 +1,19 @@
 {
     global:
-        Native_SCardEstablishContext;
-        Native_SCardReleaseContext;
-        Native_SCardConnect;
-        Native_SCardReconnect;
-        Native_SCardDisconnect;
+        Native_BN_bin2bn;
+        Native_BN_bn2bin;
+        Native_BN_num_bytes;
         Native_SCardBeginTransaction;
-        Native_SCardEndTransaction;
-        Native_SCardGetStatusChange;
-        Native_SCardTransmit;
-        Native_SCardListReaders;
         Native_SCardCancel;
+        Native_SCardConnect;
+        Native_SCardDisconnect;
+        Native_SCardEndTransaction;
+        Native_SCardEstablishContext;
+        Native_SCardGetStatusChange;
+        Native_SCardListReaders;
+        Native_SCardReconnect;
+        Native_SCardReleaseContext;
+        Native_SCardTransmit;
     local:
         *;
 };

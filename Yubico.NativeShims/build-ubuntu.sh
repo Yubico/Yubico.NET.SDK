@@ -1,9 +1,15 @@
-export DOCKER_BUILDKIT=1
-
 # We use Docker Build Kit as it supports advanced features such as
 # cross-architecture building using QEMU, and extracting files from
 # the final build image.
-#
+
+export DOCKER_BUILDKIT=1
+
+# Download the Docker image / plugin that allows QEMU to run non-
+# native container architectures. This step is necessary to run
+# the cross build steps below.
+docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p yes
+
+
 # Parameter guide:
 #
 # Tag: Right now, we do not save these images to any container

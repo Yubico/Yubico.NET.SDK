@@ -5,6 +5,9 @@
 typedef void* Native_EC_POINT;
 typedef void* Native_EC_KEY;
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+
 int32_t
 NATIVEAPI
 Native_ECDH_compute_key(
@@ -16,3 +19,5 @@ Native_ECDH_compute_key(
 {
     return ECDH_compute_key(out, outlen, public_key, ecdh, kdf);
 }
+
+#pragma clang diagnostic pop

@@ -20,19 +20,23 @@ namespace Yubico.PlatformInterop
     internal static partial class NativeMethods
     {
         // BIGNUM* BN_bin2bn(const unsigned char* s, int len, BIGNUM* ret);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BnBinaryToBigNum", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bin2bn", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr BnBinaryToBigNum(byte[] buffer, int length, IntPtr ret);
 
         // void BN_clear_free(BIGNUM* a);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BnClearFree", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_clear_free", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern void BnClearFree(IntPtr bignum);
 
         // int BN_num_bytes(const BIGNUM* a);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BnNumBytes", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_num_bytes", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern void BnNumBytes(IntPtr bignum);
 
         // int BN_bn2bin(const BIGNUM* a, unsigned char* to);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BnBigNumToBinary", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bn2bin", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int BnBigNumToBinary(IntPtr bignum, byte[] buffer);
 
         // BN_CTX_new

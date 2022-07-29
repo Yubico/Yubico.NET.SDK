@@ -76,6 +76,9 @@ limitations under the License. -->
     <None Include="..\..\Yubico.NET.SDK.snk">
       <Link>Yubico.NET.SDK.snk</Link>
     </None>
+    <Compile Remove="Yubico\Core\Cryptography\**" />
+    <EmbeddedResource Remove="Yubico\Core\Cryptography\**" />
+    <None Remove="Yubico\Core\Cryptography\**" />
   </ItemGroup>
 
   <ItemGroup Label="Grouping HID code partial classes">
@@ -136,7 +139,6 @@ limitations under the License. -->
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Yubico\Core\Cryptography" />
     <Folder Include="Yubico\PlatformInterop\macOS\CoreFoundation\" />
   </ItemGroup>
 </Project>

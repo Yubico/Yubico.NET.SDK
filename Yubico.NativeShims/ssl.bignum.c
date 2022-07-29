@@ -33,3 +33,12 @@ Native_BN_num_bytes(
 {
     return BN_num_bytes(a);
 }
+
+void
+NATIVEAPI
+Native_BN_clear_free(
+    const Native_BIGNUM a
+)
+{
+    return BN_clear_free(a);
+}

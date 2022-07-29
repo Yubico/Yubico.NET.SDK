@@ -1,5 +1,6 @@
 _Native_BN_bin2bn
 _Native_BN_bn2bin
+_Native_BN_clear_free
 _Native_BN_num_bytes
 _Native_SCardBeginTransaction
 _Native_SCardCancel
@@ -12,3 +13,11 @@ _Native_SCardListReaders
 _Native_SCardReconnect
 _Native_SCardReleaseContext
 _Native_SCardTransmit
+_Native_EC_POINT_new
+_Native_EC_POINT_free
+_Native_EC_POINT_set_affine_coordinates_GFp
+_Native_EC_POINT_get_affine_coordinates_GFp
+_Native_EC_POINT_mul
+_Native_EC_GROUP_new_by_curve_name
+_Native_EC_GROUP_get_degree
+_Native_EC_GROUP_free

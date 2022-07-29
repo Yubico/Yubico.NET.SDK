@@ -21,3 +21,8 @@ _Native_EC_POINT_mul
 _Native_EC_GROUP_new_by_curve_name
 _Native_EC_GROUP_get_degree
 _Native_EC_GROUP_free
+_Native_EC_KEY_new_by_curve_name
+_Native_EC_KEY_free
+_Native_EC_KEY_get0_private_key
+_Native_EC_KEY_set_private_key
+_Native_ECDH_compute_key

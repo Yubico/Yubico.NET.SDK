@@ -23,6 +23,12 @@
         Native_EC_GROUP_new_by_curve_name;
         Native_EC_GROUP_get_degree;
         Native_EC_GROUP_free;
+        Native_EC_KEY_new_by_curve_name;
+        Native_EC_KEY_free;
+        Native_EC_KEY_get0_private_key;
+        Native_EC_KEY_set_private_key;
+        Native_ECDH_compute_key;
+
     local:
         *;
 };

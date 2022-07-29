@@ -38,12 +38,5 @@ namespace Yubico.PlatformInterop
         [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bn2bin", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int BnBigNumToBinary(IntPtr bignum, byte[] buffer);
-
-        // BN_CTX_new
-        // BN_CTX_start
-        // BN_CTX_get
-        // BN_CTX_end
-        // BN_CTX_free
-
     }
 }

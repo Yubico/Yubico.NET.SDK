@@ -281,7 +281,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiHSM Auth", "YubiHSM Aut
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Commands", "Commands", "{9FED027A-6330-407B-99F5-2DDC54B52213}"
 	ProjectSection(SolutionItems) = preProject
-		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\apdu\list-credentials.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\apdu\list-credentials.md
+		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\list-credentials.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\list-credentials.md
 		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\yubihsm-auth-commands.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\yubihsm-auth-commands.md
 	EndProjectSection
 EndProject

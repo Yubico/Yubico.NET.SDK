@@ -16,40 +16,40 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# YubiHSM Auth Overview
+# YubiHSM Auth overview
 
 YubiHSM Auth is a YubiKey CCID application that stores the long-lived credentials used to establish secure sessions to a YubiHSM 2. The secure session protocol is based on Secure Channel Protocol 3 (SCP03). YubiHSM Auth is supported by YubiKey firmware version 5.4.3.
 
 YubiHSM Auth uses hardware to protect the long-lived credentials for accessing a YubiHSM 2. This increases the security of the authentication credentials, as compared to the authentication solution for the YubiHSM 2 based on software credentials derived from the Password-Based Key Derivation Function 2 (PBKDF2) algorithm with a password as input.
 
-## Credentials and PIN Codes
+## Credentials and PIN codes
 
 Each YubiHSM Auth credential is comprised of two AES-128 keys which are used to derive the three session-specific AES-128 keys. The YubiHSM Auth application can store up to 32 YubiHSM Auth credentials in the YubiKey.
 
-Each YubiHSM Auth credential is protected by a 16-byte user access code provided to the YubiKey for each YubiHSM Auth operation. The access code is used to access the YubiHSM Auth Credential to derive the session-specific AES-128 keys.
+Each YubiHSM Auth long-lived credential is protected by a 16-byte user access code. This code must be provided to the YubiKey for each YubiHSM Auth operation, which requires access to the YubiHSM Auth long-lived credential in order to derive the session-specific AES-128 keys.
 
 Storing or deleting YubiHSM Auth credentials requires a separate 16-byte admin access code.
 
-Each access code has a limit of eight retries and optionally, verification of user presence (touch).
+Each access code has a limit of eight retries and an optional verification of user presence (touch).
 
-## YubiHSM 2 Secure Channel
+## YubiHSM 2 secure channel
 
-Use the YubiKey YubiHSM Auth application to establish an encrypted and authenticated session to a YubiHSM 2. Although the YubiHSM 2 secure channel is based on the protocol Global Platform Secure Channel Protocol ‘03’ (SCP03), there are two important differences:
+The YubiKey's YubiHSM Auth application can be used to establish an encrypted and authenticated session with a YubiHSM 2. The YubiHSM 2 secure channel protocol is based on the Global Platform Secure Channel Protocol ‘03’ (SCP03), but there are two important differences:
 
-- The YubiHSM 2 secure channel protocol does not use APDUs, so the commands and possible options are not those of the complete SCP03 specification.
+- The YubiHSM 2 secure channel protocol does not use APDUs, so the commands and possible options do not match the complete SCP03 specification.
 - SCP03 uses key sets with three long-lived AES keys, while the YubiHSM 2 secure channel uses key sets with two long-lived AES keys.
 
 The YubiHSM 2 authentication protocol uses a set of static credentials called a long-lived key set. This consists of two AES-128 keys:
 
-- ENC: Used for deriving keys for command and response encryption, as specified in SCP03.
-- MAC: Used for deriving keys for command and response authentication, as specified in SCP03.
+- ENC: used for deriving keys for command and response encryption, as specified in SCP03.
+- MAC: used for deriving keys for command and response authentication, as specified in SCP03.
 
 The identical long-lived keyset is protected in the YubiHSM 2 and in the YubiKey YubiHSM Auth application.
 
 Those long-lived key sets are used by the YubiHSM Auth application to derive a set of three session-specific AES-128 keys using the challenge-response protocol as defined in SCP03:
 
-- Session Secure Channel Encryption Key (S-ENC): Used for data confidentiality.
-- Secure Channel Message Authentication Code Key for Command (S-MAC): Used for data and protocol integrity.
-- Secure Channel Message Authentication Code Key for Response (S-RMAC): Used for data and protocol integrity.
+- Session Secure Channel Encryption Key (S-ENC): used for data confidentiality.
+- Secure Channel Message Authentication Code Key for Command (S-MAC): used for data and protocol integrity.
+- Secure Channel Message Authentication Code Key for Response (S-RMAC): used for data and protocol integrity.
 
 The YubiHSM Auth session-specific keys are output from the YubiKey to the calling library, which uses the session keys to encrypt and authenticate commands and responses during a single session. The session keys are discarded afterwards.

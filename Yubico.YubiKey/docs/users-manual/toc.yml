@@ -271,10 +271,9 @@
 - name: "Application: YubiHSM Auth"
   homepage: application-yubihsm-auth/yubihsm-auth-overview.md
   items:
-  - name: Commands
+  - name: YubiHSM Auth commands
+    href: application-yubihsm-auth/commands/yubihsm-auth-commands.md
     items:
-    - name: YubiHSM Auth commands
-      href: application-yubihsm-auth/commands/yubihsm-auth-commands.md
     - name: APDU reference
       items:
       - name: List credentials

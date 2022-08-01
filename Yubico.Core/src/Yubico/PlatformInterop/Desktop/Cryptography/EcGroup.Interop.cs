@@ -28,10 +28,5 @@ namespace Yubico.PlatformInterop
         [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_GROUP_free", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern void EcGroupFree(IntPtr group);
-
-        // int EC_GROUP_get_degree(const EC_GROUP* group);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_GROUP_get_degree", ExactSpelling = true, CharSet = CharSet.Ansi)]
-        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern int EcGroupGetDegree(IntPtr group);
     }
 }

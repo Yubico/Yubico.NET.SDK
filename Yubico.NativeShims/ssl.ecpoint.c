@@ -7,9 +7,6 @@ typedef void* Native_EC_GROUP;
 typedef void* Native_BIGNUM;
 typedef void* Native_BN_CTX;
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdeprecated-declarations"
-
 Native_EC_POINT
 NATIVEAPI
 Native_EC_POINT_new(
@@ -28,11 +25,9 @@ Native_EC_POINT_free(
     return EC_POINT_free(point);
 }
 
-
-// Function is deprecated in OpenSSL 3.x
 int32_t
 NATIVEAPI
-Native_EC_POINT_set_affine_coordinates_GFp(
+Native_EC_POINT_set_affine_coordinates(
     const Native_EC_GROUP group,
     Native_EC_POINT p,
     const Native_BIGNUM x,
@@ -40,13 +35,12 @@ Native_EC_POINT_set_affine_coordinates_GFp(
     Native_BN_CTX ctx
     )
 {
-    return EC_POINT_set_affine_coordinates_GFp(group, p, x, y, ctx);
+    return EC_POINT_set_affine_coordinates(group, p, x, y, ctx);
 }
 
-// Function is deprecated in OpenSSL 3.x
 int32_t
 NATIVEAPI
-Native_EC_POINT_get_affine_coordinates_GFp(
+Native_EC_POINT_get_affine_coordinates(
     const Native_EC_GROUP group,
     const Native_EC_POINT p,
     Native_BIGNUM x,
@@ -54,7 +48,7 @@ Native_EC_POINT_get_affine_coordinates_GFp(
     Native_BN_CTX ctx
     )
 {
-    return EC_POINT_get_affine_coordinates_GFp(group, p, x, y, ctx);
+    return EC_POINT_get_affine_coordinates(group, p, x, y, ctx);
 }
 
 int32_t
@@ -70,5 +64,3 @@ Native_EC_POINT_mul(
 {
     return EC_POINT_mul(group, r, n, q, m, ctx);
 }
-
-#pragma clang diagnostic pop

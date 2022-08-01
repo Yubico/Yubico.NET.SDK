@@ -13,15 +13,6 @@ Native_EC_GROUP_new_by_curve_name(
     return EC_GROUP_new_by_curve_name(nid);
 }
 
-int32_t
-NATIVEAPI
-Native_EC_GROUP_get_degree(
-    const Native_EC_GROUP group
-    )
-{
-    return EC_GROUP_get_degree(group);
-}
-
 void
 NATIVEAPI
 Native_EC_GROUP_free(

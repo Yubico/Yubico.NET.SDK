@@ -38,5 +38,10 @@ namespace Yubico.PlatformInterop
         [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bn2bin", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int BnBigNumToBinary(IntPtr bignum, byte[] buffer);
+
+        // int BN_bn2binpad(const BIGNUM* a, unsighed char* to, int tolen);
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bn2bin", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern int BnBigNumToBinaryWithPadding(IntPtr bignum, byte[] buffer, int bufferSize);
     }
 }

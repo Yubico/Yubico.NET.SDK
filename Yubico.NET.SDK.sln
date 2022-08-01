@@ -281,12 +281,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiHSM Auth", "YubiHSM Aut
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Commands", "Commands", "{9FED027A-6330-407B-99F5-2DDC54B52213}"
 	ProjectSection(SolutionItems) = preProject
-		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\yubihsm-auth-commands.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\yubihsm-auth-commands.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{84204A2E-3368-4BCC-948E-D6A474FF9091}"
-	ProjectSection(SolutionItems) = preProject
 		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\apdu\list-credentials.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\apdu\list-credentials.md
+		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\yubihsm-auth-commands.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\yubihsm-auth-commands.md
 	EndProjectSection
 EndProject
 Global
@@ -387,7 +383,6 @@ Global
 		{8CE9438B-FEE8-47BF-B2DB-B5BA7A896774} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
 		{4176F4C2-3A9E-4C89-96B6-48CF41DD98C2} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
 		{9FED027A-6330-407B-99F5-2DDC54B52213} = {4176F4C2-3A9E-4C89-96B6-48CF41DD98C2}
-		{84204A2E-3368-4BCC-948E-D6A474FF9091} = {9FED027A-6330-407B-99F5-2DDC54B52213}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DF71DF2-3B6F-4855-8BC4-35B9714F3B0F}

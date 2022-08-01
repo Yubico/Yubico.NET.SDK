@@ -286,10 +286,8 @@
   - name: YubiHSM Auth commands
     href: application-yubihsm-auth/commands/yubihsm-auth-commands.md
     items:
-    - name: APDU reference
-      items:
-      - name: List credentials
-        href: application-yubihsm-auth/commands/apdu/list-credentials.md
+    - name: List credentials
+      href: application-yubihsm-auth/commands/list-credentials.md
 
 - name: "Supporting routines"
   homepage: support/support-overview.md

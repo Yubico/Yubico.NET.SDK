@@ -76,7 +76,6 @@ target_sources(
         pcsc.c
         ssl.bignum.c
         ssl.ecgroup.c
-        ssl.eckey.c
         ssl.ecpoint.c
         )
 

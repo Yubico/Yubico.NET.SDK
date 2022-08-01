@@ -14,7 +14,6 @@ _Native_EC_POINT_get_affine_coordinates_GFp
 _Native_EC_POINT_mul
 _Native_EC_POINT_new
 _Native_EC_POINT_set_affine_coordinates_GFp
-_Native_ECDH_compute_key
 _Native_SCardBeginTransaction
 _Native_SCardCancel
 _Native_SCardConnect

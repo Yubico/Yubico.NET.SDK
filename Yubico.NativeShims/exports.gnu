@@ -16,7 +16,6 @@
         Native_EC_POINT_mul;
         Native_EC_POINT_new;
         Native_EC_POINT_set_affine_coordinates_GFp;
-        Native_ECDH_compute_key;
         Native_SCardBeginTransaction;
         Native_SCardCancel;
         Native_SCardConnect;

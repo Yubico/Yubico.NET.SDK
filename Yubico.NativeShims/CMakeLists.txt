@@ -75,7 +75,6 @@ target_sources(
     PRIVATE
         pcsc.c
         ssl.bignum.c
-        ssl.ecdh.c
         ssl.ecgroup.c
         ssl.eckey.c
         ssl.ecpoint.c

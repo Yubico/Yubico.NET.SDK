@@ -268,6 +268,18 @@
       - name: Reset
         href: application-u2f/apdu/reset.md
 
+- name: "Application: FIDO2"
+  homepage: application-fido2/fido2-overview.md
+  items:
+  - name: Commands
+    items:
+    - name: FIDO2 commands
+      href: application-fido2/fido2-commands.md
+    - name: APDU reference
+      items:
+      - name: Version
+        href: application-fido2/apdu/version.md
+
 - name: "Application: YubiHSM Auth"
   homepage: application-yubihsm-auth/yubihsm-auth-overview.md
   items:

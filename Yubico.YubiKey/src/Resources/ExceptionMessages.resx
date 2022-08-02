@@ -421,6 +421,9 @@
   <data name="WrongNdefType" xml:space="preserve">
     <value>The NDEF record has a type of {0}. Unable to translate it to {1} as requested.</value>
   </data>
+  <data name="InvalidFido2DeviceInfo" xml:space="preserve">
+    <value>The Fido2DeviceInfo is invalid for member number {0} (see authenticatorGetInfo in CTAP standard).</value>
+  </data>
   <data name="UnknownFido2Status" xml:space="preserve">
     <value>The authenticator returned an unknown FIDO2 status indicating an error.</value>
   </data>

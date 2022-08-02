@@ -18,7 +18,7 @@ using System.Diagnostics;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    internal class Fido2Response : YubiKeyResponse
+    public class Fido2Response : YubiKeyResponse
     {
         public Fido2Response(ResponseApdu responseApdu) : base(responseApdu)
         {

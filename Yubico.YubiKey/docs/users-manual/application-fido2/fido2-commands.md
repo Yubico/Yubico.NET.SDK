@@ -63,9 +63,9 @@ All YubiKeys with the FIDO2 application.
 
 ### SDK classes
 
---GetInfoCommand--xref:Yubico.YubiKey.Fido2.Commands.GetInfoCommand--
+[GetInfoCommand](xref:Yubico.YubiKey.Fido2.Commands.GetInfoCommand)
 
---GetInfoResponse--xref:Yubico.YubiKey.Fido2.Commands.GetInfoResponse--
+[GetInfoResponse](xref:Yubico.YubiKey.Fido2.Commands.GetInfoResponse)
 
 ### Input
 
@@ -73,7 +73,17 @@ None.
 
 ### Output
 
---Fido2DeviceInfo--xref:Yubico.YubiKey.Fido2.Fido2DeviceInfo--
+[Fido2DeviceInfo](xref:Yubico.YubiKey.Fido2.Fido2DeviceInfo)
+
+Also see the FIDO2 CTAP standard (CTAP 2.1), section 6.4 for a list of possible elements
+returned.
+
+The standard specifies 21 possible elements an authenticator can return from a GetInfo
+command. Most of the elements are optional, so that any one encoding may or may not have
+the same subset of possible key/value pairs.
+
+The YubiKey can return up to 20 of the defined elements. It will not return
+`vendorPrototypeConfigCommands`.
 
 ### APDU
 

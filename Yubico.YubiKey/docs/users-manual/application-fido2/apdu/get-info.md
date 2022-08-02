@@ -28,3 +28,24 @@ Data Length: *variable*
 Data | SW1 | SW2
 :---: | :---: | :---:
 *encoded info* | 90 | 00
+
+The info returned is CBOR encoded. It has a structure similar to the
+following.
+
+```
+  AC
+     01 --data--
+     02 --data--
+       . . .
+     14 --data--
+```
+
+The `AC` means there's a map of 12 key/value pairs. Each pair is an
+integer followed by data encoded as specified by the integer, defined in
+the CTAP 2.1 standard, section 6.4.
+
+The standard specifies integer keys from `01` to `15` (in decimal that
+is 1 to 21). However, the YubiKey does not support the key `15`.
+
+Most of the elements are optional, so that any one encoding may or may
+not have the same subset of possible key/value pairs.

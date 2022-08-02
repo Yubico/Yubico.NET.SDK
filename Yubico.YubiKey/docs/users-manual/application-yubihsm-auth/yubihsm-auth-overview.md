@@ -24,7 +24,7 @@ YubiHSM Auth uses hardware to protect these long-lived credentials. This provide
 
 ## Credentials and PIN codes
 
-Each YubiHSM Auth credential is comprised of two long-lived AES-128 keys which are used to derive session-specific keys. The YubiHSM Auth application can store up to 32 YubiHSM Auth credentials in the YubiKey.
+Each YubiHSM Auth credential is comprised of two long-lived AES-128 keys, which are used to derive session-specific keys. The YubiHSM Auth application can store up to 32 YubiHSM Auth credentials in the YubiKey.
 
 The two long-lived keys stored in each YubiHSM Auth credential are:
 

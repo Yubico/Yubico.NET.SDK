@@ -22,7 +22,7 @@ Get the public properties of all credentials present in the YubiHSM Auth applica
 
 ## Available
 
-All YubiKeys with the YubiHSM Auth application.
+All YubiKeys with the YubiHSM Auth application (included in firmware version 5.4.3 and later).
 
 ## SDK classes
 

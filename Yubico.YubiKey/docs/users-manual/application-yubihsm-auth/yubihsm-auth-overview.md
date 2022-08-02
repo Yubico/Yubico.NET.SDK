@@ -20,20 +20,20 @@ limitations under the License. -->
 
 YubiHSM Auth is a YubiKey CCID application that stores the long-lived credentials used to establish secure sessions with a YubiHSM 2. The secure session protocol is based on Secure Channel Protocol 3 (SCP03). YubiHSM Auth is supported by YubiKey firmware version 5.4.3.
 
-YubiHSM Auth uses hardware to protect these long-lived credentials. This provides better security than the YubiHSM 2's authentication solution, which uses the Password-Based Key Derivation Function 2 (PBKDF2) algorithm and requires the user to manually enter a password (which could be stolen or guessed by an attacker).
+YubiHSM Auth uses hardware to protect these long-lived credentials. This provides better security than the YubiHSM 2's authentication solution, which uses the Password-Based Key Derivation Function 2 (PBKDF2) algorithm and requires the user to manually enter a password (which could be more easily compromised).
 
 ## Credentials and PIN codes
 
-Each YubiHSM Auth credential is comprised of two AES-128 keys which are used to derive the three session-specific AES-128 keys. The YubiHSM Auth application can store up to 32 YubiHSM Auth credentials in the YubiKey.
+Each YubiHSM Auth credential is comprised of two long-lived AES-128 keys which are used to derive session-specific keys. The YubiHSM Auth application can store up to 32 YubiHSM Auth credentials in the YubiKey.
 
-The two keys stored in each YubiHSM Auth credential are:
+The two long-lived keys stored in each YubiHSM Auth credential are:
 
 - ENC: an AES-128 key used for deriving keys for command and response encryption, as specified in SCP03.
 - MAC: an AES-128 key used for deriving keys for command and response authentication, as specified in SCP03.
 
 These keys cannot be accessed directly, but you can retrieve session-specific keys (which are calculated using the ENC and MAC keys). The session-specific keys can then used to set up a secure connection with a YubiHSM 2 device. See the section on [YubiHSM 2 secure channel](#yubihsm-2-secure-channel) for more information.
 
-Each YubiHSM Auth long-lived credential is protected by a 16-byte user access code. This code must be provided to the YubiKey for each YubiHSM Auth operation, which requires access to the YubiHSM Auth long-lived credential in order to derive the session-specific AES-128 keys.
+Each YubiHSM Auth credential is protected by a 16-byte user access code. This code must be provided to the YubiKey for each YubiHSM Auth operation that uses the long-lived keys (such as calculating session-specific keys).
 
 Storing or deleting YubiHSM Auth credentials requires a separate 16-byte admin access code.
 

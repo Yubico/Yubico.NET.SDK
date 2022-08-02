@@ -1,4 +1,6 @@
-cmake \
+rm -rf build64 buildarm osx-arm64 osx-x64
+
+\cmake \
     -S . \
     -B ./build64 \
     -DCMAKE_BUILD_TYPE=Release \

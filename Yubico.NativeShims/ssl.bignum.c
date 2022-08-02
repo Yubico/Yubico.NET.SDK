@@ -14,6 +14,17 @@ Native_BN_bn2bin(
     return BN_bn2bin(a, to);
 }
 
+int32_t
+NATIVEAPI
+Native_BN_bn2binpad(
+    const Native_BIGNUM a,
+    uint8_t* to,
+    int32_t tolen
+)
+{
+    return BN_bn2binpad(a, to, tolen);
+}
+
 Native_BIGNUM
 NATIVEAPI
 Native_BN_bin2bn(
@@ -32,4 +43,13 @@ Native_BN_num_bytes(
 )
 {
     return BN_num_bytes(a);
+}
+
+void
+NATIVEAPI
+Native_BN_clear_free(
+    const Native_BIGNUM a
+)
+{
+    return BN_clear_free(a);
 }

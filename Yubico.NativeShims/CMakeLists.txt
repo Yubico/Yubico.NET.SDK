@@ -75,6 +75,8 @@ target_sources(
     PRIVATE
         pcsc.c
         ssl.bignum.c
+        ssl.ecgroup.c
+        ssl.ecpoint.c
         )
 
 # Linker

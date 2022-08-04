@@ -25,18 +25,18 @@ namespace Yubico.Core
     internal class EcdhOpenSsl : IEcdh
     {
         /// <inheritdoc />
-        public ECParameters GenerateKey(ECCurve curve)
+        public ECParameters GenerateKeyPair(ECCurve curve)
         {
-            const int privateKeySize = 32;
+            const int privateValueSize = 32;
             const int publicCoordinateSize = 32;
 
             // Create a random 32 bit number as the private key and store it in an OpenSSL big num.
             using var rng = RandomNumberGenerator.Create();
 
-            byte[] privateKeyBinary = new byte[privateKeySize];
-            rng.GetBytes(privateKeyBinary);
+            byte[] privateValueBinary = new byte[privateValueSize];
+            rng.GetBytes(privateValueBinary);
 
-            using SafeBigNum privateKeyBn = NativeMethods.BnBinaryToBigNum(privateKeyBinary);
+            using SafeBigNum privateValueBn = NativeMethods.BnBinaryToBigNum(privateValueBinary);
 
             // Create the curve that the public point should reside on.
             using SafeEcGroup group = NativeMethods.EcGroupNewByCurveName(curve.ToSslCurveId());
@@ -46,7 +46,7 @@ namespace Yubico.Core
             int result = NativeMethods.EcPointMul(
                 group,
                 publicPoint,
-                privateKeyBn.DangerousGetHandle(),
+                privateValueBn.DangerousGetHandle(),
                 IntPtr.Zero,
                 IntPtr.Zero);
 
@@ -85,7 +85,7 @@ namespace Yubico.Core
             return new ECParameters
             {
                 Curve = curve,
-                D = privateKeyBinary,
+                D = privateValueBinary,
                 Q = new ECPoint
                 {
                     X = xBinary,
@@ -95,24 +95,24 @@ namespace Yubico.Core
         }
 
         /// <inheritdoc />
-        public byte[] DeriveSharedValue(ECParameters publicKey, ReadOnlySpan<byte> privateKey)
+        public byte[] ComputeSharedSecret(ECParameters publicKey, ReadOnlySpan<byte> privateValue)
         {
             // Convert all fo the input into OpenSSL datatypes
             (SafeEcGroup? group, SafeEcPoint? publicPoint) = publicKey.ToSslPublicKey();
 
-            using SafeEcPoint derivedPoint = NativeMethods.EcPointNew(group);
+            using SafeEcPoint sharedPoint = NativeMethods.EcPointNew(group);
 
-            byte[] privateKeyBinary = privateKey.ToArray();
-            using SafeBigNum privateKeyBn = NativeMethods.BnBinaryToBigNum(privateKeyBinary);
-            CryptographicOperations.ZeroMemory(privateKeyBinary);
+            byte[] privateValueBinary = privateValue.ToArray();
+            using SafeBigNum privateValueBn = NativeMethods.BnBinaryToBigNum(privateValueBinary);
+            CryptographicOperations.ZeroMemory(privateValueBinary);
 
             // Perform the scalar-multiplication to compute the shared point.
             int result = NativeMethods.EcPointMul(
                 group,
-                derivedPoint,
+                sharedPoint,
                 IntPtr.Zero,
                 publicPoint.DangerousGetHandle(),
-                privateKeyBn.DangerousGetHandle());
+                privateValueBn.DangerousGetHandle());
 
             if (result == 0)
             {
@@ -122,7 +122,7 @@ namespace Yubico.Core
             // Retrieve the X and Y coordinates from the shared point.
             using SafeBigNum x = NativeMethods.BnNew();
             using SafeBigNum y = NativeMethods.BnNew();
-            result = NativeMethods.EcPointGetAffineCoordinates(group, derivedPoint, x, y);
+            result = NativeMethods.EcPointGetAffineCoordinates(group, sharedPoint, x, y);
 
             if (result == 0)
             {

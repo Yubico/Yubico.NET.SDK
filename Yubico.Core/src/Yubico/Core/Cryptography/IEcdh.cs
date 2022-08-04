@@ -42,25 +42,26 @@ namespace Yubico.Core
         /// key is no longer needed.
         /// </para>
         /// </remarks>
-        public ECParameters GenerateKey(ECCurve curve);
+        public ECParameters GenerateKeyPair(ECCurve curve);
 
         /// <summary>
-        /// Produces the ECDH shared point without running it through a KDF.
+        /// Computes a shared secret by producing the ECDH shared point without running it through a KDF. Only the
+        /// X-coordinate is returned.
         /// </summary>
         /// <param name="publicKey">
         /// The other party's public key.
         /// </param>
-        /// <param name="privateKey">
-        /// Your private key value, that was generated based on the same curve as the other party's public key.
+        /// <param name="privateValue">
+        /// Your private key value that was generated based on the same curve as the other party's public key.
         /// </param>
         /// <returns>
-        /// The X coordinate of the computed shared point.
+        /// The X-coordinate of the computed shared point.
         /// </returns>
         /// <remarks>
         /// This function calculates the shared point - the result of the scalar-multiplication of the peer's
-        /// <paramref name="publicKey"/> and the local <paramref name="privateKey"/>. Only the X coordinate
+        /// <paramref name="publicKey"/> and the local <paramref name="privateValue"/>. Only the X coordinate
         /// of the shared point is returned.
         /// </remarks>
-        public byte[] DeriveSharedValue(ECParameters publicKey, ReadOnlySpan<byte> privateKey);
+        public byte[] ComputeSharedSecret(ECParameters publicKey, ReadOnlySpan<byte> privateValue);
     }
 }

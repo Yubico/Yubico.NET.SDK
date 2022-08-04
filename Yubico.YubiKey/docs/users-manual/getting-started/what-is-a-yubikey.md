@@ -24,6 +24,7 @@ individual's online identity. YubiKeys currently support the following:
 - Smart cards
   - Personal Identity Verification (PIV) card
   - OpenPGP card
+  - YubiHSM Auth
 - FIDO / WebAuthn
   - FIDO Universal 2nd Factor (U2F)
   - FIDO2

@@ -280,6 +280,15 @@
       - name: Version
         href: application-fido2/apdu/version.md
 
+- name: "Application: YubiHSM Auth"
+  homepage: application-yubihsm-auth/yubihsm-auth-overview.md
+  items:
+  - name: YubiHSM Auth commands
+    href: application-yubihsm-auth/commands/yubihsm-auth-commands.md
+    items:
+    - name: List credentials
+      href: application-yubihsm-auth/commands/list-credentials.md
+
 - name: "Supporting routines"
   homepage: support/support-overview.md
   items:

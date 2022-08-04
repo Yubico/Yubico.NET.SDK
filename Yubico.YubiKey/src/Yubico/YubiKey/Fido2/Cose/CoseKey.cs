@@ -98,7 +98,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// --- or ---
         /// <para>
         /// The <see cref="CoseAlgorithmIdentifier"/> could not be determined from the data provided.
-        /// </parA>
+        /// </para>
         /// </exception>
         /// <exception cref="NotSupportedException">
         /// The <see cref="CoseAlgorithmIdentifier"/> is not supported by this object representation.

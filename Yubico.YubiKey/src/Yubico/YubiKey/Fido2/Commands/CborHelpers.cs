@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Formats.Cbor;
 
 namespace Yubico.YubiKey.Fido2.Commands
@@ -113,5 +114,232 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </code>
         /// </returns>
         public static MapWriter BeginMap(CborWriter cbor) => new MapWriter(cbor);
+
+    }
+
+    public class CborMap
+    {
+        private readonly IDictionary<long, object?> _dict;
+
+        public CborMap(IDictionary<long, object?> dict)
+        {
+            _dict = dict;
+        }
+
+        public CborMap(CborReader reader)
+        {
+            if (reader is null)
+            {
+                throw new ArgumentNullException(nameof(reader));
+            }
+
+            _dict = ProcessMap(reader);
+        }
+
+        public bool Contains(long key) => _dict.ContainsKey(key);
+
+        [CLSCompliant(false)]
+        public ulong ReadUInt64(long key)
+        {
+            object? value = _dict[key];
+
+            if (value is ulong unboxedValue)
+            {
+                return unboxedValue;
+            }
+
+            throw new InvalidCastException();
+        }
+
+        [CLSCompliant(false)]
+        public ulong ReadNegativeInteger(long key)
+        {
+            object? value = _dict[key];
+
+            if (value is ulong unboxedValue)
+            {
+                return unboxedValue;
+            }
+
+            throw new InvalidCastException();
+        }
+
+        public ReadOnlyMemory<byte> ReadByteString(long key)
+        {
+            object? value = _dict[key];
+
+            if (value is byte[] bstr)
+            {
+                return bstr;
+            }
+
+            throw new InvalidCastException();
+        }
+
+        public string ReadTextString(long key)
+        {
+            object? value = _dict[key];
+
+            if (value is string tstr)
+            {
+                return tstr;
+            }
+
+            throw new InvalidCastException();
+        }
+
+        public CborMap ReadMap(long key)
+        {
+            object? value = _dict[key];
+
+            if (value is IDictionary<long, object?> nestedDict)
+            {
+                return new CborMap(nestedDict);
+            }
+
+            throw new InvalidCastException();
+        }
+
+        public object[] ReadArray(long key)
+        {
+            object? value = _dict[key];
+
+            if (value is object[] arr)
+            {
+                return arr;
+            }
+
+            throw new InvalidCastException();
+        }
+
+        public float ReadSingle(long key)
+        {
+            object? value = _dict[key];
+
+            if (value is float unboxedValue)
+            {
+                return unboxedValue;
+            }
+
+            throw new InvalidCastException();
+        }
+
+        public double ReadDouble(long key)
+        {
+            object? value = _dict[key];
+
+            if (value is double unboxedValue)
+            {
+                return unboxedValue;
+            }
+
+            throw new InvalidCastException();
+        }
+
+        public void ReadNull(long key)
+        {
+            object? value = _dict[key];
+
+            if (value is null)
+            {
+                return;
+            }
+
+            throw new InvalidCastException();
+        }
+
+        public bool ReadBoolean(long key)
+        {
+            object? value = _dict[key];
+
+            if (value is bool unboxedValue)
+            {
+                return unboxedValue;
+            }
+
+            throw new InvalidCastException();
+        }
+
+        private IDictionary<long, object?> ProcessMap(CborReader cbor)
+        {
+            if (cbor.PeekState() != CborReaderState.StartMap)
+            {
+                throw new ArgumentException("Expected a CBOR map.");
+            }
+
+            var dict = new Dictionary<long, object?>();
+            int? numberElements = cbor.ReadStartMap();
+
+            if (numberElements is null)
+            {
+                return dict;
+            }
+
+            for (int i = 0; i < numberElements; i++)
+            {
+                // Technically the typecast from ulong -> long could truncate data, but in practice we do not expect
+                // the map keys to be larger than a byte.
+                long key;
+                if (cbor.PeekState() == CborReaderState.NegativeInteger)
+                {
+                    key = 0 - (long)cbor.ReadCborNegativeIntegerRepresentation();
+                }
+                else
+                {
+                    key = (long)cbor.ReadUInt64();
+                }
+
+                object? value = ProcessSingleElement(cbor);
+
+                dict.Add(key, value);
+            }
+
+            cbor.ReadEndMap();
+
+            return dict;
+        }
+
+        private object? ProcessSingleElement(CborReader cbor) => cbor.PeekState() switch
+        {
+            CborReaderState.Undefined => null,
+            CborReaderState.UnsignedInteger => cbor.ReadUInt64(),
+            CborReaderState.NegativeInteger => cbor.ReadCborNegativeIntegerRepresentation(),
+            CborReaderState.ByteString => cbor.ReadByteString(),
+            CborReaderState.TextString => cbor.ReadTextString(),
+            CborReaderState.StartMap => ProcessMap(cbor),
+            CborReaderState.StartArray => ProcessArray(cbor),
+            CborReaderState.SinglePrecisionFloat => cbor.ReadSingle(),
+            CborReaderState.DoublePrecisionFloat => cbor.ReadDouble(),
+            CborReaderState.Null => ProcessNull(cbor),
+            CborReaderState.Boolean => cbor.ReadBoolean(),
+            _ => throw new NotSupportedException()
+        };
+
+        private static object? ProcessNull(CborReader cbor)
+        {
+            cbor.ReadNull();
+            return null;
+        }
+
+        private object? ProcessArray(CborReader cbor)
+        {
+            int? numberElements = cbor.ReadStartArray();
+
+            if (numberElements is null)
+            {
+                throw new InvalidOperationException();
+            }
+
+            IList<object?> elements = new List<object?>(numberElements.Value);
+
+            for (int i = 0; i < numberElements; i++)
+            {
+                elements[i] = ProcessSingleElement(cbor);
+            }
+
+            cbor.ReadEndArray();
+
+            return elements;
+        }
     }
 }

@@ -14,6 +14,7 @@
 
 using System;
 using System.Security.Cryptography;
+using Yubico.Core;
 
 namespace Yubico.YubiKey.Cryptography
 {
@@ -360,5 +361,9 @@ namespace Yubico.YubiKey.Cryptography
         /// </para>
         /// </remarks>
         public static Func<DES> DesCreator { get; set; } = DES.Create;
+
+        public static Func<IEcdh> EcdhCreator { get; set; } = Ecdh.Create;
+
+        public static Func<string, HMAC> HmacCreator { get; set; } = HMAC.Create;
     }
 }

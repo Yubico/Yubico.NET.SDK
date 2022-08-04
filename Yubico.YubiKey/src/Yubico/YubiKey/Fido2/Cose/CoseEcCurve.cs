@@ -14,8 +14,14 @@
 
 namespace Yubico.YubiKey.Fido2.Cose
 {
+    /// <summary>
+    /// An enumeration of the elliptic curves that are supported by COSE representations.
+    /// </summary>
     public enum CoseEcCurve
     {
+        /// <summary>
+        /// The EC curve could not be determined.
+        /// </summary>
         Unknown = 0,
 
         /// <summary>

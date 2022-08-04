@@ -1,11 +1,11 @@
 // Copyright 2022 Yubico AB
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -14,10 +14,16 @@
 
 namespace Yubico.YubiKey.Fido2.Cose
 {
+    /// <summary>
+    /// An enumeration of the operations that one can potentially perform with a COSE key.
+    /// </summary>
     public enum CoseKeyOperations
     {
+        /// <summary>
+        /// The operation could not be determined.
+        /// </summary>
         None = 0,
-        
+
         /// <summary>
         /// The key is used to create signatures. Requires private key fields.
         /// </summary>

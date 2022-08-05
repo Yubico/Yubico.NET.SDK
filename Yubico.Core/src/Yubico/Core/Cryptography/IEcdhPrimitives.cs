@@ -20,7 +20,7 @@ namespace Yubico.Core
     /// <summary>
     /// An interface exposing ECDH primitive operations.
     /// </summary>
-    public interface IEcdh
+    public interface IEcdhPrimitives
     {
         /// <summary>
         /// Generates a elliptic curve public/private keypair that can be used for ECDH operations.

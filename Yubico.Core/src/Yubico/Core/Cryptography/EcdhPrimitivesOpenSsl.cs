@@ -22,7 +22,7 @@ namespace Yubico.Core
     /// <summary>
     /// An OpenSSL implementation of the IEcdh interface, exposing ECDH primitives to the SDK.
     /// </summary>
-    internal class EcdhOpenSsl : IEcdh
+    internal class EcdhPrimitivesOpenSsl : IEcdhPrimitives
     {
         /// <inheritdoc />
         public ECParameters GenerateKeyPair(ECCurve curve)

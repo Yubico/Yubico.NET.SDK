@@ -15,9 +15,9 @@
 namespace Yubico.Core
 {
     /// <summary>
-    /// Factory class that will return the `Yubico.Core` implementation of the <see cref="IEcdh"/> interface.
+    /// Factory class that will return the `Yubico.Core` implementation of the <see cref="IEcdhPrimitives"/> interface.
     /// </summary>
-    public static class Ecdh
+    public static class EcdhPrimitives
     {
         /// <summary>
         /// Creates a new instance of an implementation of the low level Elliptic Curve Diffie Hellman (ECDH) functions.
@@ -25,6 +25,6 @@ namespace Yubico.Core
         /// <returns>
         /// A new instance of the default implementation of this interface.
         /// </returns>
-        public static IEcdh Create() => new EcdhOpenSsl();
+        public static IEcdhPrimitives Create() => new EcdhPrimitivesOpenSsl();
     }
 }

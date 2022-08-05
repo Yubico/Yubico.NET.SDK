@@ -26,6 +26,7 @@ what information is needed from the caller for that command.
 
 * [Version](#get-version)
 * [Get Info](#get-info)
+* [Get Key Agreement](#get-key-agreement) (get a public key)
 ___
 ## Get version
 
@@ -88,4 +89,31 @@ The YubiKey can return up to 20 of the defined elements. It will not return
 ### APDU
 
 [Technical APDU Details](apdu/get-info.md)
+___
+## Get key agreement
+
+Get the YubiKey's public key that will be used to perform key agreement. The shared secret
+result of key agreement will be used to derive a shared key used for PIN operations.
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[GetKeyAgreementCommand](xref:Yubico.YubiKey.Fido2.Commands.GetKeyAgreementCommand)
+
+[GetKeyAgreementResponse](xref:Yubico.YubiKey.Fido2.Commands.GetKeyAgreementResponse)
+
+### Input
+
+[The UV/PIN Auth Protocol](xref:Yubico.YubiKey.Fido2.Commands.PinUvAuthProtocol).
+
+### Output
+
+[The FIDO2 ECC Public Key](xref:Yubico.YubiKey.Fido2.Fido2EccPublicKey)
+
+### APDU
+
+[Technical APDU Details](apdu/get-key-agree.md)
 ___

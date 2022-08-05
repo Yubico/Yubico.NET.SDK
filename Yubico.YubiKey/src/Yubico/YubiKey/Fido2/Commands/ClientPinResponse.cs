@@ -74,7 +74,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 switch (key)
                 {
                     case TagKeyAgreement:
-                        data.KeyAgreement = cbor.ReadByteString();
+                        data.KeyAgreement = cbor.ReadEncodedValue();
                         break;
 
                     case TagPinUvAuthToken:

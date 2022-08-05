@@ -53,6 +53,30 @@ that was holding the authentication token when your application has finished usi
 
 ### Get key agreement
 
+The application is going to encrypt the PIN before sending it to the YubiKey. But to do so
+it needs a key, one that can encrypt in such a way that the YubiKey will be able to
+decrypt.
+
+Generally, there are three ways to achieve this: encrypt the PIN using the YubiKey's
+public RSA key, encrypt the PIN using a symmetric key key and encrypt the symmetric key
+using the YubiKey's public RSA key, or use a key agreement algorithm such as DH or ECDH to
+compute a shared symmetric key and encrypt the PIN using that key.
+
+Currently, CTAP2 supports only ECDH using a specified set of standard curves, such as
+NIST's P-256. In this system, the application queries the YubiKey to determine which
+UV/PIN auth protocols it supports, and from the list returned chooses one it supports as
+well. Based on the protocol chosen, it will know which curve to use and will generate a
+new key pair. In order to compute the shared secret, it will combine its new private key
+with the YubiKey's public key. Later on, the application will send to the YubiKey its
+public key so that the YubiKey can generate the same shared secret by combining its
+private key with the application's public key.
+
+This means that the application must obtain the YubiKey's public key. It does so by
+sending the <see cref="Yubico.YubiKey.Fido2.Commands.GetKeyAgreementCommand"\>. The
+response to this command is the public key the application will use to compute the shared
+secret. See the User's manual entry on
+[FIDO2 commands](fido2-commands.md#get-key-agreement) for more information.
+
 ### Set PIN
 
 ### Change PIN

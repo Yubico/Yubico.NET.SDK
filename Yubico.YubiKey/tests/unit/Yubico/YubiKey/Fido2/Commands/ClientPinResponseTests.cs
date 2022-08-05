@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             ClientPinData data = response.GetData();
 
-            Assert.True(data.KeyAgreement!.Value.Span.SequenceEqual(new byte[] { 1, 2, 3 }));
+            Assert.True(data.KeyAgreement!.Value.Span.SequenceEqual(new byte[] { 0x43, 1, 2, 3 }));
             Assert.True(data.PinUvAuthToken!.Value.Span.SequenceEqual(new byte[] { 3, 2, 1 }));
             Assert.Equal(8, data.PinRetries);
             Assert.Equal(true, data.PowerCycleState);

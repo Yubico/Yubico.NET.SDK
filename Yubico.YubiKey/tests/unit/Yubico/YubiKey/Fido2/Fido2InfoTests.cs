@@ -18,7 +18,6 @@ using Xunit;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 
-
 namespace Yubico.YubiKey.Fido2
 {
     public class Fido2InfoTests

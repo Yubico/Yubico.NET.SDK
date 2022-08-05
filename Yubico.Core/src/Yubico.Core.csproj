@@ -134,8 +134,4 @@ limitations under the License. -->
     </AssemblyAttribute>
 
   </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Yubico\PlatformInterop\macOS\CoreFoundation\" />
-  </ItemGroup>
 </Project>

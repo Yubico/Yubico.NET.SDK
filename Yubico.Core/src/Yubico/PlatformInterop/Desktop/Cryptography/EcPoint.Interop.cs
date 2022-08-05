@@ -22,27 +22,67 @@ namespace Yubico.PlatformInterop
         // EC_POINT* EC_POINT_new(const EC_GROUP* group);
         [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_new", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern IntPtr EcPointNew(IntPtr ecGroup);
+        private static extern IntPtr EcPointNew(IntPtr ecGroup);
+
+        public static SafeEcPoint EcPointNew(SafeEcGroup ecGroup) =>
+            new SafeEcPoint(EcPointNew(ecGroup.DangerousGetHandle()), true);
 
         // void EC_POINT_free(EC_POINT* point);
         [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_free", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern void EcPointFree(IntPtr ecPoint);
 
-        // int EC_POINT_set_affine_coordinates_GFp(const EC_GROUP* group, EC_POINT* p, const BIGNUM* x, const BIGNUM* y, BN_CTX* ctx);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_set_affine_coordinates_GFp", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        // int EC_POINT_set_affine_coordinates(const EC_GROUP* group, EC_POINT* p, const BIGNUM* x, const BIGNUM* y, BN_CTX* ctx);
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_set_affine_coordinates", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern int EcPointSetAffineCoordinatesGfp(IntPtr group, IntPtr point, IntPtr x, IntPtr y, IntPtr ctx);
+        private static extern int EcPointSetAffineCoordinates(IntPtr group, IntPtr point, IntPtr x, IntPtr y, IntPtr ctx);
 
-        // int EC_POINT_get_affine_coordinates_GFp(const EC_GROUP* group, EC_POINT* p, BIGNUM* x, BIGNUM* y, BN_CTX* ctx);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_get_affine_coordinates_GFp", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        public static int EcPointSetAffineCoordinates(
+            SafeEcGroup group,
+            SafeEcPoint point,
+            SafeBigNum x,
+            SafeBigNum y) =>
+            EcPointSetAffineCoordinates(
+                group.DangerousGetHandle(),
+                point.DangerousGetHandle(),
+                x.DangerousGetHandle(),
+                y.DangerousGetHandle(),
+                IntPtr.Zero);
+
+        // int EC_POINT_get_affine_coordinates(const EC_GROUP* group, EC_POINT* p, BIGNUM* x, BIGNUM* y, BN_CTX* ctx);
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_get_affine_coordinates", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern int EcPointGetAffineCoordinatesGfp(IntPtr group, IntPtr point, IntPtr x, IntPtr y, IntPtr ctx);
+        private static extern int EcPointGetAffineCoordinates(IntPtr group, IntPtr point, IntPtr x, IntPtr y, IntPtr ctx);
+
+        public static int EcPointGetAffineCoordinates(
+            SafeEcGroup group,
+            SafeEcPoint point,
+            SafeBigNum x,
+            SafeBigNum y) =>
+            EcPointGetAffineCoordinates(
+                group.DangerousGetHandle(),
+                point.DangerousGetHandle(),
+                x.DangerousGetHandle(),
+                y.DangerousGetHandle(),
+                IntPtr.Zero);
 
         // int EC_POINT_mul(const EC_GROUP* group, EC_POINT* r, const BIGNUM* n, const EC_POINT* q, const BIGNUM* m, const BN_CTX* ctx);
         [DllImport(Libraries.NativeShims, EntryPoint = "Native_EC_POINT_mul", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern int EcPointMul(IntPtr group, IntPtr r, IntPtr n, IntPtr q, IntPtr m, IntPtr ctx);
+        private static extern int EcPointMul(IntPtr group, IntPtr r, IntPtr n, IntPtr q, IntPtr m, IntPtr ctx);
 
+        public static int EcPointMul(
+            SafeEcGroup group,
+            SafeEcPoint r,
+            IntPtr n,
+            IntPtr q,
+            IntPtr m) =>
+            EcPointMul(
+                group.DangerousGetHandle(),
+                r.DangerousGetHandle(),
+                n,
+                q,
+                m,
+                IntPtr.Zero);
     }
 }

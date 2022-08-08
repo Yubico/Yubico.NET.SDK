@@ -124,8 +124,7 @@ limitations under the License. -->
     </PackageReference>
 
     <!-- Remove ExcludeAssets once the package supports netcoreapp and net462 properly -->
-    <PackageReference Include="System.Formats.Cbor" Version="7.0.0-preview.5.22301.12" ExcludeAssets="buildtransitive" />
-    
+    <PackageReference Include="System.Formats.Cbor" Version="7.0.0-preview.6.22324.4" ExcludeAssets="buildtransitive" />
     <ProjectReference Include="..\..\Yubico.Core\src\Yubico.Core.csproj" />
 
   </ItemGroup>

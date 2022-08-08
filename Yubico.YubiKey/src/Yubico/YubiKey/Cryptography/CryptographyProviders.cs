@@ -14,6 +14,7 @@
 
 using System;
 using System.Security.Cryptography;
+using Yubico.Core;
 
 namespace Yubico.YubiKey.Cryptography
 {
@@ -360,5 +361,38 @@ namespace Yubico.YubiKey.Cryptography
         /// </para>
         /// </remarks>
         public static Func<DES> DesCreator { get; set; } = DES.Create;
+
+        /// <summary>
+        /// This property is a delegate (function pointer). This method will return
+        /// an instance of <see cref="IEcdhPrimitives"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// When an SDK operation needs to perform compute the ECDH shared secret,
+        /// it will do so using an implementation of the <see cref="IEcdhPrimitives" />
+        /// interface. However, when it needs an instance, it will as this delegate
+        /// to build an object, rather than build it itself.
+        /// </para>
+        /// <para>
+        /// If you want to replace the implementation, you will likely do something
+        /// like this in your application. The body of the delegate is responsible
+        /// for creating an instance of ECDH based on an implementation of your own
+        /// choosing.
+        /// <code language="csharp">
+        ///     CryptographyProviders.EcdhPrimitivesCreator = () =>
+        ///     {
+        ///         Handle ecdhHandle = GetHandle();
+        ///         return EcdhImpl.GetEcdhObject(ecdhHandle);
+        ///     }
+        /// </code>
+        /// </para>
+        /// </remarks>
+        public static Func<IEcdhPrimitives> EcdhPrimitivesCreator { get; set; } = EcdhPrimitives.Create;
+
+        /// <summary>
+        /// This property is a delegate (function pointer). This method will return
+        /// an instance of <c>HMAC</c>.
+        /// </summary>
+        public static Func<string, HMAC> HmacCreator { get; set; } = HMAC.Create;
     }
 }

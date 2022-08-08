@@ -15,7 +15,7 @@
 using System;
 using System.Formats.Cbor;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Cbor
 {
     /// <summary>
     /// Some helpers to make working with CBOR a little easier.
@@ -113,5 +113,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </code>
         /// </returns>
         public static MapWriter BeginMap(CborWriter cbor) => new MapWriter(cbor);
+
     }
 }

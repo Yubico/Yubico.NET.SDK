@@ -14,7 +14,7 @@
 
 using System;
 using System.Formats.Cbor;
-using Yubico.YubiKey.Fido2.Commands;
+using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2.Cose
 {

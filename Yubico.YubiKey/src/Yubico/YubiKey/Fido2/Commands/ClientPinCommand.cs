@@ -15,6 +15,7 @@
 using System;
 using System.Formats.Cbor;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {

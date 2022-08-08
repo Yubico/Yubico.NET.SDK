@@ -16,7 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Formats.Cbor;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.Cbor
 {
     /// <summary>
     /// Some helpers to make working with CBOR a little easier.

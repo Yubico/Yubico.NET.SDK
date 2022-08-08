@@ -117,15 +117,31 @@ namespace Yubico.YubiKey.Fido2.Commands
 
     }
 
-    public class CborMap
+    /// <summary>
+    /// Represents a CBOR map as a random-access dictionary.
+    /// </summary>
+    internal class CborMap
     {
         private readonly IDictionary<long, object?> _dict;
 
+        /// <summary>
+        /// Creates a new instance of <see cref="CborMap"/> based on a dictionary.
+        /// </summary>
+        /// <param name="dict">An integer keyed dictionary of objects representing a CBOR map.</param>
         public CborMap(IDictionary<long, object?> dict)
         {
             _dict = dict;
         }
 
+        /// <summary>
+        /// Creates a new instance of <see cref="CborMap"/> based on a CborReader.
+        /// </summary>
+        /// <param name="reader">
+        /// A CborReader that is queued up at the start of a map.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The reader instance is null.
+        /// </exception>
         public CborMap(CborReader reader)
         {
             if (reader is null)
@@ -136,9 +152,14 @@ namespace Yubico.YubiKey.Fido2.Commands
             _dict = ProcessMap(reader);
         }
 
+        /// <summary>
+        /// Checks to see whether a given key is present in the map, without throwing an exception.
+        /// </summary>
         public bool Contains(long key) => _dict.ContainsKey(key);
 
-        [CLSCompliant(false)]
+        /// <summary>
+        /// Read the value for the given key as a positive-integer `ulong`.
+        /// </summary>
         public ulong ReadUInt64(long key)
         {
             object? value = _dict[key];
@@ -151,7 +172,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             throw new InvalidCastException();
         }
 
-        [CLSCompliant(false)]
+        /// <summary>
+        /// Read the value for the given key as a negative-integer `ulong`.
+        /// </summary>
         public ulong ReadNegativeInteger(long key)
         {
             object? value = _dict[key];
@@ -164,6 +187,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             throw new InvalidCastException();
         }
 
+        /// <summary>
+        /// Read the value for the given key as a byte array.
+        /// </summary>
         public ReadOnlyMemory<byte> ReadByteString(long key)
         {
             object? value = _dict[key];
@@ -176,6 +202,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             throw new InvalidCastException();
         }
 
+        /// <summary>
+        /// Read the value for the given key as a string.
+        /// </summary>
         public string ReadTextString(long key)
         {
             object? value = _dict[key];
@@ -188,6 +217,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             throw new InvalidCastException();
         }
 
+        /// <summary>
+        /// Read the value for the given key as a nested map.
+        /// </summary>
         public CborMap ReadMap(long key)
         {
             object? value = _dict[key];
@@ -200,6 +232,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             throw new InvalidCastException();
         }
 
+        /// <summary>
+        /// Read the value for the given key as an array of objects.
+        /// </summary>
         public object[] ReadArray(long key)
         {
             object? value = _dict[key];
@@ -212,6 +247,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             throw new InvalidCastException();
         }
 
+        /// <summary>
+        /// Read the value for the given key as a single-width floating point number.
+        /// </summary>
         public float ReadSingle(long key)
         {
             object? value = _dict[key];
@@ -224,6 +262,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             throw new InvalidCastException();
         }
 
+        /// <summary>
+        /// Read the value for the given key as a double-width floating point number.
+        /// </summary>
         public double ReadDouble(long key)
         {
             object? value = _dict[key];
@@ -236,6 +277,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             throw new InvalidCastException();
         }
 
+        /// <summary>
+        /// Read the given key as a "null" value - throw if there is a value.
+        /// </summary>
         public void ReadNull(long key)
         {
             object? value = _dict[key];
@@ -248,6 +292,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             throw new InvalidCastException();
         }
 
+        /// <summary>
+        /// Read the value for the given key as a boolean.
+        /// </summary>
         public bool ReadBoolean(long key)
         {
             object? value = _dict[key];

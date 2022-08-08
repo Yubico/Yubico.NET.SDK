@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Formats.Cbor;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
 
@@ -78,16 +79,16 @@ namespace Yubico.YubiKey.Fido2.Cose
         }
 
         /// <inheritdoc />
-        public CosePublicEcKey(CborMap map) : base(map)
+        public CosePublicEcKey(ReadOnlyMemory<byte> coseEncodedKey)
         {
-            if (map is null)
-            {
-                throw new ArgumentNullException(nameof(map));
-            }
+            var cborReader = new CborReader(coseEncodedKey);
+            var map = new CborMap(cborReader);
 
             Curve = (CoseEcCurve)map.ReadUInt64(TagCurve);
             X = map.ReadByteString(TagX);
             Y = map.ReadByteString(TagY);
+            Type = (CoseKeyType)map.ReadUInt64(TagKeyType);
+            Algorithm = (CoseAlgorithmIdentifier)map.ReadUInt64(TagAlgorithm);
         }
 
         /// <summary>

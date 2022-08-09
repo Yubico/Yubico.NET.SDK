@@ -14,6 +14,7 @@
 
 using System;
 using System.Formats.Cbor;
+using System.Globalization;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 
@@ -49,6 +50,9 @@ namespace Yubico.YubiKey.Fido2.Cose
         private const long TagX = -2;
         private const long TagY = -3;
 
+        // We currently support only one coordinate size
+        private const int P256CoordinateLength = 32;
+
         private ECParameters _ecParameters;
 
         /// <summary>
@@ -57,7 +61,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         public CoseEcCurve Curve
         {
             get => NamedCurveToCoseCurve(_ecParameters.Curve);
-            set => CoseCurveToNamedCurve(value);
+            set => _ecParameters.Curve = CoseCurveToNamedCurve(value);
         }
 
         /// <summary>
@@ -66,7 +70,18 @@ namespace Yubico.YubiKey.Fido2.Cose
         public ReadOnlyMemory<byte> X
         {
             get => _ecParameters.Q.X;
-            set => _ecParameters.Q.X = value.ToArray();
+            set
+            {
+                if (value.Length != P256CoordinateLength)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidPublicKeyData));
+                }
+
+                _ecParameters.Q.X = value.ToArray();
+            }
         }
 
         /// <summary>
@@ -75,7 +90,17 @@ namespace Yubico.YubiKey.Fido2.Cose
         public ReadOnlyMemory<byte> Y
         {
             get => _ecParameters.Q.Y;
-            set => _ecParameters.Q.Y = value.ToArray();
+            set
+            {
+                if (value.Length != P256CoordinateLength)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidPublicKeyData));
+                }
+                _ecParameters.Q.Y = value.ToArray();
+            }
         }
 
         /// <inheritdoc />
@@ -118,6 +143,35 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// </returns>
         public ECParameters AsEcParameters() => _ecParameters;
 
+        /// <summary>
+        /// Return a new byte array that is the key data encoded following the
+        /// FIDO2/CBOR standard.
+        /// </summary>
+        /// <returns>
+        /// The encoded key.
+        /// </returns>
+        public byte[] ToEncodedCoseKey()
+        {
+            const int DataMapCount = 5;
+
+            // This encodes the map of 5 things.
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartMap(DataMapCount);
+            cbor.WriteUInt64(TagKeyType);
+            cbor.WriteUInt64((ulong)Type);
+            cbor.WriteUInt64(TagAlgorithm);
+            cbor.WriteInt64((long)Algorithm);
+            cbor.WriteInt64(TagCurve);
+            cbor.WriteInt64((long)Curve);
+            cbor.WriteInt64(TagX);
+            cbor.WriteByteString(X.Span);
+            cbor.WriteInt64(TagY);
+            cbor.WriteByteString(Y.Span);
+            cbor.WriteEndMap();
+
+            return cbor.Encode();
+        }
+
         private static ECCurve CoseCurveToNamedCurve(CoseEcCurve curveId) =>
             curveId switch
             {
@@ -130,9 +184,9 @@ namespace Yubico.YubiKey.Fido2.Cose
         private static CoseEcCurve NamedCurveToCoseCurve(ECCurve namedCurve) =>
             namedCurve switch
             {
-                _ when namedCurve.Oid == ECCurve.NamedCurves.nistP256.Oid => CoseEcCurve.P256,
-                _ when namedCurve.Oid == ECCurve.NamedCurves.nistP384.Oid => CoseEcCurve.P384,
-                _ when namedCurve.Oid == ECCurve.NamedCurves.nistP521.Oid => CoseEcCurve.P521,
+                _ when namedCurve.Oid.Value == ECCurve.NamedCurves.nistP256.Oid.Value => CoseEcCurve.P256,
+                _ when namedCurve.Oid.Value == ECCurve.NamedCurves.nistP384.Oid.Value => CoseEcCurve.P384,
+                _ when namedCurve.Oid.Value == ECCurve.NamedCurves.nistP521.Oid.Value => CoseEcCurve.P521,
                 _ => throw new NotSupportedException("Elliptic curve not supported.")
             };
     }

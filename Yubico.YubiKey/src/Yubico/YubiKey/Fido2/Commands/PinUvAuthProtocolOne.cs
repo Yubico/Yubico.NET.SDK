@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public (CoseKey coseKey, byte[] sharedSecret) Encapsulate(CosePublicEcKey peerCosePublicKey)
+        public (CosePublicEcKey coseKey, byte[] sharedSecret) Encapsulate(CosePublicEcKey peerCosePublicKey)
         {
             if (peerCosePublicKey is null)
             {

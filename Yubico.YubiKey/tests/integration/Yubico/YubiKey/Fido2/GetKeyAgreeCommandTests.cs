@@ -38,12 +38,12 @@ namespace Yubico.YubiKey.Fido2
             var connection = new FidoConnection(deviceToUse);
             Assert.NotNull(connection);
 
-            var cmd = new GetKeyAgreementCommand() { PinUvAuthProtocol = PinUvAuthProtocol.ProtocolTwo, };
+            var cmd = new GetKeyAgreementCommand() { PinUvAuthProtocol = new PinUvAuthProtocolOne(), };
             GetKeyAgreementResponse rsp = connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            Fido2EccPublicKey pubKey = rsp.GetData();
-            Assert.Equal(CoseAlgorithmIdentifier.ES256, pubKey.Algorithm);
+            (CosePublicEcKey keyAgreementKey, _) = rsp.GetData();
+            Assert.Equal(CoseAlgorithmIdentifier.ES256, keyAgreementKey.Algorithm);
         }
 
         private static HidDevice? GetFidoHid(IEnumerable<HidDevice> devices)

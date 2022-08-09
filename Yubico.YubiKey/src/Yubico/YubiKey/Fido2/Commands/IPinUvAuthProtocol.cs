@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// Generates an encapsulation for the authenticator's public key and returns the message to transmit and the
         /// shared secret.
         /// </summary>
-        (CoseKey coseKey, byte[] sharedSecret) Encapsulate(CosePublicEcKey peerCosePublicKey);
+        (CosePublicEcKey coseKey, byte[] sharedSecret) Encapsulate(CosePublicEcKey peerCosePublicKey);
 
         /// <summary>
         /// Returns the AES-256-CBC encryption of plaintext using an all-zero IV.

@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// others.
         /// </para>
         /// </remarks>
-        public PinUvAuthProtocol? PinUvAuthProtocol { get; set; }
+        public IPinUvAuthProtocol? PinUvAuthProtocol { get; set; }
 
         /// <summary>
         /// The Client PIN sub-command to issue to the YubiKey.
@@ -165,7 +165,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
 
             CborHelpers.BeginMap(cbor)
-                .OptionalEntry(TagPinUvAuthProtocol, (uint?)PinUvAuthProtocol)
+                .OptionalEntry(TagPinUvAuthProtocol, (uint?)PinUvAuthProtocol?.Protocol)
                 .Entry(TagSubCommand, (uint)SubCommand)
                 .OptionalEntry(TagKeyAgreement, KeyAgreement)
                 .OptionalEntry(TagPinUvAuthParam, PinUvAuthParam)

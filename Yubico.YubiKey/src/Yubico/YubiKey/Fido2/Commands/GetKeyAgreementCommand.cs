@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <summary>
         /// The PIN/UV Auth Protocol for which the public key is requested.
         /// </summary>
-        public PinUvAuthProtocol? PinUvAuthProtocol
+        public IPinUvAuthProtocol? PinUvAuthProtocol
         {
             get => _command.PinUvAuthProtocol;
             set => _command.PinUvAuthProtocol = value;
@@ -72,7 +72,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <param name="protocol">
         /// Which protocol the caller will be using.
         /// </param>
-        public GetKeyAgreementCommand(PinUvAuthProtocol protocol)
+        public GetKeyAgreementCommand(IPinUvAuthProtocol protocol)
             : this()
         {
             PinUvAuthProtocol = protocol;
@@ -83,6 +83,6 @@ namespace Yubico.YubiKey.Fido2.Commands
 
         /// <inheritdoc />
         public GetKeyAgreementResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetKeyAgreementResponse(responseApdu);
+            new GetKeyAgreementResponse(responseApdu, PinUvAuthProtocol!);
     }
 }

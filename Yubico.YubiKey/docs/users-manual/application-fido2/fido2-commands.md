@@ -107,11 +107,11 @@ All YubiKeys with the FIDO2 application.
 
 ### Input
 
-[The UV/PIN Auth Protocol](xref:Yubico.YubiKey.Fido2.Commands.PinUvAuthProtocol).
+[The UV/PIN Auth Protocol](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocol).
 
 ### Output
 
-[The FIDO2 ECC Public Key](xref:Yubico.YubiKey.Fido2.Fido2EccPublicKey)
+[The FIDO2 COSE EC Public Key](xref:Yubico.YubiKey.Fido2.Cose.CosePublicEcKey)
 
 ### APDU
 

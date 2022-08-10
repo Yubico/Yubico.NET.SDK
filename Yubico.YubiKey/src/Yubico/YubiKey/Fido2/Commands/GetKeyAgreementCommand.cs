@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -40,9 +41,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <summary>
         /// The PIN/UV Auth Protocol for which the public key is requested.
         /// </summary>
-        public PinUvAuthProtocol? PinUvAuthProtocol
+        public PinUvAuthProtocol PinUvAuthProtocol
         {
-            get => _command.PinUvAuthProtocol;
+            get => _command.PinUvAuthProtocol ?? PinUvAuthProtocol.None;
             set => _command.PinUvAuthProtocol = value;
         }
 

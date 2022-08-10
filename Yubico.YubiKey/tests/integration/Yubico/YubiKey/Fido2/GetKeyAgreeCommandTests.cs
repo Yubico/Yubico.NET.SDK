@@ -17,6 +17,7 @@ using Yubico.Core.Devices.Hid;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using Xunit;
+using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -42,7 +43,7 @@ namespace Yubico.YubiKey.Fido2
             GetKeyAgreementResponse rsp = connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            Fido2EccPublicKey pubKey = rsp.GetData();
+            CosePublicEcKey pubKey = rsp.GetData();
             Assert.Equal(CoseAlgorithmIdentifier.ES256, pubKey.Algorithm);
         }
 

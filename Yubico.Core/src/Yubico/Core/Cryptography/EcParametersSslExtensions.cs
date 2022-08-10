@@ -63,6 +63,6 @@ namespace Yubico.Core
                 _ => throw new NotSupportedException("Specified elliptic curve is not supported.")
             };
 
-        private static bool HasSameOid(this ECCurve curve, ECCurve named) => curve.Oid == named.Oid;
+        private static bool HasSameOid(this ECCurve curve, ECCurve named) => curve.Oid.Value == named.Oid.Value;
     }
 }

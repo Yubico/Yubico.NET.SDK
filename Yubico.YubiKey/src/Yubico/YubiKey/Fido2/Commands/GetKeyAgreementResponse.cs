@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -22,7 +23,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// This is the partner response class to the
     /// <see cref="GetKeyAgreementCommand" /> command class.
     /// </summary>
-    public class GetKeyAgreementResponse : IYubiKeyResponseWithData<Fido2EccPublicKey>
+    public class GetKeyAgreementResponse : IYubiKeyResponseWithData<CosePublicEcKey>
     {
         private readonly ClientPinResponse _response;
 
@@ -47,7 +48,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </summary>
         /// <remarks>
         /// </remarks>
-        public Fido2EccPublicKey GetData()
+        public CosePublicEcKey GetData()
         {
             ClientPinData data = _response.GetData();
 
@@ -59,7 +60,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         ExceptionMessages.Ctap2MissingRequiredField));
             }
 
-            return new Fido2EccPublicKey((ReadOnlyMemory<byte>)data.KeyAgreement);
+            return new CosePublicEcKey(data.KeyAgreement.Value);
         }
 
         /// <inheritdoc />

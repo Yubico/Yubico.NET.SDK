@@ -13,20 +13,18 @@
 // limitations under the License.
 
 using System;
-using System.Collections.ObjectModel;
 using Xunit;
-using Yubico.YubiKey.Fido2.Commands;
-using Yubico.YubiKey.Fido2.Cose;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2.Cose
 {
-    public class Fido2EccKeyTests
+    public class CosePublicEcKeyTests
     {
         [Fact]
         public void Encode_ReturnsCorrect()
         {
             byte[] correctValue = new byte[] {
-                0xa5, 0x01, 0x02, 0x03, 0x38, 0x18, 0x20, 0x01, 0x21, 0x58, 0x20,
+                0xa5, 0x01, 0x02, 0x03, 0x26, 0x20, 0x01,
+                0x21, 0x58, 0x20,
                 0x8B, 0x1C, 0x84, 0x52, 0x7E, 0x02, 0x89, 0x9F, 0x58, 0x5C, 0xFF, 0xDB, 0x35, 0x48, 0xC3, 0x6E,
                 0xBC, 0x29, 0xFC, 0xE7, 0xAC, 0x3E, 0x44, 0xCC, 0xC4, 0x21, 0xFA, 0xCB, 0xAA, 0x98, 0x47, 0x5F,
                 0x22, 0x58, 0x20,
@@ -37,12 +35,19 @@ namespace Yubico.YubiKey.Fido2
             byte[] xCoord = new byte[32];
             byte[] yCoord = new byte[32];
 
-            Array.Copy(correctValue, 11, xCoord, 0, 32);
-            Array.Copy(correctValue, 46, yCoord, 0, 32);
+            Array.Copy(correctValue, 10, xCoord, 0, 32);
+            Array.Copy(correctValue, 45, yCoord, 0, 32);
 
-            var eccKey = new Fido2EccPublicKey(CoseAlgorithmIdentifier.ES256, xCoord, yCoord);
+            var eccKey = new CosePublicEcKey()
+            {
+                Type = CoseKeyType.Ec2,
+                Algorithm = CoseAlgorithmIdentifier.ES256,
+                Curve = CoseEcCurve.P256,
+                X = xCoord,
+                Y = yCoord
+            };
 
-            ReadOnlyMemory<byte> encodedKey = eccKey.GetEncodedKey();
+            ReadOnlyMemory<byte> encodedKey = eccKey.ToEncodedCoseKey();
 
             bool isValid = MemoryExtensions.SequenceEqual(correctValue, encodedKey.Span);
 

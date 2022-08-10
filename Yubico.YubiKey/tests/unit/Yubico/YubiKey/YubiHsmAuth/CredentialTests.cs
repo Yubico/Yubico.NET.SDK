@@ -95,6 +95,21 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
         #region KeyType Property
         [Fact]
+        public void KeyType_GetSetAes128_KeyTypeIsAes128()
+        {
+            CryptographicKeyType expectedKeyType = CryptographicKeyType.Aes128;
+
+            Credential cred = new Credential(
+                CryptographicKeyType.Aes128,
+                "test key",
+                false);
+
+            cred.KeyType = expectedKeyType;
+
+            Assert.Equal(expectedKeyType, cred.KeyType);
+        }
+
+        [Fact]
         public void KeyType_SetNegative1_ThrowsArgOutOfRange()
         {
             CryptographicKeyType invalidKeyType = (CryptographicKeyType)(-1);

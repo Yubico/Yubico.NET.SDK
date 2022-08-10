@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {

@@ -17,7 +17,7 @@ using System.IO;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.PinProtocols
 {
     public class PinUvAuthProtocolOne : PinUvAuthProtocolBase
     {

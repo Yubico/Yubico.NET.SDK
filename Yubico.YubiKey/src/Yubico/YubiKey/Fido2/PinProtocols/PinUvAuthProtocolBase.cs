@@ -18,7 +18,7 @@ using Yubico.Core;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cose;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.PinProtocols
 {
     /// <summary>
     /// Base class for FIDO2 PIN/UV auth protocol implementations.

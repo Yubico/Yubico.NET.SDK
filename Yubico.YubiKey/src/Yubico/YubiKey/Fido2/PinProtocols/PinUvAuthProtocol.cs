@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2.PinProtocols
 {
     /// <summary>
     /// An enumeration denoting the FIDO2 PIN/UV authentication protocol.

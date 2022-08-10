@@ -107,7 +107,7 @@ All YubiKeys with the FIDO2 application.
 
 ### Input
 
-[The UV/PIN Auth Protocol](xref:Yubico.YubiKey.Fido2.Commands.PinUvAuthProtocol).
+[The UV/PIN Auth Protocol](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocol).
 
 ### Output
 

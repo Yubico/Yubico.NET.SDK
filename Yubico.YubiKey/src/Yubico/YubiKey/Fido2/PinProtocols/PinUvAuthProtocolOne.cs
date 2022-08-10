@@ -15,52 +15,19 @@
 using System;
 using System.IO;
 using System.Security.Cryptography;
-using Yubico.Core;
 using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    public class PinUvAuthProtocolOne : IPinUvAuthProtocol
+    public class PinUvAuthProtocolOne : PinUvAuthProtocolBase
     {
-        private ECParameters _myKey;
-
-        /// <summary>
-        /// Always returns <see cref="PinUvAuthProtocol.ProtocolOne"/>.
-        /// </summary>
-        public PinUvAuthProtocol Protocol => PinUvAuthProtocol.ProtocolOne;
-
-        /// <inheritdoc />
-        public void Initialize()
+        public PinUvAuthProtocolOne()
         {
-            IEcdhPrimitives ecdh = CryptographyProviders.EcdhPrimitivesCreator();
-            _myKey = ecdh.GenerateKeyPair(ECCurve.NamedCurves.nistP256);
+            Protocol = PinUvAuthProtocol.ProtocolOne;
         }
 
         /// <inheritdoc />
-        public (CosePublicEcKey coseKey, byte[] sharedSecret) Encapsulate(CosePublicEcKey peerCosePublicKey)
-        {
-            if (peerCosePublicKey is null)
-            {
-                throw new ArgumentNullException(nameof(peerCosePublicKey));
-            }
-
-            if (_myKey.D is null)
-            {
-                throw new InvalidOperationException("Missing private key.");
-            }
-
-            IEcdhPrimitives ecdh = CryptographyProviders.EcdhPrimitivesCreator();
-            byte[] derivedValue = ecdh.ComputeSharedSecret(peerCosePublicKey.AsEcParameters(), _myKey.D);
-            byte[] sharedSecret = Kdf(derivedValue);
-
-            CryptographicOperations.ZeroMemory(derivedValue);
-
-            return (new CosePublicEcKey(_myKey), sharedSecret);
-        }
-
-        /// <inheritdoc />
-        public byte[] Encrypt(byte[] key, byte[] plaintext)
+        public override byte[] Encrypt(byte[] key, byte[] plaintext)
         {
             using Aes aes = CryptographyProviders.AesCreator();
             aes.Key = key;
@@ -75,7 +42,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public byte[] Decrypt(byte[] key, byte[] ciphertext)
+        public override byte[] Decrypt(byte[] key, byte[] ciphertext)
         {
             if (key is null)
             {
@@ -89,6 +56,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             using Aes aes = CryptographyProviders.AesCreator();
             aes.Key = key;
+            aes.IV = new byte[16];
 
             if (ciphertext.Length % aes.BlockSize != 0)
             {
@@ -104,14 +72,14 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public byte[] Authenticate(byte[] key, byte[] message)
+        public override byte[] Authenticate(byte[] key, byte[] message)
         {
             using HMAC hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
             hmacSha256.Key = key;
             return hmacSha256.ComputeHash(message).AsMemory(0, 16).ToArray();
         }
 
-        private static byte[] Kdf(byte[] buffer)
+        protected override byte[] DeriveKey(byte[] buffer)
         {
             using SHA256 sha256 = CryptographyProviders.Sha256Creator();
             return sha256.ComputeHash(buffer);

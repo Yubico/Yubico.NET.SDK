@@ -95,9 +95,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
         #region KeyType Property
         [Fact]
-        public void KeyType_GetSetEcp256_KeyTypeIsEcp256()
+        public void KeyType_GetSetAes128_KeyTypeIsAes128()
         {
-            CryptographicKeyType expectedKeyType = CryptographicKeyType.Ecp256;
+            CryptographicKeyType expectedKeyType = CryptographicKeyType.Aes128;
 
             Credential cred = new Credential(
                 CryptographicKeyType.Aes128,

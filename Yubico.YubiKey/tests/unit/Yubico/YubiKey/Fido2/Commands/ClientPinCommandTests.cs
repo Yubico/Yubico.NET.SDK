@@ -70,7 +70,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             var command = new ClientPinCommand()
             {
-                PinUvAuthProtocol = new PinUvAuthProtocolOne(),
+                PinUvAuthProtocol = PinUvAuthProtocol.ProtocolOne,
                 SubCommand = 0xFF,
                 KeyAgreement = new byte[] { 1, 2, 3 },
                 PinUvAuthParam = new byte[] { 4, 5, 6 },

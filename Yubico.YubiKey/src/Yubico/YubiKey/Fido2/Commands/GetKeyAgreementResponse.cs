@@ -23,10 +23,9 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// This is the partner response class to the
     /// <see cref="GetKeyAgreementCommand" /> command class.
     /// </summary>
-    public class GetKeyAgreementResponse : IYubiKeyResponseWithData<(CosePublicEcKey keyAgreementKey, byte[] sharedSecret)>
+    public class GetKeyAgreementResponse : IYubiKeyResponseWithData<CosePublicEcKey>
     {
         private readonly ClientPinResponse _response;
-        private readonly IPinUvAuthProtocol _pinUvAuthProtocol;
 
         /// <summary>
         /// Constructs a new instance of the
@@ -38,14 +37,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// `getKeyAgreement` sub-command of the `authenticatorClientPIN` CTAP2
         /// command.
         /// </param>
-        /// <param name="pinUvAuthProtocol">
-        /// The PIN/UV auth protocol instance that was used by the partner
-        /// command class instance.
-        /// </param>
-        public GetKeyAgreementResponse(ResponseApdu responseApdu, IPinUvAuthProtocol pinUvAuthProtocol)
+        public GetKeyAgreementResponse(ResponseApdu responseApdu)
         {
             _response = new ClientPinResponse(responseApdu);
-            _pinUvAuthProtocol = pinUvAuthProtocol;
         }
 
         /// <summary>
@@ -54,7 +48,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </summary>
         /// <remarks>
         /// </remarks>
-        public (CosePublicEcKey keyAgreementKey, byte[] sharedSecret) GetData()
+        public CosePublicEcKey GetData()
         {
             ClientPinData data = _response.GetData();
 
@@ -66,8 +60,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         ExceptionMessages.Ctap2MissingRequiredField));
             }
 
-            var peerCoseKey = new CosePublicEcKey(data.KeyAgreement.Value);
-            return _pinUvAuthProtocol.Encapsulate(peerCoseKey);
+            return new CosePublicEcKey(data.KeyAgreement.Value);
         }
 
         /// <inheritdoc />

@@ -118,7 +118,7 @@ limitations under the License. -->
     <!-- This is a DocFX plugin and tempate separates class and struct members into their own documentation pages. -->
     <PackageReference Include="memberpage" Condition="$(Configuration.Contains('WithDocs')) and $(TargetFramework)=='netstandard2.0'" Version="$(DocFxVersion)" PrivateAssets="all" IncludeAssets="contentfiles" GeneratePathProperty="true" />
 
-    <PackageReference Include="Nullable" Version="1.3.0">
+    <PackageReference Include="Nullable" Version="1.3.1">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

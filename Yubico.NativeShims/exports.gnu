@@ -1,5 +1,6 @@
 {
     global:
+        Native_BN_new;
         Native_BN_bin2bn;
         Native_BN_bn2bin;
         Native_BN_bn2binpad;

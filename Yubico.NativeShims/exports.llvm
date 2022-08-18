@@ -1,3 +1,4 @@
+_Native_BN_new
 _Native_BN_bin2bn
 _Native_BN_bn2bin
 _Native_BN_bn2binpad

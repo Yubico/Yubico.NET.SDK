@@ -4,6 +4,13 @@
 
 typedef void* Native_BIGNUM;
 
+Native_BIGNUM
+NATIVEAPI
+Native_BN_new()
+{
+    return BN_new();
+}
+
 int32_t
 NATIVEAPI
 Native_BN_bn2bin(

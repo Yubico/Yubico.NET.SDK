@@ -16,10 +16,14 @@ using System;
 using System.Security.Cryptography;
 using Yubico.PlatformInterop;
 
-namespace Yubico.Core
+namespace Yubico.Core.Cryptography
 {
     internal static class OpenSslExtensions
     {
+        private const int NistP256BitLength = 256;
+        private const int NistP384BitLength = 384;
+        private const int NistP521BitLength = 521;
+
         /// <summary>
         /// Converts an ECParameters structure into the OpenSSL data types for the public key: EC_GROUP and EC_POINT
         /// </summary>
@@ -60,6 +64,28 @@ namespace Yubico.Core
                 _ when curve.HasSameOid(ECCurve.NamedCurves.nistP256) => 415, // Exists as X9.64-prime256v1 in OpenSSL
                 _ when curve.HasSameOid(ECCurve.NamedCurves.nistP384) => 715,
                 _ when curve.HasSameOid(ECCurve.NamedCurves.nistP521) => 716,
+                _ => throw new NotSupportedException("Specified elliptic curve is not supported.")
+            };
+
+        /// <summary>
+        /// Return the bit length of the curve. This will be the bit length of
+        /// the private value and each coordinate of a point in the curve.
+        /// </summary>
+        /// <param name="curve">
+        /// The .NET representation of a named elliptic curve.
+        /// </param>
+        /// <returns>
+        /// The curve's bit length.
+        /// </returns>
+        /// <exception cref="NotSupportedException">
+        /// This function only supports the NIST P256, P384, and P512 curves as of version 1.5.0.
+        /// </exception>
+        public static int BitLength (this ECCurve curve) =>
+            curve switch
+            {
+                _ when curve.HasSameOid(ECCurve.NamedCurves.nistP256) => NistP256BitLength,
+                _ when curve.HasSameOid(ECCurve.NamedCurves.nistP384) => NistP384BitLength,
+                _ when curve.HasSameOid(ECCurve.NamedCurves.nistP521) => NistP521BitLength,
                 _ => throw new NotSupportedException("Specified elliptic curve is not supported.")
             };
 

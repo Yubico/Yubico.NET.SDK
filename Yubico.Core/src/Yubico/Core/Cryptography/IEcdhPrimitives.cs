@@ -15,7 +15,7 @@
 using System;
 using System.Security.Cryptography;
 
-namespace Yubico.Core
+namespace Yubico.Core.Cryptography
 {
     /// <summary>
     /// An interface exposing ECDH primitive operations.

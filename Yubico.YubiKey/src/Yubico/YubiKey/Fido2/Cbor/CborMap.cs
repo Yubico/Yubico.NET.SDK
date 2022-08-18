@@ -1,11 +1,11 @@
 // Copyright 2022 Yubico AB
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 //     http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -59,28 +59,13 @@ namespace Yubico.YubiKey.Fido2.Cbor
         public bool Contains(long key) => _dict.ContainsKey(key);
 
         /// <summary>
-        /// Read the value for the given key as a positive-integer `ulong`.
+        /// Read the value for the given key as a signed integer `long`.
         /// </summary>
-        public ulong ReadUInt64(long key)
+        public long ReadInt64(long key)
         {
             object? value = _dict[key];
 
-            if (value is ulong unboxedValue)
-            {
-                return unboxedValue;
-            }
-
-            throw new InvalidCastException();
-        }
-
-        /// <summary>
-        /// Read the value for the given key as a negative-integer `ulong`.
-        /// </summary>
-        public ulong ReadNegativeInteger(long key)
-        {
-            object? value = _dict[key];
-
-            if (value is ulong unboxedValue)
+            if (value is long unboxedValue)
             {
                 return unboxedValue;
             }
@@ -227,15 +212,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 // Technically the typecast from ulong -> long could truncate data, but in practice we do not expect
                 // the map keys to be larger than a byte.
-                long key;
-                if (cbor.PeekState() == CborReaderState.NegativeInteger)
-                {
-                    key = 0 - (long)cbor.ReadCborNegativeIntegerRepresentation();
-                }
-                else
-                {
-                    key = (long)cbor.ReadUInt64();
-                }
+                long key = cbor.ReadInt64();
 
                 object? value = ProcessSingleElement(cbor);
 
@@ -250,8 +227,8 @@ namespace Yubico.YubiKey.Fido2.Cbor
         private object? ProcessSingleElement(CborReader cbor) => cbor.PeekState() switch
         {
             CborReaderState.Undefined => null,
-            CborReaderState.UnsignedInteger => cbor.ReadUInt64(),
-            CborReaderState.NegativeInteger => cbor.ReadCborNegativeIntegerRepresentation(),
+            CborReaderState.UnsignedInteger => cbor.ReadInt64(),
+            CborReaderState.NegativeInteger => cbor.ReadInt64(),
             CborReaderState.ByteString => cbor.ReadByteString(),
             CborReaderState.TextString => cbor.ReadTextString(),
             CborReaderState.StartMap => ProcessMap(cbor),

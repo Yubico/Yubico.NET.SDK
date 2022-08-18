@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Globalization;
 using System.Formats.Cbor;
 using Yubico.YubiKey.Fido2.Cbor;
 
@@ -23,7 +24,13 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// </summary>
     public abstract class CoseKey
     {
+        /// <summary>
+        /// The CBOR tag (key of key/value pair) for the COSE key type.
+        /// </summary>
         protected const long TagKeyType = 1;
+        /// <summary>
+        /// The CBOR tag (key of key/value pair) for the COSE key algorithm.
+        /// </summary>
         protected const long TagAlgorithm = 3;
 
         /// <summary>
@@ -41,7 +48,6 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// </summary>
         protected CoseKey()
         {
-
         }
 
         /// <summary>
@@ -78,15 +84,18 @@ namespace Yubico.YubiKey.Fido2.Cose
                 throw new Ctap2DataException("Missing required field.");
             }
 
-            switch ((CoseAlgorithmIdentifier)map.ReadUInt64(3))
+            switch ((CoseAlgorithmIdentifier)map.ReadInt64(3))
             {
                 case CoseAlgorithmIdentifier.ES256:
                 case CoseAlgorithmIdentifier.ES384:
                 case CoseAlgorithmIdentifier.ES512:
-                    return new CosePublicEcKey(coseEncodedKey);
+                    return new CoseEcPublicKey(coseEncodedKey);
             }
 
-            throw new NotSupportedException("Algorithm not supported.");
+            throw new NotSupportedException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.UnsupportedAlgorithm));
         }
     }
 }

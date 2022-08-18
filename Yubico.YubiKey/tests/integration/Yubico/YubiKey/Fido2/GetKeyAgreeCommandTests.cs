@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.Fido2
             GetKeyAgreementResponse rsp = connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            CosePublicEcKey pubKey = rsp.GetData();
+            CoseEcPublicKey pubKey = rsp.GetData();
             Assert.Equal(CoseAlgorithmIdentifier.ES256, pubKey.Algorithm);
         }
 

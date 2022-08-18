@@ -55,7 +55,7 @@ namespace Yubico.PlatformInterop
             BnBigNumToBinary(bigNum.DangerousGetHandle(), buffer);
 
         // int BN_bn2binpad(const BIGNUM* a, unsighed char* to, int tolen);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bn2bin", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_bn2binpad", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern int BnBigNumToBinaryWithPadding(IntPtr bignum, byte[] buffer, int bufferSize);
 

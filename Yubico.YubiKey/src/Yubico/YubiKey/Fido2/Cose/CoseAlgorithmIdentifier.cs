@@ -30,6 +30,11 @@ namespace Yubico.YubiKey.Fido2.Cose
         ES256 = -7,
 
         /// <summary>
+        /// ECDH with key derivation function HKDF using SHA-256.
+        /// </summary>
+        ECDHwHKDF256 = -25,
+
+        /// <summary>
         /// ECDSA with SHA-384 using the NIST P-384 curve.
         /// </summary>
         ES384 = -35,

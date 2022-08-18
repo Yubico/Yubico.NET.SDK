@@ -12,19 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.Security.Cryptography;
+using Xunit;
+
 namespace Yubico.Core.Cryptography
 {
-    /// <summary>
-    /// Factory class that will return the `Yubico.Core` implementation of the <see cref="IEcdhPrimitives"/> interface.
-    /// </summary>
-    public static class EcdhPrimitives
+    public static class CryptoSupport
     {
-        /// <summary>
-        /// Creates a new instance of an implementation of the low level Elliptic Curve Diffie Hellman (ECDH) functions.
-        /// </summary>
-        /// <returns>
-        /// A new instance of the default implementation of this interface.
-        /// </returns>
-        public static IEcdhPrimitives Create() => new EcdhPrimitivesOpenSsl();
+        // This method will get one of three curves: P-256, P384, or P-512.
+        // If the curveNum is
+        //    0, return P-256
+        //    1, return P-384
+        //    2, return P-512
+        // If the curveNum is any other value (other than 0, 1, or 2), return
+        // P-256.
+        public static ECCurve GetNamedCurve(int curveNum) => curveNum switch
+        {
+            1 => ECCurve.NamedCurves.nistP384,
+            2 => ECCurve.NamedCurves.nistP521,
+            _ => ECCurve.NamedCurves.nistP256,
+        };
     }
 }

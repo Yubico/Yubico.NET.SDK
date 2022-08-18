@@ -295,6 +295,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to An object returned by CryptographyProviders failed to execute properly..
+        /// </summary>
+        internal static string CryptographyProviderFailure {
+            get {
+                return ResourceManager.GetString("CryptographyProviderFailure", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The CBOR response contained an indefinite-length array or map, which is unsupported..
         /// </summary>
         internal static string Ctap2CborIndefiniteLength {
@@ -637,6 +646,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A method was called out of an appropriate order..
+        /// </summary>
+        internal static string InvalidCallOrder {
+            get {
+                return ResourceManager.GetString("InvalidCallOrder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A challenge must be 8 bytes..
         /// </summary>
         internal static string InvalidChallengeLength {
@@ -799,7 +817,7 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The device info returned is invalid for member {0} (see authenticatorGetInfo in CTAP standard)..
+        ///   Looks up a localized string similar to The Fido2DeviceInfo is invalid for member number {0} (see authenticatorGetInfo in CTAP standard)..
         /// </summary>
         internal static string InvalidFido2DeviceInfo {
             get {

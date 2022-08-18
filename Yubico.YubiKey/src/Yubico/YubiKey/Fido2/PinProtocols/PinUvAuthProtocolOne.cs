@@ -13,76 +13,165 @@
 // limitations under the License.
 
 using System;
+using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Fido2.PinProtocols
 {
+    /// <summary>
+    /// This class contains methods that perform the platform operations of
+    /// FIDO2's PIN/UV auth protocol one.
+    /// </summary>
     public class PinUvAuthProtocolOne : PinUvAuthProtocolBase
     {
+        private const int KeyLength = 32;
+        private const int BlockSize = 16;
+
+        private bool _disposed;
+
+        private readonly byte[] _keyData = new byte[KeyLength];
+
+        /// <summary>
+        /// Constructs a new instance of <see cref="PinUvAuthProtocolOne"/>.
+        /// </summary>
         public PinUvAuthProtocolOne()
         {
             Protocol = PinUvAuthProtocol.ProtocolOne;
         }
 
         /// <inheritdoc />
-        public override byte[] Encrypt(byte[] key, byte[] plaintext)
+        public override byte[] Encrypt(byte[] plaintext)
         {
+            if (EncryptionKey is null)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidCallOrder));
+            }
+
+            if (plaintext is null)
+            {
+                throw new ArgumentNullException(nameof(plaintext));
+            }
+            if ((plaintext.Length < BlockSize) || ((plaintext.Length % BlockSize) != 0))
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.IncorrectPlaintextLength));
+            }
+
             using Aes aes = CryptographyProviders.AesCreator();
-            aes.Key = key;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.None;
+            aes.IV = new byte[BlockSize];
+            aes.Key = _keyData;
+            using ICryptoTransform aesTransform = aes.CreateEncryptor();
 
-            using ICryptoTransform encryptor = aes.CreateEncryptor();
-            using var msEncrypt = new MemoryStream();
-            using var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write);
-            using var bwEncrypt = new BinaryWriter(csEncrypt);
+            byte[] encryptedData = new byte[plaintext.Length];
+            _ = aesTransform.TransformBlock(plaintext, 0, plaintext.Length, encryptedData, 0);
 
-            bwEncrypt.Write(plaintext);
-            return msEncrypt.ToArray();
+            return encryptedData;
         }
 
         /// <inheritdoc />
-        public override byte[] Decrypt(byte[] key, byte[] ciphertext)
+        public override byte[] Decrypt(byte[] ciphertext)
         {
-            if (key is null)
+            if (EncryptionKey is null)
             {
-                throw new ArgumentNullException(nameof(key));
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidCallOrder));
             }
 
             if (ciphertext is null)
             {
                 throw new ArgumentNullException(nameof(ciphertext));
             }
-
-            using Aes aes = CryptographyProviders.AesCreator();
-            aes.Key = key;
-            aes.IV = new byte[16];
-
-            if (ciphertext.Length % aes.BlockSize != 0)
+            if ((ciphertext.Length == 0) || (ciphertext.Length % BlockSize != 0))
             {
-                throw new ArgumentException("The cipherText is not a multiple of the AES block size.");
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.IncorrectCiphertextLength));
             }
 
-            using ICryptoTransform decryptor = aes.CreateDecryptor();
-            using var msDecrypt = new MemoryStream(ciphertext);
-            using var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
-            using var brDecrypt = new BinaryReader(csDecrypt);
+            using Aes aes = CryptographyProviders.AesCreator();
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.None;
+            aes.IV = new byte[BlockSize];
+            aes.Key = _keyData;
+            using ICryptoTransform aesTransform = aes.CreateDecryptor();
 
-            return brDecrypt.ReadBytes(ciphertext.Length);
+            byte[] decryptedData = new byte[ciphertext.Length];
+            _ = aesTransform.TransformBlock(ciphertext, 0, ciphertext.Length, decryptedData, 0);
+
+            return decryptedData;
         }
 
         /// <inheritdoc />
-        public override byte[] Authenticate(byte[] key, byte[] message)
+        public override byte[] Authenticate(byte[] message)
         {
+            if (AuthenticationKey is null)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidCallOrder));
+            }
+
+            if (message is null)
+            {
+                throw new ArgumentNullException(nameof(message));
+            }
+
             using HMAC hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
-            hmacSha256.Key = key;
+            hmacSha256.Key = _keyData;
             return hmacSha256.ComputeHash(message).AsMemory(0, 16).ToArray();
         }
 
-        protected override byte[] DeriveKey(byte[] buffer)
+        /// <inheritdoc />
+        protected override void DeriveKeys(byte[] buffer)
         {
+            if (buffer is null)
+            {
+                throw new ArgumentNullException(nameof(buffer));
+            }
+
             using SHA256 sha256 = CryptographyProviders.Sha256Creator();
-            return sha256.ComputeHash(buffer);
+            int bytesWritten = sha256.TransformBlock(buffer, 0, buffer.Length, _keyData, 0);
+            if (bytesWritten != KeyLength)
+            {
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.CryptographyProviderFailure));
+            }
+
+            EncryptionKey = new ReadOnlyMemory<byte>(_keyData);
+            AuthenticationKey = new ReadOnlyMemory<byte>(_keyData);
+        }
+
+        /// <summary>
+        /// Release resources, overwrite sensitive data.
+        /// </summary>
+        protected override void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    CryptographicOperations.ZeroMemory(_keyData);
+                }
+
+                _disposed = true;
+            }
+
+            base.Dispose(disposing);
         }
     }
 }

@@ -37,31 +37,31 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 _cbor.WriteStartMap(null);
             }
 
-            public MapWriter Entry(uint key, string value)
+            public MapWriter Entry(long key, string value)
             {
-                _cbor.WriteUInt32(key);
+                _cbor.WriteInt64(key);
                 _cbor.WriteTextString(value);
 
                 return this;
             }
 
-            public MapWriter Entry(uint key, uint value)
+            public MapWriter Entry(long key, long value)
             {
-                _cbor.WriteUInt32(key);
-                _cbor.WriteUInt32(value);
+                _cbor.WriteInt64(key);
+                _cbor.WriteInt64(value);
 
                 return this;
             }
 
-            public MapWriter Entry(uint key, ReadOnlyMemory<byte> value)
+            public MapWriter Entry(long key, ReadOnlyMemory<byte> value)
             {
-                _cbor.WriteUInt32(key);
+                _cbor.WriteInt64(key);
                 _cbor.WriteByteString(value.Span);
 
                 return this;
             }
 
-            public MapWriter OptionalEntry(uint key, string? value)
+            public MapWriter OptionalEntry(long key, string? value)
             {
                 if (value is { })
                 {
@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 return this;
             }
 
-            public MapWriter OptionalEntry(uint key, uint? value)
+            public MapWriter OptionalEntry(long key, long? value)
             {
                 if (value.HasValue)
                 {
@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 return this;
             }
 
-            public MapWriter OptionalEntry(uint key, ReadOnlyMemory<byte>? value)
+            public MapWriter OptionalEntry(long key, ReadOnlyMemory<byte>? value)
             {
                 if (value.HasValue)
                 {

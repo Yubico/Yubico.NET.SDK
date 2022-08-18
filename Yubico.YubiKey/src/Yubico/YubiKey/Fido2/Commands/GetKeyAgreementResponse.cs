@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// This is the partner response class to the
     /// <see cref="GetKeyAgreementCommand" /> command class.
     /// </summary>
-    public class GetKeyAgreementResponse : IYubiKeyResponseWithData<CosePublicEcKey>
+    public class GetKeyAgreementResponse : IYubiKeyResponseWithData<CoseEcPublicKey>
     {
         private readonly ClientPinResponse _response;
 
@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </summary>
         /// <remarks>
         /// </remarks>
-        public CosePublicEcKey GetData()
+        public CoseEcPublicKey GetData()
         {
             ClientPinData data = _response.GetData();
 
@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         ExceptionMessages.Ctap2MissingRequiredField));
             }
 
-            return new CosePublicEcKey(data.KeyAgreement.Value);
+            return new CoseEcPublicKey(data.KeyAgreement.Value);
         }
 
         /// <inheritdoc />

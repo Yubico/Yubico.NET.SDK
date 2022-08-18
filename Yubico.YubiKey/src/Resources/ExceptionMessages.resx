@@ -382,6 +382,12 @@
   <data name="MissingCtap2Data" xml:space="preserve">
     <value>A required property was missing for CTAP2.</value>
   </data>
+  <data name="InvalidCallOrder" xml:space="preserve">
+    <value>A method was called out of an appropriate order.</value>
+  </data>
+  <data name="CryptographyProviderFailure" xml:space="preserve">
+    <value>An object returned by CryptographyProviders failed to execute properly.</value>
+  </data>
   <data name="Fido2ResponseMissing" xml:space="preserve">
     <value>No FIDO2 status was available in the response to a FIDO2 command.</value>
   </data>

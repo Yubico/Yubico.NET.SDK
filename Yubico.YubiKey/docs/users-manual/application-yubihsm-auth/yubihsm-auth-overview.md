@@ -33,11 +33,11 @@ The two long-lived keys stored in each YubiHSM Auth credential are:
 
 These keys cannot be accessed directly, but you can retrieve session-specific keys (which are calculated using the ENC and MAC keys). The session-specific keys can then used to set up a secure connection with a YubiHSM 2 device. See the section on [YubiHSM 2 secure channel](#yubihsm-2-secure-channel) for more information.
 
-Each YubiHSM Auth credential is protected by a 16-byte user access code. This code must be provided to the YubiKey for each YubiHSM Auth operation that uses the long-lived keys (such as calculating session-specific keys).
+Each YubiHSM Auth credential is protected by a 16-byte credential password. This password must be provided to the YubiKey for each YubiHSM Auth operation that uses the long-lived keys (such as calculating session-specific keys).
 
-Storing or deleting YubiHSM Auth credentials requires a separate 16-byte admin access code.
+Storing or deleting YubiHSM Auth credentials requires a separate 16-byte management key.
 
-Each access code has a limit of eight retries and an optional verification of user presence (touch).
+The credential password and management key each have a limit of eight retries and can optionally require verification of user presence (touch).
 
 ## YubiHSM 2 secure channel
 

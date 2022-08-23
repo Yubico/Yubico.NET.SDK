@@ -288,6 +288,8 @@
     items:
     - name: List credentials
       href: application-yubihsm-auth/commands/list-credentials.md
+    - name: Add credential
+      href: application-yubihsm-auth/commands/add-credential.md
 
 - name: "Supporting routines"
   homepage: support/support-overview.md

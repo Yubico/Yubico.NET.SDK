@@ -48,7 +48,7 @@ A byte array formatted as a series of TLVs, where each element is a credential a
 
 For example, for a YubiKey with two credentials stored in the YubiHSM Auth application, the response data (in hexadecimal) might look like:
 
-```
+```text
 Byte array: 72 07 26 00 61 62 63 00 04 72 08 26 01 77 78 79 7A 00 00
 
 Notated:

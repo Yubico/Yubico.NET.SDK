@@ -1978,11 +1978,49 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The label must have a UTF-8 byte count between {0} and {1}, inclusive. The actual byte count was {2}..
+        /// </summary>
+        internal static string YubiHsmAuthInvalidCredentialLabelLength {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthInvalidCredentialLabelLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The encryption key must be exactly 16 bytes. The actual size was {0}..
+        /// </summary>
+        internal static string YubiHsmAuthInvalidEncSize {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthInvalidEncSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The MAC key must be exactly 16 bytes. The actual size was {0}..
+        /// </summary>
+        internal static string YubiHsmAuthInvalidMacSize {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthInvalidMacSize", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The management key must be exactly 16 bytes. The actual size was {0}..
         /// </summary>
-        internal static string YubiHsmAuthInvalidMgmtKeyLength {
-            get {
+        internal static string YubiHsmAuthInvalidMgmtKeyLength
+        {
+            get
+            {
                 return ResourceManager.GetString("YubiHsmAuthInvalidMgmtKeyLength", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to The credential password must be exactly 16 bytes. The actual size was {0}..
+        /// </summary>
+        internal static string YubiHsmAuthInvalidPasswordLength {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthInvalidPasswordLength", resourceCulture);
             }
         }
         

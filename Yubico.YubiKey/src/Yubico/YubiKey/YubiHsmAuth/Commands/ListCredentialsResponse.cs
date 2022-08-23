@@ -35,8 +35,8 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         private readonly Index RetryIndex = ^1;
 
         // CryptoKeyType (1) + Touch (1) + Retry (1) + Label (min/max)
-        private const int MinElementSize = 3 + Credential.MinLabelLength;
-        private const int MaxElementSize = 3 + Credential.MaxLabelLength;
+        private const int MinElementSize = 3 + Credential.MinLabelByteCount;
+        private const int MaxElementSize = 3 + Credential.MaxLabelByteCount;
         
 
         /// <summary>

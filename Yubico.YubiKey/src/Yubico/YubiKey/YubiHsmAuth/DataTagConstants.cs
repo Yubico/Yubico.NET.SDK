@@ -29,7 +29,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public const byte LabelList = 0x72;
 
         public const byte Password = 0x73;
-        public const byte Algorithm = 0x74;
+        public const byte CryptographicKeyType = 0x74;
         public const byte EncryptionKey = 0x75;
         public const byte MacKey = 0x76;
         public const byte Context = 0x77;

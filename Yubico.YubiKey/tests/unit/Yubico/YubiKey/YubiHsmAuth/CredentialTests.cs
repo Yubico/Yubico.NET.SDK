@@ -67,13 +67,13 @@ namespace Yubico.YubiKey.YubiHsmAuth
         }
 
         [Theory]
-        [InlineData(Credential.MinLabelLength - 1)]
-        [InlineData(Credential.MaxLabelLength + 1)]
+        [InlineData(Credential.MinLabelByteCount - 1)]
+        [InlineData(Credential.MaxLabelByteCount + 1)]
         public void Constructor_LabelInvalidLength_ThrowsArgException(int strLength)
         {
             string expectedLabel = new string('a', strLength);
 
-            _ = Assert.Throws<ArgumentException>(() => new Credential(
+            _ = Assert.Throws<ArgumentOutOfRangeException>(() => new Credential(
                     CryptographicKeyType.Aes128,
                     expectedLabel,
                     false));
@@ -142,18 +142,18 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [Fact]
         public void MinLabelLength_Get_Returns1()
         {
-            Assert.Equal(1, Credential.MinLabelLength);
+            Assert.Equal(1, Credential.MinLabelByteCount);
         }
 
         [Fact]
         public void MaxLabelLength_Get_Returns64()
         {
-            Assert.Equal(64, Credential.MaxLabelLength);
+            Assert.Equal(64, Credential.MaxLabelByteCount);
         }
 
         [Theory]
-        [InlineData(Credential.MinLabelLength)]
-        [InlineData(Credential.MaxLabelLength)]
+        [InlineData(Credential.MinLabelByteCount)]
+        [InlineData(Credential.MaxLabelByteCount)]
         public void Label_SetGetLabel_ReturnsMatchingString(int labelLength)
         {
             string expectedLabel = new string('a', labelLength);
@@ -168,10 +168,24 @@ namespace Yubico.YubiKey.YubiHsmAuth
             Assert.Equal(expectedLabel, cred.Label);
         }
 
+        [Fact]
+        public void Label_SetNonUtf8Character_ThrowsArgException()
+        {
+            string expectedLabel = "abc\uD801\uD802d";
+
+            Credential cred = new Credential(
+                CryptographicKeyType.Aes128,
+                "old label",
+                false);
+
+            _ = Assert.ThrowsAny<ArgumentException>(
+                () => cred.Label = expectedLabel);
+        }
+
         [Theory]
-        [InlineData(Credential.MinLabelLength - 1)]
-        [InlineData(Credential.MaxLabelLength + 1)]
-        public void Label_SetInvalidLabelLength_ThrowsArgException(int labelLength)
+        [InlineData(Credential.MinLabelByteCount - 1)]
+        [InlineData(Credential.MaxLabelByteCount + 1)]
+        public void Label_SetInvalidLabelLength_ThrowsArgOutOfRangeException(int labelLength)
         {
             string expectedLabel = new string('a', labelLength);
 
@@ -180,7 +194,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 "old label",
                 false);
 
-            _ = Assert.Throws<ArgumentException>(
+            _ = Assert.Throws<ArgumentOutOfRangeException>(
                 () => cred.Label = expectedLabel);
         }
         #endregion

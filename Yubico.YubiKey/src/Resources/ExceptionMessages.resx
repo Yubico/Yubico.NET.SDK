@@ -772,4 +772,16 @@
   <data name="YubiHsmAuthInvalidMgmtKeyLength" xml:space="preserve">
     <value>The management key must be exactly 16 bytes. The actual size was {0}.</value>
   </data>
+  <data name="YubiHsmAuthInvalidCredentialLabelLength" xml:space="preserve">
+    <value>The label must have a UTF-8 byte count between {0} and {1}, inclusive. The actual byte count was {2}.</value>
+  </data>
+  <data name="YubiHsmAuthInvalidEncSize" xml:space="preserve">
+    <value>The encryption key must be exactly 16 bytes. The actual size was {0}.</value>
+  </data>
+  <data name="YubiHsmAuthInvalidMacSize" xml:space="preserve">
+    <value>The MAC key must be exactly 16 bytes. The actual size was {0}.</value>
+  </data>
+  <data name="YubiHsmAuthInvalidPasswordLength" xml:space="preserve">
+    <value>The credential password must be exactly 16 bytes. The actual size was {0}.</value>
+  </data>
 </root>

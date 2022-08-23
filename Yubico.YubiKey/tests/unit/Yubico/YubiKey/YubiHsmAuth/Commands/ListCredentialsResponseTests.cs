@@ -64,7 +64,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void GetData_DataTagAlgorithm_ThrowsMalformedException()
         {
-            byte[] dataWithoutSw = new byte[] { DataTagConstants.Algorithm, 1, 0 };
+            byte[] dataWithoutSw = new byte[] { DataTagConstants.CryptographicKeyType, 1, 0 };
             ResponseApdu apdu = new ResponseApdu(dataWithoutSw, SWConstants.Success);
 
             ListCredentialsResponse response = new ListCredentialsResponse(apdu);
@@ -77,10 +77,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void GetData_DataTagAlgorithm_ExceptionMessageInvalidDataTag()
         {
-            string expectedMessage = $"The value { DataTagConstants.Algorithm } is not " +
+            string expectedMessage = $"The value { DataTagConstants.CryptographicKeyType } is not " +
                 $"a data tag supported by the YubiKey application.";
 
-            byte[] dataWithoutSw = new byte[] { DataTagConstants.Algorithm, 1, 0 };
+            byte[] dataWithoutSw = new byte[] { DataTagConstants.CryptographicKeyType, 1, 0 };
             ResponseApdu apdu = new ResponseApdu(dataWithoutSw, SWConstants.Success);
 
             ListCredentialsResponse response = new ListCredentialsResponse(apdu);

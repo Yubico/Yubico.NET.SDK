@@ -70,7 +70,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         {
             string invalidLabel = new string('a', length);
 
-            _ = Assert.Throws<ArgumentException>(
+            _ = Assert.ThrowsAny<ArgumentException>(
                 () => new DeleteCredentialCommand(_mgmtKey, invalidLabel));
         }
 
@@ -94,7 +94,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
 
             DeleteCredentialCommand cmd = new DeleteCredentialCommand(_mgmtKey);
 
-            _ = Assert.Throws<ArgumentException>(() => cmd.Label = invalidLabel);
+            _ = Assert.ThrowsAny<ArgumentException>(() => cmd.Label = invalidLabel);
         }
 
         [Fact]

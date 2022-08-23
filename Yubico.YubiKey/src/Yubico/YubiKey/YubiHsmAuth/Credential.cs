@@ -14,6 +14,8 @@
 
 using System;
 using System.Globalization;
+using System.Linq.Expressions;
+using System.Text;
 
 namespace Yubico.YubiKey.YubiHsmAuth
 {
@@ -24,18 +26,20 @@ namespace Yubico.YubiKey.YubiHsmAuth
     /// </summary>
     public class Credential
     {
+        private static readonly Encoding _utf8ThrowOnInvalidBytes = new UTF8Encoding(false, true);
+
         private CryptographicKeyType _keyType = CryptographicKeyType.None;
         private string _label = string.Empty;
 
         /// <summary>
         /// Minimum length of the <see cref="Label"/>.
         /// </summary>
-        public const int MinLabelLength = 1;
+        public const int MinLabelByteCount = 1;
 
         /// <summary>
         /// Maximum length of the <see cref="Label"/>.
         /// </summary>
-        public const int MaxLabelLength = 64;
+        public const int MaxLabelByteCount = 64;
 
         /// <summary>
         /// The cryptographic algorithm associated with the Credential.
@@ -69,14 +73,34 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// A short name or description of the Credential.
         /// </summary>
         /// <remarks>
-        /// There is a minimum and maximum string length as defined
-        /// by <see cref="MinLabelLength"/> and
-        /// <see cref="MaxLabelLength"/>, respectively.
+        /// <para>
+        /// The string only contains characters that can be encoded with UTF-8,
+        /// and its UTF-8 byte count is between <see cref="MinLabelByteCount"/>
+        /// and <see cref="MaxLabelByteCount"/>. Non-printing characters are
+        /// allowed, as long as they can be encoded with UTF-8. For example,
+        /// null (UTF-8: 0x00) and Right-To-Left Mark U+200F (UTF-8: 0xE2 0x80
+        /// 0x8F) would be acceptable.
+        /// </para>
+        /// <para>
+        /// The <see cref="UTF8Encoding"/> class contains methods such as
+        /// <see cref="UTF8Encoding.GetByteCount(string)"/> which can be used
+        /// to validate the string prior to attempting to set it here. It is
+        /// recommended to use the constructor
+        /// <see cref="UTF8Encoding(bool, bool)"/> so error detection is
+        /// enabled for invalid characters.
+        /// </para>
         /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        /// Thrown when the supplied string is null.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// Thrown when the string's UTF-8 byte count does not meet the length
+        /// parameters <see cref="MinLabelByteCount"/> and
+        /// <see cref="MaxLabelByteCount"/>.
+        /// </exception>
         /// <exception cref="ArgumentException">
-        /// Thrown if there is an attempt to set the value to a string
-        /// which does not meet the length parameters as specified by
-        /// <see cref="MinLabelLength"/> and <see cref="MaxLabelLength"/>.
+        /// Thrown when there is a character that cannot be encoded with UTF-8.
+        /// The exact exception may be derived from ArgumentException.
         /// </exception>
         public string Label
         {
@@ -84,23 +108,26 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
             set
             {
-                if (!(value is null)
-                    && value.Length >= MinLabelLength
-                    && value.Length <= MaxLabelLength)
+                if (value is null)
                 {
-                    _label = value;
+                    throw new ArgumentNullException(nameof(value));
                 }
                 else
                 {
-                    int actualLength = string.IsNullOrEmpty(value) ? 0 : value!.Length;
+                    int byteCount = _utf8ThrowOnInvalidBytes.GetByteCount(value);
 
-                    throw new ArgumentException(
+                    if (byteCount < MinLabelByteCount || byteCount > MaxLabelByteCount)
+                    {
+                        throw new ArgumentOutOfRangeException(
                             string.Format(
                                 CultureInfo.CurrentCulture,
-                                ExceptionMessages.InvalidStringLength,
-                                MinLabelLength,
-                                MaxLabelLength,
-                                actualLength));
+                                ExceptionMessages.YubiHsmAuthInvalidCredentialLabelLength,
+                                MinLabelByteCount,
+                                MaxLabelByteCount,
+                                byteCount));
+                    }
+
+                    _label = value;
                 }
             }
         }

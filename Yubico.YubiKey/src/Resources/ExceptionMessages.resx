@@ -769,4 +769,7 @@
   <data name="InvalidDataTag" xml:space="preserve">
     <value>The value {0} is not a data tag supported by the YubiKey application.</value>
   </data>
+  <data name="YubiHsmAuthInvalidMgmtKeyLength" xml:space="preserve">
+    <value>The management key must be exactly 16 bytes. The actual size was {0}.</value>
+  </data>
 </root>

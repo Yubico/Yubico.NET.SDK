@@ -28,8 +28,8 @@ All YubiKeys with the YubiHSM Auth application (included in firmware version 5.4
 
 ## SDK classes
 
-* DeleteCredentialCommand
-* DeleteCredentialResponse
+* [DeleteCredentialCommand](xref:Yubico.YubiKey.YubiHsmAuth.Commands.DeleteCredentialCommand)
+* [DeleteCredentialResponse](xref:Yubico.YubiKey.YubiHsmAuth.Commands.DeleteCredentialResponse)
 
 ## Input
 

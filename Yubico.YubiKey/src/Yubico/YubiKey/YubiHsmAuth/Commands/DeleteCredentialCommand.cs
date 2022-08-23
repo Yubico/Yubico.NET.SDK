@@ -1,0 +1,129 @@
+﻿// Copyright 2022 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
+using System.Globalization;
+using System.Text;
+using Yubico.Core.Iso7816;
+using Yubico.Core.Tlv;
+
+namespace Yubico.YubiKey.YubiHsmAuth.Commands
+{
+    /// <summary>
+    /// Remove a credential from the YubiHSM Auth application.
+    /// </summary>
+    /// <remarks>
+    /// The associated response class is
+    /// <see cref="DeleteCredentialResponse"/>.
+    /// </remarks>
+    public class DeleteCredentialCommand : IYubiKeyCommand<DeleteCredentialResponse>
+    {
+        private const byte DeleteCredentialInstruction = 0x02;
+
+        private readonly ReadOnlyMemory<byte> _managementKey;
+        private readonly Credential _credential = new Credential();
+
+        /// <inheritdoc cref="Credential.Label"/>
+        public string Label
+        {
+            get => _credential.Label;
+            set => _credential.Label = value;
+        }
+
+        /// <summary>
+        /// The management key must be exactly 16 bytes.
+        /// </summary>
+        /// <remarks>
+        /// The management key is supplied as an argument to the constructor.
+        /// </remarks>
+        public static readonly int ValidManagementKeyLength = 16;
+
+        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
+
+        /// <summary>
+        /// Constructs an instance of the <see cref="DeleteCredentialCommand"/>
+        /// class.
+        /// </summary>
+        /// <remarks>
+        /// The <see cref="Label"/> will need to be set before calling
+        /// <see cref="CreateCommandApdu"/>.
+        /// </remarks>
+        /// <param name="managementKey">
+        /// The secret used to authenticate to the application prior to adding
+        /// or removing credentials. See <see cref="ValidManagementKeyLength"/>
+        /// for its required length. The application has a default management
+        /// key of all zeros.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="managementKey"/> does not meet the length
+        /// requirements.
+        /// </exception>
+        public DeleteCredentialCommand(ReadOnlyMemory<byte> managementKey)
+        {
+            _managementKey = managementKey.Length == ValidManagementKeyLength
+                ? managementKey
+                : throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.YubiHsmAuthInvalidMgmtKeyLength,
+                        managementKey.Length));
+        }
+
+        /// <summary>
+        /// Constructs an instance of the <see cref="DeleteCredentialCommand"/>
+        /// class.
+        /// </summary>
+        /// <param name="managementKey">
+        /// The secret used to authenticate to the application prior to adding
+        /// or removing credentials. See <see cref="ValidManagementKeyLength"/>
+        /// for its required length. The application has a default management
+        /// key of all zeros.
+        /// </param>
+        /// <param name="label">
+        /// The label of the credential to be deleted. The string must meet the
+        /// same requirements as <see cref="Credential.Label"/>.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// <paramref name="managementKey"/> does not meet the length
+        /// requirements.
+        /// </exception>
+        public DeleteCredentialCommand(ReadOnlyMemory<byte> managementKey, string label)
+            : this(managementKey)
+        {
+            Label = label;
+        }
+
+        public CommandApdu CreateCommandApdu() => new CommandApdu()
+        {
+            Ins = DeleteCredentialInstruction,
+            Data = BuildDataField()
+        };
+
+        public DeleteCredentialResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new DeleteCredentialResponse(responseApdu);
+
+        private byte[] BuildDataField()
+        {
+            TlvWriter tlvWriter = new TlvWriter();
+            tlvWriter.WriteValue(DataTagConstants.ManagementKey, _managementKey.Span);
+            tlvWriter.WriteString(DataTagConstants.Label,
+                Label, Encoding.UTF8);
+
+            byte[] returnValue = tlvWriter.Encode();
+            tlvWriter.Clear();
+
+            return returnValue;
+        }
+    }
+}

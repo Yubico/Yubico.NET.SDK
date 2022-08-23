@@ -37,6 +37,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
             {
                 "connectyha" => ConnectYubiHsmAuth(),
                 "listcreds" => ListCredentials(),
+                "deletecred" => DeleteCredential(),
                 _ => throw new ArgumentException($"Invalid command [{ Command }] specified")
             };
         }
@@ -124,6 +125,106 @@ namespace Yubico.YubiKey.TestApp.Plugins
             }
 
             return result;
+        }
+
+        private bool DeleteCredential()
+        {
+            byte[] mgmtKey = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+
+            bool result = default;
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
+
+            if (keys.Any())
+            {
+                IYubiKeyDevice device = keys.First();
+
+                Output.WriteLine($"\nUsing YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
+
+                bool yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
+                if (!yubiHsmAuthEnabled)
+                {
+                    Output.WriteLine($"YubiHSM Auth not enabled. Exiting...");
+                    return result;
+                }
+
+                using (IYubiKeyConnection hsmAuthConnection = device.Connect(YubiKeyApplication.YubiHsmAuth))
+                {
+                    Output.WriteLine("\nBefore:");
+                    if (!HelperWriteCreds(hsmAuthConnection))
+                    {
+                        return result;
+                    }
+
+                    List<CredentialRetryPair>? credRetryPairs = HelperGetCreds(hsmAuthConnection);
+                    if (credRetryPairs is null || !credRetryPairs.Any())
+                    {
+                        return result;
+                    }
+
+                    CredentialRetryPair credRetryPair = credRetryPairs.First();
+
+                    DeleteCredentialCommand cmd =
+                        new DeleteCredentialCommand(mgmtKey, credRetryPair.Credential.Label);
+
+                    Output.WriteLine($"\nAttempting to delete credential \"{cmd.Label}\"...");
+
+                    DeleteCredentialResponse response = hsmAuthConnection.SendCommand(cmd);
+
+                    if (response.Status != ResponseStatus.Success)
+                    {
+                        Output.WriteLine($"Failed to add cred, response status: {response.Status}, {response.StatusMessage}");
+                        return result;
+                    }
+
+                    Output.WriteLine("\nAfter:");
+                    if (!HelperWriteCreds(hsmAuthConnection))
+                    {
+                        return result;
+                    }
+                }
+
+                result = true;
+            }
+
+            if (!result)
+            {
+                Output.WriteLine($"No YubiKeys found with YubiHSM Auth enabled.");
+            }
+
+            return result;
+        }
+
+        private bool HelperWriteCreds(IYubiKeyConnection hsmAuthConnection)
+        {
+            List<CredentialRetryPair>? credRetryPairs = HelperGetCreds(hsmAuthConnection);
+            if (credRetryPairs is null)
+            {
+                return false;
+            }
+
+            Output.WriteLine($"Credential count: {credRetryPairs.Count}");
+            int credentialIndex = 1;
+            foreach (CredentialRetryPair credRetryPair in credRetryPairs)
+            {
+                Output.WriteLine($"Credential {credentialIndex++}) '{credRetryPair.Credential.Label}'");
+            }
+
+            Output.WriteLine();
+
+            return true;
+        }
+
+        private List<CredentialRetryPair>? HelperGetCreds(IYubiKeyConnection hsmAuthConnection)
+        {
+            ListCredentialsCommand listCmd = new ListCredentialsCommand();
+            ListCredentialsResponse listResponse = hsmAuthConnection.SendCommand(listCmd);
+            if (listResponse.Status != ResponseStatus.Success)
+            {
+                Output.WriteLine($"Failed to list creds, response status: {listResponse.Status}");
+                return null;
+            }
+
+            return listResponse.GetData();
         }
     }
 }

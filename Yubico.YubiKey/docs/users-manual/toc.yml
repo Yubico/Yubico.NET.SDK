@@ -290,6 +290,8 @@
       href: application-yubihsm-auth/commands/list-credentials.md
     - name: Add credential
       href: application-yubihsm-auth/commands/add-credential.md
+    - name: Delete credential
+      href: application-yubihsm-auth/commands/delete-credential.md
 
 - name: "Supporting routines"
   homepage: support/support-overview.md

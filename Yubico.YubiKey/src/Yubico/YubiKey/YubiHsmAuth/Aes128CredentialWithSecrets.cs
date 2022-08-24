@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// <remarks>
         /// The caller is responsible for controlling the buffer which holds
         /// this value, and should overwrite the data after the command
-        /// is sent.
+        /// (see <see cref="Commands.AddCredentialCommand"/>) is sent.
         /// The user's manual entry
         /// <xref href="UsersManualSensitive">"Sensitive Data"</xref> has further
         /// details and recommendations for handling this kind of data.
@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// <remarks>
         /// The caller is responsible for controlling the buffer which holds
         /// this value, and should overwrite the data after the command
-        /// is sent.
+        /// (see <see cref="Commands.AddCredentialCommand"/>) is sent.
         /// The user's manual entry
         /// <xref href="UsersManualSensitive">"Sensitive Data"</xref> has further
         /// details and recommendations for handling this kind of data.

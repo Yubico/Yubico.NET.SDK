@@ -21,7 +21,8 @@ namespace Yubico.YubiKey.YubiHsmAuth
 {
     /// <summary>
     /// This <see cref="Credential"/> subclass is used when adding new
-    /// credentials to the YubiHSM Auth application.
+    /// credentials to the YubiHSM Auth application. See
+    /// <see cref="Commands.AddCredentialCommand"/> for more information.
     /// </summary>
     /// <remarks>
     /// Every credential in the YubiHSM Auth application contains two
@@ -52,7 +53,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// <remarks>
         /// The caller is responsible for controlling the buffer which holds
         /// this value, and should overwrite the data after the command
-        /// is sent.
+        /// (see <see cref="Commands.AddCredentialCommand"/>) is sent.
         /// The user's manual entry
         /// <xref href="UsersManualSensitive">"Sensitive Data"</xref> has further
         /// details and recommendations for handling this kind of data.

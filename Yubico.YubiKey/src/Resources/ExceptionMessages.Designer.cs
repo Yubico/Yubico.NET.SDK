@@ -2003,24 +2003,31 @@ namespace Yubico.YubiKey {
                 return ResourceManager.GetString("YubiHsmAuthInvalidMacSize", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to The management key must be exactly 16 bytes. The actual size was {0}..
         /// </summary>
-        internal static string YubiHsmAuthInvalidMgmtKeyLength
-        {
-            get
-            {
+        internal static string YubiHsmAuthInvalidMgmtKeyLength {
+            get {
                 return ResourceManager.GetString("YubiHsmAuthInvalidMgmtKeyLength", resourceCulture);
             }
         }
-
+        
         /// <summary>
         ///   Looks up a localized string similar to The credential password must be exactly 16 bytes. The actual size was {0}..
         /// </summary>
         internal static string YubiHsmAuthInvalidPasswordLength {
             get {
                 return ResourceManager.GetString("YubiHsmAuthInvalidPasswordLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The cryptographic key type is not supported..
+        /// </summary>
+        internal static string YubiHsmAuthKeyTypeNotSupported {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthKeyTypeNotSupported", resourceCulture);
             }
         }
         

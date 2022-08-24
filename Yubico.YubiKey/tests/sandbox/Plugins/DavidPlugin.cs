@@ -15,6 +15,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Security;
+using System.Text;
 using Yubico.YubiKey.YubiHsmAuth;
 using Yubico.YubiKey.YubiHsmAuth.Commands;
 
@@ -38,7 +40,10 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 "connectyha" => ConnectYubiHsmAuth(),
                 "listcreds" => ListCredentials(),
                 "deletecred" => DeleteCredential(),
-                _ => throw new ArgumentException($"Invalid command [{ Command }] specified")
+                "addcred" => AddCredential(),
+                "testlabelstuff" => TestLabelStuff(),
+                "testcredlimit" => TestCredLimit(),
+                _ => throw new ArgumentException($"Invalid command [{Command}] specified")
             };
         }
 
@@ -122,6 +127,297 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 }
 
                 result = true;
+            }
+
+            return result;
+        }
+
+        public bool AddCredential()
+        {
+            bool result = default;
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
+
+            if (keys.Any())
+            {
+                IYubiKeyDevice device = keys.First();
+
+                Output.WriteLine($"\nUsing YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
+
+                bool yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
+                if (!yubiHsmAuthEnabled)
+                {
+                    Output.WriteLine($"YubiHSM Auth not enabled. Exiting...");
+                    return false;
+                }
+
+                using (IYubiKeyConnection hsmAuthConnection = device.Connect(YubiKeyApplication.YubiHsmAuth))
+                {
+                    byte[] mgmtKey = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                    byte[] password = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                    byte[] encKey = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                    byte[] macKey = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+
+                    string label = "test cred 1832";
+                    bool touchRequired = false;
+
+                    var aesCred = new Aes128CredentialWithSecrets(password, encKey, macKey, label, touchRequired);
+                    AddCredentialCommand cmd = new AddCredentialCommand(mgmtKey, aesCred);
+                    AddCredentialResponse response = hsmAuthConnection.SendCommand(cmd);
+
+                    if (response.Status != ResponseStatus.Success)
+                    {
+                        Output.WriteLine($"Failed, response status: {response.Status}, {response.StatusMessage}");
+                        return false;
+                    }
+                }
+
+                result = true;
+            }
+
+            if (result)
+            {
+                Output.WriteLine($"Credential added successfully");
+            }
+            else
+            {
+                Output.WriteLine($"No YubiKeys found with YubiHSM Auth enabled.");
+            }
+
+            return result;
+        }
+
+        // Spec testing
+
+        // Label length, incl formatting with and without trailing null character
+        public bool TestLabelStuff()
+        {
+            bool result = default;
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
+
+            if (keys.Any())
+            {
+                IYubiKeyDevice device = keys.First();
+
+                Output.WriteLine($"\nUsing YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
+
+                bool yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
+                if (!yubiHsmAuthEnabled)
+                {
+                    Output.WriteLine($"YubiHSM Auth not enabled. Exiting...");
+                    return false;
+                }
+
+                using (IYubiKeyConnection hsmAuthConnection = device.Connect(YubiKeyApplication.YubiHsmAuth))
+                {
+                    Output.WriteLine("Label = 'a/0'");
+                    LabelTesting(hsmAuthConnection, new byte[] { 0x61, 0x00 });
+
+                    Output.WriteLine("Label = 'a'");
+                    LabelTesting(hsmAuthConnection, new byte[] { 0x61 });
+
+                    Output.WriteLine("(duplicate) Label = 'a'");
+                    LabelTesting(hsmAuthConnection, new byte[] { 0x61 });
+
+                    Output.WriteLine("Label = '/0'");
+                    LabelTesting(hsmAuthConnection, new byte[] { 0x00 });
+
+                    Output.WriteLine("Label = ''");
+                    LabelTesting(hsmAuthConnection, new byte[] { });
+
+                    Output.WriteLine("Label = '/0a'");
+                    LabelTesting(hsmAuthConnection, new byte[] { 0x00, 0x61 });
+
+                    Output.WriteLine("Label = '/0a/0'");
+                    LabelTesting(hsmAuthConnection, new byte[] { 0x00, 0x61, 0x00 });
+
+                    Output.WriteLine("Label = (63 char) + '/0'");
+                    LabelTesting(hsmAuthConnection, new byte[] {
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x00,
+                    });
+
+                    Output.WriteLine("Label = (64 char) + '/0'");
+                    LabelTesting(hsmAuthConnection, new byte[] {
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x00,
+                    });
+
+                    Output.WriteLine("Label = (64 char)");
+                    LabelTesting(hsmAuthConnection, new byte[] {
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                        0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
+                    });
+                }
+
+                result = true;
+            }
+
+            if (!result)
+            {
+                Output.WriteLine($"No YubiKeys found with YubiHSM Auth enabled.");
+            }
+
+            return result;
+        }
+
+        private void LabelTesting(IYubiKeyConnection hsmAuthConnection, byte[] label)
+        {
+            byte[] mgmtKey = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+            byte[] password = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+            byte[] encKey = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+            byte[] macKey = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+            string strLabel = Encoding.UTF8.GetString(label);
+            bool touchRequired = false;
+
+            var aesCred = new Aes128CredentialWithSecrets(password, encKey, macKey, strLabel, touchRequired);
+
+            Output.WriteLine($"\n\nAttempting to add credential with the following label:");
+            Output.Write("Byte array: ");
+            foreach (byte b in label)
+            {
+                Output.Write($"{b} ");
+            }
+            Output.Write($"\nString: '{aesCred.Label}' => ");
+            foreach (byte b in Encoding.UTF8.GetBytes(aesCred.Label))
+            {
+                Output.Write($"{b} ");
+            }
+
+            Output.WriteLine("\nBefore:");
+            if (!HelperListCreds(hsmAuthConnection))
+            {
+                return;
+            }
+
+            AddCredentialCommand addCmd = new AddCredentialCommand(mgmtKey, aesCred);
+            AddCredentialResponse response = hsmAuthConnection.SendCommand(addCmd);
+
+            if (response.Status != ResponseStatus.Success)
+            {
+                Output.WriteLine($"Failed to add cred, response status: {response.Status}, {response.StatusMessage}");
+                return;
+            }
+
+            Output.WriteLine("After:");
+            if (!HelperListCreds(hsmAuthConnection))
+            {
+                return;
+            }
+        }
+
+        private bool HelperListCreds(IYubiKeyConnection hsmAuthConnection)
+        {
+            ListCredentialsCommand listCmd = new ListCredentialsCommand();
+            ListCredentialsResponse listResponse = hsmAuthConnection.SendCommand(listCmd);
+            if (listResponse.Status != ResponseStatus.Success)
+            {
+                Output.WriteLine($"Failed to list creds, response status: {listResponse.Status}");
+                return false;
+            }
+
+            List<CredentialRetryPair> credRetryPairs = listResponse.GetData();
+
+            Output.WriteLine($"Credential count: {credRetryPairs.Count}");
+            int credentialIndex = 1;
+            foreach (CredentialRetryPair credRetryPair in credRetryPairs)
+            {
+                Output.WriteLine($"Credential {credentialIndex++}) '{credRetryPair.Credential.Label}'");
+            }
+
+            Output.WriteLine();
+
+            return true;
+        }
+
+        // Capacity (# of creds)
+
+        // Add a 33rd cred (limit should be 32)
+        public bool TestCredLimit()
+        {
+            bool result = default;
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
+
+            if (keys.Any())
+            {
+                IYubiKeyDevice device = keys.First();
+
+                Output.WriteLine($"\nUsing YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
+
+                bool yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
+                if (!yubiHsmAuthEnabled)
+                {
+                    Output.WriteLine($"YubiHSM Auth not enabled. Exiting...");
+                    return false;
+                }
+
+                byte[] mgmtKey = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                byte[] password = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                byte[] encKey = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                byte[] macKey = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                string strLabel = "abc";
+                bool touchRequired = false;
+
+                var aesCred = new Aes128CredentialWithSecrets(password, encKey, macKey, strLabel, touchRequired);
+
+                using (IYubiKeyConnection hsmAuthConnection = device.Connect(YubiKeyApplication.YubiHsmAuth))
+                {
+                    ListCredentialsCommand listCmd = new ListCredentialsCommand();
+                    ListCredentialsResponse listResponse = hsmAuthConnection.SendCommand(listCmd);
+                    if (listResponse.Status != ResponseStatus.Success)
+                    {
+                        Output.WriteLine($"Failed to list creds, response status: {listResponse.Status}");
+                        return false;
+                    }
+
+                    List<CredentialRetryPair> credRetryPairs = listResponse.GetData();
+
+                    int beforeCount = credRetryPairs.Count;
+
+                    for (int i = beforeCount + 1; i < 34; i++)
+                    {
+                        Output.WriteLine($"Adding cred #{i}");
+
+                        aesCred.Label = $"Test Cred {i}";
+                        AddCredentialCommand cmd = new AddCredentialCommand(mgmtKey, aesCred);
+                        AddCredentialResponse response = hsmAuthConnection.SendCommand(cmd);
+
+                        if (response.Status != ResponseStatus.Success)
+                        {
+                            Output.WriteLine($"Failed, response status: {response.Status}, {response.StatusMessage}");
+                            return false;
+                        }
+                        else
+                        {
+                            Output.WriteLine($"Cred added successfully");
+                        }
+                    }
+                }
+
+                result = true;
+            }
+
+            if (!result)
+            {
+                Output.WriteLine($"No YubiKeys found with YubiHSM Auth enabled.");
             }
 
             return result;

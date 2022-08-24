@@ -655,6 +655,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A credential with that label already exists..
+        /// </summary>
+        internal static string YubiHsmAuthLabelConflict {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthLabelConflict", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The device was not touched..
         /// </summary>
         internal static string YubiHsmAuthTouchRequired {

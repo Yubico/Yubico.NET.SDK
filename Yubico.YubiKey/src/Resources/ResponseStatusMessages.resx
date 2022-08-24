@@ -318,4 +318,7 @@
   <data name="YubiHsmAuthTouchRequired" xml:space="preserve">
     <value>The device was not touched.</value>
   </data>
+  <data name="YubiHsmAuthLabelConflict" xml:space="preserve">
+    <value>A credential with that label already exists.</value>
+  </data>
 </root>

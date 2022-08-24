@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
@@ -87,13 +88,14 @@ namespace Yubico.YubiKey.Oath.Commands
                 {
                     0x71, 0x1A, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F, 0x66,
                     0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75, 0x74,
-                    0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D, 0x74, 0x08,
-                    0xF1, 0x03, 0xDA, 0x89, 0x58, 0xE4, 0x40, 0x85
+                    0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D, 0x74, 0x08
                 };
 
+                byte[] challenge = GenerateChallenge(_credential.Period);
+                var newDataList = dataList.Concat(challenge).ToArray();
                 ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
-                Assert.True(data.Span.SequenceEqual(dataList));
+                Assert.Equal(newDataList.Length, command.CreateCommandApdu().Nc);
             }
             finally
             {
@@ -115,12 +117,13 @@ namespace Yubico.YubiKey.Oath.Commands
                     0x71, 0x1A, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F, 0x66,
                     0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75, 0x74,
                     0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D, 0x74, 0x08,
-                    0xF1, 0x03, 0xDA, 0x89, 0x58, 0xE4, 0x40, 0x85
                 };
-
+                
+                byte[] challenge = GenerateChallenge(_credential.Period);
+                var newDataList = dataList.Concat(challenge).ToArray();
                 ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-
-                Assert.True(data.Span.SequenceEqual(dataList));
+                
+                Assert.True(data.Span.SequenceEqual(newDataList));
             }
             finally
             {
@@ -139,11 +142,12 @@ namespace Yubico.YubiKey.Oath.Commands
                 0x71, 0x15, 0x41, 0x70, 0x70, 0x6C, 0x65, 0x3A,
                 0x74, 0x65, 0x73, 0x74, 0x40, 0x69, 0x63, 0x6C,
                 0x6F, 0x75, 0x64, 0x2E, 0x63, 0x6F, 0X6D, 0x74,
+                0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00
             };
 
             ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-
+            
             Assert.Equal(dataList.Length, command.CreateCommandApdu().Nc);
             Assert.True(data.Span.SequenceEqual(dataList));
         }
@@ -156,6 +160,20 @@ namespace Yubico.YubiKey.Oath.Commands
             var response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is CalculateCredentialResponse);
+        }
+        
+        private byte[] GenerateChallenge(CredentialPeriod? period)
+        {
+            if (period is null)
+            {
+                period = CredentialPeriod.Period30;
+            }
+
+            int timePeriod = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (int)period;
+            byte[] bytes = BitConverter.GetBytes(timePeriod);
+            byte[] challenge = bytes.Concat(new byte[8 - bytes.Length]).ToArray();
+            
+            return challenge;
         }
     }
 }

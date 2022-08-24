@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
 
@@ -25,6 +26,8 @@ namespace Yubico.YubiKey.Oath.Commands
         private const byte CalculateAllInstruction = 0xA4;
         private const byte ChallengeTag = 0x74;
 
+        private DateTimeOffset _timestamp;
+        
         /// <summary>
         /// Full or truncated response to receive back.
         /// </summary>
@@ -64,7 +67,10 @@ namespace Yubico.YubiKey.Oath.Commands
         public CommandApdu CreateCommandApdu()
         {
             var tlvWriter = new TlvWriter();
-            tlvWriter.WriteValue(ChallengeTag, GenerateChallenge());
+            _timestamp = DateTimeOffset.UtcNow;
+            // Using default period which is 30 seconds for calculating all credentials.
+            // Credentials that have different period are recalculated later in CalculateAllCredentialsResponse.
+            tlvWriter.WriteValue(ChallengeTag, GenerateTotpChallenge(CredentialPeriod.Period30, _timestamp));
 
             return new CommandApdu
             {
@@ -76,7 +82,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
         /// <inheritdoc />
         public CalculateAllCredentialsResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new CalculateAllCredentialsResponse(responseApdu);
+            new CalculateAllCredentialsResponse(responseApdu, _timestamp);
     }
 }
 

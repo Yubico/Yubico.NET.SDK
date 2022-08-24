@@ -65,10 +65,13 @@ namespace Yubico.YubiKey.Oath
         /// <param name="period">
         /// The credential period to calculate the OTP code validity.
         /// </param>
+        /// <param name="timestamp">
+        /// The timestamp which is used as start point of calculation for TOTP, can be null for HOTP.
+        /// </param>
         /// <exception cref="ArgumentException">
         /// The provided period is invalid.
         /// </exception>
-        public Code(string? value, CredentialPeriod period)
+        public Code(string? value, CredentialPeriod period, DateTimeOffset timestamp)
         {
             if (!Enum.IsDefined(typeof(CredentialPeriod), period))
             {
@@ -77,8 +80,6 @@ namespace Yubico.YubiKey.Oath
 
             if (!string.IsNullOrWhiteSpace(value)) {
                 Value = value;
-
-                DateTimeOffset timestamp = DateTimeOffset.Now;
 
                 if (period != CredentialPeriod.Undefined)
                 {

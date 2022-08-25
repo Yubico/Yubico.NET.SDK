@@ -53,6 +53,7 @@ namespace Yubico.YubiKey.TestApp
                 ["smartcardevents"] = (output) => new SmartCardDeviceListenerPlugin(output),
                 ["feature"] = (output) => new YubiKeyFeaturePlugin(output),
                 ["david"] = (output) => new DavidPlugin(output),
+                ["oath"] = (output) => new OathPlugin(output),
             };
 
         static int Main(string[] args)

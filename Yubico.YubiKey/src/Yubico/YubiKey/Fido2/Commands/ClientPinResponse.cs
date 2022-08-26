@@ -15,6 +15,7 @@
 using System;
 using System.Formats.Cbor;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -74,7 +75,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 switch (key)
                 {
                     case TagKeyAgreement:
-                        data.KeyAgreement = cbor.ReadEncodedValue();
+                        data.KeyAgreement = CoseKey.Create(cbor.ReadEncodedValue());
                         break;
 
                     case TagPinUvAuthToken:

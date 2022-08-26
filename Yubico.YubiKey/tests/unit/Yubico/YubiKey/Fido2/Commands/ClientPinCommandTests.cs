@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Linq;
 using Xunit;
 using Yubico.Core.Iso7816;
@@ -73,7 +74,6 @@ namespace Yubico.YubiKey.Fido2.Commands
             {
                 PinUvAuthProtocol = PinUvAuthProtocol.ProtocolOne,
                 SubCommand = 0xFF,
-                KeyAgreement = new byte[] { 1, 2, 3 },
                 PinUvAuthParam = new byte[] { 4, 5, 6 },
                 NewPinEnc = new byte[] { 3, 2, 1 },
                 PinHashEnc = new byte[] { 6, 5, 4 },
@@ -84,10 +84,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             byte[] expectedData =
             {
                 0x06, // clientAuthenticatorPin
-                0xA8, // map (8 entries)
+                0xA7, // map (8 entries)
                 0x01, 0x01, // TagPinUvAuthProtocol = PinProtocolOne
                 0x02, 0x18, 0xFF, // TagSubCommand = 0xFF
-                0x03, 0x43, 0x01, 0x02, 0x03, // TagKeyAgreement = 1, 2, 3
                 0x04, 0x43, 0x04, 0x05, 0x06, // TagPinUvAuthParam = 4, 5, 6
                 0x05, 0x43, 0x03, 0x02, 0x01, // TagNewPinEnc = 3, 2, 1
                 0x06, 0x43, 0x06, 0x05, 0x04, // TagPinHashEnc = 6, 5, 4
@@ -108,6 +107,25 @@ namespace Yubico.YubiKey.Fido2.Commands
             IYubiKeyResponse response = command.CreateResponseForApdu(new ResponseApdu(new byte[] { 0x90, 0x00 }));
 
             _ = Assert.IsType<ClientPinResponse>(response);
+        }
+
+        [Fact]
+        public void NullKeyAgreement_CorrectApdu()
+        {
+            byte[] expectedValue = new byte[] {
+                0x06, 0xA2, 0x01, 0x01, 0x02, 0x10
+            };
+
+            var command = new ClientPinCommand()
+            {
+                PinUvAuthProtocol = PinUvAuthProtocol.ProtocolOne,
+                SubCommand = 16,
+            };
+
+            CommandApdu cmdApdu = command.CreateCommandApdu();
+
+            bool isValid = MemoryExtensions.SequenceEqual(new Span<byte>(expectedValue), cmdApdu.Data.Span);
+            Assert.True(isValid);
         }
     }
 }

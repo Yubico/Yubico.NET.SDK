@@ -271,6 +271,10 @@
 - name: "Application: FIDO2"
   homepage: application-fido2/fido2-overview.md
   items:
+  - name: PIN/UV Authenticaation
+    href: application-fido2/pin-uv-auth-protocols.md
+  - name: The FIDO2 PIN
+    href: application-fido2/fido2-pin.md
   - name: Commands
     items:
     - name: FIDO2 commands

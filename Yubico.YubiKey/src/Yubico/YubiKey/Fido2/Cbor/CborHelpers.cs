@@ -61,6 +61,14 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 return this;
             }
 
+            public MapWriter Entry(long key, ICborEncode value)
+            {
+                _cbor.WriteInt64(key);
+                _cbor.WriteEncodedValue(value.CborEncode());
+
+                return this;
+            }
+
             public MapWriter OptionalEntry(long key, string? value)
             {
                 if (value is { })
@@ -91,6 +99,16 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 return this;
             }
 
+            public MapWriter OptionalEntry(long key, ICborEncode? value)
+            {
+                if (!(value is null))
+                {
+                    return Entry(key, value);
+                }
+
+                return this;
+            }
+
             public void EndMap() => _cbor.WriteEndMap();
         }
 
@@ -113,6 +131,5 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// </code>
         /// </returns>
         public static MapWriter BeginMap(CborWriter cbor) => new MapWriter(cbor);
-
     }
 }

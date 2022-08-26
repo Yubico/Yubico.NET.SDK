@@ -19,7 +19,8 @@ using System.Formats.Cbor;
 namespace Yubico.YubiKey.Fido2.Cbor
 {
     /// <summary>
-    /// Represents a CBOR map as a random-access dictionary.
+    /// Represents a CBOR map as a random-access dictionary. This is used to read
+    /// a map in a CBOR-encoded construction.
     /// </summary>
     internal class CborMap
     {

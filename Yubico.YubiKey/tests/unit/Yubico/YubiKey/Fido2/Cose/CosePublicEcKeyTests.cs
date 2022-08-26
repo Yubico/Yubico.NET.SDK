@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Fido2.Cose
                 YCoordinate = yCoord
             };
 
-            ReadOnlyMemory<byte> encodedKey = eccKey.ToEncodedCoseKey();
+            ReadOnlyMemory<byte> encodedKey = eccKey.Encode();
 
             bool isValid = MemoryExtensions.SequenceEqual(correctValue, encodedKey.Span);
 
@@ -113,7 +113,7 @@ namespace Yubico.YubiKey.Fido2.Cose
             };
 
             var eccKey = new CoseEcPublicKey(encodedKey);
-            ECParameters ecParams = eccKey.AsEcParameters();
+            ECParameters ecParams = eccKey.ToEcParameters();
             Assert.NotNull(ecParams.Q.X);
             if (ecParams.Q.X is null)
             {
@@ -143,7 +143,7 @@ namespace Yubico.YubiKey.Fido2.Cose
             };
 
             var eccKey = new CoseEcPublicKey(encodedKey);
-            ECParameters ecParams = eccKey.AsEcParameters();
+            ECParameters ecParams = eccKey.ToEcParameters();
             Assert.NotNull(ecParams.Q.Y);
             if (ecParams.Q.Y is null)
             {
@@ -184,7 +184,7 @@ namespace Yubico.YubiKey.Fido2.Cose
             };
 
             var eccKey = new CoseEcPublicKey(ecParams);
-            ReadOnlyMemory<byte> encodedKey = eccKey.ToEncodedCoseKey();
+            ReadOnlyMemory<byte> encodedKey = eccKey.Encode();
 
             bool isValid = MemoryExtensions.SequenceEqual(encodingSpan, encodedKey.Span);
 

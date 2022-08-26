@@ -16,6 +16,7 @@ using System;
 using System.Formats.Cbor;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.Cbor;
+using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
@@ -109,11 +110,11 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// The platform key-agreement key.
         /// </summary>
         /// <remarks>
-        /// This is a COSE_Key-encoded public key, derived using the current PIN/UV protocol in use. See the
+        /// This is a public key, derived using the current PIN/UV protocol in use. See the
         /// user manual entry on <xref href="Fido2PinProtocol">PIN protocols</xref> for a much more in depth guide
         /// to working with PINs within FIDO2.
         /// </remarks>
-        public ReadOnlyMemory<byte>? KeyAgreement { get; set; }
+        public CoseKey? KeyAgreement { get; set; }
 
         /// <summary>
         /// The output of calling authenticate on the PIN/UV protocol specific to a particular sub-command.

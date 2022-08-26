@@ -20,16 +20,22 @@ using Yubico.YubiKey.Fido2.Cose;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// This is the partner response class to the
-    /// <see cref="GetKeyAgreementCommand" /> command class.
+    /// This is the partner response class to the <see cref="SetPinCommand"/>
+    /// class.
     /// </summary>
-    public class GetKeyAgreementResponse : IYubiKeyResponseWithData<CoseEcPublicKey>
+    /// <remarks>
+    /// Note that this response has no data to return (there is no <c>GetData</c>
+    /// method). If the PIN is successfully set, the <see cref="Status"/>
+    /// property will be <c>ResponseStatus.Success</c>. If the PIN is not set,
+    /// the <c>Status</c> property will indicate the error.
+    /// </remarks>
+    public class SetPinResponse : IYubiKeyResponse
     {
         private readonly ClientPinResponse _response;
 
         /// <summary>
         /// Constructs a new instance of the
-        /// <see cref="GetKeyAgreementResponse"/> class based on a response APDU
+        /// <see cref="SetPinResponse"/> class based on a response APDU
         /// provided by the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
@@ -37,30 +43,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// `getKeyAgreement` sub-command of the `authenticatorClientPIN` CTAP2
         /// command.
         /// </param>
-        public GetKeyAgreementResponse(ResponseApdu responseApdu)
+        public SetPinResponse(ResponseApdu responseApdu)
         {
             _response = new ClientPinResponse(responseApdu);
-        }
-
-        /// <summary>
-        /// Returns the YubiKey's public key for the key agreement algorithm of
-        /// the PIN/UV auth protocol specified in the command.
-        /// </summary>
-        /// <remarks>
-        /// </remarks>
-        public CoseEcPublicKey GetData()
-        {
-            ClientPinData data = _response.GetData();
-
-            if (data.KeyAgreement is CoseEcPublicKey ecPublicKey)
-            {
-                return ecPublicKey;
-            }
-
-            throw new Ctap2DataException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.Ctap2MissingRequiredField));
         }
 
         /// <inheritdoc />
@@ -73,3 +58,4 @@ namespace Yubico.YubiKey.Fido2.Commands
         public string StatusMessage => _response.StatusMessage;
     }
 }
+

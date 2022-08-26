@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// <summary>
     /// A base class for all COSE key representations.
     /// </summary>
-    public abstract class CoseKey
+    public abstract class CoseKey : ICborEncode
     {
         /// <summary>
         /// The CBOR tag (key of key/value pair) for the COSE key type.
@@ -49,6 +49,30 @@ namespace Yubico.YubiKey.Fido2.Cose
         protected CoseKey()
         {
         }
+
+        /// <summary>
+        /// Return a new byte array that is the key data encoded following the
+        /// FIDO2/CBOR standard.
+        /// </summary>
+        /// <returns>
+        /// The encoded key.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// The object contains no key data.
+        /// </exception>
+        byte[] ICborEncode.CborEncode() => Encode();
+
+        /// <summary>
+        /// Return a new byte array that is the key data encoded following the
+        /// FIDO2/CBOR standard.
+        /// </summary>
+        /// <returns>
+        /// The encoded key.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// The object contains no key data.
+        /// </exception>
+        public abstract byte[] Encode();
 
         /// <summary>
         /// Creates the correct COSE key representation based on the CBOR data provided.
@@ -79,17 +103,16 @@ namespace Yubico.YubiKey.Fido2.Cose
             var cborReader = new CborReader(coseEncodedKey);
             var map = new CborMap(cborReader);
 
-            if (!map.Contains(3))
+            if (!map.Contains(TagAlgorithm))
             {
                 throw new Ctap2DataException("Missing required field.");
             }
 
-            switch ((CoseAlgorithmIdentifier)map.ReadInt64(3))
+            // Currently the only supported algorithm is -25 (ECDHwHKDF256).
+            // This seems odd, but it is the algorithm the standard specifies.
+            if ((CoseAlgorithmIdentifier)map.ReadInt64(TagAlgorithm) == CoseAlgorithmIdentifier.ECDHwHKDF256)
             {
-                case CoseAlgorithmIdentifier.ES256:
-                case CoseAlgorithmIdentifier.ES384:
-                case CoseAlgorithmIdentifier.ES512:
-                    return new CoseEcPublicKey(coseEncodedKey);
+                return new CoseEcPublicKey(coseEncodedKey);
             }
 
             throw new NotSupportedException(

@@ -36,8 +36,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             var apdu = new ResponseApdu(
                 new byte[]
                 {
-                    0xA5, // Map (5 entries)
-                    0x01, 0x43, 0x01, 0x02, 0x03, // TagKeyAgreement = 1, 2, 3
+                    0xA4, // Map (5 entries)
                     0x02, 0x43, 0x03, 0x02, 0x01, // TagPinUvAuthToken = 3, 2, 1
                     0x03, 0x08, // TagPinRetries = 8
                     0x04, 0xF5, // TagPowerCycleState = true
@@ -48,7 +47,6 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             ClientPinData data = response.GetData();
 
-            Assert.True(data.KeyAgreement!.Value.Span.SequenceEqual(new byte[] { 0x43, 1, 2, 3 }));
             Assert.True(data.PinUvAuthToken!.Value.Span.SequenceEqual(new byte[] { 3, 2, 1 }));
             Assert.Equal(8, data.PinRetries);
             Assert.Equal(true, data.PowerCycleState);

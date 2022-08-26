@@ -127,10 +127,19 @@ namespace Yubico.YubiKey.Fido2.Cose
             }
         }
 
-        /// <inheritdoc />
-        public CoseEcPublicKey(ReadOnlyMemory<byte> coseEncodedKey)
+        /// <summary>
+        /// Construct a <see cref="CoseEcPublicKey"/> based on the CBOR encoding
+        /// of a <c>COSE_Key</c>.
+        /// </summary>
+        /// <param name="encodedCoseKey">
+        /// The CBOR encoding.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// The <c>encodedCoseKey</c> is not a correct EC Public Key encoding.
+        /// </exception>
+        public CoseEcPublicKey(ReadOnlyMemory<byte> encodedCoseKey)
         {
-            var cborReader = new CborReader(coseEncodedKey);
+            var cborReader = new CborReader(encodedCoseKey);
             var map = new CborMap(cborReader);
 
             Curve = (CoseEcCurve)map.ReadInt64(TagCurve);
@@ -177,17 +186,22 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <summary>
         /// Constructs a new instance of <see cref="CoseEcPublicKey"/>.
         /// </summary>
+        /// <remarks>
+        /// This constructor is provided for those developers who want to use the
+        /// object initializer pattern.
+        /// </remarks>
         public CoseEcPublicKey()
         {
         }
 
         /// <summary>
-        /// Returns the COSE key as a .NET `ECParameters` structure. Used for interoperating with the .NET crypto library.
+        /// Returns the COSE key as a new .NET <c>ECParameters</c> structure. Used
+        /// for interoperating with the .NET crypto library.
         /// </summary>
         /// <returns>
-        /// The public key in the form of an `ECParameters` structure.
+        /// The public key in the form of an <c>ECParameters</c> structure.
         /// </returns>
-        public ECParameters AsEcParameters()
+        public ECParameters ToEcParameters()
         {
             var ecParams = new ECParameters
             {
@@ -200,17 +214,11 @@ namespace Yubico.YubiKey.Fido2.Cose
             return ecParams;
         }
 
-        /// <summary>
-        /// Return a new byte array that is the key data encoded following the
-        /// FIDO2/CBOR standard.
-        /// </summary>
-        /// <returns>
-        /// The encoded key.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// The object contains no key data.
-        /// </exception>
-        public byte[] ToEncodedCoseKey()
+        // <inheritdoc/>
+        //internal override byte[] CborEncode() => Encode();
+
+        /// <inheritdoc/>
+        public override byte[] Encode()
         {
             if ((_xCoordinate.Length != P256CoordinateLength) || (_yCoordinate.Length != P256CoordinateLength))
             {

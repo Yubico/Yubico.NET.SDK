@@ -21,15 +21,17 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2
 {
-    public class GetKeyAgreeCommandTests
+    public class SetPinCommandTests
     {
         [Fact]
-        public void GetKeyAgreeCommand_Succeeds()
+        public void SetPinCommand_Succeeds()
         {
+            byte[] newPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+
             IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
             Assert.NotNull(devices);
 
-            HidDevice? deviceToUse = GetFidoHid(devices);
+            HidDevice? deviceToUse = GetKeyAgreeCommandTests.GetFidoHid(devices);
             Assert.NotNull(deviceToUse);
             if (deviceToUse is null)
             {
@@ -39,26 +41,20 @@ namespace Yubico.YubiKey.Fido2
             var connection = new FidoConnection(deviceToUse);
             Assert.NotNull(connection);
 
-            var cmd = new GetKeyAgreementCommand() { PinUvAuthProtocol = PinUvAuthProtocol.ProtocolTwo, };
+            var protocol = new PinUvAuthProtocolOne();
+
+            var cmd = new GetKeyAgreementCommand(protocol.Protocol);
             GetKeyAgreementResponse rsp = connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            CoseEcPublicKey pubKey = rsp.GetData();
-            Assert.Equal(CoseEcCurve.P256, pubKey.Curve);
-        }
+            CoseEcPublicKey authenticatorPubKey = rsp.GetData();
+            Assert.Equal(CoseEcCurve.P256, authenticatorPubKey.Curve);
 
-        public static HidDevice? GetFidoHid(IEnumerable<HidDevice> devices)
-        {
-            foreach (HidDevice currentDevice in devices)
-            {
-                if ((currentDevice.VendorId == 0x1050) &&
-                    (currentDevice.UsagePage == HidUsagePage.Fido))
-                {
-                    return currentDevice;
-                }
-            }
+            protocol.Encapsulate(authenticatorPubKey);
 
-            return null;
+            var setPinCmd = new SetPinCommand(protocol, newPin);
+            SetPinResponse setPinRsp = connection.SendCommand(setPinCmd);
+            Assert.Equal(ResponseStatus.Success, setPinRsp.Status);
         }
     }
 }

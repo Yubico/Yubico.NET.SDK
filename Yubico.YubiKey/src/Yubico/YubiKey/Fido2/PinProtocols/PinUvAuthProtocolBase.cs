@@ -202,7 +202,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                 platformKeyPair = ecdh.GenerateKeyPair(ECCurve.NamedCurves.nistP256);
 
                 PlatformPublicKey = new CoseEcPublicKey(platformKeyPair.Value);
-                sharedValue = ecdh.ComputeSharedSecret(authPubKey.AsEcParameters(), platformKeyPair.Value.D);
+                sharedValue = ecdh.ComputeSharedSecret(authPubKey.ToEcParameters(), platformKeyPair.Value.D);
                 DeriveKeys(sharedValue);
             }
             finally

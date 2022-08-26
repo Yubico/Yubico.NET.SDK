@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -37,7 +38,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <summary>
         /// Used to convey the authenticator's public key to the client / platform.
         /// </summary>
-        public ReadOnlyMemory<byte>? KeyAgreement { get; set; }
+        public CoseKey? KeyAgreement { get; set; }
 
         /// <summary>
         /// The pinUvAuthToken, encrypted by calling `encrypt` on the PIN/UV auto protocol with the shared secret as

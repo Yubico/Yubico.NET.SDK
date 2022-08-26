@@ -826,6 +826,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A FIDO2 PIN has a minimum Unicode code point count and must be a UTF-8 encoding of no more than 63 bytes..
+        /// </summary>
+        internal static string InvalidFido2Pin {
+            get {
+                return ResourceManager.GetString("InvalidFido2Pin", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Incorrect host challenge length..
         /// </summary>
         internal static string InvalidHostChallengeLength {

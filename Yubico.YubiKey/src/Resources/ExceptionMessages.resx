@@ -433,6 +433,9 @@
   <data name="UnknownFido2Status" xml:space="preserve">
     <value>The authenticator returned an unknown FIDO2 status indicating an error.</value>
   </data>
+  <data name="InvalidFido2Pin" xml:space="preserve">
+    <value>A FIDO2 PIN has a minimum Unicode code point count and must be a UTF-8 encoding of no more than 63 bytes.</value>
+  </data>
   <data name="Ctap2CommandTooLarge" xml:space="preserve">
     <value>The CTAP2 command was too large to transmit.</value>
   </data>

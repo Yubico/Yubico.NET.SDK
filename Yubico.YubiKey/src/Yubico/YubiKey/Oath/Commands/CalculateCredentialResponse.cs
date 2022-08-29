@@ -27,8 +27,6 @@ namespace Yubico.YubiKey.Oath.Commands
     {
         private const byte FullResponseTag = 0x75;
         private const byte TruncatedResponseTag = 0x76;
-        
-        private readonly DateTimeOffset _timestamp;
 
         /// <inheritdoc/>
         protected override ResponseStatusPair StatusCodeMap =>
@@ -52,14 +50,10 @@ namespace Yubico.YubiKey.Oath.Commands
         /// <param name="credential">
         /// The credential that was sent to calculate in CalculateCredentialCommand.
         /// </param>
-        /// <param name="timestamp">
-        /// The timestamp which is used as start point of calculation for TOTP, can be null for HOTP.
-        /// </param>
-        public CalculateCredentialResponse(ResponseApdu responseApdu, Credential credential, DateTimeOffset timestamp) :
+        public CalculateCredentialResponse(ResponseApdu responseApdu, Credential credential) :
              base(responseApdu)
         {
             Credential = credential;
-            _timestamp = timestamp;
         }
 
         /// <summary>
@@ -115,7 +109,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 Credential.Period = Credential.Type == CredentialType.Totp ? CredentialPeriod.Period30 : CredentialPeriod.Undefined;
             }
 
-            return new Code(response, (CredentialPeriod)Credential.Period, _timestamp);
+            return new Code(response, (CredentialPeriod)Credential.Period);
         }
     }
 }

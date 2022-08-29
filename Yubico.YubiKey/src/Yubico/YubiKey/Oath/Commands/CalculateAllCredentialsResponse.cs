@@ -33,21 +33,16 @@ namespace Yubico.YubiKey.Oath.Commands
         private const byte TouchTag = 0x7C;
         private const byte NameTag = 0x71;
 
-        private readonly DateTimeOffset _timestamp;
-
         /// <summary>
         /// Constructs an instance of the <see cref="CalculateAllCredentialsResponse" /> class based on a ResponseApdu received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
         /// The ResponseApdu returned by the YubiKey.
         /// </param>
-        /// <param name="timestamp">
-        /// The timestamp which is used as start point of calculation for TOTP, can be null for HOTP.
-        /// </param>
-        public CalculateAllCredentialsResponse(ResponseApdu responseApdu, DateTimeOffset timestamp) :
+        public CalculateAllCredentialsResponse(ResponseApdu responseApdu) :
              base(responseApdu)
         {
-            _timestamp = timestamp;
+
         }
 
         /// <summary>
@@ -134,7 +129,7 @@ namespace Yubico.YubiKey.Oath.Commands
                     throw new InvalidOperationException(ExceptionMessages.InvalidCredentialPeriod);
                 }
 
-                var code = new Code(response.OtpString, (CredentialPeriod)credential.Period, _timestamp);
+                var code = new Code(response.OtpString, (CredentialPeriod)credential.Period);
 
                 calculatedCredentials.Add(credential, code);
             }

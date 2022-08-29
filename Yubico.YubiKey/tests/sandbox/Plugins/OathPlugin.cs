@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
@@ -22,6 +23,7 @@ using Yubico.YubiKey.Oath.Commands;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
+    // Use Authenticator Test (https://rootprojects.org/authenticator/) to test OTP values.
     internal class OathPlugin : PluginBase
     {
         public override string Name => "OATH";
@@ -41,25 +43,21 @@ namespace Yubico.YubiKey.TestApp.Plugins
                         })
                     .AddFilter(level => level >= LogLevel.Information));
 
-            var yubiKey = YubiKeyDevice.FindAll().First();
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindAll();
+            IYubiKeyDevice? yubiKey = keys.First();
 
-            //Thread.Sleep(3000);
-
-            //YubiKeyDeviceListener.Instance.Arrived += (s, e) =>
-            //{
-              //  Console.WriteLine("YubiKey arrived:");
-               // Console.WriteLine(e.Device);
                 
-                using var oathSession = new OathSession(yubiKey);
-            
-                var uri = new Uri("otpauth://totp/ACME%20Co:john@example.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30");
-                var credential = Credential.ParseUri(uri);
+            using var oathSession = new OathSession(yubiKey);
 
-                oathSession.AddCredential(credential);
-                var otp = oathSession.CalculateCredential(credential);
-            
-                Console.WriteLine($"OTP value: {otp}");
-           // };
+            // Copy URI string from Authenticator Test console and pass here.
+            var uri = new Uri("otpauth://totp/ACME%20Co:john@example.com?secret=23A3DQA6AB6CAQDKWQOHN4HGHBWASHX6&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30");
+            var credential = Credential.ParseUri(uri);
+
+            oathSession.AddCredential(credential);
+            Code otp = oathSession.CalculateCredential(credential);
+
+            // Verify OTP value the the value in Authenticator Test.
+            Console.WriteLine($"OTP value: {otp.Value}");
 
             return true;
         }

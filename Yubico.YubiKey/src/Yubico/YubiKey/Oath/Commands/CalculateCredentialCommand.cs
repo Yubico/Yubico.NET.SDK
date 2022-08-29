@@ -28,8 +28,6 @@ namespace Yubico.YubiKey.Oath.Commands
         private const byte NameTag = 0x71;
         private const byte ChallengeTag = 0x74;
 
-        private DateTimeOffset _timestamp;
-
         /// <summary>
         /// The credential to calculate.
         /// </summary>
@@ -107,8 +105,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             if (Credential.Type == CredentialType.Totp)
             {
-                _timestamp = DateTimeOffset.UtcNow;
-                tlvWriter.WriteValue(ChallengeTag, GenerateTotpChallenge(Credential.Period, _timestamp));
+                tlvWriter.WriteValue(ChallengeTag, GenerateTotpChallenge(Credential.Period));
             }
             else
             {
@@ -131,7 +128,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 throw new InvalidOperationException(ExceptionMessages.InvalidCredential);
             }
 
-            return new CalculateCredentialResponse(responseApdu, Credential, _timestamp);
+            return new CalculateCredentialResponse(responseApdu, Credential);
         }
     }
 }

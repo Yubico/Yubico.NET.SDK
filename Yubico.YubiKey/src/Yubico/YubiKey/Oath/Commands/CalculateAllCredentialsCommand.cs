@@ -25,8 +25,6 @@ namespace Yubico.YubiKey.Oath.Commands
     {
         private const byte CalculateAllInstruction = 0xA4;
         private const byte ChallengeTag = 0x74;
-
-        private DateTimeOffset _timestamp;
         
         /// <summary>
         /// Full or truncated response to receive back.
@@ -67,10 +65,10 @@ namespace Yubico.YubiKey.Oath.Commands
         public CommandApdu CreateCommandApdu()
         {
             var tlvWriter = new TlvWriter();
-            _timestamp = DateTimeOffset.UtcNow;
+            
             // Using default period which is 30 seconds for calculating all credentials.
             // Credentials that have different period are recalculated later in CalculateAllCredentialsResponse.
-            tlvWriter.WriteValue(ChallengeTag, GenerateTotpChallenge(CredentialPeriod.Period30, _timestamp));
+            tlvWriter.WriteValue(ChallengeTag, GenerateTotpChallenge(CredentialPeriod.Period30));
 
             return new CommandApdu
             {
@@ -82,7 +80,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
         /// <inheritdoc />
         public CalculateAllCredentialsResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new CalculateAllCredentialsResponse(responseApdu, _timestamp);
+            new CalculateAllCredentialsResponse(responseApdu);
     }
 }
 

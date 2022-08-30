@@ -19,6 +19,7 @@ using Xunit;
 using Yubico.YubiKey.TestUtilities;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
+using System.Buffers.Binary;
 
 namespace Yubico.YubiKey.Oath.Commands
 {
@@ -109,10 +110,10 @@ namespace Yubico.YubiKey.Oath.Commands
 
                 byte[] dataList = { 0x74, 0x08 };
 
-                int timePeriod = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (int)CredentialPeriod.Period30;
-                byte[] bytes = BitConverter.GetBytes(timePeriod);
-                byte[] challenge = bytes.Concat(new byte[8 - bytes.Length]).ToArray();
-                var newDataList = dataList.Concat(challenge).ToArray();
+                ulong timePeriod = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (uint)CredentialPeriod.Period30;
+                byte[] bytes = new byte[8];
+                BinaryPrimitives.WriteUInt64BigEndian(bytes, timePeriod);
+                var newDataList = dataList.Concat(bytes).ToArray();
                 
                 ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 

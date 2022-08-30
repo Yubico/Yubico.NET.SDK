@@ -19,6 +19,7 @@ using Xunit;
 using Yubico.YubiKey.TestUtilities;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
+using System.Buffers.Binary;
 
 namespace Yubico.YubiKey.Oath.Commands
 {
@@ -169,11 +170,11 @@ namespace Yubico.YubiKey.Oath.Commands
                 period = CredentialPeriod.Period30;
             }
 
-            int timePeriod = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (int)period;
-            byte[] bytes = BitConverter.GetBytes(timePeriod);
-            byte[] challenge = bytes.Concat(new byte[8 - bytes.Length]).ToArray();
-            
-            return challenge;
+            ulong timePeriod = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (uint)period;
+            byte[] bytes = new byte[8];
+            BinaryPrimitives.WriteUInt64BigEndian(bytes, timePeriod);
+
+            return bytes;
         }
     }
 }

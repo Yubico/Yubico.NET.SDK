@@ -27,8 +27,8 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-            var timestamp = DateTimeOffset.UtcNow;
-            var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu, timestamp);
+            
+            var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
             Assert.Equal(ResponseStatus.Success, calculateAllCredentialsResponse.Status);
         }
@@ -40,8 +40,8 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-            var timestamp = DateTimeOffset.UtcNow;
-            var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu, timestamp);
+           
+            var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
             Assert.Equal(SWConstants.Success, calculateAllCredentialsResponse.StatusWord);
         }
@@ -53,8 +53,8 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-            var timestamp = DateTimeOffset.UtcNow;
-            var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu, timestamp);
+     
+            var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
             var data = calculateAllCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, calculateAllCredentialsResponse.StatusWord);
@@ -75,8 +75,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 0x69, 0x63, 0x6C, 0x6F, 0x75, 0x64, 0x2E, 0x63, 0x6F, 0x6D, 0x77, 0x01, 0x06, sw1, sw2
             });
 
-            var timestamp = DateTimeOffset.UtcNow;
-            var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu, timestamp);
+            var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
             var data = calculateAllCredentialsResponse.GetData();
             var credentialHotp = new Credential("Apple", "test@icloud.com", CredentialType.Hotp, CredentialPeriod.Undefined);
@@ -104,8 +103,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 0x69, 0x63, 0x6C, 0x6F, 0x75, 0x64, 0x2E, 0x63, 0x6F, 0x6D, 0x78, 0x01, 0x06, sw1, sw2
             });
 
-            var timestamp = DateTimeOffset.UtcNow;
-            var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu, timestamp);
+            var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(() => calculateAllCredentialsResponse.GetData());
         }
@@ -119,8 +117,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 0x1A, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F, sw1, sw2
             });
 
-            var timestamp = DateTimeOffset.UtcNow;
-            var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu, timestamp);
+            var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(() => calculateAllCredentialsResponse.GetData());
         }
@@ -129,8 +126,8 @@ namespace Yubico.YubiKey.Oath.Commands
         public void ResponseApduFailed_ThrowsInvalidOperationException()
         {
             var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
-            var timestamp = DateTimeOffset.UtcNow;
-            var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu, timestamp);
+
+            var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
             _ = Assert.Throws<InvalidOperationException>(() => calculateAllCredentialsResponse.GetData());
         }

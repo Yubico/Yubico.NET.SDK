@@ -56,8 +56,8 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             var p2 = new PinUvAuthProtocolTwo();
             p2.Encapsulate(pubKey);
 
-            byte[] encryptedData = p2.Encrypt(dataToEncrypt);
-            byte[] decryptedData = p2.Decrypt(encryptedData);
+            byte[] encryptedData = p2.Encrypt(dataToEncrypt, 0, dataToEncrypt.Length);
+            byte[] decryptedData = p2.Decrypt(encryptedData, 0, encryptedData.Length);
 
             bool isValid = MemoryExtensions.SequenceEqual(dataToEncrypt.AsSpan<byte>(), decryptedData.AsSpan<byte>());
 

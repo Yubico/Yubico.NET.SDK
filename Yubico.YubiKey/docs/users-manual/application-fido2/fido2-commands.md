@@ -27,6 +27,8 @@ what information is needed from the caller for that command.
 * [Version](#get-version)
 * [Get Info](#get-info)
 * [Get Key Agreement](#get-key-agreement) (get a public key)
+* [Set PIN](#set-pin)
+* [Change PIN](#change-pin)
 ___
 ## Get version
 
@@ -116,4 +118,58 @@ All YubiKeys with the FIDO2 application.
 ### APDU
 
 [Technical APDU Details](apdu/get-key-agree.md)
+___
+## Set PIN
+
+Set the YubiKey's FIDO application to be PIN-protected.
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[SetPinCommand](xref:Yubico.YubiKey.Fido2.Commands.SetPinCommand)
+
+[SetPinResponse](xref:Yubico.YubiKey.Fido2.Commands.SetPinResponse)
+
+### Input
+
+A [Protocol object](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase) and the
+PIN.
+
+### Output
+
+none
+
+### APDU
+
+[Technical APDU Details](apdu/set-pin.md)
+___
+## Change PIN
+
+Change the YubiKey's FIDO application's PIN.
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[ChangePinCommand](xref:Yubico.YubiKey.Fido2.Commands.ChangePinCommand)
+
+[ChangePinResponse](xref:Yubico.YubiKey.Fido2.Commands.ChangePinResponse)
+
+### Input
+
+A [Protocol object](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase), the
+current PIN and the new PIN.
+
+### Output
+
+none
+
+### APDU
+
+[Technical APDU Details](apdu/change-pin.md)
 ___

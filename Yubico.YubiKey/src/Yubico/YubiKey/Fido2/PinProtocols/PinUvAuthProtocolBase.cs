@@ -223,6 +223,13 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// <param name="plaintext">
         /// The data to encrypt.
         /// </param>
+        /// <param name="offset">
+        /// The offset in <c>plaintext</c> where the method will begin
+        /// encrypting.
+        /// </param>
+        /// <param name="length">
+        /// The number of bytes to encrypt.
+        /// </param>
         /// <returns>
         /// A new byte array containing the encrypted data. With protocol 2, the
         /// ciphertext is actually the concatenation of the IV and the encrypted
@@ -239,7 +246,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// The length of the <c>plaintext</c> is not a multiple of the AES block
         /// size (16 bytes).
         /// </exception>
-        public abstract byte[] Encrypt(byte[] plaintext);
+        public abstract byte[] Encrypt(byte[] plaintext, int offset, int length);
 
         /// <summary>
         /// Returns the AES-256-CBC decryption of ciphertext using an IV specified
@@ -249,6 +256,13 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// </summary>
         /// <param name="ciphertext">
         /// The data to decrypt.
+        /// </param>
+        /// <param name="offset">
+        /// The offset in <c>ciphertext</c> where the method will begin
+        /// decrypting.
+        /// </param>
+        /// <param name="length">
+        /// The number of bytes to decrypt.
         /// </param>
         /// <returns>
         /// A new byte array containing the decrypted data.
@@ -264,7 +278,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// The length of the <c>ciphertext</c> is not a multiple of the AES block
         /// size (16 bytes).
         /// </exception>
-        public abstract byte[] Decrypt(byte[] ciphertext);
+        public abstract byte[] Decrypt(byte[] ciphertext, int offset, int length);
 
         /// <summary>
         /// Returns the result of computing HMAC-SHA-256 on the given message

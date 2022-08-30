@@ -20,30 +20,30 @@ using Yubico.YubiKey.Fido2.Cose;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// This is the partner response class to the <see cref="SetPinCommand"/>
+    /// This is the partner response class to the <see cref="ChangePinCommand"/>
     /// class.
     /// </summary>
     /// <remarks>
     /// Note that this response has no data to return (there is no <c>GetData</c>
-    /// method). If the PIN is successfully set, the <see cref="Status"/>
-    /// property will be <c>ResponseStatus.Success</c>. If the PIN is not set,
-    /// the <c>Status</c> property will indicate the error.
+    /// method). If the PIN is successfully changed, the <see cref="Status"/>
+    /// property will be <c>ResponseStatus.Success</c>. If the PIN is not
+    /// changed, the <c>Status</c> property will indicate the error.
     /// </remarks>
-    public class SetPinResponse : IYubiKeyResponse
+    public class ChangePinResponse : IYubiKeyResponse
     {
         private readonly ClientPinResponse _response;
 
         /// <summary>
         /// Constructs a new instance of the
-        /// <see cref="SetPinResponse"/> class based on a response APDU
+        /// <see cref="ChangePinResponse"/> class based on a response APDU
         /// provided by the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
         /// A response APDU containing the CBOR response for the
-        /// `setPin` sub-command of the `authenticatorClientPIN` CTAP2
+        /// `changePin` sub-command of the `authenticatorClientPIN` CTAP2
         /// command.
         /// </param>
-        public SetPinResponse(ResponseApdu responseApdu)
+        public ChangePinResponse(ResponseApdu responseApdu)
         {
             _response = new ClientPinResponse(responseApdu);
         }

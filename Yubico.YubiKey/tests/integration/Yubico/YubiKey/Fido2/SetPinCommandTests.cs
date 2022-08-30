@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.Fido2
             var connection = new FidoConnection(deviceToUse);
             Assert.NotNull(connection);
 
-            var protocol = new PinUvAuthProtocolOne();
+            var protocol = new PinUvAuthProtocolTwo();
 
             var cmd = new GetKeyAgreementCommand(protocol.Protocol);
             GetKeyAgreementResponse rsp = connection.SendCommand(cmd);
@@ -55,6 +55,41 @@ namespace Yubico.YubiKey.Fido2
             var setPinCmd = new SetPinCommand(protocol, newPin);
             SetPinResponse setPinRsp = connection.SendCommand(setPinCmd);
             Assert.Equal(ResponseStatus.Success, setPinRsp.Status);
+        }
+
+        [Fact]
+        public void ChangePinCommand_Succeeds()
+        {
+            byte[] currentPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            byte[] newPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
+
+            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
+            Assert.NotNull(devices);
+
+            HidDevice? deviceToUse = GetKeyAgreeCommandTests.GetFidoHid(devices);
+            Assert.NotNull(deviceToUse);
+            if (deviceToUse is null)
+            {
+                return;
+            }
+
+            var connection = new FidoConnection(deviceToUse);
+            Assert.NotNull(connection);
+
+            var protocol = new PinUvAuthProtocolOne();
+
+            var cmd = new GetKeyAgreementCommand(protocol.Protocol);
+            GetKeyAgreementResponse rsp = connection.SendCommand(cmd);
+            Assert.Equal(ResponseStatus.Success, rsp.Status);
+
+            CoseEcPublicKey authenticatorPubKey = rsp.GetData();
+            Assert.Equal(CoseEcCurve.P256, authenticatorPubKey.Curve);
+
+            protocol.Encapsulate(authenticatorPubKey);
+
+            var changePinCmd = new ChangePinCommand(protocol, currentPin, newPin);
+            ChangePinResponse changePinRsp = connection.SendCommand(changePinCmd);
+            Assert.Equal(ResponseStatus.Success, changePinRsp.Status);
         }
     }
 }

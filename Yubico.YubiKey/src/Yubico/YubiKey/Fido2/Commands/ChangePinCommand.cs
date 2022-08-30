@@ -17,34 +17,35 @@ using System.Globalization;
 using System.Security.Cryptography;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.PinProtocols;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Set the YubiKey's FIDO2 application to be PIN-protected.
+    /// Change the YubiKey's FIDO2 application PIN.
     /// </summary>
     /// <remarks>
     /// Upon manufacture, the YubiKey's FIDO2 application has no PIN set as there
-    /// is no default PIN defined. Any FIDO2 operation is possible by simply
+    /// is no default PIN defined. Many FIDO2 operations are possible by simply
     /// inserting the YubiKey and possibly touching the contact.
-    /// <para>
     /// However, it is possible to set the application to require a PIN to
-    /// perform many of the operations. Use this command to set the PIN.
-    /// </para>
+    /// perform many of the operations. Use <see cref="SetPinCommand"/> to set
+    /// the PIN.
     /// <para>
-    /// Note that this command is possible only if no PIN is currently set. To
-    /// change a PIN, use the <see cref="ChangePinCommand"/>. To remove a PIN,
-    /// reset the application. Note that resetting the application will mean
-    /// losing all credentials as well as removing the PIN.
+    /// Use this command to change the PIN to a new value. Note that this command
+    /// is possible only if a PIN is currently set. Note that it is not possible
+    /// to remove a PIN, other than by resetting the entire application, which
+    /// will mean losing all credentials as well as removing the PIN.
     /// </para>
     /// </remarks>
-    public class SetPinCommand : IYubiKeyCommand<SetPinResponse>
+    public class ChangePinCommand : IYubiKeyCommand<ChangePinResponse>
     {
         private readonly ClientPinCommand _command;
 
-        private const int SubCmdSetPin = 0x03;
+        private const int SubCmdChangePin = 0x04;
         private const int MaximumPinLength = 63;
         private const int PinBlockLength = 64;
+        private const int PinHashLength = 16;
 
         /// <inheritdoc />
         public YubiKeyApplication Application => _command.Application;
@@ -53,13 +54,13 @@ namespace Yubico.YubiKey.Fido2.Commands
         // used.
         // Note that there is no object-initializer constructor. All the
         // constructor inputs have no default or are secret byte arrays.
-        private SetPinCommand()
+        private ChangePinCommand()
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Constructs a new instance of <see cref="SetPinCommand"/>.
+        /// Constructs a new instance of <see cref="ChangePinCommand"/>.
         /// </summary>
         /// <remarks>
         /// The caller must specify which PIN protocol the command will use. This
@@ -70,8 +71,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// requires the YubiKey's public key, which is obtained by executing the
         /// <see cref="GetKeyAgreementCommand"/>.
         /// <para>
-        /// In order to set the PIN, the caller must supply the new PIN at
-        /// construction. In this class, the PIN is supplied as
+        /// In order to change the PIN, the caller must supply both the current
+        /// and new PINs at construction. In this class, the PINs are supplied as
         /// <c>ReadOnlyMemory&lt;byte&gt;</c>. It is possible to pass a
         /// <c>byte[]</c>, because it will be automatically cast.
         /// </para>
@@ -88,8 +89,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// failure.
         /// </para>
         /// <para>
-        /// This class will copy the PIN (not just a reference). That means you
-        /// can overwrite the PIN in your byte array after calling the
+        /// This class will copy the PINs (not just references). That means you
+        /// can overwrite the PINs in your byte array after calling the
         /// constructor.
         /// </para>
         /// <para>
@@ -114,21 +115,26 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <see cref="PinUvAuthProtocolBase.Encapsulate"/> method must have been
         /// successfully executed before passing it to this constructor.
         /// </param>
+        /// <param name="currentPin">
+        /// The current PIN that is to be changed. This is a byte array with the
+        /// PIN provided as the UTF-8 encoding of Unicode characters in
+        /// Normalization Form C.
+        /// </param>
         /// <param name="newPin">
-        /// The PIN to set. This is a byte array with the PIN provided as the
-        /// UTF-8 encoding of Unicode characters in Normalization Form C.
+        /// The PIN to change to. This is a byte array with the PIN provided as
+        /// the UTF-8 encoding of Unicode characters in Normalization Form C.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// The <c>pinProtocol</c> arg is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// The PIN is an incorrect length.
+        /// A PIN is an incorrect length.
         /// </exception>
         /// <exception cref="ArgumentException">
         /// The <c>pinProtocol</c> is in a state indicating <c>Encapsulate</c>
         /// has not executed.
         /// </exception>
-        public SetPinCommand(PinUvAuthProtocolBase pinProtocol, ReadOnlyMemory<byte> newPin)
+        public ChangePinCommand(PinUvAuthProtocolBase pinProtocol, ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin)
         {
             if (pinProtocol is null)
             {
@@ -141,7 +147,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidCallOrder));
             }
-            if (newPin.Length > MaximumPinLength)
+            if ((currentPin.Length > MaximumPinLength) || (newPin.Length > MaximumPinLength))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -149,19 +155,29 @@ namespace Yubico.YubiKey.Fido2.Commands
                         ExceptionMessages.InvalidFido2Pin));
             }
 
+            using SHA256 sha256Object = CryptographyProviders.Sha256Creator();
+            byte[] pin = currentPin.ToArray();
+            byte[] digest = sha256Object.ComputeHash(pin);
+            CryptographicOperations.ZeroMemory(pin);
+            byte[] encryptedPinHash = pinProtocol.Encrypt(digest, 0, PinHashLength);
+
             byte[] dataToEncrypt = new byte[PinBlockLength];
             newPin.CopyTo(dataToEncrypt.AsMemory());
-
             byte[] encryptedPin = pinProtocol.Encrypt(dataToEncrypt, 0, dataToEncrypt.Length);
             CryptographicOperations.ZeroMemory(dataToEncrypt);
-            byte[] pinAuthentication = pinProtocol.Authenticate(encryptedPin);
+
+            byte[] dataToAuth = new byte[encryptedPin.Length + encryptedPinHash.Length];
+            Array.Copy(encryptedPin, 0, dataToAuth, 0, encryptedPin.Length);
+            Array.Copy(encryptedPinHash, 0, dataToAuth, encryptedPin.Length, encryptedPinHash.Length);
+            byte[] pinAuthentication = pinProtocol.Authenticate(dataToAuth);
 
             _command = new ClientPinCommand()
             {
-                SubCommand = SubCmdSetPin,
+                SubCommand = SubCmdChangePin,
                 PinUvAuthProtocol = pinProtocol.Protocol,
                 KeyAgreement = pinProtocol.PlatformPublicKey,
                 NewPinEnc = encryptedPin,
+                PinHashEnc = encryptedPinHash,
                 PinUvAuthParam = pinAuthentication,
             };
         }
@@ -170,7 +186,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
-        public SetPinResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new SetPinResponse(responseApdu);
+        public ChangePinResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new ChangePinResponse(responseApdu);
     }
 }
+

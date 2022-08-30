@@ -42,7 +42,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         }
 
         /// <inheritdoc />
-        public override byte[] Encrypt(byte[] plaintext)
+        public override byte[] Encrypt(byte[] plaintext, int offset, int length)
         {
             if (EncryptionKey is null)
             {
@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 throw new ArgumentNullException(nameof(plaintext));
             }
-            if ((plaintext.Length < BlockSize) || ((plaintext.Length % BlockSize) != 0))
+            if ((length < BlockSize) || ((length % BlockSize) != 0) || ((offset + length) > plaintext.Length))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -71,14 +71,14 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             aes.Key = _keyData;
             using ICryptoTransform aesTransform = aes.CreateEncryptor();
 
-            byte[] encryptedData = new byte[plaintext.Length];
-            _ = aesTransform.TransformBlock(plaintext, 0, plaintext.Length, encryptedData, 0);
+            byte[] encryptedData = new byte[length];
+            _ = aesTransform.TransformBlock(plaintext, offset, length, encryptedData, 0);
 
             return encryptedData;
         }
 
         /// <inheritdoc />
-        public override byte[] Decrypt(byte[] ciphertext)
+        public override byte[] Decrypt(byte[] ciphertext, int offset, int length)
         {
             if (EncryptionKey is null)
             {
@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 throw new ArgumentNullException(nameof(ciphertext));
             }
-            if ((ciphertext.Length == 0) || (ciphertext.Length % BlockSize != 0))
+            if ((length == 0) || (length % BlockSize != 0) || (offset + length > ciphertext.Length))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -107,8 +107,8 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             aes.Key = _keyData;
             using ICryptoTransform aesTransform = aes.CreateDecryptor();
 
-            byte[] decryptedData = new byte[ciphertext.Length];
-            _ = aesTransform.TransformBlock(ciphertext, 0, ciphertext.Length, decryptedData, 0);
+            byte[] decryptedData = new byte[length];
+            _ = aesTransform.TransformBlock(ciphertext, offset, length, decryptedData, 0);
 
             return decryptedData;
         }

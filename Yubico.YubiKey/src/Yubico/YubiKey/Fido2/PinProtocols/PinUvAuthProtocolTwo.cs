@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         }
 
         /// <inheritdoc />
-        public override byte[] Encrypt(byte[] plaintext)
+        public override byte[] Encrypt(byte[] plaintext, int offset, int length)
         {
             if (EncryptionKey is null)
             {
@@ -63,7 +63,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 throw new ArgumentNullException(nameof(plaintext));
             }
-            if ((plaintext.Length == 0) || (plaintext.Length % BlockSize) != 0)
+            if ((length == 0) || ((length % BlockSize) != 0) || ((offset + length) > plaintext.Length))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -85,15 +85,15 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             aes.Key = _aesKey;
             using ICryptoTransform aesTransform = aes.CreateEncryptor();
 
-            byte[] encryptedData = new byte[BlockSize + plaintext.Length];
+            byte[] encryptedData = new byte[BlockSize + length];
             Array.Copy(initVector, 0, encryptedData, 0, BlockSize);
-            _ = aesTransform.TransformBlock(plaintext, 0, plaintext.Length, encryptedData, BlockSize);
+            _ = aesTransform.TransformBlock(plaintext, offset, length, encryptedData, BlockSize);
 
             return encryptedData;
         }
 
         /// <inheritdoc />
-        public override byte[] Decrypt(byte[] ciphertext)
+        public override byte[] Decrypt(byte[] ciphertext, int offset, int length)
         {
             if (EncryptionKey is null)
             {
@@ -109,7 +109,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             }
             // The first BlockSize bytes are the IV, so there should be at least
             // 2 blocks.
-            if ((ciphertext.Length < 2 * BlockSize) || (ciphertext.Length % BlockSize != 0))
+            if ((length < 2 * BlockSize) || ((length % BlockSize) != 0) || ((offset + length) > ciphertext.Length))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -119,7 +119,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
 
             // The first BlockSize bytes are the IV, decrypt the rest.
             byte[] initVector = new byte[BlockSize];
-            Array.Copy(ciphertext, 0, initVector, 0, BlockSize);
+            Array.Copy(ciphertext, offset, initVector, 0, BlockSize);
 
             using Aes aes = CryptographyProviders.AesCreator();
             aes.Mode = CipherMode.CBC;
@@ -128,8 +128,8 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             aes.Key = _aesKey;
             using ICryptoTransform aesTransform = aes.CreateDecryptor();
 
-            byte[] decryptedData = new byte[ciphertext.Length - BlockSize];
-            _ = aesTransform.TransformBlock(ciphertext, BlockSize, ciphertext.Length - BlockSize, decryptedData, 0);
+            byte[] decryptedData = new byte[length - BlockSize];
+            _ = aesTransform.TransformBlock(ciphertext, BlockSize + offset, length - BlockSize, decryptedData, 0);
 
             return decryptedData;
         }

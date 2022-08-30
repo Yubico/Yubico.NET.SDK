@@ -103,6 +103,20 @@ key and compute the shared secret
 
 ### Change PIN
 
+Changing a PIN is very similar to setting the PIN.
+
+1. create an instance of one of the
+[PIN Protocol](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase) classes,
+this specifies which protocol to use, this does not need to be the same protocol used to
+set the PIN originally.
+2. call the
+[GetKeyAgreementCommand](xref:Yubico.YubiKey.Fido2.Commands.GetKeyAgreementCommand) to
+obtain the YubiKey's public key
+3. call the `PinProtocol` object's `Encapsulate` method to generate the platform public
+key and compute the shared secret
+4. call the [ChangePinCommand](xref:Yubico.YubiKey.Fido2.Commands.ChangePinCommand),
+supplying both the current PIN and the new PIN.
+
 ### Getting the PIN/UV authentication token
 
 ## PIN adjacent operations

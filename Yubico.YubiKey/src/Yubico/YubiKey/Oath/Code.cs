@@ -85,8 +85,6 @@ namespace Yubico.YubiKey.Oath
                     // The valid period can start before the calculation happens and potentially might happen even before,
                     // so that code is valid only 1 second after calculation.
                     // Taking the timestamp and rounding down to the nearest time segment given a period.
-                    //int secondsFromLastPeriod = (int)(timestamp.ToUnixTimeSeconds() % (int)period);
-
                     int secondsFromLastPeriod = (int)(timestamp.ToUnixTimeSeconds() % (int)period);
                     ValidFrom = timestamp.AddSeconds(-secondsFromLastPeriod);
                     ValidUntil = ValidFrom.Value.AddSeconds((int)period);

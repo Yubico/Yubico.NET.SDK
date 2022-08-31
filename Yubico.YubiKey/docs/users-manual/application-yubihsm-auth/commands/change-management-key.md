@@ -24,7 +24,7 @@ This command is used to change the management key. The management key is require
 
 All YubiKeys with the YubiHSM Auth application (included in firmware version 5.4.3 and later).
 > [!NOTE]
-> Use the .NET API's [HasFeature()](xref:Yubico.YubiKey.YubiKeyFeatureExtensions.HasFeature%28Yubico.YubiKey.IYubiKeyDevice%2CYubico.YubiKey.YubiKeyFeature%29) method to check if a key has the YubiHSM Auth application."
+> Use the .NET API's [HasFeature()](xref:Yubico.YubiKey.YubiKeyFeatureExtensions.HasFeature%28Yubico.YubiKey.IYubiKeyDevice%2CYubico.YubiKey.YubiKeyFeature%29) method to check if a key has the YubiHSM Auth application.
 
 ## SDK classes
 

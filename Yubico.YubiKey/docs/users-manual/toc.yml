@@ -298,6 +298,8 @@
       href: application-yubihsm-auth/commands/delete-credential.md
     - name: Change management key
       href: application-yubihsm-auth/commands/change-management-key.md
+    - name: Get application version
+      href: application-yubihsm-auth/commands/get-application-version.md
 
 - name: "Supporting routines"
   homepage: support/support-overview.md

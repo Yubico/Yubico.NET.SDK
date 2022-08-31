@@ -43,6 +43,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 "addcred" => AddCredential(),
                 "testlabelstuff" => TestLabelStuff(),
                 "testcredlimit" => TestCredLimit(),
+                "appversion" => GetAppVersion(),
                 "changemgmt" => ChangeManagementKey(),
                 _ => throw new ArgumentException($"Invalid command [{Command}] specified")
             };
@@ -522,6 +523,51 @@ namespace Yubico.YubiKey.TestApp.Plugins
             }
 
             return listResponse.GetData();
+        }
+
+        private bool GetAppVersion()
+        {
+            bool result = default;
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
+
+            if (keys.Any())
+            {
+                IYubiKeyDevice device = keys.First();
+
+                Output.WriteLine($"\nUsing YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
+
+                bool yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
+                if (!yubiHsmAuthEnabled)
+                {
+                    Output.WriteLine($"YubiHSM Auth not enabled. Exiting...");
+                    return false;
+                }
+
+                using (IYubiKeyConnection hsmAuthConnection = device.Connect(YubiKeyApplication.YubiHsmAuth))
+                {
+                    GetApplicationVersionCommand cmd = new GetApplicationVersionCommand();
+                    GetApplicationVersionResponse response = hsmAuthConnection.SendCommand(cmd);
+
+                    if (response.Status != ResponseStatus.Success)
+                    {
+                        Output.WriteLine($"Failed, response status: {response.Status}, {response.StatusMessage}");
+                        return false;
+                    }
+                    else
+                    {
+                        Output.WriteLine($"YubiHSM Auth v{response.GetData()}");
+                    }
+                }
+
+                result = true;
+            }
+
+            if (!result)
+            {
+                Output.WriteLine($"No YubiKeys found.");
+            }
+
+            return result;
         }
 
         private bool ChangeManagementKey()

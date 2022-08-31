@@ -26,3 +26,4 @@ For each possible YubiHSM Auth command, there will be a class that knows how to 
 * [Add credential](xref:YubiHsmAuthCmdAddCredential): store long-lived keys in the YubiHSM Auth application by creating a new credential.
 * [Delete credential](xref:YubiHsmAuthCmdDeleteCredential): remove a credential
 * [Change management key](xref:YubiHsmAuthCmdChangeManagementKey): change the management key
+* [Get application version](xref:YubiHsmAuthCmdGetAppVersion): get the version of the YubiHSM Auth application

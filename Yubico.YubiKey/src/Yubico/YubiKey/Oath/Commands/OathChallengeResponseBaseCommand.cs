@@ -59,9 +59,10 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
 
-                byte[] randomBytes = new byte[8];
-                randomObject.GetBytes(randomBytes);
-                return randomBytes;
+            byte[] randomBytes = new byte[8];
+            randomObject.GetBytes(randomBytes);
+            
+            return randomBytes;
         }
 
         /// <summary>

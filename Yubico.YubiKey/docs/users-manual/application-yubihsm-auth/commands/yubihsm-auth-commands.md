@@ -25,3 +25,4 @@ For each possible YubiHSM Auth command, there will be a class that knows how to 
 * [List credentials](xref:YubiHsmAuthCmdListCredentials): get the public properties of all credentials present in the YubiHSM Auth application along with the number of retries remaining for each.
 * [Add credential](xref:YubiHsmAuthCmdAddCredential): store long-lived keys in the YubiHSM Auth application by creating a new credential.
 * [Delete credential](xref:YubiHsmAuthCmdDeleteCredential): remove a credential
+* [Change management key](xref:YubiHsmAuthCmdChangeManagementKey): change the management key

@@ -296,6 +296,8 @@
       href: application-yubihsm-auth/commands/add-credential.md
     - name: Delete credential
       href: application-yubihsm-auth/commands/delete-credential.md
+    - name: Change management key
+      href: application-yubihsm-auth/commands/change-management-key.md
 
 - name: "Supporting routines"
   homepage: support/support-overview.md

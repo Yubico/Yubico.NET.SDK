@@ -43,6 +43,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 "addcred" => AddCredential(),
                 "testlabelstuff" => TestLabelStuff(),
                 "testcredlimit" => TestCredLimit(),
+                "changemgmt" => ChangeManagementKey(),
                 _ => throw new ArgumentException($"Invalid command [{Command}] specified")
             };
         }
@@ -521,6 +522,63 @@ namespace Yubico.YubiKey.TestApp.Plugins
             }
 
             return listResponse.GetData();
+        }
+
+        private bool ChangeManagementKey()
+        {
+            bool result = default;
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
+
+            if (keys.Any())
+            {
+                IYubiKeyDevice device = keys.First();
+
+                Output.WriteLine($"\nUsing YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
+
+                bool yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
+                if (!yubiHsmAuthEnabled)
+                {
+                    Output.WriteLine($"YubiHSM Auth not enabled. Exiting...");
+                    return false;
+                }
+
+                using (IYubiKeyConnection hsmAuthConnection = device.Connect(YubiKeyApplication.YubiHsmAuth))
+                {
+                    byte[] currentManagementKey = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                    byte[] newManagementKey = new byte[16] { 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4 };
+
+                    ChangeManagementKeyCommand cmd = new ChangeManagementKeyCommand(currentManagementKey, newManagementKey);
+                    ChangeManagementKeyResponse response = hsmAuthConnection.SendCommand(cmd);
+
+                    if (response.Status != ResponseStatus.Success)
+                    {
+                        Output.WriteLine($"Failed changing from default to new, response status: {response.Status}, {response.StatusMessage}");
+                        return false;
+                    }
+
+                    cmd = new ChangeManagementKeyCommand(newManagementKey, currentManagementKey);
+                    response = hsmAuthConnection.SendCommand(cmd);
+
+                    if (response.Status != ResponseStatus.Success)
+                    {
+                        Output.WriteLine($"Failed changing back to default, response status: {response.Status}, {response.StatusMessage}");
+                        return false;
+                    }
+                }
+
+                result = true;
+            }
+
+            if (result)
+            {
+                Output.WriteLine($"Management key successfully changed, and then back to default.");
+            }
+            else
+            {
+                Output.WriteLine($"No YubiKeys found with YubiHSM Auth enabled.");
+            }
+
+            return result;
         }
     }
 }

@@ -42,7 +42,8 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 "deletecred" => DeleteCredential(),
                 "addcred" => AddCredential(),
                 "testlabelstuff" => TestLabelStuff(),
-                "testcredlimit" => TestCredLimit(),
+                "getmgmtretries" => GetMgmtRetries(),
+                "testmgmtretries" => TestMgmtRetries(),
                 "appversion" => GetAppVersion(),
                 "changemgmt" => ChangeManagementKey(),
                 _ => throw new ArgumentException($"Invalid command [{Command}] specified")
@@ -525,6 +526,46 @@ namespace Yubico.YubiKey.TestApp.Plugins
             return listResponse.GetData();
         }
 
+        private bool GetMgmtRetries()
+        {
+            bool result = default;
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
+
+            if (keys.Any())
+            {
+                int deviceCount = 1;
+                foreach (IYubiKeyDevice device in keys)
+                {
+                    bool yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
+                    if (!yubiHsmAuthEnabled)
+                    {
+                        continue;
+                    }
+
+                    Output.WriteLine($"\n{deviceCount++}) Using YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
+
+                    using (IYubiKeyConnection hsmAuthConnection = device.Connect(YubiKeyApplication.YubiHsmAuth))
+                    {
+                        GetManagementKeyRetriesCommand cmd = new GetManagementKeyRetriesCommand();
+                        GetManagementKeyRetriesResponse response = hsmAuthConnection.SendCommand(cmd);
+                        if (response.Status != ResponseStatus.Success)
+                        {
+                            Output.WriteLine($"Failed, response status: {response.Status}");
+                            continue;
+                        }
+
+                        int retries = response.GetData();
+
+                        Output.WriteLine($"{retries} retries remaining.");
+                    }
+                }
+
+                result = true;
+            }
+
+            return result;
+        }
+
         private bool GetAppVersion()
         {
             bool result = default;
@@ -622,6 +663,92 @@ namespace Yubico.YubiKey.TestApp.Plugins
             else
             {
                 Output.WriteLine($"No YubiKeys found with YubiHSM Auth enabled.");
+            }
+
+            return result;
+        }
+
+        private bool TestMgmtRetries()
+        {
+            bool result = default;
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
+
+            if (keys.Any())
+            {
+                int deviceCount = 1;
+                foreach (IYubiKeyDevice device in keys)
+                {
+                    bool yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
+                    if (!yubiHsmAuthEnabled)
+                    {
+                        continue;
+                    }
+
+                    Output.WriteLine($"\n{deviceCount++}) Using YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
+
+                    using (IYubiKeyConnection hsmAuthConnection = device.Connect(YubiKeyApplication.YubiHsmAuth))
+                    {
+                        // Get initial mgmt key retries remaining
+                        GetManagementKeyRetriesCommand cmdRetries = new GetManagementKeyRetriesCommand();
+                        GetManagementKeyRetriesResponse responseRetries = hsmAuthConnection.SendCommand(cmdRetries);
+                        if (responseRetries.Status != ResponseStatus.Success)
+                        {
+                            Output.WriteLine($"Failed to get mgmt retries, response status: {responseRetries.Status}");
+                            continue;
+                        }
+
+                        int retries = responseRetries.GetData();
+
+                        Output.WriteLine($"{retries} retries remaining. About to supply WRONG management key...");
+
+                        // Supply wrong current mgmt key 
+                        byte[] currentManagementKey = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                        byte[] newManagementKey = new byte[16] { 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4 };
+
+                        ChangeManagementKeyCommand cmdChangeMgmt = new ChangeManagementKeyCommand(newManagementKey, currentManagementKey);
+                        ChangeManagementKeyResponse responseChangeMgmt = hsmAuthConnection.SendCommand(cmdChangeMgmt);
+
+                        if (responseChangeMgmt.Status != ResponseStatus.Success)
+                        {
+                            Output.WriteLine($"Failed change mgmt key (1), response status: {responseChangeMgmt.Status}, {responseChangeMgmt.StatusMessage}");
+                        }
+
+                        // Check mgmt retries
+                        responseRetries = hsmAuthConnection.SendCommand(cmdRetries);
+                        if (responseRetries.Status != ResponseStatus.Success)
+                        {
+                            Output.WriteLine($"Failed to get mgmt retries, response status: {responseRetries.Status}");
+                            continue;
+                        }
+
+                        retries = responseRetries.GetData();
+
+                        Output.WriteLine($"{retries} retries remaining. Now supplying CORRECT management key...");
+
+                        // Supply correct current mgmt key 
+                        cmdChangeMgmt = new ChangeManagementKeyCommand(currentManagementKey, currentManagementKey);
+                        responseChangeMgmt = hsmAuthConnection.SendCommand(cmdChangeMgmt);
+
+                        if (responseChangeMgmt.Status != ResponseStatus.Success)
+                        {
+                            Output.WriteLine($"Failed change mgmt key (2), response status: {responseChangeMgmt.Status}, {responseChangeMgmt.StatusMessage}");
+                        }
+
+                        // Check mgmt retries
+                        responseRetries = hsmAuthConnection.SendCommand(cmdRetries);
+                        if (responseRetries.Status != ResponseStatus.Success)
+                        {
+                            Output.WriteLine($"Failed to get mgmt retries, response status: {responseRetries.Status}");
+                            continue;
+                        }
+
+                        retries = responseRetries.GetData();
+
+                        Output.WriteLine($"{retries} retries remaining.");
+                    }
+                }
+
+                result = true;
             }
 
             return result;

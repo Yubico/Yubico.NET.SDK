@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             byte[] secret = CalculateSecret(_password, _oathData.Salt);
             byte[] response = CalculateResponse(secret, _oathData.Challenge);
-            byte[] challenge = GenerateChallenge();
+            byte[] challenge = GenerateRandomChallenge();
 
             CalculatedResponse = CalculateResponse(secret, challenge);
 

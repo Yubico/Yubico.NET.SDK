@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
+            
             var calculateCredentialResponse = new CalculateCredentialResponse(responseApdu, credential);
 
             Assert.Equal(SWConstants.Success, calculateCredentialResponse.StatusWord);
@@ -75,7 +75,6 @@ namespace Yubico.YubiKey.Oath.Commands
                 0xC4, 0x9F, 0x6C, sw1, sw2
             });
 
-
             var calculateCredentialResponse = new CalculateCredentialResponse(responseApdu, credential);
 
             var data = calculateCredentialResponse.GetData();
@@ -108,6 +107,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0x75, 0x02, 0x06, 0x8A, sw1, sw2 });
+
             var calculateCredentialResponse = new CalculateCredentialResponse(responseApdu, credential);
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(() => calculateCredentialResponse.GetData());
@@ -119,6 +119,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, sw1, sw2 });
+
             var calculateCredentialResponse = new CalculateCredentialResponse(responseApdu, credential);
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(() => calculateCredentialResponse.GetData());
@@ -128,6 +129,7 @@ namespace Yubico.YubiKey.Oath.Commands
         public void ResponseApduFailed_ThrowsInvalidOperationException()
         {
             var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
+
             var calculateCredentialResponse = new CalculateCredentialResponse(responseApdu, credential);
 
             _ = Assert.Throws<InvalidOperationException>(() => calculateCredentialResponse.GetData());

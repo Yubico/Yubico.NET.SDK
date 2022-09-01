@@ -92,6 +92,11 @@ namespace Yubico.YubiKey.Oath.Commands
             {
                 throw new InvalidOperationException(ExceptionMessages.InvalidCredentialType);
             }
+            
+            if (Credential.Period is null)
+            {
+                throw new InvalidOperationException(ExceptionMessages.InvalidCredentialPeriod);
+            }
 
             byte[] nameBytes = Encoding.UTF8.GetBytes(Credential.Name);
 
@@ -100,11 +105,11 @@ namespace Yubico.YubiKey.Oath.Commands
 
             if (Credential.Type == CredentialType.Totp)
             {
-                tlvWriter.WriteValue(ChallengeTag, GenerateChallenge());
+                tlvWriter.WriteValue(ChallengeTag, GenerateTotpChallenge(Credential.Period));
             }
             else
             {
-                tlvWriter.WriteValue(ChallengeTag, null);
+                tlvWriter.WriteValue(ChallengeTag, new byte[8]);
             }
 
             return new CommandApdu

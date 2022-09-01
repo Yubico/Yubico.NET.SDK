@@ -42,6 +42,7 @@ namespace Yubico.YubiKey.Oath.Commands
         public CalculateAllCredentialsResponse(ResponseApdu responseApdu) :
              base(responseApdu)
         {
+
         }
 
         /// <summary>

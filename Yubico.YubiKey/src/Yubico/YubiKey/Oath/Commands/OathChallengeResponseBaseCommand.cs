@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System;
+using System.Buffers.Binary;
+using System.Linq;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 
@@ -25,17 +27,41 @@ namespace Yubico.YubiKey.Oath.Commands
     public abstract class OathChallengeResponseBaseCommand
     {
         /// <summary>
+        /// Generates 8 bytes challenge that can be used for TOTP credential calculation.
+        /// </summary>
+        /// <returns>
+        /// 8 bytes challenge.
+        /// </returns>
+        protected static byte[] GenerateTotpChallenge(CredentialPeriod? period)
+        {
+            if (period is null)
+            {
+                period = CredentialPeriod.Period30;
+            }
+
+            ulong timePeriod = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (uint)period;
+            byte[] bytes = new byte[8];
+            BinaryPrimitives.WriteUInt64BigEndian(bytes, timePeriod);
+
+            return bytes;
+        }
+
+        [Obsolete("This method is obsolete. Call GenerateRandomChallenge instead.")]
+        protected static byte[] GenerateChallenge() => GenerateRandomChallenge();
+
+        /// <summary>
         /// Generates random 8 bytes that can be used as challenge for authentication.
         /// </summary>
         /// <returns>
         /// Random 8 bytes.
         /// </returns>
-        protected static byte[] GenerateChallenge()
+        protected static byte[] GenerateRandomChallenge()
         {
             using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
 
             byte[] randomBytes = new byte[8];
             randomObject.GetBytes(randomBytes);
+            
             return randomBytes;
         }
 

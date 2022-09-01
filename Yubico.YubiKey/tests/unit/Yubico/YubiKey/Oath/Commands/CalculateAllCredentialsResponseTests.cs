@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
+            
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
             Assert.Equal(ResponseStatus.Success, calculateAllCredentialsResponse.Status);
@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
+           
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
             Assert.Equal(SWConstants.Success, calculateAllCredentialsResponse.StatusWord);
@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-
+     
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
             var data = calculateAllCredentialsResponse.GetData();
 
@@ -126,6 +126,7 @@ namespace Yubico.YubiKey.Oath.Commands
         public void ResponseApduFailed_ThrowsInvalidOperationException()
         {
             var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
+
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
             _ = Assert.Throws<InvalidOperationException>(() => calculateAllCredentialsResponse.GetData());

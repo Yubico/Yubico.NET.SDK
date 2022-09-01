@@ -90,7 +90,7 @@ namespace Yubico.YubiKey.Oath.Commands
             else
             {
                 byte[] secret = CalculateSecret(Password, OathData.Salt);
-                byte[] challenge = GenerateChallenge();
+                byte[] challenge = GenerateRandomChallenge();
                 byte[] response = CalculateResponse(secret, challenge);
 
                 byte[] fullKey = new byte[1 + secret.Length];

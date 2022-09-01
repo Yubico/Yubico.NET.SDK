@@ -42,7 +42,6 @@ namespace Yubico.YubiKey.TestApp
                 ["update"] = (output) => new UpdateSlot(output),
                 ["yubiotp"] = (output) => new YubiOtp(output),
                 ["enumeration"] = (output) => new EnumeratePlugin(output),
-                ["fido"] = (output) => new FidoPlugin(output),
                 ["u2f"] = (output) => new U2fPlugin(output),
                 ["hidcodetablegenerator"] = (output) => new HidCodeTablePlugin(output),
                 ["validatehotp"] = (output) => new ValidateHotp(output),
@@ -52,7 +51,8 @@ namespace Yubico.YubiKey.TestApp
                 ["eventmgmt"] = (output) => new EventManagerPlugin(output),
                 ["hidevents"] = (output) => new HidDeviceListenerPlugin(output),
                 ["smartcardevents"] = (output) => new SmartCardDeviceListenerPlugin(output),
-                ["feature"] = (output) => new YubiKeyFeaturePlugin(output)
+                ["feature"] = (output) => new YubiKeyFeaturePlugin(output),
+                ["oath"] = (output) => new OathPlugin(output),
             };
 
         static int Main(string[] args)

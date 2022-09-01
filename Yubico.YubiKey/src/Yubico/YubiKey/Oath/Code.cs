@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.Oath
             if (!string.IsNullOrWhiteSpace(value)) {
                 Value = value;
 
-                DateTimeOffset timestamp = DateTimeOffset.Now;
+                DateTimeOffset timestamp = DateTimeOffset.UtcNow;
 
                 if (period != CredentialPeriod.Undefined)
                 {

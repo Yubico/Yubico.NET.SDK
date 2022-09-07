@@ -28,3 +28,4 @@ For each possible YubiHSM Auth command, there will be a class that knows how to 
 * [Get management key retries](xref:YubiHsmAuthCmdGetMgmtRetries): get the number of retries for the management key
 * [Change management key](xref:YubiHsmAuthCmdChangeManagementKey): change the management key
 * [Get application version](xref:YubiHsmAuthCmdGetAppVersion): get the version of the YubiHSM Auth application
+* [Reset application](xref:YubiHsmAuthCmdResetApplication): reset the YubiHSM Auth application

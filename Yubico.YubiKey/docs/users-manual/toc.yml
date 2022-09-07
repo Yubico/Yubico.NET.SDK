@@ -302,6 +302,8 @@
       href: application-yubihsm-auth/commands/change-management-key.md
     - name: Get application version
       href: application-yubihsm-auth/commands/get-application-version.md
+    - name: Reset application
+      href: application-yubihsm-auth/commands/reset-application.md
 
 - name: "Supporting routines"
   homepage: support/support-overview.md

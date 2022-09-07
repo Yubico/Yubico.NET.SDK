@@ -46,6 +46,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 "testmgmtretries" => TestMgmtRetries(),
                 "appversion" => GetAppVersion(),
                 "changemgmt" => ChangeManagementKey(),
+                "resetyha" => ResetYubiHsmAuth(),
                 _ => throw new ArgumentException($"Invalid command [{Command}] specified")
             };
         }
@@ -745,6 +746,79 @@ namespace Yubico.YubiKey.TestApp.Plugins
                         retries = responseRetries.GetData();
 
                         Output.WriteLine($"{retries} retries remaining.");
+                    }
+                }
+
+                result = true;
+            }
+
+            return result;
+        }
+
+        private bool ResetYubiHsmAuth()
+        {
+            bool result = default;
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
+
+            if (keys.Any())
+            {
+                int deviceCount = 1;
+                foreach (IYubiKeyDevice device in keys)
+                {
+                    bool yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
+                    if (!yubiHsmAuthEnabled)
+                    {
+                        continue;
+                    }
+
+                    byte[] mgmtKey = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                    byte[] password = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                    byte[] encKey = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                    byte[] macKey = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                    string strLabel = "abc";
+                    bool touchRequired = false;
+
+                    var aesCred = new Aes128CredentialWithSecrets(password, encKey, macKey, strLabel, touchRequired);
+
+                    Output.WriteLine($"\n{deviceCount++}) Using YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
+
+                    using (IYubiKeyConnection hsmAuthConnection = device.Connect(YubiKeyApplication.YubiHsmAuth))
+                    {
+                        if (!HelperGetCreds(hsmAuthConnection).Any())
+                        {
+                            AddCredentialCommand cmdAddCred = new AddCredentialCommand(mgmtKey, aesCred);
+                            AddCredentialResponse responseAddCred = hsmAuthConnection.SendCommand(cmdAddCred);
+
+                            if (responseAddCred.Status != ResponseStatus.Success)
+                            {
+                                Output.WriteLine($"Failed to add a credential, response status: {responseAddCred.Status}, {responseAddCred.StatusMessage}");
+                                return false;
+                            }
+                        }
+
+                        Output.WriteLine("\nBefore:");
+                        if (!HelperWriteCreds(hsmAuthConnection))
+                        {
+                            return result;
+                        }
+
+                        ResetApplicationCommand cmd = new ResetApplicationCommand();
+                        ResetApplicationResponse response = hsmAuthConnection.SendCommand(cmd);
+                        if (response.Status != ResponseStatus.Success)
+                        {
+                            Output.WriteLine($"Failed to reset application, response status: {response.Status}");
+                            continue;
+                        }
+                        else
+                        {
+                            Output.WriteLine("Succeeded in resetting the YubiHSM Auth application.");
+                        }
+
+                        Output.WriteLine("\nAfter:");
+                        if (!HelperWriteCreds(hsmAuthConnection))
+                        {
+                            return result;
+                        }
                     }
                 }
 

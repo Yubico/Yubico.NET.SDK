@@ -285,8 +285,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Commands", "Commands", "{9F
 		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\change-management-key.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\change-management-key.md
 		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\delete-credential.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\delete-credential.md
 		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\get-application-version.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\get-application-version.md
-		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\list-credentials.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\list-credentials.md
 		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\get-management-key-retries.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\get-management-key-retries.md
+		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\list-credentials.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\list-credentials.md
+		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\reset-application.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\reset-application.md
 		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\yubihsm-auth-commands.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\yubihsm-auth-commands.md
 	EndProjectSection
 EndProject

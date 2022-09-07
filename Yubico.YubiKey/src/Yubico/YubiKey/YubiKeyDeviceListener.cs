@@ -196,7 +196,8 @@ namespace Yubico.YubiKey
 
             IEnumerable<IYubiKeyDevice> removedYubiKeys = _internalCache
                 .Where(e => e.Value == false)
-                .Select(e => e.Key);
+                .Select(e => e.Key)
+                .ToList();
 
             foreach (IYubiKeyDevice removedKey in removedYubiKeys)
             {

@@ -13,38 +13,32 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
 using System.Security.Cryptography;
-using Yubico.Core.Iso7816;
+using System.Globalization;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.PinProtocols;
+using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Set the YubiKey's FIDO2 application to be PIN-protected.
+    /// Gets a new PIN/UV Auth token using the subcommand
+    /// <c>getPinUvAuthTokenUsingPinWithPermissions</c>.
     /// </summary>
     /// <remarks>
-    /// Upon manufacture, the YubiKey's FIDO2 application has no PIN set as there
-    /// is no default PIN defined. Any FIDO2 operation is possible by simply
-    /// inserting the YubiKey and possibly touching the contact.
-    /// <para>
-    /// However, it is possible to set the application to require a PIN to
-    /// perform many of the operations. Use this command to set the PIN.
-    /// </para>
-    /// <para>
-    /// Note that this command is possible only if no PIN is currently set. To
-    /// change a PIN, use the <see cref="ChangePinCommand"/>. To remove a PIN,
-    /// reset the application. Note that resetting the application will mean
-    /// losing all credentials as well as removing the PIN.
-    /// </para>
+    /// Note that a YubiKey might not support this command. Sections 6.5.5.7.2,
+    /// 6.5.5.7.3, and 6.4 in the FIDO2 standard describe the prerequisites for
+    /// supporting this command. A program can determine if a YubiKey supports
+    /// this command by getting device info (<see cref="GetInfoCommand"/> and
+    /// checking the <c>Options</c> supported.
     /// </remarks>
-    public class SetPinCommand : IYubiKeyCommand<SetPinResponse>
+    public class GetPinUvAuthTokenUsingPinCommand : IYubiKeyCommand<GetPinUvAuthTokenResponse>
     {
         private readonly ClientPinCommand _command;
 
-        private const int SubCmdSetPin = 0x03;
+        private const int SubCmdGetTokenUsingPin = 0x09;
         private const int MaximumPinLength = 63;
-        private const int PinBlockLength = 64;
+        private const int PinHashLength = 16;
 
         /// <inheritdoc />
         public YubiKeyApplication Application => _command.Application;
@@ -53,15 +47,25 @@ namespace Yubico.YubiKey.Fido2.Commands
         // used.
         // Note that there is no object-initializer constructor. All the
         // constructor inputs have no default or are secret byte arrays.
-        private SetPinCommand()
+        private GetPinUvAuthTokenUsingPinCommand()
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Constructs a new instance of <see cref="SetPinCommand"/>.
+        /// Constructs a new instance of
+        /// <see cref="GetPinUvAuthTokenUsingPinCommand"/>.
         /// </summary>
         /// <remarks>
+        /// The subcommand in the standard is called
+        /// <c>getPinUvAuthTokenUsingPinWithPermissions</c>. The
+        /// <c>WithPermissions</c> means the token will be associated with
+        /// permissions. The caller must specify the permissions as a bit field,
+        /// the <c>PinUvAuthTokenPermissions</c> enum. Note that with some
+        /// permissions, the relying party ID (<c>rpId</c>) is required as well.
+        /// For other permissions it is optional or ignored, so the <c>rpId</c>
+        /// arg can be null.
+        /// <para>
         /// The caller must specify which PIN protocol the command will use. This
         /// is done by passing in a subclass of <see cref="PinUvAuthProtocolBase"/>.
         /// This constructor requires the
@@ -69,44 +73,17 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// before passing it in. Note that the <c>Encapsulate</c> method
         /// requires the YubiKey's public key, which is obtained by executing the
         /// <see cref="GetKeyAgreementCommand"/>.
+        /// </para>
         /// <para>
-        /// In order to set the PIN, the caller must supply the new PIN at
+        /// In order to get the token, the caller must supply the current PIN at
         /// construction. In this class, the PIN is supplied as
         /// <c>ReadOnlyMemory&lt;byte&gt;</c>. It is possible to pass a
         /// <c>byte[]</c>, because it will be automatically cast.
         /// </para>
         /// <para>
-        /// The standard specifies that the PIN must be "the UTF-8 representation
-        /// of" the "Unicode characters in Normalization Form C." This
-        /// constructor expects the PIN to already be in that representation. See
-        /// the User's Manual entry on
-        /// <xref href="TheFido2Pin"> the FIDO2 PIN</xref> for more information
-        /// on what this means and how to build the PIN into the appropriate
-        /// form. While this constructor will verify that the PIN is not too
-        /// long, it will not verify the PIN is in the correct form. If it is
-        /// invalid, the YubiKey might reject it and the response will indicate a
-        /// failure.
-        /// </para>
-        /// <para>
         /// This class will encrypt the PIN and will not copy a reference. That
         /// means you can overwrite the PIN in your byte array after calling the
         /// constructor.
-        /// </para>
-        /// <para>
-        /// The PIN is at least 4 unicode code points. If the YubiKey supports
-        /// the "Set Minimum PIN Length" feature, it is possible to change this
-        /// minimum to a bigger number, but never smaller than 4.
-        /// </para>
-        /// <para>
-        /// Note that the minimum length is given in code points, not bytes. The
-        /// PIN must be converted to a sequence of bytes representing the Unicode
-        /// characters in Normalization Form C, then UTF-8 encoded.
-        /// </para>
-        /// <para>
-        /// The maximum length is 63 bytes. This limit is in bytes, not code
-        /// points. The standard also specifies that the last byte cannot be
-        /// zero. Because the PIN must be UTF-8 encoded, this should never be an
-        /// issue.
         /// </para>
         /// </remarks>
         /// <param name="pinProtocol">
@@ -114,9 +91,16 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <see cref="PinUvAuthProtocolBase.Encapsulate"/> method must have been
         /// successfully executed before passing it to this constructor.
         /// </param>
-        /// <param name="newPin">
-        /// The PIN to set. This is a byte array with the PIN provided as the
-        /// UTF-8 encoding of Unicode characters in Normalization Form C.
+        /// <param name="currentPin">
+        /// The PIN. This is a byte array with the PIN provided as the UTF-8
+        /// encoding of Unicode characters in Normalization Form C.
+        /// </param>
+        /// <param name="permissions">
+        /// All the permissions necessary to complete the operations intended.
+        /// </param>
+        /// <param name="rpId">
+        /// If at least one of the permissions chosen requires it or is optional
+        /// and the feature is intended, supply it here. Otherwise, pass in null.
         /// </param>
         /// <exception cref="ArgumentNullException">
         /// The <c>pinProtocol</c> arg is null.
@@ -124,11 +108,15 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <exception cref="ArgumentException">
         /// The PIN is an incorrect length.
         /// </exception>
-        /// <exception cref="ArgumentException">
+        /// <exception cref="InvalidOperationException">
         /// The <c>pinProtocol</c> is in a state indicating <c>Encapsulate</c>
         /// has not executed.
         /// </exception>
-        public SetPinCommand(PinUvAuthProtocolBase pinProtocol, ReadOnlyMemory<byte> newPin)
+        public GetPinUvAuthTokenUsingPinCommand(
+            PinUvAuthProtocolBase pinProtocol,
+            ReadOnlyMemory<byte> currentPin,
+            PinUvAuthTokenPermissions permissions,
+            string? rpId)
         {
             if (pinProtocol is null)
             {
@@ -141,7 +129,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidCallOrder));
             }
-            if (newPin.Length > MaximumPinLength)
+            if (currentPin.Length > MaximumPinLength)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -149,20 +137,20 @@ namespace Yubico.YubiKey.Fido2.Commands
                         ExceptionMessages.InvalidFido2Pin));
             }
 
-            byte[] dataToEncrypt = new byte[PinBlockLength];
-            newPin.CopyTo(dataToEncrypt.AsMemory());
-
-            byte[] encryptedPin = pinProtocol.Encrypt(dataToEncrypt, 0, dataToEncrypt.Length);
-            CryptographicOperations.ZeroMemory(dataToEncrypt);
-            byte[] pinAuthentication = pinProtocol.Authenticate(encryptedPin);
+            using SHA256 sha256Object = CryptographyProviders.Sha256Creator();
+            byte[] pin = currentPin.ToArray();
+            byte[] digest = sha256Object.ComputeHash(pin);
+            CryptographicOperations.ZeroMemory(pin);
+            byte[] encryptedPinHash = pinProtocol.Encrypt(digest, 0, PinHashLength);
 
             _command = new ClientPinCommand()
             {
-                SubCommand = SubCmdSetPin,
+                SubCommand = SubCmdGetTokenUsingPin,
                 PinUvAuthProtocol = pinProtocol.Protocol,
                 KeyAgreement = pinProtocol.PlatformPublicKey,
-                NewPinEnc = encryptedPin,
-                PinUvAuthParam = pinAuthentication,
+                PinHashEnc = encryptedPinHash,
+                Permissions = permissions,
+                RpId = rpId,
             };
         }
 
@@ -170,7 +158,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
-        public SetPinResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new SetPinResponse(responseApdu);
+        public GetPinUvAuthTokenResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new GetPinUvAuthTokenResponse(responseApdu);
     }
 }

@@ -31,42 +31,10 @@ namespace Yubico.YubiKey.Fido2.Commands
                 _ => _Status
             };
 
-        public virtual void ThrowIfFailed()
-        {
-            if (ResponseApdu.Data.IsEmpty)
-            {
-                throw new MalformedYubiKeyResponseException(ExceptionMessages.Fido2ResponseMissing);
-            }
-
-            if (ResponseApdu.Data.Span[0] != (int)Fido2Status.Success)
-            {
-                throw new BadFido2StatusException(ResponseApdu.Data.Span[0]);
-            }
-
-            switch (StatusWord)
-            {
-                default:
-                    _ThrowIfFailed();
-                    break;
-            }
-        }
-
         private ResponseStatus _Status => StatusWord switch
         {
             SWConstants.Success => ResponseStatus.Success,
             _ => ResponseStatus.Failed
         };
-
-        private void _ThrowIfFailed()
-        {
-            switch (StatusWord)
-            {
-                case SWConstants.Success:
-                    Debug.Assert(Status == ResponseStatus.Success);
-                    return;
-                default:
-                    throw new Exception();
-            }
-        }
     }
 }

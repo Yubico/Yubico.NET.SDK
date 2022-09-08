@@ -12,29 +12,37 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-## Get the YubiKey's Key Agreement public key
+## Get a PIN/UV Auth token using the PIN
 
 ### Command APDU info
 
 CLA | INS | P1 | P2 | Lc | Data | Le
 :---: | :---: | :---: | :---: | :---: | :---:
-00 | 10 | 00 | 00 | 06 | 06 A2 01 02 02 02 | (absent)
+00 | 10 | 00 | 00 | *data length* | 06 *encoded info* | (absent)
 
-The Ins byte (instruction) is 10, which is the byte for CTAPHID_CBOR.
+The INS byte (instruction) is 10, which is the byte for CTAPHID_CBOR.
 That means the command information is in a CBOR encoded structure in the
 Data.
 
-The data consists of the CTAP Command Byte and the CBOR encoding of the
+The Data consists of the CTAP Command Byte and the CBOR encoding of the
 command's parameters. In this case, the CTAP Command Byte is `06`,
 which is the command "`authenticatorClientPin`". The CBOR encoding is
 the following:
 
 ```txt
-  A2         map containing two elements
+  A6         map containing four elements
      01      key (of key/value) specifying ...
         0x   ... UV/PIN protocol (x=1 for protocol one, x=2 for protocol two)
      02      key specifying ...
-        02   ... subcommand, 02 = KeyAgreement
+        09   ... subcommand, 09 = getPinUvAuthTokenUsingPin
+     03      key specifying ...
+        <>   ... CBOR-encoded COSE_Key, the platform's public key
+     06      key specifying ...
+        <>   ... encrypted hash of current PIN
+     09      key specifying ...
+        xx   ... permissions, e.g. 0x01, 0x03, 0x21
+     0A      key specifying ...
+        <>   ... relying party ID (a text string)
 ```
 
 ### Response APDU info
@@ -52,22 +60,13 @@ The info returned is CBOR encoded. It has a structure similar to the
 following.
 
 ```txt
-  A5
-     01 --int--
-     03 --int--
-     20 --int--
-     21 --byte string--
-     22 --byte string--
+  A1
+     02 --byte string--
 ```
 
-The integers describe the algorithm and curve, and the byte strings are
-the x- and y-coordinates of the public key. 
-
-The lengths of the byte string are dependent on the algorithm.
-Currently only one algorithm is supported, ECDH using the NIST curve
-P-256. That means the byte strings are both 32 bytes long. The total
-length of the encoding will be 78 bytes. Hence, the total length of the
-response will be 80 bytes.
+The byte string is the encrypted token. For protocol one, the string
+will be 32 bytes long, and for protocol two the string will be 48 bytes
+long.
 
 #### Response APDU when no protocol is given
 

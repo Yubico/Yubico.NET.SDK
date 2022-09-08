@@ -27,20 +27,20 @@ Data.
 The data consists of the CTAP Command Byte and the CBOR encoding of the
 command's parameters. In this case, the CTAP Command Byte is `06`,
 which is the command "`authenticatorClientPin`". The CBOR encoding is
-the following.
+the following:
 
 ```txt
   A5         map containing five elements
-     01      first element key (of key/value)
-        0x   UV/PIN protocol (x=1 for protocol 1, x=2 for protocol 2)
-     02      second element key
-        03   subcommand, 03 = SetPin
-     03      third element key
-        <>   CBOR-encoded COSE_Key, the platform's public key
-     04      fourth element key
-        <>   authentication value
-     05      fifth element key
-        <>   encrypted new PIN
+     01      key (of key/value) specifying ...
+        0x   ... UV/PIN protocol (x=1 for protocol one, x=2 for protocol two)
+     02      key specifying ...
+        03   ... subcommand, 03 = SetPin
+     03      key specifying ...
+        <>   ... CBOR-encoded COSE_Key, the platform's public key
+     04      key specifying ...
+        <>   ... authentication value
+     05      key specifying ...
+        <>   ... encrypted new PIN
 ```
 
 ### Response APDU info

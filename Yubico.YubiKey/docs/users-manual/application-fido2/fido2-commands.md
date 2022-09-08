@@ -29,6 +29,9 @@ what information is needed from the caller for that command.
 * [Get Key Agreement](#get-key-agreement) (get a public key)
 * [Set PIN](#set-pin)
 * [Change PIN](#change-pin)
+* [Get PIN Token](#get-pin-token)
+* [Get PIN/UV Auth Token Using PIN](#pin-uv-auth-using-pin)
+* [Get PIN/UV Auth Token Using UV](#pin-uv-auth-using-uv)
 ___
 ## Get version
 
@@ -172,4 +175,126 @@ none
 ### APDU
 
 [Technical APDU Details](apdu/change-pin.md)
+___
+## Get PIN token
+
+Get a PIN token, which can be used in later operations such as Make Credential.
+
+There are actually three versions of "Get PIN Token":
+
+* getPinToken
+* getPinUvAuthTokenUsingPinWithPermissions
+* getPinUvAuthTokenUsingUvWithPermissions
+
+The SDK has three different command classes to call each of the three operations:
+
+* GetPinTokenCommand
+* [GetPinUvAuthTokenUsingPinCommand](#pin-uv-auth-using-pin)
+* [GetPinUvAuthTokenUsingUvCommand](#pin-uv-auth-using-uv)
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[GetPinTokenCommand](xref:Yubico.YubiKey.Fido2.Commands.GetPinTokenCommand)
+
+[GetPinUvAuthTokenResponse](xref:Yubico.YubiKey.Fido2.Commands.GetPinUvAuthTokenResponse)
+
+### Input
+
+* [The UV/PIN Auth Protocol](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase)
+* [The PIN](fido2-pin.md)
+
+### Output
+
+The encrypted token as a byte array.
+
+### APDU
+
+[Technical APDU Details](apdu/get-pin-token.md)
+___
+<a name="pin-uv-auth-using-pin"></a>
+## Get PIN/UV Auth token using PIN
+
+Get A PIN/UV Auth token, to be used in later operations such as Make Credential.
+
+There are actually three versions of "Get PIN Token":
+
+* getPinToken
+* getPinUvAuthTokenUsingPinWithPermissions
+* getPinUvAuthTokenUsingUvWithPermissions
+
+The SDK has three different command classes to call each of the three operations:
+
+* [GetPinTokenCommand](#get-pin-token)
+* GetPinUvAuthTokenUsingPinCommand
+* [GetPinUvAuthTokenUsingUvCommand](#pin-uv-auth-using-uv)
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[GetPinUvAuthTokenUsingPinCommand](xref:Yubico.YubiKey.Fido2.Commands.GetPinUvAuthTokenUsingPinCommand)
+
+[GetPinUvAuthTokenResponse](xref:Yubico.YubiKey.Fido2.Commands.GetPinUvAuthTokenResponse)
+
+### Input
+
+* [The UV/PIN Auth Protocol](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase)
+* [The PIN](fido2-pin.md)
+* A bit field listing the [permissions](xref:Yubico.YubiKey.Fido2.Commands.PinUvAuthTokenPermissions)
+* An optional relying party ID (`rpId`)
+
+### Output
+
+The encrypted token as a byte array.
+
+### APDU
+
+[Technical APDU Details](apdu/get-auth-token-using-pin.md)
+___
+<a name="pin-uv-auth-using-uv"></a>
+## Get PIN/UV Auth token using user verification (UV)
+
+Get A PIN/UV Auth token, to be used in later operations such as Make Credential.
+
+There are actually three versions of "Get PIN Token":
+
+* getPinToken
+* getPinUvAuthTokenUsingPinWithPermissions
+* getPinUvAuthTokenUsingUvWithPermissions
+
+The SDK has three different command classes to call each of the three operations:
+
+* [GetPinTokenCommand](#get-pin-token)
+* [GetPinUvAuthTokenUsingPinCommand](#pin-uv-auth-using-pin)
+* GetPinUvAuthTokenUsingUvCommand
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[GetPinUvAuthTokenUsingUvCommand](xref:Yubico.YubiKey.Fido2.Commands.GetPinUvAuthTokenUsingUvCommand)
+
+[GetPinUvAuthTokenResponse](xref:Yubico.YubiKey.Fido2.Commands.GetPinUvAuthTokenResponse)
+
+### Input
+
+* [The UV/PIN Auth Protocol](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase)
+* A bit field listing the [permissions](xref:Yubico.YubiKey.Fido2.Commands.PinUvAuthTokenPermissions)
+* An optional relying party ID (`rpId`)
+
+### Output
+
+The encrypted token as a byte array.
+
+### APDU
+
+[Technical APDU Details](apdu/get-auth-token-using-uv.md)
 ___

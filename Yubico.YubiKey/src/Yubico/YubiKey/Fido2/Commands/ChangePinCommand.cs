@@ -89,8 +89,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// failure.
         /// </para>
         /// <para>
-        /// This class will copy the PINs (not just references). That means you
-        /// can overwrite the PINs in your byte array after calling the
+        /// This class will encrypt the PINs and will not copy references. That
+        /// means you can overwrite the PINs in your byte arrays after calling the
         /// constructor.
         /// </para>
         /// <para>

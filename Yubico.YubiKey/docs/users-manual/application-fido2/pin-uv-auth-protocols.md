@@ -45,9 +45,9 @@ that was holding the authentication token when your application has finished usi
 
 ## The PIN/UV protocol interface
 
-### Pin protocol 1
+### Pin protocol one
 
-### Pin protocol 2
+### Pin protocol two
 
 ## PIN operations
 

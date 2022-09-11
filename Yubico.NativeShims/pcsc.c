@@ -190,7 +190,7 @@ Native_SCardTransmit(
     uint32_t* pcbRecvLength
 )
 {
-    DWORD recvLength;
+    DWORD recvLength = *pcbRecvLength;
     int32_t status = SCardTransmit(
         hCard,
         pioSendPci,

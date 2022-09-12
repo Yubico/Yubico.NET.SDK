@@ -18,6 +18,21 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.4.x Releases
 
+### 1.4.1
+
+Release date: September 12th, 2022
+
+Bug fixes:
+
+- TOTP calculations in the OATH application were incorrect. The OATH application was mistakenly using a random
+  challenge instead of the time for calculation of TOTP credentials. This has been resolved.
+- The device listener was attempting to modify a collection that it was also iterating over in a loop. This is
+  not allowed by .NET. The list to iterate over is now a clone of the original list.
+- MacOS does not always return properties of HID devices (including Vendor and Product IDs). This can cause
+  the enumeration code path to fail on certain MacOS based devices, including Apple Silicon devices. The SDK now
+  expects all HID properties to be optional and will skip over devices that don't have the minimum set required.
+
+
 ### 1.4.0
 
 Release date: June 30th, 2022

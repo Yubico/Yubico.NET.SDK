@@ -80,7 +80,8 @@
         href: application-otp/challenge-response.md
       - name: NDEF
         href: application-otp/ndef.md
-  - name: How-to Guides
+  - name: How-to guides
+    href: application-otp/how-tos-overview.md
     items:
     - name: How to program a slot with a Yubico OTP credential
       href: application-otp/how-to-program-a-yubico-otp-credential.md

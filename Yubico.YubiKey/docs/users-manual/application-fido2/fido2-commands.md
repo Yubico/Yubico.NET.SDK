@@ -79,7 +79,7 @@ None.
 
 ### Output
 
-[Fido2DeviceInfo](xref:Yubico.YubiKey.Fido2.Fido2DeviceInfo)
+[AuthenticatorInfo](xref:Yubico.YubiKey.Fido2.AuthenticatorInfo)
 
 Also see the FIDO2 CTAP standard (CTAP 2.1), section 6.4 for a list of possible elements
 returned.

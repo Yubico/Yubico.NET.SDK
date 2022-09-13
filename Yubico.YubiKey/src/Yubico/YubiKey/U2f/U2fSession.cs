@@ -145,7 +145,7 @@ namespace Yubico.YubiKey.U2f
         /// </para>
         /// <para>
         /// The SDK will call the <c>KeyCollector</c> with a <c>Request</c> of <c>Release</c> when the process
-        /// completes. In this case, the <c>KeyCollector</c> MUST NOT thow an exception. The <c>Release</c> is called
+        /// completes. In this case, the <c>KeyCollector</c> MUST NOT throw an exception. The <c>Release</c> is called
         /// from inside a <c>finally</c> block, and it is best practice not to throw exceptions in this context.
         /// </para>
         /// </remarks>

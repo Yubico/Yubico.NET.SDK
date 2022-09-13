@@ -280,5 +280,11 @@ namespace Yubico.YubiKey
         /// current PIN.
         /// </summary>
         VerifyU2fPin = 12,
+
+        /// <summary>
+        /// Indicates that the SDK is setting the FIDO2 PIN. The YubiKey is
+        /// not set with a FIDO2 PIN yet, so only collect a new PIN.
+        /// </summary>
+        SetFido2Pin = 13,
     }
 }

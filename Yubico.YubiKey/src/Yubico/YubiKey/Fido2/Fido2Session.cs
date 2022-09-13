@@ -19,7 +19,7 @@ using Yubico.YubiKey.Fido2.Commands;
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
-    /// Represents an active session to the FIDO2 application on the YubiKey.
+    /// Represents an active session with the FIDO2 application on the YubiKey.
     /// </summary>
     /// <remarks>
     /// <para>
@@ -35,7 +35,8 @@ namespace Yubico.YubiKey.Fido2
     ///       IEnumerable&lt;IYubiKeyDevice&gt; yubiKeyList = YubiKey.FindAll();
     ///       foreach (IYubiKeyDevice current in yubiKeyList)
     ///       {
-    ///           /* determine which YubiKey to use */
+    ///           /* Determine which YubiKey to use */
+    ///
     ///           if (selected)
     ///           {
     ///               return current;
@@ -58,7 +59,7 @@ namespace Yubico.YubiKey.Fido2
     /// </para>
     /// <para>
     /// If this class is used as part of a <c>using</c> expression or statement, when the session goes out of scope, the
-    /// <c>Dispose</c> method will be called to dispose the active FIDO2 session. This will clear any application state,
+    /// <c>Dispose</c> method will be called to dispose of the active FIDO2 session. This will clear any application state,
     /// and ultimately release the connection to the YubiKey.
     /// </para>
     /// </remarks>
@@ -68,19 +69,44 @@ namespace Yubico.YubiKey.Fido2
         private bool _disposed;
 
         /// <summary>
-        /// The object that represents the connection to the YubiKey. Most applications can ignore this, but if can be
+        /// The object that represents the connection to the YubiKey. Most applications can ignore this, but it can be
         /// used to call command classes and send APDUs directly to the YubiKey during advanced scenarios.
         /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Most common FIDO2 operations can be done using the various methods contained on the <see cref="Fido2Session"/>
+        /// class. There are some cases where you will need to issue a very specific command that is otherwise not
+        /// available to you using the session's methods.
+        /// </para>
+        /// <para>
+        /// This property gives you direct access to the existing connection to the YubiKey using the
+        /// <see cref="IYubiKeyConnection"/> interface. To send your own commands, call the
+        /// <see cref="IYubiKeyConnection.SendCommand{TResponse}"/> method like in the following example:
+        /// <example lang="C#">
+        /// var yubiKey = FindYubiKey();
+        ///
+        /// using (var fido2 = new Fido2Session(yubiKey))
+        /// {
+        ///     var command = new ClientPinCommand(){ /* Set properties to your needs */ };
+        ///
+        ///     // Sends a command to the FIDO2 application
+        ///     var response = fido2.Connection.SendCommand(command);
+        ///
+        ///     /* Read and handle the response */
+        /// }
+        /// </example>
+        /// </para>
+        /// </remarks>
         public IYubiKeyConnection Connection { get; }
 
         /// <summary>
         /// A callback that this class will call when it needs the YubiKey
-        /// touched or a PIN to be verified.
+        /// touched or a PIN verified.
         /// </summary>
         /// <remarks>
         /// <para>
-        /// The callback will need to read the <see cref="KeyEntryData"/> parameter which contains the information
-        /// needed to determine what to collect, and methods to submit what has been collected. The callback shall
+        /// The callback will need to read the <see cref="KeyEntryData"/> parameter, which contains the information
+        /// needed to determine what to collect and methods to submit what has been collected. The callback shall
         /// return <c>true</c> for success or <c>false</c> for "cancel". A cancellation will usually happen when the
         /// user has clicked the "Cancel" button when this has been implemented in UI. That is often the case when the
         /// user has entered the wrong value a number of times, and they would like to stop trying before they exhaust
@@ -89,14 +115,13 @@ namespace Yubico.YubiKey.Fido2
         /// <para>
         /// With a FIDO2 Session, there are three situations where the SDK will call
         /// a <c>KeyCollector</c>: PIN, non-biometric touch, and biometric touch.
-        /// Biometric touch is only available on YubiKeys that support this, such as
-        /// the YubiKey Bio Series.
+        /// Biometric touch is only available on YubiKey Bio Series keys.
         /// </para>
         /// <para>
         /// In addition, it is possible to set the PIN without using the <c>KeyCollector</c>, see
         /// TryVerifyPin. With Touch, the <c>KeyCollector</c>
-        /// will call when the YubiKey is waiting for proof of user presence.
-        /// This is so that the calling app can alert the user that touch is
+        /// will call your application when the YubiKey is waiting for proof of user presence.
+        /// This is so that your application can alert the user that touch is
         /// required. There is nothing the <c>KeyCollector</c> needs to return to
         /// the SDK.
         /// </para>

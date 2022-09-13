@@ -18,6 +18,50 @@ using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2
 {
+    /// <summary>
+    /// Represents an active session to the FIDO2 application on the YubiKey.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// When you need to perform FIDO2 operations, instantiate this class to create a session, then call on methods
+    /// within the class.
+    /// </para>
+    /// <para>
+    /// Generally, you will choose the YubiKey to use by building an instance of <see cref="IYubiKeyDevice" />. This
+    /// object will represent the actual YubiKey hardware.
+    /// <code language="csharp">
+    ///   IYubiKeyDevice SelectYubiKey()
+    ///   {
+    ///       IEnumerable&lt;IYubiKeyDevice&gt; yubiKeyList = YubiKey.FindAll();
+    ///       foreach (IYubiKeyDevice current in yubiKeyList)
+    ///       {
+    ///           /* determine which YubiKey to use */
+    ///           if (selected)
+    ///           {
+    ///               return current;
+    ///           }
+    ///       }
+    ///   }
+    /// </code>
+    /// </para>
+    /// <para>
+    /// Once you have the YubiKey to use, you will build an instance of this Fido2Session class to represent the FIDO2
+    /// application on the hardware. Because this class implements <c>IDisposable</c>, use the <c>using</c> keyword.
+    /// For example,
+    /// <code language="csharp">
+    ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
+    ///     using (var fido2 = new Fido2Session(yubiKeyToUse))
+    ///     {
+    ///         /* Perform FIDO2 operations. */
+    ///     }
+    /// </code>
+    /// </para>
+    /// <para>
+    /// If this class is used as part of a <c>using</c> expression or statement, when the session goes out of scope, the
+    /// <c>Dispose</c> method will be called to dispose the active FIDO2 session. This will clear any application state,
+    /// and ultimately release the connection to the YubiKey.
+    /// </para>
+    /// </remarks>
     public sealed partial class Fido2Session : IDisposable
     {
         private readonly Logger _log = Log.GetLogger();
@@ -29,7 +73,7 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public IYubiKeyConnection Connection { get; }
 
-                /// <summary>
+        /// <summary>
         /// A callback that this class will call when it needs the YubiKey
         /// touched or a PIN to be verified.
         /// </summary>

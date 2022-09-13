@@ -562,7 +562,7 @@ namespace Yubico.YubiKey.Fido2
             return true;
         }
 
-        private static byte[] GetSampleEncoded()
+        internal static byte[] GetSampleEncoded()
         {
 //                b4
 //                  01

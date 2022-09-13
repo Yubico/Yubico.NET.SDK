@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Fido2
     /// <summary>
     /// Device information returned by the FIDO2 GetDeviceInfo command.
     /// </summary>
-    public class Fido2DeviceInfo
+    public class AuthenticatorInfo
     {
         private const int KeyVersions = 1;
         private const int KeyExtensions = 2;
@@ -243,7 +243,7 @@ namespace Yubico.YubiKey.Fido2
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
-        private Fido2DeviceInfo()
+        private AuthenticatorInfo()
         {
             throw new NotImplementedException();
         }
@@ -264,7 +264,7 @@ namespace Yubico.YubiKey.Fido2
         /// The <c>cborEncoding</c> is not a valid CBOR encoding, or it is not a
         /// correct encoding for FIDO2 device info.
         /// </exception>
-        public Fido2DeviceInfo(ReadOnlyMemory<byte> cborEncoding)
+        public AuthenticatorInfo(ReadOnlyMemory<byte> cborEncoding)
         {
             Versions = new ReadOnlyCollection<string>(_versions);
             Aaguid = new ReadOnlyMemory<byte>(_aaguid);
@@ -387,7 +387,7 @@ namespace Yubico.YubiKey.Fido2
 
             // There are two elements that must be present. If not, this is a
             // Malformed response.
-            if ((Versions.Count == 0) || (Aaguid.Length != Fido2DeviceInfo.AaguidLength))
+            if ((Versions.Count == 0) || (Aaguid.Length != AuthenticatorInfo.AaguidLength))
             {
                 throw new MalformedYubiKeyResponseException(
                     string.Format(

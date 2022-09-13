@@ -30,7 +30,7 @@ namespace Yubico.YubiKey.Fido2
                 0xa2, 0x01, 0x81, 0x66, 0x55, 0x32, 0x46, 0x5f, 0x56, 0x32, 0x16, 0x05
             };
 
-            _ = Assert.Throws<ArgumentException>(() => new Fido2DeviceInfo(encodedData));
+            _ = Assert.Throws<ArgumentException>(() => new AuthenticatorInfo(encodedData));
         }
 
         [Fact]
@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.Fido2
                 0x4f, 0x5f, 0x32, 0x5f, 0x30, 0x11, 0x01, 0x14, 0x02
             };
 
-            _ = Assert.Throws<ArgumentException>(() => new Fido2DeviceInfo(encodedData));
+            _ = Assert.Throws<ArgumentException>(() => new AuthenticatorInfo(encodedData));
         }
 
         [Fact]
@@ -55,7 +55,7 @@ namespace Yubico.YubiKey.Fido2
 
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             bool isValid = CompareStringLists(correctStrings, fido2Info.Versions);
 
             Assert.True(isValid);
@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.Fido2
 
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.NotNull(fido2Info.Extensions);
             if (fido2Info.Extensions is null)
             {
@@ -87,7 +87,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.Extensions);
         }
 
@@ -100,7 +100,7 @@ namespace Yubico.YubiKey.Fido2
 
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             bool isValid = MemoryExtensions.SequenceEqual(correctValue, fido2Info.Aaguid.Span);
 
             Assert.True(isValid);
@@ -118,7 +118,7 @@ namespace Yubico.YubiKey.Fido2
 
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.NotNull(fido2Info.Options);
 
             if (fido2Info.Options is null)
@@ -152,7 +152,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.Options);
         }
 
@@ -161,7 +161,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Equal(1200, fido2Info.MaximumMessageSize);
         }
 
@@ -170,7 +170,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.MaximumMessageSize);
         }
 
@@ -185,7 +185,7 @@ namespace Yubico.YubiKey.Fido2
 
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.NotNull(fido2Info.PinUvAuthProtocols);
             if (fido2Info.PinUvAuthProtocols is null)
             {
@@ -212,7 +212,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.PinUvAuthProtocols);
         }
 
@@ -221,7 +221,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Equal(8, fido2Info.MaximumCredentialCountInList);
         }
 
@@ -230,7 +230,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.MaximumCredentialCountInList);
         }
 
@@ -239,7 +239,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Equal(128, fido2Info.MaximumCredentialIdLength);
         }
 
@@ -248,7 +248,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.MaximumCredentialIdLength);
         }
 
@@ -262,7 +262,7 @@ namespace Yubico.YubiKey.Fido2
 
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.NotNull(fido2Info.Transports);
             if (fido2Info.Transports is null)
             {
@@ -278,7 +278,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.Transports);
         }
 
@@ -296,7 +296,7 @@ namespace Yubico.YubiKey.Fido2
 
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.NotNull(fido2Info.Algorithms);
             if (fido2Info.Algorithms is null)
             {
@@ -329,7 +329,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.Algorithms);
         }
 
@@ -338,7 +338,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Equal(2000, fido2Info.MaximumSerializedLargeBlobArray);
         }
 
@@ -347,7 +347,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.MaximumSerializedLargeBlobArray);
         }
 
@@ -356,7 +356,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.True(fido2Info.ForcePinChange);
         }
 
@@ -365,7 +365,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.ForcePinChange);
         }
 
@@ -374,7 +374,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Equal(4, fido2Info.MinimumPinLength);
         }
 
@@ -383,7 +383,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.MinimumPinLength);
         }
 
@@ -392,7 +392,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Equal(0x00050403, fido2Info.FirmwareVersion);
         }
 
@@ -401,7 +401,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.FirmwareVersion);
         }
 
@@ -410,7 +410,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Equal(36, fido2Info.MaximumCredentialBlobLength);
         }
 
@@ -419,7 +419,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.MaximumCredentialBlobLength);
         }
 
@@ -428,7 +428,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Equal(8, fido2Info.MaximumRpidsForSetMinPinLength);
         }
 
@@ -437,7 +437,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.MaximumRpidsForSetMinPinLength);
         }
 
@@ -446,7 +446,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Equal(1, fido2Info.PreferredPlatformUvAttempts);
         }
 
@@ -455,7 +455,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.PreferredPlatformUvAttempts);
         }
 
@@ -464,7 +464,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Equal(2, fido2Info.UvModality);
         }
 
@@ -473,7 +473,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.UvModality);
         }
 
@@ -489,7 +489,7 @@ namespace Yubico.YubiKey.Fido2
 
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.NotNull(fido2Info.Certifications);
             if (fido2Info.Certifications is null)
             {
@@ -522,7 +522,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.Certifications);
         }
 
@@ -531,7 +531,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetSampleEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Equal(2, fido2Info.RemainingDiscoverableCredentials);
         }
 
@@ -540,7 +540,7 @@ namespace Yubico.YubiKey.Fido2
         {
             byte[] encodedData = GetMinimumEncoded();
 
-            var fido2Info = new Fido2DeviceInfo(encodedData);
+            var fido2Info = new AuthenticatorInfo(encodedData);
             Assert.Null(fido2Info.RemainingDiscoverableCredentials);
         }
 

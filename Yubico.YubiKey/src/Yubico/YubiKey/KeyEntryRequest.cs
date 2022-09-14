@@ -271,7 +271,7 @@ namespace Yubico.YubiKey
         /// <summary>
         /// Indicates that the SDK is requesting the current FIDO U2F PIN and a
         /// new PIN, in order to change the PIN from the current to the new.
-        /// Collect both both the current and a new PIN.
+        /// Collect both the current and a new PIN.
         /// </summary>
         ChangeU2fPin = 11,
 
@@ -286,5 +286,18 @@ namespace Yubico.YubiKey
         /// not set with a FIDO2 PIN yet, so only collect a new PIN.
         /// </summary>
         SetFido2Pin = 13,
+
+        /// <summary>
+        /// Indicates that the SDK is requesting the current FIDO2 PIN and a
+        /// new PIN, in order to change the PIN from the current to the new.
+        /// Collect both the current and new PINs.
+        /// </summary>
+        ChangeFido2Pin = 14,
+
+        /// <summary>
+        /// Indicates that the SDK is verifying the FIDO2 PIN. Collect the
+        /// current PIN.
+        /// </summary>
+        VerifyFido2Pin = 15,
     }
 }

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
@@ -22,13 +23,14 @@ namespace Yubico.YubiKey.Fido2
     public sealed partial class Fido2Session
     {
         private PinUvAuthProtocolBase? _selectedPinProtocol;
+        private Memory<byte>? _pinUvAuthToken;
 
         private const int PinMinimumByteLength = 4;
         private const int PinMaximumByteLength = 63;
 
         public void SetPin(PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
         {
-            if (TrySetPin())
+            if (TrySetPin(protocol))
             {
                 return;
             }
@@ -52,7 +54,7 @@ namespace Yubico.YubiKey.Fido2
                     return false; // User cancellation
                 }
 
-                if (TrySetPin(keyEntryData.GetCurrentValue()))
+                if (TrySetPin(keyEntryData.GetCurrentValue(), protocol))
                 {
                     return true;
                 }
@@ -71,18 +73,8 @@ namespace Yubico.YubiKey.Fido2
         public bool TrySetPin(ReadOnlyMemory<byte> newPin, PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
         {
             AuthenticatorInfo info = GetAuthenticatorInfo();
-            int minPinLengthInCodePoints = info.MinimumPinLength ?? PinMinimumByteLength;
 
-            // Assumption - newPIN is already normalized
-            if (newPin.Length < minPinLengthInCodePoints)
-            {
-                throw new ArgumentException("PIN too short.");
-            }
-
-            if (newPin.Length > PinMaximumByteLength)
-            {
-                throw new ArgumentException("PIN too long.");
-            }
+            VerifyPinLengthRequirements(info, newPin);
 
             ObtainSharedSecret(info, protocol);
 
@@ -102,34 +94,170 @@ namespace Yubico.YubiKey.Fido2
         }
 
 
-        public void ChangePin()
+        public void ChangePin(PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
         {
-            throw new NotImplementedException();
+            if (TryChangePin(protocol))
+            {
+                return;
+            }
+
+            throw new OperationCanceledException("The user cancelled the PIN collection operation.");
         }
 
-        public bool TryChangePin()
+        public bool TryChangePin(PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
         {
-            throw new NotImplementedException();
+            Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
+
+            var keyEntryData = new KeyEntryData()
+            {
+                Request = KeyEntryRequest.ChangeFido2Pin
+            };
+
+            try
+            {
+                while (keyCollector(keyEntryData))
+                {
+                    if (TryChangePin(keyEntryData.GetCurrentValue(), keyEntryData.GetNewValue(), protocol))
+                    {
+                        return true;
+                    }
+
+                    keyEntryData.IsRetry = true;
+                }
+            }
+            finally
+            {
+                keyEntryData.Clear();
+
+                keyEntryData.Request = KeyEntryRequest.Release;
+                _ = keyCollector(keyEntryData);
+            }
+
+            return false;
         }
 
-        public bool TryChangePin(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin)
+        public bool TryChangePin(
+            ReadOnlyMemory<byte> currentPin,
+            ReadOnlyMemory<byte> newPin,
+            PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
         {
+            AuthenticatorInfo info = GetAuthenticatorInfo();
 
+            VerifyPinLengthRequirements(info, newPin);
+
+            ObtainSharedSecret(info, protocol);
+
+            ChangePinResponse result = Connection.SendCommand(new ChangePinCommand(
+                GetCurrentPinProtocol(),
+                currentPin,
+                newPin));
+
+            if (result.Status == ResponseStatus.Success)
+            {
+                return true;
+            }
+
+            if (GetFido2Status(result) == Fido2Status.Ctap2ErrPinInvalid)
+            {
+                return false; // PIN is invalid
+            }
+
+            throw new Fido2Exception(result.StatusMessage);
         }
 
-        public void VerifyPin()
+        public void VerifyPin(PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
         {
-            throw new NotImplementedException();
+            if (TryVerifyPin(protocol))
+            {
+                return;
+            }
+
+            throw new OperationCanceledException("The user cancelled the PIN collection operation.");
         }
 
-        public bool TryVerifyPin()
+        public bool TryVerifyPin(PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
         {
-            throw new NotImplementedException();
+            Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
+
+            var keyEntryData = new KeyEntryData()
+            {
+                Request = KeyEntryRequest.VerifyFido2Pin
+            };
+
+            try
+            {
+                while (keyCollector(keyEntryData))
+                {
+                    if (TryVerifyPin(keyEntryData.GetCurrentValue(), protocol))
+                    {
+                        return true;
+                    }
+
+                    keyEntryData.IsRetry = true;
+                }
+            }
+            finally
+            {
+                keyEntryData.Clear();
+
+                keyEntryData.Request = KeyEntryRequest.Release;
+                _ = keyCollector(keyEntryData);
+            }
+
+            return false;
         }
 
-        public bool TryVerifyPin(ReadOnlyMemory<byte> currentPin)
+        public bool TryVerifyPin(ReadOnlyMemory<byte> currentPin, PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
         {
+            AuthenticatorInfo info = GetAuthenticatorInfo();
 
+            ObtainSharedSecret(info, protocol);
+
+            GetPinUvAuthTokenResponse response = Connection.SendCommand(
+                new GetPinTokenCommand(GetCurrentPinProtocol(), currentPin));
+
+            SetAuthToken(response.GetData());
+
+            if (response.Status == ResponseStatus.Success)
+            {
+                return true;
+            }
+
+            if (GetFido2Status(response) == Fido2Status.Ctap2ErrPinInvalid)
+            {
+                return false; // PIN is invalid
+            }
+
+            throw new Fido2Exception(response.StatusMessage);
+        }
+
+        private void SetAuthToken(Memory<byte>? token)
+        {
+            if (_pinUvAuthToken.HasValue)
+            {
+                CryptographicOperations.ZeroMemory(_pinUvAuthToken.Value.Span);
+            }
+
+            if (token.HasValue)
+            {
+                _pinUvAuthToken = token.Value;
+            }
+        }
+
+        private static void VerifyPinLengthRequirements(AuthenticatorInfo info, ReadOnlyMemory<byte> newPin)
+        {
+            int minPinLengthInCodePoints = info.MinimumPinLength ?? PinMinimumByteLength;
+
+            // Assumption - newPIN is already normalized
+            if (newPin.Length < minPinLengthInCodePoints)
+            {
+                throw new ArgumentException("PIN too short.");
+            }
+
+            if (newPin.Length > PinMaximumByteLength)
+            {
+                throw new ArgumentException("PIN too long.");
+            }
         }
 
         private static PinUvAuthProtocolBase GetPreferredPinProtocol(AuthenticatorInfo info, PinUvAuthProtocol protocol)

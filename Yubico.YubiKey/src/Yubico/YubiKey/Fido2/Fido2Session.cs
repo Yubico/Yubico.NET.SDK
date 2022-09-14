@@ -105,54 +105,28 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <remarks>
         /// <para>
-        /// The callback will need to read the <see cref="KeyEntryData"/> parameter, which contains the information
-        /// needed to determine what to collect and methods to submit what has been collected. The callback shall
-        /// return <c>true</c> for success or <c>false</c> for "cancel". A cancellation will usually happen when the
-        /// user has clicked the "Cancel" button when this has been implemented in UI. That is often the case when the
-        /// user has entered the wrong value a number of times, and they would like to stop trying before they exhaust
-        /// their remaining retries and the YubiKey becomes blocked.
-        /// </para>
-        /// <para>
         /// With a FIDO2 Session, there are three situations where the SDK will call
         /// a <c>KeyCollector</c>: PIN, non-biometric touch, and biometric touch.
         /// Biometric touch is only available on YubiKey Bio Series keys.
         /// </para>
         /// <para>
-        /// In addition, it is possible to set the PIN without using the <c>KeyCollector</c>, see
-        /// TryVerifyPin. With Touch, the <c>KeyCollector</c>
-        /// will call your application when the YubiKey is waiting for proof of user presence.
-        /// This is so that your application can alert the user that touch is
-        /// required. There is nothing the <c>KeyCollector</c> needs to return to
-        /// the SDK.
+        /// It is possible to perform PIN operations without using the <c>KeyCollector</c>. Look
+        /// for the overloads of TryVerifyPin, TryChangePin, and TrySetPin that take in PIN
+        /// parameters. With Touch, the <c>KeyCollector</c> will call your application
+        /// when the YubiKey is waiting for proof of user presence. This is so that your
+        /// application can alert the user that touch is required. There is nothing the
+        /// <c>KeyCollector</c> needs to return to the SDK.
         /// </para>
         /// <para>
         /// If you do not provide a <c>KeyCollector</c> and an operation requires
         /// touch, then the SDK will simply wait for the touch without informing
         /// the caller. However, it will be much more difficult to know when
-        /// touch is needed. Namely, the end user will have to know that touch is
+        /// touch is needed. The end user will have to know that touch is
         /// needed and look for the flashing YubiKey.
         /// </para>
         /// <para>
-        /// This means that it is possible to perform FIDO2 operations without a
-        /// <c>KeyCollector</c>. However, it is very useful, especially to be
-        /// able to know precisely when touch is needed.
-        /// </para>
-        /// <para>
-        /// When a touch is needed, the SDK will call the <c>KeyCollector</c>
-        /// with a <c>Request</c> of <c>KeyEntryRequest.TouchRequest</c>. During
-        /// registration or authentication, the YubiKey will not perform the
-        /// operation until the user has touched the sensor. When that touch is
-        /// needed, the SDK will call the <c>KeyCollector</c> which can then
-        /// present a message (likely launch a Window) requesting the user touch
-        /// the YubiKey's sensor. After the YubiKey completes the task, the SDK
-        /// will call the <c>KeyCollector</c> with <c>KeyEntryRequest.Release</c>
-        /// and the app can know it is time to remove the message requesting the
-        /// touch.
-        /// </para>
-        /// <para>
-        /// The SDK will call the <c>KeyCollector</c> with a <c>Request</c> of <c>Release</c> when the process
-        /// completes. In this case, the <c>KeyCollector</c> MUST NOT throw an exception. The <c>Release</c> is called
-        /// from inside a <c>finally</c> block, and it is best practice not to throw exceptions in this context.
+        /// You can read more about the KeyCollector and its implementation in its
+        /// <xref href="UsersManualKeyCollector">user's manual entry</xref>.
         /// </para>
         /// </remarks>
         public Func<KeyEntryData, bool>? KeyCollector { get; set; }

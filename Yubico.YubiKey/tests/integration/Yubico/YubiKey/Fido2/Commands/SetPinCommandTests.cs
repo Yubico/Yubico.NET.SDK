@@ -251,7 +251,7 @@ namespace Yubico.YubiKey.Fido2
             GetInfoResponse rsp = connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            Fido2DeviceInfo deviceInfo = rsp.GetData();
+            AuthenticatorInfo deviceInfo = rsp.GetData();
             if (deviceInfo.Options is null)
             {
                 return false;

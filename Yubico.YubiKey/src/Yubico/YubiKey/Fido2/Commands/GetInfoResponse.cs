@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// The response to the <see cref="GetInfoCommand"/> command, containing
     /// information about the device and FIDO2 application.
     /// </summary>
-    public sealed class GetInfoResponse : Fido2Response, IYubiKeyResponseWithData<Fido2DeviceInfo>
+    public sealed class GetInfoResponse : Fido2Response, IYubiKeyResponseWithData<AuthenticatorInfo>
     {
         /// <summary>
         /// Constructs a <c>GetInfoResponse</c> instance based on a ResponseApdu
@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// Gets the <see cref="Fido2DeviceInfo"/> class that contains details
+        /// Gets the <see cref="AuthenticatorInfo"/> class that contains details
         /// about the authenticator, such as a list of all supported protocol
         /// versions, supported extensions, AAGUID of the device, and its
         /// capabilities.
@@ -48,14 +48,14 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <returns>
         /// The data in the response APDU, presented as a <c>Fido2DeviceInfo</c> class.
         /// </returns>
-        public Fido2DeviceInfo GetData()
+        public AuthenticatorInfo GetData()
         {
             if (Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(StatusMessage);
             }
 
-            return new Fido2DeviceInfo(ResponseApdu.Data);
+            return new AuthenticatorInfo(ResponseApdu.Data);
         }
     }
 }

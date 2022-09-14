@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <see cref="GetPinUvAuthTokenUsingPinCommand"/>, and
     /// <see cref="GetPinUvAuthTokenUsingUvCommand"/>, command classes.
     /// </summary>
-    public class GetPinUvAuthTokenResponse : IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
+    public class GetPinUvAuthTokenResponse : IYubiKeyResponseWithData<Memory<byte>>
     {
         private readonly ClientPinResponse _response;
 
@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// The token returned is encrypted using the shared secret from the
         /// protocol object used in the command.
         /// </remarks>
-        public ReadOnlyMemory<byte> GetData()
+        public Memory<byte> GetData()
         {
             ClientPinData data = _response.GetData();
 
@@ -63,7 +63,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         ExceptionMessages.Ctap2MissingRequiredField));
             }
 
-            return (ReadOnlyMemory<byte>)data.PinUvAuthToken;
+            return data.PinUvAuthToken.Value;
         }
 
         /// <inheritdoc />

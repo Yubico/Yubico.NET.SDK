@@ -45,9 +45,9 @@ These steps are covered in depth in the [SDK programming guide](xref:UsersManual
 > [!NOTE]
 > Many of the how-to guides create the OtpSession instance with `using (OtpSession otp = new OtpSession(yKey))`. This assumes that `yKey` is an IYubiKeyDevice object that represents the YubiKey.
 
-### To run any of the OTP operation methods, you must call Execute()
+### Fluent builder pattern
 
-You may notice in the how-to guide examples that the [Execute() method](xref:Yubico.YubiKey.Otp.Operations.OperationBase%601.Execute) is called after the other OTP operations methods. For example:
+The API implements a [fluent builder design pattern](https://medium.com/@martinstm/fluent-builder-pattern-c-4ac39fafcb0b). This design allows you to easily and concisely chain class methods together. For example:
 
 ```C#
 using (OtpSession otp = new OtpSession(yKey))
@@ -62,4 +62,10 @@ using (OtpSession otp = new OtpSession(yKey))
 
 The code above shows how to configure the short-press slot of a YubiKey to generate Yubico OTPs (and sets the public ID to the key's serial number, the private ID to `privateId`, and the AES secret key to `aesKey`).
 
-In order to run ConfigureYubicoOtp(), UseSerialNumberAsPublicId(), UsePrivateId(), and UseKey() and apply their respective changes, you **must call Execute()**. This applies to **ALL** Yubico.YubiKey.Otp.Operations class methods. If methods are chained together as in the example, you must call Execute() at the end of the chain.
+### The Execute() method
+
+You may notice in the how-to guide examples that the [Execute() method](xref:Yubico.YubiKey.Otp.Operations.OperationBase%601.Execute) is called after the other OTP operations methods.
+
+**In order to apply changes to the YubiKey from any Yubico.YubiKey.Otp.Operations class method, you must call Execute().**
+
+So for the previous example, this means that the Yubico OTP configuration will not be applied to the short-press slot of the YubiKey until Execute() is called.

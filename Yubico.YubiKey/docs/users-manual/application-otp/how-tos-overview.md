@@ -45,9 +45,9 @@ These steps are covered in depth in the [SDK programming guide](xref:UsersManual
 > [!NOTE]
 > Many of the how-to guides create the OtpSession instance with `using (OtpSession otp = new OtpSession(yKey))`. This assumes that `yKey` is an IYubiKeyDevice object that represents the YubiKey.
 
-### Fluent builder pattern
+### Fluent interface
 
-The API implements a [fluent builder design pattern](https://medium.com/@martinstm/fluent-builder-pattern-c-4ac39fafcb0b). This design allows you to easily and concisely chain class methods together. For example:
+The API implements a [fluent interface](https://en.wikipedia.org/wiki/Fluent_interface). This design allows you to easily and concisely chain class methods together. For example:
 
 ```C#
 using (OtpSession otp = new OtpSession(yKey))

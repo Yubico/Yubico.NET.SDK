@@ -196,6 +196,7 @@ namespace Yubico.YubiKey.Fido2
             }
 
             Connection.Dispose();
+            _selectedPinProtocol?.Dispose();
             KeyCollector = null;
             _disposed = true;
         }

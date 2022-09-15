@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKey.Fido2
 {
-    internal enum CtapError
+    public enum CtapStatus
     {
         // CTAP1 / Shared codes
         Ok = 0x00,

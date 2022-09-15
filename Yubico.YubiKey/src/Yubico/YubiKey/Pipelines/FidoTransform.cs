@@ -304,7 +304,7 @@ namespace Yubico.YubiKey.Pipelines
         {
             if (responseData.Length == 1)
             {
-                return new ResponseApdu(Array.Empty<byte>(), GetSwForCtapError((CtapError)responseData[0]));
+                return new ResponseApdu(Array.Empty<byte>(), GetSwForCtapError((CtapStatus)responseData[0]));
             }
 
             if (responseData[0] != 0)
@@ -316,14 +316,14 @@ namespace Yubico.YubiKey.Pipelines
             return new ResponseApdu(responseData[1..].ToArray(), SWConstants.Success);
         }
 
-        private static short GetSwForCtapError(CtapError ctapError) =>
-            ctapError switch
+        private static short GetSwForCtapError(CtapStatus ctapStatus) =>
+            ctapStatus switch
             {
-                Fido2.CtapError.Ok => SWConstants.Success,
-                Fido2.CtapError.InvalidCommand => SWConstants.CommandNotAllowed,
-                Fido2.CtapError.InvalidParameter => SWConstants.InvalidParameter,
-                Fido2.CtapError.InvalidLength => SWConstants.WrongLength,
-                _ => unchecked((short)((SW1Constants.NoPreciseDiagnosis << 8) | (byte)ctapError))
+                Fido2.CtapStatus.Ok => SWConstants.Success,
+                Fido2.CtapStatus.InvalidCommand => SWConstants.CommandNotAllowed,
+                Fido2.CtapStatus.InvalidParameter => SWConstants.InvalidParameter,
+                Fido2.CtapStatus.InvalidLength => SWConstants.WrongLength,
+                _ => unchecked((short)((SW1Constants.NoPreciseDiagnosis << 8) | (byte)ctapStatus))
             };
     }
 }

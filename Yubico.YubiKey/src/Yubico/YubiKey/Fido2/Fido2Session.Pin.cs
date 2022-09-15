@@ -85,7 +85,9 @@ namespace Yubico.YubiKey.Fido2
                 return true;
             }
 
-            if (GetFido2Status(result) == Fido2Status.Ctap2ErrPinAuthInvalid)
+            // Spec says "PinAuthInvalid" for PIN already set. YubiKey says "NotAllowed".
+            if (GetCtapError(result) == CtapStatus.PinAuthInvalid ||
+                GetCtapError(result) == CtapStatus.NotAllowed)
             {
                 return false; // PIN is already set.
             }
@@ -157,7 +159,7 @@ namespace Yubico.YubiKey.Fido2
                 return true;
             }
 
-            if (GetFido2Status(result) == Fido2Status.Ctap2ErrPinInvalid)
+            if (GetCtapError(result) == CtapStatus.PinInvalid)
             {
                 return false; // PIN is invalid
             }
@@ -223,7 +225,7 @@ namespace Yubico.YubiKey.Fido2
                 return true;
             }
 
-            if (GetFido2Status(response) == Fido2Status.Ctap2ErrPinInvalid)
+            if (GetCtapError(response) == CtapStatus.PinInvalid)
             {
                 return false; // PIN is invalid
             }

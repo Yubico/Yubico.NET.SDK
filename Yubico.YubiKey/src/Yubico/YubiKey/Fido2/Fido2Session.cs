@@ -185,7 +185,7 @@ namespace Yubico.YubiKey.Fido2
             return info.GetData();
         }
 
-        private static Fido2Status GetFido2Status(IYubiKeyResponse r) => (Fido2Status)(r.StatusWord & 0xFF);
+        private static CtapStatus GetCtapError(IYubiKeyResponse r) => (CtapStatus)(r.StatusWord & 0xFF);
 
         /// <inheritdoc />
         public void Dispose()

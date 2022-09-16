@@ -341,6 +341,46 @@ namespace Yubico.YubiKey.Fido2
             throw new Fido2Exception(result.StatusMessage);
         }
 
+        /// <summary>
+        /// Verifies the PIN against the YubiKey using the <c>KeyCollector</c>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// A YubiKey is manufactured with no PIN set on the FIDO2 application. A PIN must be set before a user
+        /// can perform most FIDO2 operations. After a PIN has been set, it must be Verified against the YubiKey
+        /// before privileged operations can occur. This method will perform that verification.
+        /// </para>
+        /// <para>
+        /// The SDK will automatically verify the PIN when the YubiKey requests it, so in many circumstances, your
+        /// app many not need to call this method directly. It can be advantageous to preempt the verification -
+        /// for example, if it would provide a better user experience in your application to do so sooner. This
+        /// method is available for those sorts of scenarios.
+        /// </para>
+        /// <para>
+        /// This version of VerifyPin uses the <see cref="KeyCollector"/> delegate. You can read about key collectors
+        /// in much more detail in the <xref href="UsersManualKeyCollector">user's manual entry</xref>.
+        /// </para>
+        /// <para>
+        /// If the PIN was incorrectly entered, the SDK will automatically retry. The key collector will be called
+        /// again allowing for another attempt at entry. Each time the key collector is called, the <c>IsRetry</c>
+        /// member will be set to <c>true</c> and the <c>RetryCount</c> will be updated to reflect the number of
+        /// retries left before the YubiKey blocks further PIN attempts. To cancel pin collection operations, simply
+        /// return <c>false</c> in the handler for the key collector.
+        /// </para>
+        /// <para>
+        /// The PIN, while often comprised of ASCII values, can in fact contain most Unicode characters. The PIN
+        /// must be encoded as a byte array using a UTF-8 encoding in Normalized Form C. See the
+        /// <xref href="TheFido2Pin">user's manual entry</xref> on FIDO2 PINs for more information.
+        /// </para>
+        /// </remarks>
+        /// <param name="protocol">
+        /// The preferred PIN/UV authentication protocol to use. Leaving this parameter unspecified or passing in
+        /// `None` will have the same effect - it will use the YubiKey's preferred protocol.
+        /// </param>
+        /// <exception cref="OperationCanceledException">
+        /// The user cancelled PIN collection. This happens when the application returns <c>false</c>
+        /// in the <c>KeyCollector</c>.
+        /// </exception>
         public void VerifyPin(PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
         {
             if (TryVerifyPin(protocol))
@@ -351,6 +391,46 @@ namespace Yubico.YubiKey.Fido2
             throw new OperationCanceledException(ExceptionMessages.PinCollectionCancelled);
         }
 
+        /// <summary>
+        /// Tries to verify the PIN against the YubiKey using the <c>KeyCollector</c>.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// A YubiKey is manufactured with no PIN set on the FIDO2 application. A PIN must be set before a user
+        /// can perform most FIDO2 operations. After a PIN has been set, it must be Verified against the YubiKey
+        /// before privileged operations can occur. This method will perform that verification.
+        /// </para>
+        /// <para>
+        /// The SDK will automatically verify the PIN when the YubiKey requests it, so in many circumstances, your
+        /// app many not need to call this method directly. It can be advantageous to preempt the verification -
+        /// for example, if it would provide a better user experience in your application to do so sooner. This
+        /// method is available for those sorts of scenarios.
+        /// </para>
+        /// <para>
+        /// This version of TryVerifyPin uses the <see cref="KeyCollector"/> delegate. You can read about key collectors
+        /// in much more detail in the <xref href="UsersManualKeyCollector">user's manual entry</xref>.
+        /// </para>
+        /// <para>
+        /// If the PIN was incorrectly entered, the SDK will automatically retry. The key collector will be called
+        /// again allowing for another attempt at entry. Each time the key collector is called, the <c>IsRetry</c>
+        /// member will be set to <c>true</c> and the <c>RetryCount</c> will be updated to reflect the number of
+        /// retries left before the YubiKey blocks further PIN attempts. To cancel pin collection operations, simply
+        /// return <c>false</c> in the handler for the key collector.
+        /// </para>
+        /// <para>
+        /// The PIN, while often comprised of ASCII values, can in fact contain most Unicode characters. The PIN
+        /// must be encoded as a byte array using a UTF-8 encoding in Normalized Form C. See the
+        /// <xref href="TheFido2Pin">user's manual entry</xref> on FIDO2 PINs for more information.
+        /// </para>
+        /// </remarks>
+        /// <param name="protocol">
+        /// The preferred PIN/UV authentication protocol to use. Leaving this parameter unspecified or passing in
+        /// `None` will have the same effect - it will use the YubiKey's preferred protocol.
+        /// </param>
+        /// <returns>
+        /// <c>True</c> on success, <c>False</c> if the user cancelled PIN collection, and an exception for all
+        /// other kinds of failures.
+        /// </returns>
         public bool TryVerifyPin(PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
         {
             Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
@@ -383,6 +463,46 @@ namespace Yubico.YubiKey.Fido2
             return false;
         }
 
+        /// <summary>
+        /// Verifies the PIN against the YubiKey.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// A YubiKey is manufactured with no PIN set on the FIDO2 application. A PIN must be set before a user
+        /// can perform most FIDO2 operations. After a PIN has been set, it must be Verified against the YubiKey
+        /// before privileged operations can occur. This method will perform that verification.
+        /// </para>
+        /// <para>
+        /// The SDK will automatically verify the PIN when the YubiKey requests it, so in many circumstances, your
+        /// app many not need to call this method directly. It can be advantageous to preempt the verification -
+        /// for example, if it would provide a better user experience in your application to do so sooner. This
+        /// method is available for those sorts of scenarios.
+        /// </para>
+        /// <para>
+        /// This version of TryVerifyPin does not use the key collector. This method will only attempt to verify a
+        /// single PIN and will not automatically retry. In this case, the method will return <c>false</c> if the
+        /// PIN was incorrect. It will throw an exception in all other failure cases.
+        /// </para>
+        /// <para>
+        /// The PIN, while often comprised of ASCII values, can in fact contain most Unicode characters. The PIN
+        /// must be encoded as a byte array using a UTF-8 encoding in Normalized Form C. See the
+        /// <xref href="TheFido2Pin">user's manual entry</xref> on FIDO2 PINs for more information.
+        /// </para>
+        /// </remarks>
+        /// <param name="currentPin">
+        /// The FIDO2 PIN that you wish to verify.
+        /// </param>
+        /// <param name="protocol">
+        /// The preferred PIN/UV authentication protocol to use. Leaving this parameter unspecified or passing in
+        /// `None` will have the same effect - it will use the YubiKey's preferred protocol.
+        /// </param>
+        /// <returns>
+        /// <c>True</c> if the PIN successfully verified, <c>False</c> if the PIN was incorrect, and an exception for all
+        /// other kinds of failures.
+        /// </returns>
+        /// <exception cref="Fido2Exception">
+        /// The YubiKey returned an error indicating that the PIN verification request could not be completed.
+        /// </exception>
         public bool TryVerifyPin(ReadOnlyMemory<byte> currentPin, PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
         {
             AuthenticatorInfo info = GetAuthenticatorInfo();

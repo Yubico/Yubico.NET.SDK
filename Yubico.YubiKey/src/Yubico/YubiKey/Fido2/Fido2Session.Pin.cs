@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Globalization;
 using System.Security;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
@@ -71,7 +72,7 @@ namespace Yubico.YubiKey.Fido2
                 return;
             }
 
-            throw new OperationCanceledException("The user cancelled the PIN collection operation.");
+            throw new OperationCanceledException(ExceptionMessages.PinCollectionCancelled);
         }
 
         /// <summary>
@@ -123,7 +124,7 @@ namespace Yubico.YubiKey.Fido2
                     return true;
                 }
 
-                throw new SecurityException("PIN is already set.");
+                throw new SecurityException(ExceptionMessages.PinAlreadySet);
             }
             finally
             {
@@ -222,7 +223,7 @@ namespace Yubico.YubiKey.Fido2
                 return;
             }
 
-            throw new OperationCanceledException("The user cancelled the PIN collection operation.");
+            throw new OperationCanceledException(ExceptionMessages.PinCollectionCancelled);
         }
 
         /// <summary>
@@ -347,7 +348,7 @@ namespace Yubico.YubiKey.Fido2
                 return;
             }
 
-            throw new OperationCanceledException("The user cancelled the PIN collection operation.");
+            throw new OperationCanceledException(ExceptionMessages.PinCollectionCancelled);
         }
 
         public bool TryVerifyPin(PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
@@ -391,10 +392,9 @@ namespace Yubico.YubiKey.Fido2
             GetPinUvAuthTokenResponse response = Connection.SendCommand(
                 new GetPinTokenCommand(GetCurrentPinProtocol(), currentPin));
 
-            SetAuthToken(response.GetData());
-
             if (response.Status == ResponseStatus.Success)
             {
+                SetAuthToken(response.GetData());
                 return true;
             }
 
@@ -426,12 +426,24 @@ namespace Yubico.YubiKey.Fido2
             // Assumption - newPIN is already normalized
             if (newPin.Length < minPinLengthInCodePoints)
             {
-                throw new ArgumentException("PIN too short.");
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.PinTooShort,
+                        minPinLengthInCodePoints,
+                        "bytes",
+                        newPin.Length));
             }
 
             if (newPin.Length > PinMaximumByteLength)
             {
-                throw new ArgumentException("PIN too long.");
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.PinTooLong,
+                        PinMaximumByteLength,
+                        "bytes",
+                        newPin.Length));
             }
         }
 
@@ -448,12 +460,16 @@ namespace Yubico.YubiKey.Fido2
             {
                 PinUvAuthProtocol.ProtocolOne => new PinUvAuthProtocolOne(),
                 PinUvAuthProtocol.ProtocolTwo => new PinUvAuthProtocolTwo(),
-                _ => throw new NotSupportedException($"PIN Protocol {protocol} is not supported.")
+                _ => throw new NotSupportedException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.PinProtocolNotSupported,
+                        protocol))
             };
         }
 
         private PinUvAuthProtocolBase GetCurrentPinProtocol() =>
-            _selectedPinProtocol ?? throw new InvalidOperationException("No PIN protocol in use.");
+            _selectedPinProtocol ?? throw new InvalidOperationException(ExceptionMessages.NoActivePinProtocol);
 
         private CoseEcPublicKey GetPeerCoseKey()
         {

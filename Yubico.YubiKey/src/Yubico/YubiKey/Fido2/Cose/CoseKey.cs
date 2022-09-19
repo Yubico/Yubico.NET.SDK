@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         public static CoseKey Create(ReadOnlyMemory<byte> coseEncodedKey)
         {
             var cborReader = new CborReader(coseEncodedKey);
-            var map = new CborMap(cborReader);
+            var map = new CborMap<long>(cborReader);
 
             if (!map.Contains(TagAlgorithm))
             {

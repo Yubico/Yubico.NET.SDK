@@ -140,7 +140,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         public CoseEcPublicKey(ReadOnlyMemory<byte> encodedCoseKey)
         {
             var cborReader = new CborReader(encodedCoseKey);
-            var map = new CborMap(cborReader);
+            var map = new CborMap<long>(cborReader);
 
             Curve = (CoseEcCurve)map.ReadInt64(TagCurve);
             XCoordinate = map.ReadByteString(TagX);
@@ -232,7 +232,7 @@ namespace Yubico.YubiKey.Fido2.Cose
             // The standard specifies that the Algorithm is -25, ECDH with
             // HKDF256.
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            CborHelpers.BeginMap(cbor)
+            CborHelpers.BeginMap<long>(cbor)
                 .Entry(TagKeyType, (long)CoseKeyType.Ec2)
                 .Entry(TagAlgorithm, (long)CoseAlgorithmIdentifier.ECDHwHKDF256)
                 .Entry(TagCurve, (long)CoseEcCurve.P256)

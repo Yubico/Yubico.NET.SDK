@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Formats.Cbor;
+using System.Globalization;
 
 namespace Yubico.YubiKey.Fido2.Cbor
 {
@@ -22,21 +23,21 @@ namespace Yubico.YubiKey.Fido2.Cbor
     /// Represents a CBOR map as a random-access dictionary. This is used to read
     /// a map in a CBOR-encoded construction.
     /// </summary>
-    internal class CborMap
+    internal class CborMap<TKey>
     {
-        private readonly IDictionary<long, object?> _dict;
+        private readonly IDictionary<TKey, object?> _dict;
 
         /// <summary>
-        /// Creates a new instance of <see cref="CborMap"/> based on a dictionary.
+        /// Creates a new instance of <see cref="CborMap{TKey}"/> based on a dictionary.
         /// </summary>
         /// <param name="dict">An integer keyed dictionary of objects representing a CBOR map.</param>
-        public CborMap(IDictionary<long, object?> dict)
+        public CborMap(IDictionary<TKey, object?> dict)
         {
             _dict = dict;
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="CborMap"/> based on a CborReader.
+        /// Creates a new instance of <see cref="CborMap{TKey}"/> based on a CborReader.
         /// </summary>
         /// <param name="reader">
         /// A CborReader that is queued up at the start of a map.
@@ -57,12 +58,12 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// <summary>
         /// Checks to see whether a given key is present in the map, without throwing an exception.
         /// </summary>
-        public bool Contains(long key) => _dict.ContainsKey(key);
+        public bool Contains(TKey key) => _dict.ContainsKey(key);
 
         /// <summary>
         /// Read the value for the given key as a signed integer `long`.
         /// </summary>
-        public long ReadInt64(long key)
+        public long ReadInt64(TKey key)
         {
             object? value = _dict[key];
 
@@ -77,7 +78,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// <summary>
         /// Read the value for the given key as a byte array.
         /// </summary>
-        public ReadOnlyMemory<byte> ReadByteString(long key)
+        public ReadOnlyMemory<byte> ReadByteString(TKey key)
         {
             object? value = _dict[key];
 
@@ -92,7 +93,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// <summary>
         /// Read the value for the given key as a string.
         /// </summary>
-        public string ReadTextString(long key)
+        public string ReadTextString(TKey key)
         {
             object? value = _dict[key];
 
@@ -107,13 +108,13 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// <summary>
         /// Read the value for the given key as a nested map.
         /// </summary>
-        public CborMap ReadMap(long key)
+        public CborMap<TNestedKey> ReadMap<TNestedKey>(TKey key)
         {
             object? value = _dict[key];
 
-            if (value is IDictionary<long, object?> nestedDict)
+            if (value is IDictionary<TNestedKey, object?> nestedDict)
             {
-                return new CborMap(nestedDict);
+                return new CborMap<TNestedKey>(nestedDict);
             }
 
             throw new InvalidCastException();
@@ -122,7 +123,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// <summary>
         /// Read the value for the given key as an array of objects.
         /// </summary>
-        public object[] ReadArray(long key)
+        public object[] ReadArray(TKey key)
         {
             object? value = _dict[key];
 
@@ -137,7 +138,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// <summary>
         /// Read the value for the given key as a single-width floating point number.
         /// </summary>
-        public float ReadSingle(long key)
+        public float ReadSingle(TKey key)
         {
             object? value = _dict[key];
 
@@ -152,7 +153,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// <summary>
         /// Read the value for the given key as a double-width floating point number.
         /// </summary>
-        public double ReadDouble(long key)
+        public double ReadDouble(TKey key)
         {
             object? value = _dict[key];
 
@@ -167,7 +168,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// <summary>
         /// Read the given key as a "null" value - throw if there is a value.
         /// </summary>
-        public void ReadNull(long key)
+        public void ReadNull(TKey key)
         {
             object? value = _dict[key];
 
@@ -182,7 +183,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// <summary>
         /// Read the value for the given key as a boolean.
         /// </summary>
-        public bool ReadBoolean(long key)
+        public bool ReadBoolean(TKey key)
         {
             object? value = _dict[key];
 
@@ -194,14 +195,14 @@ namespace Yubico.YubiKey.Fido2.Cbor
             throw new InvalidCastException();
         }
 
-        private IDictionary<long, object?> ProcessMap(CborReader cbor)
+        private IDictionary<TKey, object?> ProcessMap(CborReader cbor)
         {
             if (cbor.PeekState() != CborReaderState.StartMap)
             {
                 throw new ArgumentException("Expected a CBOR map.");
             }
 
-            var dict = new Dictionary<long, object?>();
+            var dict = new Dictionary<TKey, object?>();
             int? numberElements = cbor.ReadStartMap();
 
             if (numberElements is null)
@@ -213,7 +214,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 // Technically the typecast from ulong -> long could truncate data, but in practice we do not expect
                 // the map keys to be larger than a byte.
-                long key = cbor.ReadInt64();
+                TKey key = ReadKey(cbor);
 
                 object? value = ProcessSingleElement(cbor);
 
@@ -223,6 +224,21 @@ namespace Yubico.YubiKey.Fido2.Cbor
             cbor.ReadEndMap();
 
             return dict;
+        }
+
+        private static TKey ReadKey(CborReader cbor)
+        {
+            if (typeof(TKey) == typeof(long))
+            {
+                return (TKey)Convert.ChangeType(cbor.ReadInt64(), typeof(TKey), CultureInfo.InvariantCulture);
+            }
+
+            if (typeof(TKey) == typeof(string))
+            {
+                return (TKey)Convert.ChangeType(cbor.ReadTextString(), typeof(TKey), CultureInfo.InvariantCulture);
+            }
+
+            throw new InvalidOperationException("Unsupported key type.");
         }
 
         private object? ProcessSingleElement(CborReader cbor) => cbor.PeekState() switch

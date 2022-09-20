@@ -169,6 +169,8 @@ namespace Yubico.YubiKey.Fido2
                 yubiKeyDevice.SerialNumber);
 
             Connection = yubiKeyDevice.Connect(YubiKeyApplication.Fido2);
+
+            AuthProtocol = GetPreferredPinProtocol();
         }
 
         /// <summary>
@@ -196,7 +198,7 @@ namespace Yubico.YubiKey.Fido2
             }
 
             Connection.Dispose();
-            _selectedPinProtocol?.Dispose();
+            AuthProtocol.Dispose();
             KeyCollector = null;
             _disposed = true;
         }

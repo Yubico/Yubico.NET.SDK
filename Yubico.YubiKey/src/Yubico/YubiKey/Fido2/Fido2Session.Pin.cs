@@ -15,7 +15,6 @@
 using System;
 using System.Globalization;
 using System.Security;
-using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
@@ -25,14 +24,25 @@ namespace Yubico.YubiKey.Fido2
     // This portion of the Fido2Session class contains code for PIN operations.
     public sealed partial class Fido2Session
     {
-        // The PIN protocol classes contain some state that will be useful
-        // for other session operations.
-        private PinUvAuthProtocolBase? _selectedPinProtocol;
+        /// <summary>
+        /// The PIN protocol to use for all operations on this session instance.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// By default, the SDK will ask the YubiKey for its preferred protocol and will instantiate the appropriate
+        /// protocol object. A user can also override the YubiKey's choice and provide their own protocol instance
+        /// by calling the <see cref="SetAuthProtocol"/> method on the session class.
+        /// </para>
+        /// <para>
+        /// This property's value will always point to the currently used auth protocol that is currently being
+        /// used by the session.
+        /// </para>
+        /// </remarks>
+        public PinUvAuthProtocolBase AuthProtocol { get; private set; }
 
         // Likewise, the auth token is our ticket to successfully authenticating
-        // other session operations. This field should be cleared during the
-        // disposal of the Fido2Session class.
-        private Memory<byte>? _pinUvAuthToken;
+        // other session operations.
+        private ReadOnlyMemory<byte>? _pinUvAuthToken;
 
         private const int PinMinimumByteLength = 4;
         private const int PinMaximumByteLength = 63;
@@ -50,14 +60,11 @@ namespace Yubico.YubiKey.Fido2
         /// credentials.
         /// </para>
         /// <para>
-        /// The PIN is binary data and must be at least 4 and no more than 63 bytes long. The encoding process for PINs
-        /// is described in detail in the <xref href="TheFido2Pin">user's manual</xref>.
+        /// Several considerations must be made when collecting the PIN. It must be encoded in UTF-8 with Normalization
+        /// Form C. It must be at least 4 Unicode code points in length, and not to exceed 64 bytes in encoded length.
+        /// Read more about PINs <xref href="TheFido2Pin">here</xref>.
         /// </para>
         /// </remarks>
-        /// <param name="protocol">
-        /// The preferred PIN/UV authentication protocol to use. Leaving this parameter unspecified or passing in
-        /// `None` will have the same effect - it will use the YubiKey's preferred protocol.
-        /// </param>
         /// <exception cref="SecurityException">
         /// The YubiKey already has a PIN set. This function cannot be used to change the PIN.
         /// </exception>
@@ -65,9 +72,9 @@ namespace Yubico.YubiKey.Fido2
         /// The user cancelled PIN collection. This happens when the application returns <c>false</c>
         /// in the <c>KeyCollector</c>.
         /// </exception>
-        public void SetPin(PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
+        public void SetPin()
         {
-            if (TrySetPin(protocol))
+            if (TrySetPin())
             {
                 return;
             }
@@ -77,7 +84,7 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// Tries to set the initial FIDO2 PIN using the <c>KeyCollector</c>. To change an existing PIN, use
-        /// the <see cref="TryChangePin(Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocol)"/> function.
+        /// the <see cref="TryChangePin()"/> function.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -88,14 +95,11 @@ namespace Yubico.YubiKey.Fido2
         /// credentials.
         /// </para>
         /// <para>
-        /// The PIN is binary data and must be at least 4 and no more than 63 bytes long. The encoding process for PINs
-        /// is described in detail in the <xref href="TheFido2Pin">user's manual</xref>.
+        /// Several considerations must be made when collecting the PIN. It must be encoded in UTF-8 with Normalization
+        /// Form C. It must be at least 4 Unicode code points in length, and not to exceed 64 bytes in encoded length.
+        /// Read more about PINs <xref href="TheFido2Pin">here</xref>.
         /// </para>
         /// </remarks>
-        /// <param name="protocol">
-        /// The preferred PIN/UV authentication protocol to use. Leaving this parameter unspecified or passing in
-        /// `None` will have the same effect - it will use the YubiKey's preferred protocol.
-        /// </param>
         /// <returns>
         /// <c>True</c> on success, <c>False</c> if the user cancelled PIN collection, and an exception for all
         /// other kinds of failures.
@@ -103,7 +107,7 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="SecurityException">
         /// The YubiKey already has a PIN set. This function cannot be used to change the PIN.
         /// </exception>
-        public bool TrySetPin(PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
+        public bool TrySetPin()
         {
             Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
 
@@ -119,7 +123,7 @@ namespace Yubico.YubiKey.Fido2
                     return false; // User cancellation
                 }
 
-                if (TrySetPin(keyEntryData.GetCurrentValue(), protocol))
+                if (TrySetPin(keyEntryData.GetCurrentValue()))
                 {
                     return true;
                 }
@@ -137,7 +141,7 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// Tries to set the initial FIDO2 PIN. To change an existing PIN, use the
-        /// <see cref="TryChangePin(Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocol)"/> function.
+        /// <see cref="TryChangePin()"/> function.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -147,18 +151,11 @@ namespace Yubico.YubiKey.Fido2
         /// without resetting the FIDO2 application. This operation will unset the PIN as well as clear all registered
         /// credentials.
         /// </para>
-        /// <para>
-        /// The PIN is binary data and must be at least 4 and no more than 63 bytes long. The encoding process for PINs
-        /// is described in detail in the <xref href="TheFido2Pin">user's manual</xref>.
-        /// </para>
         /// </remarks>
         /// <param name="newPin">
-        /// The PIN to program onto the YubiKey. It must be encoded in UTF-8 with Normalization Form C. It must also
-        /// be between 4 and 63 bytes long. Read more about PINs <xref href="TheFido2Pin">here</xref>.
-        /// </param>
-        /// <param name="protocol">
-        /// The preferred PIN/UV authentication protocol to use. Leaving this parameter unspecified or passing in
-        /// `None` will have the same effect - it will use the YubiKey's preferred protocol.
+        /// The PIN to program onto the YubiKey. It must be encoded in UTF-8 with Normalization Form C. It must be
+        /// at least 4 Unicode code points in length, and not to exceed 64 bytes in encoded length. Read more about
+        /// PINs <xref href="TheFido2Pin">here</xref>.
         /// </param>
         /// <returns>
         /// <c>True</c> on success, <c>False</c> if the YubiKey has a PIN already set, and an exception for all
@@ -167,15 +164,15 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="SecurityException">
         /// The YubiKey already has a PIN set. This function cannot be used to change the PIN.
         /// </exception>
-        public bool TrySetPin(ReadOnlyMemory<byte> newPin, PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
+        public bool TrySetPin(ReadOnlyMemory<byte> newPin)
         {
             AuthenticatorInfo info = GetAuthenticatorInfo();
 
             VerifyPinLengthRequirements(info, newPin);
 
-            ObtainSharedSecret(info, protocol);
+            ObtainSharedSecret();
 
-            SetPinResponse result = Connection.SendCommand(new SetPinCommand(GetCurrentPinProtocol(), newPin));
+            SetPinResponse result = Connection.SendCommand(new SetPinCommand(AuthProtocol, newPin));
 
             if (result.Status == ResponseStatus.Success)
             {
@@ -204,21 +201,18 @@ namespace Yubico.YubiKey.Fido2
         /// removed.
         /// </para>
         /// <para>
-        /// The PIN is binary data and must be at least 4 and no more than 63 bytes long. The encoding process for PINs
-        /// is described in detail in the <xref href="TheFido2Pin">user's manual</xref>.
+        /// Several considerations must be made when collecting the PIN. It must be encoded in UTF-8 with Normalization
+        /// Form C. It must be at least 4 Unicode code points in length, and not to exceed 64 bytes in encoded length.
+        /// Read more about PINs <xref href="TheFido2Pin">here</xref>.
         /// </para>
         /// </remarks>
-        /// <param name="protocol">
-        /// The preferred PIN/UV authentication protocol to use. Leaving this parameter unspecified or passing in
-        /// `None` will have the same effect - it will use the YubiKey's preferred protocol.
-        /// </param>
         /// <exception cref="OperationCanceledException">
         /// The user cancelled PIN collection. This happens when the application returns <c>false</c>
         /// in the <c>KeyCollector</c>.
         /// </exception>
-        public void ChangePin(PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
+        public void ChangePin()
         {
-            if (TryChangePin(protocol))
+            if (TryChangePin())
             {
                 return;
             }
@@ -238,19 +232,16 @@ namespace Yubico.YubiKey.Fido2
         /// removed.
         /// </para>
         /// <para>
-        /// The PIN is binary data and must be at least 4 and no more than 63 bytes long. The encoding process for PINs
-        /// is described in detail in the <xref href="TheFido2Pin">user's manual</xref>.
+        /// Several considerations must be made when collecting the PIN. It must be encoded in UTF-8 with Normalization
+        /// Form C. It must be at least 4 Unicode code points in length, and not to exceed 64 bytes in encoded length.
+        /// Read more about PINs <xref href="TheFido2Pin">here</xref>.
         /// </para>
         /// </remarks>
-        /// <param name="protocol">
-        /// The preferred PIN/UV authentication protocol to use. Leaving this parameter unspecified or passing in
-        /// `None` will have the same effect - it will use the YubiKey's preferred protocol.
-        /// </param>
         /// <returns>
         /// <c>True</c> on success, <c>False</c> if the user cancelled PIN collection, and an exception for all
         /// other kinds of failures.
         /// </returns>
-        public bool TryChangePin(PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
+        public bool TryChangePin()
         {
             Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
 
@@ -263,7 +254,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 while (keyCollector(keyEntryData))
                 {
-                    if (TryChangePin(keyEntryData.GetCurrentValue(), keyEntryData.GetNewValue(), protocol))
+                    if (TryChangePin(keyEntryData.GetCurrentValue(), keyEntryData.GetNewValue()))
                     {
                         return true;
                     }
@@ -302,29 +293,24 @@ namespace Yubico.YubiKey.Fido2
         /// The existing PIN encoded using UTF-8 in Normalization Form C.
         /// </param>
         /// <param name="newPin">
-        /// The new value for PIN to set on the YubiKey, encoded using UTF-8 in Normalization Form C.
-        /// </param>
-        /// <param name="protocol">
-        /// The preferred PIN/UV authentication protocol to use. Leaving this parameter unspecified or passing in
-        /// `None` will have the same effect - it will use the YubiKey's preferred protocol.
+        /// The PIN to program onto the YubiKey. It must be encoded in UTF-8 with Normalization Form C. It must be
+        /// at least 4 Unicode code points in length, and not to exceed 64 bytes in encoded length. Read more about
+        /// PINs <xref href="TheFido2Pin">here</xref>.
         /// </param>
         /// <returns></returns>
         /// <exception cref="Fido2Exception">
         /// The YubiKey returned an error indicating that the change PIN request could not be completed.
         /// </exception>
-        public bool TryChangePin(
-            ReadOnlyMemory<byte> currentPin,
-            ReadOnlyMemory<byte> newPin,
-            PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
+        public bool TryChangePin(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin)
         {
             AuthenticatorInfo info = GetAuthenticatorInfo();
 
             VerifyPinLengthRequirements(info, newPin);
 
-            ObtainSharedSecret(info, protocol);
+            ObtainSharedSecret();
 
             ChangePinResponse result = Connection.SendCommand(new ChangePinCommand(
-                GetCurrentPinProtocol(),
+                AuthProtocol,
                 currentPin,
                 newPin));
 
@@ -373,17 +359,13 @@ namespace Yubico.YubiKey.Fido2
         /// <xref href="TheFido2Pin">user's manual entry</xref> on FIDO2 PINs for more information.
         /// </para>
         /// </remarks>
-        /// <param name="protocol">
-        /// The preferred PIN/UV authentication protocol to use. Leaving this parameter unspecified or passing in
-        /// `None` will have the same effect - it will use the YubiKey's preferred protocol.
-        /// </param>
         /// <exception cref="OperationCanceledException">
         /// The user cancelled PIN collection. This happens when the application returns <c>false</c>
         /// in the <c>KeyCollector</c>.
         /// </exception>
-        public void VerifyPin(PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
+        public void VerifyPin()
         {
-            if (TryVerifyPin(protocol))
+            if (TryVerifyPin())
             {
                 return;
             }
@@ -423,15 +405,11 @@ namespace Yubico.YubiKey.Fido2
         /// <xref href="TheFido2Pin">user's manual entry</xref> on FIDO2 PINs for more information.
         /// </para>
         /// </remarks>
-        /// <param name="protocol">
-        /// The preferred PIN/UV authentication protocol to use. Leaving this parameter unspecified or passing in
-        /// `None` will have the same effect - it will use the YubiKey's preferred protocol.
-        /// </param>
         /// <returns>
         /// <c>True</c> on success, <c>False</c> if the user cancelled PIN collection, and an exception for all
         /// other kinds of failures.
         /// </returns>
-        public bool TryVerifyPin(PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
+        public bool TryVerifyPin()
         {
             Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
 
@@ -444,7 +422,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 while (keyCollector(keyEntryData))
                 {
-                    if (TryVerifyPin(keyEntryData.GetCurrentValue(), protocol))
+                    if (TryVerifyPin(keyEntryData.GetCurrentValue()))
                     {
                         return true;
                     }
@@ -492,10 +470,6 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="currentPin">
         /// The FIDO2 PIN that you wish to verify.
         /// </param>
-        /// <param name="protocol">
-        /// The preferred PIN/UV authentication protocol to use. Leaving this parameter unspecified or passing in
-        /// `None` will have the same effect - it will use the YubiKey's preferred protocol.
-        /// </param>
         /// <returns>
         /// <c>True</c> if the PIN successfully verified, <c>False</c> if the PIN was incorrect, and an exception for all
         /// other kinds of failures.
@@ -503,18 +477,16 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="Fido2Exception">
         /// The YubiKey returned an error indicating that the PIN verification request could not be completed.
         /// </exception>
-        public bool TryVerifyPin(ReadOnlyMemory<byte> currentPin, PinUvAuthProtocol protocol = PinUvAuthProtocol.None)
+        public bool TryVerifyPin(ReadOnlyMemory<byte> currentPin)
         {
-            AuthenticatorInfo info = GetAuthenticatorInfo();
-
-            ObtainSharedSecret(info, protocol);
+            ObtainSharedSecret();
 
             GetPinUvAuthTokenResponse response = Connection.SendCommand(
-                new GetPinTokenCommand(GetCurrentPinProtocol(), currentPin));
+                new GetPinTokenCommand(AuthProtocol, currentPin));
 
             if (response.Status == ResponseStatus.Success)
             {
-                SetAuthToken(response.GetData());
+                _pinUvAuthToken = response.GetData();
                 return true;
             }
 
@@ -526,17 +498,39 @@ namespace Yubico.YubiKey.Fido2
             throw new Fido2Exception(response.StatusMessage);
         }
 
-        private void SetAuthToken(Memory<byte>? token)
+        /// <summary>
+        /// Overrides the default PIN / UV Auth protocol determined by the YubiKey and SDK.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Call this method with an instance of a class that derives <see cref="PinUvAuthProtocolBase"/> - either
+        /// <see cref="PinUvAuthProtocolOne"/> or <seealso cref="PinUvAuthProtocolTwo"/>. When called, this method
+        /// will dispose of the instance referred to by the <see cref="AuthProtocol"/> property. The session will
+        /// then take a reference to the instance provided by <paramref name="authProtocol"/> by setting <c>AuthProtocol</c>
+        /// to this value. Finally, it will call the <c>Initialize</c> method on the <c>AuthProtocol</c>.
+        /// </para>
+        /// <para>
+        /// The auth protocol is not remembered across sessions. That is - if you call this method on session A, and
+        /// later create a session B, the session B will be using the default auth protocol. You would need to call this
+        /// method on both session instances to override the default behavior.
+        /// </para>
+        /// </remarks>
+        /// <param name="authProtocol">
+        /// The PIN/UV auth protocol instance to use for this session class.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The value specified by <c>authProtocol</c> is null.
+        /// </exception>
+        public void SetAuthProtocol(PinUvAuthProtocolBase authProtocol)
         {
-            if (_pinUvAuthToken.HasValue)
+            if (authProtocol is null)
             {
-                CryptographicOperations.ZeroMemory(_pinUvAuthToken.Value.Span);
+                throw new ArgumentNullException(nameof(authProtocol));
             }
 
-            if (token.HasValue)
-            {
-                _pinUvAuthToken = token.Value;
-            }
+            AuthProtocol.Dispose();
+            AuthProtocol = authProtocol;
+            AuthProtocol.Initialize();
         }
 
         private static void VerifyPinLengthRequirements(AuthenticatorInfo info, ReadOnlyMemory<byte> newPin)
@@ -567,14 +561,10 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
-        private static PinUvAuthProtocolBase GetPreferredPinProtocol(AuthenticatorInfo info, PinUvAuthProtocol protocol)
+        private PinUvAuthProtocolBase GetPreferredPinProtocol()
         {
-            if (protocol == PinUvAuthProtocol.None)
-            {
-                protocol = info.PinUvAuthProtocols != null
-                    ? info.PinUvAuthProtocols[0]
-                    : PinUvAuthProtocol.ProtocolTwo;
-            }
+            AuthenticatorInfo info = GetAuthenticatorInfo();
+            PinUvAuthProtocol protocol = info.PinUvAuthProtocols?[0] ?? PinUvAuthProtocol.ProtocolOne;
 
             return protocol switch
             {
@@ -588,28 +578,23 @@ namespace Yubico.YubiKey.Fido2
             };
         }
 
-        private PinUvAuthProtocolBase GetCurrentPinProtocol() =>
-            _selectedPinProtocol ?? throw new InvalidOperationException(ExceptionMessages.NoActivePinProtocol);
-
         private CoseEcPublicKey GetPeerCoseKey()
         {
             GetKeyAgreementResponse keyAgreementResponse =
-                Connection.SendCommand(new GetKeyAgreementCommand(GetCurrentPinProtocol().Protocol));
+                Connection.SendCommand(new GetKeyAgreementCommand(AuthProtocol.Protocol));
 
             CoseEcPublicKey peerCoseKey = keyAgreementResponse.GetData();
             return peerCoseKey;
         }
 
 
-        private void ObtainSharedSecret(AuthenticatorInfo info, PinUvAuthProtocol preferredProtocol)
+        private void ObtainSharedSecret()
         {
-            _selectedPinProtocol?.Dispose();
-            _selectedPinProtocol = GetPreferredPinProtocol(info, preferredProtocol);
-            _selectedPinProtocol.Initialize();
-
-            CoseEcPublicKey peerCoseKey = GetPeerCoseKey();
-
-            _selectedPinProtocol.Encapsulate(peerCoseKey);
+            if (AuthProtocol.PlatformPublicKey is null)
+            {
+                CoseEcPublicKey peerCoseKey = GetPeerCoseKey();
+                AuthProtocol.Encapsulate(peerCoseKey);
+            }
         }
 
         private Func<KeyEntryData, bool> EnsureKeyCollector()

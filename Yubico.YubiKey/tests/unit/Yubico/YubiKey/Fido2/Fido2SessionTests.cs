@@ -39,6 +39,16 @@ namespace Yubico.YubiKey.Fido2
         void Constructor_ValidYubiKeyDevice_Succeeds()
         {
             var mockYubiKey = new Mock<IYubiKeyDevice>();
+            var mockConnection = new Mock<IYubiKeyConnection>();
+            var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
+
+            _ = mockConnection
+                .Setup(c => c.SendCommand(It.IsAny<IYubiKeyCommand<IYubiKeyResponse>>()))
+                .Returns(mockResponse);
+
+            _ = mockYubiKey
+                .Setup(k => k.Connect(YubiKeyApplication.Fido2))
+                .Returns(mockConnection.Object);
 
             var session = new Fido2Session(mockYubiKey.Object);
 
@@ -50,6 +60,11 @@ namespace Yubico.YubiKey.Fido2
         {
             var mockYubiKey = new Mock<IYubiKeyDevice>();
             var mockConnection = new Mock<IYubiKeyConnection>();
+            var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
+
+            _ = mockConnection
+                .Setup(c => c.SendCommand(It.IsAny<IYubiKeyCommand<IYubiKeyResponse>>()))
+                .Returns(mockResponse);
 
             _ = mockYubiKey
                 .Setup(k => k.Connect(YubiKeyApplication.Fido2))

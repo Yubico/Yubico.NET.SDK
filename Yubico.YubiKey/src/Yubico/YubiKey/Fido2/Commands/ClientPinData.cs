@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// The pinUvAuthToken, encrypted by calling `encrypt` on the PIN/UV auto protocol with the shared secret as
         /// the key.
         /// </summary>
-        public Memory<byte>? PinUvAuthToken { get; set; }
+        public ReadOnlyMemory<byte>? PinUvAuthToken { get; set; }
 
         /// <summary>
         /// The number of PIN attemps remaining before the YubiKey's FIDO2 application is locked out.

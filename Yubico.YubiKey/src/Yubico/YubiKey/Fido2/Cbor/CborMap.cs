@@ -52,7 +52,8 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 throw new ArgumentNullException(nameof(reader));
             }
 
-            _dict = ProcessMap(reader);
+            _dict = ProcessMap(reader) as IDictionary<TKey, object?> ??
+                throw new InvalidOperationException("Key found in map does not match the type specified.");
         }
 
         /// <summary>
@@ -195,26 +196,43 @@ namespace Yubico.YubiKey.Fido2.Cbor
             throw new InvalidCastException();
         }
 
-        private IDictionary<TKey, object?> ProcessMap(CborReader cbor)
+        private object ProcessMap(CborReader cbor)
         {
             if (cbor.PeekState() != CborReaderState.StartMap)
             {
                 throw new ArgumentException("Expected a CBOR map.");
             }
 
-            var dict = new Dictionary<TKey, object?>();
             int? numberElements = cbor.ReadStartMap();
 
             if (numberElements is null)
             {
-                return dict;
+                return new Dictionary<object, object>();
             }
 
-            for (int i = 0; i < numberElements; i++)
+            CborReaderState cborType = cbor.PeekState();
+
+            switch (cborType)
+            {
+                case CborReaderState.UnsignedInteger:
+                case CborReaderState.NegativeInteger:
+                    return ProcessMap<long>(cbor, numberElements.Value);
+                case CborReaderState.TextString:
+                    return ProcessMap<string>(cbor, numberElements.Value);
+                default:
+                    throw new InvalidOperationException("Type not supported.");
+            }
+        }
+
+        private IDictionary<TNestedKey, object?> ProcessMap<TNestedKey>(CborReader cbor, int numberOfElements)
+        {
+            var dict = new Dictionary<TNestedKey, object?>();
+
+            for (int i = 0; i < numberOfElements; i++)
             {
                 // Technically the typecast from ulong -> long could truncate data, but in practice we do not expect
                 // the map keys to be larger than a byte.
-                TKey key = ReadKey(cbor);
+                TNestedKey key = ReadKey<TNestedKey>(cbor);
 
                 object? value = ProcessSingleElement(cbor);
 
@@ -226,16 +244,16 @@ namespace Yubico.YubiKey.Fido2.Cbor
             return dict;
         }
 
-        private static TKey ReadKey(CborReader cbor)
+        private static TReadKey ReadKey<TReadKey>(CborReader cbor)
         {
-            if (typeof(TKey) == typeof(long))
+            if (typeof(TReadKey) == typeof(long))
             {
-                return (TKey)Convert.ChangeType(cbor.ReadInt64(), typeof(TKey), CultureInfo.InvariantCulture);
+                return (TReadKey)Convert.ChangeType(cbor.ReadInt64(), typeof(TReadKey), CultureInfo.InvariantCulture);
             }
 
-            if (typeof(TKey) == typeof(string))
+            if (typeof(TReadKey) == typeof(string))
             {
-                return (TKey)Convert.ChangeType(cbor.ReadTextString(), typeof(TKey), CultureInfo.InvariantCulture);
+                return (TReadKey)Convert.ChangeType(cbor.ReadTextString(), typeof(TReadKey), CultureInfo.InvariantCulture);
             }
 
             throw new InvalidOperationException("Unsupported key type.");
@@ -276,7 +294,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             for (int i = 0; i < numberElements; i++)
             {
-                elements[i] = ProcessSingleElement(cbor);
+                elements.Add(ProcessSingleElement(cbor));
             }
 
             cbor.ReadEndArray();

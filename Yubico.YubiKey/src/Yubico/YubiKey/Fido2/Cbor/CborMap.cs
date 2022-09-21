@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
             }
 
             _dict = ProcessMap(reader) as IDictionary<TKey, object?> ??
-                throw new InvalidOperationException("Key found in map does not match the type specified.");
+                throw new InvalidOperationException(ExceptionMessages.TypeMismatch);
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         {
             if (cbor.PeekState() != CborReaderState.StartMap)
             {
-                throw new ArgumentException("Expected a CBOR map.");
+                throw new ArgumentException(ExceptionMessages.CborUnexpectedMapTag);
             }
 
             int? numberElements = cbor.ReadStartMap();
@@ -220,7 +220,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 case CborReaderState.TextString:
                     return ProcessMap<string>(cbor, numberElements.Value);
                 default:
-                    throw new InvalidOperationException("Type not supported.");
+                    throw new InvalidOperationException(ExceptionMessages.TypeNotSupported);
             }
         }
 
@@ -256,7 +256,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 return (TReadKey)Convert.ChangeType(cbor.ReadTextString(), typeof(TReadKey), CultureInfo.InvariantCulture);
             }
 
-            throw new InvalidOperationException("Unsupported key type.");
+            throw new InvalidOperationException(ExceptionMessages.TypeNotSupported);
         }
 
         private object? ProcessSingleElement(CborReader cbor) => cbor.PeekState() switch

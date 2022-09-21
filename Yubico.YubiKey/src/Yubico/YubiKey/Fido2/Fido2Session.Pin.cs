@@ -40,6 +40,10 @@ namespace Yubico.YubiKey.Fido2
         /// </remarks>
         public PinUvAuthProtocolBase AuthProtocol { get; private set; }
 
+        // We need to dispose the automatically created AuthProtocol. If it's overridden by SetAuthProtocol, then
+        // that method will dispose the original, set this to false, and update the reference to the new protocol.
+        private bool _disposeAuthProtocol = true;
+
         // Likewise, the auth token is our ticket to successfully authenticating
         // other session operations.
         private ReadOnlyMemory<byte>? _pinUvAuthToken;
@@ -505,9 +509,10 @@ namespace Yubico.YubiKey.Fido2
         /// <para>
         /// Call this method with an instance of a class that derives <see cref="PinUvAuthProtocolBase"/> - either
         /// <see cref="PinUvAuthProtocolOne"/> or <seealso cref="PinUvAuthProtocolTwo"/>. When called, this method
-        /// will dispose of the instance referred to by the <see cref="AuthProtocol"/> property. The session will
-        /// then take a reference to the instance provided by <paramref name="authProtocol"/> by setting <c>AuthProtocol</c>
-        /// to this value. Finally, it will call the <c>Initialize</c> method on the <c>AuthProtocol</c>.
+        /// will replace the existing reference stored as <see cref="AuthProtocol"/> with the one that was passed
+        /// to this function. The SDK will automatically dispose of the previous protocol if it was the default
+        /// protocol created by the SDK. Otherwise, it will not. The caller of this function owns the lifetime of any
+        /// protocol passed into the session - the SDK will not dispose of any user-set auth protocol.
         /// </para>
         /// <para>
         /// The auth protocol is not remembered across sessions. That is - if you call this method on session A, and
@@ -528,9 +533,13 @@ namespace Yubico.YubiKey.Fido2
                 throw new ArgumentNullException(nameof(authProtocol));
             }
 
-            AuthProtocol.Dispose();
+            if (_disposeAuthProtocol)
+            {
+                AuthProtocol.Dispose();
+                _disposeAuthProtocol = false; // Dispose no longer needed as caller now owns AuthProtocol.
+            }
+
             AuthProtocol = authProtocol;
-            AuthProtocol.Initialize();
         }
 
         private static void VerifyPinLengthRequirements(AuthenticatorInfo info, ReadOnlyMemory<byte> newPin)

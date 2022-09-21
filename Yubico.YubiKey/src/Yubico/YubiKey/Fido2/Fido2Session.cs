@@ -198,7 +198,12 @@ namespace Yubico.YubiKey.Fido2
             }
 
             Connection.Dispose();
-            AuthProtocol.Dispose();
+
+            if (_disposeAuthProtocol)
+            {
+                AuthProtocol.Dispose();
+            }
+
             KeyCollector = null;
             _disposed = true;
         }

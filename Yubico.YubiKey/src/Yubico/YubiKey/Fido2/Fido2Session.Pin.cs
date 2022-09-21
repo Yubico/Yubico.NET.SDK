@@ -34,8 +34,7 @@ namespace Yubico.YubiKey.Fido2
         /// by calling the <see cref="SetAuthProtocol"/> method on the session class.
         /// </para>
         /// <para>
-        /// This property's value will always point to the currently used auth protocol that is currently being
-        /// used by the session.
+        /// This property's value will always point to the auth protocol that is currently being used by the session.
         /// </para>
         /// </remarks>
         public PinUvAuthProtocolBase AuthProtocol { get; private set; }
@@ -57,15 +56,19 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <remarks>
         /// <para>
-        /// The Yubikey is manufactured with no default PIN set on the FIDO2 application. To initially configure
-        /// a PIN, use this function. This function will only succeed if no PIN is currently configured. To change
-        /// an already set PIN, use the <see cref="ChangePin"/> method instead. Once set, a PIN cannot be removed
-        /// without resetting the FIDO2 application. This operation will unset the PIN as well as clear all registered
+        /// The Yubikey is manufactured with no default PIN set on the FIDO2 application. To configure a YubiKey's
+        /// initial PIN, use this function. This function will only succeed if no PIN is currently configured. To change
+        /// an existing PIN, use the <see cref="ChangePin"/> method instead. Once set, a PIN cannot be removed
+        /// without resetting the FIDO2 application. The reset operation will remove the PIN and clear all registered
         /// credentials.
         /// </para>
         /// <para>
-        /// Several considerations must be made when collecting the PIN. It must be encoded in UTF-8 with Normalization
-        /// Form C. It must be at least 4 Unicode code points in length, and not to exceed 64 bytes in encoded length.
+        /// Several considerations must be made when collecting the PIN.
+        /// <list type="bullet">
+        /// <item><description>It must be encoded in UTF-8 with Normalization Form C.</description></item>
+        /// <item><description>It must be at least 4 Unicode code points in length.</description></item>
+        /// <item><description>It must not exceed 63 bytes in encoded length.</description></item>
+        /// </list>
         /// Read more about PINs <xref href="TheFido2Pin">here</xref>.
         /// </para>
         /// </remarks>
@@ -99,8 +102,12 @@ namespace Yubico.YubiKey.Fido2
         /// credentials.
         /// </para>
         /// <para>
-        /// Several considerations must be made when collecting the PIN. It must be encoded in UTF-8 with Normalization
-        /// Form C. It must be at least 4 Unicode code points in length, and not to exceed 64 bytes in encoded length.
+        /// Several considerations must be made when collecting the PIN.
+        /// <list type="bullet">
+        /// <item><description>It must be encoded in UTF-8 with Normalization Form C.</description></item>
+        /// <item><description>It must be at least 4 Unicode code points in length.</description></item>
+        /// <item><description>It must not exceed 63 bytes in encoded length.</description></item>
+        /// </list>
         /// Read more about PINs <xref href="TheFido2Pin">here</xref>.
         /// </para>
         /// </remarks>
@@ -158,7 +165,7 @@ namespace Yubico.YubiKey.Fido2
         /// </remarks>
         /// <param name="newPin">
         /// The PIN to program onto the YubiKey. It must be encoded in UTF-8 with Normalization Form C. It must be
-        /// at least 4 Unicode code points in length, and not to exceed 64 bytes in encoded length. Read more about
+        /// at least 4 Unicode code points in length, and not to exceed 63 bytes in encoded length. Read more about
         /// PINs <xref href="TheFido2Pin">here</xref>.
         /// </param>
         /// <returns>
@@ -199,14 +206,18 @@ namespace Yubico.YubiKey.Fido2
         /// <remarks>
         /// <para>
         /// FIDO2 separates the action of setting the initial PIN from changing it. Use <see cref="SetPin"/> to set
-        /// the PIN on first use, and use this method to change the PIN after that. In order to change the PIN both
-        /// the current and the desired new PIN must be supplied. A PIN cannot be removed from FIDO2. The only way
+        /// the first PIN, and use this method to change the PIN after that. In order to change the PIN, both
+        /// the current PIN and the new PIN must be supplied. A PIN cannot be removed from FIDO2. The only way
         /// to clear the PIN is to reset the entire FIDO2 application, which will result in all credentials being
         /// removed.
         /// </para>
         /// <para>
-        /// Several considerations must be made when collecting the PIN. It must be encoded in UTF-8 with Normalization
-        /// Form C. It must be at least 4 Unicode code points in length, and not to exceed 64 bytes in encoded length.
+        /// Several considerations must be made when collecting the PIN.
+        /// <list type="bullet">
+        /// <item><description>It must be encoded in UTF-8 with Normalization Form C.</description></item>
+        /// <item><description>It must be at least 4 Unicode code points in length.</description></item>
+        /// <item><description>It must not exceed 63 bytes in encoded length.</description></item>
+        /// </list>
         /// Read more about PINs <xref href="TheFido2Pin">here</xref>.
         /// </para>
         /// </remarks>
@@ -230,14 +241,18 @@ namespace Yubico.YubiKey.Fido2
         /// <remarks>
         /// <para>
         /// FIDO2 separates the action of setting the initial PIN from changing it. Use <see cref="SetPin"/> to set
-        /// the PIN on first use, and use this method to change the PIN after that. In order to change the PIN both
-        /// the current and the desired new PIN must be supplied. A PIN cannot be removed from FIDO2. The only way
+        /// the first PIN, and use this method to change the PIN after that. In order to change the PIN, both
+        /// the current PIN and the new PIN must be supplied. A PIN cannot be removed from FIDO2. The only way
         /// to clear the PIN is to reset the entire FIDO2 application, which will result in all credentials being
         /// removed.
         /// </para>
         /// <para>
-        /// Several considerations must be made when collecting the PIN. It must be encoded in UTF-8 with Normalization
-        /// Form C. It must be at least 4 Unicode code points in length, and not to exceed 64 bytes in encoded length.
+        /// Several considerations must be made when collecting the PIN.
+        /// <list type="bullet">
+        /// <item><description>It must be encoded in UTF-8 with Normalization Form C.</description></item>
+        /// <item><description>It must be at least 4 Unicode code points in length.</description></item>
+        /// <item><description>It must not exceed 63 bytes in encoded length.</description></item>
+        /// </list>
         /// Read more about PINs <xref href="TheFido2Pin">here</xref>.
         /// </para>
         /// </remarks>
@@ -283,23 +298,23 @@ namespace Yubico.YubiKey.Fido2
         /// <remarks>
         /// <para>
         /// FIDO2 separates the action of setting the initial PIN from changing it. Use <see cref="SetPin"/> to set
-        /// the PIN on first use, and use this method to change the PIN after that. In order to change the PIN both
-        /// the current and the desired new PIN must be supplied. A PIN cannot be removed from FIDO2. The only way
+        /// the first PIN, and use this method to change the PIN after that. In order to change the PIN, both
+        /// the current PIN and the new PIN must be supplied. A PIN cannot be removed from FIDO2. The only way
         /// to clear the PIN is to reset the entire FIDO2 application, which will result in all credentials being
         /// removed.
-        /// </para>
-        /// <para>
-        /// The PIN is binary data and must be at least 4 and no more than 63 bytes long. The encoding process for PINs
-        /// is described in detail in the <xref href="TheFido2Pin">user's manual</xref>.
         /// </para>
         /// </remarks>
         /// <param name="currentPin">
         /// The existing PIN encoded using UTF-8 in Normalization Form C.
         /// </param>
         /// <param name="newPin">
-        /// The PIN to program onto the YubiKey. It must be encoded in UTF-8 with Normalization Form C. It must be
-        /// at least 4 Unicode code points in length, and not to exceed 64 bytes in encoded length. Read more about
-        /// PINs <xref href="TheFido2Pin">here</xref>.
+        /// The new PIN to program onto the YubiKey. The new PIN:
+        /// <list type="bullet">
+        /// <item><description>Must be encoded in UTF-8 with Normalization Form C.</description></item>
+        /// <item><description>Must be at least 4 Unicode code points in length.</description></item>
+        /// <item><description>Must not exceed 63 bytes in encoded length.</description></item>
+        /// </list>
+        /// Read more about PINs <xref href="TheFido2Pin">here</xref>.
         /// </param>
         /// <returns></returns>
         /// <exception cref="Fido2Exception">
@@ -337,13 +352,13 @@ namespace Yubico.YubiKey.Fido2
         /// <remarks>
         /// <para>
         /// A YubiKey is manufactured with no PIN set on the FIDO2 application. A PIN must be set before a user
-        /// can perform most FIDO2 operations. After a PIN has been set, it must be Verified against the YubiKey
+        /// can perform most FIDO2 operations. After a PIN has been set, it must be verified against the YubiKey
         /// before privileged operations can occur. This method will perform that verification.
         /// </para>
         /// <para>
         /// The SDK will automatically verify the PIN when the YubiKey requests it, so in many circumstances, your
-        /// app many not need to call this method directly. It can be advantageous to preempt the verification -
-        /// for example, if it would provide a better user experience in your application to do so sooner. This
+        /// app many not need to call this method directly. However, it can be advantageous to preempt the verification
+        /// in situations where it would provide a better user experience in your application to do so sooner. This
         /// method is available for those sorts of scenarios.
         /// </para>
         /// <para>
@@ -383,13 +398,13 @@ namespace Yubico.YubiKey.Fido2
         /// <remarks>
         /// <para>
         /// A YubiKey is manufactured with no PIN set on the FIDO2 application. A PIN must be set before a user
-        /// can perform most FIDO2 operations. After a PIN has been set, it must be Verified against the YubiKey
+        /// can perform most FIDO2 operations. After a PIN has been set, it must be verified against the YubiKey
         /// before privileged operations can occur. This method will perform that verification.
         /// </para>
         /// <para>
         /// The SDK will automatically verify the PIN when the YubiKey requests it, so in many circumstances, your
-        /// app many not need to call this method directly. It can be advantageous to preempt the verification -
-        /// for example, if it would provide a better user experience in your application to do so sooner. This
+        /// app many not need to call this method directly. However, it can be advantageous to preempt the verification
+        /// in situations where it would provide a better user experience in your application to do so sooner. This
         /// method is available for those sorts of scenarios.
         /// </para>
         /// <para>
@@ -451,13 +466,13 @@ namespace Yubico.YubiKey.Fido2
         /// <remarks>
         /// <para>
         /// A YubiKey is manufactured with no PIN set on the FIDO2 application. A PIN must be set before a user
-        /// can perform most FIDO2 operations. After a PIN has been set, it must be Verified against the YubiKey
+        /// can perform most FIDO2 operations. After a PIN has been set, it must be verified against the YubiKey
         /// before privileged operations can occur. This method will perform that verification.
         /// </para>
         /// <para>
         /// The SDK will automatically verify the PIN when the YubiKey requests it, so in many circumstances, your
-        /// app many not need to call this method directly. It can be advantageous to preempt the verification -
-        /// for example, if it would provide a better user experience in your application to do so sooner. This
+        /// app many not need to call this method directly. However, it can be advantageous to preempt the verification
+        /// in situations where it would provide a better user experience in your application to do so sooner. This
         /// method is available for those sorts of scenarios.
         /// </para>
         /// <para>
@@ -503,7 +518,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Overrides the default PIN / UV Auth protocol determined by the YubiKey and SDK.
+        /// Overrides the default PIN/UV Auth protocol (which is determined by the YubiKey and SDK).
         /// </summary>
         /// <remarks>
         /// <para>

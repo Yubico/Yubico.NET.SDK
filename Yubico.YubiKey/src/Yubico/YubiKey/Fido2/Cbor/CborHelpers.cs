@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
     /// </summary>
     internal static class CborHelpers
     {
-        public class MapWriter
+        public class MapWriter<TKey>
         {
             private readonly CborWriter _cbor;
 
@@ -37,39 +37,55 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 _cbor.WriteStartMap(null);
             }
 
-            public MapWriter Entry(long key, string value)
+            private void WriteKey(TKey key)
             {
-                _cbor.WriteInt64(key);
+                if (key is long longKey)
+                {
+                    _cbor.WriteInt64(longKey);
+                }
+                else if (key is string strKey)
+                {
+                    _cbor.WriteTextString(strKey);
+                }
+                else
+                {
+                    throw new ArgumentException("Unsupported key type.");
+                }
+            }
+
+            public MapWriter<TKey> Entry(TKey key, string value)
+            {
+                WriteKey(key);
                 _cbor.WriteTextString(value);
 
                 return this;
             }
 
-            public MapWriter Entry(long key, long value)
+            public MapWriter<TKey> Entry(TKey key, long value)
             {
-                _cbor.WriteInt64(key);
+                WriteKey(key);
                 _cbor.WriteInt64(value);
 
                 return this;
             }
 
-            public MapWriter Entry(long key, ReadOnlyMemory<byte> value)
+            public MapWriter<TKey> Entry(TKey key, ReadOnlyMemory<byte> value)
             {
-                _cbor.WriteInt64(key);
+                WriteKey(key);
                 _cbor.WriteByteString(value.Span);
 
                 return this;
             }
 
-            public MapWriter Entry(long key, ICborEncode value)
+            public MapWriter<TKey> Entry(TKey key, ICborEncode value)
             {
-                _cbor.WriteInt64(key);
+                WriteKey(key);
                 _cbor.WriteEncodedValue(value.CborEncode());
 
                 return this;
             }
 
-            public MapWriter OptionalEntry(long key, string? value)
+            public MapWriter<TKey> OptionalEntry(TKey key, string? value)
             {
                 if (value is { })
                 {
@@ -79,7 +95,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 return this;
             }
 
-            public MapWriter OptionalEntry(long key, long? value)
+            public MapWriter<TKey> OptionalEntry(TKey key, long? value)
             {
                 if (value.HasValue)
                 {
@@ -89,7 +105,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 return this;
             }
 
-            public MapWriter OptionalEntry(long key, ReadOnlyMemory<byte>? value)
+            public MapWriter<TKey> OptionalEntry(TKey key, ReadOnlyMemory<byte>? value)
             {
                 if (value.HasValue)
                 {
@@ -99,7 +115,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 return this;
             }
 
-            public MapWriter OptionalEntry(long key, ICborEncode? value)
+            public MapWriter<TKey> OptionalEntry(TKey key, ICborEncode? value)
             {
                 if (!(value is null))
                 {
@@ -130,6 +146,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
         ///     .EndMap();
         /// </code>
         /// </returns>
-        public static MapWriter BeginMap(CborWriter cbor) => new MapWriter(cbor);
+        public static MapWriter<TKey> BeginMap<TKey>(CborWriter cbor) => new MapWriter<TKey>(cbor);
     }
 }

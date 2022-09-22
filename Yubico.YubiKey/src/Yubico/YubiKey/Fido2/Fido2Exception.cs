@@ -14,72 +14,73 @@
 
 using System;
 using System.Globalization;
+using System.Runtime.Serialization;
 
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
     /// Exception that represents when the authenticator presents an unsuccessful FIDO2 status.
     /// </summary>
-#pragma warning disable CA1064 // Exceptions should be public
-    internal class BadFido2StatusException : Exception
-#pragma warning restore CA1064 // Exceptions should be public
+    [Serializable]
+    public class Fido2Exception : Exception
     {
         /// <summary>
         /// The FIDO2 status returned by the authenticator.
         /// </summary>
-        public Fido2Status? Status { get; private set; }
+        public CtapStatus? Status { get; private set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BadFido2StatusException"/> class.
+        /// Initializes a new instance of the <see cref="Fido2Exception"/> class.
         /// </summary>
-        public BadFido2StatusException()
+        public Fido2Exception()
         {
 
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BadFido2StatusException"/> class.
+        /// Initializes a new instance of the <see cref="Fido2Exception"/> class.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
-        public BadFido2StatusException(string message) : base(message)
+        public Fido2Exception(string message) : base(message)
         {
 
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="BadFido2StatusException"/> class.
+        /// Initializes a new instance of the <see cref="Fido2Exception"/> class.
         /// </summary>
         /// <param name="message">The error message that explains the reason for the exception.</param>
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
-        public BadFido2StatusException(string message, Exception innerException) : base(message, innerException)
+        public Fido2Exception(string message, Exception innerException) : base(message, innerException)
         {
 
         }
 
         /// <summary>
-        /// Intializes a new instance of the <see cref="BadFido2StatusException"/> class, and sets an appropriate message.
+        /// Initializes a new instance of the <see cref="Fido2Exception"/> class, and sets an appropriate message.
         /// </summary>
         /// <param name="status">The error status returned by the authenticator.</param>
-        public BadFido2StatusException(byte status)
+        public Fido2Exception(CtapStatus status)
             : base(ConstructMessage(status))
         {
-            Status = Enum.IsDefined(typeof(Fido2Status), (int)status) 
-                ? (Fido2Status?)status 
-                : null;
+            Status = status;
         }
 
-        private static string ConstructMessage(byte status)
+        private static string ConstructMessage(CtapStatus status)
         {
-            if (Enum.IsDefined(typeof(Fido2Status), (int)status))
+            if (Enum.IsDefined(typeof(CtapStatus), (int)status))
             {
-                string name = Enum.GetName(typeof(Fido2Status), (int)status);
+                string name = Enum.GetName(typeof(CtapStatus), (int)status) ?? string.Empty;
                 return string.Format(CultureInfo.InvariantCulture, ExceptionMessages.BadFido2Status, status, name);
             }
-            else
-            {
-                return string.Format(CultureInfo.InvariantCulture, ExceptionMessages.UnknownFido2Status);
-            }
+
+            return string.Format(CultureInfo.InvariantCulture, ExceptionMessages.UnknownFido2Status);
+        }
+
+        protected Fido2Exception(SerializationInfo serializationInfo, StreamingContext streamingContext) :
+            base(serializationInfo, streamingContext)
+        {
+
         }
     }
 }
-

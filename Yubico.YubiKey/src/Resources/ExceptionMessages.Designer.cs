@@ -1401,6 +1401,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No PIN protocol is currently in use..
+        /// </summary>
+        internal static string NoActivePinProtocol {
+            get {
+                return ResourceManager.GetString("NoActivePinProtocol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There is no data to encode..
         /// </summary>
         internal static string NoDataToEncode {
@@ -1644,11 +1653,56 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The PIN has already been set and cannot be changed using this function..
+        /// </summary>
+        internal static string PinAlreadySet {
+            get {
+                return ResourceManager.GetString("PinAlreadySet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The user cancelled the PIN collection operation..
+        /// </summary>
+        internal static string PinCollectionCancelled {
+            get {
+                return ResourceManager.GetString("PinCollectionCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The YubiKey is configured for something incompatible with PIN-only..
         /// </summary>
         internal static string PinOnlyNotPossible {
             get {
                 return ResourceManager.GetString("PinOnlyNotPossible", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The PIN protocol {0} is not supported..
+        /// </summary>
+        internal static string PinProtocolNotSupported {
+            get {
+                return ResourceManager.GetString("PinProtocolNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified PIN was too long. It must be no more than {0} {1} long. It was {2} {1}..
+        /// </summary>
+        internal static string PinTooLong {
+            get {
+                return ResourceManager.GetString("PinTooLong", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The specified PIN was too short. It must be at least {0} {1} long. It was {2} {1}..
+        /// </summary>
+        internal static string PinTooShort {
+            get {
+                return ResourceManager.GetString("PinTooShort", resourceCulture);
             }
         }
         

@@ -793,6 +793,24 @@
   <data name="YubiHsmAuthKeyTypeNotSupported" xml:space="preserve">
     <value>The cryptographic key type is not supported.</value>
   </data>
+  <data name="PinCollectionCancelled" xml:space="preserve">
+    <value>The user cancelled the PIN collection operation.</value>
+  </data>
+  <data name="PinAlreadySet" xml:space="preserve">
+    <value>The PIN has already been set and cannot be changed using this function.</value>
+  </data>
+  <data name="PinTooShort" xml:space="preserve">
+    <value>The specified PIN was too short. It must be at least {0} {1} long. It was {2} {1}.</value>
+  </data>
+  <data name="PinTooLong" xml:space="preserve">
+    <value>The specified PIN was too long. It must be no more than {0} {1} long. It was {2} {1}.</value>
+  </data>
+  <data name="PinProtocolNotSupported" xml:space="preserve">
+    <value>The PIN protocol {0} is not supported.</value>
+  </data>
+  <data name="NoActivePinProtocol" xml:space="preserve">
+    <value>No PIN protocol is currently in use.</value>
+  </data>
   <data name="TypeNotSupported" xml:space="preserve">
     <value>Type not supported.</value>
   </data>

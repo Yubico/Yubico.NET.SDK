@@ -13,13 +13,15 @@
 // limitations under the License.
 
 using System;
+using System.Runtime.Serialization;
 
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
     /// Exception that represents invalid or missing data passed to a CTAP2 command.
     /// </summary>
-    internal class Ctap2DataException : Ctap2Exception
+    [Serializable]
+    public class Ctap2DataException : Fido2Exception
     {
         /// <summary>
         /// The name of the property that contained invalid data.
@@ -52,6 +54,11 @@ namespace Yubico.YubiKey.Fido2
         {
 
         }
+
+        protected Ctap2DataException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
+            base(serializationInfo, streamingContext)
+        {
+
+        }
     }
 }
-

@@ -169,6 +169,8 @@ namespace Yubico.YubiKey.Fido2
                 yubiKeyDevice.SerialNumber);
 
             Connection = yubiKeyDevice.Connect(YubiKeyApplication.Fido2);
+
+            AuthProtocol = GetPreferredPinProtocol();
         }
 
         /// <summary>
@@ -185,6 +187,8 @@ namespace Yubico.YubiKey.Fido2
             return info.GetData();
         }
 
+        private static CtapStatus GetCtapError(IYubiKeyResponse r) => (CtapStatus)(r.StatusWord & 0xFF);
+
         /// <inheritdoc />
         public void Dispose()
         {
@@ -194,6 +198,12 @@ namespace Yubico.YubiKey.Fido2
             }
 
             Connection.Dispose();
+
+            if (_disposeAuthProtocol)
+            {
+                AuthProtocol.Dispose();
+            }
+
             KeyCollector = null;
             _disposed = true;
         }

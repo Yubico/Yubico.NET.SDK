@@ -272,6 +272,9 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fido2", "Fido2", "{8CE9438B-FEE8-47BF-B2DB-B5BA7A896774}"
 	ProjectSection(SolutionItems) = preProject
 		Yubico.YubiKey\docs\users-manual\application-fido2\pin-uv-auth-protocols.md = Yubico.YubiKey\docs\users-manual\application-fido2\pin-uv-auth-protocols.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-commands.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-commands.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-overview.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-overview.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-pin.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-pin.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiHSM Auth", "YubiHSM Auth", "{4176F4C2-3A9E-4C89-96B6-48CF41DD98C2}"

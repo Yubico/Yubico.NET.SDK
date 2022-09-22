@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKey.Fido2
 {
-    internal enum CtapError
+    public enum CtapStatus
     {
         // CTAP1 / Shared codes
         Ok = 0x00,
@@ -44,8 +44,8 @@ namespace Yubico.YubiKey.Fido2
         KeyStoreFull = 0x28,
         NotBusy = 0x29,
         NoOperationPending = 0x2A,
-        UnsupportedOperation = 0x2B,
-        InvalidOperation = 0x2C,
+        UnsupportedOption = 0x2B,
+        InvalidOption = 0x2C,
         KeepAliveCancel = 0x2D,
         NoCredentials = 0x2E,
         UserActionTimeout = 0x2F,

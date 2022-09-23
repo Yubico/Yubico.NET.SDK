@@ -13,7 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
@@ -41,7 +42,7 @@ namespace Yubico.YubiKey.Fido2
                 0x4f, 0x5f, 0x32, 0x5f, 0x30, 0x11, 0x01, 0x14, 0x02
             };
 
-            _ = Assert.Throws<ArgumentException>(() => new AuthenticatorInfo(encodedData));
+            _ = Assert.Throws<Ctap2DataException>(() => new AuthenticatorInfo(encodedData));
         }
 
         [Fact]
@@ -544,7 +545,7 @@ namespace Yubico.YubiKey.Fido2
             Assert.Null(fido2Info.RemainingDiscoverableCredentials);
         }
 
-        private static bool CompareStringLists(string[] correctStrings, ReadOnlyCollection<string> candidate)
+        private static bool CompareStringLists(string[] correctStrings, IReadOnlyList<string> candidate)
         {
             if (correctStrings.Length != candidate.Count)
             {

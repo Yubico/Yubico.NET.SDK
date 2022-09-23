@@ -825,7 +825,7 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The Fido2DeviceInfo is invalid for member number {0} (see authenticatorGetInfo in CTAP standard)..
+        ///   Looks up a localized string similar to The Fido2 AuthenticatorInfo is invalid for member number {0} (see authenticatorGetInfo in CTAP standard)..
         /// </summary>
         internal static string InvalidFido2DeviceInfo {
             get {

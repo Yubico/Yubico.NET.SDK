@@ -105,7 +105,10 @@ namespace Yubico.YubiKey.Fido2.Cose
 
             if (!map.Contains(TagAlgorithm))
             {
-                throw new Ctap2DataException("Missing required field.");
+                throw new Ctap2DataException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.Ctap2MissingRequiredField));
             }
 
             // Currently the only supported algorithm is -25 (ECDHwHKDF256).

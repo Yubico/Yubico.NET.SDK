@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Formats.Cbor;
 
 namespace Yubico.YubiKey.Fido2.Cbor
@@ -22,111 +23,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
     /// </summary>
     internal static class CborHelpers
     {
-        public class MapWriter<TKey>
-        {
-            private readonly CborWriter _cbor;
-
-            public MapWriter(CborWriter cbor)
-            {
-                if (cbor.ConvertIndefiniteLengthEncodings == false)
-                {
-                    throw new ArgumentException(ExceptionMessages.CborWriterMustConvertIdenfiteLengths);
-                }
-
-                _cbor = cbor;
-                _cbor.WriteStartMap(null);
-            }
-
-            private void WriteKey(TKey key)
-            {
-                if (key is long longKey)
-                {
-                    _cbor.WriteInt64(longKey);
-                }
-                else if (key is string strKey)
-                {
-                    _cbor.WriteTextString(strKey);
-                }
-                else
-                {
-                    throw new ArgumentException("Unsupported key type.");
-                }
-            }
-
-            public MapWriter<TKey> Entry(TKey key, string value)
-            {
-                WriteKey(key);
-                _cbor.WriteTextString(value);
-
-                return this;
-            }
-
-            public MapWriter<TKey> Entry(TKey key, long value)
-            {
-                WriteKey(key);
-                _cbor.WriteInt64(value);
-
-                return this;
-            }
-
-            public MapWriter<TKey> Entry(TKey key, ReadOnlyMemory<byte> value)
-            {
-                WriteKey(key);
-                _cbor.WriteByteString(value.Span);
-
-                return this;
-            }
-
-            public MapWriter<TKey> Entry(TKey key, ICborEncode value)
-            {
-                WriteKey(key);
-                _cbor.WriteEncodedValue(value.CborEncode());
-
-                return this;
-            }
-
-            public MapWriter<TKey> OptionalEntry(TKey key, string? value)
-            {
-                if (value is { })
-                {
-                    return Entry(key, value);
-                }
-
-                return this;
-            }
-
-            public MapWriter<TKey> OptionalEntry(TKey key, long? value)
-            {
-                if (value.HasValue)
-                {
-                    return Entry(key, value.Value);
-                }
-
-                return this;
-            }
-
-            public MapWriter<TKey> OptionalEntry(TKey key, ReadOnlyMemory<byte>? value)
-            {
-                if (value.HasValue)
-                {
-                    return Entry(key, value.Value);
-                }
-
-                return this;
-            }
-
-            public MapWriter<TKey> OptionalEntry(TKey key, ICborEncode? value)
-            {
-                if (!(value is null))
-                {
-                    return Entry(key, value);
-                }
-
-                return this;
-            }
-
-            public void EndMap() => _cbor.WriteEndMap();
-        }
+        // Use this delegate to pass in an encoding function (rather than the
+        // entire object) for WriteEncodedValue.
+        // If there is nothing to encode (e.g. localData is null), then return an
+        // empty byte array.
+        public delegate byte[] CborEncodeDelegate(object? localData);
 
         /// <summary>
         /// Use this method to write CBOR maps (which is mostly what CTAP2 uses). This uses a builder-like pattern
@@ -136,7 +37,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// An instance of a CborWriter. It must have the `ConvertIndefiniteLengthEncodings` option enabled.
         /// </param>
         /// <returns>
-        /// An instance of the `MapWriter` builder class. You should not need to store this value anywhere. The intended
+        /// An instance of the `CborMapWriter` builder class. You should not need to store this value anywhere. The intended
         /// use is to chain calls to its method like the following:
         /// <code language="C#">
         /// CborHelper.BeginMap(cborWriter)
@@ -144,8 +45,80 @@ namespace Yubico.YubiKey.Fido2.Cbor
         ///     .Entry(456, "def")
         ///     .OptionalEntry(2, maybeNullVariable)
         ///     .EndMap();
+        /// byte[] encoding = cborWriter.Encode();
         /// </code>
         /// </returns>
-        public static MapWriter<TKey> BeginMap<TKey>(CborWriter cbor) => new MapWriter<TKey>(cbor);
+        public static CborMapWriter<TKey> BeginMap<TKey>(CborWriter cbor) => new CborMapWriter<TKey>(cbor);
+
+        /// <summary>
+        /// Read an array of strings, placing them into the given <c>List</c> if
+        /// it is not null. Create a new <c>List</c> if it the array is null.
+        /// Return the new <c>List</c> if this method creates one, return the
+        /// input destination if the method does not.
+        /// </summary>
+        /// <param name="cbor">
+        /// The object that will read the array. This method assumes that this
+        /// object is "pointing to" the array.
+        /// </param>
+        /// <param name="destination">
+        /// If the array is not null, the strings will be deposited here. If it
+        /// is null, the method will create a new <c>List</c>.
+        /// </param>
+        /// <returns>
+        /// The <c>List</c> containing the strings. If the input
+        /// <c>destination</c> argument is null, then the return is a new
+        /// <c>List</c>. Otherwise, <c>destination</c> is returned.
+        /// </returns>
+        public static List<string>? ReadStringArray(CborReader cbor, List<string>? destination)
+        {
+            int? entries = cbor.ReadStartArray();
+            int count = entries ?? 0;
+
+            List<string> dest = destination ?? new List<string>(count);
+
+            for (int index = 0; index < count; index++)
+            {
+                dest.Add(cbor.ReadTextString());
+            }
+
+            cbor.ReadEndArray();
+
+            return dest;
+        }
+
+        /// <summary>
+        /// Encode an array of strings. This implements <c>CborEncodeDelegate</c>.
+        /// </summary>
+        /// <remarks>
+        /// This method expects the <c>localData</c> to be an instance of
+        /// <c>IReadOnlyList&lt;string&gt;</c>. If it is null, this method will
+        /// return an empty byte array.
+        /// </remarks>
+        /// <param name="localData">
+        /// The list of strings to encode.
+        /// </param>
+        /// <returns>
+        /// A byte array containing the encoded list. If there is no list
+        /// (<c>localData</c> is null or a list with <c>Count</c> zero), the
+        /// return will be an empty byte array.
+        /// </returns>
+        public static byte[] EncodeStringArray(object? localData)
+        {
+            if ((!(localData is IReadOnlyList<string> stringList)) || (stringList.Count == 0))
+            {
+                return Array.Empty<byte>();
+            }
+
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+
+            cbor.WriteStartArray(stringList.Count);
+            foreach (string currentString in stringList)
+            {
+                cbor.WriteTextString(currentString);
+            }
+            cbor.WriteEndArray();
+
+            return cbor.Encode();
+        }
     }
 }

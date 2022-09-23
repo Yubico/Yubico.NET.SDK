@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Formats.Cbor;
-using System.Globalization;
 
 namespace Yubico.YubiKey.Fido2.Cbor
 {
@@ -200,7 +200,10 @@ namespace Yubico.YubiKey.Fido2.Cbor
         {
             if (cbor.PeekState() != CborReaderState.StartMap)
             {
-                throw new ArgumentException(ExceptionMessages.CborUnexpectedMapTag);
+                throw new Ctap2DataException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.Ctap2MissingRequiredField));
             }
 
             int? numberElements = cbor.ReadStartMap();

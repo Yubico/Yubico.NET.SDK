@@ -30,6 +30,9 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
     /// </remarks>
     public enum PinUvAuthProtocol
     {
+        /// <summary>
+        /// No protocol is specified.
+        /// </summary>
         None = 0,
 
         /// <summary>

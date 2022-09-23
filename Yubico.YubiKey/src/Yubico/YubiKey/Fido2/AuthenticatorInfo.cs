@@ -16,8 +16,7 @@ using System;
 using System.Formats.Cbor;
 using System.Globalization;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using Yubico.YubiKey.Fido2.Commands;
+using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
@@ -78,14 +77,14 @@ namespace Yubico.YubiKey.Fido2
         /// List of version strings of CTAP supported by the authenticator.
         /// This is a REQUIRED value.
         /// </summary>
-        public ReadOnlyCollection<string> Versions { get; }
+        public IReadOnlyList<string> Versions => _versions;
 
         /// <summary>
         /// List of extension strings of CTAP supported by the authenticator.
         /// This propery is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
-        public ReadOnlyCollection<string>? Extensions { get; }
+        public IReadOnlyList<string>? Extensions { get; private set; }
 
         /// <summary>
         /// The AAGUID, unique to the authenticator and model.
@@ -100,7 +99,7 @@ namespace Yubico.YubiKey.Fido2
         /// This propery is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
-        public IReadOnlyDictionary<string, bool>? Options { get; private set; }
+        public IReadOnlyDictionary<string, bool>? Options {get; private set; }
 
         /// <summary>
         /// The maximum size, in bytes, of a message sent to the YubiKey.
@@ -116,7 +115,7 @@ namespace Yubico.YubiKey.Fido2
         /// This propery is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
-        public ReadOnlyCollection<PinUvAuthProtocol>? PinUvAuthProtocols { get; private set; }
+        public IReadOnlyList<PinUvAuthProtocol>? PinUvAuthProtocols { get; private set; }
 
         /// <summary>
         /// The maximum number of credentials in the CredentialID list. Note that
@@ -139,7 +138,7 @@ namespace Yubico.YubiKey.Fido2
         /// This propery is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
-        public ReadOnlyCollection<string>? Transports { get; }
+        public IReadOnlyList<string>? Transports { get; private set; }
 
         /// <summary>
         /// The list of supported algorithms for credential generation. Each
@@ -249,8 +248,8 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Build a new instance of <c>Fido2DeviceInfo</c> based on the given
-        /// Cbor encoding.
+        /// Build a new instance of <see cref="AuthenticatorInfo"/> based on the
+        /// given Cbor encoding.
         /// </summary>
         /// <remarks>
         /// The encoding must follow the definition of
@@ -260,13 +259,12 @@ namespace Yubico.YubiKey.Fido2
         /// The device info, encoded following the CTAP 2.1 and CBOR (RFC 8949)
         /// standards.
         /// </param>
-        /// <exception cref="ArgumentException">
+        /// <exception cref="Ctap2DataException">
         /// The <c>cborEncoding</c> is not a valid CBOR encoding, or it is not a
         /// correct encoding for FIDO2 device info.
         /// </exception>
         public AuthenticatorInfo(ReadOnlyMemory<byte> cborEncoding)
         {
-            Versions = new ReadOnlyCollection<string>(_versions);
             Aaguid = new ReadOnlyMemory<byte>(_aaguid);
 
             int mapKey = 0;
@@ -284,11 +282,11 @@ namespace Yubico.YubiKey.Fido2
                     switch (mapKey)
                     {
                         case KeyVersions:
-                            _ = ReadStringArray(cbor, _versions);
+                            _ = CborHelpers.ReadStringArray(cbor, _versions);
                             break;
 
                         case KeyExtensions:
-                            Extensions = ReadStringArray(cbor, null);
+                            Extensions = CborHelpers.ReadStringArray(cbor, null);
                             break;
 
                         case KeyAaguid:
@@ -317,7 +315,7 @@ namespace Yubico.YubiKey.Fido2
                             break;
 
                         case KeyTransports:
-                            Transports = ReadStringArray(cbor, null);
+                            Transports = CborHelpers.ReadStringArray(cbor, null);
                             break;
 
                         case KeyAlgorithms:
@@ -378,11 +376,11 @@ namespace Yubico.YubiKey.Fido2
             }
             catch (CborContentException cborException)
             {
-                throw new ArgumentException(
+                throw new Ctap2DataException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidFido2DeviceInfo, mapKey)
-                        + " " + cborException.Message);
+                        ExceptionMessages.InvalidFido2DeviceInfo, mapKey),
+                        cborException);
             }
 
             // There are two elements that must be present. If not, this is a
@@ -396,83 +394,74 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
-        // Read an array of strings, placing them into the given List if it is
-        // not null. Create a new List if it is null.
-        // Return the new List wrapped in a ReadOnlyCollection if this method
-        // creates one. If this method does not create a new list (destination
-        // was not null), return null.
-        private static ReadOnlyCollection<string>? ReadStringArray(CborReader cbor, List<string>? destination)
-        {
-            int? entries = cbor.ReadStartArray();
-            int count = entries ?? 0;
-
-            List<string> dest = destination ?? new List<string>(count);
-
-            for (int index = 0; index < count; index++)
-            {
-                dest.Add(cbor.ReadTextString());
-            }
-
-            cbor.ReadEndArray();
-
-            return ((destination is null) && (count != 0)) ? new ReadOnlyCollection<string>(dest) : null;
-        }
-
+        // Read a map of (string, bool) key/value pairs, placing them into a new
+        // Dictionary. Return the new Dictionary.
         // We're expecting to find a map(string, bool).
-        private static IReadOnlyDictionary<string, bool>? ReadOptionsMap(CborReader cbor)
+        private static Dictionary<string, bool>? ReadOptionsMap(CborReader cbor)
         {
             int? entries = cbor.ReadStartMap();
             int count = entries ?? 0;
 
-            var returnValue = new Dictionary<string, bool>(count);
+            var destination = new Dictionary<string, bool>(count);
 
             for (int index = 0; index < count; index++)
             {
                 string mapKey = cbor.ReadTextString();
                 bool isSupported = cbor.ReadBoolean();
 
-                returnValue.Add(mapKey, isSupported);
+                destination.Add(mapKey, isSupported);
             }
 
             cbor.ReadEndMap();
 
-            return (count == 0) ? null : returnValue;
+            return destination;
         }
 
         // Read an array of UInts, returning them (converted to the enum) in a
-        // new Collection.
-        private static ReadOnlyCollection<PinUvAuthProtocol>? ReadProtocolsArray(CborReader cbor)
+        // new List.
+        private static List<PinUvAuthProtocol> ReadProtocolsArray(CborReader cbor)
         {
             int? entries = cbor.ReadStartArray();
             int count = entries ?? 0;
 
-            var protocolList = new List<PinUvAuthProtocol>(count);
+            var destination = new List<PinUvAuthProtocol>(count);
 
             for (int index = 0; index < count; index++)
             {
-                protocolList.Add((PinUvAuthProtocol)cbor.ReadUInt32());
+                destination.Add((PinUvAuthProtocol)cbor.ReadUInt32());
             }
 
             cbor.ReadEndArray();
 
-            return (count == 0) ? null : new ReadOnlyCollection<PinUvAuthProtocol>(protocolList);
+            return destination;
         }
 
         // We're expecting to find an
         //   array of
         //     [map(negative int, string), map(string, string)]
-        // If that's not what we find, return false.
-        private static IReadOnlyDictionary<CoseAlgorithmIdentifier, string>? ReadAlgorithmsMapArray(CborReader cbor)
+        // The first map is a key/value pair, where we only want the value. Call
+        // this value-1. The second map is a key/value pair, where we only want
+        // the value. Call this value-2.
+        // We're going to create a dictionary of key/value pairs, where value-1
+        // is the key and value-2 is the value of this new key/value pair.
+        // If the destination is not null, set it with the key/value pairs and
+        // return it. If it is null, create a new Dictionary, set it, and return
+        // it.
+        private static Dictionary<CoseAlgorithmIdentifier, string>? ReadAlgorithmsMapArray(CborReader cbor)
         {
-            int? arrayEntries = cbor.ReadStartArray();
-            int arrayCount = arrayEntries ?? 0;
+            int? entries = cbor.ReadStartArray();
+            int count = entries ?? 0;
 
-            var algorithms = new Dictionary<CoseAlgorithmIdentifier, string>(arrayCount);
+            var destination = new Dictionary<CoseAlgorithmIdentifier, string>(count);
 
-            for (int index = 0; index < arrayCount; index++)
+            for (int index = 0; index < count; index++)
             {
-                _ = cbor.ReadStartMap();
+                entries = cbor.ReadStartMap();
+                int mapCount = entries ?? 0;
 
+                // Init algorithm to 0. That is not a valid number for an
+                // algorithm, so if, after reading, this is not 0, we know there
+                // was an error.
                 int algorithm = 0;
                 string credentialType = "";
 
@@ -480,14 +469,14 @@ namespace Yubico.YubiKey.Fido2
                 //   string, negative integer,
                 //   string, string
                 // in either order. If not, error.
-                for (int indexM = 0; indexM < 2; indexM++)
+                for (int indexM = 0; indexM < mapCount; indexM++)
                 {
                     string mapKey = cbor.ReadTextString();
 
                     switch (mapKey)
                     {
                         default:
-                            throw new ArgumentException(
+                            throw new Ctap2DataException(
                                 string.Format(
                                     CultureInfo.CurrentCulture,
                                     ExceptionMessages.InvalidFido2DeviceInfo, KeyAlgorithms));
@@ -502,42 +491,47 @@ namespace Yubico.YubiKey.Fido2
                     }
                 }
 
-                if ((algorithm == 0) || (!credentialType.Equals("public-key", StringComparison.Ordinal)))
+                if ((mapCount != 2) || (algorithm == 0) || (!credentialType.Equals("public-key", StringComparison.Ordinal)))
                 {
-                    throw new ArgumentException(
+                    throw new Ctap2DataException(
                         string.Format(
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.InvalidFido2DeviceInfo, KeyAlgorithms));
                 }
 
-                algorithms.Add((CoseAlgorithmIdentifier)algorithm, credentialType);
+                destination.Add((CoseAlgorithmIdentifier)algorithm, credentialType);
 
                 cbor.ReadEndMap();
             }
 
             cbor.ReadEndArray();
 
-            return (arrayCount == 0) ? null : algorithms;
+            return destination;
         }
 
-        private static IReadOnlyDictionary<string, int>? ReadCertificationsMap(CborReader cbor)
+        // There are an indefinite number of certifications. Each one is a
+        // key/value pair of string/int.
+        // Read them and build the Dictionary. If destination is not null, set it
+        // and return it. If it is null, create a new Dictionary, then set it and
+        // return it.
+        private static Dictionary<string, int>? ReadCertificationsMap(CborReader cbor)
         {
             int? entries = cbor.ReadStartMap();
             int count = entries ?? 0;
 
-            var certifications = new Dictionary<string, int>(count);
+            var destination = new Dictionary<string, int>(count);
 
             for (int index = 0; index < count; index++)
             {
                 string certifier = cbor.ReadTextString();
                 int certLevel = (int)cbor.ReadUInt32();
 
-                certifications.Add(certifier, certLevel);
+                destination.Add(certifier, certLevel);
             }
 
             cbor.ReadEndMap();
 
-            return (count == 0) ? null : certifications;
+            return destination;
         }
     }
 }

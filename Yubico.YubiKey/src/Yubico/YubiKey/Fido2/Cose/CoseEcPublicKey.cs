@@ -134,7 +134,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <param name="encodedCoseKey">
         /// The CBOR encoding.
         /// </param>
-        /// <exception cref="ArgumentException">
+        /// <exception cref="Ctap2DataException">
         /// The <c>encodedCoseKey</c> is not a correct EC Public Key encoding.
         /// </exception>
         public CoseEcPublicKey(ReadOnlyMemory<byte> encodedCoseKey)

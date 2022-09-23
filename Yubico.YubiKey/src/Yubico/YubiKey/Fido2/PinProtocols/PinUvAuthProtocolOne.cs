@@ -129,8 +129,14 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                 throw new ArgumentNullException(nameof(message));
             }
 
+            return Authenticate(_keyData, message);
+        }
+
+        /// <inheritdoc />
+        protected override byte[] Authenticate(byte[] keyData, byte[] message)
+        {
             using HMAC hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
-            hmacSha256.Key = _keyData;
+            hmacSha256.Key = keyData;
             return hmacSha256.ComputeHash(message).AsMemory(0, 16).ToArray();
         }
 

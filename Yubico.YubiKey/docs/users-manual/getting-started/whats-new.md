@@ -18,6 +18,17 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.4.x Releases
 
+### 1.4.2
+
+Release date: September 27th, 2022
+
+Bug fixes:
+
+- The UWP .NET Native toolchain has slightly different rules around P/Invoke name resolution than normal .NET,
+  which caused UWP projects to crash when enumerating YubiKeys. Additional annotation has been added to some of
+  the Windows API P/Invoke definitions to help the native compiler resolve the APIs and prevent these crashes.
+
+
 ### 1.4.1
 
 Release date: September 12th, 2022

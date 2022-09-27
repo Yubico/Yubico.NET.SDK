@@ -66,20 +66,20 @@ namespace Yubico.PlatformInterop
         // settings). It does not currently have any effect on platforms other
         // than Windows, but is included because of the analyzer and in the hope
         // that it will be supported by these platforms in the future.
-        [DllImport(Libraries.Hid, SetLastError = true)]
+        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern bool HidD_FreePreparsedData(
             IntPtr PreparsedData
             );
 
-        [DllImport(Libraries.Hid, SetLastError = true)]
+        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern bool HidD_GetAttributes(
             SafeFileHandle HidDeviceObject,
             out HIDD_ATTRIBUTES Attributes
             );
 
-        [DllImport(Libraries.Hid, SetLastError = true)]
+        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern bool HidD_GetFeature(
             SafeFileHandle HidDeviceObject,
@@ -87,7 +87,7 @@ namespace Yubico.PlatformInterop
             int ReportBufferLength
             );
 
-        [DllImport(Libraries.Hid, SetLastError = true)]
+        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern bool HidD_GetManufacturerString(
             SafeFileHandle HidDeviceObject,
@@ -95,14 +95,14 @@ namespace Yubico.PlatformInterop
             int BufferLength
             );
 
-        [DllImport(Libraries.Hid, SetLastError = true)]
+        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern bool HidD_GetPreparsedData(
             SafeFileHandle HidDeviceObject,
             out IntPtr PreparsedData
             );
 
-        [DllImport(Libraries.Hid, SetLastError = true)]
+        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern bool HidD_GetProductString(
             SafeFileHandle HidDeviceObject,
@@ -110,7 +110,7 @@ namespace Yubico.PlatformInterop
             int BufferLength
             );
 
-        [DllImport(Libraries.Hid, SetLastError = true)]
+        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern bool HidD_SetFeature(
             SafeFileHandle HidDeviceObject,
@@ -118,7 +118,7 @@ namespace Yubico.PlatformInterop
             int BufferLength
             );
 
-        [DllImport(Libraries.Hid, SetLastError = true)]
+        [DllImport(Libraries.Hid, SetLastError = true, ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern bool HidP_GetCaps(
             IntPtr PreparsedData,

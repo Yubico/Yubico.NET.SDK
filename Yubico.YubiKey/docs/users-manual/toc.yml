@@ -305,6 +305,8 @@
       href: application-yubihsm-auth/commands/get-application-version.md
     - name: Reset application
       href: application-yubihsm-auth/commands/reset-application.md
+  - name: YubiHSM Auth session APIs
+    href: application-yubihsm-auth/yubihsm-auth-session.md
 
 - name: "Supporting routines"
   homepage: support/support-overview.md

@@ -280,6 +280,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiHSM Auth", "YubiHSM Auth", "{4176F4C2-3A9E-4C89-96B6-48CF41DD98C2}"
 	ProjectSection(SolutionItems) = preProject
 		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\yubihsm-auth-overview.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\yubihsm-auth-overview.md
+		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\yubihsm-auth-session.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\yubihsm-auth-session.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Commands", "Commands", "{9FED027A-6330-407B-99F5-2DDC54B52213}"

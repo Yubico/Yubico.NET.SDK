@@ -817,4 +817,10 @@
   <data name="TypeMismatch" xml:space="preserve">
     <value>The value is not of the expected type. This often indicates a bug in the SDK.</value>
   </data>
+  <data name="YubiHsmAuthInvalidHostChallengeLength" xml:space="preserve">
+    <value>The host challenge must be exactly 8 bytes. The actual size was {0}.</value>
+  </data>
+  <data name="YubiHsmAuthInvalidHsmDeviceChallengeLength" xml:space="preserve">
+    <value>The HSM device challenge must be exactly 8 bytes. The actual size was {0}.</value>
+  </data>
 </root>

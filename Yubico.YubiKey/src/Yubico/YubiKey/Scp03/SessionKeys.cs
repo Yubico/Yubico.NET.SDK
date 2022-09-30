@@ -16,9 +16,11 @@ namespace Yubico.YubiKey.Scp03
 {
     internal class SessionKeys
     {
+#pragma warning disable CA1819 // Properties should not return arrays
         public byte[] SessionMacKey { get; set; }
         public byte[] SessionEncryptionKey { get; set; }
         public byte[] SessionRmacKey { get; set; }
+#pragma warning restore CA1819 // Properties should not return arrays
 
         public SessionKeys(byte[] sessionMacKey, byte[] sessionEncryptionKey, byte[] sessionRmacKey)
         {

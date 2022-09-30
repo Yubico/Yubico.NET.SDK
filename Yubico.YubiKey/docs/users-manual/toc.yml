@@ -305,6 +305,8 @@
       href: application-yubihsm-auth/commands/get-application-version.md
     - name: Reset application
       href: application-yubihsm-auth/commands/reset-application.md
+    - name: Get AES-128 session keys
+      href: application-yubihsm-auth/commands/get-aes128-session-keys.md
   - name: YubiHSM Auth session APIs
     href: application-yubihsm-auth/yubihsm-auth-session.md
 

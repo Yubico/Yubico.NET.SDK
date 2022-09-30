@@ -47,6 +47,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 "appversion" => GetAppVersion(),
                 "changemgmt" => ChangeManagementKey(),
                 "resetyha" => ResetYubiHsmAuth(),
+                "getsessionkeys" => GetSessionKeys(),
 
                 "sessionappmethods" => SessionAppMethods(),
                 _ => throw new ArgumentException($"Invalid command [{Command}] specified")
@@ -69,6 +70,17 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
                     Output.WriteLine($"YubiHSM Auth app, has feature: {yubiHsmAuthCapable}");
                     Output.WriteLine($"YubiHSM Auth app, is enabled: {yubiHsmAuthEnabled}");
+
+                    if (!yubiHsmAuthEnabled)
+                    {
+                        device.SetEnabledUsbCapabilities(device.EnabledUsbCapabilities | YubiKeyCapabilities.YubiHsmAuth);
+
+                        yubiHsmAuthCapable = device.HasFeature(YubiKeyFeature.YubiHsmAuthApplication);
+                        yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
+
+                        Output.WriteLine($"YubiHSM Auth app, has feature: {yubiHsmAuthCapable}");
+                        Output.WriteLine($"YubiHSM Auth app, is enabled: {yubiHsmAuthEnabled}");
+                    }
 
                     result = yubiHsmAuthEnabled ? device.TryConnect(YubiKeyApplication.YubiHsmAuth, out _) : false;
 
@@ -875,6 +887,107 @@ namespace Yubico.YubiKey.TestApp.Plugins
                         if (!HelperWriteCreds(yhaSession.Connection))
                         {
                             return result;
+                        }
+                    }
+                }
+
+                result = true;
+            }
+
+            return result;
+        }
+
+        private bool GetSessionKeys()
+        {
+            bool result = default;
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
+
+            if (keys.Any())
+            {
+                int deviceCount = 1;
+                foreach (IYubiKeyDevice device in keys)
+                {
+                    Output.WriteLine($"\n{deviceCount++}) Using YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
+
+                    bool yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
+                    if (!yubiHsmAuthEnabled)
+                    {
+                        Output.WriteLine($"YubiHSM Auth not enabled.");
+                        continue;
+                    }
+
+                    byte[] mgmtKey = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                    byte[] password = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                    byte[] encKey = new byte[16] { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30 };
+                    byte[] macKey = new byte[16] { 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31 };
+                    string strLabel = "abc";
+                    bool touchRequired = false;
+
+                    var aesCred = new Aes128CredentialWithSecrets(password, encKey, macKey, strLabel, touchRequired);
+
+                    byte[] hostChallenge = new byte[8] { 1, 0, 1, 0, 1, 0, 1, 0 };
+                    byte[] hsmDeviceChallenge = new byte[8] { 2, 4, 2, 4, 2, 4, 2, 4 };
+
+                    using (IYubiKeyConnection hsmAuthConnection = device.Connect(YubiKeyApplication.YubiHsmAuth))
+                    {
+                        // Reset app
+                        ResetApplicationCommand cmd = new ResetApplicationCommand();
+                        ResetApplicationResponse response = hsmAuthConnection.SendCommand(cmd);
+                        if (response.Status != ResponseStatus.Success)
+                        {
+                            Output.WriteLine($"Failed to reset application, response status: {response.Status}");
+                            continue;
+                        }
+                        else
+                        {
+                            Output.WriteLine("Succeeded in resetting the YubiHSM Auth application.");
+                        }
+
+                        // Add cred
+                        AddCredentialCommand cmdAddCred = new AddCredentialCommand(mgmtKey, aesCred);
+                        AddCredentialResponse responseAddCred = hsmAuthConnection.SendCommand(cmdAddCred);
+
+                        if (responseAddCred.Status != ResponseStatus.Success)
+                        {
+                            Output.WriteLine($"Failed to add a credential, response status: {responseAddCred.Status}, {responseAddCred.StatusMessage}");
+                            return false;
+                        }
+                        else
+                        {
+                            Output.WriteLine($"Succeeded in adding credential \"{strLabel}\".");
+                        }
+
+                        // Get session keys
+                        GetAes128SessionKeysCommand cmdGetSessionKeys = new GetAes128SessionKeysCommand(strLabel, password, hostChallenge, hsmDeviceChallenge);
+                        GetAes128SessionKeysResponse rspGetSessionKeys = hsmAuthConnection.SendCommand(cmdGetSessionKeys);
+
+                        if (responseAddCred.Status != ResponseStatus.Success)
+                        {
+                            Output.WriteLine($"Failed to get session keys, response status: {responseAddCred.Status}, {responseAddCred.StatusMessage}");
+                            return false;
+                        }
+                        else
+                        {
+                            SessionKeys sessionKeys = rspGetSessionKeys.GetData();
+
+                            Output.WriteLine($"Succeeded in getting session keys:");
+                            Output.Write($"S-ENC:");
+                            foreach (byte b in sessionKeys.EncryptionKey.Span)
+                            {
+                                Output.Write($" {b.ToString("X4")}");
+                            }
+
+                            Output.Write($"\nS-MAC:");
+                            foreach (byte b in sessionKeys.MacKey.Span)
+                            {
+                                Output.Write($" {b.ToString("X4")}");
+                            }
+
+                            Output.Write($"\nS-RMAC:");
+                            foreach (byte b in sessionKeys.RmacKey.Span)
+                            {
+                                Output.Write($" {b.ToString("X4")}");
+                            }
                         }
                     }
                 }

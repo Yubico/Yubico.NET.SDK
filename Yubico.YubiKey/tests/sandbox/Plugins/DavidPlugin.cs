@@ -848,46 +848,25 @@ namespace Yubico.YubiKey.TestApp.Plugins
                         continue;
                     }
 
-                    byte[] mgmtKey = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-                    byte[] password = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
-                    byte[] encKey = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
-                    byte[] macKey = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
-                    string strLabel = "abc";
-                    bool touchRequired = false;
-
-                    var aesCred = new Aes128CredentialWithSecrets(password, encKey, macKey, strLabel, touchRequired);
-
                     Output.WriteLine($"\n{deviceCount++}) Using YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
 
                     using (YubiHsmAuthSession yhaSession = new YubiHsmAuthSession(device))
                     {
-                        Output.WriteLine($"YubiHSM Auth v{yhaSession.GetApplicationVersion()}");
+                        Output.WriteLine($"Mgmt retries, before: {yhaSession.GetManagementKeyRetries()}");
 
-                        if (!HelperGetCreds(yhaSession.Connection).Any())
+                        // Supply wrong current mgmt key 
+                        byte[] currentManagementKey = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                        byte[] newManagementKey = new byte[16] { 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4 };
+
+                        ChangeManagementKeyCommand cmdChangeMgmt = new ChangeManagementKeyCommand(newManagementKey, currentManagementKey);
+                        ChangeManagementKeyResponse responseChangeMgmt = yhaSession.Connection.SendCommand(cmdChangeMgmt);
+
+                        if (responseChangeMgmt.Status != ResponseStatus.Success)
                         {
-                            AddCredentialCommand cmdAddCred = new AddCredentialCommand(mgmtKey, aesCred);
-                            AddCredentialResponse responseAddCred = yhaSession.Connection.SendCommand(cmdAddCred);
-
-                            if (responseAddCred.Status != ResponseStatus.Success)
-                            {
-                                Output.WriteLine($"Failed to add a credential, response status: {responseAddCred.Status}, {responseAddCred.StatusMessage}");
-                                return false;
-                            }
+                            Output.WriteLine($"Failed change mgmt key (1), response status: {responseChangeMgmt.Status}, {responseChangeMgmt.StatusMessage}");
                         }
 
-                        Output.WriteLine("\nBefore:");
-                        if (!HelperWriteCreds(yhaSession.Connection))
-                        {
-                            return result;
-                        }
-
-                        yhaSession.ResetApplication();
-
-                        Output.WriteLine("\nAfter:");
-                        if (!HelperWriteCreds(yhaSession.Connection))
-                        {
-                            return result;
-                        }
+                        Output.WriteLine($"Mgmt retries, after: {yhaSession.GetManagementKeyRetries()}");
                     }
                 }
 

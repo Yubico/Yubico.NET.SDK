@@ -46,3 +46,4 @@ Clicking on the method will bring you to the API documentation where more inform
 | -- | -- |
 | [Reset application](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.ResetApplication) | Reset the YubiHSM Auth application, which will delete all credentials and set the management key to its default value (all zeros). |
 | [Get application version](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.GetApplicationVersion) | Get the version of the YubiHSM Auth application returned as a major, minor, and patch value. |
+| [Get management key retries](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.GetManagementKeyRetries) | Get the number of retries remaining for the management key. When supplying the management key for an operation, there is a limit of 8 retries before the application is locked and must be completely reset. Supplying the correct management key before the application is locked will reset the retry counter to 8. |

@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 0x40, 0x79, 0xbb, 0x2b, 0x2a, 0x28, 0x96, 0x4f, 0x6b, 0x15, 0x41, 0x95, 0xe7, 0x0f
             };
 
-            return CoseKey.Create(encodedKey);
+            return CoseKey.Create(encodedKey, out int _);
         }
     }
 }

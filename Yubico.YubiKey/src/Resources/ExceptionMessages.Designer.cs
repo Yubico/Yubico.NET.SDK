@@ -826,11 +826,11 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The Fido2 AuthenticatorInfo is invalid for member number {0} (see authenticatorGetInfo in CTAP standard)..
+        ///   Looks up a localized string similar to The FIDO2 info returned is invalid..
         /// </summary>
-        internal static string InvalidFido2DeviceInfo {
+        internal static string InvalidFido2Info {
             get {
-                return ResourceManager.GetString("InvalidFido2DeviceInfo", resourceCulture);
+                return ResourceManager.GetString("InvalidFido2Info", resourceCulture);
             }
         }
         

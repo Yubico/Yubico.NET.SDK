@@ -47,7 +47,7 @@ the following:
 
 ### Response APDU info
 
-#### Response APDU for a successful set PIN
+#### Response APDU for a successful change PIN
 
 Total Length: 2\
 Data Length: 0

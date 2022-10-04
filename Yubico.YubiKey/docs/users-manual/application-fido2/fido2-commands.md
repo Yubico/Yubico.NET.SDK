@@ -32,6 +32,7 @@ what information is needed from the caller for that command.
 * [Get PIN Token](#get-pin-token)
 * [Get PIN/UV Auth Token Using PIN](#pin-uv-auth-using-pin)
 * [Get PIN/UV Auth Token Using UV](#pin-uv-auth-using-uv)
+* [Make credential](#make-credential)
 ___
 ## Get version
 
@@ -297,4 +298,33 @@ The encrypted token as a byte array.
 ### APDU
 
 [Technical APDU Details](apdu/get-auth-token-using-uv.md)
+___
+## Make credential
+
+Make a credential for a relying party. This is the 
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[MakeCredentialCommand](xref:Yubico.YubiKey.Fido2.Commands.MakeCredentialCommand)
+
+[MakeCredentialResponse](xref:Yubico.YubiKey.Fido2.Commands.MakeCredentialResponse)
+
+### Input
+
+The `authenticatorMakeCredential` parameters specified in section 6.1 of the FIDO2
+specifications.
+
+### Output
+
+The credential (public key) and other information.
+
+[MakeCredentialData](xref:Yubico.YubiKey.Fido2.MakeCredentialData)
+
+### APDU
+
+[Technical APDU Details](apdu/make-credential.md)
 ___

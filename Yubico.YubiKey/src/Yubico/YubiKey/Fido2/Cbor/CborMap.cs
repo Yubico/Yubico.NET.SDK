@@ -28,6 +28,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
         private readonly IDictionary<TKey, object?> _dict;
 
         /// <summary>
+        /// The number of key/value pairs in this map.
+        /// </summary>
+        public int Count => _dict.Count;
+
+        /// <summary>
         /// Creates a new instance of <see cref="CborMap{TKey}"/> based on a dictionary.
         /// </summary>
         /// <param name="dict">An integer keyed dictionary of objects representing a CBOR map.</param>
@@ -124,11 +129,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// <summary>
         /// Read the value for the given key as an array of objects.
         /// </summary>
-        public object[] ReadArray(TKey key)
+        public IList<object> ReadArray(TKey key)
         {
             object? value = _dict[key];
 
-            if (value is object[] arr)
+            if (value is IList<object> arr)
             {
                 return arr;
             }

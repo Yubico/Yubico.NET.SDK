@@ -80,6 +80,9 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <param name="coseEncodedKey">
         /// A valid COSE key representation.
         /// </param>
+        /// <param name="bytesRead">
+        /// The method will return the number of bytes read in this argument.
+        /// </param>
         /// <returns>
         /// A COSE key instance corresponding to the type described by the CBOR data.
         /// </returns>
@@ -98,10 +101,11 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <exception cref="NotSupportedException">
         /// The <see cref="CoseAlgorithmIdentifier"/> is not supported by this object representation.
         /// </exception>
-        public static CoseKey Create(ReadOnlyMemory<byte> coseEncodedKey)
+        public static CoseKey Create(ReadOnlyMemory<byte> coseEncodedKey, out int bytesRead)
         {
             var cborReader = new CborReader(coseEncodedKey);
             var map = new CborMap<long>(cborReader);
+            bytesRead = coseEncodedKey.Length - cborReader.BytesRemaining;
 
             if (!map.Contains(TagAlgorithm))
             {
@@ -111,9 +115,12 @@ namespace Yubico.YubiKey.Fido2.Cose
                         ExceptionMessages.Ctap2MissingRequiredField));
             }
 
-            // Currently the only supported algorithm is -25 (ECDHwHKDF256).
-            // This seems odd, but it is the algorithm the standard specifies.
-            if ((CoseAlgorithmIdentifier)map.ReadInt64(TagAlgorithm) == CoseAlgorithmIdentifier.ECDHwHKDF256)
+            // We only support ECC using the P-256 curve. For the algorithm, we
+            // might encounter either -7 (ES256 = ECDSA with SHA-256) or -25
+            // (ECDHwHKDF256). If the -25 seems odd, it is specified in the FIDO2
+            // standard.
+            var algorithm = (CoseAlgorithmIdentifier)map.ReadInt64(TagAlgorithm);
+            if ((algorithm == CoseAlgorithmIdentifier.ECDHwHKDF256) || (algorithm == CoseAlgorithmIdentifier.ES256))
             {
                 return new CoseEcPublicKey(coseEncodedKey);
             }

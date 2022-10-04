@@ -267,7 +267,6 @@ namespace Yubico.YubiKey.Fido2
         {
             Aaguid = new ReadOnlyMemory<byte>(_aaguid);
 
-            int mapKey = 0;
             try
             {
                 var cbor = new CborReader(cborEncoding, CborConformanceMode.Ctap2Canonical);
@@ -277,7 +276,7 @@ namespace Yubico.YubiKey.Fido2
 
                 while (count > 0)
                 {
-                    mapKey = (int)cbor.ReadUInt32();
+                    int mapKey = (int)cbor.ReadUInt32();
 
                     switch (mapKey)
                     {
@@ -366,7 +365,7 @@ namespace Yubico.YubiKey.Fido2
                             throw new ArgumentException(
                                 string.Format(
                                     CultureInfo.CurrentCulture,
-                                    ExceptionMessages.InvalidFido2DeviceInfo, mapKey));
+                                    ExceptionMessages.InvalidFido2Info));
                     }
 
                     count--;
@@ -379,8 +378,8 @@ namespace Yubico.YubiKey.Fido2
                 throw new Ctap2DataException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidFido2DeviceInfo, mapKey),
-                        cborException);
+                        ExceptionMessages.InvalidFido2Info),
+                    cborException);
             }
 
             // There are two elements that must be present. If not, this is a
@@ -479,7 +478,7 @@ namespace Yubico.YubiKey.Fido2
                             throw new Ctap2DataException(
                                 string.Format(
                                     CultureInfo.CurrentCulture,
-                                    ExceptionMessages.InvalidFido2DeviceInfo, KeyAlgorithms));
+                                    ExceptionMessages.InvalidFido2Info));
 
                         case "alg":
                             algorithm = cbor.ReadInt32();
@@ -496,7 +495,7 @@ namespace Yubico.YubiKey.Fido2
                     throw new Ctap2DataException(
                         string.Format(
                             CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidFido2DeviceInfo, KeyAlgorithms));
+                            ExceptionMessages.InvalidFido2Info));
                 }
 
                 destination.Add((CoseAlgorithmIdentifier)algorithm, credentialType);

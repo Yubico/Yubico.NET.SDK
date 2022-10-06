@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
         // If the Encoder writes out an empty array, this will throw an
         // exception.
-        public CborMapWriter<TKey> Entry(TKey key, CborHelpers.CborEncodeDelegate Encoder, object? localData)
+        public CborMapWriter<TKey> Entry<T>(TKey key, CborHelpers.CborEncodeDelegate<T> Encoder, T? localData) where T : class
         {
             WriteKey(key);
             _cbor.WriteEncodedValue(Encoder(localData));
@@ -136,7 +136,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         // An encoder is always provided. If the return value is an empty
         // byte array, then treat it as an option not exercised, that is,
         // don't write anything out.
-        public CborMapWriter<TKey> OptionalEntry(TKey key, CborHelpers.CborEncodeDelegate Encoder, object? localData)
+        public CborMapWriter<TKey> OptionalEntry<T>(TKey key, CborHelpers.CborEncodeDelegate<T> Encoder, T? localData) where T : class
         {
             byte[] encoding = Encoder(localData);
             if (encoding.Length != 0)

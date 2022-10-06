@@ -14,9 +14,9 @@
 
 using System;
 using System.Formats.Cbor;
-using System.Globalization;
 using System.Collections.Generic;
 using Yubico.YubiKey.Fido2.Cbor;
+using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2
@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Fido2
         private const int TagClientDataHash = 1;
         private const int TagRp = 2;
         private const int TagUserEntity = 3;
-        private const int TagCredentialTypeList = 4;
+        private const int TagAlgorithmsList = 4;
         private const int TagExcludeList = 5;
         private const int TagExtensions = 6;
         private const int TagOptions = 7;
@@ -48,14 +48,10 @@ namespace Yubico.YubiKey.Fido2
         private const int TagProtocol = 9;
         private const int TagEnterpriseAttestation = 10;
 
-        private const string OptionRk = "rk";
-        private const string OptionUp = "up";
-        private const string OptionUv = "uv";
-
+        private readonly List<Tuple<string, CoseAlgorithmIdentifier>> _algorithms = new List<Tuple<string, CoseAlgorithmIdentifier>>();
         private List<CredentialId>? _excludeList;
         private Dictionary<string, byte[]>? _extensions;
         private Dictionary<string, bool>? _options;
-        private readonly List<CredentialType> _credentialTypes = new List<CredentialType>();
 
         /// <summary>
         /// The original <c>clientDataHash</c> that was provided by the client.
@@ -76,27 +72,22 @@ namespace Yubico.YubiKey.Fido2
         public UserEntity UserEntity { get; set; }
 
         /// <summary>
-        /// The list of supported credential types and algorithms. The YubiKey
-        /// will select one from the list based on what it supports. This is a
-        /// required element.
+        /// The list of supported algorithms for credential generation. This is
+        /// the "pubKeyCredParams" in the standard (FIDO2 section 6.1).
+        /// This is an optional parameter so it can be null.
         /// </summary>
         /// <remarks>
-        /// To add an entry to the list, call <see cref="AddCredentialType"/>.
+        /// Each entry in the list is a type and algorithm. Neither the type nor
+        /// algorithm are guaranteed to be unique, although each combination is.
+        /// Currently, the only type defined is "public-key". The only algorithm
+        /// the YubiKey supports is ECDSA with SHA-256 using the NIST P-256
+        /// curve. This is the pair
+        /// "public-key"/<c>CoseAlgorithmIdentifier.ES256</c>.
         /// <para>
-        /// Currently only credential parameters of the pair
-        /// "public-key"/ECDSA with SHA-256 is supported, so it is sufficent to
-        /// use the constructor that automatically adds the default credential
-        /// type. If this constructor is used and no other credential type is
-        /// needed, there is no need to call <c>AddCredentialType</c>.
+        /// To add an entry to the list, call <see cref="AddAlgorithm"/>.
         /// </para>
         /// </remarks>
-        public IReadOnlyList<CredentialType> CredentialTypes => _credentialTypes;
-
-        /// <summary>
-        /// The protocol chosen by the platform. This is an optional parameter,
-        /// so it can be null.
-        /// </summary>
-        public PinUvAuthProtocol? Protocol { get; set; }
+        public IReadOnlyList<Tuple<string, CoseAlgorithmIdentifier>> Algorithms => _algorithms;
 
         /// <summary>
         /// The list of credentialIds for which the authenticator should not
@@ -135,6 +126,9 @@ namespace Yubico.YubiKey.Fido2
         /// key/value pair, where the key is a string and the value is a boolean.
         /// This is an optional parameter, so it can be null.
         /// </summary>
+        /// <remarks>
+        /// To add options, call <see cref="AddOption"/>.
+        /// </remarks>
         public IReadOnlyDictionary<string, bool>? Options => _options;
 
         /// <summary>
@@ -158,6 +152,12 @@ namespace Yubico.YubiKey.Fido2
         public ReadOnlyMemory<byte>? PinUvAuthParam { get; set; }
 
         /// <summary>
+        /// The protocol chosen by the platform. This is an optional parameter,
+        /// so it can be null.
+        /// </summary>
+        public PinUvAuthProtocol? Protocol { get; set; }
+
+        /// <summary>
         /// Specifies whether an enterprise attestation is to be returned along
         /// with the credential, and if so, which kind. This is an optional
         /// parameter, so it is can be null.
@@ -176,7 +176,7 @@ namespace Yubico.YubiKey.Fido2
         /// platform-managed attestation as a request for vendor-facilitated.
         /// </para>
         /// </remarks>
-        public EnterpriseAttestation? Attestation { get; set; }
+        public EnterpriseAttestation? EnterpriseAttestation { get; set; }
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -186,24 +186,23 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Constructs a new instance of <see cref="MakeCredentialParameters"/>.
+        /// Constructs a new instance of <see cref="MakeCredentialParameters"/>
+        /// setting the preferred algorithm to something other than the default.
         /// </summary>
         /// <remarks>
         /// One of the required elements of the <c>MakeCredential</c> parameters
-        /// is a list of supported credential types
-        /// (<see cref="CredentialTypes"/>). Hence, you must supply at least
-        /// one credential type, and that one will be the preferred type.
-        /// Currently the only credential type supported by the YubiKey is the
-        /// pair <c>"public-key"/ECDSA with SHA-256</c>. To build this parameters
+        /// is a list of supported algorithms (a type and algorithm pair,
+        /// <see cref="Algorithms"/>). Hence, you must supply at least one
+        /// algorithm, which will be the preferred one. Currently the only
+        /// algorithm supported by the YubiKey is the pair
+        /// <c>"public-key"/ECDSA with SHA-256</c>. To build this parameters
         /// object with that credential type, use the constructor that adds it be
-        /// default, or pass in an instance of <see cref="CredentialType"/>
-        /// built using the default constructor. That is,
-        /// <code>
-        ///    var params = new MakeCredentialParameters(
-        ///        relyingParty, userEntity, new CredentialType());
-        /// </code>
+        /// default. If you want to specify something other than the default, use
+        /// this constructor.
+        /// <para>
         /// It is possible to add more types later using the method
-        /// <see cref="AddCredentialType"/>.
+        /// <see cref="AddAlgorithm"/>.
+        /// </para>
         /// </remarks>
         /// <param name="relyingParty">
         /// The relying party for which the credential is to be created. This
@@ -213,32 +212,43 @@ namespace Yubico.YubiKey.Fido2
         /// The user for which the credential is to be created. This constructor
         /// copies a reference to the input object.
         /// </param>
-        /// <param name="preferredCredentialType">
-        /// The credential type (type and algorithm) that is the caller's first
+        /// <param name="algorithmType">
+        /// The type of type and algorithm that is the caller's preferred choice.
+        /// </param>
+        /// <param name="algorithm">
+        /// The algorithm of type and algorithm that is the caller's preferred
         /// choice.
         /// </param>
-        public MakeCredentialParameters(RelyingParty relyingParty, UserEntity userEntity, CredentialType preferredCredentialType)
+        public MakeCredentialParameters(
+            RelyingParty relyingParty,
+            UserEntity userEntity,
+            string algorithmType,
+            CoseAlgorithmIdentifier algorithm)
         {
             RelyingParty = relyingParty;
             UserEntity = userEntity;
-            AddCredentialType(preferredCredentialType);
+            AddAlgorithm(algorithmType, algorithm);
         }
 
         /// <summary>
         /// Constructs a new instance of <see cref="MakeCredentialParameters"/>
-        /// using the default credential type.
+        /// using the default preferred algorithm
         /// </summary>
         /// <remarks>
         /// One of the required elements of the <c>MakeCredential</c> parameters
-        /// is a list of supported credential types
-        /// (<see cref="CredentialTypes"/>). Hence, you must supply at least
-        /// one credential type, and that one will be the preferred type.
-        /// Currently the only credential type supported by the YubiKey is the
-        /// pair <c>"public-key"/ECDSA with SHA-256</c>. This constructor will
-        /// add that credential. If you do not want this credential type, then
-        /// use the other constructor that takes in a
-        /// <see cref="CredentialType"/>. It is possible to add more types later
-        /// using the method <see cref="AddCredentialType"/>.
+        /// is a list of supported algorithms (a type and algorithm pair,
+        /// <see cref="Algorithms"/>). Hence, you must supply at least one
+        /// algorithm, which will be the preferred one. Currently the only
+        /// algorithm supported by the YubiKey is the pair
+        /// <c>"public-key"/ECDSA with SHA-256</c>. To build this parameters
+        /// object with that credential type, use this constructor, which will
+        /// add it by default. If you want to specify something other than the
+        /// default, use the constructor that takes in an <c>algorithmType</c>
+        /// and <c>algorithm</c>.
+        /// <para>
+        /// It is possible to add more types later using the method
+        /// <see cref="AddAlgorithm"/>.
+        /// </para>
         /// </remarks>
         /// <param name="relyingParty">
         /// The relying party for which the credential is to be created. This
@@ -252,172 +262,14 @@ namespace Yubico.YubiKey.Fido2
         {
             RelyingParty = relyingParty;
             UserEntity = userEntity;
-            AddCredentialType(new CredentialType());
+            AddAlgorithm(ParameterHelpers.DefaultAlgType, ParameterHelpers.DefaultAlg);
         }
 
         /// <summary>
-        /// Constructs a new instance of <see cref="MakeCredentialParameters"/>
-        /// from the encoded value.
+        /// Add an entry to <see cref="Algorithms"/>.
         /// </summary>
-         /// <remarks>
-        /// This constructor expects the encoding to follow this template.
-        /// <code>
-        ///    map {
-        ///      01  --byte string--
-        ///      02  --map--
-        ///      03  --map--
-        ///      04  --array of CredentialType--
-        ///      05  --array of CredentialId-- (Optional)
-        ///      07  --map-- (Optional)
-        ///      08  --byte string-- (Optional)
-        ///      09  --int-- (Optional)
-        ///      0A  --int-- (Optional)
-        ///    }
-        /// </code>
-        /// </remarks>
-        /// <param name="encodedParameters">
-        /// The CBOR-encoded <c>MakeCredentialParameters</c>.
-        /// </param>
-        /// <exception cref="Ctap2DataException">
-        /// The <c>encodedParameters</c> is not a correct encoding.
-        /// </exception>
-        public MakeCredentialParameters(ReadOnlyMemory<byte> encodedParameters)
-        {
-            var cbor = new CborReader(encodedParameters, CborConformanceMode.Ctap2Canonical);
-            int? entries = cbor.ReadStartMap();
-            int count = entries ?? 0;
-
-            while (count > 0)
-            {
-                int mapKey = (int)cbor.ReadInt32();
-
-                switch (mapKey)
-                {
-                    default:
-                        throw new Ctap2DataException(
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                ExceptionMessages.Ctap2CborUnexpectedKey, TagClientDataHash, mapKey));
-
-                    case TagClientDataHash:
-                        ClientDataHash = new ReadOnlyMemory<byte>(cbor.ReadByteString());
-                        break;
-
-                    case TagRp:
-                        RelyingParty = new RelyingParty(cbor.ReadEncodedValue());
-                        break;
-
-                    case TagUserEntity:
-                        UserEntity = new UserEntity(cbor.ReadEncodedValue());
-                        break;
-
-                    case TagCredentialTypeList:
-                        entries = cbor.ReadStartArray();
-                        int tCount = entries ?? 0;
-
-                        while (tCount > 0)
-                        {
-                            AddCredentialType(new CredentialType(cbor.ReadEncodedValue()));
-                            tCount--;
-                        }
-
-                        cbor.ReadEndArray();
-                        break;
-
-                    case TagExcludeList:
-                        entries = cbor.ReadStartArray();
-                        int eCount = entries ?? 0;
-
-                        while (eCount > 0)
-                        {
-                            ExcludeCredential(new CredentialId(cbor.ReadEncodedValue()));
-                            eCount--;
-                        }
-
-                        cbor.ReadEndArray();
-                        break;
-
-                    case TagExtensions:
-                        entries = cbor.ReadStartMap();
-                        int xCount = entries ?? 0;
-
-                        while (xCount > 0)
-                        {
-                            string extensionKey = cbor.ReadTextString();
-                            AddExtension(extensionKey, cbor.ReadEncodedValue().ToArray());
-                            xCount--;
-                        }
-
-                        cbor.ReadEndMap();
-                        break;
-
-                    case TagOptions:
-                        entries = cbor.ReadStartMap();
-                        int oCount = entries ?? 0;
-
-                        while (oCount > 0)
-                        {
-                            string optionKey = cbor.ReadTextString();
-                            AddOption(optionKey, cbor.ReadBoolean());
-                            oCount--;
-                        }
-
-                        cbor.ReadEndMap();
-                        break;
-
-                    case TagPinUvAuth:
-                        PinUvAuthParam = new ReadOnlyMemory<byte>(cbor.ReadByteString());
-                        break;
-
-                    case TagProtocol:
-                        Protocol = (PinUvAuthProtocol)cbor.ReadInt32();
-                        break;
-
-                    case TagEnterpriseAttestation:
-                        Attestation = (EnterpriseAttestation)cbor.ReadInt32();
-                        break;
-                }
-
-                count--;
-            }
-
-            cbor.ReadEndMap();
-
-            if ((ClientDataHash.Length == 0)
-                || (RelyingParty is null)
-                || (UserEntity is null)
-                || (CredentialTypes.Count == 0))
-            {
-                throw new Ctap2DataException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.Ctap2MissingRequiredField));
-            }
-        }
-
-        /// <summary>
-        /// Add an entry to the credential parameters list.
-        /// </summary>
-        /// <remarks>
-        /// Currently only credential parameters of the pair "public-key"/ECDSA
-        /// with SHA-256 is supported, so it is sufficent to call the constructor
-        /// that adds this one by default.
-        /// </remarks>
-        /// <param name="credentialType">
-        /// The <c>credentialType</c> object to add.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// The <c>credentialParamters</c> arg is null.
-        /// </exception>
-        public void AddCredentialType(CredentialType credentialType)
-        {
-            if (credentialType is null)
-            {
-                throw new ArgumentNullException(nameof(credentialType));
-            }
-
-            _credentialTypes.Add(credentialType);
-        }
+        public void AddAlgorithm(string algorithmType, CoseAlgorithmIdentifier algorithm) =>
+            _algorithms.Add(new Tuple<string, CoseAlgorithmIdentifier>(algorithmType, algorithm));
 
         /// <summary>
         /// Add an entry to the exclude list.
@@ -433,15 +285,8 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="ArgumentNullException">
         /// The <c>credentialId</c> arg is null.
         /// </exception>
-        public void ExcludeCredential(CredentialId credentialId)
-        {
-            if (credentialId is null)
-            {
-                throw new ArgumentNullException(nameof(credentialId));
-            }
-
-            (_excludeList ??= new List<CredentialId>()).Add(credentialId);
-        }
+        public void ExcludeCredential(CredentialId credentialId) => _excludeList =
+            ParameterHelpers.AddToList<CredentialId>(credentialId, _excludeList);
 
         /// <summary>
         /// Add an entry to the extensions list.
@@ -456,7 +301,7 @@ namespace Yubico.YubiKey.Fido2
         /// is different. There will be a definition of the value that
         /// accompanies each key. It will be possible to encode that definition
         /// using the rules of CBOR. The caller supplies the key and the encoded
-        /// value.
+        /// value. This method copies a reference to the byte array value.
         /// </para>
         /// </remarks>
         /// <param name="extensionKey">
@@ -468,19 +313,8 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="ArgumentNullException">
         /// The <c>extensionKey</c> or <c>encodedValue</c> arg is null.
         /// </exception>
-        public void AddExtension(string extensionKey, byte[] encodedValue)
-        {
-            if (extensionKey is null)
-            {
-                throw new ArgumentNullException(nameof(extensionKey));
-            }
-            if (encodedValue is null)
-            {
-                throw new ArgumentNullException(nameof(encodedValue));
-            }
-
-            (_extensions ??= new Dictionary<string, byte[]>()).Add(extensionKey, encodedValue);
-        }
+        public void AddExtension(string extensionKey, byte[] encodedValue) => _extensions =
+            ParameterHelpers.AddKeyValue<byte[]>(extensionKey, encodedValue, _extensions);
 
         /// <summary>
         /// Add an entry to the list of options.
@@ -488,116 +322,24 @@ namespace Yubico.YubiKey.Fido2
         /// <remarks>
         /// If the <c>Options</c> list already contains an entry with the given
         /// <c>optionKey</c>, this method will replace it.
+        /// <para>
+        /// Note that the standard specifies valid option keys. Currently they
+        /// are "rk", "up", and "uv". This method will accept any key given and
+        /// pass it to the YubiKey. If an invalid key is used, the YubiKey will
+        /// return an error.
+        /// </para>
         /// </remarks>
         /// <param name="optionKey">
         /// The option to add. This is the key of the option key/value pair.
         /// </param>
-        /// <param name="value">
+        /// <param name="optionValue">
         /// The value this option will possess.
         /// </param>
-        /// <exception cref="ArgumentException">
-        /// The <c>optionKey</c> arg is not a valid key defined in the
-        /// standard.
-        /// </exception>
         /// <exception cref="ArgumentNullException">
         /// The <c>optionKey</c> arg is null.
         /// </exception>
-        public void AddOption(string optionKey, bool value)
-        {
-            if (optionKey is null)
-            {
-                throw new ArgumentNullException(nameof(optionKey));
-            }
-
-            if (!IsValidOption(optionKey))
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidCtap2Data));
-            }
-
-            _options ??= new Dictionary<string, bool>();
-            // If the option already exists, relpace what is in the dictionary
-            // with this one.
-            // This will add a new entry if there is no entry associated with the
-            // given optionKey.
-            _options[optionKey] = value;
-        }
-
-        // Check to see if the given optionKey is one from the standard.
-        private static bool IsValidOption(string optionKey)
-        {
-            return optionKey.Equals(OptionRk, StringComparison.Ordinal)
-                || optionKey.Equals(OptionUp, StringComparison.Ordinal)
-                || optionKey.Equals(OptionUv, StringComparison.Ordinal);
-        }
-
-        // Implements CborHelper.CborEncodeDelegate.
-        // Encode each of the entries as an array.
-        // If there are no entries in the list, this method will write out an
-        // array of 0 elements. So if you want "no entries" to mean "don't write
-        // anything", don't call this method.
-        private static byte[] EncodeArrayOfObjects(object? localData)
-        {
-            if ((!(localData is IReadOnlyList<ICborEncode> entryList)) || (entryList.Count == 0))
-            {
-                return Array.Empty<byte>();
-            }
-
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-
-            cbor.WriteStartArray(entryList.Count);
-            foreach (ICborEncode cborEncode in entryList)
-            {
-                cbor.WriteEncodedValue(cborEncode.CborEncode());
-            }
-            cbor.WriteEndArray();
-
-            return cbor.Encode();
-        }
-
-        // Implements CborHelper.CborEncodeDelegate.
-        private byte[] EncodeExtensions(object? localData)
-        {
-            if ((_extensions is null) || !(localData is null))
-            {
-                return Array.Empty<byte>();
-            }
-
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-
-            cbor.WriteStartMap(null);
-            foreach (KeyValuePair<string, byte[]> entry in _extensions)
-            {
-                cbor.WriteTextString(entry.Key);
-                cbor.WriteEncodedValue(entry.Value);
-            }
-            cbor.WriteEndMap();
-
-            return cbor.Encode();
-        }
-
-        // Implements CborHelper.CborEncodeDelegate.
-        private byte[] EncodeOptions(object? localData)
-        {
-            if ((_options is null) || !(localData is null))
-            {
-                return Array.Empty<byte>();
-            }
-
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-
-            cbor.WriteStartMap(null);
-            foreach (KeyValuePair<string, bool> entry in _options)
-            {
-                cbor.WriteTextString(entry.Key);
-                cbor.WriteBoolean(entry.Value);
-            }
-            cbor.WriteEndMap();
-
-            return cbor.Encode();
-        }
+        public void AddOption(string optionKey, bool optionValue) => _options =
+            ParameterHelpers.AddKeyValue<bool>(optionKey, optionValue, _options);
 
         /// <inheritdoc/>
         public byte[] CborEncode()
@@ -608,14 +350,41 @@ namespace Yubico.YubiKey.Fido2
                 .Entry(TagClientDataHash, ClientDataHash)
                 .Entry(TagRp, RelyingParty)
                 .Entry(TagUserEntity, UserEntity)
-                .Entry(TagCredentialTypeList, EncodeArrayOfObjects, CredentialTypes)
-                .OptionalEntry(TagExcludeList, EncodeArrayOfObjects, ExcludeList)
-                .OptionalEntry(TagExtensions, EncodeExtensions, null)
-                .OptionalEntry(TagOptions, EncodeOptions, null)
+                .Entry(TagAlgorithmsList, EncodeAlgorithms, this)
+                .OptionalEntry<IReadOnlyList<ICborEncode>>(TagExcludeList, CborHelpers.EncodeArrayOfObjects, ExcludeList)
+                .OptionalEntry<Dictionary<string,byte[]>>(TagExtensions, ParameterHelpers.EncodeKeyValues<byte[]>, _extensions)
+                .OptionalEntry<Dictionary<string,bool>>(TagOptions, ParameterHelpers.EncodeKeyValues<bool>, _options)
                 .OptionalEntry(TagPinUvAuth, PinUvAuthParam)
                 .OptionalEntry(TagProtocol, (long?)Protocol)
-                .OptionalEntry(TagEnterpriseAttestation, (long?)Attestation)
+                .OptionalEntry(TagEnterpriseAttestation, (long?)EnterpriseAttestation)
                 .EndMap();
+
+            return cbor.Encode();
+        }
+
+        private byte[] EncodeAlgorithms(MakeCredentialParameters? localData)
+        {
+            if ((localData is null) || (localData.Algorithms.Count == 0))
+            {
+                return Array.Empty<byte>();
+            }
+
+            int count = localData.Algorithms.Count;
+
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cbor.WriteStartArray(count);
+
+            for (int index = 0; index < count; index++)
+            {
+                string algType = localData.Algorithms[index].Item1;
+                int alg = (int)localData.Algorithms[index].Item2;
+
+                CborHelpers.BeginMap<string>(cbor)
+                    .Entry(ParameterHelpers.TagType, algType)
+                    .Entry(ParameterHelpers.TagAlg, alg)
+                    .EndMap();
+            }
+            cbor.WriteEndArray();
 
             return cbor.Encode();
         }

@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         {
             var cbor = new CborReader(encoding, CborConformanceMode.Ctap2Canonical);
 
-            var cborMap = new CborMap<long>(cbor);
+            var cborMap = new CborMap<int>(cbor);
 
             return cborMap.Contains(3);
         }

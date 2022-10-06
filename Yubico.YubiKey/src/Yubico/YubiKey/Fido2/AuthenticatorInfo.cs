@@ -70,14 +70,13 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public const int DefaultMinimumPinLength = 4;
 
-        private readonly List<string> _versions = new List<string>();
-        private readonly byte[] _aaguid = Array.Empty<byte>();
+        private readonly byte[] _aaguid;
 
         /// <summary>
         /// List of version strings of CTAP supported by the authenticator.
         /// This is a REQUIRED value.
         /// </summary>
-        public IReadOnlyList<string> Versions => _versions;
+        public IReadOnlyList<string> Versions { get; private set; }
 
         /// <summary>
         /// List of extension strings of CTAP supported by the authenticator.
@@ -141,13 +140,18 @@ namespace Yubico.YubiKey.Fido2
         public IReadOnlyList<string>? Transports { get; private set; }
 
         /// <summary>
-        /// The list of supported algorithms for credential generation. Each
-        /// entry in the list is an algorithm specified in the COSE algorithm
-        /// identifier list and a string specifying the type of credential.
-        /// Currently the standard has only one type defined, "public-key".
-        /// This is an OPTIONAL value and the <c>Count</c> can be zero.
+        /// The list of supported algorithms for credential generation. This is
+        /// an optional value and can be null.
         /// </summary>
-        public IReadOnlyDictionary<CoseAlgorithmIdentifier, string>? Algorithms { get; private set; }
+        /// <remarks>
+        /// Each entry in the list is a type and algorithm. Neither the type nor
+        /// algorithm are guaranteed to be unique, although each combination is.
+        /// Currently, the only type defined is "public-key". The only algorithm
+        /// the YubiKey supports is ECDSA with SHA-256 using the NIST P-256
+        /// curve. This is the pair
+        /// "public-key"/<c>CoseAlgorithmIdentifier.ES256</c>.
+        /// </remarks>
+        public IReadOnlyList<Tuple<string, CoseAlgorithmIdentifier>>? Algorithms { get; private set; }
 
         /// <summary>
         /// The maximum size, in bytes, of the serialized large-blob array that
@@ -265,113 +269,57 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public AuthenticatorInfo(ReadOnlyMemory<byte> cborEncoding)
         {
-            Aaguid = new ReadOnlyMemory<byte>(_aaguid);
-
             try
             {
-                var cbor = new CborReader(cborEncoding, CborConformanceMode.Ctap2Canonical);
+                var cborMap = new CborMap<int>(cborEncoding);
 
-                int? entries = cbor.ReadStartMap();
-                int count = entries ?? 0;
-
-                while (count > 0)
+                Versions = cborMap.ReadArray<string>(KeyVersions);
+                _aaguid = cborMap.ReadByteString(KeyAaguid).ToArray();
+                Aaguid = new ReadOnlyMemory<byte>(_aaguid);
+                if (cborMap.Contains(KeyExtensions))
                 {
-                    int mapKey = (int)cbor.ReadUInt32();
-
-                    switch (mapKey)
-                    {
-                        case KeyVersions:
-                            _ = CborHelpers.ReadStringArray(cbor, _versions);
-                            break;
-
-                        case KeyExtensions:
-                            Extensions = CborHelpers.ReadStringArray(cbor, null);
-                            break;
-
-                        case KeyAaguid:
-                            _aaguid = cbor.ReadByteString();
-                            Aaguid = new ReadOnlyMemory<byte>(_aaguid);
-                            break;
-
-                        case KeyOptions:
-                            Options = ReadOptionsMap(cbor);
-                            break;
-
-                        case KeyMaxMsgSize:
-                            MaximumMessageSize = (int)cbor.ReadUInt32();
-                            break;
-
-                        case KeyPinUvAuthProtocols:
-                            PinUvAuthProtocols = ReadProtocolsArray(cbor);
-                            break;
-
-                        case KeyMaxCredentialCountInList:
-                            MaximumCredentialCountInList = (int)cbor.ReadUInt32();
-                            break;
-
-                        case KeyMaxCredentialIdLength:
-                            MaximumCredentialIdLength = (int)cbor.ReadUInt32();
-                            break;
-
-                        case KeyTransports:
-                            Transports = CborHelpers.ReadStringArray(cbor, null);
-                            break;
-
-                        case KeyAlgorithms:
-                            Algorithms = ReadAlgorithmsMapArray(cbor);
-                            break;
-
-                        case KeyMaxSerializedLargeBlobArray:
-                            MaximumSerializedLargeBlobArray = (int)cbor.ReadUInt32();
-                            break;
-
-                        case KeyForcePinChange:
-                            ForcePinChange = cbor.ReadBoolean();
-                            break;
-
-                        case KeyMinPinLength:
-                            MinimumPinLength = (int)cbor.ReadUInt32();
-                            break;
-
-                        case KeyFirmwareVersion:
-                            FirmwareVersion = (int)cbor.ReadUInt32();
-                            break;
-
-                        case KeyMaxCredBlobLength:
-                            MaximumCredentialBlobLength = (int)cbor.ReadUInt32();
-                            break;
-
-                        case KeyMaxRpidsForSetMinPinLength:
-                            MaximumRpidsForSetMinPinLength = (int)cbor.ReadUInt32();
-                            break;
-
-                        case KeyPreferredPlatformUvAttempts:
-                            PreferredPlatformUvAttempts = (int)cbor.ReadUInt32();
-                            break;
-
-                        case KeyUvModality:
-                            UvModality = (int)cbor.ReadUInt32();
-                            break;
-
-                        case KeyCertifications:
-                            Certifications = ReadCertificationsMap(cbor);
-                            break;
-
-                        case KeyRemainingDiscoverableCredentials:
-                            RemainingDiscoverableCredentials = (int)cbor.ReadUInt32();
-                            break;
-
-                        default:
-                            throw new ArgumentException(
-                                string.Format(
-                                    CultureInfo.CurrentCulture,
-                                    ExceptionMessages.InvalidFido2Info));
-                    }
-
-                    count--;
+                    Extensions = (IReadOnlyList<string>)cborMap.ReadArray<string>(KeyExtensions);
                 }
-
-                cbor.ReadEndMap();
+                if (cborMap.Contains(KeyOptions))
+                {
+                    CborMap<string> optionsMap = cborMap.ReadMap<string>(KeyOptions);
+                    Options = optionsMap.AsDictionary<bool>();
+                }
+                MaximumMessageSize = (int?)cborMap.ReadOptional<int>(KeyMaxMsgSize);
+                if (cborMap.Contains(KeyPinUvAuthProtocols))
+                {
+                    IReadOnlyList<int> temp = cborMap.ReadArray<int>(KeyPinUvAuthProtocols);
+                    var translator = new List<PinUvAuthProtocol>(temp.Count);
+                    for (int index = 0; index < temp.Count; index++)
+                    {
+                        translator.Add((PinUvAuthProtocol)temp[index]);
+                    }
+                    PinUvAuthProtocols = translator;
+                }
+                MaximumCredentialCountInList = (int?)cborMap.ReadOptional<int>(KeyMaxCredentialCountInList);
+                MaximumCredentialIdLength = (int?)cborMap.ReadOptional<int>(KeyMaxCredentialIdLength);
+                if (cborMap.Contains(KeyTransports))
+                {
+                    Transports = (IReadOnlyList<string>)cborMap.ReadArray<string>(KeyTransports);
+                }
+                if (cborMap.Contains(KeyAlgorithms))
+                {
+                    ReadAlgorithms(cborMap);
+                }
+                MaximumSerializedLargeBlobArray = (int?)cborMap.ReadOptional<int>(KeyMaxSerializedLargeBlobArray);
+                ForcePinChange = (bool?)cborMap.ReadOptional<bool>(KeyForcePinChange);
+                MinimumPinLength = (int?)cborMap.ReadOptional<int>(KeyMinPinLength);
+                FirmwareVersion = (int?)cborMap.ReadOptional<int>(KeyFirmwareVersion);
+                MaximumCredentialBlobLength = (int?)cborMap.ReadOptional<int>(KeyMaxCredBlobLength);
+                MaximumRpidsForSetMinPinLength = (int?)cborMap.ReadOptional<int>(KeyMaxRpidsForSetMinPinLength);
+                PreferredPlatformUvAttempts = (int?)cborMap.ReadOptional<int>(KeyPreferredPlatformUvAttempts);
+                UvModality = (int?)cborMap.ReadOptional<int>(KeyUvModality);
+                if (cborMap.Contains(KeyCertifications))
+                {
+                    CborMap<string> certMap = cborMap.ReadMap<string>(KeyCertifications);
+                    Certifications = certMap.AsDictionary<int>();
+                }
+                RemainingDiscoverableCredentials = (int?)cborMap.ReadOptional<int>(KeyRemainingDiscoverableCredentials);
             }
             catch (CborContentException cborException)
             {
@@ -381,156 +329,36 @@ namespace Yubico.YubiKey.Fido2
                         ExceptionMessages.InvalidFido2Info),
                     cborException);
             }
-
-            // There are two elements that must be present. If not, this is a
-            // Malformed response.
-            if ((Versions.Count == 0) || (Aaguid.Length != AuthenticatorInfo.AaguidLength))
-            {
-                throw new MalformedYubiKeyResponseException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.Ctap2MissingRequiredField));
-            }
         }
 
-        // Read a map of (string, bool) key/value pairs, placing them into a new
-        // Dictionary. Return the new Dictionary.
-        // We're expecting to find a map(string, bool).
-        private static Dictionary<string, bool>? ReadOptionsMap(CborReader cbor)
+        // We've checked, the KeyAlgorithms is in cborMap.
+        // The value is an array.
+        // Each entry in the array is a map.
+        // Each map should be the same, two elements
+        //   key/value     "alg"/<int>
+        //   key/value     "type"/<string>
+        // The return from ReadArray will be a List, the list of entries.
+        // Because each entry is a map, the return from ReadArray will be the
+        // type returned by the CborMap, which is the type returned by processing
+        // a map, namely an IDictionary.
+        // Look in this map to find the entry for "alg" and collect the value.
+        // Look in this map to find the entry for "type" and collect the value.
+        // Now build a Tuple out of the two values and add it to the Algorithms
+        // list.
+        private void ReadAlgorithms(CborMap<int> cborMap)
         {
-            int? entries = cbor.ReadStartMap();
-            int count = entries ?? 0;
+            var algorithms = new List<Tuple<string, CoseAlgorithmIdentifier>>();
 
-            var destination = new Dictionary<string, bool>(count);
-
-            for (int index = 0; index < count; index++)
+            IReadOnlyList<CborMap<string>> entries = cborMap.ReadArray<CborMap<string>>(KeyAlgorithms);
+            for (int index = 0; index < entries.Count; index++)
             {
-                string mapKey = cbor.ReadTextString();
-                bool isSupported = cbor.ReadBoolean();
+                string currentType = entries[index].ReadTextString(ParameterHelpers.TagType);
+                var currentAlg = (CoseAlgorithmIdentifier)entries[index].ReadInt32(ParameterHelpers.TagAlg);
 
-                destination.Add(mapKey, isSupported);
+                algorithms.Add(new Tuple<string, CoseAlgorithmIdentifier>(currentType, currentAlg));
             }
 
-            cbor.ReadEndMap();
-
-            return destination;
-        }
-
-        // Read an array of UInts, returning them (converted to the enum) in a
-        // new List.
-        private static List<PinUvAuthProtocol> ReadProtocolsArray(CborReader cbor)
-        {
-            int? entries = cbor.ReadStartArray();
-            int count = entries ?? 0;
-
-            var destination = new List<PinUvAuthProtocol>(count);
-
-            for (int index = 0; index < count; index++)
-            {
-                destination.Add((PinUvAuthProtocol)cbor.ReadUInt32());
-            }
-
-            cbor.ReadEndArray();
-
-            return destination;
-        }
-
-        // We're expecting to find an
-        //   array of
-        //     [map(negative int, string), map(string, string)]
-        // The first map is a key/value pair, where we only want the value. Call
-        // this value-1. The second map is a key/value pair, where we only want
-        // the value. Call this value-2.
-        // We're going to create a dictionary of key/value pairs, where value-1
-        // is the key and value-2 is the value of this new key/value pair.
-        // If the destination is not null, set it with the key/value pairs and
-        // return it. If it is null, create a new Dictionary, set it, and return
-        // it.
-        private static Dictionary<CoseAlgorithmIdentifier, string>? ReadAlgorithmsMapArray(CborReader cbor)
-        {
-            int? entries = cbor.ReadStartArray();
-            int count = entries ?? 0;
-
-            var destination = new Dictionary<CoseAlgorithmIdentifier, string>(count);
-
-            for (int index = 0; index < count; index++)
-            {
-                entries = cbor.ReadStartMap();
-                int mapCount = entries ?? 0;
-
-                // Init algorithm to 0. That is not a valid number for an
-                // algorithm, so if, after reading, this is not 0, we know there
-                // was an error.
-                int algorithm = 0;
-                string credentialType = "";
-
-                // At this point there should be two maps:
-                //   string, negative integer,
-                //   string, string
-                // in either order. If not, error.
-                for (int indexM = 0; indexM < mapCount; indexM++)
-                {
-                    string mapKey = cbor.ReadTextString();
-
-                    switch (mapKey)
-                    {
-                        default:
-                            throw new Ctap2DataException(
-                                string.Format(
-                                    CultureInfo.CurrentCulture,
-                                    ExceptionMessages.InvalidFido2Info));
-
-                        case "alg":
-                            algorithm = cbor.ReadInt32();
-                            break;
-
-                        case "type":
-                           credentialType = cbor.ReadTextString();
-                           break;
-                    }
-                }
-
-                if ((mapCount != 2) || (algorithm == 0) || (!credentialType.Equals("public-key", StringComparison.Ordinal)))
-                {
-                    throw new Ctap2DataException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidFido2Info));
-                }
-
-                destination.Add((CoseAlgorithmIdentifier)algorithm, credentialType);
-
-                cbor.ReadEndMap();
-            }
-
-            cbor.ReadEndArray();
-
-            return destination;
-        }
-
-        // There are an indefinite number of certifications. Each one is a
-        // key/value pair of string/int.
-        // Read them and build the Dictionary. If destination is not null, set it
-        // and return it. If it is null, create a new Dictionary, then set it and
-        // return it.
-        private static Dictionary<string, int>? ReadCertificationsMap(CborReader cbor)
-        {
-            int? entries = cbor.ReadStartMap();
-            int count = entries ?? 0;
-
-            var destination = new Dictionary<string, int>(count);
-
-            for (int index = 0; index < count; index++)
-            {
-                string certifier = cbor.ReadTextString();
-                int certLevel = (int)cbor.ReadUInt32();
-
-                destination.Add(certifier, certLevel);
-            }
-
-            cbor.ReadEndMap();
-
-            return destination;
+            Algorithms = algorithms;
         }
     }
 }

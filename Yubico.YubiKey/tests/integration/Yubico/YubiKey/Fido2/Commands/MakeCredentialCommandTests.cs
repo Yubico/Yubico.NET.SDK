@@ -80,7 +80,7 @@ namespace Yubico.YubiKey.Fido2
                 DisplayName = "User",
             };
 
-            makeParams = new MakeCredentialParameters(rp, user, new CredentialType());
+            makeParams = new MakeCredentialParameters(rp, user);
 
             if (!GetPinToken(connection, protocol, pin, out byte[] pinToken))
             {

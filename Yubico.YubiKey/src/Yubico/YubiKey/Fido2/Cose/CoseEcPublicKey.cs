@@ -46,9 +46,9 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// </remarks>
     public class CoseEcPublicKey : CoseKey
     {
-        private const long TagCurve = -1;
-        private const long TagX = -2;
-        private const long TagY = -3;
+        private const int TagCurve = -1;
+        private const int TagX = -2;
+        private const int TagY = -3;
 
         private const string P256Oid = "1.2.840.10045.3.1.7";
 
@@ -139,14 +139,13 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// </exception>
         public CoseEcPublicKey(ReadOnlyMemory<byte> encodedCoseKey)
         {
-            var cborReader = new CborReader(encodedCoseKey);
-            var map = new CborMap<long>(cborReader);
+            var map = new CborMap<int>(encodedCoseKey);
 
-            Curve = (CoseEcCurve)map.ReadInt64(TagCurve);
+            Curve = (CoseEcCurve)map.ReadInt32(TagCurve);
             XCoordinate = map.ReadByteString(TagX);
             YCoordinate = map.ReadByteString(TagY);
-            Type = (CoseKeyType)map.ReadInt64(TagKeyType);
-            Algorithm = (CoseAlgorithmIdentifier)map.ReadInt64(TagAlgorithm);
+            Type = (CoseKeyType)map.ReadInt32(TagKeyType);
+            Algorithm = (CoseAlgorithmIdentifier)map.ReadInt32(TagAlgorithm);
         }
 
         /// <summary>

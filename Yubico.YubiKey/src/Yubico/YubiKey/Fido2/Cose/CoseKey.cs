@@ -27,11 +27,11 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <summary>
         /// The CBOR tag (key of key/value pair) for the COSE key type.
         /// </summary>
-        protected const long TagKeyType = 1;
+        protected const int TagKeyType = 1;
         /// <summary>
         /// The CBOR tag (key of key/value pair) for the COSE key algorithm.
         /// </summary>
-        protected const long TagAlgorithm = 3;
+        protected const int TagAlgorithm = 3;
 
         /// <summary>
         /// The key's type (or family). E.g. "EC2" for elliptic curve with an X,Y point.
@@ -103,8 +103,8 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// </exception>
         public static CoseKey Create(ReadOnlyMemory<byte> coseEncodedKey, out int bytesRead)
         {
-            var cborReader = new CborReader(coseEncodedKey);
-            var map = new CborMap<long>(cborReader);
+            var cborReader = new CborReader(coseEncodedKey, CborConformanceMode.Ctap2Canonical);
+            var map = new CborMap<int>(cborReader);
             bytesRead = coseEncodedKey.Length - cborReader.BytesRemaining;
 
             if (!map.Contains(TagAlgorithm))
@@ -119,7 +119,7 @@ namespace Yubico.YubiKey.Fido2.Cose
             // might encounter either -7 (ES256 = ECDSA with SHA-256) or -25
             // (ECDHwHKDF256). If the -25 seems odd, it is specified in the FIDO2
             // standard.
-            var algorithm = (CoseAlgorithmIdentifier)map.ReadInt64(TagAlgorithm);
+            var algorithm = (CoseAlgorithmIdentifier)map.ReadInt32(TagAlgorithm);
             if ((algorithm == CoseAlgorithmIdentifier.ECDHwHKDF256) || (algorithm == CoseAlgorithmIdentifier.ES256))
             {
                 return new CoseEcPublicKey(coseEncodedKey);

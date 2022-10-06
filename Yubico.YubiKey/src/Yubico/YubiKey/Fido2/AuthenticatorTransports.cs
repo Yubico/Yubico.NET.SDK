@@ -42,11 +42,6 @@ namespace Yubico.YubiKey.Fido2
     ///    credentialId.AddTransport(AuthenticatorTransports1.Usb);
     /// </code>
     /// </para>
-    /// <para>
-    /// This class also contains an object that can build the Cbor encoding of a
-    /// list of strings. It implements the <c>CborEncodeDelegate</c>, so it can
-    /// be used in <c>CborMapWriter</c>.
-    /// </para>
     /// </remarks>
     public static class AuthenticatorTransports
     {

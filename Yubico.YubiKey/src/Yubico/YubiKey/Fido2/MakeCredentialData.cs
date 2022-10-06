@@ -174,8 +174,7 @@ namespace Yubico.YubiKey.Fido2
         {
             try
             {
-                var cbor = new CborReader(cborEncoding, CborConformanceMode.Ctap2Canonical);
-                var map = new CborMap<long>(cbor);
+                var map = new CborMap<int>(cborEncoding);
 
                 Format = map.ReadTextString(KeyFormat);
                 AuthenticatorData = new AuthenticatorData(map.ReadByteString(KeyAuthData));
@@ -214,7 +213,7 @@ namespace Yubico.YubiKey.Fido2
         //    "x5c"/array of certs.
         // The byte array is the DER encoding of the ECDSA signature.
         // If everything works, return true. Otherwise, return false.
-        private bool ReadAttestation(CborMap<long> map)
+        private bool ReadAttestation(CborMap<int> map)
         {
             CborMap<string> attest = map.ReadMap<string>(KeyAttestationStatement);
             if (!Format.Equals(PackedString, StringComparison.Ordinal)
@@ -225,17 +224,17 @@ namespace Yubico.YubiKey.Fido2
                 return false;
             }
 
-            AttestationAlgorithm = (CoseAlgorithmIdentifier)attest.ReadInt64(AlgString);
+            AttestationAlgorithm = (CoseAlgorithmIdentifier)attest.ReadInt32(AlgString);
             AttestationStatement = attest.ReadByteString(SigString);
 
             if (attest.Contains(X5cString))
             {
-                IList<object> certList = attest.ReadArray(X5cString);
+                IReadOnlyList<byte[]> certList = attest.ReadArray<byte[]>(X5cString);
                 var attestationCertificates = new List<X509Certificate2>(certList.Count);
 
                 for (int index = 0; index < certList.Count; index++)
                 {
-                    attestationCertificates.Add(new X509Certificate2((byte[])certList[index]));
+                    attestationCertificates.Add(new X509Certificate2(certList[index]));
                 }
 
                 AttestationCertificates = attestationCertificates;

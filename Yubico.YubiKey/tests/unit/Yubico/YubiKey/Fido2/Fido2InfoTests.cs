@@ -25,16 +25,6 @@ namespace Yubico.YubiKey.Fido2
     public class Fido2InfoTests
     {
         [Fact]
-        public void Decode_ExtraKey_Throws()
-        {
-            byte[] encodedData = new byte[] {
-                0xa2, 0x01, 0x81, 0x66, 0x55, 0x32, 0x46, 0x5f, 0x56, 0x32, 0x16, 0x05
-            };
-
-            _ = Assert.Throws<ArgumentException>(() => new AuthenticatorInfo(encodedData));
-        }
-
-        [Fact]
         public void Decode_RepeatKey_Throws()
         {
             byte[] encodedData = new byte[] {
@@ -286,11 +276,11 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Algorithms_Correct()
         {
-            var correctKeys = new CoseAlgorithmIdentifier[] {
+            var correctAlgs = new CoseAlgorithmIdentifier[] {
                 CoseAlgorithmIdentifier.ES256,
                 CoseAlgorithmIdentifier.EdDSA
             };
-            string[] correctValues = new string[] {
+            string[] correctTypes = new string[] {
                 "public-key",
                 "public-key"
             };
@@ -305,13 +295,15 @@ namespace Yubico.YubiKey.Fido2
             }
 
             int index = 0;
-            if (fido2Info.Algorithms.Count == correctKeys.Length)
+            if (fido2Info.Algorithms.Count == correctAlgs.Length)
             {
-                for (; index < correctKeys.Length; index++)
+                for (; index < correctAlgs.Length; index++)
                 {
-                    if (fido2Info.Algorithms.TryGetValue(correctKeys[index], out string? currentValue))
+                    string currentType = fido2Info.Algorithms[index].Item1;
+                    CoseAlgorithmIdentifier currentAlg = fido2Info.Algorithms[index].Item2;
+                    if (currentType.Equals(correctTypes[index], StringComparison.Ordinal))
                     {
-                        if (currentValue.Equals(correctValues[index], StringComparison.Ordinal))
+                        if (currentAlg == correctAlgs[index])
                         {
                             continue;
                         }
@@ -322,7 +314,7 @@ namespace Yubico.YubiKey.Fido2
             }
 
             // If we broke out early (index < Length), error.
-            Assert.True(index >= correctKeys.Length);
+            Assert.True(index >= correctAlgs.Length);
         }
 
         [Fact]

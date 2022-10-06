@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         // entire object) for WriteEncodedValue.
         // If there is nothing to encode (e.g. localData is null), then return an
         // empty byte array.
-        public delegate byte[] CborEncodeDelegate(object? localData);
+        public delegate byte[] CborEncodeDelegate<T>(T? localData) where T : class;
 
         /// <summary>
         /// Use this method to write CBOR maps (which is mostly what CTAP2 uses). This uses a builder-like pattern
@@ -102,19 +102,56 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// (<c>localData</c> is null or a list with <c>Count</c> zero), the
         /// return will be an empty byte array.
         /// </returns>
-        public static byte[] EncodeStringArray(object? localData)
+        public static byte[] EncodeStringArray(IReadOnlyList<string>? localData)
         {
-            if ((!(localData is IReadOnlyList<string> stringList)) || (stringList.Count == 0))
+            if ((localData is null) || (localData.Count == 0))
             {
                 return Array.Empty<byte>();
             }
 
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
 
-            cbor.WriteStartArray(stringList.Count);
-            foreach (string currentString in stringList)
+            cbor.WriteStartArray(localData.Count);
+            foreach (string currentString in localData)
             {
                 cbor.WriteTextString(currentString);
+            }
+            cbor.WriteEndArray();
+
+            return cbor.Encode();
+        }
+
+        /// <summary>
+        /// Encode an array of objects. This implements <c>CborEncodeDelegate</c>.
+        /// </summary>
+        /// <remarks>
+        /// This method expects the <c>localData</c> to be an instance of
+        /// <c>IReadOnlyList&lt;ICborEncode&gt;</c>. If it is null, or the list's
+        /// count is zero, this method will return an empty byte array. So if you
+        /// want "no entries" to mean "don't write anything", don't call this
+        /// method.
+        /// </remarks>
+        /// <param name="localData">
+        /// The list of objects to encode.
+        /// </param>
+        /// <returns>
+        /// A byte array containing the encoded list. If there is no list
+        /// (<c>localData</c> is null or a list with <c>Count</c> zero), the
+        /// return will be an empty byte array.
+        /// </returns>
+        public static byte[] EncodeArrayOfObjects(IReadOnlyList<ICborEncode>? localData)
+        {
+            if ((localData is null) || (localData.Count == 0))
+            {
+                return Array.Empty<byte>();
+            }
+
+            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+
+            cbor.WriteStartArray(localData.Count);
+            foreach (ICborEncode cborEncode in localData)
+            {
+                cbor.WriteEncodedValue(cborEncode.CborEncode());
             }
             cbor.WriteEndArray();
 

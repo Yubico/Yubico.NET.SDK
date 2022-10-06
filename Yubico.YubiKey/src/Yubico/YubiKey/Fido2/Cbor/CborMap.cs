@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Linq;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Formats.Cbor;
@@ -42,23 +43,50 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Creates a new instance of <see cref="CborMap{TKey}"/> based on a CborReader.
+        /// Creates a new instance of <see cref="CborMap{TKey}"/> based on the
+        /// encoding.
         /// </summary>
-        /// <param name="reader">
-        /// A CborReader that is queued up at the start of a map.
+        /// <param name="encoding">
+        /// A byte array containing a CBOR encoding that is a map.
         /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// The reader instance is null.
-        /// </exception>
-        public CborMap(CborReader reader)
+        public CborMap(ReadOnlyMemory<byte> encoding)
+            : this(new CborReader(encoding, CborConformanceMode.Ctap2Canonical))
         {
-            if (reader is null)
+        }
+
+        /// <summary>
+        /// Creates a new instance of <see cref="CborMap{TKey}"/> based on the
+        /// given <c>CborReader</c>.
+        /// </summary>
+        /// <param name="cbor">
+        /// A <c>CborReader</c> that holds the data to decode.
+        /// </param>
+        public CborMap(CborReader cbor)
+        {
+            if (cbor.PeekState() != CborReaderState.StartMap)
             {
-                throw new ArgumentNullException(nameof(reader));
+                throw new Ctap2DataException(ExceptionMessages.Ctap2MissingRequiredField);
             }
 
-            _dict = ProcessMap(reader) as IDictionary<TKey, object?> ??
-                throw new InvalidOperationException(ExceptionMessages.TypeMismatch);
+            int? numberElements = cbor.ReadStartMap();
+            if (numberElements is null)
+            {
+                throw new NotSupportedException(ExceptionMessages.Ctap2CborIndefiniteLength);
+            }
+
+            int count = numberElements.Value;
+            _dict = new Dictionary<TKey, object?>(count);
+
+            while (count > 0)
+            {
+                TKey currentKey = ReadKey<TKey>(cbor);
+                object? currentValue = ProcessSingleElement(cbor);
+                _dict.Add(currentKey, currentValue);
+
+                count--;
+            }
+
+            cbor.ReadEndMap();
         }
 
         /// <summary>
@@ -67,13 +95,111 @@ namespace Yubico.YubiKey.Fido2.Cbor
         public bool Contains(TKey key) => _dict.ContainsKey(key);
 
         /// <summary>
-        /// Read the value for the given key as a signed integer `long`.
+        /// Returns this map as an IDictionary of key/value pairs where the keys
+        /// are all of type TKey and the values are all of the type TValue. If
+        /// one or more of the map's values is not of the specified type, this
+        /// will throw an exception.
         /// </summary>
-        public long ReadInt64(TKey key)
+        /// <remarks>
+        /// This is genrally used to get a sub map out. For example, one element
+        /// of the main map is a map itself, a map of key/value pairs where each
+        /// key is a string and each value is a boolean (or a string). So get the
+        /// sub map out (e.g. subMap = mainMap.ReadMap(4)), then get that
+        /// map as a dictionary (e.g. subMap.AsDictionary()).
+        /// </remarks>
+        /// <returns>
+        /// A new IDictionary representing this map.
+        /// </returns>
+        public IReadOnlyDictionary<TKey,TValue> AsDictionary<TValue>()
+        {
+            var returnValue = new Dictionary<TKey,TValue>(_dict.Count);
+            foreach (KeyValuePair<TKey, object?> entry in _dict)
+            {
+                if (!(entry.Value is TValue targetValue))
+                {
+                    throw new InvalidCastException();
+                }
+
+                returnValue.Add(entry.Key, targetValue);
+            }
+
+            return returnValue;
+        }
+
+        /// <summary>
+        /// Read the value for the given key as a nested map.
+        /// </summary>
+        public CborMap<TNestedKey> ReadMap<TNestedKey>(TKey key)
         {
             object? value = _dict[key];
 
-            if (value is long unboxedValue)
+            if (value is CborMap<TNestedKey> nestedMap)
+            {
+                return nestedMap;
+            }
+
+            throw new InvalidCastException();
+        }
+
+        /// <summary>
+        /// Read the value for the given key as an array of TValue.
+        /// </summary>
+        public IReadOnlyList<TValue> ReadArray<TValue>(TKey key)
+        {
+            object? value = _dict[key];
+
+            if (value is List<object?> entries)
+            {
+                var returnValue = new List<TValue>(entries.Count);
+
+                int index = 0;
+                for (; index < entries.Count; index++)
+                {
+                    if (!(entries[index] is TValue currentValue))
+                    {
+                        break;
+                    }
+
+                    returnValue.Add(currentValue);
+                }
+
+                if (index >= entries.Count)
+                {
+                    return returnValue;
+                }
+            }
+
+            throw new InvalidCastException();
+        }
+
+        /// <summary>
+        /// If the map does not contain the given key, return null, otherwise
+        /// read the value as a "T".
+        /// </summary>
+        public object? ReadOptional<T>(TKey key)
+        {
+            if (!_dict.ContainsKey(key))
+            {
+                return null;
+            }
+
+            object? value = _dict[key];
+            if (value is T typedValue)
+            {
+                return typedValue;
+            }
+
+            throw new InvalidCastException();
+        }
+
+        /// <summary>
+        /// Read the value for the given key as a signed integer.
+        /// </summary>
+        public int ReadInt32(TKey key)
+        {
+            object? value = _dict[key];
+
+            if (value is int unboxedValue)
             {
                 return unboxedValue;
             }
@@ -106,36 +232,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
             if (value is string tstr)
             {
                 return tstr;
-            }
-
-            throw new InvalidCastException();
-        }
-
-        /// <summary>
-        /// Read the value for the given key as a nested map.
-        /// </summary>
-        public CborMap<TNestedKey> ReadMap<TNestedKey>(TKey key)
-        {
-            object? value = _dict[key];
-
-            if (value is IDictionary<TNestedKey, object?> nestedDict)
-            {
-                return new CborMap<TNestedKey>(nestedDict);
-            }
-
-            throw new InvalidCastException();
-        }
-
-        /// <summary>
-        /// Read the value for the given key as an array of objects.
-        /// </summary>
-        public IList<object> ReadArray(TKey key)
-        {
-            object? value = _dict[key];
-
-            if (value is IList<object> arr)
-            {
-                return arr;
             }
 
             throw new InvalidCastException();
@@ -201,62 +297,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
             throw new InvalidCastException();
         }
 
-        private object ProcessMap(CborReader cbor)
-        {
-            if (cbor.PeekState() != CborReaderState.StartMap)
-            {
-                throw new Ctap2DataException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.Ctap2MissingRequiredField));
-            }
-
-            int? numberElements = cbor.ReadStartMap();
-
-            if (numberElements is null)
-            {
-                return new Dictionary<object, object>();
-            }
-
-            CborReaderState cborType = cbor.PeekState();
-
-            switch (cborType)
-            {
-                case CborReaderState.UnsignedInteger:
-                case CborReaderState.NegativeInteger:
-                    return ProcessMap<long>(cbor, numberElements.Value);
-                case CborReaderState.TextString:
-                    return ProcessMap<string>(cbor, numberElements.Value);
-                default:
-                    throw new InvalidOperationException(ExceptionMessages.TypeNotSupported);
-            }
-        }
-
-        private IDictionary<TNestedKey, object?> ProcessMap<TNestedKey>(CborReader cbor, int numberOfElements)
-        {
-            var dict = new Dictionary<TNestedKey, object?>();
-
-            for (int i = 0; i < numberOfElements; i++)
-            {
-                // Technically the typecast from ulong -> long could truncate data, but in practice we do not expect
-                // the map keys to be larger than a byte.
-                TNestedKey key = ReadKey<TNestedKey>(cbor);
-
-                object? value = ProcessSingleElement(cbor);
-
-                dict.Add(key, value);
-            }
-
-            cbor.ReadEndMap();
-
-            return dict;
-        }
-
         private static TReadKey ReadKey<TReadKey>(CborReader cbor)
         {
-            if (typeof(TReadKey) == typeof(long))
+            if (typeof(TReadKey) == typeof(int))
             {
-                return (TReadKey)Convert.ChangeType(cbor.ReadInt64(), typeof(TReadKey), CultureInfo.InvariantCulture);
+                return (TReadKey)Convert.ChangeType(cbor.ReadInt32(), typeof(TReadKey), CultureInfo.InvariantCulture);
             }
 
             if (typeof(TReadKey) == typeof(string))
@@ -267,14 +312,14 @@ namespace Yubico.YubiKey.Fido2.Cbor
             throw new InvalidOperationException(ExceptionMessages.TypeNotSupported);
         }
 
-        private object? ProcessSingleElement(CborReader cbor) => cbor.PeekState() switch
+        private static object? ProcessSingleElement(CborReader cbor) => cbor.PeekState() switch
         {
             CborReaderState.Undefined => null,
-            CborReaderState.UnsignedInteger => cbor.ReadInt64(),
-            CborReaderState.NegativeInteger => cbor.ReadInt64(),
+            CborReaderState.UnsignedInteger => cbor.ReadInt32(),
+            CborReaderState.NegativeInteger => cbor.ReadInt32(),
             CborReaderState.ByteString => cbor.ReadByteString(),
             CborReaderState.TextString => cbor.ReadTextString(),
-            CborReaderState.StartMap => ProcessMap(cbor),
+            CborReaderState.StartMap => ProcessSubMap(cbor),
             CborReaderState.StartArray => ProcessArray(cbor),
             CborReaderState.SinglePrecisionFloat => cbor.ReadSingle(),
             CborReaderState.DoublePrecisionFloat => cbor.ReadDouble(),
@@ -289,25 +334,45 @@ namespace Yubico.YubiKey.Fido2.Cbor
             return null;
         }
 
-        private object? ProcessArray(CborReader cbor)
+        private static object? ProcessArray(CborReader cbor)
         {
-            int? numberElements = cbor.ReadStartArray();
+            int? entryCount = cbor.ReadStartArray();
+            int count = entryCount ?? 0;
 
-            if (numberElements is null)
+            if (count == 0)
             {
-                throw new InvalidOperationException();
+                return null;
             }
 
-            IList<object?> elements = new List<object?>(numberElements.Value);
-
-            for (int i = 0; i < numberElements; i++)
+            var entries = new List<object?>(count);
+            while (count > 0)
             {
-                elements.Add(ProcessSingleElement(cbor));
+                entries.Add(ProcessSingleElement(cbor));
+                count--;
             }
 
             cbor.ReadEndArray();
 
-            return elements;
+            return entries;
+        }
+
+        private static object? ProcessSubMap(CborReader cbor)
+        {
+            ReadOnlyMemory<byte> encodedMap = cbor.ReadEncodedValue();
+            var subCbor = new CborReader(encodedMap, CborConformanceMode.Ctap2Canonical);
+            _ = subCbor.ReadStartMap();
+
+            CborReaderState cborType = subCbor.PeekState();
+            switch (cborType)
+            {
+                case CborReaderState.UnsignedInteger:
+                case CborReaderState.NegativeInteger:
+                    return new CborMap<int>(encodedMap);
+                case CborReaderState.TextString:
+                    return new CborMap<string>(encodedMap);
+                default:
+                    throw new InvalidOperationException(ExceptionMessages.TypeNotSupported);
+            }
         }
     }
 }

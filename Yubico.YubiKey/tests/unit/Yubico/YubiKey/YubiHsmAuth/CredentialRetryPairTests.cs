@@ -34,6 +34,13 @@ namespace Yubico.YubiKey.YubiHsmAuth
         }
 
         [Fact]
+        public void Constructor_Given2Retries_SetsRetriesTo2()
+        {
+            CredentialRetryPair pair = new CredentialRetryPair(cred, 2);
+            Assert.Equal(2, pair.Retries);
+        }
+
+        [Fact]
         public void Constructor_NegativeRetries_ThrowsArgOutOfRangeException()
         {
             Action action = () => new CredentialRetryPair(cred, -1);

@@ -38,6 +38,18 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// Both of these challenges are then used to construct this command.
     /// </para>
     /// <para>
+    /// There is a limit of 8 attempts to authenticate with the credential's
+    /// password before the credential is deleted. Once the credential is
+    /// deleted, it cannot be recovered. Supplying the correct password before the
+    /// credential is deleted will reset the retry counter to 8.
+    /// </para>
+    /// <para>
+    /// If the credential requires touch (see <see cref="Credential.TouchRequired"/>),
+    /// then the user must also touch the YubiKey as part of the authentication
+    /// procedure. See <see cref="GetAes128SessionKeysResponse"/> for more
+    /// information on response statuses.
+    /// </para>
+    /// <para>
     /// The secure session protocol is based on Secure Channel Protocol 3
     /// (SCP03). The session keys returned by the application are the
     /// Session Secure Channel Encryption Key (S-ENC),

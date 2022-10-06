@@ -25,13 +25,8 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             public SampleYubiHsmAuthResponse(ResponseApdu responseApdu) : base(responseApdu)
             {
             }
-
-            public bool HasRetries => StatusWordContainsRetries;
-            public int? RetryCount => RetriesRemaining;
         }
 
-        private const string AuthenticationRequired0RetriesStatusMessage = "Wrong password or authentication key. Retries remaining: 0.";
-        private const string AuthenticationRequired15RetriesStatusMessage = "Wrong password or authentication key. Retries remaining: 15.";
         private const string SecurityStatusNotSatisfiedStatusMessage = "The device was not touched.";
         private const string AuthenticationMethodBlockedStatusMessage = "The entry is invalid.";
         private const string ReferenceDataUnusableStatusMessage = "Invalid authentication data.";
@@ -49,8 +44,6 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         }
 
         [Theory]
-        [InlineData(SWConstants.VerifyFail, ResponseStatus.AuthenticationRequired)]
-        [InlineData(0x63cf, ResponseStatus.AuthenticationRequired)]
         [InlineData(SWConstants.SecurityStatusNotSatisfied, ResponseStatus.RetryWithTouch)]
         [InlineData(SWConstants.AuthenticationMethodBlocked, ResponseStatus.Failed)]
         [InlineData(SWConstants.ReferenceDataUnusable, ResponseStatus.Failed)]
@@ -64,8 +57,6 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         }
 
         [Theory]
-        [InlineData(SWConstants.VerifyFail, AuthenticationRequired0RetriesStatusMessage)]
-        [InlineData(0x63cf, AuthenticationRequired15RetriesStatusMessage)]
         [InlineData(SWConstants.SecurityStatusNotSatisfied, SecurityStatusNotSatisfiedStatusMessage)]
         [InlineData(SWConstants.AuthenticationMethodBlocked, AuthenticationMethodBlockedStatusMessage)]
         [InlineData(SWConstants.ReferenceDataUnusable, ReferenceDataUnusableStatusMessage)]
@@ -76,41 +67,6 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                 new ResponseApdu(new byte[] { }, responseSw));
 
             Assert.Equal(expectedMessage, response.StatusMessage);
-        }
-
-        [Theory]
-        [InlineData(SWConstants.VerifyFail, true)]
-        [InlineData(0x63cf, true)]
-        [InlineData(SWConstants.Success, false)]
-        [InlineData(SWConstants.InvalidParameter, false)]
-        public void SwContainsRetries_GivenSw_ReturnsTrueWhenRetriesPresent(short responseSw, bool expectedResponse)
-        {
-            SampleYubiHsmAuthResponse response = new SampleYubiHsmAuthResponse(
-                new ResponseApdu(new byte[] { }, responseSw));
-
-            Assert.Equal(expectedResponse, response.HasRetries);
-        }
-
-        [Theory]
-        [InlineData(SWConstants.VerifyFail, 0)]
-        [InlineData(0x63cf, 15)]
-        public void RetriesRemaining_GivenSwWithRetryCount_ReturnsCorrectRetryCount(short responseSw, int? expectedCount)
-        {
-            SampleYubiHsmAuthResponse response = new SampleYubiHsmAuthResponse(
-                new ResponseApdu(new byte[] { }, responseSw));
-
-            Assert.Equal(expectedCount, response.RetryCount);
-        }
-
-        [Theory]
-        [InlineData(SWConstants.Success)]
-        [InlineData(SWConstants.InvalidParameter)]
-        public void RetriesRemaining_GivenSwNoRetryCount_ReturnsNull(short responseSw)
-        {
-            SampleYubiHsmAuthResponse response = new SampleYubiHsmAuthResponse(
-                new ResponseApdu(new byte[] { }, responseSw));
-
-            Assert.True(!response.RetryCount.HasValue);
         }
     }
 }

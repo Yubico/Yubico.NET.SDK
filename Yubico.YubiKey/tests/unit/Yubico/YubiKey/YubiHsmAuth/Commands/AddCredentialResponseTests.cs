@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
 
         // Test pass through to base class status word handling
         [Fact]
-        public void ResponseStatus_GivenStatusWord0x63C1_ReturnsAuthenticationRequired()
+        public void ResponseStatus_GivenStatusWord0x63C0_ReturnsAuthenticationRequired()
         {
             ResponseApdu apdu = new ResponseApdu(new byte[0], SWConstants.VerifyFail);
 

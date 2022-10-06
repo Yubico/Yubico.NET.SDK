@@ -33,7 +33,9 @@ All YubiKeys with the YubiHSM Auth application (included in firmware version 5.4
 
 ## Input
 
-This operation requires authenticating to the YubiHSM Auth application by providing the application's management key. The credential to be deleted is then selected by providing the credential's label. The label may only contain characters that can be encoded with UTF-8, and its UTF-8 byte count must be between 1 and 64. Non-printing characters are allowed, as long as they can be encoded with UTF-8. For example, null (UTF-8: 0x00) and Right-To-Left Mark U+200F (UTF-8: 0xE2 0x80 0x8F) would be accepted.
+The input includes the label of the credential to be deleted, and the management key.
+
+There is a limit of 8 attempts to authenticate with the management key before the management key is blocked. Once the management key is blocked, the application must be reset before performing operations which require authentication with the management key (such as adding credentials, deleting credentials, and changing the management key). To reset the application, see [ResetApplicationCommand](xref:YubiHsmAuthCmdResetApplication). Supplying the correct management key before the management key is blocked will reset the retry counter to 8.
 
 ## Output
 

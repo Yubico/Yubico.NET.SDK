@@ -18,8 +18,9 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    /// Reset the YubiHSM Auth application, which will delete all credentials
-    /// and set the management key to its default value (all zeros).
+    /// Reset the YubiHSM Auth application, which will delete all credentials,
+    /// reset the management key to its default value (all zeros), and reset
+    /// the management key retry counter to 8.
     /// </summary>
     /// <remarks>
     /// The associated response class is <see cref="ResetApplicationResponse"/>.

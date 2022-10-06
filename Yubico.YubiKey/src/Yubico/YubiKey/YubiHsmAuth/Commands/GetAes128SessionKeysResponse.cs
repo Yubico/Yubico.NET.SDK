@@ -23,9 +23,27 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// a secure connection with a YubiHSM 2 device.
     /// </summary>
     /// <remarks>
-    /// The partner class is <see cref="GetAes128SessionKeysCommand"/>.
+    /// <para>
+    /// If authentication with the credential's password failed, the
+    /// <see cref="YubiKeyResponse.Status"/> will be set to
+    /// <see cref="ResponseStatus.AuthenticationRequired"/> and
+    /// <see cref="BaseYubiHsmAuthResponseWithRetries.RetriesRemaining"/>
+    /// will contain the number of retries remaining for the credential's
+    /// password.
+    /// </para>
+    /// <para>
+    /// A credential may require the user to touch the YubiKey as part of the
+    /// authentication procedure (see <see cref="Credential.TouchRequired"/>).
+    /// If this proof of user presence fails, the
+    /// <see cref="YubiKeyResponse.Status"/> will be set to
+    /// <see cref="ResponseStatus.RetryWithTouch"/>, and the credential password
+    /// retry count is not changed.
+    /// </para>
+    /// <para>
+    /// The associated command class is <see cref="GetAes128SessionKeysCommand"/>.
+    /// </para>
     /// </remarks>
-    public class GetAes128SessionKeysResponse : BaseYubiHsmAuthResponse,
+    public class GetAes128SessionKeysResponse : BaseYubiHsmAuthResponseWithRetries,
         IYubiKeyResponseWithData<SessionKeys>
     {
         private const int encStart = 0;

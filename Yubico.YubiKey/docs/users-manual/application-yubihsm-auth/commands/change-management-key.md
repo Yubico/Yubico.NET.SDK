@@ -18,7 +18,9 @@ limitations under the License. -->
 
 # Change management key
 
-This command is used to change the management key. The management key is required when [adding](xref:YubiHsmAuthCmdAddCredential) or [deleting](xref:YubiHsmAuthCmdDeleteCredential) credentials from the YubiHSM Auth application. When supplying the management key for an operation, there is a limit of 8 retries before the application is locked and must be completely reset.
+This command is used to change the management key. The management key is required when [adding](xref:YubiHsmAuthCmdAddCredential) or [deleting](xref:YubiHsmAuthCmdDeleteCredential) credentials from the YubiHSM Auth application.
+
+There is a limit of 8 attempts to authenticate with the management key before the management key is blocked. Once the management key is blocked, the application itself must be reset before authentication can be attempted again. To reset the application, see [ResetApplicationCommand](xref:YubiHsmAuthCmdResetApplication). Supplying the correct management key before the management key is blocked will reset the retry counter to 8.
 
 ## Available
 

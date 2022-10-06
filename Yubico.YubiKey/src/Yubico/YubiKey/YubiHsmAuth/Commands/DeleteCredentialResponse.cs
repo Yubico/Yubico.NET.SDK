@@ -19,7 +19,19 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// <summary>
     /// The response to the <see cref="DeleteCredentialCommand"/> class.
     /// </summary>
-    public class DeleteCredentialResponse : BaseYubiHsmAuthResponse
+    /// <remarks>
+    /// <para>
+    /// If authentication failed, the <see cref="YubiKeyResponse.Status"/>
+    /// will be set to
+    /// <see cref="ResponseStatus.AuthenticationRequired"/> and
+    /// <see cref="BaseYubiHsmAuthResponseWithRetries.RetriesRemaining"/>
+    /// will contain the number of retries remaining for the management key.
+    /// </para>
+    /// <para>
+    /// The associated command class is <see cref="DeleteCredentialCommand"/>.
+    /// </para>
+    /// </remarks>
+    public class DeleteCredentialResponse : BaseYubiHsmAuthResponseWithRetries
     {
         /// <summary>
         /// Constructs a DeleteCredential instance based on a ResponseApdu

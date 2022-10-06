@@ -35,11 +35,15 @@ All YubiKeys with the YubiHSM Auth application (included in firmware version 5.4
 
 Before calling this operation, the host needs to generate an 8-byte challenge (the host challenge). The host challenge is typically generated using a random or pseudorandom method. The host sends the host challenge to the HSM device, which returns its own 8-byte challenge (the HSM device challenge). See [YubiHSM Shell](https://developers.yubico.com/yubihsm-shell/) for ways to communicate with the HSM device.
 
-To call GetAes128SessionKeysCommand, you must pass it the label and password of the AES-128 credential that will be used to calculate the SCP03 session keys as well as the host challenge and HSM device challenge from the initial step. See [AddCredentialCommand](xref:YubiHsmAuthCmdAddCredential) for more information on the requirements of the label and password.
+To call GetAes128SessionKeysCommand, you must pass it the label and password of the AES-128 credential that will be used to calculate the SCP03 session keys as well as the host challenge and HSM device challenge from the initial step. There is a limit of 8 attempts to authenticate with the password before the credential is deleted. Once the credential is deleted, it cannot be recovered. Supplying the correct password before the credential is deleted will reset the retry counter to 8.
+
+The credential may require proof of user presence. This is configured when the credential is added (see [AddCredentialCommand](xref:YubiHsmAuthCmdAddCredential)). In this case, the user must touch the YubiKey in order to complete the authentication procedure. Otherwise, the command will fail (though the credential password retry counter does not change).
 
 ## Output
 
 An array which contains the ENC, MAC, and R-MAC session keys. Each key is exactly 16-bytes long.
+
+In the case of a failure, the status word in the response may include further information. For example, the credential was configured to require touch, but the user did not touch the YubiKey.
 
 ## Command APDU
 

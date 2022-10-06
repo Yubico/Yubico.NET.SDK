@@ -21,9 +21,18 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// The response class for changing the management key.
     /// </summary>
     /// <remarks>
-    /// The partner class is <see cref="ChangeManagementKeyCommand"/>.
+    /// <para>
+    /// If authentication failed, the <see cref="YubiKeyResponse.Status"/>
+    /// will be set to
+    /// <see cref="ResponseStatus.AuthenticationRequired"/> and
+    /// <see cref="BaseYubiHsmAuthResponseWithRetries.RetriesRemaining"/>
+    /// will contain the number of retries remaining for the management key.
+    /// </para>
+    /// <para>
+    /// The associated command class is <see cref="ChangeManagementKeyCommand"/>.
+    /// </para>
     /// </remarks>
-    public class ChangeManagementKeyResponse : BaseYubiHsmAuthResponse
+    public class ChangeManagementKeyResponse : BaseYubiHsmAuthResponseWithRetries
     {
         /// <summary>
         /// Constructs a ChangeManagementKeyResponse based on a ResponseApdu

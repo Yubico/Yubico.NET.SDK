@@ -30,7 +30,9 @@ All YubiKeys with the YubiHSM Auth application (included in firmware version 5.4
 
 ## Input
 
-This operation requires authenticating to the YubiHSM Auth application as part of the command. This is done by providing the application's management key (16 bytes). The rest of the input data is related to the new credential:
+This operation requires authenticating with the management key. There is a limit of 8 attempts to authenticate with the management key before the management key is blocked. Once the management key is blocked, the application itself must be reset before authentication can be attempted again. To reset the application, see [ResetApplicationCommand](xref:YubiHsmAuthCmdResetApplication). Supplying the correct management key before the management key is blocked will reset the retry counter to 8.
+
+The rest of the input data is related to the new credential:
 
 * Label (64 bytes)
 * Algorithm (1 byte)

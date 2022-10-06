@@ -18,7 +18,7 @@ limitations under the License. -->
 
 # Reset application
 
-Reset the YubiHSM Auth application. All credentials will be deleted and the management key will be reset to the default value (all zeros).
+Reset the YubiHSM Auth application. All credentials will be deleted, the management key will be reset to the default value (all zeros), and the management key retry counter will be reset to 8.
 
 ## Available
 

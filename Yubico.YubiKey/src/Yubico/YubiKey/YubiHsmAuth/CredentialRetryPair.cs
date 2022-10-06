@@ -56,6 +56,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
             {
                 throw new ArgumentOutOfRangeException(nameof(retries), ExceptionMessages.RetryCountNegative);
             }
+            else
+            {
+                Retries = retries;
+            }
         }
     }
 }

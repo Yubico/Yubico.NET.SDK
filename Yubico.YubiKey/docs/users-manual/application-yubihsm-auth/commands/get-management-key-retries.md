@@ -18,7 +18,9 @@ limitations under the License. -->
 
 # Get management key retries
 
-Get the number of retries remaining for the management key. When supplying the management key for an operation, there is a limit of 8 retries before the application is locked and must be completely reset. Supplying the correct management key before the application is locked will reset the retry counter to 8.
+Get the number of retries remaining for the management key.
+
+Some operations require authentication with the management key (such as adding and deleting credentials). There is a limit of 8 attempts to authenticate with the management key before the management key is blocked. Once the management key is blocked, the application itself must be reset before authentication can be attempted again. To reset the application, see [ResetApplicationCommand](xref:YubiHsmAuthCmdResetApplication). Supplying the correct management key before the management key is blocked will reset the retry counter to 8.
 
 ## Available
 

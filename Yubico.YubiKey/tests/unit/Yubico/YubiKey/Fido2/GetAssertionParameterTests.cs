@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.Fido2
                 authData = authData.Slice(0, 16);
             }
 
-            var rp = new RelyingParty("someRpId")
+            var rp = new RelyingParty("SomeRpId")
             {
                 Name = "SomeRpName",
             };

@@ -127,7 +127,8 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Read the value for the given key as a nested map.
+        /// Read the value for the given key as a nested map, a map where each
+        /// element is a key/value pair and each key is of type TNestedKey.
         /// </summary>
         public CborMap<TNestedKey> ReadMap<TNestedKey>(TKey key)
         {

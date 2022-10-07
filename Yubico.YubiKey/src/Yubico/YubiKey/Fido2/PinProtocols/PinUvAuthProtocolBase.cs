@@ -184,14 +184,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             var authPubKey = (CoseEcPublicKey)authenticatorPublicKey;
 
             // Create a local copy of the authenticatorPublicKey.
-            AuthenticatorPublicKey = new CoseEcPublicKey()
-            {
-                Type = CoseKeyType.Ec2,
-                Algorithm = CoseAlgorithmIdentifier.ECDHwHKDF256,
-                Curve = CoseEcCurve.P256,
-                XCoordinate = authPubKey.XCoordinate,
-                YCoordinate = authPubKey.YCoordinate
-            };
+            AuthenticatorPublicKey = new CoseEcPublicKey(CoseEcCurve.P256, authPubKey.XCoordinate, authPubKey.YCoordinate);
 
             ECParameters? platformKeyPair = null;
             byte[] sharedValue = Array.Empty<byte>();

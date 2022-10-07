@@ -18,7 +18,6 @@ using System.Security.Cryptography;
 using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
-using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
@@ -41,21 +40,12 @@ namespace Yubico.YubiKey.Fido2
         private const int KeyEnterpriseAttestation = 4;
         private const int KeyLargeBlob = 5;
 
-        private const int SequenceTag = 0x30;
-        private const int IntegerTag = 0x02;
-        private const int OffsetX = 1;
-        private const int CoordinateLength = 32;
-        private const int SignatureLength = 2 * CoordinateLength;
-
         private const int MaxAttestationMapCount = 3;
 
         private const string PackedString = "packed";
         private const string AlgString = "alg";
         private const string SigString = "sig";
         private const string X5cString = "x5c";
-
-        private const string EccP256OidValue = "1.2.840.10045.3.1.7";
-        private const string EccPublicKey = "1.2.840.10045.2.1";
 
         /// <summary>
         /// The attestation statement format identifier.
@@ -67,6 +57,10 @@ namespace Yubico.YubiKey.Fido2
         /// is to be used in verifying the attestation statement, and the decoded
         /// elements, including the credential itself, a public key.
         /// </summary>
+        /// <remarks>
+        /// Save the public key in this object and use it to verify assertions
+        /// returned by calling <c>GetAssertion</c>.
+        /// </remarks>
         public AuthenticatorData AuthenticatorData { get; private set; }
 
         /// <summary>
@@ -266,9 +260,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public bool VerifyAttestation(ReadOnlyMemory<byte> clientDataHash)
         {
-            if ((AttestationCertificates is null) || (AttestationCertificates.Count == 0)
-                || !AttestationCertificates[0].PublicKey.Oid.Value.Equals(EccPublicKey, StringComparison.Ordinal)
-                || !TryConvertDerSignature(out byte[] convertedSignature))
+            if ((AttestationCertificates is null) || (AttestationCertificates.Count == 0))
             {
                 throw new InvalidOperationException(ExceptionMessages.MissingCtap2Data);
             }
@@ -279,79 +271,8 @@ namespace Yubico.YubiKey.Fido2
                 AuthenticatorData.EncodedAuthenticatorData.Length, null, 0);
             _ = digester.TransformFinalBlock(clientDataHash.ToArray(), 0, clientDataHash.Length);
 
-            var encodedKey = new ReadOnlyMemory<byte>(AttestationCertificates[0].PublicKey.EncodedKeyValue.RawData);
-
-            var eccCurve = ECCurve.CreateFromValue(EccP256OidValue);
-            var eccParams = new ECParameters
-            {
-                Curve = (ECCurve)eccCurve,
-            };
-            eccParams.Q.X = encodedKey.Slice(OffsetX, CoordinateLength).ToArray();
-            eccParams.Q.Y = encodedKey.Slice(OffsetX + CoordinateLength, CoordinateLength).ToArray();
-
-            using var ecdsaObject = ECDsa.Create(eccParams);
-
-            return ecdsaObject.VerifyHash(digester.Hash, convertedSignature);
-        }
-
-        // Convert the DER signature into (r || s), where r and s are exactly
-        // CoordinateLength bytes long.
-        // If successful, return true.
-        // If the current _signature decodes to something that cannot be
-        // converted, return false.
-        private bool TryConvertDerSignature(out byte[] convertedSignature)
-        {
-            convertedSignature = new byte[SignatureLength];
-            var signatureMemory = new Memory<byte>(convertedSignature);
-
-            var tlvReader = new TlvReader(AttestationStatement);
-            if (tlvReader.TryReadNestedTlv(out tlvReader, SequenceTag))
-            {
-                if (TryCopyNextInteger(tlvReader, signatureMemory))
-                {
-                    return TryCopyNextInteger(tlvReader, signatureMemory[CoordinateLength..]);
-                }
-            }
-
-            return false;
-        }
-
-        // Decode the next value in tlvReader, then copy the result into
-        // signatureValue.
-        // Copy exactly CoordinateLength bytes.
-        // The decoded value might have a leading 00 byte. It is safe to ignore
-        // it.
-        // If the tag is wrong, return false.
-        // If the number of non-zero bytes is < CoordinateLength, prepend 00
-        // bytes in the output.
-        // If the number of non-zero bytes is > CoordinateLength, return false.
-        private static bool TryCopyNextInteger(TlvReader tlvReader, Memory<byte> signatureValue)
-        {
-            if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> rsValue, IntegerTag))
-            {
-                // strip any leading 00 bytes.
-                int length = rsValue.Length;
-                int index = 0;
-                while (length > 0)
-                {
-                    if (rsValue.Span[index] != 0)
-                    {
-                        break;
-                    }
-
-                    index++;
-                    length--;
-                }
-
-                // If we still have data and it is not too long, copy
-                if ((length > 0) && (length <= CoordinateLength))
-                {
-                    rsValue[index..].CopyTo(signatureValue[(CoordinateLength - length)..]);
-                    return true;
-                }
-            }
-
-            return false;
+            using var ecdsaVfy = new EcdsaVerify(AttestationCertificates[0]);
+            return ecdsaVfy.VerifyDigestedData(digester.Hash, AttestationStatement.ToArray());
         }
     }
 }

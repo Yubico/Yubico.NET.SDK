@@ -20,6 +20,10 @@ namespace Yubico.YubiKey.Fido2.Cbor
     /// <summary>
     /// Some helpers to make writing CBOR maps a little easier.
     /// </summary>
+    /// <remarks>
+    /// Note that the only types supported for <c>TKey</c> are <c>int</c> and
+    /// <c>string</c>.
+    /// </remarks>
     internal class CborMapWriter<TKey>
     {
         private readonly CborWriter _cbor;
@@ -37,9 +41,9 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
         private void WriteKey(TKey key)
         {
-            if (key is long longKey)
+            if (key is int intKey)
             {
-                _cbor.WriteInt64(longKey);
+                _cbor.WriteInt32(intKey);
             }
             else if (key is string strKey)
             {
@@ -59,10 +63,10 @@ namespace Yubico.YubiKey.Fido2.Cbor
             return this;
         }
 
-        public CborMapWriter<TKey> Entry(TKey key, long value)
+        public CborMapWriter<TKey> Entry(TKey key, int value)
         {
             WriteKey(key);
-            _cbor.WriteInt64(value);
+            _cbor.WriteInt32(value);
 
             return this;
         }
@@ -103,7 +107,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
             return this;
         }
 
-        public CborMapWriter<TKey> OptionalEntry(TKey key, long? value)
+        public CborMapWriter<TKey> OptionalEntry(TKey key, int? value)
         {
             if (value.HasValue)
             {

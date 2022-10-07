@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
+using Yubico.YubiKey.Cryptography;
 using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.U2f
@@ -27,8 +27,6 @@ namespace Yubico.YubiKey.U2f
     /// </remarks>
     public abstract class U2fSignedData : U2fBuffer
     {
-        private const int SignatureTag = 0x30;
-        private const int IntegerTag = 0x02;
         private const int SignatureLength = 2 * CoordinateLength;
         // The longest possible BER signature is
         //  30 len
@@ -62,76 +60,22 @@ namespace Yubico.YubiKey.U2f
             _signatureOffset = signatureOffset;
         }
 
-        // The subclass will build the ECDsa object and call this method to
-        // perform the actual verification.
+        // The subclass will build the EcdsaVerify object based on the format of
+        // the key it is using, and call this method to digest the data and
+        // perform the verification.
+        // For each subclass, the data to verify is in the _buffer (it is not yet
+        // digested). In addition, the data to verify begins at index 0 and
+        // continues until the signature. Therefore, the data to verify is the
+        // byte array _buffer until _signatureOffset.
         private protected bool VerifySignature(
-            ECDsa ecdsaObject, ReadOnlyMemory<byte> applicationId, ReadOnlyMemory<byte> clientDataHash)
+            EcdsaVerify verifier, ReadOnlyMemory<byte> applicationId, ReadOnlyMemory<byte> clientDataHash)
         {
             ApplicationId = applicationId;
             ClientDataHash = clientDataHash;
 
-            return TryConvertDerSignature(out byte[] convertedSignature) &&
-                ecdsaObject.VerifyData(_buffer, 0, _signatureOffset, convertedSignature, HashAlgorithmName.SHA256);
-        }
-
-        // Convert the DER signature into (r || s), where r and s are exactly
-        // CoordinateLength bytes long.
-        // If successful, return true.
-        // If the current _signature decodes to something that cannot be
-        // converted, return false.
-        private bool TryConvertDerSignature(out byte[] convertedSignature)
-        {
-            convertedSignature = new byte[SignatureLength];
-            var signatureMemory = new Memory<byte>(convertedSignature);
-
-            var tlvReader = new TlvReader(_bufferMemory.Slice(_signatureOffset, _berSignatureLength));
-            if (tlvReader.TryReadNestedTlv(out tlvReader, SignatureTag))
-            {
-                if (TryCopyNextInteger(tlvReader, signatureMemory))
-                {
-                    return TryCopyNextInteger(tlvReader, signatureMemory.Slice(CoordinateLength));
-                }
-            }
-
-            return false;
-        }
-
-        // Decode the next value in tlvReader, then copy the result into
-        // signatureValue.
-        // Copy exactly CoordinateLength bytes.
-        // The decoded value might have a leading 00 byte. It is safe to ignore
-        // it.
-        // If the tag is wrong, return false.
-        // If the number of non-zero bytes is < CoordinateLength, prepend 00
-        // bytes in the output.
-        // If the number of non-zero bytes is > CoordinateLength, return false.
-        private static bool TryCopyNextInteger(TlvReader tlvReader, Memory<byte> signatureValue)
-        {
-            if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> rsValue, IntegerTag))
-            {
-                // strip any leading 00 bytes.
-                int length = rsValue.Length;
-                int index = 0;
-                while (length > 0)
-                {
-                    if (rsValue.Span[index] != 0)
-                    {
-                        break;
-                    }
-
-                    index++;
-                    length--;
-                }
-
-                // If we still have data and it is not too long, copy
-                if ((length > 0) && (length <= CoordinateLength))
-                {
-                    rsValue.Slice(index).CopyTo(signatureValue.Slice(CoordinateLength - length));
-                    return true;
-                }
-            }
-
-            return false;
+            return verifier.VerifyData(
+                _bufferMemory.Slice(0, _signatureOffset).ToArray(),
+                _bufferMemory.Slice(_signatureOffset, _berSignatureLength).ToArray());
         }
     }
 }

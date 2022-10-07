@@ -77,84 +77,9 @@ namespace Yubico.YubiKey.Fido2
         /// The user's account ID. This constructor will copy a reference to the
         /// input <c>id</c>.
         /// </param>
-        public UserEntity(byte[] id)
+        public UserEntity(ReadOnlyMemory<byte> id)
         {
-            Id = new ReadOnlyMemory<byte>(id);
-        }
-
-        /// <summary>
-        /// Constructs a new instance of <see cref="UserEntity"/> based on the
-        /// encoded value.
-        /// </summary>
-        /// <remarks>
-        /// This constructor expects the encoding to follow this template.
-        /// <code>
-        ///    map {
-        ///      "id"          --byte string--
-        ///      "displayName" --text string-- (optional)
-        ///      "name"        --text string-- (optional)
-        ///    }
-        /// </code>
-        /// </remarks>
-        /// <param name="encodedUserEntity">
-        /// The CBOR-encoded user entity info.
-        /// </param>
-        /// <exception cref="Ctap2DataException">
-        /// The <c>encodedUserEntity</c> is not a correct encoding.
-        /// </exception>
-        public UserEntity(ReadOnlyMemory<byte> encodedUserEntity)
-        {
-            var cbor = new CborReader(encodedUserEntity, CborConformanceMode.Ctap2Canonical);
-
-            int? entries = cbor.ReadStartMap();
-            int count = entries ?? 0;
-
-            try
-            {
-                while (count > 0)
-                {
-                    string mapKey = cbor.ReadTextString();
-
-                    switch (mapKey)
-                    {
-                        default:
-                            throw new Ctap2DataException(
-                                string.Format(
-                                    CultureInfo.CurrentCulture,
-                                    ExceptionMessages.Ctap2CborUnexpectedKey, TagId, mapKey));
-
-                        case TagId:
-                            Id = cbor.ReadByteString();
-                            break;
-
-                        case TagDisplayName:
-                            DisplayName = cbor.ReadTextString();
-                            break;
-
-                        case TagName:
-                            Name = cbor.ReadTextString();
-                            break;
-                    }
-
-                    count--;
-                }
-            }
-            catch (CborContentException cborException)
-            {
-                throw new Ctap2DataException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.Ctap2CborUnexpectedValue),
-                        cborException);
-            }
-
-            if (Id.Length == 0)
-            {
-                throw new Ctap2DataException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.Ctap2MissingRequiredField));
-            }
+            Id = id;
         }
 
         /// <inheritdoc/>

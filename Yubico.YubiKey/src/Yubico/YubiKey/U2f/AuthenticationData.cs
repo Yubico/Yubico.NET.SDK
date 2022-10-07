@@ -15,8 +15,7 @@
 using System;
 using System.Buffers.Binary;
 using System.Globalization;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKey.Cryptography;
 using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.U2f
@@ -131,16 +130,9 @@ namespace Yubico.YubiKey.U2f
             ReadOnlyMemory<byte> userPublicKey, ReadOnlyMemory<byte> applicationId, ReadOnlyMemory<byte> clientDataHash)
         {
             _log.LogInformation("Verify a U2F AuthenticationData signature.");
-            var eccCurve = ECCurve.CreateFromValue("1.2.840.10045.3.1.7");
-            var eccParams = new ECParameters
-            {
-                Curve = (ECCurve)eccCurve,
-            };
-            eccParams.Q.X = userPublicKey.Slice(1, CoordinateLength).ToArray();
-            eccParams.Q.Y = userPublicKey.Slice(1 + CoordinateLength, CoordinateLength).ToArray();
-            using var ecdsaObject = ECDsa.Create(eccParams);
 
-            return VerifySignature(ecdsaObject, applicationId, clientDataHash);
+            using var verifier = new EcdsaVerify(userPublicKey);
+            return VerifySignature(verifier, applicationId, clientDataHash);
         }
     }
 }

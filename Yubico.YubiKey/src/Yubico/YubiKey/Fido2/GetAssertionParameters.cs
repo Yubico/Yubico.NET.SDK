@@ -97,6 +97,9 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <remarks>
         /// To add options, call <see cref="AddOption"/>.
+        /// The standard lists two option keys: "up" and "uv". Any other option
+        /// on a YubiKey will yield an error. In addition, YubiKeys that are not
+        /// BIO series will not allow "uv".
         /// </remarks>
         public IReadOnlyDictionary<string, bool>? Options => _options;
 
@@ -207,10 +210,9 @@ namespace Yubico.YubiKey.Fido2
         /// If the <c>Options</c> list already contains an entry with the given
         /// <c>optionKey</c>, this method will replace it.
         /// <para>
-        /// Note that the standard specifies valid option keys. Currently they
-        /// are "up", and "uv". This method will accept any key given and pass
-        /// it to the YubiKey. If an invalid key is used, the YubiKey will
-        /// return an error.
+        /// The standard lists two option keys: "up" and "uv". Any other option
+        /// on a YubiKey will yield an error. In addition, YubiKeys that are not
+        /// BIO series will not allow "uv".
         /// </para>
         /// </remarks>
         /// <param name="optionKey">
@@ -230,14 +232,14 @@ namespace Yubico.YubiKey.Fido2
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
 
-            CborHelpers.BeginMap<long>(cbor)
-                .Entry(TagRp, RelyingParty)
+            CborHelpers.BeginMap<int>(cbor)
+                .Entry(TagRp, RelyingParty.Id)
                 .Entry(TagClientDataHash, ClientDataHash)
                 .OptionalEntry<IReadOnlyList<ICborEncode>>(TagAllowList, CborHelpers.EncodeArrayOfObjects, AllowList)
                 .OptionalEntry<Dictionary<string, byte[]>>(TagExtensions, ParameterHelpers.EncodeKeyValues<byte[]>, _extensions)
                 .OptionalEntry<Dictionary<string, bool>>(TagOptions, ParameterHelpers.EncodeKeyValues<bool>, _options)
                 .OptionalEntry(TagPinUvAuth, PinUvAuthParam)
-                .OptionalEntry(TagProtocol, (long?)Protocol)
+                .OptionalEntry(TagProtocol, (int?)Protocol)
                 .EndMap();
 
             return cbor.Encode();

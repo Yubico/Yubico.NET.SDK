@@ -20,11 +20,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
     public class CborHelperTests
     {
         [Fact]
-        public void EncodeDecode_MapWithLongKey_Succeeds()
+        public void EncodeDecode_MapWithIntKey_Succeeds()
         {
             var w = new CborWriter(CborConformanceMode.Ctap2Canonical, true);
 
-            CborHelpers.BeginMap<long>(w)
+            CborHelpers.BeginMap<int>(w)
                 .Entry(1, "test")
                 .Entry(2, "foo")
                 .Entry(-4, "bar")

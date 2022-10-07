@@ -39,14 +39,7 @@ namespace Yubico.YubiKey.Fido2.Cose
             Array.Copy(correctValue, 11, xCoord, 0, 32);
             Array.Copy(correctValue, 46, yCoord, 0, 32);
 
-            var eccKey = new CoseEcPublicKey()
-            {
-                Type = CoseKeyType.Ec2,
-                Algorithm = CoseAlgorithmIdentifier.ES256,
-                Curve = CoseEcCurve.P256,
-                XCoordinate = xCoord,
-                YCoordinate = yCoord
-            };
+            var eccKey = new CoseEcPublicKey(CoseEcCurve.P256, xCoord, yCoord);
 
             ReadOnlyMemory<byte> encodedKey = eccKey.Encode();
 

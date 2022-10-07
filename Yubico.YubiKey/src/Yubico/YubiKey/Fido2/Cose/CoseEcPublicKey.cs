@@ -127,6 +127,50 @@ namespace Yubico.YubiKey.Fido2.Cose
             }
         }
 
+        // The default constructor explicitly defined. We don't want it to be
+        // used.
+        private CoseEcPublicKey()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Construct a <see cref="CoseEcPublicKey"/> based on the curve and
+        /// point.
+        /// </summary>
+        /// <remarks>
+        /// An ECC public key is a curve and public point. This class supports
+        /// only one curve: NIST P-256 (<c>CoseEcCurve.P256</c>). This
+        /// constructor expects the length of each coordinate to be at least one
+        /// byte and 32 bytes or fewer.
+        /// </remarks>
+        /// <param name="curve">
+        /// The curve for this public key.
+        /// </param>
+        /// <param name="xCoordinate">
+        /// The x-coordinate of the public point.
+        /// </param>
+        /// <param name="yCoordinate">
+        /// The y-coordinate of the public point.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// The <c>encodedPoint</c> is not a correct EC Point encoding.
+        /// </exception>
+        public CoseEcPublicKey(CoseEcCurve curve, ReadOnlyMemory<byte> xCoordinate, ReadOnlyMemory<byte> yCoordinate)
+        {
+            if ((curve != CoseEcCurve.P256) || (xCoordinate.Length == 0) || (xCoordinate.Length > P256CoordinateLength)
+                || (yCoordinate.Length == 0) || (yCoordinate.Length > P256CoordinateLength))
+            {
+                throw new ArgumentException(ExceptionMessages.InvalidPublicKeyData);
+            }
+
+            Curve = CoseEcCurve.P256;
+            XCoordinate = xCoordinate;
+            YCoordinate = yCoordinate;
+            Type = CoseKeyType.Ec2;
+            Algorithm = CoseAlgorithmIdentifier.ES256;
+        }
+
         /// <summary>
         /// Construct a <see cref="CoseEcPublicKey"/> based on the CBOR encoding
         /// of a <c>COSE_Key</c>.
@@ -183,17 +227,6 @@ namespace Yubico.YubiKey.Fido2.Cose
         }
 
         /// <summary>
-        /// Constructs a new instance of <see cref="CoseEcPublicKey"/>.
-        /// </summary>
-        /// <remarks>
-        /// This constructor is provided for those developers who want to use the
-        /// object initializer pattern.
-        /// </remarks>
-        public CoseEcPublicKey()
-        {
-        }
-
-        /// <summary>
         /// Returns the COSE key as a new .NET <c>ECParameters</c> structure. Used
         /// for interoperating with the .NET crypto library.
         /// </summary>
@@ -213,9 +246,6 @@ namespace Yubico.YubiKey.Fido2.Cose
             return ecParams;
         }
 
-        // <inheritdoc/>
-        //internal override byte[] CborEncode() => Encode();
-
         /// <inheritdoc/>
         public override byte[] Encode()
         {
@@ -231,10 +261,10 @@ namespace Yubico.YubiKey.Fido2.Cose
             // The standard specifies that the Algorithm is -25, ECDH with
             // HKDF256.
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            CborHelpers.BeginMap<long>(cbor)
-                .Entry(TagKeyType, (long)CoseKeyType.Ec2)
-                .Entry(TagAlgorithm, (long)CoseAlgorithmIdentifier.ECDHwHKDF256)
-                .Entry(TagCurve, (long)CoseEcCurve.P256)
+            CborHelpers.BeginMap<int>(cbor)
+                .Entry(TagKeyType, (int)CoseKeyType.Ec2)
+                .Entry(TagAlgorithm, (int)CoseAlgorithmIdentifier.ECDHwHKDF256)
+                .Entry(TagCurve, (int)CoseEcCurve.P256)
                 .Entry(TagX, XCoordinate)
                 .Entry(TagY, YCoordinate)
                 .EndMap();

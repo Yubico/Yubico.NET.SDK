@@ -166,14 +166,14 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
 
-            CborHelpers.BeginMap<long>(cbor)
-                .OptionalEntry(TagPinUvAuthProtocol, (uint?)PinUvAuthProtocol)
-                .Entry(TagSubCommand, (uint)SubCommand)
+            CborHelpers.BeginMap<int>(cbor)
+                .OptionalEntry(TagPinUvAuthProtocol, (int?)PinUvAuthProtocol)
+                .Entry(TagSubCommand, (int)SubCommand)
                 .OptionalEntry(TagKeyAgreement, KeyAgreement)
                 .OptionalEntry(TagPinUvAuthParam, PinUvAuthParam)
                 .OptionalEntry(TagNewPinEnc, NewPinEnc)
                 .OptionalEntry(TagPinHashEnc, PinHashEnc)
-                .OptionalEntry(TagPermissions, (uint?)Permissions)
+                .OptionalEntry(TagPermissions, (int?)Permissions)
                 .OptionalEntry(TagRpId, RpId)
                 .EndMap();
 

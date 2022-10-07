@@ -346,7 +346,7 @@ namespace Yubico.YubiKey.Fido2
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
 
-            CborHelpers.BeginMap<long>(cbor)
+            CborHelpers.BeginMap<int>(cbor)
                 .Entry(TagClientDataHash, ClientDataHash)
                 .Entry(TagRp, RelyingParty)
                 .Entry(TagUserEntity, UserEntity)
@@ -355,8 +355,8 @@ namespace Yubico.YubiKey.Fido2
                 .OptionalEntry<Dictionary<string,byte[]>>(TagExtensions, ParameterHelpers.EncodeKeyValues<byte[]>, _extensions)
                 .OptionalEntry<Dictionary<string,bool>>(TagOptions, ParameterHelpers.EncodeKeyValues<bool>, _options)
                 .OptionalEntry(TagPinUvAuth, PinUvAuthParam)
-                .OptionalEntry(TagProtocol, (long?)Protocol)
-                .OptionalEntry(TagEnterpriseAttestation, (long?)EnterpriseAttestation)
+                .OptionalEntry(TagProtocol, (int?)Protocol)
+                .OptionalEntry(TagEnterpriseAttestation, (int?)EnterpriseAttestation)
                 .EndMap();
 
             return cbor.Encode();

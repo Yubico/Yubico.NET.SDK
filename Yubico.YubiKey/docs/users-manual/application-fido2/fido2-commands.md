@@ -33,6 +33,7 @@ what information is needed from the caller for that command.
 * [Get PIN/UV Auth Token Using PIN](#pin-uv-auth-using-pin)
 * [Get PIN/UV Auth Token Using UV](#pin-uv-auth-using-uv)
 * [Make credential](#make-credential)
+* [Get Assertion](#get-assertion)
 ___
 ## Get version
 
@@ -301,7 +302,7 @@ The encrypted token as a byte array.
 ___
 ## Make credential
 
-Make a credential for a relying party. This is the 
+Make a credential for a relying party.
 
 ### Available
 
@@ -327,4 +328,35 @@ The credential (public key) and other information.
 ### APDU
 
 [Technical APDU Details](apdu/make-credential.md)
+___
+## Get assertion
+
+Get an assertion (credential) that will be verified by a relying party.
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[GetAssertionCommand](xref:Yubico.YubiKey.Fido2.Commands.GetAssertionCommand)
+
+[GetAssertionResponse](xref:Yubico.YubiKey.Fido2.Commands.GetAssertionResponse)
+
+### Input
+
+The `authenticatorGetAssertion` parameters specified in section 6.2 of the FIDO2
+specifications.
+
+[GetAssertionParameters](xref:Yubico.YubiKey.Fido2.GetAssertionParameters)
+
+### Output
+
+The credential, along with other information.
+
+[GetAssertionData](xref:Yubico.YubiKey.Fido2.GetAssertionData)
+
+### APDU
+
+[Technical APDU Details](apdu/get-assertion.md)
 ___

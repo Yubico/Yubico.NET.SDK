@@ -14,8 +14,8 @@
 
 using System;
 using System.Globalization;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKey.Cryptography;
 using Yubico.Core.Tlv;
 using Yubico.Core.Logging;
 
@@ -188,8 +188,9 @@ namespace Yubico.YubiKey.U2f
         public bool VerifySignature(ReadOnlyMemory<byte> applicationId, ReadOnlyMemory<byte> clientDataHash)
         {
             _log.LogInformation("Verify a U2F RegistrationData signature.");
-            using ECDsa ecdsaObject = AttestationCert.GetECDsaPublicKey();
-            return VerifySignature(ecdsaObject, applicationId, clientDataHash);
+
+            using var verifier = new EcdsaVerify(AttestationCert);
+            return VerifySignature(verifier, applicationId, clientDataHash);
         }
     }
 }

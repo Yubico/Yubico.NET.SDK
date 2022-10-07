@@ -21,10 +21,10 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2
 {
-    public class MakeCredentialCommandTests
+    public class GetAssertionCommandTests
     {
         [Fact]
-        public void MakeCredentialCommand_Succeeds()
+        public void GetAssertionCommand_Succeeds()
         {
             byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
@@ -43,22 +43,21 @@ namespace Yubico.YubiKey.Fido2
 
             var protocol = new PinUvAuthProtocolTwo();
 
-            bool isValid = GetParams(connection, protocol, pin, out MakeCredentialParameters makeParams);
+            bool isValid = GetParams(connection, protocol, pin, out GetAssertionParameters assertionParams);
             Assert.True(isValid);
 
-            var cmd = new MakeCredentialCommand(makeParams);
-            MakeCredentialResponse rsp = connection.SendCommand(cmd);
+            var cmd = new GetAssertionCommand(assertionParams);
+            GetAssertionResponse rsp = connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
-            MakeCredentialData cData = rsp.GetData();
-            isValid = cData.VerifyAttestation(makeParams.ClientDataHash);
-            Assert.True(isValid);
+            GetAssertionData cData = rsp.GetData();
+            Assert.Equal(48, cData.CredentialId.Id.Length);
         }
 
         private bool GetParams(
             FidoConnection connection,
             PinUvAuthProtocolBase protocol,
             byte[] pin,
-            out MakeCredentialParameters makeParams)
+            out GetAssertionParameters assertionParams)
         {
             byte[] clientDataHash = new byte[] {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
@@ -69,14 +68,8 @@ namespace Yubico.YubiKey.Fido2
             {
                 Name = "SomeRpName",
             };
-            byte[] userId = new byte[] { 0x11, 0x22, 0x33, 0x44 };
-            var user = new UserEntity(new ReadOnlyMemory<byte>(userId))
-            {
-                Name = "SomeUserName",
-                DisplayName = "User",
-            };
 
-            makeParams = new MakeCredentialParameters(rp, user);
+            assertionParams = new GetAssertionParameters(rp, clientDataHash);
 
             if (!GetPinToken(connection, protocol, pin, out byte[] pinToken))
             {
@@ -85,13 +78,12 @@ namespace Yubico.YubiKey.Fido2
 
             byte[] pinUvAuthParam = protocol.AuthenticateUsingPinToken(pinToken, clientDataHash);
 
-            makeParams.ClientDataHash = clientDataHash;
-            makeParams.Protocol = protocol.Protocol;
-            makeParams.PinUvAuthParam = pinUvAuthParam;
+            assertionParams.Protocol = protocol.Protocol;
+            assertionParams.PinUvAuthParam = pinUvAuthParam;
 
-            makeParams.AddOption("rk", true);
-            //makeParams.AddOption("up", true);
-            //makeParams.AddOption("uv", false);
+            //assertionParams.AddOption("rk", true);
+            assertionParams.AddOption("up", true);
+            //assertionParams.AddOption("uv", false);
 
             return true;
         }

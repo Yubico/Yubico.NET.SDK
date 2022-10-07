@@ -19,41 +19,41 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Instruct the YubiKey to make a credential based on the input parameters.
+    /// Instruct the YubiKey to get an assertion based on the input parameters.
     /// </summary>
-    public class MakeCredentialCommand : IYubiKeyCommand<MakeCredentialResponse>
+    public class GetAssertionCommand : IYubiKeyCommand<GetAssertionResponse>
     {
-        private const int CtapMakeCredentialCmd = 0x01;
+        private const int CtapGetAssertionCmd = 0x02;
 
         /// <inheritdoc />
         public YubiKeyApplication Application => YubiKeyApplication.Fido2;
 
-        private readonly MakeCredentialParameters _params;
+        private readonly GetAssertionParameters _params;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
         // Note that there is no object-initializer constructor. All the
         // constructor inputs have no default or are secret byte arrays.
-        private MakeCredentialCommand()
+        private GetAssertionCommand()
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Constructs an instance of the <see cref="MakeCredentialCommand" />
+        /// Constructs an instance of the <see cref="GetAssertionCommand" />
         /// class using the given parameters.
         /// </summary>
         /// <remarks>
         /// This class will copy a reference to the input parameters object. It
         /// will no longer need it after the call to <c>SendCommand</c>.
         /// </remarks>
-        /// <param name="makeCredentialParameters">
-        /// An object containing all the parameters the YubiKey will use to make
-        /// a new credential.
+        /// <param name="getAssertionParameters">
+        /// An object containing all the parameters the YubiKey will use to get
+        /// an assertion.
         /// </param>
-        public MakeCredentialCommand(MakeCredentialParameters makeCredentialParameters)
+        public GetAssertionCommand(GetAssertionParameters getAssertionParameters)
         {
-            _params = makeCredentialParameters;
+            _params = getAssertionParameters;
         }
 
         /// <inheritdoc />
@@ -61,7 +61,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             byte[] encodedParams = _params.CborEncode();
             byte[] payload = new byte[encodedParams.Length + 1];
-            payload[0] = CtapMakeCredentialCmd;
+            payload[0] = CtapGetAssertionCmd;
             Array.Copy(encodedParams, 0, payload, 1, encodedParams.Length);
             return new CommandApdu()
             {
@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public MakeCredentialResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new MakeCredentialResponse(responseApdu);
+        public GetAssertionResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new GetAssertionResponse(responseApdu);
     }
 }

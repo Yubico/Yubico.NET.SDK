@@ -84,8 +84,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
         }
 
         /// <summary>
-        /// Reset the YubiHSM Auth application, which will delete all credentials
-        /// and set the management key to its default value (all zeros).
+        /// Reset the YubiHSM Auth application, which will delete all credentials,
+        /// reset the management key to its default value (all zeros), and reset
+        /// the management key retry counter to 8.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// The command to reset the application failed.

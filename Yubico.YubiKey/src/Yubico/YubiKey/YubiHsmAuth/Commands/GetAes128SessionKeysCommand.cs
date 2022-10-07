@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// </summary>
     /// <remarks>
     /// <para>
-    /// Some steps must be performed prior to calling this command. First the
+    /// Some steps must be performed prior to calling this command. First,
     /// generate an 8-byte challenge, called the "host challenge", using a
     /// random or pseudorandom method. Next, the host challenge is sent to the
     /// YubiHSM 2 device using the

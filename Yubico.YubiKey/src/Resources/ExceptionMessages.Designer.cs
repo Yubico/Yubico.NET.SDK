@@ -2068,6 +2068,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to authenticate the credential password. Retries remaining: {0}..
+        /// </summary>
+        internal static string YubiHsmAuthCredPasswordAuthFailed {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthCredPasswordAuthFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The label must have a UTF-8 byte count between {0} and {1}, inclusive. The actual byte count was {2}..
         /// </summary>
         internal static string YubiHsmAuthInvalidCredentialLabelLength {
@@ -2136,6 +2145,15 @@ namespace Yubico.YubiKey {
         internal static string YubiHsmAuthKeyTypeNotSupported {
             get {
                 return ResourceManager.GetString("YubiHsmAuthKeyTypeNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed to authenticate the management key. Retries remaining: {0}..
+        /// </summary>
+        internal static string YubiHsmAuthMgmtKeyAuthFailed {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthMgmtKeyAuthFailed", resourceCulture);
             }
         }
         

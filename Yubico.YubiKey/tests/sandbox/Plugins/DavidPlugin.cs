@@ -832,50 +832,6 @@ namespace Yubico.YubiKey.TestApp.Plugins
             return result;
         }
 
-        private bool SessionAppMethods()
-        {
-            bool result = default;
-            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
-
-            if (keys.Any())
-            {
-                int deviceCount = 1;
-                foreach (IYubiKeyDevice device in keys)
-                {
-                    bool yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
-                    if (!yubiHsmAuthEnabled)
-                    {
-                        continue;
-                    }
-
-                    Output.WriteLine($"\n{deviceCount++}) Using YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
-
-                    using (YubiHsmAuthSession yhaSession = new YubiHsmAuthSession(device))
-                    {
-                        Output.WriteLine($"Mgmt retries, before: {yhaSession.GetManagementKeyRetries()}");
-
-                        // Supply wrong current mgmt key 
-                        byte[] currentManagementKey = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
-                        byte[] newManagementKey = new byte[16] { 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4 };
-
-                        ChangeManagementKeyCommand cmdChangeMgmt = new ChangeManagementKeyCommand(newManagementKey, currentManagementKey);
-                        ChangeManagementKeyResponse responseChangeMgmt = yhaSession.Connection.SendCommand(cmdChangeMgmt);
-
-                        if (responseChangeMgmt.Status != ResponseStatus.Success)
-                        {
-                            Output.WriteLine($"Failed change mgmt key (1), response status: {responseChangeMgmt.Status}, {responseChangeMgmt.StatusMessage}");
-                        }
-
-                        Output.WriteLine($"Mgmt retries, after: {yhaSession.GetManagementKeyRetries()}");
-                    }
-                }
-
-                result = true;
-            }
-
-            return result;
-        }
-
         private bool GetSessionKeys()
         {
             bool result = default;
@@ -968,6 +924,182 @@ namespace Yubico.YubiKey.TestApp.Plugins
                                 Output.Write($" {b.ToString("X4")}");
                             }
                         }
+                    }
+                }
+
+                result = true;
+            }
+
+            return result;
+        }
+
+        private bool SessionAppMethods()
+        {
+            bool result = default;
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
+
+            if (keys.Any())
+            {
+                int deviceCount = 1;
+                foreach (IYubiKeyDevice device in keys)
+                {
+                    bool yubiHsmAuthEnabled = device.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.YubiHsmAuth);
+                    if (!yubiHsmAuthEnabled)
+                    {
+                        continue;
+                    }
+
+                    Output.WriteLine($"\n{deviceCount++}) Using YubiKey v{device.FirmwareVersion} S/N {device.SerialNumber}...");
+
+                    using (YubiHsmAuthSession yhaSession = new YubiHsmAuthSession(device))
+                    {
+                        Output.WriteLine("Resetting YubiHSM Auth application...");
+                        yhaSession.ResetApplication();
+                        Output.WriteLine();
+                        Output.WriteLine();
+                        Output.WriteLine();
+
+                        Output.WriteLine("Adding a credential...");
+                        byte[] currentMgmtKey = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+                        byte[] password = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                        byte[] encKey = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                        byte[] macKey = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+                        string label1 = "test cred 1";
+                        string label2 = "test cred 2";
+                        bool touchRequired = false;
+                        var aesCred = new Aes128CredentialWithSecrets(password, encKey, macKey, label1, touchRequired);
+                        yhaSession.AddCredential(currentMgmtKey, aesCred);
+                        aesCred = new Aes128CredentialWithSecrets(password, encKey, macKey, label2, touchRequired);
+                        yhaSession.AddCredential(currentMgmtKey, aesCred);
+                        Output.WriteLine();
+
+                        Output.WriteLine("Attempting to get list of credentials...");
+                        var creds = yhaSession.ListCredentials();
+                        Output.WriteLine($"{creds.Count} credentials found.");
+                        int credLineCount = 1;
+                        foreach (var cred in creds)
+                        {
+                            Output.WriteLine($"{credLineCount++}) {cred.Credential.Label}, retries = {cred.Retries}");
+                        }
+                        Output.WriteLine();
+                        Output.WriteLine();
+                        Output.WriteLine();
+
+                        //Output.WriteLine("Blocking management key...");
+                        byte[] newMgmtKey = new byte[16] { 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4 };
+                        //int? retriesRemaining = yhaSession.GetManagementKeyRetries();
+                        //while (retriesRemaining > 0)
+                        //{
+                        //    _ = yhaSession.TryChangeManagementKey(newMgmtKey, currentMgmtKey, out retriesRemaining);
+                        //}
+                        //Output.WriteLine("Management key now blocked.");
+                        //Output.WriteLine();
+
+                        //Output.WriteLine("Attempting to change mgmt key (correct current mgmt key)...");
+                        //ChangeManagementKeyCommand cmdChangeMgmt = new ChangeManagementKeyCommand(currentMgmtKey, newMgmtKey);
+                        //ChangeManagementKeyResponse responseChangeMgmt = yhaSession.Connection.SendCommand(cmdChangeMgmt);
+                        //Output.WriteLine($"Response status: {responseChangeMgmt.Status}, {responseChangeMgmt.StatusMessage}; retries = {responseChangeMgmt.RetriesRemaining}");
+                        //Output.WriteLine();
+                        //Output.WriteLine();
+                        //Output.WriteLine();
+
+                        //Output.WriteLine("Attempting to get list of credentials...");
+                        //creds = yhaSession.ListCredentials();
+                        //Output.WriteLine($"{creds.Count} credentials found.");
+                        //credLineCount = 1;
+                        //foreach (var cred in creds)
+                        //{
+                        //    Output.WriteLine($"{credLineCount++}) {cred.Credential.Label}, retries = {cred.Retries}");
+                        //}
+                        //Output.WriteLine();
+
+                        //string targetCredLabel = creds.First().Credential.Label;
+                        //Output.WriteLine($"Attempting to get session keys from {targetCredLabel}...");
+                        byte[] hostChallenge = new byte[8] { 1, 0, 1, 0, 1, 0, 1, 0 };
+                        byte[] hsmDeviceChallenge = new byte[8] { 2, 4, 2, 4, 2, 4, 2, 4 };
+                        //_ = yhaSession.GetAes128SessionKeys(targetCredLabel, password, hostChallenge, hsmDeviceChallenge);
+                        //Output.WriteLine("Successfully retrieved session keys.");
+                        //Output.WriteLine();
+
+                        //Output.WriteLine($"Blocking cred {targetCredLabel}");
+                        //retriesRemaining = creds.First(cred => cred.Credential.Label == targetCredLabel).Retries;
+                        //GetAes128SessionKeysCommand getSessionKeys = new GetAes128SessionKeysCommand(targetCredLabel, newMgmtKey, hostChallenge, hsmDeviceChallenge);
+                        //GetAes128SessionKeysResponse responseSessionKeys;
+                        //while (retriesRemaining > 0)
+                        //{
+                        //    // Pass in wrong password to block cred
+                        //    responseSessionKeys = yhaSession.Connection.SendCommand(getSessionKeys);
+                        //    Output.WriteLine($"Response status: {responseSessionKeys.Status}, {responseSessionKeys.StatusMessage}; retries = {responseSessionKeys.RetriesRemaining}");
+
+                        //    retriesRemaining = responseSessionKeys.RetriesRemaining;
+                        //}
+                        //Output.WriteLine($"Credential {targetCredLabel} is now blocked.");
+                        //Output.WriteLine();
+
+                        //Output.WriteLine("Attempting to get list of credentials...");
+                        //creds = yhaSession.ListCredentials();
+                        //Output.WriteLine($"{creds.Count} credentials found.");
+                        //credLineCount = 1;
+                        //foreach (var cred in creds)
+                        //{
+                        //    Output.WriteLine($"{credLineCount++}) {cred.Credential.Label}, retries = {cred.Retries}");
+                        //}
+                        //Output.WriteLine();
+
+                        //Output.WriteLine($"Attempting to get session keys from {targetCredLabel} (correct password)...");
+                        //getSessionKeys = new GetAes128SessionKeysCommand(targetCredLabel, password, hostChallenge, hsmDeviceChallenge);
+                        //responseSessionKeys = yhaSession.Connection.SendCommand(getSessionKeys);
+                        //Output.WriteLine($"Response status: {responseSessionKeys.Status}, {responseSessionKeys.StatusMessage}; retries = {responseSessionKeys.RetriesRemaining}");
+                        //Output.WriteLine();
+                        //Output.WriteLine();
+
+                        string targetCredLabel = creds.First().Credential.Label;
+                        Output.WriteLine($"Reducing {targetCredLabel} retries to 6...");
+                        int? retriesRemaining = creds.First(cred => cred.Credential.Label == targetCredLabel).Retries;
+                        GetAes128SessionKeysCommand getSessionKeys = new GetAes128SessionKeysCommand(targetCredLabel, newMgmtKey, hostChallenge, hsmDeviceChallenge);
+                        GetAes128SessionKeysResponse responseSessionKeys;
+                        while (retriesRemaining > 6)
+                        {
+                            // Pass in wrong password to cred
+                            responseSessionKeys = yhaSession.Connection.SendCommand(getSessionKeys);
+                            Output.WriteLine($"Response status: {responseSessionKeys.Status}, {responseSessionKeys.StatusMessage}; retries = {responseSessionKeys.RetriesRemaining}");
+
+                            retriesRemaining = responseSessionKeys.RetriesRemaining;
+                        }
+                        Output.WriteLine($"Cred {targetCredLabel} now has {retriesRemaining} retries remaining.");
+                        Output.WriteLine();
+
+                        Output.WriteLine("Attempting to get list of credentials...");
+                        creds = yhaSession.ListCredentials();
+                        Output.WriteLine($"{creds.Count} credentials found.");
+                        credLineCount = 1;
+                        foreach (var cred in creds)
+                        {
+                            Output.WriteLine($"{credLineCount++}) {cred.Credential.Label}, retries = {cred.Retries}");
+                        }
+                        Output.WriteLine();
+
+                        //Output.WriteLine($"Attempting to get session keys from {targetCredLabel} (correct password)...");
+                        //getSessionKeys = new GetAes128SessionKeysCommand(targetCredLabel, password, hostChallenge, hsmDeviceChallenge);
+                        //responseSessionKeys = yhaSession.Connection.SendCommand(getSessionKeys);
+                        //Output.WriteLine($"Response status: {responseSessionKeys.Status}, {responseSessionKeys.StatusMessage}; retries = {responseSessionKeys.RetriesRemaining}");
+                        //Output.WriteLine();
+
+                        Output.WriteLine("Attempting to change mgmt key (correct current mgmt key)...");
+                        ChangeManagementKeyCommand cmdChangeMgmt = new ChangeManagementKeyCommand(currentMgmtKey, newMgmtKey);
+                        ChangeManagementKeyResponse responseChangeMgmt = yhaSession.Connection.SendCommand(cmdChangeMgmt);
+                        Output.WriteLine($"Response status: {responseChangeMgmt.Status}, {responseChangeMgmt.StatusMessage}; retries = {responseChangeMgmt.RetriesRemaining}");
+                        Output.WriteLine();
+
+                        Output.WriteLine("Attempting to get list of credentials...");
+                        creds = yhaSession.ListCredentials();
+                        Output.WriteLine($"{creds.Count} credentials found.");
+                        credLineCount = 1;
+                        foreach (var cred in creds)
+                        {
+                            Output.WriteLine($"{credLineCount++}) {cred.Credential.Label}, retries = {cred.Retries}");
+                        }
+                        Output.WriteLine();
                     }
                 }
 

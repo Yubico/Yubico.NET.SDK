@@ -61,6 +61,11 @@ namespace Yubico.YubiKey.Fido2
         RequestTooLarge = 0x39,
         ActionTimeout = 0x3A,
         TupRequired = 0x3B,
+        UvBlocked = 0x3C,
+        IntegrityFailure = 0x3D,
+        InvalidSubcommand = 0x3E,
+        UvInvalid = 0x3F,
+        UnauthorizedPermission = 0x40,
         SpecLast = 0xDF, // Not a real error - Last in error range defined by the CTAP2 spec
         ExtensionFirst = 0xE0, // Extension specific error range begin
         ExtensionLast = 0xEF, // Extension specific error range end

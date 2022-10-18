@@ -34,6 +34,7 @@ what information is needed from the caller for that command.
 * [Get PIN/UV Auth Token Using UV](#pin-uv-auth-using-uv)
 * [Make credential](#make-credential)
 * [Get Assertion](#get-assertion)
+* [Get Next Assertion](#get-next-assertion)
 ___
 ## Get version
 
@@ -359,4 +360,36 @@ The credential, along with other information.
 ### APDU
 
 [Technical APDU Details](apdu/get-assertion.md)
+___
+## Get next assertion
+
+Get the next assertion (credential) associated with the relying party specified
+in a previous call to [Get Assertion])(get-assertion).
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[GetNextAssertionCommand](xref:Yubico.YubiKey.Fido2.Commands.GetNextAssertionCommand)
+
+[GetAssertionResponse](xref:Yubico.YubiKey.Fido2.Commands.GetAssertionResponse)
+
+Note that the response to `GetNextAssertion` is the same as the response to
+`GetAssertion`.
+
+### Input
+
+None.
+
+### Output
+
+The credential, along with other information.
+
+[GetAssertionData](xref:Yubico.YubiKey.Fido2.GetAssertionData)
+
+### APDU
+
+[Technical APDU Details](apdu/get-next-assertion.md)
 ___

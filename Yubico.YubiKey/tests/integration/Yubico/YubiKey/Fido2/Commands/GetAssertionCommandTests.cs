@@ -50,6 +50,17 @@ namespace Yubico.YubiKey.Fido2
             GetAssertionResponse rsp = connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
             GetAssertionData cData = rsp.GetData();
+            if (!(cData.NumberOfCredentials is null) && (cData.NumberOfCredentials > 0))
+            {
+                int count = (int)cData.NumberOfCredentials;
+                for (int index = 1; index < count; index++)
+                {
+                    var nextCmd = new GetNextAssertionCommand();
+                    rsp = connection.SendCommand(nextCmd);
+                    Assert.Equal(ResponseStatus.Success, rsp.Status);
+                    cData = rsp.GetData();
+                }
+            }
             Assert.Equal(48, cData.CredentialId.Id.Length);
         }
 

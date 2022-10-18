@@ -12,23 +12,22 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-## Get an assertion
+## Get the next assertion
 
 ### Command APDU info
 
 CLA | INS | P1 | P2 | Lc | Data | Le
 :---: | :---: | :---: | :---: | :---: | :---:
-00 | 10 | 00 | 00 | *data length* | 02 *encoded info* | (absent)
+00 | 10 | 00 | 00 | 01 | 08 | (absent)
 
 The Ins byte (instruction) is 10, which is the byte for CTAPHID_CBOR.
 That means the command information is in a CBOR encoded structure in the
 Data.
 
 The data consists of the CTAP Command Byte and the CBOR encoding of the
-command's parameters. In this case, the CTAP Command Byte is `02`,
-which is the command "`authenticatorGetAssertion`". The CBOR encoding is
-described in the documentation for
-[GetAssertionParameters](xref:Yubico.YubiKey.Fido2.GetAssertionParameters).
+command's parameters. In this case, the CTAP Command Byte is `08`,
+which is the command "`authenticatorGetNextAssertion`". There are no
+command parameters.
 
 ### Response APDU info
 
@@ -54,3 +53,13 @@ following.
      06 --boolean--
      07 --byte string--
 ```
+
+#### Response APDU on timeout or when there is no next assertion
+
+Total Length: 2\
+Data Length: 0
+
+Data | SW1 | SW2
+:---: | :---: | :---:
+(no data) | 6F | 30
+

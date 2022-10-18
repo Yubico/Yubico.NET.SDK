@@ -20,7 +20,7 @@ limitations under the License. -->
 
 YubiHSM Auth is a YubiKey CCID application that stores the long-lived credentials used to establish secure sessions with a YubiHSM 2. The secure session protocol is based on Secure Channel Protocol 3 (SCP03). YubiHSM Auth is supported by YubiKey firmware version 5.4.3.
 
-YubiHSM Auth uses hardware to protect these long-lived credentials. This provides better security than the YubiHSM 2's authentication solution, which uses the Password-Based Key Derivation Function 2 (PBKDF2) algorithm and requires the user to manually enter a password (which could be more easily compromised).
+YubiHSM Auth uses hardware to protect these long-lived credentials. In addition to providing robust security for the YubiHSM Auth application itself, this hardware protection subsequently increases the security of the default password-based solution for YubiHSM 2's authentication.
 
 ## Credentials and PIN codes
 

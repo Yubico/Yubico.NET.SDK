@@ -14,9 +14,11 @@
 
 using System;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.Fido2;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
@@ -43,11 +45,42 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
             Thread.Sleep(3000);
 
-            using (var connection = yubiKey.Connect(YubiKeyApplication.Fido2))
-            {
-                var response = connection.SendCommand(new Fido2.Commands.GetUvRetriesCommand());
+            Console.WriteLine($"YubiKey Version: {yubiKey.FirmwareVersion}");
 
-                Console.WriteLine($"FIDO2 UV retries: {response.GetData()}");
+            using (var fido2 = new Fido2Session(yubiKey))
+            {
+                fido2.KeyCollector = data =>
+                {
+                    Console.WriteLine("Touch now.");
+                    return true;
+                };
+
+                var info = fido2.GetAuthenticatorInfo();
+
+                foreach (var option in info.Options!)
+                {
+                    Console.WriteLine($"{option.Key} = {option.Value}");
+                }
+
+                var pin = Encoding.UTF8.GetBytes("123456");
+                _ = fido2.TrySetPin(pin);
+
+                bool success = fido2.TryVerifyPin(pin);
+
+                Console.WriteLine($"Verify PIN: {success}");
+
+                byte[] clientDataHash = new byte[] {
+                    0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+                    0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
+                };
+
+                var mcParams = fido2.MakeCredential(b => b
+                    .SetClientHash(clientDataHash)
+                    .SetRelyingParty("test-rp-id")
+                    .SetUser(new byte[]{ 0x11, 0x22, 0x33, 0x44 }, "greg", "Greg")
+                    .Build());
+
+                Console.WriteLine($"Successfully made credential: {mcParams.Format}");
             }
 
             return true;

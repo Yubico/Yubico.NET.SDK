@@ -26,7 +26,6 @@ namespace Yubico.YubiKey.Fido2.ParameterBuilder
         private ReadOnlyMemory<byte> _clientDataHash;
         private RelyingParty? _relyingParty;
         private MakeCredentialParameters? _makeCredentialParameters;
-        private CredentialId? _excludedCredentialId;
 
         /// <inheritdoc />
         public IMcRelyingPartyBuilder SetClientHash(ReadOnlyMemory<byte> clientHash)
@@ -39,14 +38,12 @@ namespace Yubico.YubiKey.Fido2.ParameterBuilder
         /// <inheritdoc />
         public IMcUserBuilder SetRelyingParty(string id) => SetRelyingParty(id, null);
 
-        public IMcUserBuilder SetRelyingParty(string id, string? name)
-        {
-            if (id is null)
-            {
-                throw new ArgumentNullException(nameof(id));
-            }
+        public IMcUserBuilder SetRelyingParty(string id, string? name) =>
+            SetRelyingParty(new RelyingParty(id) { Name = name });
 
-            _relyingParty = new RelyingParty(id) { Name = name };
+        public IMcUserBuilder SetRelyingParty(RelyingParty relyingParty)
+        {
+            _relyingParty = relyingParty;
 
             return this;
         }

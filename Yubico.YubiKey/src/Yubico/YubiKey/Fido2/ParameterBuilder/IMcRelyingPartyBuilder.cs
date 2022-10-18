@@ -46,5 +46,16 @@ namespace Yubico.YubiKey.Fido2.ParameterBuilder
         /// The next interface in the fluent builder chain.
         /// </returns>
         public IMcUserBuilder SetRelyingParty(string id, string? name);
+
+        /// <summary>
+        /// Sets the relying party for the credential.
+        /// </summary>
+        /// <param name="relyingParty">
+        /// The relying party.
+        /// </param>
+        /// <returns>
+        /// The next interface in the fluent builder chain.
+        /// </returns>
+        public IMcUserBuilder SetRelyingParty(RelyingParty relyingParty);
     }
 }

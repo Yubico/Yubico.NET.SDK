@@ -98,7 +98,7 @@ namespace Yubico.YubiKey.Fido2.ParameterBuilder
         /// <inheritdoc />
         public IMcOptionalBuilder ExcludeCredential(CredentialId credentialId)
         {
-            _excludedCredentialId = credentialId;
+            _makeCredentialParameters!.ExcludeCredential(credentialId);
 
             return this;
         }

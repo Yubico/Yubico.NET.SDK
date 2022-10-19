@@ -86,7 +86,17 @@ namespace Yubico.YubiKey.Fido2
                 // run out in the background, the YubiKey would also not be able to process other operations.
                 // So doing so might cause weird failures and timeouts in other areas of the code. Better
                 // to just wait until timeout no matter what.
-                Task.WaitAll(touchNotifyTask, makeCredentialTask);
+                int completedTask = Task.WaitAny(touchNotifyTask, makeCredentialTask);
+
+                if (completedTask == 0)
+                {
+                    if (touchNotifyTask.Result == false)
+                    {
+                        throw new OperationCanceledException();
+                    }
+
+                    makeCredentialTask.Wait();
+                }
 
                 MakeCredentialResponse response = makeCredentialTask.Result;
 

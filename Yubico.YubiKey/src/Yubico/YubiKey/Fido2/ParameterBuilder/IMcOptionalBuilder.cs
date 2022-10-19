@@ -17,8 +17,7 @@ using Yubico.YubiKey.Fido2.Cose;
 namespace Yubico.YubiKey.Fido2.ParameterBuilder
 {
     /// <summary>
-    /// A fluent builder interface for specifying the optional parameter components for a
-    /// <see cref="Fido2Session.MakeCredential(Yubico.YubiKey.Fido2.Fido2Session.MakeCredentialParamBuilderFn)"/>
+    /// A fluent builder interface for specifying the optional parameter components for a <see cref="Fido2Session.MakeCredential"/>
     /// operation.
     /// </summary>
     public interface IMcOptionalBuilder

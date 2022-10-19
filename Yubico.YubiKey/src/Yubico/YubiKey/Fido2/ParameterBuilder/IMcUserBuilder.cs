@@ -15,8 +15,7 @@
 namespace Yubico.YubiKey.Fido2.ParameterBuilder
 {
     /// <summary>
-    /// A fluent builder interface for specifying the user entity data required for a
-    /// <see cref="Fido2Session.MakeCredential(Yubico.YubiKey.Fido2.Fido2Session.MakeCredentialParamBuilderFn)"/>
+    /// A fluent builder interface for specifying the user entity data required for a <see cref="Fido2Session.MakeCredential"/>
     /// operation.
     /// </summary>
     public interface IMcUserBuilder

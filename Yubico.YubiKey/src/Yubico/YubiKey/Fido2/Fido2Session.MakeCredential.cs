@@ -16,7 +16,6 @@ using System;
 using System.Security;
 using System.Threading.Tasks;
 using Yubico.YubiKey.Fido2.Commands;
-using Yubico.YubiKey.Fido2.ParameterBuilder;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -25,71 +24,13 @@ namespace Yubico.YubiKey.Fido2
     public sealed partial class Fido2Session
     {
         /// <summary>
-        /// A delegate facilitating the fluent builder pattern used by the
-        /// <see cref="Fido2Session.MakeCredential(Yubico.YubiKey.Fido2.Fido2Session.MakeCredentialParamBuilderFn)"/>
-        /// function.
-        /// </summary>
-        public delegate MakeCredentialParameters MakeCredentialParamBuilderFn(IMcClientHashBuilder b);
-
-        /// <summary>
-        /// Creates a FIDO2 credential on the YubiKey using a fluent-builder for
-        /// gathering the parameters.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// Use this version of MakeCredential to take advantage of the fluent builder for
-        /// the <see cref="MakeCredentialParameters"/> object. The builder will guide you
-        /// through the mandatory parameters, as well as allowing you to specify all of the
-        /// optional parameters in a clear and concise way.
-        /// </para>
-        /// <para>
-        /// The builder is accessed through the only parameter passed along into the builder
-        /// delegate. Call the methods on this parameter to begin constructing the parameters
-        /// object. For example:
-        /// <code language="csharp">
-        /// using var fido2 = new Fido2Session(yubiKeyDevice);
-        ///
-        /// // Collect the PIN or UV prior to calling MakeCredential
-        ///
-        /// fido2.MakeCredential(b => b
-        ///     .SetClientHash(clientHashData)
-        ///     .SetRelyingParty("my-rp-id")
-        ///     .SetUser(userId, "username", "Display Name")
-        ///     .Build());
-        /// </code>
-        /// </para>
-        /// <para>
-        /// See the documentation for <see cref="MakeCredentialParameters"/> for more information
-        /// on the various parameters and input to MakeCredential.
-        /// </para>
-        /// </remarks>
-        /// <param name="paramBuilder">
-        /// A delegate that receives the start of a fluent builder object's workflow and
-        /// returns the constructed <see cref="MakeCredentialParameters"/> object. See
-        /// the remarks section for more details.
-        /// </param>
-        /// <returns>
-        /// <inheritdoc cref="MakeCredential(MakeCredentialParameters)"/>
-        /// </returns>
-        /// <exception cref="ArgumentNullException">
-        /// The <paramref name="paramBuilder"/> argument is null.
-        /// </exception>
-        public MakeCredentialData MakeCredential(MakeCredentialParamBuilderFn paramBuilder)
-        {
-            if (paramBuilder is null)
-            {
-                throw new ArgumentNullException(nameof(paramBuilder));
-            }
-
-            return MakeCredential(paramBuilder(new MakeCredentialParameterBuilder()));
-        }
-
-        /// <summary>
         /// Creates a FIDO2 credential on the YubiKey given a parameters object.
         /// </summary>
         /// <remarks>
         /// Detailed information about the parameters structure and its expected values can be found on
-        /// the <see cref="MakeCredentialParameters"/> page.
+        /// the <see cref="MakeCredentialParameters"/> page. A fluent builder to aid in the construction
+        /// of the parameters structure is also available. Create it by calling
+        /// <see cref="MakeCredentialParametersBuilder.Create"/>.
         /// </remarks>
         /// <param name="parameters">
         /// A fully populated <see cref="MakeCredentialParameters"/> structure that

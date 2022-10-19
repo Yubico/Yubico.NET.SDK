@@ -74,10 +74,13 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
                 };
 
-                var mcParams = fido2.MakeCredential(b => b
+                var builder = MakeCredentialParametersBuilder.Create();
+
+                var mcParams = fido2.MakeCredential(builder
                     .SetClientHash(clientDataHash)
                     .SetRelyingParty("test-rp-id")
                     .SetUser(new byte[]{ 0x11, 0x22, 0x33, 0x44 }, "greg", "Greg")
+                    .IsDiscoverableCredential()
                     .Build());
 
                 Console.WriteLine($"Successfully made credential: {mcParams.Format}");

@@ -17,7 +17,7 @@ using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2.ParameterBuilder
 {
-    internal class MakeCredentialParameterBuilder :
+    internal class McParameterBuilderImpl :
         IMcClientHashBuilder,
         IMcRelyingPartyBuilder,
         IMcUserBuilder,

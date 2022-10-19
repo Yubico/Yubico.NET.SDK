@@ -28,9 +28,7 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <remarks>
         /// Detailed information about the parameters structure and its expected values can be found on
-        /// the <see cref="MakeCredentialParameters"/> page. A fluent builder to aid in the construction
-        /// of the parameters structure is also available. Create it by calling
-        /// <see cref="MakeCredentialParametersBuilder.Create"/>.
+        /// the <see cref="MakeCredentialParameters"/> page.
         /// </remarks>
         /// <param name="parameters">
         /// A fully populated <see cref="MakeCredentialParameters"/> structure that

@@ -829,4 +829,22 @@
   <data name="YubiHsmAuthCredPasswordAuthFailed" xml:space="preserve">
     <value>Failed to authenticate the credential password. Retries remaining: {0}.</value>
   </data>
+  <data name="Fido2NoMoreRetries" xml:space="preserve">
+    <value>There are no more retries remaining.</value>
+  </data>
+  <data name="Fido2NoPin" xml:space="preserve">
+    <value>The YubiKey does not have a PIN set.</value>
+  </data>
+  <data name="Fido2PermsNotSupported" xml:space="preserve">
+    <value>This YubiKey does not support permissions on PIN / UV auth tokens.</value>
+  </data>
+  <data name="Fido2UvNotSupported" xml:space="preserve">
+    <value>This YubiKey does not support onboard user-verification.</value>
+  </data>
+  <data name="Fido2NotAuthed" xml:space="preserve">
+    <value>The YubiKey has not been authenticated.</value>
+  </data>
+  <data name="Fido2TouchTimeout" xml:space="preserve">
+    <value>The YubiKey was not touched in the allotted time.</value>
+  </data>
 </root>

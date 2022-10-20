@@ -301,7 +301,7 @@ namespace Yubico.YubiKey
         VerifyFido2Pin = 15,
 
         /// <summary>
-        /// Indicates that the SDK and YubiKey is waiting for user verification.
+        /// Indicates that the SDK and YubiKey are waiting for user verification.
         /// This usually means touching the biometric sensor on the YubiKey. Nothing
         /// to collect, this is an informative request.
         /// </summary>

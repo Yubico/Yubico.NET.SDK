@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.Fido2
         /// <remarks>
         /// The PIN / UV Auth Token, or auth token for short, is created when (Try)VerifyPin or (Try)VerifyUv is called.
         /// The auth token may also have a set of permissions that restrict the use of the token. These permissions
-        /// are specified when verifying PIN or UV and are shown in the <see cref="AuthTokenPermissions"/> property.
+        /// are specified when verifying the PIN or UV and are shown in the <see cref="AuthTokenPermissions"/> property.
         /// </remarks>
         public ReadOnlyMemory<byte>? AuthToken { get; private set; }
 
@@ -59,15 +59,15 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <remarks>
         /// <para>
-        /// The permissions for an auth token are determined when PIN or UV verification occur. Check this property
+        /// The permissions for an auth token are set when PIN or UV verification occur. Check this property
         /// to determine if you are able to perform a certain FIDO2 operation or not. If the auth token does not include
         /// the permission you require, you will need to perform PIN or UV verification again with the new permission
         /// set.
         /// </para>
         /// <para>
         /// Not all YubiKeys support auth tokens with permissions. To determine if this feature is available, check
-        /// to see if the `pinUvAuthToken` option is present and `true` in the <see cref="AuthenticatorInfo"/>. If
-        /// permissions are not supported, do not specify any permissions when verifying PIN. Once the PIN has been
+        /// if the `pinUvAuthToken` option is present and `true` in <see cref="AuthenticatorInfo.Options"/>. If
+        /// permissions are not supported, do not specify any permissions when verifying the PIN. Once the PIN has been
         /// verified, this property will be set to `null`.
         /// </para>
         /// </remarks>
@@ -198,9 +198,6 @@ namespace Yubico.YubiKey.Fido2
         /// <c>True</c> on success, <c>False</c> if the YubiKey has a PIN already set, and an exception for all
         /// other kinds of failures.
         /// </returns>
-        /// <exception cref="SecurityException">
-        /// The YubiKey already has a PIN set. This function cannot be used to change the PIN.
-        /// </exception>
         public bool TrySetPin(ReadOnlyMemory<byte> newPin)
         {
             AuthenticatorInfo info = GetAuthenticatorInfo();
@@ -251,6 +248,9 @@ namespace Yubico.YubiKey.Fido2
         /// The user cancelled PIN collection. This happens when the application returns <c>false</c>
         /// in the <c>KeyCollector</c>.
         /// </exception>
+        /// <exception cref="Fido2Exception">
+        /// The YubiKey returned an error indicating that the change PIN request could not be completed.
+        /// </exception>
         public void ChangePin()
         {
             if (TryChangePin())
@@ -286,6 +286,9 @@ namespace Yubico.YubiKey.Fido2
         /// <c>True</c> on success, <c>False</c> if the user cancelled PIN collection, and an exception for all
         /// other kinds of failures.
         /// </returns>
+        /// <exception cref="Fido2Exception">
+        /// The YubiKey returned an error indicating that the change PIN request could not be completed.
+        /// </exception>
         public bool TryChangePin()
         {
             Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
@@ -342,7 +345,7 @@ namespace Yubico.YubiKey.Fido2
         /// </list>
         /// Read more about PINs <xref href="TheFido2Pin">here</xref>.
         /// </param>
-        /// <returns></returns>
+        /// <returns>True, if successful. Otherwise false.</returns>
         /// <exception cref="Fido2Exception">
         /// The YubiKey returned an error indicating that the change PIN request could not be completed.
         /// </exception>
@@ -382,9 +385,10 @@ namespace Yubico.YubiKey.Fido2
         /// before privileged operations can occur. This method will perform that verification.
         /// </para>
         /// <para>
-        /// Unlike other applications in this SDK (such as PIV and OATH), the SDK will not automatically perform
-        /// verification. Your application must call this method explicitly before attempting to perform a FIDO2 operation
-        /// that requires verification. This is due to the complex nature in which FIDO2 verifies a user.
+        /// Unlike other applications in this SDK (such as PIV and OATH), the SDK will not automatically verify PIN or
+        /// UV using the KeyCollector in methods like <see cref="MakeCredential"/> due to FIDO2's complex user
+        /// verification process. Your application must call this method explicitly before attempting to perform a FIDO2
+        /// operation that requires verification.
         /// </para>
         /// <para>
         /// This version of VerifyPin uses the <see cref="KeyCollector"/> delegate. You can read about key collectors
@@ -405,11 +409,11 @@ namespace Yubico.YubiKey.Fido2
         /// </remarks>
         /// <param name="permissions">
         /// The set of operations that this auth token should be permitted to do. This parameter is allowed only if the
-        /// YubiKey contains the `pinUvAuthToken` option in the <see cref="AuthenticatorInfo"/> structure. If the YubiKey
-        /// does not support this, leave the parameter `null` and the legacy <see cref="GetPinTokenCommand"/> will be used
+        /// YubiKey contains the `pinUvAuthToken` option in <see cref="AuthenticatorInfo.Options"/>. If the YubiKey
+        /// does not support this, leave the parameter `null`; the legacy <see cref="GetPinTokenCommand"/> will be used
         /// as a fallback.
         /// </param>
-        /// <param name="rpId">
+        /// <param name="relyingPartyId">
         /// Some <paramref name="permissions"/> require the qualification of a relying party ID. This parameter should
         /// only be specified when a permission requires it, otherwise it should be left null. See
         /// <see cref="PinUvAuthTokenPermissions"/> for more details on which permissions require the RP ID and for which
@@ -419,9 +423,20 @@ namespace Yubico.YubiKey.Fido2
         /// The user cancelled PIN collection. This happens when the application returns <c>false</c>
         /// in the <c>KeyCollector</c>.
         /// </exception>
-        public void VerifyPin(PinUvAuthTokenPermissions? permissions = null, string? rpId = null)
+        /// <exception cref="SecurityException">
+        /// There are no retries remaining.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The YubiKey does not have a PIN set.
+        /// --- or ---
+        /// This YubiKey does not support permissions on PIN / UV auth tokens.
+        /// </exception>
+        /// <exception cref="Fido2Exception">
+        /// The YubiKey returned an error indicating that the PIN verification request could not be completed.
+        /// </exception>
+        public void VerifyPin(PinUvAuthTokenPermissions? permissions = null, string? relyingPartyId = null)
         {
-            if (TryVerifyPin(permissions, rpId))
+            if (TryVerifyPin(permissions, relyingPartyId))
             {
                 return;
             }
@@ -439,9 +454,10 @@ namespace Yubico.YubiKey.Fido2
         /// before privileged operations can occur. This method will perform that verification.
         /// </para>
         /// <para>
-        /// Unlike other applications in this SDK (such as PIV and OATH), the SDK will not automatically perform
-        /// verification. Your application must call this method explicitly before attempting to perform a FIDO2 operation
-        /// that requires verification. This is due to the complex nature in which FIDO2 verifies a user.
+        /// Unlike other applications in this SDK (such as PIV and OATH), the SDK will not automatically verify PIN or
+        /// UV using the KeyCollector in methods like <see cref="MakeCredential"/> due to FIDO2's complex user
+        /// verification process. Your application must call this method explicitly before attempting to perform a FIDO2
+        /// operation that requires verification.
         /// </para>
         /// <para>
         /// This version of TryVerifyPin uses the <see cref="KeyCollector"/> delegate. You can read about key collectors
@@ -462,11 +478,11 @@ namespace Yubico.YubiKey.Fido2
         /// </remarks>
         /// <param name="permissions">
         /// The set of operations that this auth token should be permitted to do. This parameter is allowed only if the
-        /// YubiKey contains the `pinUvAuthToken` option in the <see cref="AuthenticatorInfo"/> structure. If the YubiKey
+        /// YubiKey contains the `pinUvAuthToken` option in <see cref="AuthenticatorInfo.Options"/>. If the YubiKey
         /// does not support this, leave the parameter `null` and the legacy <see cref="GetPinTokenCommand"/> will be used
         /// as a fallback.
         /// </param>
-        /// <param name="rpId">
+        /// <param name="relyingPartyId">
         /// Some <paramref name="permissions"/> require the qualification of a relying party ID. This parameter should
         /// only be specified when a permission requires it, otherwise it should be left null. See
         /// <see cref="PinUvAuthTokenPermissions"/> for more details on which permissions require the RP ID and for which
@@ -476,7 +492,18 @@ namespace Yubico.YubiKey.Fido2
         /// <c>True</c> on success, <c>False</c> if the user cancelled PIN collection, and an exception for all
         /// other kinds of failures.
         /// </returns>
-        public bool TryVerifyPin(PinUvAuthTokenPermissions? permissions = null, string? rpId = null)
+        /// <exception cref="SecurityException">
+        /// There are no retries remaining.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The YubiKey does not have a PIN set.
+        /// --- or ---
+        /// This YubiKey does not support permissions on PIN / UV auth tokens.
+        /// </exception>
+        /// <exception cref="Fido2Exception">
+        /// The YubiKey returned an error indicating that the PIN verification request could not be completed.
+        /// </exception>
+        public bool TryVerifyPin(PinUvAuthTokenPermissions? permissions = null, string? relyingPartyId = null)
         {
             Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
 
@@ -489,12 +516,18 @@ namespace Yubico.YubiKey.Fido2
             {
                 while (keyCollector(keyEntryData))
                 {
-                    if (TryVerifyPin(keyEntryData.GetCurrentValue(), permissions, rpId))
+                    if (TryVerifyPin(keyEntryData.GetCurrentValue(), permissions, relyingPartyId, out int? retriesRemaining, out _))
                     {
                         return true;
                     }
 
                     keyEntryData.IsRetry = true;
+                    keyEntryData.RetriesRemaining = retriesRemaining!; // If we are retrying, we know this won't be null.
+
+                    if (keyEntryData.RetriesRemaining == 0)
+                    {
+                        throw new SecurityException(ExceptionMessages.Fido2NoMoreRetries);
+                    }
                 }
             }
             finally
@@ -518,9 +551,10 @@ namespace Yubico.YubiKey.Fido2
         /// before privileged operations can occur. This method will perform that verification.
         /// </para>
         /// <para>
-        /// Unlike other applications in this SDK (such as PIV and OATH), the SDK will not automatically perform
-        /// verification. Your application must call this method explicitly before attempting to perform a FIDO2 operation
-        /// that requires verification. This is due to the complex nature in which FIDO2 verifies a user.
+        /// Unlike other applications in this SDK (such as PIV and OATH), the SDK will not automatically verify PIN or
+        /// UV using the KeyCollector in methods like <see cref="MakeCredential"/> due to FIDO2's complex user
+        /// verification process. Your application must call this method explicitly before attempting to perform a FIDO2
+        /// operation that requires verification.
         /// </para>
         /// <para>
         /// This version of TryVerifyPin does not use the key collector. This method will only attempt to verify a
@@ -536,26 +570,43 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="currentPin">
         /// The FIDO2 PIN that you wish to verify.
         /// </param>
+        /// <param name="retriesRemaining">
+        /// The number of PIN retries remaining before the FIDO2 application becomes locked.
+        /// </param>
+        /// <param name="rebootRequired">
+        /// Indicates whether a reboot of the YubiKey (unplug and re-insert) is required before further PIN retries are
+        /// allowed.
+        /// </param>
         /// <param name="permissions">
         /// The set of operations that this auth token should be permitted to do. This parameter is allowed only if the
-        /// YubiKey contains the `pinUvAuthToken` option in the <see cref="AuthenticatorInfo"/> structure. If the YubiKey
-        /// does not support this, leave the parameter `null` and the legacy <see cref="GetPinTokenCommand"/> will be used
-        /// as a fallback.
+        /// YubiKey contains the `pinUvAuthToken` option in <see cref="AuthenticatorInfo.Options"/>. If the YubiKey
+        /// does not support this, this parameter must be `null` and the legacy <see cref="GetPinTokenCommand"/> will be
+        /// used as a fallback.
         /// </param>
-        /// <param name="rpId">
+        /// <param name="relyingPartyId">
         /// Some <paramref name="permissions"/> require the qualification of a relying party ID. This parameter should
         /// only be specified when a permission requires it, otherwise it should be left null. See
         /// <see cref="PinUvAuthTokenPermissions"/> for more details on which permissions require the RP ID and for which
-        /// it is optional.
+        /// it is optional. If <paramref name="permissions"/> is `null`, this parameter must also be `null`.
         /// </param>
         /// <returns>
         /// <c>True</c> if the PIN successfully verified, <c>False</c> if the PIN was incorrect, and an exception for all
         /// other kinds of failures.
         /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// The YubiKey does not have a PIN set.
+        /// --- or ---
+        /// This YubiKey does not support permissions on PIN / UV auth tokens.
+        /// </exception>
         /// <exception cref="Fido2Exception">
         /// The YubiKey returned an error indicating that the PIN verification request could not be completed.
         /// </exception>
-        public bool TryVerifyPin(ReadOnlyMemory<byte> currentPin, PinUvAuthTokenPermissions? permissions = null, string? rpId = null)
+        public bool TryVerifyPin(
+            ReadOnlyMemory<byte> currentPin,
+            PinUvAuthTokenPermissions? permissions,
+            string? relyingPartyId,
+            out int? retriesRemaining,
+            out bool? rebootRequired)
         {
             AuthenticatorInfo info = GetAuthenticatorInfo();
 
@@ -563,7 +614,7 @@ namespace Yubico.YubiKey.Fido2
 
             if (!OptionEnabled(info, "clientPin"))
             {
-                throw new InvalidOperationException("The YubiKey does not have a PIN set.");
+                throw new InvalidOperationException(ExceptionMessages.Fido2NoPin);
             }
 
             ObtainSharedSecret();
@@ -576,15 +627,14 @@ namespace Yubico.YubiKey.Fido2
             {
                 if (!OptionEnabled(info, "pinUvAuthToken"))
                 {
-                    throw new InvalidOperationException(
-                        "This YubiKey does not support permissions on PIN / UV auth tokens.");
+                    throw new InvalidOperationException(ExceptionMessages.Fido2PermsNotSupported);
                 }
 
                 command = new GetPinUvAuthTokenUsingPinCommand(
                     AuthProtocol,
                     currentPin,
                     permissions.Value,
-                    rpId);
+                    relyingPartyId);
             }
 
             GetPinUvAuthTokenResponse response = Connection.SendCommand(command);
@@ -593,11 +643,17 @@ namespace Yubico.YubiKey.Fido2
             {
                 AuthToken = response.GetData();
                 AuthTokenPermissions = permissions;
+
+                retriesRemaining = null;
+                rebootRequired = null;
+
                 return true;
             }
 
             if (GetCtapError(response) == CtapStatus.PinInvalid)
             {
+                (retriesRemaining, rebootRequired) = Connection.SendCommand(new GetPinRetriesCommand()).GetData();
+
                 return false; // PIN is invalid
             }
 
@@ -612,33 +668,36 @@ namespace Yubico.YubiKey.Fido2
         /// <para>
         /// A YubiKey is manufactured with no PIN and no biometric templates set. A PIN must be set before a user
         /// can register fingerprints. After a PIN has been set, a user can enroll one or more fingers using their
-        /// platform (operating system's) built in registration mechanism.
+        /// platform or operating system's built in registration mechanism.
         /// </para>
         /// <para>
-        /// Once both a PIN has been set and a finger print has been registered, a user can perform verification. This
-        /// method initiates the biometric (or user verification) process. If the user cannot match a valid finger after
-        /// a few retries, it is best practice to fall back to PIN verification.
+        /// Once both a PIN has been set and a fingerprint has been registered, a user can perform verification. This
+        /// method initiates the biometric (or user verification) process. If the user cannot match a valid finger within
+        /// the allowed number of retries, it is best practice to fall back to PIN verification.
         /// </para>
         /// <para>
-        /// Unlike other applications in this SDK (such as PIV and OATH), the SDK will not automatically perform
-        /// verification. Your application must call this method explicitly before attempting to perform a FIDO2 operation
-        /// that requires verification. This is due to the complex nature in which FIDO2 verifies a user.
+        /// Unlike other applications in this SDK (such as PIV and OATH), the SDK will not automatically verify PIN or
+        /// UV using the KeyCollector in methods like <see cref="MakeCredential"/> due to FIDO2's complex user
+        /// verification process. Your application must call this method explicitly before attempting to perform a FIDO2
+        /// operation that requires verification.
         /// </para>
         /// <para>
         /// If the YubiKey was unable to verify a registered fingerprint, the SDK will automatically retry. The key
         /// collector will be called again to notify your app that touch is required. Each time the key collector is
         /// called, the <c>IsRetry</c> member will be set to <c>true</c> and the <c>RetryCount</c> will be updated to
-        /// reflect the number of retries left before the YubiKey blocks further PIN attempts. To cancel UV collection
-        /// operations, simply return <c>false</c> in the handler for the key collector.
+        /// reflect the number of retries left before the YubiKey blocks further UV attempts. To cancel UV collection
+        /// operations, simply return <c>false</c> in the handler for the key collector. When the retries have been
+        /// exhausted, a `SecurityException` will be thrown. This, along with user cancellation, are indicators that
+        /// your application should switch to verification with PIN.
         /// </para>
         /// </remarks>
         /// <param name="permissions">
         /// The set of operations that this auth token should be permitted to do. This parameter is allowed only if the
-        /// YubiKey contains the `pinUvAuthToken` option in the <see cref="AuthenticatorInfo"/> structure. If the YubiKey
+        /// YubiKey contains the `pinUvAuthToken` option in <see cref="AuthenticatorInfo.Options"/>. If the YubiKey
         /// does not support this, leave the parameter `null` and the legacy <see cref="GetPinTokenCommand"/> will be used
         /// as a fallback.
         /// </param>
-        /// <param name="rpId">
+        /// <param name="relyingPartyId">
         /// Some <paramref name="permissions"/> require the qualification of a relying party ID. This parameter should
         /// only be specified when a permission requires it, otherwise it should be left null. See
         /// <see cref="PinUvAuthTokenPermissions"/> for more details on which permissions require the RP ID and for which
@@ -648,9 +707,9 @@ namespace Yubico.YubiKey.Fido2
         /// The user cancelled UV collection. This happens when the application returns <c>false</c>
         /// in the <c>KeyCollector</c>.
         /// </exception>
-        public void VerifyUv(PinUvAuthTokenPermissions? permissions, string? rpId = null)
+        public void VerifyUv(PinUvAuthTokenPermissions? permissions, string? relyingPartyId = null)
         {
-            if (TryVerifyPin(permissions, rpId))
+            if (TryVerifyPin(permissions, relyingPartyId))
             {
                 return;
             }
@@ -666,33 +725,36 @@ namespace Yubico.YubiKey.Fido2
         /// <para>
         /// A YubiKey is manufactured with no PIN and no biometric templates set. A PIN must be set before a user
         /// can register fingerprints. After a PIN has been set, a user can enroll one or more fingers using their
-        /// platform (operating system's) built in registration mechanism.
+        /// platform or operating system's built in registration mechanism.
         /// </para>
         /// <para>
-        /// Once both a PIN has been set and a finger print has been registered, a user can perform verification. This
-        /// method initiates the biometric (or user verification) process. If the user cannot match a valid finger after
-        /// a few retries, it is best practice to fall back to PIN verification.
+        /// Once both a PIN has been set and a fingerprint has been registered, a user can perform verification. This
+        /// method initiates the biometric (or user verification) process. If the user cannot match a valid finger within
+        /// the allowed number of retries, it is best practice to fall back to PIN verification.
         /// </para>
         /// <para>
-        /// Unlike other applications in this SDK (such as PIV and OATH), the SDK will not automatically perform
-        /// verification. Your application must call this method explicitly before attempting to perform a FIDO2 operation
-        /// that requires verification. This is due to the complex nature in which FIDO2 verifies a user.
+        /// Unlike other applications in this SDK (such as PIV and OATH), the SDK will not automatically verify PIN or
+        /// UV using the KeyCollector in methods like <see cref="MakeCredential"/> due to FIDO2's complex user
+        /// verification process. Your application must call this method explicitly before attempting to perform a FIDO2
+        /// operation thatwhen requires verification.
         /// </para>
         /// <para>
         /// If the YubiKey was unable to verify a registered fingerprint, the SDK will automatically retry. The key
         /// collector will be called again to notify your app that touch is required. Each time the key collector is
         /// called, the <c>IsRetry</c> member will be set to <c>true</c> and the <c>RetryCount</c> will be updated to
-        /// reflect the number of retries left before the YubiKey blocks further PIN attempts. To cancel UV collection
-        /// operations, simply return <c>false</c> in the handler for the key collector.
+        /// reflect the number of retries left before the YubiKey blocks further UV attempts. To cancel UV collection
+        /// operations, simply return <c>false</c> in the handler for the key collector. When the retries have been
+        /// exhausted, a `SecurityException` will be thrown. This, along with user cancellation, are indicators that
+        /// your application should switch to verification with PIN.
         /// </para>
         /// </remarks>
         /// <param name="permissions">
         /// The set of operations that this auth token should be permitted to do. This parameter is allowed only if the
-        /// YubiKey contains the `pinUvAuthToken` option in the <see cref="AuthenticatorInfo"/> structure. If the YubiKey
+        /// YubiKey contains the `pinUvAuthToken` option in <see cref="AuthenticatorInfo.Options"/>. If the YubiKey
         /// does not support this, leave the parameter `null` and the legacy <see cref="GetPinTokenCommand"/> will be used
         /// as a fallback.
         /// </param>
-        /// <param name="rpId">
+        /// <param name="relyingPartyId">
         /// Some <paramref name="permissions"/> require the qualification of a relying party ID. This parameter should
         /// only be specified when a permission requires it, otherwise it should be left null. See
         /// <see cref="PinUvAuthTokenPermissions"/> for more details on which permissions require the RP ID and for which
@@ -701,7 +763,7 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="InvalidOperationException">
         /// The YubiKey does not support onboard user-verification.
         /// </exception>
-        public bool TryVerifyUv(PinUvAuthTokenPermissions permissions, string? rpId = null)
+        public bool TryVerifyUv(PinUvAuthTokenPermissions permissions, string? relyingPartyId = null)
         {
             Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
 
@@ -714,8 +776,7 @@ namespace Yubico.YubiKey.Fido2
 
             if (!OptionEnabled(info, "pinUvAuthToken") || !OptionEnabled(info, "uv"))
             {
-                throw new InvalidOperationException(
-                    "This YubiKey does not support onboard user-verification.");
+                throw new InvalidOperationException(ExceptionMessages.Fido2UvNotSupported);
             }
 
             try
@@ -723,9 +784,8 @@ namespace Yubico.YubiKey.Fido2
                 // Inform key collector that we're asking for UV.
                 while (keyCollector(keyEntryData))
                 {
-                    // TODO: I think this blocks... let's find out.
                     GetPinUvAuthTokenResponse response = Connection.SendCommand(
-                        new GetPinUvAuthTokenUsingUvCommand(AuthProtocol, permissions, rpId));
+                        new GetPinUvAuthTokenUsingUvCommand(AuthProtocol, permissions, relyingPartyId));
 
                     if (response.Status == ResponseStatus.Success)
                     {
@@ -738,6 +798,12 @@ namespace Yubico.YubiKey.Fido2
                     if (GetCtapError(response) == CtapStatus.UvInvalid)
                     {
                         keyEntryData.IsRetry = true;
+                        keyEntryData.RetriesRemaining = Connection.SendCommand(new GetUvRetriesCommand()).GetData();
+
+                        if (keyEntryData.RetriesRemaining == 0)
+                        {
+                            throw new SecurityException(ExceptionMessages.Fido2NoMoreRetries);
+                        }
                     }
                 }
             }

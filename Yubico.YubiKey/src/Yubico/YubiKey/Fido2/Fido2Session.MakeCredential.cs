@@ -27,8 +27,15 @@ namespace Yubico.YubiKey.Fido2
         /// Creates a FIDO2 credential on the YubiKey given a parameters object.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// Detailed information about the parameters structure and its expected values can be found on
         /// the <see cref="MakeCredentialParameters"/> page.
+        /// </para>
+        /// <para>
+        /// Unlike other applications in this SDK (such as PIV and OATH), the SDK will not automatically perform PIN or
+        /// user verification using the KeyCollector. Your application must call <see cref="VerifyPin"/> or
+        /// <see cref="VerifyUv"/> before calling this method.
+        /// </para>
         /// </remarks>
         /// <param name="parameters">
         /// A fully populated <see cref="MakeCredentialParameters"/> structure that
@@ -36,8 +43,8 @@ namespace Yubico.YubiKey.Fido2
         /// </param>
         /// <returns>
         /// An object containing all of the relevant information returned by the YubiKey
-        /// after calling make credential. This includes the public key for the credential
-        /// itself, along with supporting information like the attestation statement, and
+        /// after calling MakeCredential. This includes the public key for the credential
+        /// itself, along with supporting information like the attestation statement and
         /// other authenticator data.
         /// </returns>
         /// <exception cref="ArgumentNullException">
@@ -60,7 +67,7 @@ namespace Yubico.YubiKey.Fido2
 
             if (AuthToken.HasValue == false)
             {
-                throw new SecurityException("The YubiKey has not been authenticated.");
+                throw new SecurityException(ExceptionMessages.Fido2NotAuthed);
             }
 
             parameters.Protocol = AuthProtocol.Protocol;
@@ -103,7 +110,7 @@ namespace Yubico.YubiKey.Fido2
                 if (GetCtapError(response) == CtapStatus.OperationDenied
                     || GetCtapError(response) == CtapStatus.ActionTimeout)
                 {
-                    throw new TimeoutException("The YubiKey was not touched in the allotted time.");
+                    throw new TimeoutException(ExceptionMessages.Fido2TouchTimeout);
                 }
 
                 return makeCredentialTask.Result.GetData();

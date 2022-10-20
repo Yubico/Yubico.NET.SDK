@@ -28,34 +28,38 @@ namespace Yubico.YubiKey.Fido2.Commands
         None = 0,
 
         /// <summary>
-        /// Allow the auth token to be used for MakeCredential operations with the provided rpId parameter.
+        /// Allow the auth token to be used for <see cref="MakeCredentialCommand"/> operations with the provided relying
+        /// party ID parameter.
         /// </summary>
         MakeCredential = 0x01,
 
         /// <summary>
-        /// Allow the auth token to be used for the GetAssertion operations with the provided rpId parameter.
+        /// Allow the auth token to be used for <see cref="GetAssertionCommand"/> operations with the provided relying
+        /// party ID parameter.
         /// </summary>
         GetAssertion = 0x02,
 
         /// <summary>
-        /// Allow the auth token to be used with the CredentialManagement command. The rpId parameter is optional.
+        /// Allow the auth token to be used with the CredentialManagement command. The relying party ID parameter is
+        /// optional.
         /// </summary>
         CredentialManagement = 0x04,
 
         /// <summary>
-        /// Allow the auth token to be used with the BioEnrollment command. The rpId parameter is ignored for this
-        /// permission.
+        /// Allow the auth token to be used with the BioEnrollment command. The relying party ID parameter is ignored
+        /// for this permission.
         /// </summary>
         BioEnrollment = 0x08,
 
         /// <summary>
-        /// Allow the auth token to be used with the LargeBlobs command. The rpId parameter is ignored for this
-        /// permission.
+        /// Allow the auth token to be used with the LargeBlobs command. The relying party ID parameter is ignored for
+        /// this permission.
         /// </summary>
         LargeBlobWrite = 0x10,
 
         /// <summary>
-        /// Allow the auth token to be used with the Config command. The rpId parameter is ignored for this permission.
+        /// Allow the auth token to be used with the Config command. The relying party ID parameter is ignored for this
+        /// permission.
         /// </summary>
         AuthenticatorConfiguration = 0x20,
     }

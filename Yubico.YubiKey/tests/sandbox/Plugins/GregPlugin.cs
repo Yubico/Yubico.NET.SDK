@@ -65,25 +65,25 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 var pin = Encoding.UTF8.GetBytes("123456");
                 _ = fido2.TrySetPin(pin);
 
-                bool success = fido2.TryVerifyPin(pin);
+                bool success = fido2.TryVerifyPin(pin, null, null, out _, out _);
 
                 Console.WriteLine($"Verify PIN: {success}");
 
-                byte[] clientDataHash = new byte[] {
+                byte[] clientDataHash = {
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
                 };
 
-                var builder = MakeCredentialParametersBuilder.Create();
+                var mcParams = new MakeCredentialParameters(
+                    new RelyingParty("test-rp-id") { Name = "My RP" },
+                    new UserEntity(new byte[] { 0x11, 0x22, 0x33, 0x44 }) { Name = "SomeUserName", DisplayName = "User"})
+                    {
+                        ClientDataHash = clientDataHash
+                    };
 
-                var mcParams = fido2.MakeCredential(builder
-                    .SetClientHash(clientDataHash)
-                    .SetRelyingParty("test-rp-id")
-                    .SetUser(new byte[]{ 0x11, 0x22, 0x33, 0x44 }, "greg", "Greg")
-                    .IsDiscoverableCredential()
-                    .Build());
+                var mcData = fido2.MakeCredential(mcParams);
 
-                Console.WriteLine($"Successfully made credential: {mcParams.Format}");
+                Console.WriteLine($"Successfully made credential: {mcData.Format}");
             }
 
             return true;

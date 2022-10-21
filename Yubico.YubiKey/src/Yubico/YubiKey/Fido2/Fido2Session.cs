@@ -189,6 +189,12 @@ namespace Yubico.YubiKey.Fido2
 
         private static CtapStatus GetCtapError(IYubiKeyResponse r) => (CtapStatus)(r.StatusWord & 0xFF);
 
+        private static bool OptionPresent(AuthenticatorInfo info, string key) =>
+            info.Options != null && info.Options.ContainsKey(key);
+
+        private static bool OptionEnabled(AuthenticatorInfo info, string key) =>
+            OptionPresent(info, key) && info.Options![key];
+
         /// <inheritdoc />
         public void Dispose()
         {

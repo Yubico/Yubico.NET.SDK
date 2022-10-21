@@ -97,7 +97,7 @@ namespace Yubico.YubiKey.Fido2
         /// When making a credential, this information will be provided, when
         /// getting an assertion, it will not.
         /// </remarks>
-        public ReadOnlyMemory<byte>? CredentialId { get; private set; }
+        public CredentialId? CredentialId { get; private set; }
 
         /// <summary>
         /// The Credential's public key. This is an optional value and can be null.
@@ -175,7 +175,7 @@ namespace Yubico.YubiKey.Fido2
                 int credentialIdLength = BinaryPrimitives.ReadInt16BigEndian(
                     EncodedAuthenticatorData.Span.Slice(offset, CredentialIdLengthLength));
                 offset += CredentialIdLengthLength;
-                CredentialId = EncodedAuthenticatorData.Slice(offset, credentialIdLength);
+                CredentialId = new CredentialId() { Id = EncodedAuthenticatorData.Slice(offset, credentialIdLength) };
                 offset += credentialIdLength;
                 CredentialPublicKey = CoseKey.Create(EncodedAuthenticatorData[offset..], out int bytesRead);
                 offset += bytesRead;

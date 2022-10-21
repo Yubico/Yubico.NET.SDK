@@ -28,11 +28,18 @@ namespace Yubico.YubiKey.Fido2
         /// Gets one or more assertions for a particular relying party.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// Detailed information about the parameters structure and its expected values can be found on the
         /// <see cref="GetAssertionParameters"/> page.
+        /// </para>
+        /// <para>
+        /// Unlike other applications in this SDK (such as PIV and OATH), the SDK will not automatically perform PIN or
+        /// user verification using the KeyCollector. Your application must call <see cref="VerifyPin"/> or
+        /// <see cref="VerifyUv"/> before calling this method.
+        /// </para>
         /// </remarks>
         /// <param name="parameters">
-        /// A fully populated <see cref="GetAssertionParameters"/> structure that
+        /// An appropriately populated <see cref="GetAssertionParameters"/> structure that
         /// follows all of the rules set forth by that object.
         /// </param>
         /// <returns>
@@ -49,7 +56,7 @@ namespace Yubico.YubiKey.Fido2
         /// The YubiKey either required touch for a user presence check or a biometric touch for user authentication.
         /// The YubiKey timed out waiting for this action to be performed.
         /// </exception>
-        public ICollection<GetAssertionData> GetAssertion(GetAssertionParameters parameters)
+        public IList<GetAssertionData> GetAssertions(GetAssertionParameters parameters)
         {
             if (parameters is null)
             {

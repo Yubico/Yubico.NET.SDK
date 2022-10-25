@@ -272,6 +272,10 @@
 - name: "Application: FIDO2"
   homepage: application-fido2/fido2-overview.md
   items:
+  - name: How FIDO2 works
+    href: application-fido2/how-fido2-works.md
+  - name: FIDO2 credentials
+    href: application-fido2/fido2-credentials.md
   - name: PIN/UV Authenticaation
     href: application-fido2/pin-uv-auth-protocols.md
   - name: The FIDO2 PIN

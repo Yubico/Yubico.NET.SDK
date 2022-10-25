@@ -74,7 +74,6 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// The list of supported algorithms for credential generation. This is
         /// the "pubKeyCredParams" in the standard (FIDO2 section 6.1).
-        /// This is an optional parameter so it can be null.
         /// </summary>
         /// <remarks>
         /// Each entry in the list is a type and algorithm. Neither the type nor

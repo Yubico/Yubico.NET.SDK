@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security;
+using System.Threading.Tasks;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
@@ -692,10 +693,7 @@ namespace Yubico.YubiKey.Fido2
         /// </para>
         /// </remarks>
         /// <param name="permissions">
-        /// The set of operations that this auth token should be permitted to do. This parameter is allowed only if the
-        /// YubiKey contains the `pinUvAuthToken` option in <see cref="AuthenticatorInfo.Options"/>. If the YubiKey
-        /// does not support this, leave the parameter `null` and the legacy <see cref="GetPinTokenCommand"/> will be used
-        /// as a fallback.
+        /// The set of operations that this auth token should be permitted to do.
         /// </param>
         /// <param name="relyingPartyId">
         /// Some <paramref name="permissions"/> require the qualification of a relying party ID. This parameter should
@@ -707,9 +705,9 @@ namespace Yubico.YubiKey.Fido2
         /// The user cancelled UV collection. This happens when the application returns <c>false</c>
         /// in the <c>KeyCollector</c>.
         /// </exception>
-        public void VerifyUv(PinUvAuthTokenPermissions? permissions, string? relyingPartyId = null)
+        public void VerifyUv(PinUvAuthTokenPermissions permissions, string? relyingPartyId = null)
         {
-            if (TryVerifyPin(permissions, relyingPartyId))
+            if (TryVerifyUv(permissions, relyingPartyId))
             {
                 return;
             }
@@ -779,31 +777,30 @@ namespace Yubico.YubiKey.Fido2
                 throw new InvalidOperationException(ExceptionMessages.Fido2UvNotSupported);
             }
 
+            ObtainSharedSecret();
+
             try
             {
-                // Inform key collector that we're asking for UV.
-                while (keyCollector(keyEntryData))
+                while (true)
                 {
-                    GetPinUvAuthTokenResponse response = Connection.SendCommand(
-                        new GetPinUvAuthTokenUsingUvCommand(AuthProtocol, permissions, relyingPartyId));
+                    var touchNotifyTask = Task.Run(() => keyCollector(keyEntryData));
+                    var verifyUvTask = Task.Run(() => SingleUvAttempt(keyEntryData, permissions, relyingPartyId));
 
-                    if (response.Status == ResponseStatus.Success)
+                    int completedTask = Task.WaitAny(touchNotifyTask, verifyUvTask);
+
+                    if (completedTask == 0)
                     {
-                        AuthToken = response.GetData();
-                        AuthTokenPermissions = permissions;
+                        if (touchNotifyTask.Result == false)
+                        {
+                            return false;
+                        }
 
-                        return true;
+                        verifyUvTask.Wait();
                     }
 
-                    if (GetCtapError(response) == CtapStatus.UvInvalid)
+                    if (verifyUvTask.Result)
                     {
-                        keyEntryData.IsRetry = true;
-                        keyEntryData.RetriesRemaining = Connection.SendCommand(new GetUvRetriesCommand()).GetData();
-
-                        if (keyEntryData.RetriesRemaining == 0)
-                        {
-                            throw new SecurityException(ExceptionMessages.Fido2NoMoreRetries);
-                        }
+                        return true;
                     }
                 }
             }
@@ -812,8 +809,35 @@ namespace Yubico.YubiKey.Fido2
                 keyEntryData.Request = KeyEntryRequest.Release;
                 _ = keyCollector(keyEntryData);
             }
+        }
 
-            return false;
+        private bool SingleUvAttempt(KeyEntryData keyEntryData, PinUvAuthTokenPermissions permissions, string? relyingPartyId)
+        {
+            GetPinUvAuthTokenResponse response = Connection.SendCommand(
+                new GetPinUvAuthTokenUsingUvCommand(AuthProtocol, permissions, relyingPartyId));
+
+            if (response.Status == ResponseStatus.Success)
+            {
+                AuthToken = response.GetData();
+                AuthTokenPermissions = permissions;
+
+                return true;
+            }
+
+            if (GetCtapError(response) == CtapStatus.UvInvalid)
+            {
+                keyEntryData.IsRetry = true;
+                keyEntryData.RetriesRemaining = Connection.SendCommand(new GetUvRetriesCommand()).GetData();
+
+                if (keyEntryData.RetriesRemaining == 0)
+                {
+                    throw new SecurityException(ExceptionMessages.Fido2NoMoreRetries);
+                }
+
+                return false;
+            }
+
+            throw new InvalidOperationException(response.StatusMessage);
         }
 
         /// <summary>

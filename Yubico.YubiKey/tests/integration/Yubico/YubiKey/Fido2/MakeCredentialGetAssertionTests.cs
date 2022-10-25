@@ -22,16 +22,16 @@ namespace Yubico.YubiKey.Fido2
 {
     public class MakeCredentialGetAssertionTests
     {
+        static readonly byte[] _clientDataHash = {
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+            0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
+        };
+
+        static readonly RelyingParty _rp = new RelyingParty("relyingparty1");
+
         [Fact]
         public void MakeCredential_NonDiscoverable_GetAssertion_Succeeds()
         {
-            byte[] clientDataHash = {
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
-                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
-            };
-
-            var rp = new RelyingParty("relyingparty1");
-
             // Test assumptions: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)
             IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
 
@@ -50,29 +50,82 @@ namespace Yubico.YubiKey.Fido2
                     DisplayName = "Test User"
                 };
 
-                var mcParams = new MakeCredentialParameters(rp, userId)
+                var mcParams = new MakeCredentialParameters(_rp, userId)
                 {
-                    ClientDataHash = clientDataHash
+                    ClientDataHash = _clientDataHash
                 };
 
                 MakeCredentialData mcData = fido2.MakeCredential(mcParams);
 
-                Assert.True(mcData.VerifyAttestation(clientDataHash));
+                Assert.True(mcData.VerifyAttestation(_clientDataHash));
 
                 // Call GetAssertion
-                var gaParams = new GetAssertionParameters(rp, clientDataHash);
+                var gaParams = new GetAssertionParameters(_rp, _clientDataHash);
 
-                var credentialId = new CredentialId()
-                {
-                    Id = mcData.AuthenticatorData.CredentialId!.Value
-                };
+                gaParams.AllowCredential(mcData.AuthenticatorData.CredentialId!);
 
-                gaParams.AllowCredential(credentialId);
-
-                ICollection<GetAssertionData> assertions = fido2.GetAssertion(gaParams);
+                IList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
 
                 Assert.Equal(1, assertions.Count);
-                Assert.Equal(1, assertions.First().NumberOfCredentials ?? 1);
+                Assert.Equal(1, assertions[0].NumberOfCredentials);
+            }
+        }
+
+        [Fact]
+        public void MakeCredential_MultipleCredentials_GetAssertion_ReturnsMultipleAssertions()
+        {
+            // Test assumptions: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)
+            IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
+
+            using (var fido2 = new Fido2Session(yubiKeyDevice))
+            {
+                // Set up a key collector
+                fido2.KeyCollector = KeyCollector;
+
+                // Verify the PIN
+                fido2.VerifyPin();
+
+                // Call MakeCredential
+                var user1 = new UserEntity(new byte[] { 1, 2, 3, 4 })
+                {
+                    Name = "TestUser1",
+                    DisplayName = "Test User"
+                };
+
+                var user2 = new UserEntity(new byte[] { 5, 6, 7, 8 })
+                {
+                    Name = "TestUser2",
+                    DisplayName = "Test User 2"
+                };
+
+                var mcParams1 = new MakeCredentialParameters(_rp, user1)
+                {
+                    ClientDataHash = _clientDataHash
+                };
+
+                var mcParams2 = new MakeCredentialParameters(_rp, user2)
+                {
+                    ClientDataHash = _clientDataHash
+                };
+
+                MakeCredentialData mcData = fido2.MakeCredential(mcParams1);
+                Assert.True(mcData.VerifyAttestation(_clientDataHash));
+                CredentialId cred1 = mcData.AuthenticatorData.CredentialId!;
+
+                mcData = fido2.MakeCredential(mcParams2);
+                Assert.True(mcData.VerifyAttestation(_clientDataHash));
+                CredentialId cred2 = mcData.AuthenticatorData.CredentialId!;
+
+                // Call GetAssertion
+                var gaParams = new GetAssertionParameters(_rp, _clientDataHash);
+
+                gaParams.AllowCredential(cred1);
+                gaParams.AllowCredential(cred2);
+
+                IList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
+
+                Assert.Equal(2, assertions.Count);
+                Assert.Equal(2, assertions[0].NumberOfCredentials);
             }
         }
 

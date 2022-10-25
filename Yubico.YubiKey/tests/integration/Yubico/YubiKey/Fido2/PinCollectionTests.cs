@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Linq;
 using System.Text;
 using Xunit;
+using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -53,6 +55,43 @@ namespace Yubico.YubiKey.Fido2
                 fido2.ChangePin();
                 fido2.VerifyPin();
             }
+        }
+
+        [Fact]
+        public void UvOperations_Succeed()
+        {
+            // Test assumptions: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)
+            // Test assumptions: A fingerprint is registered on the key.
+
+            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
+
+            using (var fido2 = new Fido2Session(yubiKey))
+            {
+                fido2.KeyCollector = KeyCollector;
+                fido2.VerifyUv(PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion, "relyingParty1");
+            }
+        }
+
+        private bool KeyCollector(KeyEntryData arg)
+        {
+            switch (arg.Request)
+            {
+                case KeyEntryRequest.TouchRequest:
+                    Console.WriteLine("YubiKey requires touch");
+                    break;
+                case KeyEntryRequest.VerifyFido2Pin:
+                    arg.SubmitValue(Encoding.UTF8.GetBytes("123456"));
+                    break;
+                case KeyEntryRequest.VerifyFido2Uv:
+                    Console.WriteLine("Bio touch needed.");
+                    break;
+                case KeyEntryRequest.Release:
+                    break;
+                default:
+                    throw new NotSupportedException("Not supported by this test");
+            }
+
+            return true;
         }
     }
 }

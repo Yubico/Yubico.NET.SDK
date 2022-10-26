@@ -27,9 +27,9 @@ Features:
 - **YubiHSM Auth.** YubiHSM Auth is a YubiKey application that stores the long-lived credentials used to
   establish secure sessions with a YubiHSM 2. The secure session protocol is based on Secure Channel Protocol
   3 (SCP03). The SDK adds full support for this application. This includes both management of credentials
-  and creating the session keys for communicating with an HSM.
+  and creating the session keys for communicating with a YubiHSM 2.
 - **FIDO2 partial support.** The basic building blocks for FIDO2 are now available. Making credentials and
-  generating assertions is now possible using the SDK, along with verification using both PIN and biometric
+  generating assertions are now possible using the SDK, along with verification using both PIN and biometric
   touch. Both PIN protocols are also available. Future releases will add additional FIDO2 functionality.
 
 ## 1.4.x Releases

@@ -19,7 +19,7 @@ namespace Yubico.YubiKey {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class ResponseStatusMessages {
@@ -453,6 +453,51 @@ namespace Yubico.YubiKey {
         internal static string BaseWrongLength {
             get {
                 return ResourceManager.GetString("BaseWrongLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request was rejected because the operation is not allowed..
+        /// </summary>
+        internal static string Fido2NotAllowed {
+            get {
+                return ResourceManager.GetString("Fido2NotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request was rejected because the PIN was blocked..
+        /// </summary>
+        internal static string Fido2PinBlocked {
+            get {
+                return ResourceManager.GetString("Fido2PinBlocked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request was rejected because there is no PIN set for the FIDO2 application on this YubiKey..
+        /// </summary>
+        internal static string Fido2PinNotSet {
+            get {
+                return ResourceManager.GetString("Fido2PinNotSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request was rejected because the PIN was not verified..
+        /// </summary>
+        internal static string Fido2PinNotVerified {
+            get {
+                return ResourceManager.GetString("Fido2PinNotVerified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request was rejected because the FIDO2 application timed out..
+        /// </summary>
+        internal static string Fido2Timeout {
+            get {
+                return ResourceManager.GetString("Fido2Timeout", resourceCulture);
             }
         }
         

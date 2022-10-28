@@ -182,7 +182,7 @@ That call requires you to specify the mode, `PinProtected`, `PinDerived`, or bot
     {
         pivSession.KeyCollector = SomeKeyCollector;
 
-        pivSession.SetYubiKeyPivPinOnly(PivPinOnlyMode.PinProtected);
+        pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
     }
 ```
 
@@ -192,11 +192,10 @@ application that supports only PIN-derived, you should not set a YubiKey to eith
 `PinDerived` or `PinDerived | PinProtected`.
 
 In order to set a YubiKey to PIN-only the management key must be authenticated. This is
-necessary even if it has already been authenticated. The `SetYubiKeyPivPinOnly` method
-will try to authenticate using the default management key. If that works, there will be no
-call to the `KeyCollector` to retrieve the management key, the user will not have to enter
-it somehow. If the default key does not work, then the method will call the
-`KeyCollector`.
+necessary even if it has already been authenticated. The `SetPinOnlyMode` method will try
+to authenticate using the default management key. If that works, there will be no call to
+the `KeyCollector` to retrieve the management key, the user will not have to enter it
+somehow. If the default key does not work, then the method will call the `KeyCollector`.
 
 It is also necessary to verify the PIN. If it has already been verified and the mode to
 set is `PinProtected`, the method won't collect the PIN again. But if the mode is
@@ -238,7 +237,7 @@ otherwise, then you will likely use code that looks something like this.
 
         PivAlgorithm mgmtKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey) ?
             PivAlgorithm.Aes128 : PivAlgorithm.TripleDes;
-        pivSession.SetYubiKeyPivPinOnly(PivPinOnlyMode.PinProtected, mgmtKeyAlgorithm);
+        pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected, mgmtKeyAlgorithm);
     }
 ```
 

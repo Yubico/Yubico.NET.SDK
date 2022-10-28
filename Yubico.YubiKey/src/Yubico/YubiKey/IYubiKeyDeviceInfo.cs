@@ -80,7 +80,7 @@ namespace Yubico.YubiKey
         /// </summary>
         /// <remarks>
         /// <para>
-        /// This field is only meaningful if <see cref="DeviceFlags.TouchEject"/> in
+        /// This field is only meaningful if <see cref="Yubico.YubiKey.DeviceFlags.TouchEject"/> in
         /// <see cref="DeviceFlags"/> is set. A value of <c>0</c> means that the timeout
         /// is disabled (the smart card will not be ejected automatically).
         /// </para>

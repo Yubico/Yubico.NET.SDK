@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+// Copyright 2022 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -12,53 +12,50 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Obtain the next per-credential signature for a given <see cref="GetAssertionCommand"/> request.
-    /// This command must follow a <see cref="GetAssertionCommand"/> or <see cref="GetNextAssertionCommand"/>.
+    /// Instruct the YubiKey to get the next assertion associated with the
+    /// relying party specified in the previous call to
+    /// <see cref="GetAssertionCommand"/>.
     /// </summary>
-    /// <remarks>
-    /// <para>
-    /// Use this command when the <see cref="GetAssertionCommand"/> response contains
-    /// the <see cref="GetAssertionOutput.NumberOfCredentials"/> member and the number
-    /// of credentials exceeds 1.
-    /// </para>
-    /// 
-    /// <para>
-    /// Responses to the <see cref="GetNextAssertionCommand"/> will never have the
-    /// <see cref="GetAssertionOutput.NumberOfCredentials"/> member set.
-    /// </para>
-    /// </remarks>
-    internal sealed class GetNextAssertionCommand : IYubiKeyCommand<GetAssertionResponse>
+    public class GetNextAssertionCommand : IYubiKeyCommand<GetAssertionResponse>
     {
-        private const byte CtapGetNextAssertionCommand = 0x08;
+        private const int CtapGetNextAssertionCmd = 0x08;
+
+        /// <inheritdoc />
         public YubiKeyApplication Application => YubiKeyApplication.Fido2;
 
         /// <summary>
-        /// Initializes a new instance of the GetNextAssertionCommand class.
+        /// Constructs an instance of the <see cref="GetNextAssertionCommand"/>.
         /// </summary>
+        /// <remarks>
+        /// The <c>GetNextAssertionCommand</c> will retrieve the next assertion
+        /// in the list of assertions associated with a relying party. The
+        /// relying party (and parameters) were sent to the YubiKey in a
+        /// previous <see cref="GetAssertionCommand"/>.
+        /// </remarks>
         public GetNextAssertionCommand()
         {
-
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
         {
-            byte[] payload = { CtapGetNextAssertionCommand };
-
+            byte[] payload = new byte[] { CtapGetNextAssertionCmd };
             return new CommandApdu()
             {
-                Ins = (byte)CtapHidCommand.Cbor,
+                Ins = CtapConstants.CtapHidCbor,
                 Data = payload
             };
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public GetAssertionResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetAssertionResponse (responseApdu);
+            new GetAssertionResponse(responseApdu);
     }
 }

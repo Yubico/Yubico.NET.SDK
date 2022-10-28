@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+// Copyright 2022 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -20,10 +20,10 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// Gets detailed information about the authenticator.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="GetInfoResponse"/>. 
+    /// The partner Response class is <see cref="GetInfoResponse"/>.
     /// Specified in CTAP as "authenticatorGetInfo".
     /// </remarks>
-    internal sealed class GetInfoCommand : IYubiKeyCommand<GetInfoResponse>
+    public sealed class GetInfoCommand : IYubiKeyCommand<GetInfoResponse>
     {
         private const byte CtapGetInfoCmd = 0x04;
 
@@ -40,7 +40,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </summary>
         public GetInfoCommand()
         {
-
         }
 
         /// <inheritdoc />
@@ -49,7 +48,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             byte[] payload = new byte[] { CtapGetInfoCmd };
             return new CommandApdu()
             {
-                Ins = (byte)CtapHidCommand.Cbor,
+                Ins = CtapConstants.CtapHidCbor,
                 Data = payload
             };
         }

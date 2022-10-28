@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+// Copyright 2022 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -13,19 +13,20 @@
 // limitations under the License.
 
 using System;
-using System.Formats.Cbor;
+using System.Globalization;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Fido2.Serialization;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// The response to the <see cref="GetInfoCommand"/> command, containing the device information.
+    /// The response to the <see cref="GetInfoCommand"/> command, containing
+    /// information about the device and FIDO2 application.
     /// </summary>
-    internal sealed class GetInfoResponse : Fido2Response, IYubiKeyResponseWithData<DeviceInfo>
+    public sealed class GetInfoResponse : Fido2Response, IYubiKeyResponseWithData<AuthenticatorInfo>
     {
         /// <summary>
-        /// Constructs a GetInfoResponse instance based on a ResponseApdu received from the YubiKey.
+        /// Constructs a <c>GetInfoResponse</c> instance based on a ResponseApdu
+        /// received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
         /// The ResponseApdu returned by the YubiKey.
@@ -33,57 +34,28 @@ namespace Yubico.YubiKey.Fido2.Commands
         public GetInfoResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
 
         /// <summary>
-        /// Gets the <see cref="DeviceInfo"/> class that contains details about the authenticator, such as
-        /// a list of all supported protocol versions, supported extensions, AAGUID of the device, and its capabilities.
+        /// Gets the <see cref="AuthenticatorInfo"/> class that contains details
+        /// about the authenticator, such as a list of all supported protocol
+        /// versions, supported extensions, AAGUID of the device, and its
+        /// capabilities.
         /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
+        /// </exception>
         /// <returns>
-        /// The data in the response APDU, presented as a DeviceInfo class.
+        /// The data in the response APDU, presented as a <c>Fido2DeviceInfo</c> class.
         /// </returns>
-        public DeviceInfo GetData()
+        public AuthenticatorInfo GetData()
         {
-            ThrowIfFailed();
-
-            if (ResponseApdu.Data.IsEmpty)
+            if (Status != ResponseStatus.Success)
             {
-                throw new MalformedYubiKeyResponseException(ExceptionMessages.UnknownFidoError)
-                {
-                    ActualDataLength = 0,
-                    ResponseClass = nameof(GetInfoResponse)
-                };
+                throw new InvalidOperationException(StatusMessage);
             }
 
-            byte[] responseData = ResponseApdu.Data.ToArray();
-
-            if (responseData.Length < 2)
-            {
-                throw new MalformedYubiKeyResponseException(ExceptionMessages.UnknownFidoError)
-                {
-                    ActualDataLength = responseData.Length,
-                    ResponseClass = nameof(GetInfoResponse)
-                };
-            }
-
-            if (responseData[0] != (byte)Fido2Status.Success)
-            {
-                throw new MalformedYubiKeyResponseException(ExceptionMessages.BadFido2Status)
-                {
-                    ActualDataLength = responseData.Length,
-                    DataErrorIndex = 0,
-                    ResponseClass = nameof(GetInfoResponse)
-                };
-            }
-
-            Memory<byte> cborData = responseData.AsMemory(1);
-
-            var reader = new CborReader(cborData, CborConformanceMode.Ctap2Canonical);
-
-            DeviceInfo deviceInfo = Ctap2CborSerializer.Deserialize<DeviceInfo>(reader);
-
-            return deviceInfo;
+            return new AuthenticatorInfo(ResponseApdu.Data);
         }
     }
 }

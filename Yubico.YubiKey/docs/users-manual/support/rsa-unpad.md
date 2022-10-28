@@ -17,7 +17,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# Attacks on RSA decryption unpad operations
+# Attacks on RSA decryption and mitigation
 
 There are attacks on RSA involving the unpad operation. This document describes those
 attacks, whether the YubiKey and/or SDK is vulnerable, and SDK mitigations.
@@ -149,7 +149,7 @@ Even though the server was not explicitly returning a descriptive error code, th
 of time it was spending on the decryption was enough information to launch the attack.
 
 The number of messages required was generally estimated to be around 1,000,000 for a
-2048-bit key. 
+2048-bit key.
 
 ### Mitigation updated
 

@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.10)
 
 project(Yubico.NativeShims VERSION 1.3.0)
 
-
 if (APPLE)
     set(PLATFORM_MACOS true)
     set(BACKEND "macscard")
@@ -38,11 +37,24 @@ endif()
 include(${CMAKE_SOURCE_DIR}/cmake/pcscd.cmake)
 find_pcscd()
 
+find_package(OpenSSL REQUIRED)
 
 #
 # Build definition
 #
 add_library(Yubico.NativeShims SHARED)
+
+# Enable IPO/LTO (Link time optimization) if supported
+# Optional IPO. Do not use IPO if it's not supported by compiler.
+include(CheckIPOSupported)
+
+check_ipo_supported(RESULT result OUTPUT output)
+if(result)
+    message(INFO "IPO is enabled.")
+    set_property(TARGET Yubico.NativeShims PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+else()
+    message(WARNING "IPO is not supported: ${output}")
+endif()
 
 # Pre-processor
 configure_file(
@@ -62,6 +74,9 @@ target_sources(
     Yubico.NativeShims
     PRIVATE
         pcsc.c
+        ssl.bignum.c
+        ssl.ecgroup.c
+        ssl.ecpoint.c
         )
 
 # Linker
@@ -71,4 +86,5 @@ target_link_libraries(
         ${PCSC_WIN_LIBS}
         ${PCSC_MACOSX_LIBS}
         ${PCSC_CUSTOM_LIBS}
+        OpenSSL::Crypto
         )

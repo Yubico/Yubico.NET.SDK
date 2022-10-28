@@ -291,9 +291,6 @@
   <data name="NotSupportedByYubiKeyVersion" xml:space="preserve">
     <value>This operation is not supported by this version of YubiKey.</value>
   </data>
-  <data name="InvalidDataTag" xml:space="preserve">
-    <value>The value {0} is not a data tag supported by the YubiKey application.</value>
-  </data>
   <data name="InvalidDataEncoding" xml:space="preserve">
     <value>The data provided does not match the expected encoding.</value>
   </data>
@@ -336,9 +333,6 @@
   </data>
   <data name="UnknownFidoError" xml:space="preserve">
     <value>An unknown FIDO error has occurred.</value>
-  </data>
-  <data name="Ctap2CborDeserializationError" xml:space="preserve">
-    <value>The CBOR response failed to deserialize correctly.</value>
   </data>
   <data name="InvalidCredential" xml:space="preserve">
     <value>A credential cannot be null.</value>
@@ -388,6 +382,12 @@
   <data name="MissingCtap2Data" xml:space="preserve">
     <value>A required property was missing for CTAP2.</value>
   </data>
+  <data name="InvalidCallOrder" xml:space="preserve">
+    <value>A method was called out of an appropriate order.</value>
+  </data>
+  <data name="CryptographyProviderFailure" xml:space="preserve">
+    <value>An object returned by CryptographyProviders failed to execute properly.</value>
+  </data>
   <data name="Fido2ResponseMissing" xml:space="preserve">
     <value>No FIDO2 status was available in the response to a FIDO2 command.</value>
   </data>
@@ -427,8 +427,17 @@
   <data name="WrongNdefType" xml:space="preserve">
     <value>The NDEF record has a type of {0}. Unable to translate it to {1} as requested.</value>
   </data>
+  <data name="InvalidFido2Info" xml:space="preserve">
+    <value>The FIDO2 info returned is invalid.</value>
+  </data>
   <data name="UnknownFido2Status" xml:space="preserve">
     <value>The authenticator returned an unknown FIDO2 status indicating an error.</value>
+  </data>
+  <data name="InvalidFido2Pin" xml:space="preserve">
+    <value>A FIDO2 PIN has a minimum Unicode code point count and must be a UTF-8 encoding of no more than 63 bytes.</value>
+  </data>
+  <data name="InvalidFido2Authentication" xml:space="preserve">
+    <value>A FIDO2 authentication form was invalid, currently only PIN and User Verification are supported.</value>
   </data>
   <data name="Ctap2CommandTooLarge" xml:space="preserve">
     <value>The CTAP2 command was too large to transmit.</value>
@@ -738,5 +747,104 @@
   </data>
   <data name="CannotMergeDifferentParents" xml:space="preserve">
     <value>The device specified has a different parent from the one it is being merged with.</value>
+  </data>
+  <data name="CborLengthMismatch" xml:space="preserve">
+    <value>The lengths of the command data buffer and the CBOR message do not agree.</value>
+  </data>
+  <data name="CborWriterMustConvertIdenfiteLengths" xml:space="preserve">
+    <value>The CborWriter instance must have 'ConvertIndefiniteLengthEncodings' set to true.</value>
+  </data>
+  <data name="CborMapEntriesExpected" xml:space="preserve">
+    <value>No entries found under the CBOR map.</value>
+  </data>
+  <data name="CborUnexpectedMapTag" xml:space="preserve">
+    <value>Encountered an unexpected tag while processing a CBOR map.</value>
+  </data>
+  <data name="Ctap2MissingRequiredField" xml:space="preserve">
+    <value>A required field was missing from the CTAP2 CBOR response.</value>
+  </data>
+  <data name="InvalidCredentialRetryDataLength" xml:space="preserve">
+    <value>Invalid size of credential and retry data.</value>
+  </data>
+  <data name="RetryCountNegative" xml:space="preserve">
+    <value>The retry count must be non-negative.</value>
+  </data>
+  <data name="InvalidStringLength" xml:space="preserve">
+    <value>The string must have a minimum length of {0}, and a maximum of {1}. Actual length: {2}.</value>
+  </data>
+  <data name="InvalidDataTag" xml:space="preserve">
+    <value>The value {0} is not a data tag supported by the YubiKey application.</value>
+  </data>
+  <data name="YubiHsmAuthInvalidCredentialLabelLength" xml:space="preserve">
+    <value>The label must have a UTF-8 byte count between {0} and {1}, inclusive. The actual byte count was {2}.</value>
+  </data>
+  <data name="YubiHsmAuthInvalidEncSize" xml:space="preserve">
+    <value>The encryption key must be exactly 16 bytes. The actual size was {0}.</value>
+  </data>
+  <data name="YubiHsmAuthInvalidMacSize" xml:space="preserve">
+    <value>The MAC key must be exactly 16 bytes. The actual size was {0}.</value>
+  </data>
+  <data name="YubiHsmAuthInvalidPasswordLength" xml:space="preserve">
+    <value>The credential password must be exactly 16 bytes. The actual size was {0}.</value>
+  </data>
+  <data name="YubiHsmAuthInvalidMgmtKeyLength" xml:space="preserve">
+    <value>The management key must be exactly 16 bytes. The actual size was {0}.</value>
+  </data>
+  <data name="YubiHsmAuthKeyTypeNotSupported" xml:space="preserve">
+    <value>The cryptographic key type is not supported.</value>
+  </data>
+  <data name="PinCollectionCancelled" xml:space="preserve">
+    <value>The user cancelled the PIN collection operation.</value>
+  </data>
+  <data name="PinAlreadySet" xml:space="preserve">
+    <value>The PIN has already been set and cannot be changed using this function.</value>
+  </data>
+  <data name="PinTooShort" xml:space="preserve">
+    <value>The specified PIN was too short. It must be at least {0} {1} long. It was {2} {1}.</value>
+  </data>
+  <data name="PinTooLong" xml:space="preserve">
+    <value>The specified PIN was too long. It must be no more than {0} {1} long. It was {2} {1}.</value>
+  </data>
+  <data name="PinProtocolNotSupported" xml:space="preserve">
+    <value>The PIN protocol {0} is not supported.</value>
+  </data>
+  <data name="NoActivePinProtocol" xml:space="preserve">
+    <value>No PIN protocol is currently in use.</value>
+  </data>
+  <data name="TypeNotSupported" xml:space="preserve">
+    <value>Type not supported.</value>
+  </data>
+  <data name="TypeMismatch" xml:space="preserve">
+    <value>The value is not of the expected type. This often indicates a bug in the SDK.</value>
+  </data>
+  <data name="YubiHsmAuthInvalidHostChallengeLength" xml:space="preserve">
+    <value>The host challenge must be exactly 8 bytes. The actual size was {0}.</value>
+  </data>
+  <data name="YubiHsmAuthInvalidHsmDeviceChallengeLength" xml:space="preserve">
+    <value>The HSM device challenge must be exactly 8 bytes. The actual size was {0}.</value>
+  </data>
+  <data name="YubiHsmAuthMgmtKeyAuthFailed" xml:space="preserve">
+    <value>Failed to authenticate the management key. Retries remaining: {0}.</value>
+  </data>
+  <data name="YubiHsmAuthCredPasswordAuthFailed" xml:space="preserve">
+    <value>Failed to authenticate the credential password. Retries remaining: {0}.</value>
+  </data>
+  <data name="Fido2NoMoreRetries" xml:space="preserve">
+    <value>There are no more retries remaining.</value>
+  </data>
+  <data name="Fido2NoPin" xml:space="preserve">
+    <value>The YubiKey does not have a PIN set.</value>
+  </data>
+  <data name="Fido2PermsNotSupported" xml:space="preserve">
+    <value>This YubiKey does not support permissions on PIN / UV auth tokens.</value>
+  </data>
+  <data name="Fido2UvNotSupported" xml:space="preserve">
+    <value>This YubiKey does not support onboard user-verification.</value>
+  </data>
+  <data name="Fido2NotAuthed" xml:space="preserve">
+    <value>The YubiKey has not been authenticated.</value>
+  </data>
+  <data name="Fido2TouchTimeout" xml:space="preserve">
+    <value>The YubiKey was not touched in the allotted time.</value>
   </data>
 </root>

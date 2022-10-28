@@ -457,6 +457,51 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The request was rejected because the operation is not allowed..
+        /// </summary>
+        internal static string Fido2NotAllowed {
+            get {
+                return ResourceManager.GetString("Fido2NotAllowed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request was rejected because the PIN was blocked..
+        /// </summary>
+        internal static string Fido2PinBlocked {
+            get {
+                return ResourceManager.GetString("Fido2PinBlocked", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request was rejected because there is no PIN set for the FIDO2 application on this YubiKey..
+        /// </summary>
+        internal static string Fido2PinNotSet {
+            get {
+                return ResourceManager.GetString("Fido2PinNotSet", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request was rejected because the PIN was not verified..
+        /// </summary>
+        internal static string Fido2PinNotVerified {
+            get {
+                return ResourceManager.GetString("Fido2PinNotVerified", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request was rejected because the FIDO2 application timed out..
+        /// </summary>
+        internal static string Fido2Timeout {
+            get {
+                return ResourceManager.GetString("Fido2Timeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Authentication is not enabled..
         /// </summary>
         internal static string OathAuthNotEnabled {
@@ -624,6 +669,51 @@ namespace Yubico.YubiKey {
         internal static string U2fWrongData {
             get {
                 return ResourceManager.GetString("U2fWrongData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wrong password or authentication key. Retries remaining: {0}..
+        /// </summary>
+        internal static string YubiHsmAuthAuthenticationRequired {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthAuthenticationRequired", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Invalid authentication data..
+        /// </summary>
+        internal static string YubiHsmAuthInvalidAuthData {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthInvalidAuthData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The entry is invalid..
+        /// </summary>
+        internal static string YubiHsmAuthInvalidEntry {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthInvalidEntry", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A credential with that label already exists..
+        /// </summary>
+        internal static string YubiHsmAuthLabelConflict {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthLabelConflict", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The device was not touched..
+        /// </summary>
+        internal static string YubiHsmAuthTouchRequired {
+            get {
+                return ResourceManager.GetString("YubiHsmAuthTouchRequired", resourceCulture);
             }
         }
     }

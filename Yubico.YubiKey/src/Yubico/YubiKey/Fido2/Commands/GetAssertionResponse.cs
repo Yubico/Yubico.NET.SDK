@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+// Copyright 2022 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -12,32 +12,52 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Formats.Cbor;
+using System;
+using System.Globalization;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Fido2.Serialization;
+using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Represents a response to the GetAssertion FIDO2 command. Contains a <see cref="GetAssertionOutput"/> as its data.
+    /// This is the partner response class to the
+    /// <see cref="GetAssertionCommand"/> command class.
     /// </summary>
-    internal class GetAssertionResponse : Fido2Response, IYubiKeyResponseWithData<GetAssertionOutput>
+    public class GetAssertionResponse : Fido2Response, IYubiKeyResponseWithData<GetAssertionData>
     {
-        public GetAssertionResponse(ResponseApdu responseApdu) : base(responseApdu)
+        /// <summary>
+        /// Constructs a new instance of the
+        /// <see cref="GetAssertionResponse"/> class based on a response APDU
+        /// provided by the YubiKey.
+        /// </summary>
+        /// <param name="responseApdu">
+        /// A response APDU containing the CBOR response for the
+        /// <c>authenticatorGetAssertion</c> command.
+        /// </param>
+        public GetAssertionResponse(ResponseApdu responseApdu) :
+            base(responseApdu)
         {
-
         }
 
-        public GetAssertionOutput GetData()
+        /// <summary>
+        /// Returns a new instance of <see cref="GetAssertionData"/> containing
+        /// the credential (a public key) and other information.
+        /// </summary>
+        /// <returns>
+        /// A new instance of <c>GetAssertionData</c>.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// The response indicates there was an error, so there is no data to
+        /// return.
+        /// </exception>
+        public GetAssertionData GetData()
         {
-            ThrowIfFailed();
+            if (Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(StatusMessage);
+            }
 
-            byte[] cborData = ResponseApdu.Data.Slice(1).ToArray();
-            var reader = new CborReader(cborData, CborConformanceMode.Ctap2Canonical);
-
-            GetAssertionOutput getAssertionOutput = Ctap2CborSerializer.Deserialize<GetAssertionOutput>(reader);
-
-            return getAssertionOutput;
+            return new GetAssertionData(ResponseApdu.Data);
         }
     }
 }

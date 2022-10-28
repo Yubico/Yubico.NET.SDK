@@ -21,6 +21,9 @@ namespace Yubico.YubiKey.Oath
     /// </summary>
     public enum CredentialType
     {
+        /// <summary>
+        /// No type is specified.
+        /// </summary>
         None = 0,
 
         /// <summary>

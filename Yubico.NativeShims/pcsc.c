@@ -61,14 +61,17 @@ Native_SCardConnect(
     uint32_t* pdwActiveProtocol
 )
 {
-    return SCardConnect(
+    DWORD activeProtocol;
+    int32_t status = SCardConnect(
         hContext,
         szReader,
         dwShareMode,
         dwPreferredProtocols,
         phCard,
-        pdwActiveProtocol
+        &activeProtocol
     );
+    *pdwActiveProtocol = (uint32_t)activeProtocol;
+    return status;
 }
 
 int32_t
@@ -81,13 +84,16 @@ Native_SCardReconnect(
     uint32_t* pdwActiveProtocol
 )
 {
-    return SCardReconnect(
+    DWORD activeProtocol;
+    int32_t status = SCardReconnect(
         hCard,
         dwShareMode,
         dwPreferredProtocols,
         dwInitialization,
-        pdwActiveProtocol
+        &activeProtocol
     );
+    *pdwActiveProtocol = (uint32_t)activeProtocol;
+    return status;
 }
 
 int32_t
@@ -184,15 +190,18 @@ Native_SCardTransmit(
     uint32_t* pcbRecvLength
 )
 {
-    return SCardTransmit(
+    DWORD recvLength = *pcbRecvLength;
+    int32_t status = SCardTransmit(
         hCard,
         pioSendPci,
         pbSendBuffer,
         cbSendLength,
         pioRecvPci,
         pbRecvBuffer,
-        pcbRecvLength
+        &recvLength
     );
+    *pcbRecvLength = (uint32_t)recvLength;
+    return status;
 }
 
 int32_t
@@ -204,12 +213,15 @@ Native_SCardListReaders(
     uint32_t* pcchReaders
 )
 {
-    return SCardListReaders(
+    DWORD cchReaders;
+    int32_t status = SCardListReaders(
         hContext,
         mszGroups,
         mszReaders,
-        pcchReaders
+        &cchReaders
     );
+    *pcchReaders = (uint32_t)cchReaders;
+    return status;
 }
 
 int32_t

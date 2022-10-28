@@ -83,6 +83,32 @@ namespace Yubico.YubiKey
 
         internal ISmartCardDevice GetSmartCardDevice() => _smartCardDevice!;
 
+        /// <inheritdoc />
+        public Transport AvailableTransports
+        {
+            get
+            {
+                Transport transports = Transport.None;
+
+                if (HasHidKeyboard)
+                {
+                    transports |= Transport.HidKeyboard;
+                }
+
+                if (HasHidFido)
+                {
+                    transports |= Transport.HidFido;
+                }
+
+                if (HasSmartCard)
+                {
+                    transports |= IsNfcDevice ? Transport.NfcSmartCard : Transport.UsbSmartCard;
+                }
+
+                return transports;
+            }
+        }
+
         /// <summary>
         /// Constructs a <see cref="YubiKeyDevice"/> instance.
         /// </summary>

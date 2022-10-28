@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+// Copyright 2022 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -14,65 +14,58 @@
 
 using System;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Fido2.Serialization;
+using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Command to get an assertion from a FIDO2 credential on the YubiKey.
+    /// Instruct the YubiKey to get an assertion based on the input parameters.
     /// </summary>
-    /// <remarks>
-    /// <p>
-    /// This command takes as input a <see cref="GetAssertionInput"/>, and produces a <see cref="GetAssertionResponse"/>
-    /// response containing <see cref="GetAssertionOutput"/> as its data.
-    /// </p>
-    /// <p>
-    /// This command may require that the user tap their device to complete the assertion.
-    /// </p>
-    /// <p>
-    /// On certain platforms, accessing a FIDO device over HID may require that the 
-    /// application is running with elevated permissions.
-    /// </p>
-    /// </remarks>
-    internal sealed class GetAssertionCommand : IYubiKeyCommand<GetAssertionResponse>
+    public class GetAssertionCommand : IYubiKeyCommand<GetAssertionResponse>
     {
-        private const byte CtapGetAssertionCmd = 0x02;
+        private const int CtapGetAssertionCmd = 0x02;
 
+        /// <inheritdoc />
         public YubiKeyApplication Application => YubiKeyApplication.Fido2;
 
-        private readonly GetAssertionInput _getAssertionInput;
+        private readonly GetAssertionParameters _params;
+
+        // The default constructor explicitly defined. We don't want it to be
+        // used.
+        // Note that there is no object-initializer constructor. All the
+        // constructor inputs have no default or are secret byte arrays.
+        private GetAssertionCommand()
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
-        /// Initializes a new instance of the GetAssertionCommand class.
+        /// Constructs an instance of the <see cref="GetAssertionCommand" />
+        /// class using the given parameters.
         /// </summary>
         /// <remarks>
-        /// Initialization with invalid input will trigger an <see cref="Ctap2DataException"/>.
+        /// This class will copy a reference to the input parameters object. It
+        /// will no longer need it after the call to <c>SendCommand</c>.
         /// </remarks>
-        public GetAssertionCommand(GetAssertionInput getAssertionInput)
+        /// <param name="getAssertionParameters">
+        /// An object containing all the parameters the YubiKey will use to get
+        /// an assertion.
+        /// </param>
+        public GetAssertionCommand(GetAssertionParameters getAssertionParameters)
         {
-            if (getAssertionInput is null)
-            {
-                throw new ArgumentNullException(nameof(getAssertionInput));
-            }
-
-            getAssertionInput.Validate();
-
-            _getAssertionInput = getAssertionInput;
+            _params = getAssertionParameters;
         }
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
         {
-            byte[] cborData = Ctap2CborSerializer.Serialize(_getAssertionInput);
-
-            byte[] payload = new byte[1 + cborData.Length];
+            byte[] encodedParams = _params.CborEncode();
+            byte[] payload = new byte[encodedParams.Length + 1];
             payload[0] = CtapGetAssertionCmd;
-
-            cborData.CopyTo(payload, 1);
-
+            Array.Copy(encodedParams, 0, payload, 1, encodedParams.Length);
             return new CommandApdu()
             {
-                Ins = (byte)CtapHidCommand.Cbor,
+                Ins = CtapConstants.CtapHidCbor,
                 Data = payload
             };
         }

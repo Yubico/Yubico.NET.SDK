@@ -16,7 +16,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# Protecting OATH application with a password 
+# Protecting the OATH application with a password
 
 For greater security, you can protect the OATH application on the YubiKey with a password. If a password is set, the user will first need to verify the password to unlock the application and perform OATH operations. The exception is resetting the application. The password is not required for that.
 
@@ -36,7 +36,7 @@ oathSession.SetPassword();
 
 ## Verifying the password
 
-Mutual authentication is performed to unlock the OATH application protected with the password. 
+Mutual authentication is performed to unlock the OATH application protected with the password.
 
 The challenge for this comes from the YubiKey. The response is computed by performing the correct HMAC function of that challenge with the secret, which is a user-supplied password and deviceID put through 1,000 rounds of PBKDF2.
 

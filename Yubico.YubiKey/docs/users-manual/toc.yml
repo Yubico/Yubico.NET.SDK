@@ -27,7 +27,7 @@
 
 - name: YubiKey reference
   items:
-  - name: Transports
+  - name: Physical interfaces
     href: yubikey-reference/transports/overview.md
   - name: APDUs
     href: yubikey-reference/apdu.md
@@ -80,7 +80,8 @@
         href: application-otp/challenge-response.md
       - name: NDEF
         href: application-otp/ndef.md
-  - name: How-to Guides
+  - name: How-to guides
+    href: application-otp/how-tos-overview.md
     items:
     - name: How to program a slot with a Yubico OTP credential
       href: application-otp/how-to-program-a-yubico-otp-credential.md
@@ -102,10 +103,31 @@
       href: application-otp/how-to-delete-a-slot-configuration.md
     - name: How to swap slot configurations
       href: application-otp/how-to-swap-slot-configs.md
-  - name: Commands
+  - name: OTP commands and APDUs
+    href: application-otp/otp-commands.md
     items:
-    - name: OTP commands and APDUs
-      href: application-otp/otp-commands.md
+    - name: Configure slot
+      href: application-otp/commands-configure-slot.md
+    - name: Update slot
+      href: application-otp/commands-update-slot.md
+    - name: Swap slot configurations
+      href: application-otp/commands-swap-slots.md
+    - name: Program NDEF
+      href: application-otp/commands-program-ndef.md
+    - name: Get serial number
+      href: application-otp/commands-get-serial.md
+    - name: Update scan-code map
+      href: application-otp/commands-update-scan-code-map.md
+    - name: Get device information
+      href: application-otp/commands-get-device-info.md
+    - name: Query FIPS mode
+      href: application-otp/commands-query-fips-mode.md
+    - name: Challenge-response
+      href: application-otp/commands-challenge-response.md
+    - name: Read status
+      href: application-otp/commands-read-status.md
+    - name: Read NDEF payload
+      href: application-otp/commands-read-ndef.md
 
 - name: "Application: OATH"
   homepage: application-oath/oath-overview.md
@@ -114,15 +136,15 @@
     href: application-oath/oath-overview.md
   - name: OATH credentials
     href: application-oath/oath-credentials.md
-  - name: OATH session
+  - name: OATH session APIs
     href: application-oath/oath-session.md
-  - name: Protecting OATH application with a password
+  - name: Protecting the OATH application with a password
     href: application-oath/oath-password.md
   - name: Building a basic authenticator
     href: application-oath/oath-use-case.md
   - name: URI string format
     href: application-oath/uri-string-format.md
-  - name: How to backup credentials
+  - name: How to back up credentials
     href: application-oath/oath-backup-credentials.md
   - name: Commands
     items:
@@ -152,7 +174,7 @@
     href: application-piv/cert-size.md
   - name: ECDSA signatures
     href: application-piv/ecdsa-signatures.md
-  - name: EC Diffie-Hellman Key Agreement
+  - name: EC Diffie-Hellman key agreement
     href: application-piv/key-agreement.md
   - name: Public keys
     href: application-piv/public-keys.md
@@ -162,7 +184,7 @@
     href: application-piv/get-and-put-data.md
   - name: Data objects
     href: application-piv/piv-objects.md
-  - name: Migrating from SmartCard.NET/Minidriver
+  - name: Migrating from SmartCard.NET
     href: application-piv/migrate-smartcardnet.md
   - name: Commands
     items:
@@ -172,13 +194,13 @@
       items:
       - name: Attest
         href: application-piv/apdu/attest.md
-      - name: "Authenticate: Decrypt"
+      - name: "Authenticate: decrypt"
         href: application-piv/apdu/auth-decrypt.md
-      - name: "Authenticate: Key agreement"
+      - name: "Authenticate: key agreement"
         href: application-piv/apdu/auth-key-agree.md
-      - name: "Authenticate: Management key"
+      - name: "Authenticate: management key"
         href: application-piv/apdu/auth-mgmt.md
-      - name: "Authenticate: Sign"
+      - name: "Authenticate: sign"
         href: application-piv/apdu/auth-sign.md
       - name: "Change ref"
         href: application-piv/apdu/change-ref.md
@@ -194,7 +216,7 @@
         href: application-piv/apdu/put-data.md
       - name: "Reset"
         href: application-piv/apdu/reset-piv.md
-      - name: "Reset retry count"
+      - name: "Reset retry (recover the PIN)"
         href: application-piv/apdu/reset-retry.md
       - name: "Get serial number"
         href: application-piv/apdu/serial.md
@@ -216,6 +238,8 @@
     href: application-u2f/u2f-pin.md
   - name: FIDO U2F and FIPS
     href: application-u2f/fips-mode.md
+  - name: Resetting the FIDO U2F application
+    href: application-u2f/u2f-reset.md
   - name: Commands
     items:
     - name: FIDO U2F commands
@@ -245,10 +269,55 @@
       - name: Reset
         href: application-u2f/apdu/reset.md
 
+- name: "Application: FIDO2"
+  homepage: application-fido2/fido2-overview.md
+  items:
+  - name: How FIDO2 works
+    href: application-fido2/how-fido2-works.md
+  - name: FIDO2 credentials
+    href: application-fido2/fido2-credentials.md
+  - name: PIN/UV Authenticaation
+    href: application-fido2/pin-uv-auth-protocols.md
+  - name: The FIDO2 PIN
+    href: application-fido2/fido2-pin.md
+  - name: Commands
+    items:
+    - name: FIDO2 commands
+      href: application-fido2/fido2-commands.md
+    - name: APDU reference
+      items:
+      - name: Version
+        href: application-fido2/apdu/version.md
+
+- name: "Application: YubiHSM Auth"
+  homepage: application-yubihsm-auth/yubihsm-auth-overview.md
+  items:
+  - name: YubiHSM Auth commands
+    href: application-yubihsm-auth/commands/yubihsm-auth-commands.md
+    items:
+    - name: List credentials
+      href: application-yubihsm-auth/commands/list-credentials.md
+    - name: Add credential
+      href: application-yubihsm-auth/commands/add-credential.md
+    - name: Delete credential
+      href: application-yubihsm-auth/commands/delete-credential.md
+    - name: Get management key retries
+      href: application-yubihsm-auth/commands/get-management-key-retries.md
+    - name: Change management key
+      href: application-yubihsm-auth/commands/change-management-key.md
+    - name: Get application version
+      href: application-yubihsm-auth/commands/get-application-version.md
+    - name: Reset application
+      href: application-yubihsm-auth/commands/reset-application.md
+    - name: Get AES-128 session keys
+      href: application-yubihsm-auth/commands/get-aes128-session-keys.md
+  - name: YubiHSM Auth session APIs
+    href: application-yubihsm-auth/yubihsm-auth-session.md
+
 - name: "Supporting routines"
   homepage: support/support-overview.md
   items:
   - name: TLV
     href: support/support-tlv.md
-  - name: RSA padding
+  - name: Attacks on RSA decryption and mitigation
     href: support/rsa-unpad.md

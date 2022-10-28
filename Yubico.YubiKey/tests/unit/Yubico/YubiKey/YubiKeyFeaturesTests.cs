@@ -289,5 +289,29 @@ namespace Yubico.YubiKey
             Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpAlphaNumericPasswords));
             Assert.False(yubiKey.HasFeature(YubiKeyFeature.OtpPasswordManualUpdates));
         }
-    }
+
+        [Theory]
+        [InlineData(5, 4, 3, true)]
+        [InlineData(5, 4, 4, true)]
+        [InlineData(5, 4, 2, false)]
+        public void HasFeature_YubiHsmAuthApplication(
+            byte major,
+            byte minor,
+            byte patch,
+            bool expectedResult)
+        {
+            var yubiKey = new HollowYubiKeyDevice()
+            {
+                AvailableUsbCapabilities = YubiKeyCapabilities.YubiHsmAuth
+            };
+
+            yubiKey.FirmwareVersion.Major = major;
+            yubiKey.FirmwareVersion.Minor = minor;
+            yubiKey.FirmwareVersion.Patch = patch;
+
+            bool actualResult = yubiKey.HasFeature(YubiKeyFeature.YubiHsmAuthApplication);
+
+            Assert.Equal(expectedResult, actualResult);
+        }
+}
 }

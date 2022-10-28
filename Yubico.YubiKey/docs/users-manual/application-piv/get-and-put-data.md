@@ -16,7 +16,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# PIV Get and Put Data
+# PIV GET and PUT DATA
 
 There is a PIV command called [GET DATA](commands.md#get-data). It is a general
 purpose command that takes in a "tag" indicating what data to get, and returns a byte

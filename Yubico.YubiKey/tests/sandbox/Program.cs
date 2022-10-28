@@ -52,6 +52,7 @@ namespace Yubico.YubiKey.TestApp
                 ["hidevents"] = (output) => new HidDeviceListenerPlugin(output),
                 ["smartcardevents"] = (output) => new SmartCardDeviceListenerPlugin(output),
                 ["feature"] = (output) => new YubiKeyFeaturePlugin(output),
+                ["david"] = (output) => new DavidPlugin(output),
                 ["oath"] = (output) => new OathPlugin(output),
             };
 

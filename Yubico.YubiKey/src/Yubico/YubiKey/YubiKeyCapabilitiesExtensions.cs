@@ -43,7 +43,8 @@ namespace Yubico.YubiKey
                 deviceInfoCapabilities |=
                     YubiKeyCapabilities.Piv
                     | YubiKeyCapabilities.Oath
-                    | YubiKeyCapabilities.OpenPgp;
+                    | YubiKeyCapabilities.OpenPgp
+                    | YubiKeyCapabilities.YubiHsmAuth;
             }
 
             return deviceInfoCapabilities;

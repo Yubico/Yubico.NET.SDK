@@ -12,61 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Iso7816;
-using System.Diagnostics;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
-    internal class Fido2Response : YubiKeyResponse
+    public class Fido2Response : YubiKeyResponse
     {
+        private const short CtapStatusMask = 0xFF;
+
+        /// <summary>
+        /// The CTAP status code.
+        /// </summary>
+        public CtapStatus CtapStatus { get; private set; }
+
         public Fido2Response(ResponseApdu responseApdu) : base(responseApdu)
         {
-
+            CtapStatus = (CtapStatus)(StatusWord & CtapStatusMask);
         }
 
-        public virtual new ResponseStatus Status =>
-            StatusWord switch
-            {
-                _ => _Status
-            };
-
-        public virtual void ThrowIfFailed()
+        /// <summary>
+        /// Overridden to modify the messages associated with certain
+        /// status words. The messages match the status words' meanings
+        /// as described in the FIDO2 specifications.
+        /// </summary>
+        protected override ResponseStatusPair StatusCodeMap => CtapStatus switch
         {
-            if (ResponseApdu.Data.IsEmpty)
-            {
-                throw new MalformedYubiKeyResponseException(ExceptionMessages.Fido2ResponseMissing);
-            }
+            CtapStatus.NotAllowed => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2NotAllowed),
+            CtapStatus.PinNotSet => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinNotSet),
+            CtapStatus.PinInvalid => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.Fido2PinNotVerified),
+            CtapStatus.PinBlocked => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinBlocked),
+            CtapStatus.ActionTimeout => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2Timeout),
 
-            if (ResponseApdu.Data.Span[0] != (int)Fido2Status.Success)
-            {
-                throw new BadFido2StatusException(ResponseApdu.Data.Span[0]);
-            }
-
-            switch (StatusWord)
-            {
-                default:
-                    _ThrowIfFailed();
-                    break;
-            }
-        }
-
-        private ResponseStatus _Status => StatusWord switch
-        {
-            SWConstants.Success => ResponseStatus.Success,
-            _ => ResponseStatus.Failed
+            _ => base.StatusCodeMap,
         };
-
-        private void _ThrowIfFailed()
-        {
-            switch (StatusWord)
-            {
-                case SWConstants.Success:
-                    Debug.Assert(Status == ResponseStatus.Success);
-                    return;
-                default:
-                    throw new Exception();
-            }
-        }
     }
 }

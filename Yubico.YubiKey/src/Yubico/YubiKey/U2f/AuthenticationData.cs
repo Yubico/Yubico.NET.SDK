@@ -15,8 +15,8 @@
 using System;
 using System.Buffers.Binary;
 using System.Globalization;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKey.Cryptography;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -55,6 +55,8 @@ namespace Yubico.YubiKey.U2f
         private const int SignatureOffset = ClientDataOffset + ClientDataHashLength;
         private const int PayloadLength = AppIdHashLength + ClientDataHashLength + CounterLength + MaxBerSignatureLength + 1;
 
+        private readonly Logger _log = Log.GetLogger();
+
         /// <summary>
         /// If the user's presence was verified in the authentication operation,
         /// this will be <c>true</c>. Otherwise it will be <c>false</c>.
@@ -74,6 +76,7 @@ namespace Yubico.YubiKey.U2f
         public AuthenticationData(ReadOnlyMemory<byte> encodedResponse)
             : base(PayloadLength, AppIdOffset, ClientDataOffset, SignatureOffset)
         {
+            _log.LogInformation("Create a new instance of U2F AuthenticationData by decoding.");
             if ((encodedResponse.Length < MinEncodedLength)
                 || ((encodedResponse.Span[MsgUserPresenceOffset] & ~UserPresenceMask) != 0))
             {
@@ -126,16 +129,10 @@ namespace Yubico.YubiKey.U2f
         public bool VerifySignature(
             ReadOnlyMemory<byte> userPublicKey, ReadOnlyMemory<byte> applicationId, ReadOnlyMemory<byte> clientDataHash)
         {
-            var eccCurve = ECCurve.CreateFromValue("1.2.840.10045.3.1.7");
-            var eccParams = new ECParameters
-            {
-                Curve = (ECCurve)eccCurve,
-            };
-            eccParams.Q.X = userPublicKey.Slice(1, CoordinateLength).ToArray();
-            eccParams.Q.Y = userPublicKey.Slice(1 + CoordinateLength, CoordinateLength).ToArray();
-            using var ecdsaObject = ECDsa.Create(eccParams);
+            _log.LogInformation("Verify a U2F AuthenticationData signature.");
 
-            return VerifySignature(ecdsaObject, applicationId, clientDataHash);
+            using var verifier = new EcdsaVerify(userPublicKey);
+            return VerifySignature(verifier, applicationId, clientDataHash);
         }
     }
 }

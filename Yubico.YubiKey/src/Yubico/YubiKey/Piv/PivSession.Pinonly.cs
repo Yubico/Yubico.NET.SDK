@@ -599,7 +599,7 @@ namespace Yubico.YubiKey.Piv
         /// <code language="csharp">
         ///   PivAlgorithm mgmtKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey) ?
         ///       PivAlgorithm.Aes128 : PivAlgorithm.TripleDes;
-        ///   pivSession.SetYubiKeyPivPinOnly(PivPinOnlyMode.PinProtected, mgmtKeyAlgorithm);
+        ///   pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected, mgmtKeyAlgorithm);
         /// </code>
         /// If the algorithm is not supported by the YubiKey, this method will
         /// throw an exception. It will not change the YubiKey, it will not set

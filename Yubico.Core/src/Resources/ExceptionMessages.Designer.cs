@@ -124,6 +124,24 @@ namespace Yubico.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Computation of the ECDH derived data failed..
+        /// </summary>
+        internal static string EcdhComputationFailed {
+            get {
+                return ResourceManager.GetString("EcdhComputationFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Generation of ECDH key failed..
+        /// </summary>
+        internal static string EcdhKeygenFailed {
+            get {
+                return ResourceManager.GetString("EcdhKeygenFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The output span is not sufficient to contain the encoded output..
         /// </summary>
         internal static string EncodingOverflow {

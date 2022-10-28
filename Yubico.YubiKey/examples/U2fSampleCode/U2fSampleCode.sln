@@ -1,0 +1,44 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+# Copyright 2021 Yubico AB
+# 
+# Licensed under the Apache License, Version 2.0 (the "License").
+# You may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+VisualStudioVersion = 16.0.32510.428
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "U2fSampleCode", "U2fSampleCode.csproj", "{1931206D-ED53-4147-8971-BAC3D4ADE5E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedSampleCode", "..\SharedSampleCode\SharedSampleCode.csproj", "{F4732FD7-E2E8-4A84-BDBE-4D45B2C4AFCE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1931206D-ED53-4147-8971-BAC3D4ADE5E7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1931206D-ED53-4147-8971-BAC3D4ADE5E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1931206D-ED53-4147-8971-BAC3D4ADE5E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1931206D-ED53-4147-8971-BAC3D4ADE5E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F4732FD7-E2E8-4A84-BDBE-4D45B2C4AFCE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F4732FD7-E2E8-4A84-BDBE-4D45B2C4AFCE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F4732FD7-E2E8-4A84-BDBE-4D45B2C4AFCE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F4732FD7-E2E8-4A84-BDBE-4D45B2C4AFCE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {17FF2BB8-6C49-4589-B4AC-1E11226F823B}
+	EndGlobalSection
+EndGlobal

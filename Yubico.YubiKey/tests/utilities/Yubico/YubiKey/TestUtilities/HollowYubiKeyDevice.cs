@@ -34,6 +34,8 @@ namespace Yubico.YubiKey.TestUtilities
         public bool HasHidFido { get; }
         public bool HasHidKeyboard { get; }
 
+        public Transport AvailableTransports => Transport.All;
+
         #region IYubiKeyDeviceInfo
         /// <inheritdoc />
         public YubiKeyCapabilities AvailableUsbCapabilities { get; set; }

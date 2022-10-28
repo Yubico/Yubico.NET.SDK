@@ -24,6 +24,7 @@ using System.Threading.Tasks;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.U2f.Commands;
 using Yubico.Core.Iso7816;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -75,6 +76,7 @@ namespace Yubico.YubiKey.U2f
     {
         private const double MaxTimeoutSeconds = 30.0;
 
+        private readonly Logger _log = Log.GetLogger();
         private bool _disposed;
 
         /// <summary>
@@ -143,7 +145,7 @@ namespace Yubico.YubiKey.U2f
         /// </para>
         /// <para>
         /// The SDK will call the <c>KeyCollector</c> with a <c>Request</c> of <c>Release</c> when the process
-        /// completes. In this case, the <c>KeyCollector</c> MUST NOT thow an exception. The <c>Release</c> is called
+        /// completes. In this case, the <c>KeyCollector</c> MUST NOT throw an exception. The <c>Release</c> is called
         /// from inside a <c>finally</c> block, and it is best practice not to throw exceptions in this context.
         /// </para>
         /// </remarks>
@@ -177,6 +179,7 @@ namespace Yubico.YubiKey.U2f
         /// </exception>
         public U2fSession(IYubiKeyDevice yubiKey)
         {
+            _log.LogInformation("Create a new instance of U2fSession.");
             if (yubiKey is null)
             {
                 throw new ArgumentNullException(nameof(yubiKey));
@@ -296,6 +299,7 @@ namespace Yubico.YubiKey.U2f
             ReadOnlyMemory<byte> clientDataHash,
             TimeSpan timeout)
         {
+            _log.LogInformation("Register a new U2F credential.");
             RegisterResponse response = CommonRegister(applicationId, clientDataHash, timeout, true);
 
             // If everything worked, this will return the correct result. If
@@ -404,6 +408,7 @@ namespace Yubico.YubiKey.U2f
             TimeSpan timeout,
             [MaybeNullWhen(returnValue: false)] out RegistrationData registrationData)
         {
+            _log.LogInformation("Try to register a new U2F credential.");
             RegisterResponse response = CommonRegister(applicationId, clientDataHash, timeout, false);
 
             if (response.Status == ResponseStatus.Success)
@@ -550,6 +555,7 @@ namespace Yubico.YubiKey.U2f
             ReadOnlyMemory<byte> keyHandle
             )
         {
+            _log.LogInformation("Verify a U2F key handle.");
             var command = new AuthenticateCommand(U2fAuthenticationType.CheckOnly, applicationId, clientDataHash, keyHandle);
             AuthenticateResponse response = Connection.SendCommand(command);
 
@@ -670,6 +676,7 @@ namespace Yubico.YubiKey.U2f
             TimeSpan timeout,
             bool requireProofOfPresence = true)
         {
+            _log.LogInformation("Authenticate a U2F credential.");
             AuthenticateResponse response = CommonAuthenticate(
                 applicationId, clientDataHash, keyHandle, timeout, requireProofOfPresence);
 
@@ -743,6 +750,7 @@ namespace Yubico.YubiKey.U2f
             [MaybeNullWhen(returnValue: false)] out AuthenticationData authenticationData,
             bool requireProofOfPresence = true)
         {
+            _log.LogInformation("Try to authenticate a U2F credential.");
             AuthenticateResponse response = CommonAuthenticate(
                 applicationId, clientDataHash, keyHandle, timeout, requireProofOfPresence);
 

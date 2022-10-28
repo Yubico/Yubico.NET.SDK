@@ -16,7 +16,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# APDU
+# APDUs
 
 An Application Protocol Data Unit (APDU) is simply a byte array that contains
 information following the ISO 7816 standard. There are two kinds of APDU:
@@ -182,9 +182,9 @@ For example, suppose the application wanted a copy of the attestation certificat
 process would look something like this.
 
 ```C
-command APDU:  00 cb 3f ff 05 5c 03 5f ff 01 
+command APDU:  00 cb 3f ff 05 5c 03 5f ff 01
 response APDU: 53 82 02 f5 ... 61 ff
-command APDU:  00 c0 00 00 
+command APDU:  00 c0 00 00
 response APDU: a9 e9 c1 5b ... 61 f9
 command APDU:  00 c0 00 00
 response APDU: 28 42 e5 8d ... 90 00

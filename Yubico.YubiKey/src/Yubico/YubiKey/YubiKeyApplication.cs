@@ -27,7 +27,8 @@ namespace Yubico.YubiKey
         OpenPgp = 6,
         Piv = 7,
         InterIndustry = 8,
-        OtpNdef = 9
+        OtpNdef = 9,
+        YubiHsmAuth = 10,
     }
 
     internal static class YubiKeyApplicationExtensions
@@ -40,6 +41,7 @@ namespace Yubico.YubiKey
         private static readonly byte[] OpenPgpAppId = new byte[] { 0xd2, 0x76, 0x00, 0x01, 0x24, 0x01 };
         private static readonly byte[] PivAppId = new byte[] { 0xa0, 0x00, 0x00, 0x03, 0x08 };
         private static readonly byte[] OtpNdef = new byte[] { 0xd2, 0x76, 0x00, 0x00, 0x85, 0x01, 0x01 };
+        private static readonly byte[] YubiHsmAuthId = new byte[] { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x07, 0x01 };
 
 
         public static byte[] GetIso7816ApplicationId(this YubiKeyApplication application) =>
@@ -53,6 +55,7 @@ namespace Yubico.YubiKey
                 YubiKeyApplication.OpenPgp => OpenPgpAppId,
                 YubiKeyApplication.Piv => PivAppId,
                 YubiKeyApplication.OtpNdef => OtpNdef,
+                YubiKeyApplication.YubiHsmAuth => YubiHsmAuthId,
                 _ => throw new NotSupportedException(ExceptionMessages.ApplicationIdNotFound),
             };
     }

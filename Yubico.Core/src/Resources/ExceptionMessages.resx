@@ -261,4 +261,10 @@
   <data name="CmError" xml:space="preserve">
     <value>Encountered an error in the Config Manager library.</value>
   </data>
+  <data name="EcdhKeygenFailed" xml:space="preserve">
+    <value>Generation of ECDH key failed.</value>
+  </data>
+  <data name="EcdhComputationFailed" xml:space="preserve">
+    <value>Computation of the ECDH derived data failed.</value>
+  </data>
 </root>

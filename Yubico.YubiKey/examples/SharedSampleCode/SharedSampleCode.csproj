@@ -19,7 +19,7 @@ limitations under the License. -->
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Yubico.YubiKey" Version="1.3.0" />
+    <PackageReference Include="Yubico.YubiKey" Version="1.4.0" />
   </ItemGroup>
 
 </Project>

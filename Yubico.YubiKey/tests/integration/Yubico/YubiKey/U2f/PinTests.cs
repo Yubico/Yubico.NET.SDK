@@ -14,7 +14,7 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Yubico.Core.Iso7816;
 using Yubico.Core.Devices.Hid;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
@@ -100,7 +100,6 @@ namespace Yubico.YubiKey.U2f
             Assert.Equal(ResponseStatus.ConditionsNotSatisfied, setRsp.Status);
         }
 
-
         [Fact]
         public void InvalidPin_CorrectError()
         {
@@ -153,6 +152,104 @@ namespace Yubico.YubiKey.U2f
             vfyCmd = new VerifyPinCommand(wrongPin);
             vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
             Assert.Equal(ResponseStatus.Failed, vfyRsp.Status);
+
+            vfyCmd = new VerifyPinCommand(correctPin);
+            vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
+            Assert.Equal(ResponseStatus.Success, vfyRsp.Status);
+        }
+
+        // Run this test only if the PIN is indeed "123456", or the YubiKey has
+        // not had the PIN set yet.
+        // NOTE!!!!!
+        // This test will make block the YubiKey's U2F application. The only way
+        // to unblock is to reset, but once a U2F application has been reset, it
+        // is not possible to put that YubiKey back into FIPS mode.
+        [Fact]
+        public void WrongPin_ThreeTimes()
+        {
+            byte[] correctPin = new byte[] {
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36
+            };
+            byte[] wrongPin = new byte[] {
+                0x41, 0x42, 0x43, 0x44, 0x45, 0x46
+            };
+
+            bool isValid = IsYubiKeyVersion4Fips(out bool isFipsMode);
+            Assert.True(isValid);
+            if (!isFipsMode)
+            {
+                isValid = SetU2fPin(correctPin);
+                Assert.True(isValid);
+            }
+
+            var vfyCmd = new VerifyPinCommand(correctPin);
+            VerifyPinResponse vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
+            Assert.Equal(ResponseStatus.Success, vfyRsp.Status);
+
+            // Verify with the wrong PIN 3 times.
+            // The first two times, the return should be SWConstants.VerifyFail.
+            // The third time it should be
+            // SWConstants.AuthenticationMethodBlocked.
+            vfyCmd = new VerifyPinCommand(wrongPin);
+            vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
+            Assert.Equal(SWConstants.VerifyFail, vfyRsp.StatusWord);
+
+            vfyCmd = new VerifyPinCommand(wrongPin);
+            vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
+            Assert.Equal(SWConstants.VerifyFail, vfyRsp.StatusWord);
+
+            vfyCmd = new VerifyPinCommand(wrongPin);
+            vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
+            Assert.Equal(SWConstants.AuthenticationMethodBlocked, vfyRsp.StatusWord);
+
+            // At this point, the YubiKey's U2F application is blocked and the
+            // only way to unblock it is to reset.
+        }
+
+        private bool IsYubiKeyVersion4Fips(out bool isFipsMode)
+        {
+            isFipsMode = false;
+
+            if (_fidoConnection is null)
+            {
+                return false;
+            }
+
+            var cmd = new GetDeviceInfoCommand();
+            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
+            if (rsp.Status != ResponseStatus.Success)
+            {
+                return false;
+            }
+
+            YubiKeyDeviceInfo getData = rsp.GetData();
+            if ((!getData.IsFipsSeries) ||
+                (getData.FirmwareVersion >= new FirmwareVersion(5, 0, 0)) ||
+                (getData.FirmwareVersion < new FirmwareVersion(4, 0, 0)))
+            {
+                return false;
+            }
+
+            var vfyCmd = new VerifyFipsModeCommand();
+            VerifyFipsModeResponse vfyRsp = _fidoConnection.SendCommand(vfyCmd);
+            if (vfyRsp.Status != ResponseStatus.Success)
+            {
+                return false;
+            }
+
+            isFipsMode = vfyRsp.GetData();
+
+            return true;
+        }
+
+        // Set the PIN. That is, the U2F application is not in FIPS mode, so we
+        // need to set the initial PIN.
+        private bool SetU2fPin(byte[] newPin)
+        {
+            var setCmd = new SetPinCommand(ReadOnlyMemory<byte>.Empty, newPin);
+            SetPinResponse setRsp = _fidoConnection.SendCommand(setCmd);
+
+            return setRsp.Status == ResponseStatus.Success;
         }
     }
 }

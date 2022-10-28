@@ -14,9 +14,11 @@
 
 using System;
 using System.Linq;
+using System.Text;
+using System.Threading;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
-using Yubico.YubiKey.Otp;
+using Yubico.YubiKey.Fido2;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
@@ -39,23 +41,49 @@ namespace Yubico.YubiKey.TestApp.Plugins
                         })
                     .AddFilter(level => level >= LogLevel.Information));
 
-            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
+            var yubiKey = YubiKeyDevice.FindAll().First();
 
-            using (var otp = new OtpSession(yubiKey))
+            Thread.Sleep(3000);
+
+            Console.WriteLine($"YubiKey Version: {yubiKey.FirmwareVersion}");
+
+            using (var fido2 = new Fido2Session(yubiKey))
             {
-                otp.ConfigureNdef(Slot.ShortPress)
-                    .AsText("foo")
-                    .Execute();
+                fido2.KeyCollector = data =>
+                {
+                    Console.WriteLine("Touch now.");
+                    return true;
+                };
 
-                NdefDataReader ndefValue = otp.ReadNdefTag();
-                if (ndefValue.Type == NdefDataType.Text)
+                var info = fido2.GetAuthenticatorInfo();
+
+                foreach (var option in info.Options!)
                 {
-                    Console.WriteLine(ndefValue.ToText().Text);
+                    Console.WriteLine($"{option.Key} = {option.Value}");
                 }
-                else
-                {
-                    Console.WriteLine(ndefValue.ToUri());
-                }
+
+                var pin = Encoding.UTF8.GetBytes("123456");
+                _ = fido2.TrySetPin(pin);
+
+                bool success = fido2.TryVerifyPin(pin, null, null, out _, out _);
+
+                Console.WriteLine($"Verify PIN: {success}");
+
+                byte[] clientDataHash = {
+                    0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+                    0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
+                };
+
+                var mcParams = new MakeCredentialParameters(
+                    new RelyingParty("test-rp-id") { Name = "My RP" },
+                    new UserEntity(new byte[] { 0x11, 0x22, 0x33, 0x44 }) { Name = "SomeUserName", DisplayName = "User"})
+                    {
+                        ClientDataHash = clientDataHash
+                    };
+
+                var mcData = fido2.MakeCredential(mcParams);
+
+                Console.WriteLine($"Successfully made credential: {mcData.Format}");
             }
 
             return true;

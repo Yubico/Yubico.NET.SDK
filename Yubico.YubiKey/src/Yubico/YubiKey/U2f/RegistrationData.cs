@@ -14,9 +14,10 @@
 
 using System;
 using System.Globalization;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKey.Cryptography;
 using Yubico.Core.Tlv;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -65,6 +66,8 @@ namespace Yubico.YubiKey.U2f
         private const int PublicKeyOffset = KeyHandleOffset + KeyHandleLength;
         private const int SignatureOffset = PublicKeyOffset + PublicKeyLength;
         private const int PayloadLength = AppIdHashLength + ClientDataHashLength + KeyHandleLength + PublicKeyLength + MaxBerSignatureLength + 1;
+
+        private readonly Logger _log = Log.GetLogger();
 
         /// <summary>
         /// The ECDSA public key for this user credential. Each coordinate must
@@ -129,6 +132,7 @@ namespace Yubico.YubiKey.U2f
         public RegistrationData(ReadOnlyMemory<byte> encodedResponse)
             : base(PayloadLength, AppIdOffset, ClientDataOffset, SignatureOffset)
         {
+            _log.LogInformation("Create a new instance of U2F RegistrationData by decoding.");
             bool isValid = false;
             int certLength = 1;
             if (encodedResponse.Length > MinEncodedLength)
@@ -183,8 +187,10 @@ namespace Yubico.YubiKey.U2f
         /// </returns>
         public bool VerifySignature(ReadOnlyMemory<byte> applicationId, ReadOnlyMemory<byte> clientDataHash)
         {
-            using ECDsa ecdsaObject = AttestationCert.GetECDsaPublicKey();
-            return VerifySignature(ecdsaObject, applicationId, clientDataHash);
+            _log.LogInformation("Verify a U2F RegistrationData signature.");
+
+            using var verifier = new EcdsaVerify(AttestationCert);
+            return VerifySignature(verifier, applicationId, clientDataHash);
         }
     }
 }

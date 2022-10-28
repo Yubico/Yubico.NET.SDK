@@ -307,12 +307,6 @@ namespace Yubico.YubiKey.Pipelines
                 return new ResponseApdu(Array.Empty<byte>(), GetSwForCtapError((CtapStatus)responseData[0]));
             }
 
-            if (responseData[0] != 0)
-            {
-                // This should be removed prior to releasing FIDO2 in 1.5
-                throw new Exception("This is a temporary exception to monitor this assumption.");
-            }
-
             return new ResponseApdu(responseData[1..].ToArray(), SWConstants.Success);
         }
 
@@ -320,9 +314,6 @@ namespace Yubico.YubiKey.Pipelines
             ctapStatus switch
             {
                 Fido2.CtapStatus.Ok => SWConstants.Success,
-                Fido2.CtapStatus.InvalidCommand => SWConstants.CommandNotAllowed,
-                Fido2.CtapStatus.InvalidParameter => SWConstants.InvalidParameter,
-                Fido2.CtapStatus.InvalidLength => SWConstants.WrongLength,
                 _ => unchecked((short)((SW1Constants.NoPreciseDiagnosis << 8) | (byte)ctapStatus))
             };
     }

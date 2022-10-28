@@ -85,3 +85,27 @@ Accounts and Chrome, and have since resulted in a thriving ecosystem of hardware
 and service providers.
 
 Read more about FIDO U2F [here](users-manual/application-u2f/fido-u2f-overview.md).
+
+### FIDO2
+
+FIDO2 is the "second generation" of the FIDO open authentication standard. It is similar to U2F
+in that implementations allow instant secure access to web-based services, with no drivers or
+client software needed. FIDO2 was created by the [FIDO Alliance](https://fidoalliance.org/) -- a
+consortium of dozens of tech and other companies as well as government organizations from around the
+world -- along with the [W3C](https://www.w3.org) (World Wide Web Consortium). The technical
+specifications for FIDO2 were launched in 2018. Today, many [browsers and mobile platforms support
+FIDO2](https://support.yubico.com/hc/en-us/articles/360016615020-Operating-system-and-web-browser-support-for-FIDO2-and-U2F).
+
+Read more about FIDO2 [here](xref:Fido2Overview).
+
+### YubiHSM Auth
+
+YubiHSM Auth is a YubiKey CCID application that stores the long-lived credentials used to establish
+secure sessions with a YubiHSM 2. The secure session protocol is based on Secure Channel Protocol 3
+(SCP03). YubiHSM Auth is supported by YubiKey firmware version 5.4.3.
+
+YubiHSM Auth uses hardware to protect these long-lived credentials. In addition to providing robust
+security for the YubiHSM Auth application itself, this hardware protection subsequently increases the
+security of the default password-based solution for YubiHSM 2's authentication.
+
+Read more about YubiHSM Auth [here.](xref:YubiHsmAuthOverview)

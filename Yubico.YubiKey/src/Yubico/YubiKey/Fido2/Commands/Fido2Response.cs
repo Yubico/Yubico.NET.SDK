@@ -12,29 +12,38 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Iso7816;
-using System.Diagnostics;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
     public class Fido2Response : YubiKeyResponse
     {
+        private const short CtapStatusMask = 0xFF;
+
+        /// <summary>
+        /// The CTAP status code.
+        /// </summary>
+        public CtapStatus CtapStatus { get; private set; }
+
         public Fido2Response(ResponseApdu responseApdu) : base(responseApdu)
         {
-
+            CtapStatus = (CtapStatus)(StatusWord & CtapStatusMask);
         }
 
-        public virtual new ResponseStatus Status =>
-            StatusWord switch
-            {
-                _ => _Status
-            };
-
-        private ResponseStatus _Status => StatusWord switch
+        /// <summary>
+        /// Overridden to modify the messages associated with certain
+        /// status words. The messages match the status words' meanings
+        /// as described in the FIDO2 specifications.
+        /// </summary>
+        protected override ResponseStatusPair StatusCodeMap => CtapStatus switch
         {
-            SWConstants.Success => ResponseStatus.Success,
-            _ => ResponseStatus.Failed
+            CtapStatus.NotAllowed => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2NotAllowed),
+            CtapStatus.PinNotSet => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinNotSet),
+            CtapStatus.PinInvalid => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.Fido2PinNotVerified),
+            CtapStatus.PinBlocked => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinBlocked),
+            CtapStatus.ActionTimeout => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2Timeout),
+
+            _ => base.StatusCodeMap,
         };
     }
 }

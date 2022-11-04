@@ -3,7 +3,7 @@ services:
     entrypoint:
     - sleep
     - infinity
-    image: docker/kasmweb/core-ubuntu-bionic:1.11.0
+    image: kasmweb/core-ubuntu-bionic:1.11.0
     init: true
     volumes:
     - type: bind

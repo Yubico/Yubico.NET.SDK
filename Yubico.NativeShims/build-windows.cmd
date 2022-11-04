@@ -1,3 +1,11 @@
+:: Update to latest vcpkg baseline
+pushd %VCPKG_INSTALLATION_ROOT%
+git checkout master
+git restore .
+git pull
+vcpkg x-update-baseline
+popd
+
 :: 32-bit builds
 cmake -S . -B build32 -A Win32 -DCMAKE_TOOLCHAIN_FILE=%VCPKG_INSTALLATION_ROOT%/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=x86-windows-static
 cmake --build build32 --config Release

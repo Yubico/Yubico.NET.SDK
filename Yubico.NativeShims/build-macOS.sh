@@ -1,5 +1,12 @@
 rm -rf build64 buildarm osx-arm64 osx-x64
 
+pushd $VCPKG_INSTALLATION_ROOT
+git checkout master
+git restore .
+git pull
+vcpkg x-update-baseline
+popd
+
 \cmake \
     -S . \
     -B ./build64 \

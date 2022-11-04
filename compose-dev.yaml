@@ -3,7 +3,7 @@ services:
     entrypoint:
     - sleep
     - infinity
-    image: ubuntu:latest
+    image: docker/dev-environments-default:stable-1
     init: true
     volumes:
     - type: bind

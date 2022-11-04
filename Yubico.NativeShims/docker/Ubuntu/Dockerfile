@@ -1,6 +1,6 @@
 # use modified Dockerfile from Yubico.NativeShims/docker/Ubuntu/Dockerfile
 # just use latest
-FROM ubuntu:latest AS env
+FROM ubuntu:bionic AS env
 
 # These arguments are passed in from the console or by Docker-CLI itself. User/Group ID
 # is used to run the shell as the host's user identity. Artifact_dir should be set to
@@ -45,7 +45,7 @@ RUN apt-get update -qq \
 # from Kitware (makers of CMake).
 RUN apt-get update -qq \
     && wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add - \
-    && add-apt-repository 'deb https://apt.kitware.com/ubuntu/ latest main' \
+    && add-apt-repository 'deb https://apt.kitware.com/ubuntu/ bionic main' \
     && apt-get update -qq \
     && apt-get install cmake -yq \
     && cmake -version
@@ -95,5 +95,4 @@ FROM scratch AS build_install
 COPY --from=build /home/build/artifacts/$ARTIFACT_DIR/ .
 
 
-# run build script
-RUN sh /home/Yubico.NativeShims/build-ubuntu.sh
+

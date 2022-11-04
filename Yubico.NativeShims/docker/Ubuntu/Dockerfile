@@ -17,6 +17,16 @@ ENV PATH=/usr/local/bin:$PATH
 # Add the host user and group to the image.
 RUN groupadd -f -g ${GROUP_ID} local && useradd -o -u ${USER_ID} -g ${GROUP_ID} -s /bin/sh local
 
+
+# add script for docker install
+RUN apt-get update
+RUN apt-get install curl
+RUN curl -sSL https://get.docker.com/ | sh
+#To run Docker as a non-privileged user, consider setting up the
+#Docker daemon in rootless mode for your user:
+#RUN dockerd-rootless-setuptool.sh install
+
+
 # Install build tools
 RUN apt-get update -qq \
 && DEBIAN_FRONTEND=noninteractive apt-get install -yq \
@@ -84,3 +94,7 @@ RUN mkdir -p /home/build/artifacts/$ARTIFACT_DIR \
 # specifies what we do with this result.
 FROM scratch AS build_install
 COPY --from=build /home/build/artifacts/$ARTIFACT_DIR/ .
+
+
+# run build script
+RUN sh /home/Yubico.NativeShims/build-ubuntu.sh

@@ -1,6 +1,5 @@
-# We use Bionic as the basis for our image. Bionic is the last Ubuntu long-term support
-# release that is both still supported and still supports i386 processors. Once Bionic
-# leaves support, we can consider upgrading to the next LTS release.
+# use modified Dockerfile from Yubico.NativeShims/docker/Ubuntu/Dockerfile
+# just use latest
 FROM ubuntu:latest AS env
 
 # These arguments are passed in from the console or by Docker-CLI itself. User/Group ID

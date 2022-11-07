@@ -11,6 +11,6 @@ services:
       target: /var/run/docker.sock
 
 volumes:
-  volume-kindtek-yubi-net-sdk 
+  - volume-kindtek-yubi-net-sdk
 
 

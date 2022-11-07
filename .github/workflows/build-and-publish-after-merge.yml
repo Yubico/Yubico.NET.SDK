@@ -162,14 +162,13 @@ jobs:
       # Push our docker image to GCP
           # gcloud components install beta --quiet
           # gcloud beta auth configure-docker ${IMAGE_REGISTRY_URL} --project ${IMAGE_REGISTRY_PROJECT}
-      - name: Push Docker image
-          #       gcloud components install beta --quiet
-          # gcloud beta auth configure-docker ${IMAGE_REGISTRY_URL} --project ${IMAGE_REGISTRY_PROJECT}
-        run: |
-          echo "image, url: ${IMAGE_NAME}:${{ github.sha }}" "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
-          docker tag "${IMAGE_NAME}:${{ github.sha }}" "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
-          docker push "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
-          echo "New image tag: ${{ github.sha }}"
+      # - name: Push Docker image
+      #   run: |
+      #     gcloud components install beta --quiet
+      #     gcloud beta auth configure-docker ${IMAGE_REGISTRY_URL} --project ${IMAGE_REGISTRY_PROJECT}
+      #     docker tag "${IMAGE_NAME}:${{ github.sha }}" "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
+      #     docker push "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
+      #     echo "New image tag: ${{ github.sha }}"
 
   publish-internal:
     name: Publish to internal NuGet
@@ -186,7 +185,7 @@ jobs:
           $polyfills = (Get-ChildItem -Recurse Yubico.DotnetPolyfills/*.nupkg)[0].FullName
           $core = (Get-ChildItem -Recurse Yubico.Core/*.nupkg)[0].FullName
           $yubikey = (Get-ChildItem -Recurse Yubico.YubiKey/*.nupkg)[0].FullName
-          dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+          dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/kindtek/index.json"
           dotnet nuget push $polyfills --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
           dotnet nuget push $core --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}
           dotnet nuget push $yubikey --source "github" --api-key ${{ secrets.GITHUB_TOKEN }}

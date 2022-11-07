@@ -27,9 +27,6 @@ RUN addgroup -g ${GID} -S ynginx \
 COPY --chown=0:0 Yubico.YubiKey/docs/_site /usr/share/nginx/www/
 COPY --chown=0:0 nginx.conf /etc/nginx/nginx.conf
 
-VOLUME ["/volume-kindtek-yubi-net-sdk "]
-
-WORKDIR /
 
 USER ${UID}:${GID}
 

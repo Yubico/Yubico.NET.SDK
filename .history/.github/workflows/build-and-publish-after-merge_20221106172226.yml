@@ -161,10 +161,9 @@ jobs:
 
       # Push our docker image to GCP
       - name: Push Docker image
-          #       gcloud components install beta --quiet
-          # gcloud beta auth configure-docker ${IMAGE_REGISTRY_URL} --project ${IMAGE_REGISTRY_PROJECT}
         run: |
-
+           gcloud components install beta --quiet
+          # gcloud beta auth configure-docker ${IMAGE_REGISTRY_URL} --project ${IMAGE_REGISTRY_PROJECT}
           docker tag "${IMAGE_NAME}:${{ github.sha }}" "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
           docker push "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
           echo "New image tag: ${{ github.sha }}"

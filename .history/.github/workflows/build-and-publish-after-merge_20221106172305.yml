@@ -160,9 +160,9 @@ jobs:
           service_account_key: ${{ secrets.IMAGE_REPO_GCP_SA_KEY }}
 
       # Push our docker image to GCP
-      - name: Push Docker image
-          #       gcloud components install beta --quiet
+          # gcloud components install beta --quiet
           # gcloud beta auth configure-docker ${IMAGE_REGISTRY_URL} --project ${IMAGE_REGISTRY_PROJECT}
+      - name: Push Docker image
         run: |
 
           docker tag "${IMAGE_NAME}:${{ github.sha }}" "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"

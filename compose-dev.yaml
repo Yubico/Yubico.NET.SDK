@@ -7,6 +7,10 @@ services:
     init: true
     volumes:
     - type: volume
-      source: /var/run/docker.sock
+      source: volume-kindtek-yubi-net-sdk 
       target: /var/run/docker.sock
+
+volumes:
+  volume-kindtek-yubi-net-sdk 
+
 

@@ -551,3 +551,6 @@ cython_debug/
 # XML Documentation Output
 /Yubico.Core/src/Yubico.Core.xml
 /Yubico.YubiKey/src/Yubico.YubiKey.xml
+
+# other
+.history

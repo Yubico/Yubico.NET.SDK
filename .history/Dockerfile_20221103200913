@@ -1,6 +1,6 @@
 # use modified Dockerfile from Yubico.NativeShims/docker/Ubuntu/Dockerfile
 # just use latest
-FROM ubuntu:bionic AS env
+FROM ubuntu:latest AS env
 
 # These arguments are passed in from the console or by Docker-CLI itself. User/Group ID
 # is used to run the shell as the host's user identity. Artifact_dir should be set to
@@ -17,13 +17,13 @@ ENV PATH=/usr/local/bin:$PATH
 RUN groupadd -f -g ${GROUP_ID} local && useradd -o -u ${USER_ID} -g ${GROUP_ID} -s /bin/sh local
 
 
-# # add script for docker install
-# RUN apt-get update
-# RUN apt-get install curl
-# RUN curl -sSL https://get.docker.com/ | sh
-# #To run Docker as a non-privileged user, consider setting up the
-# #Docker daemon in rootless mode for your user:
-# #RUN dockerd-rootless-setuptool.sh install
+# add script for docker install
+RUN apt-get update
+RUN apt-get install curl
+RUN curl -sSL https://get.docker.com/ | sh
+#To run Docker as a non-privileged user, consider setting up the
+#Docker daemon in rootless mode for your user:
+#RUN dockerd-rootless-setuptool.sh install
 
 
 # Install build tools
@@ -45,7 +45,7 @@ RUN apt-get update -qq \
 # from Kitware (makers of CMake).
 RUN apt-get update -qq \
     && wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add - \
-    && add-apt-repository 'deb https://apt.kitware.com/ubuntu/ bionic main' \
+    && add-apt-repository 'deb https://apt.kitware.com/ubuntu/ latest main' \
     && apt-get update -qq \
     && apt-get install cmake -yq \
     && cmake -version
@@ -93,6 +93,10 @@ RUN mkdir -p /home/build/artifacts/$ARTIFACT_DIR \
 # specifies what we do with this result.
 FROM scratch AS build_install
 COPY --from=build /home/build/artifacts/$ARTIFACT_DIR/ .
+<<<<<<< HEAD
 
 
-
+# run build script
+RUN sh /home/Yubico.NativeShims/build-ubuntu.sh
+=======
+>>>>>>> d413c4da157a032241343b3f61837651e63519c9

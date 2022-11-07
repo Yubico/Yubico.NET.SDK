@@ -46,7 +46,11 @@ namespace Yubico.YubiKey.Fido2
             var connection = new FidoConnection(deviceToUse);
             Assert.NotNull(connection);
 
-            var protocol = new PinUvAuthProtocolTwo();
+            var resetCmd = new ResetCommand();
+            ResetResponse resetRsp = connection.SendCommand(resetCmd);
+            Assert.Equal(ResponseStatus.ConditionsNotSatisfied, resetRsp.Status);
+
+            var protocol = new PinUvAuthProtocolOne();
 
             var cmd = new GetKeyAgreementCommand(protocol.Protocol);
             GetKeyAgreementResponse rsp = connection.SendCommand(cmd);

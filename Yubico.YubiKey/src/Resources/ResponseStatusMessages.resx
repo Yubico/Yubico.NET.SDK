@@ -291,6 +291,12 @@
   <data name="Fido2Timeout" xml:space="preserve">
     <value>The request was rejected because the FIDO2 application timed out.</value>
   </data>
+  <data name="Fido2ResetProcess" xml:space="preserve">
+    <value>The FIDO2 reset command must be sent within 10 seconds of the YubiKey being removed and reinserted.</value>
+  </data>
+  <data name="Fido2ResetTimeout" xml:space="preserve">
+    <value>The FIDO2 reset command could not complete because the YubiKey was not touched within the time limit.</value>
+  </data>
   <data name="U2fPinNotVerified" xml:space="preserve">
     <value>The request was rejected because the PIN was not verified.</value>
   </data>

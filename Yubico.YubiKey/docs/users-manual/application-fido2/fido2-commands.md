@@ -35,6 +35,7 @@ what information is needed from the caller for that command.
 * [Make credential](#make-credential)
 * [Get Assertion](#get-assertion)
 * [Get Next Assertion](#get-next-assertion)
+* [Reset](#reset)
 ___
 ## Get version
 
@@ -392,4 +393,35 @@ The credential, along with other information.
 ### APDU
 
 [Technical APDU Details](apdu/get-next-assertion.md)
+___
+## Reset
+
+Reset the FIDO2 application on a YubiKey. This will delete all existing FIDO2 keys and
+credentials, and remove the PIN.
+
+It is not sufficient to simply execute this command in order to reset, it must be done
+within a time limit of inserting a YubiKey and must be accompanied by a proof of user
+presence (touch).
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[ResetCommand](xref:Yubico.YubiKey.Fido2.Commands.ResetCommand)
+
+[ResetResponse](xref:Yubico.YubiKey.Fido2.Commands.ResetResponse)
+
+### Input
+
+None.
+
+### Output
+
+None
+
+### APDU
+
+[Technical APDU Details](apdu/reset.md)
 ___

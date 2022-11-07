@@ -493,6 +493,24 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The FIDO2 reset command must be sent within 10 seconds of the YubiKey being removed and reinserted..
+        /// </summary>
+        internal static string Fido2ResetProcess {
+            get {
+                return ResourceManager.GetString("Fido2ResetProcess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The FIDO2 reset command could not complete because the YubiKey was not touched within the time limit..
+        /// </summary>
+        internal static string Fido2ResetTimeout {
+            get {
+                return ResourceManager.GetString("Fido2ResetTimeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The request was rejected because the FIDO2 application timed out..
         /// </summary>
         internal static string Fido2Timeout {

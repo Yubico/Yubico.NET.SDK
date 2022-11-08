@@ -271,10 +271,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation-system", "doc
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fido2", "Fido2", "{8CE9438B-FEE8-47BF-B2DB-B5BA7A896774}"
 	ProjectSection(SolutionItems) = preProject
-		Yubico.YubiKey\docs\users-manual\application-fido2\pin-uv-auth-protocols.md = Yubico.YubiKey\docs\users-manual\application-fido2\pin-uv-auth-protocols.md
 		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-commands.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-commands.md
 		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-overview.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-overview.md
 		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-pin.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-pin.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\pin-uv-auth-protocols.md = Yubico.YubiKey\docs\users-manual\application-fido2\pin-uv-auth-protocols.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiHSM Auth", "YubiHSM Auth", "{4176F4C2-3A9E-4C89-96B6-48CF41DD98C2}"
@@ -294,6 +294,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Commands", "Commands", "{9F
 		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\list-credentials.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\list-credentials.md
 		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\reset-application.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\reset-application.md
 		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\yubihsm-auth-commands.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\commands\yubihsm-auth-commands.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Objects", "Objects", "{1908F042-CEBD-456F-BBEB-B1A7DE0372B1}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\objects\credential.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\objects\credential.md
 	EndProjectSection
 EndProject
 Global
@@ -394,6 +399,7 @@ Global
 		{8CE9438B-FEE8-47BF-B2DB-B5BA7A896774} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
 		{4176F4C2-3A9E-4C89-96B6-48CF41DD98C2} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
 		{9FED027A-6330-407B-99F5-2DDC54B52213} = {4176F4C2-3A9E-4C89-96B6-48CF41DD98C2}
+		{1908F042-CEBD-456F-BBEB-B1A7DE0372B1} = {4176F4C2-3A9E-4C89-96B6-48CF41DD98C2}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DF71DF2-3B6F-4855-8BC4-35B9714F3B0F}

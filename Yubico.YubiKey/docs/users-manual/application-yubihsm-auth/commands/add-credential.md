@@ -15,7 +15,7 @@ limitations under the License. -->
 
 # Add credential
 
-Store long-lived keys in the YubiHSM Auth application by creating a new credential.
+Store long-lived keys in the YubiHSM Auth application by creating a new [credential](xref:YubiHsmAuthCredential).
 
 ## Available
 

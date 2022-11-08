@@ -18,26 +18,17 @@ limitations under the License. -->
 
 # YubiHSM Auth overview
 
-YubiHSM Auth is a YubiKey CCID application that stores the long-lived credentials used to establish secure sessions with a YubiHSM 2. The secure session protocol is based on Secure Channel Protocol 3 (SCP03). YubiHSM Auth is supported by YubiKey firmware version 5.4.3.
+YubiHSM Auth is a YubiKey CCID application that stores the long-lived [credentials](xref:YubiHsmAuthCredential) used to establish secure sessions with a YubiHSM 2. The secure session protocol is based on Secure Channel Protocol 3 (SCP03). YubiHSM Auth is supported by YubiKey firmware version 5.4.3.
 
-YubiHSM Auth uses hardware to protect these long-lived credentials. In addition to providing robust security for the YubiHSM Auth application itself, this hardware protection subsequently increases the security of the default password-based solution for YubiHSM 2's authentication.
+YubiHSM Auth uses hardware to protect these credentials. In addition to providing robust security for the YubiHSM Auth application itself, this hardware protection subsequently increases the security of the default password-based solution for YubiHSM 2's authentication.
 
-## Credentials and PIN codes
+## Credential
 
-Each YubiHSM Auth credential is comprised of two long-lived AES-128 keys, which are used to derive session-specific keys. The YubiHSM Auth application can store up to 32 YubiHSM Auth credentials in the YubiKey.
+Each credential contains a cryptographic key set which is used to establish secure sessions with a YubiHSM 2. Adding or deleting a credential requires a 16-byte management key to be supplied. Once a credential is added, it cannot be edited.
 
-The two long-lived keys stored in each YubiHSM Auth credential are:
+Each credential has a 16-byte password which is required when calculating session keys. There is a limit of eight retries, after which the credential will be permanently deleted. Optionally, the credential may be configured to also require touch when calculating session keys. This proof of user presence provides an additional layer of security.
 
-- ENC: an AES-128 key used for deriving keys for command and response encryption, as specified in SCP03.
-- MAC: an AES-128 key used for deriving keys for command and response authentication, as specified in SCP03.
-
-These keys cannot be accessed directly, but you can retrieve session-specific keys (which are calculated using the ENC and MAC keys). The session-specific keys can then used to set up a secure connection with a YubiHSM 2 device. See the section on [YubiHSM 2 secure channel](#yubihsm-2-secure-channel) for more information.
-
-Each YubiHSM Auth credential is protected by a 16-byte credential password. This password must be provided to the YubiKey for each YubiHSM Auth operation that uses the long-lived keys (such as calculating session-specific keys).
-
-Storing or deleting YubiHSM Auth credentials requires a separate 16-byte management key.
-
-The credential password and management key each have a limit of eight retries and can optionally require verification of user presence (touch).
+For more information, see the [credential overview](xref:YubiHsmAuthCredential).
 
 ## YubiHSM 2 secure channel
 
@@ -46,7 +37,7 @@ In order to establish an encrypted and authenticated session with a YubiHSM 2, t
 - The YubiHSM 2 secure channel protocol does not use APDUs, so the commands and possible options do not match the complete SCP03 specification.
 - SCP03 uses a set of three long-lived AES keys, while the YubiHSM 2 secure channel uses a set of two long-lived AES keys.
 
-The two long-lived keys used in the YubiHSM 2 authentication protocol include an ENC key and a MAC key, as described [above](#credentials-and-pin-codes). In order to successfully create a secure channel, the long-lived keys in the YubiHSM Auth credential and YubiHSM 2 device must be identical.
+The two long-lived keys used in the YubiHSM 2 authentication protocol include an ENC key and a MAC key. In order to successfully create a secure channel, the long-lived keys in the YubiHSM Auth credential and YubiHSM 2 device must be identical.
 
 Those long-lived key sets are used by the YubiHSM Auth application to derive a set of three session-specific AES-128 keys using the challenge-response protocol as defined in SCP03:
 

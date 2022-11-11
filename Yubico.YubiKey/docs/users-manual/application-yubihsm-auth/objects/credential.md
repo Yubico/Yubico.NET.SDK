@@ -28,7 +28,7 @@ Each credential contains four major properties. The [cryptographic key set](#cry
 
 ### Cryptographic key set
 
-The YubiHSM 2 uses a [secure channel protocol](xref:YubiHsmAuthOverview#yubihsm-2-secure-channel) based on symmetric keys. This means that both parties (YubiKey and YubiHSM 2) must have identical copies of the key set in order to create a secure session.
+The YubiHSM 2 uses a [secure channel protocol](xref:YubiHsmAuthInteractingYubiHsm2#yubihsm-2-secure-channel) based on symmetric keys. This means that both parties (YubiKey and YubiHSM 2) must have identical copies of the key set in order to create a secure session.
 
 The key set is a pair of AES-128 keys (each 128 bits in length):
 

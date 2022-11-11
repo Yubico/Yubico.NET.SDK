@@ -315,6 +315,8 @@
     href: application-yubihsm-auth/objects/credential.md
   - name: YubiHSM Auth session APIs
     href: application-yubihsm-auth/yubihsm-auth-session.md
+  - name: Interacting with a YubiHSM 2
+    href: application-yubihsm-auth/interacting-yubihsm-2.md
 
 - name: "Supporting routines"
   homepage: support/support-overview.md

@@ -22,6 +22,8 @@ The high level YubiHSM Auth session APIs provide a simpler way to work with the 
 
 For more information on the YubiHSM Auth application and commands, see [YubiHSM Auth Overview](xref:YubiHsmAuthOverview).
 
+A guide for creating a secure session with a YubiHSM 2 device is covered in [Interacting with a YubiHSM 2](xref:YubiHsmAuthInteractingYubiHsm2)
+
 ## YubiHsmAuthSession
 
 To perform YubiHSM Auth operations, first select the IYubiKeyDevice you would like to use. Next, create an instance of the YubiHsmAuthSession class using that device. During the lifetime of that session, you can use the session APIs as a simple way to work with the YubiHSM Auth application on the YubiKey.

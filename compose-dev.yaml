@@ -15,7 +15,7 @@ services:
     - type: volume
       source: volume-docker-sock
       target: /var/run/docker.sock
-      
+
   yubi:
     command:
     - infinity
@@ -98,7 +98,6 @@ volumes:
     external: true
   volume-docker-sock:
     name: volume-docker-sock
-    external: true
 
 
 

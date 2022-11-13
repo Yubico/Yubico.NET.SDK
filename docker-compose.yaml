@@ -6,7 +6,7 @@ services:
     init: true
     ports:
     - "8080:8080"
-    build: .
+    build: /com.docker.devenvironments.code/Yubico.NativShims/docker/Ubuntu
 #  push_service1:
 #    build: .
 #    ports:

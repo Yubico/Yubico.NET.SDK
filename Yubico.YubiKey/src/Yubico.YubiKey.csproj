@@ -126,7 +126,10 @@ limitations under the License. -->
     <!-- Remove ExcludeAssets once the package supports netcoreapp and net462 properly -->
     <PackageReference Include="System.Formats.Cbor" Version="7.0.0-preview.6.22324.4" ExcludeAssets="buildtransitive" />
     <ProjectReference Include="..\..\Yubico.Core\src\Yubico.Core.csproj" />
-
+    <PackageReference Include="docfx.console" Version="2.52.0">
+    <PrivateAssets>all</PrivateAssets>
+    <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net47'">

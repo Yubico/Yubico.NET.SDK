@@ -15,7 +15,7 @@ services:
     - type: volume
       source: volume-docker-sock
       target: /var/run/docker.sock
-
+      
   yubi:
     command:
     - infinity
@@ -89,15 +89,16 @@ networks:
 volumes:
   volume-yubico-net-sdk-distracted_rubin:
     name: volume-yubico-net-sdk-distracted_rubin
-    external: true
+    #external: true
   vsCodeServerVolume-yubico-net-sdk-distracted_rubin-app:
     name: vsCodeServerVolume-yubico-net-sdk-distracted_rubin-app
-    external: true
+    #external: true
   volume-yubico-net-sdk-distracted_rubin-sol:
     name: volume-yubico-net-sdk-distracted_rubin-sol
-    external: true
+    #external: true
   volume-docker-sock:
     name: volume-docker-sock
+    #external: true
 
 
 

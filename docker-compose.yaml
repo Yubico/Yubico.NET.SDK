@@ -1,6 +1,5 @@
 version: "3.8"
-name: yubico-net-sdk-distracted_rubin
-
+# name: yubico-net-sdk-distracted_rubin
 services:
   yesdk-docserver:
     init: true

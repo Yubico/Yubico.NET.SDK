@@ -80,9 +80,9 @@ services:
     networks:
       default: null
     stop_signal: SIGKILL
-    volumes_from:
-    - sol
-    - yubi
+    # volumes_from:
+    # - sol
+    # - yubi
 networks:
   default:
     name: yubico-net-sdk-distracted_rubin_default

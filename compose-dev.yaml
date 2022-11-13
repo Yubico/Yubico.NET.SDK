@@ -1,10 +1,28 @@
-name: yubico-net-sdk-distracted_rubin
+version: "3.8"
+# name: yubico-net-sdk-distracted_rubin
 services:
-#  push_service1:
-#    build: .
-#    ports:
-#    - "443:443"
-#    image: kindtek/sdb_yub_k:latest  ## goes to your repository on Docker Hub
+  # agent:
+  #   image: portainer/agent
+  #   environment:
+  #     AGENT_CLUSTER_ADDR: tasks.agent
+  #     CAP_HOST_MANAGEMENT: 1
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #     - /var/lib/docker/volumes:/var/lib/docker/volumes
+  #     - /:/host
+  #   ports:
+  #     - target: 9001
+  #       published: 9001
+  #       protocol: tcp
+  #       mode: host
+  #   networks:
+  #     - portainer_agent
+  #   deploy:
+  #     mode: global
+  #     placement:
+  #       constraints: [node.platform.os == linux]
+
+
   web:
     entrypoint:
     - sleep
@@ -22,6 +40,7 @@ services:
     entrypoint:
     - sleep
     image: docker/dev-environments-default:stable-1
+    #build: docker build https://github.com/kindtek/yubico-net-sdk.git#develop:/Yubico.NativeShims/docker/Ubuntu
     init: true
     labels:
       com.docker.devenvironments: "true"
@@ -32,8 +51,11 @@ services:
       default: null
     stop_signal: SIGKILL
     volumes:
-    - type: bind
-      source: /var/run/docker.sock
+    - type: volume
+      source: volume-yubico-net-sdk-distracted_rubin-sol
+      target: /usr/bin
+    - type: volume
+      source: volume-docker-sock
       target: /var/run/docker.sock
     - type: volume
       source: volume-yubico-net-sdk-distracted_rubin
@@ -62,10 +84,20 @@ services:
     - type: volume
       source: volume-yubico-net-sdk-distracted_rubin-sol
       target: /usr/bin
+    - type: volume
+      source: volume-docker-sock
+      target: /var/run/docker.sock
+    - type: volume
+      source: volume-yubico-net-sdk-distracted_rubin
+      target: /com.docker.devenvironments.code
+    - type: volume
+      source: vsCodeServerVolume-yubico-net-sdk-distracted_rubin-app
+      target: /home/vscode
   app:
     depends_on:
     - "sol"
     - "yubi"
+#    - "agent"
     command:
     - infinity
     entrypoint:
@@ -80,12 +112,27 @@ services:
     networks:
       default: null
     stop_signal: SIGKILL
-    volumes_from:
-    - sol
-    - yubi
+    volumes:
+    - type: volume
+      source: volume-yubico-net-sdk-distracted_rubin-sol
+      target: /usr/bin
+    - type: volume
+      source: volume-docker-sock
+      target: /var/run/docker.sock
+    - type: volume
+      source: volume-yubico-net-sdk-distracted_rubin
+      target: /com.docker.devenvironments.code
+    - type: volume
+      source: vsCodeServerVolume-yubico-net-sdk-distracted_rubin-app
+      target: /home/vscode
 networks:
   default:
-    name: yubico-net-sdk-distracted_rubin_default
+    name: yubico-net-sdk-distracted_rubin_default-net-5
+    attachable: true
+  # portainer_agent:
+  #   driver: overlay
+  #   attachable: true
+
 volumes:
   volume-yubico-net-sdk-distracted_rubin:
     name: volume-yubico-net-sdk-distracted_rubin
@@ -99,6 +146,3 @@ volumes:
   volume-docker-sock:
     name: volume-docker-sock
     #external: true
-
-
-

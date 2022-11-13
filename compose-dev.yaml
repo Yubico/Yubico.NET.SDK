@@ -1,4 +1,5 @@
 version: "3.8"
+# name: yubico-net-sdk-distracted_rubin
 services:
   # agent:
   #   image: portainer/agent
@@ -21,12 +22,7 @@ services:
   #     placement:
   #       constraints: [node.platform.os == linux]
 
-# name: yubico-net-sdk-distracted_rubin
-#  push_service1:
-#    build: .
-#    ports:
-#    - "443:443"
-#    image: kindtek/sdb_yub_k:latest  ## goes to your repository on Docker Hub
+
   web:
     entrypoint:
     - sleep
@@ -131,7 +127,8 @@ services:
       target: /home/vscode
 networks:
   default:
-    name: yubico-net-sdk-distracted_rubin_default-net-4
+    name: yubico-net-sdk-distracted_rubin_default-net-5
+    attachable: true
   # portainer_agent:
   #   driver: overlay
   #   attachable: true

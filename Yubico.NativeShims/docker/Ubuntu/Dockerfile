@@ -1,3 +1,5 @@
+# use modified Dockerfile from Yubico.NativeShims/docker/Ubuntu/Dockerfile
+# just use latest
 FROM ubuntu:bionic AS env
 
 # These arguments are passed in from the console or by Docker-CLI itself. User/Group ID

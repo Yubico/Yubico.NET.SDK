@@ -50,7 +50,6 @@ docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p
 # some point to make adding new distributions and architectures even
 # easier.
 
-docker buildx use insecure-builder
 # Distro: Ubuntu
 # Arch: amd64/x64
 # Output: ./ubuntu-x64/libYubico.NativeShims.so
@@ -61,7 +60,6 @@ docker buildx build \
     --build-arg USER_ID=`id -u` \
     --build-arg GROUP_ID=`id -g` \
     --output type=local,dest=ubuntu-x64 \
-    --allow security.insecure \
     .
 
 # Distro: Ubuntu

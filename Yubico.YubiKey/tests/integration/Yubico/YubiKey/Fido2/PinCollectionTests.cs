@@ -72,6 +72,35 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
+        [Fact]
+        public void InvalidPinFollowedByValidPin_Succeeds()
+        {
+            // Test assumption: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)
+            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
+
+            byte[] invalidPin = Encoding.UTF8.GetBytes("44444");
+            byte[] validPin = Encoding.UTF8.GetBytes("123456");
+
+            using (var fido2 = new Fido2Session(yubiKey))
+            {
+                bool success = fido2.TryVerifyPin(
+                    invalidPin,
+                    PinUvAuthTokenPermissions.MakeCredential,
+                    "abc",
+                    out _, out _);
+
+                Assert.False(success);
+
+                success = fido2.TryVerifyPin(
+                    validPin,
+                    PinUvAuthTokenPermissions.MakeCredential,
+                    "abc",
+                    out _, out _);
+
+                Assert.True(success);
+            }
+        }
+
         private bool KeyCollector(KeyEntryData arg)
         {
             switch (arg.Request)

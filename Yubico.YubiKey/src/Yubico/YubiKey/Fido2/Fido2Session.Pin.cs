@@ -370,6 +370,9 @@ namespace Yubico.YubiKey.Fido2
 
             if (GetCtapError(result) == CtapStatus.PinInvalid)
             {
+                // FIDO authenticators regenerate the public key used for the auth protocol. We need to
+                // re-initialize everything so we can obtain the new shared secret.
+                AuthProtocol.Initialize();
                 return false; // PIN is invalid
             }
 

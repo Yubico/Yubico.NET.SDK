@@ -51,9 +51,6 @@ limitations under the License. -->
     <!-- StrongName signing -->
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
-
-    <!-- NU5104 - We want to allow prerelease NuGet packages -->
-    <NoWarn>@(NoWarn);NU5104</NoWarn>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
@@ -124,7 +121,7 @@ limitations under the License. -->
     </PackageReference>
 
     <!-- Remove ExcludeAssets once the package supports netcoreapp and net462 properly -->
-    <PackageReference Include="System.Formats.Cbor" Version="7.0.0-preview.6.22324.4" ExcludeAssets="buildtransitive" />
+    <PackageReference Include="System.Formats.Cbor" Version="7.0.0" ExcludeAssets="buildtransitive" />
     <ProjectReference Include="..\..\Yubico.Core\src\Yubico.Core.csproj" />
 
   </ItemGroup>

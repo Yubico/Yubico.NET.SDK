@@ -89,7 +89,7 @@ namespace Yubico.YubiKey.Fido2
             makeParams.Protocol = protocol.Protocol;
             makeParams.PinUvAuthParam = pinUvAuthParam;
 
-            makeParams.AddOption("rk", true);
+            makeParams.AddOption(AuthenticatorOptions.rk, true);
             //makeParams.AddOption("up", true);
             //makeParams.AddOption("uv", false);
 

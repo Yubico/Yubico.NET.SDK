@@ -18,8 +18,12 @@ limitations under the License. -->
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <NoWarn>@(NoWarn);NU5105;NU5104</NoWarn>
+  </PropertyGroup>
+
   <ItemGroup>
-    <PackageReference Include="Yubico.YubiKey" Version="1.5.0" />
+    <PackageReference Include="Yubico.YubiKey" Version="1.5.0-prerelease.20221108.1" />
   </ItemGroup>
 
 </Project>

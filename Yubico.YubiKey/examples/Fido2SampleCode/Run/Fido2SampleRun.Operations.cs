@@ -43,6 +43,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             Fido2MainMenuItem.VerifyPin => RunVerifyPin(),
             Fido2MainMenuItem.MakeCredential => RunMakeCredential(),
             Fido2MainMenuItem.GetAssertion => RunGetAssertions(),
+            Fido2MainMenuItem.Reset => RunReset(),
             _ => RunUnimplementedOperation(),
         };
 
@@ -55,6 +56,74 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         public static bool RunUnimplementedOperation()
         {
             SampleMenu.WriteMessage(MessageType.Special, 0, "Unimplemented operation");
+            return true;
+        }
+
+        public bool RunReset()
+        {
+            string versionNumber = _yubiKeyChosen.FirmwareVersion.ToString();
+
+            SampleMenu.WriteMessage(MessageType.Title, 0, "DANGER!!!");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Resetting the FIDO2 application will mean losing all FIDO2");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "credentials on this YubiKey.\n");
+
+            string[] menuItems = new string[] {
+                "Yes",
+                "No",
+            };
+
+            int response = _menuObject.RunMenu("Do you want to continue?", menuItems);
+            if (response != 0)
+            {
+                return true;
+            }
+
+            SampleMenu.WriteMessage(MessageType.Title, 0, "This is the YubiKey for which the FIDO2 application will be reset.\n");
+
+            int? serial = _yubiKeyChosen.SerialNumber;
+            if (serial is null)
+            {
+                SampleMenu.WriteMessage(MessageType.Title, 0, "Unknown serial number : version = " + versionNumber);
+            }
+            else
+            {
+                SampleMenu.WriteMessage(MessageType.Title, 0, serial.ToString() + " : version = " + versionNumber);
+            }
+
+            response = _menuObject.RunMenu("\nIs this correct?", menuItems);
+            if (response != 0)
+            {
+                return true;
+            }
+
+            SampleMenu.WriteMessage(MessageType.Title, 0, "To reset, when prompted, you will need to remove, then re-insert");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "the YubiKey. Then, when prompted, touch the YubiKey's contact.\n");
+            response = _menuObject.RunMenu("Do you want to continue?", menuItems);
+            if (response != 0)
+            {
+                return true;
+            }
+
+            _keyCollector.Operation = Fido2KeyCollectorOperation.Reset;
+
+            // To reset the FIDO2 application, one must call the reset command
+            // within a short time limit after the YubiKey has been "rebooted".
+            // In order to obtain an IYubiKeyDevice quickly after reinserting
+            // we're going to listen for the event.
+            // This means we need to worry about asynchronous operations, and the
+            // EventHandler delegates must have access to the serial number.
+            // So we're going to use a separate class to handle this.
+            var fido2Reset = new Fido2Reset(_yubiKeyChosen.SerialNumber);
+            ResponseStatus status = fido2Reset.RunFido2Reset(_keyCollector.Fido2SampleKeyCollectorDelegate);
+            if (status == ResponseStatus.Success)
+            {
+                SampleMenu.WriteMessage(MessageType.Title, 0, "\nFIDO2 application successfully reset.\n");
+            }
+            else
+            {
+                SampleMenu.WriteMessage(MessageType.Title, 0, "\nFIDO2 application NOT reset.\n");
+            }
+
             return true;
         }
 
@@ -86,6 +155,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
                 if (isValid)
                 {
+                    _keyCollector.Operation = Fido2KeyCollectorOperation.Verify;
+
                     return Fido2Pin.VerifyPin(
                         _yubiKeyChosen,
                         _keyCollector.Fido2SampleKeyCollectorDelegate,
@@ -106,16 +177,18 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 "For expedience, it will generate a value based on the relying party info and use it as\n" +
                 "the ClientDataHash, even though that is not how it is actually computed.\n" +
                 "In addition, the User ID is binary data (a byte array), and this sample simply uses\n" +
-                "random numbers (as recommended in W3C).\n");
+                "random numbers (as recommended in W3C).\n" +
+                "Furthermore, the standard specifies that the relyingPartyName, user Name, and user\n" +
+                "DisplayName are optional. However, this sample requires these elements.\n");
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the relyingPartyName (optional)");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the relyingPartyName");
             _ = SampleMenu.ReadResponse(out string relyingPartyName);
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the relyingPartyId");
             _ = SampleMenu.ReadResponse(out string relyingPartyId);
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the user Name (optional)");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the user Name");
             _ = SampleMenu.ReadResponse(out string userName);
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the user DisplayName (optional)");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the user DisplayName");
             _ = SampleMenu.ReadResponse(out string userDisplayName);
 
             RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
@@ -124,6 +197,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             var userId = new ReadOnlyMemory<byte>(randomBytes);
 
             ReadOnlyMemory<byte> clientDataHash = BuildFakeClientDataHash(relyingPartyId);
+
+            _keyCollector.Operation = Fido2KeyCollectorOperation.MakeCredential;
 
             bool isValid = Fido2Protocol.RunMakeCredential(
                 _yubiKeyChosen,
@@ -166,6 +241,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             _ = SampleMenu.ReadResponse(out string relyingPartyId);
 
             ReadOnlyMemory<byte> clientDataHash = BuildFakeClientDataHash(relyingPartyId);
+
+            _keyCollector.Operation = Fido2KeyCollectorOperation.GetAssertion;
 
             bool isValid = Fido2Protocol.RunGetAssertions(
                 _yubiKeyChosen,

@@ -125,7 +125,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                     break;
 
                 case Fido2KeyCollectorOperation.Reset:
-                    SampleMenu.WriteMessage(MessageType.Title, 0, "The YubiKey is trying to reset the FIDO2 application,");
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "\nThe YubiKey is trying to reset the FIDO2 application,");
                     break;
             }
         }

@@ -41,10 +41,24 @@ namespace Yubico.YubiKey.Fido2
                             req.SubmitValue(pin1);
                             break;
                         case KeyEntryRequest.ChangeFido2Pin:
-                            req.SubmitValues(pin1, pin2);
+                            if (req.IsRetry)
+                            {
+                                req.SubmitValues(pin1, pin2);
+                            }
+                            else
+                            {
+                                req.SubmitValues(pin2, pin1);
+                            }
                             break;
                         case KeyEntryRequest.VerifyFido2Pin:
-                            req.SubmitValue(pin2);
+                            if (req.IsRetry)
+                            {
+                                req.SubmitValue(pin2);
+                            }
+                            else
+                            {
+                                req.SubmitValue(pin1);
+                            }
                             break;
                     }
 
@@ -54,6 +68,16 @@ namespace Yubico.YubiKey.Fido2
                 fido2.SetPin();
                 fido2.ChangePin();
                 fido2.VerifyPin();
+
+                bool isValid = fido2.TryChangePin(pin1, pin2);
+                Assert.False(isValid);
+                isValid = fido2.TryChangePin(pin2, pin1);
+                Assert.True(isValid);
+
+                isValid = fido2.TryVerifyPin(pin2, null, null, out _, out _);
+                Assert.False(isValid);
+                isValid = fido2.TryVerifyPin(pin1, null, null, out _, out _);
+                Assert.True(isValid);
             }
         }
 

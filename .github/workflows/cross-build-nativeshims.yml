@@ -21,10 +21,10 @@ on:
         description: 'Push to internal NuGet'
         required: true
         type: boolean
-      version-suffix:
-        description: 'Suffix to append to version'
+      version:
+        description: 'Version'
         required: false
-        default: "-prerelease."
+        default: "0.0.0-prerelease.YYYMMDD.B"
         type: string
 
 jobs:
@@ -105,7 +105,7 @@ jobs:
           $repo.SetAttribute("url","https://github.com/${{ github.repository }}")
           $repo.SetAttribute("type","git")
           $nuspec.package.metadata.AppendChild($repo)
-          $nuspec.package.metadata.version += "${{ github.event.inputs.version-suffix }}"
+          $nuspec.package.metadata.version = "${{ github.event.inputs.version }}"
           $nuspec.Save("Yubico.NativeShims.nuspec")
           cat Yubico.NativeShims.nuspec
       - run: nuget pack Yubico.NativeShims.nuspec

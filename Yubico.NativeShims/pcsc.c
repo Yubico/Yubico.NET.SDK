@@ -213,7 +213,7 @@ Native_SCardListReaders(
     uint32_t* pcchReaders
 )
 {
-    DWORD cchReaders;
+    DWORD cchReaders = *pcchReaders;
     int32_t status = SCardListReaders(
         hContext,
         mszGroups,

@@ -18,6 +18,19 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.5.x Releases
 
+### 1.5.1 (Yubico.YubiKey), 1.5.2 (Yubico.NativeShims)
+
+Release date: November 18th, 2022
+
+Bug fixes:
+
+- Fixed a bug in Yubico.NativeShims where a function parameter wasn't properly initialized. This
+  affected enumeration of smart cards in some cases.
+- Upgraded System.Formats.Cbor to 7.0.0 now that .NET 7 has been released.
+- FIDO2 re-initializes the auth protocol after a failed PIN attempt. This now matches spec behavior.
+- Upgraded the version of OpenSSL that Yubico.NativeShims uses to 3.0.7. Note: the SDK was *not* affected by any of
+  the November 2022 security advisories.
+
 ### 1.5.0
 
 Release date: October 28th, 2022

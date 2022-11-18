@@ -14,7 +14,7 @@ Yubico.NativeShims/ubuntu-*
 # NuGet config
 # We treat NuGet configs as per-user settings
 nuget.config
-
+ 
 # CMake ignore
 .cmake
 CMakeLists.txt.user
@@ -554,3 +554,5 @@ cython_debug/
 
 # other
 .history
+
+

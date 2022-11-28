@@ -68,7 +68,7 @@
 #     - "apt-get update -qq && apt-get install -yq wget"
 #     entrypoint:
 #     - "/usr/bin/solana-run.sh"
-#     image: solanalabs/solana:stable
+#     image: kindtek/solana:stable
 #     ports:
 #     - "8899:8899"
 #     init: true

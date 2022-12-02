@@ -93,7 +93,7 @@ RUN mkdir -p /home/build/artifacts/ubuntu-x64 \
 # a completely blank image. We then use the `COPY` instruction to pull only the files
 # we care about into this blank space. The `--output` argument to the `docker` command
 # specifies what we do with this result.
-FROM scratch AS build_install
+FROM alpine AS build_install
 COPY --from=build /home/build/artifacts/ubuntu-x64/ .
 
 

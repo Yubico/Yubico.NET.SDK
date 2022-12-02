@@ -3,9 +3,14 @@ version: "3.8"
 services:
   yubi:
     build:
+      args:
+          USER_ID: 1000
+          GROUP_ID: 1000 
+          ARTIFACT_DIR: ubuntu-x64
       context: .
       dockerfile: docker/Ubuntu/Dockerfile
     image: kindtek/yubico-nativeshims-ubuntu:1.0
     entrypoint: tail -f /dev/null
+
 
     

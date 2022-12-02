@@ -59,6 +59,7 @@ docker buildx build \
     --platform=linux/amd64 \
     --build-arg USER_ID=`id -u` \
     --build-arg GROUP_ID=`id -g` \
+    --build-arg ARTIFACT_DIR=ubuntu-x64 \
     --output type=local,dest=ubuntu-x64 \
     .
 
@@ -71,6 +72,7 @@ docker buildx build \
     --platform=linux/386 \
     --build-arg USER_ID=`id -u` \
     --build-arg GROUP_ID=`id -g` \
+    --build-arg ARTIFACT_DIR=ubuntu-x86 \
     --output type=local,dest=ubuntu-x86 \
     .
 
@@ -83,5 +85,6 @@ docker buildx build \
     --platform=linux/arm64 \
     --build-arg USER_ID=`id -u` \
     --build-arg GROUP_ID=`id -g` \
+    --build-arg ARTIFACT_DIR=ubuntu-arm64 \
     --output type=local,dest=ubuntu-arm64 \
     .

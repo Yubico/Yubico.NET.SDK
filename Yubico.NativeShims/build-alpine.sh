@@ -54,7 +54,7 @@ docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p
 # Arch: amd64/x64
 # Output: ./alpine-x64/libYubico.NativeShims.so
 docker buildx build \
-    --tag kindtek/yubico-safedb-alpine:sdb-0.1.0 \
+    --tag kindtek/yubico-safedb-alpine:sdb-0.1.4 \
     --file docker/Alpine/Dockerfile \
     --platform=linux/amd64 \
     --build-arg USER_ID=`id -u` \
@@ -67,7 +67,7 @@ docker buildx build \
 # Arch: i386/x86
 # Output: ./alpine-x86/libYubico.NativeShims.so
 docker buildx build \
-    --tag kindtek/yubico-safedb-alpine:sdb-0.1.0 \
+    --tag kindtek/yubico-safedb-alpine:sdb-0.1.4 \
     --file docker/Alpine/Dockerfile \
     --platform=linux/386 \
     --build-arg USER_ID=`id -u` \
@@ -80,7 +80,7 @@ docker buildx build \
 # Arch: arm64
 # Output: ./alpine-arm64/libYubico.NativeShims.so
 docker buildx build \
-    --tag kindtek/yubico-safedb-alpine:sdb-0.1.0 \
+    --tag kindtek/yubico-safedb-alpine:sdb-0.1.4 \
     --file docker/Alpine/Dockerfile \
     --platform=linux/arm64 \
     --build-arg USER_ID=`id -u` \

@@ -554,3 +554,6 @@ cython_debug/
 
 # other
 .history
+Yubico.NativeShims/alpine-x**
+Yubico.NativeShims/alpine-arm**
+

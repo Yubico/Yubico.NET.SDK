@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  yubi:
+    build:
+      context: .
+      dockerfile: docker/Ubuntu
+    image: kindtek/yubico-nativeshims-ubuntu:1.0
+    entrypoint: tail -f /dev/null
+
+    

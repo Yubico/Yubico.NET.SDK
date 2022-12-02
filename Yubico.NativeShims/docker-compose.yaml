@@ -9,4 +9,4 @@ services:
           ARTIFACT_DIR: ubuntu-x64
       context: .
       dockerfile: docker/Ubuntu/Dockerfile
-    image: kindtek/yubico-nativeshims-ubuntu:1.0
+    image: kindtek/yubico-safedb-ubuntu:1.0

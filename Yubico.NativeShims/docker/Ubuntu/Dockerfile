@@ -9,7 +9,7 @@ FROM ubuntu:bionic AS env
 # in the GitHub Action workflow.
 ARG USER_ID
 ARG GROUP_ID
-ARG ARTIFACT_DIR
+ARG ARTIFACT_DIR=ubuntu-x64
 
 # Set up basic environment variables such as the path.
 ENV PATH=/usr/local/bin:$PATH

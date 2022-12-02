@@ -9,7 +9,7 @@ FROM ubuntu:bionic AS env
 # in the GitHub Action workflow.
 ARG USER_ID
 ARG GROUP_ID
-ARG ARTIFACT_DIR=ubuntu-x64
+ARG ARTIFACT_DIR
 
 # Set up basic environment variables such as the path.
 ENV PATH=/usr/local/bin:$PATH
@@ -74,8 +74,8 @@ RUN rm -rf artifacts
 FROM devel AS build
 RUN cmake -S . -B build_out -DCMAKE_BUILD_TYPE=Release
 RUN cmake --build build_out --target all -v
-RUN mkdir -p /home/build/artifacts/$ARTIFACT_DIR \
-&& cp /home/build/build_out/*.so /home/build/artifacts/$ARTIFACT_DIR
+RUN mkdir -p /home/build/artifacts/ubuntu-x64 \
+&& cp /home/build/build_out/*.so /home/build/artifacts/ubuntu-x64
 
 # Copy over the build artifacts to a blank image. This way we can easily retrieve the
 # build results without copying all of the previous image's filesystem. `Scratch` is
@@ -83,4 +83,4 @@ RUN mkdir -p /home/build/artifacts/$ARTIFACT_DIR \
 # we care about into this blank space. The `--output` argument to the `docker` command
 # specifies what we do with this result.
 FROM scratch AS build_install
-COPY --from=build /home/build/artifacts/$ARTIFACT_DIR/ .
+COPY --from=build /home/build/artifacts/ubuntu-x64/ .

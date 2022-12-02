@@ -1,6 +1,7 @@
 # We use Bionic as the basis for our image. Bionic is the last Ubuntu long-term support
 # release that is both still supported and still supports i386 processors. Once Bionic
 # leaves support, we can consider upgrading to the next LTS release.
+
 FROM ubuntu:bionic AS env
 
 # These arguments are passed in from the console or by Docker-CLI itself. User/Group ID
@@ -15,11 +16,21 @@ ARG ARTIFACT_DIR
 ENV PATH=/usr/local/bin:$PATH
 
 # Add the host user and group to the image.
-RUN groupadd -f -g ${GROUP_ID} local && useradd -u ${USER_ID} -g ${GROUP_ID} -s /bin/sh local
+RUN groupadd -f -g ${GROUP_ID} local && useradd -o -u ${USER_ID} -g ${GROUP_ID} -s /bin/sh local
+
+
+# # add script for docker install
+# RUN apt-get update
+# RUN apt-get install curl
+# RUN curl -sSL https://get.docker.com/ | sh
+# #To run Docker as a non-privileged user, consider setting up the
+# #Docker daemon in rootless mode for your user:
+# #RUN dockerd-rootless-setuptool.sh install
+
 
 # Install build tools
 RUN apt-get update -qq \
-&& DEBIAN_FRONTEND=noninteractive apt-get install -yq \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -yq \
     wget \
     ca-certificates \
     gnupg \
@@ -27,19 +38,19 @@ RUN apt-get update -qq \
     build-essential \
     pkg-config \
     ninja-build \
-&& apt-get clean \
-&& rm -rf /var/lib/apt/lists/* /tmp/* /var/temp/*
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/temp/*
 
 # Install latest CMake
 # Ubuntu Bionic contains a very old version of CMake (3.10). Our project requires a newer
 # version of the tool. This is the easiest way to update CMake using the official builds
 # from Kitware (makers of CMake).
 RUN apt-get update -qq \
-&& wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add - \
-&& add-apt-repository 'deb https://apt.kitware.com/ubuntu/ bionic main' \
-&& apt-get update -qq \
-&& apt-get install cmake -yq \
-&& cmake -version
+    && wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add - \
+    && add-apt-repository 'deb https://apt.kitware.com/ubuntu/ bionic main' \
+    && apt-get update -qq \
+    && apt-get install cmake -yq \
+    && cmake -version
 
 # Install build dependencies
 # This is where we should add any additional dependencies needed by Yubico.NativeShims.
@@ -48,7 +59,7 @@ RUN apt-get update -qq \
 # headers and pre-built libraries. Be sure to use the -dev packages, as these typically
 # denote the package that contains headers and libs.
 RUN  apt-get update -qq \
-&& apt-get install -yq \
+    && apt-get install -yq \
     libpcsclite-dev \
     libssl-dev
 
@@ -74,8 +85,8 @@ RUN rm -rf artifacts
 FROM devel AS build
 RUN cmake -S . -B build_out -DCMAKE_BUILD_TYPE=Release
 RUN cmake --build build_out --target all -v
-RUN mkdir -p /home/build/artifacts/ubuntu-x64 \
-&& cp /home/build/build_out/*.so /home/build/artifacts/ubuntu-x64
+RUN mkdir -p /home/build/artifacts/$ARTIFACT_DIR \
+    && cp /home/build/build_out/*.so /home/build/artifacts/$ARTIFACT_DIR
 
 # Copy over the build artifacts to a blank image. This way we can easily retrieve the
 # build results without copying all of the previous image's filesystem. `Scratch` is
@@ -83,4 +94,7 @@ RUN mkdir -p /home/build/artifacts/ubuntu-x64 \
 # we care about into this blank space. The `--output` argument to the `docker` command
 # specifies what we do with this result.
 FROM scratch AS build_install
-COPY --from=build /home/build/artifacts/ubuntu-x64/ .
+COPY --from=build /home/build/artifacts/$ARTIFACT_DIR/ .
+
+
+

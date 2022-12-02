@@ -4,7 +4,7 @@ services:
   yubi:
     build:
       context: .
-      dockerfile: docker/Ubuntu
+      dockerfile: docker/Ubuntu/Dockerfile
     image: kindtek/yubico-nativeshims-ubuntu:1.0
     entrypoint: tail -f /dev/null
 

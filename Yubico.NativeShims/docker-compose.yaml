@@ -8,5 +8,5 @@ services:
           GROUP_ID: 1000 
           ARTIFACT_DIR: ubuntu-x64
       context: .
-      dockerfile: docker/Ubuntu/Dockerfile
+      dockerfile: docker/Alpine/Dockerfile
     image: kindtek/yubico-safedb-alpine:0.0.4

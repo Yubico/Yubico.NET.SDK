@@ -306,5 +306,29 @@ namespace Yubico.YubiKey
         /// to collect, this is an informative request.
         /// </summary>
         VerifyFido2Uv = 16,
+
+        /// <summary>
+        /// Indicates that the SDK is requesting the current YubiHSM Auth management
+        /// key in order to authenticate.
+        /// </summary>
+        /// <remarks>
+        /// When the <see cref="KeyEntryData.Request"/> is this value, the
+        /// delegate should collect the current management key and submit it
+        /// using <see cref="KeyEntryData.SubmitValue(System.ReadOnlySpan{byte})"/>.
+        /// <p>
+        /// When the <c>Request</c> is this value and
+        /// <see cref="KeyEntryData.IsRetry"/> property is <c>false</c>, this
+        /// is the initial request for the management key.
+        /// </p>
+        /// <p>
+        /// When the <c>Request</c> is this value and <c>IsRetry</c> is
+        /// <c>true</c>, this means a previous attempt at authenticating the
+        /// management key failed and the <c>KeyCollector</c> should try again
+        /// to obtain the value. In this situation,
+        /// <see cref="KeyEntryData.RetriesRemaining"/> will contain additional
+        /// information.
+        /// </p>
+        /// </remarks>
+        AuthenticateYubiHsmAuthManagementKey = 17,
     }
 }

@@ -15,20 +15,28 @@
 using System;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Oath;
+using Yubico.YubiKey.YubiHsmAuth;
+using System.Linq;
 
 namespace Yubico.YubiKey.TestUtilities
 {
+    /// <summary>
+    /// These methods help get the YubiKey under test into a known state
+    /// by enabling capabilities and resetting applications.
+    /// </summary>
     public class DeviceReset
     {
         /// <summary>
         /// Enables all USB and NFC capabilities
-        /// and resets the PIV and OATH applications to the default state
+        /// and resets the PIV, OATH, and YubiHSM Auth applications
+        /// to the default state
         /// </summary>
         public static IYubiKeyDevice ResetAll(IYubiKeyDevice key)
         {
+            key = EnableAllCapabilities(key);
             key = ResetPiv(key);
             key = ResetOath(key);
-            key = EnableAllCapabilities(key);
+            key = ResetYubiHsmAuth(key);
 
             return key;
         }
@@ -57,13 +65,34 @@ namespace Yubico.YubiKey.TestUtilities
             }
 
             return key;
-        }   
-        
+        }
+
+        /// <summary>
+        /// Resets the YubiHSM Auth application to the default state.
+        /// </summary>
+        public static IYubiKeyDevice ResetYubiHsmAuth(IYubiKeyDevice key)
+        {
+            using (var yubiHsmAuthSession = new YubiHsmAuthSession(key))
+            {
+                yubiHsmAuthSession.ResetApplication();
+            }
+
+            return key;
+        }
+
         /// <summary>
         /// Enables all USB and NFC capabilities.
         /// </summary>
+        /// <remarks>
+        /// The <paramref name="key"/> must have a serial number. The serial
+        /// number is what is used to find the YubiKey after it resets. The
+        /// "re-found" <c>IYubiKeyDevice</c> is returned by this method.
+        /// </remarks>
         public static IYubiKeyDevice EnableAllCapabilities(IYubiKeyDevice key)
         {
+            int serialNumber =
+                key.SerialNumber ?? throw new InvalidOperationException("Serial number required");
+
             var setCommand = new Management.Commands.SetDeviceInfoCommand
             {
                 EnabledUsbCapabilities = key.AvailableUsbCapabilities,
@@ -77,6 +106,10 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 throw new InvalidOperationException(setDeviceInfoResponse.StatusMessage);
             }
+
+            // Get the new device handle once the YubiKey reconnects
+            System.Threading.Thread.Sleep(1000);
+            key = TestDeviceSelection.RenewDeviceEnumeration(serialNumber);
 
             return key;
         }

@@ -37,6 +37,18 @@ namespace Yubico.YubiKey
         PivApplication,
 
         /// <summary>
+        /// The FIDO U2F application. Corresponds to the functionality located in
+        /// the Yubico.YubiKey.U2f namespace.
+        /// </summary>
+        U2fApplication,
+
+        /// <summary>
+        /// The FIDO2 application. Corresponds to the functionality located in
+        /// the Yubico.YubiKey.Fido2 namespace.
+        /// </summary>
+        Fido2Application,
+
+        /// <summary>
         /// The YubiKey management application. Corresponds to the functionality located in the
         /// Yubico.YubiKey.Management namespace.
         /// </summary>

@@ -30,7 +30,10 @@ namespace Yubico.YubiKey
         [Fact]
         public void CheckOtpApplication_ReturnsTrue()
         {
-            var yubiKey = new HollowYubiKeyDevice();
+            var yubiKey = new HollowYubiKeyDevice
+            {
+                AvailableUsbCapabilities = YubiKeyCapabilities.Otp
+            };
             Assert.True(yubiKey.HasFeature(YubiKeyFeature.OtpApplication));
         }
 
@@ -46,11 +49,6 @@ namespace Yubico.YubiKey
             yubiKey.FirmwareVersion.Minor = 1;
 
             Assert.True(yubiKey.HasFeature(YubiKeyFeature.OathApplication));
-
-            yubiKey.FirmwareVersion.Major = 3;
-            yubiKey.FirmwareVersion.Minor = 0;
-
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.OathApplication));
         }
 
         [Fact]
@@ -65,11 +63,6 @@ namespace Yubico.YubiKey
             yubiKey.FirmwareVersion.Minor = 1;
 
             Assert.True(yubiKey.HasFeature(YubiKeyFeature.PivApplication));
-
-            yubiKey.FirmwareVersion.Major = 3;
-            yubiKey.FirmwareVersion.Minor = 0;
-
-            Assert.False(yubiKey.HasFeature(YubiKeyFeature.PivApplication));
         }
 
         [Fact]

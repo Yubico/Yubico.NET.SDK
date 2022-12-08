@@ -63,15 +63,20 @@ namespace Yubico.YubiKey
             {
                 // General YubiKey features
 
-                YubiKeyFeature.OtpApplication => true,
+                YubiKeyFeature.OtpApplication =>
+                    HasApplication(yubiKeyDevice, YubiKeyCapabilities.Otp),
 
                 YubiKeyFeature.OathApplication =>
-                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V3_1_0
-                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath),
+                    HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath),
 
                 YubiKeyFeature.PivApplication =>
-                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V3_1_0
-                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
+                    HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
+
+                YubiKeyFeature.U2fApplication =>
+                    HasApplication(yubiKeyDevice, YubiKeyCapabilities.FidoU2f),
+
+                YubiKeyFeature.Fido2Application =>
+                    HasApplication(yubiKeyDevice, YubiKeyCapabilities.Fido2),
 
                 YubiKeyFeature.ManagementApplication =>
                     yubiKeyDevice.FirmwareVersion >= new FirmwareVersion(5),

@@ -10,6 +10,10 @@
 
             This is an internal package that is subject to change.
         </description>
+
+        <dependencies>
+            <group targetFramework=".NETFramework4.7" />
+        </dependencies>
     </metadata>
 
     <files>
@@ -27,5 +31,9 @@
         <file src="ubuntu-x64/libYubico.NativeShims.so" target="runtimes/linux-x64/native/libYubico.NativeShims.so" />
         <file src="ubuntu-x86/libYubico.NativeShims.so" target="runtimes/linux-x86/native/libYubico.NativeShims.so" />
         <file src="ubuntu-arm64/libYubico.NativeShims.so" target="runtimes/linux-arm64/native/libYubico.NativeShims.so" />
+
+        <!-- Support files -->
+        <file src="msbuild/Yubico.NativeShims.targets" target="build/net47/Yubico.NativeShims.targets" />
+        <file src="msbuild/_._" target="lib/net47/_._" />
     </files>
 </package>

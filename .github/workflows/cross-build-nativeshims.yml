@@ -52,6 +52,10 @@ jobs:
         with:
           name: nuspec
           path: Yubico.NativeShims/*.nuspec
+      - uses: actions/upload-artifact@v3
+        with:
+          name: msbuild
+          path: Yubico.NativeShims/msbuild/*
 
   build-ubuntu:
     name: Build Ubuntu

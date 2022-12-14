@@ -13,6 +13,7 @@
 
         <dependencies>
             <group targetFramework=".NETFramework4.7" />
+            <group targetFramework="netstandard2.0" />
         </dependencies>
     </metadata>
 
@@ -35,5 +36,6 @@
         <!-- Support files -->
         <file src="msbuild/Yubico.NativeShims.targets" target="build/net47/Yubico.NativeShims.targets" />
         <file src="msbuild/_._" target="lib/net47/_._" />
+        <file src="msbuild/_._" target="lib/netstandard20/_._" />
     </files>
 </package>

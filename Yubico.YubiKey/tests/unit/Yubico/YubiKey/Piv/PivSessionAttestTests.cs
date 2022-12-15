@@ -74,7 +74,9 @@ namespace Yubico.YubiKey.Piv
             yubiKey.FirmwareVersion.Minor = 2;
 
             var privateKey = new PivPrivateKey();
+#pragma warning disable SYSLIB0026
             var cert = new X509Certificate2();
+#pragma warning restore SYSLIB0026
             using (var pivSession = new PivSession(yubiKey))
             {
                 _ = Assert.Throws<NotSupportedException>(() => pivSession.ReplaceAttestationKeyAndCertificate(privateKey, cert));

@@ -361,7 +361,7 @@ namespace Yubico.YubiKey.Cryptography
 
             // lHash = digest of empty string.
             _ = digester.TransformFinalBlock(buffer, 0, 0);
-            Array.Copy(digester.Hash, 0, buffer, digestLength + 1, digestLength);
+            Array.Copy(digester.Hash!, 0, buffer, digestLength + 1, digestLength);
             if ((errorType & 1) != 0)
             {
                 buffer[digestLength + 5]++;
@@ -429,7 +429,7 @@ namespace Yubico.YubiKey.Cryptography
 
                 for (int index = 0; index < xorCount; index++)
                 {
-                    target[offset + index] ^= digester.Hash[index];
+                    target[offset + index] ^= digester.Hash![index];
                 }
 
                 bytesRemaining -= xorCount;

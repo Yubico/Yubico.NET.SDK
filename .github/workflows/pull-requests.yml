@@ -86,6 +86,3 @@ jobs:
 
       - name: Test Yubico.Core
         run: dotnet test --configuration ${{matrix.configuration}} --verbosity normal --no-build --nologo Yubico.Core/tests/Yubico.Core.UnitTests.csproj
-
-      - name: Test Yubico.DotNetPolyfills
-        run: dotnet test --configuration ${{matrix.configuration}} --verbosity normal --no-build --nologo Yubico.DotNetPolyfills/tests/Yubico.DotNetPolyfills.UnitTests.csproj

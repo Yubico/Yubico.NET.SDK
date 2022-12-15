@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <!-- .NET Framework versions don't seem to include the native
-        runtime files that are needed for this package. This makes
-        they are included in downlevel projects -->
+    <!-- .NET Framework versions don't seem to include the native runtime files that
+        are needed for this package. This makes sure they are included in downlevel projects.
+        Since .NET Framework is Windows only, we only need to worry about that platform. -->
     <ItemGroup Condition="'$(Platform)' == 'x86' OR '$(Platform)' == 'AnyCPU'">
         <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x86\native\Yubico.NativeShims.dll">
             <Link>Yubico.NativeShims.dll</Link>
@@ -12,6 +12,13 @@
     </ItemGroup>
     <ItemGroup Condition="'$(Platform)' == 'x64'">
         <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x64\native\Yubico.NativeShims.dll">
+            <Link>Yubico.NativeShims.dll</Link>
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+            <Visible>false</Visible>
+        </Content>
+    </ItemGroup>
+    <ItemGroup Condition="'$(Platform)' == 'arm64'">
+        <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-arm64\native\Yubico.NativeShims.dll">
             <Link>Yubico.NativeShims.dll</Link>
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
             <Visible>false</Visible>

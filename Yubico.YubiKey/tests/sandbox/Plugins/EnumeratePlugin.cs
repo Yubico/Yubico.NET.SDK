@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 : result;
         }
 
-        private ArgumentException GetArgumentException(string command)
+        private static ArgumentException GetArgumentException(string command)
         {
             return new ArgumentException(string.Join(Eol, new[] {
                 $"[{ command }] is not valid. Valid commands are:",

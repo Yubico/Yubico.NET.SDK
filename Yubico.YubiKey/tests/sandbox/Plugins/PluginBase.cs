@@ -141,9 +141,14 @@ namespace Yubico.YubiKey.TestApp.Plugins
         {
             get
             {
-                using var current = WindowsIdentity.GetCurrent();
-                return new WindowsPrincipal(current)
-                    .IsInRole(WindowsBuiltInRole.Administrator);
+                if (OperatingSystem.IsWindows())
+                {
+                    using var current = WindowsIdentity.GetCurrent();
+                    return new WindowsPrincipal(current)
+                        .IsInRole(WindowsBuiltInRole.Administrator);
+                }
+
+                return true;
             }
         }
     }

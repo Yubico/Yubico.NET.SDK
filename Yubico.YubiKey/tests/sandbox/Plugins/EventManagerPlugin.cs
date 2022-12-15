@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
             logEvent.AddPropertyIfAbsent(propertyFactory.CreateProperty(
-                "ThreadId", Thread.CurrentThread.ManagedThreadId));
+                "ThreadId", Environment.CurrentManagedThreadId));
         }
     }
 

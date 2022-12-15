@@ -240,7 +240,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     LabelTesting(hsmAuthConnection, new byte[] { 0x00 });
 
                     Output.WriteLine("Label = ''");
-                    LabelTesting(hsmAuthConnection, new byte[] { });
+                    LabelTesting(hsmAuthConnection, Array.Empty<byte>());
 
                     Output.WriteLine("Label = '/0a'");
                     LabelTesting(hsmAuthConnection, new byte[] { 0x00, 0x61 });
@@ -716,7 +716,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
                         Output.WriteLine($"{retries} retries remaining. About to supply WRONG management key...");
 
-                        // Supply wrong current mgmt key 
+                        // Supply wrong current mgmt key
                         byte[] currentManagementKey = new byte[16] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
                         byte[] newManagementKey = new byte[16] { 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4 };
 
@@ -740,7 +740,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
                         Output.WriteLine($"{retries} retries remaining. Now supplying CORRECT management key...");
 
-                        // Supply correct current mgmt key 
+                        // Supply correct current mgmt key
                         cmdChangeMgmt = new ChangeManagementKeyCommand(currentManagementKey, currentManagementKey);
                         responseChangeMgmt = hsmAuthConnection.SendCommand(cmdChangeMgmt);
 
@@ -798,7 +798,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
                     using (YubiHsmAuthSession yhaSession = new YubiHsmAuthSession(device))
                     {
-                        if (!HelperGetCreds(yhaSession.Connection).Any())
+                        if (!HelperGetCreds(yhaSession.Connection)!.Any())
                         {
                             AddCredentialCommand cmdAddCred = new AddCredentialCommand(mgmtKey, aesCred);
                             AddCredentialResponse responseAddCred = yhaSession.Connection.SendCommand(cmdAddCred);
@@ -1053,7 +1053,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                         //Output.WriteLine();
                         //Output.WriteLine();
 
-                        string targetCredLabel = creds.First().Credential.Label;
+                        string targetCredLabel = creds[0].Credential.Label;
                         Output.WriteLine($"Reducing {targetCredLabel} retries to 6...");
                         int? retriesRemaining = creds.First(cred => cred.Credential.Label == targetCredLabel).Retries;
                         GetAes128SessionKeysCommand getSessionKeys = new GetAes128SessionKeysCommand(targetCredLabel, newMgmtKey, hostChallenge, hsmDeviceChallenge);

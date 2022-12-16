@@ -34,7 +34,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             // Look at the SignatureAlgorithm property. If it is "RSA", we can
             // cast the input to RSA.
-            if (string.Compare(dotNetObject.SignatureAlgorithm, AlgorithmRsa, StringComparison.Ordinal) == 0)
+            if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmRsa, StringComparison.Ordinal))
             {
                 RSAParameters rsaParams = ((RSA)dotNetObject).ExportParameters(false);
                 // This constructor will validate the modulus and exponent.
@@ -45,11 +45,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             var eccParams = new ECParameters();
 
             // If the SignatureAlgorithm is "ECDsa", we can cast to ECDsa.
-            if (string.Compare(dotNetObject.SignatureAlgorithm, AlgorithmEcdsa, StringComparison.Ordinal) == 0)
+            if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmEcdsa, StringComparison.Ordinal))
             {
                 eccParams = ((ECDsa)dotNetObject).ExportParameters(false);
             }
-            else if (string.Compare(dotNetObject.KeyExchangeAlgorithm, AlgorithmEcdh, StringComparison.Ordinal) == 0)
+            else if (string.Equals(dotNetObject.KeyExchangeAlgorithm, AlgorithmEcdh, StringComparison.Ordinal))
             {
                 eccParams = ((ECDiffieHellman)dotNetObject).ExportParameters(false);
             }
@@ -138,7 +138,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 // Look at the SignatureAlgorithm property. If it is "RSA", we can
                 // cast the input to RSA.
-                if (string.Compare(dotNetObject.SignatureAlgorithm, AlgorithmRsa, StringComparison.Ordinal) == 0)
+                if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmRsa, StringComparison.Ordinal))
                 {
                     rsaParams = ((RSA)dotNetObject).ExportParameters(true);
                     var rsaPriKey = new PivRsaPrivateKey(
@@ -151,11 +151,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 }
 
                 // If the SignatureAlgorithm is "ECDsa", we can cast to ECDsa.
-                if (string.Compare(dotNetObject.SignatureAlgorithm, AlgorithmEcdsa, StringComparison.Ordinal) == 0)
+                if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmEcdsa, StringComparison.Ordinal))
                 {
                     eccParams = ((ECDsa)dotNetObject).ExportParameters(true);
                 }
-                else if (string.Compare(dotNetObject.KeyExchangeAlgorithm, AlgorithmEcdh, StringComparison.Ordinal) == 0)
+                else if (string.Equals(dotNetObject.KeyExchangeAlgorithm, AlgorithmEcdh, StringComparison.Ordinal))
                 {
                     eccParams = ((ECDiffieHellman)dotNetObject).ExportParameters(true);
                 }

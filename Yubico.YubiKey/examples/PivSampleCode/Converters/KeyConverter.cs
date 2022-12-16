@@ -140,9 +140,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // Make sure the params are P256 or P384.
         private static bool ValidateEccParameters(ECParameters eccParams)
         {
-            if (string.Compare(eccParams.Curve.Oid.Value, OidP256, StringComparison.Ordinal) != 0)
+            if (!string.Equals(eccParams.Curve.Oid.Value, OidP256, StringComparison.Ordinal))
             {
-                if (string.Compare(eccParams.Curve.Oid.Value, OidP384, StringComparison.Ordinal) != 0)
+                if (!string.Equals(eccParams.Curve.Oid.Value, OidP384, StringComparison.Ordinal))
                 {
                     return false;
                 }

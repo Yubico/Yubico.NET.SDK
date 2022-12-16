@@ -222,10 +222,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 encodedKey = PemOperations.GetEncodingFromPem(pemKeyString, out string title);
 
                 bool isPemPrivate = true;
-                if (string.Compare(PrivateKeyTitle, title, StringComparison.Ordinal) != 0)
+                if (!string.Equals(PrivateKeyTitle, title, StringComparison.Ordinal))
                 {
                     isPemPrivate = false;
-                    if (string.Compare(PublicKeyTitle, title, StringComparison.Ordinal) != 0)
+                    if (!string.Equals(PublicKeyTitle, title, StringComparison.Ordinal))
                     {
                         return Array.Empty<byte>();
                     }

@@ -172,7 +172,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // Otherwise, convert each character to its associated ASCII byte.
         private static byte[] ConvertCharArrayToByteArray(string valueType, char[] valueChars)
         {
-            if (string.Compare(valueType, DefaultMgmtKeyString, StringComparison.Ordinal) == 0)
+            if (string.Equals(valueType, DefaultMgmtKeyString, StringComparison.Ordinal))
             {
                 byte[] keyArray = new byte[24];
                 int indexV = 0;

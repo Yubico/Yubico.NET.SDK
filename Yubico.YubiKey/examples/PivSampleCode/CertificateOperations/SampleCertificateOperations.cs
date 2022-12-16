@@ -502,7 +502,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             var returnValue = RSA.Create();
-            returnValue.ImportSubjectPublicKeyInfo(certificate.PublicKey.Key.ExportSubjectPublicKeyInfo(), out int _);
+            returnValue.ImportSubjectPublicKeyInfo(certificate.PublicKey.GetRSAPublicKey().ExportSubjectPublicKeyInfo(), out int _);
 
             return returnValue;
         }

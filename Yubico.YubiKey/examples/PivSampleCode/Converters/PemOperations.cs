@@ -166,7 +166,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         public static byte[] GetEncodingFromPem(char[] pemString, string expectedTitle)
         {
             byte[] encoding = GetEncodingFromPem(pemString, out string title);
-            if (string.Compare(title, expectedTitle, StringComparison.Ordinal) == 0)
+            if (string.Equals(title, expectedTitle, StringComparison.Ordinal))
             {
                 return encoding;
             }

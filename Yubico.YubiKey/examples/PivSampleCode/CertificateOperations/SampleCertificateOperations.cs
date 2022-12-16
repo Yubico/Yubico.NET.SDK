@@ -264,7 +264,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             //   04 <x-coordinate> <y-coordinate>
             // where each coordinate is exactly 48 bytes (384 bits) long.
             HashAlgorithmName signerHash = HashAlgorithmName.SHA256;
-            if ((string.Compare(signerCert.PublicKey.Oid.FriendlyName, "ECC", StringComparison.Ordinal) == 0)
+            if ((string.Equals(signerCert.PublicKey.Oid.FriendlyName, "ECC", StringComparison.Ordinal))
                 && (signerCert.PublicKey.EncodedKeyValue.RawData.Length == 97))
             {
                 signerHash = HashAlgorithmName.SHA384;
@@ -362,7 +362,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 out X500DistinguishedName _,
                 out byte[] signature);
 
-            if (string.Compare(pubKey.SignatureAlgorithm, "RSA", StringComparison.Ordinal) == 0)
+            if (string.Equals(pubKey.SignatureAlgorithm, "RSA", StringComparison.Ordinal))
             {
                 return ((RSA)pubKey).VerifyData(
                     toBeSigned,
@@ -443,7 +443,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // The signature is a BIT FIELD so the first octet is the unused
             // bits. That's why in the following we use a Slice of the signature
             // buffer.
-            if (string.Compare(pubKey.SignatureAlgorithm, "RSA", StringComparison.Ordinal) == 0)
+            if (string.Equals(pubKey.SignatureAlgorithm, "RSA", StringComparison.Ordinal))
             {
                 return ((RSA)pubKey).VerifyData(
                     toBeSigned.Span,
@@ -495,14 +495,14 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 throw new ArgumentNullException(nameof(certificate));
             }
 
-            if (string.Compare(certificate.PublicKey.Oid.FriendlyName, "ECC", StringComparison.Ordinal) == 0)
+            if (string.Equals(certificate.PublicKey.Oid.FriendlyName, "ECC", StringComparison.Ordinal))
             {
                 var pivPub = new PivEccPublicKey(certificate.PublicKey.EncodedKeyValue.RawData);
                 return KeyConverter.GetDotNetFromPivPublicKey(pivPub);
             }
 
             var returnValue = RSA.Create();
-            returnValue.ImportSubjectPublicKeyInfo(certificate.PublicKey.Key.ExportSubjectPublicKeyInfo(), out int _);
+            returnValue.ImportSubjectPublicKeyInfo(certificate.PublicKey.GetRSAPublicKey().ExportSubjectPublicKeyInfo(), out int _);
 
             return returnValue;
         }

@@ -165,7 +165,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
         // If the response cannot be converted to an integer, return -1.
         public static int ReadResponse(out string responseString)
         {
-            responseString = Console.ReadLine();
+            responseString = Console.ReadLine() ?? string.Empty;
             if (int.TryParse(responseString, out int response))
             {
                 return response;

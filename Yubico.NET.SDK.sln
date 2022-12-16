@@ -302,6 +302,18 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Objects", "Objects", "{1908
 		Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\objects\credential.md = Yubico.YubiKey\docs\users-manual\application-yubihsm-auth\objects\credential.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SampleCode", "SampleCode", "{E7F9924F-227A-455F-B7AB-3352BAB6DA46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedSampleCode", "Yubico.YubiKey\examples\SharedSampleCode\SharedSampleCode.csproj", "{3546DD14-6205-447E-82FA-1B43A7AE2483}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fido2SampleCode", "Yubico.YubiKey\examples\Fido2SampleCode\Fido2SampleCode.csproj", "{0AC0433E-2477-42AE-A003-CE2F2772487B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OathSampleCode", "Yubico.YubiKey\examples\OathSampleCode\OathSampleCode.csproj", "{396C13D6-0DDA-4B95-BFE9-1ECE3557E6B6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PivSampleCode", "Yubico.YubiKey\examples\PivSampleCode\PivSampleCode.csproj", "{2AB8AD5F-2449-48A1-9659-F438C690BB03}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "U2fSampleCode", "Yubico.YubiKey\examples\U2fSampleCode\U2fSampleCode.csproj", "{769A850B-DEA5-44AD-8F9B-30C72601D851}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -363,6 +375,36 @@ Global
 		{B6C9FB57-AF94-4170-AE17-020809E5CED2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{B6C9FB57-AF94-4170-AE17-020809E5CED2}.ReleaseWithDocs|Any CPU.ActiveCfg = ReleaseWithDocs|Any CPU
 		{B6C9FB57-AF94-4170-AE17-020809E5CED2}.ReleaseWithDocs|Any CPU.Build.0 = ReleaseWithDocs|Any CPU
+		{3546DD14-6205-447E-82FA-1B43A7AE2483}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3546DD14-6205-447E-82FA-1B43A7AE2483}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3546DD14-6205-447E-82FA-1B43A7AE2483}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3546DD14-6205-447E-82FA-1B43A7AE2483}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3546DD14-6205-447E-82FA-1B43A7AE2483}.ReleaseWithDocs|Any CPU.ActiveCfg = Debug|Any CPU
+		{3546DD14-6205-447E-82FA-1B43A7AE2483}.ReleaseWithDocs|Any CPU.Build.0 = Debug|Any CPU
+		{0AC0433E-2477-42AE-A003-CE2F2772487B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AC0433E-2477-42AE-A003-CE2F2772487B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AC0433E-2477-42AE-A003-CE2F2772487B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AC0433E-2477-42AE-A003-CE2F2772487B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AC0433E-2477-42AE-A003-CE2F2772487B}.ReleaseWithDocs|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AC0433E-2477-42AE-A003-CE2F2772487B}.ReleaseWithDocs|Any CPU.Build.0 = Debug|Any CPU
+		{396C13D6-0DDA-4B95-BFE9-1ECE3557E6B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{396C13D6-0DDA-4B95-BFE9-1ECE3557E6B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{396C13D6-0DDA-4B95-BFE9-1ECE3557E6B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{396C13D6-0DDA-4B95-BFE9-1ECE3557E6B6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{396C13D6-0DDA-4B95-BFE9-1ECE3557E6B6}.ReleaseWithDocs|Any CPU.ActiveCfg = Debug|Any CPU
+		{396C13D6-0DDA-4B95-BFE9-1ECE3557E6B6}.ReleaseWithDocs|Any CPU.Build.0 = Debug|Any CPU
+		{2AB8AD5F-2449-48A1-9659-F438C690BB03}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AB8AD5F-2449-48A1-9659-F438C690BB03}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2AB8AD5F-2449-48A1-9659-F438C690BB03}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2AB8AD5F-2449-48A1-9659-F438C690BB03}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2AB8AD5F-2449-48A1-9659-F438C690BB03}.ReleaseWithDocs|Any CPU.ActiveCfg = Debug|Any CPU
+		{2AB8AD5F-2449-48A1-9659-F438C690BB03}.ReleaseWithDocs|Any CPU.Build.0 = Debug|Any CPU
+		{769A850B-DEA5-44AD-8F9B-30C72601D851}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{769A850B-DEA5-44AD-8F9B-30C72601D851}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{769A850B-DEA5-44AD-8F9B-30C72601D851}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{769A850B-DEA5-44AD-8F9B-30C72601D851}.Release|Any CPU.Build.0 = Release|Any CPU
+		{769A850B-DEA5-44AD-8F9B-30C72601D851}.ReleaseWithDocs|Any CPU.ActiveCfg = Debug|Any CPU
+		{769A850B-DEA5-44AD-8F9B-30C72601D851}.ReleaseWithDocs|Any CPU.Build.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -401,6 +443,12 @@ Global
 		{4176F4C2-3A9E-4C89-96B6-48CF41DD98C2} = {6F0B9833-A875-4535-AAC0-1EB3AFB1E8FC}
 		{9FED027A-6330-407B-99F5-2DDC54B52213} = {4176F4C2-3A9E-4C89-96B6-48CF41DD98C2}
 		{1908F042-CEBD-456F-BBEB-B1A7DE0372B1} = {4176F4C2-3A9E-4C89-96B6-48CF41DD98C2}
+		{E7F9924F-227A-455F-B7AB-3352BAB6DA46} = {43F5DCFE-2AB7-4156-AA03-3DD5D5D61C1D}
+		{3546DD14-6205-447E-82FA-1B43A7AE2483} = {E7F9924F-227A-455F-B7AB-3352BAB6DA46}
+		{0AC0433E-2477-42AE-A003-CE2F2772487B} = {E7F9924F-227A-455F-B7AB-3352BAB6DA46}
+		{396C13D6-0DDA-4B95-BFE9-1ECE3557E6B6} = {E7F9924F-227A-455F-B7AB-3352BAB6DA46}
+		{2AB8AD5F-2449-48A1-9659-F438C690BB03} = {E7F9924F-227A-455F-B7AB-3352BAB6DA46}
+		{769A850B-DEA5-44AD-8F9B-30C72601D851} = {E7F9924F-227A-455F-B7AB-3352BAB6DA46}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DF71DF2-3B6F-4855-8BC4-35B9714F3B0F}

@@ -222,7 +222,7 @@ namespace Yubico.YubiKey.Piv
 
                     byte[] signature = pivSession.Sign(slotNumber, digester.Hash);
 
-                    bool isValid = ConvertEcdsaSignature(signature, digester.Hash.Length, out byte[] rsSignature);
+                    bool isValid = ConvertEcdsaSignature(signature, digester.Hash!.Length, out byte[] rsSignature);
                     Assert.True(isValid);
 
                     using ECDsa eccPublic = pubKey.GetEccObject();

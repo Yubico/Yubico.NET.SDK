@@ -340,7 +340,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 "The Yubico OTP server returned an invalid response.");
         }
 
-        private HttpResponseMessage SendRequest(string json)
+        private static HttpResponseMessage SendRequest(string json)
         {
             var content = new StringContent(json,
                 Encoding.UTF8,
@@ -356,7 +356,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             return client.PostAsync("/prepare", content).Result;
         }
 
-        IEnumerable<string> GetYubiOtpErrors(IEnumerable<string> errorCodes) =>
+        static IEnumerable<string> GetYubiOtpErrors(IEnumerable<string> errorCodes) =>
             errorCodes.Select(e => e switch
                 {
                     "PRIVATE_ID_INVALID_LENGTH" => "Private ID must be 12 characters long.",
@@ -376,7 +376,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 }
             );
 
-        private void OpenUrl(string url)
+        private static void OpenUrl(string url)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {

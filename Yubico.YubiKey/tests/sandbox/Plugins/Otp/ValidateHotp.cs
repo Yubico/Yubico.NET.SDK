@@ -141,7 +141,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             byte offset = (byte)(hash[^1] & 0x0f);
             // The ykman code reads this as a uint, but masks the top bit. I'll just do the same
             // thing, but treat it as an int since that's CLS-compliant.
-            int dataInt = (int)BinaryPrimitives.ReadUInt32BigEndian(hash[offset..]) & 0x7fffffff;
+            int dataInt = (int)BinaryPrimitives.ReadUInt32BigEndian(hash.AsSpan(offset)) & 0x7fffffff;
 
             string code = (dataInt % (uint)Math.Pow(10, _digits!.Value))
                 .ToString(CultureInfo.InvariantCulture).PadLeft(_digits!.Value, '0');

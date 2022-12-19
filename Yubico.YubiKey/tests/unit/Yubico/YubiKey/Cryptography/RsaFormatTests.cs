@@ -140,7 +140,7 @@ namespace Yubico.YubiKey.Cryptography
                     _ => CryptographyProviders.Sha512Creator(),
                 };
                 _ = digester.TransformFinalBlock(mPrimeAndH, 0, (2 * digest.Length) + 8);
-                byte[] messageDigest = new byte[digester.Hash.Length];
+                byte[] messageDigest = new byte[digester.Hash!.Length];
                 Array.Copy(digester.Hash, messageDigest, digester.Hash.Length);
 
                 isValid = messageDigest.SequenceEqual(digest);
@@ -385,7 +385,7 @@ namespace Yubico.YubiKey.Cryptography
 
                     Assert.True(isValid);
                     Assert.Equal(digestAlgorithm, digestAlg);
-                    isValid = digest.SequenceEqual(digester.Hash);
+                    isValid = digest.SequenceEqual(digester.Hash!);
                     Assert.True(isValid);
                 }
                 else

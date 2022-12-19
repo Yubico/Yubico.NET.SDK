@@ -62,9 +62,9 @@ namespace Yubico.YubiKey.TestApp.Plugins
         {
             IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
             bool result = yubiKey.HasFeature(feature);
-            
+
             if (result)
-            { 
+            {
                 Output.WriteLine($"The feature [{ feature }] is available on this YubiKey");
                 Output.WriteLine();
             }
@@ -87,7 +87,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
             Output.WriteLine("5. Serial Number visibility controls");
             Output.WriteLine("");
             Output.Write("Select an option, or any other key to exit: ");
-                
+
             char inputChar = Console.ReadKey().KeyChar;
             Output.WriteLine();
 
@@ -174,7 +174,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 inputKey = Console.ReadKey(true);
                 if (inputKey.Key != ConsoleKey.Enter)
                 {
-                    _ = inputStr.Append(inputKey.KeyChar.ToString());
+                    _ = inputStr.Append(inputKey.KeyChar);
                     Console.Write(inputKey.KeyChar.ToString());
                 }
             }

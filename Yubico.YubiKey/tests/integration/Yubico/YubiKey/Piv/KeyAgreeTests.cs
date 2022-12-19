@@ -117,7 +117,7 @@ namespace Yubico.YubiKey.Piv
                 digester.Initialize();
                 _ = digester.TransformFinalBlock(sharedSecret, 0, sharedSecret.Length);
 
-                isValid = correspondentSecret.SequenceEqual(digester.Hash);
+                isValid = correspondentSecret.SequenceEqual(digester.Hash!);
                 Assert.True(isValid);
             }
         }

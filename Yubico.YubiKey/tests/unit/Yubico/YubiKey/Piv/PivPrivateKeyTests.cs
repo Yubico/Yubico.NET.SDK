@@ -356,7 +356,7 @@ namespace Yubico.YubiKey.Piv
                 // keySize.
                 ECParameters eccParams = eccObject.ExportParameters(true);
                 byte[] privateValue = new byte[keySize];
-                offset = keySize - eccParams.D.Length;
+                offset = keySize - eccParams.D!.Length;
                 Array.Copy(eccParams.D, 0, privateValue, offset, eccParams.D.Length);
 
                 var eccPriKey = new PivEccPrivateKey(privateValue);

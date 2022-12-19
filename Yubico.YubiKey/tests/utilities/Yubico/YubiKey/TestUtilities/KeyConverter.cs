@@ -720,7 +720,7 @@ namespace Yubico.YubiKey.TestUtilities
             int keySize = eccObject.KeySize / 8;
             ECParameters eccParams = eccObject.ExportParameters(true);
             byte[] privateValue = new byte[keySize];
-            int offset = keySize - eccParams.D.Length;
+            int offset = keySize - eccParams.D!.Length;
             Array.Copy(eccParams.D, 0, privateValue, offset, eccParams.D.Length);
 
             var eccPriKey = new PivEccPrivateKey(privateValue);
@@ -738,9 +738,9 @@ namespace Yubico.YubiKey.TestUtilities
             ECParameters eccParams = eccObject.ExportParameters(false);
             byte[] point = new byte[(keySize * 2) + 1];
             point[0] = 4;
-            int offset = 1 + (keySize - eccParams.Q.X.Length);
+            int offset = 1 + (keySize - eccParams.Q.X!.Length);
             Array.Copy(eccParams.Q.X, 0, point, offset, eccParams.Q.X.Length);
-            offset += keySize + (keySize - eccParams.Q.Y.Length);
+            offset += keySize + (keySize - eccParams.Q.Y!.Length);
             Array.Copy(eccParams.Q.Y, 0, point, offset, eccParams.Q.Y.Length);
 
             var eccPubKey = new PivEccPublicKey(point);

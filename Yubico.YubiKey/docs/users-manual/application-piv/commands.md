@@ -531,7 +531,7 @@ ___
 Set the management key to a new value.
 
 The YubiKey is manufactured with a default PIV management key:
-`hex 010203040500708010203040500708010203040500708` (`0102030405060708` three times). If
+`hex 010203040506070801020304050607080102030405060708` (`0102030405060708` three times). If
 you want to change to a different key, use this command.
 
 You can also set the management key to a newer value after changing it from the default.

@@ -94,10 +94,10 @@ namespace Yubico.YubiKey.Otp
                 var report = new KeyboardReport();
                 int index = reportIndex * _hidReportPayloadSize;
 
-                IEnumerable<byte> payload = frame.Skip(index).Take(_hidReportPayloadSize);
+                IEnumerable<byte> payload = frame.Skip(index).Take(_hidReportPayloadSize).ToArray();
                 if (reportIndex == 0
                     || reportIndex == TotalReports - 1
-                    || payload.Where(b => b != 0).Any())
+                    || payload.Any(b => b != 0))
                 {
                     report.Payload = payload.ToArray().AsSpan();
                     report.SequenceNumber = reportIndex;

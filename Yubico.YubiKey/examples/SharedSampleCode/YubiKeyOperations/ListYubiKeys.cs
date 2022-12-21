@@ -36,12 +36,14 @@ namespace Yubico.YubiKey.Sample.SharedCode
 
         private static void ReportResult(IEnumerable<IYubiKeyDevice> yubiKeyEnumerable)
         {
+            IEnumerable<IYubiKeyDevice> yubiKeyDevices = yubiKeyEnumerable as IYubiKeyDevice[] ?? yubiKeyEnumerable.ToArray();
+
             // Are there any?
             string outputList = "No YubiKeys found";
-            if (yubiKeyEnumerable.Any())
+            if (yubiKeyDevices.Any())
             {
                 outputList = "\n   YubiKeys:";
-                foreach (IYubiKeyDevice current in yubiKeyEnumerable)
+                foreach (IYubiKeyDevice current in yubiKeyDevices)
                 {
                     int serial = 0;
                     if (!(current.SerialNumber is null))

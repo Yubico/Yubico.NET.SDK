@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKey.Sample.OathSampleCode
 {
-    class StartProgram
+    internal sealed class StartProgram
     {
         static void Main()
         {

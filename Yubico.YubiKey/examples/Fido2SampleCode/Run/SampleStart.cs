@@ -16,7 +16,7 @@ using System;
 
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
 {
-    class StartProgram
+    internal sealed class StartProgram
     {
         static void Main()
         {

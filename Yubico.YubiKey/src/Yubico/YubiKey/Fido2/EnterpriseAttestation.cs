@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Fido2
     /// If the YubiKey does not support enterprise attestation, requesting it
     /// will generate an error return. To know if enterprise attestation is
     /// supported, get the device info
-    /// (<see cref="Fido2Session.GetAuthenticatorInfo"/>) and check the
+    /// (<see cref="Fido2Session.AuthenticatorInfo"/>) and check the
     /// <c>Options</c> property of <see cref="AuthenticatorInfo"/>). If the
     /// option <c>"ep"</c> is listed and is <c>true</c>, then enterprise
     /// attestation is supported.

@@ -772,6 +772,9 @@
   <data name="InvalidStringLength" xml:space="preserve">
     <value>The string must have a minimum length of {0}, and a maximum of {1}. Actual length: {2}.</value>
   </data>
+  <data name="InvalidDataLength" xml:space="preserve">
+    <value>The data must have a minimum length of {0}, and a maximum of {1}. Actual length: {2}.</value>
+  </data>
   <data name="InvalidDataTag" xml:space="preserve">
     <value>The value {0} is not a data tag supported by the YubiKey application.</value>
   </data>

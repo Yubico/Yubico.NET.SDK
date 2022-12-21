@@ -537,6 +537,45 @@ namespace Yubico.YubiKey.Fido2
             Assert.Null(fido2Info.RemainingDiscoverableCredentials);
         }
 
+        [Theory]
+        [InlineData("madeUpOption", OptionValue.Unknown)]
+        [InlineData("up", OptionValue.True)]
+        [InlineData("plat", OptionValue.False)]
+        [InlineData("rk", OptionValue.False)]
+        [InlineData("noMcGaPermissionsWithClientPin", OptionValue.False)]
+        [InlineData("makeCredUvNotRqd", OptionValue.False)]
+        [InlineData("clientPin", OptionValue.NotSupported)]
+        [InlineData("uv", OptionValue.NotSupported)]
+        [InlineData("pinUvAuthToken", OptionValue.NotSupported)]
+        [InlineData("largeBlobs", OptionValue.NotSupported)]
+        [InlineData("ep", OptionValue.NotSupported)]
+        [InlineData("bioEnroll", OptionValue.NotSupported)]
+        [InlineData("userVerificationMgmtPreview", OptionValue.NotSupported)]
+        [InlineData("uvBioEnroll", OptionValue.NotSupported)]
+        [InlineData("authnrCfg", OptionValue.NotSupported)]
+        [InlineData("uvAcfg", OptionValue.NotSupported)]
+        [InlineData("credMgmt", OptionValue.NotSupported)]
+        [InlineData("credentialMgmtPreview", OptionValue.NotSupported)]
+        [InlineData("setMinPINLength", OptionValue.NotSupported)]
+        [InlineData("alwaysUv", OptionValue.NotSupported)]
+        public void GetOptionValue_ReturnsCorrect(string option, OptionValue expectedValue)
+        {
+            OptionValue returnedValue = AuthenticatorOptions.GetDefaultOptionValue(option);
+            Assert.Equal(expectedValue, returnedValue);
+        }
+
+        [Theory]
+        [InlineData("madeUpExtension", false)]
+        [InlineData("credProtect", true)]
+        public void Extensions_IsSupported_Correct(string extension, bool expectedValue)
+        {
+            byte[] encodedData = GetSampleEncoded();
+
+            var fido2Info = new AuthenticatorInfo(encodedData);
+            bool isSupported = fido2Info.IsExtensionSupported(extension);
+            Assert.Equal(expectedValue, isSupported);
+        }
+
         private static bool CompareStringLists(string[] correctStrings, IReadOnlyList<string> candidate)
         {
             if (correctStrings.Length != candidate.Count)

@@ -26,10 +26,8 @@ namespace Yubico.YubiKey.Fido2
 
             using (var fido2 = new Fido2Session(yubiKey))
             {
-                AuthenticatorInfo authenticatorInfo = fido2.GetAuthenticatorInfo();
-
-                Assert.True(authenticatorInfo.Aaguid.Length > 0);
-                Assert.NotNull(authenticatorInfo.PinUvAuthProtocols);
+                Assert.True(fido2.AuthenticatorInfo.Aaguid.Length > 0);
+                Assert.NotNull(fido2.AuthenticatorInfo.PinUvAuthProtocols);
             }
         }
     }

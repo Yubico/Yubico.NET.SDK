@@ -12,14 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Formats.Cbor;
-using System.Globalization;
-using System.Collections.Generic;
-using Yubico.YubiKey.Fido2.Cbor;
-using Yubico.YubiKey.Fido2.Cose;
-using Yubico.YubiKey.Fido2.PinProtocols;
-
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
@@ -156,5 +148,62 @@ namespace Yubico.YubiKey.Fido2
         /// The string to use when specifying the <c>alwaysUv</c> Option.
         /// </summary>
         public const string alwaysUv = "alwaysUv";
+
+        /// <summary>
+        /// Return the default value for the given <c>option</c>.
+        /// </summary>
+        /// <remarks>
+        /// If an option is listed in the <see cref="AuthenticatorInfo.Options"/>
+        /// property, it will be <c>true</c> or <c>false</c>. If it is not
+        /// listed, it will be a default value. The default value can be either
+        /// True, False, or Not Supported. This method returns the default value
+        /// for an option.
+        /// <para>
+        /// There is one more value it could be, Unknown. This happens when the
+        /// option is a string not in the list here in this class.
+        /// </para>
+        /// <para>
+        /// Note that this method is not returning the current value of the given
+        /// <c>option</c>, only what its default value is.
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// An <c>OptionValue</c> enum that specifies the default value for an
+        /// option as either <c>True</c>, <c>False</c>, <c>NotSupported</c>, or
+        /// <c>Unknown</c>.
+        /// </returns>
+        public static OptionValue GetDefaultOptionValue(string option)
+        {
+            switch (option)
+            {
+                default:
+                    return OptionValue.Unknown;
+
+                case "plat":
+                case "rk":
+                case "noMcGaPermissionsWithClientPin":
+                case "makeCredUvNotRqd":
+                    return OptionValue.False;
+
+                case "up":
+                    return OptionValue.True;
+
+                case "clientPin":
+                case "uv":
+                case "pinUvAuthToken":
+                case "largeBlobs":
+                case "ep":
+                case "bioEnroll":
+                case "userVerificationMgmtPreview":
+                case "uvBioEnroll":
+                case "authnrCfg":
+                case "uvAcfg":
+                case "credMgmt":
+                case "credentialMgmtPreview":
+                case "setMinPINLength":
+                case "alwaysUv":
+                    return OptionValue.NotSupported;
+            }
+        }
     }
 }

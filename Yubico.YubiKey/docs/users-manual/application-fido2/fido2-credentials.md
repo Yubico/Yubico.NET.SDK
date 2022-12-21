@@ -225,15 +225,13 @@ Your code will look something like this:
         GetAssertionResponse getAssertionResponse = connection.SendCommand(getAssertionCommand);
         GetAssertionData getAssertionData = getAssertionResponse.GetData();
 
-        if (!(getAssertionData.NumberOfCredentials is null))
+        int count = getAssertionData.NumberOfCredentials ?? 0;
+        for (int index = 1; index < count; index++)
         {
-            int count = (int)getAssertionData.NumberOfCredentials;
-            for (int index = 1; index < count; index++)
-            {
-                var getNextAssertionCommand = new GetNextAssertionCommand();
-                getAssertionResponse = connection.SendCommand(getNextAssertionCommand);
-                getAssertionData = getAssertionResponse.GetData();
-            }
+            var getNextAssertionCommand = new GetNextAssertionCommand();
+            getAssertionResponse = connection.SendCommand(getNextAssertionCommand);
+            getAssertionData = getAssertionResponse.GetData();
+        }
 ```
 
 The data type returned by the `GetNextAssertionCommand` is the same as the type returned

@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.Fido2
         private const int KeyUser = 4;
         private const int KeyNumberCredentials = 5;
         private const int KeyUserSelected = 6;
-        private const int KeyLargeKeyBlob = 7;
+        private const int KeyLargeBlobKey = 7;
 
         private const string KeyCredentialType = "type";
         private const string KeyCredentialTransports = "transports";
@@ -94,9 +94,9 @@ namespace Yubico.YubiKey.Fido2
         public bool? UserSelected { get; private set; }
 
         /// <summary>
-        /// The large key blob, if there is one. This is optional and can be null.
+        /// The large blob key, if there is one. This is optional and can be null.
         /// </summary>
-        public ReadOnlyMemory<byte>? LargeKeyBlob { get; private set; }
+        public ReadOnlyMemory<byte>? LargeBlobKey { get; private set; }
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -156,7 +156,11 @@ namespace Yubico.YubiKey.Fido2
                 }
                 NumberOfCredentials = (int?)map.ReadOptional<int>(KeyNumberCredentials);
                 UserSelected = (bool?)map.ReadOptional<bool>(KeyUserSelected);
-                LargeKeyBlob = (ReadOnlyMemory<byte>?)map.ReadOptional<ReadOnlyMemory<byte>>(KeyLargeKeyBlob);
+                byte[]? keyData = (byte[]?)map.ReadOptional<byte[]>(KeyLargeBlobKey);
+                if (!(keyData is null))
+                {
+                    LargeBlobKey = new ReadOnlyMemory<byte>(keyData);
+                }
             }
             catch (CborContentException cborException)
             {

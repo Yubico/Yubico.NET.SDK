@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Linq;
 using System.Formats.Cbor;
 using System.Globalization;
 using System.Collections.Generic;
@@ -329,6 +330,74 @@ namespace Yubico.YubiKey.Fido2
                         ExceptionMessages.InvalidFido2Info),
                     cborException);
             }
+        }
+
+        /// <summary>
+        /// Get the value of the given <c>option</c> in this
+        /// <c>AuthenticatorInfo</c>.
+        /// </summary>
+        /// <remarks>
+        /// An option can be "true", "false", or "not supported". This method
+        /// will determine which value is appropriate for the given option.
+        /// <para>
+        /// The FIDO2 standard specifies that each option has a value, even if
+        /// an authenticator does not list it. If an option is not listed, its
+        /// value is a default, and the standard specifies default values for
+        /// each option. This method will determine if an option is listed, and
+        /// if so, return the listed value. If not, it will return the default
+        /// value. A default value can be "true", "false", or "not supported".
+        /// </para>
+        /// <para>
+        /// If the option is unknown (not one of the standard-definde options),
+        /// and it is not listed, this method will return "unknown".
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// An <c>OptionValue</c> enum that specifies the option as either
+        /// <c>True</c>, <c>False</c>, <c>NotSupported</c>, or <c>Unknown</c>.
+        /// </returns>
+        public OptionValue GetOptionValue(string option)
+        {
+            if (!(Options is null))
+            {
+                if (Options.ContainsKey(option))
+                {
+                    return Options[option] ? OptionValue.True : OptionValue.False;
+                }
+            }
+
+            return AuthenticatorOptions.GetDefaultOptionValue(option);
+        }
+
+        /// <summary>
+        /// Determine if the given <c>extension</c> is listed in this
+        /// <c>AuthenticatorInfo</c>.
+        /// </summary>
+        /// <remarks>
+        /// Because the <see cref="Extensions"/> property can be null (this
+        /// happens if a YubiKey does not specify any extensions), to check for
+        /// any particular extension requires first checking for null. If it is
+        /// not null, then it is necessary to check to see if that extension is
+        /// listed.
+        /// <para>
+        /// This method offers a convenient way to determine if an extension is
+        /// listed. This method will determine if <c>Extensions</c> is null. If
+        /// it is null, it will return <c>false</c>. If not, it will check to see
+        /// if the given value is listed. If so, return <c>true</c>, otherwise
+        /// return <c>false</c>.
+        /// </para>
+        /// </remarks>
+        public bool IsExtensionSupported(string extension)
+        {
+            if (!(Extensions is null))
+            {
+                if (Extensions.Contains(extension))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         // We've checked, the KeyAlgorithms is in cborMap.

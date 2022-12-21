@@ -197,5 +197,36 @@ namespace Yubico.YubiKey.Fido2
                 Extensions = extensionList;
             }
         }
+
+        /// <summary>
+        /// Get the value of the "credBlob" extension. This returns the decoded
+        /// value.
+        /// </summary>
+        /// <remarks>
+        /// Because this extension is used more often, a dedicated method is
+        /// provided as a convenience. There is no need for the caller to
+        /// decode the byte array value for the key "credBlob".
+        /// <para>
+        /// If there is no "credBlob" extension, this method will return an empty
+        /// byte array.
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// A byte array containing the decoded "credBlob" extension.
+        /// </returns>
+        public byte[] GetCredBlobExtension()
+        {
+            if (!(Extensions is null))
+            {
+                if (Extensions.ContainsKey("credBlob"))
+                {
+                    byte[] encodedValue = Extensions["credBlob"];
+                    var cborReader = new CborReader(encodedValue, CborConformanceMode.Ctap2Canonical);
+                    return cborReader.ReadByteString();
+                }
+            }
+
+            return Array.Empty<byte>();
+        }
     }
 }

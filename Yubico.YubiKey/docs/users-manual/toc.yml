@@ -280,6 +280,13 @@
     href: application-fido2/pin-uv-auth-protocols.md
   - name: The FIDO2 PIN
     href: application-fido2/fido2-pin.md
+  - name: FIDO2 Blobs
+    href: application-fido2/fido2-blobs.md
+    items:
+    - name: Credential blobs
+      href: application-fido2/cred-blobs.md
+    - name: Large blobs
+      href: application-fido2/large-blobs.md
   - name: Commands
     items:
     - name: FIDO2 commands

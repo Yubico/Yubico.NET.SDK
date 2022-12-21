@@ -67,6 +67,7 @@ namespace Yubico.YubiKey.Fido2
     {
         private readonly Logger _log = Log.GetLogger();
         private bool _disposed;
+        private AuthenticatorInfo? _authenticatorInfo;
 
         /// <summary>
         /// The object that represents the connection to the YubiKey. Most applications can ignore this, but it can be
@@ -131,6 +132,28 @@ namespace Yubico.YubiKey.Fido2
         /// </remarks>
         public Func<KeyEntryData, bool>? KeyCollector { get; set; }
 
+        /// <summary>
+        /// The FIDO2 <c>AuthenticatorInfo</c> for the connected YubiKey.
+        /// </summary>
+        /// <remarks>
+        /// Note that it is possible for the <c>AuthenticatorInfo</c> to change
+        /// during operations. That is, there are cases where the info says one
+        /// thing, then after some operation, the info says something else. This
+        /// property is updated each time one such operation is executed.
+        /// <para>
+        /// For example, if the YubiKey supports a PIN, but it is not set, then
+        /// the <c>AuthenticatorInfo.Options</c> will contain the option
+        /// "clientPin" and it will be <c>false</c>. After the PIN has been set,
+        /// the option "clientPin" will be <c>true</c>.
+        /// </para>
+        /// <para>
+        /// These are not very common, but it is important to use
+        /// <c>Fido2Session.AuthenticatorInfo</c> in your code, rather than
+        /// getting a copy of the info and using it throughout.
+        /// </para>
+        /// </remarks>
+        public AuthenticatorInfo AuthenticatorInfo => _authenticatorInfo ?? SetAndReturnAuthenticatorInfoField();
+
         // The default constructor is explicitly defined to show that we do not want it used.
         private Fido2Session()
         {
@@ -180,11 +203,21 @@ namespace Yubico.YubiKey.Fido2
         /// <returns>
         /// An <see cref="AuthenticatorInfo"/> instance containing information provided by the YubiKey.
         /// </returns>
+        [Obsolete("The GetAuthenticatorInfo method is deprecated, please use the AuthenticatorInfo property instead.")]
         public AuthenticatorInfo GetAuthenticatorInfo()
         {
-            GetInfoResponse info = Connection.SendCommand(new GetInfoCommand());
+            return AuthenticatorInfo;
+        }
 
-            return info.GetData();
+        // Get the AuthenticatorInfo and return it. In addition, set the
+        // _authenticatorInfo field with the info so that is is no longer
+        // necessary to call the command.
+        private AuthenticatorInfo SetAndReturnAuthenticatorInfoField()
+        {
+            GetInfoResponse info = Connection.SendCommand(new GetInfoCommand());
+            _authenticatorInfo = info.GetData();
+
+            return _authenticatorInfo;
         }
 
         private static CtapStatus GetCtapError(IYubiKeyResponse r) => (CtapStatus)(r.StatusWord & 0xFF);

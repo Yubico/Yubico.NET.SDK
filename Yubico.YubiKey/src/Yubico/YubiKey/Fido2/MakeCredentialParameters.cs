@@ -15,6 +15,8 @@
 using System;
 using System.Formats.Cbor;
 using System.Collections.Generic;
+using System.Linq;
+using System.Globalization;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
@@ -47,6 +49,7 @@ namespace Yubico.YubiKey.Fido2
         private const int TagPinUvAuth = 8;
         private const int TagProtocol = 9;
         private const int TagEnterpriseAttestation = 10;
+        private const string KeyCredBlob = "credBlob";
 
         private readonly List<Tuple<string, CoseAlgorithmIdentifier>> _algorithms = new List<Tuple<string, CoseAlgorithmIdentifier>>();
         private List<CredentialId>? _excludeList;
@@ -314,6 +317,80 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void AddExtension(string extensionKey, byte[] encodedValue) => _extensions =
             ParameterHelpers.AddKeyValue<byte[]>(extensionKey, encodedValue, _extensions);
+
+        /// <summary>
+        /// Add the "credBlob" extension.
+        /// </summary>
+        /// <remarks>
+        /// Because this extension is used more often, a dedicated method is
+        /// provided as a convenience. There is no need for the caller to
+        /// encode the <c>credBlobValue</c>. That is, this is essentially the
+        /// same as calling <c>AddExtension</c>, except this method will verify
+        /// the YubiKey supports the extension, verify the data length, use the
+        /// appropriate <c>extensionString</c>, and encode the value.
+        /// <para>
+        /// The caller supplies the <c>AuthenticatorInfo</c> for the YubiKey,
+        /// obtained by calling the <see cref="Commands.GetInfoCommand"/> or
+        /// providing the <see cref="Fido2Session.AuthenticatorInfo"/> property.
+        /// </para>
+        /// <para>
+        /// This method will determine from the <c>authenticatorInfo</c> whether
+        /// the YubiKey supports this extension, and whether the data provided is
+        /// within the YubiKey's range for "credBlob". The standard specifies
+        /// that the maximum credBlob length is at least 32 bytes. The
+        /// <c>AuthenticatorInfo</c> contains the property
+        /// <c>MaximumCredentialBlobLength</c>, which is the length the YubiKey
+        /// supports. If the YubiKey does not support the "credBlob" extension,
+        /// or the data is too long, this method will throw an exception.
+        /// </para>
+        /// <para>
+        /// The caller supplies the un-encoded <c>credBlobValue</c>. This method
+        /// will encode it.
+        /// </para>
+        /// </remarks>
+        /// <param name="credBlobValue">
+        /// The data to add as the "credBlob" extension.
+        /// </param>
+        /// <param name="authenticatorInfo">
+        /// The FIDO2 <c>AuthenticatorInfo</c> for the YubiKey being used.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>credBlobValue</c> or <c>authenticatorInfo</c> arg is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The YubiKey does not support this extension, or the value's length
+        /// was invalid.
+        /// </exception>
+        public void AddCredBlobExtension(byte[] credBlobValue, AuthenticatorInfo authenticatorInfo)
+        {
+            if (authenticatorInfo is null)
+            {
+                throw new ArgumentNullException(nameof(authenticatorInfo));
+            }
+            if (credBlobValue is null)
+            {
+                throw new ArgumentNullException(nameof(credBlobValue));
+            }
+
+            if (!authenticatorInfo.Extensions.Contains<string>(KeyCredBlob))
+            {
+                throw new ArgumentException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+            }
+            if (credBlobValue.Length > authenticatorInfo.MaximumCredentialBlobLength)
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidDataLength,
+                        0, authenticatorInfo.MaximumCredentialBlobLength, credBlobValue.Length));
+            }
+
+            var cborWriter = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
+            cborWriter.WriteByteString(credBlobValue);
+            byte[] encodedValue = cborWriter.Encode();
+
+            AddExtension(KeyCredBlob, encodedValue);
+        }
 
         /// <summary>
         /// Add an entry to the list of options.

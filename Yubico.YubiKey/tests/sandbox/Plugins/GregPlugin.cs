@@ -55,9 +55,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     return true;
                 };
 
-                var info = fido2.GetAuthenticatorInfo();
-
-                foreach (var option in info.Options!)
+                foreach (var option in fido2.AuthenticatorInfo.Options!)
                 {
                     Console.WriteLine($"{option.Key} = {option.Value}");
                 }

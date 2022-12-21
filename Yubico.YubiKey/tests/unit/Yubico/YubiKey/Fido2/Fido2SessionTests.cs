@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.Fido2
 
             var session = new Fido2Session(mockYubiKey.Object);
 
-            _ = session.GetAuthenticatorInfo();
+            //session.AuthenticatorInfo;
 
             mockConnection.Verify(c => c.SendCommand(It.IsAny<GetInfoCommand>()));
         }

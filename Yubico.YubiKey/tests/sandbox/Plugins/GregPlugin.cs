@@ -17,8 +17,11 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using Serilog;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Fido2;
+using Yubico.YubiKey.YubiHsmAuth;
+using Yubico.YubiKey.YubiHsmAuth.Commands;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
@@ -31,14 +34,15 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         public override bool Execute()
         {
-            Log.LoggerFactory = LoggerFactory.Create(
-                builder => builder.AddSimpleConsole(
-                        options =>
-                        {
-                            options.IncludeScopes = true;
-                            options.SingleLine = true;
-                            options.TimestampFormat = "hh:mm:ss";
-                        })
+            using var log = new LoggerConfiguration()
+                .Enrich.With(new ThreadIdEnricher())
+                .WriteTo.Console(
+                    outputTemplate: "[{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
+                .CreateLogger();
+
+            Core.Logging.Log.LoggerFactory = LoggerFactory.Create(
+                builder => builder
+                    .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));
 
             var yubiKey = YubiKeyDevice.FindAll().First();
@@ -47,41 +51,19 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
             Console.WriteLine($"YubiKey Version: {yubiKey.FirmwareVersion}");
 
-            using (var fido2 = new Fido2Session(yubiKey))
+            using (var hsmAuth = new YubiHsmAuthSession(yubiKey))
             {
-                fido2.KeyCollector = data =>
-                {
-                    Console.WriteLine("Touch now.");
-                    return true;
-                };
+                string label = "mycred";
+                byte[] password = new byte[16];
+                Encoding.ASCII.GetBytes("abc123").CopyTo(password, 0);
+                byte[] hostChallenge = { 0, 1, 2, 3, 4, 5, 6, 7 };
+                byte[] hsmDeviceChallenge = { 8, 9, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15 };
 
-                foreach (var option in fido2.AuthenticatorInfo.Options!)
-                {
-                    Console.WriteLine($"{option.Key} = {option.Value}");
-                }
+                var command = new GetAes128SessionKeysCommand(label, password, hostChallenge, hsmDeviceChallenge);
 
-                var pin = Encoding.UTF8.GetBytes("123456");
-                _ = fido2.TrySetPin(pin);
-
-                bool success = fido2.TryVerifyPin(pin, null, null, out _, out _);
-
-                Console.WriteLine($"Verify PIN: {success}");
-
-                byte[] clientDataHash = {
-                    0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
-                    0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
-                };
-
-                var mcParams = new MakeCredentialParameters(
-                    new RelyingParty("test-rp-id") { Name = "My RP" },
-                    new UserEntity(new byte[] { 0x11, 0x22, 0x33, 0x44 }) { Name = "SomeUserName", DisplayName = "User"})
-                    {
-                        ClientDataHash = clientDataHash
-                    };
-
-                var mcData = fido2.MakeCredential(mcParams);
-
-                Console.WriteLine($"Successfully made credential: {mcData.Format}");
+                Console.WriteLine("Calling calculate...");
+                var response = hsmAuth.Connection.SendCommand(command);
+                Console.WriteLine($"Calculate returned with {response.Status}");
             }
 
             return true;

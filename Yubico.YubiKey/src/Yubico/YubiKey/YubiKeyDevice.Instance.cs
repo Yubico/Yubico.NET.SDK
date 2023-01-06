@@ -15,9 +15,11 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
+using System.Threading;
 using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
+using Yubico.Core.Logging;
 using Yubico.YubiKey.DeviceExtensions;
 using MgmtCmd = Yubico.YubiKey.Management.Commands;
 
@@ -80,6 +82,9 @@ namespace Yubico.YubiKey
         private IHidDevice? _hidFidoDevice;
         private IHidDevice? _hidKeyboardDevice;
         private IYubiKeyDeviceInfo _yubiKeyInfo;
+        private Transport _lastActiveTransport;
+
+        private readonly Logger _log = Log.GetLogger();
 
         internal ISmartCardDevice GetSmartCardDevice() => _smartCardDevice!;
 
@@ -132,8 +137,11 @@ namespace Yubico.YubiKey
                     throw new ArgumentException(ExceptionMessages.DeviceTypeNotRecognized, nameof(device));
             }
 
+            _log.LogInformation("Created a YubiKeyDevice based on the {Transport} transport.", _lastActiveTransport);
+
             _yubiKeyInfo = info;
             IsNfcDevice = _smartCardDevice?.IsNfcTransport() ?? false;
+            _lastActiveTransport = Transport.None;
         }
 
         /// <summary>
@@ -149,6 +157,7 @@ namespace Yubico.YubiKey
             IHidDevice? hidFidoDevice,
             IYubiKeyDeviceInfo yubiKeyDeviceInfo)
         {
+            _lastActiveTransport = Transport.None;
             _smartCardDevice = smartCardDevice;
             _hidFidoDevice = hidFidoDevice;
             _hidKeyboardDevice = hidKeyboardDevice;
@@ -268,6 +277,7 @@ namespace Yubico.YubiKey
             // if unavailable.
             if (application == YubiKeyApplication.Otp && HasHidKeyboard)
             {
+                PreSelectUsbTransport(Transport.HidKeyboard);
                 connection = new KeyboardConnection(_hidKeyboardDevice!);
                 return true;
             }
@@ -277,6 +287,7 @@ namespace Yubico.YubiKey
             if ((application == YubiKeyApplication.Fido2 || application == YubiKeyApplication.FidoU2f)
                 && HasHidFido)
             {
+                PreSelectUsbTransport(Transport.HidFido);
                 connection = new FidoConnection(_hidFidoDevice!);
                 return true;
             }
@@ -287,6 +298,7 @@ namespace Yubico.YubiKey
                 return false;
             }
 
+            PreSelectUsbTransport(Transport.SmartCard);
             connection = new CcidConnection(_smartCardDevice, application);
 
             return true;
@@ -304,6 +316,7 @@ namespace Yubico.YubiKey
                 return false;
             }
 
+            PreSelectUsbTransport(Transport.SmartCard);
             connection = new CcidConnection(_smartCardDevice, applicationId);
 
             return true;
@@ -813,5 +826,59 @@ namespace Yubico.YubiKey
             return res;
         }
         #endregion
+
+        private DateTime GetLastActiveTime() =>
+            _lastActiveTransport switch
+            {
+                Transport.SmartCard when _smartCardDevice is { } => _smartCardDevice.LastAccessed,
+                Transport.HidFido when _hidFidoDevice is { } => _hidFidoDevice.LastAccessed,
+                Transport.HidKeyboard when _hidKeyboardDevice is { } => _hidKeyboardDevice.LastAccessed,
+                Transport.None => DateTime.Now,
+                _ => throw new InvalidOperationException(ExceptionMessages.DeviceTypeNotRecognized)
+            };
+
+        // This function handles waiting for the reclaim timeout on the YubiKey to elapse. The reclaim timeout requires
+        // the SDK to wait 3 seconds since the last USB message to an interface before switching to a different interface.
+        // Failure to wait can result in very strange behavior from the USB devices ultimately resulting in communication
+        // failures (i.e. exceptions).
+        private void PreSelectUsbTransport(Transport t)
+        {
+            // We're only affected by the reclaim timeout if we're switching USB transports.
+            if (_lastActiveTransport == t)
+            {
+                _log.LogInformation(
+                    "{Transport} transport is already active. No need to wait for reclaim.",
+                    _lastActiveTransport);
+
+                return;
+            }
+
+            _log.LogInformation(
+                "Switching USB transports from {OldTransport} to {NewTransport}.",
+                _lastActiveTransport,
+                t);
+
+            // We use 3.01 seconds to give us a little wiggle room as the YubiKey's measurement
+            // for the reclaim timeout is likely not as accurate as the system's clock.
+            var reclaimTimeout = TimeSpan.FromSeconds(3.01);
+            TimeSpan timeSinceLastActivation = DateTime.Now - GetLastActiveTime();
+
+            // If we haven't already waited the duration of the reclaim timeout, we need to do so.
+            // Otherwise we've already waited and can immediately switch the transport.
+            if (timeSinceLastActivation < reclaimTimeout)
+            {
+                TimeSpan waitNeeded = reclaimTimeout - timeSinceLastActivation;
+
+                _log.LogInformation(
+                    "Reclaim timeout still active. Need to wait {TimeMS} milliseconds.",
+                    waitNeeded.TotalMilliseconds);
+
+                Thread.Sleep(waitNeeded);
+            }
+
+            _lastActiveTransport = t;
+
+            _log.LogInformation("Reclaim timeout has lapsed. It is safe to switch USB transports.");
+        }
     }
 }

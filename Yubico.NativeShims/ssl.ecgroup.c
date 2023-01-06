@@ -19,5 +19,5 @@ Native_EC_GROUP_free(
     Native_EC_GROUP group
     )
 {
-    return EC_GROUP_free(group);
+    EC_GROUP_free(group);
 }

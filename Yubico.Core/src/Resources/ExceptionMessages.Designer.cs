@@ -61,6 +61,15 @@ namespace Yubico.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The AES-GCM operation failed..
+        /// </summary>
+        internal static string AesGcmFailed {
+            get {
+                return ResourceManager.GetString("AesGcmFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A command APDU has returned an error in the status word. Check ApduStatus and other properties for more details..
         /// </summary>
         internal static string ApduError {
@@ -201,6 +210,15 @@ namespace Yubico.Core {
         internal static string IllegalCharacter {
             get {
                 return ResourceManager.GetString("IllegalCharacter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to One or more AES-GCM inputs were invalid..
+        /// </summary>
+        internal static string InvalidAesGcmInput {
+            get {
+                return ResourceManager.GetString("InvalidAesGcmInput", resourceCulture);
             }
         }
         

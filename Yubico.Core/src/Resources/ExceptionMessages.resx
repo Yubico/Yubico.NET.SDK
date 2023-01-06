@@ -267,4 +267,10 @@
   <data name="EcdhComputationFailed" xml:space="preserve">
     <value>Computation of the ECDH derived data failed.</value>
   </data>
+  <data name="InvalidAesGcmInput" xml:space="preserve">
+    <value>One or more AES-GCM inputs were invalid.</value>
+  </data>
+  <data name="AesGcmFailed" xml:space="preserve">
+    <value>The AES-GCM operation failed.</value>
+  </data>
 </root>

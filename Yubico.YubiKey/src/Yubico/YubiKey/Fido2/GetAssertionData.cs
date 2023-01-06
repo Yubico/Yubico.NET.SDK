@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Fido2
     /// assertion, including the credential. There are several elements
     /// in this data and this structure contains those elements.
     /// </remarks>
-    public class GetAssertionData
+    public class GetAssertionData : IDisposable
     {
         private const int KeyCredential = 1;
         private const int KeyAuthData = 2;
@@ -47,6 +47,10 @@ namespace Yubico.YubiKey.Fido2
         private const string KeyUserId = "id";
         private const string KeyUserName = "name";
         private const string KeyUserDisplayName = "displayName";
+
+//        private readonly Logger _log = Log.GetLogger();
+        private bool _disposed;
+        private byte[]? _keyData;
 
         /// <summary>
         /// The credential ID for the assertion just obtained.
@@ -156,10 +160,10 @@ namespace Yubico.YubiKey.Fido2
                 }
                 NumberOfCredentials = (int?)map.ReadOptional<int>(KeyNumberCredentials);
                 UserSelected = (bool?)map.ReadOptional<bool>(KeyUserSelected);
-                byte[]? keyData = (byte[]?)map.ReadOptional<byte[]>(KeyLargeBlobKey);
-                if (!(keyData is null))
+                _keyData = (byte[]?)map.ReadOptional<byte[]>(KeyLargeBlobKey);
+                if (!(_keyData is null))
                 {
-                    LargeBlobKey = new ReadOnlyMemory<byte>(keyData);
+                    LargeBlobKey = new ReadOnlyMemory<byte>(_keyData);
                 }
             }
             catch (CborContentException cborException)
@@ -203,6 +207,28 @@ namespace Yubico.YubiKey.Fido2
 
             using var ecdsaVfy = new EcdsaVerify(publicKey);
             return ecdsaVfy.VerifyDigestedData(digester.Hash, Signature.ToArray());
+        }
+
+        /// <summary>
+        /// Releases any unmanaged resources and overwrites any sensitive data.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases any unmanaged resources and overwrites any sensitive data.
+        /// </summary>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                CryptographicOperations.ZeroMemory(_keyData);
+            }
+
+            _disposed = true;
         }
     }
 }

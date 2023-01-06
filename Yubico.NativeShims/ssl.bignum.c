@@ -58,5 +58,5 @@ Native_BN_clear_free(
     const Native_BIGNUM a
 )
 {
-    return BN_clear_free(a);
+    BN_clear_free(a);
 }

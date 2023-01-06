@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// Get the current <c>serializedLargeBlobArray</c> out of the YubiKey.
         /// </summary>
-        public LargeBlobArray GetCurrentLargeBlobArray()
+        public SerializedLargeBlobArray GetCurrentLargeBlobArray()
         {
             throw new NotImplementedException();
         }
@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Fido2
         /// Set the <c>serializedLargeBlobArray</c> in the YubiKey to contain the
         /// data in the input <c>largeBlobArray</c>.
         /// </summary>
-        public void SetLargeBlobArray(LargeBlobArray largeBlobArray)
+        public void SetLargeBlobArray(SerializedLargeBlobArray largeBlobArray)
         {
             throw new NotImplementedException();
         }

@@ -13,6 +13,12 @@
         Native_EC_POINT_mul;
         Native_EC_POINT_new;
         Native_EC_POINT_set_affine_coordinates;
+        Native_EVP_CIPHER_CTX_new;
+        Native_EVP_CIPHER_CTX_free;
+        Native_EVP_Aes256Gcm_Init;
+        Native_EVP_Update;
+        Native_EVP_Final_ex;
+        Native_EVP_CIPHER_CTX_ctrl;
         Native_SCardBeginTransaction;
         Native_SCardCancel;
         Native_SCardConnect;

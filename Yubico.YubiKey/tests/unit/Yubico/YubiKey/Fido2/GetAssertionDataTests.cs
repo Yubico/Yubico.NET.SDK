@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.Fido2
                 0x11, 0x22, 0x33, 0x44
             };
 
-            var aData = new GetAssertionData(encodedData);
+            using var aData = new GetAssertionData(encodedData);
             var pubKey = new CoseEcPublicKey(CoseEcCurve.P256, pubKeyX, pubKeyY);
 
             bool isVerified = aData.VerifyAssertion(pubKey, clientDataHash);

@@ -22,7 +22,7 @@ Native_EC_POINT_free(
     Native_EC_POINT point
     )
 {
-    return EC_POINT_free(point);
+    EC_POINT_free(point);
 }
 
 int32_t

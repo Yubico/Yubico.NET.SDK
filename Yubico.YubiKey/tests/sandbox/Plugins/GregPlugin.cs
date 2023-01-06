@@ -47,8 +47,6 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
             var yubiKey = YubiKeyDevice.FindAll().First();
 
-            Thread.Sleep(3000);
-
             Console.WriteLine($"YubiKey Version: {yubiKey.FirmwareVersion}");
 
             using (var hsmAuth = new YubiHsmAuthSession(yubiKey))

@@ -103,7 +103,7 @@ namespace Yubico.Core.Devices.Hid
         /// An active connection object.
         /// </returns>
         public override IHidConnection ConnectToFeatureReports() =>
-            new MacOSHidFeatureReportConnection(_entryId);
+            new MacOSHidFeatureReportConnection(this, _entryId);
 
         /// <summary>
         /// Establishes a connection capable of transmitting IO reports to a FIDO device.
@@ -112,7 +112,7 @@ namespace Yubico.Core.Devices.Hid
         /// An active connection object.
         /// </returns>
         public override IHidConnection ConnectToIOReports() =>
-            new MacOSHidIOReportConnection(_entryId);
+            new MacOSHidIOReportConnection(this, _entryId);
 
         internal static long GetEntryId(IntPtr device)
         {
@@ -131,6 +131,12 @@ namespace Yubico.Core.Devices.Hid
             }
 
             return entryId;
+        }
+
+        public void AccessDevice()
+        {
+            LastAccessed = DateTime.Now;
+            _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
         }
     }
 }

@@ -52,12 +52,13 @@ namespace Yubico.Core.Devices.SmartCard
                 {
                     log.SCardApiCall(nameof(SCardListReaders), result);
                 }
-                
+
                 // It's OK if there are no readers on the system. Treat this the same as if we
                 // didn't find any devices.
                 if (result == ErrorCode.SCARD_E_NO_READERS_AVAILABLE || readerNames.Length == 0)
                 {
                     log.LogInformation("No smart card devices found.");
+
                     return new List<ISmartCardDevice>();
                 }
 
@@ -77,6 +78,7 @@ namespace Yubico.Core.Devices.SmartCard
                     0,
                     readerStates,
                     readerStates.Length);
+
                 log.SCardApiCall(nameof(SCardGetStatusChange), result);
                 log.LogInformation("Updated SCard reader states: {ReaderStates}", readerStates);
 
@@ -97,13 +99,14 @@ namespace Yubico.Core.Devices.SmartCard
             }
         }
 
-        private static ISmartCardDevice NewSmartCardDevice(string readerName, AnswerToReset? atr) => SdkPlatformInfo.OperatingSystem switch
-        {
-            SdkPlatform.Windows => new DesktopSmartCardDevice(readerName, atr),
-            SdkPlatform.MacOS => new DesktopSmartCardDevice(readerName, atr),
-            SdkPlatform.Linux => new DesktopSmartCardDevice(readerName, atr),
-            _ => throw new PlatformNotSupportedException()
-        };
+        private static ISmartCardDevice NewSmartCardDevice(string readerName, AnswerToReset? atr) =>
+            SdkPlatformInfo.OperatingSystem switch
+            {
+                SdkPlatform.Windows => new DesktopSmartCardDevice(readerName, atr),
+                SdkPlatform.MacOS => new DesktopSmartCardDevice(readerName, atr),
+                SdkPlatform.Linux => new DesktopSmartCardDevice(readerName, atr),
+                _ => throw new PlatformNotSupportedException()
+            };
 
         public DesktopSmartCardDevice(string readerName, AnswerToReset? atr) :
             base(readerName, atr)
@@ -135,6 +138,7 @@ namespace Yubico.Core.Devices.SmartCard
                     SCARD_PROTOCOL.Tx,
                     out cardHandle,
                     out SCARD_PROTOCOL activeProtocol);
+
                 _log.SCardApiCall(nameof(SCardConnect), result);
 
                 if (result != ErrorCode.SCARD_S_SUCCESS)
@@ -153,6 +157,7 @@ namespace Yubico.Core.Devices.SmartCard
                     activeProtocol);
 
                 var connection = new DesktopSmartCardConnection(
+                    this,
                     context,
                     cardHandle,
                     activeProtocol);
@@ -179,5 +184,12 @@ namespace Yubico.Core.Devices.SmartCard
                 }
             }
         }
+
+        public void AccessDevice()
+        {
+            LastAccessed = DateTime.Now;
+            _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
+        }
+
     }
 }

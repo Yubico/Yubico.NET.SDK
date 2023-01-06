@@ -19,6 +19,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
 {
     class FakeHidDevice : IHidDevice
     {
+        public DateTime LastAccessed { get; } = DateTime.Now;
         public string Path { get; } = String.Empty;
         public string? ParentDeviceId { get; } = null;
         public short VendorId { get; }

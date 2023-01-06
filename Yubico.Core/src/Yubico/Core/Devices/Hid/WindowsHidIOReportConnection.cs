@@ -19,20 +19,17 @@ namespace Yubico.Core.Devices.Hid
 {
     internal class WindowsHidIOReportConnection : IHidConnection
     {
+        private readonly WindowsHidDevice _owningDevice;
+
         private IHidDDevice Device { get; set; }
 
         public int InputReportSize { get; private set; }
         public int OutputReportSize { get; private set; }
 
-        internal WindowsHidIOReportConnection(string path)
+        internal WindowsHidIOReportConnection(WindowsHidDevice device, string path)
         {
+            _owningDevice = device;
             Device = new HidDDevice(path);
-            SetupConnection();
-        }
-
-        internal WindowsHidIOReportConnection(IHidDDevice device)
-        {
-            Device = device;
             SetupConnection();
         }
 
@@ -43,11 +40,17 @@ namespace Yubico.Core.Devices.Hid
             OutputReportSize = Device.OutputReportByteLength;
         }
 
-        public byte[] GetReport() =>
-            Device.GetInputReport();
+        public byte[] GetReport()
+        {
+            _owningDevice.AccessDevice();
+            return Device.GetInputReport();
+        }
 
-        public void SetReport(byte[] report) =>
+        public void SetReport(byte[] report)
+        {
+            _owningDevice.AccessDevice();
             Device.SetOutputReport(report);
+        }
 
         #region IDisposable Support
         private bool disposedValue; // To detect redundant calls

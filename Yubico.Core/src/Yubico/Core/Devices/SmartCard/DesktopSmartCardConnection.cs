@@ -24,6 +24,7 @@ namespace Yubico.Core.Devices.SmartCard
     public class DesktopSmartCardConnection : ISmartCardConnection
     {
         private readonly Logger _log = Log.GetLogger();
+        private readonly DesktopSmartCardDevice _device;
         private readonly SCardContext _context;
         private readonly SCardCardHandle _cardHandle;
         private SCARD_PROTOCOL _activeProtocol;
@@ -76,10 +77,12 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         internal DesktopSmartCardConnection(
+            DesktopSmartCardDevice device,
             SCardContext context,
             SCardCardHandle cardHandle,
             SCARD_PROTOCOL activeProtocol)
         {
+            _device = device;
             _context = context;
             _cardHandle = cardHandle;
             _activeProtocol = activeProtocol;
@@ -139,6 +142,8 @@ namespace Yubico.Core.Devices.SmartCard
             {
                 throw new ArgumentNullException(nameof(commandApdu));
             }
+
+            _device.AccessDevice();
 
             // The YubiKey likely will never return a buffer larger than 512 bytes without instead
             // using response chaining.

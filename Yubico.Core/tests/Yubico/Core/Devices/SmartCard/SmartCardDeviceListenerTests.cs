@@ -20,6 +20,7 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
 {
     class FakeSmartCardDevice : ISmartCardDevice
     {
+        public DateTime LastAccessed { get; } = DateTime.Now;
         public string Path { get; } = string.Empty;
         public string? ParentDeviceId { get; } = null;
         public AnswerToReset? Atr { get; }

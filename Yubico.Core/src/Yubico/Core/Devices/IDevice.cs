@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Yubico.Core.Devices
 {
     /// <summary>
@@ -48,5 +50,15 @@ namespace Yubico.Core.Devices
         /// </para>
         /// </remarks>
         string? ParentDeviceId { get; }
+
+        /// <summary>
+        /// The time when this device was last accessed.
+        /// </summary>
+        /// <remarks>
+        /// Certain Yubico devices, such as the YubiKey, require a short delay before switching to and communicating with
+        /// a different USB interface. This is called the reclaim timeout. The YubiKey SDK must keep track of the last
+        /// interface to have been accessed and when in order to properly implement this delay.
+        /// </remarks>
+        DateTime LastAccessed { get; }
     }
 }

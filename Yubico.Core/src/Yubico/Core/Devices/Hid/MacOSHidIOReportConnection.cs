@@ -27,11 +27,12 @@ namespace Yubico.Core.Devices.Hid
     /// <summary>
     /// macOS implementation of the FIDO IO report connection.
     /// </summary>
-    public sealed class MacOSHidIOReportConnection : IHidConnection
+    internal sealed class MacOSHidIOReportConnection : IHidConnection
     {
         private readonly long _entryId;
         private IntPtr _deviceHandle;
         private bool _isDisposed;
+        private readonly MacOSHidDevice _device;
         private readonly IntPtr _loopId;
         private readonly Logger _log = Log.GetLogger();
 
@@ -48,13 +49,17 @@ namespace Yubico.Core.Devices.Hid
         /// <summary>
         /// Constructs an instance of the MacOSHidIOReportConnection class.
         /// </summary>
+        /// <param name="device">
+        /// The device object from which this connection originates.
+        /// </param>
         /// <param name="entryId">
         /// The IOKit registry entry identifier representing the device we're trying to connect to.
         /// </param>
-        public MacOSHidIOReportConnection(long entryId)
+        public MacOSHidIOReportConnection(MacOSHidDevice device, long entryId)
         {
             _log.LogInformation("Creating a new IO report connection for device [{EntryId}]", entryId);
 
+            _device = device;
             _entryId = entryId;
 
             byte[] cstr = Encoding.UTF8.GetBytes($"fido2-loopid-{entryId}");
@@ -288,6 +293,8 @@ namespace Yubico.Core.Devices.Hid
             _log.SensitiveLogInformation(
                 "Calling SetReport with data: {Report}",
                 Hex.BytesToHex(report));
+
+            _device.AccessDevice();
 
             int result = IOHIDDeviceSetReport(
                 _deviceHandle,

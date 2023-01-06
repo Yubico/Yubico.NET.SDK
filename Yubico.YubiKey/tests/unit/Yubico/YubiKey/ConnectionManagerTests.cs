@@ -31,6 +31,7 @@ namespace Yubico.YubiKey
         public readonly static ISmartCardDevice NfcInstance = new TestSmartCardDevice()
             { Kind = SmartCardConnectionKind.Nfc };
 
+        public DateTime LastAccessed { get; } = DateTime.Now;
         public string Path { get; } = string.Empty;
         public string? ParentDeviceId { get; } = null;
         public AnswerToReset? Atr { get; }
@@ -46,6 +47,7 @@ namespace Yubico.YubiKey
         public readonly static IHidDevice FidoInstance = new TestHidDevice() { UsagePage = HidUsagePage.Fido };
         public readonly static IHidDevice KeyboardInstance = new TestHidDevice() { UsagePage = HidUsagePage.Keyboard };
 
+        public DateTime LastAccessed { get; } = DateTime.Now;
         public string Path { get; } = string.Empty;
         public string? ParentDeviceId { get; } = null;
         public short VendorId { get; }

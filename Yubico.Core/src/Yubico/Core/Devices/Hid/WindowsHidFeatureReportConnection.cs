@@ -17,22 +17,19 @@ using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid
 {
-    internal class WindowsHidFeatureReportConnection : IHidConnection
+    internal sealed class WindowsHidFeatureReportConnection : IHidConnection
     {
+        private readonly WindowsHidDevice _owningDevice;
+
         private IHidDDevice Device { get; set; }
 
         public int InputReportSize { get; private set; }
         public int OutputReportSize { get; private set; }
 
-        internal WindowsHidFeatureReportConnection(string path)
+        internal WindowsHidFeatureReportConnection(WindowsHidDevice owningDevice, string path)
         {
+            _owningDevice = owningDevice;
             Device = new HidDDevice(path);
-            SetupConnection();
-        }
-
-        internal WindowsHidFeatureReportConnection(IHidDDevice device)
-        {
-            Device = device;
             SetupConnection();
         }
 
@@ -43,17 +40,22 @@ namespace Yubico.Core.Devices.Hid
             OutputReportSize = Device.FeatureReportByteLength;
         }
 
-        public byte[] GetReport() =>
-            Device.GetFeatureReport();
+        public byte[] GetReport()
+        {
+            _owningDevice.AccessDevice();
+            return Device.GetFeatureReport();
+        }
 
-        public void SetReport(byte[] report) =>
+        public void SetReport(byte[] report)
+        {
+            _owningDevice.AccessDevice();
             Device.SetFeatureReport(report);
-
+        }
 
         #region IDisposable Support
         private bool disposedValue; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!disposedValue)
             {

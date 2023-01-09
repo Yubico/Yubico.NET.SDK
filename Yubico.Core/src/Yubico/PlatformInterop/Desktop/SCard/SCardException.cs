@@ -57,7 +57,7 @@ namespace Yubico.PlatformInterop
                 ErrorCode.ERROR_BROKEN_PIPE =>
                     "ERROR_BROKEN_PIPE: The client attempted a smart card operation in a remote session, such as a client " +
                     "session running on a terminal server, and the operating system in use does not support smart card " +
-                    "redirection",
+                    "redirection.",
                 ErrorCode.SCARD_E_BAD_SEEK =>
                     "SCARD_E_BAD_SEEK: An error occurred in setting the smart card file object pointer.",
                 ErrorCode.SCARD_E_CANCELLED =>

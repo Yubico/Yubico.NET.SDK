@@ -141,7 +141,7 @@ namespace Yubico.YubiKey
 
             _yubiKeyInfo = info;
             IsNfcDevice = _smartCardDevice?.IsNfcTransport() ?? false;
-            _lastActiveTransport = Transport.None;
+            _lastActiveTransport = GetTransportIfOnlyDevice();
         }
 
         /// <summary>
@@ -157,12 +157,12 @@ namespace Yubico.YubiKey
             IHidDevice? hidFidoDevice,
             IYubiKeyDeviceInfo yubiKeyDeviceInfo)
         {
-            _lastActiveTransport = Transport.None;
             _smartCardDevice = smartCardDevice;
             _hidFidoDevice = hidFidoDevice;
             _hidKeyboardDevice = hidKeyboardDevice;
             _yubiKeyInfo = yubiKeyDeviceInfo;
             IsNfcDevice = smartCardDevice?.IsNfcTransport() ?? false;
+            _lastActiveTransport = GetTransportIfOnlyDevice(); // Must be after setting the three device fields.
         }
 
         /// <summary>
@@ -223,6 +223,8 @@ namespace Yubico.YubiKey
                 default:
                     throw new ArgumentException(ExceptionMessages.DeviceTypeNotRecognized, nameof(device));
             }
+
+            _lastActiveTransport = GetTransportIfOnlyDevice();
         }
 
         bool IYubiKeyDevice.HasSameParentDevice(IDevice device) => HasSameParentDevice(device);
@@ -836,6 +838,31 @@ namespace Yubico.YubiKey
                 Transport.None => DateTime.Now,
                 _ => throw new InvalidOperationException(ExceptionMessages.DeviceTypeNotRecognized)
             };
+
+        // If this YubiKey only has a single active USB transport attached to it, we do not really need to worry about
+        // the reclaim timeout. This can help speed up the first access of the device as we know for a fact that there
+        // is no transport switching involved. In the case that there are multiple transports present, we set the
+        // transport to "none" to force the wait on first device access. We must force this wait because enumeration
+        // cheats by not waiting between switching transports.
+        private Transport GetTransportIfOnlyDevice()
+        {
+            if (HasHidKeyboard && !HasHidFido && !HasSmartCard)
+            {
+                return Transport.HidKeyboard;
+            }
+
+            if (HasHidFido && !HasHidKeyboard && !HasSmartCard)
+            {
+                return Transport.HidFido;
+            }
+
+            if (HasSmartCard && !HasHidKeyboard && !HasHidFido)
+            {
+                return Transport.SmartCard;
+            }
+
+            return Transport.None;
+        }
 
         // This function handles waiting for the reclaim timeout on the YubiKey to elapse. The reclaim timeout requires
         // the SDK to wait 3 seconds since the last USB message to an interface before switching to a different interface.

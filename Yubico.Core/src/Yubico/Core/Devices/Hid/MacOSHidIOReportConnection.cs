@@ -35,6 +35,8 @@ namespace Yubico.Core.Devices.Hid
         private readonly MacOSHidDevice _device;
         private readonly IntPtr _loopId;
         private readonly Logger _log = Log.GetLogger();
+        private readonly byte[] _readBuffer;
+        private readonly GCHandle _readHandle;
 
         /// <summary>
         /// The correct size, in bytes, for the data buffer to be transmitted to the device.
@@ -64,6 +66,9 @@ namespace Yubico.Core.Devices.Hid
 
             byte[] cstr = Encoding.UTF8.GetBytes($"fido2-loopid-{entryId}");
             _loopId = CFStringCreateWithCString(IntPtr.Zero, cstr, 0);
+
+            _readBuffer = new byte[64];
+            _readHandle = GCHandle.Alloc(_readBuffer, GCHandleType.Pinned);
 
             SetupConnection();
 
@@ -98,7 +103,7 @@ namespace Yubico.Core.Devices.Hid
                     throw new PlatformApiException(ExceptionMessages.IOKitCannotOpenDevice);
                 }
 
-                int result = IOHIDDeviceOpen(_deviceHandle, 0);
+                int result = IOHIDDeviceOpen(_deviceHandle, 0x01);
                 _log.IOKitApiCall(nameof(IOHIDDeviceOpen), (kern_return_t)result);
 
                 if (result != 0)
@@ -108,6 +113,21 @@ namespace Yubico.Core.Devices.Hid
                         result,
                         ExceptionMessages.IOKitCannotOpenDevice);
                 }
+
+                // Why are we using callbacks instead of directly reading the report? This is because it is stated in
+                // Apple documentation here https://developer.apple.com/documentation/iokit/1588659-iohiddevicegetreport
+                // that this async methods should be used for "input reports", which is the type of report frame that
+                // FIDO uses.
+                IntPtr reportCallback = Marshal.GetFunctionPointerForDelegate<IOHIDReportCallback>(ReportCallback);
+                IOHIDDeviceRegisterInputReportCallback(
+                    _deviceHandle,
+                    _readBuffer,
+                    _readBuffer.Length,
+                    reportCallback,
+                    GCHandle.ToIntPtr(_readHandle));
+
+                IntPtr callback = Marshal.GetFunctionPointerForDelegate<IOHIDCallback>(RemovalCallback);
+                IOHIDDeviceRegisterRemovalCallback(_deviceHandle, callback, _deviceHandle);
             }
             finally
             {
@@ -130,28 +150,8 @@ namespace Yubico.Core.Devices.Hid
         /// </exception>
         public byte[] GetReport()
         {
-            const int readBufferSize = 64;
-
-            byte[] readBuffer = new byte[readBufferSize];
-            GCHandle readHandle = GCHandle.Alloc(readBuffer, GCHandleType.Pinned);
-
             try
             {
-                // Why are we using callbacks instead of directly reading the report? This is because it is stated in
-                // Apple documentation here https://developer.apple.com/documentation/iokit/1588659-iohiddevicegetreport
-                // that this async methods should be used for "input reports", which is the type of report frame that
-                // FIDO uses.
-                IntPtr reportCallback = Marshal.GetFunctionPointerForDelegate<IOHIDReportCallback>(ReportCallback);
-                IOHIDDeviceRegisterInputReportCallback(
-                    _deviceHandle,
-                    readBuffer,
-                    readBuffer.Length,
-                    reportCallback,
-                    GCHandle.ToIntPtr(readHandle));
-
-                IntPtr callback = Marshal.GetFunctionPointerForDelegate<IOHIDCallback>(RemovalCallback);
-                IOHIDDeviceRegisterRemovalCallback(_deviceHandle, callback, _deviceHandle);
-
                 IntPtr runLoop = CFRunLoopGetCurrent();
 
                 IOHIDDeviceScheduleWithRunLoop(_deviceHandle, runLoop, _loopId);
@@ -174,26 +174,23 @@ namespace Yubico.Core.Devices.Hid
 
                 _log.SensitiveLogInformation(
                     "GetReport returned buffer: {Report}",
-                    Hex.BytesToHex(readBuffer));
+                    Hex.BytesToHex(_readBuffer));
+
+                _device.AccessDevice();
 
                 // Return a copy of the report
-                return readBuffer.ToArray();
+                return _readBuffer.ToArray();
             }
             finally
             {
                 IOHIDDeviceRegisterInputReportCallback(
                     _deviceHandle,
-                    readBuffer,
-                    readBuffer.Length,
+                    _readBuffer,
+                    _readBuffer.Length,
                     IntPtr.Zero,
                     IntPtr.Zero);
 
                 IOHIDDeviceRegisterRemovalCallback(_deviceHandle, IntPtr.Zero, IntPtr.Zero);
-
-                if (readHandle.IsAllocated)
-                {
-                    readHandle.Free();
-                }
             }
         }
 
@@ -324,6 +321,11 @@ namespace Yubico.Core.Devices.Hid
             if (disposing)
             {
                 // Dispose managed state here
+            }
+
+            if (_readHandle.IsAllocated)
+            {
+                _readHandle.Free();
             }
 
             if (_deviceHandle != IntPtr.Zero)

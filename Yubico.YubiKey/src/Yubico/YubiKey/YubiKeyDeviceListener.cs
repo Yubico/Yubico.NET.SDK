@@ -219,7 +219,18 @@ namespace Yubico.YubiKey
 
             IList<IDevice> hidKeyboardDevices = GetHidKeyboardDevices().ToList();
             IList<IDevice> smartCardDevices = GetSmartCardDevices().ToList();
-            IList<IDevice> hidFidoDevices = GetHidFidoDevices().ToList();
+            IList<IDevice> hidFidoDevices = new List<IDevice>();
+
+            if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows && !SdkPlatformInfo.IsElevated)
+            {
+                _log.LogWarning(
+                    "SDK running in an un-elevated Windows process. " +
+                    "Skipping FIDO enumeration as this requires process elevation.");
+            }
+            else
+            {
+                hidFidoDevices = GetHidFidoDevices().ToList();
+            }
 
             _log.LogInformation(
                 "Found {HidCount} HID Keyboard devices, {FidoCount} HID FIDO devices, and {SCardCount} Smart Card devices for processing.",

@@ -1233,6 +1233,7 @@ namespace Yubico.YubiKey.Cryptography
                 //  DB = lHash || PS || 01 || input data
 
                 // lHash = digest of empty string.
+                digester.Initialize();
                 _ = digester.TransformFinalBlock(buffer, 0, 0);
                 int index = 0;
                 for (; index < digestLength; index++)

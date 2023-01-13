@@ -26,12 +26,14 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         {
             using (var fido2Session = new Fido2Session(yubiKey))
             {
-                authenticatorInfo = fido2Session.GetAuthenticatorInfo();
+                authenticatorInfo = fido2Session.AuthenticatorInfo;
             }
 
             return true;
         }
 
+        // Note that this method will not check the length of credBlobData,
+        // allowing you to see how the SDK handles improper input.
         public static bool RunMakeCredential(
             IYubiKeyDevice yubiKey,
             Func<KeyEntryData, bool> KeyCollectorDelegate,
@@ -41,8 +43,14 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             string userName,
             string userDisplayName,
             ReadOnlyMemory<byte> userId,
+            byte[] credBlobData,
             out MakeCredentialData makeCredentialData)
         {
+            if (credBlobData is null)
+            {
+                throw new ArgumentNullException(nameof(credBlobData));
+            }
+
             makeCredentialData = null;
             var relyingParty = new RelyingParty(relyingPartyId)
             {
@@ -58,16 +66,6 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             {
                 fido2Session.KeyCollector = KeyCollectorDelegate;
 
-                // In order to make a credential, the PIN must be verified in
-                // this session. The SDK doesn't call the Verify method
-                // automatically because an app might want to verify with
-                // specific permissions (restrictions) and a relying party ID.
-                // This sample code verifies without setting the permissions or
-                // relying party, but to see an example of verifying that checks
-                // if permissions are possible and if so allows the caller to
-                // specify, see the FidowSampleRun.RunVerifyPin method.
-                fido2Session.VerifyPin();
-
                 var makeCredentialParameters = new MakeCredentialParameters(relyingParty, userEntity)
                 {
                     ClientDataHash = clientDataHash,
@@ -82,6 +80,22 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 // in the AllowList for the call to GetAssertion.
                 // This sample code wants all credentials to be discoverable.
                 makeCredentialParameters.AddOption("rk", true);
+
+                if (credBlobData.Length > 0)
+                {
+                    makeCredentialParameters.AddCredBlobExtension(
+                        credBlobData, fido2Session.AuthenticatorInfo);
+                }
+
+                // In order to make a credential, the PIN must be verified in
+                // this session. The SDK doesn't call the Verify method
+                // automatically because an app might want to verify with
+                // specific permissions (restrictions) and a relying party ID.
+                // This sample code verifies without setting the permissions or
+                // relying party. To see an example of PIN verification that
+                // checks if permissions are possible and if so allows the caller
+                // to specify, see the FidowSampleRun.RunVerifyPin method.
+                fido2Session.VerifyPin();
 
                 makeCredentialData = fido2Session.MakeCredential(makeCredentialParameters);
 
@@ -116,6 +130,13 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 fido2Session.VerifyPin();
 
                 var getAssertionParameters = new GetAssertionParameters(relyingParty, clientDataHash);
+
+                // If there is a credBlob, we want to get it. By setting the "credBlob"
+                // extension, the YubiKey will return it if there is one (and return
+                // nothing if there is none). In this case, the data to accompany the
+                // name of the extension ("credBlob"), is the CBOR encoding of true.
+                // That's simply the single byte 0xF5.
+                getAssertionParameters.AddExtension("credBlob", new byte[] { 0xF5 });
 
                 assertions = fido2Session.GetAssertions(getAssertionParameters);
             }

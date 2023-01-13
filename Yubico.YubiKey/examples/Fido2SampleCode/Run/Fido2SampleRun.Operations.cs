@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Text;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Sample.SharedCode;
@@ -173,9 +174,12 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             SampleMenu.WriteMessage(
                 MessageType.Title, 0,
                 "In order to make a credential, this sample code will collect relying party and user\n" +
-                "info, and will set the \"rk\" option to true. No other optional elements will be set.\n" +
+                "info, and will set the \"rk\" option to true. If the credBlob extension is supported,\n" +
+                "it will ask if the caller wants to store any data in the credBlob.\n" +
+                "No other optional elements will be set.\n" +
                 "For expedience, it will generate a value based on the relying party info and use it as\n" +
-                "the ClientDataHash, even though that is not how it is actually computed.\n" +
+                "the ClientDataHash, even though what is performed in this sample code is not how it is\n" +
+                "actually computed.\n" +
                 "In addition, the User ID is binary data (a byte array), and this sample simply uses\n" +
                 "random numbers (as recommended in W3C).\n" +
                 "Furthermore, the standard specifies that the relyingPartyName, user Name, and user\n" +
@@ -198,6 +202,37 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
             ReadOnlyMemory<byte> clientDataHash = BuildFakeClientDataHash(relyingPartyId);
 
+            byte[] credBlobData = Array.Empty<byte>();
+            if (!Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out AuthenticatorInfo authenticatorInfo))
+            {
+                return false;
+            }
+            int maxCredBlobLength = authenticatorInfo.MaximumCredentialBlobLength ?? 0;
+            if (maxCredBlobLength > 0)
+            {
+                string[] menuItems = new string[] {
+                    "Yes",
+                    "No",
+                };
+
+                int response = _menuObject.RunMenu("Do you want to store credBlob data? (Maximum " + maxCredBlobLength + " bytes)", menuItems);
+                if (response == 0)
+                {
+                    SampleMenu.WriteMessage(
+                        MessageType.Title, 0,
+                        "The credBlob data can be any binary bytes but this sample code will store a string.\n" +
+                        "This sample code will expect each character in the string to be 2-byte Unicode, so\n" +
+                        "the limit is " + (maxCredBlobLength / 2) + " characters. If you use any characters other than\n" +
+                        "2-byte Unicode, there is no guarantee this sample will execute properly.\n" +
+                        "Note that the SDK will check the length of the credBlob, but not this sample code.");
+
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the credBlob data");
+                    _ = SampleMenu.ReadResponse(out string credBlobDataString);
+
+                    credBlobData = Encoding.Unicode.GetBytes(credBlobDataString);
+                }
+            }
+
             _keyCollector.Operation = Fido2KeyCollectorOperation.MakeCredential;
 
             bool isValid = Fido2Protocol.RunMakeCredential(
@@ -206,6 +241,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 clientDataHash,
                 relyingPartyName, relyingPartyId,
                 userName, userDisplayName, userId,
+                credBlobData,
                 out MakeCredentialData makeCredentialData);
 
             if (!isValid)
@@ -235,7 +271,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 "this sample run, it will only be able to verify the signatures of assertions for\n" +
                 "those credentials.\n" +
                 "For expedience, it will generate a value based on the relying party info and use it\n" +
-                "as the ClientDataHash, even though that is not how it is actually computed.\n");
+                "as the ClientDataHash, even though what is performed in this sample code is not how\n" +
+                "it is actually computed.\n");
 
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the relyingPartyId");
             _ = SampleMenu.ReadResponse(out string relyingPartyId);
@@ -284,6 +321,13 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             }
             string credentialIdString = BitConverter.ToString(assertion.CredentialId.Id.ToArray()).Replace("-", string.Empty, StringComparison.Ordinal);
             SampleMenu.WriteMessage(MessageType.Title, 0, "Credential ID: " + credentialIdString);
+
+            byte[] credBlobData = assertion.AuthenticatorData.GetCredBlobExtension();
+            if (credBlobData.Length > 0)
+            {
+                string credBlobDataString = Encoding.Unicode.GetString(credBlobData);
+                SampleMenu.WriteMessage(MessageType.Title, 0, "Credential Blob: " + credBlobDataString);
+            }
 
             int indexC = FindCredential(assertion.CredentialId.Id);
             if (indexC >= 0)

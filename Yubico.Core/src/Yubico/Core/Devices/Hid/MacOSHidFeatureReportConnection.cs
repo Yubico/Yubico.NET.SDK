@@ -134,6 +134,8 @@ namespace Yubico.Core.Devices.Hid
                buffer,
                ref bufferSize);
 
+            _device.LogDeviceAccessTime();
+
             _log.IOKitApiCall(nameof(IOHIDDeviceGetReport), (kern_return_t)result);
 
             if (result != 0)
@@ -147,8 +149,6 @@ namespace Yubico.Core.Devices.Hid
             _log.SensitiveLogInformation(
                 "GetReport returned buffer: {Report}",
                 Hex.BytesToHex(buffer));
-
-            _device.AccessDevice();
 
             return buffer;
         }
@@ -168,14 +168,14 @@ namespace Yubico.Core.Devices.Hid
                 "Calling SetReport with data: {Report}",
                 Hex.BytesToHex(report));
 
-            _device.AccessDevice();
-
             int result = IOHIDDeviceSetReport(
                 _deviceHandle,
                 IOKitHidConstants.kIOHidReportTypeFeature,
                 0,
                 report,
                 report.Length);
+
+            _device.LogDeviceAccessTime();
 
             _log.IOKitApiCall(nameof(IOHIDDeviceSetReport), (kern_return_t)result);
 

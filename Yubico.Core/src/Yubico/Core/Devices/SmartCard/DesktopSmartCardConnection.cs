@@ -143,8 +143,6 @@ namespace Yubico.Core.Devices.SmartCard
                 throw new ArgumentNullException(nameof(commandApdu));
             }
 
-            _device.AccessDevice();
-
             // The YubiKey likely will never return a buffer larger than 512 bytes without instead
             // using response chaining.
             byte[] outputBuffer = new byte[512];
@@ -157,7 +155,10 @@ namespace Yubico.Core.Devices.SmartCard
                 outputBuffer,
                 out int outputBufferSize
                 );
+
             _log.SCardApiCall(nameof(SCardTransmit), result);
+
+            _device.LogDeviceAccessTime();
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {

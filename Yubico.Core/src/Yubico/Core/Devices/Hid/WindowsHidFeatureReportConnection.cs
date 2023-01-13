@@ -19,37 +19,41 @@ namespace Yubico.Core.Devices.Hid
 {
     internal sealed class WindowsHidFeatureReportConnection : IHidConnection
     {
-        private readonly WindowsHidDevice _owningDevice;
-
-        private IHidDDevice Device { get; set; }
+        // The SDK device instance that created this connection instance.
+        private readonly WindowsHidDevice _device;
+        // The underlying Windows HID device used for communication.
+        private IHidDDevice HidDDevice { get; set; }
 
         public int InputReportSize { get; private set; }
         public int OutputReportSize { get; private set; }
 
-        internal WindowsHidFeatureReportConnection(WindowsHidDevice owningDevice, string path)
+        internal WindowsHidFeatureReportConnection(WindowsHidDevice device, string path)
         {
-            _owningDevice = owningDevice;
-            Device = new HidDDevice(path);
+            _device = device;
+            HidDDevice = new HidDDevice(path);
             SetupConnection();
         }
 
         private void SetupConnection()
         {
-            Device.OpenFeatureConnection();
-            InputReportSize = Device.FeatureReportByteLength;
-            OutputReportSize = Device.FeatureReportByteLength;
+            HidDDevice.OpenFeatureConnection();
+            InputReportSize = HidDDevice.FeatureReportByteLength;
+            OutputReportSize = HidDDevice.FeatureReportByteLength;
         }
 
         public byte[] GetReport()
         {
-            _owningDevice.AccessDevice();
-            return Device.GetFeatureReport();
+            byte[] data = HidDDevice.GetFeatureReport();
+
+            _device.LogDeviceAccessTime();
+
+            return data;
         }
 
         public void SetReport(byte[] report)
         {
-            _owningDevice.AccessDevice();
-            Device.SetFeatureReport(report);
+            HidDDevice.SetFeatureReport(report);
+            _device.LogDeviceAccessTime();
         }
 
         #region IDisposable Support
@@ -61,7 +65,7 @@ namespace Yubico.Core.Devices.Hid
             {
                 if (disposing)
                 {
-                    Device.Dispose();
+                    HidDDevice.Dispose();
                 }
 
                 disposedValue = true;

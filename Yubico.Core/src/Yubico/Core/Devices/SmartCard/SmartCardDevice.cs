@@ -28,7 +28,7 @@ namespace Yubico.Core.Devices.SmartCard
         private readonly Logger _log = Log.GetLogger();
 
         /// <inheritdoc />
-        public DateTime LastAccessed { get; protected set; }
+        public DateTime LastAccessed { get; protected set; } = DateTime.MinValue;
 
         /// <inheritdoc />
         public string Path { get; }

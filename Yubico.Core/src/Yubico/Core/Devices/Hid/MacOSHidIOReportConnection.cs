@@ -161,6 +161,9 @@ namespace Yubico.Core.Devices.Hid
                 // tight timeout of 4 seconds, but that seemed to not always work. 6 seconds (double the timeout)
                 // seems like a more reasonable timeout for the operating system.
                 int runLoopResult = CFRunLoopRunInMode(_loopId, 6, true);
+
+                _device.LogDeviceAccessTime();
+
                 if (runLoopResult != kCFRunLoopRunHandledSource)
                 {
                     throw new PlatformApiException(
@@ -175,8 +178,6 @@ namespace Yubico.Core.Devices.Hid
                 _log.SensitiveLogInformation(
                     "GetReport returned buffer: {Report}",
                     Hex.BytesToHex(_readBuffer));
-
-                _device.AccessDevice();
 
                 // Return a copy of the report
                 return _readBuffer.ToArray();
@@ -291,14 +292,14 @@ namespace Yubico.Core.Devices.Hid
                 "Calling SetReport with data: {Report}",
                 Hex.BytesToHex(report));
 
-            _device.AccessDevice();
-
             int result = IOHIDDeviceSetReport(
                 _deviceHandle,
                 IOKitHidConstants.kIOHidReportTypeOutput,
                 0,
                 report,
                 report.Length);
+
+            _device.LogDeviceAccessTime();
 
             _log.IOKitApiCall(nameof(IOHIDDeviceSetReport), (kern_return_t)result);
 

@@ -70,10 +70,11 @@ namespace Yubico.Core.Devices.Hid
 
             try
             {
-                _device.AccessDevice();
-
                 Marshal.Copy(reportToSend, 0, setReportData, reportToSend.Length);
                 int bytesSent = NativeMethods.ioctl(_handle, ioctlFlag, setReportData);
+
+                _device.LogDeviceAccessTime();
+
                 if (bytesSent >= 0)
                 {
                     return;
@@ -98,11 +99,12 @@ namespace Yubico.Core.Devices.Hid
 
             try
             {
-                _device.AccessDevice();
-
                 // The return value is either < 0 for error, or the number of
                 // bytes placed into the provided buffer.
                 int bytesReturned = NativeMethods.ioctl(_handle, ioctlFlag, getReportData);
+
+                _device.LogDeviceAccessTime();
+
                 if (bytesReturned >= 0)
                 {
                     // A YubiKey "has a usable payload of 8 bytes". Hence,

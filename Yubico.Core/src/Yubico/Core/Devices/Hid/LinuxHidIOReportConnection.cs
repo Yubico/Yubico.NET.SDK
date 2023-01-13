@@ -73,9 +73,10 @@ namespace Yubico.Core.Devices.Hid
             byte[] paddedBuffer = new byte[YubiKeyIOReportSize + 1];
             report.CopyTo(paddedBuffer.AsSpan(1)); // Leave the first byte as 00
 
-            _device.AccessDevice();
-
             int bytesWritten = NativeMethods.write(_handle.DangerousGetHandle().ToInt32(), paddedBuffer, paddedBuffer.Length);
+
+            _device.LogDeviceAccessTime();
+
             CryptographicOperations.ZeroMemory(paddedBuffer);
 
             if (bytesWritten >= 0)
@@ -94,12 +95,13 @@ namespace Yubico.Core.Devices.Hid
         // Get the response that is waiting on the device. It will be 64 bytes.
         public byte[] GetReport()
         {
-            _device.AccessDevice();
-
             // The return value is either < 0 for error, or the number of
             // bytes placed into the provided buffer.
             byte[] outputBuffer = new byte[YubiKeyIOReportSize];
             int bytesRead = NativeMethods.read(_handle, outputBuffer, YubiKeyIOReportSize);
+
+            _device.LogDeviceAccessTime();
+
             if (bytesRead >= 0)
             {
                 _log.SensitiveLogInformation("Receiving IO report< {report}", Hex.BytesToHex(outputBuffer));

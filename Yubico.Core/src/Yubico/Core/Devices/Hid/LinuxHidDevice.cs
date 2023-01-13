@@ -327,7 +327,7 @@ namespace Yubico.Core.Devices.Hid
             return new LinuxHidIOReportConnection(this, _devnode);
         }
 
-        public void AccessDevice()
+        public void LogDeviceAccessTime()
         {
             LastAccessed = DateTime.Now;
             _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);

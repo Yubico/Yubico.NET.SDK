@@ -19,37 +19,41 @@ namespace Yubico.Core.Devices.Hid
 {
     internal class WindowsHidIOReportConnection : IHidConnection
     {
-        private readonly WindowsHidDevice _owningDevice;
-
-        private IHidDDevice Device { get; set; }
+        // The SDK device instance that created this connection instance.
+        private readonly WindowsHidDevice _device;
+        // The underlying Windows HID device used for communication.
+        private IHidDDevice HidDDevice { get; set; }
 
         public int InputReportSize { get; private set; }
         public int OutputReportSize { get; private set; }
 
         internal WindowsHidIOReportConnection(WindowsHidDevice device, string path)
         {
-            _owningDevice = device;
-            Device = new HidDDevice(path);
+            _device = device;
+            HidDDevice = new HidDDevice(path);
             SetupConnection();
         }
 
         private void SetupConnection()
         {
-            Device.OpenIOConnection();
-            InputReportSize = Device.InputReportByteLength;
-            OutputReportSize = Device.OutputReportByteLength;
+            HidDDevice.OpenIOConnection();
+            InputReportSize = HidDDevice.InputReportByteLength;
+            OutputReportSize = HidDDevice.OutputReportByteLength;
         }
 
         public byte[] GetReport()
         {
-            _owningDevice.AccessDevice();
-            return Device.GetInputReport();
+            byte[] data = HidDDevice.GetInputReport();
+
+            _device.LogDeviceAccessTime();
+
+            return data;
         }
 
         public void SetReport(byte[] report)
         {
-            _owningDevice.AccessDevice();
-            Device.SetOutputReport(report);
+            HidDDevice.SetOutputReport(report);
+            _device.LogDeviceAccessTime();
         }
 
         #region IDisposable Support
@@ -61,7 +65,7 @@ namespace Yubico.Core.Devices.Hid
             {
                 if (disposing)
                 {
-                    Device.Dispose();
+                    HidDDevice.Dispose();
                 }
 
                 disposedValue = true;

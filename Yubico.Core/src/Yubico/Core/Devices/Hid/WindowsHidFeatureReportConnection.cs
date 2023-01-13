@@ -17,49 +17,55 @@ using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid
 {
-    internal class WindowsHidFeatureReportConnection : IHidConnection
+    internal sealed class WindowsHidFeatureReportConnection : IHidConnection
     {
-        private IHidDDevice Device { get; set; }
+        // The SDK device instance that created this connection instance.
+        private readonly WindowsHidDevice _device;
+        // The underlying Windows HID device used for communication.
+        private IHidDDevice HidDDevice { get; set; }
 
         public int InputReportSize { get; private set; }
         public int OutputReportSize { get; private set; }
 
-        internal WindowsHidFeatureReportConnection(string path)
+        internal WindowsHidFeatureReportConnection(WindowsHidDevice device, string path)
         {
-            Device = new HidDDevice(path);
-            SetupConnection();
-        }
-
-        internal WindowsHidFeatureReportConnection(IHidDDevice device)
-        {
-            Device = device;
+            _device = device;
+            HidDDevice = new HidDDevice(path);
             SetupConnection();
         }
 
         private void SetupConnection()
         {
-            Device.OpenFeatureConnection();
-            InputReportSize = Device.FeatureReportByteLength;
-            OutputReportSize = Device.FeatureReportByteLength;
+            HidDDevice.OpenFeatureConnection();
+            InputReportSize = HidDDevice.FeatureReportByteLength;
+            OutputReportSize = HidDDevice.FeatureReportByteLength;
         }
 
-        public byte[] GetReport() =>
-            Device.GetFeatureReport();
+        public byte[] GetReport()
+        {
+            byte[] data = HidDDevice.GetFeatureReport();
 
-        public void SetReport(byte[] report) =>
-            Device.SetFeatureReport(report);
+            _device.LogDeviceAccessTime();
 
+            return data;
+        }
+
+        public void SetReport(byte[] report)
+        {
+            HidDDevice.SetFeatureReport(report);
+            _device.LogDeviceAccessTime();
+        }
 
         #region IDisposable Support
         private bool disposedValue; // To detect redundant calls
 
-        protected virtual void Dispose(bool disposing)
+        private void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
                 if (disposing)
                 {
-                    Device.Dispose();
+                    HidDDevice.Dispose();
                 }
 
                 disposedValue = true;

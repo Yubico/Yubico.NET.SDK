@@ -315,7 +315,7 @@ namespace Yubico.Core.Devices.Hid
         /// <returns>An open <see cref="IHidConnection"/>.</returns>
         public override IHidConnection ConnectToFeatureReports()
         {
-            return new LinuxHidFeatureReportConnection(_devnode);
+            return new LinuxHidFeatureReportConnection(this, _devnode);
         }
 
         /// <summary>
@@ -324,7 +324,13 @@ namespace Yubico.Core.Devices.Hid
         /// <returns>An open <see cref="IHidConnection"/>.</returns>
         public override IHidConnection ConnectToIOReports()
         {
-            return new LinuxHidIOReportConnection(_devnode);
+            return new LinuxHidIOReportConnection(this, _devnode);
+        }
+
+        public void LogDeviceAccessTime()
+        {
+            LastAccessed = DateTime.Now;
+            _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
         }
     }
 }

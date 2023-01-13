@@ -115,6 +115,9 @@ namespace Yubico.Core.Devices.Hid
         /// </para>
         public HidUsagePage UsagePage { get; protected set; }
 
+        /// <inheritdoc />
+        public DateTime LastAccessed { get; protected set; } = DateTime.MinValue;
+
         /// <summary>
         /// Get a list of all the HIDs present on this computer.
         /// </summary>

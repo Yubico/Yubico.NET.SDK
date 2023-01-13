@@ -19,35 +19,42 @@ namespace Yubico.Core.Devices.Hid
 {
     internal class WindowsHidIOReportConnection : IHidConnection
     {
-        private IHidDDevice Device { get; set; }
+        // The SDK device instance that created this connection instance.
+        private readonly WindowsHidDevice _device;
+        // The underlying Windows HID device used for communication.
+        private IHidDDevice HidDDevice { get; set; }
 
         public int InputReportSize { get; private set; }
         public int OutputReportSize { get; private set; }
 
-        internal WindowsHidIOReportConnection(string path)
+        internal WindowsHidIOReportConnection(WindowsHidDevice device, string path)
         {
-            Device = new HidDDevice(path);
-            SetupConnection();
-        }
-
-        internal WindowsHidIOReportConnection(IHidDDevice device)
-        {
-            Device = device;
+            _device = device;
+            HidDDevice = new HidDDevice(path);
             SetupConnection();
         }
 
         private void SetupConnection()
         {
-            Device.OpenIOConnection();
-            InputReportSize = Device.InputReportByteLength;
-            OutputReportSize = Device.OutputReportByteLength;
+            HidDDevice.OpenIOConnection();
+            InputReportSize = HidDDevice.InputReportByteLength;
+            OutputReportSize = HidDDevice.OutputReportByteLength;
         }
 
-        public byte[] GetReport() =>
-            Device.GetInputReport();
+        public byte[] GetReport()
+        {
+            byte[] data = HidDDevice.GetInputReport();
 
-        public void SetReport(byte[] report) =>
-            Device.SetOutputReport(report);
+            _device.LogDeviceAccessTime();
+
+            return data;
+        }
+
+        public void SetReport(byte[] report)
+        {
+            HidDDevice.SetOutputReport(report);
+            _device.LogDeviceAccessTime();
+        }
 
         #region IDisposable Support
         private bool disposedValue; // To detect redundant calls
@@ -58,7 +65,7 @@ namespace Yubico.Core.Devices.Hid
             {
                 if (disposing)
                 {
-                    Device.Dispose();
+                    HidDDevice.Dispose();
                 }
 
                 disposedValue = true;

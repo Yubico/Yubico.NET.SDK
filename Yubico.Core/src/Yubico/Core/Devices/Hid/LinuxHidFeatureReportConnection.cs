@@ -26,15 +26,17 @@ namespace Yubico.Core.Devices.Hid
 
         private readonly LinuxFileSafeHandle _handle;
         private bool _isDisposed;
+        private readonly LinuxHidDevice _device;
 
         public int InputReportSize { get; private set; }
         public int OutputReportSize { get; private set; }
 
-        public LinuxHidFeatureReportConnection(string devnode)
+        public LinuxHidFeatureReportConnection(LinuxHidDevice device, string devnode)
         {
             InputReportSize = YubiKeyFeatureReportSize;
             OutputReportSize = YubiKeyFeatureReportSize;
 
+            _device = device;
             _handle = NativeMethods.open(
                 devnode, NativeMethods.OpenFlags.O_RDWR | NativeMethods.OpenFlags.O_NONBLOCK);
 
@@ -70,6 +72,9 @@ namespace Yubico.Core.Devices.Hid
             {
                 Marshal.Copy(reportToSend, 0, setReportData, reportToSend.Length);
                 int bytesSent = NativeMethods.ioctl(_handle, ioctlFlag, setReportData);
+
+                _device.LogDeviceAccessTime();
+
                 if (bytesSent >= 0)
                 {
                     return;
@@ -97,6 +102,9 @@ namespace Yubico.Core.Devices.Hid
                 // The return value is either < 0 for error, or the number of
                 // bytes placed into the provided buffer.
                 int bytesReturned = NativeMethods.ioctl(_handle, ioctlFlag, getReportData);
+
+                _device.LogDeviceAccessTime();
+
                 if (bytesReturned >= 0)
                 {
                     // A YubiKey "has a usable payload of 8 bytes". Hence,

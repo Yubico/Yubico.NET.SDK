@@ -29,17 +29,19 @@ namespace Yubico.Core.Devices.Hid
         private bool _isDisposed;
 
         private readonly Logger _log = Log.GetLogger();
+        private readonly LinuxHidDevice _device;
 
         public int InputReportSize { get; private set; }
         public int OutputReportSize { get; private set; }
 
-        public LinuxHidIOReportConnection(string devnode)
+        public LinuxHidIOReportConnection(LinuxHidDevice device, string devnode)
         {
             _log.LogInformation("Creating new IO report connection for device [{DevNode}]", devnode);
 
             InputReportSize = YubiKeyIOReportSize;
             OutputReportSize = YubiKeyIOReportSize;
 
+            _device = device;
             _handle = NativeMethods.open(devnode, NativeMethods.OpenFlags.O_RDWR);
 
             if (_handle.IsInvalid)
@@ -72,6 +74,9 @@ namespace Yubico.Core.Devices.Hid
             report.CopyTo(paddedBuffer.AsSpan(1)); // Leave the first byte as 00
 
             int bytesWritten = NativeMethods.write(_handle.DangerousGetHandle().ToInt32(), paddedBuffer, paddedBuffer.Length);
+
+            _device.LogDeviceAccessTime();
+
             CryptographicOperations.ZeroMemory(paddedBuffer);
 
             if (bytesWritten >= 0)
@@ -94,6 +99,9 @@ namespace Yubico.Core.Devices.Hid
             // bytes placed into the provided buffer.
             byte[] outputBuffer = new byte[YubiKeyIOReportSize];
             int bytesRead = NativeMethods.read(_handle, outputBuffer, YubiKeyIOReportSize);
+
+            _device.LogDeviceAccessTime();
+
             if (bytesRead >= 0)
             {
                 _log.SensitiveLogInformation("Receiving IO report< {report}", Hex.BytesToHex(outputBuffer));

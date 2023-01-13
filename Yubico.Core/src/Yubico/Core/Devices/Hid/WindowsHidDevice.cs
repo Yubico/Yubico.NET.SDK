@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
+using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.Hid
@@ -26,6 +27,8 @@ namespace Yubico.Core.Devices.Hid
     /// </summary>
     internal class WindowsHidDevice : HidDevice
     {
+        private readonly Logger _log = Log.GetLogger();
+
         /// <summary>
         /// Gets the list of Windows HID devices available to the system.
         /// </summary>
@@ -99,13 +102,19 @@ namespace Yubico.Core.Devices.Hid
         /// </summary>
         /// <returns>An open <see cref="IHidConnection"/>.</returns>
         public override IHidConnection ConnectToFeatureReports() =>
-            new WindowsHidFeatureReportConnection(Path);
+            new WindowsHidFeatureReportConnection(this, Path);
 
         /// <summary>
         /// Opens an active connection to the Windows HID device.
         /// </summary>
         /// <returns>An open <see cref="IHidConnection"/>.</returns>
         public override IHidConnection ConnectToIOReports() =>
-            new WindowsHidIOReportConnection(Path);
+            new WindowsHidIOReportConnection(this, Path);
+
+        public void LogDeviceAccessTime()
+        {
+            LastAccessed = DateTime.Now;
+            _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
+        }
     }
 }

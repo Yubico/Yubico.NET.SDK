@@ -24,6 +24,7 @@ namespace Yubico.Core.Devices.SmartCard
     public class DesktopSmartCardConnection : ISmartCardConnection
     {
         private readonly Logger _log = Log.GetLogger();
+        private readonly DesktopSmartCardDevice _device;
         private readonly SCardContext _context;
         private readonly SCardCardHandle _cardHandle;
         private SCARD_PROTOCOL _activeProtocol;
@@ -76,10 +77,12 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         internal DesktopSmartCardConnection(
+            DesktopSmartCardDevice device,
             SCardContext context,
             SCardCardHandle cardHandle,
             SCARD_PROTOCOL activeProtocol)
         {
+            _device = device;
             _context = context;
             _cardHandle = cardHandle;
             _activeProtocol = activeProtocol;
@@ -152,7 +155,10 @@ namespace Yubico.Core.Devices.SmartCard
                 outputBuffer,
                 out int outputBufferSize
                 );
+
             _log.SCardApiCall(nameof(SCardTransmit), result);
+
+            _device.LogDeviceAccessTime();
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
             {

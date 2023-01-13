@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Fido2
     /// <remarks>
     /// The <see cref="SerializedLargeBlobArray"/> class contains a <c>List</c> of
     /// <c>LargeBlobEntry</c>, this class. When you get a Large Blob Array from a
-    /// YubiKey (<see cref="Fido2Session.GetCurrentLargeBlobArray"/>), you get a
+    /// YubiKey (<see cref="Fido2Session.GetSerializedLargeBlobArray"/>), you get a
     /// <c>LargeBlobArray</c> object. You then have access to each of the
     /// individual entries in the Large Blob Array through that list of
     /// <c>LargeBlobEntry</c>. If you want to add a new <c>LargeBlobEntry</c> to
@@ -283,18 +283,16 @@ namespace Yubico.YubiKey.Fido2
             _log.LogInformation("Encrypt a LargeBlobEntry.");
 
             byte[] plaintext = blobData.ToArray();
-            byte[] compressedData = new byte[blobData.Length];
             byte[] dataToEncrypt = Array.Empty<byte>();
 
             try
             {
                 using var uncompressedStream = new MemoryStream(plaintext);
-                using var compressedStream = new MemoryStream(compressedData);
+                using var compressedStream = new MemoryStream();
                 using var deflateStream = new DeflateStream(compressedStream, CompressionMode.Compress);
                 uncompressedStream.CopyTo(deflateStream);
                 deflateStream.Flush();
-                dataToEncrypt = new byte[compressedStream.Position];
-                Array.Copy(compressedData, 0, dataToEncrypt, 0, compressedStream.Position);
+                dataToEncrypt = compressedStream.ToArray();
 
                 byte[] ciphertext = new byte[dataToEncrypt.Length + GcmTagSize];
                 byte[] encryptedData = new byte[dataToEncrypt.Length];
@@ -316,7 +314,6 @@ namespace Yubico.YubiKey.Fido2
             finally
             {
                 CryptographicOperations.ZeroMemory(plaintext);
-                CryptographicOperations.ZeroMemory(compressedData);
                 CryptographicOperations.ZeroMemory(dataToEncrypt);
             }
         }

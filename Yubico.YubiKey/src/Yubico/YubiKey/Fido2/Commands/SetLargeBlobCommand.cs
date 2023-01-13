@@ -25,10 +25,10 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// is given.
     /// &gt; [!WARNING]
     /// &gt; While storing arbitrary data that does not follow the standard's
-    /// &gt; formatting specification is possible, it is dangerous.
+    /// &gt; formatting specification is possible, it is not recommended.
     /// &gt; See the <xref href="Fido2Blobs">User's Manual entry</xref> on FIDO2
     /// &gt; Blobs and the documentation for the method
-    /// <see cref="Fido2Session.SetLargeBlobArray"/>.
+    /// <see cref="Fido2Session.SetSerializedLargeBlobArray"/>.
     /// </summary>
     /// <remarks>
     /// The partner Response class is <see cref="SetLargeBlobResponse"/>.

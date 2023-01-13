@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -73,9 +74,9 @@ namespace Yubico.YubiKey.Fido2
     /// </para>
     /// <para>
     /// This class is the input to the
-    /// <see cref="Fido2Session.SetLargeBlobArray"/>. To set a Large Blob Array,
-    /// get the current array
-    /// (<see cref="Fido2Session.GetCurrentLargeBlobArray"/>) and remove,
+    /// <see cref="Fido2Session.SetSerializedLargeBlobArray"/>. To set a Large
+    /// Blob Array, get the current array
+    /// (<see cref="Fido2Session.GetSerializedLargeBlobArray"/>) and remove,
     /// replace, or add entries. Even if there are no entries in the YubiKey
     /// (e.g. it is a new YubiKey with the initial serialized large blob array)
     /// get the current array.
@@ -86,7 +87,7 @@ namespace Yubico.YubiKey.Fido2
     /// </para>
     /// <para>
     /// This class is also the return from
-    /// <see cref="Fido2Session.GetCurrentLargeBlobArray"/>. After getting the
+    /// <see cref="Fido2Session.GetSerializedLargeBlobArray"/>. After getting the
     /// array, if there are any elements, they will be encrypted. Determine which
     /// elements you want to decrypt, obtain the <c>LargeBlobKey</c> for the
     /// associated credential and call the decryption method.
@@ -127,7 +128,7 @@ namespace Yubico.YubiKey.Fido2
         /// As soon as this class detects a change to one of the entries, this
         /// property and the <c>Digest</c> property are no longer valid and will
         /// be set to null. If you call <see cref="Encode"/> or
-        /// <see cref="Fido2Session.SetLargeBlobArray"/> and this property is
+        /// <see cref="Fido2Session.SetSerializedLargeBlobArray"/> and this property is
         /// null, the array will be rebuilt.
         /// </para>
         /// </remarks>
@@ -144,7 +145,7 @@ namespace Yubico.YubiKey.Fido2
         /// As soon as this class detects a change to one of the entries, this
         /// property and the <c>EncodedArray</c> property are no longer valid and
         /// will be set to null. If you call <see cref="Encode"/> or
-        /// <see cref="Fido2Session.SetLargeBlobArray"/> and this property is
+        /// <see cref="Fido2Session.SetSerializedLargeBlobArray"/> and this property is
         /// null, the array will be rebuilt and a new digest will be computed.
         /// </para>
         /// </remarks>
@@ -341,6 +342,35 @@ namespace Yubico.YubiKey.Fido2
             }
 
             return EncodedArray.Value;
+        }
+
+        /// <summary>
+        /// Determine if the <see cref="Digest"/> verifies for the given
+        /// <see cref="EncodedArray"/>.
+        /// </summary>
+        /// <remarks>
+        /// If either or both <c>EncodedData</c> and <c>Digest</c> is null, this
+        /// method returns <c>false</c>. If they are both present, this method
+        /// will compute the SHA-256 digest of the <c>EncodedData</c>, and
+        /// compare the "left" 16 bytes of that result with <c>Digest</c>.
+        /// </remarks>
+        /// <returns>
+        /// A boolean, <c>true</c> if there is <c>EncodedData</c> and a
+        /// <c>Digest</c>, and the digest is correct. <c>false</c> otherwise.
+        /// </returns>
+        public bool IsDigestVerified()
+        {
+            bool returnValue = false;
+
+            if (!(EncodedArray is null) && !(Digest is null))
+            {
+                using SHA256 digester = CryptographyProviders.Sha256Creator();
+                byte[] computedDigest = digester.ComputeHash(EncodedArray.Value.ToArray());
+                var digestSpan = new Span<byte>(computedDigest, 0, DigestLength);
+                returnValue = MemoryExtensions.SequenceEqual<byte>(digestSpan, Digest.Value.Span);
+            }
+
+            return returnValue;
         }
 
         // left 16 bytes of SHA-256(EncodedArray)

@@ -296,14 +296,8 @@ namespace Yubico.YubiKey.Cryptography
             }
             finally
             {
-                if (!(publicKey is null))
-                {
-                    publicKey.Clear();
-                }
-                if (!(privateKey is null))
-                {
-                    privateKey.Clear();
-                }
+                publicKey?.Clear();
+                privateKey?.Clear();
             }
         }
 
@@ -403,14 +397,8 @@ namespace Yubico.YubiKey.Cryptography
             }
             finally
             {
-                if (!(publicKey is null))
-                {
-                    publicKey.Clear();
-                }
-                if (!(privateKey is null))
-                {
-                    privateKey.Clear();
-                }
+                publicKey?.Clear();
+                privateKey?.Clear();
             }
         }
 
@@ -484,14 +472,8 @@ namespace Yubico.YubiKey.Cryptography
             }
             finally
             {
-                if (!(publicKey is null))
-                {
-                    publicKey.Clear();
-                }
-                if (!(privateKey is null))
-                {
-                    privateKey.Clear();
-                }
+                publicKey?.Clear();
+                privateKey?.Clear();
             }
         }
 
@@ -566,14 +548,8 @@ namespace Yubico.YubiKey.Cryptography
             }
             finally
             {
-                if (!(publicKey is null))
-                {
-                    publicKey.Clear();
-                }
-                if (!(privateKey is null))
-                {
-                    privateKey.Clear();
-                }
+                publicKey?.Clear();
+                privateKey?.Clear();
             }
         }
     }

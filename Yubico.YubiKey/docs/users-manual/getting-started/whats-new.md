@@ -16,6 +16,35 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.6.x Releases
+
+### 1.6.0
+
+Release date: January 16th, 2023
+
+Features:
+
+- **FIDO2 Credential Blobs and Large Blob support.** FIDO2 allows applications to store additional information
+  alongside a credential. Credential Blobs and Large Blobs are two separate, though related, features for achieving
+  this.
+
+Bug fixes:
+
+- Added an MSBuild rule for projects that target .NET Framework 4.x that now automatically copy the correct
+  version of Yubico.NativeShims.dll into the build directory. This addresses the "Missing DLL" issue that .NET
+  Framework users would encounter. Fixes [GitHub Issue #11](https://github.com/Yubico/Yubico.NET.SDK/issues/11).
+- Addressed an issue where the SDK would enumerate FIDO devices on Windows despite being un-elevated. Windows requires
+  process elevation in order to communicate with FIDO devices. The SDK would display one or more YubiKeys with
+  incorrect properties as a result. Fixes [GitHub Issue #20](https://github.com/Yubico/Yubico.NET.SDK/issues/20).
+- A difference in behavior between .NET Framework 4.x and .NET 6 caused OAEP padding operations to fail for projects
+  running on .NET Framework 4.x. The SDK has been updated to work around this difference in behavior and should
+  now work for all supported versions of .NET. Fixes [GitHub Issue #33](https://github.com/Yubico/Yubico.NET.SDK/issues/33).
+- The YubiKey requires a short delay when switching between its USB interfaces. Switching too quickly can result
+  in failed operations and other strange behaviors. The SDK will now automatically wait the required amount of
+  time to ensure stable communication with the YubiKey. Note that this may cause the first operation or command
+  sent to the YubiKey to appear slow. Subsequent calls to the same application will not be affected.
+  Fixes [GitHub Issue #34](https://github.com/Yubico/Yubico.NET.SDK/issues/34).
+
 ## 1.5.x Releases
 
 ### 1.5.1 (Yubico.YubiKey), 1.5.2 (Yubico.NativeShims)

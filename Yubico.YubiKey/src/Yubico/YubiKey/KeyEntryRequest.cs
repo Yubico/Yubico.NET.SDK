@@ -330,5 +330,32 @@ namespace Yubico.YubiKey
         /// </p>
         /// </remarks>
         AuthenticateYubiHsmAuthManagementKey = 17,
+
+        /// <summary>
+        /// This indicates that the SDK is attempting to change the YubiHSM Auth
+        /// management key. It is requesting the current YubiHSM Auth
+        /// management key and a new YubiHSM Auth management key as part of the
+        /// operation.
+        /// </summary>
+        /// <remarks>
+        /// When the <see cref="KeyEntryData.Request"/> is
+        /// <c>ChangeYubiHsmAuthManagementKey</c>, the
+        /// delegate should collect the current management key and submit it
+        /// using <see cref="KeyEntryData.SubmitValues(System.ReadOnlySpan{byte}, System.ReadOnlySpan{byte})"/>.
+        /// <p>
+        /// When the <c>Request</c> is <c>ChangeYubiHsmAuthManagementKey</c> and
+        /// <see cref="KeyEntryData.IsRetry"/> property is <c>false</c>, this
+        /// is the initial request for the management key.
+        /// </p>
+        /// <p>
+        /// When the <c>Request</c> is <c>ChangeYubiHsmAuthManagementKey</c> and
+        /// <c>IsRetry</c> is<c>true</c>, this means a previous attempt at changing
+        /// the management key failed and the <c>KeyCollector</c> should try again
+        /// to obtain the value. In this situation,
+        /// <see cref="KeyEntryData.RetriesRemaining"/> will contain additional
+        /// information.
+        /// </p>
+        /// </remarks>
+        ChangeYubiHsmAuthManagementKey = 18,
     }
 }

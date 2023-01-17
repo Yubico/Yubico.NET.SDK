@@ -16,7 +16,6 @@ using System;
 using System.Collections.Generic;
 using System.Security;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.YubiHsmAuth
 {

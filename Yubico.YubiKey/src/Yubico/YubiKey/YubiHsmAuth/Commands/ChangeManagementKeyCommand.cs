@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// <param name="newManagementKey">
         /// The new value of the management key.
         /// </param>
-        /// <exception cref="ArgumentOutOfRangeException">
+        /// <exception cref="ArgumentException">
         /// Thrown when a management key has an invalid length.
         /// </exception>
         public ChangeManagementKeyCommand(ReadOnlyMemory<byte> currentManagementKey,

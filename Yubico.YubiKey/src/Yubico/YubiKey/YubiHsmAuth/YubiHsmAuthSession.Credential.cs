@@ -208,7 +208,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </exception>
         public bool TryDeleteCredential(string label)
         {
-            EnsureKeyCollector();
+            var keyCollector = GetKeyCollector();
 
             var keyEntryData = new KeyEntryData()
             {
@@ -217,7 +217,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
             try
             {
-                while (KeyCollector!(keyEntryData) == true)
+                while (keyCollector(keyEntryData) == true)
                 {
                     bool credentialDeleted = 
                         TryDeleteCredential(
@@ -251,7 +251,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 keyEntryData.Clear();
 
                 keyEntryData.Request = KeyEntryRequest.Release;
-                _ = KeyCollector!(keyEntryData);
+                _ = keyCollector(keyEntryData);
             }
 
             return false;

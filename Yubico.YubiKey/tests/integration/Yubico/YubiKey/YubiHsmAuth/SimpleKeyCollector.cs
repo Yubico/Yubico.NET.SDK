@@ -58,6 +58,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
                     keyEntryData.SubmitValue(YhaTestUtilities.DefaultMgmtKey);
                     return true;
 
+                case KeyEntryRequest.ChangeYubiHsmAuthManagementKey:
+                    keyEntryData.SubmitValues(YhaTestUtilities.DefaultMgmtKey, YhaTestUtilities.AlternateMgmtKey);
+                    return true;
+
                 case KeyEntryRequest.Release:
                     return true;
 
@@ -80,6 +84,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
             {
                 case KeyEntryRequest.AuthenticateYubiHsmAuthManagementKey:
                     keyEntryData.SubmitValue(YhaTestUtilities.AlternateMgmtKey);
+                    return true;
+
+                case KeyEntryRequest.ChangeYubiHsmAuthManagementKey:
+                    keyEntryData.SubmitValues(YhaTestUtilities.AlternateMgmtKey, YhaTestUtilities.DefaultMgmtKey);
                     return true;
 
                 case KeyEntryRequest.Release:

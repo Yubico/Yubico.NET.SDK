@@ -147,8 +147,8 @@ namespace Yubico.YubiKey.YubiHsmAuth
             return applicationVersionResponse.GetData();
         }
 
-        // Checks if the KeyCollector delegate is null
-        private void EnsureKeyCollector()
+        // Returns the KeyCollector. Throws exception if it's null.
+        private Func<KeyEntryData, bool> GetKeyCollector()
         {
             if (KeyCollector is null)
             {
@@ -157,6 +157,8 @@ namespace Yubico.YubiKey.YubiHsmAuth
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.MissingKeyCollector));
             }
+
+            return KeyCollector;
         }
 
         /// <summary>

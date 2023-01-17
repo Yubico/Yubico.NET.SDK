@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security;
 using Xunit;
 
@@ -21,6 +22,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
 {
     public class SessionCredentialTests
     {
+        #region DeleteCredential
         [Fact]
         public void AddCredential_DefaultTestCred_AppContainsOneCred()
         {
@@ -168,5 +170,134 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<InvalidOperationException>(tryDeleteCred);
             }
         }
+        #endregion
+
+        #region AddCredential
+        [Fact]
+        public void TryAddCredentialKeyCollector_CorrectMgmtKey_AppContainsNewCred()
+        {
+            // Preconditions
+            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+
+            IReadOnlyList<CredentialRetryPair> credentialList;
+
+            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+            {
+                yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.DefaultValueCollectorDelegate;
+
+                // Test
+                _ = yubiHsmAuthSession.TryAddCredential(YhaTestUtilities.DefaultAes128Cred);
+
+                credentialList = yubiHsmAuthSession.ListCredentials();
+            }
+
+            // Postconditions
+            Credential credInApp = credentialList.Single().Credential;
+            Assert.Equal(YhaTestUtilities.DefaultCredLabel, credInApp.Label);
+        }
+
+        [Fact]
+        public void TryAddCredentialKeyCollector_CorrectMgmtKey_ReturnsTrue()
+        {
+            // Preconditions
+            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+
+            bool addCredSuccess = false;
+
+            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+            {
+                yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.DefaultValueCollectorDelegate;
+
+                // Test
+                addCredSuccess = yubiHsmAuthSession.TryAddCredential(YhaTestUtilities.DefaultAes128Cred);
+            }
+
+            // Postconditions
+            Assert.True(addCredSuccess);
+        }
+
+        [Fact]
+        public void TryAddCredentialKeyCollector_MgmtKeyRetry_AppContainsNewCred()
+        {
+            // Preconditions
+            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+
+            SimpleKeyCollector simpleKeyCollector = new SimpleKeyCollector()
+            {
+                // Start with the incorrect management key, forcing a retry
+                UseDefaultValue = false,
+            };
+            IReadOnlyList<CredentialRetryPair> credentialList;
+
+            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+            {
+                yubiHsmAuthSession.KeyCollector = simpleKeyCollector.FlipFlopCollectorDelegate;
+
+                // Test
+                _ = yubiHsmAuthSession.TryAddCredential(YhaTestUtilities.DefaultAes128Cred);
+
+                credentialList = yubiHsmAuthSession.ListCredentials();
+            }
+
+            // Postconditions
+            Credential credInApp = credentialList.Single().Credential;
+            Assert.Equal(YhaTestUtilities.DefaultCredLabel, credInApp.Label);
+        }
+
+        [Fact]
+        public void TryAddCredentialKeyCollector_KeyCollectorReturnsFalse_ReturnsFalse()
+        {
+            // Preconditions
+            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+
+            bool addCredSuccess = false;
+
+            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+            {
+                yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.ReturnsFalseCollectorDelegate;
+
+                // Test
+                addCredSuccess = yubiHsmAuthSession.TryAddCredential(YhaTestUtilities.DefaultAes128Cred);
+            }
+
+            // Postconditions
+            Assert.False(addCredSuccess);
+        }
+
+        [Fact]
+        public void TryAddCredentialKeyCollector_WrongMgmtKeyNoRetries_ThrowsSecurityException()
+        {
+            // Preconditions
+            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+
+            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+            {
+                // Use incorrect management key, exhausting retries
+                yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.AlternateValueCollectorDelegate;
+
+                // Test & postcondition
+                void tryAddCred() => yubiHsmAuthSession.TryAddCredential(YhaTestUtilities.DefaultAes128Cred);
+
+                _ = Assert.Throws<SecurityException>(tryAddCred);
+            }
+        }
+
+        [Fact]
+        public void TryAddCredentialKeyCollector_NoKeyCollector_ThrowsInvalidOpEx()
+        {
+            // Preconditions
+            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+
+            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+            {
+                // Leave yubiHsmAuthSession.KeyCollector set to its default value of `null`
+
+                // Test & postcondition
+                void tryAddCred() => yubiHsmAuthSession.TryAddCredential(YhaTestUtilities.DefaultAes128Cred);
+
+                _ = Assert.Throws<InvalidOperationException>(tryAddCred);
+            }
+        }
+        #endregion
     }
 }

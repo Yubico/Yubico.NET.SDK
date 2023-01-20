@@ -357,5 +357,31 @@ namespace Yubico.YubiKey
         /// </p>
         /// </remarks>
         ChangeYubiHsmAuthManagementKey = 18,
+
+        /// <summary>
+        /// Indicates that the SDK is requesting the YubiHSM Auth credential's
+        /// password in order to authenticate.
+        /// </summary>
+        /// <remarks>
+        /// When the <see cref="KeyEntryData.Request"/> is
+        /// <c>AuthenticateYubiHsmAuthCredentialPassword</c>, the
+        /// delegate should collect the current management key and submit it
+        /// using <see cref="KeyEntryData.SubmitValue(System.ReadOnlySpan{byte})"/>.
+        /// <p>
+        /// When the <c>Request</c> is <c>AuthenticateYubiHsmAuthCredentialPassword</c>
+        /// and <see cref="KeyEntryData.IsRetry"/> property is <c>false</c>, this
+        /// is the initial request for the management key.
+        /// </p>
+        /// <p>
+        /// When the <c>Request</c> is
+        /// <c>AuthenticateYubiHsmAuthCredentialPassword</c> and <c>IsRetry</c> is
+        /// <c>true</c>, this means a previous attempt at authenticating the
+        /// management key failed and the <c>KeyCollector</c> should try again
+        /// to obtain the value. In this situation,
+        /// <see cref="KeyEntryData.RetriesRemaining"/> will contain additional
+        /// information.
+        /// </p>
+        /// </remarks>
+        AuthenticateYubiHsmAuthCredentialPassword = 19,
     }
 }

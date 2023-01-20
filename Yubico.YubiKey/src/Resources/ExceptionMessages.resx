@@ -850,4 +850,7 @@
   <data name="Fido2TouchTimeout" xml:space="preserve">
     <value>The YubiKey was not touched in the allotted time.</value>
   </data>
+  <data name="YubiHsmAuthTouchTimeout" xml:space="preserve">
+    <value>The operation timed out while waiting for touch.</value>
+  </data>
 </root>

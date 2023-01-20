@@ -29,7 +29,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// </exception>
         public static IYubiKeyDevice RenewDeviceEnumeration(int serialNumber)
         {
-            const int maxReconnectAttempts = 10;
+            const int maxReconnectAttempts = 40;
             const int sleepDuration = 100; //ms
 
             int reconnectAttempts = 0;

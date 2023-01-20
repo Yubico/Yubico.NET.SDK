@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.Threading;
+
 namespace Yubico.YubiKey.YubiHsmAuth
 {
     /// <summary>
@@ -62,6 +65,15 @@ namespace Yubico.YubiKey.YubiHsmAuth
                     keyEntryData.SubmitValues(YhaTestUtilities.DefaultMgmtKey, YhaTestUtilities.AlternateMgmtKey);
                     return true;
 
+                case KeyEntryRequest.AuthenticateYubiHsmAuthCredentialPassword:
+                    keyEntryData.SubmitValue(YhaTestUtilities.DefaultCredPassword);
+                    return true;
+
+                case KeyEntryRequest.TouchRequest:
+                    // "default" cred does not require touch, so we should
+                    // never get this request.
+                    throw new InvalidOperationException("Unexpected key entry request: TouchRequest");
+
                 case KeyEntryRequest.Release:
                     return true;
 
@@ -88,6 +100,16 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
                 case KeyEntryRequest.ChangeYubiHsmAuthManagementKey:
                     keyEntryData.SubmitValues(YhaTestUtilities.AlternateMgmtKey, YhaTestUtilities.DefaultMgmtKey);
+                    return true;
+
+                case KeyEntryRequest.AuthenticateYubiHsmAuthCredentialPassword:
+                    keyEntryData.SubmitValue(YhaTestUtilities.AlternateCredPassword);
+                    return true;
+
+                case KeyEntryRequest.TouchRequest:
+                    // For integration tests that require touch, run the test
+                    // in "debug" and add a breakpoint here so you know when
+                    // to provide touch
                     return true;
 
                 case KeyEntryRequest.Release:

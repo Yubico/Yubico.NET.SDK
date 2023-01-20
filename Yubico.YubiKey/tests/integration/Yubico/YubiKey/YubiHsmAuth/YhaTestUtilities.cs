@@ -38,7 +38,12 @@ namespace Yubico.YubiKey.YubiHsmAuth
             new byte[16] { 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31 };
 
         public static readonly string DefaultCredLabel = "abc";
-        public static readonly bool DefaultCredTouchRequired = true;
+        public static readonly bool DefaultCredTouchRequired = false;
+        
+        public static readonly byte[] DefaultHostChallenge =
+            new byte[8] { 0, 1, 2, 3, 4, 5, 6, 7 };
+        public static readonly byte[] DefaultHsmDeviceChallenge =
+            new byte[8] { 0, 2, 4, 6, 8, 10, 12, 14 };
         #endregion
 
         #region alternate
@@ -53,7 +58,12 @@ namespace Yubico.YubiKey.YubiHsmAuth
             new byte[16] { 31, 29, 27, 25, 23, 21, 19, 17, 15, 13, 11, 9, 7, 5, 3, 1 };
 
         public static readonly string AlternateCredLabel = "xyz";
-        public static readonly bool AlternateCredTouchRequired = false;
+        public static readonly bool AlternateCredTouchRequired = true;
+
+        public static readonly byte[] AlternateHostChallenge =
+            new byte[8] { 7, 6, 5, 4, 3, 2, 1, 0 };
+        public static readonly byte[] AlternateHsmDeviceChallenge =
+            new byte[8] { 14, 12, 10, 8, 6, 4, 2, 0 };
         #endregion
 
         /// <summary>
@@ -113,6 +123,18 @@ namespace Yubico.YubiKey.YubiHsmAuth
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
                 yubiHsmAuthSession.AddCredential(DefaultMgmtKey, DefaultAes128Cred);
+            }
+        }
+
+        /// <summary>
+        /// Adds an AES-128 credential (with values from the alternate set) to the
+        /// YubiHSM Auth application. It uses the default management key.
+        /// </summary>
+        public static void AddAlternateAes128Credential(IYubiKeyDevice testDevice)
+        {
+            using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
+            {
+                yubiHsmAuthSession.AddCredential(DefaultMgmtKey, AlternateAes128Cred);
             }
         }
     }

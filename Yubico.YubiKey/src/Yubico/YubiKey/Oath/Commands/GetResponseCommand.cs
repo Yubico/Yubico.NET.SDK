@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2023 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -15,18 +15,14 @@
 using System;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.InterIndustry.Commands
+namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
     /// Gets additional response data from the previously issued command.
     /// </summary>
-    /// <remarks>
-    /// The OATH application uses a different version of this command. See
-    /// <see cref="Oath.Commands.GetResponseCommand"/>.
-    /// </remarks>
     public class GetResponseCommand : IYubiKeyCommand<YubiKeyResponse>
     {
-        private const byte GetResponseInstruction = 0xC0;
+        private const byte GetResponseInstruction = 0xA5;
 
         private readonly byte _Cla;
         private readonly int _SW2;
@@ -34,14 +30,10 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         /// <summary>
         /// Gets the YubiKeyApplication (e.g. PIV, OATH, etc.) that this command applies to.
         /// </summary>
-        /// <remarks>
-        /// This command does not apply to the OATH application. The OATH application uses
-        /// <see cref="Oath.Commands.GetResponseCommand"/>.
-        /// </remarks>
         /// <value>
-        /// The value will always be `YubiKeyApplication.InterIndustry` for this command.
+        /// The value will always be `YubiKeyApplication.Oath` for this command.
         /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
+        public YubiKeyApplication Application => YubiKeyApplication.Oath;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetResponseCommand"/> class.

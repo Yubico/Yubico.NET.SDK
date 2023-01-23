@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Pipelines
@@ -23,6 +22,10 @@ namespace Yubico.YubiKey.Pipelines
     /// A transform that automatically detects large responses and issues GET_RESPONSE APDUs until
     /// all data has been returned.
     /// </summary>
+    /// <remarks>
+    /// This transform will work for all YubiKey applications except
+    /// OATH. For OATH, use <see cref="OathResponseChainingTransform"/>.
+    /// </remarks>
     internal class ResponseChainingTransform : IApduTransform
     {
         private readonly IApduTransform _pipeline;
@@ -55,8 +58,15 @@ namespace Yubico.YubiKey.Pipelines
             {
                 tempBuffer.AddRange(response.Data.ToArray());
 
-                var getResponseCommand = new GetResponseCommand(command, response.SW2);
-                response = _pipeline.Invoke(getResponseCommand.CreateCommandApdu(), commandType, responseType);
+                // Note that OATH uses its own "get response" command.
+                // See OathResponseChainingTransform
+                IYubiKeyCommand<YubiKeyResponse> getResponseCommand =
+                    CreateGetResponseCommand(command, response.SW2);
+
+                response = _pipeline.Invoke(
+                    getResponseCommand.CreateCommandApdu(),
+                    commandType,
+                    responseType);
             }
             while (response.SW1 == SW1Constants.BytesAvailable);
 
@@ -67,6 +77,9 @@ namespace Yubico.YubiKey.Pipelines
 
             return new ResponseApdu(tempBuffer.ToArray(), response.SW);
         }
+
+        protected virtual IYubiKeyCommand<YubiKeyResponse> CreateGetResponseCommand(CommandApdu originatingCommand, short SW2) =>
+            new InterIndustry.Commands.GetResponseCommand(originatingCommand, SW2);
 
         public void Setup() => _pipeline.Setup();
     }

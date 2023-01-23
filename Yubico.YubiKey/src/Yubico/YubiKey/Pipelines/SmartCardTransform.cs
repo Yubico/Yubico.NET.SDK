@@ -36,7 +36,6 @@ namespace Yubico.YubiKey.Pipelines
             _smartCardConnection = smartCardConnection;
         }
 
-
         public void Cleanup()
         {
 
@@ -48,7 +47,5 @@ namespace Yubico.YubiKey.Pipelines
         {
 
         }
-
-
     }
 }

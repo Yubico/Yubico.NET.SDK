@@ -110,6 +110,8 @@ namespace Yubico.YubiKey.Cryptography
         private const int P384KeySize = 384;
         private const string OidP256 = "1.2.840.10045.3.1.7";
         private const string OidP384 = "1.3.132.0.34";
+        private const string NameP256 = "nistP256";
+        private const string NameP384 = "nistP384";
 
         private const byte EncodedPointTag = 4;
         private const int SequenceTag = 0x30;
@@ -403,10 +405,10 @@ namespace Yubico.YubiKey.Cryptography
         {
             ECParameters eccParams = toCheck.ExportParameters(false);
 
-            int coordinateLength = eccParams.Curve.Oid.Value switch
+            int coordinateLength = eccParams.Curve.Oid.FriendlyName switch
             {
-                OidP256 => (P256EncodedPointLength - 1) / 2,
-                OidP384 => (P384EncodedPointLength - 1) / 2,
+                NameP256 => (P256EncodedPointLength - 1) / 2,
+                NameP384 => (P384EncodedPointLength - 1) / 2,
                 _ => -1,
             };
 

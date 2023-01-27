@@ -123,6 +123,45 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
+        /// Constructs a new instance of <see cref="CredentialId"/> from the
+        /// <c>encodedCredentialId</c>.
+        /// </summary>
+        /// <remarks>
+        /// This constructor expects the encoding to follow this Cbor template.
+        /// <code>
+        ///    map {
+        ///      "type"        --text string--
+        ///      "id"          --text string--
+        ///      "transports"  --array of strings-- (optional)
+        ///    }
+        /// </code>
+        /// </remarks>
+        /// <param name="encodedCredentialId">
+        /// The Cbor encoding of the credential ID.
+        /// </param>
+        /// <param name="bytesRead">
+        /// The constructor will return the number of bytes read.
+        /// </param>
+        /// <exception cref="Ctap2DataException">
+        /// The <c>encodedCredentialId</c> is not a correct encoding.
+        /// </exception>
+        public CredentialId(ReadOnlyMemory<byte> encodedCredentialId, out int bytesRead)
+        {
+            var cborMap = new CborMap<string>(encodedCredentialId);
+            Type = cborMap.ReadTextString(TagType);
+            Id = cborMap.ReadByteString(TagId);
+            if (cborMap.Contains(TagTransports))
+            {
+                IReadOnlyList<string> transportArray = cborMap.ReadArray<string>(TagTransports);
+                foreach (string entry in transportArray)
+                {
+                    AddTransport(entry);
+                }
+            }
+            bytesRead = cborMap.BytesRead;
+        }
+
+        /// <summary>
         /// Add an entry to the list of transports.
         /// </summary>
         /// <remarks>

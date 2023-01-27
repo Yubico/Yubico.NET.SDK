@@ -239,6 +239,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "U2f", "U2f", "{2C7EFA92-1B4
 		Yubico.YubiKey\docs\users-manual\application-u2f\how-u2f-works.md = Yubico.YubiKey\docs\users-manual\application-u2f\how-u2f-works.md
 		Yubico.YubiKey\docs\users-manual\application-u2f\u2f-commands.md = Yubico.YubiKey\docs\users-manual\application-u2f\u2f-commands.md
 		Yubico.YubiKey\docs\users-manual\application-u2f\u2f-pin.md = Yubico.YubiKey\docs\users-manual\application-u2f\u2f-pin.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\u2f-reset.md = Yubico.YubiKey\docs\users-manual\application-u2f\u2f-reset.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "contributordocs", "contributordocs", "{522DEBA9-211E-425A-916D-30F5636F5646}"
@@ -269,9 +270,16 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "documentation-system", "doc
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fido2", "Fido2", "{8CE9438B-FEE8-47BF-B2DB-B5BA7A896774}"
 	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\application-fido2\cred-blobs.md = Yubico.YubiKey\docs\users-manual\application-fido2\cred-blobs.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-blobs.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-blobs.md
 		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-commands.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-commands.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-cred-mgmt.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-cred-mgmt.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-credentials.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-credentials.md
 		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-overview.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-overview.md
 		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-pin.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-pin.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-reset.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-reset.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\how-fido2-works.md = Yubico.YubiKey\docs\users-manual\application-fido2\how-fido2-works.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\large-blobs.md = Yubico.YubiKey\docs\users-manual\application-fido2\large-blobs.md
 		Yubico.YubiKey\docs\users-manual\application-fido2\pin-uv-auth-protocols.md = Yubico.YubiKey\docs\users-manual\application-fido2\pin-uv-auth-protocols.md
 	EndProjectSection
 EndProject
@@ -302,15 +310,49 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Objects", "Objects", "{1908
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SampleCode", "SampleCode", "{E7F9924F-227A-455F-B7AB-3352BAB6DA46}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedSampleCode", "Yubico.YubiKey\examples\SharedSampleCode\SharedSampleCode.csproj", "{3546DD14-6205-447E-82FA-1B43A7AE2483}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedSampleCode", "Yubico.YubiKey\examples\SharedSampleCode\SharedSampleCode.csproj", "{3546DD14-6205-447E-82FA-1B43A7AE2483}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Fido2SampleCode", "Yubico.YubiKey\examples\Fido2SampleCode\Fido2SampleCode.csproj", "{0AC0433E-2477-42AE-A003-CE2F2772487B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Fido2SampleCode", "Yubico.YubiKey\examples\Fido2SampleCode\Fido2SampleCode.csproj", "{0AC0433E-2477-42AE-A003-CE2F2772487B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OathSampleCode", "Yubico.YubiKey\examples\OathSampleCode\OathSampleCode.csproj", "{396C13D6-0DDA-4B95-BFE9-1ECE3557E6B6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OathSampleCode", "Yubico.YubiKey\examples\OathSampleCode\OathSampleCode.csproj", "{396C13D6-0DDA-4B95-BFE9-1ECE3557E6B6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PivSampleCode", "Yubico.YubiKey\examples\PivSampleCode\PivSampleCode.csproj", "{2AB8AD5F-2449-48A1-9659-F438C690BB03}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PivSampleCode", "Yubico.YubiKey\examples\PivSampleCode\PivSampleCode.csproj", "{2AB8AD5F-2449-48A1-9659-F438C690BB03}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "U2fSampleCode", "Yubico.YubiKey\examples\U2fSampleCode\U2fSampleCode.csproj", "{769A850B-DEA5-44AD-8F9B-30C72601D851}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "U2fSampleCode", "Yubico.YubiKey\examples\U2fSampleCode\U2fSampleCode.csproj", "{769A850B-DEA5-44AD-8F9B-30C72601D851}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{1962BE4F-D9C6-4705-A72B-BD6F6700EC78}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\change-pin.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\change-pin.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-assertion.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-assertion.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-auth-token-using-pin.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-auth-token-using-pin.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-auth-token-using-uv.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-auth-token-using-uv.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-cred-metadata.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-cred-metadata.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-info.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-info.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-key-agree.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-key-agree.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-large-blob.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-large-blob.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-next-assertion.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-next-assertion.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-pin-token.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-pin-token.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\make-credential.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\make-credential.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\reset.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\reset.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\set-large-blob.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\set-large-blob.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\set-pin.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\set-pin.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\version.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\version.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{1B24E020-1C2A-4A11-BC84-944F6D396861}"
+	ProjectSection(SolutionItems) = preProject
+		Yubico.YubiKey\docs\users-manual\application-u2f\apdu\authenticate.md = Yubico.YubiKey\docs\users-manual\application-u2f\apdu\authenticate.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\apdu\echo-cmd.md = Yubico.YubiKey\docs\users-manual\application-u2f\apdu\echo-cmd.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\apdu\get-device-info.md = Yubico.YubiKey\docs\users-manual\application-u2f\apdu\get-device-info.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\apdu\get-protocol-version.md = Yubico.YubiKey\docs\users-manual\application-u2f\apdu\get-protocol-version.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\apdu\register.md = Yubico.YubiKey\docs\users-manual\application-u2f\apdu\register.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\apdu\reset.md = Yubico.YubiKey\docs\users-manual\application-u2f\apdu\reset.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\apdu\set-device-info.md = Yubico.YubiKey\docs\users-manual\application-u2f\apdu\set-device-info.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\apdu\set-legacy-device-config.md = Yubico.YubiKey\docs\users-manual\application-u2f\apdu\set-legacy-device-config.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\apdu\set-pin.md = Yubico.YubiKey\docs\users-manual\application-u2f\apdu\set-pin.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\apdu\verify-fips.md = Yubico.YubiKey\docs\users-manual\application-u2f\apdu\verify-fips.md
+		Yubico.YubiKey\docs\users-manual\application-u2f\apdu\verify-pin.md = Yubico.YubiKey\docs\users-manual\application-u2f\apdu\verify-pin.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -440,6 +482,8 @@ Global
 		{396C13D6-0DDA-4B95-BFE9-1ECE3557E6B6} = {E7F9924F-227A-455F-B7AB-3352BAB6DA46}
 		{2AB8AD5F-2449-48A1-9659-F438C690BB03} = {E7F9924F-227A-455F-B7AB-3352BAB6DA46}
 		{769A850B-DEA5-44AD-8F9B-30C72601D851} = {E7F9924F-227A-455F-B7AB-3352BAB6DA46}
+		{1962BE4F-D9C6-4705-A72B-BD6F6700EC78} = {8CE9438B-FEE8-47BF-B2DB-B5BA7A896774}
+		{1B24E020-1C2A-4A11-BC84-944F6D396861} = {2C7EFA92-1B47-4F5B-91B5-C130BDB19D93}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {3DF71DF2-3B6F-4855-8BC4-35B9714F3B0F}

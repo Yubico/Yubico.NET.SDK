@@ -33,7 +33,8 @@ namespace Yubico.YubiKey.Fido2
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36
         };
 
-        [Fact(Skip = "This test requires user interation to reset the FIDO2 application.")]
+        //[Fact(Skip = "This test requires user interation to reset the FIDO2 application.")]
+        [Fact]
         public void SetLargeBlob_Succeeds()
         {
             IYubiKeyDevice yubiKey = IntegrationTestDeviceEnumeration.GetTestDevices()

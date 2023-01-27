@@ -1,0 +1,61 @@
+// Copyright 2022 Yubico AB
+//
+// Licensed under the Apache License, Version 2.0 (the "License").
+// You may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
+using System.Formats.Cbor;
+using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Fido2.Cose;
+
+namespace Yubico.YubiKey.Fido2.Commands
+{
+    /// <summary>
+    /// The response partner to <see cref="CredentialManagementCommand"/> and all
+    /// of its sub-commands.
+    /// </summary>
+    /// <remarks>
+    /// As with <see cref="CredentialManagementCommand"/>, this response
+    /// represents all of the possible outputs of all sub-commands supported by
+    /// <c>authenticatorClientPin</c>. It is recommended that you use the command
+    /// class that corresponds with the particular sub-command you care about.
+    /// All subcommands return the same data structure
+    /// (<see cref="CredentialManagementData"/>). Hence, all sub-commands will
+    /// generate the same response.
+    /// </remarks>
+    public class CredentialManagementResponse : YubiKeyResponse, IYubiKeyResponseWithData<CredentialManagementData>
+    {
+        /// <summary>
+        /// Constructs a new instance of
+        /// <see cref="CredentialManagementResponse"/> based on a response APDU
+        /// provided by the YubiKey.
+        /// </summary>
+        /// <param name="responseApdu">
+        /// A response APDU containing the CBOR response data for the
+        /// <c>authenticatorCredentialManagement</c> command.
+        /// </param>
+        public CredentialManagementResponse(ResponseApdu responseApdu) : base(responseApdu)
+        {
+        }
+
+        /// <inheritdoc />
+        public CredentialManagementData GetData()
+        {
+            if (Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(StatusMessage);
+            }
+
+            return new CredentialManagementData(ResponseApdu.Data);
+        }
+    }
+}

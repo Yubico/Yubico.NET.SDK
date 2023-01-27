@@ -35,6 +35,9 @@ what information is needed from the caller for that command.
 * [Make credential](#make-credential)
 * [Get Assertion](#get-assertion)
 * [Get Next Assertion](#get-next-assertion)
+* [Get Credential Metadata](#get-credential-metadata)
+* [Get Large Blob](#get-large-blob)
+* [Set Large Blob](#set-large-blob)
 * [Reset](#reset)
 ___
 ## Get version
@@ -147,7 +150,7 @@ PIN.
 
 ### Output
 
-none
+None
 
 ### APDU
 
@@ -174,7 +177,7 @@ current PIN and the new PIN.
 
 ### Output
 
-none
+None
 
 ### APDU
 
@@ -393,6 +396,131 @@ The credential, along with other information.
 ### APDU
 
 [Technical APDU Details](apdu/get-next-assertion.md)
+___
+## Get credential metadata
+
+Get information about the credentials on the YubiKey. This is one of the sub-commands of
+the `authenticatorCredentialManagement` command.
+
+Not all YubiKeys support credential management. If you send this command to a YubiKey that
+does not support it, the response will be "Unsupported option".
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[GetCredentialMetadataCommand](xref:Yubico.YubiKey.Fido2.Commands.GetCredentialMetadataCommand)
+
+[CredentialManagementResponse](xref:Yubico.YubiKey.Fido2.Commands.CredentialManagementResponse)
+
+### Input
+
+None.
+
+### Output
+
+The number of existing discoverable credentials on the YubiKey, and the maximum number of
+additional credentials the YubiKey can store.
+
+The data is returned in the form of a
+[CredentialManagementData](xref:Yubico.YubiKey.Fido2.CredentialManagementData) object.
+
+### APDU
+
+[Technical APDU Details](apdu/get-cred-metadata.md)
+___
+## Get large blob
+
+Get the large blob data out of the YubiKey. This command gets the raw data, it does not
+perform any parsing or decoding.
+
+Not all YubiKeys support large blobs. If you send this command to a YubiKey that does not
+support it, the response will be "Unsupported extension".
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[GetLargeBlobCommand](xref:Yubico.YubiKey.Fido2.Commands.GetLargeBlobCommand)
+
+[GetLargeBlobResponse](xref:Yubico.YubiKey.Fido2.Commands.GetLargeBlobResponse)
+
+### Input
+
+offset and count
+
+Because a large blob can be bigger than the maximum message length, it is possible
+retrieving the entire data will require more than one call. The offset specifies the
+offset in the large blob data on the YubiKey where the returned data should begin. The
+first call specifies an offset of zero, and each subsequent call specifies an offset of
+the total number of bytes returned so far by each previous call.
+
+The count is the number of bytes requested this call. This value must be less than or
+equal to the "maximum fragment length". There is a maximum message size (specified by the
+YubiKey and found in the `AuthenticatorInfo`) and the `MaxFragmentLength` is the
+`MaxMessageSize - 64`.
+
+### Output
+
+The bytes the YubiKey was able to return. This is in the form of a `ReadOnlyMemory<byte>`.
+If the number of bytes returned is less than the count given, then there are no more bytes
+to return. If the number is equal to the count, there could be more bytes on the YubiKey,
+and the caller should send another command.
+
+### APDU
+
+[Technical APDU Details](apdu/get-large-blob.md)
+___
+## Set large blob
+
+Store large blob data on the YubiKey. This command stores the data given, it does not
+perform any encoding. This replaces any data currently in the large blob storage area on
+the YubiKey.
+
+Not all YubiKeys support large blobs. If you send this command to a YubiKey that does not
+support it, the response will be "Unsupported extension".
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[SetLargeBlobCommand](xref:Yubico.YubiKey.Fido2.Commands.SetLargeBlobCommand)
+
+[SetLargeBlobResponse](xref:Yubico.YubiKey.Fido2.Commands.SetLargeBlobResponse)
+
+### Input
+
+data to store, offset, count, PinUvAuthParam, PinProtocol
+
+Because a large blob can be bigger than the maximum message length, it is possible storing
+the entire data will require more than one call. The offset specifies the offset in the
+large blob data on the YubiKey where the input data should be stored. The first call
+specifies an offset of zero, and each subsequent call specifies an offset of the total
+number of bytes stored so far by each previous call.
+
+The count is the total number of bytes that will be stored. That is, it is the sum of all
+the lengths of bytes stored by each call. The first time the set command is called, the
+offset is zero and the count is the total number of bytes. Each subsequent call the offset
+is where the previous call left off and the count is ignored.
+
+Each block of input must be less than or equal to `maxFragmentLength` bytes
+(`MaxMessageSize - 64`).
+
+The caller need authorization to store, and obtains that by generating a PinUvAuthParam.
+
+### Output
+
+None
+
+### APDU
+
+[Technical APDU Details](apdu/set-large-blob.md)
 ___
 ## Reset
 

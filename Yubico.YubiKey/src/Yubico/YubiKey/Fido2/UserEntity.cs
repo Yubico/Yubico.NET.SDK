@@ -82,6 +82,38 @@ namespace Yubico.YubiKey.Fido2
             Id = id;
         }
 
+        /// <summary>
+        /// Constructs a new instance of <see cref="UserEntity"/> from the
+        /// <c>encodedUserEntity</c>.
+        /// </summary>
+        /// <remarks>
+        /// This constructor expects the encoding to follow this Cbor template.
+        /// <code>
+        ///    map {
+        ///      "id"          --byte string--
+        ///      "name"        --text string-- (optional)
+        ///      "displayName" --text string-- (optional)
+        ///    }
+        /// </code>
+        /// </remarks>
+        /// <param name="encodedUserEntity">
+        /// The Cbor encoding of the user information.
+        /// </param>
+        /// <param name="bytesRead">
+        /// The constructor will return the number of bytes read.
+        /// </param>
+        /// <exception cref="Ctap2DataException">
+        /// The <c>encodedUserEntity</c> is not a correct encoding.
+        /// </exception>
+        public UserEntity(ReadOnlyMemory<byte> encodedUserEntity, out int bytesRead)
+        {
+            var cborMap = new CborMap<string>(encodedUserEntity);
+            Id = cborMap.ReadByteString(TagId);
+            Name = (string?)cborMap.ReadOptional<string>(TagName);
+            DisplayName = (string?)cborMap.ReadOptional<string>(TagDisplayName);
+            bytesRead = cborMap.BytesRead;
+        }
+
         /// <inheritdoc/>
         public byte[] CborEncode()
         {

@@ -276,7 +276,9 @@
     href: application-fido2/how-fido2-works.md
   - name: FIDO2 credentials
     href: application-fido2/fido2-credentials.md
-  - name: PIN/UV Authenticaation
+  - name: FIDO2 credential management
+    href: application-fido2/fido2-cred-mgmt.md
+  - name: PIN/UV Authentication
     href: application-fido2/pin-uv-auth-protocols.md
   - name: The FIDO2 PIN
     href: application-fido2/fido2-pin.md
@@ -295,6 +297,34 @@
       items:
       - name: Version
         href: application-fido2/apdu/version.md
+      - name: Get info
+        href: application-fido2/apdu/get-info.md
+      - name: Get key agreement
+        href: application-fido2/apdu/get-key-agree.md
+      - name: Set PIN
+        href: application-fido2/apdu/set-pin.md
+      - name: Change PIN
+        href: application-fido2/apdu/change-pin.md
+      - name: Get PIN token
+        href: application-fido2/apdu/get-pin-token.md
+      - name: GetPIN/UV auth token using PIN
+        href: application-fido2/apdu/get-auth-token-using-pin.md
+      - name: GetPIN/UV auth token using UV
+        href: application-fido2/apdu/get-auth-token-using-uv.md
+      - name: Make credential
+        href: application-fido2/apdu/make-credential.md
+      - name: Get assertion
+        href: application-fido2/apdu/get-assertion.md
+      - name: Get next assertion
+        href: application-fido2/apdu/get-next-assertion.md
+      - name: Get credential metadata
+        href: application-fido2/apdu/get-cred-metadata.md
+      - name: Get large blob
+        href: application-fido2/apdu/get-large-blob.md
+      - name: Set large blob
+        href: application-fido2/apdu/set-large-blob.md
+      - name: Reset
+        href: application-fido2/apdu/reset.md
 
 - name: "Application: YubiHSM Auth"
   homepage: application-yubihsm-auth/yubihsm-auth-overview.md

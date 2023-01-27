@@ -34,6 +34,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
         public int Count => _dict.Count;
 
         /// <summary>
+        /// The number of bytes in the encoding that were read.
+        /// </summary>
+        public int BytesRead { get; private set; }
+
+        /// <summary>
         /// Creates a new instance of <see cref="CborMap{TKey}"/> based on a dictionary.
         /// </summary>
         /// <param name="dict">An integer keyed dictionary of objects representing a CBOR map.</param>
@@ -63,6 +68,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// </param>
         public CborMap(CborReader cbor)
         {
+            int totalBytes = cbor.BytesRemaining;
             if (cbor.PeekState() != CborReaderState.StartMap)
             {
                 throw new Ctap2DataException(ExceptionMessages.Ctap2MissingRequiredField);
@@ -87,6 +93,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
             }
 
             cbor.ReadEndMap();
+            BytesRead = totalBytes - cbor.BytesRemaining;
         }
 
         /// <summary>

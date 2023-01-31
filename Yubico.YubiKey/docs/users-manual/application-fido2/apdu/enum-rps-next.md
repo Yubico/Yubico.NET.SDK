@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-## Get credential metadata
+## Enumerate RPs get next RP
 
 ### Command APDU info
 
@@ -31,7 +31,7 @@ encoding is
 
 ```txt
   A3
-     01 --int-- sub-command = 01
+     01 --int-- sub-command = 03
      03 --int-- protocol
      04 --byte string-- PinUvAuthParam
 ```
@@ -52,6 +52,6 @@ following.
 
 ```txt
   A2
-     01 --int--
-     02 --int--
+     03 --map-- Rp
+     04 --byte string-- RpIdHash
 ```

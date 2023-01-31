@@ -36,6 +36,8 @@ what information is needed from the caller for that command.
 * [Get Assertion](#get-assertion)
 * [Get Next Assertion](#get-next-assertion)
 * [Get Credential Metadata](#get-credential-metadata)
+* [Enumerate RPs Begin](#enumerate-rps-begin)
+* [Enumerate RPs Get Next RP](#enumerate-rps-get-next-rp)
 * [Get Large Blob](#get-large-blob)
 * [Set Large Blob](#set-large-blob)
 * [Reset](#reset)
@@ -119,7 +121,7 @@ All YubiKeys with the FIDO2 application.
 
 ### Input
 
-[The UV/PIN Auth Protocol](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocol).
+[The PIN/UV Auth Protocol](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocol).
 
 ### Output
 
@@ -211,7 +213,7 @@ All YubiKeys with the FIDO2 application.
 
 ### Input
 
-* [The UV/PIN Auth Protocol](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase)
+* [The PIN/UV Auth Protocol](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase)
 * [The PIN](fido2-pin.md)
 
 ### Output
@@ -251,7 +253,7 @@ All YubiKeys with the FIDO2 application.
 
 ### Input
 
-* [The UV/PIN Auth Protocol](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase)
+* [The PIN/UV Auth Protocol](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase)
 * [The PIN](fido2-pin.md)
 * A bit field listing the [permissions](xref:Yubico.YubiKey.Fido2.Commands.PinUvAuthTokenPermissions)
 * An optional relying party ID (`rpId`)
@@ -293,7 +295,7 @@ All YubiKeys with the FIDO2 application.
 
 ### Input
 
-* [The UV/PIN Auth Protocol](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase)
+* [The PIN/UV Auth Protocol](xref:Yubico.YubiKey.Fido2.PinProtocols.PinUvAuthProtocolBase)
 * A bit field listing the [permissions](xref:Yubico.YubiKey.Fido2.Commands.PinUvAuthTokenPermissions)
 * An optional relying party ID (`rpId`)
 
@@ -417,7 +419,8 @@ All YubiKeys with the FIDO2 application.
 
 ### Input
 
-None.
+A PIN/UV auth token (built using the credential management, cm, permission), and the
+protocol used to build the token. 
 
 ### Output
 
@@ -430,6 +433,78 @@ The data is returned in the form of a
 ### APDU
 
 [Technical APDU Details](apdu/get-cred-metadata.md)
+___
+## Enumerate RPs begin
+
+Get information about the first relying party (RP) represented by the credentials on the
+YubiKey, along with the total number of RPs that can be found. This is one of the
+sub-commands of the `authenticatorCredentialManagement` command.
+
+Not all YubiKeys support credential management. If you send this command to a YubiKey that
+does not support it, the response will be "Unsupported option".
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[EnumerateRpsBeginCommand](xref:Yubico.YubiKey.Fido2.Commands.EnumerateRpsBeginCommand)
+
+[CredentialManagementResponse](xref:Yubico.YubiKey.Fido2.Commands.CredentialManagementResponse)
+
+### Input
+
+A PIN/UV auth token (built using the credential management, cm, permission), and the
+protocol used to build the token. 
+
+### Output
+
+Information about the first RP on the YubiKey, and the total number of RPs represented.
+
+The data is returned in the form of a
+[CredentialManagementData](xref:Yubico.YubiKey.Fido2.CredentialManagementData) object.
+
+### APDU
+
+[Technical APDU Details](apdu/enum-rps-begin.md)
+___
+## Enumerate RPs get next RP
+
+Get information about the next relying party (RP) represented by the credentials on the
+YubiKey. This is one of the sub-commands of the `authenticatorCredentialManagement`
+command.
+
+Not all YubiKeys support credential management. If you send this command to a YubiKey that
+does not support it, the response will be "Unsupported option".
+
+### Available
+
+All YubiKeys with the FIDO2 application.
+
+### SDK classes
+
+[EnumerateRpsGetNextCommand](xref:Yubico.YubiKey.Fido2.Commands.EnumerateRpsGetNextCommand)
+
+[CredentialManagementResponse](xref:Yubico.YubiKey.Fido2.Commands.CredentialManagementResponse)
+
+### Input
+
+A PIN/UV auth token (built using the credential management, cm, permission), and the
+protocol used to build the token. 
+
+### Output
+
+Information about the next RP on the YubiKey. The call to `EnumerateRpsBeginCommand`
+returned the first RP. If there are more RPs, each successive call to
+`EnumerateRpsGetNextCommand` returns the next one.
+
+The data is returned in the form of a
+[CredentialManagementData](xref:Yubico.YubiKey.Fido2.CredentialManagementData) object.
+
+### APDU
+
+[Technical APDU Details](apdu/enum-rps-next.md)
 ___
 ## Get large blob
 

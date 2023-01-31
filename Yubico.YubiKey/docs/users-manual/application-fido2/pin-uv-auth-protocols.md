@@ -45,9 +45,9 @@ that was holding the authentication token when your application has finished usi
 
 ## The PIN/UV protocol interface
 
-### Pin protocol one
+### PIN protocol one
 
-### Pin protocol two
+### PIN protocol two
 
 ## PIN operations
 
@@ -62,7 +62,7 @@ the YubiKey's public RSA key, or use a key agreement algorithm such as DH or ECD
 compute a shared symmetric key and encrypt the PIN using that key.
 
 Currently, CTAP2 supports only ECDH using a specified set of standard curves, such as
-NIST's P-256. In this system, the platform queries the YubiKey to determine which UV/PIN
+NIST's P-256. In this system, the platform queries the YubiKey to determine which PIN/UV
 auth protocols it supports, and from the list returned chooses one it supports as well.
 Based on the protocol chosen, it will know which curve to use and will generate a new key
 pair. In order to compute the shared secret, it will combine its new private key with the

@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-## Get credential metadata
+## Enumerate RPs begin
 
 ### Command APDU info
 
@@ -31,7 +31,7 @@ encoding is
 
 ```txt
   A3
-     01 --int-- sub-command = 01
+     01 --int-- sub-command = 02
      03 --int-- protocol
      04 --byte string-- PinUvAuthParam
 ```
@@ -51,7 +51,8 @@ The info returned is CBOR encoded. It has a structure similar to the
 following.
 
 ```txt
-  A2
-     01 --int--
-     02 --int--
+  A3
+     03 --map-- Rp
+     04 --byte string-- RpIdHash
+     05 --int-- total number of Rps
 ```

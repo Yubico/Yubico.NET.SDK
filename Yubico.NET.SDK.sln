@@ -323,6 +323,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{1962BE4F-D9C6-4705-A72B-BD6F6700EC78}"
 	ProjectSection(SolutionItems) = preProject
 		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\change-pin.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\change-pin.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\enum-rps-begin.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\enum-rps-begin.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\enum-rps-next.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\enum-rps-next.md
 		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-assertion.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-assertion.md
 		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-auth-token-using-pin.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-auth-token-using-pin.md
 		Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-auth-token-using-uv.md = Yubico.YubiKey\docs\users-manual\application-fido2\apdu\get-auth-token-using-uv.md

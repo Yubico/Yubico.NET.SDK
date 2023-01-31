@@ -32,7 +32,7 @@ the following:
 ```txt
   A2         map containing two elements
      01      key (of key/value) specifying ...
-        0x   ... UV/PIN protocol (x=1 for protocol one, x=2 for protocol two)
+        0x   ... PIN/UV protocol (x=1 for protocol one, x=2 for protocol two)
      02      key specifying ...
         02   ... subcommand, 02 = KeyAgreement
 ```

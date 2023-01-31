@@ -64,7 +64,7 @@ namespace Yubico.YubiKey.Otp.Operations
         /// <inheritdoc/>
         protected override void ExecuteOperation()
         {
-            ReadOnlyMemory<byte> configBuffer = string.IsNullOrEmpty(_text)
+            ReadOnlyMemory<byte> configBuffer = _text is null
                 ? NdefConfig.CreateUriConfig(_uri!)
                 : NdefConfig.CreateTextConfig(_text!, _languageCode!, _useUtf16);
 
@@ -120,7 +120,7 @@ namespace Yubico.YubiKey.Otp.Operations
         /// </exception>
         public ConfigureNdef AsText(string text)
         {
-            if (!string.IsNullOrEmpty(text))
+            if (text is { })
             {
                 if (_uri != null)
                 {

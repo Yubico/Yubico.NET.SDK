@@ -163,7 +163,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 throw new ArgumentNullException(nameof(label));
             }
 
-            (CredentialPeriod period, string issuer, string account) = Credential.ParseLabel(label, type);
+            (CredentialPeriod period, string? issuer, string account) = Credential.ParseLabel(label, type);
             return new Credential(issuer, account, type, period);
         }
     }

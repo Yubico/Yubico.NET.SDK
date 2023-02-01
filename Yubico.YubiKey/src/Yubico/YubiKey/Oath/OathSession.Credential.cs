@@ -153,7 +153,7 @@ namespace Yubico.YubiKey.Oath
         /// Gets an OTP code for the specific credential.
         /// </summary>
         /// <param name="issuer">
-        /// The issuer is a string indicating the provider or service.
+        /// The issuer is an optional string indicating the provider or service.
         /// </param>
         /// <param name="account">
         /// The account name that usually is the user's email address.
@@ -163,7 +163,8 @@ namespace Yubico.YubiKey.Oath
         /// </param>
         /// <param name="period">
         /// Indicates the <see cref="CredentialPeriod"/> of the credential in seconds for TOTP code.
-        /// It can only be 15, 30, or 60 seconds. For HOTP should be set to zero.
+        /// It can only be 15, 30, or 60 seconds. For HOTP should be set to zero
+        /// (<see cref="CredentialPeriod.Undefined"/>).
         /// </param>
         /// <param name="responseFormat">
         /// Full or truncated <see cref="ResponseFormat"/> to receive back. The default value is Truncated.
@@ -180,7 +181,7 @@ namespace Yubico.YubiKey.Oath
         /// an incorrect password was provided if authentication is required.
         /// </exception>
         public Code CalculateCredential(
-            string issuer,
+            string? issuer,
             string account,
             CredentialType type,
             CredentialPeriod period,
@@ -257,7 +258,7 @@ namespace Yubico.YubiKey.Oath
         /// No touch.
         /// </remarks>
         /// <param name="issuer">
-        /// The issuer is a string indicating the provider or service.
+        /// The issuer is an optional string indicating the provider or service.
         /// </param>
         /// <param name="account">
         /// The account name that usually is the user's email address.
@@ -268,8 +269,8 @@ namespace Yubico.YubiKey.Oath
         /// </param>
         /// <param name="period">
         /// Indicates the <see cref="CredentialPeriod"/> of the credential in seconds for TOTP code.
-        /// It can only be 15, 30, or 60 seconds. For HOTP should be set to zero.
-        /// The default value is 30.
+        /// It can only be 15, 30, or 60 seconds. For HOTP should be set to zero
+        /// (<see cref="CredentialPeriod.Undefined"/>). The default value is 30.
         /// </param>
         /// <returns>
         /// The <see cref="Credential"/> that was created and added to the YubiKey.
@@ -283,7 +284,7 @@ namespace Yubico.YubiKey.Oath
         /// an incorrect password was provided if authentication is required.
         /// </exception>
         public Credential AddCredential(
-          string issuer,
+          string? issuer,
           string account,
           CredentialType type = CredentialType.Totp,
           CredentialPeriod period = CredentialPeriod.Period30)
@@ -373,7 +374,7 @@ namespace Yubico.YubiKey.Oath
         /// Removes an existing credential from the YubiKey.
         /// </summary>
         /// <param name="issuer">
-        /// The issuer is a string indicating the provider or service.
+        /// The issuer is an optional string indicating the provider or service.
         /// </param>
         /// <param name="account">
         /// The account name that usually is the user's email address.
@@ -384,8 +385,8 @@ namespace Yubico.YubiKey.Oath
         /// </param>
         /// <param name="period">
         /// Indicates the <see cref="CredentialPeriod"/> of the credential in seconds for TOTP code.
-        /// It can only be 15, 30, or 60 seconds. For HOTP should be set to zero.
-        /// The default value is 30.
+        /// It can only be 15, 30, or 60 seconds. For HOTP should be set to zero
+        /// (<see cref="CredentialPeriod.Undefined"/>). The default value is 30.
         /// </param>
         /// <returns>
         /// The <c>Credential</c> that was removed from the YubiKey.
@@ -399,7 +400,7 @@ namespace Yubico.YubiKey.Oath
         /// an incorrect password was provided if authentication is required.
         /// </exception>
         public Credential RemoveCredential(
-            string issuer,
+            string? issuer,
             string account,
             CredentialType type = CredentialType.Totp,
             CredentialPeriod period = CredentialPeriod.Period30)
@@ -427,7 +428,7 @@ namespace Yubico.YubiKey.Oath
         /// The <c>Credential</c> to rename.
         /// </param>
         /// <param name="newIssuer">
-        /// The new issuer to set on the credential. The issuer can be null or empty string.
+        /// The new issuer to set on the credential. The issuer is optional and can be null.
         /// </param>
         /// <param name="newAccount">
         /// The new account name to set on the credential.
@@ -479,7 +480,7 @@ namespace Yubico.YubiKey.Oath
         /// The current credential's account name.
         /// </param>
         /// <param name="newIssuer">
-        /// The new issuer to set on the credential. The issuer can be null or empty string.
+        /// The new issuer to set on the credential. The issuer is optional and can be null.
         /// </param>
         /// <param name="newAccount">
         /// The new account name to set on the credential.
@@ -490,8 +491,8 @@ namespace Yubico.YubiKey.Oath
         /// </param>
         /// <param name="currentPeriod">
         /// Indicates the <see cref="CredentialPeriod"/> of the current credential in seconds for TOTP code.
-        /// It can only be 15, 30, or 60 seconds. For HOTP should be set to zero.
-        /// The default value is 30.
+        /// It can only be 15, 30, or 60 seconds. For HOTP should be set to zero
+        /// (<see cref="CredentialPeriod.Undefined"/>). The default value is 30.
         /// </param>
         /// <exception cref="InvalidOperationException">
         /// There is no <c>KeyCollector</c> loaded if the authentication is required,

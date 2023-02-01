@@ -338,7 +338,7 @@
     <value>A credential cannot be null.</value>
   </data>
   <data name="InvalidCredentialAccount" xml:space="preserve">
-    <value>A credential's account cannot be null.</value>
+    <value>A credential's account cannot be empty or white space.</value>
   </data>
   <data name="InvalidCredentialNameLength" xml:space="preserve">
     <value>A credential's name cannot be more than 64 bytes in length.</value>
@@ -488,7 +488,7 @@
     <value>Failed to select the smart card application. 0x{0:X4}</value>
   </data>
   <data name="InvalidCredentialType" xml:space="preserve">
-    <value>A credential type cannot be null.</value>
+    <value>A credential type must be specified.</value>
   </data>
   <data name="InvalidKeyboardInstruction" xml:space="preserve">
     <value>A YubiOTP APDU was received with instruction number {0}. This instruction is not supported.</value>
@@ -852,5 +852,8 @@
   </data>
   <data name="YubiHsmAuthTouchTimeout" xml:space="preserve">
     <value>The operation timed out while waiting for touch.</value>
+  </data>
+  <data name="InvalidUriQuery" xml:space="preserve">
+    <value>The URI query cannot be null or empty.</value>
   </data>
 </root>

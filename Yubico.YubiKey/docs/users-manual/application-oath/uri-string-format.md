@@ -55,8 +55,10 @@ The label is created from:
 
 | Name | Description |
 | :--- | :--- |
-| Issuer | A string value indicating the provider or service this account is associated with. It can be absent. |
+| Issuer | An optional string value indicating the provider or service this account is associated with. |
 | Account Name | A URI-encoded string that usually is the user's email address. |
+
+It is formatted as "Issuer:Account" when both parameters are present. It is formatted as "Account" when there is no Issuer.
 
 The label prevents collisions between different accounts with different providers that might be identified using the same account name, e.g. the user's email address.
 
@@ -67,6 +69,7 @@ Example:alice@gmail.com
 
 ACME%20Co:john.doe@email.com
 ```
+
 ## Parameters
 
 ### Secret
@@ -81,7 +84,7 @@ There is Base32 helper class in the Yubico.Core library.
 
 ### Issuer
 
-The issuer parameter is a string value indicating the provider or service the credential is associated with. It is URL-encoded according to [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986). 
+The issuer parameter is an optional string value indicating the provider or service the credential is associated with. It is URL-encoded according to [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986). 
 
 Valid values corresponding to the label examples above would be: 
 

@@ -13,36 +13,353 @@
 // limitations under the License.
 
 using System;
+using System.Text;
 using Xunit;
 
 namespace Yubico.YubiKey.Oath
 {
     public class CredentialTests
     {
-        [Fact]
-        public void CredentialName_TotpTypeAndDefaultPeriod_ReturnsCorrectlyParsedLabel()
-        {
-            var credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp, CredentialPeriod.Period30);
+        private readonly string DefaultTestIssuer = "Microsoft";
+        private readonly string DefaultTestAccount = "test@outlook.com";
 
-            Assert.Equal("Microsoft:test@outlook.com", credential.Name);
+        #region Issuer
+        [Fact]
+        public void Issuer_GetDefaultValue_ReturnsNull()
+        {
+            Credential cred = new Credential();
+
+            Assert.Null(cred.Issuer);
         }
 
         [Fact]
-        public void CredentialName_TotpTypeAndPeriod15_ReturnsCorrectlyParsedLabel()
+        public void Issuer_SetToTestString_ReturnsTestString()
         {
-            var credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp, CredentialPeriod.Period15);
+            Credential cred = new Credential();
 
-            Assert.Equal("15/Microsoft:test@outlook.com", credential.Name);
+            cred.Issuer = DefaultTestIssuer;
+            string? actualIssuer = cred.Issuer;
+
+            Assert.Equal(DefaultTestIssuer, actualIssuer);
         }
 
         [Fact]
-        public void CredentialName_HotpTypeAndUndefinedPeriod_ReturnsCorrectlyParsedLabel()
+        public void Issuer_SetToTestStringWithLeadingTrailingWhiteSpace_ReturnsTestString()
         {
-            var credential = new Credential("Apple", "test@icloud.com", CredentialType.Hotp, CredentialPeriod.Undefined);
+            Credential cred = new Credential();
 
-            Assert.Equal("Apple:test@icloud.com", credential.Name);
+            string? expectedIssuer = "  " + DefaultTestIssuer + " \t ";
+            cred.Issuer = expectedIssuer;
+            string? actualIssuer = cred.Issuer;
+
+            Assert.Equal(expectedIssuer, actualIssuer);
         }
 
+        [Fact]
+        public void Issuer_SetToNull_ReturnsNull()
+        {
+            Credential cred = new Credential();
+
+            cred.Issuer = null;
+            string? actualIssuer = cred.Issuer;
+
+            Assert.Null(actualIssuer);
+        }
+
+        [Fact]
+        public void Issuer_SetToEmptyString_ReturnsNull()
+        {
+            Credential cred = new Credential();
+
+            cred.Issuer = string.Empty;
+            string? actualIssuer = cred.Issuer;
+
+            Assert.Null(actualIssuer);
+        }
+
+        [Theory]
+        [InlineData("      ")]
+        [InlineData("   \t   ")]
+        [InlineData("\u2000\u2000\u2000")]
+        public void Issuer_SetToWhiteSpace_ReturnsNull(string? issuerValue)
+        {
+            Credential cred = new Credential();
+
+            cred.Issuer = issuerValue;
+            string? actualIssuer = cred.Issuer;
+
+            Assert.Null(actualIssuer);
+        }
+        #endregion Issuer
+
+        #region Name: valid credentials
+
+        // "15/Microsoft:test@outlook.com" TOTP @ 15s, Issuer = Microsoft, Account = "test@outlook.com"
+        [Fact]
+        public void Name_Totp15sIssuerAccount_ReturnsCorrectName()
+        {
+            Credential cred = new Credential();
+
+            cred.Type = CredentialType.Totp;
+            cred.Period = CredentialPeriod.Period15;
+            cred.Issuer = DefaultTestIssuer;
+            cred.AccountName = DefaultTestAccount;
+
+            string expectedName = $"15/{DefaultTestIssuer}:{DefaultTestAccount}";
+
+            Assert.Equal(expectedName, cred.Name);
+        }
+
+        // "Microsoft:test@outlook.com" [TOTP @ 30s/HOTP], Issuer = Microsoft, Account = "test@outlook.com"
+        [Fact]
+        public void Name_Totp30sIssuerAccount_ReturnsCorrectName()
+        {
+            Credential cred = new Credential();
+
+            cred.Type = CredentialType.Totp;
+            cred.Period = CredentialPeriod.Period30;
+            cred.Issuer = DefaultTestIssuer;
+            cred.AccountName = DefaultTestAccount;
+
+            string expectedName = $"{DefaultTestIssuer}:{DefaultTestAccount}";
+
+            Assert.Equal(expectedName, cred.Name);
+        }
+
+        // "Microsoft:test@outlook.com" [TOTP @ 30s/HOTP], Issuer = Microsoft, Account = "test@outlook.com"
+        [Fact]
+        public void Name_HotpIssuerAccount_ReturnsCorrectName()
+        {
+            Credential cred = new Credential();
+
+            cred.Type = CredentialType.Hotp;
+            cred.Issuer = DefaultTestIssuer;
+            cred.AccountName = DefaultTestAccount;
+
+            string expectedName = $"{DefaultTestIssuer}:{DefaultTestAccount}";
+
+            Assert.Equal(expectedName, cred.Name);
+        }
+
+        // "15/test@outlook.com" TOTP @ 15s, Account = "test@outlook.com"
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("      ")]
+        public void Name_Totp15sAccount_ReturnsCorrectName(string? issuerValue)
+        {
+            Credential cred = new Credential();
+
+            cred.Type = CredentialType.Totp;
+            cred.Period = CredentialPeriod.Period15;
+            cred.Issuer = issuerValue;
+            cred.AccountName = DefaultTestAccount;
+
+            string expectedName = $"15/{DefaultTestAccount}";
+
+            Assert.Equal(expectedName, cred.Name);
+        }
+
+        // "15/test@outlook.com" TOTP @ 15s, Account = "test@outlook.com"
+        [Fact]
+        public void Name_Totp15sAccountDefaultIssuer_ReturnsCorrectName()
+        {
+            Credential cred = new Credential();
+
+            cred.Type = CredentialType.Totp;
+            cred.Period = CredentialPeriod.Period15;
+            cred.AccountName = DefaultTestAccount;
+
+            string expectedName = $"15/{DefaultTestAccount}";
+
+            Assert.Equal(expectedName, cred.Name);
+        }
+
+        // "test@outlook.com" [TOTP @ 30s/HOTP], Account = "test@outlook.com"
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("      ")]
+        public void Name_Totp30sAccount_ReturnsCorrectName(string? issuerValue)
+        {
+            Credential cred = new Credential();
+
+            cred.Type = CredentialType.Totp;
+            cred.Period = CredentialPeriod.Period30;
+            cred.Issuer = issuerValue;
+            cred.AccountName = DefaultTestAccount;
+
+            string expectedName = $"{DefaultTestAccount}";
+
+            Assert.Equal(expectedName, cred.Name);
+        }
+
+        // "test@outlook.com" [TOTP @ 30s/HOTP], Account = "test@outlook.com"
+        [Fact]
+        public void Name_Totp30sAccountDefaultIssuer_ReturnsCorrectName()
+        {
+            Credential cred = new Credential();
+
+            cred.Type = CredentialType.Totp;
+            cred.Period = CredentialPeriod.Period30;
+            cred.AccountName = DefaultTestAccount;
+
+            string expectedName = $"{DefaultTestAccount}";
+
+            Assert.Equal(expectedName, cred.Name);
+        }
+
+        // "test@outlook.com" [TOTP @ 30s/HOTP], Account = "test@outlook.com"
+        [Theory]
+        [InlineData(null)]
+        [InlineData("")]
+        [InlineData("      ")]
+        public void Name_HotpAccount_ReturnsCorrectName(string? issuerValue)
+        {
+            Credential cred = new Credential();
+
+            cred.Type = CredentialType.Hotp;
+            cred.Issuer = issuerValue;
+            cred.AccountName = DefaultTestAccount;
+
+            string expectedName = $"{DefaultTestAccount}";
+
+            Assert.Equal(expectedName, cred.Name);
+        }
+
+        // "test@outlook.com" [TOTP @ 30s/HOTP], Account = "test@outlook.com"
+        [Fact]
+        public void Name_HotpAccountDefaultIssuer_ReturnsCorrectName()
+        {
+            Credential cred = new Credential();
+
+            cred.Type = CredentialType.Hotp;
+            cred.AccountName = DefaultTestAccount;
+
+            string expectedName = $"{DefaultTestAccount}";
+
+            Assert.Equal(expectedName, cred.Name);
+        }
+
+        [Theory]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period15, "123456", "123456789012345678901234567890123456789012345678901234")]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period30, "123456789", "123456789012345678901234567890123456789012345678901234")]
+        [InlineData(CredentialType.Hotp, CredentialPeriod.Undefined, "123456789", "123456789012345678901234567890123456789012345678901234")]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period15, null, "1234567890123456789012345678901234567890123456789012345678901")]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period15, "", "1234567890123456789012345678901234567890123456789012345678901")]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period15, "     ", "1234567890123456789012345678901234567890123456789012345678901")]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period30, null, "1234567890123456789012345678901234567890123456789012345678901234")]
+        [InlineData(CredentialType.Hotp, CredentialPeriod.Undefined, null, "1234567890123456789012345678901234567890123456789012345678901234")]
+        public void Name_64ByteNameLength_ReturnsCorrectName(CredentialType credType, CredentialPeriod credPeriod, string? issuer, string account)
+        {
+            Credential cred = new Credential();
+
+            cred.Type = credType;
+            cred.Period = credPeriod;
+            cred.Issuer = issuer;
+            cred.AccountName = account;
+
+            string actualCredName = cred.Name;
+
+            Assert.Equal(64, Encoding.UTF8.GetByteCount(actualCredName));
+        }
+        #endregion
+
+        #region Name: invalid credentials
+        [Theory]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period15, "123456", "1234567890123456789012345678901234567890123456789012345")]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period30, "123456789", "1234567890123456789012345678901234567890123456789012345")]
+        [InlineData(CredentialType.Hotp, CredentialPeriod.Undefined, "123456789", "1234567890123456789012345678901234567890123456789012345")]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period15, null, "12345678901234567890123456789012345678901234567890123456789012")]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period15, "", "12345678901234567890123456789012345678901234567890123456789012")]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period15, "     ", "12345678901234567890123456789012345678901234567890123456789012")]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period30, null, "12345678901234567890123456789012345678901234567890123456789012345")]
+        [InlineData(CredentialType.Hotp, CredentialPeriod.Undefined, null, "12345678901234567890123456789012345678901234567890123456789012345")]
+        public void Name_65ByteNameLength_ThrowsInvalidOperationException(CredentialType credType, CredentialPeriod credPeriod, string? issuer, string account)
+        {
+            Credential cred = new Credential();
+
+            cred.Type = credType;
+            cred.Period = credPeriod;
+            cred.Issuer = issuer;
+            cred.AccountName = account;
+
+            _ = Assert.Throws<InvalidOperationException>(() => cred.Name);
+        }
+
+        [Fact]
+        public void Name_CredTypeDefault_ThrowsInvalidOperationException()
+        {
+            Credential cred = new Credential();
+
+            cred.Issuer = DefaultTestIssuer;
+            cred.AccountName = DefaultTestAccount;
+
+            _ = Assert.Throws<InvalidOperationException>(() => cred.Name);
+        }
+
+        [Fact]
+        public void Name_CredTypeNone_ThrowsInvalidOperationException()
+        {
+            Credential cred = new Credential();
+
+            cred.Type = CredentialType.None;
+            cred.Issuer = DefaultTestIssuer;
+            cred.AccountName = DefaultTestAccount;
+
+            _ = Assert.Throws<InvalidOperationException>(() => cred.Name);
+        }
+
+        [Fact]
+        public void Name_TotpCredPeriodDefault_ThrowsInvalidOperationException()
+        {
+            Credential cred = new Credential();
+
+            cred.Type = CredentialType.Totp;
+            cred.Issuer = DefaultTestIssuer;
+            cred.AccountName = DefaultTestAccount;
+
+            _ = Assert.Throws<InvalidOperationException>(() => cred.Name);
+        }
+
+        [Fact]
+        public void Name_TotpCredPeriodUndefined_ThrowsInvalidOperationException()
+        {
+            Credential cred = new Credential();
+
+            cred.Period = CredentialPeriod.Undefined;
+            cred.Type = CredentialType.Totp;
+            cred.Issuer = DefaultTestIssuer;
+            cred.AccountName = DefaultTestAccount;
+
+            _ = Assert.Throws<InvalidOperationException>(() => cred.Name);
+        }
+
+        [Fact]
+        public void Name_Totp30sAccountDefault_ThrowsInvalidOperationException()
+        {
+            Credential cred = new Credential();
+
+            cred.Type = CredentialType.Totp;
+            cred.Period = CredentialPeriod.Period30;
+            cred.Issuer = DefaultTestIssuer;
+
+            _ = Assert.Throws<InvalidOperationException>(() => cred.Name);
+        }
+
+        [Fact]
+        public void Name_HotpAccountDefault_ThrowsInvalidOperationException()
+        {
+            Credential cred = new Credential();
+
+            cred.Type = CredentialType.Hotp;
+            cred.Issuer = DefaultTestIssuer;
+
+            _ = Assert.Throws<InvalidOperationException>(() => cred.Name);
+        }
+        #endregion
+
+        #region parsing
         [Fact]
         public void CredentialIssuerAndAccount_UriUnescape_ReturnsCorrectUnescapedStrings()
         {
@@ -98,11 +415,113 @@ namespace Yubico.YubiKey.Oath
         }
 
         [Fact]
-        public void CredentialAccountNotValid_ThrowsException()
+        public void CredentialParseLabel_Totp15sAccount_ReturnsCorrectlyParsedLabel()
         {
+            var label = "15/test@outlook.com";
+            var parsedLabel = Credential.ParseLabel(label, CredentialType.Totp);
+
+            Assert.Equal(CredentialPeriod.Period15, parsedLabel.period);
+            Assert.Null(parsedLabel.issuer);
+            Assert.Equal("test@outlook.com", parsedLabel.account);
+        }
+
+        [Fact]
+        public void CredentialParseLabel_Totp30sAccount_ReturnsCorrectlyParsedLabel()
+        {
+            var label = "test@outlook.com";
+            var parsedLabel = Credential.ParseLabel(label, CredentialType.Totp);
+
+            Assert.Equal(CredentialPeriod.Period30, parsedLabel.period);
+            Assert.Null(parsedLabel.issuer);
+            Assert.Equal("test@outlook.com", parsedLabel.account);
+        }
+
+        [Fact]
+        public void CredentialParseLabel_HotpAccount_ReturnsCorrectlyParsedLabel()
+        {
+            var label = "test@outlook.com";
+            var parsedLabel = Credential.ParseLabel(label, CredentialType.Hotp);
+
+            Assert.Equal(CredentialPeriod.Undefined, parsedLabel.period);
+            Assert.Null(parsedLabel.issuer);
+            Assert.Equal("test@outlook.com", parsedLabel.account);
+        }
+
+        [Theory]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period15, "123456", "123456789012345678901234567890123456789012345678901234", "15/123456:123456789012345678901234567890123456789012345678901234")]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period30, "123456789", "123456789012345678901234567890123456789012345678901234", "123456789:123456789012345678901234567890123456789012345678901234")]
+        [InlineData(CredentialType.Hotp, CredentialPeriod.Undefined, "123456789", "123456789012345678901234567890123456789012345678901234", "123456789:123456789012345678901234567890123456789012345678901234")]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period15, null, "1234567890123456789012345678901234567890123456789012345678901", "15/1234567890123456789012345678901234567890123456789012345678901")]
+        [InlineData(CredentialType.Totp, CredentialPeriod.Period30, null, "1234567890123456789012345678901234567890123456789012345678901234", "1234567890123456789012345678901234567890123456789012345678901234")]
+        [InlineData(CredentialType.Hotp, CredentialPeriod.Undefined, null, "1234567890123456789012345678901234567890123456789012345678901234", "1234567890123456789012345678901234567890123456789012345678901234")]
+        public void CredentialParseLabel_TotalLength64_ReturnsCorrectlyParsedLabel(CredentialType type, CredentialPeriod period, string? issuer, string account, string label)
+        {
+            var parsedLabel = Credential.ParseLabel(label, type);
+
+            Assert.Equal(period, parsedLabel.period);
+            Assert.Equal(issuer, parsedLabel.issuer);
+            Assert.Equal(account, parsedLabel.account);
+        }
+
+        [Fact]
+        public void CredentialParseUri_NoOptionalParameters_ReturnsCorrectlyParsedCredentialParameters()
+        {
+            var uri = new Uri("otpauth://totp/Microsoft:test@outlook.com?secret=TEST&issuer=Microsoft");
+            var parsedCredential = Credential.ParseUri(uri);
+
+            Assert.Equal("Microsoft", parsedCredential.Issuer);
+            Assert.Equal("test@outlook.com", parsedCredential.AccountName);
+            Assert.Equal("TEST", parsedCredential.Secret);
+            Assert.Equal(CredentialType.Totp, parsedCredential.Type);
+            Assert.Equal(HashAlgorithm.Sha1, parsedCredential.Algorithm);
+            Assert.Equal(CredentialPeriod.Period30, parsedCredential.Period);
+            Assert.Equal(6, parsedCredential.Digits);
+            Assert.Null(parsedCredential.Counter);
+        }
+
+        [Fact]
+        public void CredentialParseUri_WithOptionalParameters_ReturnsCorrectlyParsedCredentialParameters()
+        {
+            var uri = new Uri("otpauth://totp/Microsoft%3Ademo:test@outlook.com?secret=TEST&issuer=Microsoft%3Ademo&algorithm=SHA256&digits=7&period=60");
+            var parsedCredential = Credential.ParseUri(uri);
+
+            Assert.Equal("Microsoft:demo", parsedCredential.Issuer);
+            Assert.Equal("test@outlook.com", parsedCredential.AccountName);
+            Assert.Equal("TEST", parsedCredential.Secret);
+            Assert.Equal(CredentialType.Totp, parsedCredential.Type);
+            Assert.Equal(HashAlgorithm.Sha256, parsedCredential.Algorithm);
+            Assert.Equal(CredentialPeriod.Period60, parsedCredential.Period);
+            Assert.Equal(7, parsedCredential.Digits);
+            Assert.Null(parsedCredential.Counter);
+        }
+
+        [Fact]
+        public void CredentialParseUri_NoIssuer_ReturnsCorrectlyParsedCredentialParameters()
+        {
+            var uri = new Uri("otpauth://totp/test@outlook.com?secret=TEST");
+            var parsedCredential = Credential.ParseUri(uri);
+
+            Assert.Null(parsedCredential.Issuer);
+            Assert.Equal("test@outlook.com", parsedCredential.AccountName);
+            Assert.Equal("TEST", parsedCredential.Secret);
+            Assert.Equal(CredentialType.Totp, parsedCredential.Type);
+            Assert.Equal(HashAlgorithm.Sha1, parsedCredential.Algorithm);
+            Assert.Equal(CredentialPeriod.Period30, parsedCredential.Period);
+            Assert.Equal(6, parsedCredential.Digits);
+            Assert.Null(parsedCredential.Counter);
+        }
+
+        [Fact]
+        public void CredentialParseUri_UriNotValid_ThrowsException()
+        {
+
             static void Action()
             {
-                _ = new Credential("Microsoft", string.Empty, CredentialType.Totp, HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
+#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
+                var uri = new Uri(null);
+#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
+                _ = Credential.ParseUri(uri);
+
             }
 
             Exception? ex = Record.Exception(Action);
@@ -110,11 +529,55 @@ namespace Yubico.YubiKey.Oath
         }
 
         [Fact]
-        public void CredentialNameNotValid_ThrowsException()
+        public void CredentialParseUri_UriNotValid_ThrowsException_2()
+        {
+
+            static void Action()
+            {
+                var uri = new Uri(string.Empty);
+                _ = Credential.ParseUri(uri);
+            }
+
+            Exception? ex = Record.Exception(Action);
+            Assert.NotNull(ex);
+        }
+
+        [Fact]
+        public void CredentialParseUri_UriSchemeNotValid_ThrowsException()
+        {
+
+            static void Action()
+            {
+                var uri = new Uri("otp://totp/Microsoft:test@outlook.com?secret=TEST&issuer=Microsoft");
+                _ = Credential.ParseUri(uri);
+            }
+
+            Exception? ex = Record.Exception(Action);
+            Assert.NotNull(ex);
+        }
+
+        [Fact]
+        public void CredentialParseUri_UriPathNotValid_ThrowsException()
+        {
+
+            static void Action()
+            {
+                var uri = new Uri("otpauth://totp/secret=TEST&issuer=Microsoft");
+                _ = Credential.ParseUri(uri);
+            }
+
+            Exception? ex = Record.Exception(Action);
+            Assert.NotNull(ex);
+        }
+        #endregion
+
+        #region non-default constructor
+        [Fact]
+        public void CredentialAccountNotValid_ThrowsException()
         {
             static void Action()
             {
-                _ = new Credential("Microsoft", "HLKTFGJRUY6S2NWRMH7GN32IJNNJRFNQZLTIS4FB6E5COG@outlook.com", CredentialType.Totp, HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
+                _ = new Credential("Microsoft", string.Empty, CredentialType.Totp, HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
             }
 
             Exception? ex = Record.Exception(Action);
@@ -181,96 +644,6 @@ namespace Yubico.YubiKey.Oath
             Exception? ex = Record.Exception(Action);
             Assert.NotNull(ex);
         }
-
-        [Fact]
-        public void CredentialParseUri_NoOptionalParameters_ReturnsCorrectlyParsedCredentialParameters()
-        {
-            var uri = new Uri("otpauth://totp/Microsoft:test@outlook.com?secret=TEST&issuer=Microsoft");
-            var parsedCredential= Credential.ParseUri(uri);
-
-            Assert.Equal("Microsoft", parsedCredential.Issuer);
-            Assert.Equal("test@outlook.com", parsedCredential.AccountName);
-            Assert.Equal("TEST", parsedCredential.Secret);
-            Assert.Equal(CredentialType.Totp, parsedCredential.Type);
-            Assert.Equal(HashAlgorithm.Sha1, parsedCredential.Algorithm);
-            Assert.Equal(CredentialPeriod.Period30, parsedCredential.Period);
-            Assert.Equal(6, parsedCredential.Digits);
-            Assert.Null(parsedCredential.Counter);
-        }
-
-        [Fact]
-        public void CredentialParseUri_WithOptionalParameters_ReturnsCorrectlyParsedCredentialParameters()
-        {
-            var uri = new Uri("otpauth://totp/Microsoft%3Ademo:test@outlook.com?secret=TEST&issuer=Microsoft%3Ademo&algorithm=SHA256&digits=7&period=60");
-            var parsedCredential = Credential.ParseUri(uri);
-
-            Assert.Equal("Microsoft:demo", parsedCredential.Issuer);
-            Assert.Equal("test@outlook.com", parsedCredential.AccountName);
-            Assert.Equal("TEST", parsedCredential.Secret);
-            Assert.Equal(CredentialType.Totp, parsedCredential.Type);
-            Assert.Equal(HashAlgorithm.Sha256, parsedCredential.Algorithm);
-            Assert.Equal(CredentialPeriod.Period60, parsedCredential.Period);
-            Assert.Equal(7, parsedCredential.Digits);
-            Assert.Null(parsedCredential.Counter);
-        }
-
-        [Fact]
-        public void CredentialParseUri_UriNotValid_ThrowsException()
-        {
-            
-            static void Action()
-            {
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-                var uri = new Uri(null);
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
-                _ = Credential.ParseUri(uri);
-
-            }
-
-            Exception? ex = Record.Exception(Action);
-            Assert.NotNull(ex);
-        }
-
-        [Fact]
-        public void CredentialParseUri_UriNotValid_ThrowsException_2()
-        {
-
-            static void Action()
-            {
-                var uri = new Uri(string.Empty);
-                _ = Credential.ParseUri(uri);
-            }
-
-            Exception? ex = Record.Exception(Action);
-            Assert.NotNull(ex);
-        }
-
-        [Fact]
-        public void CredentialParseUri_UriSchemeNotValid_ThrowsException()
-        {
-
-            static void Action()
-            {
-                var uri = new Uri("otp://totp/Microsoft:test@outlook.com?secret=TEST&issuer=Microsoft");
-                _ = Credential.ParseUri(uri);
-            }
-
-            Exception? ex = Record.Exception(Action);
-            Assert.NotNull(ex);
-        }
-
-        [Fact]
-        public void CredentialParseUri_UriPathNotValid_ThrowsException()
-        {
-
-            static void Action()
-            {
-                var uri = new Uri("otpauth://totp/secret=TEST&issuer=Microsoft");
-                _ = Credential.ParseUri(uri);
-            }
-
-            Exception? ex = Record.Exception(Action);
-            Assert.NotNull(ex);
-        }
+        #endregion
     }
 }

@@ -26,14 +26,14 @@ The credential has a set of parameters.
 
 | Name | Description |
 | :--- | :--- |
-| Issuer | The issuer parameter is a string value indicating the provider or service this account is associated with. |
+| Issuer | The issuer parameter is an optional string value indicating the provider or service this account is associated with. |
 | Account Name | The account name is a string that usually is the user's email address. |
 | Type | Indicates the type of the credential as either HOTP or TOTP. |
 | Algorithm | The hash algorithm used by the credential. |
 | Secret | The secret parameter is an arbitrary key value encoded in Base32 according to RFC 3548. |
 | Digits | The number of digits in a one-time password (OTP). |
 | Requires Touch | The credential requires the user to touch the key to generate a one-time password (OTP). |
-| Name | Only get property witch serves as the unique identifier for the credential.|
+| Name | Only get property which serves as the unique identifier for the credential. |
 
 The Name is created from Period, Issue and Account Name with the following format:
 
@@ -41,19 +41,19 @@ The Name is created from Period, Issue and Account Name with the following forma
 "period/issuer:account"
 ```
 
-If period is a default value - 30 seconds, or the credential's type is HOTP, then the format will be:
+If the credential is TOTP with the default period (30 seconds) or the credential's type is HOTP, then the format will be:
 
 ```
 "issuer:account"
 ```
 
-Also, if Issuer is not specified, the format will be:
+If Issuer is not specified, the format will be:
 
 ```
 "period/account"
 ```
 
-Or just an Account Name for TOTP with default period or HOTP credentials:
+Or just an Account Name for TOTP with default period (30 seconds) or HOTP credentials:
 
 ```
 "account"
@@ -121,12 +121,12 @@ The URI specification [RFC 3986](https://datatracker.ietf.org/doc/html/rfc3986).
 
 2. Specifying each parameter
 
-If you are unable to capture the QR code and use a URI string, you can manually create the credential by adding the account information, the provider (Amazon, Google, Microsoft, etc.) and the shared secret.
+If you are unable to capture the QR code and use a URI string, you can manually create the credential by adding the account information. The Issuer is recommended, but not required.
 
 ```
 // create TOTP credential
 var credential = new Credential {
-    Issuer = Yubico,
+    Issuer = "Yubico",
     AccountName = "test@yubico.com",
     Type = Totp,
     Period = 30,
@@ -137,12 +137,11 @@ var credential = new Credential {
 
 // create HOTP credential
 var credential = new Credential {
-    Issuer = Yubico,
+    Issuer = "Yubico",
     AccountName = "test@yubico.com",
     Type = Hotp,
-    Period = 0,
     Digits = 6,
-    Counter =
+    Counter = 0,
     Secret = "HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ",
     RequireTouch = false
 }

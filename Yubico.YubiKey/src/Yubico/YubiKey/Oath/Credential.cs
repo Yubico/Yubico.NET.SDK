@@ -58,18 +58,16 @@ namespace Yubico.YubiKey.Oath
             get => _type;
             set
             {
-                if (_type != value)
+                if (!Enum.IsDefined(typeof(CredentialType), value))
                 {
-                    if (!Enum.IsDefined(typeof(CredentialType), value))
-                    {
-                        throw new InvalidOperationException(
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                ExceptionMessages.ValueIsNotEnum,
-                                value,
-                                nameof(CredentialType)));
-                    }
+                    throw new InvalidOperationException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.ValueIsNotEnum,
+                            value,
+                            nameof(CredentialType)));
                 }
+
                 _type = value;
             }
         }
@@ -85,41 +83,36 @@ namespace Yubico.YubiKey.Oath
             get => _algorithm;
             set
             {
-                if (_algorithm != value) 
+                if (!Enum.IsDefined(typeof(HashAlgorithm), value))
                 {
-                    if (!Enum.IsDefined(typeof(HashAlgorithm), value))
-                    {
-                        throw new InvalidOperationException(
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                ExceptionMessages.ValueIsNotEnum,
-                                value,
-                                nameof(Algorithm)));
-                    }
+                    throw new InvalidOperationException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.ValueIsNotEnum,
+                            value,
+                            nameof(Algorithm)));
                 }
+
                 _algorithm = value;
             } 
         }
 
         /// <summary>
-        /// String value indicating the provider or the service the account is associated with.
+        /// The provider or the service the account is associated with.
         /// </summary>
         /// <remarks>
-        /// The issuer parameter is recommended, but it can be absent.
+        /// <para>
+        /// The Issuer property is recommended, but it can be absent (set to <c>null</c>).
+        /// </para>
         /// </remarks>
         public string? Issuer
         {
             get => _issuer;
-            set
-            {
-                string? issuer = value ?? string.Empty;
-                CheckNameLength();
-                _issuer = issuer;
-            }
+            set => _issuer = string.IsNullOrWhiteSpace(value) ? null : value;
         }
 
         /// <summary>
-        /// The account name is a string that usually is the user's email address.
+        /// The account name, which is typically the user's email address.
         /// </summary>
         /// <exception cref="InvalidOperationException">
         /// The value is null, empty, or consists only of white-space characters.
@@ -134,7 +127,6 @@ namespace Yubico.YubiKey.Oath
                     throw new InvalidOperationException(ExceptionMessages.InvalidCredentialAccount);
                 }
 
-                CheckNameLength();
                 _accountName = value;
             }
         }
@@ -181,7 +173,13 @@ namespace Yubico.YubiKey.Oath
             get => _digits;
             set
             {
-                if (value < 6 || (value > 8))
+                // For the comparison operators <, >, <=, and >=, if one or both
+                // operands are null, the result is false; otherwise, the
+                // contained values of operands are compared.
+                //
+                // Therefore `null` is an accepted value and will not throw an
+                // exception.
+                if (value < 6 || value > 8)
                 {
                     throw new InvalidOperationException(ExceptionMessages.InvalidCredentialDigits);
                 }
@@ -203,23 +201,20 @@ namespace Yubico.YubiKey.Oath
 
             set
             {
-                if (Type == CredentialType.Totp) 
+                // We include the null check here so that a `null` value throws
+                // an InvalidOperationException. If we passed `null` into
+                // `Enum.IsDefined`, it would throw an ArgumentNullException which
+                // would technically be a breaking change.
+                if (value is null || !Enum.IsDefined(typeof(CredentialPeriod), value))
                 {
-
-                    if (!new CredentialPeriod?[] { CredentialPeriod.Period15, CredentialPeriod.Period30, CredentialPeriod.Period60 }.Contains(value))
-                    {
-                        throw new InvalidOperationException(ExceptionMessages.InvalidCredentialPeriod);
-                    }
-                }
-                else
-                {
-                    if (value != CredentialPeriod.Undefined)
-                    {
-                        throw new InvalidOperationException(ExceptionMessages.InvalidCredentialPeriod);
-                    }
+                    throw new InvalidOperationException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.ValueIsNotEnum,
+                            value,
+                            nameof(CredentialPeriod)));
                 }
 
-                CheckNameLength();
                 _period = value;
             }
         }
@@ -250,30 +245,70 @@ namespace Yubico.YubiKey.Oath
         /// Get-property witch serves as the unique identifier for the credential.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// The Name prevents collisions between different accounts with different providers that might be identified using
-        /// the same account name, e.g. the user's email address. The Name is created from Period, Issue and Account Name with
+        /// the same account name, e.g. the user's email address. The Name is created from Period, Issuer and Account Name with
         /// the following format: "period/issuer:account". If Period is a default value (30seconds), or the credential's type is HOTP,
         /// it'll be: "issuer:account". Also, if Issuer is not specified, the format will be: "period/account" or just "account" for TOTP
         /// with default period or HOTP credentials.
+        /// </para>
+        /// <para>
+        /// At a minimum, this member requires <see cref="AccountName"/> and <see cref="Type"/> to be set. The <c>Type</c> cannot
+        /// be <see cref="CredentialType.None"/>. Also, if <c>Type</c> is set to <see cref="CredentialType.Totp"/>, then
+        /// <see cref="Period"/> cannot be <c>null</c> nor <see cref="CredentialPeriod.Undefined"/>.
+        /// </para>
+        /// <para>
+        /// There is a maximum length allowed for the Name (64 bytes in UTF-8 encoding, see <see cref="MaximumNameLength"/>).
+        /// To avoid an exception from being thrown due to invalid length, <see cref="IsValidNameLength"/> can be called first.
+        /// If the total length is too long, <see cref="Issuer"/> and/or <see cref="AccountName"/> should be shortened.
+        /// </para>
         /// </remarks>
-        public string Name
-        {
-            get
-            {
-                var nameString = new StringBuilder();
+        /// <exception cref="InvalidOperationException">
+        /// A required parameter is missing or the name exceeds the maximum length.
+        /// </exception>
+        public string Name => IsValidNameLength ? _buildName() : throw new InvalidOperationException(ExceptionMessages.InvalidCredentialNameLength);
 
-                if (Type == CredentialType.Totp && Period != null && Period != CredentialPeriod.Period30)
+        /// <summary>
+        /// Checks the name length, which cannot be more than 64 bytes in UTF-8 encoding.
+        /// </summary>
+        /// <exception cref="InvalidOperationException">
+        /// A required parameter is missing. See <see cref="Name"/> for more information.
+        /// </exception>
+        public bool IsValidNameLength => Encoding.UTF8.GetByteCount(_buildName()) <= MaximumNameLength;
+
+        private string _buildName()
+        {
+            var nameString = new StringBuilder();
+
+            if (AccountName is null)
+            {
+                throw new InvalidOperationException(ExceptionMessages.InvalidCredentialAccount);
+            }
+
+            if (Type is null || Type == CredentialType.None)
+            {
+                throw new InvalidOperationException(ExceptionMessages.InvalidCredentialType);
+            }
+
+            if (Type == CredentialType.Totp)
+            {
+                if (Period is null || Period == CredentialPeriod.Undefined)
+                {
+                    throw new InvalidOperationException(ExceptionMessages.InvalidCredentialPeriod);
+                }
+
+                if (Period != CredentialPeriod.Period30)
                 {
                     _ = nameString.Append($"{(int)Period}/");
                 }
-
-                if (Issuer != null)
-                {
-                    _ = nameString.Append($"{Issuer}:");
-                }
-
-                return nameString.Append(AccountName).ToString();
             }
+
+            if (Issuer != null)
+            {
+                _ = nameString.Append($"{Issuer}:");
+            }
+
+            return nameString.Append(AccountName).ToString();
         }
 
         /// <summary>
@@ -287,7 +322,7 @@ namespace Yubico.YubiKey.Oath
         /// Constructs an instance of the <see cref="Credential" /> class for CalculateAllCommand.
         /// </summary>
         /// <param name="issuer">
-        /// A string indicating the provider or service.
+        /// An optional string indicating the provider or service.
         /// </param>
         /// <param name="account">
         /// The account name that usually is the user's email address.
@@ -298,7 +333,7 @@ namespace Yubico.YubiKey.Oath
         /// <param name="period">
         /// The credential period.
         /// </param>
-        public Credential(string issuer, string account, CredentialType type, CredentialPeriod period)
+        public Credential(string? issuer, string account, CredentialType type, CredentialPeriod period)
         {
             Issuer = issuer;
             AccountName = account;
@@ -310,7 +345,7 @@ namespace Yubico.YubiKey.Oath
         /// Constructs an instance of the <see cref="Credential" /> class for List Command.
         /// </summary>
         /// <param name="issuer">
-        /// The issuer is a string indicating the provider or service.
+        /// The issuer is an optional string indicating the provider or service.
         /// </param>
         /// <param name="account">
         /// The account name that usually is the user's email address.
@@ -324,7 +359,7 @@ namespace Yubico.YubiKey.Oath
         /// <param name="algorithm">
         /// The types of hash algorithm.
         /// </param> 
-        public Credential(string issuer, string account, CredentialPeriod period, CredentialType type, HashAlgorithm algorithm)
+        public Credential(string? issuer, string account, CredentialPeriod period, CredentialType type, HashAlgorithm algorithm)
         {
             Issuer = issuer;
             AccountName = account;
@@ -337,7 +372,7 @@ namespace Yubico.YubiKey.Oath
         /// Constructs an instance of the <see cref="Credential" /> class for PutCommand.
         /// </summary>
         /// <param name="issuer">
-        /// The issuer is a string indicating the provider or service.
+        /// The issuer is an optional string indicating the provider or service.
         /// </param>
         /// <param name="account">
         /// The account name that usually is the user's email address.
@@ -363,7 +398,7 @@ namespace Yubico.YubiKey.Oath
         /// <param name="requireTouch">
         /// The credential requires the user to touch the key to generate a one-time password.
         /// </param>
-        public Credential(string issuer, string account, CredentialType type, HashAlgorithm algorithm, string secret, CredentialPeriod period, int digits, int? counter, bool requireTouch)
+        public Credential(string? issuer, string account, CredentialType type, HashAlgorithm algorithm, string secret, CredentialPeriod period, int digits, int? counter, bool requireTouch)
         {
             Issuer = issuer;
             AccountName = account;
@@ -377,29 +412,15 @@ namespace Yubico.YubiKey.Oath
         }
 
         /// <summary>
-        /// Checks the name length, which cannot be more than 64bytes.
-        /// </summary>
-        /// <exception cref="InvalidOperationException">
-        /// The credential's name length is invalid.
-        /// </exception>
-        private void CheckNameLength()
-        {
-            if (Encoding.UTF8.GetBytes(Name).Length > MaximumNameLength)
-            {
-                throw new InvalidOperationException(ExceptionMessages.InvalidCredentialNameLength);
-            }
-        }
-
-        /// <summary>
         /// Parses the label string presented as 'period/issuer:account'.
         /// </summary>
         /// <returns>
         /// The triple of extracted period, issuer, and account.
         /// </returns>
-        internal static (CredentialPeriod period, string issuer, string account) ParseLabel(string label, CredentialType type)
+        internal static (CredentialPeriod period, string? issuer, string account) ParseLabel(string label, CredentialType type)
         {
             CredentialPeriod period = CredentialPeriod.Period30;
-            string? issuer = string.Empty;
+            string? issuer = null;
             string issuerAccount;
 
             if (type == CredentialType.Totp)
@@ -468,17 +489,22 @@ namespace Yubico.YubiKey.Oath
                 throw new InvalidOperationException(ExceptionMessages.InvalidUriScheme);
             }
 
-            string? uriPath = uri.AbsolutePath;
+            string uriPath = uri.AbsolutePath;
             if (string.IsNullOrWhiteSpace(uriPath))
             {
                 throw new InvalidOperationException(ExceptionMessages.InvalidUriPath);
             }
 
             string uriQuery = uri.Query;
+            if (string.IsNullOrWhiteSpace(uriQuery))
+            {
+                throw new InvalidOperationException(ExceptionMessages.InvalidUriQuery);
+            }
+
             NameValueCollection? parsedUri = HttpUtility.ParseQueryString(uriQuery);
             
-            string defaultIssuer = parsedUri["issuer"];
-            (string issuer, string account) = ParseUriPath(uriPath, defaultIssuer);
+            string? defaultIssuer = parsedUri["issuer"];
+            (string? issuer, string account) = ParseUriPath(uriPath, defaultIssuer);
 
             string secret = parsedUri["secret"];
 
@@ -511,7 +537,6 @@ namespace Yubico.YubiKey.Oath
                             ExceptionMessages.ValueIsNotEnum,
                             tempAlgorithm,
                             nameof(Algorithm)));
-                    
                 }
             }
 
@@ -547,7 +572,12 @@ namespace Yubico.YubiKey.Oath
             string counterString = parsedUri["counter"];
             int? counter = int.TryParse(counterString, NumberStyles.Integer, CultureInfo.InvariantCulture, out int result) ? result : (int?)null;
 
-            return new Credential(Uri.UnescapeDataString(issuer), Uri.UnescapeDataString(account), type, algorithm, secret, period, digits, counter, false);
+            if (issuer != null)
+            {
+                issuer = Uri.UnescapeDataString(issuer);
+            }
+
+            return new Credential(issuer, Uri.UnescapeDataString(account), type, algorithm, secret, period, digits, counter, false);
         }
 
         /// <summary>
@@ -556,7 +586,7 @@ namespace Yubico.YubiKey.Oath
         /// <returns>
         /// The pair of extracted issuer and account.
         /// </returns>
-        private static (string issuer, string account) ParseUriPath(string path, string defaultIssuer)
+        private static (string? issuer, string account) ParseUriPath(string path, string? defaultIssuer)
         {
             string tempPath = path.StartsWith("/", true, CultureInfo.InvariantCulture) ? path.Substring(1) : path;
 

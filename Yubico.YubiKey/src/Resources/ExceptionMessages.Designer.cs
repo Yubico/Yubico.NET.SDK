@@ -754,7 +754,7 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A credential&apos;s account cannot be null..
+        ///   Looks up a localized string similar to A credential&apos;s account cannot be empty or white space..
         /// </summary>
         internal static string InvalidCredentialAccount {
             get {
@@ -808,7 +808,7 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to A credential type cannot be null..
+        ///   Looks up a localized string similar to A credential type must be specified..
         /// </summary>
         internal static string InvalidCredentialType {
             get {
@@ -1155,6 +1155,15 @@ namespace Yubico.YubiKey {
         internal static string InvalidUriPath {
             get {
                 return ResourceManager.GetString("InvalidUriPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The URI query cannot be null or empty..
+        /// </summary>
+        internal static string InvalidUriQuery {
+            get {
+                return ResourceManager.GetString("InvalidUriQuery", resourceCulture);
             }
         }
         

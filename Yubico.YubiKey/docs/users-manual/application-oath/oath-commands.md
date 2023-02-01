@@ -148,8 +148,8 @@ CLA | INS | P1 | P2 | Lc | Data |
 | IMF data(o) | Imf |
 
 Notes:
-- Name data is presented as "period/issuer:account", if period is standard (30s) then it's presented as "issuer:account".
-- Minimal length of the Key data (secret) is 14 bytes, if the lentgth is less then pad with 0s.
+- Name data is typically presented as "period/issuer:account", but the "period/" and "issuer:" are optional under certain configurations.
+- Minimal length of the Key data (secret) is 14 bytes, if the length is less then pad with 0s.
 - Key (secret) is arbitary key value encoded in Base32 according to RFC 3548.
 - Imf data is a Counter, which counts the number of iterations for HOTP.
 
@@ -218,7 +218,7 @@ CLA | INS | P1 | P2 | Lc | Data |
 
 Notes:
 - This command is only available on YubiKeys with firmware version 5.3.0 and later.
-- Name data is presented as `period/issuer:account`. If period is standard (30s) or if credential is HOTP then it's presented as `issuer:account`.
+- Name data is presented as `period/issuer:account`, but the "period/" and "issuer:" are optional under certain configurations.
 - The new issuer can be an empty string.
 
 ### Response APDU info

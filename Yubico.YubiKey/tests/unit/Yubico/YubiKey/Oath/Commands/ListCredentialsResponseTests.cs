@@ -62,7 +62,6 @@ namespace Yubico.YubiKey.Oath.Commands
                 sw1, sw2
             });
 
-
             var listCredentialsResponse = new ListResponse(responseApdu);
 
             var data = listCredentialsResponse.GetData();
@@ -72,6 +71,64 @@ namespace Yubico.YubiKey.Oath.Commands
             _ = Assert.Single(data);
             Assert.Equal("Microsoft", data[0].Issuer);
             Assert.Equal("test@outlook.com", data[0].AccountName);
+            Assert.Equal(CredentialType.Totp, data[0].Type);
+            Assert.Equal(CredentialPeriod.Period30, data[0].Period);
+            Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
+        }
+
+        [Fact]
+        public void Constructor_SuccessResponseApdu_Totp30sAccountMaxLength_ListCredentialsCorrectly()
+        {
+            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            const byte sw2 = unchecked((byte)SWConstants.Success);
+
+            var responseApdu = new ResponseApdu(new byte[] {
+                0x72, 0x41, 0x21,
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
+                0x31, 0x32, 0x33, 0x34, // (64 char)
+                sw1, sw2
+            });
+
+            var listCredentialsResponse = new ListResponse(responseApdu);
+
+            var data = listCredentialsResponse.GetData();
+
+            Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
+
+            _ = Assert.Single(data);
+            Assert.Equal("1234567890123456789012345678901234567890123456789012345678901234", data[0].AccountName);
+            Assert.Equal(CredentialType.Totp, data[0].Type);
+            Assert.Equal(CredentialPeriod.Period30, data[0].Period);
+            Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
+        }
+
+        [Fact]
+        public void Constructor_SuccessResponseApdu_OneCredentialNoIssuer_ListCredentialsCorrectly()
+        {
+            const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            const byte sw2 = unchecked((byte)SWConstants.Success);
+
+            var responseApdu = new ResponseApdu(new byte[] {
+                0x72, 0x11, 0x21, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75,
+                0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D,
+                sw1, sw2
+            });
+
+            var listCredentialsResponse = new ListResponse(responseApdu);
+
+            var data = listCredentialsResponse.GetData();
+
+            Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
+
+            _ = Assert.Single(data);
+            Assert.Null(data[0].Issuer);
+            Assert.Equal("test@outlook.com", data[0].AccountName);
+            Assert.Equal("test@outlook.com", data[0].Name);
             Assert.Equal(CredentialType.Totp, data[0].Type);
             Assert.Equal(CredentialPeriod.Period30, data[0].Period);
             Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
@@ -91,7 +148,6 @@ namespace Yubico.YubiKey.Oath.Commands
                 0x65, 0x73, 0x74, 0x40, 0x67, 0x6D, 0x61, 0x69, 0x6C, 0x2E,
                 0x63, 0x6F, 0x6D, sw1, sw2
             });
-
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
@@ -127,7 +183,6 @@ namespace Yubico.YubiKey.Oath.Commands
                 0x6F, 0x6D, sw1, sw2
             });
 
-
             var listCredentialsResponse = new ListResponse(responseApdu);
 
             var data = listCredentialsResponse.GetData();
@@ -154,7 +209,6 @@ namespace Yubico.YubiKey.Oath.Commands
                 0x73, 0x74, 0x40, 0x6F, 0x75, 0x74, 0x6C, 0x6F, 0x6F, 0x6B,
                 0x2E, 0x63, 0x6F, 0x6D, sw1, sw2
             });
-
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 

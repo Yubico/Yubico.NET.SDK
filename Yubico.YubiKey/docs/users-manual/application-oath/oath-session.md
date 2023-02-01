@@ -57,7 +57,6 @@ var credentialHotp = new Credential
   Issuer = "Yubico",
   AccountName = "test@yubico.com",
   Type = Hotp,
-  Period = 0,
   Algorithm = Sha256,
   Digits = 8,
   Counter = 10,

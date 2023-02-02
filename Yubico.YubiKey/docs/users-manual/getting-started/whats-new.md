@@ -18,6 +18,26 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.6.x Releases
 
+### 1.6.1
+
+Release date: February 2nd, 2023
+
+Features:
+
+- Added KeyCollector variants to the YubiHsmAuthSession class for methods which require credential gathering.
+
+Bug fixes:
+
+- Fixed a bug which prevented large responses from the OATH application from being received. Fixes
+  [GitHub Issue #35](https://github.com/Yubico/Yubico.NET.SDK/issues/35)
+- The YubiKey can accept a zero-length NDEF text prefix. The SDK was previously preventing users from using such
+  a prefix.
+- Added an MSBuild target that instructs .NET Framework-based builds to automatically copy the correct
+  version of `Yubico.NativeShims.dll` into the build's output directory. This requires the use of `PackageReferences`
+  in the consuming project's csproj file. `Packages.config` is not supported. Fixes
+  [GitHub Issue #11](https://github.com/Yubico/Yubico.NET.SDK/issues/11)
+
+
 ### 1.6.0
 
 Release date: January 16th, 2023

@@ -25,20 +25,23 @@ Release date: February 2nd, 2023
 Features:
 
 - Added KeyCollector variants to the YubiHsmAuthSession class for methods which require credential gathering.
+  - [TryGetAes128SessionKeys](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.TryGetAes128SessionKeys(System.String,System.ReadOnlyMemory{System.Byte},System.ReadOnlyMemory{System.Byte},Yubico.YubiKey.YubiHsmAuth.SessionKeys@))
+  - [TryAddCredential](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.TryAddCredential(Yubico.YubiKey.YubiHsmAuth.CredentialWithSecrets))
+  - [TryDeleteCredential](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.TryDeleteCredential(System.String))
+  - [TryChangeManagementKey](xref:Yubico.YubiKey.YubiHsmAuth.YubiHsmAuthSession.TryChangeManagementKey)
 
 Bug fixes:
 
-- Fixed a bug which prevented large responses from the OATH application from being received. Fixes
-  [GitHub Issue #35](https://github.com/Yubico/Yubico.NET.SDK/issues/35)
-- The YubiKey can accept a zero-length NDEF text prefix. The SDK was previously preventing users from using such
-  a prefix.
+- Fixed a bug which prevented large responses from the OATH application from being received by the SDK. Fixes
+  [GitHub Issue #35](https://github.com/Yubico/Yubico.NET.SDK/issues/35).
+- The YubiKey can now accept a zero-length NDEF text prefix, which was previously prevented by the SDK.
 - Added an MSBuild target that instructs .NET Framework-based builds to automatically copy the correct
   version of `Yubico.NativeShims.dll` into the build's output directory. This requires the use of `PackageReferences`
-  in the consuming project's csproj file. `Packages.config` is not supported. Fixes
-  [GitHub Issue #11](https://github.com/Yubico/Yubico.NET.SDK/issues/11)
+  in the consuming project's csproj file in order to properly consume this dependency transitively through
+  the `Yubico.YubiKey` package. `Packages.config` is not supported. Fixes
+  [GitHub Issue #11](https://github.com/Yubico/Yubico.NET.SDK/issues/11).
 - Addressed a difference in behavior found in EcdsaVerify that caused .NET Framework users to receive
-  an exception. Fixes [GitHub Issue #36](https://github.com/Yubico/Yubico.NET.SDK/issues/36)
-
+  an exception. Fixes [GitHub Issue #36](https://github.com/Yubico/Yubico.NET.SDK/issues/36).
 
 ### 1.6.0
 

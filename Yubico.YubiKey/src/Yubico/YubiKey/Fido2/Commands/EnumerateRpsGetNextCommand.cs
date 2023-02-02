@@ -12,12 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Globalization;
-using System.Security.Cryptography;
-using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Fido2.PinProtocols;
-
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
@@ -38,6 +32,12 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// not include the <c>totalRPs</c>, which is returned only by the
     /// <c>enumerateRPsBegin</c> sub-command
     /// </para>
+    /// <para>
+    /// Note that this command does not need the <c>pinUvAuthToken</c> nor the
+    /// <c>authProtocol</c>. This command picks up where the
+    /// <see cref="EnumerateRpsBeginCommand"/> left off, and can only operate
+    /// successfully after that "Begin" command has successfully completed.
+    /// </para>
     /// </remarks>
     public class EnumerateRpsGetNextCommand : CredentialManagementCommand
     {
@@ -46,16 +46,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <summary>
         /// Constructs a new instance of <see cref="EnumerateRpsGetNextCommand"/>.
         /// </summary>
-        /// <param name="pinUvAuthToken">
-        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        /// key.
-        /// </param>
-        /// <param name="authProtocol">
-        /// The Auth Protocol used to build the Auth Token.
-        /// </param>
-        public EnumerateRpsGetNextCommand(
-            ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
-            : base(SubCmdGetEnumerateRpsGetNext, null, pinUvAuthToken, authProtocol)
+        public EnumerateRpsGetNextCommand()
+            : base(SubCmdGetEnumerateRpsGetNext)
         {
         }
     }

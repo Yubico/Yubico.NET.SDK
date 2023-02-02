@@ -13,48 +13,39 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using Yubico.Core.Devices.Hid;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.PinProtocols;
+using Yubico.YubiKey.TestUtilities;
 using Xunit;
 
 namespace Yubico.YubiKey.Fido2
 {
-    public class CredMetadataCommandTests
+    public class CredMetadataCommandTests : SimpleIntegrationTestConnection
     {
+        public CredMetadataCommandTests()
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+        {
+        }
+
         [Fact]
         public void GetMetadataCommand_Succeeds()
         {
             byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
-            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
-            Assert.NotNull(devices);
-
-            HidDevice? deviceToUse = GetKeyAgreeCommandTests.GetFidoHid(devices);
-            Assert.NotNull(deviceToUse);
-            if (deviceToUse is null)
-            {
-                return;
-            }
-
-            var connection = new FidoConnection(deviceToUse);
-            Assert.NotNull(connection);
-
             var protocol = new PinUvAuthProtocolTwo();
             var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
-            GetKeyAgreementResponse getKeyRsp = connection.SendCommand(getKeyCmd);
+            GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
             Assert.Equal(ResponseStatus.Success, getKeyRsp.Status);
 
             protocol.Encapsulate(getKeyRsp.GetData());
             PinUvAuthTokenPermissions permissions = PinUvAuthTokenPermissions.CredentialManagement;
             var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, pin, permissions, null);
-            GetPinUvAuthTokenResponse getTokenRsp = connection.SendCommand(getTokenCmd);
+            GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
             Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
             ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
 
             var cmd = new GetCredentialMetadataCommand(pinToken, protocol);
-            CredentialManagementResponse rsp = connection.SendCommand(cmd);
+            CredentialManagementResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
             CredentialManagementData mgmtData = rsp.GetData();

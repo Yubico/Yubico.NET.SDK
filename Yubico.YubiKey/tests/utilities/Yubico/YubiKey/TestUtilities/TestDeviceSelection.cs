@@ -73,6 +73,7 @@ namespace Yubico.YubiKey.TestUtilities
                 StandardTestDevice.Fw5 => yubiKeys.SelectRequiredTestDevice(5, FormFactor.UsbAKeychain, false),
                 StandardTestDevice.Fw5ci => yubiKeys.SelectRequiredTestDevice(5, FormFactor.UsbCLightning, false),
                 StandardTestDevice.Fw5Fips => yubiKeys.SelectRequiredTestDevice(5, FormFactor.UsbAKeychain, true),
+                StandardTestDevice.Bio => yubiKeys.SelectRequiredTestDevice(5, FormFactor.UsbABiometricKeychain, false),
                 _ => throw new ArgumentException("Invalid test device value.", nameof(testDevice)),
             };
 

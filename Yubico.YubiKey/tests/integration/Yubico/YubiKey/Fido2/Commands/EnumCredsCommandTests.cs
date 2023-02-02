@@ -20,15 +20,15 @@ using Xunit;
 
 namespace Yubico.YubiKey.Fido2
 {
-    public class EnumRpsCommandTests : SimpleIntegrationTestConnection
+    public class EnumCredsCommandTests : SimpleIntegrationTestConnection
     {
-        public EnumRpsCommandTests()
+        public EnumCredsCommandTests()
             : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
         {
         }
 
         [Fact]
-        public void EnumRpsCommand_Succeeds()
+        public void EnumCredsCommand_Succeeds()
         {
             byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
@@ -49,12 +49,23 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
             CredentialManagementData mgmtData = rsp.GetData();
-            Assert.NotNull(mgmtData.TotalRelyingPartyCount);
+            Assert.NotNull(mgmtData.RelyingPartyIdHash);
+            if (mgmtData.RelyingPartyIdHash is null)
+            {
+                return;
+            }
 
-            int count = mgmtData.TotalRelyingPartyCount ?? 0;
+            var credCmd = new EnumerateCredentialsBeginCommand(mgmtData.RelyingPartyIdHash.Value, pinToken, protocol);
+            rsp = Connection.SendCommand(credCmd);
+            Assert.Equal(ResponseStatus.Success, rsp.Status);
+
+            mgmtData = rsp.GetData();
+            Assert.NotNull(mgmtData.TotalCredentialsForRelyingParty);
+
+            int count = mgmtData.TotalCredentialsForRelyingParty ?? 0;
             for (int index = 1; index < count; index++)
             {
-                var getNextCmd = new EnumerateRpsGetNextCommand();
+                var getNextCmd = new EnumerateCredentialsGetNextCommand();
                 CredentialManagementResponse getNextRsp = Connection.SendCommand(getNextCmd);
                 Assert.Equal(ResponseStatus.Success, getNextRsp.Status);
 
@@ -64,3 +75,4 @@ namespace Yubico.YubiKey.Fido2
         }
     }
 }
+

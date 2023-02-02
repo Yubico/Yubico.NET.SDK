@@ -12,8 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Collections.Generic;
-using Yubico.Core.Devices.Hid;
+using Yubico.YubiKey.TestUtilities;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using Xunit;
@@ -21,44 +20,22 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2
 {
-    public class GetKeyAgreeCommandTests
+    public class GetKeyAgreeCommandTests : SimpleIntegrationTestConnection
     {
+        public GetKeyAgreeCommandTests()
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+        {
+        }
+
         [Fact]
         public void GetKeyAgreeCommand_Succeeds()
         {
-            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
-            Assert.NotNull(devices);
-
-            HidDevice? deviceToUse = GetFidoHid(devices);
-            Assert.NotNull(deviceToUse);
-            if (deviceToUse is null)
-            {
-                return;
-            }
-
-            var connection = new FidoConnection(deviceToUse);
-            Assert.NotNull(connection);
-
             var cmd = new GetKeyAgreementCommand() { PinUvAuthProtocol = PinUvAuthProtocol.ProtocolTwo, };
-            GetKeyAgreementResponse rsp = connection.SendCommand(cmd);
+            GetKeyAgreementResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
             CoseEcPublicKey pubKey = rsp.GetData();
             Assert.Equal(CoseEcCurve.P256, pubKey.Curve);
-        }
-
-        public static HidDevice? GetFidoHid(IEnumerable<HidDevice> devices)
-        {
-            foreach (HidDevice currentDevice in devices)
-            {
-                if ((currentDevice.VendorId == 0x1050) &&
-                    (currentDevice.UsagePage == HidUsagePage.Fido))
-                {
-                    return currentDevice;
-                }
-            }
-
-            return null;
         }
     }
 }

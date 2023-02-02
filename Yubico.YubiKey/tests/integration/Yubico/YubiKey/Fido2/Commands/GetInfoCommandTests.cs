@@ -12,51 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Collections.Generic;
-using Yubico.Core.Devices.Hid;
+using Yubico.YubiKey.TestUtilities;
 using Yubico.YubiKey.Fido2.Commands;
 using Xunit;
 
 namespace Yubico.YubiKey.Fido2
 {
-    public class GetInfoCommandTests
+    public class GetInfoCommandTests : SimpleIntegrationTestConnection
     {
+        public GetInfoCommandTests()
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+        {
+        }
+
         [Fact]
         public void GetInfoCommand_Succeeds()
         {
-            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
-            Assert.NotNull(devices);
-
-            HidDevice? deviceToUse = GetFidoHid(devices);
-            Assert.NotNull(deviceToUse);
-            if (deviceToUse is null)
-            {
-                return;
-            }
-
-            var connection = new FidoConnection(deviceToUse);
-            Assert.NotNull(connection);
-
             var cmd = new GetInfoCommand();
-            GetInfoResponse rsp = connection.SendCommand(cmd);
+            GetInfoResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
             AuthenticatorInfo deviceInfo = rsp.GetData();
             Assert.NotEmpty(deviceInfo.Versions);
-        }
-
-        private static HidDevice? GetFidoHid(IEnumerable<HidDevice> devices)
-        {
-            foreach (HidDevice currentDevice in devices)
-            {
-                if ((currentDevice.VendorId == 0x1050) &&
-                    (currentDevice.UsagePage == HidUsagePage.Fido))
-                {
-                    return currentDevice;
-                }
-            }
-
-            return null;
         }
     }
 }

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Formats.Cbor;
 using System.Collections.Generic;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.PinProtocols;
@@ -230,9 +229,7 @@ namespace Yubico.YubiKey.Fido2
         /// <inheritdoc/>
         public byte[] CborEncode()
         {
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-
-            CborHelpers.BeginMap<int>(cbor)
+            return new CborMapWriter<int>()
                 .Entry(TagRp, RelyingParty.Id)
                 .Entry(TagClientDataHash, ClientDataHash)
                 .OptionalEntry<IReadOnlyList<ICborEncode>>(TagAllowList, CborHelpers.EncodeArrayOfObjects, AllowList)
@@ -240,9 +237,7 @@ namespace Yubico.YubiKey.Fido2
                 .OptionalEntry<Dictionary<string, bool>>(TagOptions, ParameterHelpers.EncodeKeyValues<bool>, _options)
                 .OptionalEntry(TagPinUvAuth, PinUvAuthParam)
                 .OptionalEntry(TagProtocol, (int?)Protocol)
-                .EndMap();
-
-            return cbor.Encode();
+                .Encode();
         }
    }
 }

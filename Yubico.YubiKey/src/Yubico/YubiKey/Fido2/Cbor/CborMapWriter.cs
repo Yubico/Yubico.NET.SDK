@@ -28,6 +28,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
     {
         private readonly CborWriter _cbor;
 
+        public CborMapWriter()
+            : this(new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true))
+        {
+        }
+
         public CborMapWriter(CborWriter cbor)
         {
             if (cbor.ConvertIndefiniteLengthEncodings == false)
@@ -153,5 +158,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         public void EndMap() => _cbor.WriteEndMap();
+
+        public byte[] Encode()
+        {
+            _cbor.WriteEndMap();
+            return _cbor.Encode();
+        }
     }
 }

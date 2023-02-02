@@ -321,20 +321,16 @@ namespace Yubico.YubiKey.Fido2
         /// <inheritdoc/>
         internal byte[] CborEncode()
         {
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-
             // An encoded LargeBlobEntry is
             //   map
             //     01  byte string: ciphertext
             //     02  byte string: nonce
             //     03  unsinged int : originalplaintext length
-            CborHelpers.BeginMap<int>(cbor)
+            return new CborMapWriter<int>()
                 .Entry(KeyCiphertext, Ciphertext)
                 .Entry(KeyNonce, Nonce)
                 .Entry(KeyOrigSize, OriginalDataLength)
-                .EndMap();
-
-            return cbor.Encode();
+                .Encode();
         }
     }
 }

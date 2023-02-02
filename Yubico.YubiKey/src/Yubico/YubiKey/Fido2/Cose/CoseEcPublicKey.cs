@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Formats.Cbor;
 using System.Globalization;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
@@ -260,16 +259,13 @@ namespace Yubico.YubiKey.Fido2.Cose
             // This encodes the map of 5 things.
             // The standard specifies that the Algorithm is -25, ECDH with
             // HKDF256.
-            var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
-            CborHelpers.BeginMap<int>(cbor)
+            return new CborMapWriter<int>()
                 .Entry(TagKeyType, (int)CoseKeyType.Ec2)
                 .Entry(TagAlgorithm, (int)CoseAlgorithmIdentifier.ECDHwHKDF256)
                 .Entry(TagCurve, (int)CoseEcCurve.P256)
                 .Entry(TagX, XCoordinate)
                 .Entry(TagY, YCoordinate)
-                .EndMap();
-
-            return cbor.Encode();
+                .Encode();
         }
     }
 }

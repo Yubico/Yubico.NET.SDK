@@ -13,9 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
-using System.Security.Cryptography;
-using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
@@ -31,14 +28,21 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// more RPs, then you can get information on all of them by calling the
     /// <c>enumerateRPsGetNextRP</c> sub-command.
     /// <para>
-    /// The return from this command is the
-    /// <c>authenticatorCredentialManagement</c> response, but only three of the
-    /// elements are included: <c>rp</c>, <c>rpIDHash</c> and <c>totalRPs</c>.
+    /// The return from this command is the <c>CredentialManagementData</c>
+    /// class, but only three of the elements are included: <c>rp</c>,
+    /// <c>rpIDHash</c> and <c>totalRPs</c>.
     /// </para>
     /// </remarks>
     public class EnumerateRpsBeginCommand : CredentialManagementCommand
     {
-        private const int SubCmdGetEnumerateRpsBegin = 0x02;
+        private const int SubCmdEnumerateRpsBegin = 0x02;
+
+        // The default constructor explicitly defined. We don't want it to be
+        // used.
+        private EnumerateRpsBeginCommand()
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Constructs a new instance of <see cref="EnumerateRpsBeginCommand"/>.
@@ -52,7 +56,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </param>
         public EnumerateRpsBeginCommand(
             ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
-            : base(SubCmdGetEnumerateRpsBegin, null, pinUvAuthToken, authProtocol)
+            : base(SubCmdEnumerateRpsBegin, null, pinUvAuthToken, authProtocol)
         {
         }
     }

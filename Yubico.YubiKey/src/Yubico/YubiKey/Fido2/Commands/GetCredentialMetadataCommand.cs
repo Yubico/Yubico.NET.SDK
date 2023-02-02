@@ -34,6 +34,13 @@ namespace Yubico.YubiKey.Fido2.Commands
     {
         private const int SubCmdGetMetadata = 0x01;
 
+        // The default constructor explicitly defined. We don't want it to be
+        // used.
+        private GetCredentialMetadataCommand()
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// Constructs a new instance of <see cref="GetCredentialMetadataCommand"/>.
         /// </summary>

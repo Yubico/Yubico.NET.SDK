@@ -16,7 +16,6 @@ using System;
 using System.Formats.Cbor;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.Cbor;
-using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
@@ -64,6 +63,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         private const int TagProtocol = 3;
         private const int TagPinUvAuthParam = 4;
 
+        private readonly byte[]? _encodedParams;
+        private readonly int? _protocol;
+
         /// <inheritdoc />
         public YubiKeyApplication Application => YubiKeyApplication.Fido2;
 
@@ -86,39 +88,61 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// recommended as these command classes will only expose the parameters
         /// that are relevant to that sub-command.
         /// </remarks>
-        public int SubCommand { get; set; }
+        public int SubCommand { get; private set; }
 
         /// <summary>
         /// The encoded params for the specified sub-command. If a sub-command
         /// has no parameters, this will be null.
         /// </summary>
-        public ReadOnlyMemory<byte>? SubCommandParameters { get; set; }
+        public ReadOnlyMemory<byte>? SubCommandParameters => _encodedParams?.AsMemory();
 
         /// <summary>
         /// The PIN/UV protocol version chosen by the platform.
         /// </summary>
         /// <remarks>
-        /// A PIN/UV protocol must be used when performing CredentialManagement
-        /// operations. The specified protocol must be one of the protocols that
-        /// are supported by the YubiKey. This can be determined by issuing the
-        /// AuthenticatorGetInfo command.
+        /// A PIN/UV protocol must be used when performing some of the
+        /// CredentialManagement operations. The specified protocol must be one
+        /// of the protocols that are supported by the YubiKey. This can be
+        /// determined by issuing the AuthenticatorGetInfo command.
         /// </remarks>
-        public PinUvAuthProtocol PinUvAuthProtocol { get; set; }
+        public PinUvAuthProtocol? PinUvAuthProtocol { get; private set; }
 
         /// <summary>
         /// The output of calling authenticate on the PIN/UV protocol specific to
         /// a particular sub-command.
         /// </summary>
         /// <remarks>
-        /// See the user manual entry on
+        /// See the User's Manual entry on
         /// <xref href="Fido2PinProtocol">PIN protocols</xref> for a much more in
         /// depth guide to working with PINs within FIDO2.
+        /// <para>
+        /// See also the User's Manual entry on
+        /// <xref href="Fido2CredentialManagement">FIDO2 Credential Management</xref>
+        /// for more information on building the <c>PIN/UV Auth Param</c>
+        /// specific to the CredentialManagement commands.
+        /// </para>
         /// </remarks>
-        public ReadOnlyMemory<byte> PinUvAuthParam { get; set; }
+        public ReadOnlyMemory<byte>? PinUvAuthParam { get; private set; }
+
+        /// <summary>
+        /// This constructor will throw <c>NotImplementedException</c>. It is the
+        /// default constructor explicitly defined. We don't want it to be used.
+        /// It is made <c>protected</c> rather than <c>private</c> because there
+        /// are subclasses.
+        /// </summary>
+        protected CredentialManagementCommand()
+        {
+            throw new NotImplementedException();
+        }
 
         /// <summary>
         /// Constructs a new instance of <see cref="CredentialManagementCommand"/>.
         /// </summary>
+        /// <remarks>
+        /// Note that if the command does not need the <c>pinUvAuthToken</c> and
+        /// <c>authProtocol</c>, use the constructor that takes only the
+        /// <c>subCommand</c>.
+        /// </remarks>
         /// <param name="subCommand">
         /// The byte representing the sub-command to execute.
         /// </param>
@@ -134,7 +158,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// The Auth Protocol used to build the Auth Token.
         /// </param>
         public CredentialManagementCommand(
-            int subCommand, ReadOnlyMemory<byte>? subCommandParams,
+            int subCommand, byte[]? subCommandParams,
             ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
         {
             if (authProtocol is null)
@@ -143,7 +167,8 @@ namespace Yubico.YubiKey.Fido2.Commands
             }
 
             SubCommand = subCommand;
-            SubCommandParameters = subCommandParams;
+            _encodedParams = subCommandParams;
+            _protocol = (int)authProtocol.Protocol;
 
             // Compute pinUvAuthParam =
             //     authProtocol.AuthenticateUsingPinToken(authToken, contents);
@@ -154,14 +179,27 @@ namespace Yubico.YubiKey.Fido2.Commands
             int length = subCommandParams?.Length ?? 0;
             byte[] message = new byte[length + 1];
             message[0] = (byte)subCommand;
-            subCommandParams?.CopyTo(message.AsMemory(1));
+            subCommandParams?.CopyTo(message, 1);
 
             // The pinUvAuthToken is an encrypted value, so there's no need to
             // overwrite the array.
             byte[] authParam = authProtocol.AuthenticateUsingPinToken(pinUvAuthToken.ToArray(), message);
             PinUvAuthParam = new ReadOnlyMemory<byte>(authParam, 0, 16);
-            //PinUvAuthParam = new ReadOnlyMemory<byte>(authParam);
             PinUvAuthProtocol = authProtocol.Protocol;
+        }
+
+        /// <summary>
+        /// Constructs a new instance of <see cref="CredentialManagementCommand"/>.
+        /// </summary>
+        /// <param name="subCommand">
+        /// The byte representing the sub-command to execute.
+        /// </param>
+        public CredentialManagementCommand(int subCommand)
+        {
+            SubCommand = subCommand;
+            _encodedParams = null;
+            PinUvAuthProtocol = null;
+            PinUvAuthParam = null;
         }
 
         /// <inheritdoc />
@@ -171,9 +209,9 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             CborHelpers.BeginMap<int>(cbor)
                 .Entry(TagSubCommand, (int)SubCommand)
-                .OptionalEntry(TagParams, SubCommandParameters)
-                .Entry(TagProtocol, (int)PinUvAuthProtocol)
-                .Entry(TagPinUvAuthParam, PinUvAuthParam)
+                .OptionalEntry<byte[]>(TagParams, WriteEncodedParams, _encodedParams)
+                .OptionalEntry(TagProtocol, _protocol)
+                .OptionalEntry(TagPinUvAuthParam, PinUvAuthParam)
                 .EndMap();
 
             byte[] data = new byte[1 + cbor.BytesWritten];
@@ -196,5 +234,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <inheritdoc />
         public CredentialManagementResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new CredentialManagementResponse(responseApdu);
+
+        // This implements CborHelpers.CborEncodeDelegate.
+        private static byte[] WriteEncodedParams(byte[]? encodedParams) => encodedParams ?? Array.Empty<byte>();
     }
 }

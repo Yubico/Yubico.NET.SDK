@@ -13,41 +13,32 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using Xunit;
-using Yubico.Core.Devices.Hid;
+using Yubico.YubiKey.TestUtilities;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2
 {
-    public class MakeCredentialCommandTests
+    public class MakeCredentialCommandTests : SimpleIntegrationTestConnection
     {
+        public MakeCredentialCommandTests()
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+        {
+        }
+
         [Fact]
         public void MakeCredentialCommand_Succeeds()
         {
             byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
-            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
-            Assert.NotNull(devices);
-
-            HidDevice? deviceToUse = GetKeyAgreeCommandTests.GetFidoHid(devices);
-            Assert.NotNull(deviceToUse);
-            if (deviceToUse is null)
-            {
-                return;
-            }
-
-            var connection = new FidoConnection(deviceToUse);
-            Assert.NotNull(connection);
-
             var protocol = new PinUvAuthProtocolTwo();
 
-            bool isValid = GetParams(connection, protocol, pin, out MakeCredentialParameters makeParams);
+            bool isValid = GetParams(protocol, pin, out MakeCredentialParameters makeParams);
             Assert.True(isValid);
 
             var cmd = new MakeCredentialCommand(makeParams);
-            MakeCredentialResponse rsp = connection.SendCommand(cmd);
+            MakeCredentialResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
             MakeCredentialData cData = rsp.GetData();
             isValid = cData.VerifyAttestation(makeParams.ClientDataHash);
@@ -55,7 +46,6 @@ namespace Yubico.YubiKey.Fido2
         }
 
         private bool GetParams(
-            FidoConnection connection,
             PinUvAuthProtocolBase protocol,
             byte[] pin,
             out MakeCredentialParameters makeParams)
@@ -78,7 +68,7 @@ namespace Yubico.YubiKey.Fido2
 
             makeParams = new MakeCredentialParameters(rp, user);
 
-            if (!GetPinToken(connection, protocol, pin, out byte[] pinToken))
+            if (!GetPinToken(protocol, pin, out byte[] pinToken))
             {
                 return false;
             }
@@ -106,7 +96,6 @@ namespace Yubico.YubiKey.Fido2
         // get the PIN token.
         // If it doesn't work because the PIN was wron, return false.
         private bool GetPinToken(
-            FidoConnection connection,
             PinUvAuthProtocolBase protocol,
             byte[] pin,
             out byte[] pinToken)
@@ -115,7 +104,7 @@ namespace Yubico.YubiKey.Fido2
             if (protocol.AuthenticatorPublicKey is null)
             {
                 var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
-                GetKeyAgreementResponse getKeyRsp = connection.SendCommand(getKeyCmd);
+                GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
                 if (getKeyRsp.Status != ResponseStatus.Success)
                 {
                     return false;
@@ -124,7 +113,7 @@ namespace Yubico.YubiKey.Fido2
                 protocol.Encapsulate(getKeyRsp.GetData());
 
                 var getTokenCmd = new GetPinTokenCommand(protocol, pin);
-                GetPinUvAuthTokenResponse getTokenRsp = connection.SendCommand(getTokenCmd);
+                GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
                 if (getTokenRsp.Status == ResponseStatus.Success)
                 {
                     pinToken = getTokenRsp.GetData().ToArray();
@@ -137,7 +126,7 @@ namespace Yubico.YubiKey.Fido2
                 }
 
                 var setPinCmd = new SetPinCommand(protocol, pin);
-                SetPinResponse setPinRsp = connection.SendCommand(setPinCmd);
+                SetPinResponse setPinRsp = Connection.SendCommand(setPinCmd);
                 if (setPinRsp.Status != ResponseStatus.Success)
                 {
                     return false;
@@ -145,7 +134,7 @@ namespace Yubico.YubiKey.Fido2
             }
 
             var cmd = new GetPinTokenCommand(protocol, pin);
-            GetPinUvAuthTokenResponse rsp = connection.SendCommand(cmd);
+            GetPinUvAuthTokenResponse rsp = Connection.SendCommand(cmd);
             if (rsp.Status == ResponseStatus.Success)
             {
                 pinToken = rsp.GetData().ToArray();

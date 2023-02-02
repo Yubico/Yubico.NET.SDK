@@ -54,10 +54,10 @@ namespace Yubico.YubiKey.TestUtilities
         /// The user needs to go to the LocalApplicationData location and create a folder
         /// called "Yubico" and a text file called "BlockList.txt" inside the Yubico Folder
         /// (Both case-insensitive).
-        /// 
-        /// The block list text file should be in the C:\Users\<username>\AppData\Local\Yubico 
+        ///
+        /// The block list text file should be in the C:\Users\<username>\AppData\Local\Yubico
         /// and /Users/<username>/.local/share/Yubico for mac user.
-        /// 
+        ///
         /// The block list file contains the serial numbers of YubiKeys to be blocked.
         /// Each serial number should be on a separate line.
         /// </remarks>

@@ -36,6 +36,8 @@ Bug fixes:
   version of `Yubico.NativeShims.dll` into the build's output directory. This requires the use of `PackageReferences`
   in the consuming project's csproj file. `Packages.config` is not supported. Fixes
   [GitHub Issue #11](https://github.com/Yubico/Yubico.NET.SDK/issues/11)
+- Addressed a difference in behavior found in EcdsaVerify that caused .NET Framework users to receive
+  an exception. Fixes [GitHub Issue #36](https://github.com/Yubico/Yubico.NET.SDK/issues/36)
 
 
 ### 1.6.0

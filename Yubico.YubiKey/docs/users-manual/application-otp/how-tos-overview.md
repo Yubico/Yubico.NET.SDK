@@ -42,6 +42,13 @@ Before you can run the example code in the how-to articles, your application mus
 
 These steps are covered in depth in the [SDK programming guide](xref:UsersManualMakingAConnection).
 
+Additionally, macOS developers must enable input monitoring in order to interact with a YubiKey's OTP application. This is because the YubiKey acts as a keyboard, and the SDK needs to be able to "monitor" it in order to interact with it.
+
+To enable input monitoring, open **System Preferences** and go to **Security & Privacy**. Scroll down and click on **Input Monitoring**. Check the box next to the application that needs to monitor YubiKeys via the SDK, such as Visual Studio. You may need to click the lock icon in the bottom left corner and enter your Mac user password in order to make changes. 
+
+![Input monitoring settings](../../images/input-monitoring.png "Input monitoring settings in macOS")
+
+
 > [!NOTE]
 > Many of the how-to guides create the OtpSession instance with `using (OtpSession otp = new OtpSession(yKey))`. This assumes that `yKey` is an IYubiKeyDevice object that represents the YubiKey.
 

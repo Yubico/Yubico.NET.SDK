@@ -115,6 +115,13 @@ possible applications:
 * OpenPgpCard
 * OATH
 
+> [!NOTE]
+> macOS developers must enable input monitoring in order to interact with a YubiKey's OTP application. This is because the YubiKey acts as a keyboard, and the SDK needs to be able to "monitor" it in order to interact with it.
+> 
+> To enable input monitoring, open **System Preferences** and go to **Security & Privacy**. Scroll down and click on **Input Monitoring**. Check the box next to the application that needs to monitor YubiKeys via the SDK, such as Visual Studio. You may need to click the lock icon in the bottom left corner and enter your Mac user password in order to make changes. 
+> 
+> ![Input monitoring settings](../../images/input-monitoring.png "Input monitoring settings in macOS")
+
 ### 2a: Session
 
 To connect to the YubiKey application, you can use a `Session` class. For example, to make

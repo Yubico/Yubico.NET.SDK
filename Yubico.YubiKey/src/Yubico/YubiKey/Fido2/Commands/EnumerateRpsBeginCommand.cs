@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
@@ -22,18 +23,21 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// represented in credentials on the YubiKey.
     /// </summary>
     /// <remarks>
+    /// The partner Response class is <see cref="CredentialManagementResponse"/>.
+    /// <para>
     /// This returns information on one of the relying parties, and the total
     /// number of relying parties represented in the set of credentials. If there
     /// is only one RP, then you have all the information you need. If there are
     /// more RPs, then you can get information on all of them by calling the
     /// <c>enumerateRPsGetNextRP</c> sub-command.
+    /// </para>
     /// <para>
     /// The return from this command is the <c>CredentialManagementData</c>
     /// class, but only three of the elements are included: <c>rp</c>,
     /// <c>rpIDHash</c> and <c>totalRPs</c>.
     /// </para>
     /// </remarks>
-    public class EnumerateRpsBeginCommand : CredentialManagementCommand
+    public class EnumerateRpsBeginCommand : CredentialManagementCommand<CredentialManagementResponse>
     {
         private const int SubCmdEnumerateRpsBegin = 0x02;
 
@@ -59,5 +63,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             : base(SubCmdEnumerateRpsBegin, null, pinUvAuthToken, authProtocol)
         {
         }
+
+        /// <inheritdoc />
+        public override CredentialManagementResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new CredentialManagementResponse(responseApdu);
     }
 }

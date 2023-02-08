@@ -91,10 +91,11 @@ The commands are
 * [EnumerateRpsGetNextCommand](xref:Yubico.YubiKey.Fido2.Commands.EnumerateRpsGetNextCommand)
 * [EnumerateCredentialsBeginCommand](xref:Yubico.YubiKey.Fido2.Commands.EnumerateCredentialsBeginCommand)
 * [EnumerateCredentialsGetNextCommand](xref:Yubico.YubiKey.Fido2.Commands.EnumerateCredentialsGetNextCommand)
-* DeleteCredentialCommand
+* [DeleteCredentialCommand](xref:Yubico.YubiKey.Fido2.Commands.DeleteCredentialCommand)
 * UpdateUserInformationCommand
 
-If you call a command, you will be responsible for building a PinToken (see next section).
+Some of the commands require a PinToken. You will be responsible for building a PinToken
+(see next section).
 
 The Fido2Session methods are
 
@@ -104,12 +105,12 @@ The Fido2Session methods are
 * DeleteCredential
 * UpdateUserInformationForCredential
 
-If you use these methods, the SDK will build the proper PinToken.
+If you use these methods, the SDK will build the proper PinToken if needed.
 
 ## PIN/UV Auth Param
 
 In order to perform some credential management operations, it is necessary to compute a
-PIN/UV Auth Param. The SDK will build the Pin/Uv Auth Param, you do not need to supply it.
+PIN/UV Auth Param. The SDK will build the PIN/UV Auth Param, you do not need to supply it.
 The PIN/UV Auth Param is built using a `PinToken`. If you use the Fido2Session methods,
 the SDK will also obtain the `PinToken`.
 
@@ -237,7 +238,24 @@ then the `EnumerateCredentialsGetNextCommand` to get each successive credential.
 
 ## Delete credential
 
-Remove one credential from the YubiKey.
+This allows you to remove one credential from the YubiKey.
+
+Whether you use the [command](xref:Yubico.YubiKey.Fido2.Commands.DeleteCredentialCommand)
+or the Fido2Session method, you must supply the CredentialId. This tells the YubiKey which
+credential to remove. You will likely use the
+[Enumerate commands](xref:Yubico.YubiKey.Fido2.Commands.EnumerateCredentialsBeginCommand)
+or the Fido2Session.EnumerateCredentialsForRelyingParty method to obtain a list of
+[CredentialManagementData](xref:Yubico.YubiKey.Fido2.CredentialManagementData) objects,
+and choose the credential to delete from that list. Finally, you can use the
+[CredentialId](xref:Yubico.YubiKey.Fido2.CredentialManagementData.CredentialId) property
+in the object as the input to the delete call.
+
+This operation needs the [PIN/UV Auth Param](#pinuv-auth-param).
+
+It is possible that there is some [large blob](large-blobs.md) data stored against the
+credential you are deleting. If so, you will likely want to delete that data as well. If
+you use the commands to delete, it is your responsibility to delete the large blob data.
+The `Fido2Session` method will delete it for you.
 
 ## Update user information
 

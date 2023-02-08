@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.Fido2.Cbor;
 
@@ -23,11 +24,14 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// associated with a specific relying party stored on the YubiKey.
     /// </summary>
     /// <remarks>
+    /// The partner Response class is <see cref="CredentialManagementResponse"/>.
+    /// <para>
     /// This returns information on one of the credentials, and the total number
     /// of credentials on the YubiKey. If there is only one credential, then you
     /// have all the information you need. If there are more credentials, then
     /// you can get information on all of them by calling the
     /// <c>enumerateCredentialsGetNextRP</c> sub-command.
+    /// </para>
     /// <para>
     /// The return from this command is the <c>CredentialManagementData</c>
     /// class, but only six of the elements are included: <c>user</c>,
@@ -35,7 +39,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <c>largeBlobKey</c>, and <c>totalCredentials</c>.
     /// </para>
     /// </remarks>
-    public class EnumerateCredentialsBeginCommand : CredentialManagementCommand
+    public class EnumerateCredentialsBeginCommand : CredentialManagementCommand<CredentialManagementResponse>
     {
         private const int SubCmdEnumerateCredsBegin = 0x04;
         private const int KeyRpIdHash = 1;
@@ -68,6 +72,10 @@ namespace Yubico.YubiKey.Fido2.Commands
             : base(SubCmdEnumerateCredsBegin, EncodeParams(relyingPartyIdHash), pinUvAuthToken, authProtocol)
         {
         }
+
+        /// <inheritdoc />
+        public override CredentialManagementResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new CredentialManagementResponse(responseApdu);
 
         // This method encodes the parameters. For
         // EnumerateCredentialsBeginCommand, the parameters consist of only the

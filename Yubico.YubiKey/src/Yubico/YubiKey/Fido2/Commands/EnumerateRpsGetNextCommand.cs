@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Yubico.Core.Iso7816;
+
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
@@ -19,12 +21,15 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// represented in credentials on the YubiKey, by getting the next RP.
     /// </summary>
     /// <remarks>
+    /// The partner Response class is <see cref="CredentialManagementResponse"/>.
+    /// <para>
     /// This returns information on one of the relying parties. If there is only
     /// one RP, then the call to the <c>enumerateRPsBegin</c> sub-command gave
     /// you all the information you need. It also indicated that there was only
     /// one RP. If there are more RPs, then you can get information on all of
     /// them by calling this sub-command, calling it once for every RP after the
     /// first one.
+    /// </para>
     /// <para>
     /// The return from this command is the
     /// <c>authenticatorCredentialManagement</c> response, but only two of the
@@ -39,7 +44,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// successfully after that "Begin" command has successfully completed.
     /// </para>
     /// </remarks>
-    public class EnumerateRpsGetNextCommand : CredentialManagementCommand
+    public class EnumerateRpsGetNextCommand : CredentialManagementCommand<CredentialManagementResponse>
     {
         private const int SubCmdGetEnumerateRpsGetNext = 0x03;
 
@@ -50,5 +55,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             : base(SubCmdGetEnumerateRpsGetNext)
         {
         }
+
+        /// <inheritdoc />
+        public override CredentialManagementResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new CredentialManagementResponse(responseApdu);
     }
 }

@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
-using System.Security.Cryptography;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
@@ -24,13 +22,16 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// Get the YubiKey's FIDO2 credential metadata.
     /// </summary>
     /// <remarks>
+    /// The partner Response class is <see cref="CredentialManagementResponse"/>.
+    /// <para>
     /// This returns metadata on all the credentials. The return from this
     /// command is the <c>authenticatorCredentialManagement</c> response, but
     /// only two of the elements are included:
     /// <c>existingResidentCredentialsCount</c> and
     /// <c>maxPossibleRemainingResidentCredentialsCount</c>.
+    /// </para>
     /// </remarks>
-    public class GetCredentialMetadataCommand : CredentialManagementCommand
+    public class GetCredentialMetadataCommand : CredentialManagementCommand<CredentialManagementResponse>
     {
         private const int SubCmdGetMetadata = 0x01;
 
@@ -56,5 +57,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             : base(SubCmdGetMetadata, null, pinUvAuthToken, authProtocol)
         {
         }
+
+        /// <inheritdoc />
+        public override CredentialManagementResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new CredentialManagementResponse(responseApdu);
     }
 }

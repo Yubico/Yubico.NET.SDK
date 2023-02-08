@@ -20,16 +20,20 @@ namespace Yubico.YubiKey
     /// An interface for representing a command that can be run on a YubiKey.
     /// </summary>
     /// <remarks>
-    /// <p>Classes that implement this interface represent a low level command that can be
-    /// Sent to the YubiKey.</p>
-    ///
-    /// <p>An implementation of this interface can be thought of as a factory class for creating
+    /// <para>
+    /// Classes that implement this interface represent a low level command that can be
+    /// Sent to the YubiKey.
+    /// </para>
+    /// <para>
+    /// An implementation of this interface can be thought of as a factory class for creating
     /// the necessary CommandApdu to send to the YubiKey (but does not actually send it itself).
     /// In addition, the implementation serves as a factory for creating the necessary IYubiKeyResponse
-    /// based on the ResponseApdu.</p>
-    ///
-    /// <p>Derived classes should expose strongly typed properties and methods to take in the
-    /// parameters and data that the YubiKey command requires.</p>
+    /// based on the ResponseApdu.
+    /// </para>
+    /// <para>
+    /// Derived classes should expose strongly typed properties and methods to take in the
+    /// parameters and data that the YubiKey command requires.
+    /// </para>
     /// </remarks>
     /// <typeparam name="TResponse">The concrete type of the response to this command.</typeparam>
     public interface IYubiKeyCommand<out TResponse> where TResponse : IYubiKeyResponse

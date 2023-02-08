@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
@@ -22,12 +23,15 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// associated with a specific relying party stored on the YubiKey.
     /// </summary>
     /// <remarks>
+    /// The partner Response class is <see cref="CredentialManagementResponse"/>.
+    /// <para>
     /// This returns information on one of the credentials. If there is only one
     /// credential associated with the relying party, then the call to the
     /// <c>enumerateCredentialsBegin</c> sub-command gave you all the information
     /// you need. It also indicated that there was only one credential. If there
     /// are more credentials, then you can get information on the rest after the
     /// first by calling this sub-command, calling it once for every credential.
+    /// </para>
     /// <para>
     /// The return from this command is the
     /// <c>authenticatorCredentialManagement</c> response, but only five of the
@@ -44,7 +48,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// completed.
     /// </para>
     /// </remarks>
-    public class EnumerateCredentialsGetNextCommand : CredentialManagementCommand
+    public class EnumerateCredentialsGetNextCommand : CredentialManagementCommand<CredentialManagementResponse>
     {
         private const int SubCmdGetEnumerateCredsGetNext = 0x05;
 
@@ -56,5 +60,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             : base(SubCmdGetEnumerateCredsGetNext)
         {
         }
+
+        /// <inheritdoc />
+        public override CredentialManagementResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new CredentialManagementResponse(responseApdu);
     }
 }

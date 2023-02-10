@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.Otp.Operations
         /// <summary>
         /// Set the initial moving factor for the credential.
         /// </summary>
-        /// <param name="imf">Initial moving factor to set.</param>
+        /// <param name="imf">Initial moving factor to set. Must be an integer between 0 and 0xffff0 (1,048,560) that is divisible by 0x10 (16).</param>
         /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
         public ConfigureHotp UseInitialMovingFactor(int imf)
         {

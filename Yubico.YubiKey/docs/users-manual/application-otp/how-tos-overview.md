@@ -25,7 +25,7 @@ The articles in this section provide examples on how to accomplish common operat
 - [How to program a slot with a challenge-response credential](xref:OtpProgramChallengeResponse)
 - [How to calculate a response code for a challenge-response credential](xref:OtpCalcChallengeResponseCode)
 - [How to delete a slot’s configuration](xref:OtpDeleteSlotConfig)
-- [How to program a slot with an HMAC-SHA1 OATH-HOTP credential](xref:OtpProgramHOTP)
+- How to program a slot with an HMAC-SHA1 OATH-HOTP credential
 - [How to retrieve a slot’s status](xref:OtpRetrieveSlotStatus)
 - [How to configure NDEF to use a slot to generate an OTP](xref:OtpConfigureNDEF)
 - [How to read information from an NDEF tag](xref:OtpReadNDEF)

@@ -1,3 +1,4 @@
+---
 uid: OtpProgramHOTP
 summary: *content
 ---
@@ -104,10 +105,9 @@ The following additional (optional) settings can be applied during configuration
 - [Use10msPacing()](xref:Yubico.YubiKey.Otp.Operations.ConfigureHotp.Use10msPacing%28System.Boolean%29)
 - [Use20msPacing()](xref:Yubico.YubiKey.Otp.Operations.ConfigureHotp.Use20msPacing%28System.Boolean%29)
 - [UseFastTrigger()](xref:Yubico.YubiKey.Otp.Operations.ConfigureHotp.UseFastTrigger%28System.Boolean%29)
-- [UseNumericKeypad()](xref:Yubico.YubiKey.Otp.Operations.ConfigureHotp.UseFastTrigger%28System.Boolean%29)
+- [UseNumericKeypad()](xref:Yubico.YubiKey.Otp.Operations.ConfigureHotp.UseNumericKeypad%28System.Boolean%29)
 
-> [!NOTE] 
-> The OATH HOTP does not have a fixed part, but you can still use ``AppendDelayToFixed()`` and ``AppendTabToFixed()``. These will simply add a delay or send a tab prior to the HOTP, respectively. 
+The OATH HOTP does not have a fixed part, but you can still use ``AppendDelayToFixed()`` and ``AppendTabToFixed()``. These will simply add a delay or send a tab prior to the HOTP, respectively. 
 
 With the exception of ``SendReferenceString()``, these settings can also be toggled after HOTP configuration by calling [UpdateSlot()](xref:OtpUpdateSlot). 
 

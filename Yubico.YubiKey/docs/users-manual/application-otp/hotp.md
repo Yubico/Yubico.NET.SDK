@@ -85,4 +85,4 @@ You can also add additional keystrokes as needed for your intended application w
 
 For a full list of the methods in the ConfigureHotp class, please see the [API documentation](xref:Yubico.YubiKey.Otp.Operations.ConfigureHotp).
 
-For an example of how to use ConfigureHotp(), please see [How to program a slot with an OATH HOTP credential](xref:OtpProgramHOTP).
+For an example of how to use ConfigureHotp(), please see How to program a slot with an OATH HOTP credential.

@@ -85,6 +85,8 @@
     items:
     - name: How to program a slot with a Yubico OTP credential
       href: application-otp/how-to-program-a-yubico-otp-credential.md
+    - name: How to program a slot with an OATH HOTP credential
+      href: application-otp/how-to-program-an-hotp-credential.md
     - name: How to program a slot with a challenge-response credential
       href: application-otp/how-to-program-a-challenge-response-credential.md
     - name: How to calculate a response code for a challenge-response credential

@@ -47,7 +47,7 @@ These steps are covered in depth in the [SDK programming guide](xref:UsersManual
 
 ### Additional macOS requirement: enable input monitoring
 
-macOS developers must enable input monitoring in order to interact with a YubiKey's OTP application. This is because the YubiKey acts as a keyboard, and the SDK needs to be able to "monitor" it in order to interact with it. If you do not enable it, the SDK will throw an exception when trying to create an instance of the OtpSession class:
+Developers working with the SDK on macOS must enable input monitoring in order to interact with a YubiKey's OTP application. The YubiKey acts as a keyboard, and the SDK needs to be able to "monitor" it in order to interact with it. If you do not enable it, the SDK will throw an exception when trying to create an instance of the OtpSession class:
 
 ![Exception thrown when trying to create OtpSession instance](../../images/input-monitoring-error.png "Exception thrown when trying to create an OtpSession instance")
 
@@ -55,7 +55,12 @@ To enable input monitoring, open **System Preferences** and go to **Security & P
 
 ![Input monitoring settings](../../images/input-monitoring.png "Input monitoring settings in macOS")
 
+If you are building a macOS application, your users must also go through these same steps to enable input monitoring. 
 
+Additionally, developers must add the following entitlements to their Entitlements.plist file (Entitlements.plist is created automatically when you create a new macOS application project in Visual Studio): 
+
+- ``com.apple.security.smartcard``
+- ``com.apple.security.device.usb``
 
 ### Fluent interface
 

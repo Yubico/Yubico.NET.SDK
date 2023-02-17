@@ -1,6 +1,5 @@
 ---
 uid: OtpCommandQueryFipsMode
-summary: *content
 ---
 
 <!-- Copyright 2021 Yubico AB

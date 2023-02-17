@@ -1,6 +1,5 @@
 ---
 uid: OtpConfigConcepts
-summary: *content
 ---
 
 <!-- Copyright 2021 Yubico AB

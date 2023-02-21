@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// the particular sub-command you care about. Doing so will return a more specific response partner class that will
     /// only contain the information relevant to that sub-command.
     /// </remarks>
-    public class ClientPinResponse : YubiKeyResponse, IYubiKeyResponseWithData<ClientPinData>
+    public class ClientPinResponse : Fido2Response, IYubiKeyResponseWithData<ClientPinData>
     {
         // Response constants
         private const int TagKeyAgreement = 0x01;

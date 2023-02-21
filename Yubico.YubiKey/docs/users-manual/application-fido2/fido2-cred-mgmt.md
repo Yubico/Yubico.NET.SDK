@@ -92,7 +92,7 @@ The commands are
 * [EnumerateCredentialsBeginCommand](xref:Yubico.YubiKey.Fido2.Commands.EnumerateCredentialsBeginCommand)
 * [EnumerateCredentialsGetNextCommand](xref:Yubico.YubiKey.Fido2.Commands.EnumerateCredentialsGetNextCommand)
 * [DeleteCredentialCommand](xref:Yubico.YubiKey.Fido2.Commands.DeleteCredentialCommand)
-* UpdateUserInformationCommand
+* [UpdateUserInfoCommand](xref:Yubico.YubiKey.Fido2.Commands.UpdateUserInfoCommand)
 
 Some of the commands require a PinToken. You will be responsible for building a PinToken
 (see next section).
@@ -103,7 +103,7 @@ The Fido2Session methods are
 * EnumerateRelyingParties
 * EnumerateCredentialsForRelyingParty
 * DeleteCredential
-* UpdateUserInformationForCredential
+* UpdateUserInfoForCredential
 
 If you use these methods, the SDK will build the proper PinToken if needed.
 
@@ -262,3 +262,53 @@ The `Fido2Session` method will delete it for you.
 Each credential contains user information, represented as an instance of the
 [UserEntity](xref:Yubico.YubiKey.Fido2.UserEntity) class. You can change what user
 information is stored on the YubiKey in that credential.
+
+The way to change the user information is to create a new `UserEntity` object, and then
+call the command or the `Fido2Session` method. This replaces the information on the
+YubiKey, it does not "edit" it.
+
+For example,
+
+```csharp
+    // Find the relying party of interest by enumerating all RPs and selecting from the list.
+    IReadOnlyList<CredentialManagementData> rpList = fido2Session.EnumerateRelyingParties();
+    int index = ChooseRelyingParty(rpList);
+
+    // Find the credential of interset by enumerating all the credentials associated with
+    // the relying party of intereset and selecting from the list.
+    IReadOnlyList<CredentialManagementData> credList =
+        fido2Session.EnumerateCredentialsForRelyingParty(rpList[index].RelyingPartyId);
+    index = ChooseCredential(credList);
+
+    // Create a new UserEntity based on the current.
+    var updatedUserInfo = new UserEntity(credArray[index].User.Id)
+    {
+        Name = credArray[index].User.Name,
+        DisplayName = "Jane Doe",
+    };
+
+    fido2Session.UpdateUserInfoForCredential(credArray[index].CredentialId, updatedUserInfo);
+```
+
+Suppose the original user information was the following:
+
+* Id = 0x3A 67 ... E9
+* Name = jdoe
+* DisplayName = J Doe
+
+In the sample, the display name was changed to "Jane Doe". It built a new `UserEntity`
+object with the following:
+
+* Id = 0x3A 67 ... E9
+* Name = jdoe
+* DisplayName = Jane Doe
+
+Then it called the update method.
+
+If it had supplied a `UserEntity` object with only the display name (because that is all
+it needed to change), then after the update, the YubiKey would have contained an entry for
+a user with no `Id` and no `Name`, just a `DisplayName`.
+
+You must supply all the user information in the updated object. That is, the object you
+provide as the update must include all the info that does not change as well as the info
+that does.

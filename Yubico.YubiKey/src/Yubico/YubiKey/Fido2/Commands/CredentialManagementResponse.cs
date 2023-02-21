@@ -34,7 +34,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// simply <c>IYubiKeyResponse</c>.
     /// </para>
     /// </remarks>
-    public class CredentialManagementResponse : YubiKeyResponse, IYubiKeyResponseWithData<CredentialManagementData>
+    public class CredentialManagementResponse : Fido2Response, IYubiKeyResponseWithData<CredentialManagementData>
     {
         /// <summary>
         /// Constructs a new instance of

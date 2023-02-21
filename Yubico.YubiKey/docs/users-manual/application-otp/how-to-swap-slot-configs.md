@@ -1,6 +1,5 @@
 ---
 uid: OtpSwapSlot
-summary: *content
 ---
 
 <!-- Copyright 2021 Yubico AB

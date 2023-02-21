@@ -1,6 +1,5 @@
 ---
 uid: OtpCommands
-summary: *content
 ---
 
 

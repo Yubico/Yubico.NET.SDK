@@ -71,12 +71,52 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public const int DefaultMinimumPinLength = 4;
 
+        /// <summary>
+        /// The string in the <see cref="Versions"/> property that indicates
+        /// FIDO U2F.
+        /// </summary>
+        public const string VersionU2f = "U2F_V2";
+
+        /// <summary>
+        /// The string in the <see cref="Versions"/> property that indicates
+        /// FIDO2 version 2.0.
+        /// </summary>
+        public const string Version20 = "FIDO_2_0";
+
+        /// <summary>
+        /// The string in the <see cref="Versions"/> property that indicates
+        /// FIDO2 version 2.1 preview.
+        /// </summary>
+        public const string Version21Pre = "FIDO_2_1_PRE";
+
+        /// <summary>
+        /// The string in the <see cref="Versions"/> property that indicates
+        /// FIDO2 version 2.1.
+        /// </summary>
+        public const string Version21 = "FIDO_2_1";
+
         private readonly byte[] _aaguid;
 
         /// <summary>
         /// List of version strings of CTAP supported by the authenticator.
         /// This is a REQUIRED value.
         /// </summary>
+        /// <remarks>
+        /// A list of strings is not the easiest to parse, but that is the way
+        /// the standard specifies reporting the supported versions. If you want
+        /// to know if a particular version is supported, call the
+        /// <c>Contains</c> method of the <c>IReadOnlyList</c> interface, using
+        /// the strings defined in this class. For example, suppose you build a
+        /// <c>Fido2Session</c> object and you want to know whether the connected
+        /// YubiKey supports version 2.1, your code would look something like
+        /// this.
+        /// <code language="csharp">
+        ///    if (fido2Session.AuthenticatorInfo.Versions.Contains(AuthenticatorInfo.Version21))
+        ///    {
+        ///        . . .
+        ///    }
+        /// </code>
+        /// </remarks>
         public IReadOnlyList<string> Versions { get; private set; }
 
         /// <summary>

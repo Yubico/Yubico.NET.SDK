@@ -280,7 +280,11 @@
     href: application-fido2/fido2-credentials.md
   - name: FIDO2 credential management
     href: application-fido2/fido2-cred-mgmt.md
-  - name: PIN/UV Authentication
+  - name: AuthTokens, permissions, PIN/UV, and AuthParams
+    href: application-fido2/fido2-auth-tokens.md
+  - name: The SDK's AuthToken retrieval logic
+    href: application-fido2/sdk-auth-token-logic.md
+  - name: PIN/UV authentication protocols
     href: application-fido2/pin-uv-auth-protocols.md
   - name: The FIDO2 PIN
     href: application-fido2/fido2-pin.md

@@ -99,7 +99,7 @@ Some of the commands require a PinToken. You will be responsible for building a 
 
 The Fido2Session methods are
 
-* GetCredentialMetadata
+* [GetCredentialMetadata](xref:Yubico.YubiKey.Fido2.Fido2Session.GetCredentialMetadata)
 * EnumerateRelyingParties
 * EnumerateCredentialsForRelyingParty
 * DeleteCredential

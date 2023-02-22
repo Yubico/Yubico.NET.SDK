@@ -430,11 +430,29 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No permissions were specified for an operation that required them..
+        /// </summary>
+        internal static string Fido2PermsMissing {
+            get {
+                return ResourceManager.GetString("Fido2PermsMissing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This YubiKey does not support permissions on PIN / UV auth tokens..
         /// </summary>
         internal static string Fido2PermsNotSupported {
             get {
                 return ResourceManager.GetString("Fido2PermsNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No relying party was specified for an operation that required one..
+        /// </summary>
+        internal static string Fido2RelyingPartyMissing {
+            get {
+                return ResourceManager.GetString("Fido2RelyingPartyMissing", resourceCulture);
             }
         }
         

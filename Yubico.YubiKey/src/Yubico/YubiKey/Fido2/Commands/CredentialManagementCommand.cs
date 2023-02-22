@@ -176,8 +176,6 @@ namespace Yubico.YubiKey.Fido2.Commands
             _encodedParams = subCommandParams;
             _protocol = (int)authProtocol.Protocol;
 
-            // Compute pinUvAuthParam =
-            //     authProtocol.AuthenticateUsingPinToken(authToken, contents);
             // If there are no params, the contents consists of the single byte
             // subCommand.
             // If there are params, the contents consist of

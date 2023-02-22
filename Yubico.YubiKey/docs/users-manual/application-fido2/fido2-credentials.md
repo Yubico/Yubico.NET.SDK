@@ -28,6 +28,20 @@ relying party, the YubiKey will build an assertion by using the private key to s
 data that includes a challenge from the relyng party. The relying party will verify the
 signature, thus verifying the assertion, in order to authenticate the YubiKey.
 
+There are two kinds of credentials:
+
+* Discoverable (FIDO2 version 2.0: resident keys)
+* Non-discoverable or server-side (FIDO2 version 2.0: non-resident credentials)
+
+A discoverable credential can be seen or used if you have only the relying party ID. For
+example, if you want to get information about a discoverable credential, you can simply
+ask the YubiKey to enumerate all credentials associated with a particular relying party.
+You need only supply the relying party ID.
+
+A non-discoverable credential is only visible if the caller provides the credential ID.
+There's no way to get the credential ID from the YubiKey. The caller must know what the
+credential ID is outside the FIDO2 operations.
+
 There are two main operations in FIDO2:
 
 - Make a credential (registration)

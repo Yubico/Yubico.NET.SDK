@@ -48,34 +48,386 @@ namespace Yubico.YubiKey.Fido2
         /// The current PIN / UV Auth token, if present.
         /// </summary>
         /// <remarks>
-        /// The PIN / UV Auth Token, or auth token for short, is created when (Try)VerifyPin or (Try)VerifyUv is called.
-        /// The auth token may also have a set of permissions that restrict the use of the token. These permissions
-        /// are specified when verifying the PIN or UV and are shown in the <see cref="AuthTokenPermissions"/> property.
+        /// See the <xref href="Fido2AuthTokens">User's Manual entry</xref> for a
+        /// deeper discussion of FIDO2 authentication and how AuthTokens,
+        /// permissions, PIN/UV, and AuthParams fit together.
+        /// <para>
+        /// See also the <xref href="SdkAuthTokenLogic">User's Manual entry</xref>
+        /// on the SDK's AuthToken logic. That article goes into greater detail
+        /// how the SDK performs "automatic" AuthToken retrieval based on the
+        /// version of the connected YubiKey, the state of the Fido2 application
+        /// on the YubiKey, the input, and the state of the <c>Fido2Session</c>.
+        /// </para>
+        /// <para>
+        /// The PIN / UV Auth Token, or auth token for short, is created when
+        /// (Try)VerifyPin or (Try)VerifyUv is called. The auth token may also
+        /// have a set of permissions that restrict the use of the token. These
+        /// permissions are specified when verifying the PIN or UV and are shown
+        /// in the <see cref="AuthTokenPermissions"/> property.
+        /// </para>
         /// </remarks>
         public ReadOnlyMemory<byte>? AuthToken { get; private set; }
 
         /// <summary>
-        /// The set of permissions assigned to the <see cref="AuthToken"/> that indicate which operations will be
-        /// allowed.
+        /// The set of permissions associated with the <see cref="AuthToken"/>.
         /// </summary>
         /// <remarks>
+        /// See the <xref href="Fido2AuthTokens">User's Manual entry</xref> for a
+        /// deeper discussion of FIDO2 authentication and how AuthTokens,
+        /// permissions, PIN/UV, and AuthParams fit together.
         /// <para>
-        /// The permissions for an auth token are set when PIN or UV verification occur. Check this property
-        /// to determine if you are able to perform a certain FIDO2 operation or not. If the auth token does not include
-        /// the permission you require, you will need to perform PIN or UV verification again with the new permission
-        /// set.
+        /// See also the <xref href="SdkAuthTokenLogic">User's Manual entry</xref>
+        /// on the SDK's AuthToken logic. That article goes into greater detail
+        /// how the SDK performs "automatic" AuthToken retrieval based on the
+        /// version of the connected YubiKey, the state of the Fido2 application
+        /// on the YubiKey, the input, and the state of the <c>Fido2Session</c>.
         /// </para>
         /// <para>
-        /// Not all YubiKeys support auth tokens with permissions. To determine if this feature is available, check
-        /// if the `pinUvAuthToken` option is present and `true` in <see cref="AuthenticatorInfo.Options"/>. If
-        /// permissions are not supported, do not specify any permissions when verifying the PIN. Once the PIN has been
-        /// verified, this property will be set to `null`.
+        /// The permissions for an auth token are set when PIN or UV verification
+        /// occur. This property shows the permission set of the most recent
+        /// <c>AuthToken</c>.
+        /// </para>
+        /// <para>
+        /// There are exceptions. It is possible this property does not represent
+        /// the current AuthToken's permissions. See the
+        /// <xref href="SdkAuthTokenLogic">User's Manual entry</xref> on the
+        /// SDK's AuthToken logic for a description of the "corner cases" where
+        /// this property is not accurate.
+        /// </para>
+        /// <para>
+        /// Note that because an AuthToken can be expired, this property is not
+        /// necessarily the permissions of a valid AuthToken that can be used to
+        /// build an AuthParam that will authenticate a command. This property
+        /// represents a set of permissions originally specified in the calls to
+        /// <see cref="AddPermissions"/>, and those added by the SDK needed to
+        /// perform all the operations called.
+        /// </para>
+        /// <para>
+        /// Not all YubiKeys support permissions with the auth tokens. To
+        /// determine if if this feature is available, check if the
+        /// <c>pinUvAuthToken</c> option is present and <c>true</c> in
+        /// <see cref="AuthenticatorInfo.Options"/>. If permissions are not
+        /// supported, do not specify any permissions when verifying the PIN.
+        /// </para>
+        /// <para>
+        /// Because an AuthToken can be expired, it is possible an operation will
+        /// not be able to execute with the current <c>AuthToken</c>. The SDK
+        /// might need to retrieve a new AuthToken with the same permissions
+        /// represented here during an operation.
         /// </para>
         /// </remarks>
         public PinUvAuthTokenPermissions? AuthTokenPermissions { get; private set; }
 
+        /// <summary>
+        /// The relying party ID associated with the permissions.
+        /// </summary>
+        /// <remarks>
+        /// See the <xref href="Fido2AuthTokens">User's Manual entry</xref> for a
+        /// deeper discussion of FIDO2 authentication and how AuthTokens,
+        /// permissions, PIN/UV, and AuthParams fit together.
+        /// <para>
+        /// See also the <xref href="SdkAuthTokenLogic">User's Manual entry</xref>
+        /// on the SDK's AuthToken logic. That article goes into greater detail
+        /// how the SDK performs "automatic" AuthToken retrieval based on the
+        /// version of the connected YubiKey, the state of the Fido2 application
+        /// on the YubiKey, the input, and the state of the <c>Fido2Session</c>.
+        /// </para>
+        /// <para>
+        /// If the <see cref="AuthToken"/> was obtained with a permission of
+        /// <c>MakeCredential</c> and/or <c>GetAssertion</c>, a relying party ID
+        /// was associated with it. It is also optional to associate a relying
+        /// party with the <c>CredentialManagement</c> permission as well.
+        /// </para>
+        /// </remarks>
+        public string? AuthTokenRelyingPartyId { get; private set; }
+
         private const int PinMinimumByteLength = 4;
         private const int PinMaximumByteLength = 63;
+
+        /// <summary>
+        /// Obtain a PinUvAuthToken that possesses the given permissions along
+        /// with the current permissions. This is generally called early in a
+        /// session to specify which set of permissions you expect to need for
+        /// the operations you will be calling.
+        /// </summary>
+        /// <remarks>
+        /// See the <xref href="Fido2AuthTokens">User's Manual entry</xref> for a
+        /// deeper discussion of FIDO2 authentication and how AuthTokens,
+        /// PinTokens, permissions, PIN/UV, and AuthParams fit together.
+        /// <para>
+        /// See also the <xref href="SdkAuthTokenLogic">User's Manual entry</xref>
+        /// on the SDK's AuthToken logic. That article goes into greater detail
+        /// how this method, as well as other operations, perform "automatic"
+        /// AuthToken retrieval based on the version of the connected YubiKey,
+        /// the state of the Fido2 application on the YubiKey, the input, and the
+        /// state of the <c>Fido2Session</c>.
+        /// </para>
+        /// <para>
+        /// This method will use the <see cref="KeyCollector"/> to obtain the PIN
+        /// or prompt for user verification (fingerprint on YubiKey Bio). If no
+        /// <c>KeyCollector</c> is loaded, then this method will throw an
+        /// exception.
+        /// </para>
+        /// <para>
+        /// If the connected YubiKey does not support the option
+        /// <c>pinUvAuthToken</c>, then there is likely no need to call this
+        /// method. But if you do, the <c>relyingPartyId</c> arg must be null and
+        /// the <c>permissions</c> arg must be <c>None</c>. To know if the
+        /// YubiKey supports it, make this call.
+        /// <code language="csharp">
+        ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
+        ///     using (var fido2Session = new Fido2Session(yubiKeyToUse))
+        ///     {
+        ///         if (fido2Session.AuthenticatorInfo.GetOptionValue(
+        ///             AuthenticatorOptions.pinUvAuthToken) == OptionValue.True)
+        ///         {
+        ///             fido2Session.AddPermissions(
+        ///                 PinUvAuthTokenPermissions.GetAssertion | PinUvAuthTokenPermissions.CredentialManagement,
+        ///                 relyingPartyIdOfInterest);
+        ///         }
+        ///     }
+        /// </code>
+        /// Generally, YubiKeys that support only FIDO2 version 2.0 will not
+        /// support <c>pinUvAuthToken</c> and YubiKeys that support FIDO2 version
+        /// 2.1, will support it. See also the
+        /// <xref href="SdkAuthTokenLogic">User's Manual entry</xref>
+        /// on the SDK's AuthToken logic for more details on using this method
+        /// with a YubiKey that supports only FIDO2 version 2.0.
+        /// </para>
+        /// <para>
+        /// If the YubiKey does support <c>pinUvAuthToken</c>, then you can still
+        /// call this method with no permissions (<c>None</c>) and a null
+        /// <c>relyingPartyId</c>. In this case, the SDK will build a PinToken.
+        /// See this <xref href="Fido2AuthTokens">User's Manual entry</xref> for
+        /// a deeper discussion of PinTokens on YubiKey that supports
+        /// PinUvAuthTokens. If you call with no permissions but with a relying
+        /// party ID, then this method will throw an exception.
+        /// </para>
+        /// <para>
+        /// If the YubiKey supports PinUvAuthTokens, and this is called with
+        /// permissions, then this method will determine if the YubiKey has UV
+        /// capabilities, and if so, whether any bio verification has been
+        /// enrolled. On the YubiKey, if there is a fingerprint enrolled, this
+        /// method will first try to authenticate using UV, and if that fails,
+        /// try to authenticate using PIN (see the FIDO2 standard, sections
+        /// 6.5.5.7 and 6.5.5.7.3 step 3.10.3).
+        /// </para>
+        /// <para>
+        /// Calling this method will make sure that the <see cref="AuthToken"/>
+        /// property in this class possesses the requested permissions along
+        /// with any permissions specified in the
+        /// <see cref="AuthTokenPermissions"/> property. To do so, this method
+        /// will always obtain a new AuthToken, even if there is an AuthToken
+        /// already in the object. More details are in the
+        /// <xref href="SdkAuthTokenLogic">User's Manual entry</xref>
+        /// on the SDK's AuthToken logic.
+        /// </para>
+        /// <para>
+        /// The <c>MakeCredential</c> and <c>GetAssertion</c> permissions require
+        /// a relying party ID. That is, an AuthToken can be used to make a
+        /// credential or get an assertion only for a specific relying party. If
+        /// the <c>permissions</c> arg does not include <c>MakeCredential</c> or
+        /// <c>GetAssertion</c>, then the <c>relyingPartyId</c> arg can be null.
+        /// More details are in the
+        /// <xref href="SdkAuthTokenLogic">User's Manual entry</xref>
+        /// on the SDK's AuthToken logic.
+        /// </para>
+        /// <para>
+        /// It is not necessary to call this method at the beginning. However, if
+        /// you do not make this call, then each time the SDK needs an AuthToken,
+        /// it will obtain one with only one permission. That means that if you
+        /// perform more than one operation, you might be called upon to obtain
+        /// the PIN from the user, or require the user to perform user
+        /// verification several times during this session.
+        /// </para>
+        /// <para>
+        /// An alternative to this method and the "automatic" AuthToken
+        /// collection the SDK performs is to call
+        /// <see cref="TryVerifyPin(ReadOnlyMemory{byte}, PinUvAuthTokenPermissions?, string?, out int?, out bool?)"/>,
+        /// <see cref="TryVerifyUv(PinUvAuthTokenPermissions, string?)"/> or
+        /// some other verification method directly. However, because AuthTokens
+        /// "expire" (see the <xref href="Fido2AuthTokens">User's Manual entry</xref>
+        /// on AuthTokens), it is possible you will need to re-verify during a
+        /// session. Hence, if you want to avoid this method or not build a
+        /// <c>KeyCollector</c>, then you must write your code so that it calls,
+        /// if needed, the appropriate <c>Verify</c> method before performing an
+        /// operation. That is, you must then write your code so that it adheres
+        /// to the permissions and expriy logic of FIDO2.
+        /// </para>
+        /// </remarks>
+        /// <param name="permissions">
+        /// An OR of all the permissions you expect to be needed suring the
+        /// session.
+        /// </param>
+        /// <param name="relyingPartyId">
+        /// If needed or wanted, how to specify the relying party in question.
+        /// The default for this parameter is null, so if no arg is given, then
+        /// there will be no relying party specified.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// The connected YubiKey does not support the permissions given, or the
+        /// permission requires a relyingPartyId and none is given.
+        /// </exception>
+        public void AddPermissions(PinUvAuthTokenPermissions permissions, string? relyingPartyId = null)
+        {
+            PinUvAuthTokenPermissions current = AuthTokenPermissions ?? PinUvAuthTokenPermissions.None;
+            PinUvAuthTokenPermissions allPermissions = permissions | current;
+
+            // If the caller supplies an RpId, replace the one in the
+            // AuthTokenRelyingPartyId property.
+            string? rpId = relyingPartyId ?? AuthTokenRelyingPartyId;
+
+            // If there are no permissions and there is no RpId, then get a
+            // PinToken. This generally happens with YubiKeys that support only
+            // FIDO2 version 2.0, but we will do this with 2.1 as well.
+            // If there is a relying party but no permissions, throw an
+            // exception.
+            if (permissions == PinUvAuthTokenPermissions.None)
+            {
+                if (rpId is null)
+                {
+                    VerifyPin();
+                    return;
+                }
+
+                throw new ArgumentException(ExceptionMessages.Fido2PermsMissing);
+            }
+
+            // If this does not support the option pinUvAuthToken, then the
+            // current permissions must be None and the rpId variable must be
+            // null. But if we got to this point, permissions are not None.
+            if (AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.pinUvAuthToken) != OptionValue.True)
+            {
+                throw new ArgumentException(ExceptionMessages.Fido2PermsNotSupported);
+            }
+
+            // If the permissions requested require an RpId, then make sure there
+            // is one.
+            if ((allPermissions.GetRpIdRequirement() == RequirementValue.Required) && (rpId is null))
+            {
+                throw new InvalidOperationException(ExceptionMessages.Fido2RelyingPartyMissing);
+            }
+
+            // Now determine if this YubiKey supports UV. If it does, see if a
+            // fingerprint has been enrolled. If so, then VerifyUv.
+            // To be added!!!
+
+            // If we reach this code, then either the YubiKey did not support UV
+            // or nothing was enrolled, or else there was a fingerprint but it
+            // failed. We want to verify the Pin.
+            VerifyPin(allPermissions, rpId);
+        }
+
+        // This is called by methods inside the Fido2Session class.
+        // When a method wants to perform an operation that requires an AuthToken,
+        // it will call this method. This method will return an object that is
+        // not nullable.
+        // If this method is called with false for forceNewToken, it will check
+        // to see if there is an existing AuthToken, and if there is one, return
+        // it. If not build a new one.
+        // It is possible that the current AuthToken has expired, so returning
+        // the existing one will not return a workable one. That's OK, we can't
+        // know whether it is valid or not unless we try it, so we'll return it
+        // and let the caller try it.
+        // If this is called with true for forceNewToken, it will skip the check
+        // on the existing AuthToken and simply build a new one. This happens
+        // when a method tries to perform an operation, but the response is
+        // CTAP2_ERR_PIN_AUTH_INVALID (Ctap2Status.PinAuthInvalid). It will call
+        // this method with a true "force" arg.
+        // This error generally happens when the AuthToken does not work. And the
+        // AuthToken generally does not work when it does not have the
+        // appropriate permissions, either because it lost them through expiry,
+        // or it never had them in the first place.
+        // Although it is possible to get the AUTH_INVALID error for reasons
+        // other than "missing permission", when we get this error, we will try
+        // this method. It will get a new AuthToken with the required
+        // permissions. If the original operation now works, great, if not, then
+        // it can throw an exception.
+        // This method will check to see if the connected YubiKey supports
+        // "pinUvAuthToken". If it does, call AddPermissions with the input here.
+        // If not, just call AddPermissions with None and null. This is so
+        // callers don't have to make that decision, we make it once. For
+        // example, suppose some operation wants to get an assertion, but they
+        // got the error. So they could check to see if they need to get an
+        // AuthToken with permissions, or if they can only get a PinToken. But by
+        // simply calling this method they don't have to worry about that. Just
+        // always call the same method with the same arguments.
+        // It's possible that someone tried to do something that was not
+        // supported on a particular YubiKey (e.g. credential management). In
+        // that case, the original error would have been
+        // CTAP2_ERR_UNSUPPORTED_OPTION or possibly something else, and so the
+        // method operating would have already thrown an exception and will not
+        // call this method.
+        private ReadOnlyMemory<byte> GetAuthToken(
+            bool forceNewToken, PinUvAuthTokenPermissions permissions, string? relyingPartyId = null)
+        {
+            // If the caller is willing to use the existing AuthToken (force is
+            // false), and it exists, return it.
+            // Note that we're not going to check permissions here because even
+            // if we're on a YubiKey that supports permissions, the AuthToken
+            // might be a PinToken and might work. We'll let the caller decide if
+            // it works or not. If not, they'll call again with a force of true.
+            if (!forceNewToken && !(AuthToken is null))
+            {
+                return AuthToken.Value;
+            }
+
+            if (AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.pinUvAuthToken) == OptionValue.True)
+            {
+                AddPermissions(permissions, relyingPartyId);
+            }
+            else
+            {
+                AddPermissions(PinUvAuthTokenPermissions.None, null);
+            }
+
+            return AuthToken ?? ReadOnlyMemory<byte>.Empty;
+        }
+
+        /// <summary>
+        /// Reset the <see cref="AuthToken"/>, <see cref="AuthTokenPermissions"/>,
+        /// and <see cref="AuthTokenRelyingPartyId"/> to null, so that any future
+        /// operation that retrieves an <see cref="AuthToken"/> will not use the
+        /// current values.
+        /// </summary>
+        /// <remarks>
+        /// See the <xref href="Fido2AuthTokens">User's Manual entry</xref> for a
+        /// deeper discussion of FIDO2 authentication and how AuthTokens,
+        /// permissions, PIN/UV, and AuthParams fit together.
+        /// <para>
+        /// See also the <xref href="SdkAuthTokenLogic">User's Manual entry</xref>
+        /// on the SDK's AuthToken logic. That article goes into greater detail
+        /// how this method, as well as other operations, perform "automatic"
+        /// AuthToken retrieval based on the version of the connected YubiKey,
+        /// the state of the Fido2 application on the YubiKey, the input, and the
+        /// state of the <c>Fido2Session</c>.
+        /// </para>
+        /// <para>
+        /// Generally you will begin a <c>Fido2Session</c> with a call to
+        /// <see cref="AddPermissions"/>. If the <c>AuthToken</c> is expired,
+        /// and an AuthToken is needed for a new operation, the SDK will obtain a
+        /// new AuthToken, using the original permissions (and any new
+        /// permisisons needed by the operation) and the
+        /// <see cref="AuthTokenRelyingPartyId"/>.
+        /// </para>
+        /// <para>
+        /// However, if you want to set the <c>AuthTokenPermissions</c> to a
+        /// completely new value that does not have the same permission set as
+        /// the current, or set it to be associated with a new relying party, or
+        /// with no relying party at all, then clear the current set of values.
+        /// </para>
+        /// <para>
+        /// If you ever need to clear the <c>AuthToken</c> and associated
+        /// properties, you will likely follow up a call to this method with a
+        /// call to <c>AddPermissions</c> to start a new process.
+        /// </para>
+        /// </remarks>
+        public void ClearAuthToken()
+        {
+            AuthToken = null;
+            AuthTokenPermissions = null;
+            AuthTokenRelyingPartyId = null;
+        }
 
         /// <summary>
         /// Sets the initial FIDO2 PIN using the <c>KeyCollector</c>. To change an existing PIN, use
@@ -644,6 +996,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 AuthToken = response.GetData();
                 AuthTokenPermissions = permissions;
+                AuthTokenRelyingPartyId = relyingPartyId;
 
                 retriesRemaining = null;
                 rebootRequired = null;
@@ -821,6 +1174,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 AuthToken = response.GetData();
                 AuthTokenPermissions = permissions;
+                AuthTokenRelyingPartyId = relyingPartyId;
 
                 return true;
             }

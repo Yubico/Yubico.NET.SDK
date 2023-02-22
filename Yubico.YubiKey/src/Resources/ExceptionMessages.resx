@@ -841,6 +841,12 @@
   <data name="Fido2PermsNotSupported" xml:space="preserve">
     <value>This YubiKey does not support permissions on PIN / UV auth tokens.</value>
   </data>
+  <data name="Fido2PermsMissing" xml:space="preserve">
+    <value>No permissions were specified for an operation that required them.</value>
+  </data>
+  <data name="Fido2RelyingPartyMissing" xml:space="preserve">
+    <value>No relying party was specified for an operation that required one.</value>
+  </data>
   <data name="Fido2UvNotSupported" xml:space="preserve">
     <value>This YubiKey does not support onboard user-verification.</value>
   </data>

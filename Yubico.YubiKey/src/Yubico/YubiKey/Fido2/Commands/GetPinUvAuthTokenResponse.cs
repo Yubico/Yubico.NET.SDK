@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <param name="responseApdu">
         /// A response APDU containing the CBOR response for the
         /// <c>getPinToken</c>, <c>getPinUvAuthTokenUsingPinWithPermissions</c>,
-        /// and <c>getPinUvAuthTokenUsingUvWithPermissions</c> sub-commands of
+        /// and <c>getPinUvAuthTokenUsingUvWithPermissions</c> subcommands of
         /// the <c>authenticatorClientPIN</c> CTAP2 command.
         /// </param>
         public GetPinUvAuthTokenResponse(ResponseApdu responseApdu)

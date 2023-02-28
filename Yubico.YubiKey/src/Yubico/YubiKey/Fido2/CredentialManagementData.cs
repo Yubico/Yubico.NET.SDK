@@ -26,23 +26,23 @@ namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
     /// Contains the data returned by the YubiKey after calling one of the
-    /// <c>authenticatorCredentialManagement</c> sub-commands.
+    /// <c>authenticatorCredentialManagement</c> subcommands.
     /// </summary>
     /// <remarks>
-    /// When a credential management sub-command is sent to the YubiKey, it
+    /// When a credential management subcommand is sent to the YubiKey, it
     /// returns data encoded following the definition of the
     /// <c>authenticatorCredentialManagement</c> response. The FIDO2 standard
     /// defines this encoded response as a map of a set of elements. The standard
     /// also specifies which subset of the total data is returned by each
-    /// sub-command.
+    /// subcommand.
     /// <para>
-    /// After calling one of the sub-commands, get the data out of the response.
+    /// After calling one of the subcommands, get the data out of the response.
     /// It will be an instance of this class. Only those elements the particular
-    /// sub-command returns will be represented in the object, the rest will be
+    /// subcommand returns will be represented in the object, the rest will be
     /// null.
     /// </para>
     /// <para>
-    /// For example, if you call the get credential metadata sub-command, the
+    /// For example, if you call the get credential metadata subcommand, the
     /// YubiKey will return the number of discoverable credentials and the
     /// maximum number of credentials the YubiKey can yet hold (i.e. the number
     /// of remaining slots). Hence, the only two properties with values will be

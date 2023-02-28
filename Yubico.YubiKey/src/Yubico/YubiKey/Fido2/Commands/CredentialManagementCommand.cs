@@ -23,14 +23,14 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <summary>
     /// The <see cref="CredentialManagementCommand{TResponse}"/> is the class for
     /// <c>authenticatorCredentialManagement</c>. This command has a number of
-    /// sub-commands, each of which is represented by its own class. You will
+    /// subcommands, each of which is represented by its own class. You will
     /// likely never use this class directly, but it does contain code shared by
-    /// all the sub-commands.
+    /// all the subcommands.
     /// </summary>
     /// <remarks>
     /// The <c>authenticatorCredentialManagement (0x0A)</c> FIDO2 command can be
     /// thought of as a "meta" command. That is, it provides the structure and
-    /// mechanism for performing a number of sub-commands. These sub-commands are:
+    /// mechanism for performing a number of subcommands. These subcommands are:
     /// <code language="adoc">
     /// - getCredsMetadata (0x01)
     /// - enumerateRPsBegin (0x02)
@@ -40,17 +40,17 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// - deleteCredential (0x06)
     /// - updateUserInformation (0x07)
     /// </code>
-    /// Since the SDK does not have the concept of a sub-command natively, these
+    /// Since the SDK does not have the concept of a subcommand natively, these
     /// are all exposed as their own separate commands.
     /// <para>
     /// See the user manual entry on
     /// <xref href="Fido2CredentialManagement">Credential Management</xref> for a
     /// much more in depth guide to working with credentials within FIDO2. For
-    /// more information on a particular sub-command, see the API reference
+    /// more information on a particular subcommand, see the API reference
     /// documentation for that command class.
     /// </para>
     /// <para>
-    /// Some of the sub-commands return data (e.g. a credential), others return
+    /// Some of the subcommands return data (e.g. a credential), others return
     /// only a success or failure response code. Those that return data will
     /// implement the <c>IYubiKeyCommand&lt;CredentialManagementResponse&gt;</c>
     /// interface. Those that do not will implement the
@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         public YubiKeyApplication Application => YubiKeyApplication.Fido2;
 
         /// <summary>
-        /// The CredentialManagement sub-command to issue to the YubiKey.
+        /// The CredentialManagement subcommand to issue to the YubiKey.
         /// </summary>
         /// <remarks>
         /// This is a mandatory parameter, and must be one of the following values:
@@ -90,14 +90,14 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// - updateUserInformation (0x07)
         /// </code>
         /// Alternatively - you can use one of the command classes exposed by the
-        /// SDK that represents the sub-command itself. Such a method is
+        /// SDK that represents the subcommand itself. Such a method is
         /// recommended as these command classes will only expose the parameters
-        /// that are relevant to that sub-command.
+        /// that are relevant to that subcommand.
         /// </remarks>
         public int SubCommand { get; private set; }
 
         /// <summary>
-        /// The encoded params for the specified sub-command. If a sub-command
+        /// The encoded params for the specified subcommand. If a subcommand
         /// has no parameters, this will be null.
         /// </summary>
         public ReadOnlyMemory<byte>? SubCommandParameters => _encodedParams?.AsMemory();
@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
         /// <summary>
         /// The output of calling authenticate on the PIN/UV protocol specific to
-        /// a particular sub-command.
+        /// a particular subcommand.
         /// </summary>
         /// <remarks>
         /// See the User's Manual entry on
@@ -150,11 +150,11 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <c>subCommand</c>.
         /// </remarks>
         /// <param name="subCommand">
-        /// The byte representing the sub-command to execute.
+        /// The byte representing the subcommand to execute.
         /// </param>
         /// <param name="subCommandParams">
-        /// The parameters needed in order to execute the sub-command. Not all
-        /// sub-commands have parameters, so this can be null.
+        /// The parameters needed in order to execute the subcommand. Not all
+        /// subcommands have parameters, so this can be null.
         /// </param>
         /// <param name="pinUvAuthToken">
         /// The PIN/UV Auth Token built from the PIN. This is the encrypted token

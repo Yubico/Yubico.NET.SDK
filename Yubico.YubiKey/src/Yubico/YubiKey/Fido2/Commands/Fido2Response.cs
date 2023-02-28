@@ -37,10 +37,13 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </summary>
         protected override ResponseStatusPair StatusCodeMap => CtapStatus switch
         {
+            CtapStatus.NoCredentials => new ResponseStatusPair(ResponseStatus.NoData, ResponseStatusMessages.Fido2NoCredentials),
             CtapStatus.NotAllowed => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2NotAllowed),
             CtapStatus.PinNotSet => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinNotSet),
             CtapStatus.PinInvalid => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.Fido2PinNotVerified),
             CtapStatus.PinBlocked => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinBlocked),
+            CtapStatus.PinAuthInvalid => new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.Fido2AuthInvalid),
+            CtapStatus.UvBlocked => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinBlocked),
             CtapStatus.ActionTimeout => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2Timeout),
 
             _ => base.StatusCodeMap,

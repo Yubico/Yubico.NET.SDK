@@ -30,7 +30,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// of credentials on the YubiKey. If there is only one credential, then you
     /// have all the information you need. If there are more credentials, then
     /// you can get information on all of them by calling the
-    /// <c>enumerateCredentialsGetNextRP</c> sub-command.
+    /// <c>enumerateCredentialsGetNextRP</c> subcommand.
     /// </para>
     /// <para>
     /// The return from this command is the <c>CredentialManagementData</c>

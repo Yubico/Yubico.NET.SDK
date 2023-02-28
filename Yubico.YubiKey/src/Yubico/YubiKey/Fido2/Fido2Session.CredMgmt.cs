@@ -13,6 +13,10 @@
 // limitations under the License.
 
 using System;
+using System.Text;
+using System.Collections.Generic;
+using System.Security.Cryptography;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2
@@ -22,7 +26,7 @@ namespace Yubico.YubiKey.Fido2
     public sealed partial class Fido2Session
     {
         /// <summary>
-        /// This performs the <c>getCredsMetadata</c> sub command of the
+        /// This performs the <c>getCredsMetadata</c> subcommand of the
         /// <c>authenticatorCredentialManagement</c> command. It gets
         /// metadata for all the credentials on the YubiKey.
         /// </summary>
@@ -34,9 +38,9 @@ namespace Yubico.YubiKey.Fido2
         /// <see cref="CredentialManagementData"/> class.
         /// </para>
         /// <para>
-        /// Many credential management sub commands return data. The data
+        /// Many credential management subcommands return data. The data
         /// returned as defined in the standard is represented in the SDK as
-        /// <c>CredentialManagementData</c>. Each sub command returns only a
+        /// <c>CredentialManagementData</c>. Each subcommand returns only a
         /// subset of all the data in this class.
         /// </para>
         /// <para>
@@ -143,6 +147,264 @@ namespace Yubico.YubiKey.Fido2
             // the data, have an error other than PinAuthInvalid, or we do have
             // the error PinAuthInvalid but only after trying twice.
             return rsp.GetData();
+        }
+
+        /// <summary>
+        /// This performs the <c>enumerateRPs</c> (Begin and GetNextRP)
+        /// subcommands of the <c>authenticatorCredentialManagement</c> command.
+        /// It gets a list of all the relying parties represented in all the
+        /// discoverable credentials on the YubiKey.
+        /// </summary>
+        /// <remarks>
+        /// See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
+        /// on credential management.
+        /// <para>
+        /// This method returns a list of <see cref="CredentialManagementData"/>
+        /// objects. Each object contains information about one of the relying
+        /// parties represented on the YubiKey. If there are no discoverable
+        /// credentials on the YubiKey, then the list will have no elements
+        /// (<c>Count</c> will be zero).
+        /// </para>
+        /// <para>
+        /// Many credential management subcommands return data. The data
+        /// returned as defined in the standard is represented in the SDK as
+        /// <c>CredentialManagementData</c>. Each subcommand returns only a
+        /// subset of all the data in this class.
+        /// </para>
+        /// <para>
+        /// For <c>EnumerateRPs</c>, the data returned will be the properties
+        /// <see cref="CredentialManagementData.RelyingParty"/>,
+        /// <see cref="CredentialManagementData.RelyingPartyIdHash"/>,
+        /// and possibly
+        /// <see cref="CredentialManagementData.TotalRelyingPartyCount"/>.
+        /// All other properties will be null. The <c>TotalRelyingPartyCount</c>
+        /// property is returned only for the first relying party returned by the
+        /// YubiKey. Hence, you will be able to find that number in the element
+        /// at index zero of the returned list, but no other (the rest will be
+        /// null). Of course, the total number of relying parties is also the
+        /// list's Count.
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// A list of <c>CredentialManagementData</c> objects, one for each
+        /// relying party. Only the <c>RelyingParty</c>,
+        /// <c>RelyingPartyIdHash</c>, and <c>TotalRelyingPartyCount</c>
+        /// properties will have values.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// The connected YubiKey does not support CredentialManagement, or the
+        /// PIN was invalid, or there was no KeyCollector.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The user canceled the operation while collecting the PIN.
+        /// </exception>
+        /// <exception cref="System.Security.SecurityException">
+        /// The PIN retry count was exhausted.
+        /// </exception>
+        public IReadOnlyList<CredentialManagementData> EnumerateRelyingParties()
+        {
+            ReadOnlyMemory<byte> currentToken = GetAuthToken(
+                false, PinUvAuthTokenPermissions.CredentialManagement, null);
+
+            var cmd = new EnumerateRpsBeginCommand(currentToken, AuthProtocol);
+            CredentialManagementResponse rsp = Connection.SendCommand(cmd);
+
+            // If the error is PinAuthInvalid, try again.
+            // If the result is not PinAuthInvalid, we know we're not going
+            // to try again, error or no error.
+            if (rsp.CtapStatus == CtapStatus.PinAuthInvalid)
+            {
+                // EnumerateRPs is an odd one. The standard says that the
+                // RpId is optional with CredentialManagement. Except the
+                // standard also says it is not possible to enumerate RPs if the
+                // RpId is present. So to guarantee a null RpId when we get the
+                // AuthToken now, yet have the RpId be the same as it was at the
+                // beginning, we'll save the AuthTokenRelyingPartyId, set the
+                // property to null, get the AuthToken, perform the operation,
+                // then restore the AuthTokenRelyingPartyId. But that's not
+                // enough. Suppose the current permissions include something that
+                // requires RpId. If we just add "cm" we won't be able to get a
+                // token, so we need to make sure the permissions only say "cm".
+                // So we'll have to save (and then restore) the
+                // AuthTokenPermissions as well.
+                // Note that this method adds "cm", so make sure the original
+                // restored includes this.
+                PinUvAuthTokenPermissions? savePermissions = AuthTokenPermissions;
+                string? saveRpId = AuthTokenRelyingPartyId;
+                AuthTokenPermissions = null;
+                AuthTokenRelyingPartyId = null;
+                try
+                {
+                    currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
+                    cmd = new EnumerateRpsBeginCommand(currentToken, AuthProtocol);
+                    rsp = Connection.SendCommand(cmd);
+                }
+                finally
+                {
+                    AuthTokenPermissions = savePermissions | PinUvAuthTokenPermissions.CredentialManagement;
+                    AuthTokenRelyingPartyId = saveRpId;
+                }
+            }
+
+            // If the response is NoCredentials, return an empty list.
+            if (rsp.CtapStatus == CtapStatus.NoCredentials)
+            {
+                return new List<CredentialManagementData>();
+            }
+
+            // This will return the data or throw an exception. We either have
+            // the data, have an error other than PinAuthInvalid, or we do have
+            // the error PinAuthInvalid but only after trying twice.
+            CredentialManagementData mgmtData = rsp.GetData();
+
+            // Get the count. The return from the Begin call has the total number
+            // of RPs.
+            int count = mgmtData.TotalRelyingPartyCount ?? 0;
+
+            var returnValue = new List<CredentialManagementData>(count)
+            {
+                mgmtData
+            };
+
+            // Get the rest of the RPs. The EnumerateRpsGetNextCommand does not
+            // need the AuthToken.
+            var nextCmd = new EnumerateRpsGetNextCommand();
+            for (int index = 1; index < count; index++)
+            {
+                rsp = Connection.SendCommand(nextCmd);
+                mgmtData = rsp.GetData();
+                returnValue.Add(mgmtData);
+            }
+
+            return returnValue;
+        }
+
+        /// <summary>
+        /// This performs the <c>enumerateCredentials</c> (Begin and
+        /// GetNextCredential) subcommands of the
+        /// <c>authenticatorCredentialManagement</c> command. It gets a list of
+        /// all the credentials associated with a specified relying party.
+        /// </summary>
+        /// <remarks>
+        /// See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
+        /// on credential management.
+        /// <para>
+        /// This method returns a list of <see cref="CredentialManagementData"/>
+        /// objects. Each object contains information about one of the
+        /// discoverable credentials associated with the relying party on the
+        /// YubiKey. If there are no discoverable credentials on the YubiKey,
+        /// then the list will have no elements (<c>Count</c> will be zero).
+        /// </para>
+        /// <para>
+        /// Many credential management subcommands return data. The data
+        /// returned as defined in the standard is represented in the SDK as
+        /// <c>CredentialManagementData</c>. Each subcommand returns only a
+        /// subset of all the data in this class.
+        /// </para>
+        /// <para>
+        /// For <c>EnumerateCredentials</c>, the data returned will be the
+        /// properties <see cref="CredentialManagementData.User"/>,
+        /// <see cref="CredentialManagementData.CredentialId"/>,
+        /// <see cref="CredentialManagementData.CredentialPublicKey"/>,
+        /// <see cref="CredentialManagementData.CredProtectPolicy"/>,
+        /// <see cref="CredentialManagementData.LargeBlobKey"/>,
+        /// and possibly
+        /// <see cref="CredentialManagementData.TotalCredentialsForRelyingParty"/>.
+        /// All other properties will be null. The
+        /// <c>TotalCredentialsForRelyingParty</c> property is returned only for
+        /// the first credential returned by the YubiKey. Hence, you will be able
+        /// to find that number in the element at index zero of the returned
+        /// list, but no other (for the rest the property will be null). Of
+        /// course, the total number of credentials is also the list's Count.
+        /// </para>
+        /// </remarks>
+        /// <param name="relyingPartyId">
+        /// The relying party for which the list of credentials is requested.
+        /// </param>
+        /// <returns>
+        /// A list of <c>CredentialManagementData</c> objects, one for each
+        /// credential. Only the <c>User</c>, <c>CredentialId</c>,
+        /// <c>CredentialPublicKey</c>, <c>CredProtectPolicy</c>,
+        /// <c>LargeBlobKey</c>, and <c>TotalCredentialsForRelyingParty</c>
+        /// properties will have values.
+        /// </returns>
+        /// <exception cref="InvalidOperationException">
+        /// The connected YubiKey does not support CredentialManagement, or the
+        /// PIN was invalid, or there was no KeyCollector.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The user canceled the operation while collecting the PIN.
+        /// </exception>
+        /// <exception cref="System.Security.SecurityException">
+        /// The PIN retry count was exhausted.
+        /// </exception>
+        public IReadOnlyList<CredentialManagementData> EnumerateCredentialsForRelyingParty(string relyingPartyId)
+        {
+            ReadOnlyMemory<byte> currentToken = GetAuthToken(
+                false, PinUvAuthTokenPermissions.CredentialManagement, relyingPartyId);
+
+            using SHA256 digester = CryptographyProviders.Sha256Creator();
+            digester.Initialize();
+            byte[] utf = Encoding.UTF8.GetBytes(relyingPartyId);
+            byte[] digest = digester.ComputeHash(utf);
+
+            var cmd = new EnumerateCredentialsBeginCommand(digest, currentToken, AuthProtocol);
+            CredentialManagementResponse rsp = Connection.SendCommand(cmd);
+
+            // If the error is PinAuthInvalid, try again.
+            // If the result is not PinAuthInvalid, we know we're not going
+            // to try again, error or no error.
+            if (rsp.CtapStatus == CtapStatus.PinAuthInvalid)
+            {
+                // In order to enumerate the credentials, we need the relying
+                // party. The standard specifies the RpIdHash as the way to
+                // specify the RP. But there is also the possibility that the
+                // permissions lists an RP. The standard says that the RpId is
+                // optional with the CredentialManagement permission. However, if
+                // it is given, the RP in the permissions must match the RP
+                // specified as the RP of interest. If there's currently no RP in
+                // the permissions, leave it blank. If there is, set it to what
+                // the caller specified.
+                if (!(AuthTokenRelyingPartyId is null))
+                {
+                    AuthTokenRelyingPartyId = relyingPartyId;
+                }
+                currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
+                cmd = new EnumerateCredentialsBeginCommand(digest, currentToken, AuthProtocol);
+                rsp = Connection.SendCommand(cmd);
+            }
+
+            // If the response is NoCredentials, return an empty list.
+            if (rsp.CtapStatus == CtapStatus.NoCredentials)
+            {
+                return new List<CredentialManagementData>();
+            }
+
+            // This will return the data or throw an exception. We either have
+            // the data, have an error other than PinAuthInvalid, or we do have
+            // the error PinAuthInvalid but only after trying twice.
+            CredentialManagementData mgmtData = rsp.GetData();
+
+            // Get the count. The return from the Begin call has the total number
+            // of RPs.
+            int count = mgmtData.TotalCredentialsForRelyingParty ?? 0;
+
+            var returnValue = new List<CredentialManagementData>(count)
+            {
+                mgmtData
+            };
+
+            // Get the rest of the credentials. The
+            // EnumerateCredentialsGetNextCommand does not need the AuthToken.
+            var nextCmd = new EnumerateCredentialsGetNextCommand();
+            for (int index = 1; index < count; index++)
+            {
+                rsp = Connection.SendCommand(nextCmd);
+                mgmtData = rsp.GetData();
+                returnValue.Add(mgmtData);
+            }
+
+            return returnValue;
         }
     }
 }

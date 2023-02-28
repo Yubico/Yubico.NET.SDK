@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </summary>
         /// <param name="responseApdu">
         /// A response APDU containing the CBOR response for the
-        /// `changePin` sub-command of the `authenticatorClientPIN` CTAP2
+        /// `changePin` subcommand of the `authenticatorClientPIN` CTAP2
         /// command.
         /// </param>
         public ChangePinResponse(ResponseApdu responseApdu)

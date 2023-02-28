@@ -401,7 +401,7 @@ The credential, along with other information.
 ___
 ## Get credential metadata
 
-Get information about the credentials on the YubiKey. This is one of the sub-commands of
+Get information about the credentials on the YubiKey. This is one of the subcommands of
 the `authenticatorCredentialManagement` command.
 
 Not all YubiKeys support credential management. If you send this command to a YubiKey that
@@ -438,7 +438,7 @@ ___
 
 Get information about the first relying party (RP) represented by the credentials on the
 YubiKey, along with the total number of RPs that can be found. This is one of the
-sub-commands of the `authenticatorCredentialManagement` command.
+subcommands of the `authenticatorCredentialManagement` command.
 
 Not all YubiKeys support credential management. If you send this command to a YubiKey that
 does not support it, the response will be "Unsupported option".
@@ -472,7 +472,7 @@ ___
 ## Enumerate RPs get next RP
 
 Get information about the next relying party (RP) represented by the credentials on the
-YubiKey. This is one of the sub-commands of the `authenticatorCredentialManagement`
+YubiKey. This is one of the subcommands of the `authenticatorCredentialManagement`
 command.
 
 Not all YubiKeys support credential management. If you send this command to a YubiKey that

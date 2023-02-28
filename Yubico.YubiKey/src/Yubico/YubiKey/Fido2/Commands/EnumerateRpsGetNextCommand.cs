@@ -24,10 +24,10 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// The partner Response class is <see cref="CredentialManagementResponse"/>.
     /// <para>
     /// This returns information on one of the relying parties. If there is only
-    /// one RP, then the call to the <c>enumerateRPsBegin</c> sub-command gave
+    /// one RP, then the call to the <c>enumerateRPsBegin</c> subcommand gave
     /// you all the information you need. It also indicated that there was only
     /// one RP. If there are more RPs, then you can get information on all of
-    /// them by calling this sub-command, calling it once for every RP after the
+    /// them by calling this subcommand, calling it once for every RP after the
     /// first one.
     /// </para>
     /// <para>
@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <c>authenticatorCredentialManagement</c> response, but only two of the
     /// elements are included: <c>rp</c> and <c>rpIDHash</c>. Note that this does
     /// not include the <c>totalRPs</c>, which is returned only by the
-    /// <c>enumerateRPsBegin</c> sub-command
+    /// <c>enumerateRPsBegin</c> subcommand
     /// </para>
     /// <para>
     /// Note that this command does not need the <c>pinUvAuthToken</c> nor the

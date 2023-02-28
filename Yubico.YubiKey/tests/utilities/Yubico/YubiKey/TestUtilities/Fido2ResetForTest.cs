@@ -17,52 +17,84 @@ using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
 using Yubico.YubiKey.Fido2.Commands;
+using Yubico.YubiKey.Fido2;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.TestUtilities
 {
-// #nullable enable
     // This class knows how to reset the U2F application on a YubiKey.
+    // This will reset (clear any credentials and "remove" the PIN).
+    // If you want, it will then set the PIN to a value you specify. Otherwise,
+    // it will not set the PIN.
     public class Fido2ResetForTest
     {
         private const int ReinsertTimeoutSeconds = 10;
         private readonly string ReinsertTimeoutString = ReinsertTimeoutSeconds.ToString(NumberFormatInfo.InvariantInfo);
 
-        private int? _serialNumber;
         private IYubiKeyDevice? _yubiKeyDevice;
+        private readonly bool _setPin;
+        private readonly ReadOnlyMemory<byte> _pin;
         private readonly KeyEntryData _keyEntryData = new KeyEntryData();
+
 
         // Set the serial number using this property. If there is no serial
         // number (the actual YubiKey's serial number is null), this will be 0.
-        public int SerialNumber
+        public int SerialNumber { get; private set; }
+
+        public Func<KeyEntryData, bool> KeyCollector { get; private set; }
+
+        private Fido2ResetForTest()
         {
-            get => _serialNumber ?? 0;
-            set => _serialNumber = value;
+            throw new NotImplementedException();
         }
 
-        public Fido2ResetForTest()
+        // Create a new instance that will be able to reset the FIDO2 application
+        // on the YubiKey with the given serial number.
+        // Most common usage:
+        //     var resetObj = new Fido2ResetForTest(yubiKeyDevice.SerialNumber);
+        // If there is no serial number for the YubiKey, either pass in null or
+        // zero (note that there is no default for this arg).
+        // If you want this object to set the PIN to some value after the reset
+        // (even if the PIN you want to use is "123456"), then pass in the
+        // newPin. The newPin must be at least 4 bytes long. There are
+        // complicated rules about PINs (and length), but this test code simply
+        // requires at least 4 bytes of input. If there is no input newPin arg,
+        // or the arg is null), then after reset there will be no PIN set on the
+        // YubiKey.
+        // Note that the default key collector will only be able to return the
+        // specified PIN if called with KeyEntryRequest.VerifyFido2Pin.
+        // Note also that if no PIN is given, the default key collector will only
+        // be able to return the PIN "123456" if called with
+        // KeyEntryRequest.VerifyFido2Pin.
+        // If there is no input keyCollector (or the arg is null), then this
+        // object will use the default key collector. Otherwise, pass in the
+        // alternate key collector you want this object to use.
+        public Fido2ResetForTest(
+            int? serialNumber, ReadOnlyMemory<byte>? newPin = null, Func<KeyEntryData, bool>? keyCollector = null)
         {
-        }
-
-        // Create a new instance that will be able to reset the YubiKey with the
-        // given serial number.
-        public Fido2ResetForTest(int? serialNumber)
-        {
-            _serialNumber = serialNumber;
-        }
-
-        // This implementation requires a valid KeyCollector. Although the SDK
-        // does not require a KeyCollector, this sample code does.
-        public ResponseStatus RunFido2Reset(Func<KeyEntryData, bool> KeyCollector)
-        {
-            if (KeyCollector is null)
+            SerialNumber = serialNumber ?? 0;
+            if (newPin is null)
             {
-                throw new ArgumentNullException(nameof(KeyCollector));
+                _pin = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
+                _setPin = false;
             }
+            else
+            {
+                if (newPin.Value.Length < 4)
+                {
+                    throw new ArgumentException("PIN is too short");
+                }
+                _pin = new ReadOnlyMemory<byte>(newPin.Value.ToArray());
+                _setPin = true;
+            }
+            KeyCollector = keyCollector ?? ResetForTestKeyCollector;
+        }
 
+        public ResponseStatus RunFido2Reset()
+        {
             _yubiKeyDevice = null;
             _keyEntryData.Request = KeyEntryRequest.Release;
             using var tokenSource = new CancellationTokenSource();
-            var touchMessageTask = new Task(CallKeyCollectorTouch, (object)KeyCollector, tokenSource.Token);
+            var touchMessageTask = new Task(CallKeyCollectorTouch, tokenSource.Token);
 
             try
             {
@@ -153,6 +185,14 @@ namespace Yubico.YubiKey.Fido2
                 var resetCmd = new ResetCommand();
                 ResetResponse resetRsp = fido2Session.Connection.SendCommand(resetCmd);
 
+                if ((resetRsp.Status == ResponseStatus.Success) && _setPin)
+                {
+                    if (!fido2Session.TrySetPin(_pin))
+                    {
+                        return ResponseStatus.Failed;
+                    }
+                }
+
                 return resetRsp.Status;
             }
             finally
@@ -195,15 +235,11 @@ namespace Yubico.YubiKey.Fido2
 
         // We want to call the KeyCollector indicating touch is needed. However,
         // we don't want to call it if the Reset has already completed.
-        // That generally happens in case there was an error (e.g. NFC
-        // connection). That's why we'll delay a little bit first.
-        private void CallKeyCollectorTouch(object? KeyCollectorObject)
+        // Unfortunately, that's not really possible with the YubiKey.
+        private void CallKeyCollectorTouch()
         {
-            if (KeyCollectorObject is Func<KeyEntryData, bool> KeyCollector)
-            {
-                _keyEntryData.Request = KeyEntryRequest.TouchRequest;
-                _ = KeyCollector(_keyEntryData);
-            }
+            _keyEntryData.Request = KeyEntryRequest.TouchRequest;
+            _ = KeyCollector(_keyEntryData);
         }
 
         private IYubiKeyDevice CheckReinsert()
@@ -226,10 +262,10 @@ namespace Yubico.YubiKey.Fido2
                                 "\nexpected serial number = " + SerialNumber.ToString(NumberFormatInfo.InvariantInfo) +
                                 "\n removed serial number = " + serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
             }
-//            else
-//            {
-//                WriteMessageBox(" removed serial number = " + serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
-//            }
+            else
+            {
+                WriteMessageBox(" removed serial number = " + serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
+            }
         }
 
         private void YubiKeyInserted(object? sender, YubiKeyDeviceEventArgs eventArgs)
@@ -244,12 +280,22 @@ namespace Yubico.YubiKey.Fido2
             }
             else
             {
-//                WriteMessageBox("inserted serial number = " + serialNumberInserted.ToString(NumberFormatInfo.InvariantInfo));
+                WriteMessageBox("inserted serial number = " + serialNumberInserted.ToString(NumberFormatInfo.InvariantInfo));
                 _yubiKeyDevice = eventArgs.Device;
             }
         }
 
+        public bool ResetForTestKeyCollector(KeyEntryData keyEntryData)
+        {
+            return ResetKeyCollector(keyEntryData, _pin);
+        }
+
         public static bool ResetForTestKeyCollectorDelegate(KeyEntryData keyEntryData)
+        {
+            return ResetKeyCollector(keyEntryData, null);
+        }
+
+        public static bool ResetKeyCollector(KeyEntryData keyEntryData, ReadOnlyMemory<byte>? pin)
         {
             if (keyEntryData is null)
             {
@@ -270,7 +316,8 @@ namespace Yubico.YubiKey.Fido2
                     return true;
 
                 case KeyEntryRequest.VerifyFido2Pin:
-                    keyEntryData.SubmitValue(new ReadOnlySpan<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 }));
+                    ReadOnlyMemory<byte> toSubmit = pin ?? new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
+                    keyEntryData.SubmitValue(toSubmit.Span);
                     return true;
 
                 case KeyEntryRequest.TouchRequest:
@@ -287,5 +334,4 @@ namespace Yubico.YubiKey.Fido2
             Console.WriteLine(msg);
         }
     }
-// #nullable restore
 }

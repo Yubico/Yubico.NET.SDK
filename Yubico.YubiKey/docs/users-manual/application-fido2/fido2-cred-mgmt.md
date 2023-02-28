@@ -100,8 +100,8 @@ Some of the commands require a PinToken. You will be responsible for building a 
 The Fido2Session methods are
 
 * [GetCredentialMetadata](xref:Yubico.YubiKey.Fido2.Fido2Session.GetCredentialMetadata)
-* EnumerateRelyingParties
-* EnumerateCredentialsForRelyingParty
+* [EnumerateRelyingParties](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateRelyingParties)
+* [EnumerateCredentialsForRelyingParty](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateCredentialsForRelyingParty%2a)
 * DeleteCredential
 * UpdateUserInfoForCredential
 
@@ -111,53 +111,23 @@ If you use these methods, the SDK will build the proper PinToken if needed.
 
 In order to perform some credential management operations, it is necessary to compute a
 PIN/UV Auth Param. The SDK will build the PIN/UV Auth Param, you do not need to supply it.
-The PIN/UV Auth Param is built using a `PinToken`. If you use the Fido2Session methods,
-the SDK will also obtain the `PinToken`.
+The PIN/UV Auth Param is built using an `AuthToken`. If you use the Fido2Session methods,
+the SDK will also obtain the `AuthToken`.
 
-However, the PinToken needed for CredentialManagement must be obtained with the
-[CredentialManagement](xref:Yubico.YubiKey.Fido2.Commands.PinUvAuthTokenPermissions)
-permission set. Hence, it is possible you have a PinToken already (for example, see the
-Fido2Session property [AuthToken](xref:Yubico.YubiKey.Fido2.Fido2Session.AuthToken)), but
-need a new one. In order to build a new one, the SDK will need the PIN. Hence, although
-you might already have verified the PIN in the session, it can still be necessary to enter
-it again.
-
-If you use a command to perform the CredentialManagement operation, you will need to
-supply the PinToken. See the
-[GetPinUvAuthTokenUsingPinCommand](xref:Yubico.YubiKey.Fido2.Commands.GetPinUvAuthTokenUsingPinCommand).
-Your code to get a PinToken will look something like this.
-
-```csharp
-    var protocol = new PinUvAuthProtocolTwo();
-    var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
-    GetKeyAgreementResponse getKeyRsp = connection.SendCommand(getKeyCmd);
-    if (getKeyRsp.Status != ResponseStatus.Success)
-    {
-        ReportError();
-        return;
-    }
-    protocol.Encapsulate(getKeyRsp.GetData());
-
-    PinUvAuthTokenPermissions permissions = PinUvAuthTokenPermissions.CredentialManagement;
-    var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, pin, permissions, null);
-    GetPinUvAuthTokenResponse getTokenRsp = connection.SendCommand(getTokenCmd);
-    if (getTokenRsp.Status != ResponseStatus.Success)
-    {
-        ReportError();
-        return;
-    }
-
-    ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
-```
+See the User's Manual [entry on AuthTokens](xref:Fido2AuthTokens) for a detailed
+discussion on how they work.
 
 ## Get metadata
 
 This returns the number of discoverable credentials and the number of "empty" slots. For
 example, suppose the YubiKey has space for 25 credentials. Currently there are three
 discoverable credentials and two non-discoverable. The return from the credential
-management operation of get metadata would be 3 and 20. The number of remaining credential
-count of 20 means that it is possible to store 20 more credentials, any combination of
-discoverable and non-discoverable.
+management operation of get metadata would be 3 and 22. The number of remaining credential
+count of 22 means that it is possible to store 22 more discoverable credentials. The
+YubiKey stores no information on non-discoverable credentials, so the two non-discoverable
+credentials in this example have no effect on the number of spaces available. See also the
+User's Manual [entry on credentials](fido2-credentials.md) for more information on
+non-discoverable credentials.
 
 The return is a `CredentialManagementData` object, with the properties set as follows.
 

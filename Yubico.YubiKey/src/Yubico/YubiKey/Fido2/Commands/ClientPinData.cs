@@ -24,12 +24,12 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <para>
     /// This class contains all of the data that can be returned in a <see cref="ClientPinResponse" /> response. Since
     /// this response may represent one of several different sub-responses, not all of the properties will be set to
-    /// a value. Which property is set depends on what kind of client PIN sub-command was issued.
+    /// a value. Which property is set depends on what kind of client PIN subcommand was issued.
     /// </para>
     /// <para>
-    /// It is often more convenient to issue a sub-command directly through its command class representation. That
+    /// It is often more convenient to issue a subcommand directly through its command class representation. That
     /// command class will have a partner response class that will only return the set of information that is relevant
-    /// to that sub-command. It is recommended that you use this approach rather than using <see cref="ClientPinCommand"/>,
+    /// to that subcommand. It is recommended that you use this approach rather than using <see cref="ClientPinCommand"/>,
     /// <see cref="ClientPinResponse"/>, and <see cref="ClientPinData"/> directly.
     /// </para>
     /// </remarks>
@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// power cycle is needed, and `null` if no information was given.
         /// </para>
         /// <para>
-        /// This field is only valid in response to the `getRetries` sub-command. The YubiKey will return this when an
+        /// This field is only valid in response to the `getRetries` subcommand. The YubiKey will return this when an
         /// authentication has been blocked due to excessive retries. The power cycle behavior is a security property
         /// of the FIDO2 PIN protocol, and helps prevent automated attacks against the PIN.
         /// </para>

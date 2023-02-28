@@ -19,17 +19,26 @@ namespace Yubico.YubiKey.TestUtilities
 {
     public class SimpleIntegrationTestConnection : IDisposable
     {
-        private readonly IYubiKeyConnection? _connection;
+        private IYubiKeyConnection? _connection;
+        private readonly IYubiKeyDevice? _device;
+        private int? _serialNumber;
         private bool _disposed;
 
         public IYubiKeyConnection Connection =>
             _connection ?? throw new ObjectDisposedException("Connection unavailable.");
 
+        public IYubiKeyDevice Device =>
+            _device ?? throw new ObjectDisposedException("Device unavailable.");
+
+        public int SerialNumber =>
+            _serialNumber ?? throw new InvalidOperationException("No serial number.");
+
         public SimpleIntegrationTestConnection(
             YubiKeyApplication application, StandardTestDevice device = StandardTestDevice.Fw5)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(device);
-            _connection = testDevice.Connect(application);
+            _device = IntegrationTestDeviceEnumeration.GetTestDevice(device);
+            _connection = _device.Connect(application);
+            _serialNumber = _device.SerialNumber;
         }
 
         public void Dispose()
@@ -42,10 +51,14 @@ namespace Yubico.YubiKey.TestUtilities
         {
             if (!_disposed)
             {
-                _connection?.Dispose();
+                if (disposing)
+                {
+                    _connection?.Dispose();
+                    _serialNumber = null;
+                    _connection = null;
+                }
+                _disposed = true;
             }
-
-            _disposed = true;
         }
     }
 }

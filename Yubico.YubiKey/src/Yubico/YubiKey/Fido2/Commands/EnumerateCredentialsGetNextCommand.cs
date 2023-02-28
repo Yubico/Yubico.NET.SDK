@@ -25,10 +25,10 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <para>
     /// This returns information on one of the credentials. If there is only one
     /// credential associated with the relying party, then the call to the
-    /// <c>enumerateCredentialsBegin</c> sub-command gave you all the information
+    /// <c>enumerateCredentialsBegin</c> subcommand gave you all the information
     /// you need. It also indicated that there was only one credential. If there
     /// are more credentials, then you can get information on the rest after the
-    /// first by calling this sub-command, calling it once for every credential.
+    /// first by calling this subcommand, calling it once for every credential.
     /// </para>
     /// <para>
     /// The return from this command is the
@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// elements are included: <c>user</c>, <c>credentialId</c>,
     /// <c>publicKey</c>, <c>credProtect</c>, and <c>largeBlobKey</c>. Note that
     /// this does not include the <c>totalCredentials</c>, which is returned only
-    /// by the <c>enumerateCredentialsBegin</c> sub-command
+    /// by the <c>enumerateCredentialsBegin</c> subcommand
     /// </para>
     /// <para>
     /// Note that this command does not need the <c>relyingPartyIdHash</c>,

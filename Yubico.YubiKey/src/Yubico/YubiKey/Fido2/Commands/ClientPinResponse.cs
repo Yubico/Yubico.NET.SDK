@@ -23,10 +23,10 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// The response partner to <see cref="ClientPinCommand"/>.
     /// </summary>
     /// <remarks>
-    /// Like <see cref="ClientPinCommand"/>, this response represents all of the possible outputs of all sub-commands
+    /// Like <see cref="ClientPinCommand"/>, this response represents all of the possible outputs of all subcommands
     /// supported by `authenticatorClientPin`. It is recommended that you use the command class that corresponds with
-    /// the particular sub-command you care about. Doing so will return a more specific response partner class that will
-    /// only contain the information relevant to that sub-command.
+    /// the particular subcommand you care about. Doing so will return a more specific response partner class that will
+    /// only contain the information relevant to that subcommand.
     /// </remarks>
     public class ClientPinResponse : Fido2Response, IYubiKeyResponseWithData<ClientPinData>
     {

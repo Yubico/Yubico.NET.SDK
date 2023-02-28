@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             var response = new ChangePinResponse(new ResponseApdu(new byte[] { 0x6F, 0x33 }));
 
-            Assert.Equal(ResponseStatus.Failed, response.Status);
+            Assert.Equal(ResponseStatus.AuthenticationRequired, response.Status);
         }
     }
 }

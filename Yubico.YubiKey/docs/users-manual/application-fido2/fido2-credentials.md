@@ -33,14 +33,17 @@ There are two kinds of credentials:
 * Discoverable (FIDO2 version 2.0: resident keys)
 * Non-discoverable or server-side (FIDO2 version 2.0: non-resident credentials)
 
-A discoverable credential can be seen or used if you have only the relying party ID. For
-example, if you want to get information about a discoverable credential, you can simply
-ask the YubiKey to enumerate all credentials associated with a particular relying party.
-You need only supply the relying party ID.
+A discoverable credential is stored on the YubiKey. It can be seen or used if you have
+only the relying party ID. For example, if you want to get information about a
+discoverable credential, you can simply ask the YubiKey to enumerate all credentials
+associated with a particular relying party. You need only supply the relying party ID.
 
-A non-discoverable credential is only visible if the caller provides the credential ID.
-There's no way to get the credential ID from the YubiKey. The caller must know what the
-credential ID is outside the FIDO2 operations.
+A non-discoverable credential is not stored on the YubiKey (hence the FIDO2 version 2.0
+term "non-resident"). The credential is not stored anywhere, rather, the YubiKey can
+reconstruct a non-discoverable credential if it has enough information. That includes the
+credential ID. If you build a non-discoverable credential, then you must manage the
+credential ID yourself. Then, when you need an assertion for that credential, supply the
+credential ID and the YubiKey will be able to get an assertion.
 
 There are two main operations in FIDO2:
 
@@ -121,10 +124,10 @@ The following are optional for both the FIDO2 standard and the YubiKey:
 ```csharp
     using var fido2Session = new Fido2Session(yubiKey)
     {
-        // You must call a VerifyPin method directly. The SDK will not call
-        // it automatically.
+        // If you do not call a VerifyPin method directly, the SDK will call
+        // it automatically. But for automatic PIN collection, you must supply
+        // a KeyCollector.
         fido2Session.KeyCollector = SomeKeyCollector;
-        fido2Session.VerifyPin();
 
         // Although the YubiKey requires the Protocol and PinUvAuthParam,
         // don't supply them here because the SDK's Fido2Session.MakeCredential
@@ -134,6 +137,9 @@ The following are optional for both the FIDO2 standard and the YubiKey:
         {
             ClientDataHash = sampleClientDataHash;
         };
+        // To make the credential discoverable (stored on the YubiKey), you must
+        // set the "rk" option to true.
+        makeCredParams.AddOption(AuthenticatorOptions.rk, true);
 
         MakeCredentialData credentialData = fido2Session.MakeCredential(makeCredentialParams);
     }
@@ -206,7 +212,7 @@ The following are optional for both the FIDO2 standard and the YubiKey:
 - Options (only "up" is allowed when getting an assertion on a YubiKey, see section 6.1 of
   the FIDO2 standard, for more information on Options and "up")
 
-> [!NOTE}
+> [!NOTE]
 > The `AllowList` is required if there are credentials created as non-discoverable.
 
 ## Multiple credentials

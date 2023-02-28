@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// by the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// A response APDU containing the CBOR response for the `getPINRetries` sub-command of the `authenticatorClientPIN`
+        /// A response APDU containing the CBOR response for the `getPINRetries` subcommand of the `authenticatorClientPIN`
         /// CTAP2 command.
         /// </param>
         public GetPinRetriesResponse(ResponseApdu responseApdu)

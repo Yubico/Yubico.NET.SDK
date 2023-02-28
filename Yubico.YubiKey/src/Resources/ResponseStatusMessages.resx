@@ -276,6 +276,9 @@
   <data name="BaseWrongLength" xml:space="preserve">
     <value>Wrong length.</value>
   </data>
+  <data name="Fido2NoCredentials" xml:space="preserve">
+    <value>The YubiKey possessed no FIDO2 credentials matching the request parameters.</value>
+  </data>
   <data name="Fido2NotAllowed" xml:space="preserve">
     <value>The request was rejected because the operation is not allowed.</value>
   </data>
@@ -286,7 +289,7 @@
     <value>The request was rejected because the PIN was not verified.</value>
   </data>
   <data name="Fido2PinBlocked" xml:space="preserve">
-    <value>The request was rejected because the PIN was blocked.</value>
+    <value>The request was rejected because the PIN and/or the UV was blocked.</value>
   </data>
   <data name="Fido2Timeout" xml:space="preserve">
     <value>The request was rejected because the FIDO2 application timed out.</value>
@@ -296,6 +299,9 @@
   </data>
   <data name="Fido2ResetTimeout" xml:space="preserve">
     <value>The FIDO2 reset command could not complete because the YubiKey was not touched within the time limit.</value>
+  </data>
+  <data name="Fido2AuthInvalid" xml:space="preserve">
+    <value>The authentication was invalid for the requested FIDO2 operation.</value>
   </data>
   <data name="U2fPinNotVerified" xml:space="preserve">
     <value>The request was rejected because the PIN was not verified.</value>

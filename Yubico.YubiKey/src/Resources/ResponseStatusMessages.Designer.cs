@@ -19,7 +19,7 @@ namespace Yubico.YubiKey {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class ResponseStatusMessages {
@@ -453,6 +453,24 @@ namespace Yubico.YubiKey {
         internal static string BaseWrongLength {
             get {
                 return ResourceManager.GetString("BaseWrongLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The authentication was invalid for the requested FIDO2 operation..
+        /// </summary>
+        internal static string Fido2AuthInvalid {
+            get {
+                return ResourceManager.GetString("Fido2AuthInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The YubiKey possessed no FIDO2 credentials matching the request parameters..
+        /// </summary>
+        internal static string Fido2NoCredentials {
+            get {
+                return ResourceManager.GetString("Fido2NoCredentials", resourceCulture);
             }
         }
         

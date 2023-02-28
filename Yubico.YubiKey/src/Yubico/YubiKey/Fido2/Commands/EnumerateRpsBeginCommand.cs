@@ -29,7 +29,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// number of relying parties represented in the set of credentials. If there
     /// is only one RP, then you have all the information you need. If there are
     /// more RPs, then you can get information on all of them by calling the
-    /// <c>enumerateRPsGetNextRP</c> sub-command.
+    /// <c>enumerateRPsGetNextRP</c> subcommand.
     /// </para>
     /// <para>
     /// The return from this command is the <c>CredentialManagementData</c>

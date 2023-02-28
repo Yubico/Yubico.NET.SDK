@@ -29,7 +29,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <remarks>
     /// <para>
     /// The `authenticatorClientPin (0x06)` FIDO2 command can be thought of more as a "meta" command. That is, it provides
-    /// the structure and mechanism for performing a number of sub-commands. These sub-commands are:
+    /// the structure and mechanism for performing a number of subcommands. These subcommands are:
     ///
     /// - GetPinRetries (0x01)
     /// - GetKeyAgreement (0x02)
@@ -40,16 +40,16 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// - GetUVRetries (0x07)
     /// - GetPinUvAuthTokenUsingPinWithPermissions (0x09)
     ///
-    /// Since the SDK does not have the concept of a sub-command natively, these are all exposed as their own separate
+    /// Since the SDK does not have the concept of a subcommand natively, these are all exposed as their own separate
     /// commands.
     /// </para>
     /// <para>
-    /// This command should seldom be used directly. It is exposed for completeness. The sub-commands exposed in this
+    /// This command should seldom be used directly. It is exposed for completeness. The subcommands exposed in this
     /// namespace use it as their implementation and expose a pared down version of the parameters.
     /// </para>
     /// <para>
     /// See the user manual entry on <xref href="Fido2PinProtocol">PIN protocols</xref> for a much more in depth guide
-    /// to working with PINs within FIDO2. For more information on a particular sub-command, see the API reference
+    /// to working with PINs within FIDO2. For more information on a particular subcommand, see the API reference
     /// documentation for that command class (linked above).
     /// </para>
     /// </remarks>
@@ -79,14 +79,14 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// that are supported by the YubiKey. This can be determined by issuing the AuthenticatorGetInfo command.
         /// </para>
         /// <para>
-        /// This parameter is optional for the GetPinRetries and GetUvRetries sub-commands, and is mandatory for all
+        /// This parameter is optional for the GetPinRetries and GetUvRetries subcommands, and is mandatory for all
         /// others.
         /// </para>
         /// </remarks>
         public PinUvAuthProtocol? PinUvAuthProtocol { get; set; }
 
         /// <summary>
-        /// The Client PIN sub-command to issue to the YubiKey.
+        /// The Client PIN subcommand to issue to the YubiKey.
         /// </summary>
         /// <remarks>
         /// This is a mandatory parameter, and must be one of the following values:
@@ -100,9 +100,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// - GetUVRetries (0x07)
         /// - GetPinUvAuthTokenUsingPinWithPermissions (0x09)
         ///
-        /// Alternatively - you can use one of the command classes exposed by the SDK that represents the sub-command
+        /// Alternatively - you can use one of the command classes exposed by the SDK that represents the subcommand
         /// itself. This method is recommended as these command classes will only expose the parameters that are
-        /// relevant to that sub-command.
+        /// relevant to that subcommand.
         /// </remarks>
         public int SubCommand { get; set; }
 
@@ -117,7 +117,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         public CoseKey? KeyAgreement { get; set; }
 
         /// <summary>
-        /// The output of calling authenticate on the PIN/UV protocol specific to a particular sub-command.
+        /// The output of calling authenticate on the PIN/UV protocol specific to a particular subcommand.
         /// </summary>
         /// <remarks>
         /// See the user manual entry on <xref href="Fido2PinProtocol">PIN protocols</xref> for a much more in depth

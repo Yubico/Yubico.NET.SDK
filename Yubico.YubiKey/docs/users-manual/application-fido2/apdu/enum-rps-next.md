@@ -31,7 +31,7 @@ encoding is
 
 ```txt
   A3
-     01 --int-- sub-command = 03
+     01 --int-- subcommand = 03
      03 --int-- protocol
      04 --byte string-- PinUvAuthParam
 ```

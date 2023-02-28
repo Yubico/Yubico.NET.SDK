@@ -153,7 +153,7 @@ namespace Yubico.YubiKey.Fido2
         private bool DoReset(int? serialNum)
         {
             var fido2Reset = new Fido2ResetForTest(serialNum);
-            ResponseStatus status = fido2Reset.RunFido2Reset(Fido2ResetForTest.ResetForTestKeyCollectorDelegate);
+            ResponseStatus status = fido2Reset.RunFido2Reset();
 
             return status == ResponseStatus.Success;
         }

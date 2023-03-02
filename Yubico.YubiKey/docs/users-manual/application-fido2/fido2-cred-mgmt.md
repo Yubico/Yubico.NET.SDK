@@ -102,8 +102,8 @@ The Fido2Session methods are
 * [GetCredentialMetadata](xref:Yubico.YubiKey.Fido2.Fido2Session.GetCredentialMetadata)
 * [EnumerateRelyingParties](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateRelyingParties)
 * [EnumerateCredentialsForRelyingParty](xref:Yubico.YubiKey.Fido2.Fido2Session.EnumerateCredentialsForRelyingParty%2a)
-* DeleteCredential
-* UpdateUserInfoForCredential
+* [DeleteCredential](xref:Yubico.YubiKey.Fido2.Fido2Session.DeleteCredential%2a)
+* [UpdateUserInfoForCredential](xref:Yubico.YubiKey.Fido2.Fido2Session.UpdateUserInfoForCredential%2a)
 
 If you use these methods, the SDK will build the proper PinToken if needed.
 

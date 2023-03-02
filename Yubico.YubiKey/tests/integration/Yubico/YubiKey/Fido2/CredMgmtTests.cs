@@ -98,5 +98,69 @@ namespace Yubico.YubiKey.Fido2
                 Assert.True(isValid);
             }
         }
+
+        [Fact]
+        public void DeleteCred_Succeeds()
+        {
+            _bioFido2Fixture.AddCredentials(1, 0);
+            using (var fido2Session = new Fido2Session(_bioFido2Fixture.Device))
+            {
+                fido2Session.KeyCollector = _bioFido2Fixture.KeyCollector;
+                fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
+
+                IReadOnlyList<CredentialManagementData> credList =
+                    fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[2].RelyingParty.Id);
+                int count = credList.Count;
+                Assert.Equal(1, count);
+
+                fido2Session.ClearAuthToken();
+                fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
+
+                CredentialId credId = credList[0].CredentialId
+                    ?? throw new InvalidOperationException("No matching User.");
+
+                fido2Session.DeleteCredential(credId);
+
+                credList = fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[2].RelyingParty.Id);
+                Assert.NotNull(credList);
+                Assert.True(credList.Count == count - 1);
+            }
+        }
+
+        [Fact]
+        public void UpdateUserInfo_Succeeds()
+        {
+            string updatedDisplayName = "Updated Display Name";
+
+            using (var fido2Session = new Fido2Session(_bioFido2Fixture.Device))
+            {
+                fido2Session.KeyCollector = _bioFido2Fixture.KeyCollector;
+                fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
+
+                IReadOnlyList<CredentialManagementData> credList =
+                    fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[0].RelyingParty.Id);
+                Assert.NotEqual(0, credList.Count);
+
+                fido2Session.ClearAuthToken();
+                fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
+
+                CredentialId credId = credList[0].CredentialId
+                    ?? throw new InvalidOperationException("No matching User.");
+
+                UserEntity newInfo = credList[0].User
+                    ?? throw new InvalidOperationException("No matching User.");
+                newInfo.DisplayName = updatedDisplayName;
+
+                fido2Session.UpdateUserInfoForCredential(credId, newInfo);
+
+                credList = fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[0].RelyingParty.Id);
+
+                newInfo = credList[0].User
+                    ?? throw new InvalidOperationException("No matching User.");
+                string displayName = newInfo.DisplayName
+                    ?? throw new InvalidOperationException("No matching User.");
+                Assert.True(displayName.Equals(updatedDisplayName));
+            }
+        }
     }
 }

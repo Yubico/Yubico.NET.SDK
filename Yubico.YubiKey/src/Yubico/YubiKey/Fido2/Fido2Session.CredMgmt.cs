@@ -406,5 +406,131 @@ namespace Yubico.YubiKey.Fido2
 
             return returnValue;
         }
+
+        /// <summary>
+        /// This performs the <c>deleteCredential</c> subcommand of the
+        /// <c>authenticatorCredentialManagement</c> command. It deletes the one
+        /// credential represented by the given <c>credentialId</c>.
+        /// </summary>
+        /// <remarks>
+        /// See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
+        /// on credential management.
+        /// <para>
+        /// If there is no credential with the given <c>credentialId</c> on the
+        /// YubiKey, this method will do nothing.
+        /// </para>
+        /// </remarks>
+        /// <param name="credentialId">
+        /// The ID of the credential to delete.
+        /// </param>
+        /// <exception cref="Fido2Exception">
+        /// The YubiKey was not able to delete the specified credential.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The connected YubiKey does not support CredentialManagement, or the
+        /// PIN was invalid, or there was no KeyCollector.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The user canceled the operation while collecting the PIN.
+        /// </exception>
+        /// <exception cref="System.Security.SecurityException">
+        /// The PIN retry count was exhausted.
+        /// </exception>
+        public void DeleteCredential(CredentialId credentialId)
+        {
+            ReadOnlyMemory<byte> currentToken = GetAuthToken(
+                false, PinUvAuthTokenPermissions.CredentialManagement, null);
+
+            var cmd = new DeleteCredentialCommand(credentialId, currentToken, AuthProtocol);
+            Fido2Response rsp = Connection.SendCommand(cmd);
+
+            // If the error is PinAuthInvalid, try again.
+            // If the result is not PinAuthInvalid, we know we're not going
+            // to try again, error or no error.
+            if (rsp.CtapStatus == CtapStatus.PinAuthInvalid)
+            {
+                currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
+                cmd = new DeleteCredentialCommand(credentialId, currentToken, AuthProtocol);
+                rsp = Connection.SendCommand(cmd);
+            }
+
+            // If the response is Success, we're done.
+            if ((rsp.Status == ResponseStatus.Success) || (rsp.CtapStatus == CtapStatus.NoCredentials))
+            {
+                return;
+            }
+
+            // If the response is not Success, throw an exception.
+            throw new Fido2Exception(rsp.StatusMessage);
+        }
+
+        /// <summary>
+        /// This performs the <c>updateUserInformation</c> subcommand of the
+        /// <c>authenticatorCredentialManagement</c> command. It replaces the
+        /// user info in the credential represented by the given
+        /// <c>credentialId</c> with the given user data.
+        /// </summary>
+        /// <remarks>
+        /// See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
+        /// on credential management.
+        /// <para>
+        /// This method will replace all the user information currently stored
+        /// against the <c>credentialId</c> on the YubiKey. That is, it does not
+        /// "edit" the information. Hence, the <c>userEntity</c> you supply
+        /// should contain all the information you want stored, even if some of
+        /// that information is currently stored on the YubiKey.
+        /// </para>
+        /// <para>
+        /// If there is no credential with the given <c>credentialId</c> on the
+        /// YubiKey, this method will throw an exception
+        /// </para>
+        /// </remarks>
+        /// <param name="credentialId">
+        /// The ID of the credential to update.
+        /// </param>
+        /// <param name="newUserInfo">
+        /// An object containing the information that will replace the currently
+        /// stored info.
+        /// </param>
+        /// <exception cref="Fido2Exception">
+        /// There was no credential with the given ID.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The connected YubiKey does not support CredentialManagement, or the
+        /// PIN was invalid, or there was no KeyCollector.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The user canceled the operation while collecting the PIN.
+        /// </exception>
+        /// <exception cref="System.Security.SecurityException">
+        /// The PIN retry count was exhausted.
+        /// </exception>
+        public void UpdateUserInfoForCredential(CredentialId credentialId, UserEntity newUserInfo)
+        {
+            ReadOnlyMemory<byte> currentToken = GetAuthToken(
+                false, PinUvAuthTokenPermissions.CredentialManagement, null);
+
+            var cmd = new UpdateUserInfoCommand(credentialId, newUserInfo, currentToken, AuthProtocol);
+            Fido2Response rsp = Connection.SendCommand(cmd);
+
+            // If the error is PinAuthInvalid, try again.
+            // If the result is not PinAuthInvalid, we know we're not going
+            // to try again, error or no error.
+            if (rsp.CtapStatus == CtapStatus.PinAuthInvalid)
+            {
+                currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
+                cmd = new UpdateUserInfoCommand(credentialId, newUserInfo, currentToken, AuthProtocol);
+                rsp = Connection.SendCommand(cmd);
+            }
+
+            // If the response is Success, we're done.
+            if (rsp.Status == ResponseStatus.Success)
+            {
+                return;
+            }
+
+            // If the response is not Success, throw an exception.
+            throw new Fido2Exception(rsp.StatusMessage);
+        }
     }
 }

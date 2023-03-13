@@ -64,7 +64,7 @@ namespace Yubico.YubiKey.Fido2
 
                 gaParams.AllowCredential(mcData.AuthenticatorData.CredentialId!);
 
-                IList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
+                IReadOnlyList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
 
                 Assert.Equal(1, assertions.Count);
                 Assert.Equal(1, assertions[0].NumberOfCredentials);
@@ -122,7 +122,7 @@ namespace Yubico.YubiKey.Fido2
                 gaParams.AllowCredential(cred1);
                 gaParams.AllowCredential(cred2);
 
-                IList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
+                IReadOnlyList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
 
                 Assert.Equal(2, assertions.Count);
                 Assert.Equal(2, assertions[0].NumberOfCredentials);

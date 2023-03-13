@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Fido2
         /// </para>
         /// <para>
         /// Because writing to the large blob area in a YubiKey means overwriting
-        /// the exsting data, it is recommended that to add to, remove from, or
+        /// the existing data, it is recommended that to add to, remove from, or
         /// "edit" the large blob data, the caller should get the current large
         /// blob array, operate on the resulting <c>SerializedLargeBlobArray</c>,
         /// and then call <see cref="SetSerializedLargeBlobArray"/> with the
@@ -224,24 +224,7 @@ namespace Yubico.YubiKey.Fido2
             }
             byte[] encodedArray = serializedLargeBlobArray.Encode();
 
-            // If the current AuthToken has the LargeBlobWrite permission
-            // already, just use it, otherwise we'll need to get a token with the
-            // appropriate permission.
-            PinUvAuthTokenPermissions permissions = AuthTokenPermissions ?? PinUvAuthTokenPermissions.None;
-            if (!permissions.HasFlag(PinUvAuthTokenPermissions.LargeBlobWrite))
-            {
-                permissions |= PinUvAuthTokenPermissions.LargeBlobWrite;
-                VerifyPin(permissions);
-            }
-
-            using HashAlgorithm digester = CryptographyProviders.Sha256Creator();
-
-            byte[] token = Array.Empty<byte>();
-            if (!(AuthToken is null))
-            {
-                token = AuthToken.Value.ToArray();
-            }
-
+            byte[] token = new byte[MaximumAuthTokenLength];
             try
             {
                 int offset = 0;
@@ -249,25 +232,39 @@ namespace Yubico.YubiKey.Fido2
                 int maxFragmentLength = AuthenticatorInfo.MaximumMessageSize ?? AuthenticatorInfo.DefaultMaximumMessageSize;
                 maxFragmentLength -=  MessageOverhead;
                 int currentLength;
+                bool forceToken = false;
+
+                using HashAlgorithm digester = CryptographyProviders.Sha256Creator();
 
                 do
                 {
+                    ReadOnlyMemory<byte> currentToken = GetAuthToken(
+                        forceToken, PinUvAuthTokenPermissions.LargeBlobWrite, null);
+                    currentToken.CopyTo(token.AsMemory());
+
                     currentLength = (remaining >= maxFragmentLength) ? maxFragmentLength : remaining;
 
                     byte[] dataToAuth = BuildDataToAuth(encodedArray, offset, currentLength, digester);
-                    byte[] pinUvAuthParam = AuthProtocol.AuthenticateUsingPinToken(token, dataToAuth);
+                    byte[] pinUvAuthParam = AuthProtocol.AuthenticateUsingPinToken(token, 0, currentToken.Length, dataToAuth);
 
                     var command = new SetLargeBlobCommand(
                         new ReadOnlyMemory<byte>(encodedArray, offset, currentLength), offset, encodedArray.Length,
                         pinUvAuthParam, (int)AuthProtocol.Protocol);
                     SetLargeBlobResponse response = Connection.SendCommand(command);
-                    if (response.Status != ResponseStatus.Success)
+                    if (response.Status == ResponseStatus.Success)
                     {
-                        throw new Fido2Exception(GetCtapError(response));
+                        remaining -= currentLength;
+                        offset += currentLength;
+                        forceToken = false;
                     }
-
-                    remaining -= currentLength;
-                    offset += currentLength;
+                    else if (response.CtapStatus == CtapStatus.PinAuthInvalid)
+                    {
+                        forceToken = true;
+                    }
+                    else
+                    {
+                        throw new Fido2Exception(response.StatusMessage);
+                    }
                 } while (remaining > 0);
             }
             finally

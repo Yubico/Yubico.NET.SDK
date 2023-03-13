@@ -16,6 +16,7 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
 
@@ -67,15 +68,15 @@ namespace Yubico.YubiKey.Fido2
         /// <see cref="PinUvAuthTokenPermissions.CredentialManagement"/>.
         /// </para>
         /// <para>
-        /// The <c>Fido2Session</c> property <see cref="AuthToken"/> is the
-        /// AuthToken this method will use, but will work only if the
-        /// <see cref="AuthTokenPermissions"/> property has the
-        /// <c>CredentialManagement</c> flag.
+        /// If there is no <c>Fido2Session</c> property <see cref="AuthToken"/>,
+        /// or it does not work (i.e. it is expired or does not have the
+        /// appropriate permission), this method will use the <c>KeyCollector</c>
+        /// to obtain a new one.
         /// </para>
         /// <para>
-        /// If that permission is not set, you must verify the PIN before
-        /// calling, making sure the <c>CredentialManagement</c> permission is
-        /// set. See
+        /// If you do not want to use a KeyCollector, you must verify the PIN
+        /// before calling, making sure the <c>CredentialManagement</c>
+        /// permission is set. See
         /// <see cref="TryVerifyPin(ReadOnlyMemory{byte}, PinUvAuthTokenPermissions?, string?, out int?, out bool?)"/>
         /// <code language="csharp">
         ///   bool isVerified = fido2Session.TryVerifyPin(
@@ -101,6 +102,8 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public CredentialManagementData GetCredentialMetadata()
         {
+            _log.LogInformation("Get credential metadata.");
+
             ReadOnlyMemory<byte> currentToken = GetAuthToken(
                 false, PinUvAuthTokenPermissions.CredentialManagement, null);
 
@@ -203,6 +206,8 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public IReadOnlyList<CredentialManagementData> EnumerateRelyingParties()
         {
+            _log.LogInformation("Enumerate relying parties.");
+
             ReadOnlyMemory<byte> currentToken = GetAuthToken(
                 false, PinUvAuthTokenPermissions.CredentialManagement, null);
 
@@ -340,6 +345,8 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public IReadOnlyList<CredentialManagementData> EnumerateCredentialsForRelyingParty(string relyingPartyId)
         {
+            _log.LogInformation("Enumerate credentials for relying party: " + relyingPartyId + ".");
+
             ReadOnlyMemory<byte> currentToken = GetAuthToken(
                 false, PinUvAuthTokenPermissions.CredentialManagement, relyingPartyId);
 
@@ -438,6 +445,8 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void DeleteCredential(CredentialId credentialId)
         {
+            _log.LogInformation("Delete credential.");
+
             ReadOnlyMemory<byte> currentToken = GetAuthToken(
                 false, PinUvAuthTokenPermissions.CredentialManagement, null);
 
@@ -507,6 +516,8 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void UpdateUserInfoForCredential(CredentialId credentialId, UserEntity newUserInfo)
         {
+            _log.LogInformation("Update user information");
+
             ReadOnlyMemory<byte> currentToken = GetAuthToken(
                 false, PinUvAuthTokenPermissions.CredentialManagement, null);
 

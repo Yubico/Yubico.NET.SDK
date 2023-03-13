@@ -347,7 +347,51 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// The object has been created or initialized, but the
         /// <see cref="Encapsulate"/> method has not been called.
         /// </exception>
-        public virtual byte[] AuthenticateUsingPinToken(byte[] pinToken, byte[] message)
+        public byte[] AuthenticateUsingPinToken(byte[] pinToken, byte[] message)
+        {
+            if (!(pinToken is null))
+            {
+                return AuthenticateUsingPinToken(pinToken, 0, pinToken.Length, message);
+            }
+
+            throw new ArgumentNullException(nameof(pinToken));
+        }
+
+        /// <summary>
+        /// Returns the result of computing HMAC-SHA-256 on the given message
+        /// using the <c>pinToken</c> as the key. With protocol 1, the result is
+        /// the first 16 bytes of the HMAC, and with protocol 2 it is the entire
+        /// 32-byte result.
+        /// </summary>
+        /// <remarks>
+        /// This is the same as <see cref="AuthenticateUsingPinToken(byte[],byte[])"/>,
+        /// except this specifies an offset and length of the <c>pinToken</c>
+        /// argument.
+        /// </remarks>
+        /// <param name="pinToken">
+        /// The PIN token returned by the YubiKey. This is the encrypted value,
+        /// do not decrypt it.
+        /// </param>
+        /// <param name="offset">
+        /// The offset into <c>pinToken</c> buffer where the data begins.
+        /// </param>
+        /// <param name="length">
+        /// The length, in bytes, of the pin token.
+        /// </param>
+        /// <param name="message">
+        /// The data to be authenticated.
+        /// </param>
+        /// <returns>
+        /// A new byte array containing the authentication result.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>pinToken</c> or <c>message</c> argument is null.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The object has been created or initialized, but the
+        /// <see cref="Encapsulate"/> method has not been called.
+        /// </exception>
+        public virtual byte[] AuthenticateUsingPinToken(byte[] pinToken, int offset, int length, byte[] message)
         {
             if (pinToken is null)
             {
@@ -358,7 +402,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                 throw new ArgumentNullException(nameof(message));
             }
 
-            byte[] tokenKey = Decrypt(pinToken, 0, pinToken.Length);
+            byte[] tokenKey = Decrypt(pinToken, offset, length);
             try
             {
                 return Authenticate(tokenKey, message);

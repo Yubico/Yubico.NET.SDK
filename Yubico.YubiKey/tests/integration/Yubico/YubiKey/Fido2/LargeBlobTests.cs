@@ -14,9 +14,9 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
+using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -33,17 +33,21 @@ namespace Yubico.YubiKey.Fido2
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36
         };
 
+        private readonly IYubiKeyDevice _testDevice;
+
+        public LargeBlobTests()
+        {
+            _testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Bio);
+        }
+
         //[Fact(Skip = "This test requires user interation to reset the FIDO2 application.")]
         [Fact]
         public void SetLargeBlob_Succeeds()
         {
-            IYubiKeyDevice yubiKey = IntegrationTestDeviceEnumeration.GetTestDevices()
-                .Where(key => key.SerialNumber.HasValue).First();
-
-            bool isValid = DoReset(yubiKey.SerialNumber);
+            bool isValid = DoReset(_testDevice.SerialNumber);
             Assert.True(isValid);
 
-            using (var fido2Session = new Fido2Session(yubiKey))
+            using (var fido2Session = new Fido2Session(_testDevice))
             {
                 fido2Session.KeyCollector = Fido2ResetForTest.ResetForTestKeyCollectorDelegate;
                 isValid = fido2Session.TrySetPin(new ReadOnlyMemory<byte>(_pin));
@@ -62,10 +66,7 @@ namespace Yubico.YubiKey.Fido2
                 mcParams1.AddExtension("largeBlobKey", new byte[] { 0xF5 });
                 mcParams1.AddOption(AuthenticatorOptions.rk, true);
 
-                isValid = fido2Session.TryVerifyPin(
-                    new ReadOnlyMemory<byte>(_pin), null, null, out int? retries, out bool? reboot);
-                Assert.True(isValid);
-
+                fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
                 MakeCredentialData mcData1 = fido2Session.MakeCredential(mcParams1);
                 Assert.True(mcData1.VerifyAttestation(_clientDataHash));
 
@@ -82,21 +83,13 @@ namespace Yubico.YubiKey.Fido2
                 mcParams2.AddExtension("largeBlobKey", new byte[] { 0xF5 });
                 mcParams2.AddOption(AuthenticatorOptions.rk, true);
 
-                isValid = fido2Session.TryVerifyPin(
-                    new ReadOnlyMemory<byte>(_pin), null, null, out retries, out reboot);
-                Assert.True(isValid);
-
                 MakeCredentialData mcData2 = fido2Session.MakeCredential(mcParams2);
                 Assert.True(mcData2.VerifyAttestation(_clientDataHash));
 
                 var gaParams = new GetAssertionParameters(_rp, _clientDataHash);
                 gaParams.AddExtension("largeBlobKey", new byte[] { 0xF5 });
 
-                isValid = fido2Session.TryVerifyPin(
-                    new ReadOnlyMemory<byte>(_pin), null, null, out retries, out reboot);
-                Assert.True(isValid);
-
-                IList<GetAssertionData> assertions = fido2Session.GetAssertions(gaParams);
+                IReadOnlyList<GetAssertionData> assertions = fido2Session.GetAssertions(gaParams);
                 Assert.Equal(2, assertions.Count);
 
                 SerializedLargeBlobArray blobArray = fido2Session.GetSerializedLargeBlobArray();

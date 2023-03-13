@@ -196,7 +196,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// Constructs a new instance of <see cref="CredentialManagementCommand{TResponse}"/>.
         /// </summary>
         /// <param name="subCommand">
-        /// The byte representing the sub-command to execute.
+        /// The byte representing the subcommand to execute.
         /// </param>
         protected CredentialManagementCommand(int subCommand)
         {

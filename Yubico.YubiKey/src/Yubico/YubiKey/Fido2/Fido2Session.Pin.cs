@@ -25,6 +25,8 @@ namespace Yubico.YubiKey.Fido2
     // This portion of the Fido2Session class contains code for PIN operations.
     public sealed partial class Fido2Session
     {
+        private const int MaximumAuthTokenLength = 48;
+
         /// <summary>
         /// The PIN protocol to use for all operations on this session instance.
         /// </summary>

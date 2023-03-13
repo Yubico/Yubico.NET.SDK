@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Threading;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 
@@ -227,6 +228,32 @@ namespace Yubico.YubiKey.Fido2
 
         private static bool OptionEnabled(AuthenticatorInfo info, string key) =>
             OptionPresent(info, key) && info.Options![key];
+
+        // Use this method when running the KeyCollector on a separate thread.
+        // This will likely be used exclusively for touch and fingerprint. We
+        // will create a thread (actually a Task) that will make the call to the
+        // KeyCollector with the Request of Touch or Fingerprint. Then back on
+        // the main thread we will call on the YubiKey to do the work that will
+        // need the touch or fingerprint (the regular operation). In this way,
+        // the call to the KeyCollector won't block the regular operation.
+        // After the regular operation is done, cancel the token. This method
+        // will get the message and call Release.
+        // Notice that this method calls with the input keyEntryData. That is, it
+        // is the responsibility of the caller to make sure that
+        // keyEntryData.Request is set to the appropriate value.
+        private static void RunKeyCollectorThread(
+            Func<KeyEntryData, bool> keyCollector, KeyEntryData keyEntryData, CancellationToken token)
+        {
+            _ = keyCollector(keyEntryData);
+
+            while (!token.IsCancellationRequested)
+            {
+                Thread.Sleep(500);
+            }
+
+            keyEntryData.Request = KeyEntryRequest.Release;
+            _ = keyCollector(keyEntryData);
+        }
 
         /// <inheritdoc />
         public void Dispose()

@@ -118,7 +118,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         ///       32 x 0xff || 0x0c 00 || uint32LittleEndian(offset) ||
         ///       SHA-256(contents of set byte string)
         /// </code>
-        /// See <see cref="PinProtocols.PinUvAuthProtocolBase.AuthenticateUsingPinToken"/>.
+        /// See <see cref="PinProtocols.PinUvAuthProtocolBase.AuthenticateUsingPinToken(byte[],byte[])"/>.
         /// </para>
         /// <para>
         /// It is the responsibility of the caller to keep track of the offset.

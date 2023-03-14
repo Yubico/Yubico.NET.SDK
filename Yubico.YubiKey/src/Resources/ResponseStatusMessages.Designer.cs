@@ -466,6 +466,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The credential was rejected because it is on the relying party&apos;s exclude list..
+        /// </summary>
+        internal static string Fido2CredentialExcluded {
+            get {
+                return ResourceManager.GetString("Fido2CredentialExcluded", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The YubiKey possessed no FIDO2 credentials matching the request parameters..
         /// </summary>
         internal static string Fido2NoCredentials {
@@ -484,7 +493,16 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The request was rejected because the PIN was blocked..
+        ///   Looks up a localized string similar to An option or extension specified is either unsupported or invalid for the connected YubiKey..
+        /// </summary>
+        internal static string Fido2OptionExtension {
+            get {
+                return ResourceManager.GetString("Fido2OptionExtension", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The request was rejected because the PIN and/or the UV was blocked..
         /// </summary>
         internal static string Fido2PinBlocked {
             get {
@@ -502,7 +520,7 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The request was rejected because the PIN was not verified..
+        ///   Looks up a localized string similar to The request was rejected because the PIN and/or UV was not verified..
         /// </summary>
         internal static string Fido2PinNotVerified {
             get {

@@ -19,7 +19,7 @@ on:
   push:
     branches:
       - main
-      - develop
+      - 'develop**'
   workflow_dispatch:
     inputs:
       push-to-dev:

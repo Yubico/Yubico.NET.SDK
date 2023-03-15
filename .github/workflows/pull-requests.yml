@@ -19,7 +19,7 @@ on:
   pull_request:
     branches:
       - main
-      - develop
+      - 'develop**'
       - 'release/**'
   push:
     branches:

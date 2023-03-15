@@ -17,9 +17,13 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [main, develop]
+    branches:
+      - main
+      - 'develop**'
   pull_request:
-    branches: [main, develop]
+    branches:
+      - main
+      - 'develop**'
     paths-ignore:
       - '**/*.md'
       - '**/*.txt'

@@ -42,6 +42,8 @@
     href: sdk-programming-guide/delegates-in-sdk.md
   - name: The KeyCollector and alternatives
     href: sdk-programming-guide/key-collector.md
+  - name: The KeyCollector and touch
+    href: sdk-programming-guide/key-collector-touch.md
   - name: Providing alternate cryptographic implementations
     href: sdk-programming-guide/alternate-crypto.md
   - name: Sensitive data
@@ -284,6 +286,8 @@
     href: application-fido2/fido2-auth-tokens.md
   - name: The SDK's AuthToken retrieval logic
     href: application-fido2/sdk-auth-token-logic.md
+  - name: Touch and fingerprint notification
+    href: application-fido2/fido2-touch-notification.md
   - name: PIN/UV authentication protocols
     href: application-fido2/pin-uv-auth-protocols.md
   - name: The FIDO2 PIN

@@ -248,17 +248,24 @@ can expire on a FIDO2 version 2.1 device.
 ### PinUvAuthToken using PIN or UV
 
 It is possible to get an AuthToken using the PIN or UV (user verification, for YubiKey
-that is fingerprint). It doesn't matter how the user "autheticates", the YubiKey will
+that is fingerprint). It doesn't matter how the user "authenticates", the YubiKey will
 return a PinUvAuthToken. There is no difference between an AuthToken retrieved using PIN
 or UV. They work exactly the same. It is just a matter of how you authenticate yourself to
 the YubiKey.
 
 Note that in FIDO2 version 2.0, there was no way to perform UV to get a PinToken, there is
-only the PIN.
+only the PIN. Fingerprint authentication was added in FIDO2 version 2.1. The FIDO2
+standard currently specifies only fingerprints, but other methods, such as face
+recognition, could be added in the future.
 
-In order to be able to perform UV, the fingerprint (or other method, such as face
-recognition) must be registered with the YubiKey. More specifically, it must be registered
-with the FIDO2 application on the YubiKey. In FIDO2 this is called enrollment.
+> [!NOTE]
+> When a YubiKey would like the user to verify a fingerprint, the SDK will notify your
+> application. See the
+> [article on the KeyCollector and touch](../sdk-programming-guide/key-collector-touch.md)
+> for a more detailed description of how to handle fingerprint notifications.
+
+To perform UV, the fingerprint must be registered with the FIDO2 application on the
+YubiKey. In FIDO2 this is called enrollment.
 
 There are ways to discover whether the YubiKey has fingerprint capabilities, and if so,
 whether one has been enrolled. The standard says, the client "SHOULD" try UV first, and if

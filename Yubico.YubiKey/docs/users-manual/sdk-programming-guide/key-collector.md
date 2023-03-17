@@ -27,8 +27,15 @@ limitations under the License. -->
 In the SDK, there is the concept of a `KeyCollector`. This is a user-supplied
 [delegate](delegates-in-sdk.md), a callback method the SDK calls when it needs a PIN,
 password, key, or some other secret value in order to complete verification or
-authentication. For example, with the PIV application, you can make a call to sign data.
-That requires the PIN to be verified in order to execute.
+authentication.
+
+> [!NOTE]
+> The key collector is also used to notify the caller that touch or a fingerprint is
+> needed. See the [article on the KeyCollector and touch](key-collector-touch.md) for a
+> more detailed description of how to handle touch notifications.
+
+For example, with the PIV application, you can make a call to sign data. That requires the
+PIN to be verified in order to execute.
 
 ```csharp
     using (var pivSession = new PivSession(yubiKey))

@@ -13,7 +13,9 @@
 // limitations under the License.
 
 using System;
+using System.Text;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2;
 
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
@@ -110,7 +112,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             Func<KeyEntryData, bool> KeyCollectorDelegate,
             ReadOnlyMemory<byte> clientDataHash,
             string relyingPartyId,
-            out IList<GetAssertionData> assertions)
+            out IReadOnlyList<GetAssertionData> assertions)
         {
             assertions = new List<GetAssertionData>();
             var relyingParty = new RelyingParty(relyingPartyId);
@@ -139,6 +141,185 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 getAssertionParameters.AddExtension("credBlob", new byte[] { 0xF5 });
 
                 assertions = fido2Session.GetAssertions(getAssertionParameters);
+            }
+
+            return true;
+        }
+
+        // This method will get information about the discoverable credentials on
+        // the YubiKey and return it as a List of CredentialManagementData.
+        // The first in the list (index zero) will be the result of getting
+        // metadata, and will contain the NumberOfDiscoverableCredentials and
+        // RemainingCredentialCount (how many more discoverable credentials can
+        // be stored on the YubiKey).
+        // If there are any credentials, the next in the list will be the info
+        // for the first relying party. That will include the
+        // TotalCredentialsForRelyingParty, the number of credentials the YubiKey
+        // contains associated with that relying party. The next
+        // TotalCredentialsForRelyingParty entries will be the credentials
+        // themselves.
+        // If there are any other relying parties, the list will then contain
+        // sets of relying party and credential entries.
+        // For example, suppose there are three credentials, two for RP
+        // example.com and one for RP sample.org. The list will contain
+        // CredentialManagementData objects representing
+        //   metadata
+        //   RP example.com
+        //     cred
+        //     cred
+        //   RP sample.org
+        //     cred
+        public static bool RunGetCredentialData(
+            IYubiKeyDevice yubiKey,
+            Func<KeyEntryData, bool> KeyCollectorDelegate,
+            out IReadOnlyList<CredentialManagementData> credentialData)
+        {
+            credentialData = null;
+
+            using (var fido2Session = new Fido2Session(yubiKey))
+            {
+                if (fido2Session.AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.credMgmt) != OptionValue.True)
+                {
+                    return false;
+                }
+
+                fido2Session.KeyCollector = KeyCollectorDelegate;
+
+                CredentialManagementData metadata = fido2Session.GetCredentialMetadata();
+
+                // Create a new List with space for the metadata and each of the
+                // credentials. For each credential, make space for an RP.
+                // This is a max value because it is possible to have more than
+                // one credential per RP, but in the real world, there will
+                // likely be one credential only for each RP.
+                int count = metadata.NumberOfDiscoverableCredentials ?? 0;
+                var returnValue = new List<CredentialManagementData>((2 * count) + 1)
+                {
+                    metadata
+                };
+
+                IReadOnlyList<CredentialManagementData> rpList = fido2Session.EnumerateRelyingParties();
+                foreach (CredentialManagementData currentRp in rpList)
+                {
+                    returnValue.Add(currentRp);
+
+                    IReadOnlyList<CredentialManagementData> credentialList =
+                        fido2Session.EnumerateCredentialsForRelyingParty(currentRp.RelyingParty?.Id);
+
+                    foreach (CredentialManagementData currentCredential in credentialList)
+                    {
+                        returnValue.Add(currentCredential);
+                    }
+                }
+
+                credentialData = returnValue;
+            }
+
+            return true;
+        }
+
+        public static bool RunUpdateUserInfo(
+            IYubiKeyDevice yubiKey,
+            Func<KeyEntryData, bool> KeyCollectorDelegate,
+            CredentialId credentialId,
+            UserEntity updatedInfo)
+        {
+            using (var fido2Session = new Fido2Session(yubiKey))
+            {
+                fido2Session.KeyCollector = KeyCollectorDelegate;
+
+                fido2Session.UpdateUserInfoForCredential(credentialId, updatedInfo);
+            }
+
+            return true;
+        }
+
+        public static bool RunDeleteCredential(
+            IYubiKeyDevice yubiKey,
+            Func<KeyEntryData, bool> KeyCollectorDelegate,
+            CredentialId credentialId)
+        {
+            using (var fido2Session = new Fido2Session(yubiKey))
+            {
+                fido2Session.KeyCollector = KeyCollectorDelegate;
+
+                fido2Session.DeleteCredential(credentialId);
+            }
+
+            return true;
+        }
+
+        public static bool RunGetLargeBlobArray(
+            IYubiKeyDevice yubiKey,
+            out SerializedLargeBlobArray blobArray)
+        {
+            blobArray = null;
+
+            using (var fido2Session = new Fido2Session(yubiKey))
+            {
+                if (fido2Session.AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.largeBlobs) != OptionValue.True)
+                {
+                    return false;
+                }
+
+                blobArray = fido2Session.GetSerializedLargeBlobArray();
+            }
+
+            return true;
+        }
+
+        // Cycle through the Array, trying to decrypt each entry. If it works,
+        // return the decrypted data and the index at which the entry was found.
+        // If there is no entry, return "" and -1.
+        public static string GetLargeBlobEntry(
+            SerializedLargeBlobArray blobArray,
+            ReadOnlyMemory<byte> largeBlobKey,
+            out int entryIndex)
+        {
+            if (blobArray is null)
+            {
+                throw new ArgumentNullException(nameof(blobArray));
+            }
+
+            Memory<byte> plaintext = Memory<byte>.Empty;
+            byte[] plainArray = Array.Empty<byte>();
+            entryIndex = -1;
+            try
+            {
+                for (int index = 0; index < blobArray.Entries.Count; index++)
+                {
+                    if (blobArray.Entries[index].TryDecrypt(largeBlobKey, out plaintext))
+                    {
+                        entryIndex = index;
+                        plainArray = plaintext.ToArray();
+                        return Encoding.Unicode.GetString(plainArray);
+                    }
+                }
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(plaintext.Span);
+                CryptographicOperations.ZeroMemory(plainArray);
+            }
+
+            return "";
+        }
+
+        public static bool RunStoreLargeBlobArray(
+            IYubiKeyDevice yubiKey,
+            Func<KeyEntryData, bool> KeyCollectorDelegate,
+            SerializedLargeBlobArray blobArray)
+        {
+            using (var fido2Session = new Fido2Session(yubiKey))
+            {
+                if (fido2Session.AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.largeBlobs) != OptionValue.True)
+                {
+                    return false;
+                }
+
+                fido2Session.KeyCollector = KeyCollectorDelegate;
+
+                fido2Session.SetSerializedLargeBlobArray(blobArray);
             }
 
             return true;

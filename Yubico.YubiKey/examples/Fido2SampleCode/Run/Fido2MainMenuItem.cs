@@ -27,6 +27,14 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         MakeCredential = 10,
         GetAssertion = 11,
 
+        ListCredentials = 12,
+        UpdateCredentialUserInfo = 13,
+        DeleteCredential = 14,
+
+        RetrieveLargeBlobData = 15,
+        StoreLargeBlobData = 16,
+        DeleteLargeBlobData = 17,
+
         Reset = 20,
 
         Exit = 24,

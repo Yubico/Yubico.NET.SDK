@@ -24,7 +24,7 @@ limitations under the License. -->
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Yubico.YubiKey" Version="1.5.1-prerelease.20230110.1" />
+    <PackageReference Include="Yubico.YubiKey" Version="1.6.1-prerelease.20230301.2" />
   </ItemGroup>
 
 </Project>

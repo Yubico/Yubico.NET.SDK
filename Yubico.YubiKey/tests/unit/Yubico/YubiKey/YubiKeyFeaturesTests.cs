@@ -142,9 +142,9 @@ namespace Yubico.YubiKey
             yubiKey.FirmwareVersion.Patch = 1;
 
             Assert.True(yubiKey.HasFeature(YubiKeyFeature.OathTouchCredential));
-            
+
             yubiKey.FirmwareVersion.Major = 4;
-            yubiKey.FirmwareVersion.Minor = 2;
+            yubiKey.FirmwareVersion.Minor = 3;
             yubiKey.FirmwareVersion.Patch = 4;
 
             Assert.True(yubiKey.HasFeature(YubiKeyFeature.OathSha512));

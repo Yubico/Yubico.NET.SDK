@@ -210,11 +210,11 @@ namespace Yubico.YubiKey
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath),
 
                 YubiKeyFeature.OathTouchCredential =>
-                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V4_3_1
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V4_2_4
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath),
 
                 YubiKeyFeature.OathSha512 =>
-                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V4_2_4
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V4_3_4
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath),
 
                 _ => throw new ArgumentException(

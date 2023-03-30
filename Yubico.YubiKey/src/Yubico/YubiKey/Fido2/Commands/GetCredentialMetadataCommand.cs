@@ -25,15 +25,19 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// The partner Response class is <see cref="CredentialManagementResponse"/>.
     /// <para>
     /// This returns metadata on all the credentials. The return from this
-    /// command is the <c>authenticatorCredentialManagement</c> response, but
-    /// only two of the elements are included:
-    /// <c>existingResidentCredentialsCount</c> and
-    /// <c>maxPossibleRemainingResidentCredentialsCount</c>.
+    /// command consists of the <c>existingResidentCredentialsCount</c> and
+    /// <c>maxPossibleRemainingResidentCredentialsCount</c> (section 6.8 of the
+    /// standard).
     /// </para>
     /// </remarks>
-    public class GetCredentialMetadataCommand : CredentialManagementCommand<CredentialManagementResponse>
+    public class GetCredentialMetadataCommand : IYubiKeyCommand<GetCredentialMetadataResponse>
     {
         private const int SubCmdGetMetadata = 0x01;
+
+        private readonly CredentialManagementCommand _command;
+
+        /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -54,12 +58,15 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </param>
         public GetCredentialMetadataCommand(
             ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
-            : base(SubCmdGetMetadata, null, pinUvAuthToken, authProtocol)
         {
+            _command = new CredentialManagementCommand(SubCmdGetMetadata, null, pinUvAuthToken, authProtocol);
         }
 
         /// <inheritdoc />
-        public override CredentialManagementResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new CredentialManagementResponse(responseApdu);
+        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
+
+        /// <inheritdoc />
+        public GetCredentialMetadataResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new GetCredentialMetadataResponse(responseApdu);
     }
 }

@@ -465,9 +465,9 @@ that relying party. Your code might look like this.
     using (fido2Session = new Fido2Session(yubiKeyDevice))
     {
         fido2Session.KeyCollector = SomeKeyCollectorDelegate;
-        IList<CredentialManagementData> credentialList = fido2Session.EnumerateCredentialsForRelyingParty(relyingPartyId);
-        CredentialManagementData credentialToUse = ChooseCredential(credentialList);
-        GetAssertionParameters params = GetParamsForCredential(relyingPartyId, credentialToUse);
+        IList<CredentialUserInfo> credentialList = fido2Session.EnumerateCredentialsForRelyingParty(relyingParty);
+        CredentialUserInfo credentialToUse = ChooseCredential(credentialList);
+        GetAssertionParameters params = GetParamsForCredential(relyingParty, credentialToUse);
 
         IList<GetAssertionData> assertions = fido2Session.GetAssertions(params);
     }
@@ -537,7 +537,7 @@ directly each time you need a new PinToken.
         {
             // handle wrong PIN case.
         }
-        CredentialManagementData mgmtData = fido2Session.GetCredentialMetadata();
+        (int discoverableCredentialCount, int remainingSlots) = fido2Session.GetCredentialMetadata();
 
         // Assume you have some method that determines which relying party to use.
         // This call will probably perform other CredentialManagement operations such as

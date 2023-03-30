@@ -13,10 +13,12 @@
 // limitations under the License.
 
 using System;
+using System.Text;
 using System.Formats.Cbor;
 using System.Globalization;
-using System.Collections.Generic;
+using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -64,6 +66,16 @@ namespace Yubico.YubiKey.Fido2
         public string? Name { get; set; }
 
         /// <summary>
+        /// The SHA-256 digest of the <c>RelyingParty.Id</c>.
+        /// </summary>
+        /// <remarks>
+        /// When a <c>RelyingParty</c> object is created, the constructor will
+        /// build the <c>RelyingPartyIdHash</c>. It is the digest of the UTF8
+        /// byte array version of the string that is the <see cref="Id"/>.
+        /// </remarks>
+        public ReadOnlyMemory<byte> RelyingPartyIdHash { get; private set; }
+
+        /// <summary>
         /// Constructs a new instance of <see cref="RelyingParty"/>.
         /// </summary>
         /// <param name="id">
@@ -72,6 +84,7 @@ namespace Yubico.YubiKey.Fido2
         public RelyingParty(string id)
         {
             Id = id;
+            ComputeRelyingPartyIdHash();
         }
 
         /// <summary>
@@ -116,6 +129,7 @@ namespace Yubico.YubiKey.Fido2
 
                         case TagId:
                             Id = cbor.ReadTextString();
+                            ComputeRelyingPartyIdHash();
                             break;
 
                         case TagName:
@@ -142,6 +156,34 @@ namespace Yubico.YubiKey.Fido2
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.Ctap2MissingRequiredField));
             }
+        }
+
+        /// <summary>
+        /// Determine if the <c>candidateHash</c> the same as the computed
+        /// <see cref="RelyingPartyIdHash"/> of this object. This is likely used
+        /// when searching for a RelyingParty when all you have is the
+        /// RelyingPartyIdHash, or when given a RelyingParty and a
+        /// RelyingPartyIdHash (e.g. enumerating relying parties), and want to
+        /// verify that the given value is correct.
+        /// </summary>
+        /// <param name="candidateHash">
+        /// The purported relying party Id hash
+        /// </param>
+        /// <returns>
+        /// A boolean, <c>true</c> if the candidate matches the hash inside the
+        /// object and <c>false</c> otherwise.
+        /// </returns>
+        public bool IsMatchingRelyingPartyId(ReadOnlyMemory<byte> candidateHash) =>
+            MemoryExtensions.SequenceEqual<byte>(candidateHash.Span, RelyingPartyIdHash.Span);
+
+        // Perform the approriate digest operation to generate the correct value.
+        private void ComputeRelyingPartyIdHash()
+        {
+            using SHA256 digester = CryptographyProviders.Sha256Creator();
+            digester.Initialize();
+            byte[] utf = Encoding.UTF8.GetBytes(Id);
+            byte[] digest = digester.ComputeHash(utf);
+            RelyingPartyIdHash = new ReadOnlyMemory<byte>(digest);
         }
 
         /// <inheritdoc/>

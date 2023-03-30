@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// associated with a specific relying party stored on the YubiKey.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="CredentialManagementResponse"/>.
+    /// The partner Response class is <see cref="EnumerateCredentialsGetNextResponse"/>.
     /// <para>
     /// This returns information on one of the credentials. If there is only one
     /// credential associated with the relying party, then the call to the
@@ -31,12 +31,9 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// first by calling this subcommand, calling it once for every credential.
     /// </para>
     /// <para>
-    /// The return from this command is the
-    /// <c>authenticatorCredentialManagement</c> response, but only five of the
-    /// elements are included: <c>user</c>, <c>credentialId</c>,
-    /// <c>publicKey</c>, <c>credProtect</c>, and <c>largeBlobKey</c>. Note that
-    /// this does not include the <c>totalCredentials</c>, which is returned only
-    /// by the <c>enumerateCredentialsBegin</c> subcommand
+    /// The return from this command consist of the <c>user</c>,
+    /// <c>credentialId</c>, <c>publicKey</c>, <c>credProtect</c>, and
+    /// <c>largeBlobKey</c>.
     /// </para>
     /// <para>
     /// Note that this command does not need the <c>relyingPartyIdHash</c>,
@@ -46,21 +43,29 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// completed.
     /// </para>
     /// </remarks>
-    public class EnumerateCredentialsGetNextCommand : CredentialManagementCommand<CredentialManagementResponse>
+    public class EnumerateCredentialsGetNextCommand : IYubiKeyCommand<EnumerateCredentialsGetNextResponse>
     {
         private const int SubCmdGetEnumerateCredsGetNext = 0x05;
+
+        private readonly CredentialManagementCommand _command;
+
+        /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
 
         /// <summary>
         /// Constructs a new instance of
         /// <see cref="EnumerateCredentialsGetNextCommand"/>.
         /// </summary>
         public EnumerateCredentialsGetNextCommand()
-            : base(SubCmdGetEnumerateCredsGetNext)
         {
+            _command = new CredentialManagementCommand(SubCmdGetEnumerateCredsGetNext);
         }
 
         /// <inheritdoc />
-        public override CredentialManagementResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new CredentialManagementResponse(responseApdu);
+        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
+
+        /// <inheritdoc />
+        public EnumerateCredentialsGetNextResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new EnumerateCredentialsGetNextResponse(responseApdu);
     }
 }

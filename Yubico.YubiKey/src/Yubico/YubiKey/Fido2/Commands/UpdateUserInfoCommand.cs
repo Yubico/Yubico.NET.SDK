@@ -33,11 +33,16 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// setting any new information. Then call this command with the new object.
     /// </para>
     /// </remarks>
-    public class UpdateUserInfoCommand : CredentialManagementCommand<Fido2Response>
+    public class UpdateUserInfoCommand : IYubiKeyCommand<Fido2Response>
     {
         private const int SubCmdUpdateUserInfo = 0x07;
         private const int KeyCredentialId = 2;
         private const int KeyUserEntity = 3;
+
+        private readonly CredentialManagementCommand _command;
+
+        /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -69,12 +74,16 @@ namespace Yubico.YubiKey.Fido2.Commands
             UserEntity userEntity,
             ReadOnlyMemory<byte> pinUvAuthToken,
             PinUvAuthProtocolBase authProtocol)
-            : base(SubCmdUpdateUserInfo, EncodeParams(credentialId, userEntity), pinUvAuthToken, authProtocol)
         {
+            _command = new CredentialManagementCommand(
+                SubCmdUpdateUserInfo, EncodeParams(credentialId, userEntity), pinUvAuthToken, authProtocol);
         }
 
         /// <inheritdoc />
-        public override Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) =>
+        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
+
+        /// <inheritdoc />
+        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) =>
             new Fido2Response(responseApdu);
 
         // This method encodes the parameters. For

@@ -45,11 +45,12 @@ namespace Yubico.YubiKey.Fido2
             ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
 
             var cmd = new GetCredentialMetadataCommand(pinToken, protocol);
-            CredentialManagementResponse rsp = Connection.SendCommand(cmd);
+            GetCredentialMetadataResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            CredentialManagementData mgmtData = rsp.GetData();
-            Assert.NotNull(mgmtData.NumberOfDiscoverableCredentials);
+            (int credCount, int slotCount) = rsp.GetData();
+            Assert.True(credCount != 26);
+            Assert.True(slotCount != 26);
         }
     }
 }

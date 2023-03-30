@@ -45,32 +45,28 @@ namespace Yubico.YubiKey.Fido2
             ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
 
             var cmd = new EnumerateRpsBeginCommand(pinToken, protocol);
-            CredentialManagementResponse rsp = Connection.SendCommand(cmd);
+            EnumerateRpsBeginResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            CredentialManagementData mgmtData = rsp.GetData();
-            Assert.NotNull(mgmtData.RelyingPartyIdHash);
-            if (mgmtData.RelyingPartyIdHash is null)
-            {
-                return;
-            }
+            (int rpCount, RelyingParty firstRp) = rsp.GetData();
+            Assert.True(rpCount != 0);
 
-            var credCmd = new EnumerateCredentialsBeginCommand(mgmtData.RelyingPartyIdHash.Value, pinToken, protocol);
-            rsp = Connection.SendCommand(credCmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
+            var credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol);
+            EnumerateCredentialsBeginResponse credRsp = Connection.SendCommand(credCmd);
+            Assert.Equal(ResponseStatus.Success, credRsp.Status);
 
-            mgmtData = rsp.GetData();
-            Assert.NotNull(mgmtData.TotalCredentialsForRelyingParty);
+            (int credCount, CredentialUserInfo userInfo) = credRsp.GetData();
+            Assert.True(credCount != 0);
+            Assert.True(userInfo.CredProtectPolicy != 10);
 
-            int count = mgmtData.TotalCredentialsForRelyingParty ?? 0;
-            for (int index = 1; index < count; index++)
+            for (int index = 1; index < credCount; index++)
             {
                 var getNextCmd = new EnumerateCredentialsGetNextCommand();
-                CredentialManagementResponse getNextRsp = Connection.SendCommand(getNextCmd);
+                EnumerateCredentialsGetNextResponse getNextRsp = Connection.SendCommand(getNextCmd);
                 Assert.Equal(ResponseStatus.Success, getNextRsp.Status);
 
-                mgmtData = getNextRsp.GetData();
-                Assert.Null(mgmtData.TotalRelyingPartyCount);
+                userInfo = getNextRsp.GetData();
+                Assert.True(userInfo.CredProtectPolicy != 10);
             }
         }
     }

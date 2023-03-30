@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// represented in credentials on the YubiKey, by getting the next RP.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="CredentialManagementResponse"/>.
+    /// The partner Response class is <see cref="EnumerateRpsGetNextResponse"/>.
     /// <para>
     /// This returns information on one of the relying parties. If there is only
     /// one RP, then the call to the <c>enumerateRPsBegin</c> subcommand gave
@@ -31,11 +31,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// first one.
     /// </para>
     /// <para>
-    /// The return from this command is the
-    /// <c>authenticatorCredentialManagement</c> response, but only two of the
-    /// elements are included: <c>rp</c> and <c>rpIDHash</c>. Note that this does
-    /// not include the <c>totalRPs</c>, which is returned only by the
-    /// <c>enumerateRPsBegin</c> subcommand
+    /// The return from this command is the next relying party.
     /// </para>
     /// <para>
     /// Note that this command does not need the <c>pinUvAuthToken</c> nor the
@@ -44,20 +40,28 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// successfully after that "Begin" command has successfully completed.
     /// </para>
     /// </remarks>
-    public class EnumerateRpsGetNextCommand : CredentialManagementCommand<CredentialManagementResponse>
+    public class EnumerateRpsGetNextCommand : IYubiKeyCommand<EnumerateRpsGetNextResponse>
     {
         private const int SubCmdGetEnumerateRpsGetNext = 0x03;
+
+        private readonly CredentialManagementCommand _command;
+
+        /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
 
         /// <summary>
         /// Constructs a new instance of <see cref="EnumerateRpsGetNextCommand"/>.
         /// </summary>
         public EnumerateRpsGetNextCommand()
-            : base(SubCmdGetEnumerateRpsGetNext)
         {
+            _command = new CredentialManagementCommand(SubCmdGetEnumerateRpsGetNext);
         }
 
         /// <inheritdoc />
-        public override CredentialManagementResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new CredentialManagementResponse(responseApdu);
+        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
+
+        /// <inheritdoc />
+        public EnumerateRpsGetNextResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new EnumerateRpsGetNextResponse(responseApdu);
     }
 }

@@ -45,32 +45,20 @@ namespace Yubico.YubiKey.Fido2
             ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
 
             var cmd = new EnumerateRpsBeginCommand(pinToken, protocol);
-            CredentialManagementResponse rsp = Connection.SendCommand(cmd);
+            EnumerateRpsBeginResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            CredentialManagementData mgmtData = rsp.GetData();
-            Assert.NotNull(mgmtData.RelyingPartyIdHash);
-            if (mgmtData.RelyingPartyIdHash is null)
-            {
-                return;
-            }
+            (int rpCount, RelyingParty firstRp) = rsp.GetData();
+            Assert.True(rpCount != 0);
 
-            var credCmd = new EnumerateCredentialsBeginCommand(mgmtData.RelyingPartyIdHash.Value, pinToken, protocol);
-            rsp = Connection.SendCommand(credCmd);
+            var credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol);
+            EnumerateCredentialsBeginResponse credRsp = Connection.SendCommand(credCmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            mgmtData = rsp.GetData();
-            Assert.NotNull(mgmtData.TotalCredentialsForRelyingParty);
-            Assert.NotNull(mgmtData.CredentialId);
-            int count = mgmtData.TotalCredentialsForRelyingParty ?? 0;
+            (int credCount, CredentialUserInfo userInfo) = credRsp.GetData();
+            Assert.True(credCount != 0);
 
-            if (mgmtData.CredentialId is null)
-            {
-                return;
-            }
-
-            Assert.NotEqual(0, count);
-            var delCmd = new DeleteCredentialCommand(mgmtData.CredentialId, pinToken, protocol);
+            var delCmd = new DeleteCredentialCommand(userInfo.CredentialId, pinToken, protocol);
             Fido2Response delRsp = Connection.SendCommand(delCmd);
             Assert.Equal(ResponseStatus.Success, delRsp.Status);
         }

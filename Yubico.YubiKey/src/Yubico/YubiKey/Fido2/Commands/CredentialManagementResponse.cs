@@ -18,21 +18,11 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// The response partner to some of the CredentialManagementCommand
-    /// subcommands.
+    /// The response partner to the CredentialManagementCommand.
     /// </summary>
     /// <remarks>
-    /// Some of the subcommands have responses that return data. If so, the
-    /// subcommand class will implement
-    /// <c>IYubiKeyCommand&lt;CredentialManagementResponse&gt;</c>. The response
-    /// class will therefore be an instance of this class, and the caller
-    /// can get the data returned as (<see cref="CredentialManagementData"/>).
-    /// <para>
     /// Some subcommands return no data, they simply return a success of failure
-    /// code. Those subcommands are subclasses of
-    /// <c>CredentialManagementCommand</c>, and the partner response class is
-    /// simply <c>IYubiKeyResponse</c>.
-    /// </para>
+    /// code.
     /// </remarks>
     public class CredentialManagementResponse : Fido2Response, IYubiKeyResponseWithData<CredentialManagementData>
     {

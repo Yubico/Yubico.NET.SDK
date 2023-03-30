@@ -23,23 +23,30 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// represented in credentials on the YubiKey.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="CredentialManagementResponse"/>.
+    /// The partner Response class is <see cref="EnumerateRpsBeginResponse"/>.
     /// <para>
-    /// This returns information on one of the relying parties, and the total
-    /// number of relying parties represented in the set of credentials. If there
-    /// is only one RP, then you have all the information you need. If there are
-    /// more RPs, then you can get information on all of them by calling the
-    /// <c>enumerateRPsGetNextRP</c> subcommand.
+    /// This returns the total number of relying parties represented in the set
+    /// of credentials, along with  information on the "first" relying party. If
+    /// there is only one RP, then you have all the information you need. If
+    /// there are more RPs, then you can get information on all of them by
+    /// calling the <c>enumerateRPsGetNextRP</c> subcommand.
     /// </para>
     /// <para>
-    /// The return from this command is the <c>CredentialManagementData</c>
-    /// class, but only three of the elements are included: <c>rp</c>,
-    /// <c>rpIDHash</c> and <c>totalRPs</c>.
+    /// Note that if there are no credentials associated with the given relying
+    /// party, the response will be "No Data"
+    /// (Status = ResponseStatus.NoData, and
+    /// CtapStatus = CtapStatus.NoCredentials). In this case, calling the
+    /// <c>response.GetData()</c> method will result in an exception.
     /// </para>
     /// </remarks>
-    public class EnumerateRpsBeginCommand : CredentialManagementCommand<CredentialManagementResponse>
+    public class EnumerateRpsBeginCommand : IYubiKeyCommand<EnumerateRpsBeginResponse>
     {
         private const int SubCmdEnumerateRpsBegin = 0x02;
+
+        private readonly CredentialManagementCommand _command;
+
+        /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -60,12 +67,15 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </param>
         public EnumerateRpsBeginCommand(
             ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
-            : base(SubCmdEnumerateRpsBegin, null, pinUvAuthToken, authProtocol)
         {
+            _command = new CredentialManagementCommand(SubCmdEnumerateRpsBegin, null, pinUvAuthToken, authProtocol);
         }
 
         /// <inheritdoc />
-        public override CredentialManagementResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new CredentialManagementResponse(responseApdu);
+        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
+
+        /// <inheritdoc />
+        public EnumerateRpsBeginResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new EnumerateRpsBeginResponse(responseApdu);
     }
 }

@@ -22,11 +22,13 @@ using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Contains the data returned by the YubiKey after calling one of the
-    /// <c>authenticatorCredentialManagement</c> subcommands.
+    /// Parses the data returned by the YubiKey after calling one of the
+    /// <c>authenticatorCredentialManagement</c> subcommands. This class is
+    /// relevant only to the <see cred="CredentialManagementResponse"/> class in
+    /// order to extract data from a reponse.
     /// </summary>
     /// <remarks>
     /// When a credential management subcommand is sent to the YubiKey, it
@@ -85,6 +87,16 @@ namespace Yubico.YubiKey.Fido2
         public int? RemainingCredentialCount { get; private set; }
 
         /// <summary>
+        /// The total number of relying parties present on the YubiKey, when the
+        /// request for data is one related to specific relying parties.
+        /// </summary>
+        /// <remarks>
+        /// Not all calls to get credential management data will return this
+        /// element, hence, it can be null.
+        /// </remarks>
+        public int? TotalRelyingPartyCount { get; private set; }
+
+        /// <summary>
         /// The relying party information when the request for data is one
         /// related to specific relying parties.
         /// </summary>
@@ -105,14 +117,14 @@ namespace Yubico.YubiKey.Fido2
         public ReadOnlyMemory<byte>? RelyingPartyIdHash { get; private set; }
 
         /// <summary>
-        /// The total number of relying parties present on the YubiKey, when the
-        /// request for data is one related to specific relying parties.
+        /// The total number of credentials present on the YubiKey for a
+        /// specified relying party.
         /// </summary>
         /// <remarks>
         /// Not all calls to get credential management data will return this
         /// element, hence, it can be null.
         /// </remarks>
-        public int? TotalRelyingPartyCount { get; private set; }
+        public int? TotalCredentialsForRelyingParty { get; private set; }
 
         /// <summary>
         /// The user entity for a credential returned.
@@ -140,16 +152,6 @@ namespace Yubico.YubiKey.Fido2
         /// element, hence, it can be null.
         /// </remarks>
         public CoseKey? CredentialPublicKey { get; private set; }
-
-        /// <summary>
-        /// The total number of credentials present on the YubiKey for a
-        /// specidfied relying party.
-        /// </summary>
-        /// <remarks>
-        /// Not all calls to get credential management data will return this
-        /// element, hence, it can be null.
-        /// </remarks>
-        public int? TotalCredentialsForRelyingParty { get; private set; }
 
         /// <summary>
         /// The credential protection policy. See section 12.1.1 of the FIDO2

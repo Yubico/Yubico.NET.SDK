@@ -45,21 +45,21 @@ namespace Yubico.YubiKey.Fido2
             ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
 
             var cmd = new EnumerateRpsBeginCommand(pinToken, protocol);
-            CredentialManagementResponse rsp = Connection.SendCommand(cmd);
+            EnumerateRpsBeginResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            CredentialManagementData mgmtData = rsp.GetData();
-            Assert.NotNull(mgmtData.TotalRelyingPartyCount);
+            (int rpCount, RelyingParty rpZero) = rsp.GetData();
+            Assert.NotEqual(26, rpCount);
+            Assert.True(rpZero.RelyingPartyIdHash.Span[0] != 0);
 
-            int count = mgmtData.TotalRelyingPartyCount ?? 0;
-            for (int index = 1; index < count; index++)
+            for (int index = 1; index < rpCount; index++)
             {
                 var getNextCmd = new EnumerateRpsGetNextCommand();
-                CredentialManagementResponse getNextRsp = Connection.SendCommand(getNextCmd);
+                EnumerateRpsGetNextResponse getNextRsp = Connection.SendCommand(getNextCmd);
                 Assert.Equal(ResponseStatus.Success, getNextRsp.Status);
 
-                mgmtData = getNextRsp.GetData();
-                Assert.Null(mgmtData.TotalRelyingPartyCount);
+                RelyingParty nextRp = getNextRsp.GetData();
+                Assert.True(nextRp.RelyingPartyIdHash.Span[0] != 0);
             }
         }
     }

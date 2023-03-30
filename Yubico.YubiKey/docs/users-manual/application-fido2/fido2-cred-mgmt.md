@@ -41,27 +41,6 @@ These are the credential management operations:
 * [Delete Credential](#delete-credential)
 * [Update User Information](#update-user-information)
 
-In the SDK, the operations that return data will return an instance of the
-[CredentialManagementData](xref:Yubico.YubiKey.Fido2.CredentialManagementData) class. That
-class contains properties for all possible return values.
-
-* `NumberOfDiscoverableCredentials`
-* `RemainingCredentialCount`
-* `RelyingParty`
-* `RelyingPartyIdHash`
-* `TotalRelyingPartyCount`
-* `User`
-* `CredentialId`
-* `CredentialPublicKey`
-* `TotalCredentialsForRelyingParty`
-* `CredProtectPolicy`
-* `LargeBlobKey`
-
-Each operation that does return data will return two or more of these elements. After
-performing an operation, look at the resulting `CredentialManagementData` object. Some of
-the properties will be null, that operation did not return that item, or not null, the
-information requested.
-
 ## Support in the YubiKey
 
 Not all YubiKeys support CredentialManagement. To find out if a particular YubiKey can
@@ -129,20 +108,13 @@ credentials in this example have no effect on the number of spaces available. Se
 User's Manual [entry on credentials](fido2-credentials.md) for more information on
 non-discoverable credentials.
 
-The return is a `CredentialManagementData` object, with the properties set as follows.
+The return is a `Tuple` of 2 integers:
 
-```txt
-  `NumberOfDiscoverableCredentials  = 3`
-  `RemainingCredentialCount = 20`
-  `RelyingParty = null`
-  `RelyingPartyIdHash = null`
-  `TotalRelyingPartyCount = null`
-  `User = null`
-  `CredentialId = null`
-  `CredentialPublicKey = null`
-  `TotalCredentialsForRelyingParty = null`
-  `CredProtectPolicy = null`
-  `LargeBlobKey = null`
+```csharp
+    (int residentCredentialCount, int remainingCredentialCount) = fido2Session.GetCredentialMetadata();
+
+    // In the example above, residentCredentialCount would be 3 and
+    // remainingCredentialCount would be 22.
 ```
 
 ## Enumerate relying parties
@@ -151,11 +123,7 @@ This helps you to build a list of all the relying parties represented among all 
 credentials on the YubiKey.
 
 If you use Fido2Session.EnumerateRelyingParties, the SDK will return an array of
-`CredentialManagementData` objects, each one containing the `RelyingParty` and the
-`RelyingPartyIdHash` for each relying party found on the YubiKey. You will likely look at
-the `RelyingParty` property of each for information that is used to choose which one you
-are interested in. Then you will use the `RelyingPartyIdHash` in further calls to
-enumerate the credentials for that relying party (see the next section).
+`RelyingParty` objects.
 
 If you use the commands, you will need to use the `EnumerateRpsBeginCommand` command to
 obtain the first relying party and the total count of relying parties represented, and
@@ -163,16 +131,15 @@ then the `EnumerateRpsGetNextCommand` to get each successive relying party.
 
 ```csharp
     var enumBeginCmd = new EnumerateRpsBeginCommand(pinToken, protocol);
-    CredentialManagementResponse credMgmtRsp = connection.SendCommand(enumBeginCmd);
+    EnumerateRpsBeginResponse enumBeginRsp = connection.SendCommand(enumBeginCmd);
 
-    CredentialManagementData mgmtData = credMgmtRsp.GetData();
-    int count = mgmtData.TotalRelyingPartyCount ?? 0;
+    (int rpCount, RelyingParty firstRp) = enumBeginRsp.GetData();
 
-    for (int index = 1; index < count; index++)
+    for (int index = 1; index < rpCount; index++)
     {
         var getNextCmd = new EnumerateRpsGetNextCommand();
-        CredentialManagementResponse credMgmtRsp = connection.SendCommand(getNextCmd);
-        mgmtData = getNextRsp.GetData();
+        EnumerateRpsGetNextResponse credMgmtRsp = connection.SendCommand(getNextCmd);
+        RelyingParty nextRp = getNextRsp.GetData();
     }
 ```
 
@@ -181,10 +148,11 @@ then the `EnumerateRpsGetNextCommand` to get each successive relying party.
 This helps you to build a list of all the credentials on the YubiKey.
 
 If you use Fido2Session.EnumerateCredentialsForRelyingParty, the SDK will return an array
-of `CredentialManagementData` objects, each one containing the `User`, `CredentialId`, and
-`CredentialPublicKey` for each credential found on the YubiKey associated with the
-specified relying party. You specify which relying party you are interested in by
-supplying the `RelyingPartyIdHash`, which you likely retrieved during a call to obtain a
+of [CredentialUserInfo](xref:Yubico.YubiKey.Fido2.CredentialUserInfo) objects, each one
+containing the `User`, `CredentialId`, `CredentialPublicKey`, `CredProtectPolicy`, and the
+`LargeBlobKey` (if there is one) for each credential found on the YubiKey associated with
+the specified relying party. You specify which relying party you are interested in by
+supplying the `RelyingParty` object, which you likely retrieved during a call to obtain a
 list of relying parties.
 
 If you use the commands, you will need to use the `EnumerateCredentialsBeginCommand`
@@ -192,17 +160,16 @@ command to obtain the first credential and the total count of credentials availa
 then the `EnumerateCredentialsGetNextCommand` to get each successive credential.
 
 ```csharp
-    var enumBeginCmd = new EnumerateCredentialsBeginCommand(relyingPartyIdHash, pinToken, protocol);
-    CredentialManagementResponse credMgmtRsp = connection.SendCommand(enumBeginCmd);
+    var enumBeginCmd = new EnumerateCredentialsBeginCommand(relyingParty.RelyingPartyIdHash, pinToken, protocol);
+    EnumerateCredentialsBeginResponse enumBeginRsp = connection.SendCommand(enumBeginCmd);
 
-    CredentialManagementData mgmtData = credMgmtRsp.GetData();
-    int count = mgmtData.TotalCredentialsForRelyingParty ?? 0;
+    (int credCount, CredentialUserInfo userInfo) = enumBeginRsp.GetData();
 
-    for (int index = 1; index < count; index++)
+    for (int index = 1; index < credCount; index++)
     {
         var getNextCmd = new EnumerateCredentialsGetNextCommand();
-        CredentialManagementResponse credMgmtRsp = connection.SendCommand(getNextCmd);
-        mgmtData = getNextRsp.GetData();
+        EnumerateCredentialsGetNextResponse getNextRsp = connection.SendCommand(getNextCmd);
+        userInfo = getNextRsp.GetData();
     }
 ```
 
@@ -215,9 +182,9 @@ or the Fido2Session method, you must supply the CredentialId. This tells the Yub
 credential to remove. You will likely use the
 [Enumerate commands](xref:Yubico.YubiKey.Fido2.Commands.EnumerateCredentialsBeginCommand)
 or the Fido2Session.EnumerateCredentialsForRelyingParty method to obtain a list of
-[CredentialManagementData](xref:Yubico.YubiKey.Fido2.CredentialManagementData) objects,
+[CredentialUserInfo](xref:Yubico.YubiKey.Fido2.CredentialUserInfo) objects,
 and choose the credential to delete from that list. Finally, you can use the
-[CredentialId](xref:Yubico.YubiKey.Fido2.CredentialManagementData.CredentialId) property
+[CredentialId](xref:Yubico.YubiKey.Fido2.CredentialUserInfo.CredentialId) property
 in the object as the input to the delete call.
 
 This operation needs the [PIN/UV Auth Param](#pinuv-auth-param).
@@ -241,13 +208,13 @@ For example,
 
 ```csharp
     // Find the relying party of interest by enumerating all RPs and selecting from the list.
-    IReadOnlyList<CredentialManagementData> rpList = fido2Session.EnumerateRelyingParties();
+    IReadOnlyList<RelyingParty> rpList = fido2Session.EnumerateRelyingParties();
     int index = ChooseRelyingParty(rpList);
 
-    // Find the credential of interset by enumerating all the credentials associated with
+    // Find the credential of interest by enumerating all the credentials associated with
     // the relying party of intereset and selecting from the list.
-    IReadOnlyList<CredentialManagementData> credList =
-        fido2Session.EnumerateCredentialsForRelyingParty(rpList[index].RelyingPartyId);
+    IReadOnlyList<CredentialUserInfo> credList =
+        fido2Session.EnumerateCredentialsForRelyingParty(rpList[index]);
     index = ChooseCredential(credList);
 
     // Create a new UserEntity based on the current.

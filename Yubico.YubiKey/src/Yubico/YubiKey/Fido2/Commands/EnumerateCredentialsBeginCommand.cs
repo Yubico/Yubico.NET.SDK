@@ -24,25 +24,35 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// associated with a specific relying party stored on the YubiKey.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="CredentialManagementResponse"/>.
+    /// The partner Response class is <see cref="EnumerateCredentialsBeginResponse"/>.
     /// <para>
-    /// This returns information on one of the credentials, and the total number
-    /// of credentials on the YubiKey. If there is only one credential, then you
-    /// have all the information you need. If there are more credentials, then
-    /// you can get information on all of them by calling the
-    /// <c>enumerateCredentialsGetNextRP</c> subcommand.
+    /// This returns the total number of credentials for the given relying party
+    /// on the YubiKey along with information on the "first" credential. If there
+    /// is only one credential, then you have all the information you need. If
+    /// there are more credentials, then you can get information on all of them
+    /// by calling the <c>enumerateCredentialsGetNextRP</c> subcommand.
     /// </para>
     /// <para>
-    /// The return from this command is the <c>CredentialManagementData</c>
-    /// class, but only six of the elements are included: <c>user</c>,
+    /// Note that if there are no credentials associated with the given relying
+    /// party, the response will be "No Data" (Status = ResponseStatus.NoData,
+    /// and CtapStatus = CtapStatus.NoCredentials). In this case, calling the
+    /// <c>response.GetData()</c> method will result in an exception.
+    /// </para>
+    /// <para>
+    /// The return from this command consist of the <c>user</c>,
     /// <c>credentialId</c>, <c>publicKey</c>, <c>credProtect</c>,
-    /// <c>largeBlobKey</c>, and <c>totalCredentials</c>.
+    /// <c>largeBlobKey</c>, and <c>credentialCount</c>.
     /// </para>
     /// </remarks>
-    public class EnumerateCredentialsBeginCommand : CredentialManagementCommand<CredentialManagementResponse>
+    public class EnumerateCredentialsBeginCommand : IYubiKeyCommand<EnumerateCredentialsBeginResponse>
     {
         private const int SubCmdEnumerateCredsBegin = 0x04;
         private const int KeyRpIdHash = 1;
+
+        private readonly CredentialManagementCommand _command;
+
+        /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -54,9 +64,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <summary>
         /// Constructs a new instance of <see cref="EnumerateCredentialsBeginCommand"/>.
         /// </summary>
-        /// <param name="relyingPartyIdHash">
-        /// The digest of the relying party ID, for which the credential
-        /// enumeration is requested.
+        /// <param name="relyingParty">
+        /// The relying party for which the credential enumeration is requested.
         /// </param>
         /// <param name="pinUvAuthToken">
         /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
@@ -66,16 +75,25 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// The Auth Protocol used to build the Auth Token.
         /// </param>
         public EnumerateCredentialsBeginCommand(
-            ReadOnlyMemory<byte> relyingPartyIdHash,
+            RelyingParty relyingParty,
             ReadOnlyMemory<byte> pinUvAuthToken,
             PinUvAuthProtocolBase authProtocol)
-            : base(SubCmdEnumerateCredsBegin, EncodeParams(relyingPartyIdHash), pinUvAuthToken, authProtocol)
         {
+            if (relyingParty is null)
+            {
+                throw new ArgumentNullException(nameof(relyingParty));
+            }
+
+            _command = new CredentialManagementCommand(
+                SubCmdEnumerateCredsBegin, EncodeParams(relyingParty.RelyingPartyIdHash), pinUvAuthToken, authProtocol);
         }
 
         /// <inheritdoc />
-        public override CredentialManagementResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new CredentialManagementResponse(responseApdu);
+        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
+
+        /// <inheritdoc />
+        public EnumerateCredentialsBeginResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new EnumerateCredentialsBeginResponse(responseApdu);
 
         // This method encodes the parameters. For
         // EnumerateCredentialsBeginCommand, the parameters consist of only the

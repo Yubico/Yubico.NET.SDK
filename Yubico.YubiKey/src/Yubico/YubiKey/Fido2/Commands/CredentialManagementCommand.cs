@@ -21,7 +21,7 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// The <see cref="CredentialManagementCommand{TResponse}"/> is the class for
+    /// The <see cref="CredentialManagementCommand"/> is the class for
     /// <c>authenticatorCredentialManagement</c>. This command has a number of
     /// subcommands, each of which is represented by its own class. You will
     /// likely never use this class directly, but it does contain code shared by
@@ -51,15 +51,10 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// </para>
     /// <para>
     /// Some of the subcommands return data (e.g. a credential), others return
-    /// only a success or failure response code. Those that return data will
-    /// implement the <c>IYubiKeyCommand&lt;CredentialManagementResponse&gt;</c>
-    /// interface. Those that do not will implement the
-    /// <c>IYubiKeyCommand&lt;Fido2Response&gt;</c> interface. The
-    /// <c>Fido2Response</c> is a class for responses that return only success
-    /// or failure, but have code to give better error information.
+    /// only a success or failure response code.
     /// </para>
     /// </remarks>
-    public abstract class CredentialManagementCommand<TResponse> : IYubiKeyCommand<TResponse> where TResponse : IYubiKeyResponse
+    public class CredentialManagementCommand : IYubiKeyCommand<CredentialManagementResponse>
     {
         // Command constants
         private const byte CmdAuthenticatorCredMgmt = 0x0A;
@@ -94,7 +89,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// recommended as these command classes will only expose the parameters
         /// that are relevant to that subcommand.
         /// </remarks>
-        public int SubCommand { get; private set; }
+        public int SubCommand { get; set; }
 
         /// <summary>
         /// The encoded params for the specified subcommand. If a subcommand
@@ -111,7 +106,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// of the protocols that are supported by the YubiKey. This can be
         /// determined by issuing the AuthenticatorGetInfo command.
         /// </remarks>
-        public PinUvAuthProtocol? PinUvAuthProtocol { get; private set; }
+        public PinUvAuthProtocol? PinUvAuthProtocol { get; set; }
 
         /// <summary>
         /// The output of calling authenticate on the PIN/UV protocol specific to
@@ -128,7 +123,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// specific to the CredentialManagement commands.
         /// </para>
         /// </remarks>
-        public ReadOnlyMemory<byte>? PinUvAuthParam { get; private set; }
+        public ReadOnlyMemory<byte>? PinUvAuthParam { get; set; }
 
         /// <summary>
         /// This constructor will throw <c>NotImplementedException</c>. It is the
@@ -142,7 +137,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// Constructs a new instance of <see cref="CredentialManagementCommand{TResponse}"/>.
+        /// Constructs a new instance of <see cref="CredentialManagementCommand"/>.
         /// </summary>
         /// <remarks>
         /// Note that if the command does not need the <c>pinUvAuthToken</c> and
@@ -163,7 +158,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <param name="authProtocol">
         /// The Auth Protocol used to build the Auth Token.
         /// </param>
-        protected CredentialManagementCommand(
+        public CredentialManagementCommand(
             int subCommand, byte[]? subCommandParams,
             ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
         {
@@ -193,12 +188,12 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// Constructs a new instance of <see cref="CredentialManagementCommand{TResponse}"/>.
+        /// Constructs a new instance of <see cref="CredentialManagementCommand"/>.
         /// </summary>
         /// <param name="subCommand">
         /// The byte representing the subcommand to execute.
         /// </param>
-        protected CredentialManagementCommand(int subCommand)
+        public CredentialManagementCommand(int subCommand)
         {
             SubCommand = subCommand;
             _encodedParams = null;
@@ -247,7 +242,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public abstract TResponse CreateResponseForApdu(ResponseApdu responseApdu);
+        public CredentialManagementResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new CredentialManagementResponse(responseApdu);
 
         // This implements CborHelpers.CborEncodeDelegate.
         private static byte[] WriteEncodedParams(byte[]? encodedParams) => encodedParams ?? Array.Empty<byte>();

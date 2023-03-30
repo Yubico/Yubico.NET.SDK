@@ -44,9 +44,9 @@ namespace Yubico.YubiKey.Fido2
                 fido2Session.AddPermissions(
                     PinUvAuthTokenPermissions.MakeCredential, _bioFido2Fixture.RpInfoList[0].RelyingParty.Id);
 
-                CredentialManagementData mgmtData = fido2Session.GetCredentialMetadata();
-                Assert.Equal(3, mgmtData.NumberOfDiscoverableCredentials);
-                Assert.Equal(22, mgmtData.RemainingCredentialCount);
+                (int credCount, int slotCount) = fido2Session.GetCredentialMetadata();
+                Assert.Equal(3, credCount);
+                Assert.Equal(22, slotCount);
             }
         }
 
@@ -58,16 +58,12 @@ namespace Yubico.YubiKey.Fido2
                 fido2Session.KeyCollector = _bioFido2Fixture.KeyCollector;
                 fido2Session.AddPermissions(PinUvAuthTokenPermissions.CredentialManagement, "rp-3");
 
-                IReadOnlyList<CredentialManagementData> ykDataList = fido2Session.EnumerateRelyingParties();
-                Assert.Equal(2, ykDataList.Count);
+                IReadOnlyList<RelyingParty> rpList = fido2Session.EnumerateRelyingParties();
+                Assert.Equal(2, rpList.Count);
 
-                RelyingParty ykRp = ykDataList[0].RelyingParty
-                    ?? throw new InvalidOperationException("No matching Rp.");
-                ReadOnlyMemory<byte> ykDigest = ykDataList[0].RelyingPartyIdHash
-                    ?? throw new InvalidOperationException("No matching Rp.");
-
-                RpInfo rpInfo = _bioFido2Fixture.MatchRelyingParty(ykRp);
-                bool isValid = MemoryExtensions.SequenceEqual<byte>(ykDigest.Span, rpInfo.RelyingPartyIdHash.Span);
+                RpInfo rpInfo = _bioFido2Fixture.MatchRelyingParty(rpList[0]);
+                bool isValid = MemoryExtensions.SequenceEqual<byte>(
+                    rpInfo.RelyingPartyIdHash.Span, rpList[0].RelyingPartyIdHash.Span);
                 Assert.True(isValid);
             }
         }
@@ -81,12 +77,11 @@ namespace Yubico.YubiKey.Fido2
                 fido2Session.AddPermissions(PinUvAuthTokenPermissions.MakeCredential, "rp-3");
 
                 RpInfo rpInfo = _bioFido2Fixture.RpInfoList[0];
-                IReadOnlyList<CredentialManagementData> ykCredList =
-                    fido2Session.EnumerateCredentialsForRelyingParty(rpInfo.RelyingParty.Id);
+                IReadOnlyList<CredentialUserInfo> ykCredList =
+                    fido2Session.EnumerateCredentialsForRelyingParty(rpInfo.RelyingParty);
                 Assert.Equal(rpInfo.DiscoverableCount, ykCredList.Count);
 
-                UserEntity ykUser = ykCredList[0].User
-                    ?? throw new InvalidOperationException("No matching User.");
+                UserEntity ykUser = ykCredList[0].User;
 
                 Tuple<UserEntity,MakeCredentialData> userInfo = _bioFido2Fixture.MatchUser(rpInfo.RelyingParty, ykUser);
                 ReadOnlyMemory<byte> targetKey = userInfo.Item2.LargeBlobKey
@@ -108,20 +103,17 @@ namespace Yubico.YubiKey.Fido2
                 fido2Session.KeyCollector = _bioFido2Fixture.KeyCollector;
                 fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
 
-                IReadOnlyList<CredentialManagementData> credList =
-                    fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[2].RelyingParty.Id);
+                IReadOnlyList<CredentialUserInfo> credList =
+                    fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[2].RelyingParty);
                 int count = credList.Count;
                 Assert.Equal(1, count);
 
                 fido2Session.ClearAuthToken();
                 fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
 
-                CredentialId credId = credList[0].CredentialId
-                    ?? throw new InvalidOperationException("No matching User.");
+                fido2Session.DeleteCredential(credList[0].CredentialId);
 
-                fido2Session.DeleteCredential(credId);
-
-                credList = fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[2].RelyingParty.Id);
+                credList = fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[2].RelyingParty);
                 Assert.NotNull(credList);
                 Assert.True(credList.Count == count - 1);
             }
@@ -137,28 +129,21 @@ namespace Yubico.YubiKey.Fido2
                 fido2Session.KeyCollector = _bioFido2Fixture.KeyCollector;
                 fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
 
-                IReadOnlyList<CredentialManagementData> credList =
-                    fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[0].RelyingParty.Id);
+                IReadOnlyList<CredentialUserInfo> credList =
+                    fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[0].RelyingParty);
                 Assert.NotEqual(0, credList.Count);
 
                 fido2Session.ClearAuthToken();
                 fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
 
-                CredentialId credId = credList[0].CredentialId
-                    ?? throw new InvalidOperationException("No matching User.");
-
-                UserEntity newInfo = credList[0].User
-                    ?? throw new InvalidOperationException("No matching User.");
+                UserEntity newInfo = credList[0].User;
                 newInfo.DisplayName = updatedDisplayName;
 
-                fido2Session.UpdateUserInfoForCredential(credId, newInfo);
+                fido2Session.UpdateUserInfoForCredential(credList[0].CredentialId, newInfo);
 
-                credList = fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[0].RelyingParty.Id);
+                credList = fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[0].RelyingParty);
 
-                newInfo = credList[0].User
-                    ?? throw new InvalidOperationException("No matching User.");
-                string displayName = newInfo.DisplayName
-                    ?? throw new InvalidOperationException("No matching User.");
+                string displayName = credList[0].User.DisplayName??"";
                 Assert.True(displayName.Equals(updatedDisplayName));
             }
         }

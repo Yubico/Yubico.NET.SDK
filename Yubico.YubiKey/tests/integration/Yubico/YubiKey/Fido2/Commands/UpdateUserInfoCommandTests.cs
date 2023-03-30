@@ -45,68 +45,39 @@ namespace Yubico.YubiKey.Fido2
             ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
 
             var cmd = new EnumerateRpsBeginCommand(pinToken, protocol);
-            CredentialManagementResponse rsp = Connection.SendCommand(cmd);
+            EnumerateRpsBeginResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            CredentialManagementData rpMgmtData = rsp.GetData();
-            Assert.NotNull(rpMgmtData.RelyingPartyIdHash);
-            if (rpMgmtData.RelyingPartyIdHash is null)
+            (int rpCount, RelyingParty firstRp) = rsp.GetData();
+            Assert.True(rpCount != 0);
+
+            var credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol);
+            EnumerateCredentialsBeginResponse credRsp = Connection.SendCommand(credCmd);
+            Assert.Equal(ResponseStatus.Success, credRsp.Status);
+
+            (int credCount, CredentialUserInfo userInfo) = credRsp.GetData();
+            Assert.True(credCount != 0);
+
+            string origDisplayName = userInfo.User.DisplayName??"";
+
+            var newInfo = new UserEntity(userInfo.User.Id)
             {
-                return;
-            }
-
-            var credCmd = new EnumerateCredentialsBeginCommand(rpMgmtData.RelyingPartyIdHash.Value, pinToken, protocol);
-            rsp = Connection.SendCommand(credCmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
-
-            CredentialManagementData origMgmtData = rsp.GetData();
-            Assert.NotNull(origMgmtData.TotalCredentialsForRelyingParty);
-            Assert.NotNull(origMgmtData.CredentialId);
-            Assert.NotNull(origMgmtData.User);
-
-            if ((origMgmtData.CredentialId is null) || (origMgmtData.User is null))
-            {
-                return;
-            }
-
-            Assert.NotNull(origMgmtData.User.DisplayName);
-            int count = origMgmtData.TotalCredentialsForRelyingParty ?? 0;
-
-            if (origMgmtData.User.DisplayName is null)
-            {
-                return;
-            }
-
-            var newInfo = new UserEntity(origMgmtData.User.Id)
-            {
-                Name = origMgmtData.User.Name,
-                DisplayName = origMgmtData.User.DisplayName + " Updated",
+                Name = userInfo.User.Name,
+                DisplayName = origDisplayName + " Updated",
             };
 
-            Assert.NotEqual(0, count);
-            var updateCmd = new UpdateUserInfoCommand(origMgmtData.CredentialId, newInfo, pinToken, protocol);
+            var updateCmd = new UpdateUserInfoCommand(userInfo.CredentialId, newInfo, pinToken, protocol);
             Fido2Response updateRsp = Connection.SendCommand(updateCmd);
             Assert.Equal(ResponseStatus.Success, updateRsp.Status);
 
-            credCmd = new EnumerateCredentialsBeginCommand(rpMgmtData.RelyingPartyIdHash.Value, pinToken, protocol);
-            rsp = Connection.SendCommand(credCmd);
-            Assert.Equal(ResponseStatus.Success, rsp.Status);
+            credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol);
+            credRsp = Connection.SendCommand(credCmd);
+            Assert.Equal(ResponseStatus.Success, credRsp.Status);
 
-            CredentialManagementData newMgmtData = rsp.GetData();
-            Assert.NotNull(newMgmtData.User);
+            (credCount, userInfo) = credRsp.GetData();
+            Assert.True(credCount != 0);
 
-            if (newMgmtData.User is null)
-            {
-                return;
-            }
-
-            Assert.NotNull(newMgmtData.User.DisplayName);
-            if (newMgmtData.User.DisplayName is null)
-            {
-                return;
-            }
-
-            Assert.Equal(origMgmtData.User.DisplayName + " Updated", newMgmtData.User.DisplayName);
+            Assert.Equal(origDisplayName + " Updated", userInfo.User.DisplayName);
         }
     }
 }

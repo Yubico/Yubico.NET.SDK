@@ -17,7 +17,7 @@ using System.Collections.Generic;
 using Xunit;
 using Yubico.YubiKey.Fido2.Cose;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2.Commands
 {
     public class CredMgmtDataTests
     {
@@ -344,6 +344,8 @@ namespace Yubico.YubiKey.Fido2
 
         private CredentialManagementData GetFullCredMgmtData(out Dictionary<int, object> expectedValues)
         {
+            expectedValues = new Dictionary<int, object>(20);
+
             byte[] encodedData = new byte[] {
                 0xAB,
                   0x01, 0x02,
@@ -390,7 +392,6 @@ namespace Yubico.YubiKey.Fido2
                        0x8A, 0x98, 0xF1, 0x10, 0xD3, 0x49, 0x7B, 0x02, 0x21, 0x00, 0xB7, 0x74, 0xDF, 0x0E, 0xF9, 0x9B,
             };
 
-            expectedValues = new Dictionary<int, object>(20);
             expectedValues.Add(NumCredentials, (int)2);
             expectedValues.Add(RemainCount, (int)23);
             expectedValues.Add(RpId, "RpId");

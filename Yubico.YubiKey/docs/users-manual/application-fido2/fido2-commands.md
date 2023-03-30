@@ -415,20 +415,19 @@ All YubiKeys with the FIDO2 application.
 
 [GetCredentialMetadataCommand](xref:Yubico.YubiKey.Fido2.Commands.GetCredentialMetadataCommand)
 
-[CredentialManagementResponse](xref:Yubico.YubiKey.Fido2.Commands.CredentialManagementResponse)
+[GetCredentialMetadataResponse](xref:Yubico.YubiKey.Fido2.Commands.GetCredentialMetadataResponse)
 
 ### Input
 
-A PIN/UV auth token (built using the credential management, cm, permission), and the
-protocol used to build the token. 
+A PIN/UV auth token (built using the "cm" permission), and the protocol used to build the
+token. 
 
 ### Output
 
 The number of existing discoverable credentials on the YubiKey, and the maximum number of
 additional credentials the YubiKey can store.
 
-The data is returned in the form of a
-[CredentialManagementData](xref:Yubico.YubiKey.Fido2.CredentialManagementData) object.
+The data is returned in the form of a Tuple of two integers.
 
 ### APDU
 
@@ -436,8 +435,8 @@ The data is returned in the form of a
 ___
 ## Enumerate RPs begin
 
-Get information about the first relying party (RP) represented by the credentials on the
-YubiKey, along with the total number of RPs that can be found. This is one of the
+Get the total number of RPs that can be found along with information about the first
+relying party (RP) represented by the credentials on the YubiKey . This is one of the
 subcommands of the `authenticatorCredentialManagement` command.
 
 Not all YubiKeys support credential management. If you send this command to a YubiKey that
@@ -451,19 +450,19 @@ All YubiKeys with the FIDO2 application.
 
 [EnumerateRpsBeginCommand](xref:Yubico.YubiKey.Fido2.Commands.EnumerateRpsBeginCommand)
 
-[CredentialManagementResponse](xref:Yubico.YubiKey.Fido2.Commands.CredentialManagementResponse)
+[EnumerateRpsBeginResponse](xref:Yubico.YubiKey.Fido2.Commands.EnumerateRpsBeginResponse)
 
 ### Input
 
-A PIN/UV auth token (built using the credential management, cm, permission), and the
-protocol used to build the token. 
+A PIN/UV auth token (built using the "cm" permission), and the protocol used to build the
+token. 
 
 ### Output
 
 Information about the first RP on the YubiKey, and the total number of RPs represented.
 
-The data is returned in the form of a
-[CredentialManagementData](xref:Yubico.YubiKey.Fido2.CredentialManagementData) object.
+The data is returned in the form of a Tuple consisting of an integer and a RelyingParty
+object.
 
 ### APDU
 
@@ -486,21 +485,20 @@ All YubiKeys with the FIDO2 application.
 
 [EnumerateRpsGetNextCommand](xref:Yubico.YubiKey.Fido2.Commands.EnumerateRpsGetNextCommand)
 
-[CredentialManagementResponse](xref:Yubico.YubiKey.Fido2.Commands.CredentialManagementResponse)
+[EnumerateRpsGetNextResponse](xref:Yubico.YubiKey.Fido2.Commands.EnumerateRpsGetNextResponse)
 
 ### Input
 
-A PIN/UV auth token (built using the credential management, cm, permission), and the
-protocol used to build the token. 
+none (but this command must follow the EnumerateRpsBeginCommand)
 
 ### Output
 
-Information about the next RP on the YubiKey. The call to `EnumerateRpsBeginCommand`
-returned the first RP. If there are more RPs, each successive call to
-`EnumerateRpsGetNextCommand` returns the next one.
+The next RP on the YubiKey. The call to `EnumerateRpsBeginCommand` returned the first RP.
+If there are more RPs, each successive call to `EnumerateRpsGetNextCommand` returns the
+next one.
 
 The data is returned in the form of a
-[CredentialManagementData](xref:Yubico.YubiKey.Fido2.CredentialManagementData) object.
+[RelyingParty](xref:Yubico.YubiKey.Fido2.RelyingParty) object.
 
 ### APDU
 

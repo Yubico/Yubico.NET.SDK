@@ -35,30 +35,10 @@ namespace Yubico.YubiKey.Fido2
         /// See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
         /// on credential management.
         /// <para>
-        /// This method returns an instance of the
-        /// <see cref="CredentialManagementData"/> class.
-        /// </para>
-        /// <para>
-        /// Many credential management subcommands return data. The data
-        /// returned as defined in the standard is represented in the SDK as
-        /// <c>CredentialManagementData</c>. Each subcommand returns only a
-        /// subset of all the data in this class.
-        /// </para>
-        /// <para>
-        /// For <c>CredentialMetadata</c>, the data returned will be the
-        /// properties
-        /// <see cref="CredentialManagementData.NumberOfDiscoverableCredentials"/>
-        /// and <see cref="CredentialManagementData.RemainingCredentialCount"/>.
-        /// All other properties will be null.
-        /// </para>
-        /// <para>
-        /// Note that the <c>NumberOfDiscoverableCredentials</c> and the
-        /// <c>RemainingCredentialCount</c> might not add up to the total number
-        /// of available FIDO2 slots on the YubiKey. It is possible that there
-        /// are non-discoverable credentials on the YubiKey, which will not be
-        /// reflected in the <c>NumberOfDiscoverableCredentials</c>, but will
-        /// count towards the total number of credentials. A discoverable
-        /// credential was created with the "rk" option set to <c>true</c>.
+        /// This method returns a Tuple of two integers, the number of
+        /// discoverable credentials and the number of "slots" remaining. The
+        /// number of slots is the number of discoverable credentials the YubiKey
+        /// can still hold.
         /// </para>
         /// <para>
         /// In order to execute, this method will need a PIN/UV auth param, which
@@ -86,9 +66,9 @@ namespace Yubico.YubiKey.Fido2
         /// </para>
         /// </remarks>
         /// <returns>
-        /// A new instance of the <c>CredentialManagementData</c> class. Only the
-        /// <c>NumberOfDiscoverableCredentials</c> and
-        /// <c>RemainingCredentialCount</c> will have values.
+        /// Two integers, the number of discoverable credentials in the YubiKey's
+        /// FIDO2 application and the number of discoverable credentials for
+        /// which it has space.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         /// The connected YubiKey does not support CredentialManagement, or the
@@ -100,7 +80,7 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="System.Security.SecurityException">
         /// The PIN retry count was exhausted.
         /// </exception>
-        public CredentialManagementData GetCredentialMetadata()
+        public (int discoverableCredentialCount, int remainingCredentialCount) GetCredentialMetadata()
         {
             _log.LogInformation("Get credential metadata.");
 
@@ -108,7 +88,7 @@ namespace Yubico.YubiKey.Fido2
                 false, PinUvAuthTokenPermissions.CredentialManagement, null);
 
             var cmd = new GetCredentialMetadataCommand(currentToken, AuthProtocol);
-            CredentialManagementResponse rsp = Connection.SendCommand(cmd);
+            GetCredentialMetadataResponse rsp = Connection.SendCommand(cmd);
 
             // If the error is PinAuthInvalid, try again.
             // If the result is not PinAuthInvalid, we know we're not going
@@ -162,37 +142,19 @@ namespace Yubico.YubiKey.Fido2
         /// See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
         /// on credential management.
         /// <para>
-        /// This method returns a list of <see cref="CredentialManagementData"/>
-        /// objects. Each object contains information about one of the relying
-        /// parties represented on the YubiKey. If there are no discoverable
-        /// credentials on the YubiKey, then the list will have no elements
-        /// (<c>Count</c> will be zero).
+        /// This method returns a list of <see cref="RelyingParty"/> objects.
+        /// Each object contains information about one of the relying parties
+        /// represented on the YubiKey. If there are no discoverable credentials
+        /// on the YubiKey, then the list will have no elements (<c>Count</c>
+        /// will be zero).
         /// </para>
         /// <para>
-        /// Many credential management subcommands return data. The data
-        /// returned as defined in the standard is represented in the SDK as
-        /// <c>CredentialManagementData</c>. Each subcommand returns only a
-        /// subset of all the data in this class.
-        /// </para>
-        /// <para>
-        /// For <c>EnumerateRPs</c>, the data returned will be the properties
-        /// <see cref="CredentialManagementData.RelyingParty"/>,
-        /// <see cref="CredentialManagementData.RelyingPartyIdHash"/>,
-        /// and possibly
-        /// <see cref="CredentialManagementData.TotalRelyingPartyCount"/>.
-        /// All other properties will be null. The <c>TotalRelyingPartyCount</c>
-        /// property is returned only for the first relying party returned by the
-        /// YubiKey. Hence, you will be able to find that number in the element
-        /// at index zero of the returned list, but no other (the rest will be
-        /// null). Of course, the total number of relying parties is also the
-        /// list's Count.
+        /// Note that other FIDO2 operations require the "RelyingPartyIdHash",
+        /// which is one of the properties of the RelyingParty object.
         /// </para>
         /// </remarks>
         /// <returns>
-        /// A list of <c>CredentialManagementData</c> objects, one for each
-        /// relying party. Only the <c>RelyingParty</c>,
-        /// <c>RelyingPartyIdHash</c>, and <c>TotalRelyingPartyCount</c>
-        /// properties will have values.
+        /// A list of <c>RelyingParty</c> objects.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         /// The connected YubiKey does not support CredentialManagement, or the
@@ -204,7 +166,7 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="System.Security.SecurityException">
         /// The PIN retry count was exhausted.
         /// </exception>
-        public IReadOnlyList<CredentialManagementData> EnumerateRelyingParties()
+        public IReadOnlyList<RelyingParty> EnumerateRelyingParties()
         {
             _log.LogInformation("Enumerate relying parties.");
 
@@ -212,7 +174,7 @@ namespace Yubico.YubiKey.Fido2
                 false, PinUvAuthTokenPermissions.CredentialManagement, null);
 
             var cmd = new EnumerateRpsBeginCommand(currentToken, AuthProtocol);
-            CredentialManagementResponse rsp = Connection.SendCommand(cmd);
+            EnumerateRpsBeginResponse rsp = Connection.SendCommand(cmd);
 
             // If the error is PinAuthInvalid, try again.
             // If the result is not PinAuthInvalid, we know we're not going
@@ -254,31 +216,26 @@ namespace Yubico.YubiKey.Fido2
             // If the response is NoCredentials, return an empty list.
             if (rsp.CtapStatus == CtapStatus.NoCredentials)
             {
-                return new List<CredentialManagementData>();
+                return new List<RelyingParty>();
             }
 
             // This will return the data or throw an exception. We either have
             // the data, have an error other than PinAuthInvalid, or we do have
             // the error PinAuthInvalid but only after trying twice.
-            CredentialManagementData mgmtData = rsp.GetData();
+            (int rpCount, RelyingParty firstRp) = rsp.GetData();
 
-            // Get the count. The return from the Begin call has the total number
-            // of RPs.
-            int count = mgmtData.TotalRelyingPartyCount ?? 0;
-
-            var returnValue = new List<CredentialManagementData>(count)
+            var returnValue = new List<RelyingParty>(rpCount)
             {
-                mgmtData
+                firstRp
             };
 
             // Get the rest of the RPs. The EnumerateRpsGetNextCommand does not
             // need the AuthToken.
             var nextCmd = new EnumerateRpsGetNextCommand();
-            for (int index = 1; index < count; index++)
+            for (int index = 1; index < rpCount; index++)
             {
-                rsp = Connection.SendCommand(nextCmd);
-                mgmtData = rsp.GetData();
-                returnValue.Add(mgmtData);
+                EnumerateRpsGetNextResponse nextRsp = Connection.SendCommand(nextCmd);
+                returnValue.Add(nextRsp.GetData());
             }
 
             return returnValue;
@@ -294,44 +251,27 @@ namespace Yubico.YubiKey.Fido2
         /// See the <xref href="Fido2CredentialManagement">User's Manual entry</xref>
         /// on credential management.
         /// <para>
-        /// This method returns a list of <see cref="CredentialManagementData"/>
+        /// This method returns a list of <see cref="CredentialUserInfo"/>
         /// objects. Each object contains information about one of the
-        /// discoverable credentials associated with the relying party on the
-        /// YubiKey. If there are no discoverable credentials on the YubiKey,
-        /// then the list will have no elements (<c>Count</c> will be zero).
+        /// discoverable credentials associated with the specified relying party
+        /// on the YubiKey. If there are no discoverable credentials on the
+        /// YubiKey associated with the relying party, then the list will have no
+        /// elements (<c>Count</c> will be zero).
         /// </para>
         /// <para>
-        /// Many credential management subcommands return data. The data
-        /// returned as defined in the standard is represented in the SDK as
-        /// <c>CredentialManagementData</c>. Each subcommand returns only a
-        /// subset of all the data in this class.
-        /// </para>
-        /// <para>
-        /// For <c>EnumerateCredentials</c>, the data returned will be the
-        /// properties <see cref="CredentialManagementData.User"/>,
-        /// <see cref="CredentialManagementData.CredentialId"/>,
-        /// <see cref="CredentialManagementData.CredentialPublicKey"/>,
-        /// <see cref="CredentialManagementData.CredProtectPolicy"/>,
-        /// <see cref="CredentialManagementData.LargeBlobKey"/>,
-        /// and possibly
-        /// <see cref="CredentialManagementData.TotalCredentialsForRelyingParty"/>.
-        /// All other properties will be null. The
-        /// <c>TotalCredentialsForRelyingParty</c> property is returned only for
-        /// the first credential returned by the YubiKey. Hence, you will be able
-        /// to find that number in the element at index zero of the returned
-        /// list, but no other (for the rest the property will be null). Of
-        /// course, the total number of credentials is also the list's Count.
+        /// The <c>CredentialUserInfo</c> object contains properties for
+        /// <see cref="CredentialUserInfo.CredentialId"/>,
+        /// <see cref="CredentialUserInfo.CredentialPublicKey"/>,
+        /// <see cref="CredentialUserInfo.CredProtectPolicy"/>, and possibly
+        /// <see cref="CredentialUserInfo.LargeBlobKey"/>,
         /// </para>
         /// </remarks>
-        /// <param name="relyingPartyId">
+        /// <param name="relyingParty">
         /// The relying party for which the list of credentials is requested.
         /// </param>
         /// <returns>
-        /// A list of <c>CredentialManagementData</c> objects, one for each
-        /// credential. Only the <c>User</c>, <c>CredentialId</c>,
-        /// <c>CredentialPublicKey</c>, <c>CredProtectPolicy</c>,
-        /// <c>LargeBlobKey</c>, and <c>TotalCredentialsForRelyingParty</c>
-        /// properties will have values.
+        /// A list of <c>CredentialUserInfo</c> objects, one for each
+        /// credential.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         /// The connected YubiKey does not support CredentialManagement, or the
@@ -343,20 +283,25 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="System.Security.SecurityException">
         /// The PIN retry count was exhausted.
         /// </exception>
-        public IReadOnlyList<CredentialManagementData> EnumerateCredentialsForRelyingParty(string relyingPartyId)
+        public IReadOnlyList<CredentialUserInfo> EnumerateCredentialsForRelyingParty(RelyingParty relyingParty)
         {
-            _log.LogInformation("Enumerate credentials for relying party: " + relyingPartyId + ".");
+            if (relyingParty is null)
+            {
+                throw new ArgumentNullException(nameof(relyingParty));
+            }
+
+            _log.LogInformation("Enumerate credentials for relying party: " + relyingParty.Id + ".");
 
             ReadOnlyMemory<byte> currentToken = GetAuthToken(
-                false, PinUvAuthTokenPermissions.CredentialManagement, relyingPartyId);
+                false, PinUvAuthTokenPermissions.CredentialManagement, relyingParty.Id);
 
             using SHA256 digester = CryptographyProviders.Sha256Creator();
             digester.Initialize();
-            byte[] utf = Encoding.UTF8.GetBytes(relyingPartyId);
+            byte[] utf = Encoding.UTF8.GetBytes(relyingParty.Id);
             byte[] digest = digester.ComputeHash(utf);
 
-            var cmd = new EnumerateCredentialsBeginCommand(digest, currentToken, AuthProtocol);
-            CredentialManagementResponse rsp = Connection.SendCommand(cmd);
+            var cmd = new EnumerateCredentialsBeginCommand(relyingParty, currentToken, AuthProtocol);
+            EnumerateCredentialsBeginResponse rsp = Connection.SendCommand(cmd);
 
             // If the error is PinAuthInvalid, try again.
             // If the result is not PinAuthInvalid, we know we're not going
@@ -374,41 +319,36 @@ namespace Yubico.YubiKey.Fido2
                 // the caller specified.
                 if (!(AuthTokenRelyingPartyId is null))
                 {
-                    AuthTokenRelyingPartyId = relyingPartyId;
+                    AuthTokenRelyingPartyId = relyingParty.Id;
                 }
                 currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
-                cmd = new EnumerateCredentialsBeginCommand(digest, currentToken, AuthProtocol);
+                cmd = new EnumerateCredentialsBeginCommand(relyingParty, currentToken, AuthProtocol);
                 rsp = Connection.SendCommand(cmd);
             }
 
             // If the response is NoCredentials, return an empty list.
             if (rsp.CtapStatus == CtapStatus.NoCredentials)
             {
-                return new List<CredentialManagementData>();
+                return new List<CredentialUserInfo>();
             }
 
             // This will return the data or throw an exception. We either have
             // the data, have an error other than PinAuthInvalid, or we do have
             // the error PinAuthInvalid but only after trying twice.
-            CredentialManagementData mgmtData = rsp.GetData();
+            (int credCount, CredentialUserInfo userInfo) = rsp.GetData();
 
-            // Get the count. The return from the Begin call has the total number
-            // of RPs.
-            int count = mgmtData.TotalCredentialsForRelyingParty ?? 0;
-
-            var returnValue = new List<CredentialManagementData>(count)
+            var returnValue = new List<CredentialUserInfo>(credCount)
             {
-                mgmtData
+                userInfo
             };
 
             // Get the rest of the credentials. The
             // EnumerateCredentialsGetNextCommand does not need the AuthToken.
             var nextCmd = new EnumerateCredentialsGetNextCommand();
-            for (int index = 1; index < count; index++)
+            for (int index = 1; index < credCount; index++)
             {
-                rsp = Connection.SendCommand(nextCmd);
-                mgmtData = rsp.GetData();
-                returnValue.Add(mgmtData);
+                EnumerateCredentialsGetNextResponse nextRsp = Connection.SendCommand(nextCmd);
+                returnValue.Add(nextRsp.GetData());
             }
 
             return returnValue;

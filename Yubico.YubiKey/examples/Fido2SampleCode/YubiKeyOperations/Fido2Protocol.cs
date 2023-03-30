@@ -147,34 +147,35 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         }
 
         // This method will get information about the discoverable credentials on
-        // the YubiKey and return it as a List of CredentialManagementData.
+        // the YubiKey and return it as a List of object.
         // The first in the list (index zero) will be the result of getting
-        // metadata, and will contain the NumberOfDiscoverableCredentials and
-        // RemainingCredentialCount (how many more discoverable credentials can
-        // be stored on the YubiKey).
-        // If there are any credentials, the next in the list will be the info
-        // for the first relying party. That will include the
-        // TotalCredentialsForRelyingParty, the number of credentials the YubiKey
-        // contains associated with that relying party. The next
-        // TotalCredentialsForRelyingParty entries will be the credentials
-        // themselves.
+        // metadata, and will be an object of type Tuple<int,int>.
+        // If there are any credentials, the next in the list will be the first
+        // relying party. It will be an object of type RelyingParty.
+        // Following the relying party will be the credential or credentials. For
+        // each entry after a RelyingParty, until reaching the next RelyingParty
+        // object, it is a credential, an object of the class CredentialUserInfo.
         // If there are any other relying parties, the list will then contain
         // sets of relying party and credential entries.
         // For example, suppose there are three credentials, two for RP
         // example.com and one for RP sample.org. The list will contain
-        // CredentialManagementData objects representing
-        //   metadata
-        //   RP example.com
-        //     cred
-        //     cred
-        //   RP sample.org
-        //     cred
+        // objects representing the following:
+        //
+        //      entry                  class
+        // -------------------------------------------
+        //   metadata             Tuple<int,int>
+        //   RP example.com       RelyingParty
+        //     cred               CredentialUserInfo
+        //     cred               CredentialUserInfo
+        //   RP sample.org        RelyingParty
+        //     cred               CredentialUserInfo
         public static bool RunGetCredentialData(
             IYubiKeyDevice yubiKey,
             Func<KeyEntryData, bool> KeyCollectorDelegate,
-            out IReadOnlyList<CredentialManagementData> credentialData)
+            out IReadOnlyList<object> credentialData)
         {
-            credentialData = null;
+            var returnValue = new List<object>();
+            credentialData = returnValue;
 
             using (var fido2Session = new Fido2Session(yubiKey))
             {
@@ -185,34 +186,23 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
                 fido2Session.KeyCollector = KeyCollectorDelegate;
 
-                CredentialManagementData metadata = fido2Session.GetCredentialMetadata();
+                (int credCount, int remainingCount) = fido2Session.GetCredentialMetadata();
 
-                // Create a new List with space for the metadata and each of the
-                // credentials. For each credential, make space for an RP.
-                // This is a max value because it is possible to have more than
-                // one credential per RP, but in the real world, there will
-                // likely be one credential only for each RP.
-                int count = metadata.NumberOfDiscoverableCredentials ?? 0;
-                var returnValue = new List<CredentialManagementData>((2 * count) + 1)
-                {
-                    metadata
-                };
+                returnValue.Add(new Tuple<int, int>(credCount, remainingCount));
 
-                IReadOnlyList<CredentialManagementData> rpList = fido2Session.EnumerateRelyingParties();
-                foreach (CredentialManagementData currentRp in rpList)
+                IReadOnlyList<RelyingParty> rpList = fido2Session.EnumerateRelyingParties();
+                foreach (RelyingParty currentRp in rpList)
                 {
                     returnValue.Add(currentRp);
 
-                    IReadOnlyList<CredentialManagementData> credentialList =
-                        fido2Session.EnumerateCredentialsForRelyingParty(currentRp.RelyingParty?.Id);
+                    IReadOnlyList<CredentialUserInfo> credentialList =
+                        fido2Session.EnumerateCredentialsForRelyingParty(currentRp);
 
-                    foreach (CredentialManagementData currentCredential in credentialList)
+                    foreach (CredentialUserInfo currentCredential in credentialList)
                     {
                         returnValue.Add(currentCredential);
                     }
                 }
-
-                credentialData = returnValue;
             }
 
             return true;

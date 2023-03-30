@@ -320,7 +320,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetCredentialData(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out IReadOnlyList<CredentialManagementData> credentialData))
+                out IReadOnlyList<object> credentialData))
             {
                 return false;
             }
@@ -335,25 +335,26 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetCredentialData(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out IReadOnlyList<CredentialManagementData> credentialData))
+                out IReadOnlyList<object> credentialData))
             {
                 return false;
             }
 
             ReportCredentials(credentialData, false, false, out int credentialCount);
 
-            int index = SelectCredential(credentialData, credentialCount);
-            if ((index < 0) || (credentialData[index].User is null))
+            CredentialUserInfo userInfo = SelectCredential(credentialData, credentialCount);
+
+            if (userInfo is null)
             {
                 return false;
             }
 
-            UserEntity updatedInfo = GetUpdatedInfo(credentialData[index].User);
+            UserEntity updatedInfo = GetUpdatedInfo(userInfo.User);
 
             return Fido2Protocol.RunUpdateUserInfo(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                credentialData[index].CredentialId,
+                userInfo.CredentialId,
                 updatedInfo);
         }
 
@@ -362,16 +363,16 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetCredentialData(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out IReadOnlyList<CredentialManagementData> credentialData))
+                out IReadOnlyList<object> credentialData))
             {
                 return false;
             }
 
             ReportCredentials(credentialData, false, false, out int credentialCount);
 
-            int index = SelectCredential(credentialData, credentialCount);
-            // If there are no credentials, there's nothing to do.
-            if ((index < 0) || (credentialData[index].CredentialId is null))
+            CredentialUserInfo userInfo = SelectCredential(credentialData, credentialCount);
+
+            if (userInfo is null)
             {
                 return false;
             }
@@ -379,7 +380,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunDeleteCredential(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                credentialData[index].CredentialId))
+                userInfo.CredentialId))
             {
                 return false;
             }
@@ -388,6 +389,11 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             // data associated with a credential along with the credential itself.
             // This sample code will still return true even if something goes
             // wrong trying to delete an entry in the largeBlob data.
+            if (userInfo.LargeBlobKey is null)
+            {
+                return true;
+            }
+
             if (!Fido2Protocol.RunGetLargeBlobArray(
                 _yubiKeyChosen,
                 out SerializedLargeBlobArray blobArray))
@@ -396,7 +402,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             }
 
             _ = Fido2Protocol.GetLargeBlobEntry(
-                blobArray, credentialData[index].LargeBlobKey.Value, out int entryIndex);
+                blobArray, userInfo.LargeBlobKey.Value, out int entryIndex);
 
             if (entryIndex < 0)
             {
@@ -458,7 +464,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetCredentialData(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out IReadOnlyList<CredentialManagementData> credentialData))
+                out IReadOnlyList<object> credentialData))
             {
                 return false;
             }
@@ -470,14 +476,26 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 "LargeBlob data is stored against a credential. Select a credential for which\n" +
                 "you want to see the largeBlob data. It is possible to retrieve data only for\n" +
                 "credentials that have an available Large Blob Key.\n");
-            int index = SelectCredential(credentialData, credentialCount);
-            if ((index < 0) || (credentialData[index].LargeBlobKey is null))
+            CredentialUserInfo userInfo = SelectCredential(credentialData, credentialCount);
+
+            if (userInfo is null)
             {
                 return false;
             }
 
+            if (userInfo.LargeBlobKey is null)
+            {
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "There is no large blob key for this credential, therefore it will not be\n" +
+                    "possible to retrieve largeBlob data. It is likely there is no largeBlob\n" +
+                    "data for this credential.\n");
+
+                return true;
+            }
+
             string currentContents = Fido2Protocol.GetLargeBlobEntry(
-                blobArray, credentialData[index].LargeBlobKey.Value, out int entryIndex);
+                blobArray, userInfo.LargeBlobKey.Value, out int entryIndex);
 
             if (entryIndex < 0)
             {
@@ -509,7 +527,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetCredentialData(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out IReadOnlyList<CredentialManagementData> credentialData))
+                out IReadOnlyList<object> credentialData))
             {
                 return false;
             }
@@ -523,14 +541,25 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 "with the largeBlob option. Hence, you must choose a credential against which the\n" +
                 "data will be stored, and that credential must have an available Large Blob Key.\n" +
                 "Note that this sample code will store only one entry per credential.\n");
-            int index = SelectCredential(credentialData, credentialCount);
-            if ((index < 0) || (credentialData[index].LargeBlobKey is null))
+            CredentialUserInfo userInfo = SelectCredential(credentialData, credentialCount);
+
+            if (userInfo is null)
             {
                 return false;
             }
 
+            if (userInfo.LargeBlobKey is null)
+            {
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "There is no large blob key for this credential, therefore it will not be\n" +
+                    "possible to store largeBlob data.\n");
+
+                return true;
+            }
+
             string currentContents = Fido2Protocol.GetLargeBlobEntry(
-                blobArray, credentialData[index].LargeBlobKey.Value, out int entryIndex);
+                blobArray, userInfo.LargeBlobKey.Value, out int entryIndex);
 
             SampleMenu.WriteMessage(
                 MessageType.Title, 0,
@@ -554,7 +583,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             _ = SampleMenu.ReadResponse(out string largeBlobDataString);
 
             byte[] largeBlobData = Encoding.Unicode.GetBytes(largeBlobDataString);
-            blobArray.AddEntry(largeBlobData, credentialData[index].LargeBlobKey.Value);
+            blobArray.AddEntry(largeBlobData, userInfo.LargeBlobKey.Value);
 
             return Fido2Protocol.RunStoreLargeBlobArray(
                 _yubiKeyChosen,
@@ -574,7 +603,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (!Fido2Protocol.RunGetCredentialData(
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
-                out IReadOnlyList<CredentialManagementData> credentialData))
+                out IReadOnlyList<object> credentialData))
             {
                 return false;
             }
@@ -588,16 +617,21 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 "YubiKey, or if there is no largeBlob data stored, or nothing stored against\n" +
                 "the selected credential, this sample code will do nothing.\n");
 
-            int index = SelectCredential(credentialData, credentialCount);
+            CredentialUserInfo userInfo = SelectCredential(credentialData, credentialCount);
 
-            // If there's nothing to delete, there's nothing to do.
-            if ((index < 0) || (credentialData[index].LargeBlobKey is null))
+            if ((userInfo is null) || (userInfo.LargeBlobKey is null))
             {
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "There is no large blob key for this credential, therefore it will not be\n" +
+                    "possible to delete largeBlob data. It is likely there is no largeBlob\n" +
+                    "data for this credential.\n");
+
                 return true;
             }
 
             string currentContents = Fido2Protocol.GetLargeBlobEntry(
-                blobArray, credentialData[index].LargeBlobKey.Value, out int entryIndex);
+                blobArray, userInfo.LargeBlobKey.Value, out int entryIndex);
 
             if (entryIndex < 0)
             {
@@ -863,127 +897,103 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         }
 
         private static void ReportCredentials(
-            IReadOnlyList<CredentialManagementData> credentialData,
+            IReadOnlyList<object> credentialData,
             bool fullReport,
             bool largeBlobReport,
             out int credentialCount)
         {
             credentialCount = 0;
-            foreach (CredentialManagementData current in credentialData)
+            foreach (object current in credentialData)
             {
-                // If NumberOfDiscoverableCredentials is not null, then this
-                // entry is metadata, the ReportMetadata will report the
-                // meatadata and return true. If it is null, this Report call
-                // will do nothing and return false.
-                if (ReportMetadata(current, fullReport))
+                // If the current object is really a Tuple<int,int>, then this
+                // entry is metadata.
+                if (current is Tuple<int, int> metadata)
                 {
+                    ReportMetadata(metadata, fullReport);
                     continue;
                 }
 
-                // NumberOfDiscoverableCredentials is null, so this is not
-                // metadata. Is it a relying party? If the RelyingParty property
-                // is not null, it is.
-                if (ReportRelyingParty(current, fullReport))
+                if (current is RelyingParty relyingParty)
                 {
+                    ReportRelyingParty(relyingParty, fullReport);
                     continue;
                 }
 
-                // If not metadata nor RP, it must be a credential.
-                credentialCount++;
-                ReportCredential(current, fullReport, largeBlobReport, credentialCount);
+                if (current is CredentialUserInfo userInfo)
+                {
+                    credentialCount++;
+                    ReportCredential(userInfo, fullReport, largeBlobReport, credentialCount);
+                }
             }
 
             SampleMenu.WriteMessage(MessageType.Title, 0, "\n");
         }
 
-        private static bool ReportMetadata(CredentialManagementData current, bool fullReport)
+        private static void ReportMetadata(Tuple<int, int> metadata, bool fullReport)
         {
-            if (current.NumberOfDiscoverableCredentials is null)
-            {
-                return false;
-            }
-
-            if (current.NumberOfDiscoverableCredentials == 0)
-            {
-                SampleMenu.WriteMessage(MessageType.Title, 0, "There are no credentials on the selected YubiKey.\n");
-                return true;
-            }
-
             SampleMenu.WriteMessage(MessageType.Title, 0,
-                "Discoverable credentials:  " + current.NumberOfDiscoverableCredentials);
+                "Discoverable credentials:  " + metadata.Item1);
+
             if (fullReport)
             {
                 SampleMenu.WriteMessage(MessageType.Title, 0,
-                    "Remaining available slots: " + (current.RemainingCredentialCount.ToString() ?? "unknown"));
+                    "Remaining available slots: " + metadata.Item2);
             }
-
-            return true;
         }
 
-        private static bool ReportRelyingParty(CredentialManagementData current, bool fullReport)
+        private static void ReportRelyingParty(RelyingParty relyingParty, bool fullReport)
         {
-            if (current.RelyingParty is null)
-            {
-                return false;
-            }
-
-            SampleMenu.WriteMessage(MessageType.Title, 0, "\n  Relying party ID:       " + current.RelyingParty.Id);
-            SampleMenu.WriteMessage(MessageType.Title, 0, "  Relying party Name:     " + (current.RelyingParty.Name ?? "-"));
+            SampleMenu.WriteMessage(MessageType.Title, 0, "\n  Relying party ID:       " + relyingParty.Id);
+            SampleMenu.WriteMessage(MessageType.Title, 0, "  Relying party Name:     " + (relyingParty.Name ?? "-"));
             if (fullReport)
             {
-                byte[] idHash = current.RelyingPartyIdHash?.ToArray();
+                byte[] idHash = relyingParty.RelyingPartyIdHash.ToArray();
                 string rpIdHash = BitConverter.ToString(idHash);
                 rpIdHash = rpIdHash.Replace("-", "", StringComparison.Ordinal);
                 SampleMenu.WriteMessage(MessageType.Title, 0, "  Relying party ID Hash:  " + rpIdHash);
             }
             SampleMenu.WriteMessage(MessageType.Title, 0, "-----------");
-
-            return true;
         }
 
         private static void ReportCredential(
-            CredentialManagementData current, bool fullReport, bool largeBlobReport, int credentialIndex)
+            CredentialUserInfo userInfo, bool fullReport, bool largeBlobReport, int credentialIndex)
         {
             SampleMenu.WriteMessage(MessageType.Title, 0, "Credential index = " + credentialIndex);
-            SampleMenu.WriteMessage(MessageType.Title, 0, "        User Name:          " + (current.User.Name ?? "unknown"));
-            SampleMenu.WriteMessage(MessageType.Title, 0, "        User Display Name:  " + (current.User.DisplayName ?? "-"));
+            SampleMenu.WriteMessage(MessageType.Title, 0, "        User Name:          " + userInfo.User.Name);
+            SampleMenu.WriteMessage(MessageType.Title, 0, "        User Display Name:  " + (userInfo.User.DisplayName ?? "-"));
             if (fullReport)
             {
-                byte[] id = current.User?.Id.ToArray();
+                byte[] id = userInfo.User.Id.ToArray();
                 string userId = BitConverter.ToString(id);
                 userId = userId.Replace("-", "", StringComparison.Ordinal);
                 SampleMenu.WriteMessage(MessageType.Title, 0, "        User ID:            " + userId);
-                id = current.CredentialId?.Id.ToArray();
+                id = userInfo.CredentialId.Id.ToArray();
                 string credId = BitConverter.ToString(id);
                 credId = credId.Replace("-", "", StringComparison.Ordinal);
                 SampleMenu.WriteMessage(MessageType.Title, 0, "        Credential ID:      " + credId);
-                SampleMenu.WriteMessage(MessageType.Title, 0, "        CredProtect Policy: " + GetCredProtectPolicy(current));
+                SampleMenu.WriteMessage(MessageType.Title, 0, "        CredProtect Policy: " + GetCredProtectPolicy(userInfo.CredProtectPolicy));
             }
             if (largeBlobReport)
             {
-                string lbKeyStatus = (current.LargeBlobKey is null) ? "not available" : "available";
+                string lbKeyStatus = (userInfo.LargeBlobKey is null) ? "not available" : "available";
                 SampleMenu.WriteMessage(MessageType.Title, 0, "        Large Blob Key:     " + lbKeyStatus);
                 SampleMenu.WriteMessage(MessageType.Title, 0, "-----------");
             }
         }
 
-        private static string GetCredProtectPolicy(CredentialManagementData current)
+        private static string GetCredProtectPolicy(int credProtectPolicy) => credProtectPolicy switch
         {
-            int cpValue = current.CredProtectPolicy ?? -1;
+            1 => "userVerificationOptional",
+            2 => "userVerificationOptionalWithCredentialIDList",
+            3 => "userVerificationRequired",
+            _ => "unknown",
+        };
 
-            return cpValue switch
-            {
-                1 => "userVerificationOptional",
-                2 => "userVerificationOptionalWithCredentialIDList",
-                3 => "userVerificationRequired",
-                _ => "unknown",
-            };
-        }
-
-        // Return the index in the credentialData List of the credential of
-        // interest.
-        private int SelectCredential(
-            IReadOnlyList<CredentialManagementData> credentialData, int credentialCount)
+        // Return the CredentialUserInfo for the credential of interest in the
+        // credentialData List.
+        // If none is seleced, return null.
+        private CredentialUserInfo SelectCredential(
+            IReadOnlyList<object> credentialData, int credentialCount)
         {
             if (credentialCount > 0)
             {
@@ -996,25 +1006,22 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
                 int response = _menuObject.RunMenu("On which credential do you want to operate?", menuItems);
 
-                index = -1;
                 int credIndex = 0;
-                foreach (CredentialManagementData current in credentialData)
+                foreach (object current in credentialData)
                 {
-                    index++;
-                    if (current.User is null)
+                    if (current is CredentialUserInfo userInfo)
                     {
-                        continue;
+                        if (credIndex == response)
+                        {
+                            return userInfo;
+                        }
+                        credIndex++;
                     }
-                    if (credIndex == response)
-                    {
-                        return index;
-                    }
-                    credIndex++;
                 }
             }
 
             // Error case
-            return -1;
+            return null;
         }
 
         private UserEntity GetUpdatedInfo(UserEntity original)

@@ -40,7 +40,7 @@ for external milestones.
     Increment the minor version whenever we add support for a new class or type.
     Increment the patch version for bug fixes.
     -->
-    <YubicoDotNetPolyfillsVersion>1.6.1</YubicoDotNetPolyfillsVersion>
+    <YubicoDotNetPolyfillsVersion>1.7.0</YubicoDotNetPolyfillsVersion>
 
     <!--
     Yubico.Core project
@@ -55,7 +55,7 @@ for external milestones.
 
     This project can, and should, use pre-release suffixes for development milestones.
     -->
-    <YubicoCoreVersion>1.6.1</YubicoCoreVersion>
+    <YubicoCoreVersion>1.7.0</YubicoCoreVersion>
 
     <!--
     Yubico.Authenticator project
@@ -69,7 +69,7 @@ for external milestones.
 
     This project can, and should, use pre-release suffixes for development milestones.
     -->
-    <YubicoYubiKeyVersion>1.6.1</YubicoYubiKeyVersion>
+    <YubicoYubiKeyVersion>1.7.0</YubicoYubiKeyVersion>
 
   </PropertyGroup>
 

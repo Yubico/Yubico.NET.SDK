@@ -13,9 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {

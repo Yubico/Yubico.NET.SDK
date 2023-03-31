@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Globalization;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.Cose;
@@ -23,7 +22,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// This is the partner response class to the
     /// <see cref="GetKeyAgreementCommand" /> command class.
     /// </summary>
-    public class GetKeyAgreementResponse : IYubiKeyResponseWithData<CoseEcPublicKey>
+    public class GetKeyAgreementResponse : Fido2Response, IYubiKeyResponseWithData<CoseEcPublicKey>
     {
         private readonly ClientPinResponse _response;
 
@@ -37,7 +36,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// `getKeyAgreement` subcommand of the `authenticatorClientPIN` CTAP2
         /// command.
         /// </param>
-        public GetKeyAgreementResponse(ResponseApdu responseApdu)
+        public GetKeyAgreementResponse(ResponseApdu responseApdu) : base(responseApdu)
         {
             _response = new ClientPinResponse(responseApdu);
         }
@@ -62,14 +61,5 @@ namespace Yubico.YubiKey.Fido2.Commands
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.Ctap2MissingRequiredField));
         }
-
-        /// <inheritdoc />
-        public ResponseStatus Status => _response.Status;
-
-        /// <inheritdoc />
-        public short StatusWord => _response.StatusWord;
-
-        /// <inheritdoc />
-        public string StatusMessage => _response.StatusMessage;
     }
 }

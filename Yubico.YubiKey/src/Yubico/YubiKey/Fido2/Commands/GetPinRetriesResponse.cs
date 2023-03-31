@@ -19,7 +19,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <summary>
     /// This is the partner response class to the <see cref="GetPinRetriesCommand" /> command class.
     /// </summary>
-    public class GetPinRetriesResponse : IYubiKeyResponseWithData<(int retriesRemaining, bool? powerCycleRequired)>
+    public class GetPinRetriesResponse : Fido2Response, IYubiKeyResponseWithData<(int retriesRemaining, bool? powerCycleRequired)>
     {
         private readonly ClientPinResponse _response;
 
@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// A response APDU containing the CBOR response for the `getPINRetries` subcommand of the `authenticatorClientPIN`
         /// CTAP2 command.
         /// </param>
-        public GetPinRetriesResponse(ResponseApdu responseApdu)
+        public GetPinRetriesResponse(ResponseApdu responseApdu) : base(responseApdu)
         {
             _response = new ClientPinResponse(responseApdu);
         }
@@ -55,14 +55,5 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             return (data.PinRetries.Value, data.PowerCycleState);
         }
-
-        /// <inheritdoc />
-        public ResponseStatus Status => _response.Status;
-
-        /// <inheritdoc />
-        public short StatusWord => _response.StatusWord;
-
-        /// <inheritdoc />
-        public string StatusMessage => _response.StatusMessage;
     }
 }

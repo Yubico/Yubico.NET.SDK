@@ -12,10 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Globalization;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -25,11 +22,11 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// </summary>
     /// <remarks>
     /// Note that this response has no data to return (there is no <c>GetData</c>
-    /// method). If the PIN is successfully changed, the <see cref="Status"/>
+    /// method). If the PIN is successfully changed, the <see cref="CtapStatus"/>
     /// property will be <c>ResponseStatus.Success</c>. If the PIN is not
     /// changed, the <c>Status</c> property will indicate the error.
     /// </remarks>
-    public class ChangePinResponse : IYubiKeyResponse
+    public class ChangePinResponse : Fido2Response, IYubiKeyResponse
     {
         private readonly ClientPinResponse _response;
 
@@ -43,19 +40,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// `changePin` subcommand of the `authenticatorClientPIN` CTAP2
         /// command.
         /// </param>
-        public ChangePinResponse(ResponseApdu responseApdu)
+        public ChangePinResponse(ResponseApdu responseApdu) : base(responseApdu)
         {
             _response = new ClientPinResponse(responseApdu);
         }
-
-        /// <inheritdoc />
-        public ResponseStatus Status => _response.Status;
-
-        /// <inheritdoc />
-        public short StatusWord => _response.StatusWord;
-
-        /// <inheritdoc />
-        public string StatusMessage => _response.StatusMessage;
     }
 }
-

@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <see cref="GetPinUvAuthTokenUsingPinCommand"/>, and
     /// <see cref="GetPinUvAuthTokenUsingUvCommand"/>, command classes.
     /// </summary>
-    public class GetPinUvAuthTokenResponse : IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
+    public class GetPinUvAuthTokenResponse : Fido2Response, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
     {
         private readonly ClientPinResponse _response;
 
@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// and <c>getPinUvAuthTokenUsingUvWithPermissions</c> subcommands of
         /// the <c>authenticatorClientPIN</c> CTAP2 command.
         /// </param>
-        public GetPinUvAuthTokenResponse(ResponseApdu responseApdu)
+        public GetPinUvAuthTokenResponse(ResponseApdu responseApdu) : base(responseApdu)
         {
             _response = new ClientPinResponse(responseApdu);
         }
@@ -65,14 +65,5 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             return (ReadOnlyMemory<byte>)data.PinUvAuthToken;
         }
-
-        /// <inheritdoc />
-        public ResponseStatus Status => _response.Status;
-
-        /// <inheritdoc />
-        public short StatusWord => _response.StatusWord;
-
-        /// <inheritdoc />
-        public string StatusMessage => _response.StatusMessage;
     }
 }

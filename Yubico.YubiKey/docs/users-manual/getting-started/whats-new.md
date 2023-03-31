@@ -16,6 +16,18 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.7.x Releases
+
+### 1.7.0
+
+Release date: March 31st, 2023
+
+Features:
+
+- **FIDO2 Credential Management**. The credential management feature allows a client application to retrieve 
+  information about discoverable FIDO2 credentials on a YubiKey, update user information, and delete credentials.
+  This includes enumerating the relying parties and user information for all the discoverable credentials.
+
 ## 1.6.x Releases
 
 ### 1.6.1

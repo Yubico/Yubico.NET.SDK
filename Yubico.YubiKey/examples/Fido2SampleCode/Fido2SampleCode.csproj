@@ -22,10 +22,6 @@ limitations under the License. -->
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Yubico.YubiKey" Version="1.6.1-prerelease.20230329.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\SharedSampleCode\SharedSampleCode.csproj" />
   </ItemGroup>
 

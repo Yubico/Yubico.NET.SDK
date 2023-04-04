@@ -65,6 +65,12 @@ namespace Yubico.YubiKey.TestUtilities
         public FirmwareVersion FirmwareVersion { get; set; }
 
         /// <inheritdoc />
+        public TemplateStorageVersion TemplateStorageVersion { get; set; }
+
+        /// <inheritdoc />
+        public ImageProcessorVersion ImageProcessorVersion { get; set; }
+
+        /// <inheritdoc />
         public int AutoEjectTimeout { get; private set; }
 
         /// <inheritdoc />
@@ -93,6 +99,18 @@ namespace Yubico.YubiKey.TestUtilities
             // the setter is public. HollowConnection takes a version
             // and feeds it back in the ReadStatusCommand.
             FirmwareVersion = new FirmwareVersion
+            {
+                Major = 0,
+                Minor = 0,
+                Patch = 0
+            };
+            TemplateStorageVersion = new TemplateStorageVersion
+            {
+                Major = 0,
+                Minor = 0,
+                Patch = 0
+            };
+            ImageProcessorVersion = new ImageProcessorVersion
             {
                 Major = 0,
                 Minor = 0,

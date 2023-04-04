@@ -76,6 +76,19 @@ namespace Yubico.YubiKey
         public FirmwareVersion FirmwareVersion { get; }
 
         /// <summary>
+        /// The version of the chip/firmware storing the fingerprints (the second
+        /// secure element). If there is no template storage chip, this will be
+        /// null.
+        /// </summary>
+        public TemplateStorageVersion? TemplateStorageVersion { get; }
+
+        /// <summary>
+        /// The version of the chip/firmware performing the image processing. If
+        /// there is no image processing chip, this will be null.
+        /// </summary>
+        public ImageProcessorVersion? ImageProcessorVersion { get; }
+
+        /// <summary>
         /// The CCID auto-eject timeout (in seconds).
         /// </summary>
         /// <remarks>

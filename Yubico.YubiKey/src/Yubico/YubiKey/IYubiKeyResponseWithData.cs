@@ -32,9 +32,11 @@ namespace Yubico.YubiKey
         /// <remarks>
         /// If the method cannot return the data, it will throw an exception.
         /// This happens when the <see cref="IYubiKeyResponse.Status"/> property indicates
-        /// an error, or the data returned from the YubiKey was malformed or incomplete.
-        /// </remarks>
-        /// <example>
+        /// an error, or the data returned from the YubiKey was malformed or
+        /// incomplete.
+        /// <para>
+        /// For example,
+        /// <code language="csharp">
         /// IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);
         /// GetDataCommand getDataCommand = new GetDataCommand(PivDataTag.Chuid);
         /// GetDataResponse getDataResponse = connection.SendCommand(getDataCommand);
@@ -42,7 +44,9 @@ namespace Yubico.YubiKey
         /// {
         ///     byte[] getChuid = getDataResponse.GetData();
         /// }
-        /// </example>
+        /// </code>
+        /// </para>
+        /// </remarks>
         /// <returns>
         /// The data returned by the YubiKey, presented in a manner specific to each
         /// implementation.

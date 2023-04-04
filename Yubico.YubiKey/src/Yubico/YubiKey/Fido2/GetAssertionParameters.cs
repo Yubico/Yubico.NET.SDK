@@ -104,9 +104,14 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// The result of calling the PinProtocol's method
-        /// <see cref="PinUvAuthProtocolBase.AuthenticateUsingPinToken(byte[],byte[])"/> using
-        /// the PIN token as the key and the client data hash as the message.
-        /// This is an optional parameter, so it can be null.
+        /// <see cref="PinUvAuthProtocolBase.AuthenticateUsingPinToken(byte[],byte[])"/>
+        /// using the PIN token as the key and the client data hash as the
+        /// message. This is an optional parameter, so it can be null.
+        /// &gt; [!NOTE]
+        /// &gt; If you get assertions by calling the &gt; <see cref="Fido2Session"/>
+        /// &gt; method <see cref="Fido2Session.GetAssertions"/>, &gt; you do not
+        /// &gt; need to set this property, the SDK will do so. If you get an
+        /// &gt; assertion using the commands, you must set this property.
         /// </summary>
         /// <remarks>
         /// In order to obtain the <c>pinUvAuthParam</c>, choose a protocol and

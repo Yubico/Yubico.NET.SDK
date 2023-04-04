@@ -76,6 +76,14 @@ namespace Yubico.YubiKey.Fido2.Cbor
             return this;
         }
 
+        public CborMapWriter<TKey> Entry(TKey key, bool value)
+        {
+            WriteKey(key);
+            _cbor.WriteBoolean(value);
+
+            return this;
+        }
+
         public CborMapWriter<TKey> Entry(TKey key, ReadOnlyMemory<byte> value)
         {
             WriteKey(key);
@@ -113,6 +121,16 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         public CborMapWriter<TKey> OptionalEntry(TKey key, int? value)
+        {
+            if (value.HasValue)
+            {
+                return Entry(key, value.Value);
+            }
+
+            return this;
+        }
+
+        public CborMapWriter<TKey> OptionalEntry(TKey key, bool? value)
         {
             if (value.HasValue)
             {

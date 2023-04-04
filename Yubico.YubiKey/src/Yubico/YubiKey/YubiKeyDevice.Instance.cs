@@ -56,6 +56,12 @@ namespace Yubico.YubiKey
         public FirmwareVersion FirmwareVersion => _yubiKeyInfo.FirmwareVersion;
 
         /// <inheritdoc />
+        public TemplateStorageVersion? TemplateStorageVersion => _yubiKeyInfo.TemplateStorageVersion;
+
+        /// <inheritdoc />
+        public ImageProcessorVersion? ImageProcessorVersion => _yubiKeyInfo.ImageProcessorVersion;
+
+        /// <inheritdoc />
         public int AutoEjectTimeout => _yubiKeyInfo.AutoEjectTimeout;
 
         /// <inheritdoc />

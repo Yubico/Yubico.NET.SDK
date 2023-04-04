@@ -214,6 +214,10 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="serializedLargeBlobArray">
         /// The object containing the data to store.
         /// </param>
+        /// <exception cref="Fido2Exception">
+        /// The YubiKey could not complete the operation, likely because of a
+        /// wrong PIN or fingerprint.
+        /// </exception>
         public void SetSerializedLargeBlobArray(SerializedLargeBlobArray serializedLargeBlobArray)
         {
             _log.LogInformation("Set the YubiKey with a new large blob array.");
@@ -248,8 +252,11 @@ namespace Yubico.YubiKey.Fido2
                     byte[] pinUvAuthParam = AuthProtocol.AuthenticateUsingPinToken(token, 0, currentToken.Length, dataToAuth);
 
                     var command = new SetLargeBlobCommand(
-                        new ReadOnlyMemory<byte>(encodedArray, offset, currentLength), offset, encodedArray.Length,
-                        pinUvAuthParam, (int)AuthProtocol.Protocol);
+                        new ReadOnlyMemory<byte>(encodedArray, offset, currentLength),
+                        offset,
+                        encodedArray.Length,
+                        pinUvAuthParam,
+                        (int)AuthProtocol.Protocol);
                     SetLargeBlobResponse response = Connection.SendCommand(command);
                     if (response.Status == ResponseStatus.Success)
                     {
@@ -257,7 +264,7 @@ namespace Yubico.YubiKey.Fido2
                         offset += currentLength;
                         forceToken = false;
                     }
-                    else if (response.CtapStatus == CtapStatus.PinAuthInvalid)
+                    else if ((response.CtapStatus == CtapStatus.PinAuthInvalid) && !forceToken)
                     {
                         forceToken = true;
                     }

@@ -318,6 +318,15 @@ namespace Yubico.YubiKey
             Assert.Equal(0, FirmwareVersion.V2_0_0.CompareTo(other));
         }
 
+        [Fact]
+        public void Version_LessThan_HigherVersion_ReturnsTrue()
+        {
+            var versionLeft = new ImageProcessorVersion(3, 7, 9);
+            var versionRight = new ImageProcessorVersion(3, 7, 10);
+
+            Assert.True(versionLeft < versionRight);
+        }
+
         private static byte GetRandomByte()
         {
             var rng = new Random();

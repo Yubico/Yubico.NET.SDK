@@ -456,7 +456,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void UpdateUserInfoForCredential(CredentialId credentialId, UserEntity newUserInfo)
         {
-            _log.LogInformation("Update user information");
+            _log.LogInformation("Update user information.");
 
             ReadOnlyMemory<byte> currentToken = GetAuthToken(
                 false, PinUvAuthTokenPermissions.CredentialManagement, null);

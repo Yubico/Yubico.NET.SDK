@@ -37,6 +37,9 @@ namespace Yubico.YubiKey
         private const byte ConfigurationLockPresentTag = 0x0a;
         private const byte NfcPrePersCapabilitiesTag = 0x0d;
         private const byte NfcEnabledCapabilitiesTag = 0x0e;
+        private const byte MoreDataTag = 0x10;
+        private const byte TemplateStorageVersionTag = 0x20;
+        private const byte ImageProcessorVersionTag = 0x21;
 
         // The IapFlags tag may be returned by the device, but it should be ignored.
         private const byte IapDetectionTag = 0x0f;
@@ -80,6 +83,12 @@ namespace Yubico.YubiKey
 
         /// <inheritdoc />
         public FirmwareVersion FirmwareVersion { get; set; }
+
+        /// <inheritdoc />
+        public TemplateStorageVersion? TemplateStorageVersion { get; set; }
+
+        /// <inheritdoc />
+        public ImageProcessorVersion? ImageProcessorVersion { get; set; }
 
         /// <inheritdoc />
         public int AutoEjectTimeout { get; set; }
@@ -213,6 +222,31 @@ namespace Yubico.YubiKey
                         _ = tlvReader.ReadByte(IapDetectionTag);
                         break;
 
+                    case MoreDataTag:
+                        // Ignore this tag for now.
+                        _ = (int)tlvReader.ReadByte(MoreDataTag);
+                        break;
+
+                    case TemplateStorageVersionTag:
+                        ReadOnlySpan<byte> fpChipVersion = tlvReader.ReadValue(TemplateStorageVersionTag).Span;
+                        deviceInfo.TemplateStorageVersion = new TemplateStorageVersion()
+                        {
+                            Major = fpChipVersion[0],
+                            Minor = fpChipVersion[1],
+                            Patch = fpChipVersion[2]
+                        };
+                        break;
+
+                    case ImageProcessorVersionTag:
+                        ReadOnlySpan<byte> ipChipVersion = tlvReader.ReadValue(ImageProcessorVersionTag).Span;
+                        deviceInfo.ImageProcessorVersion = new ImageProcessorVersion()
+                        {
+                            Major = ipChipVersion[0],
+                            Minor = ipChipVersion[1],
+                            Patch = ipChipVersion[2]
+                        };
+                        break;
+
                     default:
                         Debug.Assert(false, "Encountered an unrecognized tag in DeviceInfo. Ignoring.");
                         break;
@@ -231,10 +265,7 @@ namespace Yubico.YubiKey
 
         internal YubiKeyDeviceInfo Merge(YubiKeyDeviceInfo? second)
         {
-            if (second is null)
-            {
-                second = new YubiKeyDeviceInfo();
-            }
+            second ??= new YubiKeyDeviceInfo();
 
             return new YubiKeyDeviceInfo
                 {

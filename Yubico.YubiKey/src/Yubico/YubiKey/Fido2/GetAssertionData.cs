@@ -50,7 +50,7 @@ namespace Yubico.YubiKey.Fido2
 
 //        private readonly Logger _log = Log.GetLogger();
         private bool _disposed;
-        private byte[]? _keyData;
+        private readonly byte[]? _keyData;
 
         /// <summary>
         /// The credential ID for the assertion just obtained.

@@ -72,9 +72,9 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="ArgumentNullException">
         /// The <paramref name="parameters"/> argument was null.
         /// </exception>
-        /// <exception cref="SecurityException">
-        /// The YubiKey has not been authenticated. Call <see cref="VerifyPin"/> or <see cref="VerifyUv"/> before
-        /// calling this method.
+        /// <exception cref="Fido2Exception">
+        /// The YubiKey could not complete the operation, likely because of a
+        /// wrong PIN or fingerprint.
         /// </exception>
         /// <exception cref="TimeoutException">
         /// The YubiKey either required touch for a user presence check or a biometric touch for user verification.

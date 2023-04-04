@@ -245,8 +245,12 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// Returns the AES-256-CBC decryption of ciphertext using an IV specified
         /// by the protocol and the <see cref="EncryptionKey"/>. With protocol 1
         /// the IV is all 00 bytes. With protocol 2, it is the first block size
-        /// bytes of <c>ciphertext</c>
+        /// bytes of <c>ciphertext</c>.
         /// </summary>
+        /// <remarks>
+        /// Note that this method will verify that the input buffer, offset, and
+        /// length are valid.
+        /// </remarks>
         /// <param name="ciphertext">
         /// The data to decrypt.
         /// </param>
@@ -349,12 +353,12 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// </exception>
         public byte[] AuthenticateUsingPinToken(byte[] pinToken, byte[] message)
         {
-            if (!(pinToken is null))
+            if (pinToken is null)
             {
-                return AuthenticateUsingPinToken(pinToken, 0, pinToken.Length, message);
+                throw new ArgumentNullException(nameof(pinToken));
             }
 
-            throw new ArgumentNullException(nameof(pinToken));
+            return AuthenticateUsingPinToken(pinToken, 0, pinToken.Length, message);
         }
 
         /// <summary>

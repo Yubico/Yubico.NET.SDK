@@ -28,6 +28,11 @@ namespace Yubico.YubiKey.Fido2
     {
         /// <summary>
         /// Gets one or more assertions for a particular relying party.
+        /// &gt; [!NOTE]
+        /// &gt; You must supply a <see cref="GetAssertionParameters"/> object to
+        /// &gt; this method, however, you do not need to set the
+        /// &gt; <see cref="GetAssertionParameters.PinUvAuthParam"/> property,
+        /// &gt; the SDK will do so.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -46,6 +51,11 @@ namespace Yubico.YubiKey.Fido2
         /// PIN or fingerprint, so will not call the KeyCollector. However, if it
         /// needs to perform authentication, it will request user verification
         /// and/or a PIN using the KeyCollector.
+        /// </para>
+        /// <para>
+        /// Note that because the SDK will make the appropriate authentication
+        /// calls, it will build the <c>PinUvAuthParam</c> in the
+        /// <c>GetAssertionParameters</c> input arg, so you do not need to do so.
         /// </para>
         /// <para>
         /// It is still possible to call this method with a KeyCollector that
@@ -74,9 +84,9 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="ArgumentNullException">
         /// The <paramref name="parameters"/> argument was null.
         /// </exception>
-        /// <exception cref="SecurityException">
-        /// The YubiKey has not been authenticated. Call <see cref="VerifyPin"/> or <see cref="VerifyUv"/> before
-        /// calling this method.
+        /// <exception cref="Fido2Exception">
+        /// The YubiKey could not complete the operation, likely because of a
+        /// wrong PIN or fingerprint.
         /// </exception>
         /// <exception cref="TimeoutException">
         /// The YubiKey either required touch for a user presence check or a biometric touch for user authentication.

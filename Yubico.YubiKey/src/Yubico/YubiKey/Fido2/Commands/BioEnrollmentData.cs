@@ -51,11 +51,15 @@ namespace Yubico.YubiKey.Fido2.Commands
         private const int KeyModality = 1;
         private const int KeyFingerprintKind = 2;
         private const int KeyMaxCaptureCount = 3;
+        private const int KeyTemplateId = 4;
+        private const int KeyLastEnrollStatus = 5;
+        private const int KeyRemainingSampleCount = 6;
         private const int KeyMaxFriendlyNameBytes = 8;
 
         /// <summary>
         /// The modality of the YubiKey Bio component. The modality is the
-        /// technique used to obtain Bio authentication.
+        /// technique used to obtain Bio authentication. This is an optional
+        /// element and can be null.
         /// </summary>
         /// <remarks>
         /// The value returned by the YubiKey is an integer. The standard defines
@@ -66,7 +70,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
         /// <summary>
         /// The kind of fingerprint reader, that is, what method the fingerprint
-        /// reader uses.
+        /// reader uses. This is an optional element and can be null.
         /// </summary>
         /// <remarks>
         /// The value returned by the YubiKey is an integer. The standard defines
@@ -76,7 +80,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         public int? FingerprintKind { get; private set; }
 
         /// <summary>
-        /// The number of "good" fingerprint captures required to enroll.
+        /// The number of "good" fingerprint captures required to enroll. This is
+        /// an optional element and can be null.
         /// </summary>
         /// <remarks>
         /// In order to enroll a fingerprint, it is necessary to provide the
@@ -90,7 +95,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         public int? MaxCaptureCount { get; private set; }
 
         /// <summary>
-        /// The maximum length, in bytes, of a template friendly name.
+        /// The maximum length, in bytes, of a template friendly name. This is an
+        /// optional element and can be null.
         /// </summary>
         /// <remarks>
         /// A "template" is one biometric entry: all the data the YubiKey stores
@@ -106,6 +112,24 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </para>
         /// </remarks>
         public int? MaxFriendlyNameBytes { get; private set; }
+
+        /// <summary>
+        /// The template ID of the fingerprint being enrolled. This is an
+        /// optional element and can be null.
+        /// </summary>
+        public ReadOnlyMemory<byte>? TemplateId { get; private set; }
+
+        /// <summary>
+        /// The result of the most recent attempt to provide a fingerprint
+        /// sample. This is an optional element and can be null.
+        /// </summary>
+        public int? LastEnrollSampleStatus { get; private set; }
+
+        /// <summary>
+        /// The number of successful fingerprint samples required to complete an
+        /// enrollment. This is an optional element and can be null.
+        /// </summary>
+        public int? RemainingSampleCount { get; private set; }
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -134,6 +158,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             FingerprintKind = (int?)cborMap.ReadOptional<int>(KeyFingerprintKind);
             MaxCaptureCount = (int?)cborMap.ReadOptional<int>(KeyMaxCaptureCount);
             MaxFriendlyNameBytes = (int?)cborMap.ReadOptional<int>(KeyMaxFriendlyNameBytes);
+            TemplateId = (byte[]?)cborMap.ReadOptional<byte[]>(KeyTemplateId);
+            LastEnrollSampleStatus = (int?)cborMap.ReadOptional<int>(KeyLastEnrollStatus);
+            RemainingSampleCount = (int?)cborMap.ReadOptional<int>(KeyRemainingSampleCount);
         }
     }
 }

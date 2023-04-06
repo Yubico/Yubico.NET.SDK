@@ -493,6 +493,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The operation was canceled by the caller or user..
+        /// </summary>
+        internal static string Fido2OperationCanceled {
+            get {
+                return ResourceManager.GetString("Fido2OperationCanceled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to An option or extension specified is either unsupported or invalid for the connected YubiKey..
         /// </summary>
         internal static string Fido2OptionExtension {

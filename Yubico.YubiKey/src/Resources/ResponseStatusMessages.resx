@@ -303,6 +303,9 @@
   <data name="Fido2AuthInvalid" xml:space="preserve">
     <value>The authentication was invalid for the requested FIDO2 operation.</value>
   </data>
+  <data name="Fido2OperationCanceled" xml:space="preserve">
+    <value>The operation was canceled by the caller or user.</value>
+  </data>
   <data name="Fido2CredentialExcluded" xml:space="preserve">
     <value>The credential was rejected because it is on the relying party's exclude list.</value>
   </data>

@@ -24,12 +24,10 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
-    public class MakeLargeBlobTests : SimpleIntegrationTestConnection
+    public class MakeLargeBlobTests : NeedPinToken
     {
-        private readonly byte[] _pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-
         public MakeLargeBlobTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio, null)
         {
         }
 
@@ -74,7 +72,7 @@ namespace Yubico.YubiKey.Fido2
 
             var protocol = new PinUvAuthProtocolTwo();
             bool isValid = GetPinToken(
-                protocol, _pin, PinUvAuthTokenPermissions.LargeBlobWrite, out byte[] pinToken);
+                protocol, PinUvAuthTokenPermissions.LargeBlobWrite, out byte[] pinToken);
             Assert.True(isValid);
             byte[] pinUvAuthParam = protocol.AuthenticateUsingPinToken(pinToken, dataToAuth);
 
@@ -88,86 +86,6 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(ResponseStatus.Success, getBlobRsp.Status);
             ReadOnlyMemory<byte> blobData = getBlobRsp.GetData();
             Assert.NotEmpty(blobData.ToArray());
-        }
-
-        // This will get a PIN token.
-        // To do so, it will check the PinProtocol object. If it is not yet in a
-        // post-Encapsulate state, it will get the YubiKey's public key, then
-        // call Encapsulate (the input object will be updated).
-        // Next, it will get a PIN token using the given PIN.
-        // If that works, return the PIN token (the out arg).
-        // If it doesn't work because there is no PIN set, set the PIN and then
-        // get the PIN token.
-        // If it doesn't work because the PIN was wron, return false.
-        private bool GetPinToken(
-            PinUvAuthProtocolBase protocol,
-            byte[] pin,
-            PinUvAuthTokenPermissions permissions,
-            out byte[] pinToken)
-        {
-            pinToken = Array.Empty<byte>();
-            GetPinUvAuthTokenResponse getTokenRsp;
-
-            if (protocol.AuthenticatorPublicKey is null)
-            {
-                var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
-                GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
-                if (getKeyRsp.Status != ResponseStatus.Success)
-                {
-                    return false;
-                }
-
-                protocol.Encapsulate(getKeyRsp.GetData());
-
-                if (permissions == PinUvAuthTokenPermissions.None)
-                {
-                    var getTokenCmd = new GetPinTokenCommand(protocol, pin);
-                    getTokenRsp = Connection.SendCommand(getTokenCmd);
-                }
-                else
-                {
-                    var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, pin, permissions, null);
-                    //var getTokenCmd = new GetPinUvAuthTokenUsingUvCommand(protocol, permissions, null);
-                    getTokenRsp = Connection.SendCommand(getTokenCmd);
-                }
-
-                if (getTokenRsp.Status == ResponseStatus.Success)
-                {
-                    pinToken = getTokenRsp.GetData().ToArray();
-                    return true;
-                }
-
-                if (getTokenRsp.StatusWord == 0x6F31)
-                {
-                    return false;
-                }
-
-                var setPinCmd = new SetPinCommand(protocol, pin);
-                SetPinResponse setPinRsp = Connection.SendCommand(setPinCmd);
-                if (setPinRsp.Status != ResponseStatus.Success)
-                {
-                    return false;
-                }
-            }
-
-            if (permissions == PinUvAuthTokenPermissions.None)
-            {
-                var getTokenCmd = new GetPinTokenCommand(protocol, pin);
-                getTokenRsp = Connection.SendCommand(getTokenCmd);
-            }
-            else
-            {
-                var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, pin, permissions, null);
-                getTokenRsp = Connection.SendCommand(getTokenCmd);
-            }
-
-            if (getTokenRsp.Status == ResponseStatus.Success)
-            {
-                pinToken = getTokenRsp.GetData().ToArray();
-                return true;
-            }
-
-            return false;
         }
 
         private byte[] BuildDataPlusDigest(byte[] inputData, int dataOffset, int dataLength, HashAlgorithm digester)

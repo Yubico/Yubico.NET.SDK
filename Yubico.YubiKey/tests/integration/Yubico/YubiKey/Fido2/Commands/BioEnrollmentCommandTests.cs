@@ -12,16 +12,18 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.YubiKey.Fido2.Commands;
+using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
 using Xunit;
 
 namespace Yubico.YubiKey.Fido2
 {
-    public class BioEnrollmentCommandTests : SimpleIntegrationTestConnection
+    public class BioEnrollmentCommandTests : NeedPinToken
     {
         public BioEnrollmentCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio, null)
         {
         }
 
@@ -31,7 +33,7 @@ namespace Yubico.YubiKey.Fido2
             var cmd = new GetBioModalityCommand();
             GetBioModalityResponse rsp = Connection.SendCommand(cmd);
             int modality = rsp.GetData();
-            
+
             Assert.Equal(1, modality);
         }
 
@@ -45,6 +47,70 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(1, sensorInfo.FingerprintKind);
             Assert.Equal(16, sensorInfo.MaxCaptureCount);
             Assert.Equal(15, sensorInfo.MaxFriendlyNameBytes);
+        }
+
+        [Fact]
+        public void BioEnrollBegin_Succeeds()
+        {
+            var protocol = new PinUvAuthProtocolTwo();
+            bool isValid = GetPinToken(
+                protocol, PinUvAuthTokenPermissions.BioEnrollment, out byte[] pinToken);
+            Assert.True(isValid);
+
+            var cmd = new BioEnrollBeginCommand(5000, pinToken, protocol);
+            BioEnrollBeginResponse rsp = Connection.SendCommand(cmd);
+            BioEnrollUpdateStatus enrollStatus = rsp.GetData();
+
+            Assert.Equal(BioEnrollSampleStatus.FpGood, enrollStatus.LastEnrollSampleStatus);
+        }
+
+        [Fact]
+        public void BioEnrollNextSample_Succeeds()
+        {
+            var protocol = new PinUvAuthProtocolTwo();
+            bool isValid = GetPinToken(
+                protocol, PinUvAuthTokenPermissions.BioEnrollment, out byte[] pinToken);
+            Assert.True(isValid);
+
+            var cmd = new BioEnrollBeginCommand(null, pinToken, protocol);
+            BioEnrollBeginResponse rsp = Connection.SendCommand(cmd);
+            BioEnrollUpdateStatus enrollStatus = rsp.GetData();
+            Assert.Equal(BioEnrollSampleStatus.FpGood, enrollStatus.LastEnrollSampleStatus);
+
+            var nextCmd = new BioEnrollNextSampleCommand(enrollStatus.TemplateId, null, pinToken, protocol);
+            do
+            {
+                BioEnrollNextSampleResponse nextRsp = Connection.SendCommand(nextCmd);
+                enrollStatus = nextRsp.GetData();
+            } while (enrollStatus.RemainingSampleCount > 0);
+
+            Assert.Equal(0, enrollStatus.RemainingSampleCount);
+        }
+
+        [Fact]
+        public void BioEnrollCancel_Succeeds()
+        {
+            var protocol = new PinUvAuthProtocolTwo();
+            bool isValid = GetPinToken(
+                protocol, PinUvAuthTokenPermissions.BioEnrollment, out byte[] pinToken);
+            Assert.True(isValid);
+
+            var cmd = new BioEnrollBeginCommand(null, pinToken, protocol);
+            BioEnrollBeginResponse rsp = Connection.SendCommand(cmd);
+            BioEnrollUpdateStatus enrollStatus = rsp.GetData();
+            Assert.Equal(BioEnrollSampleStatus.FpGood, enrollStatus.LastEnrollSampleStatus);
+
+            var nextCmd = new BioEnrollNextSampleCommand(enrollStatus.TemplateId, null, pinToken, protocol);
+            
+            BioEnrollNextSampleResponse nextRsp = Connection.SendCommand(nextCmd);
+            enrollStatus = nextRsp.GetData();
+ 
+            Assert.True(enrollStatus.RemainingSampleCount != 0);
+ 
+            var cancelCmd = new BioEnrollCancelCommand();
+            Fido2Response cancelRsp = Connection.SendCommand(cancelCmd);
+
+            Assert.Equal(ResponseStatus.Success, cancelRsp.Status);
         }
     }
 }

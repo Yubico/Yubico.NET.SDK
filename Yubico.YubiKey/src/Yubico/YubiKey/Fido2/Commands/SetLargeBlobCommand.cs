@@ -119,6 +119,10 @@ namespace Yubico.YubiKey.Fido2.Commands
         ///       SHA-256(contents of set byte string)
         /// </code>
         /// See <see cref="PinProtocols.PinUvAuthProtocolBase.AuthenticateUsingPinToken(byte[],byte[])"/>.
+        /// Note that this is not the "normal" process. All other commands
+        /// require only the PinUvAuthToken and they compute the PinUvAuthParam.
+        /// However, because computing the AuthParam requires digesting data,
+        /// this command requires the caller make the computations.
         /// </para>
         /// <para>
         /// It is the responsibility of the caller to keep track of the offset.

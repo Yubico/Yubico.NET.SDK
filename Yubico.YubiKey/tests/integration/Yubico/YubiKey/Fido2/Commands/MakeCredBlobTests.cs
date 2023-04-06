@@ -20,7 +20,7 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2
 {
-    public class MakeCredBlobTests : SimpleIntegrationTestConnection
+    public class MakeCredBlobTests : NeedPinToken
     {
         private readonly byte[] _clientDataHash = new byte[] {
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
@@ -45,10 +45,8 @@ namespace Yubico.YubiKey.Fido2
             DisplayName = "User",
         };
 
-        private readonly byte[] _pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-
         public MakeCredBlobTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio, null)
         {
         }
 
@@ -95,7 +93,7 @@ namespace Yubico.YubiKey.Fido2
         {
             makeParams = new MakeCredentialParameters(_rp, _user);
 
-            if (!GetPinToken(protocol, _pin, out byte[] pinToken))
+            if (!GetPinToken(protocol, PinUvAuthTokenPermissions.None, out byte[] pinToken))
             {
                 return false;
             }
@@ -118,7 +116,7 @@ namespace Yubico.YubiKey.Fido2
         {
             assertionParams = new GetAssertionParameters(_rp, _clientDataHash);
 
-            if (!GetPinToken(protocol, _pin, out byte[] pinToken))
+            if (!GetPinToken(protocol, PinUvAuthTokenPermissions.None, out byte[] pinToken))
             {
                 return false;
             }
@@ -132,64 +130,6 @@ namespace Yubico.YubiKey.Fido2
             assertionParams.AddExtension("credBlob", new byte[] { 0xF5 });
 
             return true;
-        }
-
-        // This will get a PIN token.
-        // To do so, it will check the PinProtocol object. If it is not yet in a
-        // post-Encapsulate state, it will get the YubiKey's public key, then
-        // call Encapsulate (the input object will be updated).
-        // Next, it will get a PIN token using the given PIN.
-        // If that works, return the PIN token (the out arg).
-        // If it doesn't work because there is no PIN set, set the PIN and then
-        // get the PIN token.
-        // If it doesn't work because the PIN was wron, return false.
-        private bool GetPinToken(
-            PinUvAuthProtocolBase protocol,
-            byte[] pin,
-            out byte[] pinToken)
-        {
-            pinToken = Array.Empty<byte>();
-            if (protocol.AuthenticatorPublicKey is null)
-            {
-                var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
-                GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
-                if (getKeyRsp.Status != ResponseStatus.Success)
-                {
-                    return false;
-                }
-
-                protocol.Encapsulate(getKeyRsp.GetData());
-
-                var getTokenCmd = new GetPinTokenCommand(protocol, pin);
-                GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
-                if (getTokenRsp.Status == ResponseStatus.Success)
-                {
-                    pinToken = getTokenRsp.GetData().ToArray();
-                    return true;
-                }
-
-                if (getTokenRsp.StatusWord == 0x6F31)
-                {
-                    return false;
-                }
-
-                var setPinCmd = new SetPinCommand(protocol, pin);
-                SetPinResponse setPinRsp = Connection.SendCommand(setPinCmd);
-                if (setPinRsp.Status != ResponseStatus.Success)
-                {
-                    return false;
-                }
-            }
-
-            var cmd = new GetPinTokenCommand(protocol, pin);
-            GetPinUvAuthTokenResponse rsp = Connection.SendCommand(cmd);
-            if (rsp.Status == ResponseStatus.Success)
-            {
-                pinToken = rsp.GetData().ToArray();
-                return true;
-            }
-
-            return false;
         }
 
         private bool CheckCredBlob(GetAssertionData aData)

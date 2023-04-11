@@ -17,6 +17,7 @@ using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using System.Collections.Generic;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -101,16 +102,75 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(BioEnrollSampleStatus.FpGood, enrollStatus.LastEnrollSampleStatus);
 
             var nextCmd = new BioEnrollNextSampleCommand(enrollStatus.TemplateId, null, pinToken, protocol);
-            
+
             BioEnrollNextSampleResponse nextRsp = Connection.SendCommand(nextCmd);
             enrollStatus = nextRsp.GetData();
- 
+
             Assert.True(enrollStatus.RemainingSampleCount != 0);
- 
+
             var cancelCmd = new BioEnrollCancelCommand();
             Fido2Response cancelRsp = Connection.SendCommand(cancelCmd);
 
             Assert.Equal(ResponseStatus.Success, cancelRsp.Status);
+        }
+
+        [Fact]
+        public void EnumerateEnrollmentsCommand_Succeeds()
+        {
+            var protocol = new PinUvAuthProtocolTwo();
+            bool isValid = GetPinToken(
+                protocol, PinUvAuthTokenPermissions.BioEnrollment, out byte[] pinToken);
+            Assert.True(isValid);
+
+            var cmd = new BioEnrollEnumerateCommand(pinToken, protocol);
+            BioEnrollEnumerateResponse rsp = Connection.SendCommand(cmd);
+
+            Assert.Equal(ResponseStatus.Success, rsp.Status);
+
+            IReadOnlyList<TemplateInfo> templateInfos = rsp.GetData();
+            Assert.Equal(1, templateInfos.Count);
+        }
+
+        [Fact]
+        public void FriendlyNameCommand_Succeeds()
+        {
+            var protocol = new PinUvAuthProtocolTwo();
+            bool isValid = GetPinToken(
+                protocol, PinUvAuthTokenPermissions.BioEnrollment, out byte[] pinToken);
+            Assert.True(isValid);
+
+            var cmd = new BioEnrollEnumerateCommand(pinToken, protocol);
+            BioEnrollEnumerateResponse rsp = Connection.SendCommand(cmd);
+
+            Assert.Equal(ResponseStatus.Success, rsp.Status);
+            IReadOnlyList<TemplateInfo> templateInfos = rsp.GetData();
+
+            var nameCmd = new BioEnrollSetFriendlyNameCommand(
+                templateInfos[0].TemplateId, "NameTwo", pinToken, protocol);
+            Fido2Response nameRsp = Connection.SendCommand(nameCmd);
+
+            Assert.Equal(ResponseStatus.Success, nameRsp.Status);
+        }
+
+        [Fact]
+        public void DeleteCommand_Succeeds()
+        {
+            var protocol = new PinUvAuthProtocolTwo();
+            bool isValid = GetPinToken(
+                protocol, PinUvAuthTokenPermissions.BioEnrollment, out byte[] pinToken);
+            Assert.True(isValid);
+
+            var cmd = new BioEnrollEnumerateCommand(pinToken, protocol);
+            BioEnrollEnumerateResponse rsp = Connection.SendCommand(cmd);
+
+            Assert.Equal(ResponseStatus.Success, rsp.Status);
+            IReadOnlyList<TemplateInfo> templateInfos = rsp.GetData();
+
+            var removeCmd = new BioEnrollRemoveCommand(
+                templateInfos[0].TemplateId, pinToken, protocol);
+            Fido2Response removeRsp = Connection.SendCommand(removeCmd);
+
+            Assert.Equal(ResponseStatus.Success, removeRsp.Status);
         }
     }
 }

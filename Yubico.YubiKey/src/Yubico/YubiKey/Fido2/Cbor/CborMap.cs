@@ -74,12 +74,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 throw new Ctap2DataException(ExceptionMessages.Ctap2MissingRequiredField);
             }
 
-            int? numberElements = cbor.ReadStartMap();
-            if (numberElements is null)
-            {
-                throw new NotSupportedException(ExceptionMessages.Ctap2CborIndefiniteLength);
-            }
-
+            int? numberElements = cbor.ReadStartMap() ?? throw new NotSupportedException(ExceptionMessages.Ctap2CborIndefiniteLength);
             int count = numberElements.Value;
             _dict = new Dictionary<TKey, object?>(count);
 
@@ -346,11 +341,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
         {
             int? entryCount = cbor.ReadStartArray();
             int count = entryCount ?? 0;
-
-            if (count == 0)
-            {
-                return null;
-            }
 
             var entries = new List<object?>(count);
             while (count > 0)

@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public BioEnrollmentData GetData()
+        public virtual BioEnrollmentData GetData()
         {
             if (Status != ResponseStatus.Success)
             {

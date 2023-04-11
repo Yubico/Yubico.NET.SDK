@@ -374,7 +374,7 @@ namespace Yubico.YubiKey.Fido2
 
             if (!authenticatorInfo.Extensions.Contains<string>(KeyCredBlob))
             {
-                throw new ArgumentException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+                throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
             }
             if (credBlobValue.Length > authenticatorInfo.MaximumCredentialBlobLength)
             {

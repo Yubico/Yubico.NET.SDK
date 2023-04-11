@@ -13,14 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Formats.Cbor;
-using System.Security.Cryptography;
-using System.Globalization;
-using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
-using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
-using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -54,7 +48,11 @@ namespace Yubico.YubiKey.Fido2.Commands
         private const int KeyTemplateId = 4;
         private const int KeyLastEnrollStatus = 5;
         private const int KeyRemainingSampleCount = 6;
+        private const int KeyTemplateInfos = 7;
         private const int KeyMaxFriendlyNameBytes = 8;
+
+        private const int KeyTemplateInfoId = 1;
+        private const int KeyFriendlyName = 2;
 
         /// <summary>
         /// The modality of the YubiKey Bio component. The modality is the
@@ -131,6 +129,15 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </summary>
         public int? RemainingSampleCount { get; private set; }
 
+        /// <summary>
+        /// The enumeration of enrolled fingerprints. This is an optional element
+        /// and can be null.
+        /// </summary>
+        /// <remarks>
+        /// This is a list of templateId/friendlyName pairs.
+        /// </remarks>
+        public IReadOnlyList<TemplateInfo>? TemplateInfos { get; private set; }
+
         // The default constructor explicitly defined. We don't want it to be
         // used.
         private BioEnrollmentData()
@@ -158,9 +165,28 @@ namespace Yubico.YubiKey.Fido2.Commands
             FingerprintKind = (int?)cborMap.ReadOptional<int>(KeyFingerprintKind);
             MaxCaptureCount = (int?)cborMap.ReadOptional<int>(KeyMaxCaptureCount);
             MaxFriendlyNameBytes = (int?)cborMap.ReadOptional<int>(KeyMaxFriendlyNameBytes);
-            TemplateId = (byte[]?)cborMap.ReadOptional<byte[]>(KeyTemplateId);
+            byte[]? templateId = (byte[]?)cborMap.ReadOptional<byte[]>(KeyTemplateId);
+            if (!(templateId is null))
+            {
+                TemplateId = new ReadOnlyMemory<byte>(templateId);
+            }
             LastEnrollSampleStatus = (int?)cborMap.ReadOptional<int>(KeyLastEnrollStatus);
             RemainingSampleCount = (int?)cborMap.ReadOptional<int>(KeyRemainingSampleCount);
+
+            if (cborMap.Contains(KeyTemplateInfos))
+            {
+                IReadOnlyList<CborMap<int>> templateList = cborMap.ReadArray<CborMap<int>>(KeyTemplateInfos);
+                var templateInfos = new List<TemplateInfo>(templateList.Count);
+                foreach (CborMap<int> currentMap in templateList)
+                {
+                    byte[] currentId = currentMap.ReadByteString(KeyTemplateInfoId).ToArray();
+                    string friendlyName = currentMap.Contains(KeyFriendlyName) ?
+                        currentMap.ReadTextString(KeyFriendlyName) : "";
+                    templateInfos.Add(new TemplateInfo(currentId, friendlyName));
+                }
+
+                TemplateInfos = templateInfos;
+            }
         }
     }
 }

@@ -18,21 +18,51 @@ limitations under the License. -->
 
 # How to delete a slot's configuration
 
-Deleting the configuration stored in a [slot](xref:OtpSlots) via the ```DeleteSlot()``` method is a simple operation. The only parameters that must be provided are the slot name and the slot access code (if applicable). Therefore, ```DeleteSlot()``` executes the operation directly instead of constructing an object.
+Deleting a [slot's](xref:OtpSlots) configuration removes all credentials, associated counters (if any), slot settings, etc. To delete a slot's configuration, you must use one of two methods:
 
-## DeleteSlot example
-
-In the following example, the configuration of the [long-press](xref:Yubico.YubiKey.Otp.Slot.LongPress) slot of the OTP application will be deleted, assuming the correct access code is given:
-
-```C#
-using (OtpSession otp = new OtpSession(yKey))
-{
-  otp.DeleteSlot(Slot.LongPress)
-    .UseCurrentAccessCode(_currentAccessCode)
-    .Execute();
-}
-
-```
+- [DeleteSlot()](xref:Yubico.YubiKey.Otp.OtpSession.DeleteSlot%28Yubico.YubiKey.Otp.Slot%29): for slots that are not configured with an access code.
+- [DeleteSlotConfiguration()](xref:Yubico.YubiKey.Otp.OtpSession.DeleteSlotConfiguration%28Yubico.YubiKey.Otp.Slot%29): for slots that are configured with an access code.
 
 > [!NOTE]
-> This method will fail if the slot you are trying to delete is not currently configured.
+> These methods will fail if the slot you are attempting to delete is not configured.
+
+## Examples
+
+Before running any of the code provided below, make sure you have already connected to a particular YubiKey on your host device via the [YubiKeyDevice](xref:Yubico.YubiKey.YubiKeyDevice) class. 
+
+To select the first available YubiKey connected to your host, use:
+
+```C#
+IEnumerable<IYubiKeyDevice> yubiKeyList = YubiKeyDevice.FindAll();
+
+var yubiKey = yubiKeyList.First();
+```
+
+### Deleting a slot configuration when an access code is not present
+
+To delete a slot configuration that is not protected with an access code, use [DeleteSlot()](xref:Yubico.YubiKey.Otp.OtpSession.DeleteSlot%28Yubico.YubiKey.Otp.Slot%29). You cannot chain other methods to ``DeleteSlot()``, including ``Execute()``. When calling ``DeleteSlot()``, just provide the slot field (in this example, ``Slot.LongPress``). 
+
+```C#
+using (OtpSession otp = new OtpSession(yubiKey))
+{
+  otp.DeleteSlot(Slot.LongPress);
+}
+```
+
+### Deleting a slot configuration when an access code is present
+
+To delete a slot configuration that is protected with an access code, you must call [DeleteSlotConfiguration](xref:Yubico.YubiKey.Otp.OtpSession.DeleteSlotConfiguration%28Yubico.YubiKey.Otp.Slot%29) and provide the current access code with [UseCurrentAccessCode()](xref:Yubico.YubiKey.Otp.Operations.OperationBase%601.UseCurrentAccessCode%28Yubico.YubiKey.Otp.SlotAccessCode%29). You cannot set a new access code during this operation--calling [SetNewAccessCode()](xref:Yubico.YubiKey.Otp.Operations.OperationBase%601.SetNewAccessCode%28Yubico.YubiKey.Otp.SlotAccessCode%29) will succeed, but the operation will not be applied. 
+
+Unlike ``DeleteSlot()``, ``DeleteSlotConfiguration()`` requires ``Execute()`` for the operation to apply the changes. 
+
+```C#
+using (OtpSession otp = new OtpSession(yubiKey))
+{
+  ReadOnlyMemory<byte> currentAccessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, };
+  SlotAccessCode currentAccessCode = new SlotAccessCode(currentAccessCodeBytes);
+
+  otp.DeleteSlotConfiguration(Slot.LongPress)
+    .UseCurrentAccessCode(currentAccessCode)
+    .Execute();
+}
+```

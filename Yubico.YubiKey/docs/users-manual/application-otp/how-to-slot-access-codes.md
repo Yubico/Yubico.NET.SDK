@@ -43,7 +43,7 @@ Access codes can only be set, reset, or removed during another slot configuratio
 
 Access codes must be exactly six bytes ([MaxAccessCodeLength](xref:Yubico.YubiKey.Otp.SlotAccessCode.MaxAccessCodeLength)). The [SlotAccessCode](xref:Yubico.YubiKey.Otp.SlotAccessCode) container class pads the code if less than six bytes are provided and throws an exception if more than six bytes are provided.
 
-When you specify a current access code during a configuration operation, if you don’t reset the property to the same access code, the access code will not be carried over to the new slot configuration. 
+If a slot is configured with an access code, that code must be specified during any reconfiguration operation. In addition, if you don’t also resupply the same (or any) code as a "new" access code, an access code will not be carried over to the new slot configuration, and the slot will no longer be protected after reconfiguration.
 
 ## Example code
 

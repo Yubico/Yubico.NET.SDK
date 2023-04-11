@@ -63,17 +63,17 @@ To set a slot's access code when no access code is present, call [SetNewAccessCo
 
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
-        {
-            ReadOnlyMemory<byte> hmacKey = new byte[ConfigureHotp.HmacKeySize] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
+{
+  ReadOnlyMemory<byte> hmacKey = new byte[ConfigureHotp.HmacKeySize] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
 
-            ReadOnlyMemory<byte> accessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, };
-            SlotAccessCode accessCode = new SlotAccessCode(accessCodeBytes);
+  ReadOnlyMemory<byte> accessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, };
+  SlotAccessCode accessCode = new SlotAccessCode(accessCodeBytes);
 
-            otp.ConfigureHotp(Slot.LongPress)
-              .UseKey(hmacKey)
-              .SetNewAccessCode(accessCode)
-              .Execute();
-        }
+  otp.ConfigureHotp(Slot.LongPress)
+     .UseKey(hmacKey)
+     .SetNewAccessCode(accessCode)
+     .Execute();
+}
 ```
 
 ## Example: reset a slot access code
@@ -82,21 +82,21 @@ To reset a slot's access code, you must provide the current access code with [Us
 
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
-        {
-            ReadOnlyMemory<byte> hmacKey = new byte[ConfigureHotp.HmacKeySize] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
+{
+  ReadOnlyMemory<byte> hmacKey = new byte[ConfigureHotp.HmacKeySize] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
 
-            ReadOnlyMemory<byte> currentAccessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, };
-            SlotAccessCode currentAccessCode = new SlotAccessCode(currentAccessCodeBytes);
+  ReadOnlyMemory<byte> currentAccessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, };
+  SlotAccessCode currentAccessCode = new SlotAccessCode(currentAccessCodeBytes);
 
-            ReadOnlyMemory<byte> newAccessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, };
-            SlotAccessCode newAccessCode = new SlotAccessCode(newAccessCodeBytes);
+  ReadOnlyMemory<byte> newAccessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, };
+  SlotAccessCode newAccessCode = new SlotAccessCode(newAccessCodeBytes);
 
-            otp.ConfigureHotp(Slot.LongPress)
-              .UseKey(hmacKey)
-              .UseCurrentAccessCode(currentAccessCode)
-              .SetNewAccessCode(newAccessCode)
-              .Execute();
-        }
+  otp.ConfigureHotp(Slot.LongPress)
+     .UseKey(hmacKey)
+     .UseCurrentAccessCode(currentAccessCode)
+     .SetNewAccessCode(newAccessCode)
+     .Execute();
+}
 ```
 
 ## Example: remove a slot access code
@@ -116,22 +116,22 @@ Once the access code is removed, you do not need to call ``UseCurrentAccessCode(
 
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
-        {
-            ReadOnlyMemory<byte> hmacKey = new byte[ConfigureHotp.HmacKeySize] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
+{
+  ReadOnlyMemory<byte> hmacKey = new byte[ConfigureHotp.HmacKeySize] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
 
-            ReadOnlyMemory<byte> currentAccessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, };
-            SlotAccessCode currentAccessCode = new SlotAccessCode(currentAccessCodeBytes);
+  ReadOnlyMemory<byte> currentAccessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, };
+  SlotAccessCode currentAccessCode = new SlotAccessCode(currentAccessCodeBytes);
 
-            // New access code of all zeros.
-            ReadOnlyMemory<byte> newAccessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
-            SlotAccessCode newAccessCode = new SlotAccessCode(newAccessCodeBytes);
+  // New access code of all zeros.
+  ReadOnlyMemory<byte> newAccessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
+  SlotAccessCode newAccessCode = new SlotAccessCode(newAccessCodeBytes);
 
-            otp.ConfigureHotp(Slot.LongPress)
-              .UseKey(hmacKey)
-              .UseCurrentAccessCode(currentAccessCode)
-              .SetNewAccessCode(newAccessCode)
-              .Execute();
-        }
+  otp.ConfigureHotp(Slot.LongPress)
+     .UseKey(hmacKey)
+     .UseCurrentAccessCode(currentAccessCode)
+     .SetNewAccessCode(newAccessCode)
+     .Execute();
+}
 ```
 
 ## Example: provide a slot access code during a configuration operation
@@ -140,21 +140,21 @@ Once a slot has been configured with an access code, you must provide that acces
 
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
-        {
-            ReadOnlyMemory<byte> currentAccessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, };
-            SlotAccessCode currentAccessCode = new SlotAccessCode(currentAccessCodeBytes);
+{
+  ReadOnlyMemory<byte> currentAccessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, };
+  SlotAccessCode currentAccessCode = new SlotAccessCode(currentAccessCodeBytes);
 
-            Memory<byte> privateId = new byte[ConfigureYubicoOtp.PrivateIdentifierSize];
-            Memory<byte> aesKey = new byte[ConfigureYubicoOtp.KeySize];
+  Memory<byte> privateId = new byte[ConfigureYubicoOtp.PrivateIdentifierSize];
+  Memory<byte> aesKey = new byte[ConfigureYubicoOtp.KeySize];
 
-            otp.ConfigureYubicoOtp(Slot.LongPress)
-                .UseCurrentAccessCode(currentAccessCode)
-                .SetNewAccessCode(currentAccessCode)
-                .UseSerialNumberAsPublicId()
-                .GeneratePrivateId(privateId)
-                .GenerateKey(aesKey)
-                .Execute();
-        }
+  otp.ConfigureYubicoOtp(Slot.LongPress)
+     .UseCurrentAccessCode(currentAccessCode)
+     .SetNewAccessCode(currentAccessCode)
+     .UseSerialNumberAsPublicId()
+     .GeneratePrivateId(privateId)
+     .GenerateKey(aesKey)
+     .Execute();
+}
 ```
 
 In this example, the slot is now configured with a Yubico OTP credential and is still protected by the same access code (``currentAccessCode``). 
@@ -165,14 +165,14 @@ To delete a slot configuration that is protected with an access code, you must c
 
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
-        {
-            ReadOnlyMemory<byte> currentAccessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, };
-            SlotAccessCode currentAccessCode = new SlotAccessCode(currentAccessCodeBytes);
+{
+  ReadOnlyMemory<byte> currentAccessCodeBytes = new byte[SlotAccessCode.MaxAccessCodeLength] { 0x02, 0x02, 0x02, 0x02, 0x02, 0x02, };
+  SlotAccessCode currentAccessCode = new SlotAccessCode(currentAccessCodeBytes);
 
-            otp.DeleteSlotConfiguration(Slot.LongPress)
-              .UseCurrentAccessCode(currentAccessCode)
-              .Execute();
-        }
+  otp.DeleteSlotConfiguration(Slot.LongPress)
+     .UseCurrentAccessCode(currentAccessCode)
+     .Execute();
+}
 ```
 
 To delete a slot configuration that is not protected with an access code, use [DeleteSlot()](xref:Yubico.YubiKey.Otp.OtpSession.DeleteSlot%28Yubico.YubiKey.Otp.Slot%29). 

@@ -87,7 +87,7 @@ namespace Yubico.YubiKey.Fido2
         /// <c>encodedUserEntity</c>.
         /// </summary>
         /// <remarks>
-        /// This constructor expects the encoding to follow this Cbor template.
+        /// This constructor expects the encoding to follow this CBOR template.
         /// <code>
         ///    map {
         ///      "id"          --byte string--
@@ -97,7 +97,7 @@ namespace Yubico.YubiKey.Fido2
         /// </code>
         /// </remarks>
         /// <param name="encodedUserEntity">
-        /// The Cbor encoding of the user information.
+        /// The CBOR encoding of the user information.
         /// </param>
         /// <param name="bytesRead">
         /// The constructor will return the number of bytes read.

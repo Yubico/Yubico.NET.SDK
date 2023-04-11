@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Fido2
     /// The digest value is the first 16 bytes of the SHA-256 digest of the Large
     /// Blob Array.
     /// <para>
-    /// The Large Blob Array is a Cbor array (major type 4). For example,
+    /// The Large Blob Array is a CBOR array (major type 4). For example,
     /// an array of 3 elements is encoded as
     /// <code language="adoc">
     ///   0x83  element0  element1  element2
@@ -55,7 +55,7 @@ namespace Yubico.YubiKey.Fido2
     /// <c>0x80</c>.
     /// </para>
     /// <para>
-    /// Each element in the Large Blob Array is a Cbor map consisting of three
+    /// Each element in the Large Blob Array is a CBOR map consisting of three
     /// key/value pairs:
     /// <code language="adoc">
     ///   A3                      -- map of 3 key/value pairs
@@ -160,7 +160,7 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// Build a new instance of <see cref="SerializedLargeBlobArray"/> based on the
-        /// given Cbor encoding.
+        /// given CBOR encoding.
         /// </summary>
         /// <remarks>
         /// The encoding must follow the definition of <c>serialized large blob
@@ -282,11 +282,11 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Build the Serialized Large Blob Array. This builds the Cbor encoding
+        /// Build the Serialized Large Blob Array. This builds the CBOR encoding
         /// of the large blob array, digests that array, and appends the digest.
         /// </summary>
         /// <remarks>
-        /// There is the Large Blob Array, which is the Cbor encoded array of
+        /// There is the Large Blob Array, which is the CBOR encoded array of
         /// entries. Then the Serialized Large Blob Array is the concatenation of
         /// the Large Blob Array with the digest of the Large Blob Array. This
         /// builds the Serialized Large Blob Array.
@@ -322,7 +322,7 @@ namespace Yubico.YubiKey.Fido2
             return returnValue;
         }
 
-        // Create the Cbor Array of each of the entries. Set EncodedArray to this
+        // Create the CBOR Array of each of the entries. Set EncodedArray to this
         // value, and return it as well.
         // If EncodedArray is not null, just return its value.
         private ReadOnlyMemory<byte> EncodeBlobArray()

@@ -130,7 +130,7 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// Build a new instance of <see cref="LargeBlobEntry"/> based on the
-        /// given Cbor encoding.
+        /// given CBOR encoding.
         /// </summary>
         /// <remarks>
         /// This constructor is used by the <see cref="SerializedLargeBlobArray"/>

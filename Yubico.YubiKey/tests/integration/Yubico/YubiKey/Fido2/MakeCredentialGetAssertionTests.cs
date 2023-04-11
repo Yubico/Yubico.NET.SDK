@@ -102,11 +102,13 @@ namespace Yubico.YubiKey.Fido2
                 {
                     ClientDataHash = _clientDataHash
                 };
+                mcParams1.AddOption(AuthenticatorOptions.rk, true);
 
                 var mcParams2 = new MakeCredentialParameters(_rp, user2)
                 {
                     ClientDataHash = _clientDataHash
                 };
+                mcParams2.AddOption(AuthenticatorOptions.rk, true);
 
                 MakeCredentialData mcData = fido2.MakeCredential(mcParams1);
                 Assert.True(mcData.VerifyAttestation(_clientDataHash));
@@ -118,9 +120,6 @@ namespace Yubico.YubiKey.Fido2
 
                 // Call GetAssertion
                 var gaParams = new GetAssertionParameters(_rp, _clientDataHash);
-
-                gaParams.AllowCredential(cred1);
-                gaParams.AllowCredential(cred2);
 
                 IReadOnlyList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
 

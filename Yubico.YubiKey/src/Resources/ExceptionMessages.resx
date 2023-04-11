@@ -181,6 +181,12 @@
   <data name="InvalidChannelId" xml:space="preserve">
     <value>The CTAPHID channel ID cannot be null or empty. A valid CTAPHID channel needs to be acquired.</value>
   </data>
+  <data name="InvalidSaltLength" xml:space="preserve">
+    <value>The length of a supplied salt was not valid for the usage.</value>
+  </data>
+  <data name="MissingSalt" xml:space="preserve">
+    <value>A required salt was missing.</value>
+  </data>
   <data name="InvalidCiphertextLength" xml:space="preserve">
     <value>The length of the supplied ciphertext was not valid for the usage.</value>
   </data>
@@ -831,6 +837,9 @@
   </data>
   <data name="YubiHsmAuthCredPasswordAuthFailed" xml:space="preserve">
     <value>Failed to authenticate the credential password. Retries remaining: {0}.</value>
+  </data>
+  <data name="Fido2NotEncapsulated" xml:space="preserve">
+    <value>The PIN/UV Auth Protocol is not encapsulated.</value>
   </data>
   <data name="Fido2NoMoreRetries" xml:space="preserve">
     <value>There are no more retries remaining.</value>

@@ -127,7 +127,7 @@ namespace Yubico.YubiKey.Fido2
         /// <c>encodedCredentialId</c>.
         /// </summary>
         /// <remarks>
-        /// This constructor expects the encoding to follow this Cbor template.
+        /// This constructor expects the encoding to follow this CBOR template.
         /// <code>
         ///    map {
         ///      "type"        --text string--
@@ -137,7 +137,7 @@ namespace Yubico.YubiKey.Fido2
         /// </code>
         /// </remarks>
         /// <param name="encodedCredentialId">
-        /// The Cbor encoding of the credential ID.
+        /// The CBOR encoding of the credential ID.
         /// </param>
         /// <param name="bytesRead">
         /// The constructor will return the number of bytes read.

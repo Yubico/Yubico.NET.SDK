@@ -20,7 +20,8 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
-    /// This collects and encodes the information needed to get a FIDO2 assertion.
+    /// This collects and encodes the information needed to get a FIDO2
+    /// assertion.
     /// </summary>
     /// <remarks>
     /// There are seven elements that are inputs to a FIDO2 assertion (see section
@@ -32,8 +33,10 @@ namespace Yubico.YubiKey.Fido2
     /// Then pass that object to the <c>GetAssertion</c> method or command.
     /// </para>
     /// </remarks>
-    public class GetAssertionParameters : ICborEncode
+    public partial class GetAssertionParameters : ICborEncode
     {
+        // These are the CBOR tags for the elements that make up the encoded
+        // GetAssertionParameters.
         private const int TagRp = 1;
         private const int TagClientDataHash = 2;
         private const int TagAllowList = 3;
@@ -60,7 +63,8 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// The list of credentialIds for which the authenticator must generate a
-        /// new assertion. This is an optional parameter, so it can be null.
+        /// new assertion. This is an optional parameter, so it can be null. This
+        /// is generally used to specify a non-discoverable credential.
         /// </summary>
         /// <remarks>
         /// To add an entry to the list, call <see cref="AllowCredential"/>.
@@ -114,6 +118,12 @@ namespace Yubico.YubiKey.Fido2
         /// &gt; assertion using the commands, you must set this property.
         /// </summary>
         /// <remarks>
+        /// If you are getting assertions using
+        /// <see cref="Fido2Session.GetAssertions"/>, you do NOT need to set this
+        /// property, the SDK will take care of it. But if you are getting
+        /// assertions using the <see cref="Commands.GetAssertionCommand"/>, then
+        /// you must set this property.
+        /// <para>
         /// In order to obtain the <c>pinUvAuthParam</c>, choose a protocol and
         /// build the appropriate <see cref="PinUvAuthProtocolBase"/> object.
         /// Obtain the YubiKey's Key Agreement public key and call the protocol
@@ -124,6 +134,7 @@ namespace Yubico.YubiKey.Fido2
         /// first argument in this call is the PIN token, which is an encrypted
         /// value. Do not decrypt the PIN token. The result of that
         /// authentication operation is the <c>PinUvAuthParam</c>
+        /// </para>
         /// </remarks>
         public ReadOnlyMemory<byte>? PinUvAuthParam { get; set; }
 
@@ -131,6 +142,13 @@ namespace Yubico.YubiKey.Fido2
         /// The protocol chosen by the platform. This is an optional parameter,
         /// so it can be null.
         /// </summary>
+        /// <remarks>
+        /// If you are getting assertions using
+        /// <see cref="Fido2Session.GetAssertions"/>, you do NOT need to set this
+        /// property, the SDK will take care of it. But if you are getting
+        /// assertions using the <see cref="Commands.GetAssertionCommand"/>, then
+        /// you must set this property.
+        /// </remarks>
         public PinUvAuthProtocol? Protocol { get; set; }
 
         // The default constructor explicitly defined. We don't want it to be
@@ -163,7 +181,8 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Add an entry to the allow list.
+        /// Add an entry to the allow list. Once a credential is added to the
+        /// allow list, it is not possible to remove it.
         /// </summary>
         /// <remarks>
         /// If there is no list yet when this method is called, one will be
@@ -180,7 +199,8 @@ namespace Yubico.YubiKey.Fido2
             ParameterHelpers.AddToList<CredentialId>(credentialId, _allowList);
 
         /// <summary>
-        /// Add an entry to the extensions list.
+        /// Add an entry to the extensions list. Once an entry is added to the
+        /// list, it is not possible to remove it.
         /// </summary>
         /// <remarks>
         /// If there is no list yet when this method is called, one will be
@@ -208,7 +228,8 @@ namespace Yubico.YubiKey.Fido2
             ParameterHelpers.AddKeyValue<byte[]>(extensionKey, encodedValue, _extensions);
 
         /// <summary>
-        /// Add an entry to the list of options.
+        /// Add an entry to the list of options. Once an entry is added to the
+        /// list, it is not possible to remove it.
         /// </summary>
         /// <remarks>
         /// If the <c>Options</c> list already contains an entry with the given
@@ -234,6 +255,13 @@ namespace Yubico.YubiKey.Fido2
         /// <inheritdoc/>
         public byte[] CborEncode()
         {
+            if (!(_hmacSecretEncoding is null))
+            {
+                // This replaces the existing extension, if there's already one
+                // in the list.
+                AddExtension(KeyHmacSecret, _hmacSecretEncoding);
+            }
+
             return new CborMapWriter<int>()
                 .Entry(TagRp, RelyingParty.Id)
                 .Entry(TagClientDataHash, ClientDataHash)

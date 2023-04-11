@@ -175,7 +175,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
         /// <summary>
         /// Build a new instance of <see cref="CredentialManagementData"/> based on the
-        /// given Cbor encoding.
+        /// given CBOR encoding.
         /// </summary>
         /// <remarks>
         /// The encoding must follow the definition of the

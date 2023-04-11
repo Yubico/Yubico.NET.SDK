@@ -50,6 +50,7 @@ namespace Yubico.YubiKey.Fido2
         private const int TagProtocol = 9;
         private const int TagEnterpriseAttestation = 10;
         private const string KeyCredBlob = "credBlob";
+        private const string KeyHmacSecret = "hmac-secret";
 
         private readonly List<Tuple<string, CoseAlgorithmIdentifier>> _algorithms = new List<Tuple<string, CoseAlgorithmIdentifier>>();
         private List<CredentialId>? _excludeList;
@@ -319,7 +320,8 @@ namespace Yubico.YubiKey.Fido2
             ParameterHelpers.AddKeyValue<byte[]>(extensionKey, encodedValue, _extensions);
 
         /// <summary>
-        /// Add the "credBlob" extension.
+        /// Add the "credBlob" extension. Note that the credBlob extension is
+        /// valid only for discoverable credentials.
         /// </summary>
         /// <remarks>
         /// Because this extension is used more often, a dedicated method is
@@ -346,6 +348,16 @@ namespace Yubico.YubiKey.Fido2
         /// <para>
         /// The caller supplies the un-encoded <c>credBlobValue</c>. This method
         /// will encode it.
+        /// </para>
+        /// <para>
+        /// The credBlob data will be returned when the credential is used to get
+        /// an assertion. When building the GetAssertion parameters, the caller
+        /// must specify that the YubiKey return the credBlob. See
+        /// <see cref="GetAssertionParameters.RequestCredBlobExtension"/>. The
+        /// assertion returned will contain the credBlob. The data will be
+        /// returned in the <see cref="GetAssertionData.AuthenticatorData"/> and
+        /// can be retrieved using
+        /// <see cref="AuthenticatorData.GetCredBlobExtension"/>
         /// </para>
         /// </remarks>
         /// <param name="credBlobValue">
@@ -390,6 +402,64 @@ namespace Yubico.YubiKey.Fido2
             byte[] encodedValue = cborWriter.Encode();
 
             AddExtension(KeyCredBlob, encodedValue);
+        }
+
+        /// <summary>
+        /// Add the "hmac-secret" extension, meaning the YubiKey will generate a
+        /// secret value to be associated with the credential made. When getting
+        /// an assertion, it will be possible to get the secret value. Note that
+        /// the hmac-secret extension is valid for both discoverable and
+        /// non-discoverable credentials.
+        /// </summary>
+        /// <remarks>
+        /// Because this extension is used more often, a dedicated method is
+        /// provided as a convenience. There is no need for the caller to
+        /// encode the <c>hmacSecretValue</c>. That is, this is essentially the
+        /// same as calling <c>AddExtension</c>, except this method will verify
+        /// the YubiKey supports the extension, and encode the value.
+        /// <para>
+        /// The caller supplies the <c>AuthenticatorInfo</c> for the YubiKey,
+        /// obtained by calling the <see cref="Commands.GetInfoCommand"/> or
+        /// providing the <see cref="Fido2Session.AuthenticatorInfo"/> property.
+        /// </para>
+        /// <para>
+        /// This method will determine from the <c>authenticatorInfo</c> whether
+        /// the YubiKey supports this extension.
+        /// </para>
+        /// <para>
+        /// The hmac-secret data will be returned when the credential is used to
+        /// get an assertion. When building the GetAssertion parameters, the
+        /// caller must specify that the YubiKey return the hmac-secret. See
+        /// <see cref="GetAssertionParameters.RequestHmacSecretExtension"/>. The
+        /// assertion returned will contain the hmac-secret output. The result
+        /// will be returned in the
+        /// <see cref="GetAssertionData.AuthenticatorData"/> and can be
+        /// retrieved using
+        /// <see cref="AuthenticatorData.GetHmacSecretExtension"/>
+        /// </para>
+        /// </remarks>
+        /// <param name="authenticatorInfo">
+        /// The FIDO2 <c>AuthenticatorInfo</c> for the YubiKey being used.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>authenticatorInfo</c> arg is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The YubiKey does not support this extension.
+        /// </exception>
+        public void AddHmacSecretExtension(AuthenticatorInfo authenticatorInfo)
+        {
+            if (authenticatorInfo is null)
+            {
+                throw new ArgumentNullException(nameof(authenticatorInfo));
+            }
+
+            if (!authenticatorInfo.Extensions.Contains<string>(KeyHmacSecret))
+            {
+                throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+            }
+
+            AddExtension(KeyHmacSecret, new byte[] { 0xF5 });
         }
 
         /// <summary>

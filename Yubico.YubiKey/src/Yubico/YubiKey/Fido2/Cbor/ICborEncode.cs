@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
     /// already have the <see cref="CoseKey"/> class which can encode the key. So
     /// we don't need to write the encode code again, we just need to get the
     /// encoding from the object. The resulting encoding can then be copied into
-    /// the Cbor structure. An alternative is to get the encoding from the key
+    /// the CBOR structure. An alternative is to get the encoding from the key
     /// object and pass it into the CborHelper, but then we need to know if this
     /// is encoded or a byte string, and there's the Nullable to deal with. So
     /// just implement this interface to indicate that we have an object that can

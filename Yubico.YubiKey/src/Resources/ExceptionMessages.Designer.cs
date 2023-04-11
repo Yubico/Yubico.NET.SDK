@@ -430,6 +430,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The PIN/UV Auth Protocol is not encapsulated..
+        /// </summary>
+        internal static string Fido2NotEncapsulated {
+            get {
+                return ResourceManager.GetString("Fido2NotEncapsulated", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No permissions were specified for an operation that required them..
         /// </summary>
         internal static string Fido2PermsMissing {
@@ -1114,6 +1123,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The length of a supplied salt was not valid for the usage..
+        /// </summary>
+        internal static string InvalidSaltLength {
+            get {
+                return ResourceManager.GetString("InvalidSaltLength", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Keyboard layout [{0}] doesn&apos;t have a scancode for [{1}]..
         /// </summary>
         internal static string InvalidScancode {
@@ -1353,6 +1371,15 @@ namespace Yubico.YubiKey {
         internal static string MissingKeyCollector {
             get {
                 return ResourceManager.GetString("MissingKeyCollector", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A required salt was missing..
+        /// </summary>
+        internal static string MissingSalt {
+            get {
+                return ResourceManager.GetString("MissingSalt", resourceCulture);
             }
         }
         

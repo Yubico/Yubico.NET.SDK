@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Buffers.Binary;
 using System.Formats.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
+using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -30,7 +31,7 @@ namespace Yubico.YubiKey.Fido2
     /// credential, this includes information about the authenticator itself,
     /// such as the aaguid.
     /// > The <c>authenticator data object</c> defined in the FIDO2 standard is
-    /// > encoded but not following the rules of Cbor or DER or any other
+    /// > encoded but not following the rules of CBOR or DER or any other
     /// > standard encoding scheme. The encoding is defined in the W3C standard.
     /// </remarks>
     public class AuthenticatorData
@@ -43,6 +44,8 @@ namespace Yubico.YubiKey.Fido2
         private const byte UserVerificationBit = 0x04;
         private const byte AttestedBit = 0x40;
         private const byte ExtensionsBit = 0x80;
+        private const string KeyCredBlob = "credBlob";
+        private const string KeyHmacSecret = "hmac-secret";
 
         /// <summary>
         /// The encoded authenticator data is used to verify the attestation
@@ -139,7 +142,7 @@ namespace Yubico.YubiKey.Fido2
         /// <remarks>
         /// The overall encoding does not follow any standard encoding scheme but
         /// is defined in the W3C standard, although two of the elements are
-        /// Cbor-encoded structures.
+        /// CBOR-encoded structures.
         /// <para>
         /// This constructor will copy the input data, not just a reference.
         /// </para>
@@ -205,7 +208,7 @@ namespace Yubico.YubiKey.Fido2
         /// <remarks>
         /// Because this extension is used more often, a dedicated method is
         /// provided as a convenience. There is no need for the caller to
-        /// decode the byte array value for the key "credBlob".
+        /// CBOR-decode the value for the key "credBlob".
         /// <para>
         /// If there is no "credBlob" extension, this method will return an empty
         /// byte array.
@@ -218,11 +221,82 @@ namespace Yubico.YubiKey.Fido2
         {
             if (!(Extensions is null))
             {
-                if (Extensions.ContainsKey("credBlob"))
+                if (Extensions.ContainsKey(KeyCredBlob))
                 {
-                    byte[] encodedValue = Extensions["credBlob"];
+                    byte[] encodedValue = Extensions[KeyCredBlob];
                     var cborReader = new CborReader(encodedValue, CborConformanceMode.Ctap2Canonical);
                     return cborReader.ReadByteString();
+                }
+            }
+
+            return Array.Empty<byte>();
+        }
+
+        /// <summary>
+        /// Get the value of the "hmac-secret" extension. This returns the decoded
+        /// and decrypted value or values.
+        /// </summary>
+        /// <remarks>
+        /// Because this extension is used more often, a dedicated method is
+        /// provided as a convenience. There is no need for the caller to
+        /// CBOR-decode the value for the key "hmac-secret".
+        /// <para>
+        /// There are possibly two values to return. Both will be 32 bytes long.
+        /// If there is only one secret value returned, this method will return a
+        /// 32-byte long array. If there are two values returned, this method
+        /// will return a 64-byte long array, where "output1" is the first 32
+        /// bytes and "output2" is the second 32 bytes.
+        /// </para>
+        /// <para>
+        /// The caller must supply the
+        /// <see cref="PinProtocols.PinUvAuthProtocolBase"/> used to create the
+        /// <c>GetAssertion</c> parameters.
+        /// </para>
+         /// <para>
+        /// If you are getting assertions using
+        /// <see cref="Fido2Session.GetAssertions"/>, you can use the
+        /// <see cref="Fido2Session.AuthProtocol"/> property.
+        /// <code language="csharp">
+        ///        var gaParams = new GetAssertionParameters(relyingParty, clientDataHash);
+        ///        gaParams.RequestHmacSecretExtension(salt);
+        ///        IReadOnlyList&lt;GetAssertionData&gt; assertions = fido2.GetAssertions(gaParams);
+        ///
+        ///        byte[] hmacSecret = assertions[0].AuthenticatorData.GetHmacSecretExtension(
+        ///            fido2Session.AuthProtocol);
+        /// </code>
+        /// If the "hmac-secret" extension was not specified when making the
+        /// credential, then the YubiKey will simply not return anything. It is
+        /// not an error. In that case, this method will return an empty byte
+        /// array.
+        /// </para>
+        /// </remarks>
+        /// <param name="authProtocol">
+        /// An instance of one of the subclasses of <c>PinUvAuthProtocolBase</c>,
+        /// which was used to get the assertion.
+        /// </param>
+        /// <returns>
+        /// A byte array containing the decoded "hmac-secret" extension.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// If the "hmac-key" is in the extensions, and the <c>authProtocol</c>
+        /// argument is null.
+        /// </exception>
+        public byte[] GetHmacSecretExtension(PinUvAuthProtocolBase authProtocol)
+        {
+            if (!(Extensions is null))
+            {
+                if (Extensions.ContainsKey(KeyHmacSecret))
+                {
+                    if (authProtocol is null)
+                    {
+                        throw new ArgumentNullException(nameof(authProtocol));
+                    }
+
+                    byte[] encodedValue = Extensions[KeyHmacSecret];
+                    var cborReader = new CborReader(encodedValue, CborConformanceMode.Ctap2Canonical);
+                    byte[] encryptedData = cborReader.ReadByteString();
+
+                    return authProtocol.Decrypt(encryptedData, 0, encryptedData.Length);
                 }
             }
 

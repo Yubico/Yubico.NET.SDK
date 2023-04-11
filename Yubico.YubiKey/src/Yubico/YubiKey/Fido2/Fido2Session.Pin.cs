@@ -1290,11 +1290,11 @@ namespace Yubico.YubiKey.Fido2
             return peerCoseKey;
         }
 
-
         private void ObtainSharedSecret()
         {
             if (AuthProtocol.PlatformPublicKey is null)
             {
+                AuthProtocol.Initialize();
                 CoseEcPublicKey peerCoseKey = GetPeerCoseKey();
                 AuthProtocol.Encapsulate(peerCoseKey);
             }

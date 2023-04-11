@@ -139,7 +139,7 @@ this credential. However, you will most likely not save it, but instead get the
 ```csharp
     var gaParams = new GetAssertionParameters(relyingParty, clientDataHash);
     gaParams.AddExtension("largeBlobKey", new byte[] { 0xF5 });
-    IList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
+    IReadOnlyList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
 ```
 If a credential was made with the "largeBlobKey" extension then
 [assertions[i].LargeBlobKey](xref:Yubico.YubiKey.Fido2.GetAssertionData.LargeBlobKey) will

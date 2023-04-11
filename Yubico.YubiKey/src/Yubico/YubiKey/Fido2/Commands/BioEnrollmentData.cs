@@ -147,7 +147,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
         /// <summary>
         /// Build a new instance of <see cref="BioEnrollmentData"/> based on the
-        /// given Cbor encoding.
+        /// given CBOR encoding.
         /// </summary>
         /// <param name="cborEncoding">
         /// The BioEnrollment data, encoded following the CTAP 2.1 and CBOR (RFC

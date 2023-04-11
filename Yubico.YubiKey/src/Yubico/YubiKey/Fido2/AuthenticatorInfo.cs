@@ -294,7 +294,7 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// Build a new instance of <see cref="AuthenticatorInfo"/> based on the
-        /// given Cbor encoding.
+        /// given CBOR encoding.
         /// </summary>
         /// <remarks>
         /// The encoding must follow the definition of

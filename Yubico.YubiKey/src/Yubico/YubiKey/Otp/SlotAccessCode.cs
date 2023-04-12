@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Otp
     /// <para>
     /// Access codes must be exactly six bytes when used in the YubiKey
     /// protocol. This helper-class assures that the access code does not
-    /// exceed the maximum length, and pads the code if less than six bytes
+    /// exceed the maximum length, and pads the code with zeros (0x00) if less than six bytes
     /// are specified.
     /// </para>
     /// <para>
@@ -79,7 +79,7 @@ namespace Yubico.YubiKey.Otp
         internal byte[] AccessCodeBytes { get; }
 
         // The access code has to be exactly six bytes. This method takes a byte array and makes sure
-        // it's the correct length. If it's too short, it extends it. If it's too long, it throws an
+        // it's the correct length. If it's too short, it extends it with zeros (0x00). If it's too long, it throws an
         // exception.
 
         private static byte[] GetAccessCode(byte[] code) =>

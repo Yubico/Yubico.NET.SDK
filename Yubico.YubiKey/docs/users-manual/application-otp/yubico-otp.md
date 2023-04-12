@@ -151,6 +151,9 @@ To test authentication with YubiCloud, submit a Yubico OTP from your YubiKey [he
 
 To integrate YubiCloud validation into your application, you must add calls to YubiCloud to verify OTPs. To get started, get a [YubiCloud API key](https://upgrade.yubico.com/getapikey/).
 
+> [!NOTE]
+> Check [status.yubico.com](https://status.yubico.com/) for YubiCloud service updates. 
+
 ### Self-hosted validation servers
 
 Yubico strongly recommends using YubiCloud. If for some reason YubiCloud is not suitable for your application, you may host your own validation server.

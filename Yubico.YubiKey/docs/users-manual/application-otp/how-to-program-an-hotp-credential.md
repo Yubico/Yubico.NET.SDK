@@ -46,9 +46,9 @@ using (OtpSession otp = new OtpSession(yubiKey))
     ReadOnlyMemory<byte> hmacKey = new byte[ConfigureHotp.HmacKeySize] {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, };
 
     otp.ConfigureHotp(Slot.LongPress)
-        .UseKey(hmacKey)
-        .Execute();
-    }    
+       .UseKey(hmacKey)
+       .Execute();
+}    
 ```
 
 To configure the ``LongPress`` slot with an HOTP using a randomly generated secret key, use:
@@ -59,8 +59,8 @@ using (OtpSession otp = new OtpSession(yubiKey))
     Memory<byte> hmacKey = new byte[ConfigureHotp.HmacKeySize];
 
     otp.ConfigureHotp(Slot.LongPress)
-        .GenerateKey(hmacKey)
-        .Execute();
+       .GenerateKey(hmacKey)
+       .Execute();
 }
 ```
 
@@ -83,10 +83,10 @@ using (OtpSession otp = new OtpSession(yubiKey))
     Memory<byte> hmacKey = new byte[ConfigureHotp.HmacKeySize];
 
     otp.ConfigureHotp(Slot.LongPress)
-        .UseInitialMovingFactor(16)
-        .GenerateKey(hmacKey)
-        .Use8Digits()
-        .Execute();
+       .UseInitialMovingFactor(16)
+       .GenerateKey(hmacKey)
+       .Use8Digits()
+       .Execute();
 }
 ```
 

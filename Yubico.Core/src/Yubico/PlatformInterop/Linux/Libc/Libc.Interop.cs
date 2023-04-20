@@ -104,5 +104,9 @@ namespace Yubico.PlatformInterop
             int handle,
             [MarshalAs(UnmanagedType.LPArray)]byte[] inputBuffer,
             int count);
+        
+        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "fcntl", SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern int fcntl(IntPtr fd, int cmd, int flags = 0);
     }
 }

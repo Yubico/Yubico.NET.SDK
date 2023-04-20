@@ -17,7 +17,7 @@ using System.Globalization;
 using System.Runtime.InteropServices;
 using System.Threading;
 using Yubico.PlatformInterop;
-
+using static Yubico.PlatformInterop.LibcFcntlConstants;
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.Hid
@@ -52,6 +52,8 @@ namespace Yubico.Core.Devices.Hid
         {
             _udevObject = udev_new();
             _monitorObject = ThrowIfFailedNull(udev_monitor_new_from_netlink(_udevObject, UdevMonitorName));
+            
+            RemoveNonBlockingFlagOnUdevMonitorSocket();
 
             StartListening();
         }
@@ -191,6 +193,15 @@ namespace Yubico.Core.Devices.Hid
                     ExceptionMessages.LinuxUdevError));
         }
 
+        private void RemoveNonBlockingFlagOnUdevMonitorSocket()
+        {
+            IntPtr fd = udev_monitor_get_fd(_monitorObject);
+
+            int flags = ThrowIfFailedNegative(fcntl(fd, F_GETFL)); 
+            
+            // Remove the O_NONBLOCK flag to set the file descriptor to blocking mode.
+            _ = ThrowIfFailedNegative(fcntl(fd, F_SETFL, flags & ~O_NONBLOCK));
+        }
 
         // Throw the PlatformApiException(LinuxUdevError) if the value is < 0.
         // Otherwise, just return.

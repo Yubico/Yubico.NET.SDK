@@ -260,5 +260,12 @@ namespace Yubico.PlatformInterop
         [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_receive_device", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern LinuxUdevDeviceSafeHandle udev_monitor_receive_device (LinuxUdevMonitorSafeHandle monitorObject);
+        
+        // Get the socket file descriptor associated with the monitor.
+        // The C signature is
+        //   int udev_monitor_get_fd(struct udev_monitor *udev_monitor);
+        [DllImport(Libraries.LinuxUdevLib, CharSet = CharSet.Ansi, EntryPoint = "udev_monitor_get_fd", SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
+        public static extern IntPtr udev_monitor_get_fd (LinuxUdevMonitorSafeHandle monitorObject);
     }
 }

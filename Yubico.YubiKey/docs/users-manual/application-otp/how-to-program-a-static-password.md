@@ -68,3 +68,11 @@ using (OtpSession otp = new OtpSession(yKey))
 
 > [!NOTE]
 > The ```SetPassword``` method takes a ```Memory<char>``` reference (mutable) instead of a ```string``` (immutable in .NET). Because you should clear out sensitive data afterwards, a mutable collection is used.
+
+## Slot reconfiguration and access codes
+
+If a slot is protected by an access code, and you wish to reconfigure it with a static password, you must provide that access code with ``UseCurrentAccessCode()`` during the ``ConfigureStaticPassword()`` operation. Otherwise, the operation will fail and throw the following exception:
+
+```System.InvalidOperationException has been thrown. YubiKey Operation Failed. [Warning, state of non-volatile memory is unchanged.]```
+
+For more information on slot access codes, please see [How to set, reset, remove, and use slot access codes](xref:OtpSlotAccessCodes).

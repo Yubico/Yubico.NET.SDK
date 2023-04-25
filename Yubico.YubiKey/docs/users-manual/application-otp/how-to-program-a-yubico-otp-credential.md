@@ -76,7 +76,7 @@ The API does not own the object where secrets are stored. Because of this, you m
 
 ## Slot reconfiguration and access codes
 
-If a slot is protected by an access code, and you wish to reconfigure it with a Yubico OTP credential, you must provide that access code with ``UseCurrentAccessCode()`` during the ``ConfigureYubicoOtp()`` operation. Otherwise, the operation will fail and throw the following exception:
+If a slot is protected by an access code and you wish to reconfigure it with a Yubico OTP credential, you must provide that access code with ``UseCurrentAccessCode()`` during the ``ConfigureYubicoOtp()`` operation. Otherwise, the operation will fail and throw the following exception:
 
 ```System.InvalidOperationException has been thrown. YubiKey Operation Failed. [Warning, state of non-volatile memory is unchanged.]```
 

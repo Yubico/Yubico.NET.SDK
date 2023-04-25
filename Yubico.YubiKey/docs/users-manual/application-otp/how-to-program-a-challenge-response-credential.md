@@ -61,7 +61,7 @@ using (OtpSession otp = new OtpSession(yKey))
 
 ## Slot reconfiguration and access codes
 
-If a slot is protected by an access code, and you wish to reconfigure it with a challenge-response credential, you must provide that access code with ``UseCurrentAccessCode()`` during the ``ConfigureChallengeResponse()`` operation. Otherwise, the operation will fail and throw the following exception:
+If a slot is protected by an access code and you wish to reconfigure it with a challenge-response credential, you must provide that access code with ``UseCurrentAccessCode()`` during the ``ConfigureChallengeResponse()`` operation. Otherwise, the operation will fail and throw the following exception:
 
 ```System.InvalidOperationException has been thrown. YubiKey Operation Failed. [Warning, state of non-volatile memory is unchanged.]```
 

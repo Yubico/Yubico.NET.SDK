@@ -31,6 +31,7 @@ The articles in this section provide examples on how to accomplish common operat
 - [How to read information from an NDEF tag](xref:OtpReadNDEF)
 - [How to update slot settings](xref:OtpUpdateSlot)
 - [How to swap slot configurations](xref:OtpSwapSlot)
+- [How to set, reset, remove, and use slot access codes](xref:OtpSlotAccessCodes)
 
 ## Working with the OTP operations classes
 
@@ -86,3 +87,11 @@ You may notice in the how-to guide examples that the [Execute() method](xref:Yub
 **In order to apply changes to the YubiKey from any Yubico.YubiKey.Otp.Operations class method, you must call Execute().**
 
 So for the previous example, this means that the Yubico OTP configuration will not be applied to the short-press slot of the YubiKey until Execute() is called.
+
+### Slot reconfiguration and access codes
+
+If a slot you wish to reconfigure is protected by an access code, you must provide that access code with ``UseCurrentAccessCode()`` during the reconfiguration operation. Otherwise, the operation will fail and throw the following exception:
+
+```System.InvalidOperationException has been thrown. YubiKey Operation Failed. [Warning, state of non-volatile memory is unchanged.]```
+
+For more information on slot access codes, please see [How to set, reset, remove, and use slot access codes](xref:OtpSlotAccessCodes).

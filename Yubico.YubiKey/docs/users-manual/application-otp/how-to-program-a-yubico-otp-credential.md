@@ -73,3 +73,11 @@ using (OtpSession otp = new OtpSession(yKey))
 ```
 
 The API does not own the object where secrets are stored. Because of this, you must still provide the place to put the generated information. Once you have done what is needed with the data, you should clear the memory where it is located.
+
+## Slot reconfiguration and access codes
+
+If a slot is protected by an access code and you wish to reconfigure it with a Yubico OTP credential, you must provide that access code with ``UseCurrentAccessCode()`` during the ``ConfigureYubicoOtp()`` operation. Otherwise, the operation will fail and throw the following exception:
+
+```System.InvalidOperationException has been thrown. YubiKey Operation Failed. [Warning, state of non-volatile memory is unchanged.]```
+
+For more information on slot access codes, please see [How to set, reset, remove, and use slot access codes](xref:OtpSlotAccessCodes).

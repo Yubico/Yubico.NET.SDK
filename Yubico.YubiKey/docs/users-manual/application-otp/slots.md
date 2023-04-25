@@ -46,7 +46,7 @@ The OTP application slots have the following properties:
 - Only one slot may be activated at a time.
 - Slots can be [pointed to by an NDEF tag](xref:OtpConfigureNDEF).
 - No data is shared between slots.
-- Slots can be protected with an access code.
+- Slots can be protected from reconfiguration with an [access code](xref:OtpSlotAccessCodes).
 - Slot configurations can be [deleted](xref:OtpDeleteSlotConfig).
 - Slot states can be [retrieved](xref:OtpRetrieveSlotStatus).
 - Slot configurations can be [swapped](xref:OtpSwapSlot).

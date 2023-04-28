@@ -118,7 +118,7 @@ The following additional (optional) settings can be applied during configuration
 - [UseFastTrigger()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.UseFastTrigger%28System.Boolean%29)
 - [UseNumericKeypad()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.UseNumericKeypad%28System.Boolean%29)
 
-The static password does not have a fixed part, but you can still use ``AppendDelayToFixed()``. This will simply add a delay prior to the static password. [AppendTabToFixed()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.AppendTabToFixed%28System.Boolean%29) will succeed, but instead of sending a tab before the static password, it will break up or alter the static password. Use ``SendTabFirst()`` instead.
+The static password does not have both a fixed part and a variable part like Yubico OTPs do, but you can still use ``AppendDelayToFixed()`` without error. [AppendTabToFixed()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.AppendTabToFixed%28System.Boolean%29) will succeed, but instead of sending a tab before the static password, it will break up or alter the static password. Use ``SendTabFirst()`` instead.
 
 These settings can also be toggled after static password configuration by calling [UpdateSlot()](xref:OtpUpdateSlot). 
 

@@ -14,10 +14,10 @@
 
 using System;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey
 {
     /// <summary>
-    /// Contains the information about the current state of Bio enrollment.
+    /// Contains the information about a sample provided for Bio enrollment.
     /// </summary>
     /// <remarks>
     /// When enrolling a fingerprint, it generally requires multiple readings of
@@ -34,7 +34,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// results of that reading.
     /// </para>
     /// </remarks>
-    public class BioEnrollUpdateStatus
+    public class BioEnrollSampleResult
     {
         /// <summary>
         /// The template ID of the fingerprint being enrolled.
@@ -55,13 +55,13 @@ namespace Yubico.YubiKey.Fido2.Commands
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
-        private BioEnrollUpdateStatus()
+        private BioEnrollSampleResult()
         {
             throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Build a new instance of <see cref="BioEnrollUpdateStatus"/> with the
+        /// Build a new instance of <see cref="BioEnrollSampleResult"/> with the
         /// given values.
         /// </summary>
         /// <param name="templateId">
@@ -73,7 +73,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <param name="remainingSampleCount">
         /// The number of successful readings necessary to enroll the fingerprint.
         /// </param>
-        public BioEnrollUpdateStatus(
+        public BioEnrollSampleResult(
             ReadOnlyMemory<byte> templateId,
             int lastEnrollSampleStatus,
             int remainingSampleCount)

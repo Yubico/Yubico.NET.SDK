@@ -20,7 +20,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <summary>
     /// The response partner to the BioEnrollNextSampleCommand.
     /// </summary>
-    public class BioEnrollNextSampleResponse : Fido2Response, IYubiKeyResponseWithData<BioEnrollUpdateStatus>
+    public class BioEnrollNextSampleResponse : Fido2Response, IYubiKeyResponseWithData<BioEnrollSampleResult>
     {
         private readonly BioEnrollmentResponse _response;
         private readonly ReadOnlyMemory<byte> _templateId;
@@ -46,7 +46,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc/>
-        public BioEnrollUpdateStatus GetData()
+        public BioEnrollSampleResult GetData()
         {
             if (Status != ResponseStatus.Success)
             {
@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             if (!(enrollData.LastEnrollSampleStatus is null)
                 && !(enrollData.RemainingSampleCount is null))
             {
-                return new BioEnrollUpdateStatus(
+                return new BioEnrollSampleResult(
                     _templateId,
                     enrollData.LastEnrollSampleStatus.Value,
                     enrollData.RemainingSampleCount.Value);

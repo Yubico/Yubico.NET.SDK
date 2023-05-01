@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
@@ -60,9 +59,9 @@ namespace Yubico.YubiKey.Fido2
 
             var cmd = new BioEnrollBeginCommand(5000, pinToken, protocol);
             BioEnrollBeginResponse rsp = Connection.SendCommand(cmd);
-            BioEnrollUpdateStatus enrollStatus = rsp.GetData();
+            BioEnrollSampleResult enrollResult = rsp.GetData();
 
-            Assert.Equal(BioEnrollSampleStatus.FpGood, enrollStatus.LastEnrollSampleStatus);
+            Assert.Equal(BioEnrollSampleStatus.FpGood, enrollResult.LastEnrollSampleStatus);
         }
 
         [Fact]
@@ -75,17 +74,19 @@ namespace Yubico.YubiKey.Fido2
 
             var cmd = new BioEnrollBeginCommand(null, pinToken, protocol);
             BioEnrollBeginResponse rsp = Connection.SendCommand(cmd);
-            BioEnrollUpdateStatus enrollStatus = rsp.GetData();
-            Assert.Equal(BioEnrollSampleStatus.FpGood, enrollStatus.LastEnrollSampleStatus);
+            BioEnrollSampleResult enrollResult = rsp.GetData();
+            Assert.Equal(BioEnrollSampleStatus.FpGood, enrollResult.LastEnrollSampleStatus);
 
-            var nextCmd = new BioEnrollNextSampleCommand(enrollStatus.TemplateId, null, pinToken, protocol);
+            var nextCmd = new BioEnrollNextSampleCommand(enrollResult.TemplateId, null, pinToken, protocol);
+            int totalCount = 1;
             do
             {
                 BioEnrollNextSampleResponse nextRsp = Connection.SendCommand(nextCmd);
-                enrollStatus = nextRsp.GetData();
-            } while (enrollStatus.RemainingSampleCount > 0);
+                enrollResult = nextRsp.GetData();
+                totalCount++;
+            } while (enrollResult.RemainingSampleCount > 0);
 
-            Assert.Equal(0, enrollStatus.RemainingSampleCount);
+            Assert.Equal(0, enrollResult.RemainingSampleCount);
         }
 
         [Fact]
@@ -98,15 +99,15 @@ namespace Yubico.YubiKey.Fido2
 
             var cmd = new BioEnrollBeginCommand(null, pinToken, protocol);
             BioEnrollBeginResponse rsp = Connection.SendCommand(cmd);
-            BioEnrollUpdateStatus enrollStatus = rsp.GetData();
-            Assert.Equal(BioEnrollSampleStatus.FpGood, enrollStatus.LastEnrollSampleStatus);
+            BioEnrollSampleResult enrollResult = rsp.GetData();
+            Assert.Equal(BioEnrollSampleStatus.FpGood, enrollResult.LastEnrollSampleStatus);
 
-            var nextCmd = new BioEnrollNextSampleCommand(enrollStatus.TemplateId, null, pinToken, protocol);
+            var nextCmd = new BioEnrollNextSampleCommand(enrollResult.TemplateId, null, pinToken, protocol);
 
             BioEnrollNextSampleResponse nextRsp = Connection.SendCommand(nextCmd);
-            enrollStatus = nextRsp.GetData();
+            enrollResult = nextRsp.GetData();
 
-            Assert.True(enrollStatus.RemainingSampleCount != 0);
+            Assert.True(enrollResult.RemainingSampleCount != 0);
 
             var cancelCmd = new BioEnrollCancelCommand();
             Fido2Response cancelRsp = Connection.SendCommand(cancelCmd);

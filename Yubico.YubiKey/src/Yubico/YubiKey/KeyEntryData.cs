@@ -18,6 +18,21 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKey
 {
     /// <summary>
+    /// This delegate defines the signature of a method that can be called to let
+    /// the SDK know that the user is canceling an operation.
+    /// </summary>
+    /// <remarks>
+    /// Generally a KeyCollector indicates a user cancels by returning
+    /// <c>false</c>. However, for some requests, such as
+    /// <see cref ="KeyEntryRequest.TouchRequest"/> and
+    /// <see cref ="KeyEntryRequest.EnrollFingerprint"/>, the KeyCollector's
+    /// return value is ignored because it is an asynchronous call. In those
+    /// cases, the SDK will supply an implementation of this delegate that your
+    /// KeyCollector can call to notify the SDK that the user has canceled.
+    /// </remarks>
+    public delegate void SignalUserCancel();
+
+    /// <summary>
     /// This class contains methods and data that describe the state of the
     /// process to provide keys, PINs, and other sensitive data to the SDK.
     /// </summary>
@@ -110,11 +125,86 @@ namespace Yubico.YubiKey
         /// <c>KeyCollector</c> try again? If <c>true</c>, the request is for a
         /// retry, if <c>false</c>, the request is the initial attempt.
         /// </summary>
+        /// <remarks>
+        /// Note that enrolling a fingerprint generally requires several samples,
+        /// and each sample is not a retry, but rather more information the
+        /// YubiKey uses to build a template. Hence, after each fingerprint
+        /// sample, this property will not be true, even if the previous sample
+        /// was considered a failure. Rather, look at the
+        /// <see cref="LastBioEnrollSampleResult"/> property to get information
+        /// about the previous attempt.
+        /// </remarks>
         public bool IsRetry { get; set; }
+
+        /// <summary>
+        /// This is the result of the last fingerprint sample. This will be null
+        /// if the <c>Request</c> is for something other than
+        /// <see cref="KeyEntryRequest.EnrollFingerprint"/> or if it is the first
+        /// call to Enroll.
+        /// </summary>
+        /// <remarks>
+        /// When a caller wants to enroll a fingerprint, the SDK will call the
+        /// <c>KeyCollector</c> with a <see cref="Request"/> of
+        /// <see cref="KeyEntryRequest.EnrollFingerprint"/>. For the first call
+        /// to the <c>KeyCollector</c>, there is no previous sample, so this will
+        /// be null. For each subsequent call, the SDK will provide the result
+        /// from the most recent sample. This includes the sample status (such as
+        /// <see cref="BioEnrollSampleStatus.FpGood"/> or
+        /// <see cref="BioEnrollSampleStatus.FpPoorQuality"/>), and the number of
+        /// quality samples needed to complete the enrollment.
+        /// <para>
+        /// Your <c>KeyCollector</c> will have this information which you can
+        /// pass on to the user. For example, one property in the
+        /// <c>BioEnrollSampleResult</c> is the reason a fingerprint sample was
+        /// not accepted. Letting the user know this reason could help them make
+        /// a better sample next time.
+        /// </para>
+        /// </remarks>
+        public BioEnrollSampleResult? LastBioEnrollSampleResult { get; set; }
+
+        /// <summary>
+        /// For some operations, this property is an implementation of a delegate
+        /// the KeyCollector can call to indicate the user is canceling the
+        /// operation. If it is null, report cancellation normally, by having the
+        /// KeyCollector return <c>false</c>. If it is not null, use the supplied
+        /// delegate to report user cancellation.
+        /// </summary>
+        /// <remarks>
+        /// Currently this is valid only when the <c>Request</c> is either
+        /// <see cref="KeyEntryRequest.TouchRequest"/>,
+        /// <see cref="KeyEntryRequest.EnrollFingerprint"/>, or
+        /// <see cref="KeyEntryRequest.VerifyFido2Uv"/>. For all other
+        /// requests, this will be null.
+        /// <para>
+        /// The normal way to indicate that a user is canceling an operation is
+        /// to have the KeyCollector return <c>false</c>. However, for some
+        /// operations, such as Touch and Fingerprint, the KeyCollector is called
+        /// on a separate thread and the return is ignored. That is, it is an
+        /// asynchronous call. The main thread performing the YubiKey operation
+        /// will not see the KeyCollector's return. Hence, to indicate user
+        /// cancellation in these cases, this delegate is provided.
+        /// </para>
+        /// <para>
+        /// Your KeyCollector is called with an instance of this
+        /// <c>KeyEntryData</c> class. If this property is not null, you can save
+        /// this delegate. Later on, if the user cancels, you can call the
+        /// delegate. If the YubiKey has not completed the operation or timed out
+        /// by the time it receives notification of user cancellation, the SDK
+        /// can cancel. Note that generally, user cancellation results in an
+        /// <c>OperationCanceledException</c>.
+        /// </para>
+        /// </remarks>
+        public SignalUserCancel? SignalUserCancel { get; private set; }
 
         private Memory<byte> _currentValue;
 
         private Memory<byte> _newValue;
+
+        internal KeyEntryData(SignalUserCancel signalUserCancel)
+            : this()
+        {
+            SignalUserCancel = signalUserCancel;
+        }
 
         /// <summary>
         /// Create a new instance of the <c>KeyEntryData</c> class.
@@ -247,6 +337,8 @@ namespace Yubico.YubiKey
             CryptographicOperations.ZeroMemory(_currentValue.Span);
             CryptographicOperations.ZeroMemory(_newValue.Span);
             RetriesRemaining = null;
+            LastBioEnrollSampleResult = null;
+            SignalUserCancel = null;
         }
     }
 }

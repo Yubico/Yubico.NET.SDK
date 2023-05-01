@@ -802,8 +802,17 @@
   <data name="YubiHsmAuthKeyTypeNotSupported" xml:space="preserve">
     <value>The cryptographic key type is not supported.</value>
   </data>
+  <data name="OperationCancelled" xml:space="preserve">
+    <value>The user cancelled the operation.</value>
+  </data>
   <data name="PinCollectionCancelled" xml:space="preserve">
     <value>The user cancelled the PIN collection operation.</value>
+  </data>
+  <data name="FingerprintCollectionCancelled" xml:space="preserve">
+    <value>The user cancelled the fingerprint collection operation.</value>
+  </data>
+  <data name="FingerprintDatabaseFull" xml:space="preserve">
+    <value>The fingerprint database on the selected YubiKey is full.</value>
   </data>
   <data name="PinAlreadySet" xml:space="preserve">
     <value>The PIN has already been set and cannot be changed using this function.</value>
@@ -864,6 +873,9 @@
   </data>
   <data name="Fido2TouchTimeout" xml:space="preserve">
     <value>The YubiKey was not touched in the allotted time.</value>
+  </data>
+  <data name="Fido2FingerprintTimeout" xml:space="preserve">
+    <value>The fingerprint was not collected in the allotted time.</value>
   </data>
   <data name="YubiHsmAuthTouchTimeout" xml:space="preserve">
     <value>The operation timed out while waiting for touch.</value>

@@ -403,6 +403,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The fingerprint was not collected in the allotted time..
+        /// </summary>
+        internal static string Fido2FingerprintTimeout {
+            get {
+                return ResourceManager.GetString("Fido2FingerprintTimeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to There are no more retries remaining..
         /// </summary>
         internal static string Fido2NoMoreRetries {
@@ -489,6 +498,24 @@ namespace Yubico.YubiKey {
         internal static string Fido2UvNotSupported {
             get {
                 return ResourceManager.GetString("Fido2UvNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The user cancelled the fingerprint collection operation..
+        /// </summary>
+        internal static string FingerprintCollectionCancelled {
+            get {
+                return ResourceManager.GetString("FingerprintCollectionCancelled", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The fingerprint database on the selected YubiKey is full..
+        /// </summary>
+        internal static string FingerprintDatabaseFull {
+            get {
+                return ResourceManager.GetString("FingerprintDatabaseFull", resourceCulture);
             }
         }
         
@@ -1587,6 +1614,15 @@ namespace Yubico.YubiKey {
         internal static string OnlyOneAlgorithm {
             get {
                 return ResourceManager.GetString("OnlyOneAlgorithm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The user cancelled the operation..
+        /// </summary>
+        internal static string OperationCancelled {
+            get {
+                return ResourceManager.GetString("OperationCancelled", resourceCulture);
             }
         }
         

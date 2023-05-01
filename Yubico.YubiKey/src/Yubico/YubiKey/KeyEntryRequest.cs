@@ -239,7 +239,9 @@ namespace Yubico.YubiKey
         SetOathPassword = 8,
 
         /// <summary>
-        /// The YubiKey is requesting touch for user presence verification.
+        /// The YubiKey is requesting touch for user presence verification. See
+        /// the <xref href="UsersManualKeyCollectorTouch">User's Manual entry</xref>
+        /// on how to handle a touch notification in a key collector.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -252,7 +254,9 @@ namespace Yubico.YubiKey
         /// <para>
         /// In addition, when the SDK calls a KeyCollector with this request, it
         /// will ignore the return value. That is, it is not possible to cancel
-        /// this request.
+        /// this request. However, every YubiKey operation that requires touch
+        /// has a timeout, so simply not touching will eventually cancel an
+        /// operation.
         /// </para>
         /// <para>
         /// Ideally, you should not block this call. However, to ensure the proper function
@@ -383,5 +387,22 @@ namespace Yubico.YubiKey
         /// </p>
         /// </remarks>
         AuthenticateYubiHsmAuthCredentialPassword = 19,
+
+        /// <summary>
+        /// Indicates that the SDK is requesting the user provide a fingerprint
+        /// sample.
+        /// </summary>
+        /// <remarks>
+        /// When enrolling a fingerprint, the process will generally require
+        /// several samples. It is also likely you will want to display different
+        /// messages based on whether this is the first call for a sample, and
+        /// whether it is a later, "repeat" sample used to "reinforce" the
+        /// original sample. Hence, when the <see cref="KeyEntryData.Request"/>
+        /// property is <c>EnrollFingerprint</c>, look at the
+        /// <see cref="KeyEntryData.LastBioEnrollSampleResult"/> property. If it
+        /// is null, this is the first call, and if it is not null, this is a
+        /// subsequent call.
+        /// </remarks>
+        EnrollFingerprint = 20,
     }
 }

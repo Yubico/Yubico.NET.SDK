@@ -13,9 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Security;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
 
@@ -112,9 +109,9 @@ namespace Yubico.YubiKey.Fido2
                     CryptographicOperations.ZeroMemory(token);
                 }
 
-                MakeCredentialResponse rsp = RunMakeCredential(parameters, keyCollector);
+                MakeCredentialResponse rsp = RunMakeCredential(parameters, keyCollector, out CtapStatus ctapStatus);
 
-                switch (rsp.CtapStatus)
+                switch (ctapStatus)
                 {
                     case CtapStatus.Ok:
                         return rsp.GetData();
@@ -131,7 +128,11 @@ namespace Yubico.YubiKey.Fido2
 
                     case CtapStatus.OperationDenied:
                     case CtapStatus.ActionTimeout:
+                    case CtapStatus.UserActionTimeout:
                         throw new TimeoutException(ExceptionMessages.Fido2TouchTimeout);
+
+                    case CtapStatus.VendorUserCancel:
+                        throw new OperationCanceledException(ExceptionMessages.OperationCancelled);
 
                     default:
                         // Any other error, make sure we break out of the for
@@ -147,23 +148,26 @@ namespace Yubico.YubiKey.Fido2
         }
 
         private MakeCredentialResponse RunMakeCredential(
-            MakeCredentialParameters parameters, Func<KeyEntryData, bool> keyCollector)
+            MakeCredentialParameters parameters,
+            Func<KeyEntryData, bool> keyCollector,
+            out CtapStatus ctapStatus)
         {
             var keyEntryData = new KeyEntryData()
             {
                 Request = KeyEntryRequest.TouchRequest,
             };
-            using var tokenSource = new CancellationTokenSource();
-            var touchNotifyTask = Task.Run(() =>
-                RunKeyCollectorThread(keyCollector, keyEntryData, tokenSource.Token), tokenSource.Token);
+            var touchTask = new TouchFingerprintTask(keyCollector, keyEntryData);
 
             try
             {
-                return Connection.SendCommand(new MakeCredentialCommand(parameters));
+                MakeCredentialResponse rsp = Connection.SendCommand(new MakeCredentialCommand(parameters));
+                ctapStatus = touchTask.IsUserCanceled ? CtapStatus.VendorUserCancel : rsp.CtapStatus;
+                return rsp;
             }
             finally
             {
-                tokenSource.Cancel();
+                keyEntryData.Request = KeyEntryRequest.Release;
+                touchTask.SdkUpdate(keyEntryData);
             }
         }
     }

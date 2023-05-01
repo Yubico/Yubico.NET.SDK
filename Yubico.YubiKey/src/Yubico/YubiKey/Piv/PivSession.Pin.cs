@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.Piv
         /// <c>KeyEntryData.RetriesRemaining</c> set to the number of tries
         /// remaining until the PIN is blocked. The <c>KeyCollector</c> can try
         /// to collect the PIN again, but will likely report the retries
-        /// remaining to the user and offer the option of cancelling. If the
+        /// remaining to the user and offer the option of canceling. If the
         /// <c>KeyCollector</c> returns <c>false</c>, this method will call the
         /// <c>KeyCollector</c> with <c>Release</c> and return <c>false</c>.
         /// </para>
@@ -612,7 +612,7 @@ namespace Yubico.YubiKey.Piv
         /// <c>KeyEntryData.RetriesRemaining</c> set to the number of tries
         /// remaining until the PIN is blocked. The <c>KeyCollector</c> can try
         /// to collect the PIN again, but will likely report the retries
-        /// remaining to the user and offer the option of cancelling. If the
+        /// remaining to the user and offer the option of canceling. If the
         /// <c>KeyCollector</c> returns <c>false</c>, this method will call the
         /// <c>KeyCollector</c> with <c>Release</c> and return <c>false</c>.
         /// </para>
@@ -850,7 +850,7 @@ namespace Yubico.YubiKey.Piv
         /// <c>KeyEntryData.RetriesRemaining</c> set to the number of tries
         /// remaining until the PUK is blocked. The <c>KeyCollector</c> can try
         /// to collect the PUK again, but will likely report the retries
-        /// remaining to the user and offer the option of cancelling. If the
+        /// remaining to the user and offer the option of canceling. If the
         /// <c>KeyCollector</c> returns <c>false</c>, this method will call the
         /// <c>KeyCollector</c> with <c>Release</c> and return <c>false</c>.
         /// </para>
@@ -1035,7 +1035,7 @@ namespace Yubico.YubiKey.Piv
         /// <c>KeyEntryData.RetriesRemaining</c> set to the number of tries
         /// remaining until the PUK is blocked. The <c>KeyCollector</c> can try
         /// to collect the PUK again, but will likely report the retries
-        /// remaining to the user and offer the option of cancelling. If the
+        /// remaining to the user and offer the option of canceling. If the
         /// <c>KeyCollector</c> returns <c>false</c>, this method will call the
         /// <c>KeyCollector</c> with <c>Release</c> and return <c>false</c>.
         /// </para>

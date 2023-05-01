@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// The response partner to the GetBioModalityCommand, containing
     /// information about the biometric technique of the YubiKey.
     /// </summary>
-    public class BioEnrollBeginResponse : Fido2Response, IYubiKeyResponseWithData<BioEnrollUpdateStatus>
+    public class BioEnrollBeginResponse : Fido2Response, IYubiKeyResponseWithData<BioEnrollSampleResult>
     {
         private readonly BioEnrollmentResponse _response;
 
@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc/>
-        public BioEnrollUpdateStatus GetData()
+        public BioEnrollSampleResult GetData()
         {
             BioEnrollmentData enrollData = _response.GetData();
 
@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 && !(enrollData.LastEnrollSampleStatus is null)
                 && !(enrollData.RemainingSampleCount is null))
             {
-                return new BioEnrollUpdateStatus(
+                return new BioEnrollSampleResult(
                     enrollData.TemplateId.Value,
                     enrollData.LastEnrollSampleStatus.Value,
                     enrollData.RemainingSampleCount.Value);
@@ -57,5 +57,11 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
         }
+
+        protected override ResponseStatusPair StatusCodeMap => CtapStatus switch
+        {
+            CtapStatus.FpDatabaseFull => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseNoMoreSpaceInFile),
+            _ => base.StatusCodeMap,
+        };
     }
 }

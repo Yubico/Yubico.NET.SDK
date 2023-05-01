@@ -32,16 +32,16 @@ Static passwords can be either randomly generated or manually set by a developer
 > [!NOTE]
 > Each OTP application slot may store one generated or user-defined password. If you try to configure a slot with both, you will receive a `System.InvalidOperationException`.
 
-### Generated passwords
+### Generate a password
 
-The [GeneratePassword()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.GeneratePassword%28System.Memory%7BSystem.Char%7D%29) method allows you to generate a random password of a specified length (up to 38 characters) when configuring a slot with `ConfigureStaticPassword()`. Generated passwords use the [ModHex](xref:OtpModhex) character set by default, meaning that each character of the static password will be one of the 16 ModHex characters. This ensures that the generated password will be interpreted correctly by host devices, regardless of which keyboard layout they are configured with (e.g. English, German, etc).
+The [GeneratePassword()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.GeneratePassword%28System.Memory%7BSystem.Char%7D%29) method allows you to generate a random password of a specified length (up to 38 characters) when configuring a slot with `ConfigureStaticPassword()`. If desired, the SDK can generate passwords using the [ModHex](xref:OtpModhex) character set, meaning that each character of the static password will be one of the 16 ModHex characters. This ensures that the generated password will be interpreted correctly by host devices, regardless of which keyboard layout they are configured with (e.g. English, German, etc).
 
 > [!NOTE]
-> `GeneratePassword()` can be configured to use a different keyboard layout (e.g. English) during password generation if desired.
+> `GeneratePassword()` can be configured to use any keyboard layout (e.g. US English) in the [KeyboardLayout](xref:Yubico.Core.Devices.Hid.KeyboardLayout) class.
 
 If a slot has already been configured with a generated static password, the password may be updated to a new randomly generated password without having to use client software (as long as the [AllowManualUpdate()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.AllowManualUpdate(System.Boolean)) boolean is set to `True`). For more information, see How to manually update a generated static password.
 
-### Set passwords
+### Set a password
 
 The [SetPassword()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.SetPassword%28System.ReadOnlyMemory%7BSystem.Char%7D%29) method allows you to set the static password to anything of your choosing (up to 38 characters in length).
 

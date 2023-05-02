@@ -200,10 +200,16 @@ namespace Yubico.YubiKey.Fido2
         /// If the YubiKey does support <c>pinUvAuthToken</c>, then you can still
         /// call this method with no permissions (<c>None</c>) and a null
         /// <c>relyingPartyId</c>. In this case, the SDK will build a PinToken.
-        /// See this <xref href="Fido2AuthTokens">User's Manual entry</xref> for
+        /// See <xref href="Fido2AuthTokens">this User's Manual entry</xref> for
         /// a deeper discussion of PinTokens on YubiKey that supports
         /// PinUvAuthTokens. If you call with no permissions but with a relying
         /// party ID, then this method will throw an exception.
+        /// </para>
+        /// <para>
+        /// Note that if you pass in permissions of <c>None</c>, this method will
+        /// obtain an AuthToken that has the same permission set currently set in
+        /// the property <see cref="PinUvAuthTokenPermissions"/>, if there are
+        /// any.
         /// </para>
         /// <para>
         /// If the YubiKey supports PinUvAuthTokens, and this is called with
@@ -258,7 +264,7 @@ namespace Yubico.YubiKey.Fido2
         /// </para>
         /// </remarks>
         /// <param name="permissions">
-        /// An OR of all the permissions you expect to be needed suring the
+        /// An OR of all the permissions you expect to be needed during the
         /// session.
         /// </param>
         /// <param name="relyingPartyId">
@@ -267,8 +273,11 @@ namespace Yubico.YubiKey.Fido2
         /// there will be no relying party specified.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// The connected YubiKey does not support the permissions given, or the
-        /// permission requires a relyingPartyId and none is given.
+        /// The connected YubiKey does not support the permissions given, or a
+        /// relying party was specified but no permissions were specified.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The permission requires a relyingPartyId and none is given.
         /// </exception>
         public void AddPermissions(PinUvAuthTokenPermissions permissions, string? relyingPartyId = null)
         {
@@ -279,45 +288,43 @@ namespace Yubico.YubiKey.Fido2
             // AuthTokenRelyingPartyId property.
             string? rpId = relyingPartyId ?? AuthTokenRelyingPartyId;
 
-            // If there are no permissions and there is no RpId, then get a
+            // If there are no permissions and there is no RpId, then we'll get a
             // PinToken. This generally happens with YubiKeys that support only
             // FIDO2 version 2.0, but we will do this with 2.1 as well.
             // If there is a relying party but no permissions, throw an
             // exception.
-            if (permissions == PinUvAuthTokenPermissions.None)
+            if (allPermissions == PinUvAuthTokenPermissions.None)
             {
-                if (rpId is null)
+                if (!(rpId is null))
                 {
-                    VerifyPin();
-                    return;
+                    throw new ArgumentException(ExceptionMessages.Fido2PermsMissing);
+                }
+            }
+            else
+            {
+                // If this does not support the option pinUvAuthToken, then the
+                // current permissions must be None and the rpId variable must be
+                // null.
+                if (AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.pinUvAuthToken) != OptionValue.True)
+                {
+                    throw new ArgumentException(ExceptionMessages.Fido2PermsNotSupported);
                 }
 
-                throw new ArgumentException(ExceptionMessages.Fido2PermsMissing);
+                // If the permissions requested require an RpId, then make sure there
+                // is one.
+                if ((allPermissions.GetRpIdRequirement() == RequirementValue.Required) && (rpId is null))
+                {
+                    throw new InvalidOperationException(ExceptionMessages.Fido2RelyingPartyMissing);
+                }
             }
 
-            // If this does not support the option pinUvAuthToken, then the
-            // current permissions must be None and the rpId variable must be
-            // null. But if we got to this point, permissions are not None.
-            if (AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.pinUvAuthToken) != OptionValue.True)
+
+            // Try to verify with Uv. If that doesn't work (or is not supported),
+            // verify the PIN.
+            if (DoVerifyUv(allPermissions, rpId, out string _) != CtapStatus.Ok)
             {
-                throw new ArgumentException(ExceptionMessages.Fido2PermsNotSupported);
+                VerifyPin(allPermissions, rpId);
             }
-
-            // If the permissions requested require an RpId, then make sure there
-            // is one.
-            if ((allPermissions.GetRpIdRequirement() == RequirementValue.Required) && (rpId is null))
-            {
-                throw new InvalidOperationException(ExceptionMessages.Fido2RelyingPartyMissing);
-            }
-
-            // Now determine if this YubiKey supports UV. If it does, see if a
-            // fingerprint has been enrolled. If so, then VerifyUv.
-            // To be added!!!
-
-            // If we reach this code, then either the YubiKey did not support UV
-            // or nothing was enrolled, or else there was a fingerprint but it
-            // failed. We want to verify the Pin.
-            VerifyPin(allPermissions, rpId);
         }
 
         // This is called by methods inside the Fido2Session class.
@@ -711,10 +718,7 @@ namespace Yubico.YubiKey.Fido2
 
             ObtainSharedSecret();
 
-            ChangePinResponse result = Connection.SendCommand(new ChangePinCommand(
-                AuthProtocol,
-                currentPin,
-                newPin));
+            ChangePinResponse result = Connection.SendCommand(new ChangePinCommand(AuthProtocol, currentPin, newPin));
 
             if (result.Status == ResponseStatus.Success)
             {
@@ -736,6 +740,12 @@ namespace Yubico.YubiKey.Fido2
         /// Verifies the PIN against the YubiKey using the <c>KeyCollector</c>.
         /// </summary>
         /// <remarks>
+        /// If the <c>permissions</c> arg is null or <c>None</c>, then this
+        /// method will obtain a PinToken. See
+        /// <xref href="Fido2AuthTokens">this User's Manual entry</xref> for a
+        /// deeper discussion of PinTokens on YubiKey that supports
+        /// PinUvAuthTokens. If you call with no permissions but with a relying
+        /// party ID, then this method will throw an exception.
         /// <para>
         /// A YubiKey is manufactured with no PIN set on the FIDO2 application. A PIN must be set before a user
         /// can perform most FIDO2 operations. After a PIN has been set, it must be verified against the YubiKey
@@ -805,6 +815,12 @@ namespace Yubico.YubiKey.Fido2
         /// Tries to verify the PIN against the YubiKey using the <c>KeyCollector</c>.
         /// </summary>
         /// <remarks>
+        /// If the <c>permissions</c> arg is null or <c>None</c>, then this
+        /// method will obtain a PinToken. See
+        /// <xref href="Fido2AuthTokens">this User's Manual entry</xref> for a
+        /// deeper discussion of PinTokens on YubiKey that supports
+        /// PinUvAuthTokens. If you call with no permissions but with a relying
+        /// party ID, then this method will throw an exception.
         /// <para>
         /// A YubiKey is manufactured with no PIN set on the FIDO2 application. A PIN must be set before a user
         /// can perform most FIDO2 operations. After a PIN has been set, it must be verified against the YubiKey
@@ -902,6 +918,12 @@ namespace Yubico.YubiKey.Fido2
         /// Tries to verify the PIN against the YubiKey.
         /// </summary>
         /// <remarks>
+        /// If the <c>permissions</c> arg is null or <c>None</c>, then this
+        /// method will obtain a PinToken. See
+        /// <xref href="Fido2AuthTokens">this User's Manual entry</xref> for a
+        /// deeper discussion of PinTokens on YubiKey that supports
+        /// PinUvAuthTokens. If you call with no permissions but with a relying
+        /// party ID, then this method will throw an exception.
         /// <para>
         /// A YubiKey is manufactured with no PIN set on the FIDO2 application. A PIN must be set before a user
         /// can perform most FIDO2 operations. After a PIN has been set, it must be verified against the YubiKey
@@ -974,8 +996,13 @@ namespace Yubico.YubiKey.Fido2
 
             ObtainSharedSecret();
 
-            if (!permissions.HasValue)
+            if (!permissions.HasValue || (permissions == PinUvAuthTokenPermissions.None))
             {
+                if (!string.IsNullOrEmpty(relyingPartyId))
+                {
+                    throw new ArgumentException(ExceptionMessages.Fido2PermsMissing);
+                }
+
                 command = new GetPinTokenCommand(AuthProtocol, currentPin);
             }
             else
@@ -1070,14 +1097,24 @@ namespace Yubico.YubiKey.Fido2
                 return;
             }
 
-            throw new OperationCanceledException(ExceptionMessages.PinCollectionCancelled);
+            throw new OperationCanceledException(ExceptionMessages.FingerprintCollectionCancelled);
         }
 
         /// <summary>
-        /// Tries to Perform a User Verification (UV) check on the YubiKey using the onboard biometric sensor. This
-        /// method is only supported on YubiKey Bio Series devices. Uses the KeyCollector for touch prompting.
+        /// Tries to Perform a User Verification (UV) check on the YubiKey using
+        /// the onboard biometric sensor. This method is only supported on
+        /// YubiKey Bio Series devices. The permissions argument must be
+        /// something other than <c>None</c>.
         /// </summary>
         /// <remarks>
+        /// This method will call the KeyCollector to prompt the user to provide
+        /// the fingerprint. If there is no KeyCollector, this method will throw
+        /// an exception.
+        /// <para>
+        /// When verifying using Uv, the caller must provide a valid permission.
+        /// If the input permissions arg is <c>None</c>, this method will throw
+        /// an exception.
+        /// </para>
         /// <para>
         /// A YubiKey is manufactured with no PIN and no biometric templates set. A PIN must be set before a user
         /// can register fingerprints. After a PIN has been set, a user can enroll one or more fingers using their
@@ -1089,26 +1126,27 @@ namespace Yubico.YubiKey.Fido2
         /// the allowed number of retries, it is best practice to fall back to PIN verification.
         /// </para>
         /// <para>
-        /// Unlike other applications in this SDK (such as PIV and OATH), the SDK will not automatically verify PIN or
-        /// UV using the KeyCollector in methods like <see cref="MakeCredential"/> due to FIDO2's complex user
-        /// verification process. Your application must call this method explicitly before attempting to perform a FIDO2
-        /// operation thatwhen requires verification.
-        /// </para>
-        /// <para>
         /// If the YubiKey was unable to verify a registered fingerprint, the SDK will automatically retry. The key
         /// collector will be called again to notify your app that touch is required. Each time the key collector is
         /// called, the <c>IsRetry</c> member will be set to <c>true</c> and the <c>RetryCount</c> will be updated to
         /// reflect the number of retries left before the YubiKey blocks further UV attempts. To cancel UV collection
-        /// operations, simply return <c>false</c> in the handler for the key collector. When the retries have been
-        /// exhausted, a `SecurityException` will be thrown. This, along with user cancellation, are indicators that
-        /// your application should switch to verification with PIN.
+        /// operations, call the <see cref="KeyEntryData.SignalUserCancel"/> delegate. When the retries have been
+        /// exhausted, a <c>SecurityException</c> will be thrown. This, along with user cancellation, are indicators
+        /// that your application should switch to verification with PIN.
+        /// </para>
+        /// <para>
+        /// If the user cancels the operation, this method will return
+        /// <c>false</c>. If the YubiKey times out, this method will throw a
+        /// <c>TimeoutException</c>.
         /// </para>
         /// </remarks>
+        /// <returns>
+        /// A boolean, <c>true</c> if the verification succeeds, <c>false</c> if
+        /// the user cancels.
+        /// </returns>
         /// <param name="permissions">
-        /// The set of operations that this auth token should be permitted to do. This parameter is allowed only if the
-        /// YubiKey contains the `pinUvAuthToken` option in <see cref="AuthenticatorInfo.Options"/>. If the YubiKey
-        /// does not support this, leave the parameter `null` and the legacy <see cref="GetPinTokenCommand"/> will be used
-        /// as a fallback.
+        /// The set of operations that this auth token should be permitted to do.
+        /// This parameter cannot be <c>None</c> for UvVerification.
         /// </param>
         /// <param name="relyingPartyId">
         /// Some <paramref name="permissions"/> require the qualification of a relying party ID. This parameter should
@@ -1117,84 +1155,108 @@ namespace Yubico.YubiKey.Fido2
         /// it is optional.
         /// </param>
         /// <exception cref="InvalidOperationException">
-        /// The YubiKey does not support onboard user-verification.
+        /// The YubiKey does not support onboard user-verification, or else it
+        /// does support it but there are no fingerprints enrolled.
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// The YubiKey has blocked fingerprint verification because of too many
+        /// "bad" readings.
+        /// </exception>
+        /// <exception cref="TimeoutException">
+        /// The YubiKey timed out waiting for the user to supply a fingerprint.
+        /// </exception>
+        /// <exception cref="Fido2Exception">
+        /// The permissions arg was <c>None</c> or the YubiKey was not able to
+        /// complete the process for some reason described in the exception's
+        /// message.
         /// </exception>
         public bool TryVerifyUv(PinUvAuthTokenPermissions permissions, string? relyingPartyId = null)
         {
+            CtapStatus status = DoVerifyUv(permissions, relyingPartyId, out string statusMessage);
+
+            switch(status)
+            {
+                case CtapStatus.Ok:
+                    return true;
+
+                case CtapStatus.VendorUserCancel:
+                    return false;
+
+                case CtapStatus.UnsupportedOption:
+                    throw new InvalidOperationException(ExceptionMessages.Fido2UvNotSupported);
+
+                case CtapStatus.UvInvalid:
+                case CtapStatus.LimitExceeded:
+                    throw new SecurityException(ExceptionMessages.Fido2NoMoreRetries);
+
+                case CtapStatus.OperationDenied:
+                case CtapStatus.ActionTimeout:
+                case CtapStatus.UserActionTimeout:
+                    throw new TimeoutException(ExceptionMessages.Fido2TouchTimeout);
+
+                default:
+                    throw new Fido2Exception(statusMessage);
+            }
+        }
+
+        private CtapStatus DoVerifyUv(PinUvAuthTokenPermissions permissions, string? relyingPartyId, out string statusMessage)
+        {
+            if ((AuthenticatorInfo.GetOptionValue("pinUvAuthToken") != OptionValue.True)
+                || (AuthenticatorInfo.GetOptionValue("uv") != OptionValue.True))
+            {
+                statusMessage = "";
+                return CtapStatus.UnsupportedOption;
+            }
+            if (permissions == PinUvAuthTokenPermissions.None)
+            {
+                statusMessage = ExceptionMessages.Fido2PermsMissing;
+                return CtapStatus.InvalidParameter;
+            }
+
             Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
+
+            CtapStatus status;
+            ObtainSharedSecret();
+            var command = new GetPinUvAuthTokenUsingUvCommand(AuthProtocol, permissions, relyingPartyId);
 
             var keyEntryData = new KeyEntryData()
             {
                 Request = KeyEntryRequest.VerifyFido2Uv
             };
-
-            if (!OptionEnabled(AuthenticatorInfo, "pinUvAuthToken") || !OptionEnabled(AuthenticatorInfo, "uv"))
-            {
-                throw new InvalidOperationException(ExceptionMessages.Fido2UvNotSupported);
-            }
-
-            ObtainSharedSecret();
+            var touchTask = new TouchFingerprintTask(keyCollector, keyEntryData);
 
             try
             {
-                while (true)
+                do
                 {
-                    var touchNotifyTask = Task.Run(() => keyCollector(keyEntryData));
-                    var verifyUvTask = Task.Run(() => SingleUvAttempt(keyEntryData, permissions, relyingPartyId));
+                    GetPinUvAuthTokenResponse response = Connection.SendCommand(command);
+                    status = touchTask.IsUserCanceled ? CtapStatus.VendorUserCancel : response.CtapStatus;
+                    statusMessage = response.StatusMessage;
 
-                    int completedTask = Task.WaitAny(touchNotifyTask, verifyUvTask);
-
-                    if (completedTask == 0)
+                    if (status == CtapStatus.Ok)
                     {
-                        if (touchNotifyTask.Result == false)
+                        AuthToken = response.GetData();
+                        AuthTokenPermissions = permissions;
+                        AuthTokenRelyingPartyId = relyingPartyId;
+                    }
+                    else if (status == CtapStatus.UvInvalid)
+                    {
+                        keyEntryData.IsRetry = true;
+                        keyEntryData.RetriesRemaining = Connection.SendCommand(new GetUvRetriesCommand()).GetData();
+                        if (keyEntryData.RetriesRemaining <= 0)
                         {
-                            return false;
+                            status = CtapStatus.LimitExceeded;
                         }
-
-                        verifyUvTask.Wait();
                     }
+                } while(status == CtapStatus.UvInvalid);
 
-                    if (verifyUvTask.Result)
-                    {
-                        return true;
-                    }
-                }
+                return status;
             }
             finally
             {
                 keyEntryData.Request = KeyEntryRequest.Release;
-                _ = keyCollector(keyEntryData);
+                touchTask.SdkUpdate(keyEntryData);
             }
-        }
-
-        private bool SingleUvAttempt(KeyEntryData keyEntryData, PinUvAuthTokenPermissions permissions, string? relyingPartyId)
-        {
-            GetPinUvAuthTokenResponse response = Connection.SendCommand(
-                new GetPinUvAuthTokenUsingUvCommand(AuthProtocol, permissions, relyingPartyId));
-
-            if (response.Status == ResponseStatus.Success)
-            {
-                AuthToken = response.GetData();
-                AuthTokenPermissions = permissions;
-                AuthTokenRelyingPartyId = relyingPartyId;
-
-                return true;
-            }
-
-            if (GetCtapError(response) == CtapStatus.UvInvalid)
-            {
-                keyEntryData.IsRetry = true;
-                keyEntryData.RetriesRemaining = Connection.SendCommand(new GetUvRetriesCommand()).GetData();
-
-                if (keyEntryData.RetriesRemaining == 0)
-                {
-                    throw new SecurityException(ExceptionMessages.Fido2NoMoreRetries);
-                }
-
-                return false;
-            }
-
-            throw new InvalidOperationException(response.StatusMessage);
         }
 
         /// <summary>

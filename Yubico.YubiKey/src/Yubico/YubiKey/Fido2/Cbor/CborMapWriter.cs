@@ -112,9 +112,9 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
         public CborMapWriter<TKey> OptionalEntry(TKey key, string? value)
         {
-            if (value is { })
+            if (!string.IsNullOrEmpty(value))
             {
-                return Entry(key, value);
+                return Entry(key, value!);
             }
 
             return this;

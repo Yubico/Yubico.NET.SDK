@@ -30,8 +30,8 @@ namespace Yubico.YubiKey.Fido2
 
             using (var fido2 = new Fido2Session(yubiKey))
             {
-                var pin1 = Encoding.UTF8.GetBytes("12345");
-                var pin2 = Encoding.UTF8.GetBytes("abcde");
+                byte[] pin1 = Encoding.UTF8.GetBytes("12345");
+                byte[] pin2 = Encoding.UTF8.GetBytes("abcde");
 
                 fido2.KeyCollector = req =>
                 {
@@ -109,16 +109,16 @@ namespace Yubico.YubiKey.Fido2
             {
                 bool success = fido2.TryVerifyPin(
                     invalidPin,
-                    PinUvAuthTokenPermissions.MakeCredential,
-                    "abc",
+                    PinUvAuthTokenPermissions.CredentialManagement,
+                    "",
                     out _, out _);
 
                 Assert.False(success);
 
                 success = fido2.TryVerifyPin(
                     validPin,
-                    PinUvAuthTokenPermissions.MakeCredential,
-                    "abc",
+                    PinUvAuthTokenPermissions.CredentialManagement,
+                    "",
                     out _, out _);
 
                 Assert.True(success);

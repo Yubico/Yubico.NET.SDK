@@ -337,7 +337,7 @@ namespace Yubico.YubiKey.Fido2
                 return new TemplateInfo(templateId, returnName);
             }
 
-            // The only way to readh this code is if the BioEnrollment had
+            // The only way to reach this code is if the BioEnrollment had
             // started, but not yet completed. So cancel the operation.
             var cancelCmd = new BioEnrollCancelCommand();
             _ = Connection.SendCommand(cancelCmd);

@@ -71,7 +71,6 @@ namespace Yubico.YubiKey.Fido2
         ExtensionFirst = 0xE0, // Extension specific error range begin
         ExtensionLast = 0xEF, // Extension specific error range end
         VendorFirst = 0xF0, // Vendor specific error range begin
-        VendorUserCancel = 0xF1,
         VendorLast = 0xFF, // Vendor specific error range last
     }
 }

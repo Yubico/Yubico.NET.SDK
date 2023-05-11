@@ -150,7 +150,7 @@ namespace Yubico.YubiKey.Fido2
                     case CtapStatus.UserActionTimeout:
                         throw new TimeoutException(ExceptionMessages.Fido2TouchTimeout);
 
-                    case CtapStatus.VendorUserCancel:
+                    case CtapStatus.KeepAliveCancel:
                         throw new OperationCanceledException(ExceptionMessages.OperationCancelled);
 
                     default:
@@ -175,12 +175,16 @@ namespace Yubico.YubiKey.Fido2
             {
                 Request = KeyEntryRequest.TouchRequest,
             };
-            var touchTask = new TouchFingerprintTask(keyCollector, keyEntryData);
+            using var touchTask = new TouchFingerprintTask(
+                keyCollector,
+                keyEntryData,
+                Connection,
+                CtapConstants.CtapGetAssertionCmd);
 
             try
             {
                 GetAssertionResponse rsp = Connection.SendCommand(new GetAssertionCommand(parameters));
-                ctapStatus = touchTask.IsUserCanceled ? CtapStatus.VendorUserCancel : rsp.CtapStatus;
+                ctapStatus = touchTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : rsp.CtapStatus;
                 return rsp;
             }
             finally

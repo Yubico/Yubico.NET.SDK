@@ -23,5 +23,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         public const byte CtapHidCancel = 0x11;
         public const byte CtapHidError = 0x3F;
         public const byte CtapHidKeepAlive = 0x3B;
+        public const byte CtapBioEnrollCmd = 0x09;
+        public const byte CtapMakeCredentialCmd = 0x01;
+        public const byte CtapGetAssertionCmd = 0x02;
+        public const byte CtapClientPinCmd = 0x06;
     }
 }

@@ -1179,7 +1179,7 @@ namespace Yubico.YubiKey.Fido2
                 case CtapStatus.Ok:
                     return true;
 
-                case CtapStatus.VendorUserCancel:
+                case CtapStatus.KeepAliveCancel:
                     return false;
 
                 case CtapStatus.UnsupportedOption:
@@ -1223,14 +1223,18 @@ namespace Yubico.YubiKey.Fido2
             {
                 Request = KeyEntryRequest.VerifyFido2Uv
             };
-            var touchTask = new TouchFingerprintTask(keyCollector, keyEntryData);
+            using var touchTask = new TouchFingerprintTask(
+                keyCollector,
+                keyEntryData,
+                Connection,
+                CtapConstants.CtapClientPinCmd);
 
             try
             {
                 do
                 {
                     GetPinUvAuthTokenResponse response = Connection.SendCommand(command);
-                    status = touchTask.IsUserCanceled ? CtapStatus.VendorUserCancel : response.CtapStatus;
+                    status = touchTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : response.CtapStatus;
                     statusMessage = response.StatusMessage;
 
                     if (status == CtapStatus.Ok)

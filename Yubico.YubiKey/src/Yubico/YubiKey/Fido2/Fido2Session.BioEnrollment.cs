@@ -283,14 +283,19 @@ namespace Yubico.YubiKey.Fido2
             {
                 Request = KeyEntryRequest.EnrollFingerprint,
             };
-            var fingerprintTask = new TouchFingerprintTask(keyCollector, keyEntryData);
+            using var fingerprintTask = new TouchFingerprintTask(
+                keyCollector,
+                keyEntryData,
+                Connection,
+                CtapConstants.CtapBioEnrollCmd
+                );
 
             try
             {
                 var beginCmd = new BioEnrollBeginCommand(timeoutMilliseconds, currentToken, AuthProtocol);
                 BioEnrollBeginResponse beginRsp = Connection.SendCommand(beginCmd);
                 var currentRsp = (IYubiKeyResponseWithData<BioEnrollSampleResult>)beginRsp;
-                status = fingerprintTask.IsUserCanceled ? CtapStatus.VendorUserCancel : beginRsp.CtapStatus;
+                status = fingerprintTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : beginRsp.CtapStatus;
                 generalErrorMsg = beginRsp.StatusMessage;
 
                 while (status == CtapStatus.Ok)
@@ -311,7 +316,7 @@ namespace Yubico.YubiKey.Fido2
                         AuthProtocol);
                     BioEnrollNextSampleResponse nextRsp = Connection.SendCommand(nextCmd);
                     currentRsp = (IYubiKeyResponseWithData<BioEnrollSampleResult>)nextRsp;
-                    status = fingerprintTask.IsUserCanceled ? CtapStatus.VendorUserCancel : beginRsp.CtapStatus;
+                    status = fingerprintTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : nextRsp.CtapStatus;
                     generalErrorMsg = nextRsp.StatusMessage;
                 }
 
@@ -353,7 +358,7 @@ namespace Yubico.YubiKey.Fido2
                 case CtapStatus.FpDatabaseFull:
                     throw new Fido2Exception(ExceptionMessages.FingerprintDatabaseFull);
 
-                case CtapStatus.VendorUserCancel:
+                case CtapStatus.KeepAliveCancel:
                 case CtapStatus.ErrOther:
                     throw new OperationCanceledException(ExceptionMessages.FingerprintCollectionCancelled);
 

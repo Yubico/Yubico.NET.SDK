@@ -55,8 +55,6 @@ namespace Yubico.YubiKey.Fido2.Commands
     public class BioEnrollmentCommand : IYubiKeyCommand<BioEnrollmentResponse>
     {
         // Command constants
-        private const byte CmdAuthenticatorBioEnroll = 0x09;
-
         private const int ModalityValue = 1;
         private const byte FingerprintValue = 1;
 
@@ -250,7 +248,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 throw new Ctap2DataException(ExceptionMessages.CborLengthMismatch);
             }
 
-            data[0] = CmdAuthenticatorBioEnroll;
+            data[0] = CtapConstants.CtapBioEnrollCmd;
 
             return new CommandApdu()
             {

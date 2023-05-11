@@ -18,7 +18,7 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey
 {
-    internal class FidoConnection : IYubiKeyConnection
+    internal class FidoConnection : IYubiKeyConnection, ICancelConnection
     {
         private readonly IApduTransform _apduPipeline;
         private readonly IHidConnection _fidoConnection;
@@ -29,8 +29,21 @@ namespace Yubico.YubiKey
             _fidoConnection = hidDevice.ConnectToIOReports();
 
             _apduPipeline = new FidoTransform(_fidoConnection);
-
             _apduPipeline.Setup();
+        }
+
+        // Load the QueryCancel given.
+        // This will overwrite any already loaded delegate.
+        // If the delegate is loaded, return true.
+        public bool LoadQueryCancel(QueryCancel? queryCancel)
+        {
+            if (_apduPipeline is ICancelApduTransform cancelTransform)
+            {
+                cancelTransform.QueryCancel = queryCancel;
+                return true;
+            }
+
+            return false;
         }
 
         public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)

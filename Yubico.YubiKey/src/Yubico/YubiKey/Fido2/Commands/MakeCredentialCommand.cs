@@ -23,8 +23,6 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// </summary>
     public class MakeCredentialCommand : IYubiKeyCommand<MakeCredentialResponse>
     {
-        private const int CtapMakeCredentialCmd = 0x01;
-
         /// <inheritdoc />
         public YubiKeyApplication Application => YubiKeyApplication.Fido2;
 
@@ -61,7 +59,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             byte[] encodedParams = _params.CborEncode();
             byte[] payload = new byte[encodedParams.Length + 1];
-            payload[0] = CtapMakeCredentialCmd;
+            payload[0] = CtapConstants.CtapMakeCredentialCmd;
             Array.Copy(encodedParams, 0, payload, 1, encodedParams.Length);
             return new CommandApdu()
             {

@@ -19,6 +19,7 @@ using System.Security.Cryptography;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2;
+using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Pipelines
 {
@@ -26,7 +27,7 @@ namespace Yubico.YubiKey.Pipelines
     /// Represents an ApduPipeline backed by a direct connection
     /// to the U2F/FIDO2 application.
     /// </summary>
-    internal class FidoTransform : IApduTransform
+    internal class FidoTransform : IApduTransform, ICancelApduTransform
     {
         private const int Ctap1Message = 0x03;
         private const int CtapError = 0x3F;
@@ -42,11 +43,14 @@ namespace Yubico.YubiKey.Pipelines
 
         private const byte CtapHidInitCmd = 0x06;
         private const byte CtapHidKeepAliveCmd = 0x3b;
+        private const byte CtapHidCancelCmd = 0x11;
         private const uint CtapHidBroadcastChannelId = 0xffffffff;
 
         internal readonly IHidConnection _hidConnection;
 
         private uint? _channelId;
+
+        public QueryCancel? QueryCancel { get; set; }
 
         public bool IsChannelIdAcquired => _channelId.HasValue;
 
@@ -139,7 +143,13 @@ namespace Yubico.YubiKey.Pipelines
         {
             SendRequest(channelId, commandByte, data);
 
-            byte[] responseData = ReceiveResponse(out responseByte);
+            byte cmdByte = commandByte;
+            if ((data.Length > 0) && (commandByte == CtapConstants.CtapHidCbor))
+            {
+                cmdByte = data[0];
+            }
+
+            byte[] responseData = ReceiveResponse(channelId, cmdByte, out responseByte);
 
             return responseData;
         }
@@ -180,6 +190,12 @@ namespace Yubico.YubiKey.Pipelines
         /// modes are encountered. This behavior is described in the
         /// specification document FIDO U2F HID Protocol.
         /// </remarks>
+        /// <param name="channelId">
+        /// The id number for the operation.
+        /// </param>
+        /// <param name="commandByte">
+        /// The byte describing the command currently operating.
+        /// </param>
         /// <param name="responseCommand">
         /// An output parameter containing the command identifier returned by
         /// the CTAP response.
@@ -190,12 +206,17 @@ namespace Yubico.YubiKey.Pipelines
         /// <exception cref="MalformedYubiKeyResponseException">
         /// Thrown when the response payload size is larger than expected.
         /// </exception>
-        private byte[] ReceiveResponse(out byte responseCommand)
+        private byte[] ReceiveResponse(uint channelId, byte commandByte, out byte responseCommand)
         {
             // get init response packet
             byte[] responseInitPacket = _hidConnection.GetReport();
             while (responseInitPacket[4] == (CtapHidKeepAliveCmd | 0b1000_0000))
             {
+                if (!(QueryCancel is null) && QueryCancel(commandByte))
+                {
+                    _hidConnection.SetReport(ConstructInitPacket(channelId, CtapHidCancelCmd, ReadOnlySpan<byte>.Empty, 0));
+                    QueryCancel = null;
+                }
                 responseInitPacket = _hidConnection.GetReport();
             }
             int responseDataLength = GetPacketBcnt(responseInitPacket);

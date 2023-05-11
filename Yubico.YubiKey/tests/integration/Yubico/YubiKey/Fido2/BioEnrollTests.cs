@@ -23,6 +23,15 @@ namespace Yubico.YubiKey.Fido2
 {
     public class BioEnrollTests : SimpleIntegrationTestConnection
     {
+        // Set to 0 meaning don't cancel.
+        // Or set to an integer indicating that the enroll fingerprint call
+        // should be canceled when the remaining sample count gets to that value.
+        // Or set to -1, meaning cancel on the first call to the KeyCollector
+        // (cancel before any fingerprints are sampled).
+        // If the call is touch or verify fingerprint, then any non-zero
+        // _callCancelCount value means cancel when the request comes in.
+        private int _callCancelCount = 0;
+
         public BioEnrollTests()
             : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
         {
@@ -57,6 +66,8 @@ namespace Yubico.YubiKey.Fido2
         {
             string firstName = "SomeName";
             string secondName = "Another Name";
+            _callCancelCount = 0;
+
             using (var fido2Session = new Fido2Session(Device))
             {
                 fido2Session.KeyCollector = LocalKeyCollector;
@@ -108,8 +119,33 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
+        [Theory]
+        [InlineData(4)]
+        [InlineData(-1)]
+        public void EnrollFingerprint_Cancel_ThrowsCorrect(int cancelCount)
+        {
+            _callCancelCount = cancelCount;
+
+            using (var fido2Session = new Fido2Session(Device))
+            {
+                fido2Session.KeyCollector = LocalKeyCollector;
+
+                _ = Assert.Throws<OperationCanceledException>(() => fido2Session.EnrollFingerprint(null, 5000));
+            }
+        }
+
         private bool LocalKeyCollector(KeyEntryData arg)
         {
+            bool callCancel = (_callCancelCount == 0) ? false : true;
+
+            if ((_callCancelCount > 0) && (!(arg.LastBioEnrollSampleResult is null)))
+            {
+                if (arg.LastBioEnrollSampleResult.RemainingSampleCount != _callCancelCount)
+                {
+                    callCancel = false;
+                }
+            }
+
             switch (arg.Request)
             {
                 case KeyEntryRequest.TouchRequest:
@@ -119,9 +155,17 @@ namespace Yubico.YubiKey.Fido2
                     arg.SubmitValue(Encoding.UTF8.GetBytes("123456"));
                     break;
                 case KeyEntryRequest.VerifyFido2Uv:
+                    if (callCancel && !(arg.SignalUserCancel is null))
+                    {
+                        arg.SignalUserCancel();
+                    }
                     Console.WriteLine("Fingerprint requested.");
                     break;
                 case KeyEntryRequest.EnrollFingerprint:
+                    if (callCancel && !(arg.SignalUserCancel is null))
+                    {
+                        arg.SignalUserCancel();
+                    }
                     Console.WriteLine("Fingerprint needed.");
                     break;
                 case KeyEntryRequest.Release:

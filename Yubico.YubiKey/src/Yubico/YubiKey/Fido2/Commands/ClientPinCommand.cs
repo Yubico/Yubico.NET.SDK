@@ -55,9 +55,6 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// </remarks>
     public class ClientPinCommand : IYubiKeyCommand<IYubiKeyResponse>
     {
-        // Command constants
-        private const byte CmdAuthenticatorClientPin = 0x06;
-
         private const int TagPinUvAuthProtocol = 0x01;
         private const int TagSubCommand = 0x02;
         private const int TagKeyAgreement = 0x03;
@@ -185,7 +182,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 throw new Ctap2DataException(ExceptionMessages.CborLengthMismatch);
             }
 
-            data[0] = CmdAuthenticatorClientPin;
+            data[0] = CtapConstants.CtapClientPinCmd;
 
             return new CommandApdu()
             {

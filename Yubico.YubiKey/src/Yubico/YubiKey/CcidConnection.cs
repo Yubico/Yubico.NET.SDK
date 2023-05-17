@@ -59,6 +59,11 @@ namespace Yubico.YubiKey
             _apduPipeline = AddResponseChainingTransform(_apduPipeline);
             _apduPipeline = new CommandChainingTransform(_apduPipeline);
 
+            if (yubiKeyApplication == YubiKeyApplication.Fido2)
+            {
+                _apduPipeline = new FidoErrorTransform(_apduPipeline);
+            }
+
             // CCID has the concept of multiple applications. Since we cannot guarantee the
             // state of the smart card when connecting, we should always send down a connection
             // request.
@@ -69,12 +74,21 @@ namespace Yubico.YubiKey
         {
             _applicationId = applicationId;
             _yubiKeyApplication = YubiKeyApplication.Unknown;
-            
+
             _smartCardConnection = smartCardDevice.Connect();
 
             _apduPipeline = new SmartCardTransform(_smartCardConnection);
             _apduPipeline = AddResponseChainingTransform(_apduPipeline);
             _apduPipeline = new CommandChainingTransform(_apduPipeline);
+
+            if (applicationId.SequenceEqual(YubiKeyApplication.Fido2.GetIso7816ApplicationId()))
+            {
+                _apduPipeline = new FidoErrorTransform(_apduPipeline);
+            }
+            else if (applicationId.SequenceEqual(YubiKeyApplication.Otp.GetIso7816ApplicationId()))
+            {
+                _apduPipeline = new OtpErrorTransform(_apduPipeline);
+            }
 
             // CCID has the concept of multiple applications. Since we cannot guarantee the
             // state of the smart card when connecting, we should always send down a connection
@@ -97,7 +111,15 @@ namespace Yubico.YubiKey
             _apduPipeline = new Scp03ApduTransform(_apduPipeline, staticKeys);
             _apduPipeline = AddResponseChainingTransform(_apduPipeline);
             _apduPipeline = new CommandChainingTransform(_apduPipeline);
-            _apduPipeline = new OtpErrorTransform(_apduPipeline);
+
+            if (yubiKeyApplication == YubiKeyApplication.Fido2)
+            {
+                _apduPipeline = new FidoErrorTransform(_apduPipeline);
+            }
+            else if (yubiKeyApplication == YubiKeyApplication.Otp)
+            {
+                _apduPipeline = new OtpErrorTransform(_apduPipeline);
+            }
 
             // CCID has the concept of multiple applications. Since we cannot guarantee the
             // state of the smart card when connecting, we should always send down a connection
@@ -118,7 +140,15 @@ namespace Yubico.YubiKey
             _apduPipeline = new Scp03ApduTransform(_apduPipeline, staticKeys);
             _apduPipeline = AddResponseChainingTransform(_apduPipeline);
             _apduPipeline = new CommandChainingTransform(_apduPipeline);
-            _apduPipeline = new OtpErrorTransform(_apduPipeline);
+
+            if (applicationId.SequenceEqual(YubiKeyApplication.Fido2.GetIso7816ApplicationId()))
+            {
+                _apduPipeline = new FidoErrorTransform(_apduPipeline);
+            }
+            else if (applicationId.SequenceEqual(YubiKeyApplication.Otp.GetIso7816ApplicationId()))
+            {
+                _apduPipeline = new OtpErrorTransform(_apduPipeline);
+            }
 
             // CCID has the concept of multiple applications. Since we cannot guarantee the
             // state of the smart card when connecting, we should always send down a connection

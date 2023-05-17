@@ -53,5 +53,18 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 return fido2Session.TryVerifyPin(permissions, relyingPartyId);
             }
         }
+
+        public static bool VerifyUv(
+            IYubiKeyDevice yubiKey,
+            Func<KeyEntryData, bool> KeyCollectorDelegate,
+            PinUvAuthTokenPermissions permissions,
+            string relyingPartyId)
+        {
+            using (var fido2Session = new Fido2Session(yubiKey))
+            {
+                fido2Session.KeyCollector = KeyCollectorDelegate;
+                return fido2Session.TryVerifyUv(permissions, relyingPartyId);
+            }
+        }
     }
 }

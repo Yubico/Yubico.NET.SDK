@@ -23,6 +23,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         SetPin = 4,
         ChangePin = 5,
         VerifyPin = 6,
+        VerifyUv = 7,
 
         MakeCredential = 10,
         GetAssertion = 11,
@@ -35,7 +36,12 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         StoreLargeBlobData = 16,
         DeleteLargeBlobData = 17,
 
-        Reset = 20,
+        GetBioInfo = 18,
+        EnrollFingerprint = 19,
+        SetBioTemplateFriendlyName = 21,
+        RemoveBioEnrollment = 22,
+
+        Reset = 23,
 
         Exit = 24,
     }

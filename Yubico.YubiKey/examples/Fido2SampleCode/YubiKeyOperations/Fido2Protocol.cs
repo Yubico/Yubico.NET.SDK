@@ -17,6 +17,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2;
+using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
 {
@@ -313,6 +314,88 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             }
 
             return true;
+        }
+
+        public static bool RunGetBioInfo(
+            IYubiKeyDevice yubiKey,
+            Func<KeyEntryData, bool> KeyCollectorDelegate,
+            out BioModality modality,
+            out FingerprintSensorInfo sensorInfo,
+            out IReadOnlyList<TemplateInfo> templates)
+        {
+            using (var fido2Session = new Fido2Session(yubiKey))
+            {
+                fido2Session.KeyCollector = KeyCollectorDelegate;
+
+                modality = fido2Session.GetBioModality();
+
+                if (modality != BioModality.None)
+                {
+                    sensorInfo = fido2Session.GetFingerprintSensorInfo();
+                    templates = fido2Session.EnumerateBioEnrollments();
+                }
+                else
+                {
+                    sensorInfo = new FingerprintSensorInfo(0, 0, 0);
+                    templates = new List<TemplateInfo>();
+                }
+            }
+
+            return true;
+        }
+
+        public static TemplateInfo RunEnrollFingerprint(
+            IYubiKeyDevice yubiKey,
+            Func<KeyEntryData, bool> KeyCollectorDelegate,
+            string friendlyName,
+            int timeoutMilliseconds)
+        {
+            using (var fido2Session = new Fido2Session(yubiKey))
+            {
+                fido2Session.KeyCollector = KeyCollectorDelegate;
+
+                if (timeoutMilliseconds > 0)
+                {
+                    return fido2Session.EnrollFingerprint(
+                        friendlyName,
+                        timeoutMilliseconds);
+                }
+                else
+                {
+                    return fido2Session.EnrollFingerprint(
+                        friendlyName,
+                        null);
+                }
+            }
+        }
+
+        public static bool RunSetBioTemplateFriendlyName(
+            IYubiKeyDevice yubiKey,
+            Func<KeyEntryData, bool> KeyCollectorDelegate,
+            ReadOnlyMemory<byte> templateId,
+            string friendlyName)
+        {
+            using (var fido2Session = new Fido2Session(yubiKey))
+            {
+                fido2Session.KeyCollector = KeyCollectorDelegate;
+
+                fido2Session.SetBioTemplateFriendlyName(templateId, friendlyName);
+            }
+
+            return true;
+        }
+
+        public static bool RunRemoveBioEnrollment(
+            IYubiKeyDevice yubiKey,
+            Func<KeyEntryData, bool> KeyCollectorDelegate,
+            ReadOnlyMemory<byte> templateId)
+        {
+            using (var fido2Session = new Fido2Session(yubiKey))
+            {
+                fido2Session.KeyCollector = KeyCollectorDelegate;
+
+                return fido2Session.TryRemoveBioTemplate(templateId);
+            }
         }
     }
 }

@@ -73,6 +73,23 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                     SampleMenu.WriteMessage(MessageType.Title, 0, "touch the YubiKey's contact to complete the operation.\n");
                     return true;
 
+                case KeyEntryRequest.EnrollFingerprint:
+                    if (!(keyEntryData.LastBioEnrollSampleResult is null))
+                    {
+                        string lastResult = keyEntryData.LastBioEnrollSampleResult.LastEnrollSampleStatus.ToString();
+                        SampleMenu.WriteMessage(MessageType.Title, 0, "                      Sample result: " + lastResult);
+                        SampleMenu.WriteMessage(
+                            MessageType.Title, 0,
+                            "Number of good samples still needed: " + keyEntryData.LastBioEnrollSampleResult.RemainingSampleCount);
+                    }
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "\nPlease provide a fingerprint sample.\n");
+                    return true;
+
+                case KeyEntryRequest.VerifyFido2Uv:
+                    ReportOperation();
+                    SampleMenu.WriteMessage(MessageType.Title, 0, "Use the fingerprint reader to authenticate.\n");
+                    return true;
+
                 case KeyEntryRequest.SetFido2Pin:
                     SampleMenu.WriteMessage(MessageType.Title, 0, "Setting the FIDO2 application's PIN, enter the PIN.");
                     collectedValue = SampleMenu.ReadResponse(out int _);

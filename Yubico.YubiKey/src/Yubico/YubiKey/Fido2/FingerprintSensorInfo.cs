@@ -14,7 +14,7 @@
 
 using System;
 
-namespace Yubico.YubiKey.Fido2.Commands
+namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
     /// Contains the data returned by the YubiKey after calling the

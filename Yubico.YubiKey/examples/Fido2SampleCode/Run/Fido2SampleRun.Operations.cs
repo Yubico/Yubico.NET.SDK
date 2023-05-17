@@ -43,6 +43,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             Fido2MainMenuItem.SetPin => RunSetPin(),
             Fido2MainMenuItem.ChangePin => RunChangePin(),
             Fido2MainMenuItem.VerifyPin => RunVerifyPin(),
+            Fido2MainMenuItem.VerifyUv => RunVerifyUv(),
             Fido2MainMenuItem.MakeCredential => RunMakeCredential(),
             Fido2MainMenuItem.GetAssertion => RunGetAssertions(),
             Fido2MainMenuItem.ListCredentials => RunListCredentials(),
@@ -51,6 +52,10 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             Fido2MainMenuItem.RetrieveLargeBlobData => RunRetrieveLargeBlobData(),
             Fido2MainMenuItem.StoreLargeBlobData => RunStoreLargeBlobData(),
             Fido2MainMenuItem.DeleteLargeBlobData => RunDeleteLargeBlobData(),
+            Fido2MainMenuItem.GetBioInfo => RunGetBioInfo(),
+            Fido2MainMenuItem.EnrollFingerprint => RunEnrollFingerprint(),
+            Fido2MainMenuItem.SetBioTemplateFriendlyName => RunSetBioTemplateFriendlyName(),
+            Fido2MainMenuItem.RemoveBioEnrollment => RunRemoveBioEnrollment(),
             Fido2MainMenuItem.Reset => RunReset(),
             _ => RunUnimplementedOperation(),
         };
@@ -158,17 +163,46 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out AuthenticatorInfo authenticatorInfo);
             if (isValid)
             {
-                isValid = GetVerifyPinArguments(
-                    authenticatorInfo, out PinUvAuthTokenPermissions? permissions, out string relyingPartyId);
+                isValid = GetVerifyArguments(
+                    true, authenticatorInfo, out PinUvAuthTokenPermissions? permissions, out string relyingPartyId);
 
                 if (isValid)
                 {
                     _keyCollector.Operation = Fido2KeyCollectorOperation.Verify;
 
-                    return Fido2Pin.VerifyPin(
+                    if (Fido2Pin.VerifyPin(
                         _yubiKeyChosen,
                         _keyCollector.Fido2SampleKeyCollectorDelegate,
                         permissions,
+                        relyingPartyId) == false)
+                    {
+                        SampleMenu.WriteMessage(MessageType.Special, 0, "PIN collection canceled.");
+                    }
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool RunVerifyUv()
+        {
+            bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out AuthenticatorInfo authenticatorInfo);
+
+            if (isValid)
+            {
+                isValid = GetVerifyArguments(
+                    false, authenticatorInfo, out PinUvAuthTokenPermissions? permissions, out string relyingPartyId);
+
+                if (isValid && !(permissions is null))
+                {
+                    _keyCollector.Operation = Fido2KeyCollectorOperation.Verify;
+
+                    return Fido2Pin.VerifyUv(
+                        _yubiKeyChosen,
+                        _keyCollector.Fido2SampleKeyCollectorDelegate,
+                        permissions.Value,
                         relyingPartyId);
                 }
             }
@@ -653,6 +687,199 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 blobArray);
         }
 
+        public bool RunGetBioInfo()
+        {
+            if (!Fido2Protocol.RunGetBioInfo(
+                _yubiKeyChosen,
+                _keyCollector.Fido2SampleKeyCollectorDelegate,
+                out BioModality modality,
+                out FingerprintSensorInfo sensorInfo,
+                out IReadOnlyList<TemplateInfo> templates))
+            {
+                return false;
+            }
+
+            ReportBioInfo(modality, sensorInfo, templates, false);
+
+            return true;
+        }
+
+        public bool RunEnrollFingerprint()
+        {
+            SampleMenu.WriteMessage(
+                MessageType.Title, 0,
+                "Enter the friendlyName (or simply Enter if you do not want one for now).\n" +
+                "Note that if there is already a template with the requested name or if the\n" +
+                "YubiKey rejects the name (likely because it is too long), then the template\n" +
+                "will be created with no friendly name.");
+            _ = SampleMenu.ReadResponse(out string friendlyName);
+            SampleMenu.WriteMessage(
+                MessageType.Title, 0,
+                "\nEnter a timeout (for each sample, in milliseconds) if you want to override the\n" +
+                "default. Note that some YubiKeys do not allow a timeout override and will ignore\n" +
+                "your requested timeout.\n" +
+                "If you do not want to override the default, just Enter");
+            int timeoutMilliseconds = SampleMenu.ReadResponse(out string _);
+            SampleMenu.WriteMessage(
+                MessageType.Title, 0,
+                "\nTo enroll a fingerprint, you will be asked to provide several samples.\n" +
+                "You will be notified when to provide a sample. Each notification after the\n" +
+                "first will indicate whether the previous sample was good or not, along\n" +
+                "with the number of good samples still needed to complete the enrollment.\n");
+
+            string[] menuItems = new string[] {
+                "Yes",
+                "No",
+            };
+
+            int response = _menuObject.RunMenu("Do you want to continue?", menuItems);
+            if (response != 0)
+            {
+                return true;
+            }
+
+            try
+            {
+                TemplateInfo templateInfo = Fido2Protocol.RunEnrollFingerprint(
+                    _yubiKeyChosen,
+                    _keyCollector.Fido2SampleKeyCollectorDelegate,
+                    friendlyName,
+                    timeoutMilliseconds);
+
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "friendly name applied: " + (string.IsNullOrEmpty(templateInfo.FriendlyName) ? "-" : friendlyName));
+                string idString = BitConverter.ToString(templateInfo.TemplateId.ToArray()).Replace("-", string.Empty, StringComparison.Ordinal);
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "          templateID : " + idString + "\n");
+            }
+            catch (Exception ex) when (ex is OperationCanceledException || ex is Fido2Exception)
+            {
+                SampleMenu.WriteMessage(MessageType.Title, 0, ex.Message + "\n\n");
+            }
+
+            return true;
+        }
+
+        public bool RunSetBioTemplateFriendlyName()
+        {
+            if (!Fido2Protocol.RunGetBioInfo(
+                _yubiKeyChosen,
+                _keyCollector.Fido2SampleKeyCollectorDelegate,
+                out BioModality modality,
+                out FingerprintSensorInfo sensorInfo,
+                out IReadOnlyList<TemplateInfo> templates))
+            {
+                return false;
+            }
+
+            ReportBioInfo(modality, sensorInfo, templates, true);
+
+            if (templates.Count == 0)
+            {
+                return true;
+            }
+
+            SampleMenu.WriteMessage(
+                MessageType.Title, 0, "For which template do you want to set the friendly name?");
+            int response = SampleMenu.ReadResponse(out string _);
+            SampleMenu.WriteMessage(
+                MessageType.Title, 0, "Enter the friendly name.");
+            _ = SampleMenu.ReadResponse(out string friendlyName);
+
+            return Fido2Protocol.RunSetBioTemplateFriendlyName(
+                _yubiKeyChosen,
+                _keyCollector.Fido2SampleKeyCollectorDelegate,
+                templates[response - 1].TemplateId,
+                friendlyName);
+        }
+
+        public bool RunRemoveBioEnrollment()
+        {
+            if (!Fido2Protocol.RunGetBioInfo(
+                _yubiKeyChosen,
+                _keyCollector.Fido2SampleKeyCollectorDelegate,
+                out BioModality modality,
+                out FingerprintSensorInfo sensorInfo,
+                out IReadOnlyList<TemplateInfo> templates))
+            {
+                return false;
+            }
+
+            ReportBioInfo(modality, sensorInfo, templates, true);
+
+            if (templates.Count == 0)
+            {
+                return true;
+            }
+
+            SampleMenu.WriteMessage(
+                MessageType.Title, 0, "Which template do you want to delete?");
+            int response = SampleMenu.ReadResponse(out string _);
+
+            return Fido2Protocol.RunRemoveBioEnrollment(
+                _yubiKeyChosen,
+                _keyCollector.Fido2SampleKeyCollectorDelegate,
+                templates[response - 1].TemplateId);
+        }
+
+        // If the input arg reportTempatesOnly is true, report only the
+        // templates. Otherwise, report all the info.
+        private static void ReportBioInfo(
+            BioModality modality,
+            FingerprintSensorInfo sensorInfo,
+            IReadOnlyList<TemplateInfo> templates,
+            bool reportTemplatesOnly)
+        {
+            if (modality == BioModality.None)
+            {
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "The selected YubiKey does not support Bio operations.");
+
+                return;
+            }
+
+            if (!reportTemplatesOnly)
+            {
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "Bio Modality: " + Enum.GetName(typeof(BioModality), modality));
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "Fingerprint Kind: " + (sensorInfo.FingerprintKind == 1 ? "touch type" : "swipe type"));
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "Maximum Capture Count: " + sensorInfo.MaxCaptureCount);
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "Maximum Friendly Name Bytes: " + sensorInfo.MaxFriendlyNameBytes + "\n");
+            }
+
+            if (templates.Count == 0)
+            {
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "There are no fingerprint templates on the selected YubiKey.\n");
+
+                return;
+            }
+
+            for (int index = 0; index < templates.Count; index++)
+            {
+                int counter = index + 1;
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    counter + "  Template Friendly Name: " + templates[index].FriendlyName);
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "   Template ID: " +
+                    BitConverter.ToString(
+                    templates[index].TemplateId.ToArray()).Replace("-", string.Empty, StringComparison.Ordinal) + "\n");
+            }
+        }
+
         private void DisplayAssertion(int index, GetAssertionData assertion, ReadOnlyMemory<byte> clientDataHash)
         {
             SampleMenu.WriteMessage(MessageType.Title, 0, "Assertion number " + index);
@@ -733,22 +960,46 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             SampleMenu.WriteMessage(MessageType.Special, 0, operation + (result ? ", success" : ", user canceled"));
         }
 
-        private bool GetVerifyPinArguments(
-            AuthenticatorInfo authenticatorInfo, out PinUvAuthTokenPermissions? permissions, out string relyingPartyId)
+        // Get arguments to verifyPin or verifyUv. If verifyPin is true, get
+        // arguments to verify the PIN. If false, get args for verifyUv.
+        private bool GetVerifyArguments(
+            bool verifyPin,
+            AuthenticatorInfo authenticatorInfo,
+            out PinUvAuthTokenPermissions? permissions,
+            out string relyingPartyId)
         {
             permissions = null;
             relyingPartyId = "";
 
-            bool isPinUvAuthTokenOption = CheckPinUvAuthTokenOption(authenticatorInfo);
+            bool isPinUvAuthTokenOption = CheckPinUvAuthTokenOption(authenticatorInfo, out bool uvReady);
 
-            string supportString = isPinUvAuthTokenOption ? "supports" : "does not support";
-            string verifyPinInstructions =
-                "In order to verify a PIN, the caller has the option to specify the permissions\n" +
-                "and possibly a relying party ID.\n" +
-                "However, that is possible only if the YubiKey supports the pinUvAuthToken Option\n" +
-                "(see the AuthenticatorInfo returned by Fido2Session.GetAuthenticatorInfo).\n\n" +
-                "The YubiKey chosen " + supportString + " that Option.";
-            SampleMenu.WriteMessage(MessageType.Title, 0, verifyPinInstructions);
+            string verifyInstructions;
+            if (verifyPin)
+            {
+                string supportString = isPinUvAuthTokenOption ? "supports" : "does not support";
+                verifyInstructions =
+                    "In order to verify a PIN, the caller has the option to specify the permissions\n" +
+                    "and possibly a relying party ID.\n" +
+                    "However, that is possible only if the YubiKey supports the pinUvAuthToken Option\n" +
+                    "(see the AuthenticatorInfo returned by Fido2Session.GetAuthenticatorInfo).\n" +
+                    "The YubiKey chosen " + supportString + " that Option.\n\n";
+            }
+            else
+            {
+                string supportString = uvReady ? "can" : "cannot";
+                verifyInstructions =
+                    "In order to perform the verifyUv operation, the YubiKey must support BioEnroll\n" +
+                    "and have a fingerprint enrolled.\n" +
+                    "Furthermore, the caller must specify the permissions and possibly a\n" +
+                    "relying party ID.\n" +
+                    "The YubiKey chosen " + supportString + " perform fingerprint verification.\n\n";
+            }
+            SampleMenu.WriteMessage(MessageType.Title, 0, verifyInstructions);
+
+            if (!verifyPin && !uvReady)
+            {
+                return false;
+            }
 
             if (!isPinUvAuthTokenOption)
             {
@@ -771,14 +1022,15 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         // Look for the "pinUvAuthToken" Option in the authInfo. If it is not
         // there, return false. If it is there and false, return false.
         // If it is there and true, return true.
-        private static bool CheckPinUvAuthTokenOption(AuthenticatorInfo authenticatorInfo)
+        // If the YubiKey can perform fingerprint verification, set uvReady to
+        // true.
+        private static bool CheckPinUvAuthTokenOption(AuthenticatorInfo authenticatorInfo, out bool uvReady)
         {
-            if (authenticatorInfo.Options.ContainsKey("pinUvAuthToken"))
+            uvReady = false;
+            if (authenticatorInfo.GetOptionValue(AuthenticatorOptions.pinUvAuthToken) == OptionValue.True)
             {
-                if (authenticatorInfo.Options["pinUvAuthToken"])
-                {
-                    return true;
-                }
+                uvReady = authenticatorInfo.GetOptionValue(AuthenticatorOptions.uv) == OptionValue.True;
+                return true;
             }
 
             return false;

@@ -91,8 +91,8 @@ namespace Yubico.YubiKey.Pipelines
                 responseByte switch
                 {
                     Ctap1Message   => new ResponseApdu(responseData),
-                    CtapHidCbor    => GetCtap2ResponseApdu(responseData),
-                    CtapError      => GetU2fHidErrorResponseApdu(responseData),
+                    CtapHidCbor    => CtapToApduResponse.ToCtap2ResponseApdu(responseData),
+                    CtapError      => CtapToApduResponse.ToCtap1ResponseApdu(responseData),
                     _              => new ResponseApdu(responseData, SWConstants.Success),
                 };
 
@@ -273,69 +273,5 @@ namespace Yubico.YubiKey.Pipelines
 
             _channelId = cid;
         }
-
-        /// <summary>
-        /// Converts a U2FHID_ERROR response into a ResponseApdu.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// Takes in the "data" field of a U2FHID_ERROR response, and returns a
-        /// response APDU where the data field contains the original error code,
-        /// and the status word is the closest matching ISO7816 status word.
-        /// </para>
-        /// <para>
-        /// Supports error codes defined in FIDO U2Fv1.0 section 4.1.4. For all
-        /// other error codes, the status word will be set to 0x6F00 (no precise
-        /// diagnosis).
-        /// </para>
-        /// </remarks>
-        /// <param name="responseData">
-        /// The "data" field of the U2FHID_ERROR response message.
-        /// </param>
-        /// <returns>
-        /// A <see cref="ResponseApdu"/> where <see cref="ResponseApdu.Data"/>
-        /// contains the original one-byte U2FHID error code, and
-        /// <see cref="ResponseApdu.SW"/> is set to the most appropriate ISO7816
-        /// status word (or 0x6F00 "NoPreciseDiagnosis" if there isn't a close
-        /// match).
-        /// </returns>
-        /// <exception cref="MalformedYubiKeyResponseException"></exception>
-        private static ResponseApdu GetU2fHidErrorResponseApdu(Span<byte> responseData)
-        {
-            if (responseData.Length != 1)
-            {
-                throw new MalformedYubiKeyResponseException(ExceptionMessages.Ctap2MalformedResponse);
-            }
-
-            byte errorCode = responseData[0];
-
-            short statusWord =
-                errorCode switch
-                {
-                    (byte)U2f.U2fHidStatus.Ctap1ErrInvalidCommand => SWConstants.CommandNotAllowed,
-                    (byte)U2f.U2fHidStatus.Ctap1ErrInvalidParameter => SWConstants.InvalidParameter,
-                    (byte)U2f.U2fHidStatus.Ctap1ErrInvalidLength => SWConstants.WrongLength,
-                    _ => SWConstants.NoPreciseDiagnosis,
-                };
-
-            return new ResponseApdu(responseData.ToArray(), statusWord);
-        }
-
-        private static ResponseApdu GetCtap2ResponseApdu(Span<byte> responseData)
-        {
-            if (responseData.Length == 1)
-            {
-                return new ResponseApdu(Array.Empty<byte>(), GetSwForCtapError((CtapStatus)responseData[0]));
-            }
-
-            return new ResponseApdu(responseData[1..].ToArray(), SWConstants.Success);
-        }
-
-        private static short GetSwForCtapError(CtapStatus ctapStatus) =>
-            ctapStatus switch
-            {
-                Fido2.CtapStatus.Ok => SWConstants.Success,
-                _ => unchecked((short)((SW1Constants.NoPreciseDiagnosis << 8) | (byte)ctapStatus))
-            };
     }
 }

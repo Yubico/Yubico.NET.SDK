@@ -39,6 +39,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
         public int BytesRead { get; private set; }
 
         /// <summary>
+        /// The CBOR encoded map, if available.
+        /// </summary>
+        public ReadOnlyMemory<byte>? Encoded { get; private set; }
+
+        /// <summary>
         /// Creates a new instance of <see cref="CborMap{TKey}"/> based on a dictionary.
         /// </summary>
         /// <param name="dict">An integer keyed dictionary of objects representing a CBOR map.</param>
@@ -57,6 +62,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         public CborMap(ReadOnlyMemory<byte> encoding)
             : this(new CborReader(encoding, CborConformanceMode.Ctap2Canonical))
         {
+            Encoded = encoding;
         }
 
         /// <summary>

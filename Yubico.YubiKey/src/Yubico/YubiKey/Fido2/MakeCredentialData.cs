@@ -105,6 +105,33 @@ namespace Yubico.YubiKey.Fido2
         public ReadOnlyMemory<byte> AttestationStatement { get; private set; }
 
         /// <summary>
+        /// The encoded CBOR map that describes the attestation statement.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The other members of this class make it easy to access the individual
+        /// elements of the attestation statement and supporting structures. This
+        /// property returns the raw, CBOR encoded attestation statement returned
+        /// by the YubiKey. This is useful if you are implementing or interoperating
+        /// with the WebAuthn data types. It is often easier to copy this field
+        /// over in its encoded form rather than using the parsed properties.
+        /// </para>
+        /// <para>
+        /// For example: the WebAuthn MakeCredential operation expects an "attestation
+        /// object" be returned. This is a CBOR map containing the "format", "attStmt",
+        /// and "authData" - the keys given in string form. The "authData" is the CBOR
+        /// encoded <see cref="AuthenticatorData"/> further encoded in Base64URL. The
+        /// "attStmt" is the CBOR map that contains the <see cref="AttestationAlgorithm"/>,
+        /// <see cref="AttestationStatement"/>, and <see cref="AttestationCertificates" />.
+        /// </para>
+        /// <para>
+        /// Rather than reconstructing the CBOR map, we provide it here for you, already
+        /// in encoded form.
+        /// </para>
+        /// </remarks>
+        public ReadOnlyMemory<byte> EncodedAttestationStatement { get; private set; }
+
+        /// <summary>
         /// This array contains the certificate for the public key that can be
         /// used to verify that the attestation statement, and possibly CA
         /// certificates that chain to a root. This is an optional element so it
@@ -210,6 +237,7 @@ namespace Yubico.YubiKey.Fido2
         private bool ReadAttestation(CborMap<int> map)
         {
             CborMap<string> attest = map.ReadMap<string>(KeyAttestationStatement);
+            EncodedAttestationStatement = attest.Encoded!.Value; // We know it has the encoding
             if (!Format.Equals(PackedString, StringComparison.Ordinal)
                 || !attest.Contains(AlgString) || !attest.Contains(SigString)
                 || (attest.Count > MaxAttestationMapCount)

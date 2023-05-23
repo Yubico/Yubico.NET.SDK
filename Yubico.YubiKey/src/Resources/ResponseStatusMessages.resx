@@ -148,7 +148,7 @@
     <value>Execution error.</value>
   </data>
   <data name="BaseFailed" xml:space="preserve">
-    <value>The comand failed to complete.</value>
+    <value>The command failed to complete.</value>
   </data>
   <data name="BaseFileAlreadyExists" xml:space="preserve">
     <value>File already exists.</value>

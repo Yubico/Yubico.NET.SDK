@@ -1,4 +1,4 @@
-// Copyright 2021 Yubico AB
+// Copyright 2023 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -18,28 +18,32 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// The response to the <see cref="ResetCommand"/>, containing the response
+    /// The response to the <see cref="ConfigCommand"/>, containing the response
     /// from the YubiKey.
     /// </summary>
     /// <remarks>
-    /// This is the partner response class to <see cref="ResetCommand"/>.
+    /// This is the partner response class to <see cref="ConfigCommand"/>.
     /// <para>
-    /// After executing the <c>ResetCommand</c>, the result is an
+    /// After executing the <c>ConfigCommand</c>, the result is an
     /// instance of this class. There is no data to return. Simply check the
     /// <c>Status</c> property. If it is <c>ResponseStatus.Success</c> the
-    /// FIDO2 application was reset. If it is anything else, then the application
-    /// was not reset.
+    /// operation succeeded. If it is anything else, then the operation failed
+    /// and you can check the CtapStatus and StatusMessage.
+    /// </para>
+    /// <para>
+    /// This class is really used only to override the StatusCodeMap and provide
+    /// error messages specific to AuthenticatorConfig.
     /// </para>
     /// </remarks>
-    public sealed class ResetResponse : Fido2Response, IYubiKeyResponse
+    public sealed class ConfigResponse : Fido2Response, IYubiKeyResponse
     {
         /// <summary>
-        /// Constructs a ResetResponse based on a ResponseApdu received from the YubiKey.
+        /// Constructs a ConfigResponse based on a ResponseApdu received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
         /// The object containing the response APDU returned by the YubiKey.
         /// </param>
-        public ResetResponse(ResponseApdu responseApdu) :
+        public ConfigResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
         }
@@ -47,8 +51,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <inheritdoc />
         protected override ResponseStatusPair StatusCodeMap => CtapStatus switch
         {
-            CtapStatus.NotAllowed => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.Fido2ResetProcess),
-            CtapStatus.ActionTimeout => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2ResetTimeout),
+            CtapStatus.InvalidParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseFunctionNotSupported),
             _ => base.StatusCodeMap,
         };
     }

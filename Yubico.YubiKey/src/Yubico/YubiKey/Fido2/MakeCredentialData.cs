@@ -237,7 +237,7 @@ namespace Yubico.YubiKey.Fido2
         private bool ReadAttestation(CborMap<int> map)
         {
             CborMap<string> attest = map.ReadMap<string>(KeyAttestationStatement);
-            EncodedAttestationStatement = attest.Encoded!.Value; // We know it has the encoding
+            EncodedAttestationStatement = attest.Encoded;
             if (!Format.Equals(PackedString, StringComparison.Ordinal)
                 || !attest.Contains(AlgString) || !attest.Contains(SigString)
                 || (attest.Count > MaxAttestationMapCount)

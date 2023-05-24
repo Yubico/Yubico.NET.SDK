@@ -41,16 +41,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// <summary>
         /// The CBOR encoded map, if available.
         /// </summary>
-        public ReadOnlyMemory<byte>? Encoded { get; private set; }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="CborMap{TKey}"/> based on a dictionary.
-        /// </summary>
-        /// <param name="dict">An integer keyed dictionary of objects representing a CBOR map.</param>
-        public CborMap(IDictionary<TKey, object?> dict)
-        {
-            _dict = dict;
-        }
+        public ReadOnlyMemory<byte> Encoded { get; private set; }
 
         /// <summary>
         /// Creates a new instance of <see cref="CborMap{TKey}"/> based on the

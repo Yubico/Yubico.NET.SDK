@@ -32,8 +32,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             byte[] encoded = w.Encode();
 
-            var r = new CborReader(encoded, CborConformanceMode.Ctap2Canonical);
-            var m = new CborMap<int>(r);
+            var m = new CborMap<int>(encoded);
 
             Assert.Equal("test", m.ReadTextString(1));
             Assert.Equal("foo", m.ReadTextString(2));
@@ -53,8 +52,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             byte[] encoded = w.Encode();
 
-            var r = new CborReader(encoded, CborConformanceMode.Ctap2Canonical);
-            var m = new CborMap<string>(r);
+            var m = new CborMap<string>(encoded);
 
             Assert.Equal("test", m.ReadTextString("a"));
             Assert.Equal("foo", m.ReadTextString("b"));

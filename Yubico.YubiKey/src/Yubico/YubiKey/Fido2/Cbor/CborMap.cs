@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Formats.Cbor;
@@ -51,21 +50,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// A byte array containing a CBOR encoding that is a map.
         /// </param>
         public CborMap(ReadOnlyMemory<byte> encoding)
-            : this(new CborReader(encoding, CborConformanceMode.Ctap2Canonical))
         {
             Encoded = encoding;
-        }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="CborMap{TKey}"/> based on the
-        /// given <c>CborReader</c>.
-        /// </summary>
-        /// <param name="cbor">
-        /// A <c>CborReader</c> that holds the data to decode.
-        /// </param>
-        public CborMap(CborReader cbor)
-        {
+            var cbor = new CborReader(encoding, CborConformanceMode.Ctap2Canonical);
             int totalBytes = cbor.BytesRemaining;
+
             if (cbor.PeekState() != CborReaderState.StartMap)
             {
                 throw new Ctap2DataException(ExceptionMessages.Ctap2MissingRequiredField);

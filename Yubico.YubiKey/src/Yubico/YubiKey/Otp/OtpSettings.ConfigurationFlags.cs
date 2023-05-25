@@ -247,7 +247,8 @@ namespace Yubico.YubiKey.Otp
         /// YubiKey 2 and later supports user-initiated update of a static password. If
         /// configured, the user presses and holds the key for 8-15 seconds. When
         /// the button is released, the indicator light flashes. By pressing shortly,
-        /// the change is confirmed and the new OTP is yielded.
+        /// the change is confirmed and the new OTP is yielded. The static ticket flag must be set 
+        /// before calling this method or an exception will occur. 
         /// </remarks>
         public T AllowManualUpdate(bool setting = true) =>
             ApplyFlag(Flag.AllowManualUpdate, setting);

@@ -130,8 +130,7 @@ namespace Yubico.YubiKey.Fido2
         {
             try
             {
-                var cbor = new CborReader(cborEncoding, CborConformanceMode.Ctap2Canonical);
-                var map = new CborMap<int>(cbor);
+                var map = new CborMap<int>(cborEncoding);
 
                 CborMap<string> stringMap = map.ReadMap<string>(KeyCredential);
                 CredentialId = new CredentialId()

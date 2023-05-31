@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Formats.Cbor;
@@ -39,13 +38,9 @@ namespace Yubico.YubiKey.Fido2.Cbor
         public int BytesRead { get; private set; }
 
         /// <summary>
-        /// Creates a new instance of <see cref="CborMap{TKey}"/> based on a dictionary.
+        /// The CBOR encoded map, if available.
         /// </summary>
-        /// <param name="dict">An integer keyed dictionary of objects representing a CBOR map.</param>
-        public CborMap(IDictionary<TKey, object?> dict)
-        {
-            _dict = dict;
-        }
+        public ReadOnlyMemory<byte> Encoded { get; private set; }
 
         /// <summary>
         /// Creates a new instance of <see cref="CborMap{TKey}"/> based on the
@@ -55,20 +50,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// A byte array containing a CBOR encoding that is a map.
         /// </param>
         public CborMap(ReadOnlyMemory<byte> encoding)
-            : this(new CborReader(encoding, CborConformanceMode.Ctap2Canonical))
         {
-        }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="CborMap{TKey}"/> based on the
-        /// given <c>CborReader</c>.
-        /// </summary>
-        /// <param name="cbor">
-        /// A <c>CborReader</c> that holds the data to decode.
-        /// </param>
-        public CborMap(CborReader cbor)
-        {
+            Encoded = encoding;
+            var cbor = new CborReader(encoding, CborConformanceMode.Ctap2Canonical);
             int totalBytes = cbor.BytesRemaining;
+
             if (cbor.PeekState() != CborReaderState.StartMap)
             {
                 throw new Ctap2DataException(ExceptionMessages.Ctap2MissingRequiredField);

@@ -148,7 +148,7 @@ The manual update feature allows you to update the static password to a new rand
 
 To enable the manual update feature, you must:
 
-1. Set the [static ticket flag](xref:Yubico.YubiKey.Otp.ConfigurationFlags.StaticTicket), then
+1. set the [static ticket flag](xref:Yubico.YubiKey.Otp.ConfigurationFlags.StaticTicket), then
 
 1. set [AllowManualUpdate()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.AllowManualUpdate%28System.Boolean%29) to ``true`` when calling ``ConfigureStaticPassword()``.
 

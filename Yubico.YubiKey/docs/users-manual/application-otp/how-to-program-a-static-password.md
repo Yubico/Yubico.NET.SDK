@@ -140,6 +140,22 @@ using (OtpSession otp = new OtpSession(yubiKey))
 }
 ```
 
+### Manual updates
+
+Another optional setting that can be applied during static password configuration is [AllowManualUpdate()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.AllowManualUpdate%28System.Boolean%29).
+
+The manual update feature allows you to update the static password to a new randomly generated password by pressing and holding the contact of the YubiKey for 8-15 seconds. When the contact is released, the indicator light will flash. Touching the contact again confirms the change, and the new static password is generated and stored in the OTP slot.
+
+To enable the manual update feature, you must:
+
+1. set the [static ticket flag](xref:Yubico.YubiKey.Otp.ConfigurationFlags.StaticTicket), then
+
+1. set [AllowManualUpdate()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.AllowManualUpdate%28System.Boolean%29) to ``true`` when calling ``ConfigureStaticPassword()``.
+
+If the static ticket flag is not set, an exception will be thrown when calling ``AllowManualUpdate()``. At this time, the SDK does not provide an operations class for toggling the static ticket flag. [Configuration flags](xref:Yubico.YubiKey.Otp.ConfigurationFlags), including the static ticket flag, can only be manipulated via the lower level [ConfigureSlotCommand class](xref:Yubico.YubiKey.Otp.Commands.ConfigureSlotCommand). 
+
+For more information on working with command classes, see the [SDK programming guide](xref:UsersManualCommands).
+
 ## Slot reconfiguration and access codes
 
 If a slot is protected by an access code and you wish to reconfigure it with a static password, you must provide that access code with ``UseCurrentAccessCode()`` during the ``ConfigureStaticPassword()`` operation. Otherwise, the operation will fail and throw the following exception:

@@ -39,8 +39,6 @@ The [GeneratePassword()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassw
 > [!NOTE]
 > `GeneratePassword()` can be configured to use any keyboard layout (e.g. US English) in the [KeyboardLayout](xref:Yubico.Core.Devices.Hid.KeyboardLayout) class.
 
-If a slot has already been configured with a generated static password, the password may be updated to a new randomly generated password without having to use client software (as long as the [AllowManualUpdate()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.AllowManualUpdate(System.Boolean)) boolean is set to `True`). For more information, see How to manually update a generated static password.
-
 ### Set a password
 
 The [SetPassword()](xref:Yubico.YubiKey.Otp.Operations.ConfigureStaticPassword.SetPassword%28System.ReadOnlyMemory%7BSystem.Char%7D%29) method allows you to set the static password to anything of your choosing (up to 38 characters in length).

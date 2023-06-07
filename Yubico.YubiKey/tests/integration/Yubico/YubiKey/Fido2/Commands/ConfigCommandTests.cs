@@ -75,5 +75,96 @@ namespace Yubico.YubiKey.Fido2.Commands
             authInfo = infoRsp.GetData();
             Assert.NotNull(authInfo.Options);
         }
+
+        [Fact]
+        public void SetMinPinLengthCommand_Pin_Succeeds()
+        {
+            var infoCmd = new GetInfoCommand();
+            GetInfoResponse infoRsp = Connection.SendCommand(infoCmd);
+            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+            AuthenticatorInfo authInfo = infoRsp.GetData();
+            Assert.NotNull(authInfo.Options);
+
+            var protocol = new PinUvAuthProtocolTwo();
+            bool isValid = GetPinToken(
+                protocol, PinUvAuthTokenPermissions.AuthenticatorConfiguration, out byte[] pinToken);
+            Assert.True(isValid);
+
+            var cmd = new SetMinPinLengthCommand(7, null, null, pinToken, protocol);
+            Fido2Response rsp = Connection.SendCommand(cmd);
+
+            Assert.Equal(CtapStatus.Ok, rsp.CtapStatus);
+
+            infoRsp = Connection.SendCommand(infoCmd);
+            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+            authInfo = infoRsp.GetData();
+            Assert.NotNull(authInfo.Options);
+        }
+
+        [Fact]
+        public void SetMinPinLengthCommand_ForceChange_Succeeds()
+        {
+            var infoCmd = new GetInfoCommand();
+            GetInfoResponse infoRsp = Connection.SendCommand(infoCmd);
+            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+            AuthenticatorInfo authInfo = infoRsp.GetData();
+            Assert.NotNull(authInfo.Options);
+
+            var protocol = new PinUvAuthProtocolTwo();
+            bool isValid = GetPinToken(
+                protocol, PinUvAuthTokenPermissions.AuthenticatorConfiguration, out byte[] pinToken);
+            Assert.True(isValid);
+
+            var cmd = new SetMinPinLengthCommand(null, null, true, pinToken, protocol);
+            Fido2Response rsp = Connection.SendCommand(cmd);
+
+            Assert.Equal(CtapStatus.Ok, rsp.CtapStatus);
+
+            infoRsp = Connection.SendCommand(infoCmd);
+            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+            authInfo = infoRsp.GetData();
+            Assert.True(authInfo.ForcePinChange);
+
+            byte[] currentPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            byte[] newPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
+
+            var changePinCmd = new ChangePinCommand(protocol, currentPin, newPin);
+            ChangePinResponse changePinRsp = Connection.SendCommand(changePinCmd);
+            Assert.Equal(ResponseStatus.Success, changePinRsp.Status);
+
+            infoRsp = Connection.SendCommand(infoCmd);
+            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+            authInfo = infoRsp.GetData();
+            Assert.False(authInfo.ForcePinChange);
+
+            changePinCmd = new ChangePinCommand(protocol, newPin, currentPin);
+            changePinRsp = Connection.SendCommand(changePinCmd);
+            Assert.Equal(ResponseStatus.Success, changePinRsp.Status);
+        }
+
+        [Fact]
+        public void SetMinPinLengthCommand_AllNull_Succeeds()
+        {
+            var infoCmd = new GetInfoCommand();
+            GetInfoResponse infoRsp = Connection.SendCommand(infoCmd);
+            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+            AuthenticatorInfo authInfo = infoRsp.GetData();
+            Assert.NotNull(authInfo.Options);
+
+            var protocol = new PinUvAuthProtocolTwo();
+            bool isValid = GetPinToken(
+                protocol, PinUvAuthTokenPermissions.AuthenticatorConfiguration, out byte[] pinToken);
+            Assert.True(isValid);
+
+            var cmd = new SetMinPinLengthCommand(null, null, null, pinToken, protocol);
+            Fido2Response rsp = Connection.SendCommand(cmd);
+
+            Assert.Equal(CtapStatus.Ok, rsp.CtapStatus);
+
+            infoRsp = Connection.SendCommand(infoCmd);
+            Assert.Equal(ResponseStatus.Success, infoRsp.Status);
+            authInfo = infoRsp.GetData();
+            Assert.NotNull(authInfo.Options);
+        }
     }
 }

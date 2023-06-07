@@ -537,6 +537,28 @@ namespace Yubico.YubiKey.Fido2
             Assert.Null(fido2Info.RemainingDiscoverableCredentials);
         }
 
+        [Fact]
+        public void Decode_VendorIds_Correct()
+        {
+            long[] correctIds = new long[] { 0x4d0619f94a0ee581, 0x0000000080000000 };
+
+            byte[] encodedData = GetSampleEncoded();
+
+            var fido2Info = new AuthenticatorInfo(encodedData);
+            bool isValid = CompareLongLists(correctIds, fido2Info.VendorPrototypeConfigCommands);
+
+            Assert.True(isValid);
+        }
+
+        [Fact]
+        public void Decode_NoVendorIds_Null()
+        {
+            byte[] encodedData = GetMinimumEncoded();
+
+            var fido2Info = new AuthenticatorInfo(encodedData);
+            Assert.Null(fido2Info.VendorPrototypeConfigCommands);
+        }
+
         [Theory]
         [InlineData("madeUpOption", OptionValue.Unknown)]
         [InlineData("up", OptionValue.True)]
@@ -576,6 +598,28 @@ namespace Yubico.YubiKey.Fido2
             Assert.Equal(expectedValue, isSupported);
         }
 
+        private static bool CompareLongLists(long[] correctInts, IReadOnlyList<long>? candidate)
+        {
+            if (candidate is null)
+            {
+                return false;
+            }
+            if (correctInts.Length != candidate.Count)
+            {
+                return false;
+            }
+
+            for (int index = 0; index < correctInts.Length; index++)
+            {
+                if (!candidate.Contains(correctInts[index]))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private static bool CompareStringLists(string[] correctStrings, IReadOnlyList<string> candidate)
         {
             if (correctStrings.Length != candidate.Count)
@@ -596,7 +640,7 @@ namespace Yubico.YubiKey.Fido2
 
         internal static byte[] GetSampleEncoded()
         {
-//                b4
+//                b5
 //                  01
 //                    83
 //                      66  55 32 46 5f 56 32
@@ -664,9 +708,13 @@ namespace Yubico.YubiKey.Fido2
 //                       64  46 49 44 4f
 //                        02
 //                  14 02
-
+//                  15 82
+//                        1b
+//                           9d 06 19 f9 4a 0e e5 81
+//                        1a
+//                           80 00 00 00
             byte[] encodedData = new byte[] {
-                0xb4, 0x01, 0x83, 0x66, 0x55, 0x32, 0x46, 0x5f, 0x56, 0x32, 0x68, 0x46, 0x49, 0x44, 0x4f, 0x5f,
+                0xb5, 0x01, 0x83, 0x66, 0x55, 0x32, 0x46, 0x5f, 0x56, 0x32, 0x68, 0x46, 0x49, 0x44, 0x4f, 0x5f,
                 0x32, 0x5f, 0x30, 0x6c, 0x46, 0x49, 0x44, 0x4f, 0x5f, 0x32, 0x5f, 0x31, 0x5f, 0x50, 0x52, 0x45,
                 0x02, 0x82, 0x6b, 0x63, 0x72, 0x65, 0x64, 0x50, 0x72, 0x6f, 0x74, 0x65, 0x63, 0x74, 0x6b, 0x68,
                 0x6d, 0x61, 0x63, 0x2d, 0x73, 0x65, 0x63, 0x72, 0x65, 0x74, 0x03, 0x50, 0x2f, 0xc0, 0x57, 0x9f,
@@ -680,8 +728,11 @@ namespace Yubico.YubiKey.Fido2
                 0x6c, 0x67, 0x27, 0x64, 0x74, 0x79, 0x70, 0x65, 0x6a, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x2d,
                 0x6b, 0x65, 0x79, 0x0b, 0x19, 0x07, 0xD0, 0x0c, 0xf5, 0x0d, 0x04, 0x0e, 0x1a, 0x00, 0x05, 0x04,
                 0x03, 0x0f, 0x18, 0x24, 0x10, 0x08, 0x11, 0x01, 0x12, 0x02, 0x13, 0xa1, 0x64, 0x46, 0x49, 0x44,
-                0x4f, 0x02, 0x14, 0x02
+                0x4f, 0x02, 0x14, 0x02, 0x15, 0x82, 0x1b, 0x4d, 0x06, 0x19, 0xf9, 0x4a, 0x0e, 0xe5, 0x81,
+                0x1a, 0x80, 0x00, 0x00, 0x00
             };
+//            0x4f, 0x02, 0x14, 0x02, 0x15, 0x82, 0x1b, 0x1d, 0x06, 0x19, 0xf9, 0x4a, 0x0e, 0xe5, 0x81, 0x07
+//            0x4f, 0x02, 0x14, 0x02, 0x15, 0x82, 0x1b, 0x9d, 0x06, 0x19, 0xf9, 0x4a, 0x0e, 0xe5, 0x81,
 
             // Return a new object so the caller can change data (to test errors
             // e.g.) if desired.

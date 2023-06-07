@@ -20,7 +20,7 @@ using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2.Commands
 {
     public class SetPinCommandTests : SimpleIntegrationTestConnection
     {

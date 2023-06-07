@@ -183,7 +183,13 @@ namespace Yubico.YubiKey.Fido2
                 CredentialPublicKey = CoseKey.Create(EncodedAuthenticatorData[offset..], out int bytesRead);
                 offset += bytesRead;
             }
-            if (extensions)
+            // For some versions of the YubiKey, it is possible there is no
+            // extensions data, yet the extensions bit is set. This generally
+            // happens if the caller requested extension data, but the YubiKey
+            // determines that the caller is not allowed to get that data or it
+            // is not available. So don't try to read any extensions unless we
+            // know for sure there is data to read.
+            if (extensions && (offset < EncodedAuthenticatorData.Length))
             {
                 var extensionList = new Dictionary<string, byte[]>();
                 var cbor = new CborReader(EncodedAuthenticatorData[offset..], CborConformanceMode.Ctap2Canonical);

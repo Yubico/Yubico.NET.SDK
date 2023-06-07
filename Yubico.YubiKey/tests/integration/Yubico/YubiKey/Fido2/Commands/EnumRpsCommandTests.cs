@@ -18,7 +18,7 @@ using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Xunit;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2.Commands
 {
     public class EnumRpsCommandTests : SimpleIntegrationTestConnection
     {

@@ -16,7 +16,7 @@ using Yubico.YubiKey.TestUtilities;
 using Yubico.YubiKey.Fido2.Commands;
 using Xunit;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2.Commands
 {
     public class GetInfoCommandTests : SimpleIntegrationTestConnection
     {

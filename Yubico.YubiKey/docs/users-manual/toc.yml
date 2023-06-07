@@ -296,6 +296,8 @@
     href: application-fido2/fido2-pin.md
   - name: The FIDO2 fingerprint and Bio Enrollment
     href: application-fido2/fido2-bio-enrollment.md
+  - name: FIDO2 authenticator configuration
+    href: application-fido2/fido2-authenticator-config.md
   - name: FIDO2 Blobs
     href: application-fido2/fido2-blobs.md
     items:

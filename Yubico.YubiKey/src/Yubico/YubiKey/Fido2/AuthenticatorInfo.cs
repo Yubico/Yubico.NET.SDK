@@ -48,10 +48,7 @@ namespace Yubico.YubiKey.Fido2
         private const int KeyUvModality = 18;
         private const int KeyCertifications = 19;
         private const int KeyRemainingDiscoverableCredentials = 20;
-
-        // There is one more Key
-        //   private const int KeyVendorPrototypeConfigCommands = 21;
-        // however, currently this is not supported by the YubiKey.
+        private const int KeyVendorPrototypeConfigCommands = 21;
 
         /// <summary>
         /// An <see cref="Aaguid"/> is defined in the standard as 16 bytes, no
@@ -285,6 +282,19 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public int? RemainingDiscoverableCredentials { get; }
 
+        /// <summary>
+        /// A list of vendor command IDs. If this is not null, then the YubiKey
+        /// chosen supports the vendor prototype subcommand of Authenticator
+        /// Config. If so, the list, which can be empty, will contain the valid
+        /// vendor IDs that can be used in that subcommand. If this is null, the
+        /// YubiKey chosen does not support the feature.
+        /// </summary>
+        /// <remarks>
+        /// Note that the standard defines a vendor ID as a 64-bit unsigned
+        /// integer. Thse numbers are to be random values.
+        /// </remarks>
+        public IReadOnlyList<long>? VendorPrototypeConfigCommands { get; }
+
         // The default constructor explicitly defined. We don't want it to be
         // used.
         private AuthenticatorInfo()
@@ -361,6 +371,24 @@ namespace Yubico.YubiKey.Fido2
                     Certifications = certMap.AsDictionary<int>();
                 }
                 RemainingDiscoverableCredentials = (int?)cborMap.ReadOptional<int>(KeyRemainingDiscoverableCredentials);
+                if (cborMap.Contains(KeyVendorPrototypeConfigCommands))
+                {
+                    IReadOnlyList<object> intList = cborMap.ReadArray<object>(KeyVendorPrototypeConfigCommands);
+                    var int64List = new List<long>(intList.Count);
+                    for (int index = 0; index < intList.Count; index++)
+                    {
+                        object? currentValue = CborMap<int>.ConvertValue<long>(intList[index]);
+                        if (currentValue is long currentValue64)
+                        {
+                            int64List.Add(currentValue64);
+                        }
+                        else
+                        {
+                            int64List.Add(0);
+                        }
+                    }
+                    VendorPrototypeConfigCommands = int64List;
+                }
             }
             catch (CborContentException cborException)
             {

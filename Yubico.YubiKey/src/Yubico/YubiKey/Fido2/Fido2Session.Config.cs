@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 
@@ -61,7 +62,7 @@ namespace Yubico.YubiKey.Fido2
         /// </remarks>
         /// <returns>
         /// A boolean, <c>true</c> if the YubiKey now has enterprise attestation
-        /// enabled, <c>false</c> otherwise.
+        /// enabled, <c>false</c> if the YubiKey does not support this feature.
         /// </returns>
         /// <exception cref="Ctap2DataException">
         /// The YubiKey could not perform the operation, even though enterprise
@@ -92,7 +93,7 @@ namespace Yubico.YubiKey.Fido2
             Fido2Response enableRsp = Connection.SendCommand(enableCmd);
             if (enableRsp.CtapStatus == CtapStatus.PinAuthInvalid)
             {
-                currentToken = GetAuthToken(false, PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
+                currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
                 enableCmd = new EnableEnterpriseAttestationCommand(currentToken, AuthProtocol);
                 enableRsp = Connection.SendCommand(enableCmd);
             }
@@ -152,11 +153,12 @@ namespace Yubico.YubiKey.Fido2
         /// </remarks>
         /// <returns>
         /// A boolean, <c>true</c> if the YubiKey was able to toggle the
-        /// "alwaysUv" and "makeCredUvNotReqd" options, <c>false</c> otherwise.
+        /// "alwaysUv" and "makeCredUvNotReqd" options, <c>false</c> if the
+        /// YubiKey does not support this feature.
         /// </returns>
         /// <exception cref="Ctap2DataException">
-        /// The YubiKey could not perform the operation, even though enterprise
-        /// attestation is supported.
+        /// The YubiKey could not perform the operation, even though the always
+        /// UV toggle feature is supported.
         /// </exception>
         public bool TryToggleAlwaysUv()
         {
@@ -177,7 +179,7 @@ namespace Yubico.YubiKey.Fido2
             Fido2Response toggleRsp = Connection.SendCommand(toggleCmd);
             if (toggleRsp.CtapStatus == CtapStatus.PinAuthInvalid)
             {
-                currentToken = GetAuthToken(false, PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
+                currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
                 toggleCmd = new ToggleAlwaysUvCommand(currentToken, AuthProtocol);
                 toggleRsp = Connection.SendCommand(toggleCmd);
             }
@@ -191,6 +193,177 @@ namespace Yubico.YubiKey.Fido2
             }
 
             throw new Ctap2DataException(toggleRsp.StatusMessage);
+        }
+
+        /// <summary>
+        /// Perform the <c>authenticatorConfig</c> subcommand of
+        /// <c>setMinPINLength</c>, which will set the minimum PIN length, and/or
+        /// replace the list of relying parties that are allowed to see the
+        /// minimum PIN length, and/or specify that the user must change the PIN.
+        /// </summary>
+        /// <remarks>
+        /// This method will perform the operation only if the "setMinPINLength"
+        /// option is present and set to <c>true</c>. Otherwise, it will return
+        /// <c>false</c>
+        /// <para>
+        /// There are up to three elements to set with this command: a new
+        /// minimum PIN length, a new list of relying party IDs, and an
+        /// indication to require the user change the PIN. All three are
+        /// optional, although this command will do nothing if none are set (i.e.
+        /// the three args are <c>null, null, null</c>).
+        /// </para>
+        /// <para>
+        /// If you want to set an element, provide a value for the corresponding
+        /// argument, otherwise, pass in null.
+        /// </para>
+        /// <para>
+        /// If you want to force a PIN change, pass in <c>true</c> for the
+        /// <c>forceChangePin</c> arg. If you pass in <c>false</c>, this class
+        /// will consider it the same as null. That is, the <c>forceChangePin</c>
+        /// element of this command is optional, meaning the command does not
+        /// need to include the element (i.e. leave it blank in the command sent
+        /// to the YubiKey). If you pass in <c>false</c>, this method will send
+        /// the command without that element (i.e., it will be left blank).
+        /// </para>
+        /// <para>
+        /// The YubiKey's FIDO2 application is manufactured with a minimum PIN
+        /// length. Users that want a different length can call this command.
+        /// However, it is not possible to set the minimum PIN length to a value
+        /// less than the current minimum. The only way to possibly set a shorter
+        /// minimum PIN length is to reset the entire FIDO2 application on the
+        /// given YubiKey. Even then, after reset, the minimum PIN will be the
+        /// default length with which the YubiKey was originally manufactured.
+        /// </para>
+        /// <para>
+        /// The PIN length is measured in code points. See the User's Manual entry on
+        /// <xref href="TheFido2Pin">the FIDO2 PIN</xref> for more information on PIN
+        /// composition.
+        /// </para>
+        /// <para>
+        /// Note that the standard specifies that a PIN cannot be less than 4 Unicode
+        /// characters and no more than 63 bytes when encoded as UTF-8. Hence, there
+        /// are limits to the new minimum PIN length.
+        /// </para>
+        /// <para>
+        /// The list of RP IDs will specify that any RP on the list is allowed to see
+        /// the minimum PIN length of a YubiKey. That will be visible only during the
+        /// MakeCredential process. Generally, it is used so that an RP will
+        /// refuse to provide a credential to an authenticator if the minimum PIN
+        /// length is too low.
+        /// </para>
+        /// <para>
+        /// It is possible for a YubiKey to be manufactured with a pre-configured
+        /// list of RP IDs. That list will never change, even after reset. If RP IDs
+        /// are added using the SetMinPINLength command, they will be IDs in addition
+        /// to the pre-configured list.
+        /// </para>
+        /// <para>
+        /// If RP IDs are added using this command, they will replace any RP IDs that
+        /// had been added during a previous call to this command. It will not
+        /// replace the pre-configured list. Note that there is no way to get the
+        /// current list.
+        /// </para>
+        /// <para>
+        /// If the minimum PIN length is set, and if the current PIN is smaller than
+        /// this value, then the YubiKey will require the user to change the PIN. It
+        /// will not verify the current PIN and any operation that requires
+        /// PIN verification will fail until the PIN is changed to a value that meets
+        /// the new requirement. For example, suppose the current minimum PIN length
+        /// is 4 and you have a PIN of length 6. You set the minimum PIN length to 7,
+        /// but do not set <c>forceChangePin</c> (you pass in null for that arg). The
+        /// YubiKey will still require the user change the PIN.
+        /// </para>
+        /// <para>
+        /// If <c>forceChangePin</c> is true, then the caller is requiring the user
+        /// to change the PIN, no matter what.
+        /// </para>
+        /// <para>
+        /// You can know if a PIN must be changed (either because the min PIN length
+        /// is now longer than the existing PIN or the <c>forceChangePin</c> was
+        /// set), look at the <see cref="AuthenticatorInfo.ForcePinChange"/> property
+        /// in the <c>AuthenticatorInfo</c>.
+        /// </para>
+        /// <para>
+        /// Note that if you pass in null for all three arguments, this method
+        /// will still check to see if the feature is supported and return
+        /// <c>false</c> if it is not. If the feature is supported, this method
+        /// will do nothing.
+        /// </para>
+        /// </remarks>
+        /// <param name="newMinPinLength">
+        /// The new PIN length, measured in code points. See the User's Manual
+        /// entry on <xref href="TheFido2Pin">the FIDO2 PIN</xref> for more
+        /// information on PIN composition. Pass in null to indicate the command
+        /// should not change the minimum PIN length.
+        /// </param>
+        /// <param name="relyingPartyIds">
+        /// A list of strings that are the relying party IDs for those RPs that
+        /// are allowed to see the minimum PIN length. Pass in null to indicate
+        /// the command should not add any RP IDs.
+        /// </param>
+        /// <param name="forceChangePin">
+        /// If you want to set the YubiKey to require the user change the PIN
+        /// before the next verification event, pass in <c>true</c>. If you pass
+        /// in null or <c>false</c>, this command will consider the force PIN
+        /// option not taken.
+        /// </param>
+        /// <returns>
+        /// A boolean, <c>true</c> if the YubiKey was able to set the YubiKey
+        /// with the given input data,  <c>false</c> if the YubiKey does not
+        /// support this feature.
+        /// </returns>
+        /// <exception cref="Ctap2DataException">
+        /// The YubiKey could not perform the operation, even though the set min
+        /// PIN length feature is supported. For example, if the input
+        /// newMinPinLength arg is less than the current min PIN length.
+        /// </exception>
+        public bool TrySetPinConfig(
+            int? newMinPinLength = null,
+            IReadOnlyList<string>? relyingPartyIds = null,
+            bool? forceChangePin = null)
+        {
+            _log.LogInformation("Try to set the PIN config (setMinPINLength).");
+
+            OptionValue setMinPinValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.setMinPINLength);
+
+            if (setMinPinValue != OptionValue.True)
+            {
+                return false;
+            }
+
+            ReadOnlyMemory<byte> currentToken = GetAuthToken(
+                false,
+                PinUvAuthTokenPermissions.AuthenticatorConfiguration,
+                null);
+
+            var setCmd = new SetMinPinLengthCommand(
+                newMinPinLength,
+                relyingPartyIds,
+                forceChangePin,
+                currentToken,
+                AuthProtocol);
+            Fido2Response setRsp = Connection.SendCommand(setCmd);
+            if (setRsp.CtapStatus == CtapStatus.PinAuthInvalid)
+            {
+                currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
+                setCmd = new SetMinPinLengthCommand(
+                    newMinPinLength,
+                    relyingPartyIds,
+                    forceChangePin,
+                    currentToken,
+                    AuthProtocol);
+                setRsp = Connection.SendCommand(setCmd);
+            }
+
+            if (setRsp.Status == ResponseStatus.Success)
+            {
+                // This operation can change the AuthenticatorInfo, so make sure
+                // if someone gets it, they get a new one.
+                _authenticatorInfo = null;
+                return true;
+            }
+
+            throw new Ctap2DataException(setRsp.StatusMessage);
         }
     }
 }

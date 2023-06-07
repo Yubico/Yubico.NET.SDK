@@ -103,7 +103,8 @@ namespace Yubico.YubiKey.Fido2.Cbor
             var returnValue = new Dictionary<TKey,TValue>(_dict.Count);
             foreach (KeyValuePair<TKey, object?> entry in _dict)
             {
-                if (!(entry.Value is TValue targetValue))
+                object? currentValue = ConvertValue<TValue>(entry.Value);
+                if (!(currentValue is TValue targetValue))
                 {
                     throw new InvalidCastException();
                 }
@@ -144,12 +145,14 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 int index = 0;
                 for (; index < entries.Count; index++)
                 {
-                    if (!(entries[index] is TValue currentValue))
-                    {
-                        break;
-                    }
+                    object? currentValue = ConvertValue<TValue>(entries[index]);
 
-                    returnValue.Add(currentValue);
+                    if (!(currentValue is null) && (currentValue is TValue typedValue))
+                    {
+                        returnValue.Add(typedValue);
+                        continue;
+                    }
+                    break;
                 }
 
                 if (index >= entries.Count)
@@ -172,10 +175,76 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 return null;
             }
 
-            object? value = _dict[key];
-            if (value is T typedValue)
+            return ConvertValue<T>(_dict[key]);
+        }
+
+        // If the value is a T, return it.
+        // If the value is a long or ulong, convert it to a T and return it.
+        internal static object? ConvertValue<T>(object? value)
+        {
+            switch (typeof(T))
             {
-                return typedValue;
+                case Type intType when intType == typeof(int):
+                    return ReadInt32(value);
+
+                case Type uintType when uintType == typeof(uint):
+                    return ReadUInt32(value);
+
+                case Type longType when longType == typeof(long):
+                    return ReadInt64(value);
+
+                case Type ulongType when ulongType == typeof(ulong):
+                    return ReadUInt64(value);
+
+                default:
+                    if (value is T typedValue)
+                    {
+                        return typedValue;
+                    }
+
+                    break;
+            }
+
+            throw new InvalidCastException();
+        }
+
+        /// <summary>
+        /// Read the value for the given key as a signed 32-bit integer.
+        /// </summary>
+        public int ReadInt32(TKey key) => ReadInt32(_dict[key]);
+
+        private static int ReadInt32(object? value)
+        {
+            try
+            {
+                return Convert.ToInt32(value, null);
+            }
+            catch (OverflowException overflowException)
+            {
+                throw new InvalidCastException(null, overflowException);
+            }
+
+            throw new InvalidCastException();
+        }
+
+        /// <summary>
+        /// Read the value for the given key as an unsigned 32-bit integer.
+        /// </summary>
+        /// <remarks>
+        /// WARNING! If the value is a negative int, this method will throw an
+        /// exception.
+        /// </remarks>
+        public uint ReadUInt32(TKey key) => ReadUInt32(_dict[key]);
+
+        private static uint ReadUInt32(object? value)
+        {
+            try
+            {
+                return Convert.ToUInt32(value, null);
+            }
+            catch (OverflowException overflowException)
+            {
+                throw new InvalidCastException(null, overflowException);
             }
 
             throw new InvalidCastException();
@@ -184,13 +253,40 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// <summary>
         /// Read the value for the given key as a signed integer.
         /// </summary>
-        public int ReadInt32(TKey key)
-        {
-            object? value = _dict[key];
+        public long ReadInt64(TKey key) => ReadInt64(_dict[key]);
 
-            if (value is int unboxedValue)
+        private static long ReadInt64(object? value)
+        {
+            try
             {
-                return unboxedValue;
+                return Convert.ToInt64(value, null);
+            }
+            catch (OverflowException overflowException)
+            {
+                throw new InvalidCastException(null, overflowException);
+            }
+
+            throw new InvalidCastException();
+        }
+
+        /// <summary>
+        /// Read the value for the given key as an unsigned integer.
+        /// </summary>
+        /// <remarks>
+        /// WARNING! If the value is a negative int, this method will throw an
+        /// exception.
+        /// </remarks>
+        public ulong ReadUInt64(TKey key) => ReadUInt64(_dict[key]);
+
+        private static ulong ReadUInt64(object? value)
+        {
+            try
+            {
+                return Convert.ToUInt64(value, null);
+            }
+            catch (OverflowException overflowException)
+            {
+                throw new InvalidCastException(null, overflowException);
             }
 
             throw new InvalidCastException();
@@ -301,11 +397,14 @@ namespace Yubico.YubiKey.Fido2.Cbor
             throw new InvalidOperationException(ExceptionMessages.TypeNotSupported);
         }
 
+        // Note that if the encoding specifies that the value is a negative
+        // integer, we store the value as a long. If the encoding specifies that
+        // the value is unsigned, we store the value as a ulong.
         private static object? ProcessSingleElement(CborReader cbor) => cbor.PeekState() switch
         {
             CborReaderState.Undefined => null,
-            CborReaderState.UnsignedInteger => cbor.ReadInt32(),
-            CborReaderState.NegativeInteger => cbor.ReadInt32(),
+            CborReaderState.UnsignedInteger => cbor.ReadUInt64(),
+            CborReaderState.NegativeInteger => cbor.ReadInt64(),
             CborReaderState.ByteString => cbor.ReadByteString(),
             CborReaderState.TextString => cbor.ReadTextString(),
             CborReaderState.StartMap => ProcessSubMap(cbor),

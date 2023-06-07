@@ -16,7 +16,6 @@ using System;
 using System.Text;
 using System.Collections.Generic;
 using Xunit;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
@@ -24,7 +23,7 @@ namespace Yubico.YubiKey.Fido2
     public class ConfigTests : SimpleIntegrationTestConnection
     {
         public ConfigTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
         }
 
@@ -79,6 +78,114 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
+        [Fact]
+        public void SetMinPinLen_Succeeds()
+        {
+            using (var fido2Session = new Fido2Session(Device))
+            {
+                fido2Session.KeyCollector = LocalKeyCollector;
+
+                OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
+
+                bool expectedResult = optionValue == OptionValue.True;
+
+                bool isSet = fido2Session.TrySetPinConfig(7, null, null);
+                Assert.Equal(expectedResult, isSet);
+                if (isSet)
+                {
+                    Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange);
+                    Assert.True(fido2Session.AuthenticatorInfo.ForcePinChange!);
+                }
+            }
+        }
+
+        [Fact]
+        public void ForceChangePin_Succeeds()
+        {
+            using (var fido2Session = new Fido2Session(Device))
+            {
+                fido2Session.KeyCollector = LocalKeyCollector;
+
+                Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange);
+                Assert.False(fido2Session.AuthenticatorInfo.ForcePinChange!);
+
+                OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
+
+                bool expectedResult = optionValue == OptionValue.True;
+
+                bool isSet = fido2Session.TrySetPinConfig(null, null, true);
+                Assert.Equal(expectedResult, isSet);
+                if (isSet)
+                {
+                    Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange);
+                    Assert.True(fido2Session.AuthenticatorInfo.ForcePinChange!);
+                }
+            }
+        }
+
+        [Fact]
+        public void SetRpId_Succeeds()
+        {
+            using (var fido2Session = new Fido2Session(Device))
+            {
+                fido2Session.KeyCollector = LocalKeyCollector;
+
+                OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
+                bool isSupported = fido2Session.AuthenticatorInfo.IsExtensionSupported("minPinLength");
+
+                bool expectedResult = (optionValue == OptionValue.True) && isSupported;
+
+                var rpList = new List<string>(1)
+                {
+                    "rpidOne"
+                };
+                bool isSet = fido2Session.TrySetPinConfig(null, rpList, null);
+                Assert.Equal(expectedResult, isSet);
+
+                if (isSet)
+                {
+                    isSet = VerifyExtension(fido2Session);
+                    Assert.True(isSet);
+                }
+            }
+        }
+
+        private bool VerifyExtension(Fido2Session fido2Session)
+        {
+            byte[] clientDataHash = {
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
+                0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
+            };
+            var rp = new RelyingParty("rpidOne");
+            var user1 = new UserEntity(new byte[] { 1, 2, 3, 4 })
+            {
+                Name = "TestUser",
+                DisplayName = "Test User"
+            };
+
+            var mcParams = new MakeCredentialParameters(rp, user1)
+            {
+                ClientDataHash = clientDataHash
+            };
+            mcParams.AddOption(AuthenticatorOptions.rk, true);
+            mcParams.AddExtension("minPinLength", new byte[] { 0xF5 });
+
+            MakeCredentialData mcData = fido2Session.MakeCredential(mcParams);
+
+            if (mcData.AuthenticatorData.Extensions is null)
+            {
+                return false;
+            }
+
+            bool isValid = mcData.AuthenticatorData.Extensions!.TryGetValue("minPinLength", out byte[]? eValue);
+            if (isValid)
+            {
+                isValid = eValue![0] == 4;
+            }
+
+            return isValid;
+       }
+
         private bool LocalKeyCollector(KeyEntryData arg)
         {
             switch (arg.Request)
@@ -88,6 +195,9 @@ namespace Yubico.YubiKey.Fido2
                     break;
                 case KeyEntryRequest.VerifyFido2Uv:
                     Console.WriteLine("Fingerprint requested.");
+                    break;
+                case KeyEntryRequest.TouchRequest:
+                    Console.WriteLine("Touch requested.");
                     break;
                 case KeyEntryRequest.Release:
                     break;

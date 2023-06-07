@@ -18,9 +18,14 @@ limitations under the License. -->
 
 # The FIDO2 PIN
 
-The FIDO2 standards contain some special requirements on the PIN. In brief, the PIN must
-be supplied as "... the UTF-8 representation of" the "Unicode characters in Normalization
-Form C." What does that mean? How does one build such a PIN?
+The FIDO2 standards contain some special requirements on the PIN. One constraint is that
+the PIN must be supplied as "... the UTF-8 representation of" the "Unicode characters in
+Normalization Form C". Another constraint is that the PIN must be a minimum length
+measured in "code points" (the standard declares, "This specification attempts to count
+code points as an approximation of Unicode characters"), and a maximum length measured in
+bytes (described further [below](#length-restrictions)).
+
+What does that mean? How does one build such a PIN?
 
 ## Unicode characters
 
@@ -203,3 +208,22 @@ this.
     string normalizedPin = pinAsString.Normalize();
     byte[] utf8Pin = Encoding.UTF8.GetBytes(normalizedPin);
 ```
+
+## Length restrictions
+
+The standard specifies that a PIN must be at least four code points. Remember, the
+standard declares, "This specification attempts to count code points as an approximation
+of Unicode characters".
+
+The standard also specifies that a PIN can be no more than 63 bytes. That means after the
+PIN has been converted to "... the UTF-8 representation of" the "Unicode characters in
+Normalization Form C", it is a byte array. That byte array's length must be less than or
+equal to 63.
+
+It is possible a YubiKey can be manufactured with a longer minimum length (that is allowed
+by the standard), and it is possible on some YubiKeys to programmatically increase the
+minimum length. You can find the minimum PIN length on any YubiKey in the
+AuthenticatorInfo's
+[MinimumPinLength](xref:Yubico.YubiKey.Fido2.AuthenticatorInfo.MinimumPinLength) property.
+
+The standard does not allow increasing or decreasing the maximum PIN length.

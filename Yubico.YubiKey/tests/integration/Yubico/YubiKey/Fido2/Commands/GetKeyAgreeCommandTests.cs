@@ -18,7 +18,7 @@ using Yubico.YubiKey.Fido2.Cose;
 using Xunit;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
-namespace Yubico.YubiKey.Fido2
+namespace Yubico.YubiKey.Fido2.Commands
 {
     public class GetKeyAgreeCommandTests : SimpleIntegrationTestConnection
     {

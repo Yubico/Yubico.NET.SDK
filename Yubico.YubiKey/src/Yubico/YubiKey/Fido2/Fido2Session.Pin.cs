@@ -15,10 +15,10 @@
 using System;
 using System.Globalization;
 using System.Security;
-using System.Threading.Tasks;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -281,6 +281,8 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void AddPermissions(PinUvAuthTokenPermissions permissions, string? relyingPartyId = null)
         {
+            _log.LogInformation("Add permissions (get new AuthToken with more permissions).");
+
             PinUvAuthTokenPermissions current = AuthTokenPermissions ?? PinUvAuthTokenPermissions.None;
             PinUvAuthTokenPermissions allPermissions = permissions | current;
 
@@ -433,6 +435,7 @@ namespace Yubico.YubiKey.Fido2
         /// </remarks>
         public void ClearAuthToken()
         {
+            _log.LogInformation("Clear Auth Token.");
             AuthToken = null;
             AuthTokenPermissions = null;
             AuthTokenRelyingPartyId = null;
@@ -469,6 +472,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void SetPin()
         {
+            _log.LogInformation("Set PIN (use KeyCollector).");
             if (TrySetPin())
             {
                 return;
@@ -508,6 +512,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public bool TrySetPin()
         {
+            _log.LogInformation("Try to set PIN (use KeyCollector).");
             Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
 
             var keyEntryData = new KeyEntryData()
@@ -562,6 +567,7 @@ namespace Yubico.YubiKey.Fido2
         /// </returns>
         public bool TrySetPin(ReadOnlyMemory<byte> newPin)
         {
+            _log.LogInformation("Try to set PIN (use supplied PIN).");
             VerifyPinLengthRequirements(newPin);
 
             ObtainSharedSecret();
@@ -616,6 +622,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void ChangePin()
         {
+            _log.LogInformation("Change PIN (use KeyCollector).");
             if (TryChangePin())
             {
                 return;
@@ -654,6 +661,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public bool TryChangePin()
         {
+            _log.LogInformation("Try to change PIN (use KeyCollector).");
             Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
 
             var keyEntryData = new KeyEntryData()
@@ -714,6 +722,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public bool TryChangePin(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin)
         {
+            _log.LogInformation("Try to change PIN (use supplied PIN values).");
             VerifyPinLengthRequirements(newPin);
 
             ObtainSharedSecret();
@@ -803,6 +812,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void VerifyPin(PinUvAuthTokenPermissions? permissions = null, string? relyingPartyId = null)
         {
+            _log.LogInformation("Verify PIN (use KeyCollector).");
             if (TryVerifyPin(permissions, relyingPartyId))
             {
                 return;
@@ -878,6 +888,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public bool TryVerifyPin(PinUvAuthTokenPermissions? permissions = null, string? relyingPartyId = null)
         {
+            _log.LogInformation("Try to verify PIN (use KeyCollector).");
             Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
 
             var keyEntryData = new KeyEntryData()
@@ -987,6 +998,7 @@ namespace Yubico.YubiKey.Fido2
             out int? retriesRemaining,
             out bool? rebootRequired)
         {
+            _log.LogInformation("Try to verify PIN (use supplied PIN).");
             IYubiKeyCommand<GetPinUvAuthTokenResponse> command;
 
             if (!OptionEnabled(AuthenticatorInfo, "clientPin"))
@@ -1092,6 +1104,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void VerifyUv(PinUvAuthTokenPermissions permissions, string? relyingPartyId = null)
         {
+            _log.LogInformation("Verify UV (use KeyCollector).");
             if (TryVerifyUv(permissions, relyingPartyId))
             {
                 return;
@@ -1172,6 +1185,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public bool TryVerifyUv(PinUvAuthTokenPermissions permissions, string? relyingPartyId = null)
         {
+            _log.LogInformation("Try to verify UV (use KeyCollector).");
             CtapStatus status = DoVerifyUv(permissions, relyingPartyId, out string statusMessage);
 
             switch(status)
@@ -1293,6 +1307,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(authProtocol));
             }
+            _log.LogInformation("Set auth protocol: " + authProtocol.Protocol + ".");
 
             if (_disposeAuthProtocol)
             {

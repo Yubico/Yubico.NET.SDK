@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -91,6 +92,8 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public IReadOnlyList<GetAssertionData> GetAssertions(GetAssertionParameters parameters)
         {
+            _log.LogInformation("Get assertions.");
+
             if (parameters is null)
             {
                 throw new ArgumentNullException(nameof(parameters));

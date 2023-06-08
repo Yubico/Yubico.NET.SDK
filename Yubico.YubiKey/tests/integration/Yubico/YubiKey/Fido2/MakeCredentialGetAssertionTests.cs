@@ -81,6 +81,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 // Set up a key collector
                 fido2.KeyCollector = KeyCollector;
+                int startCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!;
 
                 // Verify the PIN
                 fido2.VerifyPin();
@@ -114,9 +115,15 @@ namespace Yubico.YubiKey.Fido2
                 Assert.True(mcData.VerifyAttestation(_clientDataHash));
                 CredentialId cred1 = mcData.AuthenticatorData.CredentialId!;
 
+                int midCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!;
+                Assert.True(startCount - midCount == 1);
+
                 mcData = fido2.MakeCredential(mcParams2);
                 Assert.True(mcData.VerifyAttestation(_clientDataHash));
                 CredentialId cred2 = mcData.AuthenticatorData.CredentialId!;
+
+                int endCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!;
+                Assert.True(startCount - endCount == 2);
 
                 // Call GetAssertion
                 var gaParams = new GetAssertionParameters(_rp, _clientDataHash);

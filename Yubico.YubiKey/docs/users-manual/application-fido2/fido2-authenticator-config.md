@@ -21,7 +21,7 @@ limitations under the License. -->
 The CTAP 2.1 standard, in section 6.11, defines "authenticatorConfig" operations:
 
 * Enable enterprise attestation
-* Toggle always UV
+* Toggle "always UV"
 * Set minimum PIN length
 * Vendor prototype 
 

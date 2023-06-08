@@ -406,6 +406,11 @@ namespace Yubico.YubiKey.Fido2
             // If the response is Success, we're done.
             if ((rsp.Status == ResponseStatus.Success) || (rsp.CtapStatus == CtapStatus.NoCredentials))
             {
+                // After a credential has been deleted, the number of
+                // discoverable credentials can change. Hence, this operation can
+                // change the AuthenticatorInfo, so make sure if someone gets it,
+                // they get a new one.
+                _authenticatorInfo = null;
                 return;
             }
 

@@ -15,6 +15,7 @@
 using System;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
+using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -79,6 +80,8 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public MakeCredentialData MakeCredential(MakeCredentialParameters parameters)
         {
+            _log.LogInformation("Make credential.");
+
             if (parameters is null)
             {
                 throw new ArgumentNullException(nameof(parameters));
@@ -114,6 +117,11 @@ namespace Yubico.YubiKey.Fido2
                 switch (ctapStatus)
                 {
                     case CtapStatus.Ok:
+                        // After a credential has been made, the number of
+                        // discoverable credentials can change. Hence, this
+                        // operation can change the AuthenticatorInfo, so make
+                        // sure if someone gets it, they get a new one.
+                        _authenticatorInfo = null;
                         return rsp.GetData();
 
                     case CtapStatus.PinAuthInvalid:

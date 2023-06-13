@@ -51,6 +51,7 @@ namespace Yubico.YubiKey.Fido2
         private const int TagEnterpriseAttestation = 10;
         private const string KeyCredBlob = "credBlob";
         private const string KeyHmacSecret = "hmac-secret";
+        private const string KeyCredProtect = "credProtect";
 
         private readonly List<Tuple<string, CoseAlgorithmIdentifier>> _algorithms = new List<Tuple<string, CoseAlgorithmIdentifier>>();
         private List<CredentialId>? _excludeList;
@@ -460,6 +461,118 @@ namespace Yubico.YubiKey.Fido2
             }
 
             AddExtension(KeyHmacSecret, new byte[] { 0xF5 });
+        }
+
+        /// <summary>
+        /// Add the "credProtect" extension, specifying the protection policy the
+        /// YubiKey is to use when getting assertions.
+        /// </summary>
+        /// <remarks>
+        /// Section 12.1 of the FIDO2 CTAP 2.1 standard specifies this extension.
+        /// There are two parts: what the relying party communicates to the
+        /// client, and what the client communicates to the authenticator. This
+        /// class, <c>MakeCredentialParameters</c>, builds the parameters for the
+        /// message from the client to the authenticator. Hence, this method will
+        /// build the extension in the structure specified by the standard in the
+        /// message from the client to the YubiKey.
+        /// <para>
+        /// Note that the standard specifies that the the message from RP to
+        /// client contains the same information as the message from the client
+        /// to the authenticator, just in a different format. Furthermore, the
+        /// message from the RP to the client contains extra information, namely
+        /// a boolean indicating the RP's request on how to handle the case where
+        /// the authenticator does not support user verification (UV). That
+        /// boolean is not passed down to the YubiKey and it is the
+        /// responsibility of the client to handle that logic.
+        /// </para>
+        /// <para>
+        /// Because this extension is used more often, a dedicated method is
+        /// provided as a convenience. There is no need for the caller to
+        /// encode the <c>credProtectPolicy</c>. That is, this is essentially the
+        /// same as calling <c>AddExtension</c>, except this method will verify
+        /// the YubiKey supports the extension, verify the data, use the
+        /// appropriate <c>>extensionString</c>, and encode the value.
+        /// </para>
+        /// <para>
+        /// The caller supplies the <c>AuthenticatorInfo</c> for the YubiKey,
+        /// obtained by calling the <see cref="Commands.GetInfoCommand"/> or
+        /// providing the <see cref="Fido2Session.AuthenticatorInfo"/> property.
+        /// </para>
+        /// <para>
+        /// This method will determine from the <c>authenticatorInfo</c> whether
+        /// the YubiKey supports this extension, and whether the data provided is
+        /// correct for the YubiKey's support for "credProtect".
+        /// </para>
+        /// <para>
+        /// The standard defines three policies:
+        /// <code>
+        ///    UserVerificationOptional
+        ///    UserVerificationOptionalWithCredentialIDList
+        ///    UserVerificationRequired
+        /// </code>
+        /// The SDK provides for one more option: <c>None</c>.
+        /// </para>
+        /// <para>
+        /// The policy <c>UserVerificationOptionalWithCredentialIDList</c> means
+        /// that the authenticator may or may not enforce UV if the request for
+        /// an assertion is accompanied by a credential ID (see the
+        /// <c>allowList</c> in <see cref="GetAssertionParameters"/>). If there
+        /// is no credential ID (no <c>allowList</c>), then UV is required to get
+        /// an assertion.
+        /// </para>
+        /// <para>
+        /// You can see the "credProtect" policy in the
+        /// <c>MakeCredentialData.AuthenticatorData.Extensions</c> property once
+        /// the credential has been made. See
+        /// <see cref="AuthenticatorData.GetCredProtectExtension"/>.
+        /// </para>
+        /// <para>
+        /// Note that while the "credProtect" policy refers to how the credential
+        /// is protected when getting an assertion, the "credProtect" policy is
+        /// not returned by the YubiKey in the
+        /// <c>GetAssertionData.AuthenticatorData.Extensions</c>.
+        /// </para>
+        /// <para>
+        /// If you pass <c>None</c> as the <c>credProtectPolicy</c>, this method
+        /// will do nothing and return. The "credProtect" policy of the
+        /// credential will be the YubiKey's default.
+        /// </para>
+        /// </remarks>
+        /// <param name="credProtectPolicy">
+        /// The "credProtect" policy the YubiKey is to follow when making the
+        /// credential.
+        /// </param>
+        /// <param name="authenticatorInfo">
+        /// The FIDO2 <c>AuthenticatorInfo</c> for the YubiKey being used.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>authenticatorInfo</c> arg is null.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The YubiKey does not support this extension, or the input values were
+        /// not correct.
+        /// </exception>
+        public void AddCredProtectExtension(
+            CredProtectPolicy credProtectPolicy,
+            AuthenticatorInfo authenticatorInfo)
+        {
+            if (credProtectPolicy == CredProtectPolicy.None)
+            {
+                return;
+            }
+            if (authenticatorInfo is null)
+            {
+                throw new ArgumentNullException(nameof(authenticatorInfo));
+            }
+            if (!authenticatorInfo.Extensions.Contains<string>(KeyCredProtect))
+            {
+                throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+            }
+
+            // The encoding is key/value where the key is "credProtect" and the
+            // value is an unsigned int (major type 0). The only three possible
+            // values are 1, 2, or 3, so the encoding is simply 0x01, 02,or 03.
+            AddExtension(KeyCredProtect, new byte[] { (byte)credProtectPolicy });
         }
 
         /// <summary>

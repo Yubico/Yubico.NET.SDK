@@ -46,6 +46,7 @@ namespace Yubico.YubiKey.Fido2
         private const byte ExtensionsBit = 0x80;
         private const string KeyCredBlob = "credBlob";
         private const string KeyHmacSecret = "hmac-secret";
+        private const string KeyCredProtect = "credProtect";
 
         /// <summary>
         /// The encoded authenticator data is used to verify the attestation
@@ -307,6 +308,41 @@ namespace Yubico.YubiKey.Fido2
             }
 
             return Array.Empty<byte>();
+        }
+
+        /// <summary>
+        /// Get the value of the "credProtect" extension. This returns the
+        /// decoded value.
+        /// </summary>
+        /// <remarks>
+        /// Because this extension is used more often, a dedicated method is
+        /// provided as a convenience. There is no need for the caller to
+        /// CBOR-decode the value for the key "credProtect".
+        /// </remarks>
+        /// <returns>
+        /// The CredProtectPolicy enum describing the value of the "credProtect"
+        /// extension.
+        /// </returns>
+        /// <exception cref="Ctap2DataException">
+        /// If the value of the extension is not a valid CredProtect policy.
+        /// </exception>
+        public CredProtectPolicy GetCredProtectExtension()
+        {
+            if (!(Extensions is null))
+            {
+                if (Extensions.ContainsKey(KeyCredProtect))
+                {
+                    byte[] encodedValue = Extensions[KeyCredProtect];
+                    if ((encodedValue.Length == 1) && (encodedValue[0] >= 1) && (encodedValue[0] <= 3))
+                    {
+                        return (CredProtectPolicy)encodedValue[0];
+                    }
+
+                    throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
+                }
+            }
+
+            return CredProtectPolicy.None;
         }
     }
 }

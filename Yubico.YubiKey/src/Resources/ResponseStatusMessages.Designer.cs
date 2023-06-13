@@ -160,7 +160,7 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The comand failed to complete..
+        ///   Looks up a localized string similar to The command failed to complete..
         /// </summary>
         internal static string BaseFailed {
             get {

@@ -106,7 +106,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// data is too long, this command will send it to the YubiKey, which
         /// will likely not store the data and return an error. If this is the
         /// first call to <c>Set</c> (<c>offset</c> is zero), and the input
-        /// <c>blobData</c> is longer than the length, this comand will send the
+        /// <c>blobData</c> is longer than the length, this command will send the
         /// data into the YubiKey which will likely not store the data and return
         /// an error.
         /// </para>

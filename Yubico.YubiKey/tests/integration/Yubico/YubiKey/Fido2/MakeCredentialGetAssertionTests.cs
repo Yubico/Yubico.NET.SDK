@@ -72,6 +72,42 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
+        public void MakeCredential_NoName_GetAssertion_Succeeds()
+        {
+            // Test assumptions: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)
+            IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
+
+            using (var fido2 = new Fido2Session(yubiKeyDevice))
+            {
+                // Set up a key collector
+                fido2.KeyCollector = KeyCollector;
+
+                // Verify the PIN
+                fido2.VerifyPin();
+
+                // Call MakeCredential
+                var userId = new UserEntity(new byte[] { 1, 2, 3, 4 });
+
+                var mcParams = new MakeCredentialParameters(_rp, userId)
+                {
+                    ClientDataHash = _clientDataHash
+                };
+                mcParams.AddOption(AuthenticatorOptions.rk, true);
+
+                MakeCredentialData mcData = fido2.MakeCredential(mcParams);
+
+                Assert.True(mcData.VerifyAttestation(_clientDataHash));
+
+                // Call GetAssertion
+                var gaParams = new GetAssertionParameters(_rp, _clientDataHash);
+
+                IReadOnlyList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
+
+                Assert.Equal(1, assertions.Count);
+            }
+        }
+
+        [Fact]
         public void MakeCredential_MultipleCredentials_GetAssertion_ReturnsMultipleAssertions()
         {
             // Test assumptions: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)
@@ -104,16 +140,24 @@ namespace Yubico.YubiKey.Fido2
                     ClientDataHash = _clientDataHash
                 };
                 mcParams1.AddOption(AuthenticatorOptions.rk, true);
+                mcParams1.AddCredProtectExtension(
+                    CredProtectPolicy.UserVerificationRequired,
+                    fido2.AuthenticatorInfo);
 
                 var mcParams2 = new MakeCredentialParameters(_rp, user2)
                 {
                     ClientDataHash = _clientDataHash
                 };
                 mcParams2.AddOption(AuthenticatorOptions.rk, true);
+                mcParams2.AddCredProtectExtension(
+                    CredProtectPolicy.UserVerificationOptionalWithCredentialIDList,
+                    fido2.AuthenticatorInfo);
 
                 MakeCredentialData mcData = fido2.MakeCredential(mcParams1);
                 Assert.True(mcData.VerifyAttestation(_clientDataHash));
                 CredentialId cred1 = mcData.AuthenticatorData.CredentialId!;
+                CredProtectPolicy cpPolicy = mcData.AuthenticatorData.GetCredProtectExtension();
+                Assert.Equal(CredProtectPolicy.UserVerificationRequired, cpPolicy);
 
                 int midCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!;
                 Assert.True(startCount - midCount == 1);
@@ -121,6 +165,8 @@ namespace Yubico.YubiKey.Fido2
                 mcData = fido2.MakeCredential(mcParams2);
                 Assert.True(mcData.VerifyAttestation(_clientDataHash));
                 CredentialId cred2 = mcData.AuthenticatorData.CredentialId!;
+                cpPolicy = mcData.AuthenticatorData.GetCredProtectExtension();
+                Assert.Equal(CredProtectPolicy.UserVerificationOptionalWithCredentialIDList, cpPolicy);
 
                 int endCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!;
                 Assert.True(startCount - endCount == 2);

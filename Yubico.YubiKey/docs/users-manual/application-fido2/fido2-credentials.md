@@ -119,6 +119,13 @@ The following are optional for both the FIDO2 standard and the YubiKey:
   the FIDO2 standard, for more information on Options and "rk")
 - EnterpriseAttestation
 
+> [!NOTE]
+> The FIDO2 standard specifies that a `UserEntity` is a required element in order to make
+> a credential. The `UserEntity` is made up of an `ID`, a `Name`, and a `DisplayName`. The
+> standard also says the `Name` and `DisplayName` are optional. It should be possible to
+> make a credential using a `UserEntity` that contains only an `ID`. However, YubiKeys
+> prior to version 5.3.0 require a `Name` in order to make a credential.
+
 ### MakeCredential example
 
 ```csharp

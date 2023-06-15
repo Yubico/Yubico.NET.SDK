@@ -74,6 +74,16 @@ namespace Yubico.YubiKey.Fido2
         /// The user's ID, along with optional descriptive strings. This is a
         /// required element.
         /// </summary>
+        /// <remarks>
+        /// Note that a <c>UserEntity</c> is a required element in order to make
+        /// a credential. The standard specifies that the <c>UserEntity</c> is
+        /// made up of an <c>ID</c>, a <c>Name</c>, and a <c>DisplayName</c>.
+        /// The standard also says the <c>Name</c> and <c>DisplayName</c> are
+        /// optional. It should be possible to make a credential using a
+        /// <c>UserEntity</c> that contains only an <c>ID</c>. However, YubiKeys
+        /// prior to version 5.3.0 require a <c>Name</c> in order to make a
+        /// credential.
+        /// </remarks>
         public UserEntity UserEntity { get; set; }
 
         /// <summary>
@@ -194,6 +204,15 @@ namespace Yubico.YubiKey.Fido2
         /// setting the preferred algorithm to something other than the default.
         /// </summary>
         /// <remarks>
+        /// Note that a <c>UserEntity</c> is a required element in order to make
+        /// a credential. The standard specifies that the <c>UserEntity</c> is
+        /// made up of an <c>ID</c>, a <c>Name</c>, and a <c>DisplayName</c>.
+        /// The standard also says the <c>Name</c> and <c>DisplayName</c> are
+        /// optional. It should be possible to make a credential using a
+        /// <c>UserEntity</c> that contains only an <c>ID</c>. However, YubiKeys
+        /// prior to version 5.3.0 require a <c>Name</c> in order to make a
+        /// credential.
+        /// <para>
         /// One of the required elements of the <c>MakeCredential</c> parameters
         /// is a list of supported algorithms (a type and algorithm pair,
         /// <see cref="Algorithms"/>). Hence, you must supply at least one
@@ -203,6 +222,7 @@ namespace Yubico.YubiKey.Fido2
         /// object with that credential type, use the constructor that adds it be
         /// default. If you want to specify something other than the default, use
         /// this constructor.
+        /// </para>
         /// <para>
         /// It is possible to add more types later using the method
         /// <see cref="AddAlgorithm"/>.
@@ -239,6 +259,15 @@ namespace Yubico.YubiKey.Fido2
         /// using the default preferred algorithm
         /// </summary>
         /// <remarks>
+        /// Note that a <c>UserEntity</c> is a required element in order to make
+        /// a credential. The standard specifies that the <c>UserEntity</c> is
+        /// made up of an <c>ID</c>, a <c>Name</c>, and a <c>DisplayName</c>.
+        /// The standard also says the <c>Name</c> and <c>DisplayName</c> are
+        /// optional. It should be possible to make a credential using a
+        /// <c>UserEntity</c> that contains only an <c>ID</c>. However, YubiKeys
+        /// prior to version 5.3.0 require a <c>Name</c> in order to make a
+        /// credential.
+        /// <para>
         /// One of the required elements of the <c>MakeCredential</c> parameters
         /// is a list of supported algorithms (a type and algorithm pair,
         /// <see cref="Algorithms"/>). Hence, you must supply at least one
@@ -249,6 +278,7 @@ namespace Yubico.YubiKey.Fido2
         /// add it by default. If you want to specify something other than the
         /// default, use the constructor that takes in an <c>algorithmType</c>
         /// and <c>algorithm</c>.
+        /// </para>
         /// <para>
         /// It is possible to add more types later using the method
         /// <see cref="AddAlgorithm"/>.

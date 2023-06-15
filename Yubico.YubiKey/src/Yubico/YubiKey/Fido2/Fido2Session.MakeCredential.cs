@@ -27,10 +27,16 @@ namespace Yubico.YubiKey.Fido2
         /// Creates a FIDO2 credential on the YubiKey given a parameters object.
         /// </summary>
         /// <remarks>
-        /// <para>
-        /// Detailed information about the parameters structure and its expected values can be found on
-        /// the <see cref="MakeCredentialParameters"/> page.
-        /// </para>
+        /// Detailed information about the parameters structure and its expected
+        /// values can be found on the <see cref="MakeCredentialParameters"/> page.
+        /// Note that a <c>UserEntity</c> is a required element in order to make
+        /// a credential. The standard specifies that the <c>UserEntity</c> is
+        /// made up of an <c>ID</c>, a <c>Name</c>, and a <c>DisplayName</c>.
+        /// The standard also says the <c>Name</c> and <c>DisplayName</c> are
+        /// optional. It should be possible to make a credential using a
+        /// <c>UserEntity</c> that contains only an <c>ID</c>. However, YubiKeys
+        /// prior to version 5.3.0 require a <c>Name</c> in order to make a
+        /// credential.
         /// <para>
         /// To make a credential requires "user presence", which for a YubiKey is
         /// touch. This method will call the KeyCollector when touch is required

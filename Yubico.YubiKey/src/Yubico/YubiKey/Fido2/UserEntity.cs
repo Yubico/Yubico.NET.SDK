@@ -63,6 +63,11 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// The <c>name</c> component of the <c>UserEntity</c>.
         /// </summary>
+        /// <remarks>
+        /// The standard specifies that this element of a user entity is
+        /// optional. However, YubiKeys prior to version 5.3.0 require a
+        /// <c>Name</c> in order to make a credential.
+        /// </remarks>
         public string? Name { get; set; }
 
         /// <summary>

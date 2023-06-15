@@ -31,34 +31,45 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
     // make the appropriate calls to perform the operation selected.
     public partial class Fido2SampleRun
     {
-        public bool RunMenuItem(Fido2MainMenuItem menuItem) => menuItem switch
+        public bool RunMenuItem(Fido2MainMenuItem menuItem)
         {
-            Fido2MainMenuItem.Exit => false,
-            // Find all currently connected YubiKeys that can communicate
-            // over the HID FIDO protocol. This is the protocol used to
-            // communicate with the Fido2 application.
-            // Using Transport.HidFido finds all YubiKeys connected via USB.
-            Fido2MainMenuItem.ListYubiKeys => ListYubiKeys.RunListYubiKeys(Transport.HidFido),
-            Fido2MainMenuItem.ChooseYubiKey => RunChooseYubiKey(),
-            Fido2MainMenuItem.SetPin => RunSetPin(),
-            Fido2MainMenuItem.ChangePin => RunChangePin(),
-            Fido2MainMenuItem.VerifyPin => RunVerifyPin(),
-            Fido2MainMenuItem.VerifyUv => RunVerifyUv(),
-            Fido2MainMenuItem.MakeCredential => RunMakeCredential(),
-            Fido2MainMenuItem.GetAssertion => RunGetAssertions(),
-            Fido2MainMenuItem.ListCredentials => RunListCredentials(),
-            Fido2MainMenuItem.UpdateCredentialUserInfo => RunUpdateCredentialUserInfo(),
-            Fido2MainMenuItem.DeleteCredential => RunDeleteCredential(),
-            Fido2MainMenuItem.RetrieveLargeBlobData => RunRetrieveLargeBlobData(),
-            Fido2MainMenuItem.StoreLargeBlobData => RunStoreLargeBlobData(),
-            Fido2MainMenuItem.DeleteLargeBlobData => RunDeleteLargeBlobData(),
-            Fido2MainMenuItem.GetBioInfo => RunGetBioInfo(),
-            Fido2MainMenuItem.EnrollFingerprint => RunEnrollFingerprint(),
-            Fido2MainMenuItem.SetBioTemplateFriendlyName => RunSetBioTemplateFriendlyName(),
-            Fido2MainMenuItem.RemoveBioEnrollment => RunRemoveBioEnrollment(),
-            Fido2MainMenuItem.Reset => RunReset(),
-            _ => RunUnimplementedOperation(),
-        };
+            if ((menuItem >= Fido2MainMenuItem.MakeCredential)
+                &&(menuItem < Fido2MainMenuItem.Reset))
+            {
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "\n---This sample uses the SDK's automatic authentication (see the User's Manual)---\n");
+            }
+
+            return menuItem switch
+            {
+                Fido2MainMenuItem.Exit => false,
+                // Find all currently connected YubiKeys that can communicate
+                // over the HID FIDO protocol. This is the protocol used to
+                // communicate with the Fido2 application.
+                // Using Transport.HidFido finds all YubiKeys connected via USB.
+                Fido2MainMenuItem.ListYubiKeys => ListYubiKeys.RunListYubiKeys(Transport.HidFido),
+                Fido2MainMenuItem.ChooseYubiKey => RunChooseYubiKey(),
+                Fido2MainMenuItem.SetPin => RunSetPin(),
+                Fido2MainMenuItem.ChangePin => RunChangePin(),
+                Fido2MainMenuItem.VerifyPin => RunVerifyPin(),
+                Fido2MainMenuItem.VerifyUv => RunVerifyUv(),
+                Fido2MainMenuItem.MakeCredential => RunMakeCredential(),
+                Fido2MainMenuItem.GetAssertion => RunGetAssertions(),
+                Fido2MainMenuItem.ListCredentials => RunListCredentials(),
+                Fido2MainMenuItem.UpdateCredentialUserInfo => RunUpdateCredentialUserInfo(),
+                Fido2MainMenuItem.DeleteCredential => RunDeleteCredential(),
+                Fido2MainMenuItem.RetrieveLargeBlobData => RunRetrieveLargeBlobData(),
+                Fido2MainMenuItem.StoreLargeBlobData => RunStoreLargeBlobData(),
+                Fido2MainMenuItem.DeleteLargeBlobData => RunDeleteLargeBlobData(),
+                Fido2MainMenuItem.GetBioInfo => RunGetBioInfo(),
+                Fido2MainMenuItem.EnrollFingerprint => RunEnrollFingerprint(),
+                Fido2MainMenuItem.SetBioTemplateFriendlyName => RunSetBioTemplateFriendlyName(),
+                Fido2MainMenuItem.RemoveBioEnrollment => RunRemoveBioEnrollment(),
+                Fido2MainMenuItem.Reset => RunReset(),
+                _ => RunUnimplementedOperation(),
+            };
+        }
 
         public static bool RunInvalidEntry()
         {
@@ -141,7 +152,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         }
 
         // It is not possible to set the PIN if it is already set.
-        // It is is already set, it is possible to change it.
+        // If it is already set, it is possible to change it.
         public bool RunSetPin()
         {
             bool isSet = Fido2Pin.SetPin(_yubiKeyChosen, _keyCollector.Fido2SampleKeyCollectorDelegate);

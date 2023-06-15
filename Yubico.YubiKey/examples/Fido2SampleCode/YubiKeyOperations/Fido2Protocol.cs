@@ -90,16 +90,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                         credBlobData, fido2Session.AuthenticatorInfo);
                 }
 
-                // In order to make a credential, the PIN must be verified in
-                // this session. The SDK doesn't call the Verify method
-                // automatically because an app might want to verify with
-                // specific permissions (restrictions) and a relying party ID.
-                // This sample code verifies without setting the permissions or
-                // relying party. To see an example of PIN verification that
-                // checks if permissions are possible and if so allows the caller
-                // to specify, see the FidowSampleRun.RunVerifyPin method.
-                fido2Session.VerifyPin();
-
+                // This method will automatically perform any PIN or fingerprint
+                // verification needed.
                 makeCredentialData = fido2Session.MakeCredential(makeCredentialParameters);
 
                 // The MakeCredentialData contains an attestation statement (a
@@ -122,16 +114,6 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             {
                 fido2Session.KeyCollector = KeyCollectorDelegate;
 
-                // In order to get assertions, the PIN must be verified in
-                // this session. The SDK doesn't call the Verify method
-                // automatically because an app might want to verify with
-                // specific permissions (restrictions) and a relying party ID.
-                // This sample code verifies without setting the permissions or
-                // relying party, but to see an example of verifying that checks
-                // if permissions are possible and if so allows the caller to
-                // specify, see the FidowSampleRun.RunVerifyPin method.
-                fido2Session.VerifyPin();
-
                 var getAssertionParameters = new GetAssertionParameters(relyingParty, clientDataHash);
 
                 // If there is a credBlob, we want to get it. By setting the "credBlob"
@@ -141,6 +123,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 // That's simply the single byte 0xF5.
                 getAssertionParameters.AddExtension("credBlob", new byte[] { 0xF5 });
 
+                // This method will automatically perform any PIN or fingerprint
+                // verification needed.
                 assertions = fido2Session.GetAssertions(getAssertionParameters);
             }
 
@@ -219,6 +203,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             {
                 fido2Session.KeyCollector = KeyCollectorDelegate;
 
+                // This method will automatically perform any PIN or fingerprint
+                // verification needed.
                 fido2Session.UpdateUserInfoForCredential(credentialId, updatedInfo);
             }
 
@@ -234,6 +220,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             {
                 fido2Session.KeyCollector = KeyCollectorDelegate;
 
+                // This method will automatically perform any PIN or fingerprint
+                // verification needed.
                 fido2Session.DeleteCredential(credentialId);
             }
 
@@ -253,6 +241,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                     return false;
                 }
 
+                // This method will automatically perform any PIN or fingerprint
+                // verification needed.
                 blobArray = fido2Session.GetSerializedLargeBlobArray();
             }
 
@@ -310,6 +300,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
                 fido2Session.KeyCollector = KeyCollectorDelegate;
 
+                // This method will automatically perform any PIN or fingerprint
+                // verification needed.
                 fido2Session.SetSerializedLargeBlobArray(blobArray);
             }
 
@@ -354,6 +346,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             {
                 fido2Session.KeyCollector = KeyCollectorDelegate;
 
+                // This method will automatically perform any PIN or fingerprint
+                // verification needed.
                 if (timeoutMilliseconds > 0)
                 {
                     return fido2Session.EnrollFingerprint(
@@ -379,6 +373,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             {
                 fido2Session.KeyCollector = KeyCollectorDelegate;
 
+                // This method will automatically perform any PIN or fingerprint
+                // verification needed.
                 fido2Session.SetBioTemplateFriendlyName(templateId, friendlyName);
             }
 
@@ -394,6 +390,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             {
                 fido2Session.KeyCollector = KeyCollectorDelegate;
 
+                // This method will automatically perform any PIN or fingerprint
+                // verification needed.
                 return fido2Session.TryRemoveBioTemplate(templateId);
             }
         }

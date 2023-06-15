@@ -1272,6 +1272,8 @@ namespace Yubico.YubiKey.Fido2
             }
             finally
             {
+                keyEntryData.Clear();
+
                 keyEntryData.Request = KeyEntryRequest.Release;
                 touchTask.SdkUpdate(keyEntryData);
             }

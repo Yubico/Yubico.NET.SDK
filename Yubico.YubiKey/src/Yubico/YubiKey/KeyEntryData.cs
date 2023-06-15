@@ -339,6 +339,7 @@ namespace Yubico.YubiKey
             RetriesRemaining = null;
             LastBioEnrollSampleResult = null;
             SignalUserCancel = null;
+            IsRetry = false;
         }
     }
 }

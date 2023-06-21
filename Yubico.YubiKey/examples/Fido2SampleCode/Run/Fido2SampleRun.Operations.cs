@@ -22,6 +22,7 @@ using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using System.Globalization;
+using System.Linq;
 
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
 {
@@ -254,11 +255,31 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
             ReadOnlyMemory<byte> clientDataHash = BuildFakeClientDataHash(relyingPartyId);
 
-            byte[] credBlobData = Array.Empty<byte>();
             if (!Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out AuthenticatorInfo authenticatorInfo))
             {
                 return false;
             }
+
+            CredProtectPolicy credProtectPolicy = CredProtectPolicy.None;
+            if (authenticatorInfo.Extensions.Contains("credProtect"))
+            {
+                string[] menuItems = new string[] {
+                    "No (use default)",
+                    "Yes - " + Enum.GetName<CredProtectPolicy>(CredProtectPolicy.UserVerificationOptional),
+                    "Yes - " + Enum.GetName<CredProtectPolicy>(CredProtectPolicy.UserVerificationOptionalWithCredentialIDList),
+                    "Yes - " + Enum.GetName<CredProtectPolicy>(CredProtectPolicy.UserVerificationRequired),
+                };
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "This YubiKey allows you to set the credProtectPolicy. If you do not set it,\n" +
+                    "the policy will be the YubiKey's default. For most YubiKeys, the default is\n" +
+                    "\"UserVerificationOptional\".\n");
+
+                int response = _menuObject.RunMenu("Do you want to set the credProtectPolicy?", menuItems);
+                credProtectPolicy = (CredProtectPolicy)response;
+            }
+
+            byte[] credBlobData = Array.Empty<byte>();
             int maxCredBlobLength = authenticatorInfo.MaximumCredentialBlobLength ?? 0;
             if (maxCredBlobLength > 0)
             {
@@ -266,7 +287,6 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                     "Yes",
                     "No",
                 };
-
                 int response = _menuObject.RunMenu("Do you want to store credBlob data? (Maximum " + maxCredBlobLength + " bytes)", menuItems);
                 if (response == 0)
                 {
@@ -293,6 +313,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 clientDataHash,
                 relyingPartyName, relyingPartyId,
                 userName, userDisplayName, userId,
+                credProtectPolicy,
                 credBlobData,
                 out MakeCredentialData makeCredentialData);
 

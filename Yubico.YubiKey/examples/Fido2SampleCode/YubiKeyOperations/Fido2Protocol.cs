@@ -46,6 +46,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             string userName,
             string userDisplayName,
             ReadOnlyMemory<byte> userId,
+            CredProtectPolicy credProtectPolicy,
             byte[] credBlobData,
             out MakeCredentialData makeCredentialData)
         {
@@ -83,6 +84,11 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 // in the AllowList for the call to GetAssertion.
                 // This sample code wants all credentials to be discoverable.
                 makeCredentialParameters.AddOption("rk", true);
+
+                if (credProtectPolicy != CredProtectPolicy.None)
+                {
+                    makeCredentialParameters.AddCredProtectExtension(credProtectPolicy, fido2Session.AuthenticatorInfo);
+                }
 
                 if (credBlobData.Length > 0)
                 {

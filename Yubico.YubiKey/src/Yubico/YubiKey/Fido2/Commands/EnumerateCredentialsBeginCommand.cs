@@ -44,15 +44,10 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <c>largeBlobKey</c>, and <c>credentialCount</c>.
     /// </para>
     /// </remarks>
-    public class EnumerateCredentialsBeginCommand : IYubiKeyCommand<EnumerateCredentialsBeginResponse>
+    public class EnumerateCredentialsBeginCommand : CredentialMgmtSubCommand, IYubiKeyCommand<EnumerateCredentialsBeginResponse>
     {
         private const int SubCmdEnumerateCredsBegin = 0x04;
         private const int KeyRpIdHash = 1;
-
-        private readonly CredentialManagementCommand _command;
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -78,18 +73,10 @@ namespace Yubico.YubiKey.Fido2.Commands
             RelyingParty relyingParty,
             ReadOnlyMemory<byte> pinUvAuthToken,
             PinUvAuthProtocolBase authProtocol)
+            : base(new CredentialManagementCommand(
+            SubCmdEnumerateCredsBegin, EncodeParams(relyingParty), pinUvAuthToken, authProtocol))
         {
-            if (relyingParty is null)
-            {
-                throw new ArgumentNullException(nameof(relyingParty));
-            }
-
-            _command = new CredentialManagementCommand(
-                SubCmdEnumerateCredsBegin, EncodeParams(relyingParty.RelyingPartyIdHash), pinUvAuthToken, authProtocol);
         }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
         public EnumerateCredentialsBeginResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
@@ -100,10 +87,15 @@ namespace Yubico.YubiKey.Fido2.Commands
         // rpIdHash, and it is encoded as
         //   map
         //     01 byteString
-        private static byte[] EncodeParams(ReadOnlyMemory<byte> relyingPartyIdHash)
+        private static byte[] EncodeParams(RelyingParty relyingParty)
         {
+            if (relyingParty is null)
+            {
+                throw new ArgumentNullException(nameof(relyingParty));
+            }
+
             return new CborMapWriter<int>()
-                .Entry(KeyRpIdHash, relyingPartyIdHash)
+                .Entry(KeyRpIdHash, relyingParty.RelyingPartyIdHash)
                 .Encode();
         }
     }

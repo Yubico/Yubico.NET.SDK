@@ -71,6 +71,7 @@ namespace Yubico.YubiKey.TestUtilities
                 StandardTestDevice.Fw3 => yubiKeys.SelectRequiredTestDevice(3, FormFactor.Unknown, false),
                 StandardTestDevice.Fw4Fips => yubiKeys.SelectRequiredTestDevice(4, FormFactor.Unknown, true),
                 StandardTestDevice.Fw5 => yubiKeys.SelectRequiredTestDevice(5, FormFactor.UsbAKeychain, false),
+                StandardTestDevice.Fw5C => yubiKeys.SelectRequiredTestDevice(5, FormFactor.UsbCKeychain, false),
                 StandardTestDevice.Fw5ci => yubiKeys.SelectRequiredTestDevice(5, FormFactor.UsbCLightning, false),
                 StandardTestDevice.Fw5Fips => yubiKeys.SelectRequiredTestDevice(5, FormFactor.UsbAKeychain, true),
                 StandardTestDevice.Bio => yubiKeys.SelectRequiredTestDevice(5, FormFactor.UsbABiometricKeychain, false),

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
 using Xunit;
@@ -23,7 +22,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     public class UpdateUserInfoCommandTests : SimpleIntegrationTestConnection
     {
         public UpdateUserInfoCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
         }
 
@@ -71,6 +70,67 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.Equal(ResponseStatus.Success, updateRsp.Status);
 
             credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol);
+            credRsp = Connection.SendCommand(credCmd);
+            Assert.Equal(ResponseStatus.Success, credRsp.Status);
+
+            (credCount, userInfo) = credRsp.GetData();
+            Assert.True(credCount != 0);
+
+            Assert.Equal(origDisplayName + " Updated", userInfo.User.DisplayName);
+        }
+
+        [Fact]
+        public void UpdateInfoCommand_Preview_Succeeds()
+        {
+            byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+
+            var protocol = new PinUvAuthProtocolTwo();
+            var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
+            GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
+            Assert.Equal(ResponseStatus.Success, getKeyRsp.Status);
+
+            protocol.Encapsulate(getKeyRsp.GetData());
+            var getTokenCmd = new GetPinTokenCommand(protocol, pin);
+            GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
+            Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
+            ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
+
+            var cmd = new EnumerateRpsBeginCommand(pinToken, protocol)
+            {
+                IsPreview = true
+            };
+            EnumerateRpsBeginResponse rsp = Connection.SendCommand(cmd);
+            Assert.Equal(ResponseStatus.Success, rsp.Status);
+
+            (int rpCount, RelyingParty firstRp) = rsp.GetData();
+            Assert.True(rpCount != 0);
+
+            var credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol)
+            {
+                IsPreview = true
+            };
+            EnumerateCredentialsBeginResponse credRsp = Connection.SendCommand(credCmd);
+            Assert.Equal(ResponseStatus.Success, credRsp.Status);
+
+            (int credCount, CredentialUserInfo userInfo) = credRsp.GetData();
+            Assert.True(credCount != 0);
+
+            string origDisplayName = userInfo.User.DisplayName??"";
+
+            var newInfo = new UserEntity(userInfo.User.Id)
+            {
+                Name = userInfo.User.Name,
+                DisplayName = origDisplayName + " Updated",
+            };
+
+            var updateCmd = new UpdateUserInfoCommand(userInfo.CredentialId, newInfo, pinToken, protocol);
+            Fido2Response updateRsp = Connection.SendCommand(updateCmd);
+            Assert.Equal(ResponseStatus.Success, updateRsp.Status);
+
+            credCmd = new EnumerateCredentialsBeginCommand(firstRp, pinToken, protocol)
+            {
+                IsPreview = true
+            };
             credRsp = Connection.SendCommand(credCmd);
             Assert.Equal(ResponseStatus.Success, credRsp.Status);
 

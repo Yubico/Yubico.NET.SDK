@@ -58,6 +58,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     {
         // Command constants
         private const byte CmdAuthenticatorCredMgmt = 0x0A;
+        private const byte CmdCredentialMgmtPreview = 0x41;
 
         private const int TagSubCommand = 1;
         private const int TagParams = 2;
@@ -205,15 +206,50 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// Creates a well-formed CommandApdu to send to the YubiKey.
         /// </summary>
         /// <remarks>
+        /// This version of the CreateCommandApdu method will build the APDU for
+        /// the authenticatorCredentialManagement command. That is, it is
+        /// equivalent to calling <c>CreateCommandApdu(false)</c>.
+        /// <para>
         /// This method will first perform validation on all of the parameters and data provided
         /// to it. The CommandAPDU it creates should contain all of the data payload for the
         /// command, even if it exceeds 65,535 bytes as specified by the ISO 7816-4 specification.
         /// The APDU will be properly chained by the device connection prior to being sent to the
         /// YubiKey, and the responses will collapsed into a single result.
+        /// </para>
         /// </remarks>
         /// <returns>A valid CommandApdu that is ready to be sent to the YubiKey, or passed along
         /// to additional encoders for further processing.</returns>
-        public CommandApdu CreateCommandApdu()
+        public CommandApdu CreateCommandApdu() => CreateCommandApdu(false);
+
+        /// <summary>
+        /// Creates a well-formed CommandApdu to send to the YubiKey.
+        /// </summary>
+        /// <remarks>
+        /// This version of the CreateCommandApdu method contains an arg
+        /// indicating whether it should build an APDU for the
+        /// CredentialMgmtPreview command (<c>true</c>) or for the
+        /// authenticatorCredentialManagement command (<c>false</c>).
+        /// <para>
+        /// The authenticatorCredentialManagement command was introduced in
+        /// FIDO2.1. Hence, YubiKeys that do not support 2.1 will not have this
+        /// feature. However, there was a version "2_1_PRE" which contained the
+        /// "CredentialMgmtPreview" command. Each "credMgmt" command has a
+        /// corresponding operation in this preview command.
+        /// </para>
+        /// <para>
+        /// If the YubiKey does not support "credMgmt" but does support
+        /// "CredentialMgmtPreview", then pass <c>true</c> as the isPreview arg.
+        /// Otherwise, either pass <c>false</c> to this method or call the
+        /// <c>CreateCommandApdu</c> method that takse no argument.
+        /// </para>
+        /// </remarks>
+        /// <param name="isPreview">
+        /// Indicates whether this command should use the CredentialMgmtPreview
+        /// command (<c>true</c>) or authenticatorCredentialManagement
+        /// (<c>false</c>). This is an optional arg, and if not given the default
+        /// will be <c>false</c>.
+        /// </param>
+        public CommandApdu CreateCommandApdu(bool isPreview)
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
 
@@ -232,7 +268,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 throw new Ctap2DataException(ExceptionMessages.CborLengthMismatch);
             }
 
-            data[0] = CmdAuthenticatorCredMgmt;
+            data[0] = isPreview ? CmdCredentialMgmtPreview : CmdAuthenticatorCredMgmt;
 
             return new CommandApdu()
             {

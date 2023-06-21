@@ -84,10 +84,15 @@ namespace Yubico.YubiKey.Fido2
         {
             _log.LogInformation("Get credential metadata.");
 
+            bool isPreview = CredMgmtGetIsPreview();
+
             ReadOnlyMemory<byte> currentToken = GetAuthToken(
                 false, PinUvAuthTokenPermissions.CredentialManagement, null);
 
-            var cmd = new GetCredentialMetadataCommand(currentToken, AuthProtocol);
+            var cmd = new GetCredentialMetadataCommand(currentToken, AuthProtocol)
+            {
+                IsPreview = isPreview
+            };
             GetCredentialMetadataResponse rsp = Connection.SendCommand(cmd);
 
             // If the error is PinAuthInvalid, try again.
@@ -116,7 +121,10 @@ namespace Yubico.YubiKey.Fido2
                 try
                 {
                     currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
-                    cmd = new GetCredentialMetadataCommand(currentToken, AuthProtocol);
+                    cmd = new GetCredentialMetadataCommand(currentToken, AuthProtocol)
+                    {
+                        IsPreview = isPreview
+                    };
                     rsp = Connection.SendCommand(cmd);
                 }
                 finally
@@ -170,10 +178,15 @@ namespace Yubico.YubiKey.Fido2
         {
             _log.LogInformation("Enumerate relying parties.");
 
+            bool isPreview = CredMgmtGetIsPreview();
+
             ReadOnlyMemory<byte> currentToken = GetAuthToken(
                 false, PinUvAuthTokenPermissions.CredentialManagement, null);
 
-            var cmd = new EnumerateRpsBeginCommand(currentToken, AuthProtocol);
+            var cmd = new EnumerateRpsBeginCommand(currentToken, AuthProtocol)
+            {
+                IsPreview = isPreview
+            };
             EnumerateRpsBeginResponse rsp = Connection.SendCommand(cmd);
 
             // If the error is PinAuthInvalid, try again.
@@ -203,7 +216,10 @@ namespace Yubico.YubiKey.Fido2
                 try
                 {
                     currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
-                    cmd = new EnumerateRpsBeginCommand(currentToken, AuthProtocol);
+                    cmd = new EnumerateRpsBeginCommand(currentToken, AuthProtocol)
+                    {
+                        IsPreview = isPreview
+                    };
                     rsp = Connection.SendCommand(cmd);
                 }
                 finally
@@ -231,7 +247,10 @@ namespace Yubico.YubiKey.Fido2
 
             // Get the rest of the RPs. The EnumerateRpsGetNextCommand does not
             // need the AuthToken.
-            var nextCmd = new EnumerateRpsGetNextCommand();
+            var nextCmd = new EnumerateRpsGetNextCommand()
+            {
+                IsPreview = isPreview
+            };
             for (int index = 1; index < rpCount; index++)
             {
                 EnumerateRpsGetNextResponse nextRsp = Connection.SendCommand(nextCmd);
@@ -290,6 +309,8 @@ namespace Yubico.YubiKey.Fido2
                 throw new ArgumentNullException(nameof(relyingParty));
             }
 
+            bool isPreview = CredMgmtGetIsPreview();
+
             _log.LogInformation("Enumerate credentials for relying party: " + relyingParty.Id + ".");
 
             ReadOnlyMemory<byte> currentToken = GetAuthToken(
@@ -300,7 +321,10 @@ namespace Yubico.YubiKey.Fido2
             byte[] utf = Encoding.UTF8.GetBytes(relyingParty.Id);
             byte[] digest = digester.ComputeHash(utf);
 
-            var cmd = new EnumerateCredentialsBeginCommand(relyingParty, currentToken, AuthProtocol);
+            var cmd = new EnumerateCredentialsBeginCommand(relyingParty, currentToken, AuthProtocol)
+            {
+                IsPreview = isPreview
+            };
             EnumerateCredentialsBeginResponse rsp = Connection.SendCommand(cmd);
 
             // If the error is PinAuthInvalid, try again.
@@ -322,7 +346,10 @@ namespace Yubico.YubiKey.Fido2
                     AuthTokenRelyingPartyId = relyingParty.Id;
                 }
                 currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
-                cmd = new EnumerateCredentialsBeginCommand(relyingParty, currentToken, AuthProtocol);
+                cmd = new EnumerateCredentialsBeginCommand(relyingParty, currentToken, AuthProtocol)
+                {
+                    IsPreview = isPreview
+                };
                 rsp = Connection.SendCommand(cmd);
             }
 
@@ -344,7 +371,10 @@ namespace Yubico.YubiKey.Fido2
 
             // Get the rest of the credentials. The
             // EnumerateCredentialsGetNextCommand does not need the AuthToken.
-            var nextCmd = new EnumerateCredentialsGetNextCommand();
+            var nextCmd = new EnumerateCredentialsGetNextCommand()
+            {
+                IsPreview = isPreview
+            };
             for (int index = 1; index < credCount; index++)
             {
                 EnumerateCredentialsGetNextResponse nextRsp = Connection.SendCommand(nextCmd);
@@ -387,10 +417,15 @@ namespace Yubico.YubiKey.Fido2
         {
             _log.LogInformation("Delete credential.");
 
+            bool isPreview = CredMgmtGetIsPreview();
+
             ReadOnlyMemory<byte> currentToken = GetAuthToken(
                 false, PinUvAuthTokenPermissions.CredentialManagement, null);
 
-            var cmd = new DeleteCredentialCommand(credentialId, currentToken, AuthProtocol);
+            var cmd = new DeleteCredentialCommand(credentialId, currentToken, AuthProtocol)
+            {
+                IsPreview = isPreview
+            };
             Fido2Response rsp = Connection.SendCommand(cmd);
 
             // If the error is PinAuthInvalid, try again.
@@ -399,7 +434,10 @@ namespace Yubico.YubiKey.Fido2
             if (rsp.CtapStatus == CtapStatus.PinAuthInvalid)
             {
                 currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
-                cmd = new DeleteCredentialCommand(credentialId, currentToken, AuthProtocol);
+                cmd = new DeleteCredentialCommand(credentialId, currentToken, AuthProtocol)
+                {
+                    IsPreview = isPreview
+                };
                 rsp = Connection.SendCommand(cmd);
             }
 
@@ -487,6 +525,27 @@ namespace Yubico.YubiKey.Fido2
 
             // If the response is not Success, throw an exception.
             throw new Fido2Exception(rsp.StatusMessage);
+        }
+
+        // Determine if the YubiKey supports "credMgmt or "CredentialMgmtPreview".
+        // If it supports "credMgmt", then return false.
+        // If it supports only "CredentialMgmtPreview", return true.
+        // If it supports neither, throw an exception.
+        private bool CredMgmtGetIsPreview()
+        {
+            OptionValue cmValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.credMgmt);
+            if (cmValue == OptionValue.True)
+            {
+                return false;
+            }
+
+            cmValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.credentialMgmtPreview);
+            if (cmValue == OptionValue.True)
+            {
+                return true;
+            }
+
+            throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
         }
     }
 }

@@ -32,15 +32,10 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// not delete that data.
     /// </para>
     /// </remarks>
-    public class DeleteCredentialCommand : IYubiKeyCommand<Fido2Response>
+    public class DeleteCredentialCommand : CredentialMgmtSubCommand, IYubiKeyCommand<Fido2Response>
     {
         private const int SubCmdDeleteCredential = 0x06;
         private const int KeyCredentialId = 2;
-
-        private readonly CredentialManagementCommand _command;
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -66,13 +61,10 @@ namespace Yubico.YubiKey.Fido2.Commands
             CredentialId credentialId,
             ReadOnlyMemory<byte> pinUvAuthToken,
             PinUvAuthProtocolBase authProtocol)
+            : base(new CredentialManagementCommand(
+            SubCmdDeleteCredential, EncodeParams(credentialId), pinUvAuthToken, authProtocol))
         {
-            _command = new CredentialManagementCommand(
-                SubCmdDeleteCredential, EncodeParams(credentialId), pinUvAuthToken, authProtocol);
         }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
         public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) =>

@@ -40,25 +40,17 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// successfully after that "Begin" command has successfully completed.
     /// </para>
     /// </remarks>
-    public class EnumerateRpsGetNextCommand : IYubiKeyCommand<EnumerateRpsGetNextResponse>
+    public class EnumerateRpsGetNextCommand : CredentialMgmtSubCommand, IYubiKeyCommand<EnumerateRpsGetNextResponse>
     {
         private const int SubCmdGetEnumerateRpsGetNext = 0x03;
-
-        private readonly CredentialManagementCommand _command;
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
 
         /// <summary>
         /// Constructs a new instance of <see cref="EnumerateRpsGetNextCommand"/>.
         /// </summary>
         public EnumerateRpsGetNextCommand()
+            : base(new CredentialManagementCommand(SubCmdGetEnumerateRpsGetNext))
         {
-            _command = new CredentialManagementCommand(SubCmdGetEnumerateRpsGetNext);
         }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
         public EnumerateRpsGetNextResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

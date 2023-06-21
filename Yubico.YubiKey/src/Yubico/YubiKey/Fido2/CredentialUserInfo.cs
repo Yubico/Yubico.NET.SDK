@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.Fido2
         /// The credential protection policy. See section 12.1.1 of the FIDO2
         /// standard for a description of the meanings of the number returned.
         /// </summary>
-        public int CredProtectPolicy { get; private set; }
+        public CredProtectPolicy CredProtectPolicy { get; private set; }
 
         /// <summary>
         /// The large blob key for a credential. If this property is null, either
@@ -91,7 +91,7 @@ namespace Yubico.YubiKey.Fido2
             User = user;
             CredentialId = credentialId;
             CredentialPublicKey = credentialPublicKey;
-            CredProtectPolicy = credProtectPolicy;
+            CredProtectPolicy = (CredProtectPolicy)credProtectPolicy;
             LargeBlobKey = largeBlobKey;
         }
     }

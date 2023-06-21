@@ -32,6 +32,13 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// copying any information from the previous object you want to retain, and
     /// setting any new information. Then call this command with the new object.
     /// </para>
+    /// <para>
+    /// Note that this feature is available only to YubiKeys that support
+    /// "credMgmt". It is not available to those that support only
+    /// "CredentialMgmtPreview". It is not a subclass of
+    /// <c>CredentialMgmtSubCommand</c> and hence does not possess the property
+    /// <c>IsPreview</c>.
+    /// </para>
     /// </remarks>
     public class UpdateUserInfoCommand : IYubiKeyCommand<Fido2Response>
     {

@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     public class CredMetadataCommandTests : SimpleIntegrationTestConnection
     {
         public CredMetadataCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
         }
 
@@ -44,6 +44,34 @@ namespace Yubico.YubiKey.Fido2.Commands
             ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
 
             var cmd = new GetCredentialMetadataCommand(pinToken, protocol);
+            GetCredentialMetadataResponse rsp = Connection.SendCommand(cmd);
+            Assert.Equal(ResponseStatus.Success, rsp.Status);
+
+            (int credCount, int slotCount) = rsp.GetData();
+            Assert.True(credCount != 26);
+            Assert.True(slotCount != 26);
+        }
+
+        [Fact]
+        public void GetMetadataCommand_Preview_Succeeds()
+        {
+            byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+
+            var protocol = new PinUvAuthProtocolTwo();
+            var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
+            GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
+            Assert.Equal(ResponseStatus.Success, getKeyRsp.Status);
+
+            protocol.Encapsulate(getKeyRsp.GetData());
+            var getTokenCmd = new GetPinTokenCommand(protocol, pin);
+            GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
+            Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
+            ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
+
+            var cmd = new GetCredentialMetadataCommand(pinToken, protocol)
+            {
+                IsPreview = true
+            };
             GetCredentialMetadataResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 

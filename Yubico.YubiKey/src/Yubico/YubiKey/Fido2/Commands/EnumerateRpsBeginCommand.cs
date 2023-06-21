@@ -39,14 +39,9 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <c>response.GetData()</c> method will result in an exception.
     /// </para>
     /// </remarks>
-    public class EnumerateRpsBeginCommand : IYubiKeyCommand<EnumerateRpsBeginResponse>
+    public class EnumerateRpsBeginCommand : CredentialMgmtSubCommand, IYubiKeyCommand<EnumerateRpsBeginResponse>
     {
         private const int SubCmdEnumerateRpsBegin = 0x02;
-
-        private readonly CredentialManagementCommand _command;
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -67,12 +62,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </param>
         public EnumerateRpsBeginCommand(
             ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
+            : base(new CredentialManagementCommand(SubCmdEnumerateRpsBegin, null, pinUvAuthToken, authProtocol))
         {
-            _command = new CredentialManagementCommand(SubCmdEnumerateRpsBegin, null, pinUvAuthToken, authProtocol);
         }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
         public EnumerateRpsBeginResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

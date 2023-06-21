@@ -43,26 +43,18 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// completed.
     /// </para>
     /// </remarks>
-    public class EnumerateCredentialsGetNextCommand : IYubiKeyCommand<EnumerateCredentialsGetNextResponse>
+    public class EnumerateCredentialsGetNextCommand : CredentialMgmtSubCommand, IYubiKeyCommand<EnumerateCredentialsGetNextResponse>
     {
         private const int SubCmdGetEnumerateCredsGetNext = 0x05;
-
-        private readonly CredentialManagementCommand _command;
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
 
         /// <summary>
         /// Constructs a new instance of
         /// <see cref="EnumerateCredentialsGetNextCommand"/>.
         /// </summary>
         public EnumerateCredentialsGetNextCommand()
+            : base(new CredentialManagementCommand(SubCmdGetEnumerateCredsGetNext))
         {
-            _command = new CredentialManagementCommand(SubCmdGetEnumerateCredsGetNext);
         }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
         public EnumerateCredentialsGetNextResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

@@ -30,14 +30,9 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// standard).
     /// </para>
     /// </remarks>
-    public class GetCredentialMetadataCommand : IYubiKeyCommand<GetCredentialMetadataResponse>
+    public class GetCredentialMetadataCommand : CredentialMgmtSubCommand, IYubiKeyCommand<GetCredentialMetadataResponse>
     {
         private const int SubCmdGetMetadata = 0x01;
-
-        private readonly CredentialManagementCommand _command;
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -58,12 +53,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </param>
         public GetCredentialMetadataCommand(
             ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
+            : base(new CredentialManagementCommand(SubCmdGetMetadata, null, pinUvAuthToken, authProtocol))
         {
-            _command = new CredentialManagementCommand(SubCmdGetMetadata, null, pinUvAuthToken, authProtocol);
         }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
         public GetCredentialMetadataResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

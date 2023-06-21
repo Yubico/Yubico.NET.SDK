@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     public class GetInfoCommandTests : SimpleIntegrationTestConnection
     {
         public GetInfoCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
         }
 

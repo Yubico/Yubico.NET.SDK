@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     public class EnumRpsCommandTests : SimpleIntegrationTestConnection
     {
         public EnumRpsCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
         {
         }
 
@@ -55,6 +55,47 @@ namespace Yubico.YubiKey.Fido2.Commands
             for (int index = 1; index < rpCount; index++)
             {
                 var getNextCmd = new EnumerateRpsGetNextCommand();
+                EnumerateRpsGetNextResponse getNextRsp = Connection.SendCommand(getNextCmd);
+                Assert.Equal(ResponseStatus.Success, getNextRsp.Status);
+
+                RelyingParty nextRp = getNextRsp.GetData();
+                Assert.True(nextRp.RelyingPartyIdHash.Span[0] != 0);
+            }
+        }
+
+        [Fact]
+        public void EnumRpsCommand_Preview_Succeeds()
+        {
+            byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+
+            var protocol = new PinUvAuthProtocolTwo();
+            var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
+            GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
+            Assert.Equal(ResponseStatus.Success, getKeyRsp.Status);
+
+            protocol.Encapsulate(getKeyRsp.GetData());
+            var getTokenCmd = new GetPinTokenCommand(protocol, pin);
+            GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
+            Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
+            ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
+
+            var cmd = new EnumerateRpsBeginCommand(pinToken, protocol)
+            {
+                IsPreview = true
+            };
+            EnumerateRpsBeginResponse rsp = Connection.SendCommand(cmd);
+            Assert.Equal(ResponseStatus.Success, rsp.Status);
+
+            (int rpCount, RelyingParty rpZero) = rsp.GetData();
+            Assert.NotEqual(26, rpCount);
+            Assert.True(rpZero.RelyingPartyIdHash.Span[0] != 0);
+
+            for (int index = 1; index < rpCount; index++)
+            {
+                var getNextCmd = new EnumerateRpsGetNextCommand()
+                {
+                    IsPreview = true
+                };
                 EnumerateRpsGetNextResponse getNextRsp = Connection.SendCommand(getNextCmd);
                 Assert.Equal(ResponseStatus.Success, getNextRsp.Status);
 

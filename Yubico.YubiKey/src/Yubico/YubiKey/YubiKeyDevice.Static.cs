@@ -70,6 +70,9 @@ namespace Yubico.YubiKey
         /// </exception>
         public static IEnumerable<IYubiKeyDevice> FindByTransport(Transport transport = Transport.All)
         {
+            Logger log = Log.GetLogger();
+
+            log.LogInformation("FindByTransport {Transport}", transport);
             if (transport == Transport.None)
             {
                 throw new ArgumentException(ExceptionMessages.InvalidConnectionTypeNone, nameof(transport));

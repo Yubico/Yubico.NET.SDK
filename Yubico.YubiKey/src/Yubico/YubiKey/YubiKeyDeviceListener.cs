@@ -210,6 +210,7 @@ namespace Yubico.YubiKey
                 OnDeviceArrived(new YubiKeyDeviceEventArgs(addedKey));
             }
 
+            _log.LogInformation("Exiting write-lock.");
             RwLock.ExitWriteLock();
         }
 

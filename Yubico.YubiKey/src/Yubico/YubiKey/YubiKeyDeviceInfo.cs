@@ -16,6 +16,7 @@ using System;
 using System.Buffers.Binary;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey
@@ -128,12 +129,15 @@ namespace Yubico.YubiKey
             ReadOnlyMemory<byte> responseApduData,
             [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo deviceInfo)
         {
+            Logger log = Log.GetLogger();
+
             // Certain transports (such as OTP keyboard) may return a buffer that is larger than the
             // overall TLV size. We want to make sure we're only parsing over real TLV data here, so
             // check the first byte to get the overall TLV length and slice accordingly.
 
             if (responseApduData.IsEmpty)
             {
+                log.LogWarning("ResponseAPDU data was empty!");
                 deviceInfo = null;
                 return false;
             }
@@ -142,6 +146,7 @@ namespace Yubico.YubiKey
 
             if (tlvDataLength == 0 || 1 + tlvDataLength > responseApduData.Length)
             {
+                log.LogWarning("TLV Data length was out of expected ranges. {Length}", tlvDataLength);
                 deviceInfo = null;
                 return false;
             }
@@ -159,15 +164,18 @@ namespace Yubico.YubiKey
                     case UsbPrePersCapabilitiesTag:
                         ReadOnlySpan<byte> usbValue = tlvReader.ReadValue(UsbPrePersCapabilitiesTag).Span;
                         deviceInfo.AvailableUsbCapabilities = GetYubiKeyCapabilities(usbValue);
+                        log.SensitiveLogInformation("Available capabilities (USB): {Capabilities}", deviceInfo.AvailableUsbCapabilities);
                         break;
 
                     case SerialNumberTag:
                         deviceInfo.SerialNumber = tlvReader.ReadInt32(SerialNumberTag, true);
+                        log.SensitiveLogInformation("SerialNumber: {SerialNumber}", deviceInfo.SerialNumber);
                         break;
 
                     case UsbEnabledCapabilitiesTag:
                         ReadOnlySpan<byte> usbEnabledValue = tlvReader.ReadValue(UsbEnabledCapabilitiesTag).Span;
                         deviceInfo.EnabledUsbCapabilities = GetYubiKeyCapabilities(usbEnabledValue);
+                        log.SensitiveLogInformation("Enabled capabilities (USB): {Capabilities}", deviceInfo.EnabledUsbCapabilities);
                         break;
 
                     case FormFactorTag:
@@ -175,6 +183,7 @@ namespace Yubico.YubiKey
                         deviceInfo.FormFactor = (FormFactor)(formFactorValue & FormFactorMask);
                         fipsSeriesFlag = (formFactorValue & FipsMask) == FipsMask;
                         skySeriesFlag = (formFactorValue & SkyMask) == SkyMask;
+                        log.SensitiveLogInformation("FormFactor {FormFactor}, FIPS {Fips}, SKY {Sky}", deviceInfo.FormFactor, fipsSeriesFlag, skySeriesFlag);
                         break;
 
                     case FirmwareVersionTag:
@@ -185,34 +194,41 @@ namespace Yubico.YubiKey
                             Minor = firmwareValue[1],
                             Patch = firmwareValue[2]
                         };
+                        log.SensitiveLogInformation("FirmwareVersion: {FirmwareVersion}", deviceInfo.FirmwareVersion.ToString());
                         break;
 
                     case AutoEjectTimeoutTag:
                         deviceInfo.AutoEjectTimeout = tlvReader.ReadUInt16(AutoEjectTimeoutTag);
+                        log.SensitiveLogInformation("AutoEjectTimeout: {AutoEjectTimeout}", deviceInfo.AutoEjectTimeout);
                         break;
 
                     case ChallengeResponseTimeoutTag:
                         deviceInfo.ChallengeResponseTimeout =
                             tlvReader.ReadByte(ChallengeResponseTimeoutTag);
+                        log.SensitiveLogInformation("ChallengeResponseTimeout: {ChallengeResponseTimeout}", deviceInfo.ChallengeResponseTimeout);
                         break;
 
                     case DeviceFlagsTag:
                         deviceInfo.DeviceFlags = (DeviceFlags)tlvReader.ReadByte(DeviceFlagsTag);
+                        log.SensitiveLogInformation("DeviceFlags: {DeviceFlags}", deviceInfo.DeviceFlags);
                         break;
 
                     case ConfigurationLockPresentTag:
                         deviceInfo.ConfigurationLocked =
                             tlvReader.ReadByte(ConfigurationLockPresentTag) == 1;
+                        log.SensitiveLogInformation("ConfigurationLocked: {ConfigurationLocked}", deviceInfo.ConfigurationLocked);
                         break;
 
                     case NfcPrePersCapabilitiesTag:
                         ReadOnlySpan<byte> nfcValue = tlvReader.ReadValue(NfcPrePersCapabilitiesTag).Span;
                         deviceInfo.AvailableNfcCapabilities = GetYubiKeyCapabilities(nfcValue);
+                        log.SensitiveLogInformation("AvailableNfcCapabilities: {AvailableNfcCapabilities}", deviceInfo.AvailableNfcCapabilities);
                         break;
 
                     case NfcEnabledCapabilitiesTag:
                         ReadOnlySpan<byte> nfcEnabledValue = tlvReader.ReadValue(NfcEnabledCapabilitiesTag).Span;
                         deviceInfo.EnabledNfcCapabilities = GetYubiKeyCapabilities(nfcEnabledValue);
+                        log.SensitiveLogInformation("EnabledNfcCapabilities: {EnabledNfcCapabilities}", deviceInfo.EnabledNfcCapabilities);
                         break;
 
                     case IapDetectionTag:
@@ -235,6 +251,7 @@ namespace Yubico.YubiKey
                             Minor = fpChipVersion[1],
                             Patch = fpChipVersion[2]
                         };
+                        log.SensitiveLogInformation("TemplateStorageVersion: {TemplateStorageVersion}", deviceInfo.TemplateStorageVersion.ToString());
                         break;
 
                     case ImageProcessorVersionTag:
@@ -245,6 +262,7 @@ namespace Yubico.YubiKey
                             Minor = ipChipVersion[1],
                             Patch = ipChipVersion[2]
                         };
+                        log.SensitiveLogInformation("ImageProcessorVersion: {ImageProcessorVersion}", deviceInfo.ImageProcessorVersion.ToString());
                         break;
 
                     default:

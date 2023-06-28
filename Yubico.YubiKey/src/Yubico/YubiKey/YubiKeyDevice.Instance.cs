@@ -281,11 +281,14 @@ namespace Yubico.YubiKey
             [MaybeNullWhen(returnValue: false)]
             out IYubiKeyConnection connection)
         {
+            _log.LogInformation("YubiKey {Serial} connecting to {Application} application.", SerialNumber, application);
+
             // OTP application should prefer the HIDKeyboard transport, but fall back on smart card
             // if unavailable.
             if (application == YubiKeyApplication.Otp && HasHidKeyboard)
             {
                 WaitForReclaimTimeout(Transport.HidKeyboard);
+                _log.LogInformation("Connecting via the Keyboard interface.");
                 connection = new KeyboardConnection(_hidKeyboardDevice!);
                 return true;
             }
@@ -296,17 +299,20 @@ namespace Yubico.YubiKey
                 && HasHidFido)
             {
                 WaitForReclaimTimeout(Transport.HidFido);
+                _log.LogInformation("Connecting via the FIDO interface.");
                 connection = new FidoConnection(_hidFidoDevice!);
                 return true;
             }
 
             if (!HasSmartCard || _smartCardDevice is null)
             {
+                _log.LogInformation("No smart card interface present. Unable to establish connection to YubiKey.");
                 connection = null;
                 return false;
             }
 
             WaitForReclaimTimeout(Transport.SmartCard);
+            _log.LogInformation("Connecting via the SmartCard interface.");
             connection = new CcidConnection(_smartCardDevice, application);
 
             return true;
@@ -318,13 +324,17 @@ namespace Yubico.YubiKey
             [MaybeNullWhen(returnValue: false)]
             out IYubiKeyConnection connection)
         {
+            _log.LogInformation("YubiKey {Serial} connecting to {Application} application.", SerialNumber, applicationId);
+
             if (!HasSmartCard || _smartCardDevice is null)
             {
+                _log.LogInformation("No smart card interface present. Unable to establish connection to YubiKey.");
                 connection = null;
                 return false;
             }
 
             WaitForReclaimTimeout(Transport.SmartCard);
+            _log.LogInformation("Connecting via the SmartCard interface.");
             connection = new CcidConnection(_smartCardDevice, applicationId);
 
             return true;

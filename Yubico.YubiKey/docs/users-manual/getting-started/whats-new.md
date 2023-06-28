@@ -16,6 +16,61 @@ limitations under the License. -->
 
 Here you can find all of the updates and release notes for published versions of the SDK.
 
+## 1.8.x Releases
+
+### 1.8.0
+
+Release date: June 30th, 2023
+
+Features:
+
+- **FIDO2 Bio Enroll**. This allows enrolling and enumerating
+  fingerprint templates. In addition, the SDK implemented fingerprint
+  verification for FIDO2 and incorporated it into the automatic
+  verification process.
+
+- **FIDO2 Authenticator Config Operations**. This is a series of new
+  methods that allow the programmer to perform some esoteric FIDO2
+  configuration operations, such as enabling enterprise attestation and
+  increasing the minimum PIN length.
+
+- **FIDO2 Update Credential Management to Support CredentialMgmtPreview**. 
+  Some older YubiKeys do not support the "credential management" feature
+  (enumerate credentials, delete credentials, and others), but do
+  support the "credential management preview" feature. This is the same
+  as "credential management" except that the preview version does not
+  include "Update User Info". The credential management commands and
+  Fido2Session methods now support "Preview", meaning calls to the
+  credential management methods (e.g. Fido2Session.EnumerateRelyingParties)
+  will work on older YubiKeys that support "CredentialMgmtPreview",
+  just as the newer YubiKeys.
+
+- **FIDO2 HMAC Secret Extension and CredProtect Extension**. These are
+  oft-used extensions, and the SDK now has methods to make using them
+  easier (e.g. MakeCredentialParameters.AddHmacExtension and
+  AuthenticatorData.GetHmacSecretExtension).
+
+- **FIDO2 Encoded Attestation** The full encoded attestation statement
+  is available when making a credential. This is useful if you are
+  implementing or interoperating with the WebAuthn data types. That is,
+  it is often easier to copy this field in its encoded form rather than
+  using the parsed properties.
+
+- **FIDO2 Update Sample Code**. The FIDO2 sample project now contains
+  examples that perform bio enroll, credential management,
+  authenticator config, HMAC secret, and credProtect operations.
+
+- **OTP Documentation Updates**. There are new articles and information
+  about slots (e.g. access codes, deleting), new articles on Hotp (what
+  it is and programming an Hotp credential), new articles on static
+  passwords (what it is and programming a slot to contain a static
+  password), and a new article on updating slots, including manual
+  update.
+
+Bug Fixes:
+
+- NFC response code in FIDO2 now handled properly.
+
 ## 1.7.x Releases
 
 ### 1.7.0

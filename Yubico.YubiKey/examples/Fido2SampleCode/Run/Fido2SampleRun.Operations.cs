@@ -67,6 +67,9 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 Fido2MainMenuItem.EnrollFingerprint => RunEnrollFingerprint(),
                 Fido2MainMenuItem.SetBioTemplateFriendlyName => RunSetBioTemplateFriendlyName(),
                 Fido2MainMenuItem.RemoveBioEnrollment => RunRemoveBioEnrollment(),
+                Fido2MainMenuItem.EnableEnterpriseAttestation => RunEnableEnterpriseAttestation(),
+                Fido2MainMenuItem.ToggleAlwaysUv => RunToggleAlwaysUv(),
+                Fido2MainMenuItem.SetPinConfig => RunSetPinConfig(),
                 Fido2MainMenuItem.Reset => RunReset(),
                 _ => RunUnimplementedOperation(),
             };
@@ -854,6 +857,192 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 _yubiKeyChosen,
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
                 templates[response - 1].TemplateId);
+        }
+
+        public bool RunEnableEnterpriseAttestation()
+        {
+            bool isEnabled = Fido2Protocol.RunEnableEnterpriseAttestation(
+                _yubiKeyChosen,
+                _keyCollector.Fido2SampleKeyCollectorDelegate);
+
+            if (isEnabled)
+            {
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "Enterprise Attestation is enabled.\n\n");
+            }
+            else
+            {
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "The selected YubiKey does not support AuthenticatorConfig operations.\n\n");
+            }
+
+            return true;
+        }
+
+        public bool RunToggleAlwaysUv()
+        {
+            bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out AuthenticatorInfo authenticatorInfo);
+            if (!isValid)
+            {
+                return false;
+            }
+
+            OptionValue optionValue = authenticatorInfo.GetOptionValue("alwaysUv");
+
+            string[] menuItems = new string[] {
+                "Yes",
+                "No",
+            };
+
+            int response;
+            switch (optionValue)
+            {
+                case OptionValue.True:
+                    SampleMenu.WriteMessage(
+                        MessageType.Title, 0,
+                        "The current status of always UV is True, toggling will set it to False.\n");
+                    response = _menuObject.RunMenu("Do you want to toggle alwaysUv to False?", menuItems);
+                    break;
+
+                case OptionValue.False:
+                    SampleMenu.WriteMessage(
+                        MessageType.Title, 0,
+                        "The current status of always UV is False, toggling will set it to True.\n");
+                    response = _menuObject.RunMenu("Do you want to toggle alwaysUv to True?", menuItems);
+                    break;
+
+                default:
+                    SampleMenu.WriteMessage(
+                        MessageType.Title, 0,
+                        "The selected YubiKey does not support AuthenticatorConfig operations.\n\n");
+
+                    return true;
+            }
+
+            if (response != 0)
+            {
+                return true;
+            }
+
+            isValid = Fido2Protocol.RunToggleAlwaysUv(
+                _yubiKeyChosen,
+                _keyCollector.Fido2SampleKeyCollectorDelegate,
+                out OptionValue newValue);
+
+            if (isValid)
+            {
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "The Option alwaysUv is now " + Enum.GetName<OptionValue>(newValue) + ".\n\n");
+            }
+
+            return isValid;
+        }
+
+        public bool RunSetPinConfig()
+        {
+            bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out AuthenticatorInfo authenticatorInfo);
+            if (!isValid)
+            {
+                return false;
+            }
+
+            OptionValue setMinPinValue = authenticatorInfo.GetOptionValue(AuthenticatorOptions.setMinPINLength);
+            if (setMinPinValue != OptionValue.True)
+            {
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "The selected YubiKey does not support AuthenticatorConfig operations.\n\n");
+
+                return true;
+            }
+
+            int minPinLength = 0;
+            var rpIdList = new List<string>();
+            bool forceChangePin = false;
+
+            SampleMenu.WriteMessage(
+                MessageType.Title, 0,
+                "This operation can\n  reset the minimum PIN length (to a greater length only), and/or\n" +
+                "  set the list of relying parties that are allowed to see the minimum PIN length, and/or\n" +
+                "  force a PIN change.\n");
+            int currentLen = authenticatorInfo.MinimumPinLength ?? AuthenticatorInfo.DefaultMinimumPinLength;
+
+            SampleMenu.WriteMessage(
+                MessageType.Title, 0,
+                "The current minimum PIN length is " + currentLen + ".\n");
+
+            string[] menuItems = new string[] {
+                "Yes",
+                "No",
+            };
+            int response = _menuObject.RunMenu("Do you want to change the minimum PIN length?", menuItems);
+            if (response == 0)
+            {
+                SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the new minimum PIN length");
+                minPinLength = SampleMenu.ReadResponse(out string _);
+            }
+
+            int rpsAddCount = authenticatorInfo.MaximumRpidsForSetMinPinLength ?? 0;
+            if (rpsAddCount == 0)
+            {
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "\nThis YubiKey does not allow creating a list of RP IDs\n" +
+                    "that are allowed to see the minimum PIN length.");
+            }
+            else
+            {
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "\nThis YubiKey allows creating a list of RP IDs\n" +
+                    "that are allowed to see the minimum PIN length.\n" +
+                    "The maximum number of RP IDs in the list is " + rpsAddCount + ".\n");
+                response = _menuObject.RunMenu("Do you want to create an RP ID list?", menuItems);
+                if (response == 0)
+                {
+                    for (int index = 0; index < rpsAddCount; index++)
+                    {
+                        SampleMenu.WriteMessage(
+                            MessageType.Title, 0,
+                            "Enter the relyingPartyId or simply Enter if there are no more\n" +
+                            " RP IDs for the list.");
+                        _ = SampleMenu.ReadResponse(out string relyingPartyId);
+                        if (string.IsNullOrWhiteSpace(relyingPartyId))
+                        {
+                            break;
+                        }
+                        rpIdList.Add(relyingPartyId);
+                    }
+                }
+            }
+
+            response = _menuObject.RunMenu("\nDo you want to force the PIN to be changed?", menuItems);
+            forceChangePin = response == 0;
+
+#nullable enable
+            int? newMinPinLength = null;
+            if (minPinLength != 0)
+            {
+                newMinPinLength = minPinLength;
+            }
+
+            isValid = Fido2Protocol.RunSetPinConfig(
+                _yubiKeyChosen,
+                _keyCollector.Fido2SampleKeyCollectorDelegate,
+                newMinPinLength,
+                rpIdList.Count == 0 ? null : rpIdList,
+                forceChangePin);
+#nullable restore
+
+            if (isValid)
+            {
+                SampleMenu.WriteMessage(MessageType.Title, 0, "\nSet PIN Config successful.\n");
+            }
+
+            return isValid;
         }
 
         // If the input arg reportTempatesOnly is true, report only the

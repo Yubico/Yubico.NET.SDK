@@ -55,7 +55,6 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 throw new ArgumentNullException(nameof(credBlobData));
             }
 
-            makeCredentialData = null;
             var relyingParty = new RelyingParty(relyingPartyId)
             {
                 Name = relyingPartyName,
@@ -401,5 +400,61 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 return fido2Session.TryRemoveBioTemplate(templateId);
             }
         }
+
+        public static bool RunEnableEnterpriseAttestation(
+            IYubiKeyDevice yubiKey,
+            Func<KeyEntryData, bool> KeyCollectorDelegate)
+        {
+            using (var fido2Session = new Fido2Session(yubiKey))
+            {
+                fido2Session.KeyCollector = KeyCollectorDelegate;
+
+                // This method will automatically perform any PIN or fingerprint
+                // verification needed.
+                return fido2Session.TryEnableEnterpriseAttestation();
+            }
+        }
+
+        public static bool RunToggleAlwaysUv(
+            IYubiKeyDevice yubiKey,
+            Func<KeyEntryData, bool> KeyCollectorDelegate,
+            out OptionValue newValue)
+        {
+            newValue = OptionValue.Unknown;
+
+            using (var fido2Session = new Fido2Session(yubiKey))
+            {
+                fido2Session.KeyCollector = KeyCollectorDelegate;
+
+                // This method will automatically perform any PIN or fingerprint
+                // verification needed.
+                bool isValid = fido2Session.TryToggleAlwaysUv();
+                if (isValid)
+                {
+                    newValue = fido2Session.AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.alwaysUv);
+                }
+
+                return isValid;
+            }
+        }
+
+#nullable enable
+        public static bool RunSetPinConfig(
+            IYubiKeyDevice yubiKey,
+            Func<KeyEntryData, bool> KeyCollectorDelegate,
+            int? newMinPinLength,
+            IReadOnlyList<string>? relyingPartyIds,
+            bool? forceChangePin)
+        {
+            using (var fido2Session = new Fido2Session(yubiKey))
+            {
+                fido2Session.KeyCollector = KeyCollectorDelegate;
+
+                // This method will automatically perform any PIN or fingerprint
+                // verification needed.
+                return fido2Session.TrySetPinConfig(newMinPinLength, relyingPartyIds, forceChangePin);
+            }
+        }
+#nullable restore
     }
 }

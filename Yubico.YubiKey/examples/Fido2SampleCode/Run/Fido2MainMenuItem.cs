@@ -41,8 +41,12 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         SetBioTemplateFriendlyName = 21,
         RemoveBioEnrollment = 22,
 
-        Reset = 23,
+        EnableEnterpriseAttestation = 23,
+        ToggleAlwaysUv = 24,
+        SetPinConfig = 25,
 
-        Exit = 24,
+        Reset = 26,
+
+        Exit = 27,
     }
 }

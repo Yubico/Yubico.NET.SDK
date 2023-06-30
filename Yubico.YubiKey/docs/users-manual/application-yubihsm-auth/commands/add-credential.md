@@ -92,7 +92,7 @@ Notated:
 75 10 ca fe b0 ba ca fe b0 ba ca fe b0 ba ca fe b0 ba       Encryption key
 76 10 13 37 f0 0d 13 37 f0 0d 13 37 f0 0d 13 37 f0 0d       MAC key
 73 10 a0 a1 a2 a3 b0 b1 b2 b3 c0 c1 c2 c3 d0 d1 d2 d3       Password
-74 01 00                                                    Touch required: false
+7a 01 00                                                    Touch required: false
 ```
 
 ## Response APDU

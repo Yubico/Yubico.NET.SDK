@@ -30,14 +30,14 @@ There are two distinct flavors of a challenge-response credential, based on the 
 
 When configuring the credential, use the appropriate method ([UseYubiOtp()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseYubiOtp) or [UseHmacSha1()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseHmacSha1)) to select the algorithm you'd like to use.
 
-## Short Challenge Mode
+## Short challenge mode
 
-An HMAC-SHA1 challenge is normally 64 bytes. However, the YubiKey supports a short challenge mode where challenges are a variable length of less than 64 bytes. Because of the way the data is encoded, if a full 64-byte challenge is sent, the last byte will be truncated, which would change the result. Due to this truncation, it’s important to use the setting that will be expected by the consumer of the OTP code.
+An HMAC-SHA1 challenge is 64 bytes by default. The YubiKey also supports a short challenge mode (``UseSmallChallenge()``) where challenges can be configured to be less than 64 bytes. ``UseSmallChallenge()`` is included for compatibility with legacy systems whose implementations break data sets into multiple blocks, which often results in the last element being smaller than 64 bytes (which would change the result). Due to this truncation, it’s important to use the setting that will be expected by the consumer of the OTP code.
 
 > [!NOTE]
 > You can still use challenges smaller than 64 bytes without setting the short challenge mode by simply padding the end of the challenge with zeros. Again, it’s important that both sides of the operation agree on the length of the challenge.
 
-## Require Touch
+## Require touch
 
 Both the Yubico OTP and HMAC-SHA1 challenge-response credentials can include a setting that requires the user to touch the YubiKey before the cryptographic operation can proceed. Requiring touch improves security by ensuring that a user performs a physical operation.
 

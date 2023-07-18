@@ -52,6 +52,7 @@ namespace Yubico.YubiKey.Fido2
         private const string KeyCredBlob = "credBlob";
         private const string KeyHmacSecret = "hmac-secret";
         private const string KeyCredProtect = "credProtect";
+        private const string KeyMinPinLength = "minPinLength";
 
         private readonly List<Tuple<string, CoseAlgorithmIdentifier>> _algorithms = new List<Tuple<string, CoseAlgorithmIdentifier>>();
         private List<CredentialId>? _excludeList;
@@ -349,6 +350,61 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void AddExtension(string extensionKey, byte[] encodedValue) => _extensions =
             ParameterHelpers.AddKeyValue<byte[]>(extensionKey, encodedValue, _extensions);
+
+        /// <summary>
+        /// Specify that the YubiKey should return the minimum PIN length with
+        /// the credential.
+        /// </summary>
+        /// <remarks>
+        /// Because this extension is used more often, a dedicated method is
+        /// provided as a convenience. Note that the minimum PIN length is
+        /// visible to only those RPs who have permission. See the documentation
+        /// for <see cref="Fido2Session.TrySetPinConfig"/> and the
+        /// <xref href="Fido2MinPinLength">User's Manual entry</xref>
+        /// on the minimum PIN length.
+        /// <para>
+        /// When the YubiKey makes the credential, it will be sent to the relying
+        /// party. At that point, the relying party can reject it. One reason an
+        /// RP might reject a credential is if the minimum PIN length is too
+        /// short.
+        /// </para>
+        /// <para>
+        /// If the RP for which the credential is being built is not allowed to
+        /// see the minimum PIN length, the YubiKey will simply not return the
+        /// minimum PIN length. This is not an error. The credential will be
+        /// made, but it will not contain the minimum PIN length.
+        /// </para>
+        /// <para>
+        /// If the minimum PIN length is returned with the credential, it will be
+        /// in the <see cref="MakeCredentialData.AuthenticatorData"/> and can be
+        /// retrieved using
+        /// <see cref="AuthenticatorData.GetMinPinLengthExtension"/>
+        /// </para>
+        /// <para>
+        /// The caller supplies the <c>AuthenticatorInfo</c> for the YubiKey,
+        /// obtained by calling the <see cref="Commands.GetInfoCommand"/> or
+        /// providing the <see cref="Fido2Session.AuthenticatorInfo"/> property.
+        /// This method will determine from the <c>authenticatorInfo</c> whether
+        /// the YubiKey supports this extension.
+        /// </para>
+        /// </remarks>
+        /// <param name="authenticatorInfo">
+        /// The FIDO2 <c>AuthenticatorInfo</c> for the YubiKey being used.
+        /// </param>
+        public void AddMinPinLengthExtension(AuthenticatorInfo authenticatorInfo)
+        {
+            if (authenticatorInfo is null)
+            {
+                throw new ArgumentNullException(nameof(authenticatorInfo));
+            }
+
+            if (!authenticatorInfo.Extensions.Contains<string>(KeyMinPinLength))
+            {
+                throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+            }
+
+            AddExtension(KeyMinPinLength, new byte[] { 0xF5 });
+        }
 
         /// <summary>
         /// Add the "credBlob" extension. Note that the credBlob extension is

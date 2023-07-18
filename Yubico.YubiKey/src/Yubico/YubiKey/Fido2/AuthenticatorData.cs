@@ -47,6 +47,7 @@ namespace Yubico.YubiKey.Fido2
         private const string KeyCredBlob = "credBlob";
         private const string KeyHmacSecret = "hmac-secret";
         private const string KeyCredProtect = "credProtect";
+        private const string KeyMinPinLength = "minPinLength";
 
         /// <summary>
         /// The encoded authenticator data is used to verify the attestation
@@ -237,6 +238,36 @@ namespace Yubico.YubiKey.Fido2
             }
 
             return Array.Empty<byte>();
+        }
+
+        /// <summary>
+        /// Get the value of the "minPinLength" extension. This returns the decoded
+        /// value.
+        /// </summary>
+        /// <remarks>
+        /// Because this extension is used more often, a dedicated method is
+        /// provided as a convenience. There is no need for the caller to
+        /// CBOR-decode the value for the key "minPinLength".
+        /// <para>
+        /// If there is no "minPinLength" extension, this method will return null.
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// An int that is the decoded "minPinLength" extension.
+        /// </returns>
+        public int? GetMinPinLengthExtension()
+        {
+            if (!(Extensions is null))
+            {
+                if (Extensions.ContainsKey(KeyMinPinLength))
+                {
+                    byte[] encodedValue = Extensions[KeyMinPinLength];
+                    var cborReader = new CborReader(encodedValue, CborConformanceMode.Ctap2Canonical);
+                    return cborReader.ReadInt32();
+                }
+            }
+
+            return null;
         }
 
         /// <summary>

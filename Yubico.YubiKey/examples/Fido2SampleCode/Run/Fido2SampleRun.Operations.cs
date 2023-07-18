@@ -1444,7 +1444,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 string credId = BitConverter.ToString(id);
                 credId = credId.Replace("-", "", StringComparison.Ordinal);
                 SampleMenu.WriteMessage(MessageType.Title, 0, "        Credential ID:      " + credId);
-                SampleMenu.WriteMessage(MessageType.Title, 0, "        CredProtect Policy: " + GetCredProtectPolicy(userInfo.CredProtectPolicy));
+                SampleMenu.WriteMessage(MessageType.Title, 0, "        CredProtect Policy: " + userInfo.CredProtectPolicy.ToString());
             }
             if (largeBlobReport)
             {
@@ -1453,14 +1453,6 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 SampleMenu.WriteMessage(MessageType.Title, 0, "-----------");
             }
         }
-
-        private static string GetCredProtectPolicy(int credProtectPolicy) => credProtectPolicy switch
-        {
-            1 => "userVerificationOptional",
-            2 => "userVerificationOptionalWithCredentialIDList",
-            3 => "userVerificationRequired",
-            _ => "unknown",
-        };
 
         // Return the CredentialUserInfo for the credential of interest in the
         // credentialData List.

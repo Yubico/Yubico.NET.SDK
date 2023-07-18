@@ -89,7 +89,7 @@ namespace Yubico.YubiKey.Fido2
 
                 bool expectedResult = optionValue == OptionValue.True;
 
-                bool isSet = fido2Session.TrySetPinConfig(7, null, null);
+                bool isSet = fido2Session.TrySetPinConfig(6, null, null);
                 Assert.Equal(expectedResult, isSet);
                 if (isSet)
                 {

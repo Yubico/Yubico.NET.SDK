@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Otp.Operations
 
         public ConfigureYubicoOtpTests()
         {
-            _session = new HollowOtpSession(FirmwareVersion.Latest);
+            _session = new HollowOtpSession(FirmwareVersion.V5_4_3);
             _op = _session.ConfigureYubicoOtp(Slot.ShortPress);
         }
 

@@ -40,8 +40,6 @@ namespace Yubico.YubiKey
         internal static readonly FirmwareVersion V5_3_0 = new FirmwareVersion(5, 3, 0);
         internal static readonly FirmwareVersion V5_4_2 = new FirmwareVersion(5, 4, 2);
         internal static readonly FirmwareVersion V5_4_3 = new FirmwareVersion(5, 4, 3);
-        // Important: When you add a new version here, change "Latest".
-        internal static readonly FirmwareVersion Latest = V5_4_3;
         #endregion
 
         public byte Major { get; set; }

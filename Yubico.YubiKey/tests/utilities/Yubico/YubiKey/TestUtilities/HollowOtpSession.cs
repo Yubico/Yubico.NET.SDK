@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.TestUtilities
 {
     public sealed class HollowOtpSession : IOtpSession
     {
-        public HollowOtpSession() : this(FirmwareVersion.Latest) { }
+        public HollowOtpSession() : this(FirmwareVersion.V5_4_3) { }
 
         public HollowOtpSession(FirmwareVersion version)
             : this(new HollowYubiKeyDevice { FirmwareVersion = version }) { }

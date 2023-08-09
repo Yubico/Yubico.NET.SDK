@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.TestUtilities;
 using Xunit;
 
@@ -25,8 +26,13 @@ namespace Yubico.YubiKey.Piv
         public void SimpleGenerate(StandardTestDevice testDeviceType)
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+
+            if (testDevice is YubiKeyDevice ykDevice)
+            {
+                var staticKeys = new StaticKeys();
+                testDevice = ykDevice.WithScp03(staticKeys);
+            }
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -34,9 +40,9 @@ namespace Yubico.YubiKey.Piv
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                 PivPublicKey publicKey = pivSession.GenerateKeyPair(
-                    PivSlot.Authentication, PivAlgorithm.EccP256);
+                    PivSlot.Retired12, PivAlgorithm.Rsa2048);
 
-                Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
+                Assert.Equal(PivAlgorithm.Rsa2048, publicKey.Algorithm);
             }
         }
 

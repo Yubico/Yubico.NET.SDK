@@ -210,9 +210,14 @@ namespace Yubico.YubiKey.Scp03
                 throw new ArgumentNullException(nameof(response));
             }
 
+            // If the response is not Success, just return the response. The
+            // standard says, "No R-MAC shall be generated and no protection
+            // shall be applied to a response that includes an error status word:
+            // in this case only the status word shall be returned in the
+            // response."
             if (response.SW != SWConstants.Success)
             {
-                throw new SecureChannelException(ExceptionMessages.DecodedResponseStatusWordNotSuccess);
+                return response;
             }
 
             // ALWAYS check RMAC before decryption

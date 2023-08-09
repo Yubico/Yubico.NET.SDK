@@ -108,9 +108,9 @@ namespace Yubico.YubiKey
             _smartCardConnection = smartCardDevice.Connect();
 
             _apduPipeline = new SmartCardTransform(_smartCardConnection);
-            _apduPipeline = new Scp03ApduTransform(_apduPipeline, staticKeys);
             _apduPipeline = AddResponseChainingTransform(_apduPipeline);
             _apduPipeline = new CommandChainingTransform(_apduPipeline);
+            _apduPipeline = new Scp03ApduTransform(_apduPipeline, staticKeys);
 
             if (yubiKeyApplication == YubiKeyApplication.Fido2)
             {
@@ -137,9 +137,9 @@ namespace Yubico.YubiKey
             _smartCardConnection = smartCardDevice.Connect();
 
             _apduPipeline = new SmartCardTransform(_smartCardConnection);
-            _apduPipeline = new Scp03ApduTransform(_apduPipeline, staticKeys);
             _apduPipeline = AddResponseChainingTransform(_apduPipeline);
             _apduPipeline = new CommandChainingTransform(_apduPipeline);
+            _apduPipeline = new Scp03ApduTransform(_apduPipeline, staticKeys);
 
             if (applicationId.SequenceEqual(YubiKeyApplication.Fido2.GetIso7816ApplicationId()))
             {

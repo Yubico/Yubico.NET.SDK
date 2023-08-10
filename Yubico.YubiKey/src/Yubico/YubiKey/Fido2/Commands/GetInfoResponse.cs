@@ -45,7 +45,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
         /// <returns>
-        /// The data in the response APDU, presented as a <c>Fido2DeviceInfo</c> class.
+        /// The data in the response APDU, presented as an <c>AuthenticatorInfo</c> class.
         /// </returns>
         public AuthenticatorInfo GetData()
         {

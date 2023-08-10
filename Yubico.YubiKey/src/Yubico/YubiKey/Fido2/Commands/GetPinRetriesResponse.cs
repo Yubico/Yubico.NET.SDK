@@ -44,6 +44,13 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// The `powerCycleRequired` value returned can have three states: `true` if the YubiKey needs to be power-
         /// cycled (rebooted), `false` if it does not, and `null` if this information could not be determined.
         /// </remarks>
+        /// <returns>
+        /// An int/boolean pair. The int is the number of retries remaining, and
+        /// the boolean (if not null), indicates whether the YubiKey needs to be
+        /// power-cycled (removed and reinserted) in order to try verifying the
+        /// PIN again. If the boolean is null, then that is equivalent to
+        /// <c>false</c> (power-cycle not required).
+        /// </returns>
         public (int retriesRemaining, bool? powerCycleRequired) GetData()
         {
             ClientPinData data = _response.GetData();

@@ -51,6 +51,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// The token returned is encrypted using the shared secret from the
         /// protocol object used in the command.
         /// </remarks>
+        /// <returns>
+        /// The PinUvAuthToken.
+        /// </returns>
         public ReadOnlyMemory<byte> GetData()
         {
             ClientPinData data = _response.GetData();

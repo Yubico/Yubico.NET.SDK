@@ -41,6 +41,11 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc/>
+        /// <returns>
+        /// An int, specifying the modality. The standard defines the meaning of
+        /// each possible integer returned. Currently only one integer is
+        /// defined: the value "1" means fingerprint.
+        /// </returns>
         public int GetData()
         {
             BioEnrollmentData enrollData = _response.GetData();

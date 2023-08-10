@@ -38,6 +38,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
         }
 
+        /// <inheritdoc/>
         public FirmwareVersion GetData()
         {
             if (ResponseApdu.SW != SWConstants.Success)

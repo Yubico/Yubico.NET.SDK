@@ -14,7 +14,9 @@
 
 using System;
 using Xunit;
+using Yubico.PlatformInterop;
 using Yubico.Core.Buffers;
+using Yubico.Core.Cryptography;
 
 namespace Yubico.YubiKey.Cryptography
 {
@@ -40,12 +42,16 @@ namespace Yubico.YubiKey.Cryptography
             // Arrange
             byte[] key = GetKey();
             byte[] input = GetInput();
+            byte[] cmac = new byte[16];
 
             // Act
-            byte[] result = Cmac.AesCmac(key, input);
+            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            cmacObj.CmacInit(key);
+            cmacObj.CmacUpdate(input);
+            cmacObj.CmacFinal(cmac);
 
             // Assert
-            Assert.Equal(result, Hex.HexToBytes("165e74e305641b1365d1422a65e792ad"));
+            Assert.Equal(cmac, Hex.HexToBytes("165e74e305641b1365d1422a65e792ad"));
         }
 
         [Fact]
@@ -54,12 +60,16 @@ namespace Yubico.YubiKey.Cryptography
             // Arrange
             byte[] key = GetKey();
             byte[] input = GetShortInput();
+            byte[] cmac = new byte[16];
 
             // Act
-            byte[] result = Cmac.AesCmac(key, input);
+            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            cmacObj.CmacInit(key);
+            cmacObj.CmacUpdate(input);
+            cmacObj.CmacFinal(cmac);
 
             // Assert
-            Assert.Equal(result, Hex.HexToBytes("84438d43c2671c1322be492c768ce18e"));
+            Assert.Equal(cmac, Hex.HexToBytes("84438d43c2671c1322be492c768ce18e"));
         }
 
         [Fact]
@@ -68,12 +78,16 @@ namespace Yubico.YubiKey.Cryptography
             // Arrange
             byte[] key = GetKey();
             byte[] input = GetLongInput();
+            byte[] cmac = new byte[16];
 
             // Act
-            byte[] result = Cmac.AesCmac(key, input);
+            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            cmacObj.CmacInit(key);
+            cmacObj.CmacUpdate(input);
+            cmacObj.CmacFinal(cmac);
 
             // Assert
-            Assert.Equal(result, Hex.HexToBytes("72604ec81740e6ce8782da291c747cee"));
+            Assert.Equal(cmac, Hex.HexToBytes("72604ec81740e6ce8782da291c747cee"));
         }
     }
 }

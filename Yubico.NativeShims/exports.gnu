@@ -19,6 +19,11 @@
         Native_EVP_Update;
         Native_EVP_Final_ex;
         Native_EVP_CIPHER_CTX_ctrl;
+        Native_CMAC_EVP_MAC_CTX_new;
+        Native_EVP_MAC_CTX_free;
+        Native_CMAC_EVP_MAC_init;
+        Native_CMAC_EVP_MAC_update;
+        Native_CMAC_EVP_MAC_final;
         Native_SCardBeginTransaction;
         Native_SCardCancel;
         Native_SCardConnect;

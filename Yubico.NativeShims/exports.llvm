@@ -17,6 +17,11 @@ _Native_EVP_Aes256Gcm_Init
 _Native_EVP_Update
 _Native_EVP_Final_ex
 _Native_EVP_CIPHER_CTX_ctrl
+_Native_CMAC_EVP_MAC_CTX_new
+_Native_EVP_MAC_CTX_free
+_Native_CMAC_EVP_MAC_init
+_Native_CMAC_EVP_MAC_update
+_Native_CMAC_EVP_MAC_final
 _Native_SCardBeginTransaction
 _Native_SCardCancel
 _Native_SCardConnect

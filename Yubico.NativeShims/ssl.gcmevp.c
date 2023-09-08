@@ -47,7 +47,7 @@ Native_EVP_Update(
     int32_t inLen
     )
 {
-    if (EVP_CIPHER_CTX_is_encrypting(c) != 0)
+    if (EVP_CIPHER_CTX_encrypting(c) != 0)
     {
         return EVP_EncryptUpdate(c, output, outLen, input, inLen);
     }
@@ -63,7 +63,7 @@ Native_EVP_Final_ex(
     int32_t* outLen
     )
 {
-    if (EVP_CIPHER_CTX_is_encrypting(c) != 0)
+    if (EVP_CIPHER_CTX_encrypting(c) != 0)
     {
         return EVP_EncryptFinal_ex(c, output, outLen);
     }

@@ -12,7 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Linq;
+using Yubico.PlatformInterop;
+using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Scp03
@@ -40,7 +41,13 @@ namespace Yubico.YubiKey.Scp03
             hostChallenge.CopyTo(macInp, 16);
             cardChallenge.CopyTo(macInp, 24);
 
-            return Cmac.AesCmac(kdfKey, macInp);
+            byte[] cmac = new byte[16];
+            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            cmacObj.CmacInit(kdfKey);
+            cmacObj.CmacUpdate(macInp);
+            cmacObj.CmacFinal(cmac);
+
+            return cmac;
         }
 
         public static byte[] DeriveCryptogram(byte dataDerivationConstant, byte[] key, byte[] hostChallenge, byte[] cardChallenge) =>

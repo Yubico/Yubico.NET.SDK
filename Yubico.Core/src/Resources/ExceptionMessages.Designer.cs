@@ -79,6 +79,15 @@ namespace Yubico.Core {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The CMAC operation failed..
+        /// </summary>
+        internal static string CmacFailed {
+            get {
+                return ResourceManager.GetString("CmacFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Encountered an error in the Config Manager library..
         /// </summary>
         internal static string CmError {
@@ -237,6 +246,15 @@ namespace Yubico.Core {
         internal static string InvalidCharForHidCode {
             get {
                 return ResourceManager.GetString("InvalidCharForHidCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to One or more CMAC inputs were invalid..
+        /// </summary>
+        internal static string InvalidCmacInput {
+            get {
+                return ResourceManager.GetString("InvalidCmacInput", resourceCulture);
             }
         }
         

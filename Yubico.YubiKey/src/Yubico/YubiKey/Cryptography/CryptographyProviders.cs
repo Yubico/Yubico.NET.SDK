@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.Cryptography
         /// default implementation. For example, it could be used as follows.
         /// <code language="csharp">
         ///   RandomNumberGenerator randomObject =
-        ///   CryptographyProviders.RngCreator();
+        ///       CryptographyProviders.RngCreator();
         /// </code>
         /// </para>
         /// <para>
@@ -421,6 +421,24 @@ namespace Yubico.YubiKey.Cryptography
         /// </para>
         /// </remarks>
         public static Func<IEcdhPrimitives> EcdhPrimitivesCreator { get; set; } = EcdhPrimitives.Create;
+
+        /// <summary>
+        /// This property is a delegate (function pointer). This method will return
+        /// an instance of <see cref="ICmacPrimitives"/>, built to use the
+        /// specified algorithm.
+        /// </summary>
+        /// <remarks>
+        /// Note that ICmacPrimitives implements IDisposable, so either call
+        /// Dispose when done with it, or use the <c>using</c> keyword.
+        /// <para>
+        /// For example,
+        /// <code language="csharp">
+        ///    using ICmacPrimitives cmacObj =
+        ///        CryptographyProviders.CmacPrimitivesCreater(CmacBlockCipherAlgorithm.Aes128);
+        /// </code>
+        /// </para>
+        /// </remarks>
+        public static Func<CmacBlockCipherAlgorithm, ICmacPrimitives> CmacPrimitivesCreator { get; set; } = CmacPrimitives.Create;
 
         /// <summary>
         /// This property is a delegate (function pointer). This method will return

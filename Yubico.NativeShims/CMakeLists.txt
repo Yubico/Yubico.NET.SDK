@@ -78,6 +78,7 @@ target_sources(
         ssl.ecgroup.c
         ssl.ecpoint.c
         ssl.gcmevp.c
+        ssl.cmac.c
         )
 
 # Linker

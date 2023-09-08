@@ -51,19 +51,19 @@ namespace Yubico.YubiKey.Cryptography
 
             byte[] ciphertext;
 
-            using (var aesManaged = new AesManaged())
+            using (Aes aesObj = CryptographyProviders.AesCreator())
             {
 #pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
-                aesManaged.Mode = CipherMode.ECB;
+                aesObj.Mode = CipherMode.ECB;
 #pragma warning restore CA5358
-                aesManaged.KeySize = BlockSizeBits;
-                aesManaged.BlockSize = BlockSizeBits;
-                aesManaged.Key = key;
-                aesManaged.IV = new byte[BlockSizeBytes];
-                aesManaged.Padding = PaddingMode.None;
+                aesObj.KeySize = BlockSizeBits;
+                aesObj.BlockSize = BlockSizeBits;
+                aesObj.Key = key;
+                aesObj.IV = new byte[BlockSizeBytes];
+                aesObj.Padding = PaddingMode.None;
 #pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
                 // a non-default initialization vector
-                ICryptoTransform encryptor = aesManaged.CreateEncryptor();
+                ICryptoTransform encryptor = aesObj.CreateEncryptor();
 #pragma warning restore CA5401
                 using (var msEncrypt = new MemoryStream())
                 {
@@ -117,17 +117,17 @@ namespace Yubico.YubiKey.Cryptography
 
             byte[] ciphertext;
 
-            using (var aesManaged = new AesManaged())
+            using (Aes aesObj = CryptographyProviders.AesCreator())
             {
-                aesManaged.Mode = CipherMode.CBC;
-                aesManaged.KeySize = BlockSizeBits;
-                aesManaged.BlockSize = BlockSizeBits;
-                aesManaged.Key = key;
-                aesManaged.IV = iv;
-                aesManaged.Padding = PaddingMode.None;
+                aesObj.Mode = CipherMode.CBC;
+                aesObj.KeySize = BlockSizeBits;
+                aesObj.BlockSize = BlockSizeBits;
+                aesObj.Key = key;
+                aesObj.IV = iv;
+                aesObj.Padding = PaddingMode.None;
 #pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
                 // a non-default initialization vector
-                ICryptoTransform encryptor = aesManaged.CreateEncryptor();
+                ICryptoTransform encryptor = aesObj.CreateEncryptor();
 #pragma warning restore CA5401
                 using (var msEncrypt = new MemoryStream())
                 {
@@ -181,16 +181,16 @@ namespace Yubico.YubiKey.Cryptography
 
             byte[] plaintext;
 
-            using (var aesManaged = new AesManaged())
+            using (Aes aesObj = CryptographyProviders.AesCreator())
             {
-                aesManaged.Mode = CipherMode.CBC;
-                aesManaged.KeySize = BlockSizeBits;
-                aesManaged.BlockSize = BlockSizeBits;
-                aesManaged.Key = key;
-                aesManaged.IV = iv;
-                aesManaged.Padding = PaddingMode.None;
+                aesObj.Mode = CipherMode.CBC;
+                aesObj.KeySize = BlockSizeBits;
+                aesObj.BlockSize = BlockSizeBits;
+                aesObj.Key = key;
+                aesObj.IV = iv;
+                aesObj.Padding = PaddingMode.None;
 
-                ICryptoTransform decryptor = aesManaged.CreateDecryptor();
+                ICryptoTransform decryptor = aesObj.CreateDecryptor();
 
                 using (var msDecrypt = new MemoryStream())
                 {

@@ -18,6 +18,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 using Yubico.Core.Iso7816;
+using Yubico.Core.Cryptography;
 
 namespace Yubico.YubiKey.Scp03
 {
@@ -37,7 +38,10 @@ namespace Yubico.YubiKey.Scp03
             macChainingValue.CopyTo(macInp, 0);
             apduBytes.CopyTo(macInp, 16);
 
-            macChainingValue = Cmac.AesCmac(macKey, macInp);
+            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            cmacObj.CmacInit(macKey);
+            cmacObj.CmacUpdate(macInp);
+            cmacObj.CmacFinal(macChainingValue);
 
             return (AddDataToApdu(apdu, macChainingValue.Take(8).ToArray()), macChainingValue);
         }
@@ -64,7 +68,12 @@ namespace Yubico.YubiKey.Scp03
             macInp[16 + respDataLen] = SW1Constants.Success;
             macInp[16 + respDataLen + 1] = SWConstants.Success & 0xFF;
 
-            byte[] calculatedRmac = Cmac.AesCmac(rmacKey, macInp).Take(8).ToArray();
+            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            byte[] cmac = new byte[16];
+            cmacObj.CmacInit(rmacKey);
+            cmacObj.CmacUpdate(macInp);
+            cmacObj.CmacFinal(cmac);
+            Span<byte> calculatedRmac = cmac.AsSpan(0, 8);
 
             if (!CryptographicOperations.FixedTimeEquals(recvdRmac, calculatedRmac))
             {

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.Security.Cryptography;
 using Yubico.PlatformInterop;
 using Yubico.Core.Cryptography;
 using Yubico.YubiKey.Cryptography;
@@ -26,17 +28,32 @@ namespace Yubico.YubiKey.Scp03
         public const byte DDC_CARD_CRYPTOGRAM = 0x00;
         public const byte DDC_HOST_CRYPTOGRAM = 0x01;
 
-        public static byte[] Derive(byte dataDerivationConstant, byte outputLen, byte[] kdfKey, byte[] hostChallenge, byte[] cardChallenge)
+        // Derive a key from the challenges.
+        // This method only supports deriving a 64- or 128-bit result based on
+        // challenges each of which must be 8 bytes.
+        // The result (output) will be 8 bytes (outputLenBits = 0x40 = 64 bits)
+        // or 16 bytes (outputLen = 0x80 = 128 bits).
+        public static byte[] Derive(
+            byte dataDerivationConstant,
+            byte outputLenBits,
+            byte[] kdfKey,
+            byte[] hostChallenge,
+            byte[] cardChallenge)
         {
-            byte[] macInp = new byte[32];
-            macInp[11] = dataDerivationConstant;
-
-            if (outputLen != 0x40 && outputLen != 0x80)
+            if ((outputLenBits != 0x40) && (outputLenBits != 0x80))
             {
                 throw new SecureChannelException(ExceptionMessages.IncorrectDerivationLength);
             }
+            if ((hostChallenge.Length != 8) || (cardChallenge.Length != 8))
+            {
+                throw new SecureChannelException(ExceptionMessages.InvalidChallengeLength);
+            }
 
-            macInp[14] = outputLen;
+            byte[] macInp = new byte[32];
+            macInp[11] = dataDerivationConstant;
+
+            // This is the output length.
+            macInp[14] = outputLenBits;
             macInp[15] = 1;
             hostChallenge.CopyTo(macInp, 16);
             cardChallenge.CopyTo(macInp, 24);
@@ -47,18 +64,54 @@ namespace Yubico.YubiKey.Scp03
             cmacObj.CmacUpdate(macInp);
             cmacObj.CmacFinal(cmac);
 
-            return cmac;
+            if (outputLenBits == 0x80)
+            {
+                return cmac;
+            }
+
+            byte[] smallerResult = new byte[8];
+            Array.Copy(cmac, 0, smallerResult, 0, 8);
+            CryptographicOperations.ZeroMemory(cmac.AsSpan());
+            return smallerResult;
         }
 
-        public static byte[] DeriveCryptogram(byte dataDerivationConstant, byte[] key, byte[] hostChallenge, byte[] cardChallenge) =>
-            Derive(dataDerivationConstant, 0x40, key, hostChallenge, cardChallenge);
+        public static byte[] DeriveCryptogram(
+            byte dataDerivationConstant,
+            byte[] key,
+            byte[] hostChallenge,
+            byte[] cardChallenge) => Derive(dataDerivationConstant, 0x40, key, hostChallenge, cardChallenge);
 
-        public static SessionKeys DeriveSessionKeysFromStaticKeys(StaticKeys staticKeys, byte[] hostChallenge, byte[] cardChallenge)
+        public static SessionKeys DeriveSessionKeysFromStaticKeys(
+            StaticKeys staticKeys,
+            byte[] hostChallenge,
+            byte[] cardChallenge)
         {
-            byte[] SMAC = Derive(DDC_SMAC, 0x80, staticKeys.ChannelMacKey.ToArray(), hostChallenge, cardChallenge);
-            byte[] SENC = Derive(DDC_SENC, 0x80, staticKeys.ChannelEncryptionKey.ToArray(), hostChallenge, cardChallenge);
-            byte[] SRMAC = Derive(DDC_SRMAC, 0x80, staticKeys.ChannelMacKey.ToArray(), hostChallenge, cardChallenge);
-            return new SessionKeys(SMAC, SENC, SRMAC);
+            byte[] macKey = staticKeys.ChannelMacKey.ToArray();
+            byte[] encKey = staticKeys.ChannelEncryptionKey.ToArray();
+
+            try
+            {
+                // If these calls succeed, then control of the created buffers
+                // will be given to the new SessionKeys object created. That is,
+                // if these succeed, don't overwrite the returned sensitive data.
+                // The Derive call can throw an exception. Normally, we would
+                // want to catch that exception just in case at least one call
+                // succeeded and we have some sensitive data to overwrite. But
+                // the Derive call fails if either the host or card challenge
+                // is not exactly 8 bytes. In that case, the first call would
+                // fail before generating a result, so there will be no data to
+                // overwrite.
+                byte[] SMAC = Derive(DDC_SMAC, 0x80, macKey, hostChallenge, cardChallenge);
+                byte[] SENC = Derive(DDC_SENC, 0x80, encKey, hostChallenge, cardChallenge);
+                byte[] SRMAC = Derive(DDC_SRMAC, 0x80, macKey, hostChallenge, cardChallenge);
+
+                return new SessionKeys(SMAC, SENC, SRMAC);
+            }
+            finally
+            {
+                CryptographicOperations.ZeroMemory(macKey.AsSpan());
+                CryptographicOperations.ZeroMemory(encKey.AsSpan());
+            }
         }
     }
 }

@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey.TestUtilities
 {
@@ -83,6 +84,65 @@ namespace Yubico.YubiKey.TestUtilities
             return GetTestDevices()
                 .Where(d => d.SerialNumber.HasValue)
                 .SelectRequiredTestDevice(testDeviceType);
+        }
+
+        /// <summary>
+        /// Get YubiKey test device of specified transport and for which the
+        /// firmware version number is at least the minimum.
+        /// </summary>
+        /// <param name="transport">The transport the device must support.</param>
+        /// <param name="minimumFirmwareVersion">The earliest version number the
+        /// caller is willing to accept.</param>
+        /// <returns>A YubiKey that was found.</returns>
+        public static IYubiKeyDevice GetTestDevice(Transport transport, FirmwareVersion minimumFirmwareVersion)
+        {
+            IList<IYubiKeyDevice> deviceList = GetTestDevices(transport);
+            foreach (IYubiKeyDevice currentDevice in deviceList)
+            {
+                if (currentDevice.FirmwareVersion >= minimumFirmwareVersion)
+                {
+                    return currentDevice;
+                }
+            }
+
+            throw new InvalidOperationException("No matching YubiKey found.");
+        }
+
+        /// <summary>
+        /// Get YubiKey test device connected using SCP03 (with the default
+        /// static keys). Find the first one, regardless of the type (Fw5, Fw5C,
+        /// Bio, etc.).
+        /// </summary>
+        /// <remarks>
+        /// Note that SCP03 is available on 5.3 and later YubiKeys.
+        /// </remarks>
+        /// <param name="testDeviceType">The type of the device.</param>
+        /// <returns>A YubiKey that was found.</returns>
+        public static IYubiKeyDevice GetScp03TestDevice()
+        {
+            return GetScp03TestDevice(new StaticKeys());
+        }
+
+        /// <summary>
+        /// Get YubiKey test device connected using SCP03 and the given key set.
+        /// </summary>
+        public static IYubiKeyDevice GetScp03TestDevice(StaticKeys staticKeys)
+        {
+            IList<IYubiKeyDevice> deviceList = GetTestDevices(Transport.SmartCard);
+            foreach (IYubiKeyDevice currentDevice in deviceList)
+            {
+                if (currentDevice.FirmwareVersion >= FirmwareVersion.V5_3_0)
+                {
+                    if (currentDevice is YubiKeyDevice device)
+                    {
+#pragma warning disable CS0618 // Specifically testing this soon-to-be-deprecated feature
+                        return device.WithScp03(staticKeys);
+#pragma warning restore CS0618
+                    }
+                }
+            }
+
+            throw new InvalidOperationException("No matching YubiKey found.");
         }
     }
 }

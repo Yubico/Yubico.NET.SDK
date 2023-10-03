@@ -1168,6 +1168,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Invalid SCP03 Key Version Number..
+        /// </summary>
+        internal static string InvalidScp03Kvn {
+            get {
+                return ResourceManager.GetString("InvalidScp03Kvn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Slot number {0:X2} is not valid for the given operation on the given YubiKey..
         /// </summary>
         internal static string InvalidSlot {
@@ -1929,6 +1938,15 @@ namespace Yubico.YubiKey {
         internal static string RetryCountNegative {
             get {
                 return ResourceManager.GetString("RetryCountNegative", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to An SCP03 StaticKeys object does not match an expected key set..
+        /// </summary>
+        internal static string Scp03KeyMismatch {
+            get {
+                return ResourceManager.GetString("Scp03KeyMismatch", resourceCulture);
             }
         }
         

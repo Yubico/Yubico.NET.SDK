@@ -236,6 +236,12 @@
     <value>SCP03 handshake called out-of-order: loading an external authenticate response before processing the preceding initialize update response is not possible.</value>
     <comment>We should improve this</comment>
   </data>
+  <data name="InvalidScp03Kvn" xml:space="preserve">
+    <value>Invalid SCP03 Key Version Number.</value>
+  </data>
+  <data name="Scp03KeyMismatch" xml:space="preserve">
+    <value>An SCP03 StaticKeys object does not match an expected key set.</value>
+  </data>
   <data name="LoadInitializeUpdatePriorToBuild" xml:space="preserve">
     <value>SCP03 handshake called out-of-order: loading the response to an initialize update command before building it is not possible.</value>
     <comment>We should improve this</comment>

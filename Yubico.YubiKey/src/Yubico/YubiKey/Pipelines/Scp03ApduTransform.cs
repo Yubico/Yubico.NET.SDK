@@ -17,6 +17,7 @@ using System.Security.Cryptography;
 using Yubico.YubiKey.Scp03.Commands;
 using Yubico.YubiKey.Scp03;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Pipelines
 {
@@ -30,11 +31,14 @@ namespace Yubico.YubiKey.Pipelines
     ///
     /// Requires pre-shared <see cref="StaticKeys"/>.
     /// </remarks>
-    internal class Scp03ApduTransform : IApduTransform
+    internal class Scp03ApduTransform : IApduTransform, IDisposable
     {
         private readonly IApduTransform _pipeline;
         private readonly Session _session;
-        private readonly StaticKeys _staticKeys;
+
+        private bool _disposed;
+
+        public StaticKeys Scp03Keys { get; private set; }
 
         /// <summary>
         /// Constructs a new pipeline from the given one.
@@ -54,9 +58,10 @@ namespace Yubico.YubiKey.Pipelines
             }
 
             _pipeline = pipeline;
-            _staticKeys = staticKeys;
+            Scp03Keys = staticKeys.GetCopy();
 
             _session = new Session();
+            _disposed = false;
         }
 
         /// <summary>
@@ -64,7 +69,7 @@ namespace Yubico.YubiKey.Pipelines
         /// </summary>
         public void Setup()
         {
-            using var rng = RandomNumberGenerator.Create();
+            using RandomNumberGenerator rng = CryptographyProviders.RngCreator();
             Setup(rng);
         }
 
@@ -86,7 +91,7 @@ namespace Yubico.YubiKey.Pipelines
             // Pass along the encoded command
             ResponseApdu response = _pipeline.Invoke(encodedCommand, commandType, responseType);
             // Decode response and return it
-            
+
             // Special carve out for SelectApplication here, since there will be nothing to decode
             if (commandType == typeof(InterIndustry.Commands.SelectApplicationCommand))
             {
@@ -96,11 +101,10 @@ namespace Yubico.YubiKey.Pipelines
             return _session.DecodeResponse(response);
         }
 
-        public void Cleanup() => _pipeline.Cleanup();
-
         private void PerformInitializeUpdate(byte[] hostChallenge)
         {
-            InitializeUpdateCommand initializeUpdateCommand = _session.BuildInitializeUpdate(hostChallenge);
+            InitializeUpdateCommand initializeUpdateCommand = _session.BuildInitializeUpdate(
+                Scp03Keys.KeyVersionNumber, hostChallenge);
 
             ResponseApdu initializeUpdateResponseApdu = _pipeline.Invoke(
                 initializeUpdateCommand.CreateCommandApdu(),
@@ -109,7 +113,7 @@ namespace Yubico.YubiKey.Pipelines
 
             InitializeUpdateResponse initializeUpdateResponse = initializeUpdateCommand.CreateResponseForApdu(initializeUpdateResponseApdu);
             initializeUpdateResponse.ThrowIfFailed();
-            _session.LoadInitializeUpdateResponse(initializeUpdateResponse, _staticKeys);
+            _session.LoadInitializeUpdateResponse(initializeUpdateResponse, Scp03Keys);
         }
 
         private void PerformExternalAuthenticate()
@@ -124,6 +128,35 @@ namespace Yubico.YubiKey.Pipelines
             ExternalAuthenticateResponse externalAuthenticateResponse = externalAuthenticateCommand.CreateResponseForApdu(externalAuthenticateResponseApdu);
             externalAuthenticateResponse.ThrowIfFailed();
             _session.LoadExternalAuthenticateResponse(externalAuthenticateResponse);
+        }
+
+        // There is a call to cleanup and a call to Dispose. The cleanup only
+        // needs to call the cleanup on the local APDU Pipeline object.
+        public void Cleanup()
+        {
+            _pipeline.Cleanup();
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        // The Dispose needs to make sure the local disposable fields are
+        // disposed.
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    Scp03Keys.Dispose();
+                    _session.Dispose();
+
+                    _disposed = true;
+                }
+            }
         }
     }
 }

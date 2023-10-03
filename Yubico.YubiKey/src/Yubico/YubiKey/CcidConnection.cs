@@ -17,6 +17,7 @@ using System.Globalization;
 using Yubico.Core.Buffers;
 using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.YubiKey.Pipelines;
+using Yubico.YubiKey.Scp03;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
@@ -28,37 +29,34 @@ namespace Yubico.YubiKey
     {
         private readonly Logger _log = Log.GetLogger();
 
-        private readonly byte[]? _applicationId;
-        private readonly IApduTransform _apduPipeline;
-        private readonly ISmartCardConnection _smartCardConnection;
         private readonly YubiKeyApplication _yubiKeyApplication;
+        private readonly byte[]? _applicationId;
+        private readonly ISmartCardConnection _smartCardConnection;
+        private IApduTransform _apduPipeline;
         private bool _disposedValue;
-
-        private bool IsOath => _yubiKeyApplication == YubiKeyApplication.Oath
-            || (_applicationId != null && _applicationId.SequenceEqual(YubiKeyApplicationExtensions.GetIso7816ApplicationId(YubiKeyApplication.Oath)));
-
-        private IApduTransform AddResponseChainingTransform(IApduTransform pipeline) =>
-            IsOath
-            ? new OathResponseChainingTransform(pipeline)
-            : new ResponseChainingTransform(pipeline);
 
         public ISelectApplicationData? SelectApplicationData { get; set; }
 
-        public CcidConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication yubiKeyApplication)
+        protected CcidConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication application, byte[]? applicationId)
         {
-            if (yubiKeyApplication == YubiKeyApplication.Unknown)
+            if ((applicationId is null) && (application == YubiKeyApplication.Unknown))
             {
                 throw new NotSupportedException();
             }
 
-            _yubiKeyApplication = yubiKeyApplication;
+            _yubiKeyApplication = application;
+            _applicationId = applicationId;
 
             _smartCardConnection = smartCardDevice.Connect();
 
             _apduPipeline = new SmartCardTransform(_smartCardConnection);
             _apduPipeline = AddResponseChainingTransform(_apduPipeline);
             _apduPipeline = new CommandChainingTransform(_apduPipeline);
+        }
 
+        public CcidConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication yubiKeyApplication)
+            : this(smartCardDevice, yubiKeyApplication, null)
+        {
             if (yubiKeyApplication == YubiKeyApplication.Fido2)
             {
                 _apduPipeline = new FidoErrorTransform(_apduPipeline);
@@ -71,16 +69,8 @@ namespace Yubico.YubiKey
         }
 
         public CcidConnection(ISmartCardDevice smartCardDevice, byte[] applicationId)
+            : this(smartCardDevice, YubiKeyApplication.Unknown, applicationId)
         {
-            _applicationId = applicationId;
-            _yubiKeyApplication = YubiKeyApplication.Unknown;
-
-            _smartCardConnection = smartCardDevice.Connect();
-
-            _apduPipeline = new SmartCardTransform(_smartCardConnection);
-            _apduPipeline = AddResponseChainingTransform(_apduPipeline);
-            _apduPipeline = new CommandChainingTransform(_apduPipeline);
-
             if (applicationId.SequenceEqual(YubiKeyApplication.Fido2.GetIso7816ApplicationId()))
             {
                 _apduPipeline = new FidoErrorTransform(_apduPipeline);
@@ -96,85 +86,26 @@ namespace Yubico.YubiKey
             SelectApplication();
         }
 
-        public CcidConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication yubiKeyApplication, Scp03.StaticKeys staticKeys)
+        // Allow subclasses to build a different pipeline, which means they need
+        // to get the current one.
+        protected IApduTransform GetPipeline() => _apduPipeline;
+
+        // Allow subclasses to build a different pipeline and set it here in the
+        // base class.
+        protected void SetPipeline(IApduTransform apduPipeline)
         {
-            if (yubiKeyApplication == YubiKeyApplication.Unknown)
-            {
-                throw new NotSupportedException();
-            }
+            _apduPipeline = apduPipeline;
 
-            _yubiKeyApplication = yubiKeyApplication;
-
-            _smartCardConnection = smartCardDevice.Connect();
-
-            _apduPipeline = new SmartCardTransform(_smartCardConnection);
-            _apduPipeline = AddResponseChainingTransform(_apduPipeline);
-            _apduPipeline = new CommandChainingTransform(_apduPipeline);
-            _apduPipeline = new Scp03ApduTransform(_apduPipeline, staticKeys);
-
-            if (yubiKeyApplication == YubiKeyApplication.Fido2)
-            {
-                _apduPipeline = new FidoErrorTransform(_apduPipeline);
-            }
-            else if (yubiKeyApplication == YubiKeyApplication.Otp)
-            {
-                _apduPipeline = new OtpErrorTransform(_apduPipeline);
-            }
-
-            // CCID has the concept of multiple applications. Since we cannot guarantee the
-            // state of the smart card when connecting, we should always send down a connection
-            // request.
             SelectApplication();
-
-            _apduPipeline.Setup();
         }
 
-        public CcidConnection(ISmartCardDevice smartCardDevice, byte[] applicationId, Scp03.StaticKeys staticKeys)
-        {
-            _applicationId = applicationId;
-            _yubiKeyApplication = YubiKeyApplication.Unknown;
+        private bool IsOath => _yubiKeyApplication == YubiKeyApplication.Oath
+            || (_applicationId != null && _applicationId.SequenceEqual(YubiKeyApplicationExtensions.GetIso7816ApplicationId(YubiKeyApplication.Oath)));
 
-            _smartCardConnection = smartCardDevice.Connect();
-
-            _apduPipeline = new SmartCardTransform(_smartCardConnection);
-            _apduPipeline = AddResponseChainingTransform(_apduPipeline);
-            _apduPipeline = new CommandChainingTransform(_apduPipeline);
-            _apduPipeline = new Scp03ApduTransform(_apduPipeline, staticKeys);
-
-            if (applicationId.SequenceEqual(YubiKeyApplication.Fido2.GetIso7816ApplicationId()))
-            {
-                _apduPipeline = new FidoErrorTransform(_apduPipeline);
-            }
-            else if (applicationId.SequenceEqual(YubiKeyApplication.Otp.GetIso7816ApplicationId()))
-            {
-                _apduPipeline = new OtpErrorTransform(_apduPipeline);
-            }
-
-            // CCID has the concept of multiple applications. Since we cannot guarantee the
-            // state of the smart card when connecting, we should always send down a connection
-            // request.
-            SelectApplication();
-
-            _apduPipeline.Setup();
-        }
-
-        public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand) where TResponse : IYubiKeyResponse
-        {
-            using (IDisposable transaction = _smartCardConnection.BeginTransaction(out bool cardWasReset))
-            {
-                if (cardWasReset)
-                {
-                    SelectApplication();
-                }
-
-                ResponseApdu responseApdu = _apduPipeline.Invoke(
-                    yubiKeyCommand.CreateCommandApdu(),
-                    yubiKeyCommand.GetType(),
-                    typeof(TResponse));
-
-                return yubiKeyCommand.CreateResponseForApdu(responseApdu);
-            }
-        }
+        private IApduTransform AddResponseChainingTransform(IApduTransform pipeline) =>
+            IsOath
+            ? new OathResponseChainingTransform(pipeline)
+            : new ResponseChainingTransform(pipeline);
 
         private void SelectApplication()
         {
@@ -204,12 +135,31 @@ namespace Yubico.YubiKey
             SelectApplicationData = response.GetData();
         }
 
+        public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand) where TResponse : IYubiKeyResponse
+        {
+            using (IDisposable transaction = _smartCardConnection.BeginTransaction(out bool cardWasReset))
+            {
+                if (cardWasReset)
+                {
+                    SelectApplication();
+                }
+
+                ResponseApdu responseApdu = _apduPipeline.Invoke(
+                    yubiKeyCommand.CreateCommandApdu(),
+                    yubiKeyCommand.GetType(),
+                    typeof(TResponse));
+
+                return yubiKeyCommand.CreateResponseForApdu(responseApdu);
+            }
+        }
+
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)
             {
                 if (disposing)
                 {
+                    _apduPipeline.Cleanup();
                     _smartCardConnection.Dispose();
                 }
 

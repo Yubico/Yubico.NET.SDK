@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Pipelines
             {
                 return new ResponseApdu(Hex.HexToBytes("9000"));
             }
-            else if (command.AsByteArray().SequenceEqual(Hex.HexToBytes("8050000008360CB43F4301B894")))
+            else if (command.AsByteArray().SequenceEqual(Hex.HexToBytes("8050FF0008360CB43F4301B894")))
             {
                 return new ResponseApdu(Hex.HexToBytes("010B001F002500000000FF0360CAAFA4DAC615236ADD5607216F3E115C9000"));
             }

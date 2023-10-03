@@ -26,6 +26,7 @@ namespace Yubico.YubiKey.Scp03.Commands
         const byte GpInitializeUpdateCla = 0b1000_0000;
         const byte GpInitializeUpdateIns = 0x50;
         private readonly byte[] _challenge;
+        private readonly int _keyVersionNumber;
 
         /// <summary>
         /// Constructs an EXTERNAL_AUTHENTICATE command, containing the provided data.
@@ -33,8 +34,9 @@ namespace Yubico.YubiKey.Scp03.Commands
         /// <remarks>
         /// Clients should not generally build this manaully. See <see cref="YubiKey.Pipelines.Scp03ApduTransform"/> for more.
         /// </remarks>
+        /// <param name="keyVersionNumber">Which key set to use.</param>
         /// <param name="challenge">An 8-byte randomly-generated challenge from the host to the device.</param>
-        public InitializeUpdateCommand(byte[] challenge)
+        public InitializeUpdateCommand(int keyVersionNumber, byte[] challenge)
         {
             if (challenge is null)
             {
@@ -42,12 +44,14 @@ namespace Yubico.YubiKey.Scp03.Commands
             }
 
             _challenge = challenge;
+            _keyVersionNumber = keyVersionNumber;
         }
 
         public CommandApdu CreateCommandApdu() => new CommandApdu()
         {
             Cla = GpInitializeUpdateCla,
             Ins = GpInitializeUpdateIns,
+            P1 = (byte)_keyVersionNumber,
             Data = _challenge
         };
         public InitializeUpdateResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

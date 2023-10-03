@@ -21,20 +21,16 @@ namespace Yubico.YubiKey.Piv
 {
     public class GenerateTests
     {
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void SimpleGenerate(StandardTestDevice testDeviceType)
+        [Fact]
+        public void SimpleGenerate()
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(
+                Transport.SmartCard, FirmwareVersion.V5_3_0);
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            if (testDevice is YubiKeyDevice ykDevice)
-            {
-                var staticKeys = new StaticKeys();
-                testDevice = ykDevice.WithScp03(staticKeys);
-            }
+            var scp03Keys = new StaticKeys();
 
-            using (var pivSession = new PivSession(testDevice))
+            using (var pivSession = new PivSession(testDevice, scp03Keys))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
@@ -46,15 +42,23 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void GenerateAndSign(StandardTestDevice testDeviceType)
+        [Fact]
+        public void GenerateAndSign()
         {
             PivAlgorithm algorithm = PivAlgorithm.Rsa2048;
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(
+                Transport.SmartCard, FirmwareVersion.V5_3_0);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
+
+            Assert.True(testDevice is YubiKeyDevice);
+            if (testDevice is YubiKeyDevice device)
+            {
+#pragma warning disable CS0618 // Specifically testing this feature
+                testDevice = device.WithScp03(new StaticKeys());
+#pragma warning restore CS0618
+            }
 
             bool isValid = DoGenerate(
                 testDevice, 0x86, algorithm, PivPinPolicy.Once, PivTouchPolicy.Never);

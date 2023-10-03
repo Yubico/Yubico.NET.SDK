@@ -211,7 +211,7 @@ Features:
   This is a requirement set in place by Microsoft. See [FIDO U2F overview](xref:FidoU2fOverview) for more information.
 - **SCP03**. Secure Channel Protocol 03 (also referred to as SCP03) is a Global Platform specification that
   allows clients of smart cards to encrypt all traffic to and from the card. Since the YubiKey can act as a smart
-  card, this means that it is now possible to encrypt all traffic for the OATH, PIV, and OpenPGP applications.
+  card, this means that it is now possible to encrypt all traffic for the PIV application.
   In order for this to work, however, your YubiKey must be pre-configured for this feature. Read more about
   [SCP03 here](xref:UsersManualScp03).
 - **Debian, RHEL, and CentOS support**. Our testing of Linux platforms has expanded to include the Debian,

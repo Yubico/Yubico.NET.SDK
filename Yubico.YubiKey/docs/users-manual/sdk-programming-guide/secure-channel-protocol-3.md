@@ -41,6 +41,11 @@ addition to standard web security protocols like TLS, it could makes sense to
 leverage SCP03 as an added layer of defense. Additionally, several 'card
 management systems' use SCP03 to securely remotely manage devices.
 
+> [!NOTE]
+> SCP03 works only with SmartCard applications, namely PIV, OATH, and OpenPgp.
+> However, SCP03 is supported only on series 5 YubiKeys with firmware version 5.3
+> and later, and only the PIV application.
+
 ## Static Keys
 
 SCP03 relies on a set of shared, symmetric secret cryptographic keys, called the
@@ -68,26 +73,30 @@ does not at this time support performing derivation of static keys.
 
 To securely connect to a device using SCP03, you must have a YubiKey device with
 firmware 5.3 or later, with non-default static keys set and known to you. The
-YubiKey must have its smart card interface available (that is, one of PIV,
-OpenPGP, OATH, or YubiCrypt must be enabled).
+YubiKey must support the PIV application.
 
 ## Connecting to a device
 
 Given the above prerequisites, you can connect to a device using SCP03 by
 following these steps:
 
-1. Get an instance of the [YubiKeyDevice](xref:Yubico.YubiKey.YubiKeyDevice)
-   class that you want to connect to.
+1. Get an instance of the [IYubiKeyDevice](xref:Yubico.YubiKey.IYubiKeyDevice)
+   class that you want to connect to. (See the user's manual entry on
+   [making a connection](xref:UsersManualMakingAConnection).)
 2. Construct the static keys for this device as an instance of the
    [StaticKeys](xref:Yubico.YubiKey.Scp03.StaticKeys) class. See the above
    section for details on how to construct an instance of `StaticKeys`.
-3. Get a wrapped version of the device by calling 
-   ```c#
-   IYubiKeyDevice scp03Device = yubiKeyDevice.WithScp03(staticKeys);
-   ```
-4. Connect to applications on the device in the standard way, using the
-   `Connect` method (see the [Making a
-   connection](xref:UsersManualMakingAConnection) page for more information).
+3. Specify the key set in the connection.  
+    A. When creating a `PivSession`
+     ```c#
+     using (var pivSession = new PivSession(yubiKeyDevice, scp03Keys))
+     {
+     }
+     ```
+    B. When creating an `IYubiKeyConnection`.
+     ```c#
+     yubiKeyDevice.ConnectScp03(YubiKeyApplication.Piv, scp03Keys);
+     ```
 
 ## Security
 
@@ -122,7 +131,7 @@ In summary:
 | Response APDU | Status Word       | Integrity when `90 00`, otherwise **none** |
 
 The SDK makes conservative choices in SCP03 support. When a command sent over
-SCP03 generates an status word indicating an error (anything other than `90
+SCP03 generates a status word indicating an error (anything other than `90
 00`), the SDK will throw a `SecureChannelException`, since this response is
 unauthenticated. When using SCP03, it is therefore important to ensure that the
 expected response to all issued commands is a success, and to treat any

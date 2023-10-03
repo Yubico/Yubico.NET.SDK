@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Scp03
         {
             Session sess = GetSession();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => sess.BuildInitializeUpdate(null));
+            _ = Assert.Throws<ArgumentNullException>(() => sess.BuildInitializeUpdate(0, null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.Scp03
         {
             byte[] hostChallengeWrongLength = new byte[9];
             Session sess = GetSession();
-            _ = Assert.Throws<ArgumentException>(() => sess.BuildInitializeUpdate(hostChallengeWrongLength));
+            _ = Assert.Throws<ArgumentException>(() => sess.BuildInitializeUpdate(0, hostChallengeWrongLength));
         }
 
         [Fact]
@@ -67,7 +67,7 @@ namespace Yubico.YubiKey.Scp03
             Session sess = GetSession();
 
             // Act
-            InitializeUpdateCommand initializeUpdateCommand = sess.BuildInitializeUpdate(GetChallenge());
+            InitializeUpdateCommand initializeUpdateCommand = sess.BuildInitializeUpdate(0, GetChallenge());
             byte[] initializeUpdateCommandBytes = initializeUpdateCommand.CreateCommandApdu().AsByteArray();
 
             // Assert
@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.Scp03
         public void LoadInitializeUpdate_GivenNullInitializeUpdateResponse_ThrowsArgumentNullException()
         {
             Session sess = GetSession();
-            InitializeUpdateCommand initializeUpdateCommand = sess.BuildInitializeUpdate(GetChallenge());
+            InitializeUpdateCommand initializeUpdateCommand = sess.BuildInitializeUpdate(0, GetChallenge());
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             _ = Assert.Throws<ArgumentNullException>(() => sess.LoadInitializeUpdateResponse(null, GetStaticKeys()));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Scp03
         public void LoadInitializeUpdate_GivenNullStaticKeys_ThrowsArgumentNullException()
         {
             Session sess = GetSession();
-            InitializeUpdateCommand initializeUpdateCommand = sess.BuildInitializeUpdate(GetChallenge());
+            InitializeUpdateCommand initializeUpdateCommand = sess.BuildInitializeUpdate(0, GetChallenge());
             var correctResponse = new InitializeUpdateResponse(new ResponseApdu(GetInitializeUpdateResponse()));
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             _ = Assert.Throws<ArgumentNullException>(() => sess.LoadInitializeUpdateResponse(correctResponse, null));
@@ -110,7 +110,7 @@ namespace Yubico.YubiKey.Scp03
         {
             // Arrange
             Session sess = GetSession();
-            InitializeUpdateCommand initializeUpdateCommand = sess.BuildInitializeUpdate(GetChallenge());
+            InitializeUpdateCommand initializeUpdateCommand = sess.BuildInitializeUpdate(0, GetChallenge());
             sess.LoadInitializeUpdateResponse(initializeUpdateCommand.CreateResponseForApdu(new ResponseApdu(GetInitializeUpdateResponse())), GetStaticKeys());
 
             // Act

@@ -15,6 +15,7 @@
 using System;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.TestUtilities;
 using Yubico.Core.Tlv;
 using Xunit;
@@ -23,9 +24,8 @@ namespace Yubico.YubiKey.Piv
 {
     public class GetPutDataTests
     {
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void Cert_Auth_Req(StandardTestDevice testDeviceType)
+        [Fact]
+        public void Cert_Auth_Req()
         {
             bool isValid = SampleKeyPairs.GetMatchingKeyAndCert(
                 out X509Certificate2 cert, out PivPrivateKey privateKey);
@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.Piv
             byte[] certData = tlvWriter.Encode();
             tlvWriter.Clear();
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice();
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -100,9 +100,8 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void Chuid_Auth_Req(StandardTestDevice testDeviceType)
+        [Fact]
+        public void Chuid_Auth_Req()
         {
             byte[] chuidData = new byte[] {
                 0x53, 0x3b, 0x30, 0x19, 0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83,
@@ -111,7 +110,7 @@ namespace Yubico.YubiKey.Piv
                 0x08, 0x32, 0x30, 0x33, 0x30, 0x30, 0x31, 0x30, 0x31, 0x3e, 0x00, 0xfe, 0x00
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice();
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -162,9 +161,8 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void Capability_Auth_Req(StandardTestDevice testDeviceType)
+        [Fact]
+        public void Capability_Auth_Req()
         {
             byte[] capabilityData = new byte[] {
                 0x53, 0x33, 0xF0, 0x15, 0xA0, 0x00, 0x00, 0x01, 0x16, 0xFF, 0x02, 0x21, 0x08, 0x42, 0x10, 0x84,
@@ -173,7 +171,7 @@ namespace Yubico.YubiKey.Piv
                 0x00, 0xFD, 0x00, 0xFE, 0x00
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice();
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -230,16 +228,15 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void Discovery_Auth_Req(StandardTestDevice testDeviceType)
+        [Fact]
+        public void Discovery_Auth_Req()
         {
             byte[] discoveryData = new byte[] {
                 0x7E, 0x12, 0x4F, 0x0B, 0xA0, 0x00, 0x00, 0x03, 0x08, 0x00, 0x00, 0x10, 0x00, 0x01, 0x00, 0x5F,
                 0x2F, 0x02, 0x40, 0x00,
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice();
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -260,15 +257,27 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void Printed_Auth_Req(StandardTestDevice testDeviceType)
+        [Fact]
+        public void Printed_Auth_Req()
         {
             byte[] printedData = new byte[] {
                 0x53, 0x04, 0x04, 0x02, 0xd4, 0xe7
             };
+            byte[] key1 = new byte[] {
+                0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff
+            };
+            byte[] key2 = new byte[] {
+                0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x11
+            };
+            byte[] key3 = new byte[] {
+                0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x11, 0x22
+            };
+            var newKeys = new StaticKeys(key2, key1, key3)
+            {
+                KeyVersionNumber = 2
+            };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice(newKeys);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -419,15 +428,14 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void KeyHistory_Auth_Req(StandardTestDevice testDeviceType)
+        [Fact]
+        public void KeyHistory_Auth_Req()
         {
             byte[] keyHistoryData = new byte[] {
                 0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice();
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -927,15 +935,14 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void AdminData_Auth_Req(StandardTestDevice testDeviceType)
+        [Fact]
+        public void AdminData_Auth_Req()
         {
             byte[] adminData = new byte[] {
                 0x53, 0x09, 0x80, 0x07, 0x81, 0x01, 0x00, 0x03, 0x02, 0x5C, 0x29
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice();
 
             using (var pivSession = new PivSession(testDevice))
             {

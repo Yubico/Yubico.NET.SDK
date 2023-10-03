@@ -72,7 +72,7 @@ namespace Yubico.YubiKey.Scp03.Commands
         }
         private static InitializeUpdateCommand GetInitializeUpdateCommand()
         {
-            return new InitializeUpdateCommand(GetChallenge());
+            return new InitializeUpdateCommand(0, GetChallenge());
         }
         private static CommandApdu GetInitializeUpdateCommandApdu()
         {

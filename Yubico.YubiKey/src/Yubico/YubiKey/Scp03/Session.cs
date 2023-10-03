@@ -20,15 +20,15 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Scp03
 {
-    internal class Session
+    internal class Session : IDisposable
     {
         private SessionKeys? _sessionKeys;
         private byte[]? _hostChallenge;
         private byte[]? _hostCryptogram;
         private byte[] _macChainingValue;
         private int _encryptionCounter;
-        private byte[]? _divData;
-        private byte[]? _keyInfo;
+
+        private bool _disposed;
 
         /// <summary>
         /// Initializes the host-side state for an SCP03 session.
@@ -41,16 +41,16 @@ namespace Yubico.YubiKey.Scp03
             _hostChallenge = null;
             _hostCryptogram = null;
             _sessionKeys = null;
-            _divData = null;
-            _keyInfo = null;
+            _disposed = false;
         }
 
         /// <summary>
         /// Builds the INITIALIZE_UPDATE APDU, using the supplied host challenge.
         /// </summary>
+        /// <param name="keyVersionNumber">Which key set is to be used.</param>
         /// <param name="hostChallenge">Randomly chosen 8-byte challenge.</param>
         /// <returns>INITIALIZE_UPDATE APDU</returns>
-        public InitializeUpdateCommand BuildInitializeUpdate(byte[] hostChallenge)
+        public InitializeUpdateCommand BuildInitializeUpdate(byte keyVersionNumber, byte[] hostChallenge)
         {
             if (hostChallenge is null)
             {
@@ -63,7 +63,7 @@ namespace Yubico.YubiKey.Scp03
             }
 
             _hostChallenge = hostChallenge;
-            return new InitializeUpdateCommand(hostChallenge);
+            return new InitializeUpdateCommand(keyVersionNumber, hostChallenge);
         }
 
         /// <summary>
@@ -95,15 +95,16 @@ namespace Yubico.YubiKey.Scp03
             }
 
             // parse data in response
-            _divData = initializeUpdateResponse.DiversificationData.ToArray();
-            _keyInfo = initializeUpdateResponse.KeyInfo.ToArray();
             byte[] cardChallenge = initializeUpdateResponse.CardChallenge.ToArray();
             byte[] cardCryptogram = initializeUpdateResponse.CardCryptogram.ToArray();
             _sessionKeys = Derivation.DeriveSessionKeysFromStaticKeys(staticKeys, _hostChallenge, cardChallenge);
 
             // check supplied card cryptogram
-            byte[] calculatedCardCryptogram = Derivation.DeriveCryptogram(Derivation.DDC_CARD_CRYPTOGRAM, _sessionKeys.SessionMacKey, _hostChallenge, cardChallenge);
-            calculatedCardCryptogram = calculatedCardCryptogram.Take(8).ToArray();
+            byte[] calculatedCardCryptogram = Derivation.DeriveCryptogram(
+                Derivation.DDC_CARD_CRYPTOGRAM,
+                _sessionKeys.GetSessionMacKey(),
+                _hostChallenge,
+                cardChallenge);
 
             if (!CryptographicOperations.FixedTimeEquals(cardCryptogram, calculatedCardCryptogram))
             {
@@ -111,8 +112,11 @@ namespace Yubico.YubiKey.Scp03
             }
 
             // calculate host cryptogram
-            _hostCryptogram = Derivation.DeriveCryptogram(Derivation.DDC_HOST_CRYPTOGRAM, _sessionKeys.SessionMacKey, _hostChallenge, cardChallenge);
-            _hostCryptogram = _hostCryptogram.Take(8).ToArray();
+            _hostCryptogram = Derivation.DeriveCryptogram(
+                Derivation.DDC_HOST_CRYPTOGRAM,
+                _sessionKeys.GetSessionMacKey(),
+                _hostChallenge,
+                cardChallenge);
         }
 
         /// <summary>
@@ -134,7 +138,7 @@ namespace Yubico.YubiKey.Scp03
 
             var eaCommandInitial = new ExternalAuthenticateCommand(_hostCryptogram);
             CommandApdu macdApdu;
-            (macdApdu, _macChainingValue) = ChannelMac.MacApdu(eaCommandInitial.CreateCommandApdu(), _sessionKeys.SessionMacKey, _macChainingValue);
+            (macdApdu, _macChainingValue) = ChannelMac.MacApdu(eaCommandInitial.CreateCommandApdu(), _sessionKeys.GetSessionMacKey(), _macChainingValue);
             var eaCommand = new ExternalAuthenticateCommand(macdApdu.Data.ToArray());
             return eaCommand;
         }
@@ -184,12 +188,12 @@ namespace Yubico.YubiKey.Scp03
             };
 
             byte[] commandData = command.Data.ToArray();
-            byte[] encryptedData = ChannelEncryption.EncryptData(commandData, _sessionKeys.SessionEncryptionKey, _encryptionCounter);
+            byte[] encryptedData = ChannelEncryption.EncryptData(commandData, _sessionKeys.GetSessionEncKey(), _encryptionCounter);
             _encryptionCounter += 1;
             encodedCommand.Data = encryptedData;
 
             CommandApdu encodedApdu;
-            (encodedApdu, _macChainingValue) = ChannelMac.MacApdu(encodedCommand, _sessionKeys.SessionMacKey, _macChainingValue);
+            (encodedApdu, _macChainingValue) = ChannelMac.MacApdu(encodedCommand, _sessionKeys.GetSessionMacKey(), _macChainingValue);
             return encodedApdu;
         }
 
@@ -222,14 +226,14 @@ namespace Yubico.YubiKey.Scp03
 
             // ALWAYS check RMAC before decryption
             byte[] responseData = response.Data.ToArray();
-            ChannelMac.VerifyRmac(responseData, _sessionKeys.SessionRmacKey, _macChainingValue);
+            ChannelMac.VerifyRmac(responseData, _sessionKeys.GetSessionRmacKey(), _macChainingValue);
 
             byte[] decryptedData = Array.Empty<byte>();
             if (responseData.Length > 8)
             {
                 decryptedData = ChannelEncryption.DecryptData(
                     responseData.Take(responseData.Length - 8).ToArray(),
-                    _sessionKeys.SessionEncryptionKey,
+                    _sessionKeys.GetSessionEncKey(),
                     _encryptionCounter - 1
                 );
             }
@@ -239,6 +243,25 @@ namespace Yubico.YubiKey.Scp03
             fullDecryptedResponse[decryptedData.Length] = response.SW1;
             fullDecryptedResponse[decryptedData.Length + 1] = response.SW2;
             return new ResponseApdu(fullDecryptedResponse);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    _sessionKeys?.Dispose();
+
+                    _disposed = true;
+                }
+            }
         }
     }
 }

@@ -17,6 +17,7 @@ using System.Security;
 using System.Globalization;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.Core.Logging;
 
@@ -206,14 +207,59 @@ namespace Yubico.YubiKey.Piv
         /// The <c>yubiKey</c> argument is null.
         /// </exception>
         public PivSession(IYubiKeyDevice yubiKey)
+            : this(null, yubiKey)
         {
-            _log.LogInformation("Create a new instance of PivSession.");
+        }
+
+        /// <summary>
+        /// Create an instance of <c>PivSession</c>, the object that represents
+        /// the PIV application on the YubiKey. The communication between the SDK
+        /// and the YubiKey will be protected by SCP03.
+        /// </summary>
+        /// <remarks>
+        /// See the User's Manual entry on
+        /// <xref href="UsersManualScp03"> SCP03 </xref> for more information on
+        /// this communication protocol.
+        /// <para>
+        /// Because this class implements <c>IDisposable</c>, use the <c>using</c>
+        /// keyword. For example,
+        /// <code language="csharp">
+        ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
+        ///     // Assume you have some method that obtains the appropriate SCP03
+        ///     // key set.
+        ///     using StaticKeys scp03Keys = CollectScp03Keys();
+        ///     using (var piv = new PivSession(yubiKeyToUse, scp03Keys))
+        ///     {
+        ///         /* Perform PIV operations. */
+        ///     }
+        /// </code>
+        /// </para>
+        /// </remarks>
+        /// <param name="yubiKey">
+        /// The object that represents the actual YubiKey which will perform the
+        /// operations.
+        /// </param>
+        /// <param name="scp03Keys">
+        /// The SCP03 key set to use in establishing the connection.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The <c>yubiKey</c> argument is null.
+        /// </exception>
+        public PivSession(IYubiKeyDevice yubiKey, StaticKeys scp03Keys)
+            : this(scp03Keys, yubiKey)
+        {
+        }
+
+        private PivSession(StaticKeys? scp03Keys, IYubiKeyDevice yubiKey)
+        {
+            _log.LogInformation("Create a new instance of PivSession" + (scp03Keys is null ? "." : " over SCP03"));
             if (yubiKey is null)
             {
                 throw new ArgumentNullException(nameof(yubiKey));
             }
 
-            Connection = yubiKey.Connect(YubiKeyApplication.Piv);
+            Connection = scp03Keys is null ?
+                yubiKey.Connect(YubiKeyApplication.Piv) : yubiKey.ConnectScp03(YubiKeyApplication.Piv, scp03Keys);
             ResetAuthenticationStatus();
 
             ManagementKeyAlgorithm = PivAlgorithm.TripleDes;

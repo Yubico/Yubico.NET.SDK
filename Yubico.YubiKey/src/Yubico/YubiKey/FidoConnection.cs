@@ -64,6 +64,7 @@ namespace Yubico.YubiKey
             {
                 if (disposing)
                 {
+                    _apduPipeline.Cleanup();
                     _fidoConnection.Dispose();
                 }
 

@@ -15,6 +15,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using Yubico.Core.Devices;
+using Yubico.YubiKey.Scp03;
 using MgmtCmd = Yubico.YubiKey.Management.Commands;
 
 namespace Yubico.YubiKey
@@ -44,20 +45,88 @@ namespace Yubico.YubiKey
         Transport AvailableTransports { get; }
 
         /// <summary>
-        /// Initiate a connection to the specified application on a YubiKey device.
+        /// Initiate a connection to the specified application on a YubiKey
+        /// device.
         /// </summary>
-        /// <param name="yubikeyApplication">The application to reference on the device.</param>
-        /// <returns>A <see cref="IYubiKeyConnection"/> instance.</returns>
+        /// <param name="yubikeyApplication">
+        /// The application to reference on the device.
+        /// </param>
+        /// <returns>
+        /// An instance of a class that implements the
+        /// <see cref="IYubiKeyConnection"/> interface.
+        /// </returns>
         IYubiKeyConnection Connect(YubiKeyApplication yubikeyApplication);
 
         /// <summary>
-        /// Initiate a connection to the specified application on a YubiKey device.
+        /// Initiate a connection to the specified application on a YubiKey
+        /// device. The connection will be made over SCP03 (assuming the keys are
+        /// the ones loaded onto the YubiKey).
+        /// </summary>
+        /// <remarks>
+        /// Note that SCP03 works only with SmartCard applications, namely PIV, OATH,
+        /// and OpenPgp. However, SCP03 is supported only on series 5 YubiKeys with
+        /// firmware version 5.3 and later, and only the PIV application. If you
+        /// specify any other application, the connection will likely fail.
+        /// <para>
+        /// Note also that the return is an instance of a class that implements
+        /// <see cref="IScp03YubiKeyConnection"/> which is a "subclass" of
+        /// <see cref="IYubiKeyConnection"/>.
+        /// </para>
+        /// </remarks>
+        /// <param name="yubikeyApplication">
+        /// The application to reference on the device.
+        /// </param>
+        /// <param name="scp03Keys">
+        /// The SCP03 key set to use in making an SCP03 connection.
+        /// </param>
+        /// <returns>
+        /// An instance of a class that implements the
+        /// <see cref="IScp03YubiKeyConnection"/> interface.
+        /// </returns>
+        IScp03YubiKeyConnection ConnectScp03(YubiKeyApplication yubikeyApplication, StaticKeys scp03Keys);
+
+        /// <summary>
+        /// Initiate a connection to the specified application represented as an
+        /// <c>applicationId</c> on a YubiKey device.
         /// </summary>
         /// <param name="applicationId">
-        /// A byte array representing the smart card Application ID (AID) for the application to open.
+        /// A byte array representing the smart card Application ID (AID) for the
+        /// application to open.
         /// </param>
-        /// <returns>A <see cref="IYubiKeyConnection"/> instance.</returns>
+        /// <returns>
+        /// An instance of a class that implements the
+        /// <see cref="IYubiKeyConnection"/> interface.
+        /// </returns>
         IYubiKeyConnection Connect(byte[] applicationId);
+
+        /// <summary>
+        /// Initiate a connection to the specified application represented as an
+        /// <c>applicationId</c> on a YubiKey device. The connection will be made
+        /// over SCP03 (assuming the keys are the ones loaded onto the YubiKey).
+        /// </summary>
+        /// <remarks>
+        /// Note that SCP03 works only with SmartCard applications, namely PIV, OATH,
+        /// and OpenPgp. However, SCP03 is supported only on series 5 YubiKeys with
+        /// firmware version 5.3 and later, and only the PIV application. If you
+        /// specify any other application, the connection will likely fail.
+        /// <para>
+        /// Note also that the return is an instance of a class that implements
+        /// <see cref="IScp03YubiKeyConnection"/> which is a "subclass" of
+        /// <see cref="IYubiKeyConnection"/>.
+        /// </para>
+        /// </remarks>
+        /// <param name="applicationId">
+        /// A byte array representing the smart card Application ID (AID) for the
+        /// application to open.
+        /// </param>
+        /// <param name="scp03Keys">
+        /// The SCP03 key set to use in making an SCP03 connection.
+        /// </param>
+        /// <returns>
+        /// An instance of a class that implements the
+        /// <see cref="IYubiKeyConnection"/> interface.
+        /// </returns>
+        IScp03YubiKeyConnection ConnectScp03(byte[] applicationId, StaticKeys scp03Keys);
 
         /// <summary>
         /// Checks whether a IYubiKeyDevice instance contains a particular platform <see cref="IDevice" />.
@@ -86,15 +155,70 @@ namespace Yubico.YubiKey
             out IYubiKeyConnection connection);
 
         /// <summary>
+        /// Attempt to connect to the YubiKey device. The connection will be made
+        /// over SCP03 (assuming the keys are the ones loaded onto the YubiKey).
+        /// </summary>
+        /// <remarks>
+        /// Note that SCP03 works only with SmartCard applications, namely PIV, OATH,
+        /// and OpenPgp. However, SCP03 is supported only on series 5 YubiKeys with
+        /// firmware version 5.3 and later, and only the PIV application. If you
+        /// specify any other application, the connection will likely fail.
+        /// <para>
+        /// Note also that the return is an instance of a class that implements
+        /// <see cref="IScp03YubiKeyConnection"/> which is a "subclass" of
+        /// <see cref="IYubiKeyConnection"/>.
+        /// </para>
+        /// </remarks>
+        /// <param name="application">The application to reference on the device.</param>
+        /// <param name="scp03Keys">
+        /// The SCP03 key set to use in making an SCP03 connection.
+        /// </param>
+        /// <param name="connection">Out parameter containing the <see cref="IYubiKeyConnection"/> instance.</param>
+        /// <returns>Boolean indicating whether the call was successful.</returns>
+        bool TryConnectScp03(
+            YubiKeyApplication application,
+            StaticKeys scp03Keys,
+            [MaybeNullWhen(returnValue: false)]
+            out IScp03YubiKeyConnection connection);
+
+        /// <summary>
         /// Attempt to connect to the YubiKey device.
         /// </summary>
-        /// <param name="applicationId">A byte pattern representing the application to reference.</param>
+        /// <param name="applicationId">A byte array representing the smart card Application ID (AID) for the
+        /// application to open.</param>
         /// <param name="connection">Out parameter containing the <see cref="IYubiKeyConnection"/> instance.</param>
         /// <returns>Boolean indicating whether the call was successful.</returns>
         bool TryConnect(
             byte[] applicationId,
             [MaybeNullWhen(returnValue: false)]
             out IYubiKeyConnection connection);
+
+        /// <summary>
+        /// Attempt to connect to the YubiKey device. The connection will be made
+        /// over SCP03 (assuming the keys are the ones loaded onto the YubiKey).
+        /// </summary>
+        /// <remarks>
+        /// Note that SCP03 works only with SmartCard applications, namely PIV, OATH,
+        /// and OpenPgp. However, SCP03 is supported only on series 5 YubiKeys with
+        /// firmware version 5.3 and later, and only the PIV application. If you
+        /// specify any other application, the connection will likely fail.
+        /// <para>
+        /// Note also that the return is an instance of a class that implements
+        /// <see cref="IScp03YubiKeyConnection"/> which is a "subclass" of
+        /// <see cref="IYubiKeyConnection"/>.
+        /// </para>
+        /// </remarks>
+        /// <param name="applicationId">A byte pattern representing the application to reference.</param>
+        /// <param name="scp03Keys">
+        /// The SCP03 key set to use in making an SCP03 connection.
+        /// </param>
+        /// <param name="connection">Out parameter containing the <see cref="IYubiKeyConnection"/> instance.</param>
+        /// <returns>Boolean indicating whether the call was successful.</returns>
+        bool TryConnectScp03(
+            byte[] applicationId,
+            StaticKeys scp03Keys,
+            [MaybeNullWhen(returnValue: false)]
+            out IScp03YubiKeyConnection connection);
 
         /// <summary>
         /// Sets which NFC features are enabled (and disabled).

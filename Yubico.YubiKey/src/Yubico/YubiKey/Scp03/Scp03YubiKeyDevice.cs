@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Diagnostics.CodeAnalysis;
 using Yubico.YubiKey.Scp03;
 
@@ -19,44 +20,40 @@ namespace Yubico.YubiKey
 {
     internal class Scp03YubiKeyDevice : YubiKeyDevice
     {
-        private StaticKeys StaticKeys { get; set; }
+        public StaticKeys StaticKeys { get; private set; }
 
         public Scp03YubiKeyDevice(YubiKeyDevice device, StaticKeys staticKeys)
             : base(device.GetSmartCardDevice(), null, null, device)
         {
-            StaticKeys = staticKeys;
+            StaticKeys = staticKeys.GetCopy();
         }
 
-        public override bool TryConnect(
-            YubiKeyApplication application,
-            [MaybeNullWhen(returnValue: false)]
-            out IYubiKeyConnection connection)
+        internal override IYubiKeyConnection? Connect(
+            YubiKeyApplication? application,
+            byte[]? applicationId,
+            StaticKeys? scp03Keys)
         {
             if (!HasSmartCard)
             {
-                connection = null;
-                return false;
+                return null;
             }
 
-            connection = new CcidConnection(GetSmartCardDevice(), application, StaticKeys);
-
-            return true;
-        }
-
-        public override bool TryConnect(
-            byte[] applicationId,
-            [MaybeNullWhen(returnValue: false)]
-            out IYubiKeyConnection connection)
-        {
-            if (!HasSmartCard)
+            if (!(scp03Keys is null) && !StaticKeys.AreKeysSame(scp03Keys))
             {
-                connection = null;
-                return false;
+                return null;
             }
 
-            connection = new CcidConnection(GetSmartCardDevice(), applicationId, StaticKeys);
+            if (!(application is null))
+            {
+                return new Scp03CcidConnection(GetSmartCardDevice(), (YubiKeyApplication)application, StaticKeys);
+            }
 
-            return true;
+            if (!(applicationId is null))
+            {
+                return new Scp03CcidConnection(GetSmartCardDevice(), applicationId, StaticKeys);
+            }
+
+            return null;
         }
     }
 }

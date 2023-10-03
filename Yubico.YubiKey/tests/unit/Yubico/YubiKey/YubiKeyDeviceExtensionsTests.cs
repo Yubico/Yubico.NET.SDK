@@ -20,6 +20,7 @@ using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey
 {
+#pragma warning disable CS0618 // Specifically testing this soon-to-be-deprecated feature
     public class YubiKeyDeviceExtensionsTests
     {
         [Fact]
@@ -57,4 +58,5 @@ namespace Yubico.YubiKey
             _ = Assert.IsAssignableFrom<Scp03YubiKeyDevice>(scp03Device);
         }
     }
+#pragma warning restore CS0618
 }

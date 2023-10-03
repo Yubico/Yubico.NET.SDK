@@ -46,8 +46,10 @@ namespace Yubico.YubiKey.TestApp.Plugins
             IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.UsbSmartCard);
             IYubiKeyDevice device = keys.Single()!;
 
+#pragma warning disable CS0618 // Specifically testing this soon-to-be-deprecated feature
             IYubiKeyDevice scp03Device = (device as YubiKeyDevice)!.WithScp03(new StaticKeys());
-            using PivSession piv = new PivSession(scp03Device);
+#pragma warning restore CS0618
+            using var piv = new PivSession(scp03Device);
             bool result = piv.TryVerifyPin(new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 }), out _);
             Output.WriteLine($"pin 123456: {result}");
 

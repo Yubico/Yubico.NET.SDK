@@ -29,20 +29,21 @@ namespace Yubico.YubiKey
         InterIndustry = 8,
         OtpNdef = 9,
         YubiHsmAuth = 10,
+        Scp03 = 11,
     }
 
     internal static class YubiKeyApplicationExtensions
     {
         private static readonly byte[] ManagementAppId = new byte[] { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x47, 0x11, 0x17 };
-        private static readonly byte[] OtpAppId = new byte[] { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01, 0x01 };
-        private static readonly byte[] FidoU2fAppId = new byte[] { 0xa0, 0x00, 0x00, 0x06, 0x47, 0x2f, 0x00, 0x01 };
-        private static readonly byte[] Fido2AppId = new byte[] { 0xa0, 0x00, 0x00, 0x06, 0x47, 0x2f, 0x00, 0x01 };
-        private static readonly byte[] OathAppId = new byte[] { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01 };
-        private static readonly byte[] OpenPgpAppId = new byte[] { 0xd2, 0x76, 0x00, 0x01, 0x24, 0x01 };
-        private static readonly byte[] PivAppId = new byte[] { 0xa0, 0x00, 0x00, 0x03, 0x08 };
-        private static readonly byte[] OtpNdef = new byte[] { 0xd2, 0x76, 0x00, 0x00, 0x85, 0x01, 0x01 };
-        private static readonly byte[] YubiHsmAuthId = new byte[] { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x07, 0x01 };
-
+        private static readonly byte[] OtpAppId = new byte[]        { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x20, 0x01, 0x01 };
+        private static readonly byte[] FidoU2fAppId = new byte[]    { 0xa0, 0x00, 0x00, 0x06, 0x47, 0x2f, 0x00, 0x01 };
+        private static readonly byte[] Fido2AppId = new byte[]      { 0xa0, 0x00, 0x00, 0x06, 0x47, 0x2f, 0x00, 0x01 };
+        private static readonly byte[] OathAppId = new byte[]       { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01 };
+        private static readonly byte[] OpenPgpAppId = new byte[]    { 0xd2, 0x76, 0x00, 0x01, 0x24, 0x01 };
+        private static readonly byte[] PivAppId = new byte[]        { 0xa0, 0x00, 0x00, 0x03, 0x08 };
+        private static readonly byte[] OtpNdef = new byte[]         { 0xd2, 0x76, 0x00, 0x00, 0x85, 0x01, 0x01 };
+        private static readonly byte[] YubiHsmAuthId = new byte[]   { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x07, 0x01 };
+        private static readonly byte[] Scp03AuthId = new byte[]     { 0xA0, 0x00, 0x00, 0x01, 0x51, 0x00, 0x00, 0x00 };
 
         public static byte[] GetIso7816ApplicationId(this YubiKeyApplication application) =>
             application switch
@@ -56,6 +57,7 @@ namespace Yubico.YubiKey
                 YubiKeyApplication.Piv => PivAppId,
                 YubiKeyApplication.OtpNdef => OtpNdef,
                 YubiKeyApplication.YubiHsmAuth => YubiHsmAuthId,
+                YubiKeyApplication.Scp03 => Scp03AuthId,
                 _ => throw new NotSupportedException(ExceptionMessages.ApplicationIdNotFound),
             };
     }

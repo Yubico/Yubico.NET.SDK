@@ -1,4 +1,4 @@
-// Copyright 2022 Yubico AB
+// Copyright 2023 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -13,15 +13,47 @@
 // limitations under the License.
 
 using System;
+using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
 {
     internal sealed class StartProgram
     {
-        static void Main()
+        // To run this sample as a command-line application, simply run the
+        // exectuable created.
+        //   $ Fido2Sample
+        // To run it as a GUI application, run the executable with an argument of g.
+        //   $ Fido2Sample g
+        // Note that the GUI version is available only on Windows platforms.
+        static void Main(string[] args)
         {
-            var fido2SampleRun = new Fido2SampleRun(maxInvalidCount: 2);
-            fido2SampleRun.RunSample();
+            bool useGui = false;
+
+            if (args.Length != 0)
+            {
+                useGui = args[0].Equals("g", StringComparison.OrdinalIgnoreCase);
+            }
+
+            if (useGui)
+            {
+#if WINDOWS
+                using var fido2SampleGui = new Fido2SampleGui();
+                fido2SampleGui.RunSample();
+#else
+                SampleMenu.WriteMessage(
+                    MessageType.Title, 0,
+                    "\n---The GUI version of this sample is not available on this plaform---\n");
+#endif
+            }
+            else
+            {
+                var fido2SampleRun = new Fido2SampleRun(maxInvalidCount: 2);
+#if WINDOWS
+                fido2SampleRun.RunSample();
+#else
+                fido2SampleRun.RunSample(false);
+#endif
+            }
         }
     }
 }

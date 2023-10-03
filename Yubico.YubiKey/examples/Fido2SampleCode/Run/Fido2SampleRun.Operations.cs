@@ -1,4 +1,4 @@
-// Copyright 2022 Yubico AB
+// Copyright 2023 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -230,16 +230,23 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             SampleMenu.WriteMessage(
                 MessageType.Title, 0,
                 "In order to make a credential, this sample code will collect relying party and user\n" +
-                "info, and will set the \"rk\" option to true. If the credBlob extension is supported,\n" +
-                "it will ask if the caller wants to store any data in the credBlob.\n" +
+                "info, and will set the \"rk\" option to true. If the hmac-secret extension is supported,\n" +
+                "it will make sure one is created. If the credBlob extension is supported, it will ask\n" +
+                "if the caller wants to store any data in the credBlob. If the credProtect extension is\n" +
+                "supported, it will ask if the caller wants to set the cred protect policy.\n" +
                 "No other optional elements will be set.\n" +
                 "For expedience, it will generate a value based on the relying party info and use it as\n" +
-                "the ClientDataHash, even though what is performed in this sample code is not how it is\n" +
-                "actually computed.\n" +
+                "the ClientDataHash, even though what is performed in this sample code is not how the\n" +
+                "standard specifies that it be computed.\n" +
                 "In addition, the User ID is binary data (a byte array), and this sample simply uses\n" +
                 "random numbers (as recommended in W3C).\n" +
                 "Furthermore, the standard specifies that the relyingPartyName, user Name, and user\n" +
-                "DisplayName are optional. However, this sample requires these elements.\n");
+                "DisplayName are optional. However, this sample requires these elements.\n\n" +
+                "Note that the relying party name is available as a convenience, it allows the\n" +
+                "application to store a more easily understood description of the relying party. The\n" +
+                "relying party ID is the value used in FIDO2 computations. For example, it is often\n" +
+                "based on the URL of the entity to which the user is connecting, such as\n" +
+                "\"example.login.com\".\n");
 
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the relyingPartyName");
             _ = SampleMenu.ReadResponse(out string relyingPartyName);
@@ -355,6 +362,29 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
             ReadOnlyMemory<byte> clientDataHash = BuildFakeClientDataHash(relyingPartyId);
 
+            ReadOnlyMemory<byte> salt = ReadOnlyMemory<byte>.Empty;
+            bool isValid = Fido2Protocol.RunGetAuthenticatorInfo(_yubiKeyChosen, out AuthenticatorInfo authenticatorInfo);
+            if (isValid)
+            {
+                if (authenticatorInfo.Extensions.Contains("hmac-secret"))
+                {
+                    SampleMenu.WriteMessage(
+                        MessageType.Title, 0,
+                        "\nWould you like the hmac-secret returned with the assertions?\n" +
+                        "If not, type Enter.\n" +
+                        "Otherwise, enter a string that will be used to derive a salt.\n" +
+                        "Normally, a salt is 32 random bytes or the digest of some identifying data.\n" +
+                        "This sample code will perform SHA-256 on the input you provide and send that\n" +
+                        "digest to the YubiKey as the salt.\n");
+                    _ = SampleMenu.ReadResponse(out string dataToDigest);
+                    byte[] dataBytes = System.Text.Encoding.Unicode.GetBytes(dataToDigest);
+                    SHA256 digester = CryptographyProviders.Sha256Creator();
+                    _ = digester.TransformFinalBlock(dataBytes, 0, dataBytes.Length);
+
+                    salt = new ReadOnlyMemory<byte>(digester.Hash);
+                }
+            }
+
             _keyCollector.Operation = Fido2KeyCollectorOperation.GetAssertion;
 
             if (!Fido2Protocol.RunGetAssertions(
@@ -362,7 +392,9 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 _keyCollector.Fido2SampleKeyCollectorDelegate,
                 clientDataHash,
                 relyingPartyId,
-                out IReadOnlyList<GetAssertionData> assertions))
+                salt,
+                out IReadOnlyList<GetAssertionData> assertions,
+                out IReadOnlyList<byte[]> hmacSecrets))
             {
                 return false;
             }
@@ -378,7 +410,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
             for (int index = 0; index < assertions.Count; index++)
             {
-                DisplayAssertion(index, assertions[index], clientDataHash);
+                DisplayAssertion(index, assertions[index], hmacSecrets[index], clientDataHash);
             }
 
             return true;
@@ -1101,7 +1133,11 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             }
         }
 
-        private void DisplayAssertion(int index, GetAssertionData assertion, ReadOnlyMemory<byte> clientDataHash)
+        private void DisplayAssertion(
+            int index,
+            GetAssertionData assertion,
+            byte[] hmacSecret,
+            ReadOnlyMemory<byte> clientDataHash)
         {
             SampleMenu.WriteMessage(MessageType.Title, 0, "Assertion number " + index);
             string userIdString = BitConverter.ToString(assertion.User.Id.ToArray()).Replace("-", string.Empty, StringComparison.Ordinal);
@@ -1118,6 +1154,12 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             {
                 string credBlobDataString = Encoding.Unicode.GetString(credBlobData);
                 SampleMenu.WriteMessage(MessageType.Title, 0, "Credential Blob: " + credBlobDataString);
+            }
+
+            if (hmacSecret.Length > 0)
+            {
+                string hmacSecretString = BitConverter.ToString(hmacSecret).Replace("-", string.Empty, StringComparison.Ordinal);
+                SampleMenu.WriteMessage(MessageType.Title, 0, "HMAC Secret: " + hmacSecretString);
             }
 
             int indexC = FindCredential(assertion.CredentialId.Id);

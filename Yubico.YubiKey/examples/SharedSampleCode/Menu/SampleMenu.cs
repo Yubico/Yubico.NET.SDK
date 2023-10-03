@@ -14,10 +14,18 @@
 
 using System;
 using System.Globalization;
-using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Sample.SharedCode
 {
+    public delegate void WriteToScreen(string? content);
+    public delegate string? ReadFromScreen();
+
+    public static class ReaderWriter
+    {
+        public static ReadFromScreen ReadLine { get; set; } = Console.ReadLine;
+        public static WriteToScreen WriteLine { get; set; } = Console.WriteLine;
+    }
+
     public class SampleMenu
     {
         private const int DefaultMaxInvalidCount = 3;
@@ -146,15 +154,15 @@ namespace Yubico.YubiKey.Sample.SharedCode
             switch (messageType)
             {
                 case MessageType.Special:
-                    Console.WriteLine("\n---" + message + "---\n");
+                    ReaderWriter.WriteLine("\n---" + message + "---\n");
                     break;
 
                 case MessageType.Title:
-                    Console.WriteLine(message);
+                    ReaderWriter.WriteLine(message);
                     break;
 
                 default:
-                    Console.WriteLine("   " + numberToWrite.ToString("D1", CultureInfo.InvariantCulture) + " - " + message);
+                    ReaderWriter.WriteLine("   " + numberToWrite.ToString("D1", CultureInfo.InvariantCulture) + " - " + message);
                     break;
             }
         }
@@ -165,7 +173,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
         // If the response cannot be converted to an integer, return -1.
         public static int ReadResponse(out string responseString)
         {
-            responseString = Console.ReadLine() ?? string.Empty;
+            responseString = ReaderWriter.ReadLine() ?? string.Empty;
             if (int.TryParse(responseString, out int response))
             {
                 return response;
@@ -184,80 +192,11 @@ namespace Yubico.YubiKey.Sample.SharedCode
         // If the response cannot be converted to an integer, return -1.
         public static char[] ReadResponse(out int responseAsInt)
         {
-            char[] inputData = new char[8];
-            int dataLength = 0;
+            responseAsInt = ReadResponse(out string responseString);
+            char[] fullArray = responseString.ToCharArray();
 
-            do
-            {
-                ConsoleKeyInfo currentKeyInfo = Console.ReadKey();
-                if (currentKeyInfo.Key == ConsoleKey.Enter)
-                {
-                    break;
-                }
-
-                inputData = AppendChar(currentKeyInfo.KeyChar, inputData, ref dataLength);
-            } while (true);
-
-            char[] result = ResizeResult(inputData, dataLength);
-            if (int.TryParse(result, out responseAsInt) == false)
-            {
-                responseAsInt = -1;
-            }
-
-            Console.WriteLine("\n");
-            return result;
-        }
-
-        // Place the currentChar onto the end of inputData. The dataLength arg is
-        // how long the data currently is (so it will be the next index). Update
-        // this value to the new length.
-        // If the buffer is not big enough, create a new buffer with more space,
-        // copy the old data, overwrite the old buffer, and add the new char.
-        // Return the new buffer.
-        // If the buffer is big enough, return it.
-        public static char[] AppendChar(char currentChar, char[] inputData, ref int dataLength)
-        {
-            if (inputData is null)
-            {
-                throw new ArgumentNullException(nameof(inputData));
-            }
-
-            char[] currentBuffer = inputData;
-            if (dataLength >= inputData.Length)
-            {
-                char[] newBuffer = new char[inputData.Length + 8];
-                Array.Copy(inputData, newBuffer, inputData.Length);
-                Array.Clear(inputData, 0, inputData.Length);
-                currentBuffer = newBuffer;
-            }
-
-            currentBuffer[dataLength] = currentChar;
-            dataLength++;
-
-            return currentBuffer;
-        }
-
-        // Return a buffer whose length is dataLength.
-        // If inputData.Length is already dataLength, just return inputData.
-        // If not, create a new buffer, copy the old, overwrite the old, and
-        // return the new.
-        public static char[] ResizeResult(char[] inputData, int dataLength)
-        {
-            if (inputData is null)
-            {
-                throw new ArgumentNullException(nameof(inputData));
-            }
-
-            if (inputData.Length == dataLength)
-            {
-                return inputData;
-            }
-
-            char[] returnValue = new char[dataLength];
-            Array.Copy(inputData, returnValue, dataLength);
-            Array.Clear(inputData, 0, inputData.Length);
-
-            return returnValue;
+            ReaderWriter.WriteLine("\n");
+            return fullArray;
         }
     }
 }

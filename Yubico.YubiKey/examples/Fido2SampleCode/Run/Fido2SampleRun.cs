@@ -41,9 +41,14 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         //   var sampleRun = new SampleRun(maxInvalidCount: 21).
         // the constructor will build an object and the maxInvalidCount will be 3.
         public Fido2SampleRun(int maxInvalidCount)
+            : this(maxInvalidCount, new Fido2SampleKeyCollector())
+        {
+        }
+
+        public Fido2SampleRun(int maxInvalidCount, Fido2SampleKeyCollector keyCollector)
         {
             _menuObject = new SampleMenu(maxInvalidCount, typeof(Fido2MainMenuItem), (int)Fido2MainMenuItem.Exit);
-            _keyCollector = new Fido2SampleKeyCollector();
+            _keyCollector = keyCollector;
             _credentialList = new List<MakeCredentialData>();
         }
 
@@ -53,12 +58,22 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         // After running the operation, return to the main menu. Keep doing this
         // until the user calls for Exit or enters too many invalid responses in
         // a row.
-        public void RunSample()
+        public void RunSample(bool displayGuiMessage = true)
         {
             Fido2MainMenuItem menuItem;
 
             do
             {
+                if (displayGuiMessage)
+                {
+                    SampleMenu.WriteMessage(
+                        MessageType.Title, 0,
+                        "To run this sample as a GUI application, call the executable with an argument of g.\n" +
+                        "For example,\n" +
+                        "  $ Fido2Sample.exe g\n");
+                    displayGuiMessage = false;
+                }
+
                 menuItem = (Fido2MainMenuItem)_menuObject.RunMainMenu("What do you want to do?");
 
                 // If whatever the user wants to do requires a YubiKey, make sure

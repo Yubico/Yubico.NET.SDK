@@ -1,4 +1,4 @@
-// Copyright 2022 Yubico AB
+// Copyright 2023 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -14,6 +14,7 @@
 
 using System;
 using System.Text;
+using System.Linq;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2;
@@ -84,6 +85,11 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 // This sample code wants all credentials to be discoverable.
                 makeCredentialParameters.AddOption("rk", true);
 
+                if (fido2Session.AuthenticatorInfo.Extensions.Contains("hmac-secret"))
+                {
+                    makeCredentialParameters.AddHmacSecretExtension(fido2Session.AuthenticatorInfo);
+                }
+
                 if (credProtectPolicy != CredProtectPolicy.None)
                 {
                     makeCredentialParameters.AddCredProtectExtension(credProtectPolicy, fido2Session.AuthenticatorInfo);
@@ -110,9 +116,13 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             Func<KeyEntryData, bool> KeyCollectorDelegate,
             ReadOnlyMemory<byte> clientDataHash,
             string relyingPartyId,
-            out IReadOnlyList<GetAssertionData> assertions)
+            ReadOnlyMemory<byte> salt,
+            out IReadOnlyList<GetAssertionData> assertions,
+            out IReadOnlyList<byte[]> hmacSecrets)
         {
             assertions = new List<GetAssertionData>();
+            var hmacSecretList = new List<byte[]>();
+            hmacSecrets = hmacSecretList;
             var relyingParty = new RelyingParty(relyingPartyId);
 
             using (var fido2Session = new Fido2Session(yubiKey))
@@ -126,11 +136,22 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 // nothing if there is none). In this case, the data to accompany the
                 // name of the extension ("credBlob"), is the CBOR encoding of true.
                 // That's simply the single byte 0xF5.
-                getAssertionParameters.AddExtension("credBlob", new byte[] { 0xF5 });
+                getAssertionParameters.RequestCredBlobExtension();
+
+                if (!salt.IsEmpty)
+                {
+                    getAssertionParameters.RequestHmacSecretExtension(salt);
+                }
 
                 // This method will automatically perform any PIN or fingerprint
                 // verification needed.
                 assertions = fido2Session.GetAssertions(getAssertionParameters);
+
+                foreach (GetAssertionData assertionData in assertions)
+                {
+                    byte[] hmacSecret = assertionData.AuthenticatorData.GetHmacSecretExtension(fido2Session.AuthProtocol);
+                    hmacSecretList.Add(hmacSecret);
+                }
             }
 
             return true;

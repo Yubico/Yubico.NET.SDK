@@ -34,7 +34,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             Operation = Fido2KeyCollectorOperation.None;
         }
 
-        public bool Fido2SampleKeyCollectorDelegate(KeyEntryData keyEntryData)
+        public virtual bool Fido2SampleKeyCollectorDelegate(KeyEntryData keyEntryData)
         {
             if (keyEntryData is null)
             {

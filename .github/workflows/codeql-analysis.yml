@@ -37,6 +37,7 @@ permissions:
   # only required for workflows in private repositories
   actions: read
   contents: read
+  packages: read
 
 jobs:
   analyze:

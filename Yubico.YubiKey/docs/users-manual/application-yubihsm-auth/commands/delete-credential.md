@@ -53,7 +53,7 @@ The data is sent as concatenated TLV-formatted elements, as follows:
 
 | Tag (hexadecimal) | Length (decimal) | Value | Notes |
 | :---: | :---: | :---: | :--- |
-| 0x7b | 16 | managment key | used to authenticate to the YubiHSM Auth application |
+| 0x7b | 16 | management key | used to authenticate to the YubiHSM Auth application |
 | 0x71 | 1-64 | label | UTF-8 encoded string |
 
 ## Response APDU

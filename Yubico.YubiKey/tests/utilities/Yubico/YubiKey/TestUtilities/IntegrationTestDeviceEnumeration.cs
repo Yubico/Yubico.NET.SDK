@@ -1,4 +1,4 @@
-﻿// Copyright 2021 Yubico AB
+﻿// Copyright 2023 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
 // You may not use this file except in compliance with the License.
@@ -133,10 +133,10 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 if (currentDevice.FirmwareVersion >= FirmwareVersion.V5_3_0)
                 {
-                    if (currentDevice is YubiKeyDevice device)
+                    if (currentDevice is YubiKeyDevice ykDevice)
                     {
 #pragma warning disable CS0618 // Specifically testing this soon-to-be-deprecated feature
-                        return device.WithScp03(staticKeys);
+                        return ykDevice.WithScp03(staticKeys);
 #pragma warning restore CS0618
                     }
                 }

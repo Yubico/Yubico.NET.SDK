@@ -26,7 +26,7 @@ Features:
 
 - **FIDO2 PIN Config**. The PIN config feature, if supported by the
   connected YubiKey, is a set of operations: set the minimum PIN
-  length, force a PIN change, and returning a minimum PIN length to a
+  length, force a PIN change, and return a minimum PIN length to a
   relying party.
 
 - **FIDO2 GUI option for sample code**. There is now a version of the
@@ -36,7 +36,7 @@ Features:
   only in a Windows environment.
 
 - **SCP03 CMAC added to CryptographyProviders**. SCP03 operations rely
-  on AES-CMAC, and starting in this release, will call on the
+  on the AES-CMAC algorithm, and, starting in this release, SCP03 operations will call on the
   CryptogrphyProviders class to retrieve an implementation. The default
   implementation uses OpenSSL.
 
@@ -45,8 +45,8 @@ Features:
   sets, and removing key sets. This is done using the new Scp03Session
   class.
 
-- **SCP03 architecture**. How to build an SCP03 connection was updated.
-  the previous method (in the YubiKeyDevice class) is now deprecated and
+- **SCP03 architecture**. The process for building an SCP03 connection was updated.
+  The previous method (in the YubiKeyDevice class) is now deprecated, and
   the new method simply requires passing in the SCP03 key set to the
   PivSession constructor. It is also possible to build an
   IYubiKeyConnection that uses SCP03.

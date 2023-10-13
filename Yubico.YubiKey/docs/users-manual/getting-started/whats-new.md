@@ -20,7 +20,7 @@ Here you can find all of the updates and release notes for published versions of
 
 ### 1.9.0
 
-Release date: October 12th, 2023
+Release date: October 13th, 2023
 
 Features:
 

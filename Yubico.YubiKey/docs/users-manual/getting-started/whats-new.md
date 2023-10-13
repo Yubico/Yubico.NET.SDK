@@ -36,7 +36,7 @@ Features:
   only in a Windows environment.
 
 - **SCP03 CMAC added to CryptographyProviders**. SCP03 operations rely
-  on the AES-CMAC algorithm, and, starting in this release, SCP03 operations will call on the
+  on the AES-CMAC algorithm, and, starting in this release, they will call on the
   CryptogrphyProviders class to retrieve an implementation. The default
   implementation uses OpenSSL.
 

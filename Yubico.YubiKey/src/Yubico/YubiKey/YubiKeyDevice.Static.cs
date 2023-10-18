@@ -65,8 +65,10 @@ namespace Yubico.YubiKey
         /// <exception cref="ArgumentException">
         /// Thrown when <paramref name="transport"/> is <see cref="Transport.None"/>.
         /// </exception>
-        /// <exception cref="NotImplementedException">
-        /// Thrown when <paramref name="transport"/> contains the flag <see cref="Transport.HidFido"/>.
+        /// <exception cref="UnauthorizedAccessException">
+        /// Thrown when attempting to find YubiKeys for the transport
+        /// <c>HidFido</c> on Windows, and the application is not running in an
+        /// elevated state (e.g. "Run as administrator").
         /// </exception>
         public static IEnumerable<IYubiKeyDevice> FindByTransport(Transport transport = Transport.All)
         {

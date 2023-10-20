@@ -78,11 +78,24 @@ namespace Yubico.YubiKey.TestUtilities
         /// Get YubiKey test device of specified type available on a system.
         /// </summary>
         /// <param name="testDeviceType">The type of the device.</param>
+        /// <param name="requireSerialNumber">A boolean indicating if the caller
+        /// wants to require finding YubiKeys with serial numbers only. If
+        /// <c>true</c> the method will only examine YubiKeys have a visible
+        /// serial number. This is the default, if no <c>requireSerialNumber</c>
+        /// arg is given, then this method will require serial numbers. If
+        /// <c>false</c>, the method will examine all YubiKeys, whether the
+        /// serial number is visible or not.</param>
         /// <returns>A YubiKey that was found.</returns>
-        public static IYubiKeyDevice GetTestDevice(StandardTestDevice testDeviceType)
+        public static IYubiKeyDevice GetTestDevice(StandardTestDevice testDeviceType, bool requireSerialNumber = true)
         {
+            if (requireSerialNumber)
+            {
+                return GetTestDevices()
+                    .Where(d => d.SerialNumber.HasValue)
+                    .SelectRequiredTestDevice(testDeviceType);
+            }
+
             return GetTestDevices()
-                .Where(d => d.SerialNumber.HasValue)
                 .SelectRequiredTestDevice(testDeviceType);
         }
 

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
@@ -24,6 +25,138 @@ namespace Yubico.YubiKey
 
         private static byte[] TestLockCode =>
             new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+
+        [Fact]
+        public void Sky_SetLock_Succeeds()
+        {
+            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            {
+                if (!device.ConfigurationLocked)
+                {
+                    device.LockConfiguration(TestLockCode);
+                }
+
+                device.UnlockConfiguration(TestLockCode);
+
+                // What we really want is to refresh the device and verify that
+                // the ConfigurationLocked property is properly set. But until
+                // that feature is available, just do this.
+                Assert.False(device.IsFipsSeries);
+            }
+        }
+
+        [Fact]
+        public void Sky_SetAutoEjectTimeout_Succeeds()
+        {
+            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            {
+                if (device.AutoEjectTimeout == 0)
+                {
+                    device.SetAutoEjectTimeout(5);
+                }
+
+                device.SetAutoEjectTimeout(0);
+
+                // What we really want is to refresh the device and verify that
+                // the ConfigurationLocked property is properly set. But until
+                // that feature is available, just do this.
+                Assert.False(device.IsFipsSeries);
+            }
+        }
+
+        [Fact]
+        public void Sky_SetChallengeResponseTimeout_Succeeds()
+        {
+            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            {
+                if (device.ChallengeResponseTimeout == 15)
+                {
+                    device.SetChallengeResponseTimeout(20);
+                }
+
+                device.SetChallengeResponseTimeout(15);
+
+                // What we really want is to refresh the device and verify that
+                // the ConfigurationLocked property is properly set. But until
+                // that feature is available, just do this.
+                Assert.False(device.IsFipsSeries);
+            }
+        }
+
+        [Fact]
+        public void Sky_SetDeviceFlags_Succeeds()
+        {
+            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            {
+                if (device.DeviceFlags == DeviceFlags.None)
+                {
+                    device.SetDeviceFlags(DeviceFlags.RemoteWakeup);
+                }
+
+                device.SetDeviceFlags(DeviceFlags.None);
+
+                // What we really want is to refresh the device and verify that
+                // the ConfigurationLocked property is properly set. But until
+                // that feature is available, just do this.
+                Assert.False(device.IsFipsSeries);
+            }
+        }
+
+        [Fact]
+        public void Sky_SetEnabledNfcCapabilities_Succeeds()
+        {
+            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            {
+                if (device.EnabledNfcCapabilities == (YubiKeyCapabilities.Fido2 | YubiKeyCapabilities.FidoU2f))
+                {
+                    device.SetEnabledNfcCapabilities(YubiKeyCapabilities.Fido2);
+                }
+
+                device.SetEnabledNfcCapabilities(YubiKeyCapabilities.Fido2 | YubiKeyCapabilities.FidoU2f);
+
+                // What we really want is to refresh the device and verify that
+                // the ConfigurationLocked property is properly set. But until
+                // that feature is available, just do this.
+                Assert.False(device.IsFipsSeries);
+            }
+        }
+
+        [Fact]
+        public void Sky_SetEnabledUsbCapabilities_Succeeds()
+        {
+            if (TryGetSkyDevice(out IYubiKeyDevice device))
+            {
+                if (device.EnabledUsbCapabilities == (YubiKeyCapabilities.Fido2 | YubiKeyCapabilities.FidoU2f))
+                {
+                    device.SetEnabledUsbCapabilities(YubiKeyCapabilities.Fido2);
+                }
+
+                device.SetEnabledUsbCapabilities(YubiKeyCapabilities.Fido2 | YubiKeyCapabilities.FidoU2f);
+
+                // What we really want is to refresh the device and verify that
+                // the ConfigurationLocked property is properly set. But until
+                // that feature is available, just do this.
+                Assert.False(device.IsFipsSeries);
+            }
+        }
+
+        // Set the out arg device to the first SKY device found, return true.
+        // If no SKY is found, set device to Hollow and return false.
+        private bool TryGetSkyDevice(out IYubiKeyDevice skyDevice)
+        {
+            IEnumerable<IYubiKeyDevice> devices = YubiKeyDevice.FindAll();
+            foreach (IYubiKeyDevice device in devices)
+            {
+                if (device.IsSkySeries)
+                {
+                    skyDevice = device;
+                    return true;
+                }
+            }
+
+            skyDevice = new HollowYubiKeyDevice();
+            return false;
+        }
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]

@@ -687,6 +687,10 @@ namespace Yubico.YubiKey
                 {
                     command = new Otp.Commands.SetDeviceInfoCommand(baseCommand);
                 }
+                else if (TryConnect(YubiKeyApplication.FidoU2f, out connection))
+                {
+                    command = new U2f.Commands.SetDeviceInfoCommand(baseCommand);
+                }
                 else
                 {
                     throw new NotSupportedException(ExceptionMessages.NoInterfaceAvailable);

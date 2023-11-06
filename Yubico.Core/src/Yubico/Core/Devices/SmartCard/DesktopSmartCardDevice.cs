@@ -134,7 +134,7 @@ namespace Yubico.Core.Devices.SmartCard
                 result = SCardConnect(
                     context,
                     _readerName,
-                    SCARD_SHARE.SHARED,
+                    SCARD_SHARE.EXCLUSIVE,
                     SCARD_PROTOCOL.Tx,
                     out cardHandle,
                     out SCARD_PROTOCOL activeProtocol);

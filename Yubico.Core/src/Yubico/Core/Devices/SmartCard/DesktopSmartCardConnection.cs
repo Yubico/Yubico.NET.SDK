@@ -174,7 +174,7 @@ namespace Yubico.Core.Devices.SmartCard
         {
             uint result = SCardReconnect(
                 _cardHandle,
-                SCARD_SHARE.SHARED,
+                SCARD_SHARE.EXCLUSIVE,
                 SCARD_PROTOCOL.T1,
                 SCARD_DISPOSITION.RESET_CARD,
                 out SCARD_PROTOCOL updatedActiveProtocol);

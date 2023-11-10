@@ -66,8 +66,8 @@ namespace Yubico.YubiKey.Fido2
 
                 IReadOnlyList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
 
-                Assert.Equal(1, assertions.Count);
-                Assert.Equal(1, assertions[0].NumberOfCredentials);
+                GetAssertionData assertion = Assert.Single(assertions);
+                Assert.Equal(1, assertion.NumberOfCredentials);
             }
         }
 
@@ -103,7 +103,7 @@ namespace Yubico.YubiKey.Fido2
 
                 IReadOnlyList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
 
-                Assert.Equal(1, assertions.Count);
+                _ = Assert.Single(assertions);
             }
         }
 

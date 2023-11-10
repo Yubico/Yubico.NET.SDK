@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.U2f.Commands
             var command = new ResetCommand();
             CommandApdu commandApdu = command.CreateCommandApdu();
 
-            Assert.Equal(commandApdu.Nc, lengthHeader);
+            Assert.Equal(lengthHeader, commandApdu.Nc);
         }
 
         [Fact]

@@ -75,7 +75,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{778EE2C1
 		build\CompilerSettings.props = build\CompilerSettings.props
 		build\Directory.Build.props = build\Directory.Build.props
 		build\Directory.Build.targets = build\Directory.Build.targets
-		build\PackageReferences.props = build\PackageReferences.props
 		build\ProjectTypes.props = build\ProjectTypes.props
 		build\Versions.props = build\Versions.props
 	EndProjectSection

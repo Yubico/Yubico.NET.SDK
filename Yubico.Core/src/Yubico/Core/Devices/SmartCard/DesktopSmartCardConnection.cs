@@ -33,7 +33,7 @@ namespace Yubico.Core.Devices.SmartCard
         {
             private readonly Logger _log = Log.GetLogger();
             private readonly DesktopSmartCardConnection _thisConnection;
-            private readonly IDisposable _logScope;
+            private readonly IDisposable? _logScope;
             private bool _disposedValue;
 
             public TransactionScope(DesktopSmartCardConnection thisConnection)
@@ -58,7 +58,7 @@ namespace Yubico.Core.Devices.SmartCard
 
                 if (disposing)
                 {
-                    _logScope.Dispose();
+                    _logScope?.Dispose();
                 }
             }
 

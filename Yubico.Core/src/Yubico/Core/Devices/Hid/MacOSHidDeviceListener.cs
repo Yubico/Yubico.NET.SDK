@@ -68,7 +68,7 @@ namespace Yubico.Core.Devices.Hid
         private void ListeningThread()
         {
             const int runLoopTimeout = 10; // 10 seconds is arbitrary, pulled from Apple sample code
-            using IDisposable logScope = _log.BeginScope("MacOSHidDeviceListener.StartListening()");
+            using IDisposable? logScope = _log.BeginScope("MacOSHidDeviceListener.StartListening()");
 
             _log.LogInformation("HID listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
 

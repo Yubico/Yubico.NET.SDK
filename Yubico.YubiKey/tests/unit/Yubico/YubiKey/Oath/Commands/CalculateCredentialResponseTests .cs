@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-            
+
             var calculateCredentialResponse = new CalculateCredentialResponse(responseApdu, credential);
 
             Assert.Equal(SWConstants.Success, calculateCredentialResponse.StatusWord);
@@ -80,6 +80,7 @@ namespace Yubico.YubiKey.Oath.Commands
             var data = calculateCredentialResponse.GetData();
 
             Assert.Equal(SWConstants.Success, calculateCredentialResponse.StatusWord);
+            Assert.NotNull(data.Value);
             Assert.NotEmpty(data.Value);
         }
 
@@ -98,6 +99,7 @@ namespace Yubico.YubiKey.Oath.Commands
             var data = calculateCredentialResponse.GetData();
 
             Assert.Equal(SWConstants.Success, calculateCredentialResponse.StatusWord);
+            Assert.NotNull(data.Value);
             Assert.NotEmpty(data.Value);
         }
 

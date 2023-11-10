@@ -50,7 +50,7 @@ namespace Yubico.Core.Devices.Hid
         public static IEnumerable<HidDevice> GetList()
         {
             Logger log = Log.GetLogger();
-            using IDisposable logScope = log.BeginScope("MacOSHidDevice.GetList()");
+            using IDisposable? logScope = log.BeginScope("MacOSHidDevice.GetList()");
 
             IntPtr manager = IntPtr.Zero;
             IntPtr deviceSet = IntPtr.Zero;

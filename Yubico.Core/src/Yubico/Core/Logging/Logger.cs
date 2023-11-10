@@ -122,6 +122,6 @@ namespace Yubico.Core.Logging
         /// <returns>
         /// A disposable object that ends the logical operation scope on dispose.
         /// </returns>
-        public IDisposable BeginScope<TState>(TState state) => _logger.BeginScope(state);
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => _logger.BeginScope(state);
     }
 }

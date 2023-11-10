@@ -128,7 +128,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
             IReadOnlyList<TemplateInfo> templateInfos = rsp.GetData();
-            Assert.Equal(1, templateInfos.Count);
+            _ = Assert.Single(templateInfos);
         }
 
         [Fact]

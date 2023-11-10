@@ -32,7 +32,7 @@ namespace Yubico.Core.Devices.SmartCard
         public static IReadOnlyList<ISmartCardDevice> GetList()
         {
             Logger log = Log.GetLogger();
-            using IDisposable logScope = log.BeginScope("SmartCardDevice.GetList()");
+            using IDisposable? logScope = log.BeginScope("SmartCardDevice.GetList()");
 
             uint result = SCardEstablishContext(SCARD_SCOPE.USER, out SCardContext context);
             log.SCardApiCall(nameof(SCardEstablishContext), result);

@@ -8,7 +8,7 @@ namespace Yubico.Core.Devices.SmartCard
 {
     internal static class SmartCardLoggerExtensions
     {
-        public static IDisposable BeginTransactionScope(this Logger logger, IDisposable transactionScope) =>
+        public static IDisposable? BeginTransactionScope(this Logger logger, IDisposable transactionScope) =>
             logger.BeginScope("Transaction[{TransactionID}]", transactionScope.GetHashCode());
 
         public static void SCardApiCall(this Logger logger, string apiName, uint result)

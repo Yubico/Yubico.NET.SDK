@@ -75,7 +75,7 @@ namespace Yubico.YubiKey.Fido2
                 TemplateInfo templateInfo = fido2Session.EnrollFingerprint(firstName, 5000);
 
                 Assert.NotNull(templateInfo.FriendlyName);
-                Assert.True(templateInfo.FriendlyName.Equals(firstName, StringComparison.Ordinal));
+                Assert.Equal(firstName, templateInfo.FriendlyName);
                 Assert.NotEmpty(templateInfo.TemplateId.ToArray());
 
                 fido2Session.SetBioTemplateFriendlyName(templateInfo.TemplateId, secondName);

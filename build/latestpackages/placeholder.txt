@@ -1,1 +1,0 @@
-DO NOT DELETE. Needed to pin otherwise empty directory in Git.

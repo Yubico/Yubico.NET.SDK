@@ -934,7 +934,7 @@ namespace Yubico.Core.Logging
         /// {
         /// }
         /// </example>
-        public static IDisposable BeginScope(
+        public static IDisposable? BeginScope(
             this Logger logger,
             string messageFormat,
             params object?[] args) =>

@@ -53,10 +53,6 @@ limitations under the License. -->
     </None>
   </ItemGroup>
 
-  <Target Name="CopyPackage" AfterTargets="Pack">
-    <Copy SourceFiles="$(PackageOutputPath)$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(MSBuildProjectDirectory)\..\..\build\latestpackages" />
-  </Target>
-
   <ItemGroup>
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
   </ItemGroup>
@@ -64,7 +60,7 @@ limitations under the License. -->
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
 
     <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
-    <PackageReference Include="System.Memory" Version="4.5.4" />
+    <PackageReference Include="System.Memory" Version="4.5.5" />
 
   </ItemGroup>
 

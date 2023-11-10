@@ -46,7 +46,7 @@ namespace Yubico.Core.Iso7816.UnitTests
 
             var responseApdu = new ResponseApdu(new byte[] { SW1, SW2 });
 
-            Assert.Equal(responseApdu.SW >> 8, SW1);
+            Assert.Equal(SW1, responseApdu.SW >> 8);
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace Yubico.Core.Iso7816.UnitTests
 
             var responseApdu = new ResponseApdu(new byte[] { SW1, SW2 });
 
-            Assert.Equal(responseApdu.SW & 0xFF, SW2);
+            Assert.Equal(SW2, responseApdu.SW & 0xFF);
         }
 
         [Fact]

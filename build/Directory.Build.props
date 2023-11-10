@@ -36,7 +36,4 @@ limitations under the License. -->
   <!-- Centralized project versions -->
   <Import Project="Versions.props" />
 
-  <!-- Global NuGet package dependencies -->
-  <Import Project="PackageReferences.props"/>
-
 </Project>

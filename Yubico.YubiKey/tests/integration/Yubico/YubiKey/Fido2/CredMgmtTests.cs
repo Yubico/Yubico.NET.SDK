@@ -131,7 +131,7 @@ namespace Yubico.YubiKey.Fido2
 
                 IReadOnlyList<CredentialUserInfo> credList =
                     fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[0].RelyingParty);
-                Assert.NotEqual(0, credList.Count);
+                Assert.NotEmpty(credList);
 
                 fido2Session.ClearAuthToken();
                 fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
@@ -144,7 +144,7 @@ namespace Yubico.YubiKey.Fido2
                 credList = fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[0].RelyingParty);
 
                 string displayName = credList[0].User.DisplayName??"";
-                Assert.True(displayName.Equals(updatedDisplayName));
+                Assert.Equal(updatedDisplayName, displayName);
             }
         }
     }

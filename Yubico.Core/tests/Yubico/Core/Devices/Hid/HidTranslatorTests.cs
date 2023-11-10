@@ -156,7 +156,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         }
 #endif
 
-        private static IEnumerable<object> GetTestData()
+        public static IEnumerable<object[]> GetTestData()
         {
             // Originally, I hard-coded these, but I decided that it should do
             // this dynamically so that newly added keyboard layouts aren't left

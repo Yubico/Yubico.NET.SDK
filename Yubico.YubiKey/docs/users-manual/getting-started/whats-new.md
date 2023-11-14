@@ -39,7 +39,10 @@ Miscellaneous:
 
 - **Dependency updates**. The dependencies of the SDK were updated to the latest packages
   available. Since the SDK itself does not take many dependencies outside of the .NET Base
-  Class Libraries (BCL), there should not be much of a noticeable impact.
+  Class Libraries (BCL), there should not be much of a noticeable impact. The two that
+  affected the SDK itself (and not just test code) were:
+  - `Microsoft.Extensions.Logging.Abstractions` (6.0.1 -> 7.0.1)
+  - `System.Memory` (4.5.4 -> 4.5.5)
 
 ### 1.9.0
 

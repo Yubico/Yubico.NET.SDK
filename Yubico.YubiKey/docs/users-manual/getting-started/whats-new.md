@@ -25,22 +25,26 @@ Release date: November 14th, 2023
 Bug fixes:
 
 - **SCard handle contention**. Previously, the SDK was opening all smart card handles with
-  shared permissions. This is typically the "nice" thing to do, however this allowed other
-  applications and services (such as smart card minidrivers) to alter the current state of
-  the YubiKey without the SDK's knowledge. This would cause random failures and exceptions
-  to occur when using the SDK. We now open the handle exclusively. Callers should take care
-  to not keep a YubiKey connection or session open longer than is needed.
-- **Config changes over FIDO2**. The YubiKey management commands should have been available
-  over all three logical USB interfaces. The SDK will typically use the first available
-  interface, giving some preference to Smart Card. On FIDO only devices, this operation would
-  have failed as the commands were not properly wired up over this interface.
+  shared permissions, meaning that other applications and services were still able to interact
+  with the YubiKey while the SDK performed smart card operations. However, this allowed these
+  other entities (such as smart card minidrivers) to alter the current state of the YubiKey
+  without the SDK's knowledge. This would sometimes cause random failures and exceptions to
+  occur when using the SDK. The SDK now opens the handle exclusively, which means other
+  applications will not be able to open the smart card handle for read and write operations
+  while the SDK is using it. Callers should take care to not keep a YubiKey connection or
+  session open longer than is needed.
+- **Config changes over FIDO2**. The YubiKey Management commands are now available over all
+  three logical USB interfaces (HID keyboard, HID FIDO, and smart card). The SDK will typically
+  use the first available interface, giving some preference to the smart card. Previously,
+  this operation would have failed on FIDO-only devices as the management commands were not
+  properly wired up over this interface.
 
 Miscellaneous:
 
 - **Dependency updates**. The dependencies of the SDK were updated to the latest packages
   available. Since the SDK itself does not take many dependencies outside of the .NET Base
   Class Libraries (BCL), there should not be much of a noticeable impact. The two that
-  affected the SDK itself (and not just test code) were:
+  affect the SDK itself (and not just test code) are:
   - `Microsoft.Extensions.Logging.Abstractions` (6.0.1 -> 7.0.1)
   - `System.Memory` (4.5.4 -> 4.5.5)
 

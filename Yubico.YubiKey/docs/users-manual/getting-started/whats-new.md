@@ -18,6 +18,36 @@ Here you can find all of the updates and release notes for published versions of
 
 ## 1.9.x Releases
 
+### 1.9.1
+
+Release date: November 14th, 2023
+
+Bug fixes:
+
+- **SCard handle contention**. Previously, the SDK was opening all smart card handles with
+  shared permissions, meaning that other applications and services were still able to interact
+  with the YubiKey while the SDK performed smart card operations. However, this allowed these
+  other entities (such as smart card minidrivers) to alter the current state of the YubiKey
+  without the SDK's knowledge. This would sometimes cause random failures and exceptions to
+  occur when using the SDK. The SDK now opens the handle exclusively, which means other
+  applications will not be able to open the smart card handle for read and write operations
+  while the SDK is using it. Callers should take care to not keep a YubiKey connection or
+  session open longer than is needed.
+- **Config changes over FIDO2**. The YubiKey Management commands are now available over all
+  three logical USB interfaces (HID keyboard, HID FIDO, and smart card). The SDK will typically
+  use the first available interface, giving some preference to the smart card. Previously,
+  this operation would have failed on FIDO-only devices as the management commands were not
+  properly wired up over this interface.
+
+Miscellaneous:
+
+- **Dependency updates**. The dependencies of the SDK were updated to the latest packages
+  available. Since the SDK itself does not take many dependencies outside of the .NET Base
+  Class Libraries (BCL), there should not be much of a noticeable impact. The two that
+  affect the SDK itself (and not just test code) are:
+  - `Microsoft.Extensions.Logging.Abstractions` (6.0.1 -> 7.0.1)
+  - `System.Memory` (4.5.4 -> 4.5.5)
+
 ### 1.9.0
 
 Release date: October 13th, 2023

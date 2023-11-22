@@ -20,35 +20,57 @@ limitations under the License. -->
 
 To program a [slot](xref:OtpSlots) with a [challenge-response](xref:OtpChallengeResponse) credential, you must use a [ConfigureChallengeResponse](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse) instance. It is instantiated by calling the factory method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
 
-The challenge-response credential, unlike the other configurations, is passive. It only responds when it is queried with challenge data.
+The challenge-response credential, unlike the other configurations, is passive. It only responds when it is queried with a challenge via ``CalculateChallengeResponse()``.
 
-There are two distinct flavors of a challenge-response credential, based on the algorithm used: HMAC-SHA1 and Yubico OTP. Two major differences between the Yubico OTP and HMAC-SHA1 challenge-response credentials are:
+Slots can be programmed with one of the following types of credentials:
 
-* The key size for Yubico OTP is 16 bytes, and the key size for HMAC-SHA1 is 20 bytes.
+- [HMAC-SHA1](https://datatracker.ietf.org/doc/html/rfc2104)
+- [Yubico OTP](xref:OtpYubicoOtp)
 
-* The YubiKey supports a short challenge mode for HMAC-SHA1 (see below for more details).
+During a challenge-response operation, and slot programmed with an HMAC-SHA1 credential will digest the challenge with that credential via the HMAC-SHA1 algorithm, producing an HOTP code. If the slot was programmed with a Yubico OTP credential, the key will encrypt the challenge with that credential via the Yubico OTP algorithm, producing a Yubico OTP.
 
-When configuring the credential, use the appropriate method ([UseYubiOtp()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseYubiOtp) or [UseHmacSha1()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseHmacSha1)) to select the algorithm you'd like to use.
+## Algorithm selection and key sizes
 
-## Short challenge mode
+When programming a slot with a credential, you must call either [UseYubiOtp()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseYubiOtp) or [UseHmacSha1()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseHmacSha1) to select the algorithm you'd like to use.
 
-An HMAC-SHA1 challenge is 64 bytes by default. The YubiKey also supports a short challenge mode (``UseSmallChallenge()``) where challenges can be configured to be less than 64 bytes. ``UseSmallChallenge()`` is included for compatibility with legacy systems whose implementations break data sets into multiple blocks, which often results in the last element being smaller than 64 bytes (which would change the result). Due to this truncation, it’s important to use the setting that will be expected by the consumer of the OTP code.
+In addition, a secret key must be provided via ``UseKey()`` or generated randomly via ``GenerateKey()``. The key must be 16 bytes in size for Yubico OTP or 20 bytes for HMAC-SHA1. 
+
+The secret key must later be provided to the validation server for the purposes of verifying response codes sent from the YubiKey during challenge-response operations.
+
+## Short challenge mode for HMAC-SHA1
+
+An HMAC-SHA1 challenge is 64 bytes by default. The YubiKey also supports a short challenge mode (``UseSmallChallenge()``) where challenges, which are sent to a YubiKey with ``CalculateChallengeResponse()``, can be configured to be less than 64 bytes. ``UseSmallChallenge()`` is included for compatibility with legacy systems whose implementations break data sets into multiple blocks, which often results in the last element being smaller than 64 bytes (which would change the result). Due to this truncation, it’s important to use the setting that will be expected by the consumer of the OTP code.
 
 > [!NOTE]
 > You can still use challenges smaller than 64 bytes without setting the short challenge mode by simply padding the end of the challenge with zeros. Again, it’s important that both sides of the operation agree on the length of the challenge.
 
 ## Require touch
 
-Both the Yubico OTP and HMAC-SHA1 challenge-response credentials can include a setting that requires the user to touch the YubiKey before the cryptographic operation can proceed. Requiring touch improves security by ensuring that a user performs a physical operation.
+When programming a slot with a Yubico OTP or HMAC-SHA1 challenge-response credential, you can also include a setting that requires the user to touch the YubiKey before the cryptographic operation can proceed during a challenge-response operation. Requiring touch improves security by ensuring that a user performs a physical operation.
 
-To enable this setting, add the [UseButton()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseButton(System.Boolean)) method to your operation.
+To enable this setting, add the [UseButton()](xref:Yubico.YubiKey.Otp.Operations.ConfigureChallengeResponse.UseButton(System.Boolean)) method to your ``ConfigureChallengeResponse()`` operation.
 
-## ConfigureChallengeResponse example
+> [!NOTE]
+> If a YubiKey has been configured to require a button touch, you must make sure to alert the user of this requirement during a challenge-response operation. This can be accomplished by calling the [UseTouchNotifier()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.UseTouchNotifier(System.Action)) method when sending a challenge to a YubiKey via ``CalculateChallengeResponse()``.
+
+## ConfigureChallengeResponse examples
+
+Before running any of the code provided below, make sure you have already connected to a particular YubiKey on your host device via the [YubiKeyDevice](xref:Yubico.YubiKey.YubiKeyDevice) class. 
+
+To select the first available YubiKey connected to your host, use:
+
+```C#
+IEnumerable<IYubiKeyDevice> yubiKeyList = YubiKeyDevice.FindAll();
+
+var yubiKey = yubiKeyList.First();
+```
+
+### HMAC-SHA1 example
 
 The following code configures the [short press](xref:Yubico.YubiKey.Otp.Slot.ShortPress) slot with a challenge-response credential. This configuration uses the HMAC-SHA1 algorithm and requires the user to touch the button when there is a challenge-response operation.
 
 ```C#
-using (OtpSession otp = new OtpSession(yKey))
+using (OtpSession otp = new OtpSession(yubiKey))
 {
   // The key, hmacKey, will have been set elsewhere.
   otp.ConfigureChallengeResponse(Slot.ShortPress)
@@ -59,6 +81,10 @@ using (OtpSession otp = new OtpSession(yKey))
 }
 ```
 
+### Yubico OTP example
+
+
+
 ## Slot reconfiguration and access codes
 
 If a slot is protected by an access code and you wish to reconfigure it with a challenge-response credential, you must provide that access code with ``UseCurrentAccessCode()`` during the ``ConfigureChallengeResponse()`` operation. Otherwise, the operation will fail and throw the following exception:
@@ -66,3 +92,6 @@ If a slot is protected by an access code and you wish to reconfigure it with a c
 ```System.InvalidOperationException has been thrown. YubiKey Operation Failed. [Warning, state of non-volatile memory is unchanged.]```
 
 For more information on slot access codes, please see [How to set, reset, remove, and use slot access codes](xref:OtpSlotAccessCodes).
+
+## Additional settings
+

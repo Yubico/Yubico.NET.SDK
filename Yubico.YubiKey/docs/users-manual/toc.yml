@@ -91,7 +91,7 @@
       href: application-otp/how-to-program-an-hotp-credential.md
     - name: How to program a slot with a challenge-response credential
       href: application-otp/how-to-program-a-challenge-response-credential.md
-    - name: How to calculate a response code for a challenge-response credential
+    - name: How to send a challenge to a YubiKey and receive a response code
       href: application-otp/how-to-calculate-a-challenge-response-code.md
     - name: How to program a slot with a static password
       href: application-otp/how-to-program-a-static-password.md

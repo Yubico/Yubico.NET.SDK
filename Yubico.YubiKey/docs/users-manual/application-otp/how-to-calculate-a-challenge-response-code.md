@@ -34,7 +34,7 @@ For HMAC-SHA1 and TOTP challenge-response, the YubiKey will digest the challenge
 
 The response from a YubiKey can be received via one of three methods:
 
-1. [GetCode()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetCode%28System.Int32%29): returns a string object containing [six](``MinOtpDigits``) to [ten](``MaxOtpDigits``) 32-bit integers. A 6-digit code will be returned by default unless a larger number is specified when calling this method (for example, ``GetCode(8)``).
+1. [GetCode()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetCode%28System.Int32%29): returns a string object containing [six](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.MinOtpDigits) to [ten](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.MaxOtpDigits) 32-bit integers. A 6-digit code will be returned by default unless a larger number is specified when calling this method (for example, ``GetCode(8)``).
 1. [GetDataBytes()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetDataBytes): returns a byte array.
 1. [GetDataInt()](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.GetDataInt): returns a single 32-bit integer. For HOTP challenges, the integer returned will represent the same number as ``GetCode(10)``.
 

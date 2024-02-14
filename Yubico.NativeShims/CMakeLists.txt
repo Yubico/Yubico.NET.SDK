@@ -14,6 +14,14 @@ elseif(WIN32)
     set(BACKEND "winscard")
 endif()
 
+#enable control flow guard for windows
+if(WIN32)
+        message(STATUS "Building YubicoNativeShims with control flow guard")
+        add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/guard:cf>")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} /guard:cf")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} /guard:cf")
+endif()
+
 # export list
 if(APPLE AND (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR
    CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))

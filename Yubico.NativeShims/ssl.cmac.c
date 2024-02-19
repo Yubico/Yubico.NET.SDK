@@ -12,7 +12,6 @@ Native_EVP_MAC_CTX
 NATIVEAPI
 Native_CMAC_EVP_MAC_CTX_new()
 {
-#ifndef PLATFORM_LINUX
     EVP_MAC *mac = NULL;
     EVP_MAC_CTX *macCtx = NULL;
 
@@ -24,9 +23,7 @@ Native_CMAC_EVP_MAC_CTX_new()
     }
 
     return macCtx;
-#else
-    return CMAC_CTX_new();
-#endif
+
 }
 
 void
@@ -35,11 +32,7 @@ Native_EVP_MAC_CTX_free(
     Native_EVP_MAC_CTX c
     )
 {
-#ifndef PLATFORM_LINUX
     EVP_MAC_CTX_free(c);
-#else
-    CMAC_CTX_free(c);
-#endif
 }
 
 int32_t
@@ -51,7 +44,6 @@ Native_CMAC_EVP_MAC_init(
     int32_t keyLen
     )
 {
-#ifndef PLATFORM_LINUX
     char *cipherString;
     int32_t cipherStringLen;
     int32_t blockSize;
@@ -88,26 +80,7 @@ Native_CMAC_EVP_MAC_init(
     };
 
     return EVP_MAC_init(c, keyData, keyLen, params);
-#else
-    EVP_CIPHER *evpCipher;
 
-    switch (algorithm)
-    {
-        default:
-            evpCipher = EVP_aes_128_cbc();
-            break;
-
-        case 2:
-            evpCipher = EVP_aes_192_cbc();
-            break;
-
-        case 3:
-            evpCipher = EVP_aes_256_cbc();
-            break;
-    }
-
-    return CMAC_Init(c, keyData, keyLen, evpCipher, NULL);
-#endif
 }
 
 int32_t
@@ -118,11 +91,7 @@ Native_CMAC_EVP_MAC_update(
     int32_t inLen
     )
 {
-#ifndef PLATFORM_LINUX
     return EVP_MAC_update(c, input, inLen);
-#else
-    return CMAC_Update(c, input, inLen);
-#endif
 }
 
 int32_t
@@ -136,11 +105,8 @@ Native_CMAC_EVP_MAC_final(
 {
     int status;
     size_t outputLen = (size_t)outputSize;
-#ifndef PLATFORM_LINUX
     status = EVP_MAC_final(c, output, &outputLen, outputSize);
-#else
-    status = CMAC_Final(c, output, &outputLen);
-#endif
+
     *outLen = (int32_t)outputLen;
     return status;
 }

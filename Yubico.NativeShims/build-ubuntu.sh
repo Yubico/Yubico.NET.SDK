@@ -63,18 +63,6 @@ docker buildx build \
     .
 
 # Distro: Ubuntu
-# Arch: i386/x86
-# Output: ./ubuntu-x86/libYubico.NativeShims.so
-docker buildx build \
-    --tag yubico/nativeshims-ubuntu:1.0 \
-    --file docker/Ubuntu/Dockerfile \
-    --platform=linux/386 \
-    --build-arg USER_ID=`id -u` \
-    --build-arg GROUP_ID=`id -g` \
-    --output type=local,dest=ubuntu-x86 \
-    .
-
-# Distro: Ubuntu
 # Arch: arm64
 # Output: ./ubuntu-arm64/libYubico.NativeShims.so
 docker buildx build \

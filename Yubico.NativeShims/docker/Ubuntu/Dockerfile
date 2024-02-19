@@ -1,7 +1,4 @@
-# We use Bionic as the basis for our image. Bionic is the last Ubuntu long-term support
-# release that is both still supported and still supports i386 processors. Once Bionic
-# leaves support, we can consider upgrading to the next LTS release.
-FROM ubuntu:bionic AS env
+FROM ubuntu:20.04 AS env
 
 # These arguments are passed in from the console or by Docker-CLI itself. User/Group ID
 # is used to run the shell as the host's user identity. Artifact_dir should be set to
@@ -18,39 +15,39 @@ ENV PATH=/usr/local/bin:$PATH
 RUN groupadd -f -g ${GROUP_ID} local && useradd -u ${USER_ID} -g ${GROUP_ID} -s /bin/sh local
 
 # Install build tools
-RUN apt-get update -qq \
-&& DEBIAN_FRONTEND=noninteractive apt-get install -yq \
+RUN sudo apt-get update -qq \
+&& DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
     wget \
+    gpg \
     ca-certificates \
     gnupg \
     software-properties-common \
     build-essential \
     pkg-config \
     ninja-build \
-&& apt-get clean \
-&& rm -rf /var/lib/apt/lists/* /tmp/* /var/temp/*
+    zlib1g-dev  \
+    libpcsclite-dev \
+&& sudo apt-get clean \
+&& sudo rm -rf /var/lib/apt/lists/* /tmp/* /var/temp/*
 
-# Install latest CMake
-# Ubuntu Bionic contains a very old version of CMake (3.10). Our project requires a newer
-# version of the tool. This is the easiest way to update CMake using the official builds
-# from Kitware (makers of CMake).
-RUN apt-get update -qq \
-&& wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | apt-key add - \
-&& add-apt-repository 'deb https://apt.kitware.com/ubuntu/ bionic main' \
-&& apt-get update -qq \
-&& apt-get install cmake -yq \
-&& cmake -version
+RUN test -f /usr/share/doc/kitware-archive-keyring/copyright || \
+    wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
+
+RUN echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null \
+    sudo apt-get update \
+    sudo apt-get install cmake
 
 # Install build dependencies
-# This is where we should add any additional dependencies needed by Yubico.NativeShims.
-# We could use vcpkg to help with dependencies, but for Linux, the distro's package
-# manager is still almost always going to be the easiest way of finding the necessary
-# headers and pre-built libraries. Be sure to use the -dev packages, as these typically
-# denote the package that contains headers and libs.
-RUN  apt-get update -qq \
-&& apt-get install -yq \
-    libpcsclite-dev \
-    libssl-dev
+RUN wget https://www.openssl.org/source/openssl-3.0.2.tar.gz \
+    && tar -xzf openssl-3.0.2.tar.gz \
+    && rm openssl-3.0.2.tar.gz
+
+# Compile and install OpenSSL
+RUN cd openssl-3.0.2 \
+    && ./Configure --openssldir=/usr/local/ssl zlib \
+    && make \
+    && make install \
+    && ldconfig /usr/local/lib64/
 
 # Snapshot the base environment. If we ever decide to cache our images in a container
 # registry, `env` is the target we'd want to capture. The dependencies will be installed

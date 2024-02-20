@@ -1,12 +1,12 @@
-# Base Image: Use Ubuntu 20.04 as the starting point for the build environment
+# Base Image: Use Ubuntu 20.04 as the starting point for the build environment which ensures broad compatibility
 FROM ubuntu:20.04 AS env
 
-# Arguments: These are external variables that can be passed into the Docker build process
+# Arguments: These are external variables that can be passed into the Docker build process (e.g. --build-arg USER_ID=1000)
 ARG USER_ID
 ARG GROUP_ID
 ARG ARTIFACT_DIR
 
-# Environment Variables: Set the PATH environment variable to include /usr/local/bin
+# Environment Variables: Set the PATH environment variable to include /usr/local/bin as well, this is where OpenSSL is installed
 ENV PATH=/usr/local/bin:$PATH
 
 # User and Group Setup: Create a new user and group with specified IDs to match the host's user for file permissions
@@ -36,12 +36,13 @@ RUN groupadd -f -g ${GROUP_ID} local && \
     apt-get update -qq && \
     apt-get install cmake -yq
 
-# OpenSSL Installation: Download, compile, and install a specific version of OpenSSL from source
+# OpenSSL Installation: Download, compile, and install OpenSSL from source, updating library cache to include OpenSSL
 RUN wget https://www.openssl.org/source/openssl-3.0.2.tar.gz && \
     tar -xzf openssl-3.0.2.tar.gz && \
     cd openssl-3.0.2 && \
-    ./Configure --openssldir=/usr/local/ssl zlib && \
+    ./Configure zlib && \
     make && \
+    # make test && \
     make install && \
     ldconfig /usr/local/lib64/ && \
     cd .. && \
@@ -50,12 +51,14 @@ RUN wget https://www.openssl.org/source/openssl-3.0.2.tar.gz && \
 # Development Stage: Setup the working directory for building the application
 FROM env AS devel
 WORKDIR /home/build
+
 # Copy the entire context (source code) into the image
 COPY . .
+
 # Cleanup: Remove any pre-existing artifacts directory to ensure a clean build environment
 RUN rm -rf artifacts
 
-# Build Stage: Compile the application using CMake and store the outputs in a specific directory
+# Build Stage: Compile the Yubico.NativeShims shared object using CMake and store the outputs in an artifact directory
 FROM devel AS build
 RUN cmake -S . -B build_out -DCMAKE_BUILD_TYPE=Release && \
     cmake --build build_out --target all -v && \
@@ -64,5 +67,6 @@ RUN cmake -S . -B build_out -DCMAKE_BUILD_TYPE=Release && \
 
 # Final Image: Create a minimal final image containing only the build artifacts
 FROM scratch AS build_install
+
 # Copy build artifacts from the previous stage into the scratch image
 COPY --from=build /home/build/artifacts/$ARTIFACT_DIR/ .

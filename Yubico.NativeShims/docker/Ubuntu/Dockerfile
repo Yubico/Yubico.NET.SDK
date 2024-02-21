@@ -16,7 +16,6 @@ RUN groupadd -f -g ${GROUP_ID} local && \
     apt-get update -qq && \
     DEBIAN_FRONTEND=noninteractive apt-get install -yq \
         wget \
-        gpg \
         ca-certificates \
         gnupg \
         software-properties-common \

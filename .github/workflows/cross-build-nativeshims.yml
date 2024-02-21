@@ -32,7 +32,7 @@ jobs:
     name: Build Windows
     runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: |
           cd Yubico.NativeShims
           ./build-windows.cmd
@@ -61,7 +61,7 @@ jobs:
     name: Build Ubuntu
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: |
           cd Yubico.NativeShims
           sh ./build-ubuntu.sh
@@ -82,7 +82,7 @@ jobs:
     name: Build macOS
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: |
           cd Yubico.NativeShims
           sh ./build-macOS.sh

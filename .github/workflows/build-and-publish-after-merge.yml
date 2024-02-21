@@ -31,7 +31,11 @@ on:
         required: false
         default: "0.0.0-prerelease.YYYYMMDD.B"
         type: string
-
+        
+permissions:
+  contents: read
+  id-token: write
+  
 jobs:
   build:
     # Give this job a friendly name to show in GitHub UI.
@@ -143,10 +147,10 @@ jobs:
 
     steps:
       # Checkout the local repository as we need the Dockerfile and other things even for this step.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       # Grab the just-built documentation artifact and inflate the archive at the expected location.
-      - uses: actions/download-artifact@v2
+      - uses: actions/download-artifact@v4
         with:
           name: Documentation
           path: Yubico.YubiKey/docs/_site/
@@ -155,11 +159,14 @@ jobs:
       - name: Docker build
         run: |
           docker build -t "${IMAGE_NAME}:${{ github.sha }}" .
-
-      # Connect to our GCloud instance
-      - uses: google-github-actions/setup-gcloud@v0
+      
+      # Authenticate to Google Cloud
+      - id: 'auth'
+        name: 'Authenticate to Google Cloud'
+        uses: 'google-github-actions/auth@v2'
         with:
-          service_account_key: ${{ secrets.IMAGE_REPO_GCP_SA_KEY }}
+          workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
+          service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
 
       # Push our docker image to GCP
       - name: Push Docker image

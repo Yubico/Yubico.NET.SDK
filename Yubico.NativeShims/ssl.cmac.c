@@ -1,9 +1,6 @@
 #include "native_abi.h"
 #include "Yubico.NativeShims.h"
 #include "openssl/evp.h"
-#ifdef PLATFORM_LINUX
-#include "openssl/cmac.h"
-#endif
 
 #define CMAC_MAX_BLOCK_SIZE 16
 typedef void* Native_EVP_MAC_CTX;

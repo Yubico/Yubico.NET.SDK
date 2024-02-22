@@ -71,10 +71,6 @@ jobs:
           path: Yubico.NativeShims/ubuntu-x64/**
       - uses: actions/upload-artifact@v3
         with:
-          name: ubuntu-x86
-          path: Yubico.NativeShims/ubuntu-x86/**
-      - uses: actions/upload-artifact@v3
-        with:
           name: ubuntu-arm64
           path: Yubico.NativeShims/ubuntu-arm64/**
 

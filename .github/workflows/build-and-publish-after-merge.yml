@@ -150,7 +150,7 @@ jobs:
       - uses: actions/checkout@v4
 
       # Grab the just-built documentation artifact and inflate the archive at the expected location.
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v3
         with:
           name: Documentation
           path: Yubico.YubiKey/docs/_site/
@@ -161,18 +161,16 @@ jobs:
           docker build -t "${IMAGE_NAME}:${{ github.sha }}" .
       
       # Authenticate to Google Cloud
-      - id: 'auth'
-        name: 'Authenticate to Google Cloud'
-        uses: 'google-github-actions/auth@v2'
+      - name: Authenticate
+        uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
-          service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
+          workload_identity_provider: ${{ vars.GLOBAL_GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: yesdk-ci-builder@support-cluster-769001.iam.gserviceaccount.com
 
       # Push our docker image to GCP
       - name: Push Docker image
         run: |
-          gcloud components install beta --quiet
-          gcloud beta auth configure-docker ${IMAGE_REGISTRY_URL} --project ${IMAGE_REGISTRY_PROJECT}
+          gcloud auth configure-docker ${IMAGE_REGISTRY_URL} --project ${IMAGE_REGISTRY_PROJECT}
           docker tag "${IMAGE_NAME}:${{ github.sha }}" "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
           docker push "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
           echo "New image tag: ${{ github.sha }}"

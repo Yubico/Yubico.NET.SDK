@@ -42,8 +42,7 @@ RUN groupadd -f -g ${GROUP_ID} local && \
     # Install vcpkg and dependencies. 
     # This package manager makes sure that all the correct and compatible build flags are used so that it can match the rest of the Yubico.NativeShims.dll build.
     git clone https://github.com/Microsoft/vcpkg.git /vcpkg && \
-    /vcpkg/bootstrap-vcpkg.sh && \
-    /vcpkg/vcpkg install openssl
+    /vcpkg/bootstrap-vcpkg.sh
 
 # Development Stage
 FROM env AS devel

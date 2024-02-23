@@ -11,7 +11,7 @@ ENV PATH=/usr/local/bin:$PATH \
     CMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake
 
 # Setup and Install all dependencies in one layer
-RUN groupadd -f -g ${GROUP_ID} local && \
+RUN set -x && groupadd -f -g ${GROUP_ID} local && \
     useradd -u ${USER_ID} -g ${GROUP_ID} -s /bin/sh local && \
     apt-get update -qq && \
     DEBIAN_FRONTEND=noninteractive apt-get install -yq \

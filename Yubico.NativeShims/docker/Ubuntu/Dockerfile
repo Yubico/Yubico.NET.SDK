@@ -8,7 +8,9 @@ ARG ARTIFACT_DIR
 
 # Environment Variables
 ENV PATH=/usr/local/bin:$PATH \
-    CMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake
+    CMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
+    # Required by CMAKE for arm builds https://stackoverflow.com/questions/64455340/vcpkg-force-system-binaries-errors-when-running-vcpkg-on-raspberry-pi
+    VCPKG_FORCE_SYSTEM_BINARIES=1
 
 # Setup and Install all dependencies in one layer
 RUN set -x && groupadd -f -g ${GROUP_ID} local && \

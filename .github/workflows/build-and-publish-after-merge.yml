@@ -32,7 +32,9 @@ on:
         default: "0.0.0-prerelease.YYYYMMDD.B"
         type: string
         
-
+permissions:
+  contents: read
+  id-token: write
   
 jobs:
   build:

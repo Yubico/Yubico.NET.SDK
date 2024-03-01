@@ -57,7 +57,7 @@ jobs:
 
       # Save the built NuGet packages, just in case we need to inspect the build output.
       - name: Save build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: Nuget Packages ${{matrix.configuration}}
           path: |

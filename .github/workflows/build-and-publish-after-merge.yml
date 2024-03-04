@@ -31,7 +31,12 @@ on:
         required: false
         default: "0.0.0-prerelease.YYYYMMDD.B"
         type: string
-
+        
+permissions:
+  contents: read
+  id-token: write
+  packages: read
+  
 jobs:
   build:
     # Give this job a friendly name to show in GitHub UI.
@@ -155,17 +160,18 @@ jobs:
       - name: Docker build
         run: |
           docker build -t "${IMAGE_NAME}:${{ github.sha }}" .
-
-      # Connect to our GCloud instance
-      - uses: google-github-actions/setup-gcloud@v0
+      
+      # Authenticate to Google Cloud
+      - name: Authenticate
+        uses: google-github-actions/auth@v2
         with:
-          service_account_key: ${{ secrets.IMAGE_REPO_GCP_SA_KEY }}
+          workload_identity_provider: ${{ vars.GLOBAL_GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: yesdk-ci-builder@support-cluster-769001.iam.gserviceaccount.com
 
       # Push our docker image to GCP
       - name: Push Docker image
         run: |
-          gcloud components install beta --quiet
-          gcloud beta auth configure-docker ${IMAGE_REGISTRY_URL} --project ${IMAGE_REGISTRY_PROJECT}
+          gcloud auth configure-docker ${IMAGE_REGISTRY_URL} --project ${IMAGE_REGISTRY_PROJECT}
           docker tag "${IMAGE_NAME}:${{ github.sha }}" "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
           docker push "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
           echo "New image tag: ${{ github.sha }}"

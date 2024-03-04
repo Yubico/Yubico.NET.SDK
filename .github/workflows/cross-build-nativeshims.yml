@@ -32,27 +32,27 @@ jobs:
     name: Build Windows
     runs-on: windows-2019
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: |
           cd Yubico.NativeShims
           ./build-windows.cmd
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: win-x64
           path: Yubico.NativeShims/win-x64/**
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: win-x86
           path: Yubico.NativeShims/win-x86/**
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: win-arm64
           path: Yubico.NativeShims/win-arm64/**
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: nuspec
           path: Yubico.NativeShims/*.nuspec
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: msbuild
           path: Yubico.NativeShims/msbuild/*
@@ -61,19 +61,19 @@ jobs:
     name: Build Ubuntu
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: |
           cd Yubico.NativeShims
           sh ./build-ubuntu.sh
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ubuntu-x64
           path: Yubico.NativeShims/ubuntu-x64/**
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ubuntu-x86
           path: Yubico.NativeShims/ubuntu-x86/**
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: ubuntu-arm64
           path: Yubico.NativeShims/ubuntu-arm64/**
@@ -82,15 +82,15 @@ jobs:
     name: Build macOS
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - run: |
           cd Yubico.NativeShims
           sh ./build-macOS.sh
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: osx-x64
           path: Yubico.NativeShims/osx-x64/**
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: osx-arm64
           path: Yubico.NativeShims/osx-arm64/**
@@ -100,7 +100,7 @@ jobs:
     runs-on: windows-2019
     needs: [build-windows, build-ubuntu, build-macos]
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
       - run: |
           mv nuspec/*.nuspec .
           del nuspec
@@ -113,7 +113,7 @@ jobs:
           $nuspec.Save("Yubico.NativeShims.nuspec")
           cat Yubico.NativeShims.nuspec
       - run: nuget pack Yubico.NativeShims.nuspec
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: Yubico.NativeShims.nupkg
           path: Yubico.NativeShims.*.nupkg
@@ -125,7 +125,7 @@ jobs:
     environment: Internal NuGet feed
     if: ${{ github.event.inputs.push-to-dev == 'true' }}
     steps:
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: Yubico.NativeShims.nupkg
       - run: |

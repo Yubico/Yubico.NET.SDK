@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.10)
 
-project(Yubico.NativeShims VERSION 1.3.0)
+project(Yubico.NativeShims VERSION 1.9.1)
 
 if (APPLE)
     set(PLATFORM_MACOS true)

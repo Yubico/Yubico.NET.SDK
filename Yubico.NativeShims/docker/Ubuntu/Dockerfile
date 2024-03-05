@@ -6,13 +6,16 @@ ARG USER_ID
 ARG GROUP_ID
 ARG ARTIFACT_DIR
 
-# Environment Variables
+# Set environment variables for the build
+# - Include /usr/local/bin in PATH for easy access to installed tools
+# - Define CMAKE_TOOLCHAIN_FILE to integrate with vcpkg
+# - Enable VCPKG_FORCE_SYSTEM_BINARIES for compatibility with arm builds (See: https://stackoverflow.com/questions/64455340/vcpkg-force-system-binaries-errors-when-running-vcpkg-on-raspberry-pi)
 ENV PATH=/usr/local/bin:$PATH \
     CMAKE_TOOLCHAIN_FILE=/vcpkg/scripts/buildsystems/vcpkg.cmake \
-    # Required by CMAKE for arm builds https://stackoverflow.com/questions/64455340/vcpkg-force-system-binaries-errors-when-running-vcpkg-on-raspberry-pi
     VCPKG_FORCE_SYSTEM_BINARIES=1
 
-# Setup and Install all dependencies in one layer
+# Install dependencies, tools, and set up the user
+# This section combines updates, installs, and cleanup to keep the image size small
 RUN set -x && groupadd -f -g ${GROUP_ID} local && \
     useradd -u ${USER_ID} -g ${GROUP_ID} -s /bin/sh local && \
     apt-get update -qq && \
@@ -31,14 +34,14 @@ RUN set -x && groupadd -f -g ${GROUP_ID} local && \
         zip \
         unzip \
         tar && \
-    # Install Kitware CMake to get the latest CMake version for Ubuntu 20.04 published by Kitware (maintainer of Cmake)
+    # Install Kitware CMake to get the latest CMake version for Ubuntu 20.04 published by Kitware (maintainer of CMake)
     (wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | \
     tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null) && \
     echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | \
     tee /etc/apt/sources.list.d/kitware.list >/dev/null && \
     apt-get update && \
     apt-get install cmake -yq && \
-    # Cleanup
+    # Clean up to reduce image size
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* && \
     # Install vcpkg and dependencies. 
@@ -46,19 +49,19 @@ RUN set -x && groupadd -f -g ${GROUP_ID} local && \
     git clone https://github.com/Microsoft/vcpkg.git /vcpkg && \
     /vcpkg/bootstrap-vcpkg.sh
 
-# Development Stage
-FROM env AS devel
+# Setting up a development environment based on the previous stage
+FROM env AS develop
 WORKDIR /home/build
 COPY . .
 RUN rm -rf artifacts
 
-# Build Stage
-FROM devel AS build
+# Build
+FROM develop AS build
 RUN cmake -S . -B build_out -DCMAKE_BUILD_TYPE=Release && \
     cmake --build build_out --target all -v && \
     mkdir -p /home/build/artifacts/$ARTIFACT_DIR && \
     cp /home/build/build_out/*.so /home/build/artifacts/$ARTIFACT_DIR
 
-# Final Image
+# Prepare the final image with just the build artifacts
 FROM scratch AS build_install
 COPY --from=build /home/build/artifacts/$ARTIFACT_DIR/ .

@@ -23,8 +23,8 @@ using Yubico.YubiKey.Otp.Commands;
 namespace Yubico.YubiKey.Otp.Operations
 {
     /// <summary>
-    /// Operation class for configuring a YubiKey slot to respond to HMAC-SHA1 or 
-    /// Yubico OTP challenges.
+    /// Operation class for sending an HMAC-SHA1, TOTP, or Yubico OTP challenge 
+    /// to an OTP application slot on a YubiKey and receiving its response.
     /// </summary>
     public class CalculateChallengeResponse : OperationBase<CalculateChallengeResponse>
     {
@@ -235,6 +235,10 @@ namespace Yubico.YubiKey.Otp.Operations
         /// Instructs the operation to use TOTP instead of a <see langword="byte"/> array
         /// for the challenge.
         /// </summary>
+        /// <remarks>
+        /// UseYubiOtp(false) must be called along with UseTotp() in order for the YubiKey
+        /// to calculate the response code using the HMAC-SHA1 algorithm.
+        /// </remarks>
         /// <returns>The <see cref="CalculateChallengeResponse"/> instance</returns>
         public CalculateChallengeResponse UseTotp()
         {
@@ -255,7 +259,7 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         /// <summary>
-        /// Sets the time period in seconds that a challenge is good for.
+        /// Sets the time period in seconds that a TOTP challenge is good for.
         /// </summary>
         /// <param name="seconds">Time resolution in seconds for the challenge.</param>
         /// <returns>The <see cref="CalculateChallengeResponse"/> instance</returns>
@@ -328,15 +332,17 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         /// <summary>
-        /// Sets the operation to use the Yubico OTP algorithm to calculate the response.
+        /// Sets the operation to use the Yubico OTP or HMAC-SHA1 algorithm to calculate the response.
         /// </summary>
         /// <remarks>
-        /// By default, this class configures the YubiKey to use HMAC-SHA1 as the
-        /// algorithm. If you call this method with a <see langword="true"/> parameter,
-        /// it will configure the YubiKey to use Yubico OTP as the algorithm instead.
+        /// There is no default algorithm. You must either call this method with a 
+        /// <see langword="true"/> parameter, which will configure the YubiKey to use 
+        /// Yubico OTP as the algorithm, or a <see langword="false"/> parameter, which
+        /// will configure the YubiKey to use the HMAC-SHA1 algorithm (for both HMAC-SHA1 
+        /// and TOTP challenges).
         /// </remarks>
         /// <param name="setting">
-        /// A <see langword="bool"/> specifying whether to use the Yubico OTP algorithm.
+        /// A <see langword="bool"/> specifying whether to use the Yubico OTP or HMAC-SHA1 algorithm.
         /// </param>
         /// <returns>The <see cref="CalculateChallengeResponse"/> instance</returns>
         public CalculateChallengeResponse UseYubiOtp(bool setting)

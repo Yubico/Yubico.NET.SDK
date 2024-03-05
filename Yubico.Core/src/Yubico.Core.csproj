@@ -111,6 +111,7 @@ limitations under the License. -->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
     <PackageReference Include="System.Memory" Version="4.5.5" />
     <PackageReference Include="System.Security.Principal.Windows" Version="5.0.0" />
+    <!-- The wildcard version tag allows us to include the latest minor and pre-release versions -->
     <PackageReference Include="Yubico.NativeShims" Version="1.*-*" />
     <ProjectReference Include="..\..\Yubico.DotNetPolyfills\src\Yubico.DotNetPolyfills.csproj" />
   </ItemGroup>

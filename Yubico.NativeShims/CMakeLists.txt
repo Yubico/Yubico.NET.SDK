@@ -28,8 +28,6 @@ else()
 #enable control flow guard for windows
     string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
         " /guard:cf /def:\"${CMAKE_CURRENT_SOURCE_DIR}/exports.msvc\"")
-    string(CONCAT CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS}
-        " /guard:cf /def:\"${CMAKE_EXE_LINKER_FLAGS}/exports.msvc\"")
 endif()
 
 

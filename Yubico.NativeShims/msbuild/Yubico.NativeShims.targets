@@ -1,8 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <!-- .NET Framework versions don't seem to include the native runtime files that
+    <!--
+        .NET Framework versions don't seem to include the native runtime files that
         are needed for this package. This makes sure they are included in downlevel projects.
-        Since .NET Framework is Windows only, we only need to worry about that platform. -->
+        Since .NET Framework is Windows only, we only need to worry about that platform.
+    -->
+
+    <!-- x86 -->
     <ItemGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X86' OR '$(Platform)' == 'x86'">
         <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x86\native\Yubico.NativeShims.dll">
             <Link>Yubico.NativeShims.dll</Link>
@@ -10,6 +14,8 @@
             <Visible>false</Visible>
         </Content>
     </ItemGroup>
+
+    <!-- x64 -->
     <ItemGroup Condition="'$([System.Runtime.InteropServices.RuntimeInformation]::OSArchitecture)' == 'X64' OR '$(Platform)' == 'x64'">
         <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-x64\native\Yubico.NativeShims.dll">
             <Link>Yubico.NativeShims.dll</Link>
@@ -17,6 +23,8 @@
             <Visible>false</Visible>
         </Content>
     </ItemGroup>
+
+    <!-- Arm64 -->
     <ItemGroup Condition="'$(Platform)' == 'arm64'">
         <Content Include="$(MSBuildThisFileDirectory)..\..\runtimes\win-arm64\native\Yubico.NativeShims.dll">
             <Link>Yubico.NativeShims.dll</Link>

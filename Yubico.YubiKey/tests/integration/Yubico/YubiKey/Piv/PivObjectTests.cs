@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
+using Xunit;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Piv.Objects;
-using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -243,7 +243,7 @@ namespace Yubico.YubiKey.Piv
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Printed);
                 GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
 
-                Assert.Equal (ResponseStatus.Success, getDataResponse.Status);
+                Assert.Equal(ResponseStatus.Success, getDataResponse.Status);
                 ReadOnlyMemory<byte> getData = getDataResponse.GetData();
 
                 Assert.Equal(0x53, getData.Span[0]);
@@ -272,7 +272,7 @@ namespace Yubico.YubiKey.Piv
                 GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 ReadOnlyMemory<byte> getData = getDataResponse.GetData();
 
-                Assert.Equal (4, getData.Length);
+                Assert.Equal(4, getData.Length);
             }
         }
 

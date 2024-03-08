@@ -14,8 +14,8 @@
 
 using System;
 using Xunit;
-using Yubico.Core.Iso7816;
 using Yubico.Core.Buffers;
+using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Scp03
 {

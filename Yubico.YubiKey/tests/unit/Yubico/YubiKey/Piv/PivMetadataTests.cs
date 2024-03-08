@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -198,7 +198,7 @@ namespace Yubico.YubiKey.Piv
             var pivMetadata = new PivMetadata(testData, PivSlot.Pin);
 
             Assert.True(pivMetadata.RetryCount == 4);
-            Assert.True(pivMetadata.RetriesRemaining== 5);
+            Assert.True(pivMetadata.RetriesRemaining == 5);
         }
 
         [Fact]

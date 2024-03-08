@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.Piv.Objects;
-using Yubico.YubiKey.Piv.Commands;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.Piv.Objects;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {

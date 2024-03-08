@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.Otp.Commands;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.Otp.Commands;
 
 namespace Yubico.YubiKey.Pipelines
 {

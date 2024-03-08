@@ -16,7 +16,7 @@ using Yubico.YubiKey.Otp.Operations;
 
 namespace Yubico.YubiKey.Otp
 {
-    public partial class OtpSettings<T> where T: OperationBase<T>
+    public partial class OtpSettings<T> where T : OperationBase<T>
     {
         /// <summary>
         /// Allows the serial number to be retrieved by holding down the touch button while inserting

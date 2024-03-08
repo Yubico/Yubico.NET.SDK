@@ -55,25 +55,25 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_AuthReqdResponseApdu_SetsStatusCorrectly()
         {
-          byte sw1 = unchecked((byte)(SWConstants.SecurityStatusNotSatisfied >> 8));
-          byte sw2 = unchecked((byte)SWConstants.SecurityStatusNotSatisfied);
-          var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.SecurityStatusNotSatisfied >> 8));
+            byte sw2 = unchecked((byte)SWConstants.SecurityStatusNotSatisfied);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
-          var setPinRetriesResponse = new SetPinRetriesResponse(responseApdu);
+            var setPinRetriesResponse = new SetPinRetriesResponse(responseApdu);
 
-          Assert.Equal(ResponseStatus.AuthenticationRequired, setPinRetriesResponse.Status);
+            Assert.Equal(ResponseStatus.AuthenticationRequired, setPinRetriesResponse.Status);
         }
 
         [Fact]
         public void Constructor_ErrorResponseApdu_SetsStatusCorrectly()
         {
-          byte sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
-          byte sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
-          var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
+            byte sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
-          var setPinRetriesResponse = new SetPinRetriesResponse(responseApdu);
+            var setPinRetriesResponse = new SetPinRetriesResponse(responseApdu);
 
-          Assert.Equal(ResponseStatus.Failed, setPinRetriesResponse.Status);
+            Assert.Equal(ResponseStatus.Failed, setPinRetriesResponse.Status);
         }
     }
 }

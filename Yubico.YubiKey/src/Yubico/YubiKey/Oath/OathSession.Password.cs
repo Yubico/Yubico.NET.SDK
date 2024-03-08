@@ -49,7 +49,8 @@ namespace Yubico.YubiKey.Oath
 
             try
             {
-                if (KeyCollector!(keyEntryData) == true) {
+                if (KeyCollector!(keyEntryData) == true)
+                {
 
                     ReadOnlyMemory<byte> password = keyEntryData.GetCurrentValue();
                     var validateCommand = new ValidateCommand(password, _oathData);

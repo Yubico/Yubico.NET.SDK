@@ -97,13 +97,13 @@ namespace Yubico.YubiKey.TestUtilities
             }
 
             // Next, let' see if it's delmited.
-            if (Regex.IsMatch(s, $"[{ delimiters }]"))
+            if (Regex.IsMatch(s, $"[{delimiters}]"))
             {
                 // Okay, it may be delimited. First, are there any illegal 
                 // characters?
-                if (!Regex.IsMatch(s, $"^[\\da-fA-FxX{ delimiters }]+$"))
+                if (!Regex.IsMatch(s, $"^[\\da-fA-FxX{delimiters}]+$"))
                 {
-                    throw new ArgumentException($"[{ s }] has invalid characters and can't be parsed as a byte array.");
+                    throw new ArgumentException($"[{s}] has invalid characters and can't be parsed as a byte array.");
                 }
 
                 // Are they likely decimal or hex? This is kind of risky. It
@@ -138,7 +138,7 @@ namespace Yubico.YubiKey.TestUtilities
                 // I'm just going to let it throw at the bottom.
             }
 
-            throw new ArgumentException($"[{ s }] cannot be converted to a byte array.");
+            throw new ArgumentException($"[{s}] cannot be converted to a byte array.");
         }
 
         /// <summary>
@@ -161,11 +161,11 @@ namespace Yubico.YubiKey.TestUtilities
                 int value = Convert.ToInt32(match.Value);
                 if (value > 0xff)
                 {
-                    throw new ArgumentException($"[{ s }] cannot be converted to a byte.");
+                    throw new ArgumentException($"[{s}] cannot be converted to a byte.");
                 }
                 return Convert.ToByte(value);
             }
-            throw new ArgumentException($"[{ s }] cannot be converted to a byte.");
+            throw new ArgumentException($"[{s}] cannot be converted to a byte.");
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace Yubico.YubiKey.TestUtilities
                 "yes" => true,
                 "no" => false,
                 "" => true, // If a bool parameter didn't get a value, we assume true.
-                _ => throw new ArgumentException($"[{ s }] can't be parsed as a bool.")
+                _ => throw new ArgumentException($"[{s}] can't be parsed as a bool.")
             };
         }
 
@@ -211,7 +211,7 @@ namespace Yubico.YubiKey.TestUtilities
                     return value;
                 }
             }
-            throw new ArgumentException($"Value [{ s }] could not be parsed as type [{ typeof(T).Name }].");
+            throw new ArgumentException($"Value [{s}] could not be parsed as type [{typeof(T).Name}].");
         }
     }
 }

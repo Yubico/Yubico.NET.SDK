@@ -16,8 +16,8 @@ using System;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Yubico.YubiKey.Piv;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.Sample.PivSampleCode
 {
@@ -264,7 +264,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             //   04 <x-coordinate> <y-coordinate>
             // where each coordinate is exactly 48 bytes (384 bits) long.
             HashAlgorithmName signerHash = HashAlgorithmName.SHA256;
-            if ((string.Equals(signerCert.PublicKey.Oid.FriendlyName, "ECC", StringComparison.Ordinal))
+            if (string.Equals(signerCert.PublicKey.Oid.FriendlyName, "ECC", StringComparison.Ordinal)
                 && (signerCert.PublicKey.EncodedKeyValue.RawData.Length == 97))
             {
                 signerHash = HashAlgorithmName.SHA384;
@@ -325,14 +325,14 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // Another bit of information to extract from the cert would be the RSA
         // padding scheme, if the signature algorithm is RSA. However, to avoid
         // writing a lot more code, this sample always uses PSS.
-       public static CertificateRequest BuildCertRequestFromDer(byte[] requestDer, HashAlgorithmName signerHash)
-       {
-           using AsymmetricAlgorithm requestPublicKey = GetComponentsFromCertRequestDer(
-               requestDer,
-               out byte[] _,
-               out SignatureAlgIdConverter _,
-               out X500DistinguishedName requestName,
-               out byte[] _);
+        public static CertificateRequest BuildCertRequestFromDer(byte[] requestDer, HashAlgorithmName signerHash)
+        {
+            using AsymmetricAlgorithm requestPublicKey = GetComponentsFromCertRequestDer(
+                requestDer,
+                out byte[] _,
+                out SignatureAlgIdConverter _,
+                out X500DistinguishedName requestName,
+                out byte[] _);
 
             if (requestPublicKey is ECDsa ecDsa)
             {

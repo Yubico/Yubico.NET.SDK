@@ -14,10 +14,10 @@
 
 using System;
 using System.Linq;
-using Yubico.YubiKey.Sample.SharedCode;
-using Yubico.YubiKey.Piv;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Yubico.YubiKey.Piv;
+using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.PivSampleCode
 {
@@ -178,7 +178,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             SampleMenu.WriteMessage(MessageType.Title, 0, "overwritten. The result is the PivPinOnly mode of the YubiKey");
             SampleMenu.WriteMessage(MessageType.Title, 0, "after recovery.\n");
             if (PinOnlyMode.RunRecoverPivPinOnlyMode(
-                _yubiKeyChosen,  _keyCollector.SampleKeyCollectorDelegate, out PivPinOnlyMode mode))
+                _yubiKeyChosen, _keyCollector.SampleKeyCollectorDelegate, out PivPinOnlyMode mode))
             {
                 SampleMenu.WriteMessage(MessageType.Title, 0, "PIN-only mode: " + mode.ToString() + "\n");
                 return true;

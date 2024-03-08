@@ -15,10 +15,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Xunit;
 using Yubico.Core.Devices.Hid;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
-using Xunit;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -82,11 +82,11 @@ namespace Yubico.YubiKey.U2f
 
             var cmd = new SetDeviceInfoCommand();
             Assert.Null(cmd.DeviceFlags);
-//            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
-//            Assert.Equal(ResponseStatus.Success, rsp.Status);
+            //            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
+            //            Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-//            YubiKeyDeviceInfo getData = rsp.GetData();
-//            Assert.False(getData.IsFipsSeries);
+            //            YubiKeyDeviceInfo getData = rsp.GetData();
+            //            Assert.False(getData.IsFipsSeries);
         }
 
         [Fact]

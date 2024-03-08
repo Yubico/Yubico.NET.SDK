@@ -15,8 +15,8 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Scp03.Commands;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.Scp03.Commands;
 
 namespace Yubico.YubiKey.Scp03
 {

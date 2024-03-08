@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
     // This KeyCollector is not secure. It simply asks for the user to enter password at the keyboard,
     // with no hiding.
     public static class SampleKeyCollector
-    { 
+    {
         // This is the callback. When the SDK needs a password,
         // this is the method that will be called.
         public static bool SampleKeyCollectorDelegate(KeyEntryData keyEntryData)

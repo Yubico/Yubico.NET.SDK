@@ -15,8 +15,8 @@
 using System;
 using System.Buffers.Binary;
 using System.Globalization;
-using Yubico.YubiKey.Cryptography;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.U2f
 {

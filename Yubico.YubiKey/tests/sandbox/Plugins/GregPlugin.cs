@@ -34,7 +34,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         public override bool Execute()
         {
-            using var log = new LoggerConfiguration()
+            using Serilog.Core.Logger? log = new LoggerConfiguration()
                 .Enrich.With(new ThreadIdEnricher())
                 .WriteTo.Console(
                     outputTemplate: "[{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
@@ -45,7 +45,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));
 
-            var yubiKey = YubiKeyDevice.FindAll().First();
+            IYubiKeyDevice? yubiKey = YubiKeyDevice.FindAll().First();
 
             Console.WriteLine($"YubiKey Version: {yubiKey.FirmwareVersion}");
 
@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 var command = new GetAes128SessionKeysCommand(label, password, hostChallenge, hsmDeviceChallenge);
 
                 Console.WriteLine("Calling calculate...");
-                var response = hsmAuth.Connection.SendCommand(command);
+                GetAes128SessionKeysResponse? response = hsmAuth.Connection.SendCommand(command);
                 Console.WriteLine($"Calculate returned with {response.Status}");
             }
 

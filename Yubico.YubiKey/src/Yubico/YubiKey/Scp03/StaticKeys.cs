@@ -201,7 +201,7 @@ namespace Yubico.YubiKey.Scp03
                     && ChannelMacKey.Span.SequenceEqual(compareKeys.ChannelMacKey.Span)
                     && DataEncryptionKey.Span.SequenceEqual(compareKeys.DataEncryptionKey.Span))
                 {
-                        return true;
+                    return true;
                 }
             }
 

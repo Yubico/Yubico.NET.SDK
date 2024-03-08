@@ -14,9 +14,9 @@
 
 using System;
 using System.Security.Cryptography;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
 using Xunit.Abstractions;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Piv
         private readonly byte[] _currentKey;
         private readonly byte[] _newKey;
 
-        public ManagementKeyTests (ITestOutputHelper output)
+        public ManagementKeyTests(ITestOutputHelper output)
         {
             _output = output;
             _currentKey = new byte[] {
@@ -141,7 +141,7 @@ namespace Yubico.YubiKey.Piv
 
             if (keyEntryData.IsRetry == true)
             {
-                _output.WriteLine ("Retry");
+                _output.WriteLine("Retry");
                 return false;
             }
 

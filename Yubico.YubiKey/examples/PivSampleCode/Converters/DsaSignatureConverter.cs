@@ -14,8 +14,8 @@
 
 using System;
 using System.Globalization;
-using Yubico.YubiKey.Piv;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.Sample.PivSampleCode
 {

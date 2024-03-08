@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void SetKey_ValidAes_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5,4,2))
+            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
             {
                 return;
             }
@@ -65,13 +65,13 @@ namespace Yubico.YubiKey.Piv.Commands
 
                 setRsp = pivSession.Connection.SendCommand(setCmd);
                 Assert.Equal(ResponseStatus.Success, setRsp.Status);
-           }
+            }
         }
 
         [Fact]
         public void SetKey_Aes256_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5,4,2))
+            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
             {
                 return;
             }
@@ -100,7 +100,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void SetKey_TDes_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5,4,2))
+            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
             {
                 return;
             }

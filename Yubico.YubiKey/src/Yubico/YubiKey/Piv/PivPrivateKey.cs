@@ -118,7 +118,7 @@ namespace Yubico.YubiKey.Piv
                 tag = encodedPrivateKey.Span[0];
             }
 
-            switch(tag)
+            switch (tag)
             {
                 default:
                     throw new ArgumentException(

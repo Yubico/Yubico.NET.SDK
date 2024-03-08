@@ -129,9 +129,214 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// <exception cref="ArgumentException">
         /// Thrown when a management key has an invalid length.
         /// </exception>
+
+/* Unmerged change from project 'Yubico.YubiKey(netstandard2.1)'
+Before:
         public bool TryChangeManagementKey()
         {
             var keyCollector = GetKeyCollector();
+
+            var keyEntryData = new KeyEntryData()
+            {
+                Request = KeyEntryRequest.ChangeYubiHsmAuthManagementKey,
+            };
+
+            try
+            {
+                while (keyCollector(keyEntryData) == true)
+                {
+                    bool managementKeyChanged = TryChangeManagementKey(
+                        keyEntryData.GetCurrentValue(),
+                        keyEntryData.GetNewValue(),
+                        out int? retriesRemaining);
+
+                    if (managementKeyChanged)
+                    {
+                        return true;
+                    }
+
+                    if (retriesRemaining.HasValue && retriesRemaining.Value > 0)
+                    {
+                        keyEntryData.IsRetry = true;
+                        keyEntryData.RetriesRemaining = retriesRemaining;
+                    }
+                    else
+                    {
+                        throw new SecurityException(
+                            string.Format(
+                                CultureInfo.CurrentCulture,
+                                ExceptionMessages.NoMoreRetriesRemaining));
+                    }
+                }
+            }
+            finally
+            {
+                keyEntryData.Clear();
+
+                keyEntryData.Request = KeyEntryRequest.Release;
+                _ = keyCollector(keyEntryData);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Change the management key.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The management key is 16 bytes long, and is required when performing
+        /// operations that add or delete credentials (
+        /// <see cref="AddCredentialCommand"/> and
+        /// <see cref="DeleteCredentialCommand"/>, respectively).
+        /// </para>
+        /// <para>
+        /// There is a limit of 8 attempts to authenticate with the management key
+        /// before the management key is blocked. Once the management key is
+        /// blocked, the application must be reset before performing operations
+        /// which require authentication with the management key (such as adding
+        /// credentials, deleting credentials, and changing the management key).
+        /// To reset the application, see <see cref="ResetApplication"/>.
+        /// Supplying the correct management key before the management key is
+        /// blocked will reset the retry counter to 8.
+        /// </para>
+        /// <para>
+        /// The caller is responsible for controlling the buffers which hold
+        /// the management keys and should overwrite the data after the command
+        /// is sent. The user's manual entry
+        /// <xref href="UsersManualSensitive">"Sensitive Data"</xref> has further
+        /// details and recommendations for handling this kind of data.
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// True, when the management key has been changed successfully. False,
+        /// when authentication failed and the management key was not changed.
+        /// When this method returns false, <paramref name="retriesRemaining"/>
+        /// gives the number of retries remaining to authenticate with the
+        /// management key.
+        /// </returns>
+        /// <param name="currentManagementKey">
+        /// The current value of the management key. It must be exactly 16
+        /// bytes long (see <see cref="ChangeManagementKeyCommand.ValidManagementKeyLength"/>).
+        /// The default value is all zeros.
+        /// </param>
+        /// <param name="newManagementKey">
+        /// The new value of the management key. It must be exactly 16
+        /// bytes long (see <see cref="ChangeManagementKeyCommand.ValidManagementKeyLength"/>).
+        /// </param>
+        /// <param name="retriesRemaining">
+        /// When the command fails to authenticate the management key, this
+        /// value gives the number of retries remaining.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when a management key has an invalid length.
+        /// </exception>
+        public bool TryChangeManagementKey(
+After:
+        public bool TryChangeManagementKey(
+*/
+        public bool TryChangeManagementKey()
+        {
+            Func<KeyEntryData, bool>? keyCollector = GetKeyCollector();
+
+            var keyEntryData = new KeyEntryData()
+            {
+                Request = KeyEntryRequest.ChangeYubiHsmAuthManagementKey,
+            };
+
+            try
+            {
+                while (keyCollector(keyEntryData) == true)
+                {
+                    bool managementKeyChanged = TryChangeManagementKey(
+                        keyEntryData.GetCurrentValue(),
+                        keyEntryData.GetNewValue(),
+                        out int? retriesRemaining);
+
+                    if (managementKeyChanged)
+                    {
+                        return true;
+                    }
+
+                    if (retriesRemaining.HasValue && retriesRemaining.Value > 0)
+                    {
+                        keyEntryData.IsRetry = true;
+                        keyEntryData.RetriesRemaining = retriesRemaining;
+                    }
+                    else
+                    {
+                        throw new SecurityException(
+                            string.Format(
+                                CultureInfo.CurrentCulture,
+                                ExceptionMessages.NoMoreRetriesRemaining));
+                    }
+                }
+            }
+            finally
+            {
+                keyEntryData.Clear();
+
+                keyEntryData.Request = KeyEntryRequest.Release;
+                _ = keyCollector(keyEntryData);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Change the management key.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The management key is 16 bytes long, and is required when performing
+        /// operations that add or delete credentials (
+        /// <see cref="AddCredentialCommand"/> and
+        /// <see cref="DeleteCredentialCommand"/>, respectively).
+        /// </para>
+        /// <para>
+        /// There is a limit of 8 attempts to authenticate with the management key
+        /// before the management key is blocked. Once the management key is
+        /// blocked, the application must be reset before performing operations
+        /// which require authentication with the management key (such as adding
+        /// credentials, deleting credentials, and changing the management key).
+        /// To reset the application, see <see cref="ResetApplication"/>.
+        /// Supplying the correct management key before the management key is
+        /// blocked will reset the retry counter to 8.
+        /// </para>
+        /// <para>
+        /// The caller is responsible for controlling the buffers which hold
+        /// the management keys and should overwrite the data after the command
+        /// is sent. The user's manual entry
+        /// <xref href="UsersManualSensitive">"Sensitive Data"</xref> has further
+        /// details and recommendations for handling this kind of data.
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// True, when the management key has been changed successfully. False,
+        /// when authentication failed and the management key was not changed.
+        /// When this method returns false, <paramref name="retriesRemaining"/>
+        /// gives the number of retries remaining to authenticate with the
+        /// management key.
+        /// </returns>
+        /// <param name="currentManagementKey">
+        /// The current value of the management key. It must be exactly 16
+        /// bytes long (see <see cref="ChangeManagementKeyCommand.ValidManagementKeyLength"/>).
+        /// The default value is all zeros.
+        /// </param>
+        /// <param name="newManagementKey">
+        /// The new value of the management key. It must be exactly 16
+        /// bytes long (see <see cref="ChangeManagementKeyCommand.ValidManagementKeyLength"/>).
+        /// </param>
+        /// <param name="retriesRemaining">
+        /// When the command fails to authenticate the management key, this
+        /// value gives the number of retries remaining.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// Thrown when a management key has an invalid length.
+        /// </exception>
+        public bool TryChangeManagementKey()
+        {
+            Func<KeyEntryData, bool>? keyCollector = GetKeyCollector();
 
             var keyEntryData = new KeyEntryData()
             {

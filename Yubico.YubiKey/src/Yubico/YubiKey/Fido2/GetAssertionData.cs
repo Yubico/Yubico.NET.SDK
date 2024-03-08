@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Formats.Cbor;
 using System.Globalization;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Fido2
         private const string KeyUserName = "name";
         private const string KeyUserDisplayName = "displayName";
 
-//        private readonly Logger _log = Log.GetLogger();
+        //        private readonly Logger _log = Log.GetLogger();
         private bool _disposed;
         private readonly byte[]? _keyData;
 

@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Formats.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
@@ -290,7 +290,7 @@ namespace Yubico.YubiKey.Fido2
         /// <see cref="PinProtocols.PinUvAuthProtocolBase"/> used to create the
         /// <c>GetAssertion</c> parameters.
         /// </para>
-         /// <para>
+        /// <para>
         /// If you are getting assertions using
         /// <see cref="Fido2Session.GetAssertions"/>, you can use the
         /// <see cref="Fido2Session.AuthProtocol"/> property.

@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.Otp.Commands
         private const int AccessCodeOffset = 56;
 
         private readonly Slot _ndefSlot;
-        private readonly byte[] _configurationBuffer; 
+        private readonly byte[] _configurationBuffer;
 
         /// <summary>
         /// The required size for the AccessCode buffer.
@@ -108,7 +108,7 @@ namespace Yubico.YubiKey.Otp.Commands
         public CommandApdu CreateCommandApdu() => new CommandApdu()
         {
             Ins = OtpConstants.RequestSlotInstruction,
-            P1 = 
+            P1 =
                 _ndefSlot == Slot.ShortPress
                 ? OtpConstants.ProgramNDEFShortPress
                 : OtpConstants.ProgramNDEFLongPress,

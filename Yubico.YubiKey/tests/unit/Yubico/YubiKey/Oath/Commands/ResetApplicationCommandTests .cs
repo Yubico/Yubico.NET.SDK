@@ -75,7 +75,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new ResetCommand();
-            var response = command.CreateResponseForApdu(responseApdu);
+            OathResponse? response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is OathResponse);
         }

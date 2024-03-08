@@ -16,8 +16,8 @@ using System;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2;
+using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.TestUtilities
 {

@@ -13,11 +13,11 @@
 // limitations under the License.
 
 using System;
-using System.Formats.Cbor;
-using System.Security.Cryptography;
-using System.Globalization;
-using System.Security.Cryptography.X509Certificates;
 using System.Collections.Generic;
+using System.Formats.Cbor;
+using System.Globalization;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;

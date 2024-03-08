@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Scp03.Commands
     /// </summary>
     internal class PutKeyResponse : Scp03Response, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
     {
-        private byte[] _checksum;
+        private readonly byte[] _checksum;
 
         public PutKeyResponse(ResponseApdu responseApdu)
             : base(responseApdu)

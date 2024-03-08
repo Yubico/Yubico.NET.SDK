@@ -73,7 +73,7 @@ namespace Yubico.YubiKey.Otp
             byte typeLength = responseData[TypeLengthOffset];
             byte dataLength = responseData[DataLengthOffset];
             const int validTypeLength = 1;
-            
+
             if (typeLength != validTypeLength)
             {
                 throw new NotSupportedException(ExceptionMessages.BadNdefRecordType);

@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -42,7 +42,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void AuthKey_Default_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5,4,2))
+            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
             {
                 return;
             }
@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void AuthKey_Aes_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5,4,2))
+            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
             {
                 return;
             }

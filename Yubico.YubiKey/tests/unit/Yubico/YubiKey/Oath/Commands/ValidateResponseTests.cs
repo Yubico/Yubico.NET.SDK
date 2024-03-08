@@ -17,9 +17,9 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath.Commands
 {

@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 throw exceptions.Count == 1
                     ? exceptions[0]
                     : new AggregateException(
-                        $"{ exceptions.Count } errors encountered.",
+                        $"{exceptions.Count} errors encountered.",
                         exceptions);
             }
         }
@@ -124,7 +124,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             catch (Exception ex)
             {
                 throw new PluginFailureException(
-                    $"Error executing OtpSession.ConfigureHotp: { ex.Message }.",
+                    $"Error executing OtpSession.ConfigureHotp: {ex.Message}.",
                     ex);
             }
 
@@ -158,8 +158,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                     Output.Write((_generate ? "Generated " : string.Empty) + "Key (base-32): ");
                     Output.WriteSensitive(encoded, OutputLevel.Quiet);
                     Output.WriteLine(string.Empty, OutputLevel.Quiet);
-                    Output.WriteLine($"OTP Length: { _digits } digits", OutputLevel.Verbose);
-                    Output.WriteLine($"Initial Moving Factor: { _imf }", OutputLevel.Verbose);
+                    Output.WriteLine($"OTP Length: {_digits} digits", OutputLevel.Verbose);
+                    Output.WriteLine($"Initial Moving Factor: {_imf}", OutputLevel.Verbose);
                 }
                 finally
                 {

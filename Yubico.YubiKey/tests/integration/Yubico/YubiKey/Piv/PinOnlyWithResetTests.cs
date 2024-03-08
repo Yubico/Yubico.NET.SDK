@@ -15,9 +15,9 @@
 using System;
 using System.Security;
 using System.Security.Cryptography;
+using Xunit;
 using Yubico.YubiKey.Piv.Objects;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -111,7 +111,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Null(adminData.PinLastUpdated);
                 Assert.False(adminData.PinProtected);
                 Assert.True(adminData.PukBlocked);
-                Assert.NotNull(adminData.Salt);
+                _ = Assert.NotNull(adminData.Salt);
 
                 PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.True(pinProtect.IsEmpty);
@@ -134,7 +134,7 @@ namespace Yubico.YubiKey.Piv
 
             bool isBlocked = IsPukBlocked();
             Assert.True(isBlocked);
-         }
+        }
 
         [Fact]
         public void Run_SetPinDerived_UsesSalt()
@@ -148,7 +148,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
 
                 AdminData adminData = pivSession.ReadObject<AdminData>();
-                Assert.NotNull(adminData.Salt);
+                _ = Assert.NotNull(adminData.Salt);
                 if (!(adminData.Salt is null))
                 {
                     var result = (ReadOnlyMemory<byte>)adminData.Salt;
@@ -186,7 +186,7 @@ namespace Yubico.YubiKey.Piv
 
                 PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.False(pinProtect.IsEmpty);
-                Assert.NotNull(pinProtect.ManagementKey);
+                _ = Assert.NotNull(pinProtect.ManagementKey);
             }
 
             using (var pivSession = new PivSession(yubiKey))
@@ -272,7 +272,7 @@ namespace Yubico.YubiKey.Piv
 
                 PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.False(pinProtect.IsEmpty);
-                Assert.NotNull(pinProtect.ManagementKey);
+                _ = Assert.NotNull(pinProtect.ManagementKey);
                 if (!(pinProtect.ManagementKey is null))
                 {
                     var result = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
@@ -293,7 +293,7 @@ namespace Yubico.YubiKey.Piv
 
                 PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.False(pinProtect.IsEmpty);
-                Assert.NotNull(pinProtect.ManagementKey);
+                _ = Assert.NotNull(pinProtect.ManagementKey);
                 if (!(pinProtect.ManagementKey is null))
                 {
                     var result = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
@@ -317,7 +317,7 @@ namespace Yubico.YubiKey.Piv
                 PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
 
                 Assert.False(pinProtect.IsEmpty);
-                Assert.NotNull(pinProtect.ManagementKey);
+                _ = Assert.NotNull(pinProtect.ManagementKey);
                 if (!(pinProtect.ManagementKey is null))
                 {
                     var result = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
@@ -346,7 +346,7 @@ namespace Yubico.YubiKey.Piv
                 PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
 
                 Assert.False(pinProtect.IsEmpty);
-                Assert.NotNull(pinProtect.ManagementKey);
+                _ = Assert.NotNull(pinProtect.ManagementKey);
                 if (!(pinProtect.ManagementKey is null))
                 {
                     var result = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;

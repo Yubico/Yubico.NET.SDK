@@ -94,7 +94,7 @@ namespace Yubico.PlatformInterop
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int read(
             LinuxFileSafeHandle handle,
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)]byte[] outputBuffer,
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] byte[] outputBuffer,
             int count);
 
         // Write the count bytes in inputBuffer.
@@ -102,9 +102,9 @@ namespace Yubico.PlatformInterop
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int write(
             int handle,
-            [MarshalAs(UnmanagedType.LPArray)]byte[] inputBuffer,
+            [MarshalAs(UnmanagedType.LPArray)] byte[] inputBuffer,
             int count);
-        
+
         [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "fcntl", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int fcntl(IntPtr fd, int cmd, int flags = 0);

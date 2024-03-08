@@ -14,14 +14,14 @@
 
 using System;
 using System.Globalization;
+using System.Linq;
 using Yubico.Core.Buffers;
-using Yubico.YubiKey.InterIndustry.Commands;
-using Yubico.YubiKey.Pipelines;
-using Yubico.YubiKey.Scp03;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
-using System.Linq;
+using Yubico.YubiKey.InterIndustry.Commands;
+using Yubico.YubiKey.Pipelines;
+using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey
 {

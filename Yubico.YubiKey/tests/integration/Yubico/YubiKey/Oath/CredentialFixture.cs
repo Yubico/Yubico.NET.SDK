@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKey.Oath
 {
-    public class CredentialFixture 
+    public class CredentialFixture
     {
         public Credential TotpCredential { get; private set; }
 
@@ -30,7 +30,8 @@ namespace Yubico.YubiKey.Oath
 
         public CredentialFixture()
         {
-            TotpCredential = new Credential {
+            TotpCredential = new Credential
+            {
                 Issuer = "Microsoft",
                 AccountName = "test@outlook.com",
                 Type = CredentialType.Totp,

@@ -191,7 +191,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// The bytes that make up the new management key.
         /// </param>
         public SetManagementKeyCommand(ReadOnlyMemory<byte> newKey)
-            : this (newKey, PivTouchPolicy.Default, PivAlgorithm.TripleDes)
+            : this(newKey, PivTouchPolicy.Default, PivAlgorithm.TripleDes)
         {
         }
 
@@ -221,7 +221,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// The touch policy for the management key.
         /// </param>
         public SetManagementKeyCommand(ReadOnlyMemory<byte> newKey, PivTouchPolicy touchPolicy)
-            : this (newKey, touchPolicy, PivAlgorithm.TripleDes)
+            : this(newKey, touchPolicy, PivAlgorithm.TripleDes)
         {
         }
 

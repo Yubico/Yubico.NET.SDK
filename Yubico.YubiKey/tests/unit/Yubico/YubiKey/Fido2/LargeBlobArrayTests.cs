@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.Fido2
             SerializedLargeBlobArray array = GetInitialArray();
             AddFixedEntry(array);
             _ = array.Encode();
-            Assert.NotNull(array.EncodedArray);
+            _ = Assert.NotNull(array.EncodedArray);
 
             if (array.EncodedArray.HasValue)
             {
@@ -97,7 +97,7 @@ namespace Yubico.YubiKey.Fido2
             SerializedLargeBlobArray array = GetInitialArray();
             AddFixedEntry(array);
             _ = array.Encode();
-            Assert.NotNull(array.Digest);
+            _ = Assert.NotNull(array.Digest);
 
             if (array.Digest.HasValue)
             {

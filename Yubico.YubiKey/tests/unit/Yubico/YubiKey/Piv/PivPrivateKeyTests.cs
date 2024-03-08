@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
 using System.Linq;
+using System.Security.Cryptography;
 using Xunit;
 
 namespace Yubico.YubiKey.Piv

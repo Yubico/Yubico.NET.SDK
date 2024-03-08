@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.Fido2
 
                 UserEntity ykUser = ykCredList[0].User;
 
-                Tuple<UserEntity,MakeCredentialData> userInfo = _bioFido2Fixture.MatchUser(rpInfo.RelyingParty, ykUser);
+                Tuple<UserEntity, MakeCredentialData> userInfo = _bioFido2Fixture.MatchUser(rpInfo.RelyingParty, ykUser);
                 ReadOnlyMemory<byte> targetKey = userInfo.Item2.LargeBlobKey
                     ?? throw new InvalidOperationException("No matching User.");
                 ReadOnlyMemory<byte> ykLargeBlobKey = ykCredList[0].LargeBlobKey
@@ -143,7 +143,7 @@ namespace Yubico.YubiKey.Fido2
 
                 credList = fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[0].RelyingParty);
 
-                string displayName = credList[0].User.DisplayName??"";
+                string displayName = credList[0].User.DisplayName ?? "";
                 Assert.Equal(updatedDisplayName, displayName);
             }
         }

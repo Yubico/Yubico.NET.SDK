@@ -40,9 +40,10 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             ReadOnlyMemory<byte> expectedData = new byte[] { 0x01, 0x02, 0x03 };
 
-            var command = new EchoCommand();
-
-            command.Data = expectedData;
+            var command = new EchoCommand
+            {
+                Data = expectedData
+            };
 
             Assert.True(command.Data.Span.SequenceEqual(expectedData.Span));
         }

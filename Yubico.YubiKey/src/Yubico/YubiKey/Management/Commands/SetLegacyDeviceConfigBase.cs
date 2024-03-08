@@ -74,7 +74,7 @@ namespace Yubico.YubiKey.Management.Commands
         public YubiKeyCapabilities YubiKeyInterfaces
         {
             get => _yubiKeyInterfaces;
-            
+
             set
             {
                 if (!ContainsOnlyValidInterfaceFlags(value))

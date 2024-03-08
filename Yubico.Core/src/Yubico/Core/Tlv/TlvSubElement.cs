@@ -70,7 +70,7 @@ namespace Yubico.Core.Tlv
             _tagAndLength = BuildTagAndLength(tag, value.Length);
             _value = value.ToArray();
 
-            _encodedLength  = _tagAndLength.Length + _value.Length;
+            _encodedLength = _tagAndLength.Length + _value.Length;
         }
 
         /// <summary>

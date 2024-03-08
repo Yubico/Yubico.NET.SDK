@@ -13,13 +13,13 @@
 // limitations under the License.
 
 using System;
+using System.Buffers.Binary;
 using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
-using System.Buffers.Binary;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath.Commands
 {
@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 };
 
                 byte[] challenge = GenerateChallenge(_credential.Period);
-                var newDataList = dataList.Concat(challenge).ToArray();
+                byte[]? newDataList = dataList.Concat(challenge).ToArray();
                 ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
                 Assert.Equal(newDataList.Length, command.CreateCommandApdu().Nc);
@@ -119,11 +119,11 @@ namespace Yubico.YubiKey.Oath.Commands
                     0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75, 0x74,
                     0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D, 0x74, 0x08,
                 };
-                
+
                 byte[] challenge = GenerateChallenge(_credential.Period);
-                var newDataList = dataList.Concat(challenge).ToArray();
+                byte[]? newDataList = dataList.Concat(challenge).ToArray();
                 ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-                
+
                 Assert.True(data.Span.SequenceEqual(newDataList));
             }
             finally
@@ -148,7 +148,7 @@ namespace Yubico.YubiKey.Oath.Commands
             };
 
             ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            
+
             Assert.Equal(dataList.Length, command.CreateCommandApdu().Nc);
             Assert.True(data.Span.SequenceEqual(dataList));
         }
@@ -158,11 +158,11 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new CalculateCredentialCommand(_credential, ResponseFormat.Full);
-            var response = command.CreateResponseForApdu(responseApdu);
+            CalculateCredentialResponse? response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is CalculateCredentialResponse);
         }
-        
+
         private byte[] GenerateChallenge(CredentialPeriod? period)
         {
             if (period is null)

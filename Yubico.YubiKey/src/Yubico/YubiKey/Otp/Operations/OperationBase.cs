@@ -31,7 +31,8 @@ namespace Yubico.YubiKey.Otp.Operations
         /// <summary>
         /// The six-byte access code currently set to protect the OTP slot.
         /// </summary>
-        protected Span<byte> CurrentAccessCode {
+        protected Span<byte> CurrentAccessCode
+        {
             get => _currentAccessCode.Span;
             set => _currentAccessCode = value.ToArray();
         }

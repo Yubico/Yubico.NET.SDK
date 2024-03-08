@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Formats.Cbor;
 using System.Globalization;
-using System.Collections.Generic;
+using System.Linq;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
@@ -136,7 +136,7 @@ namespace Yubico.YubiKey.Fido2
         /// This propery is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
-        public IReadOnlyDictionary<string, bool>? Options {get; private set; }
+        public IReadOnlyDictionary<string, bool>? Options { get; private set; }
 
         /// <summary>
         /// The maximum size, in bytes, of a message sent to the YubiKey.

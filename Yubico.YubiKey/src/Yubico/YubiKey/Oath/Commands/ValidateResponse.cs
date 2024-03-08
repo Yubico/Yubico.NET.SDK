@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Oath.Commands
     public class ValidateResponse : OathResponse, IYubiKeyResponseWithData<bool>
     {
         private const byte ResponseTag = 0x75;
-        
+
         /// <inheritdoc/>
         protected override ResponseStatusPair StatusCodeMap =>
            StatusWord switch

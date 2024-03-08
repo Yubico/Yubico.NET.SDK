@@ -98,7 +98,7 @@ namespace Yubico.YubiKey.Otp.Commands
             var command = new GetDeviceInfoCommand();
 
             // Act
-            var response = command.CreateResponseForApdu(responseApdu);
+            GetDeviceInfoResponse? response = command.CreateResponseForApdu(responseApdu);
 
             // Assert
             Assert.True(response is GetDeviceInfoResponse);

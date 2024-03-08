@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey
 {
@@ -306,5 +306,5 @@ namespace Yubico.YubiKey
 
             Assert.Equal(expectedResult, actualResult);
         }
-}
+    }
 }

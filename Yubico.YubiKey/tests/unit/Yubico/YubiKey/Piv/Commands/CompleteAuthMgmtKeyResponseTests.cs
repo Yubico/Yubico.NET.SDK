@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(ApduError, ResponseStatus.Failed)]
         public void ConstructorSingle_ResponseApdu_SetsStatusCorrectly(int responseFlag, ResponseStatus status)
         {
-            var responseApdu = GetResponseApdu(responseFlag);
+            ResponseApdu? responseApdu = GetResponseApdu(responseFlag);
             var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _empty);
 
             Assert.Equal(status, response.Status);
@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(ApduError, ResponseStatus.Failed)]
         public void ConstructorMutual_ResponseApdu_SetsStatusCorrectly(int responseFlag, ResponseStatus status)
         {
-            var responseApdu = GetResponseApdu(responseFlag);
+            ResponseApdu? responseApdu = GetResponseApdu(responseFlag);
             var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
 
             Assert.Equal(status, response.Status);
@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(ApduError, SWConstants.FunctionNotSupported)]
         public void ConstructorSingle_ResponseApdu_SetsStatusWordCorrectly(int responseFlag, short statusWord)
         {
-            var responseApdu = GetResponseApdu(responseFlag);
+            ResponseApdu? responseApdu = GetResponseApdu(responseFlag);
             var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _empty);
 
             Assert.Equal(statusWord, response.StatusWord);
@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(ApduError, SWConstants.FunctionNotSupported)]
         public void ConstructorMutual_ResponseApdu_SetsStatusWordCorrectly(int responseFlag, short statusWord)
         {
-            var responseApdu = GetResponseApdu(responseFlag);
+            ResponseApdu? responseApdu = GetResponseApdu(responseFlag);
             var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
 
             Assert.Equal(statusWord, response.StatusWord);
@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void ErrorInput_GetData_ThrowException()
         {
-            var responseApdu = GetResponseApdu(ApduError);
+            ResponseApdu? responseApdu = GetResponseApdu(ApduError);
             var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
 
             _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void ConstructorSingle_GetDataNonEmptyYubiKeyAuthenticationResponse_ThrowsException()
         {
-            var responseApdu = GetResponseApdu(ApduSingle);
+            ResponseApdu? responseApdu = GetResponseApdu(ApduSingle);
             var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(() => response.GetData());
@@ -114,7 +114,7 @@ namespace Yubico.YubiKey.Piv.Commands
             int responseFlag,
             AuthenticateManagementKeyResult expectedAuth)
         {
-            var responseApdu = GetResponseApdu(responseFlag);
+            ResponseApdu? responseApdu = GetResponseApdu(responseFlag);
             var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
 
             AuthenticateManagementKeyResult getData = response.GetData();
@@ -127,7 +127,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(ApduNoAuth, AuthenticateManagementKeyResult.SingleAuthenticationFailed)]
         public void ConstructorSingle_GetData_CorrectResult(int responseFlag, AuthenticateManagementKeyResult expectedAuth)
         {
-            var responseApdu = GetResponseApdu(responseFlag);
+            ResponseApdu? responseApdu = GetResponseApdu(responseFlag);
             var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _empty);
 
             AuthenticateManagementKeyResult getData = response.GetData();
@@ -138,7 +138,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void YubiKeyFailAuth_GetData_CorrectResult()
         {
-            var responseApdu = GetResponseApdu(ApduMutual);
+            ResponseApdu? responseApdu = GetResponseApdu(ApduMutual);
             var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _wrongYubiKeyAuthenticationResponse);
 
             AuthenticateManagementKeyResult getData = response.GetData();

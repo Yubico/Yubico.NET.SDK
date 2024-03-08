@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKey.Pipelines;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Pipelines;
 
 namespace Yubico.YubiKey
 {

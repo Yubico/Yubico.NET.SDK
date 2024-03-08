@@ -14,9 +14,9 @@
 
 using System;
 using System.Security.Cryptography;
-using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Piv.Commands;
 using Xunit;
+using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Piv
         private readonly Memory<byte> _currentKey;
         private readonly Memory<byte> _newKey;
 
-        public AesMgmtKeyTests ()
+        public AesMgmtKeyTests()
         {
             _currentKeyBytes = new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -115,15 +115,15 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
 
                 // start temp
-//                pivSession.AuthenticateManagementKey(mutualAuth);
-//
-//                var setCmd = new SetManagementKeyCommand(
-//                    _newKey.Slice(0, keySize), PivTouchPolicy.Never, algorithm);
-//
-//                SetManagementKeyResponse setRsp = pivSession.Connection.SendCommand(setCmd);
-//                Assert.Equal(ResponseStatus.Success, setRsp.Status);
-//                Assert.True(pivSession.ManagementKeyAuthenticated);
-//                Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
+                //                pivSession.AuthenticateManagementKey(mutualAuth);
+                //
+                //                var setCmd = new SetManagementKeyCommand(
+                //                    _newKey.Slice(0, keySize), PivTouchPolicy.Never, algorithm);
+                //
+                //                SetManagementKeyResponse setRsp = pivSession.Connection.SendCommand(setCmd);
+                //                Assert.Equal(ResponseStatus.Success, setRsp.Status);
+                //                Assert.True(pivSession.ManagementKeyAuthenticated);
+                //                Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
                 // end temp
 
                 SwapKeys();

@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv.Objects
 {
@@ -91,7 +91,7 @@ namespace Yubico.YubiKey.Piv.Objects
             using var pinProtect = new PinProtectedData();
             pinProtect.SetManagementKey(mgmtKey);
 
-            Assert.NotNull(pinProtect.ManagementKey);
+            _ = Assert.NotNull(pinProtect.ManagementKey);
             if (!(pinProtect.ManagementKey is null))
             {
                 var getData = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
@@ -241,7 +241,7 @@ namespace Yubico.YubiKey.Piv.Objects
             using var pinProtect = new PinProtectedData();
             pinProtect.Decode(encodedData);
 
-            Assert.NotNull(pinProtect.ManagementKey);
+            _ = Assert.NotNull(pinProtect.ManagementKey);
             if (!(pinProtect.ManagementKey is null))
             {
                 var getData = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;

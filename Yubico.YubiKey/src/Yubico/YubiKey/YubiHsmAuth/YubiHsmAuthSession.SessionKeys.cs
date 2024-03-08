@@ -230,12 +230,12 @@ namespace Yubico.YubiKey.YubiHsmAuth
             sessionKeys = null;
 
             // Check if this credential requires touch
-            bool touchRequired = 
+            bool touchRequired =
                 ListCredentials()
                 .Single(c => c.Credential.Label == credentialLabel)
                 .Credential.TouchRequired;
 
-            var keyCollector = GetKeyCollector();
+            Func<KeyEntryData, bool>? keyCollector = GetKeyCollector();
 
             var keyEntryData = new KeyEntryData()
             {

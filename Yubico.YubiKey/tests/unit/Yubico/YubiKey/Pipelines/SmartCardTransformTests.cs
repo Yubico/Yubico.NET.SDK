@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Moq;
 using System;
+using Moq;
 using Xunit;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Iso7816;

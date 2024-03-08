@@ -93,7 +93,7 @@ namespace Yubico.Core.Iso7816
             {
                 if (value < 0)
                 {
-                    throw new ArgumentOutOfRangeException(nameof(Ne),ExceptionMessages.CommandApduNeRangeError);
+                    throw new ArgumentOutOfRangeException(nameof(Ne), ExceptionMessages.CommandApduNeRangeError);
                 }
                 else
                 {

@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Formats.Cbor;
 using System.Globalization;
-using System.Collections.Generic;
 using System.Security.Cryptography;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;

@@ -15,11 +15,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Xunit;
 using Yubico.Core.Devices.Hid;
+using Yubico.Core.Iso7816;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
-using Xunit;
-using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -74,8 +74,10 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void SetCRTimeout_Succeeds()
         {
-            var cmd = new SetDeviceInfoCommand();
-            cmd.ChallengeResponseTimeout = 0x20;
+            var cmd = new SetDeviceInfoCommand
+            {
+                ChallengeResponseTimeout = 0x20
+            };
             SetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
 
             Assert.Equal(ResponseStatus.Success, rsp.Status);
@@ -104,8 +106,10 @@ namespace Yubico.YubiKey.U2f
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
             };
 
-            var cmd = new SetDeviceInfoCommand();
-            cmd.ChallengeResponseTimeout = 0x21;
+            var cmd = new SetDeviceInfoCommand
+            {
+                ChallengeResponseTimeout = 0x21
+            };
             SetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
@@ -114,8 +118,10 @@ namespace Yubico.YubiKey.U2f
             rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            cmd = new SetDeviceInfoCommand();
-            cmd.ChallengeResponseTimeout = 0x22;
+            cmd = new SetDeviceInfoCommand
+            {
+                ChallengeResponseTimeout = 0x22
+            };
             rsp = _fidoConnection.SendCommand(cmd);
             Assert.NotEqual(ResponseStatus.Success, rsp.Status);
 
@@ -149,8 +155,10 @@ namespace Yubico.YubiKey.U2f
         public void SetLegacyCRTimeout_Succeeds()
         {
             var cmd = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.Ccid, 0x21, true, 255);
-            cmd.YubiKeyInterfaces = YubiKeyCapabilities.All;
+                YubiKeyCapabilities.Ccid, 0x21, true, 255)
+            {
+                YubiKeyInterfaces = YubiKeyCapabilities.All
+            };
             YubiKeyResponse rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 

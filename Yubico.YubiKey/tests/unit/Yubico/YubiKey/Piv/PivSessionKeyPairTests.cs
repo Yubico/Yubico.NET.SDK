@@ -14,9 +14,9 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
+using Xunit;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {

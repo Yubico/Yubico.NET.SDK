@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.Piv;
-using Yubico.YubiKey.Oath;
-using Yubico.YubiKey.YubiHsmAuth;
 using System.Linq;
+using Yubico.YubiKey.Oath;
+using Yubico.YubiKey.Piv;
+using Yubico.YubiKey.YubiHsmAuth;
 
 namespace Yubico.YubiKey.TestUtilities
 {
@@ -132,7 +132,7 @@ namespace Yubico.YubiKey.TestUtilities
                 ResetAfterConfig = true,
             };
 
-            IYubiKeyResponse setDeviceInfoResponse = SetDeviceInfo(key,setCommand);
+            IYubiKeyResponse setDeviceInfoResponse = SetDeviceInfo(key, setCommand);
 
             if (setDeviceInfoResponse.Status != ResponseStatus.Success)
             {

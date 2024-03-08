@@ -12,16 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Globalization;
-using Yubico.YubiKey.DeviceExtensions;
+using System.Linq;
 using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
-using Yubico.PlatformInterop;
-using System;
 using Yubico.Core.Logging;
+using Yubico.PlatformInterop;
+using Yubico.YubiKey.DeviceExtensions;
 
 namespace Yubico.YubiKey
 {

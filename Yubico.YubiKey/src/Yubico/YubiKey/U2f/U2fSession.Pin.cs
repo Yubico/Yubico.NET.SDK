@@ -16,8 +16,8 @@ using System;
 using System.Globalization;
 using System.Security;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.U2f.Commands;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.U2f.Commands;
 
 
 namespace Yubico.YubiKey.U2f
@@ -270,7 +270,7 @@ namespace Yubico.YubiKey.U2f
         /// If the caller cancels (the return from the <c>KeyCollector</c> is
         /// <c>false</c>), this will return <c>false</c>.
         /// </summary>
-         /// <remarks>
+        /// <remarks>
         /// See the documentation for <see cref="ChangePin"/> for more information
         /// on changing a PIN.
         /// </remarks>

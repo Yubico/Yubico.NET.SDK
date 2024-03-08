@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.Piv.Objects;
-using Yubico.YubiKey.Piv.Commands;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.Piv.Objects;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -142,7 +142,7 @@ namespace Yubico.YubiKey.Piv
                 using AdminData adminData = pivSession.ReadObject<AdminData>();
 
                 Assert.True(adminData.PinProtected);
-                Assert.NotNull(adminData.Salt);
+                _ = Assert.NotNull(adminData.Salt);
             }
 
             using (var pivSession = new PivSession(yubiKey))

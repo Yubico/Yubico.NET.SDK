@@ -15,8 +15,8 @@
 using System;
 using System.Linq;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Scp03.Commands;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Scp03.Commands;
 
 namespace Yubico.YubiKey.Scp03
 {

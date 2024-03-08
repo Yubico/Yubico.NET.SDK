@@ -14,9 +14,9 @@
 
 using System;
 using System.Security.Cryptography;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
 using Xunit.Abstractions;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography
 {

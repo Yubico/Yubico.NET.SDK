@@ -200,15 +200,14 @@ namespace Yubico.Core.Tlv.UnitTests
             bool validRead = reader.TryReadNestedTlv(out TlvReader nested, 0x7261);
             if (validRead == true)
             {
-                validRead = nested.TryReadValue(out ReadOnlyMemory<byte> value, 0x91);
+                validRead = nested.TryReadValue(out _, 0x91);
                 Assert.False(validRead);
-
-                validRead = nested.TryReadValue(out value, 0x01);
+                validRead = nested.TryReadValue(out ReadOnlyMemory<byte> value, 0x01);
                 if (validRead == true)
                 {
                     Assert.Equal(2, value.Length);
 
-                    validRead = nested.TryReadValue(out value, 0x92);
+                    validRead = nested.TryReadValue(out _, 0x92);
                     Assert.False(validRead);
 
                     validRead = nested.TryReadValue(out value, 0x02);

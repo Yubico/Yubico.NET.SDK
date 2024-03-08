@@ -16,10 +16,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Piv.Commands;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
 using Xunit.Abstractions;
+using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Piv
     {
         private readonly ITestOutputHelper _output;
 
-        public MsrootsTests (ITestOutputHelper output)
+        public MsrootsTests(ITestOutputHelper output)
         {
             _output = output;
         }
@@ -132,11 +132,11 @@ namespace Yubico.YubiKey.Piv
 
                 FirmwareVersion versionNumber = versionResponse.GetData();
 
-//                int maxLength = 10175;
+                //                int maxLength = 10175;
                 int maxLength = 10150;
                 if (versionNumber.Major >= 4)
                 {
-//                    maxLength = 15295;
+                    //                    maxLength = 15295;
                     maxLength = 14000;
                 }
 
@@ -259,7 +259,7 @@ namespace Yubico.YubiKey.Piv
 
                 for (int bufferSize = 2806; bufferSize <= 2808; bufferSize++)
                 {
-                    _output.WriteLine ("buffer size: {0}", bufferSize);
+                    _output.WriteLine("buffer size: {0}", bufferSize);
 
                     pivSession.ResetApplication();
 

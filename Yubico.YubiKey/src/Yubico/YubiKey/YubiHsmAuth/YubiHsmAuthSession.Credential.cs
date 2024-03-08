@@ -200,7 +200,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </returns>
         public bool TryAddCredential(CredentialWithSecrets credentialWithSecrets)
         {
-            var keyCollector = GetKeyCollector();
+            Func<KeyEntryData, bool>? keyCollector = GetKeyCollector();
 
             var keyEntryData = new KeyEntryData()
             {
@@ -322,7 +322,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </exception>
         public bool TryDeleteCredential(string label)
         {
-            var keyCollector = GetKeyCollector();
+            Func<KeyEntryData, bool>? keyCollector = GetKeyCollector();
 
             var keyEntryData = new KeyEntryData()
             {
@@ -333,7 +333,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
             {
                 while (keyCollector(keyEntryData) == true)
                 {
-                    bool credentialDeleted = 
+                    bool credentialDeleted =
                         TryDeleteCredential(
                             keyEntryData.GetCurrentValue(),
                             label,
@@ -344,7 +344,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                     {
                         return true;
                     }
-                    
+
                     // Command failed. Retry if possible, otherwise throw exception.
                     if (managementKeyRetries.HasValue && managementKeyRetries.Value > 0)
                     {

@@ -13,14 +13,14 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
-using System.Text;
-using System.Globalization;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Fido2.Commands;
-using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.TestUtilities
 {
@@ -105,7 +105,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         // Get the UserEntity/MakeCredentialData pair out of the RpInfoList that
         // matches the given RP and User.
-        public Tuple<UserEntity,MakeCredentialData> MatchUser(RelyingParty relyingParty, UserEntity user)
+        public Tuple<UserEntity, MakeCredentialData> MatchUser(RelyingParty relyingParty, UserEntity user)
         {
             RpInfo rpInfo = MatchRelyingParty(relyingParty);
             UserEntity[] userArray = rpInfo.Users.Keys.ToArray<UserEntity>();

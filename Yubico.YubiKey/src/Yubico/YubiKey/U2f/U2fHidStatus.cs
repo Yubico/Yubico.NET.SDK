@@ -14,7 +14,7 @@
 
 namespace Yubico.YubiKey.U2f
 {
-    internal enum U2fHidStatus 
+    internal enum U2fHidStatus
     {
         Success = 0x00,
         Ctap1ErrInvalidCommand = 0x01,

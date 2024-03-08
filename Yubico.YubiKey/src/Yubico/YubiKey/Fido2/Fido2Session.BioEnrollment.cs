@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Security;
+using System.Threading;
+using System.Threading.Tasks;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 
@@ -265,7 +265,7 @@ namespace Yubico.YubiKey.Fido2
             if (!string.IsNullOrEmpty(friendlyName))
             {
                 returnName = friendlyName!;
-                foreach(TemplateInfo templateInfo in templateList)
+                foreach (TemplateInfo templateInfo in templateList)
                 {
                     if (returnName!.Equals(templateInfo.FriendlyName, StringComparison.Ordinal))
                     {

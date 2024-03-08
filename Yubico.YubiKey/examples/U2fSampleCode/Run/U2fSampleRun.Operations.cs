@@ -14,10 +14,10 @@
 
 using System;
 using System.Linq;
+using System.Security.Cryptography;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Sample.SharedCode;
 using Yubico.YubiKey.U2f;
-using Yubico.YubiKey.Cryptography;
-using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Sample.U2fSampleCode
 {

@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         // CryptoKeyType (1) + Touch (1) + Retry (1) + Label (min/max)
         private const int MinElementSize = 3 + Credential.MinLabelByteCount;
         private const int MaxElementSize = 3 + Credential.MaxLabelByteCount;
-        
+
 
         /// <summary>
         /// Constructs a ListCredentialsResponse instance based on a ResponseApdu
@@ -87,8 +87,8 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                                 ExceptionMessages.InvalidDataTag,
                                 nextTagValue));
                 }
-                
-                ReadOnlySpan<byte> credentialRetryElement = 
+
+                ReadOnlySpan<byte> credentialRetryElement =
                     tlvReader.ReadValue(DataTagConstants.LabelList).Span;
 
                 // Check that it's formatted correctly

@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System.Collections.Generic;
-using Yubico.YubiKey.Sample.SharedCode;
 using Yubico.YubiKey.Fido2;
+using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
 {

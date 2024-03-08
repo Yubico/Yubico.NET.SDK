@@ -19,7 +19,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
 {
     public class CredentialRetryPairTests
     {
-        Credential cred = new Credential()
+        readonly Credential cred = new Credential()
         {
             KeyType = CryptographicKeyType.Aes128,
             TouchRequired = false,

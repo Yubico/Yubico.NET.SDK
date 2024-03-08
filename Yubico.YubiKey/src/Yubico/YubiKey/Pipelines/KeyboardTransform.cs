@@ -13,13 +13,13 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
-using Yubico.YubiKey.Otp;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
-using System.Diagnostics;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.Otp;
 
 namespace Yubico.YubiKey.Pipelines
 {

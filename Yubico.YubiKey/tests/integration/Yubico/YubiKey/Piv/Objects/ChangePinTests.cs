@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Piv.Objects;
 using Xunit;
+using Yubico.YubiKey.Piv.Objects;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Piv
 
                     Assert.False(adminData.IsEmpty);
                     Assert.True(adminData.PinProtected);
-                    Assert.NotNull(adminData.PinLastUpdated);
+                    _ = Assert.NotNull(adminData.PinLastUpdated);
                 }
                 finally
                 {
@@ -148,7 +148,7 @@ namespace Yubico.YubiKey.Piv
 
                     Assert.False(adminData.IsEmpty);
                     Assert.True(adminData.PinProtected);
-                    Assert.NotNull(adminData.PinLastUpdated);
+                    _ = Assert.NotNull(adminData.PinLastUpdated);
                 }
                 finally
                 {
@@ -220,7 +220,7 @@ namespace Yubico.YubiKey.Piv
                     adminData = pivSession.ReadObject<AdminData>();
 
                     Assert.False(adminData.IsEmpty);
-                    Assert.NotNull(adminData.PinLastUpdated);
+                    _ = Assert.NotNull(adminData.PinLastUpdated);
                     if (!(adminData.PinLastUpdated is null))
                     {
                         var check = (DateTime)adminData.PinLastUpdated;

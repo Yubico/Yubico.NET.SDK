@@ -102,9 +102,9 @@ namespace Yubico.YubiKey.Piv.Commands
         // Byte length of the key data
         private const int ValidTripleDesKeyLength = 24;
         private const int ValidDesKeyLength = 8;
-        private const int KeyOffsetFirst  = 0;
+        private const int KeyOffsetFirst = 0;
         private const int KeyOffsetSecond = 8;
-        private const int KeyOffsetThird  = 16;
+        private const int KeyOffsetThird = 16;
 
         private const int TripleDesBlockSize = 8;
 

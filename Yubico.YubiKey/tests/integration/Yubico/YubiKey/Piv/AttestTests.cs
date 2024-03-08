@@ -14,10 +14,10 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
-using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Piv.Commands;
-using Yubico.Core.Tlv;
 using Xunit;
+using Yubico.Core.Tlv;
+using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {

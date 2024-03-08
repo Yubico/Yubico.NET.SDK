@@ -160,7 +160,7 @@ namespace Yubico.YubiKey.U2f.Commands
             Assert.True(actualInnerCommandData.SequenceEqual(data));
         }
 
-         [Fact]
+        [Fact]
         public void CreateResponseApdu_ReturnsCorrectType()
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });

@@ -277,14 +277,14 @@ namespace Yubico.YubiKey.Piv
                     break;
 
                 case PivDataTag.BiometricGroupTemplate:
-                    // Verify that the data is
-                    //  02 01
-                    //     --fixed at 1 byte--
-                    //  7F 60 L
-                    //     --up to 28 bytes--
-                    //  7F 60 L (optional)
-                    //     --up to 28 bytes--
-                    // This is not yet supported. So for now, just return false.
+                // Verify that the data is
+                //  02 01
+                //     --fixed at 1 byte--
+                //  7F 60 L
+                //     --up to 28 bytes--
+                //  7F 60 L (optional)
+                //     --up to 28 bytes--
+                // This is not yet supported. So for now, just return false.
                 case PivDataTag.Printed:
                 case PivDataTag.Discovery:
                 default:
@@ -309,7 +309,7 @@ namespace Yubico.YubiKey.Piv
             try
             {
                 var tlvReader = new TlvReader(encoding);
-                TlvReader nestedReader =  tlvReader.ReadNestedTlv(expectedTag);
+                TlvReader nestedReader = tlvReader.ReadNestedTlv(expectedTag);
                 if (tlvReader.HasData == false)
                 {
                     return nestedReader;

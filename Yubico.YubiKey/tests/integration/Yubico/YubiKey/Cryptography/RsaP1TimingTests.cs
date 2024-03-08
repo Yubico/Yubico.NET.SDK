@@ -14,9 +14,9 @@
 
 using System;
 using System.Security.Cryptography;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
 using Xunit.Abstractions;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography
 {
@@ -215,7 +215,7 @@ namespace Yubico.YubiKey.Cryptography
                 _ => "all correct",
             };
 
-            _output.WriteLine (
+            _output.WriteLine(
                 scheme + " " + keySizeBits + ", " + "data length = " + dataLength + ", "
                 + message + "\n" + "  total time: {0}", totalTime);
         }

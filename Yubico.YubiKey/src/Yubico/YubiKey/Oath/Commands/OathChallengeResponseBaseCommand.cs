@@ -61,7 +61,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             byte[] randomBytes = new byte[8];
             randomObject.GetBytes(randomBytes);
-            
+
             return randomBytes;
         }
 

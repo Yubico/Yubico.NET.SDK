@@ -65,16 +65,16 @@ namespace Yubico.YubiKey.Piv
                     currentValue = _pin;
                     break;
 
-//                case KeyEntryRequest.ChangePivPin:
-//                    currentValue = CollectPin();
-//                    newValue = CollectPin();
-//                    break;
-//
-//                case KeyEntryRequest.ChangePivPuk:
-//                    currentValue = CollectPuk();
-//                    newValue = CollectPuk();
-//                    break;
-//
+                //                case KeyEntryRequest.ChangePivPin:
+                //                    currentValue = CollectPin();
+                //                    newValue = CollectPin();
+                //                    break;
+                //
+                //                case KeyEntryRequest.ChangePivPuk:
+                //                    currentValue = CollectPuk();
+                //                    newValue = CollectPuk();
+                //                    break;
+                //
                 case KeyEntryRequest.ResetPivPinWithPuk:
                     currentValue = _puk;
                     newValue = _pin;
@@ -84,14 +84,14 @@ namespace Yubico.YubiKey.Piv
                     currentValue = _mgmtKey;
                     break;
 
-//                case KeyEntryRequest.ChangePivManagementKey:
-//                    if (keyEntryData.IsRetry == true)
-//                    {
-//                        return false;
-//                    }
-//                    currentValue = CollectMgmtKey();
-//                    newValue = CollectMgmtKey();
-//                    break;
+                    //                case KeyEntryRequest.ChangePivManagementKey:
+                    //                    if (keyEntryData.IsRetry == true)
+                    //                    {
+                    //                        return false;
+                    //                    }
+                    //                    currentValue = CollectMgmtKey();
+                    //                    newValue = CollectMgmtKey();
+                    //                    break;
             }
 
             if (newValue is null)

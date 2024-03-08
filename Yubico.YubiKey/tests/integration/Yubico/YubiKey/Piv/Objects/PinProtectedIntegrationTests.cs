@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Piv.Objects;
 using Xunit;
+using Yubico.YubiKey.Piv.Objects;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -94,14 +94,14 @@ namespace Yubico.YubiKey.Piv
 
                     PinProtectedData pinProtectCopy = pivSession.ReadObject<PinProtectedData>();
 
-                    Assert.NotNull(pinProtectCopy.ManagementKey);
+                    _ = Assert.NotNull(pinProtectCopy.ManagementKey);
                     if (!(pinProtectCopy.ManagementKey is null))
                     {
                         var getData = (ReadOnlyMemory<byte>)pinProtectCopy.ManagementKey;
                         bool isValid = MemoryExtensions.SequenceEqual<byte>(mgmtKey.Span, getData.Span);
                         Assert.True(isValid);
                     }
-                    
+
                 }
                 finally
                 {

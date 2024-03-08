@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             if (exceptions.Count > 1)
             {
-                throw new AggregateException($"{ exceptions.Count } errors encountered.",
+                throw new AggregateException($"{exceptions.Count} errors encountered.",
                     exceptions);
             }
             else if (exceptions.Count == 1)
@@ -180,7 +180,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             catch (Exception ex)
             {
                 throw new PluginFailureException(
-                    $"Error executing OtpSession.SetStaticPassword: { ex.Message }.",
+                    $"Error executing OtpSession.SetStaticPassword: {ex.Message}.",
                     ex);
             }
 

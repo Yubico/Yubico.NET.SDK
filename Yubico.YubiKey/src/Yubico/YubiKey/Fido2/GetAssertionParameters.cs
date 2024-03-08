@@ -272,5 +272,5 @@ namespace Yubico.YubiKey.Fido2
                 .OptionalEntry(TagProtocol, (int?)Protocol)
                 .Encode();
         }
-   }
+    }
 }

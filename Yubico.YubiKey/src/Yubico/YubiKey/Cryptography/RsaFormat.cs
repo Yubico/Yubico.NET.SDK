@@ -14,8 +14,8 @@
 
 using System;
 using System.Globalization;
-using System.Security.Cryptography;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.Cryptography
@@ -1439,7 +1439,7 @@ namespace Yubico.YubiKey.Cryptography
                         // So look at the last byte to figure out which specific
                         // algorithm is represented.
                         supportedOid = new byte[] { 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, oid.Span[^1] };
-                        switch(oid.Span[^1])
+                        switch (oid.Span[^1])
                         {
                             default:
                                 returnValue = false;

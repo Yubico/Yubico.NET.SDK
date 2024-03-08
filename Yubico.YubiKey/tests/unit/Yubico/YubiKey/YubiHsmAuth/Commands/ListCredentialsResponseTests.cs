@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void GetData_DataTagAlgorithm_ExceptionMessageInvalidDataTag()
         {
-            string expectedMessage = $"The value { DataTagConstants.CryptographicKeyType } is not " +
+            string expectedMessage = $"The value {DataTagConstants.CryptographicKeyType} is not " +
                 $"a data tag supported by the YubiKey application.";
 
             byte[] dataWithoutSw = new byte[] { DataTagConstants.CryptographicKeyType, 1, 0 };
@@ -104,15 +104,19 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             // Touch - false
             // Label - string of given size
             // Retries - 0
-            List<byte> credRetryData = new List<byte>();
-            credRetryData.Add((byte)CryptographicKeyType.None);
-            credRetryData.Add(0);
+            List<byte> credRetryData = new List<byte>
+            {
+                (byte)CryptographicKeyType.None,
+                0
+            };
             credRetryData.AddRange(Encoding.UTF8.GetBytes(new char[labelLength]));
             credRetryData.Add(0);
 
-            List<byte> dataWithoutSw = new List<byte>();
-            dataWithoutSw.Add(DataTagConstants.LabelList);
-            dataWithoutSw.Add((byte)credRetryData.Count);
+            List<byte> dataWithoutSw = new List<byte>
+            {
+                DataTagConstants.LabelList,
+                (byte)credRetryData.Count
+            };
             dataWithoutSw.AddRange(credRetryData);
 
             ResponseApdu apdu = new ResponseApdu(dataWithoutSw.ToArray(), SWConstants.Success);
@@ -133,15 +137,19 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             // Touch - false
             // Label - string of given size
             // Retries - 0
-            List<byte> credRetryData = new List<byte>();
-            credRetryData.Add((byte)CryptographicKeyType.None);
-            credRetryData.Add(0);
+            List<byte> credRetryData = new List<byte>
+            {
+                (byte)CryptographicKeyType.None,
+                0
+            };
             credRetryData.AddRange(Encoding.UTF8.GetBytes(new char[0]));
             credRetryData.Add(0);
 
-            List<byte> dataWithoutSw = new List<byte>();
-            dataWithoutSw.Add(DataTagConstants.LabelList);
-            dataWithoutSw.Add((byte)credRetryData.Count);
+            List<byte> dataWithoutSw = new List<byte>
+            {
+                DataTagConstants.LabelList,
+                (byte)credRetryData.Count
+            };
             dataWithoutSw.AddRange(credRetryData);
 
             ResponseApdu apdu = new ResponseApdu(dataWithoutSw.ToArray(), SWConstants.Success);
@@ -155,7 +163,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             }
             catch (MalformedYubiKeyResponseException ex)
             {
-                actualMessage =  ex.Message;
+                actualMessage = ex.Message;
             }
 
             Assert.Equal(expectedMessage, actualMessage);
@@ -187,15 +195,19 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             // Touch - false
             // Label - string of given size
             // Retries - 0
-            List<byte> credRetryData = new List<byte>();
-            credRetryData.Add((byte)expectedKeyType);
-            credRetryData.Add(expectedTouch ? (byte)1 : (byte)0);
+            List<byte> credRetryData = new List<byte>
+            {
+                (byte)expectedKeyType,
+                expectedTouch ? (byte)1 : (byte)0
+            };
             credRetryData.AddRange(Encoding.UTF8.GetBytes(expectedLabel));
             credRetryData.Add(expectedRetryCount);
 
-            List<byte> dataWithoutSw = new List<byte>();
-            dataWithoutSw.Add(DataTagConstants.LabelList);
-            dataWithoutSw.Add((byte)credRetryData.Count);
+            List<byte> dataWithoutSw = new List<byte>
+            {
+                DataTagConstants.LabelList,
+                (byte)credRetryData.Count
+            };
             dataWithoutSw.AddRange(credRetryData);
 
             ResponseApdu apdu = new ResponseApdu(dataWithoutSw.ToArray(), SWConstants.Success);
@@ -228,17 +240,20 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             // Touch - false
             // Label - string of given size
             // Retries - 0
-            List<byte> credRetryData = new List<byte>();
-            credRetryData.Add((byte)expectedKeyType);
-            credRetryData.Add(expectedTouch ? (byte)1 : (byte)0);
+            List<byte> credRetryData = new List<byte>
+            {
+                (byte)expectedKeyType,
+                expectedTouch ? (byte)1 : (byte)0
+            };
             credRetryData.AddRange(Encoding.UTF8.GetBytes(expectedLabel));
             credRetryData.Add(expectedRetryCount);
 
-            List<byte> dataWithoutSw = new List<byte>();
-
-            // First element
-            dataWithoutSw.Add(DataTagConstants.LabelList);
-            dataWithoutSw.Add((byte)credRetryData.Count);
+            List<byte> dataWithoutSw = new List<byte>
+            {
+                // First element
+                DataTagConstants.LabelList,
+                (byte)credRetryData.Count
+            };
             dataWithoutSw.AddRange(credRetryData);
 
             // Second element

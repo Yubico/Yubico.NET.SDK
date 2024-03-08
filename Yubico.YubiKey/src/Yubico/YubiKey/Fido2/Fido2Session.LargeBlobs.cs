@@ -13,13 +13,13 @@
 // limitations under the License.
 
 using System;
-using System.IO;
 using System.Buffers.Binary;
+using System.IO;
 using System.Security.Cryptography;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cbor;
+using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -118,7 +118,7 @@ namespace Yubico.YubiKey.Fido2
             int maxFragmentLength = AuthenticatorInfo.MaximumMessageSize ?? AuthenticatorInfo.DefaultMaximumMessageSize;
             using var fullEncoding = new MemoryStream(maxFragmentLength);
 
-            maxFragmentLength -=  MessageOverhead;
+            maxFragmentLength -= MessageOverhead;
 
             ReadOnlyMemory<byte> currentData;
 
@@ -234,7 +234,7 @@ namespace Yubico.YubiKey.Fido2
                 int offset = 0;
                 int remaining = encodedArray.Length;
                 int maxFragmentLength = AuthenticatorInfo.MaximumMessageSize ?? AuthenticatorInfo.DefaultMaximumMessageSize;
-                maxFragmentLength -=  MessageOverhead;
+                maxFragmentLength -= MessageOverhead;
                 int currentLength;
                 bool forceToken = false;
 

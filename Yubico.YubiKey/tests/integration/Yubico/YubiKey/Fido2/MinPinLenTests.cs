@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
@@ -64,7 +64,7 @@ namespace Yubico.YubiKey.Fido2
 
                 int? minPinLen = mcData!.AuthenticatorData.GetMinPinLengthExtension();
 
-                Assert.NotNull(minPinLen);
+                _ = Assert.NotNull(minPinLen);
 
                 DeleteAddedCredential(fido2Session);
             }

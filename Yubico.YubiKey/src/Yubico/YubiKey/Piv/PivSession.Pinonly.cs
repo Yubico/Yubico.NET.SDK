@@ -16,10 +16,10 @@ using System;
 using System.Globalization;
 using System.Security;
 using System.Security.Cryptography;
+using Yubico.Core.Logging;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Piv.Objects;
-using Yubico.YubiKey.Cryptography;
-using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -1133,7 +1133,7 @@ namespace Yubico.YubiKey.Piv
         // The only way to get a false retun is if the PIN does not verify, and
         // even then, only if the ADMIN DATA says the mgmt key is PinDerived.
         private bool TryGetChangePinMode(
-            ReadOnlyMemory<byte>pin, out PivPinOnlyMode mode, out int? retriesRemaining)
+            ReadOnlyMemory<byte> pin, out PivPinOnlyMode mode, out int? retriesRemaining)
         {
             retriesRemaining = null;
 

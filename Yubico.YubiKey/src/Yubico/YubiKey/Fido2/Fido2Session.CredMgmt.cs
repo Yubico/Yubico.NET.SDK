@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;

@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.Oath.Commands
             {
                 throw new InvalidOperationException(ExceptionMessages.InvalidCredentialType);
             }
-            
+
             if (Credential.Period is null)
             {
                 throw new InvalidOperationException(ExceptionMessages.InvalidCredentialPeriod);

@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
             IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
 
             bool mgmtKeyChanged = false;
-            
+
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
                 // Test

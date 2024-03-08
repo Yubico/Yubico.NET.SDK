@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Runtime.InteropServices;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 

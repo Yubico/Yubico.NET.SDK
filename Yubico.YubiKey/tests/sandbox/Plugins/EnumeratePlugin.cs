@@ -75,12 +75,12 @@ namespace Yubico.YubiKey.TestApp.Plugins
             IList<IYubiKeyDevice> keys = IntegrationTestDeviceEnumeration.GetTestDevices(transport);
             if (keys.Count == 0)
             {
-                Output.WriteLine($"No keys found of type [{ transport }]");
+                Output.WriteLine($"No keys found of type [{transport}]");
                 return false;
             }
             for (int i = 0; i < keys.Count; ++i)
             {
-                Output.WriteLine($"{ Eol }YubiKey # { i + 1 }{ Eol + keys[i] }");
+                Output.WriteLine($"{Eol}YubiKey # {i + 1}{Eol + keys[i]}");
                 Output.WriteLine(new string('-', ConsoleWidth - 1));
             }
             Output.WriteLine(new string('=', ConsoleWidth - 1));

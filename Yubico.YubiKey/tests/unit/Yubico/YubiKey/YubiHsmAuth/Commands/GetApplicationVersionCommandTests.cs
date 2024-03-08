@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using Yubico.Core.Iso7816;
 using Xunit;
+using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {

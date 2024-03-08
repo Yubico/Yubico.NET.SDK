@@ -15,10 +15,10 @@
 using System;
 using System.Globalization;
 using System.Security;
+using Yubico.Core.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
-using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -1188,7 +1188,7 @@ namespace Yubico.YubiKey.Fido2
             _log.LogInformation("Try to verify UV (use KeyCollector).");
             CtapStatus status = DoVerifyUv(permissions, relyingPartyId, out string statusMessage);
 
-            switch(status)
+            switch (status)
             {
                 case CtapStatus.Ok:
                     return true;
@@ -1266,7 +1266,7 @@ namespace Yubico.YubiKey.Fido2
                             status = CtapStatus.LimitExceeded;
                         }
                     }
-                } while(status == CtapStatus.UvInvalid);
+                } while (status == CtapStatus.UvInvalid);
 
                 return status;
             }

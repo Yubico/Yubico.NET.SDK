@@ -99,8 +99,8 @@ namespace Yubico.YubiKey.Oath
                 Code data = oathSession.CalculateCredential(_fixture.TotpCredentialWithDefaultPeriod);
 
                 Assert.NotNull(data.Value);
-                Assert.NotNull(data.ValidFrom);
-                Assert.NotNull(data.ValidUntil);
+                _ = Assert.NotNull(data.ValidFrom);
+                _ = Assert.NotNull(data.ValidUntil);
 
                 int difference = (int)(data.ValidUntil! - data.ValidFrom!).Value.TotalSeconds;
 
@@ -122,8 +122,8 @@ namespace Yubico.YubiKey.Oath
                 Code data = oathSession.CalculateCredential(_fixture.HotpCredential);
 
                 Assert.NotNull(data.Value);
-                Assert.NotNull(data.ValidFrom);
-                Assert.NotNull(data.ValidUntil);
+                _ = Assert.NotNull(data.ValidFrom);
+                _ = Assert.NotNull(data.ValidUntil);
                 Assert.Equal(DateTimeOffset.MaxValue, data.ValidUntil);
             }
         }
@@ -146,8 +146,8 @@ namespace Yubico.YubiKey.Oath
                     CredentialPeriod.Period15);
 
                 Assert.NotNull(data.Value);
-                Assert.NotNull(data.ValidFrom);
-                Assert.NotNull(data.ValidUntil);
+                _ = Assert.NotNull(data.ValidFrom);
+                _ = Assert.NotNull(data.ValidUntil);
 
                 int difference = (int)(data.ValidUntil! - data.ValidFrom!).Value.TotalSeconds;
 
@@ -173,8 +173,8 @@ namespace Yubico.YubiKey.Oath
                     0);
 
                 Assert.NotNull(data.Value);
-                Assert.NotNull(data.ValidFrom);
-                Assert.NotNull(data.ValidUntil);
+                _ = Assert.NotNull(data.ValidFrom);
+                _ = Assert.NotNull(data.ValidUntil);
                 Assert.Equal(DateTimeOffset.MaxValue, data.ValidUntil);
             }
         }

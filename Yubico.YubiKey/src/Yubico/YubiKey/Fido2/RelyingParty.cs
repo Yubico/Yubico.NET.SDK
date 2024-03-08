@@ -13,12 +13,12 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Formats.Cbor;
 using System.Globalization;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Fido2.Cbor;
+using System.Text;
 using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2
 {

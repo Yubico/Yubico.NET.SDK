@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
 using System.Formats.Cbor;
+using System.Globalization;
 using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2.Cose

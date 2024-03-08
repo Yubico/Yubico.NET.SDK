@@ -15,11 +15,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Xunit;
 using Yubico.Core.Devices.Hid;
+using Yubico.Core.Iso7816;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
-using Xunit;
-using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -150,8 +150,8 @@ namespace Yubico.YubiKey.U2f
         }
 
         [Theory]
-        [InlineData(new byte[]{ })]
-        [InlineData(new byte[]{ 0x01, 0x02, 0x03 })]
+        [InlineData(new byte[] { })]
+        [InlineData(new byte[] { 0x01, 0x02, 0x03 })]
         public void EchoCommand_GetCorrectData(ReadOnlyMemory<byte> sendData)
         {
             if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
@@ -175,15 +175,15 @@ namespace Yubico.YubiKey.U2f
 
             IYubiKeyConnection connection = new FidoConnection(deviceToUse!);
             Assert.NotNull(connection);
-            
+
             EchoCommand echoCommand = new EchoCommand(sendData);
 
             EchoResponse echoResponse = connection.SendCommand(echoCommand);
             ReadOnlyMemory<byte> echoData = echoResponse.GetData();
-            
+
             Assert.True(echoCommand.Data.Span.SequenceEqual(echoData.Span));
         }
-        
+
         private static HidDevice? GetFidoHid(IEnumerable<HidDevice> devices)
         {
             foreach (HidDevice currentDevice in devices)

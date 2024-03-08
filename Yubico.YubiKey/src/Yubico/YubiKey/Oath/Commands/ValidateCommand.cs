@@ -96,9 +96,9 @@ namespace Yubico.YubiKey.Oath.Commands
 
             return new CommandApdu
             {
-                Ins = ValidateInstruction, 
+                Ins = ValidateInstruction,
                 Data = tlvWriter.Encode()
-            }; 
+            };
         }
 
         /// <inheritdoc />

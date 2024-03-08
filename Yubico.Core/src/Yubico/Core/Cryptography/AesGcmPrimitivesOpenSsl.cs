@@ -102,7 +102,7 @@ namespace Yubico.Core.Cryptography
         }
 
         /// <inheritdoc />
-        public bool DecryptAndVerify (
+        public bool DecryptAndVerify(
             ReadOnlySpan<byte> keyData,
             ReadOnlySpan<byte> nonce,
             ReadOnlySpan<byte> ciphertext,

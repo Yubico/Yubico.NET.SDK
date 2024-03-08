@@ -319,5 +319,5 @@ namespace Yubico.YubiKey.Fido2
                 .Entry(TagPinProtocol, (int)authProtocol.Protocol)
                 .Encode();
         }
-   }
+    }
 }

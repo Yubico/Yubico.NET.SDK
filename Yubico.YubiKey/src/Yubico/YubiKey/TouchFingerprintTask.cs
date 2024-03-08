@@ -134,7 +134,7 @@ namespace Yubico.YubiKey
         {
             if (commandByte == _commandByte)
             {
-                if(_notifyTask.Status == TaskStatus.Created)
+                if (_notifyTask.Status == TaskStatus.Created)
                 {
                     _notifyTask.Start();
                 }
@@ -157,7 +157,7 @@ namespace Yubico.YubiKey
             KeyEntryRequest request = (keyEntryData.Request == KeyEntryRequest.EnrollFingerprint)
                 ? KeyEntryRequest.EnrollFingerprint : KeyEntryRequest.Release;
 
-            lock(_updateLock)
+            lock (_updateLock)
             {
                 _isSdkUpdate = true;
                 _keyEntryData = new KeyEntryData(UserCancel)
@@ -184,7 +184,7 @@ namespace Yubico.YubiKey
             KeyEntryData keyEntryData;
             do
             {
-                lock(_updateLock)
+                lock (_updateLock)
                 {
                     makeCall = _isSdkUpdate;
                     keyEntryData = _keyEntryData;

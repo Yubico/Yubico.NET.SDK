@@ -13,11 +13,11 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
-using System.Globalization;
 using System.Buffers.Binary;
-using Yubico.Core.Tlv;
+using System.Globalization;
+using System.Security.Cryptography;
 using Yubico.Core.Logging;
+using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.Piv.Objects
 {

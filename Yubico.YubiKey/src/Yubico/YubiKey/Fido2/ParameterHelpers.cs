@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
 using System.Collections.Generic;
 using System.Formats.Cbor;
+using System.Globalization;
 using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2
@@ -103,7 +103,7 @@ namespace Yubico.YubiKey.Fido2
         /// (<c>localData</c> is null or a the <c>Count</c> is zero), the
         /// return will be an empty byte array.
         /// </returns>
-        public static byte[] EncodeKeyValues<TValue>(IReadOnlyDictionary<string,TValue>? localData)
+        public static byte[] EncodeKeyValues<TValue>(IReadOnlyDictionary<string, TValue>? localData)
         {
             if ((localData is null) || (localData.Count == 0))
             {

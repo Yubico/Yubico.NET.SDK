@@ -117,7 +117,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 throw exceptions.Count == 1
                     ? exceptions[0]
                     : new AggregateException(
-                        $"{ exceptions.Count } errors encountered.",
+                        $"{exceptions.Count} errors encountered.",
                         exceptions);
             }
         }
@@ -156,7 +156,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
         private void OutputResult()
         {
-            Output.WriteLine($"Challenge-response ({ (_yubiOtp ? "Yubico OTP" : "HMAC-SHA1") }) configured.");
+            Output.WriteLine($"Challenge-response ({(_yubiOtp ? "Yubico OTP" : "HMAC-SHA1")}) configured.");
 
             if (_generate || _generateTotp || Output.OutputLevel > OutputLevel.Normal)
             {
@@ -175,7 +175,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                             ? new ModHex()
                             : new Base16();
                     encoding.Encode(_key, encodedKey);
-                    Output.Write((_generate ? "Generated " : string.Empty) + $"Key ({ encoding.GetType() }): ");
+                    Output.Write((_generate ? "Generated " : string.Empty) + $"Key ({encoding.GetType()}): ");
                     Output.WriteSensitive(encodedKey, OutputLevel.Quiet);
                     Output.WriteLine(string.Empty, OutputLevel.Quiet);
                 }
@@ -184,7 +184,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                     encodedKey.Clear();
                 }
                 Output.WriteLine("Mode: " + (_yubiOtp ? "Yubico OTP" : "HMAC-SHA1"), OutputLevel.Verbose);
-                Output.WriteLine($"Button press: { (_button ? string.Empty : "Not ") } required");
+                Output.WriteLine($"Button press: {(_button ? string.Empty : "Not ")} required");
             }
 
             //// if outputlevel is none or error, then no output here.

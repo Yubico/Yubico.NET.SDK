@@ -216,7 +216,7 @@ namespace Yubico.YubiKey
                 sw.Restart();
                 keys = YubiKeyDevice.FindByTransport(ct).ToList();
                 sw.Stop();
-                _testOutputHelper.WriteLine($"\t({keys.Count}) -{sw.ElapsedMilliseconds, 5}ms");
+                _testOutputHelper.WriteLine($"\t({keys.Count}) -{sw.ElapsedMilliseconds,5}ms");
             }
         }
     }

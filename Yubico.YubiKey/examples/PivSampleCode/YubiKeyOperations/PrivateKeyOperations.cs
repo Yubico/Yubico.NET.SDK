@@ -14,8 +14,8 @@
 
 using System;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.Sample.PivSampleCode
 {
@@ -94,7 +94,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     digest = RsaFormat.FormatPkcs1Sign(digest, digestAlgorithm, keySizeBits);
                 }
             }
-            
+
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = KeyCollectorDelegate;
@@ -167,11 +167,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             PivPublicKey correspondentPublicKey,
             out byte[] computedSecret)
         {
-                using (var pivSession = new PivSession(yubiKey))
-                {
-                    pivSession.KeyCollector = KeyCollectorDelegate;
-                    computedSecret = pivSession.KeyAgree(slotNumber, correspondentPublicKey);
-                }
+            using (var pivSession = new PivSession(yubiKey))
+            {
+                pivSession.KeyCollector = KeyCollectorDelegate;
+                computedSecret = pivSession.KeyAgree(slotNumber, correspondentPublicKey);
+            }
 
             return true;
         }

@@ -13,13 +13,13 @@
 // limitations under the License.
 
 using System;
-using System.Security;
 using System.Globalization;
-using Yubico.YubiKey.Piv.Commands;
-using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Scp03;
-using Yubico.YubiKey.InterIndustry.Commands;
+using System.Security;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.InterIndustry.Commands;
+using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey.Piv
 {

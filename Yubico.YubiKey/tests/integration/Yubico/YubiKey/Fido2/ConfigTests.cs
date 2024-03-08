@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Fido2
                 Assert.Equal(expectedResult, isSet);
                 if (isSet)
                 {
-                    Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange);
+                    _ = Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange);
                     Assert.True(fido2Session.AuthenticatorInfo.ForcePinChange!);
                 }
             }
@@ -106,7 +106,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 fido2Session.KeyCollector = LocalKeyCollector;
 
-                Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange);
+                _ = Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange);
                 Assert.False(fido2Session.AuthenticatorInfo.ForcePinChange!);
 
                 OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
@@ -117,7 +117,7 @@ namespace Yubico.YubiKey.Fido2
                 Assert.Equal(expectedResult, isSet);
                 if (isSet)
                 {
-                    Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange);
+                    _ = Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange);
                     Assert.True(fido2Session.AuthenticatorInfo.ForcePinChange!);
                 }
             }
@@ -184,7 +184,7 @@ namespace Yubico.YubiKey.Fido2
             }
 
             return isValid;
-       }
+        }
 
         private bool LocalKeyCollector(KeyEntryData arg)
         {

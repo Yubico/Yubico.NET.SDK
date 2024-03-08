@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Globalization;
-using Yubico.Core.Tlv;
+using System.Text;
 using Yubico.Core.Logging;
+using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.Piv.Objects
 {
@@ -314,7 +314,7 @@ namespace Yubico.YubiKey.Piv.Objects
         // the URL to null. Otherwise, leave it alone.
         private void SetOffCardUrlNullIfZeroCerts()
         {
-            if ((_onCardCerts == 0) &&(_offCardCerts == 0))
+            if ((_onCardCerts == 0) && (_offCardCerts == 0))
             {
                 _offCardCertUrl = null;
                 _urlBytes = null;

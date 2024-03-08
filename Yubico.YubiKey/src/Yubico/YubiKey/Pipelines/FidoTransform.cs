@@ -90,10 +90,10 @@ namespace Yubico.YubiKey.Pipelines
             ResponseApdu responseApdu =
                 responseByte switch
                 {
-                    Ctap1Message   => new ResponseApdu(responseData),
-                    CtapHidCbor    => CtapToApduResponse.ToCtap2ResponseApdu(responseData),
-                    CtapError      => CtapToApduResponse.ToCtap1ResponseApdu(responseData),
-                    _              => new ResponseApdu(responseData, SWConstants.Success),
+                    Ctap1Message => new ResponseApdu(responseData),
+                    CtapHidCbor => CtapToApduResponse.ToCtap2ResponseApdu(responseData),
+                    CtapError => CtapToApduResponse.ToCtap1ResponseApdu(responseData),
+                    _ => new ResponseApdu(responseData, SWConstants.Success),
                 };
 
             return responseApdu;

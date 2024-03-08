@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-            
+
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
             Assert.Equal(ResponseStatus.Success, calculateAllCredentialsResponse.Status);
@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-           
+
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
             Assert.Equal(SWConstants.Success, calculateAllCredentialsResponse.StatusWord);
@@ -53,12 +53,12 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
             var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-     
+
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
-            var data = calculateAllCredentialsResponse.GetData();
+            System.Collections.Generic.IDictionary<Credential, Code>? data = calculateAllCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, calculateAllCredentialsResponse.StatusWord);
-            Assert.Empty(data);   
+            Assert.Empty(data);
         }
 
         [Fact]
@@ -77,9 +77,10 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
-            var data = calculateAllCredentialsResponse.GetData();
+            System.Collections.Generic.IDictionary<Credential, Code>? data = calculateAllCredentialsResponse.GetData();
             var credentialHotp = new Credential("Apple", "test@icloud.com", CredentialType.Hotp, CredentialPeriod.Undefined);
-            var credentialTotp = new Credential {
+            var credentialTotp = new Credential
+            {
                 Issuer = "Microsoft",
                 AccountName = "test@outlook.com",
                 Type = CredentialType.Totp,

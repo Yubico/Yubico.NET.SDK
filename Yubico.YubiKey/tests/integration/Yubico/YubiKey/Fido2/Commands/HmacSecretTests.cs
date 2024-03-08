@@ -14,9 +14,9 @@
 
 using System;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.PinProtocols;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -210,7 +210,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 SetPinResponse setPinRsp = Connection.SendCommand(setPinCmd);
                 status = setPinRsp.Status;
 
-            } while(status == ResponseStatus.Success);
+            } while (status == ResponseStatus.Success);
 
             return false;
         }

@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
 using System.Collections.Generic;
 using System.Formats.Cbor;
+using System.Globalization;
 
 namespace Yubico.YubiKey.Fido2.Cbor
 {
@@ -98,9 +98,9 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// <returns>
         /// A new IDictionary representing this map.
         /// </returns>
-        public IReadOnlyDictionary<TKey,TValue> AsDictionary<TValue>()
+        public IReadOnlyDictionary<TKey, TValue> AsDictionary<TValue>()
         {
-            var returnValue = new Dictionary<TKey,TValue>(_dict.Count);
+            var returnValue = new Dictionary<TKey, TValue>(_dict.Count);
             foreach (KeyValuePair<TKey, object?> entry in _dict)
             {
                 object? currentValue = ConvertValue<TValue>(entry.Value);

@@ -13,16 +13,16 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Sample.SharedCode;
+using System.Text;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
-using System.Globalization;
-using System.Linq;
+using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
 {
@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         public bool RunMenuItem(Fido2MainMenuItem menuItem)
         {
             if ((menuItem >= Fido2MainMenuItem.MakeCredential)
-                &&(menuItem < Fido2MainMenuItem.Reset))
+                && (menuItem < Fido2MainMenuItem.Reset))
             {
                 SampleMenu.WriteMessage(
                     MessageType.Title, 0,

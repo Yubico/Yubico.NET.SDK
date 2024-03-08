@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.Core.Devices.Hid;
 using Xunit;
 using Xunit.Abstractions;
+using Yubico.Core.Devices.Hid;
 
 namespace Yubico.PlatformInterop
 {

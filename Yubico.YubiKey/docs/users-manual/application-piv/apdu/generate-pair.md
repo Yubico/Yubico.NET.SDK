@@ -19,7 +19,7 @@ limitations under the License. -->
 
 CLA | INS | P1 | P2 | Lc | Data | Le
 :---: | :---: | :---: | :---: | :---: | :---: | :---:
-00 | 47 | 00 | *Slot number* | *data len* | AC *\<remaining bytes\>* 80 01 *\<alg\>* <br />\[AA 01 *\<pin policy\>*\] <br />\[AB 01 *\<touch policy\>*\] | (absent)
+00 | 47 | 00 | *Slot number* | *data len* | [AC *\<remaining bytes\>* 80 01 *\<alg\>*] <br />\[AA 01 *\<pin policy\>*\] <br />\[AB 01 *\<touch policy\>*\] | (absent)
 
 The slot number can be one of the following (hex values):
 

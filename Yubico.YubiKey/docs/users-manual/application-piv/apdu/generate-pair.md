@@ -19,7 +19,7 @@ limitations under the License. -->
 
 CLA | INS | P1 | P2 | Lc | Data | Le
 :---: | :---: | :---: | :---: | :---: | :---: | :---:
-00 | 47 | 00 | *Slot number* | *data len* | AC 03 80 01 *\<alg\>* <br />\[AA 01 *\<pin policy\>*\] <br />\[AB 01 *\<touch policy\>*\] | (absent)
+00 | 47 | 00 | *Slot number* | *data len* | AC [*remaining bytes*] 80 01 *\<alg\>* <br />\[AA 01 *\<pin policy\>*\] <br />\[AB 01 *\<touch policy\>*\] | (absent)
 
 The slot number can be one of the following (hex values):
 
@@ -32,6 +32,8 @@ F9
 
 Note that SP 800-73-4 declares that another possible value for the slot number is `04`.
 However, the YubiKey does not support that slot.
+
+The value for the "remaining bytes" field must be equal to the number of bytes that come after it. For example, if three bytes come after the "remaining bytes" field, the field's value must be 03.
 
 There are only four choices for "alg" (algorithm and size): RSA-1024 (06),
 RSA-2048 (07), ECC-P-256 (11), and ECC-P-384 (14).
@@ -47,7 +49,7 @@ An APDU to generate an ECC-P256 key pair with a PIN policy of "once" and a touch
 of "always" would be the following:
 
 ```C
-  00 47 00 9C 0B AC 03 80 01 11 AA 01 02 AB 01 02
+  00 47 00 9C 0B AC 09 80 01 11 AA 01 02 AB 01 02
 ```
 
 An APDU to generate an RSA-2048 key pair with PIN and touch policies of "default" would be
@@ -136,12 +138,12 @@ RSA:
 
 ```C
 $ opensc-tool -c default -s 00:a4:04:00:09:a0:00:00:03:08:00:00:10:00
-  -s 00:47:00:9c:0b:ac:03:80:01:06:aa:01:02:ab:01:02
+  -s 00:47:00:9c:0b:ac:09:80:01:06:aa:01:02:ab:01:02
 Using reader with a card: Yubico YubiKey OTP+FIDO+CCID 0
 Sending: 00 A4 04 00 09 A0 00 00 03 08 00 00 10 00
 Received (SW1=0x90, SW2=0x00):
 61 11 4F 06 00 00 10 00 01 00 79 07 4F 05 A0 00
 00 03 08
-Sending: 00 47 00 9C 0B AC 03 80 01 06 AA 01 02 AB 01 02
+Sending: 00 47 00 9C 0B AC 09 80 01 06 AA 01 02 AB 01 02
 Received (SW1=0x69, SW2=0x82)
 ```

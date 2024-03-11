@@ -9,7 +9,7 @@ Yubico.NativeShims/build*/
 Yubico.NativeShims/Yubico.NativeShims.h
 Yubico.NativeShims/win-*
 Yubico.NativeShims/osx-*
-Yubico.NativeShims/ubuntu-*
+Yubico.NativeShims/linux-*
 
 # NuGet config
 # We treat NuGet configs as per-user settings

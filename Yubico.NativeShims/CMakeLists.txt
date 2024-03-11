@@ -25,8 +25,9 @@ elseif(NOT MSVC)
     string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
         " -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/exports.gnu")
 else()
+#enable control flow guard for windows
     string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
-        " /def:\"${CMAKE_CURRENT_SOURCE_DIR}/exports.msvc\"")
+        " /guard:cf /def:\"${CMAKE_CURRENT_SOURCE_DIR}/exports.msvc\"")
 endif()
 
 

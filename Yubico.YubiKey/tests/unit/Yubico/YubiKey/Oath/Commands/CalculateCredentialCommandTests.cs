@@ -165,10 +165,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
         private byte[] GenerateChallenge(CredentialPeriod? period)
         {
-            if (period is null)
-            {
-                period = CredentialPeriod.Period30;
-            }
+            period ??= CredentialPeriod.Period30;
 
             ulong timePeriod = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (uint)period;
             byte[] bytes = new byte[8];

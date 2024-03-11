@@ -52,24 +52,24 @@ docker run --pull always --rm --privileged multiarch/qemu-user-static --reset -p
 
 # Distro: Ubuntu
 # Arch: amd64/x64
-# Output: ./ubuntu-x64/libYubico.NativeShims.so
+# Output: ./linux-x64/libYubico.NativeShims.so
 docker buildx build \
-    --tag yubico/nativeshims-ubuntu:1.0 \
-    --file docker/Ubuntu/Dockerfile \
+    --tag yubico/nativeshims-linux:1.0 \
+    --file docker/Dockerfile \
     --platform=linux/amd64 \
     --build-arg USER_ID=`id -u` \
     --build-arg GROUP_ID=`id -g` \
-    --output type=local,dest=ubuntu-x64 \
+    --output type=local,dest=linux-x64 \
     .
 
 # Distro: Ubuntu
 # Arch: arm64
-# Output: ./ubuntu-arm64/libYubico.NativeShims.so
+# Output: ./linux-arm64/libYubico.NativeShims.so
 docker buildx build \
-    --tag yubico/nativeshims-ubuntu:1.0 \
-    --file docker/Ubuntu/Dockerfile \
+    --tag yubico/nativeshims-linux:1.0 \
+    --file docker/Dockerfile \
     --platform=linux/arm64 \
     --build-arg USER_ID=`id -u` \
     --build-arg GROUP_ID=`id -g` \
-    --output type=local,dest=ubuntu-arm64 \
+    --output type=local,dest=linux-arm64 \
     .

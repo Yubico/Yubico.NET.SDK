@@ -52,7 +52,6 @@ if(APPLE AND
     add_link_options("-exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/exports.llvm")
 endif()
 if(UNIX)
-    add_compile_options("-fstack-protector-all" "-fPIC" "-fPIE") 
     add_link_options("-Wl,-z, -Wl,-z,relro,-z,now,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/exports.gnu")
 endif()
 if(WIN32)

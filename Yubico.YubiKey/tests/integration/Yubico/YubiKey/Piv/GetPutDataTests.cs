@@ -148,7 +148,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
-            // Now try to read the CHUID without authenicating the mgmt key, nor
+            // Now try to read the CHUID without authenticating the mgmt key, nor
             // verifying the PIN. It should work.
             using (var pivSession = new PivSession(testDevice))
             {
@@ -213,7 +213,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
-            // Now try to read the CCC without authenicating the mgmt key, nor
+            // Now try to read the CCC without authenticating the mgmt key, nor
             // verifying the PIN. It should work.
             using (var pivSession = new PivSession(testDevice))
             {
@@ -415,7 +415,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
-            // Now try to read the SecurityObject without authenicating the mgmt key, nor
+            // Now try to read the SecurityObject without authenticating the mgmt key, nor
             // verifying the PIN. It should work.
             using (var pivSession = new PivSession(testDevice))
             {
@@ -473,7 +473,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
-            // Now try to read the KeyHistory without authenicating the mgmt key, nor
+            // Now try to read the KeyHistory without authenticating the mgmt key, nor
             // verifying the PIN. It should work.
             using (var pivSession = new PivSession(testDevice))
             {

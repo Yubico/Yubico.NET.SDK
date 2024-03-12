@@ -17,7 +17,7 @@ using System;
 namespace Yubico.Core.Buffers
 {
     /// <summary>
-    /// Class for encoding and unencoding byte colletions into MODHEX.
+    /// Class for encoding and decoding byte collections into MODHEX.
     /// </summary>
     public class ModHex : Base16
     {
@@ -30,22 +30,21 @@ namespace Yubico.Core.Buffers
         protected override bool DefaultLowerCase => true;
 
         #region Static Version
+
         /// <inheritdoc />
         public static new void EncodeBytes(ReadOnlySpan<byte> data, Span<char> encoded) =>
             new ModHex().Encode(data, encoded);
 
         /// <inheritdoc />
-        public static new string EncodeBytes(ReadOnlySpan<byte> data) =>
-            new ModHex().Encode(data);
+        public static new string EncodeBytes(ReadOnlySpan<byte> data) => new ModHex().Encode(data);
 
         /// <inheritdoc />
         public static new void DecodeText(ReadOnlySpan<char> encoded, Span<byte> data) =>
             new ModHex().Decode(encoded, data);
 
         /// <inheritdoc />
-        public static new byte[] DecodeText(string encoded) =>
-            new ModHex().Decode(encoded);
-        #endregion
+        public static new byte[] DecodeText(string encoded) => new ModHex().Decode(encoded);
 
+        #endregion
     }
 }

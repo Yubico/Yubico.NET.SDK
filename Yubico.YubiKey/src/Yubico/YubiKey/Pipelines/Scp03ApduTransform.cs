@@ -14,10 +14,10 @@
 
 using System;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Scp03.Commands;
-using Yubico.YubiKey.Scp03;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Scp03;
+using Yubico.YubiKey.Scp03.Commands;
 
 namespace Yubico.YubiKey.Pipelines
 {
@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Pipelines
     /// <remarks>
     /// Does an SCP03 Initialize Update / External Authenticate handshake at setup.
     ///
-    /// Commands and responses sent throught this pipeline are confidential and authenticated.
+    /// Commands and responses sent through this pipeline are confidential and authenticated.
     ///
     /// Requires pre-shared <see cref="StaticKeys"/>.
     /// </remarks>

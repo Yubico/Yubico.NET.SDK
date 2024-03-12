@@ -117,7 +117,7 @@ generally three things you want to see:
 * A message explaining the status
 * The Data
 
-Note: The Status Word is the APDU's reponse code (see [APDU](xref:UsersManualApdu)). Most of the time you
+Note: The Status Word is the APDU's response code (see [APDU](xref:UsersManualApdu)). Most of the time you
 will likely not worry about this. But it is provided in case you do need to examine it.
 
 The Status is the SDK response code. It describes the result of the what the command

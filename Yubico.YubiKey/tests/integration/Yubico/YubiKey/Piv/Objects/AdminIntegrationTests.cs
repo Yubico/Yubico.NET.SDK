@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Piv.Objects;
 using Xunit;
+using Yubico.YubiKey.Piv.Objects;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -105,8 +105,8 @@ namespace Yubico.YubiKey.Piv
                     pivSession.WriteObject(admin);
 
                     AdminData adminCopy = pivSession.ReadObject<AdminData>();
-                    Assert.NotNull(adminCopy.Salt);
-                    Assert.NotNull(adminCopy.PinLastUpdated);
+                    _ = Assert.NotNull(adminCopy.Salt);
+                    _ = Assert.NotNull(adminCopy.PinLastUpdated);
 
                     if (!(adminCopy.Salt is null))
                     {

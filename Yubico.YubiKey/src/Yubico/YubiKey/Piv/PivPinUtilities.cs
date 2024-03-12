@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Piv
         /// True if <c>pinLength</c> is a valid PIV PIN length, or False otherwise.
         /// </returns>
         public static bool IsValidPinLength(int pinLength) =>
-          (pinLength >= MinimumPinLength) && (pinLength <= MaximumPinLength);
+          pinLength >= MinimumPinLength && pinLength <= MaximumPinLength;
 
         /// <summary>
         /// Determine, based on the <paramref name="statusWord"/>, what the
@@ -201,8 +201,8 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public static byte[] CopyTwoPinsWithPadding(ReadOnlyMemory<byte> firstPin, ReadOnlyMemory<byte> secondPin)
         {
-            if ((IsValidPinLength(firstPin.Length) == false)
-                || (IsValidPinLength(secondPin.Length) == false))
+            if (IsValidPinLength(firstPin.Length) == false
+                || IsValidPinLength(secondPin.Length) == false)
             {
                 throw new ArgumentException(
                     string.Format(

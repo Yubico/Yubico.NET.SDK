@@ -150,7 +150,7 @@ namespace Yubico.YubiKey.TestUtilities
 
                 case PivAlgorithm.Rsa1024:
                 case PivAlgorithm.Rsa2048:
-                    var rsaObject = _certificateObject.PublicKey.GetRSAPublicKey()!;
+                    RSA? rsaObject = _certificateObject.PublicKey.GetRSAPublicKey()!;
                     RSAParameters rsaParams = rsaObject.ExportParameters(false);
                     return new PivRsaPublicKey(rsaParams.Modulus, rsaParams.Exponent);
 
@@ -169,9 +169,9 @@ namespace Yubico.YubiKey.TestUtilities
         // throw an exception.
         public RSA GetRsaObject()
         {
-            if ((Algorithm == PivAlgorithm.Rsa1024) || (Algorithm == PivAlgorithm.Rsa2048))
+            if (Algorithm == PivAlgorithm.Rsa1024 || Algorithm == PivAlgorithm.Rsa2048)
             {
-                var rsaObject = _certificateObject.PublicKey.GetRSAPublicKey()!;
+                RSA? rsaObject = _certificateObject.PublicKey.GetRSAPublicKey()!;
                 RSAParameters rsaParams = rsaObject.ExportParameters(false);
 
                 return RSA.Create(rsaParams);

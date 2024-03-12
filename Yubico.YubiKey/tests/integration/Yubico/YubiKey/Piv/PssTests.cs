@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System.Security.Cryptography;
+using Xunit;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -106,7 +106,7 @@ namespace Yubico.YubiKey.Piv
             var privateKey = new KeyConverter(privatePem.ToCharArray());
             Assert.Equal(algorithm, privateKey.Algorithm);
 
-            if ((algorithm == PivAlgorithm.Rsa1024) || (algorithm == PivAlgorithm.Rsa2048))
+            if (algorithm == PivAlgorithm.Rsa1024 || algorithm == PivAlgorithm.Rsa2048)
             {
                 using RSA rsaPublic = publicKey.GetRsaObject();
                 Assert.Equal(keySize, rsaPublic.KeySize);

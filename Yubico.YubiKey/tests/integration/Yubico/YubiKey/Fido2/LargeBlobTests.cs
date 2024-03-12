@@ -15,8 +15,8 @@
 using System;
 using System.Collections.Generic;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
 using Yubico.YubiKey.Fido2.Commands;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Fido2
             _testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Bio);
         }
 
-        //[Fact(Skip = "This test requires user interation to reset the FIDO2 application.")]
+        //[Fact(Skip = "This test requires user interaction to reset the FIDO2 application.")]
         [Fact]
         public void SetLargeBlob_Succeeds()
         {
@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Fido2
                 Assert.Equal(2, assertions.Count);
 
                 SerializedLargeBlobArray blobArray = fido2Session.GetSerializedLargeBlobArray();
-                Assert.NotNull(blobArray.EncodedArray);
+                _ = Assert.NotNull(blobArray.EncodedArray);
 
                 byte[] blobData1 = new byte[] {
                     0x31,
@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.Fido2
                     0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x50,
                     0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x50
                 };
-                Assert.NotNull(mcData1.LargeBlobKey);
+                _ = Assert.NotNull(mcData1.LargeBlobKey);
                 ReadOnlyMemory<byte> key1 = ReadOnlyMemory<byte>.Empty;
                 if (!(mcData1.LargeBlobKey is null))
                 {
@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.Fido2
                     0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70,
                     0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70
                 };
-                Assert.NotNull(mcData2.LargeBlobKey);
+                _ = Assert.NotNull(mcData2.LargeBlobKey);
                 ReadOnlyMemory<byte> key2 = ReadOnlyMemory<byte>.Empty;
                 if (!(mcData2.LargeBlobKey is null))
                 {
@@ -125,7 +125,7 @@ namespace Yubico.YubiKey.Fido2
                 }
 
                 fido2Session.SetSerializedLargeBlobArray(blobArray);
-                Assert.NotNull(blobArray.Digest);
+                _ = Assert.NotNull(blobArray.Digest);
 
                 blobArray = fido2Session.GetSerializedLargeBlobArray();
                 Assert.Equal(2, blobArray.Entries.Count);

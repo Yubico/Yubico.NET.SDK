@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 throw new ArgumentNullException(nameof(plaintext));
             }
-            if ((length < BlockSize) || ((length % BlockSize) != 0) || ((offset + length) > plaintext.Length))
+            if (length < BlockSize || length % BlockSize != 0 || offset + length > plaintext.Length)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 throw new ArgumentNullException(nameof(ciphertext));
             }
-            if ((length == 0) || (length % BlockSize != 0) || (offset + length > ciphertext.Length))
+            if (length == 0 || length % BlockSize != 0 || offset + length > ciphertext.Length)
             {
                 throw new ArgumentException(
                     string.Format(

@@ -33,7 +33,8 @@ namespace Yubico.YubiKey.Piv
                 }
             }
 
-            var priKey = PivPrivateKey.Create(new byte[] {
+            var priKey = PivPrivateKey.Create(new byte[]
+            {
                 0x06, 0x20,
                 0xba, 0x29, 0x7a, 0xc6, 0x64, 0x62, 0xef, 0x6c, 0xd0, 0x89, 0x76, 0x5c, 0xbd, 0x46, 0x52, 0x2b,
                 0xb0, 0x48, 0x0e, 0x85, 0x49, 0x15, 0x85, 0xe7, 0x7a, 0x74, 0x3c, 0x8e, 0x03, 0x59, 0x8d, 0x3a
@@ -76,9 +77,9 @@ namespace Yubico.YubiKey.Piv
                 return false;
             }
 
-            if (BlockPinOrPuk(pivSession, PivSlot.Pin) == true)
+            if (BlockPinOrPuk(pivSession, PivSlot.Pin))
             {
-                if (BlockPinOrPuk(pivSession, PivSlot.Puk) == true)
+                if (BlockPinOrPuk(pivSession, PivSlot.Puk))
                 {
                     var resetCommand = new ResetPivCommand();
                     ResetPivResponse resetResponse = pivSession.Connection.SendCommand(resetCommand);
@@ -94,10 +95,12 @@ namespace Yubico.YubiKey.Piv
             int retriesRemaining;
             do
             {
-                byte[] currentValue = new byte[] {
+                byte[] currentValue = new byte[]
+                {
                     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
                 };
-                byte[] newValue = new byte[] {
+                byte[] newValue = new byte[]
+                {
                     0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22
                 };
                 var changeCommand = new ChangeReferenceDataCommand(slotNumber, currentValue, newValue);
@@ -109,7 +112,6 @@ namespace Yubico.YubiKey.Piv
                 }
 
                 retriesRemaining = changeResponse.GetData() ?? 1;
-
             } while (retriesRemaining > 0);
 
             return true;

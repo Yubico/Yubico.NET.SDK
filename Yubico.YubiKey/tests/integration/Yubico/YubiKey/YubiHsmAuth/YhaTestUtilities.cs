@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
         public static readonly string DefaultCredLabel = "abc";
         public static readonly bool DefaultCredTouchRequired = false;
-        
+
         public static readonly byte[] DefaultHostChallenge =
             new byte[8] { 0, 1, 2, 3, 4, 5, 6, 7 };
         public static readonly byte[] DefaultHsmDeviceChallenge =
@@ -102,7 +102,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </summary>
         public static IYubiKeyDevice GetCleanDevice(FirmwareVersion fwVersion)
         {
-            var testDevices = IntegrationTestDeviceEnumeration.GetTestDevices();
+            System.Collections.Generic.IList<IYubiKeyDevice>? testDevices = IntegrationTestDeviceEnumeration.GetTestDevices();
             IYubiKeyDevice testDevice = testDevices
                 .Where(d =>
                     d.FirmwareVersion == fwVersion

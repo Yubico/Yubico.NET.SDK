@@ -12,13 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.Core.Devices.Hid;
-using Yubico.YubiKey.DeviceExtensions;
-using System.Diagnostics;
 using System;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.Logging;
+using Yubico.Core.Devices.Hid;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.DeviceExtensions;
 
 namespace Yubico.YubiKey
 {

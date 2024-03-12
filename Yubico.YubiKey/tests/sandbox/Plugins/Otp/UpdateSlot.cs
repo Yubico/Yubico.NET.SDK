@@ -207,7 +207,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 : otp.IsLongPressConfigured;
             if (!ready)
             {
-                Output.WriteLine($"Slot[{ _slot }] is not programmed and can't be updated.");
+                Output.WriteLine($"Slot[{_slot}] is not programmed and can't be updated.");
                 Output.WriteLine("Aborted.");
                 return false;
             }
@@ -242,23 +242,23 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         private bool ConfirmConfig()
         {
             Output.WriteLine(_force
-                ? $"Updating Configuration for Slot [{ _slot }]:"
-                : $"Proposed Configuration for slot [{ _slot }]:");
+                ? $"Updating Configuration for Slot [{_slot}]:"
+                : $"Proposed Configuration for slot [{_slot}]:");
             Output.WriteLine(new string('-', 80));
-            Output.Write($"AppendDelayToFixed:    | { Val(_appendDelayToFixed) } | AppendDelayToOtp: ");
-            Output.WriteLine($"{ Val(_appendDelayToOtp) } | Dormant:    { Val(_dormant) }");
+            Output.Write($"AppendDelayToFixed:    | {Val(_appendDelayToFixed)} | AppendDelayToOtp: ");
+            Output.WriteLine($"{Val(_appendDelayToOtp)} | Dormant:    {Val(_dormant)}");
             Output.WriteLine(new string('-', 80));
-            Output.Write($"SerialVisibleToApi:    | { Val(_serialApi) } | UseNumericKeypad: ");
-            Output.WriteLine($"{ Val(_numericKeypad) } | 10msPacing: { Val(_use10msPacing) }");
+            Output.Write($"SerialVisibleToApi:    | {Val(_serialApi)} | UseNumericKeypad: ");
+            Output.WriteLine($"{Val(_numericKeypad)} | 10msPacing: {Val(_use10msPacing)}");
             Output.WriteLine(new string('-', 80));
-            Output.Write($"SerialVisibleToButton: | { Val(_serialButton) } | AppendTabToFixed: ");
-            Output.WriteLine($"{ Val(_appendTabToFixed) } | 20msPacing: { Val(_use20msPacing) }");
+            Output.Write($"SerialVisibleToButton: | {Val(_serialButton)} | AppendTabToFixed: ");
+            Output.WriteLine($"{Val(_appendTabToFixed)} | 20msPacing: {Val(_use20msPacing)}");
             Output.WriteLine(new string('-', 80));
-            Output.Write($"SerialVisibleToUsb:    | { Val(_serialUsb) } | AppendTabToOtp:   ");
-            Output.WriteLine($"{ Val(_appendTabToOtp) } | NoEnter:    { Val(_noEnter) }");
+            Output.Write($"SerialVisibleToUsb:    | {Val(_serialUsb)} | AppendTabToOtp:   ");
+            Output.WriteLine($"{Val(_appendTabToOtp)} | NoEnter:    {Val(_noEnter)}");
             Output.WriteLine(new string('-', 80));
-            Output.Write($"SendTabFirst:          | { Val(_sendTabFirst) } | FastTrigger:      ");
-            Output.WriteLine($"{ Val(_fastTrigger) } | InvertLed:  { Val(_invertLed) }");
+            Output.Write($"SendTabFirst:          | {Val(_sendTabFirst)} | FastTrigger:      ");
+            Output.WriteLine($"{Val(_fastTrigger)} | InvertLed:  {Val(_invertLed)}");
             Output.WriteLine(new string('-', 80) + Environment.NewLine);
 
             if (_force)

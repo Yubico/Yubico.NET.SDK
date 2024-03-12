@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Oath.Commands
         public void CreateCommandApdu_GetP1Property_ReturnsZero()
         {
             var command = new ListCommand();
-            
+
             Assert.Equal(0, command.CreateCommandApdu().P1);
         }
 
@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.Oath.Commands
             var command = new ListCommand();
 
             ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            
+
             Assert.True(data.IsEmpty);
         }
 
@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new ListCommand();
-            var response = command.CreateResponseForApdu(responseApdu);
+            ListResponse? response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is ListResponse);
         }

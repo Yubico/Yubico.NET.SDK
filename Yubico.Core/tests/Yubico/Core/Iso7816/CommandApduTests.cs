@@ -26,8 +26,8 @@ namespace Yubico.Core.Iso7816.UnitTests
         private static readonly byte[] _header = new byte[] { 0xBA, 0xDF, 0x00, 0xD };
         private static byte _cla => _header[0];
         private static byte _ins => _header[1];
-        private static byte _p1  => _header[2];
-        private static byte _p2  => _header[3];
+        private static byte _p1 => _header[2];
+        private static byte _p2 => _header[3];
 
         //
         // Private utility functions
@@ -577,11 +577,11 @@ namespace Yubico.Core.Iso7816.UnitTests
         {
             int ne = int.MaxValue;
             byte[] expectedLe = apduEncoding switch
-                {
-                    ApduEncoding.ShortLength => new byte[] { 0x00 },
-                    ApduEncoding.ExtendedLength => new byte[] { 0x00, 0x00, 0x00 },
-                    _ => Array.Empty<byte>(),   // Shouldn't be reached
-                };
+            {
+                ApduEncoding.ShortLength => new byte[] { 0x00 },
+                ApduEncoding.ExtendedLength => new byte[] { 0x00, 0x00, 0x00 },
+                _ => Array.Empty<byte>(),   // Shouldn't be reached
+            };
 
             var expectedByteArray = new List<byte>();
             expectedByteArray.AddRange(_header);

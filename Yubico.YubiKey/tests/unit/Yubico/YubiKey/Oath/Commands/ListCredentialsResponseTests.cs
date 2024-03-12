@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
-            var data = listCredentialsResponse.GetData();
+            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
 
             Assert.Empty(data);
             Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
@@ -64,7 +64,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
-            var data = listCredentialsResponse.GetData();
+            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
-            var data = listCredentialsResponse.GetData();
+            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
@@ -121,7 +121,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
-            var data = listCredentialsResponse.GetData();
+            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
@@ -143,15 +143,15 @@ namespace Yubico.YubiKey.Oath.Commands
             var responseApdu = new ResponseApdu(new byte[] {
                 0x72, 0x1B, 0x21, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F,
                 0x66, 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75,
-                0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D, 0x72, 
-                0x16, 0x12, 0x47, 0x6F, 0x6F, 0x67, 0x6C, 0x65, 0x3A, 0x74, 
+                0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D, 0x72,
+                0x16, 0x12, 0x47, 0x6F, 0x6F, 0x67, 0x6C, 0x65, 0x3A, 0x74,
                 0x65, 0x73, 0x74, 0x40, 0x67, 0x6D, 0x61, 0x69, 0x6C, 0x2E,
                 0x63, 0x6F, 0x6D, sw1, sw2
             });
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
-            var data = listCredentialsResponse.GetData();
+            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
@@ -178,14 +178,14 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var responseApdu = new ResponseApdu(new byte[] {
                 0x72, 0x1E, 0x21, 0x36, 0x30, 0x2F, 0x4D, 0x69, 0x63, 0x72,
-                0x6F, 0x73, 0x6F, 0x66, 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 
-                0x40, 0x6F, 0x75, 0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 
+                0x6F, 0x73, 0x6F, 0x66, 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74,
+                0x40, 0x6F, 0x75, 0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63,
                 0x6F, 0x6D, sw1, sw2
             });
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
-            var data = listCredentialsResponse.GetData();
+            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
@@ -212,7 +212,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
-            var data = listCredentialsResponse.GetData();
+            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 

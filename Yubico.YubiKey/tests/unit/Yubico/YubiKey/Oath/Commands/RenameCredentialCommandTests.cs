@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Oath.Commands
         public void CreateCommandApdu_ReturnsCorrectDataAndLength()
         {
             var command = new RenameCommand(credential, newIssuer, newAccount);
-            byte[] dataList = 
+            byte[] dataList =
             {
                 0x71, 0x1A, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F, 0x66,
                 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75, 0x74,
@@ -82,7 +82,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new RenameCommand(credential, newIssuer, newAccount);
-            var response = command.CreateResponseForApdu(responseApdu);
+            RenameResponse? response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is RenameResponse);
         }

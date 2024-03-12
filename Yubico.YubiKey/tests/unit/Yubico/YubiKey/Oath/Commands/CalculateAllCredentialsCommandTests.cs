@@ -13,13 +13,13 @@
 // limitations under the License.
 
 using System;
+using System.Buffers.Binary;
 using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
-using System.Buffers.Binary;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath.Commands
 {
@@ -85,12 +85,12 @@ namespace Yubico.YubiKey.Oath.Commands
                 var command = new CalculateAllCredentialsCommand(ResponseFormat.Full);
 
                 byte[] dataList = { 0x74, 0x08 };
-                
+
                 int timePeriod = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (int)CredentialPeriod.Period30;
                 byte[] bytes = BitConverter.GetBytes(timePeriod);
                 byte[] challenge = bytes.Concat(new byte[8 - bytes.Length]).ToArray();
-                var newDataList = dataList.Concat(challenge).ToArray();
-                
+                byte[]? newDataList = dataList.Concat(challenge).ToArray();
+
                 Assert.Equal(newDataList.Length, command.CreateCommandApdu().Nc);
             }
             finally
@@ -113,8 +113,8 @@ namespace Yubico.YubiKey.Oath.Commands
                 ulong timePeriod = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (uint)CredentialPeriod.Period30;
                 byte[] bytes = new byte[8];
                 BinaryPrimitives.WriteUInt64BigEndian(bytes, timePeriod);
-                var newDataList = dataList.Concat(bytes).ToArray();
-                
+                byte[]? newDataList = dataList.Concat(bytes).ToArray();
+
                 ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
                 Assert.True(data.Span.SequenceEqual(newDataList));
@@ -130,7 +130,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new CalculateAllCredentialsCommand();
-            var response = command.CreateResponseForApdu(responseApdu);
+            CalculateAllCredentialsResponse? response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is CalculateAllCredentialsResponse);
         }

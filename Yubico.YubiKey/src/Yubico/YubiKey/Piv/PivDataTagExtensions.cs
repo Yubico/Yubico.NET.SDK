@@ -34,13 +34,14 @@ namespace Yubico.YubiKey.Piv
         /// A boolean, true if the tag is allowed to be used in PUT DATA, and
         /// false otherwise.
         /// </returns>
-        public static bool IsValidTagForPut(this PivDataTag tag) => tag switch
-        {
-            PivDataTag.Printed => false,
-            PivDataTag.Discovery => false,
-            PivDataTag.BiometricGroupTemplate => false,
-            _ => true,
-        };
+        public static bool IsValidTagForPut(this PivDataTag tag) =>
+            tag switch
+            {
+                PivDataTag.Printed => false,
+                PivDataTag.Discovery => false,
+                PivDataTag.BiometricGroupTemplate => false,
+                _ => true,
+            };
 
         /// <summary>
         /// Is the given encoding valid for PUT DATA using the specified tag.
@@ -63,6 +64,7 @@ namespace Yubico.YubiKey.Piv
         public static bool IsValidEncodingForPut(this PivDataTag tag, ReadOnlyMemory<byte> encoding)
         {
             TlvReader? tlvReader = GetTlvReader(tag, encoding);
+
             if (tlvReader is null)
             {
                 return false;
@@ -70,6 +72,7 @@ namespace Yubico.YubiKey.Piv
 
             int[] expectedFormat;
             int optionalIndex = -1;
+
             switch (tag)
             {
                 case PivDataTag.Chuid:
@@ -82,13 +85,15 @@ namespace Yubico.YubiKey.Piv
                     //     --expiration data, ASCII YYYYMMDD, fixed at 8 bytes--
                     //  3E 00
                     //  FE 00
-                    expectedFormat = new int[] {
+                    expectedFormat = new int[]
+                    {
                         0x30, 0, 25,
                         0x34, 0, 16,
                         0x35, 0, 8,
                         0x3E, 0, 0,
                         0xFE, 0, 0
                     };
+
                     break;
 
                 case PivDataTag.Capability:
@@ -111,7 +116,8 @@ namespace Yubico.YubiKey.Piv
                     //  FC 00
                     //  FD 00
                     //  FE 00
-                    expectedFormat = new int[] {
+                    expectedFormat = new int[]
+                    {
                         0xF0, 0, 21,
                         0xF1, 0, 1,
                         0xF2, 0, 1,
@@ -126,6 +132,7 @@ namespace Yubico.YubiKey.Piv
                         0xFD, 0, 0,
                         0xFE, 0, 0
                     };
+
                     break;
 
                 case PivDataTag.Authentication:
@@ -160,11 +167,13 @@ namespace Yubico.YubiKey.Piv
                     //  FE 00
                     // Note that the PIV standard says certs are limited to 1856
                     // bytes, but the YubiKey accepts certs up to 3052 bytes.
-                    expectedFormat = new int[] {
+                    expectedFormat = new int[]
+                    {
                         0x70, 3052, 0,
                         0x71, 0, 1,
                         0xFE, 0, 0
                     };
+
                     break;
 
                 case PivDataTag.SecurityObject:
@@ -174,11 +183,13 @@ namespace Yubico.YubiKey.Piv
                     //  BB L
                     //     --up to 1298 bytes--
                     //  FE 00
-                    expectedFormat = new int[] {
+                    expectedFormat = new int[]
+                    {
                         0xBA, 30, 0,
                         0xBB, 1298, 0,
                         0xFE, 0, 0
                     };
+
                     break;
 
                 case PivDataTag.KeyHistory:
@@ -190,12 +201,14 @@ namespace Yubico.YubiKey.Piv
                     //  F3 L
                     //     --up to 118 bytes--
                     //  FE 00
-                    expectedFormat = new int[] {
+                    expectedFormat = new int[]
+                    {
                         0xC1, 0, 1,
                         0xC2, 0, 1,
                         0xF3, 118, 0,
                         0xFE, 0, 0
                     };
+
                     break;
 
                 case PivDataTag.IrisImages:
@@ -203,10 +216,12 @@ namespace Yubico.YubiKey.Piv
                     //  BC L
                     //     --image, up to 7100 bytes--
                     //  FE 00
-                    expectedFormat = new int[] {
+                    expectedFormat = new int[]
+                    {
                         0xBC, 7100, 0,
                         0xFE, 0, 0
                     };
+
                     break;
 
                 case PivDataTag.FacialImage:
@@ -214,10 +229,12 @@ namespace Yubico.YubiKey.Piv
                     //  BC L
                     //     --image, up to 12,704 bytes--
                     //  FE 00
-                    expectedFormat = new int[] {
+                    expectedFormat = new int[]
+                    {
                         0xBC, 12704, 0,
                         0xFE, 0, 0
                     };
+
                     break;
 
                 case PivDataTag.Fingerprints:
@@ -225,10 +242,12 @@ namespace Yubico.YubiKey.Piv
                     //  BC L
                     //     --up to 4000 bytes--
                     //  FE 00
-                    expectedFormat = new int[] {
+                    expectedFormat = new int[]
+                    {
                         0xBC, 4000, 0,
                         0xFE, 0, 0
                     };
+
                     break;
 
                 case PivDataTag.SecureMessageSigner:
@@ -256,13 +275,16 @@ namespace Yubico.YubiKey.Piv
                         return false;
                     }
 
-                    expectedFormat = new int[] {
+                    expectedFormat = new int[]
+                    {
                         0x70, 3048, 0,
                         0x71, 0, 1,
                         0x7F21, 3048, 0,
                         0xFE, 0, 0
                     };
+
                     optionalIndex = 6;
+
                     break;
 
                 case PivDataTag.PairingCodeReferenceData:
@@ -270,21 +292,23 @@ namespace Yubico.YubiKey.Piv
                     //  99 08
                     //     --fixed at 8 bytes--
                     //  FE 00
-                    expectedFormat = new int[] {
+                    expectedFormat = new int[]
+                    {
                         0x99, 0, 8,
                         0xFE, 0, 0
                     };
+
                     break;
 
                 case PivDataTag.BiometricGroupTemplate:
-                    // Verify that the data is
-                    //  02 01
-                    //     --fixed at 1 byte--
-                    //  7F 60 L
-                    //     --up to 28 bytes--
-                    //  7F 60 L (optional)
-                    //     --up to 28 bytes--
-                    // This is not yet supported. So for now, just return false.
+                // Verify that the data is
+                //  02 01
+                //     --fixed at 1 byte--
+                //  7F 60 L
+                //     --up to 28 bytes--
+                //  7F 60 L (optional)
+                //     --up to 28 bytes--
+                // This is not yet supported. So for now, just return false.
                 case PivDataTag.Printed:
                 case PivDataTag.Discovery:
                 default:
@@ -301,7 +325,8 @@ namespace Yubico.YubiKey.Piv
         private static TlvReader? GetTlvReader(PivDataTag tag, ReadOnlyMemory<byte> encoding)
         {
             int expectedTag = PivPutDataTag;
-            if ((tag == PivDataTag.Discovery) || (tag == PivDataTag.BiometricGroupTemplate))
+
+            if (tag == PivDataTag.Discovery || tag == PivDataTag.BiometricGroupTemplate)
             {
                 expectedTag = (int)tag;
             }
@@ -309,7 +334,8 @@ namespace Yubico.YubiKey.Piv
             try
             {
                 var tlvReader = new TlvReader(encoding);
-                TlvReader nestedReader =  tlvReader.ReadNestedTlv(expectedTag);
+                TlvReader nestedReader = tlvReader.ReadNestedTlv(expectedTag);
+
                 if (tlvReader.HasData == false)
                 {
                     return nestedReader;
@@ -341,7 +367,7 @@ namespace Yubico.YubiKey.Piv
             bool returnValue = true;
             int index = 0;
 
-            while ((returnValue == true) && (index < expectedFormat.Length))
+            while (returnValue && index < expectedFormat.Length)
             {
                 try
                 {
@@ -350,7 +376,7 @@ namespace Yubico.YubiKey.Piv
                         int getTag = 0;
 
                         // Currently, all optional tags are 2 bytes long.
-                        if (tlvReader.HasData == true)
+                        if (tlvReader.HasData)
                         {
                             getTag = tlvReader.PeekTag(2);
                         }
@@ -358,13 +384,16 @@ namespace Yubico.YubiKey.Piv
                         if (getTag != expectedFormat[index])
                         {
                             index += 3;
+
                             continue;
                         }
                     }
 
                     ReadOnlyMemory<byte> value = tlvReader.ReadValue(expectedFormat[index]);
-                    returnValue = expectedFormat[index + 1] != 0 ?
-                        value.Length <= expectedFormat[index + 1] : value.Length == expectedFormat[index + 2];
+
+                    returnValue = expectedFormat[index + 1] != 0
+                        ? value.Length <= expectedFormat[index + 1]
+                        : value.Length == expectedFormat[index + 2];
 
                     index += 3;
                 }

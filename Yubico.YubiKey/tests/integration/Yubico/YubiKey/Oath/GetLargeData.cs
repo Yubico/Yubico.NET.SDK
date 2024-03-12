@@ -65,7 +65,7 @@ namespace Yubico.YubiKey.Oath
         public void GetLotsOfCredentials(StandardTestDevice testDeviceType)
         {
             IYubiKeyDevice testDevice = GetCleanDevice(testDeviceType);
-            var expectedCredsOnDevice = FillWithRandCreds(testDevice);
+            IEnumerable<Credential>? expectedCredsOnDevice = FillWithRandCreds(testDevice);
             IEnumerable<Credential> actualCredsOnDevice;
 
             using (var oathSession = new OathSession(testDevice))

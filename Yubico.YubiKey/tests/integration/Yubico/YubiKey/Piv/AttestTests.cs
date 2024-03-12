@@ -14,10 +14,10 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
-using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Piv.Commands;
-using Yubico.Core.Tlv;
 using Xunit;
+using Yubico.Core.Tlv;
+using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -199,7 +199,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // version 4 YubiKeys accept 1024-bit RSA keys, so don't test that.
-            if ((testDevice.FirmwareVersion.Major < 5) && (whichPair == BadAttestationPairs.KeyRsa1024CertValid))
+            if (testDevice.FirmwareVersion.Major < 5 && whichPair == BadAttestationPairs.KeyRsa1024CertValid)
             {
                 return true;
             }

@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// prior to 4 will ignore the touch policy and simply perform its default.
     /// </para>
     /// <para>
-    /// The touch policy refers to whether use of the managment key will require
+    /// The touch policy refers to whether use of the management key will require
     /// touch or not, and if so, always or cached. The policy is specified using
     /// the <c>PivTouchPolicy</c> enum. If the input is <c>None</c> or
     /// <c>Never</c>, the YubiKey will not require touch to complete an operation
@@ -191,7 +191,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// The bytes that make up the new management key.
         /// </param>
         public SetManagementKeyCommand(ReadOnlyMemory<byte> newKey)
-            : this (newKey, PivTouchPolicy.Default, PivAlgorithm.TripleDes)
+            : this(newKey, PivTouchPolicy.Default, PivAlgorithm.TripleDes)
         {
         }
 
@@ -221,7 +221,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// The touch policy for the management key.
         /// </param>
         public SetManagementKeyCommand(ReadOnlyMemory<byte> newKey, PivTouchPolicy touchPolicy)
-            : this (newKey, touchPolicy, PivAlgorithm.TripleDes)
+            : this(newKey, touchPolicy, PivAlgorithm.TripleDes)
         {
         }
 

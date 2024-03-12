@@ -90,10 +90,10 @@ namespace Yubico.YubiKey.Pipelines
             ResponseApdu responseApdu =
                 responseByte switch
                 {
-                    Ctap1Message   => new ResponseApdu(responseData),
-                    CtapHidCbor    => CtapToApduResponse.ToCtap2ResponseApdu(responseData),
-                    CtapError      => CtapToApduResponse.ToCtap1ResponseApdu(responseData),
-                    _              => new ResponseApdu(responseData, SWConstants.Success),
+                    Ctap1Message => new ResponseApdu(responseData),
+                    CtapHidCbor => CtapToApduResponse.ToCtap2ResponseApdu(responseData),
+                    CtapError => CtapToApduResponse.ToCtap1ResponseApdu(responseData),
+                    _ => new ResponseApdu(responseData, SWConstants.Success),
                 };
 
             return responseApdu;
@@ -137,14 +137,14 @@ namespace Yubico.YubiKey.Pipelines
             (byte)(packet[4] & ~0x80);
 
         private static int GetPacketBcnt(byte[] packet) =>
-            (packet[5] << 8) | (packet[6]);
+            (packet[5] << 8) | packet[6];
 
         private byte[] TransmitCommand(uint channelId, byte commandByte, byte[] data, out byte responseByte)
         {
             SendRequest(channelId, commandByte, data);
 
             byte cmdByte = commandByte;
-            if ((data.Length > 0) && (commandByte == CtapConstants.CtapHidCbor))
+            if (data.Length > 0 && commandByte == CtapConstants.CtapHidCbor)
             {
                 cmdByte = data[0];
             }

@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
     // This class is a sample demonstrating how to get the the .NET Base Class
     // Library X509Certificate classes to use the YubiKey to sign.
     // In order to use an alternate signer, create a subclass of
-    // X509SignatureGeneraotr, and implement the methods
+    // X509SignatureGenerator, and implement the methods
     //   BuildPublicKey
     //   GetSignatureAlgorithmIdentifier
     //   SignData

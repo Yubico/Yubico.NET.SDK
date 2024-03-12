@@ -13,13 +13,13 @@
 // limitations under the License.
 
 using System;
-using System.Security;
 using System.Globalization;
-using Yubico.YubiKey.Piv.Commands;
-using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Scp03;
-using Yubico.YubiKey.InterIndustry.Commands;
+using System.Security;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.InterIndustry.Commands;
+using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -143,39 +143,9 @@ namespace Yubico.YubiKey.Piv
     /// </remarks>
     public sealed partial class PivSession : IDisposable
     {
-        private bool _disposed;
         private readonly Logger _log = Log.GetLogger();
         private readonly IYubiKeyDevice _yubiKeyDevice;
-
-        /// <summary>
-        /// The object that represents the connection to the YubiKey. Most
-        /// applications will ignore this, but it can be used to call Commands
-        /// directly.
-        /// </summary>
-        public IYubiKeyConnection Connection { get; private set; }
-
-        /// <summary>
-        /// The Delegate this class will call when it needs a PIN, PUK, or
-        /// management key.
-        /// </summary>
-        /// <remarks>
-        /// The delegate provided will read the <c>KeyEntryData</c> which
-        /// contains the information needed to determine what to collect and
-        /// methods to submit what was collected. The delegate will return
-        /// <c>true</c> for success or <c>false</c> for "cancel". A cancel will
-        /// usually happen when the user has clicked a "Cancel" button. That is
-        /// often the case when the user has entered the wrong value a number of
-        /// times, the remaining tries count is getting low, and they would like
-        /// to stop trying before the YubiKey is blocked.
-        /// <para>
-        /// Note that the SDK will call the <c>KeyCollector</c> with a
-        /// <c>Request</c> of <c>Release</c> when the process completes. In this
-        /// case, the <c>KeyCollector</c> MUST NOT throw an exception. The
-        /// <c>Release</c> is called from inside a <c>finally</c> block, and it
-        /// is a bad idea to throw exceptions from inside <c>finally</c>.
-        /// </para>
-        /// </remarks>
-        public Func<KeyEntryData, bool>? KeyCollector { get; set; }
+        private bool _disposed;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -253,16 +223,20 @@ namespace Yubico.YubiKey.Piv
         private PivSession(StaticKeys? scp03Keys, IYubiKeyDevice yubiKey)
         {
             _log.LogInformation("Create a new instance of PivSession" + (scp03Keys is null ? "." : " over SCP03"));
+
             if (yubiKey is null)
             {
                 throw new ArgumentNullException(nameof(yubiKey));
             }
 
-            Connection = scp03Keys is null ?
-                yubiKey.Connect(YubiKeyApplication.Piv) : yubiKey.ConnectScp03(YubiKeyApplication.Piv, scp03Keys);
+            Connection = scp03Keys is null
+                ? yubiKey.Connect(YubiKeyApplication.Piv)
+                : yubiKey.ConnectScp03(YubiKeyApplication.Piv, scp03Keys);
+
             ResetAuthenticationStatus();
 
             ManagementKeyAlgorithm = PivAlgorithm.TripleDes;
+
             if (yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey))
             {
                 var getMetadataCmd = new GetMetadataCommand(PivSlot.Management);
@@ -277,6 +251,68 @@ namespace Yubico.YubiKey.Piv
 
             _yubiKeyDevice = yubiKey;
             _disposed = false;
+        }
+
+        /// <summary>
+        /// The object that represents the connection to the YubiKey. Most
+        /// applications will ignore this, but it can be used to call Commands
+        /// directly.
+        /// </summary>
+        public IYubiKeyConnection Connection { get; private set; }
+
+        /// <summary>
+        /// The Delegate this class will call when it needs a PIN, PUK, or
+        /// management key.
+        /// </summary>
+        /// <remarks>
+        /// The delegate provided will read the <c>KeyEntryData</c> which
+        /// contains the information needed to determine what to collect and
+        /// methods to submit what was collected. The delegate will return
+        /// <c>true</c> for success or <c>false</c> for "cancel". A cancel will
+        /// usually happen when the user has clicked a "Cancel" button. That is
+        /// often the case when the user has entered the wrong value a number of
+        /// times, the remaining tries count is getting low, and they would like
+        /// to stop trying before the YubiKey is blocked.
+        /// <para>
+        /// Note that the SDK will call the <c>KeyCollector</c> with a
+        /// <c>Request</c> of <c>Release</c> when the process completes. In this
+        /// case, the <c>KeyCollector</c> MUST NOT throw an exception. The
+        /// <c>Release</c> is called from inside a <c>finally</c> block, and it
+        /// is a bad idea to throw exceptions from inside <c>finally</c>.
+        /// </para>
+        /// </remarks>
+        public Func<KeyEntryData, bool>? KeyCollector { get; set; }
+
+        /// <summary>
+        /// When the PivSession object goes out of scope, this method is called.
+        /// It will close the session. The most important function of closing a
+        /// session is to "un-authenticate" the management key and "un-verify"
+        /// the PIN.
+        /// </summary>
+
+        // Note that .NET recommends a Dispose method call Dispose(true) and
+        // GC.SuppressFinalize(this). The actual disposal is in the
+        // Dispose(bool) method.
+        //
+        // However, that does not apply to sealed classes.
+        // So the Dispose method will simply perform the
+        // "closing" process, no call to Dispose(bool) or GC.
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            // At the moment, there is no "close session" method. So for now,
+            // just connect to the management application.
+            _ = Connection.SendCommand(new SelectApplicationCommand(YubiKeyApplication.Management));
+            KeyCollector = null;
+            ResetAuthenticationStatus();
+
+            Connection.Dispose();
+
+            _disposed = true;
         }
 
         // Reset any fields and properties related to authentication or
@@ -333,6 +369,7 @@ namespace Yubico.YubiKey.Piv
         public PivMetadata GetMetadata(byte slotNumber)
         {
             _log.LogInformation("GetMetadata for slot number {0:X2}.", slotNumber);
+
             if (_yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))
             {
                 var metadataCommand = new GetMetadataCommand(slotNumber);
@@ -388,10 +425,11 @@ namespace Yubico.YubiKey.Piv
         public void ResetApplication()
         {
             _log.LogInformation("Reset the PIV application.");
+
             // To reset, both the PIN and PUK must be blocked.
-            if (BlockPinOrPuk(PivSlot.Pin) == true)
+            if (BlockPinOrPuk(PivSlot.Pin))
             {
-                if (BlockPinOrPuk(PivSlot.Puk) == true)
+                if (BlockPinOrPuk(PivSlot.Puk))
                 {
                     var resetCommand = new ResetPivCommand();
                     ResetPivResponse resetResponse = Connection.SendCommand(resetCommand);
@@ -399,6 +437,7 @@ namespace Yubico.YubiKey.Piv
                     if (resetResponse.Status == ResponseStatus.Success)
                     {
                         ResetAuthenticationStatus();
+
                         return;
                     }
                 }
@@ -425,14 +464,19 @@ namespace Yubico.YubiKey.Piv
         {
             _log.LogInformation($"Block the {(slotNumber == 0x80 ? "PIN" : "PUK")}.");
             int retriesRemaining;
+
             do
             {
-                byte[] currentValue = new byte[] {
+                byte[] currentValue = new byte[]
+                {
                     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
                 };
-                byte[] newValue = new byte[] {
+
+                byte[] newValue = new byte[]
+                {
                     0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22
                 };
+
                 var changeCommand = new ChangeReferenceDataCommand(slotNumber, currentValue, newValue);
                 ChangeReferenceDataResponse changeResponse = Connection.SendCommand(changeCommand);
 
@@ -442,41 +486,10 @@ namespace Yubico.YubiKey.Piv
                 }
 
                 retriesRemaining = changeResponse.GetData() ?? 1;
-
-            } while (retriesRemaining > 0);
+            }
+            while (retriesRemaining > 0);
 
             return true;
-        }
-
-        /// <summary>
-        /// When the PivSession object goes out of scope, this method is called.
-        /// It will close the session. The most important function of closing a
-        /// session is to "un-authenticate" the management key and "un-verify"
-        /// the PIN.
-        /// </summary>
-        // Note that .NET recommends a Dispose method call Dispose(true) and
-        // GC.SuppressFinalize(this). The actual disposal is in the
-        // Dispose(bool) method.
-        //
-        // However, that does not apply to sealed classes.
-        // So the Dispose method will simply perform the
-        // "closing" process, no call to Dispose(bool) or GC.
-        public void Dispose()
-        {
-            if (_disposed)
-            {
-                return;
-            }
-
-            // At the moment, there is no "close session" method. So for now,
-            // just connect to the management application.
-            _ = Connection.SendCommand(new SelectApplicationCommand(YubiKeyApplication.Management));
-            KeyCollector = null;
-            ResetAuthenticationStatus();
-
-            Connection.Dispose();
-
-            _disposed = true;
         }
     }
 }

@@ -14,8 +14,8 @@
 
 using System;
 using System.Globalization;
-using System.Security.Cryptography;
 using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.Cryptography
@@ -83,24 +83,28 @@ namespace Yubico.YubiKey.Cryptography
         /// Use this value to indicate the digest algorithm is SHA-1.
         /// </summary>
         public const int Sha1 = 1;
+
         private const int Sha1Length = 20;
 
         /// <summary>
         /// Use this value to indicate the digest algorithm is SHA-256.
         /// </summary>
         public const int Sha256 = 3;
+
         private const int Sha256Length = 32;
 
         /// <summary>
         /// Use this value to indicate the digest algorithm is SHA-384.
         /// </summary>
         public const int Sha384 = 4;
+
         private const int Sha384Length = 48;
 
         /// <summary>
         /// Use this value to indicate the digest algorithm is SHA-512.
         /// </summary>
         public const int Sha512 = 5;
+
         private const int Sha512Length = 64;
 
         /// <summary>
@@ -253,27 +257,27 @@ namespace Yubico.YubiKey.Cryptography
         /// <returns>
         /// <c>True</c> if the method is able to parse, <c>false</c> otherwise.
         /// </returns>
-        public static bool TryParsePkcs1Verify(
-            ReadOnlySpan<byte> formattedSignature,
-            out int digestAlgorithm,
-            out byte[] digest)
+        public static bool TryParsePkcs1Verify(ReadOnlySpan<byte> formattedSignature,
+                                               out int digestAlgorithm,
+                                               out byte[] digest)
         {
             digestAlgorithm = 0;
             digest = Array.Empty<byte>();
 
-            if ((formattedSignature.Length != 128) && (formattedSignature.Length != 256))
+            if (formattedSignature.Length != 128 && formattedSignature.Length != 256)
             {
                 return false;
             }
 
             // We expect to find 00 01 FF ... FF 00
-            if ((formattedSignature[0] != Pkcs1LeadByte) || (formattedSignature[1] != Pkcs1SignByte))
+            if (formattedSignature[0] != Pkcs1LeadByte || formattedSignature[1] != Pkcs1SignByte)
             {
                 return false;
             }
 
             // Find the first non-FF byte.
             int index = 2;
+
             for (; index < formattedSignature.Length; index++)
             {
                 if (formattedSignature[index] != Pkcs1SignPadByte)
@@ -282,11 +286,12 @@ namespace Yubico.YubiKey.Cryptography
                 }
             }
 
-            // Where was the first non-FF byte found? There shoule be at least 8
+            // Where was the first non-FF byte found? There should be at least 8
             // pad bytes, and because there are 2 leading bytes (00 01), that
             // means we need the index to be at least 10. Make sure there was a
             // non-FF byte, and that the first non-FF byte is 00.
-            if ((index < Pkcs1MinPadLength + 2) || (index >= formattedSignature.Length) || (formattedSignature[index] != Pkcs1Separator))
+            if (index < Pkcs1MinPadLength + 2 || index >= formattedSignature.Length ||
+                formattedSignature[index] != Pkcs1Separator)
             {
                 return false;
             }
@@ -298,16 +303,25 @@ namespace Yubico.YubiKey.Cryptography
             //         05 00
             //      04 len
             //         digest
-            bool isValid = false;
+            bool isValid;
             byte[] digestInfo = formattedSignature[(index + 1)..].ToArray();
+
             try
             {
                 var tlvReader = new TlvReader(digestInfo);
-                isValid = TryReadDer(true, ReadNestedNoMoreData, SequenceTag, tlvReader, out TlvReader infoReader, out _);
+
+                isValid = TryReadDer(true, ReadNestedNoMoreData, SequenceTag, tlvReader, out TlvReader infoReader,
+                    out _);
+
                 isValid = TryReadDer(isValid, ReadNested, SequenceTag, infoReader, out TlvReader oidReader, out _);
                 isValid = TryReadDer(isValid, ReadValue, OidTag, oidReader, out _, out ReadOnlyMemory<byte> oid);
-                isValid = TryReadDer(isValid, ReadValueNoMoreData, NullTag, oidReader, out _, out ReadOnlyMemory<byte> oidParams);
-                isValid = TryReadDer(isValid, ReadValueNoMoreData, OctetTag, infoReader, out _, out ReadOnlyMemory<byte> digestData);
+
+                isValid = TryReadDer(isValid, ReadValueNoMoreData, NullTag, oidReader, out _,
+                    out ReadOnlyMemory<byte> oidParams);
+
+                isValid = TryReadDer(isValid, ReadValueNoMoreData, OctetTag, infoReader, out _,
+                    out ReadOnlyMemory<byte> digestData);
+
                 isValid = TryParseOid(isValid, oid, oidParams, digestData, out digestAlgorithm);
                 digest = digestData.ToArray();
             }
@@ -641,17 +655,16 @@ namespace Yubico.YubiKey.Cryptography
         /// <returns>
         /// <c>True</c> if the method is able to parse, <c>false</c> otherwise.
         /// </returns>
-        public static bool TryParsePkcs1Pss(
-            ReadOnlySpan<byte> formattedSignature,
-            ReadOnlySpan<byte> digest,
-            int digestAlgorithm,
-            out byte[] mPrimeAndH,
-            out bool isVerified)
+        public static bool TryParsePkcs1Pss(ReadOnlySpan<byte> formattedSignature,
+                                            ReadOnlySpan<byte> digest,
+                                            int digestAlgorithm,
+                                            out byte[] mPrimeAndH,
+                                            out bool isVerified)
         {
             mPrimeAndH = Array.Empty<byte>();
             isVerified = false;
 
-            if ((formattedSignature.Length != 128) && (formattedSignature.Length != 256))
+            if (formattedSignature.Length != 128 && formattedSignature.Length != 256)
             {
                 return false;
             }
@@ -695,6 +708,7 @@ namespace Yubico.YubiKey.Cryptography
 
                 // Run MGF1 to unmask the PS and salt.
                 PerformMgf1(buffer, offsetHash, digest.Length, buffer, 0, psLength + digest.Length + 1, digester);
+
                 // It's possible the most significant bit is set if it had been
                 // "manually" removed when signing. So remove it here.
                 buffer[0] &= 0x7F;
@@ -702,7 +716,7 @@ namespace Yubico.YubiKey.Cryptography
                 // Verify that all PS bytes are 0, and that the byte after PS is 01.
                 int index = Array.FindIndex<byte>(buffer, p => p != 0);
 
-                if ((index != psLength) || (buffer[psLength] != 1))
+                if (index != psLength || buffer[psLength] != 1)
                 {
                     return false;
                 }
@@ -714,12 +728,15 @@ namespace Yubico.YubiKey.Cryptography
                 int mPrimeLength = (2 * digest.Length) + 8;
                 mPrimeAndH = new byte[mPrimeLength + digest.Length];
                 var mPrimeAsSpan = new Span<byte>(mPrimeAndH);
+
                 // The new byte[] init all bytes to 0, so the first 8 bytes of
                 // mPrimeAndH are already 00
                 // Copy the digest.
                 digest.CopyTo(mPrimeAsSpan[8..]);
+
                 // Now copy the salt
                 Array.Copy(buffer, psLength + 1, mPrimeAndH, digest.Length + 8, digest.Length);
+
                 // Copy the H value the signer computed.
                 // We're returning the signer's mPrimeAndH, so the caller can
                 // compute their own H and compare if they want.
@@ -826,7 +843,7 @@ namespace Yubico.YubiKey.Cryptography
             // There must be at least 8 bytes of pad, plus 3 extra bytes, the
             // leading 00 02, then the separator between pad and data: 00. If
             // there's too much data, we can't format.
-            if ((inputData.Length == 0) || (inputData.Length > buffer.Length - (Pkcs1MinPadLength + 3)))
+            if (inputData.Length == 0 || inputData.Length > buffer.Length - (Pkcs1MinPadLength + 3))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -839,6 +856,7 @@ namespace Yubico.YubiKey.Cryptography
             using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
             randomObject.GetBytes(buffer, 2, paddingLength);
             int index;
+
             while ((index = Array.FindIndex<byte>(buffer, 2, paddingLength, p => p == 0)) > 0)
             {
                 randomObject.GetBytes(buffer, index, 1);
@@ -914,7 +932,7 @@ namespace Yubico.YubiKey.Cryptography
             // Return this buffer if there is any error.
             outputData = Array.Empty<byte>();
 
-            if ((formattedData.Length != 128) && (formattedData.Length != 256))
+            if (formattedData.Length != 128 && formattedData.Length != 256)
             {
                 return false;
             }
@@ -932,6 +950,7 @@ namespace Yubico.YubiKey.Cryptography
             // check every byte every time (to help avoid timing attacks).
             int index = formattedData.Length - 2;
             int startIndex = 0;
+
             for (; index >= 2; index--)
             {
                 if (formattedData[index] == 0)
@@ -944,7 +963,7 @@ namespace Yubico.YubiKey.Cryptography
             // byte was 0 (startIndex will be 0), or if the zero byte does not
             // allow for more than 8 pad bytes (startIndex will be < 10), this is
             // an error.
-            if (startIndex < (Pkcs1MinPadLength + 2))
+            if (startIndex < Pkcs1MinPadLength + 2)
             {
                 errorFlag |= 1;
             }
@@ -1076,7 +1095,7 @@ namespace Yubico.YubiKey.Cryptography
 
             int digestLength = digester.HashSize / 8;
 
-            if ((inputData.Length == 0) || (inputData.Length > (buffer.Length - ((2 * digestLength) + 2))))
+            if (inputData.Length == 0 || inputData.Length > buffer.Length - ((2 * digestLength) + 2))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -1089,21 +1108,25 @@ namespace Yubico.YubiKey.Cryptography
             // Beginning with lHash is the DB
             //  DB = lHash || PS || 01 || input data
             using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
+
             // seed
             randomObject.GetBytes(buffer, 1, digestLength);
 
             // lHash = digest of empty string.
             _ = digester.TransformFinalBlock(buffer, 0, 0);
             Array.Copy(digester.Hash, 0, buffer, digestLength + 1, digestLength);
+
             // 01
             buffer[^(inputData.Length + 1)] = 1;
             inputData.CopyTo(bufferAsSpan[(buffer.Length - inputData.Length)..]);
 
             // Use the seed to mask the DB.
-            PerformMgf1(buffer, 1, digestLength, buffer, digestLength + 1, buffer.Length - (digestLength + 1), digester);
+            PerformMgf1(buffer, 1, digestLength, buffer, digestLength + 1, buffer.Length - (digestLength + 1),
+                digester);
 
             // Use the masked DB to mask the seed.
-            PerformMgf1(buffer, digestLength + 1, buffer.Length - (digestLength + 1), buffer, 1, digestLength, digester);
+            PerformMgf1(buffer, digestLength + 1, buffer.Length - (digestLength + 1), buffer, 1, digestLength,
+                digester);
 
             return buffer;
         }
@@ -1187,10 +1210,9 @@ namespace Yubico.YubiKey.Cryptography
         /// <c>True</c> if the method is able to parse, <c>false</c> otherwise.
         /// </returns>
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-        public static bool TryParsePkcs1Oaep(
-            ReadOnlySpan<byte> formattedData,
-            int digestAlgorithm,
-            out byte[] outputData)
+        public static bool TryParsePkcs1Oaep(ReadOnlySpan<byte> formattedData,
+                                             int digestAlgorithm,
+                                             out byte[] outputData)
         {
             outputData = Array.Empty<byte>();
 
@@ -1223,10 +1245,12 @@ namespace Yubico.YubiKey.Cryptography
             try
             {
                 // Use the masked DB to unmask the seed.
-                PerformMgf1(buffer, digestLength + 1, buffer.Length - (digestLength + 1), buffer, 1, digestLength, digester);
+                PerformMgf1(buffer, digestLength + 1, buffer.Length - (digestLength + 1), buffer, 1, digestLength,
+                    digester);
 
                 // Use the seed to unmask the DB.
-                PerformMgf1(buffer, 1, digestLength, buffer, digestLength + 1, buffer.Length - (digestLength + 1), digester);
+                PerformMgf1(buffer, 1, digestLength, buffer, digestLength + 1, buffer.Length - (digestLength + 1),
+                    digester);
 
                 // Verify the DB
                 //  block = 00 || salt || DB
@@ -1236,6 +1260,7 @@ namespace Yubico.YubiKey.Cryptography
                 digester.Initialize();
                 _ = digester.TransformFinalBlock(buffer, 0, 0);
                 int index = 0;
+
                 for (; index < digestLength; index++)
                 {
                     errorCount += (int)(digester.Hash[index] ^ buffer[index + digestLength + 1]);
@@ -1261,6 +1286,7 @@ namespace Yubico.YubiKey.Cryptography
                 {
                     outputData = new byte[buffer.Length - (index + 1)];
                     Array.Copy(buffer, index + 1, outputData, 0, buffer.Length - (index + 1));
+
                     return true;
                 }
             }
@@ -1272,7 +1298,7 @@ namespace Yubico.YubiKey.Cryptography
             return false;
         }
 
-        // Buid the DER of DigestInfo for the given digest, place it at the end
+        // Build the DER of DigestInfo for the given digest, place it at the end
         // of the buffer. Return the length.
         // After this call the buffer will be
         //   buffer.Length - digestInfoLen bytes undisturbed || digestInfo
@@ -1289,29 +1315,33 @@ namespace Yubico.YubiKey.Cryptography
                 case Sha1:
                     oid = new byte[] { 0x2b, 0x0e, 0x03, 0x02, 0x1a };
                     digestLength = Sha1Length;
+
                     break;
 
                 case Sha256:
                     oid = new byte[] { 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01 };
                     digestLength = Sha256Length;
+
                     break;
 
                 case Sha384:
                     oid = new byte[] { 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x02 };
                     digestLength = Sha384Length;
+
                     break;
 
                 case Sha512:
                     oid = new byte[] { 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x03 };
                     digestLength = Sha512Length;
+
                     break;
 
                 default:
                     throw new ArgumentException(
-                         string.Format(
-                             CultureInfo.CurrentCulture,
-                             ExceptionMessages.UnsupportedAlgorithm));
-            };
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.UnsupportedAlgorithm));
+            }
 
             // The longest digest length supported is 64 bytes (0x40). We also
             // support only OIDs with NULL parameters. Working backwards, the
@@ -1329,6 +1359,7 @@ namespace Yubico.YubiKey.Cryptography
             Span<byte> output = buffer[^totalLength..];
 
             var tlvWriter = new TlvWriter();
+
             using (tlvWriter.WriteNestedTlv(SequenceTag))
             {
                 using (tlvWriter.WriteNestedTlv(SequenceTag))
@@ -1336,6 +1367,7 @@ namespace Yubico.YubiKey.Cryptography
                     tlvWriter.WriteValue(OidTag, oid);
                     tlvWriter.WriteValue(NullTag, ReadOnlySpan<byte>.Empty);
                 }
+
                 tlvWriter.WriteValue(OctetTag, digest);
             }
 
@@ -1344,7 +1376,7 @@ namespace Yubico.YubiKey.Cryptography
             // If the digest.Length is not digestLength, either isValid will be
             // false or the outputLength won't be totalLength. So this is where
             // digest.Length is checked.
-            if ((isValid == false) || (outputLength != totalLength))
+            if (isValid == false || outputLength != totalLength)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -1364,19 +1396,18 @@ namespace Yubico.YubiKey.Cryptography
         // If this is Nested, set the output arg newReader to the newly-created
         // TlvReader. If this is Value, set the output arg value to the new
         // ReadOnlyMemory<byte>.
-        private static bool TryReadDer(
-            bool isValid,
-            int readType,
-            int expectedTag,
-            TlvReader reader,
-            out TlvReader newReader,
-            out ReadOnlyMemory<byte> value)
+        private static bool TryReadDer(bool isValid,
+                                       int readType,
+                                       int expectedTag,
+                                       TlvReader reader,
+                                       out TlvReader newReader,
+                                       out ReadOnlyMemory<byte> value)
         {
             value = ReadOnlyMemory<byte>.Empty;
             newReader = new TlvReader(value);
             bool returnValue = isValid;
 
-            if (isValid == true)
+            if (isValid)
             {
                 if ((readType & ReadNested) != 0)
                 {
@@ -1387,7 +1418,7 @@ namespace Yubico.YubiKey.Cryptography
                     returnValue = reader.TryReadValue(out value, expectedTag);
                 }
 
-                if ((returnValue == true) && ((readType & NoMoreData) != 0))
+                if (returnValue && (readType & NoMoreData) != 0)
                 {
                     // We want to make sure all the data has been read. We
                     // don't want a byte or more to be dangling at then end
@@ -1408,29 +1439,31 @@ namespace Yubico.YubiKey.Cryptography
         // Otherwise, make sure the OID is one we support, and if it is, make
         // sure the params are what we support, and make sure the message digest
         // is the correct length.
-        private static bool TryParseOid(
-            bool isValid,
-            ReadOnlyMemory<byte> oid,
-            ReadOnlyMemory<byte> oidParams,
-            ReadOnlyMemory<byte> digest,
-            out int algorithm)
+        private static bool TryParseOid(bool isValid,
+                                        ReadOnlyMemory<byte> oid,
+                                        ReadOnlyMemory<byte> oidParams,
+                                        ReadOnlyMemory<byte> digest,
+                                        out int algorithm)
         {
             algorithm = 0;
             int digestLength = Sha1Length;
             bool returnValue = isValid;
 
-            if (isValid == true)
+            if (isValid)
             {
                 byte[] supportedOid = Array.Empty<byte>();
+
                 switch (oid.Length)
                 {
                     default:
                         returnValue = false;
+
                         break;
 
                     case Sha1OidLength:
                         algorithm = Sha1;
                         supportedOid = new byte[] { 0x2b, 0x0e, 0x03, 0x02, 0x1a };
+
                         break;
 
                     case Sha2OidLength:
@@ -1439,33 +1472,39 @@ namespace Yubico.YubiKey.Cryptography
                         // So look at the last byte to figure out which specific
                         // algorithm is represented.
                         supportedOid = new byte[] { 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, oid.Span[^1] };
-                        switch(oid.Span[^1])
+
+                        switch (oid.Span[^1])
                         {
                             default:
                                 returnValue = false;
+
                                 break;
 
                             case Sha256OidByte:
                                 algorithm = Sha256;
                                 digestLength = Sha256Length;
+
                                 break;
 
                             case Sha384OidByte:
                                 algorithm = Sha384;
                                 digestLength = Sha384Length;
+
                                 break;
 
                             case Sha512OidByte:
                                 algorithm = Sha512;
                                 digestLength = Sha512Length;
+
                                 break;
                         }
+
                         break;
                 }
 
                 bool sameOid = oid.Span.SequenceEqual(new Span<byte>(supportedOid));
 
-                if ((sameOid == false) || (digest.Length != digestLength) || (oidParams.Length != 0))
+                if (sameOid == false || digest.Length != digestLength || oidParams.Length != 0)
                 {
                     returnValue = false;
                 }
@@ -1491,23 +1530,24 @@ namespace Yubico.YubiKey.Cryptography
         // on the number of iterations as 13. Hence, we know we will never need a
         // counter of
         //   00 00 01 00
-        private static void PerformMgf1(
-            byte[] seed,
-            int offsetSeed,
-            int seedLength,
-            byte[] target,
-            int offsetTarget,
-            int targetLength,
-            HashAlgorithm digester)
+        private static void PerformMgf1(byte[] seed,
+                                        int offsetSeed,
+                                        int seedLength,
+                                        byte[] target,
+                                        int offsetTarget,
+                                        int targetLength,
+                                        HashAlgorithm digester)
         {
             int bytesRemaining = targetLength;
             int offset = offsetTarget;
             int digestLength = digester.HashSize / 8;
 
             byte[] counter = new byte[4];
+
             while (bytesRemaining > 0)
             {
                 int xorCount = bytesRemaining;
+
                 if (digestLength <= bytesRemaining)
                 {
                     xorCount = digestLength;
@@ -1528,26 +1568,28 @@ namespace Yubico.YubiKey.Cryptography
             }
         }
 
-        private static byte[] GetKeySizeBuffer(int keySizeBits) => keySizeBits switch
-        {
-            KeySizeBits1024 => new byte[KeySizeBits1024 / 8],
-            KeySizeBits2048 => new byte[KeySizeBits2048 / 8],
-            _ => throw new ArgumentException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.IncorrectRsaKeyLength)),
-        };
+        private static byte[] GetKeySizeBuffer(int keySizeBits) =>
+            keySizeBits switch
+            {
+                KeySizeBits1024 => new byte[KeySizeBits1024 / 8],
+                KeySizeBits2048 => new byte[KeySizeBits2048 / 8],
+                _ => throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.IncorrectRsaKeyLength)),
+            };
 
-        private static HashAlgorithm GetHashAlgorithm(int digestAlgorithm) => digestAlgorithm switch
-        {
-            Sha1 => CryptographyProviders.Sha1Creator(),
-            Sha256 => CryptographyProviders.Sha256Creator(),
-            Sha384 => CryptographyProviders.Sha384Creator(),
-            Sha512 => CryptographyProviders.Sha512Creator(),
-            _ => throw new ArgumentException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.UnsupportedAlgorithm)),
-        };
+        private static HashAlgorithm GetHashAlgorithm(int digestAlgorithm) =>
+            digestAlgorithm switch
+            {
+                Sha1 => CryptographyProviders.Sha1Creator(),
+                Sha256 => CryptographyProviders.Sha256Creator(),
+                Sha384 => CryptographyProviders.Sha384Creator(),
+                Sha512 => CryptographyProviders.Sha512Creator(),
+                _ => throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.UnsupportedAlgorithm)),
+            };
     }
 }

@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.Piv
             _ = connection!.SendCommand(new Piv.Commands.GetSerialNumberCommand());
 
             Assert.NotNull(connection!.SelectApplicationData);
-            var data = Assert.IsType<InterIndustry.Commands.GenericSelectApplicationData>(connection.SelectApplicationData);
+            InterIndustry.Commands.GenericSelectApplicationData? data = Assert.IsType<InterIndustry.Commands.GenericSelectApplicationData>(connection.SelectApplicationData);
 
             Assert.False(data!.RawData.IsEmpty);
         }

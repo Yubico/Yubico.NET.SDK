@@ -22,7 +22,7 @@ namespace Yubico.YubiKey
     /// </summary>
     /// <remarks>
     /// See the documentation for the <see cref="ICancelConnection"/> interface.
-    /// That contains a discussion of how the cancellation works. It descibes how
+    /// That contains a discussion of how the cancellation works. It describes how
     /// a caller can set a Connection with a <see cref="QueryCancel"/> to be used
     /// to determine if an operation should be canceled or not. In practice, the
     /// Connection object won't be the one that handles cancellation. Rather, the

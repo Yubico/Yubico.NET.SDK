@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath
 {

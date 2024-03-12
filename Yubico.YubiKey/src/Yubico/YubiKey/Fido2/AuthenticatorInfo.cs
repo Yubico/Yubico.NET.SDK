@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
+using System.Collections.Generic;
 using System.Formats.Cbor;
 using System.Globalization;
-using System.Collections.Generic;
+using System.Linq;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
@@ -118,7 +118,7 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// List of extension strings of CTAP supported by the authenticator.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
         public IReadOnlyList<string>? Extensions { get; private set; }
@@ -133,14 +133,14 @@ namespace Yubico.YubiKey.Fido2
         /// The list of supported options. Each entry in the list is a string
         /// describing the option and a boolean, indicating whether it is
         /// supported (<c>true</c>) or not (<c>false</c>).
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
-        public IReadOnlyDictionary<string, bool>? Options {get; private set; }
+        public IReadOnlyDictionary<string, bool>? Options { get; private set; }
 
         /// <summary>
         /// The maximum size, in bytes, of a message sent to the YubiKey.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null. The standard specifies a default of 1024
         /// (see the field <see cref="DefaultMaximumMessageSize"/>).
         /// </summary>
@@ -149,7 +149,7 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// List of PIN/UV Auth Protocols the YubiKey supports. They are given in
         /// the order from most to least preferred.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
         public IReadOnlyList<PinUvAuthProtocol>? PinUvAuthProtocols { get; private set; }
@@ -158,21 +158,21 @@ namespace Yubico.YubiKey.Fido2
         /// The maximum number of credentials in the CredentialID list. Note that
         /// this is not the maximum number of credentials on a YubiKey, but the
         /// maximum number of credentials represented in a CredentialID list.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
         public int? MaximumCredentialCountInList { get; private set; }
 
         /// <summary>
         /// The maximum length of a CredentialID.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
         public int? MaximumCredentialIdLength { get; private set; }
 
         /// <summary>
         /// List of transport strings of CTAP supported by the authenticator.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
         public IReadOnlyList<string>? Transports { get; private set; }
@@ -196,7 +196,7 @@ namespace Yubico.YubiKey.Fido2
         /// this YubiKey can store. If the authenticatorLargeBlobs command is not
         /// supported, this will be null. If it is supported, it will be a value
         /// greater than 1024.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null (the authenticatorLargeBlobs command is not supported).
         /// </summary>
         public int? MaximumSerializedLargeBlobArray { get; }
@@ -204,14 +204,14 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// If <c>true</c>, certain PIN commands will return errors until the PIN
         /// has been changed. If <c>false</c>, a PIN change is not necessary.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
         public bool? ForcePinChange { get; }
 
         /// <summary>
         /// The current minimum PIN length, in Unicode code points.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null. The standard specifies a default of 4
         /// (see the field <see cref="DefaultMinimumPinLength"/>).
         /// </summary>
@@ -221,7 +221,7 @@ namespace Yubico.YubiKey.Fido2
         /// The version of the firmware on the YubiKey. Note that this is an
         /// <c>int</c>, not an instance of the <c>FirmwareVersion</c> class. The
         /// standard specifies returning an int.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
         /// <remarks>
@@ -234,7 +234,7 @@ namespace Yubico.YubiKey.Fido2
 
         /// <summary>
         /// The maximum length, in bytes, of the "credBlob" if supported.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
         public int? MaximumCredentialBlobLength { get; }
@@ -242,7 +242,7 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// The maximum number of Relying Party IDs that the YubiKey can set via
         /// the setMinPINLength subcommand.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
         public int? MaximumRpidsForSetMinPinLength { get; }
@@ -250,7 +250,7 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// The number of attempts to authenticate the UV (e.g. fingerprint) that
         /// fail before using the PIN.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
         public int? PreferredPlatformUvAttempts { get; }
@@ -259,7 +259,7 @@ namespace Yubico.YubiKey.Fido2
         /// A bit field indicating the user verification methods supported by the
         /// YubiKey. The meanings of the bits are specified in the FIDO standard,
         /// namely the Registry of Predefined Values, section 3.1.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
         public int? UvModality { get; }
@@ -269,7 +269,7 @@ namespace Yubico.YubiKey.Fido2
         /// certification is a string and number. The string is the name of the
         /// certification, and the number describes the level. See The FIDO
         /// standard for more information, specifically section 7.3 of CTAP.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
         public IReadOnlyDictionary<string, int>? Certifications { get; private set; }
@@ -277,7 +277,7 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// The estimated number of additional discoverable credentials that can
         /// be stored.
-        /// This propery is OPTIONAL, and if the YubiKey provides no value, this
+        /// This property is OPTIONAL, and if the YubiKey provides no value, this
         /// will be null.
         /// </summary>
         public int? RemainingDiscoverableCredentials { get; }
@@ -291,7 +291,7 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         /// <remarks>
         /// Note that the standard defines a vendor ID as a 64-bit unsigned
-        /// integer. Thse numbers are to be random values.
+        /// integer. These numbers are to be random values.
         /// </remarks>
         public IReadOnlyList<long>? VendorPrototypeConfigCommands { get; }
 
@@ -416,7 +416,7 @@ namespace Yubico.YubiKey.Fido2
         /// value. A default value can be "true", "false", or "not supported".
         /// </para>
         /// <para>
-        /// If the option is unknown (not one of the standard-definde options),
+        /// If the option is unknown (not one of the standard-defined options),
         /// and it is not listed, this method will return "unknown".
         /// </para>
         /// </remarks>

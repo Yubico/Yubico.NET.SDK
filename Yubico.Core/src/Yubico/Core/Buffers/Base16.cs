@@ -58,7 +58,7 @@ namespace Yubico.Core.Buffers
         /// <inheritdoc/>
         public void Encode(ReadOnlySpan<byte> data, Span<char> encoded)
         {
-            if (data.Length > (encoded.Length * 2))
+            if (data.Length > encoded.Length * 2)
             {
                 throw new ArgumentException(
                     nameof(encoded),

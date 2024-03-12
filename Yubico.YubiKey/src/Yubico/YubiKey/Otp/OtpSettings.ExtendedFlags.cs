@@ -16,7 +16,7 @@ using Yubico.YubiKey.Otp.Operations;
 
 namespace Yubico.YubiKey.Otp
 {
-    public partial class OtpSettings<T> where T: OperationBase<T>
+    public partial class OtpSettings<T> where T : OperationBase<T>
     {
         /// <summary>
         /// Allows the serial number to be retrieved by holding down the touch button while inserting
@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Otp
         /// <para>
         /// The list below is of all settings that can be updated when this setting is set. However,
         /// some of the options are not compatible with all settings, so it's important to use care
-        /// when chosing settings to apply later.
+        /// when choosing settings to apply later.
         /// </para>
         /// <list type="bullet">
         /// <listheader><b>Settings That Can Be Updated</b></listheader>

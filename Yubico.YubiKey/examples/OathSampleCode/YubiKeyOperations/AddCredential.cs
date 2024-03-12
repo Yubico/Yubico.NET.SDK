@@ -15,8 +15,8 @@
 using System;
 using System.Globalization;
 using System.Text;
-using Yubico.YubiKey.Sample.SharedCode;
 using Yubico.YubiKey.Oath;
+using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.OathSampleCode
 {
@@ -266,7 +266,8 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             SampleMenu.WriteMessage(MessageType.Title, 0, "Set require touch property? Answer Yes or No.");
             _ = SampleMenu.ReadResponse(out string touch);
 
-            var credential = new Credential {
+            var credential = new Credential
+            {
                 Issuer = issuer,
                 AccountName = account,
                 Type = CredentialType.Totp,

@@ -13,11 +13,11 @@
 // limitations under the License.
 
 using System;
-using System.Security;
-using System.IO;
 using System.Globalization;
-using Yubico.YubiKey.Piv.Commands;
+using System.IO;
+using System.Security;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Piv.Commands;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -329,7 +329,7 @@ namespace Yubico.YubiKey.Piv
             {
                 maxLength = NewMaximumObjectLength;
             }
-            if (length > (maxLength * MsrootsObjectCount))
+            if (length > maxLength * MsrootsObjectCount)
             {
                 throw new ArgumentOutOfRangeException(
                     contentsName, length,
@@ -417,7 +417,7 @@ namespace Yubico.YubiKey.Piv
         /// vendor-defined element.
         /// <para>
         /// The intention of the MSROOTS data object is to store and retrieve a
-        /// PKCS 7 constuction containing a set of root certificates. These
+        /// PKCS 7 construction containing a set of root certificates. These
         /// certificates will make it easier for the SDK to interface with the
         /// Microsoft Smart Card Base Crypto Service Provider (CSP).
         /// </para>
@@ -471,7 +471,7 @@ namespace Yubico.YubiKey.Piv
         /// objects.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// The YubiKey encountered an error, such as an unrelieable connection.
+        /// The YubiKey encountered an error, such as an unreliable connection.
         /// </exception>
         public byte[] ReadMsroots()
         {
@@ -530,7 +530,7 @@ namespace Yubico.YubiKey.Piv
         /// MSROOTS contents.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// The YubiKey encountered an error, such as an unrelieable connection.
+        /// The YubiKey encountered an error, such as an unreliable connection.
         /// </exception>
         public Stream ReadMsrootsStream()
         {

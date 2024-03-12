@@ -15,10 +15,10 @@
 using System;
 using System.Globalization;
 using System.Security;
+using Yubico.Core.Logging;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
-using Yubico.Core.Logging;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -314,7 +314,7 @@ namespace Yubico.YubiKey.Fido2
 
                 // If the permissions requested require an RpId, then make sure there
                 // is one.
-                if ((allPermissions.GetRpIdRequirement() == RequirementValue.Required) && (rpId is null))
+                if (allPermissions.GetRpIdRequirement() == RequirementValue.Required && rpId is null)
                 {
                     throw new InvalidOperationException(ExceptionMessages.Fido2RelyingPartyMissing);
                 }
@@ -418,7 +418,7 @@ namespace Yubico.YubiKey.Fido2
         /// <see cref="AddPermissions"/>. If the <c>AuthToken</c> is expired,
         /// and an AuthToken is needed for a new operation, the SDK will obtain a
         /// new AuthToken, using the original permissions (and any new
-        /// permisisons needed by the operation) and the
+        /// permissions needed by the operation) and the
         /// <see cref="AuthTokenRelyingPartyId"/>.
         /// </para>
         /// <para>
@@ -1008,7 +1008,7 @@ namespace Yubico.YubiKey.Fido2
 
             ObtainSharedSecret();
 
-            if (!permissions.HasValue || (permissions == PinUvAuthTokenPermissions.None))
+            if (!permissions.HasValue || permissions == PinUvAuthTokenPermissions.None)
             {
                 if (!string.IsNullOrEmpty(relyingPartyId))
                 {
@@ -1188,7 +1188,7 @@ namespace Yubico.YubiKey.Fido2
             _log.LogInformation("Try to verify UV (use KeyCollector).");
             CtapStatus status = DoVerifyUv(permissions, relyingPartyId, out string statusMessage);
 
-            switch(status)
+            switch (status)
             {
                 case CtapStatus.Ok:
                     return true;
@@ -1215,8 +1215,8 @@ namespace Yubico.YubiKey.Fido2
 
         private CtapStatus DoVerifyUv(PinUvAuthTokenPermissions permissions, string? relyingPartyId, out string statusMessage)
         {
-            if ((AuthenticatorInfo.GetOptionValue("pinUvAuthToken") != OptionValue.True)
-                || (AuthenticatorInfo.GetOptionValue("uv") != OptionValue.True))
+            if (AuthenticatorInfo.GetOptionValue("pinUvAuthToken") != OptionValue.True
+                || AuthenticatorInfo.GetOptionValue("uv") != OptionValue.True)
             {
                 statusMessage = "";
                 return CtapStatus.UnsupportedOption;
@@ -1266,7 +1266,7 @@ namespace Yubico.YubiKey.Fido2
                             status = CtapStatus.LimitExceeded;
                         }
                     }
-                } while(status == CtapStatus.UvInvalid);
+                } while (status == CtapStatus.UvInvalid);
 
                 return status;
             }

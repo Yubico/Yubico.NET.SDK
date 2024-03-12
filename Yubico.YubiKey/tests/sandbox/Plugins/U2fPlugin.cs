@@ -105,7 +105,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     _runRegisterTest = true;
                     break;
                 default:
-                    throw new ArgumentException($"[{ Command }] is not a valid command for this plugin");
+                    throw new ArgumentException($"[{Command}] is not a valid command for this plugin");
             }
         }
 

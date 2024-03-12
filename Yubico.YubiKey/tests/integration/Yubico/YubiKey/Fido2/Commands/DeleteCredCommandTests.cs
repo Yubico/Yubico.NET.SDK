@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
+using Xunit;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {

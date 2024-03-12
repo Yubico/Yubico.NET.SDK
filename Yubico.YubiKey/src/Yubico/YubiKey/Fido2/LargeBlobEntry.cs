@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.IO;
-using System.IO.Compression;
 using System.Buffers.Binary;
 using System.Formats.Cbor;
+using System.IO;
+using System.IO.Compression;
 using System.Security.Cryptography;
 using Yubico.Core.Cryptography;
 using Yubico.Core.Logging;
@@ -176,7 +176,7 @@ namespace Yubico.YubiKey.Fido2
 
                 // Make sure the data includes the tag plus at least one byte,
                 // and that there is original data.
-                if ((OriginalDataLength > 0) && (Ciphertext.Length > GcmTagSize))
+                if (OriginalDataLength > 0 && Ciphertext.Length > GcmTagSize)
                 {
                     return;
                 }
@@ -195,7 +195,7 @@ namespace Yubico.YubiKey.Fido2
         /// out argument (decrypted and decompressed).
         /// </summary>
         /// <remarks>
-        /// Because the data is encrpyted using AES-GCD, the ciphertext contains
+        /// Because the data is encrypted using AES-GCD, the ciphertext contains
         /// both the encrypted data and an "authentication tag". While any key
         /// will be able to decrypt the data and produce a result (some result),
         /// only the correct key will be able to authenticate the tag. Hence,
@@ -325,7 +325,7 @@ namespace Yubico.YubiKey.Fido2
             //   map
             //     01  byte string: ciphertext
             //     02  byte string: nonce
-            //     03  unsinged int : originalplaintext length
+            //     03  unsigned int : originalplaintext length
             return new CborMapWriter<int>()
                 .Entry(KeyCiphertext, Ciphertext)
                 .Entry(KeyNonce, Nonce)

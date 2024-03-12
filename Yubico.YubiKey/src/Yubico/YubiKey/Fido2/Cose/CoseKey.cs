@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
 using System.Formats.Cbor;
+using System.Globalization;
 using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2.Cose
@@ -119,7 +119,7 @@ namespace Yubico.YubiKey.Fido2.Cose
             // (ECDHwHKDF256). If the -25 seems odd, it is specified in the FIDO2
             // standard.
             var algorithm = (CoseAlgorithmIdentifier)map.ReadInt32(TagAlgorithm);
-            if ((algorithm == CoseAlgorithmIdentifier.ECDHwHKDF256) || (algorithm == CoseAlgorithmIdentifier.ES256))
+            if (algorithm == CoseAlgorithmIdentifier.ECDHwHKDF256 || algorithm == CoseAlgorithmIdentifier.ES256)
             {
                 return new CoseEcPublicKey(coseEncodedKey);
             }

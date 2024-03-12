@@ -102,9 +102,9 @@ namespace Yubico.YubiKey.Piv.Commands
         // Byte length of the key data
         private const int ValidTripleDesKeyLength = 24;
         private const int ValidDesKeyLength = 8;
-        private const int KeyOffsetFirst  = 0;
+        private const int KeyOffsetFirst = 0;
         private const int KeyOffsetSecond = 8;
-        private const int KeyOffsetThird  = 16;
+        private const int KeyOffsetThird = 16;
 
         private const int TripleDesBlockSize = 8;
 
@@ -206,15 +206,15 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 throw new ArgumentNullException(nameof(outputBuffer));
             }
-            if ((inputCount == 0) || ((inputCount & 7) != 0))
+            if (inputCount == 0 || (inputCount & 7) != 0)
             {
                 throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.IncorrectPlaintextLength));
             }
-            if ((inputOffset < 0) || ((inputBuffer.Length - inputOffset) < inputCount) ||
-                (outputOffset < 0) || (outputBuffer.Length - outputOffset < inputCount))
+            if (inputOffset < 0 || inputBuffer.Length - inputOffset < inputCount ||
+                outputOffset < 0 || outputBuffer.Length - outputOffset < inputCount)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -225,7 +225,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
             _ = _cryptoTransform.TransformBlock(inputBuffer, inputOffset, inputCount, outputBuffer, outputOffset);
 
-            if ((!(_cryptoTransformA is null)) && (!(_cryptoTransformB is null)))
+            if (!(_cryptoTransformA is null) && !(_cryptoTransformB is null))
             {
                 _ = _cryptoTransformB.TransformBlock(outputBuffer, outputOffset, inputCount, outputBuffer, outputOffset);
                 _ = _cryptoTransformA.TransformBlock(outputBuffer, outputOffset, inputCount, outputBuffer, outputOffset);

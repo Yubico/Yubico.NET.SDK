@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         public override bool Execute()
         {
-            using var log = new LoggerConfiguration()
+            using Logger? log = new LoggerConfiguration()
                 .Enrich.With(new ThreadIdEnricher())
                 .WriteTo.Console(
                     outputTemplate: "[{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")

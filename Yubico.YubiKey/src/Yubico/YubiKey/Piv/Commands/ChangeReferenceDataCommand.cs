@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
 using System.Collections.Generic;
+using System.Globalization;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Piv.Commands
@@ -104,7 +104,7 @@ namespace Yubico.YubiKey.Piv.Commands
             get => _slotNumber;
             set
             {
-                if ((value != PivSlot.Pin) && (value != PivSlot.Puk))
+                if (value != PivSlot.Pin && value != PivSlot.Puk)
                 {
                     throw new ArgumentException(
                         string.Format(
@@ -170,8 +170,8 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             SlotNumber = slotNumber;
 
-            if ((PivPinUtilities.IsValidPinLength(currentValue.Length) == false)
-             || (PivPinUtilities.IsValidPinLength(newValue.Length) == false))
+            if (PivPinUtilities.IsValidPinLength(currentValue.Length) == false
+             || PivPinUtilities.IsValidPinLength(newValue.Length) == false)
             {
                 throw new ArgumentException(
                     string.Format(

@@ -974,10 +974,10 @@ namespace Yubico.YubiKey.TestApp.Plugins
                         Output.WriteLine();
 
                         Output.WriteLine("Attempting to get list of credentials...");
-                        var creds = yhaSession.ListCredentials();
+                        IReadOnlyList<CredentialRetryPair>? creds = yhaSession.ListCredentials();
                         Output.WriteLine($"{creds.Count} credentials found.");
                         int credLineCount = 1;
-                        foreach (var cred in creds)
+                        foreach (CredentialRetryPair? cred in creds)
                         {
                             Output.WriteLine($"{credLineCount++}) {cred.Credential.Label}, retries = {cred.Retries}");
                         }
@@ -1073,7 +1073,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                         creds = yhaSession.ListCredentials();
                         Output.WriteLine($"{creds.Count} credentials found.");
                         credLineCount = 1;
-                        foreach (var cred in creds)
+                        foreach (CredentialRetryPair? cred in creds)
                         {
                             Output.WriteLine($"{credLineCount++}) {cred.Credential.Label}, retries = {cred.Retries}");
                         }
@@ -1095,7 +1095,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                         creds = yhaSession.ListCredentials();
                         Output.WriteLine($"{creds.Count} credentials found.");
                         credLineCount = 1;
-                        foreach (var cred in creds)
+                        foreach (CredentialRetryPair? cred in creds)
                         {
                             Output.WriteLine($"{credLineCount++}) {cred.Credential.Label}, retries = {cred.Retries}");
                         }

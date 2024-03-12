@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[NumCredentials];
-            if (!(mgmtData.NumberOfDiscoverableCredentials is null) && (expected is int unboxedValue))
+            if (!(mgmtData.NumberOfDiscoverableCredentials is null) && expected is int unboxedValue)
             {
                 isCorrect = unboxedValue == mgmtData.NumberOfDiscoverableCredentials;
             }
@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[RemainCount];
-            if (!(mgmtData.RemainingCredentialCount is null) && (expected is int unboxedValue))
+            if (!(mgmtData.RemainingCredentialCount is null) && expected is int unboxedValue)
             {
                 isCorrect = unboxedValue == mgmtData.RemainingCredentialCount;
             }
@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[RpId];
-            if (!(mgmtData.RelyingParty is null) && (expected is string unboxedValue))
+            if (!(mgmtData.RelyingParty is null) && expected is string unboxedValue)
             {
                 isCorrect = unboxedValue == mgmtData.RelyingParty.Id;
             }
@@ -90,7 +90,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[RpName];
-            if (!(mgmtData.RelyingParty is null) && (expected is string unboxedValue))
+            if (!(mgmtData.RelyingParty is null) && expected is string unboxedValue)
             {
                 isCorrect = unboxedValue == mgmtData.RelyingParty.Name;
             }
@@ -104,7 +104,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[RpIdHash];
-            if (!(mgmtData.RelyingPartyIdHash is null) && (expected is byte[] unboxedValue))
+            if (!(mgmtData.RelyingPartyIdHash is null) && expected is byte[] unboxedValue)
             {
                 isCorrect = MemoryExtensions.SequenceEqual(mgmtData.RelyingPartyIdHash.Value.Span, unboxedValue);
             }
@@ -118,7 +118,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[RpCount];
-            if (!(mgmtData.TotalRelyingPartyCount is null) && (expected is int unboxedValue))
+            if (!(mgmtData.TotalRelyingPartyCount is null) && expected is int unboxedValue)
             {
                 isCorrect = unboxedValue == mgmtData.TotalRelyingPartyCount;
             }
@@ -132,7 +132,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[UserId];
-            if (!(mgmtData.User is null) && (expected is byte[] unboxedValue))
+            if (!(mgmtData.User is null) && expected is byte[] unboxedValue)
             {
                 isCorrect = MemoryExtensions.SequenceEqual(mgmtData.User.Id.Span, unboxedValue);
             }
@@ -146,7 +146,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[UserName];
-            if (!(mgmtData.User is null) && (expected is string unboxedValue))
+            if (!(mgmtData.User is null) && expected is string unboxedValue)
             {
                 isCorrect = unboxedValue == mgmtData.User.Name;
             }
@@ -160,7 +160,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[UserDisplayName];
-            if (!(mgmtData.User is null) && (expected is string unboxedValue))
+            if (!(mgmtData.User is null) && expected is string unboxedValue)
             {
                 isCorrect = unboxedValue == mgmtData.User.DisplayName;
             }
@@ -174,7 +174,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[CredIdId];
-            if (!(mgmtData.CredentialId is null) && (expected is byte[] unboxedValue))
+            if (!(mgmtData.CredentialId is null) && expected is byte[] unboxedValue)
             {
                 isCorrect = MemoryExtensions.SequenceEqual(mgmtData.CredentialId.Id.Span, unboxedValue);
             }
@@ -188,7 +188,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[CredIdType];
-            if (!(mgmtData.CredentialId is null) && (expected is string unboxedValue))
+            if (!(mgmtData.CredentialId is null) && expected is string unboxedValue)
             {
                 isCorrect = unboxedValue == mgmtData.CredentialId.Type;
             }
@@ -202,9 +202,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[CredIdTransports];
-            if (!(mgmtData.CredentialId is null) && (expected is string[] unboxedValue))
+            if (!(mgmtData.CredentialId is null) && expected is string[] unboxedValue)
             {
-                if (!(mgmtData.CredentialId.Transports is null) && (mgmtData.CredentialId.Transports.Count == unboxedValue.Length))
+                if (!(mgmtData.CredentialId.Transports is null) && mgmtData.CredentialId.Transports.Count == unboxedValue.Length)
                 {
                     int index = 0;
                     for (; index < unboxedValue.Length; index++)
@@ -227,7 +227,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[PubKeyType];
-            if (!(mgmtData.CredentialPublicKey is null) && (expected is CoseKeyType unboxedValue))
+            if (!(mgmtData.CredentialPublicKey is null) && expected is CoseKeyType unboxedValue)
             {
                 isCorrect = unboxedValue == mgmtData.CredentialPublicKey.Type;
             }
@@ -241,7 +241,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[PubKeyAlg];
-            if (!(mgmtData.CredentialPublicKey is null) && (expected is CoseAlgorithmIdentifier unboxedValue))
+            if (!(mgmtData.CredentialPublicKey is null) && expected is CoseAlgorithmIdentifier unboxedValue)
             {
                 isCorrect = unboxedValue == mgmtData.CredentialPublicKey.Algorithm;
             }
@@ -255,7 +255,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[PubKeyCurve];
-            if (!(mgmtData.CredentialPublicKey is null) && (expected is CoseEcCurve unboxedValue))
+            if (!(mgmtData.CredentialPublicKey is null) && expected is CoseEcCurve unboxedValue)
             {
                 if (mgmtData.CredentialPublicKey is CoseEcPublicKey pubKey)
                 {
@@ -272,7 +272,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[PubKeyX];
-            if (!(mgmtData.CredentialPublicKey is null) && (expected is byte[] unboxedValue))
+            if (!(mgmtData.CredentialPublicKey is null) && expected is byte[] unboxedValue)
             {
                 if (mgmtData.CredentialPublicKey is CoseEcPublicKey pubKey)
                 {
@@ -289,7 +289,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[PubKeyY];
-            if (!(mgmtData.CredentialPublicKey is null) && (expected is byte[] unboxedValue))
+            if (!(mgmtData.CredentialPublicKey is null) && expected is byte[] unboxedValue)
             {
                 if (mgmtData.CredentialPublicKey is CoseEcPublicKey pubKey)
                 {
@@ -306,7 +306,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[TotalCount];
-            if (!(mgmtData.TotalCredentialsForRelyingParty is null) && (expected is int unboxedValue))
+            if (!(mgmtData.TotalCredentialsForRelyingParty is null) && expected is int unboxedValue)
             {
                 isCorrect = unboxedValue == mgmtData.TotalCredentialsForRelyingParty;
             }
@@ -320,7 +320,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[CredProtect];
-            if (!(mgmtData.CredProtectPolicy is null) && (expected is int unboxedValue))
+            if (!(mgmtData.CredProtectPolicy is null) && expected is int unboxedValue)
             {
                 isCorrect = unboxedValue == mgmtData.CredProtectPolicy;
             }
@@ -334,7 +334,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isCorrect = false;
             CredentialManagementData mgmtData = GetFullCredMgmtData(out Dictionary<int, object> expectedValues);
             object expected = expectedValues[BlobKey];
-            if (!(mgmtData.LargeBlobKey is null) && (expected is byte[] unboxedValue))
+            if (!(mgmtData.LargeBlobKey is null) && expected is byte[] unboxedValue)
             {
                 isCorrect = MemoryExtensions.SequenceEqual(mgmtData.LargeBlobKey.Value.Span, unboxedValue);
             }

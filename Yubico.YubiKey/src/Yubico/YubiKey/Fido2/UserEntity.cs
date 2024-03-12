@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Formats.Cbor;
 using System.Globalization;
-using System.Collections.Generic;
 using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2
@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.Fido2
     /// <para>
     /// The FIDO2 standard specifies that when communicating with the
     /// authenticator, the ID is not a required element, although it will likely
-    /// lead to interoperatbility issues if no value is given. This class will
+    /// lead to interoperability issues if no value is given. This class will
     /// require an ID.
     /// </para>
     /// <para>

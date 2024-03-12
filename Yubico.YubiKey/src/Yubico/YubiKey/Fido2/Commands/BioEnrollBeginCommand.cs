@@ -14,8 +14,8 @@
 
 using System;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.Fido2.Cbor;
+using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         //     03 int
         private static byte[]? EncodeParams(int? timeoutMilliseconds)
         {
-            return (timeoutMilliseconds is null) ? null
+            return timeoutMilliseconds is null ? null
                 : new CborMapWriter<int>()
                 .Entry(KeyTimeout, timeoutMilliseconds.Value)
                 .Encode();

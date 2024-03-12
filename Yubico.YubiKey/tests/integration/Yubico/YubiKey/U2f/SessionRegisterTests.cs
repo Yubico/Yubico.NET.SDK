@@ -15,10 +15,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Xunit;
 using Yubico.Core.Devices.Hid;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
-using Xunit;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -74,8 +74,8 @@ namespace Yubico.YubiKey.U2f
                     appId, clientDataHash, new TimeSpan(0, 0, 5), out RegistrationData? regDataQ);
                 Assert.True(isValid);
 
-//                RegistrationData regDataQ = u2fSession.Register(
-//                    appId, clientDataHash, TimeSpan.Zero);
+                //                RegistrationData regDataQ = u2fSession.Register(
+                //                    appId, clientDataHash, TimeSpan.Zero);
 
                 Assert.NotNull(regDataQ);
 

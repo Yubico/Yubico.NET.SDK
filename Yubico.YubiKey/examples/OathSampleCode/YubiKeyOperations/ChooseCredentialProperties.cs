@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
             int indexChosen = menuObject.RunMenu("Choose credential type", choices);
 
-            if ((indexChosen >= 0) && (indexChosen < choices.Length))
+            if (indexChosen >= 0 && indexChosen < choices.Length)
             {
                 type = _types[choices[indexChosen]];
                 return true;
@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
             int indexChosen = menuObject.RunMenu("Choose credential period", choices);
 
-            if ((indexChosen >= 0) && (indexChosen < choices.Length))
+            if (indexChosen >= 0 && indexChosen < choices.Length)
             {
                 period = _periods[choices[indexChosen]];
                 return true;
@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
             int indexChosen = menuObject.RunMenu("Choose credential algorithm", choices);
 
-            if ((indexChosen >= 0) && (indexChosen < choices.Length))
+            if (indexChosen >= 0 && indexChosen < choices.Length)
             {
                 algorithm = _hashAlgorithms[choices[indexChosen]];
                 return true;
@@ -109,7 +109,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
             int indexChosen = menuObject.RunMenu("Choose the number of digits in OTP code", choices);
 
-            if ((indexChosen >= 0) && (indexChosen < choices.Length))
+            if (indexChosen >= 0 && indexChosen < choices.Length)
             {
                 digits = _digits[choices[indexChosen]];
                 return true;

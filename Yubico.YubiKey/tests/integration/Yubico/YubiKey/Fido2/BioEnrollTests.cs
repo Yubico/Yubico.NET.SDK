@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
 using Xunit;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.TestUtilities;
@@ -136,9 +136,9 @@ namespace Yubico.YubiKey.Fido2
 
         private bool LocalKeyCollector(KeyEntryData arg)
         {
-            bool callCancel = (_callCancelCount == 0) ? false : true;
+            bool callCancel = _callCancelCount == 0 ? false : true;
 
-            if ((_callCancelCount > 0) && (!(arg.LastBioEnrollSampleResult is null)))
+            if (_callCancelCount > 0 && !(arg.LastBioEnrollSampleResult is null))
             {
                 if (arg.LastBioEnrollSampleResult.RemainingSampleCount != _callCancelCount)
                 {

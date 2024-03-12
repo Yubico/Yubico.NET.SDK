@@ -45,7 +45,7 @@ namespace Yubico.YubiKey.Piv.Commands
     ///   using System.Security.Cryptography.X509Certificates;<br/>
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   var createAttestationStatementCommand = new CreateAttestationStatementCommand (0x9A);
-    ///   CreateAttestationStatementResponse createAttestationStatementeResponse =
+    ///   CreateAttestationStatementResponse createAttestationStatementResponse =
     ///       connection.SendCommand(createAttestationStatementCommand);<br/>
     ///   if (createAttestationStatementResponse.Status != ResponseStatus.Success)
     ///   {
@@ -73,7 +73,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </summary>
         /// <returns>
         /// The X.509 cert in the response APDU, presented as a
-        /// <c>System.Security.Cryptography.X509Certiciates.X509Certificate2</c>.
+        /// <c>System.Security.Cryptography.X509Certificates.X509Certificate2</c>.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.

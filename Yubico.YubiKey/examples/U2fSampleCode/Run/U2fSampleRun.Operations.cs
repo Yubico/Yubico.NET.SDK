@@ -14,10 +14,10 @@
 
 using System;
 using System.Linq;
+using System.Security.Cryptography;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Sample.SharedCode;
 using Yubico.YubiKey.U2f;
-using Yubico.YubiKey.Cryptography;
-using System.Security.Cryptography;
 
 namespace Yubico.YubiKey.Sample.U2fSampleCode
 {
@@ -247,7 +247,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                 return true;
             }
 
-            // Now that we know we have a vaild key handle, call on the YubiKey
+            // Now that we know we have a valid key handle, call on the YubiKey
             // to compute the signature.
             // Verifying a credential is a two-step process, get the YubiKey to
             // sign the data, and then verify the signature.
@@ -270,7 +270,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             // which is to determine if the credential authenticates. Discovering
             // that a credential does not authenticate is not an error, it is the
             // method successfully completing the task it was designed to do,
-            // namely, to determine if the crenential authenticates.
+            // namely, to determine if the credential authenticates.
             if (authenticationData.VerifySignature(
                 regData.UserPublicKey, regData.ApplicationId, regData.ClientDataHash))
             {
@@ -288,9 +288,9 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
         {
             string versionNumber = _yubiKeyChosen.FirmwareVersion.ToString();
 
-            if ((_yubiKeyChosen.FirmwareVersion >= new FirmwareVersion(5, 0, 0))
-                || (_yubiKeyChosen.FirmwareVersion < new FirmwareVersion(4, 0, 0))
-                || (!_yubiKeyChosen.IsFipsSeries))
+            if (_yubiKeyChosen.FirmwareVersion >= new FirmwareVersion(5, 0, 0)
+                || _yubiKeyChosen.FirmwareVersion < new FirmwareVersion(4, 0, 0)
+                || !_yubiKeyChosen.IsFipsSeries)
             {
                 SampleMenu.WriteMessage(MessageType.Title, 0, "It is possible to reset the U2F application on only version 4");
                 SampleMenu.WriteMessage(MessageType.Title, 0, "FIPS series YubiKeys.");

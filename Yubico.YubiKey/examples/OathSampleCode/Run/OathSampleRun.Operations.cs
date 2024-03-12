@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKey.Sample.SharedCode;
 using Yubico.YubiKey.Oath;
+using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.OathSampleCode
 {
@@ -224,7 +224,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                     _yubiKeyChosen,
                     SampleKeyCollector.SampleKeyCollectorDelegate,
                     _credentialChosen,
-                    "Yubico", 
+                    "Yubico",
                     "testRename@example.com");
             }
             else

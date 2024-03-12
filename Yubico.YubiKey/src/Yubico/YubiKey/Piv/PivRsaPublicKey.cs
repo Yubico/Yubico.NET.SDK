@@ -76,17 +76,7 @@ namespace Yubico.YubiKey.Piv
 
         private Memory<byte> _modulus;
 
-        /// <summary>
-        /// Contains the modulus portion of the RSA public key.
-        /// </summary>
-        public ReadOnlySpan<byte> Modulus => _modulus.Span;
-
         private Memory<byte> _publicExponent;
-
-        /// <summary>
-        /// Contains the public exponent portion of the RSA public key.
-        /// </summary>
-        public ReadOnlySpan<byte> PublicExponent => _publicExponent.Span;
 
         // The default constructor. We don't want it to be used by anyone outside
         // this class.
@@ -121,6 +111,16 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
+        /// Contains the modulus portion of the RSA public key.
+        /// </summary>
+        public ReadOnlySpan<byte> Modulus => _modulus.Span;
+
+        /// <summary>
+        /// Contains the public exponent portion of the RSA public key.
+        /// </summary>
+        public ReadOnlySpan<byte> PublicExponent => _publicExponent.Span;
+
+        /// <summary>
         /// Try to create a new instance of an RSA public key object based on the
         /// encoding.
         /// </summary>
@@ -140,9 +140,8 @@ namespace Yubico.YubiKey.Piv
         /// True if the method was able to create a new RSA public key object,
         /// false otherwise.
         /// </returns>
-        internal static bool TryCreate(
-            out PivPublicKey publicKeyObject,
-            ReadOnlyMemory<byte> encodedPublicKey)
+        internal static bool TryCreate(out PivPublicKey publicKeyObject,
+                                       ReadOnlyMemory<byte> encodedPublicKey)
         {
             var returnValue = new PivRsaPublicKey();
             publicKeyObject = returnValue;
@@ -151,6 +150,7 @@ namespace Yubico.YubiKey.Piv
             {
                 var tlvReader = new TlvReader(encodedPublicKey);
                 int tag = tlvReader.PeekTag(2);
+
                 if (tag == PublicKeyTag)
                 {
                     tlvReader = tlvReader.ReadNestedTlv(tag);
@@ -158,18 +158,21 @@ namespace Yubico.YubiKey.Piv
 
                 var valueArray = new ReadOnlyMemory<byte>[PublicComponentCount];
 
-                while (tlvReader.HasData == true)
+                while (tlvReader.HasData)
                 {
                     int valueIndex;
                     tag = tlvReader.PeekTag();
+
                     switch (tag)
                     {
                         case ModulusTag:
                             valueIndex = ModulusIndex;
+
                             break;
 
                         case ExponentTag:
                             valueIndex = ExponentIndex;
+
                             break;
 
                         default:
@@ -201,15 +204,18 @@ namespace Yubico.YubiKey.Piv
         private bool LoadRsaPublicKey(ReadOnlySpan<byte> modulus, ReadOnlySpan<byte> publicExponent)
         {
             int sliceIndex = SliceIndex1024;
+
             switch (modulus.Length)
             {
                 case Rsa1024BlockSize:
                     Algorithm = PivAlgorithm.Rsa1024;
+
                     break;
 
                 case Rsa2048BlockSize:
                     Algorithm = PivAlgorithm.Rsa2048;
                     sliceIndex = SliceIndex2048;
+
                     break;
 
                 default:
@@ -229,11 +235,13 @@ namespace Yubico.YubiKey.Piv
             }
 
             var tlvWriter = new TlvWriter();
+
             using (tlvWriter.WriteNestedTlv(PublicKeyTag))
             {
                 tlvWriter.WriteValue(ModulusTag, modulus);
                 tlvWriter.WriteValue(ExponentTag, _exponentF4);
             }
+
             PivEncodedKey = tlvWriter.Encode();
 
             // The Metadate encoded key is the contents of the nested. So set
@@ -256,12 +264,14 @@ namespace Yubico.YubiKey.Piv
             }
 
             int index = 0;
+
             while (exponent.Length - index > ValidExponentLength)
             {
                 if (exponent[index] != 0)
                 {
                     return false;
                 }
+
                 index++;
             }
 

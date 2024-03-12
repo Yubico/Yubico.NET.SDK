@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
 using System.Linq;
-using Yubico.YubiKey.TestUtilities;
+using System.Security.Cryptography;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography
 {

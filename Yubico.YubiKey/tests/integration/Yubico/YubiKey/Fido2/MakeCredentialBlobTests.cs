@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Fido2
             Assert.NotNull(authInfo.Extensions);
             if (!(authInfo.Extensions is null))
             {
-                bool isValid = authInfo.Extensions.Contains<string>("credBlob") && (maxCredBlobLength > 0);
+                bool isValid = authInfo.Extensions.Contains<string>("credBlob") && maxCredBlobLength > 0;
                 Assert.True(isValid);
             }
         }
@@ -63,12 +63,12 @@ namespace Yubico.YubiKey.Fido2
                 Assert.True(isValid);
             }
 
-//            var cmd = new MakeCredentialCommand(makeParams);
-//            MakeCredentialResponse rsp = connection.SendCommand(cmd);
-//            Assert.Equal(ResponseStatus.Success, rsp.Status);
-//            MakeCredentialData cData = rsp.GetData();
-//            isValid = cData.VerifyAttestation(makeParams.ClientDataHash);
-//            Assert.True(isValid);
+            //            var cmd = new MakeCredentialCommand(makeParams);
+            //            MakeCredentialResponse rsp = connection.SendCommand(cmd);
+            //            Assert.Equal(ResponseStatus.Success, rsp.Status);
+            //            MakeCredentialData cData = rsp.GetData();
+            //            isValid = cData.VerifyAttestation(makeParams.ClientDataHash);
+            //            Assert.True(isValid);
         }
 
         private bool SupportsLargeBlobs(AuthenticatorInfo authenticatorInfo)

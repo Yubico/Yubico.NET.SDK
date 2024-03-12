@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
+using Xunit;
 using Yubico.YubiKey.Piv.Objects;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.Piv
                 using (adminData)
                 {
                     Assert.True(isValid);
-                    Assert.NotNull(adminData.Salt);
+                    _ = Assert.NotNull(adminData.Salt);
                     Assert.False(adminData.PinProtected);
 
                     if (!(adminData.Salt is null))
@@ -111,8 +111,8 @@ namespace Yubico.YubiKey.Piv
                 using (adminData)
                 {
                     Assert.True(isValid);
-                    Assert.NotNull(adminData.PinLastUpdated);
-                    Assert.NotNull(adminData.Salt);
+                    _ = Assert.NotNull(adminData.PinLastUpdated);
+                    _ = Assert.NotNull(adminData.Salt);
                     Assert.False(adminData.PinProtected);
 
                     if (!(adminData.Salt is null))
@@ -205,8 +205,8 @@ namespace Yubico.YubiKey.Piv
                 using (adminData)
                 {
                     Assert.True(isValid);
-                    Assert.NotNull(adminData.PinLastUpdated);
-                    Assert.NotNull(adminData.Salt);
+                    _ = Assert.NotNull(adminData.PinLastUpdated);
+                    _ = Assert.NotNull(adminData.Salt);
                     Assert.False(adminData.PinProtected);
                 }
             }
@@ -243,7 +243,7 @@ namespace Yubico.YubiKey.Piv
                 using (pinProtect)
                 {
                     Assert.True(isValid);
-                    Assert.NotNull(pinProtect.ManagementKey);
+                    _ = Assert.NotNull(pinProtect.ManagementKey);
                     if (!(pinProtect.ManagementKey is null))
                     {
                         var src = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
@@ -303,7 +303,7 @@ namespace Yubico.YubiKey.Piv
                 using (pinProtect)
                 {
                     Assert.True(isValid);
-                    Assert.NotNull(pinProtect.ManagementKey);
+                    _ = Assert.NotNull(pinProtect.ManagementKey);
                     if (!(pinProtect.ManagementKey is null))
                     {
                         var src = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
@@ -324,8 +324,8 @@ namespace Yubico.YubiKey.Piv
                 using (adminData)
                 {
                     Assert.True(isValid);
-                    Assert.NotNull(adminData.PinLastUpdated);
-                    Assert.NotNull(adminData.Salt);
+                    _ = Assert.NotNull(adminData.PinLastUpdated);
+                    _ = Assert.NotNull(adminData.Salt);
                     Assert.True(adminData.PinProtected);
                 }
             }

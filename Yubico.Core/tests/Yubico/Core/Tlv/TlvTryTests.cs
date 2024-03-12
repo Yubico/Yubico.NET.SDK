@@ -15,7 +15,6 @@
 using System;
 using System.Security.Cryptography;
 using Xunit;
-using Yubico.Core.Tlv;
 
 namespace Yubico.Core.Tlv.UnitTests
 {
@@ -24,7 +23,8 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void Tlv_TryReadValue()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x02, 0x05, 0x31, 0x32, 0x33, 0x34, 0x35
             };
 
@@ -58,18 +58,19 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void Tlv_TryReadNested()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x72, 0x61, 0x0A,
-                    0x01, 0x02, 0x41, 0x42,
-                    0x02, 0x04, 0x31, 0x32, 0x33, 0x34
+                0x01, 0x02, 0x41, 0x42,
+                0x02, 0x04, 0x31, 0x32, 0x33, 0x34
             };
 
             var reader = new TlvReader(encoding);
             bool validRead = reader.TryReadNestedTlv(out TlvReader nested, 0x7261);
-            if (validRead == true)
+            if (validRead)
             {
                 validRead = nested.TryReadValue(out ReadOnlyMemory<byte> value, 0x01);
-                if (validRead == true)
+                if (validRead)
                 {
                     Assert.Equal(2, value.Length);
                     validRead = nested.TryReadValue(out value, 0x02);
@@ -111,7 +112,7 @@ namespace Yubico.Core.Tlv.UnitTests
 
             var reader = new TlvReader(encoding);
             bool validRead = reader.TryReadInt16(out short value, 0xFF);
-            if (validRead == true)
+            if (validRead)
             {
                 validRead = reader.TryReadInt16(out value, 0xFE, false);
             }
@@ -139,7 +140,7 @@ namespace Yubico.Core.Tlv.UnitTests
 
             var reader = new TlvReader(encoding);
             bool validRead = reader.TryReadUInt16(out ushort value, 0xFF);
-            if (validRead == true)
+            if (validRead)
             {
                 validRead = reader.TryReadUInt16(out value, 0xFE, false);
             }
@@ -176,7 +177,8 @@ namespace Yubico.Core.Tlv.UnitTests
         public void Tlv_TryReadString()
         {
             string expectedValue = "12345";
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x02, 0x05, 0x31, 0x32, 0x33, 0x34, 0x35
             };
 
@@ -190,25 +192,25 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TlvTryRead_MultipleValues_Correct()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x72, 0x61, 0x0A,
-                    0x01, 0x02, 0x41, 0x42,
-                    0x02, 0x04, 0x31, 0x32, 0x33, 0x34
+                0x01, 0x02, 0x41, 0x42,
+                0x02, 0x04, 0x31, 0x32, 0x33, 0x34
             };
 
             var reader = new TlvReader(encoding);
             bool validRead = reader.TryReadNestedTlv(out TlvReader nested, 0x7261);
-            if (validRead == true)
+            if (validRead)
             {
-                validRead = nested.TryReadValue(out ReadOnlyMemory<byte> value, 0x91);
+                validRead = nested.TryReadValue(out _, 0x91);
                 Assert.False(validRead);
-
-                validRead = nested.TryReadValue(out value, 0x01);
-                if (validRead == true)
+                validRead = nested.TryReadValue(out ReadOnlyMemory<byte> value, 0x01);
+                if (validRead)
                 {
                     Assert.Equal(2, value.Length);
 
-                    validRead = nested.TryReadValue(out value, 0x92);
+                    validRead = nested.TryReadValue(out _, 0x92);
                     Assert.False(validRead);
 
                     validRead = nested.TryReadValue(out value, 0x02);
@@ -245,13 +247,14 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TryReadNested_WrongTag_ReturnsFalse()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x81, 0x13,
-                    0x01, 0x02, 0x31, 0x32,
-                    0x82, 0x0B,
-                        0x03, 0x02, 0x41, 0x42,
-                        0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
-                    0x91, 0x00
+                0x01, 0x02, 0x31, 0x32,
+                0x82, 0x0B,
+                0x03, 0x02, 0x41, 0x42,
+                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
+                0x91, 0x00
             };
 
             var reader = new TlvReader(encoding);
@@ -271,11 +274,12 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TryReadValue_WrongTag_ReturnsFalse()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x81, 0x13,
-                    0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
-                    0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
-                    0x91, 0x00
+                0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
+                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
+                0x91, 0x00
             };
 
             var reader = new TlvReader(encoding);
@@ -291,11 +295,12 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TryReadValue_InvalidLength_ReturnsFalse()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x81, 0x13,
-                    0x11, 0x80, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
-                    0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
-                    0x91, 0x00
+                0x11, 0x80, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
+                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
+                0x91, 0x00
             };
 
             var reader = new TlvReader(encoding);
@@ -311,11 +316,12 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TryReadValue_NotEnoughData_ReturnsFalse()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x81, 0x13,
-                    0x11, 0x12, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
-                    0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
-                    0x91, 0x00
+                0x11, 0x12, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
+                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
+                0x91, 0x00
             };
 
             var reader = new TlvReader(encoding);
@@ -331,11 +337,12 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TryReadByte_LengthZero_ReturnsFalse()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x81, 0x13,
-                    0x91, 0x00,
-                    0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
-                    0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65
+                0x91, 0x00,
+                0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
+                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65
             };
 
             var reader = new TlvReader(encoding);
@@ -351,11 +358,12 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TryReadByte_LengthTwo_ReturnsFalse()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x81, 0x15,
-                    0x91, 0x02, 0x41, 0x42,
-                    0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
-                    0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
+                0x91, 0x02, 0x41, 0x42,
+                0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
+                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
             };
 
             var reader = new TlvReader(encoding);
@@ -371,11 +379,12 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TryReadInt16_LengthZero_ReturnsFalse()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x81, 0x14,
-                    0x91, 0xFF, 0x00,
-                    0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
-                    0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65
+                0x91, 0xFF, 0x00,
+                0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
+                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65
             };
 
             var reader = new TlvReader(encoding);
@@ -391,11 +400,12 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TryReadInt16_LengthOne_ReturnsFalse()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x81, 0x15,
-                    0x91, 0xFF, 0x01, 0x41,
-                    0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
-                    0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
+                0x91, 0xFF, 0x01, 0x41,
+                0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
+                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
             };
 
             var reader = new TlvReader(encoding);
@@ -411,11 +421,12 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TryReadUInt16_LengthZero_ReturnsFalse()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x81, 0x14,
-                    0x91, 0xFF, 0x00,
-                    0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
-                    0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65
+                0x91, 0xFF, 0x00,
+                0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
+                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65
             };
 
             var reader = new TlvReader(encoding);
@@ -431,11 +442,12 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TryReadUInt16_LengthOne_ReturnsFalse()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0x81, 0x15,
-                    0x91, 0xFF, 0x01, 0x41,
-                    0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
-                    0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
+                0x91, 0xFF, 0x01, 0x41,
+                0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
+                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
             };
 
             var reader = new TlvReader(encoding);

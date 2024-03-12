@@ -15,16 +15,15 @@
 using System;
 using System.Diagnostics;
 using System.Threading;
+using Microsoft.Extensions.Logging;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 using Xunit;
 using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.TestUtilities;
-
-using Microsoft.Extensions.Logging;
-using Serilog;
-using Serilog.Core;
-using Serilog.Events;
 
 namespace Yubico.YubiKey
 {
@@ -42,7 +41,7 @@ namespace Yubico.YubiKey
         [Fact]
         public void SwitchingBetweenTransports_ForcesThreeSecondWait()
         {
-            using var log = new LoggerConfiguration()
+            using Logger? log = new LoggerConfiguration()
                 .Enrich.With(new ThreadIdEnricher())
                 .WriteTo.Console(
                     outputTemplate: "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")

@@ -14,11 +14,11 @@
 
 using System;
 using System.Collections.Generic;
-using Yubico.Core.Iso7816;
+using Xunit;
 using Yubico.Core.Devices.Hid;
+using Yubico.Core.Iso7816;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
-using Xunit;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -146,15 +146,15 @@ namespace Yubico.YubiKey.U2f
             }
 
             var vfyCmd = new VerifyPinCommand(correctPin);
-            VerifyPinResponse vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
+            VerifyPinResponse vfyRsp = _fidoConnection.SendCommand(vfyCmd);
             Assert.Equal(ResponseStatus.Success, vfyRsp.Status);
 
             vfyCmd = new VerifyPinCommand(wrongPin);
-            vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
+            vfyRsp = _fidoConnection.SendCommand(vfyCmd);
             Assert.Equal(ResponseStatus.Failed, vfyRsp.Status);
 
             vfyCmd = new VerifyPinCommand(correctPin);
-            vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
+            vfyRsp = _fidoConnection.SendCommand(vfyCmd);
             Assert.Equal(ResponseStatus.Success, vfyRsp.Status);
         }
 
@@ -183,7 +183,7 @@ namespace Yubico.YubiKey.U2f
             }
 
             var vfyCmd = new VerifyPinCommand(correctPin);
-            VerifyPinResponse vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
+            VerifyPinResponse vfyRsp = _fidoConnection.SendCommand(vfyCmd);
             Assert.Equal(ResponseStatus.Success, vfyRsp.Status);
 
             // Verify with the wrong PIN 3 times.
@@ -191,15 +191,15 @@ namespace Yubico.YubiKey.U2f
             // The third time it should be
             // SWConstants.AuthenticationMethodBlocked.
             vfyCmd = new VerifyPinCommand(wrongPin);
-            vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
+            vfyRsp = _fidoConnection.SendCommand(vfyCmd);
             Assert.Equal(SWConstants.VerifyFail, vfyRsp.StatusWord);
 
             vfyCmd = new VerifyPinCommand(wrongPin);
-            vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
+            vfyRsp = _fidoConnection.SendCommand(vfyCmd);
             Assert.Equal(SWConstants.VerifyFail, vfyRsp.StatusWord);
 
             vfyCmd = new VerifyPinCommand(wrongPin);
-            vfyRsp =  _fidoConnection.SendCommand(vfyCmd);
+            vfyRsp = _fidoConnection.SendCommand(vfyCmd);
             Assert.Equal(SWConstants.AuthenticationMethodBlocked, vfyRsp.StatusWord);
 
             // At this point, the YubiKey's U2F application is blocked and the
@@ -223,9 +223,9 @@ namespace Yubico.YubiKey.U2f
             }
 
             YubiKeyDeviceInfo getData = rsp.GetData();
-            if ((!getData.IsFipsSeries) ||
-                (getData.FirmwareVersion >= new FirmwareVersion(5, 0, 0)) ||
-                (getData.FirmwareVersion < new FirmwareVersion(4, 0, 0)))
+            if (!getData.IsFipsSeries ||
+                getData.FirmwareVersion >= new FirmwareVersion(5, 0, 0) ||
+                getData.FirmwareVersion < new FirmwareVersion(4, 0, 0))
             {
                 return false;
             }

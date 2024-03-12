@@ -138,7 +138,7 @@ namespace Yubico.Core.Cryptography
         /// One of the arguments was not valid (e.g. tag is not exactly 16
         /// bytes).
         /// </exception>
-        public bool DecryptAndVerify (
+        public bool DecryptAndVerify(
             ReadOnlySpan<byte> keyData,
             ReadOnlySpan<byte> nonce,
             ReadOnlySpan<byte> ciphertext,

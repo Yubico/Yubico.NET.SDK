@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Otp
         /// The default value for the enumeration.
         /// </summary>
         None = 0,
-        
+
         /// <summary>
         /// The Yubico OTP mode takes a 6 byte challenge and creates a
         /// response using the Yubico OTP algorithm, where variable fields

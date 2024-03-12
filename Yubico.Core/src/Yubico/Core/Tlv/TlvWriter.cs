@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Text;
 
 namespace Yubico.Core.Tlv
@@ -126,6 +126,7 @@ namespace Yubico.Core.Tlv
             {
                 throw new TlvException(ExceptionMessages.TlvInvalidSchema);
             }
+
             TlvNestedTlv nestedToEnd = _nestedTlvStack.Pop();
             TlvNestedTlv parent = _nestedTlvStack.Peek();
             parent.AddSubElement(nestedToEnd);
@@ -254,6 +255,7 @@ namespace Yubico.Core.Tlv
             {
                 throw new ArgumentNullException(nameof(encoding));
             }
+
             WriteValue(tag, encoding.GetBytes(value));
         }
 
@@ -299,7 +301,8 @@ namespace Yubico.Core.Tlv
         public void WriteInt16(int tag, short value, bool bigEndian = true)
         {
             byte[] valueArray = new byte[2];
-            if (bigEndian == true)
+
+            if (bigEndian)
             {
                 BinaryPrimitives.WriteInt16BigEndian(valueArray, value);
             }
@@ -330,7 +333,8 @@ namespace Yubico.Core.Tlv
         public void WriteUInt16(int tag, ushort value, bool bigEndian = true)
         {
             byte[] valueArray = new byte[2];
-            if (bigEndian == true)
+
+            if (bigEndian)
             {
                 BinaryPrimitives.WriteUInt16BigEndian(valueArray, value);
             }
@@ -363,7 +367,8 @@ namespace Yubico.Core.Tlv
         public void WriteInt32(int tag, int value, bool bigEndian = true)
         {
             byte[] valueArray = new byte[4];
-            if (bigEndian == true)
+
+            if (bigEndian)
             {
                 BinaryPrimitives.WriteInt32BigEndian(valueArray, value);
             }
@@ -420,6 +425,7 @@ namespace Yubico.Core.Tlv
             TlvNestedTlv initialNested = GetInitialNestedTlv();
 
             byte[] encoding = new byte[initialNested.EncodedLength];
+
             if (initialNested.TryEncode(encoding, 0, out _) == false)
             {
                 throw new TlvException(ExceptionMessages.TlvInvalidSchema);
@@ -516,7 +522,7 @@ namespace Yubico.Core.Tlv
         /// <para>
         /// Normally, a Dispose method overwrites sensitive data or releases
         /// resources (files, internet connections, etc.). However, the Dispose in
-        /// this class simpply calls the TlvWriter.EndNestedTlv.
+        /// this class simply calls the TlvWriter.EndNestedTlv.
         /// </para>
         /// <para>
         /// When we're building a schema, we want to make sure the elements that
@@ -527,7 +533,7 @@ namespace Yubico.Core.Tlv
         /// to a Nested TLV, we can call the End method. However, a decision was made
         /// not to expose the End method, but to use this "using" construction.
         /// The reason is so that code can be written to have a structure where
-        /// the indntations in the code match the schema.
+        /// the indentations in the code match the schema.
         /// </para>
         /// <para>
         /// Really, that's why it is done this way. To make the code have the same
@@ -561,6 +567,7 @@ namespace Yubico.Core.Tlv
         /// </code>
         /// </para>
         /// </remarks>
+
         //
         // When we're following a schema, we want to make sure the elements that
         // belong under a particular NestedTlv are placed there and not anywhere
@@ -632,7 +639,7 @@ namespace Yubico.Core.Tlv
         // method and allow the using construction. Hence, there is no need to
         // compare instances. We could have made this a Class instead of a
         // Struct, but we are following the AsnWriter pattern.
-#pragma warning disable CA1034, CA1815  // see comments above
+#pragma warning disable CA1034, CA1815 // see comments above
         public struct TlvScope : IDisposable
         {
             private TlvWriter? _writer;
@@ -655,6 +662,7 @@ namespace Yubico.Core.Tlv
             /// will make sure the Nested TLV is ended and any new additions to the
             /// TlvWriter object will be associated with the Nested TLV's parent.
             /// </summary>
+
             // Note that .NET recommends a Dispose method call Dispose(true) and
             // GC.SuppressFinalize(this). The actual disposal is in the
             // Dispose(bool) method.

@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 using System.Globalization;
+using System.Linq;
 using System.Runtime.InteropServices;
 using Yubico.PlatformInterop;
 

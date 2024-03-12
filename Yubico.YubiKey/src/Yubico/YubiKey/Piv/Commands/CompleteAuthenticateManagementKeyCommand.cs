@@ -15,9 +15,9 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Cryptography;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Commands
 {

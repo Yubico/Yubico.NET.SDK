@@ -113,7 +113,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var newCredential = new Credential
             {
-                Issuer = NewIssuer, 
+                Issuer = NewIssuer,
                 AccountName = NewAccount,
                 Type = Credential.Type,
                 Period = Credential.Period

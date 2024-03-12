@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using Yubico.Core.Devices.Hid;
-using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Otp.Operations;
 using Xunit;
+using Yubico.Core.Devices.Hid;
+using Yubico.YubiKey.Otp.Operations;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Otp
 {

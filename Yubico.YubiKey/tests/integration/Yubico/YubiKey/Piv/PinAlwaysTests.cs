@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System.Linq;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {

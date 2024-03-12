@@ -14,9 +14,9 @@
 
 using System;
 using System.Security.Cryptography;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
 using Xunit.Abstractions;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Cryptography
 {
@@ -346,7 +346,7 @@ namespace Yubico.YubiKey.Cryptography
 
             int digestLength = digester.HashSize / 8;
 
-            if ((inputData.Length == 0) || (inputData.Length > (buffer.Length - ((2 * digestLength) + 2))))
+            if (inputData.Length == 0 || inputData.Length > buffer.Length - ((2 * digestLength) + 2))
             {
                 throw new ArgumentException("invalid length");
             }

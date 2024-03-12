@@ -418,7 +418,7 @@ namespace Yubico.Core.Tlv
                 FixedLengthByte,
                 false);
 
-            if (isValid == true)
+            if (isValid)
             {
                 value = fullValue.Span[0];
             }
@@ -474,7 +474,7 @@ namespace Yubico.Core.Tlv
         {
             _ = CommonReadValue(out ReadOnlyMemory<byte> value, expectedTag, FixedLengthInt16, true);
 
-            if (bigEndian == true)
+            if (bigEndian)
             {
                 return BinaryPrimitives.ReadInt16BigEndian(value.Span);
             }
@@ -528,9 +528,9 @@ namespace Yubico.Core.Tlv
                 FixedLengthInt16,
                 false);
 
-            if (isValid == true)
+            if (isValid)
             {
-                if (bigEndian == true)
+                if (bigEndian)
                 {
                     value = BinaryPrimitives.ReadInt16BigEndian(fullValue.Span);
                 }
@@ -591,7 +591,7 @@ namespace Yubico.Core.Tlv
         {
             _ = CommonReadValue(out ReadOnlyMemory<byte> value, expectedTag, FixedLengthInt16, true);
 
-            if (bigEndian == true)
+            if (bigEndian)
             {
                 return BinaryPrimitives.ReadUInt16BigEndian(value.Span);
             }
@@ -646,9 +646,9 @@ namespace Yubico.Core.Tlv
                 FixedLengthInt16,
                 false);
 
-            if (isValid == true)
+            if (isValid)
             {
-                if (bigEndian == true)
+                if (bigEndian)
                 {
                     value = BinaryPrimitives.ReadUInt16BigEndian(fullValue.Span);
                 }
@@ -709,7 +709,7 @@ namespace Yubico.Core.Tlv
         {
             _ = CommonReadValue(out ReadOnlyMemory<byte> value, expectedTag, FixedLengthInt32, true);
 
-            if (bigEndian == true)
+            if (bigEndian)
             {
                 return BinaryPrimitives.ReadInt32BigEndian(value.Span);
             }
@@ -763,9 +763,9 @@ namespace Yubico.Core.Tlv
                 FixedLengthInt32,
                 false);
 
-            if (isValid == true)
+            if (isValid)
             {
-                if (bigEndian == true)
+                if (bigEndian)
                 {
                     value = BinaryPrimitives.ReadInt32BigEndian(fullValue.Span);
                 }
@@ -788,8 +788,8 @@ namespace Yubico.Core.Tlv
         /// <para>
         /// The method will verify that the tag is expected. If it is, it will
         /// read the length, verify that there are enough bytes in the buffer to
-        /// read, then read the value (a byte array) and returning it as astring,
-        /// converting the bytes aray following the scheme specified by the
+        /// read, then read the value (a byte array) and returning it as a string,
+        /// converting the bytes array following the scheme specified by the
         /// encoding argument.
         /// </para>
         /// </remarks>
@@ -1131,10 +1131,10 @@ namespace Yubico.Core.Tlv
             value = _encoding.Slice(_currentValueOffset, _currentLength);
             _currentOffset = _currentValueOffset + _currentLength;
 
-exit:
+        exit:
             ResetState();
 
-            if ((result != ValidEncoding) && (throwIfFailed == true))
+            if (result != ValidEncoding && throwIfFailed)
             {
                 ThrowOnFailedRead(result);
             }
@@ -1168,7 +1168,7 @@ exit:
             }
 
             int result = ReadTag(tagLength);
-            if ((result == ValidEncoding) && (_currentTag != expectedTag))
+            if (result == ValidEncoding && _currentTag != expectedTag)
             {
                 result = UnexpectedEncoding;
             }
@@ -1184,7 +1184,7 @@ exit:
         //   UnexpectedEnd (not enough bytes to read)
         private int ReadTag(int tagLength)
         {
-            if ((tagLength <= 0) || (tagLength > MaximumTagLength))
+            if (tagLength <= 0 || tagLength > MaximumTagLength)
             {
                 return UnsupportedTag;
             }
@@ -1196,7 +1196,7 @@ exit:
 
             ResetState();
 
-            if ((_currentOffset + tagLength) > _encoding.Length)
+            if (_currentOffset + tagLength > _encoding.Length)
             {
                 return UnexpectedEnd;
             }
@@ -1228,7 +1228,7 @@ exit:
             }
 
             int count = 1;
-            if ((_currentOffset + _currentTagLength) < _encoding.Length)
+            if (_currentOffset + _currentTagLength < _encoding.Length)
             {
                 _currentLength = (int)_encoding.Span[_currentOffset + _currentTagLength];
                 if (_currentLength <= 0x7F)
@@ -1244,11 +1244,11 @@ exit:
             // If the initial length byte is 0x80, that is an unsupported value
             // (it's BER for indefinite length and we support DER only). In that
             // case, we would have set count to 0 (0x80 & 0x7F yields 0).
-            if ((count == 0) || (count > MaximumLengthCount))
+            if (count == 0 || count > MaximumLengthCount)
             {
                 return UnsupportedLength;
             }
-            if ((_currentOffset + _currentTagLength + count + 1) > _encoding.Length)
+            if (_currentOffset + _currentTagLength + count + 1 > _encoding.Length)
             {
                 return UnexpectedEnd;
             }
@@ -1289,7 +1289,7 @@ exit:
                     break;
             }
 
-            return (_currentValueOffset + _currentLength) <= _encoding.Length
+            return _currentValueOffset + _currentLength <= _encoding.Length
                 ? ValidEncoding
                 : UnexpectedEnd;
         }

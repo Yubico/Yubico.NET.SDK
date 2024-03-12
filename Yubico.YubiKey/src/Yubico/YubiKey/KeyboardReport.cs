@@ -98,11 +98,11 @@ namespace Yubico.YubiKey
         public override string ToString()
         {
             return
-                $"TouchPending: { TouchPending }, " +
-                $"ReadPending: { ReadPending }, " +
-                $"WritePending: { WritePending }, " +
-                $"SequenceNumber: { SequenceNumber }, " +
-                $"Payload: { BitConverter.ToString(PayloadSpan().ToArray()) }";
+                $"TouchPending: {TouchPending}, " +
+                $"ReadPending: {ReadPending}, " +
+                $"WritePending: {WritePending}, " +
+                $"SequenceNumber: {SequenceNumber}, " +
+                $"Payload: {BitConverter.ToString(PayloadSpan().ToArray())}";
         }
     }
 }

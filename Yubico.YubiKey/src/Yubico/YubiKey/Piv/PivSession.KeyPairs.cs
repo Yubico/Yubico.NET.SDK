@@ -16,8 +16,8 @@ using System;
 using System.Globalization;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
-using Yubico.YubiKey.Piv.Commands;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Piv.Commands;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -124,11 +124,10 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
         /// </exception>
-        public PivPublicKey GenerateKeyPair(
-            byte slotNumber,
-            PivAlgorithm algorithm,
-            PivPinPolicy pinPolicy = PivPinPolicy.Default,
-            PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
+        public PivPublicKey GenerateKeyPair(byte slotNumber,
+                                            PivAlgorithm algorithm,
+                                            PivPinPolicy pinPolicy = PivPinPolicy.Default,
+                                            PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
         {
             if (ManagementKeyAuthenticated == false)
             {
@@ -137,6 +136,7 @@ namespace Yubico.YubiKey.Piv
 
             var generateCommand = new GenerateKeyPairCommand(slotNumber, algorithm, pinPolicy, touchPolicy);
             GenerateKeyPairResponse generateResponse = Connection.SendCommand(generateCommand);
+
             return generateResponse.GetData();
         }
 
@@ -229,11 +229,10 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
         /// </exception>
-        public void ImportPrivateKey(
-            byte slotNumber,
-            PivPrivateKey privateKey,
-            PivPinPolicy pinPolicy = PivPinPolicy.Default,
-            PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
+        public void ImportPrivateKey(byte slotNumber,
+                                     PivPrivateKey privateKey,
+                                     PivPinPolicy pinPolicy = PivPinPolicy.Default,
+                                     PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
         {
             if (ManagementKeyAuthenticated == false)
             {
@@ -242,6 +241,7 @@ namespace Yubico.YubiKey.Piv
 
             var importCommand = new ImportAsymmetricKeyCommand(privateKey, slotNumber, pinPolicy, touchPolicy);
             ImportAsymmetricKeyResponse importResponse = Connection.SendCommand(importCommand);
+
             if (importResponse.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(importResponse.StatusMessage);
@@ -332,16 +332,19 @@ namespace Yubico.YubiKey.Piv
 
             byte[] certDer = certificate.GetRawCertData();
             var tlvWriter = new TlvWriter();
+
             using (tlvWriter.WriteNestedTlv(PivEncodingTag))
             {
                 tlvWriter.WriteValue(PivCertTag, certDer);
                 tlvWriter.WriteByte(PivCompressionTag, 0);
                 tlvWriter.WriteValue(PivLrcTag, null);
             }
+
             byte[] encodedCert = tlvWriter.Encode();
 
             var putCommand = new PutDataCommand((int)dataTag, encodedCert);
             PutDataResponse putResponse = Connection.SendCommand(putCommand);
+
             if (putResponse.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(putResponse.StatusMessage);
@@ -395,10 +398,12 @@ namespace Yubico.YubiKey.Piv
 
             var tlvReader = new TlvReader(encodedCertData);
             bool isValid = tlvReader.TryReadNestedTlv(out TlvReader nestedReader, PivEncodingTag);
-            if (isValid == true)
+
+            if (isValid)
             {
                 isValid = nestedReader.TryReadValue(out ReadOnlyMemory<byte> certData, PivCertTag);
-                if (isValid == true)
+
+                if (isValid)
                 {
                     return new X509Certificate2(certData.ToArray());
                 }
@@ -415,7 +420,7 @@ namespace Yubico.YubiKey.Piv
         // will map the slot number to the appropriate DataTag.
         private static PivDataTag GetCertDataTagFromSlotNumber(byte slotNumber)
         {
-            if ((slotNumber >= PivSlot.Retired1) && (slotNumber <= PivSlot.Retired20))
+            if (slotNumber >= PivSlot.Retired1 && slotNumber <= PivSlot.Retired20)
             {
                 return PivDataTag.Retired1 + (slotNumber - PivSlot.Retired1);
             }

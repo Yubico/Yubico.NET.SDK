@@ -15,8 +15,8 @@
 using System;
 using System.Collections.Generic;
 using Yubico.Core.Iso7816;
-using Yubico.PlatformInterop;
 using Yubico.Core.Logging;
+using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Devices.SmartCard
 {

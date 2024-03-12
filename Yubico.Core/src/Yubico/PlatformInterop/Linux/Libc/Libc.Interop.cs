@@ -21,9 +21,20 @@ namespace Yubico.PlatformInterop
     // Currently we only need open, close, and ioctl.
     internal static partial class NativeMethods
     {
+        [Flags]
+        public enum OpenFlags
+        {
+            O_RDONLY = 0,
+            O_WRONLY = 1,
+            O_RDWR = 2,
+            O_NONBLOCK = 0x800,
+        }
+
         public const long HIDIOCGRAWINFO = 0x0000000080084803;
         public const long HIDIOCGRDESCSIZE = 0x0000000080044801;
+
         public const long HIDIOCGRDESC = 0x0000000090044802;
+
         // The FEATURE flags need to be combined with the buffer size. With "CG"
         // (Get), the buffer size is the size of the buffer into which the result
         // will be placed. With "CS" (Set), the buffer size is the size of the
@@ -32,7 +43,7 @@ namespace Yubico.PlatformInterop
         // For example, to build the ioctl flag for Get with a buffer of 256
         // bytes, use
         //   HIDIOCGFEATURE | (256 << 16);
-        // Make sure the buffer size is not greatuer than the maximum.
+        // Make sure the buffer size is not greater than the maximum.
         public const long HIDIOCGFEATURE = 0x00000000C0004807;
         public const long HIDIOCSFEATURE = 0x00000000C0004806;
         public const int MaxFeatureBufferSize = 256;
@@ -51,21 +62,13 @@ namespace Yubico.PlatformInterop
         public const int OffsetDescSize = 0;
         public const int OffsetDescValue = 4;
 
-        [Flags]
-        public enum OpenFlags
-        {
-            O_RDONLY = 0,
-            O_WRONLY = 1,
-            O_RDWR = 2,
-            O_NONBLOCK = 0x800,
-        }
-
         // Note that the DefaultDllImportSearchPaths attribute is a security best
         // practice on the Windows platform (and required by our analyzer
         // settings). It does not currently have any effect on platforms other
         // than Windows, but is included because of the analyzer and in the hope
         // that it will be supported by these platforms in the future.
-        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "open", SetLastError = true)]
+        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "open",
+            SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern LinuxFileSafeHandle open(string filename, OpenFlags flag);
 
@@ -92,19 +95,18 @@ namespace Yubico.PlatformInterop
         // Read count bytes. Place them into outputBuffer.
         [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "read", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern int read(
-            LinuxFileSafeHandle handle,
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex=2)]byte[] outputBuffer,
-            int count);
+        public static extern int read(LinuxFileSafeHandle handle,
+                                      [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
+                                      byte[] outputBuffer,
+                                      int count);
 
         // Write the count bytes in inputBuffer.
         [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "write", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern int write(
-            int handle,
-            [MarshalAs(UnmanagedType.LPArray)]byte[] inputBuffer,
-            int count);
-        
+        public static extern int write(int handle,
+                                       [MarshalAs(UnmanagedType.LPArray)] byte[] inputBuffer,
+                                       int count);
+
         [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "fcntl", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern int fcntl(IntPtr fd, int cmd, int flags = 0);

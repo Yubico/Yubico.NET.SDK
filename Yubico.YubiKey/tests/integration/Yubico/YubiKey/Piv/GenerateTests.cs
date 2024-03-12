@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Xunit;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -133,7 +133,7 @@ namespace Yubico.YubiKey.Piv
 
                 bool returnValue = signature1[10] == signature2[10];
 
-                if ((algorithm == PivAlgorithm.EccP256) || (algorithm == PivAlgorithm.EccP384))
+                if (algorithm == PivAlgorithm.EccP256 || algorithm == PivAlgorithm.EccP384)
                 {
                     returnValue = signature1[11] != signature2[11];
                 }

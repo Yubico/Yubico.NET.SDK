@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
+using Xunit;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             (int credCount, CredentialUserInfo userInfo) = credRsp.GetData();
             Assert.True(credCount != 0);
 
-            string origDisplayName = userInfo.User.DisplayName??"";
+            string origDisplayName = userInfo.User.DisplayName ?? "";
 
             var newInfo = new UserEntity(userInfo.User.Id)
             {
@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             (int credCount, CredentialUserInfo userInfo) = credRsp.GetData();
             Assert.True(credCount != 0);
 
-            string origDisplayName = userInfo.User.DisplayName??"";
+            string origDisplayName = userInfo.User.DisplayName ?? "";
 
             var newInfo = new UserEntity(userInfo.User.Id)
             {

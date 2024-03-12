@@ -223,7 +223,7 @@ namespace Yubico.YubiKey.Oath
                 throw new InvalidOperationException(ExceptionMessages.TouchNotSupported);
             }
 
-            if (credential.Algorithm == HashAlgorithm.Sha512 && 
+            if (credential.Algorithm == HashAlgorithm.Sha512 &&
                 !_yubiKeyDevice.HasFeature(YubiKeyFeature.OathSha512))
             {
                 throw new InvalidOperationException(ExceptionMessages.SHA512NotSupported);

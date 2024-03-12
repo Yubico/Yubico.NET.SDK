@@ -35,7 +35,7 @@ namespace Yubico.YubiKey
         {
             IYubiKeyDevice yubiKeyDevice = TestUtilities.IntegrationTestDeviceEnumeration.GetTestDevices().First();
             bool expectedResult = true;
-            if (!yubiKeyDevice.IsSkySeries && (yubiKeyDevice.FirmwareVersion.Major < 3))
+            if (!yubiKeyDevice.IsSkySeries && yubiKeyDevice.FirmwareVersion.Major < 3)
             {
                 expectedResult = false;
             }
@@ -50,7 +50,7 @@ namespace Yubico.YubiKey
         {
             IYubiKeyDevice yubiKeyDevice = TestUtilities.IntegrationTestDeviceEnumeration.GetTestDevices().First();
             bool expectedResult = true;
-            if (!yubiKeyDevice.IsSkySeries && (yubiKeyDevice.FirmwareVersion.Major < 5))
+            if (!yubiKeyDevice.IsSkySeries && yubiKeyDevice.FirmwareVersion.Major < 5)
             {
                 expectedResult = false;
             }

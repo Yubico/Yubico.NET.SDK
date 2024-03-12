@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using Xunit;
 using System.Linq;
+using Xunit;
 
 namespace Yubico.YubiKey.Cryptography
 {
@@ -128,7 +128,7 @@ namespace Yubico.YubiKey.Cryptography
                 RetriesRemaining = 5
             };
 
-            Assert.NotNull(entryData.RetriesRemaining);
+            _ = Assert.NotNull(entryData.RetriesRemaining);
         }
     }
 }

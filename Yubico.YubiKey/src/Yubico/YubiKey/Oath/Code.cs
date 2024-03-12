@@ -75,7 +75,8 @@ namespace Yubico.YubiKey.Oath
                 throw new ArgumentException(ExceptionMessages.InvalidCredentialPeriod);
             }
 
-            if (!string.IsNullOrWhiteSpace(value)) {
+            if (!string.IsNullOrWhiteSpace(value))
+            {
                 Value = value;
 
                 DateTimeOffset timestamp = DateTimeOffset.UtcNow;

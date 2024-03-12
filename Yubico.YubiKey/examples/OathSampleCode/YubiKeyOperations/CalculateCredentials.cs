@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             return true;
         }
 
-        private static void ReportAllResults(IDictionary<Credential,Code> credentials)
+        private static void ReportAllResults(IDictionary<Credential, Code> credentials)
         {
             // Are there any?
             var outputList = new StringBuilder("");

@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
 using System.Linq;
+using System.Security.Cryptography;
 using Xunit;
 
 namespace Yubico.YubiKey.Piv
@@ -375,7 +375,7 @@ namespace Yubico.YubiKey.Piv
         private static int ReadTagLen(byte[] buffer, int offset, bool readValue)
         {
             // Make sure there are enough bytes to read.
-            if ((offset < 0) || (buffer.Length < offset + 2))
+            if (offset < 0 || buffer.Length < offset + 2)
             {
                 return -1;
             }
@@ -388,7 +388,7 @@ namespace Yubico.YubiKey.Piv
             // beyond 83). This says the length is the next 1, 2, or 3 octets.
             int length = buffer[offset + 1];
             int increment = 2;
-            if ((length == 0x80) || (length > 0x83))
+            if (length == 0x80 || length > 0x83)
             {
                 return -1;
             }
@@ -449,7 +449,7 @@ namespace Yubico.YubiKey.Piv
                 count = 128;
             }
 
-            if ((tag <= 0) || (tag > 5))
+            if (tag <= 0 || tag > 5)
             {
                 return Memory<byte>.Empty;
             }

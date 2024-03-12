@@ -16,8 +16,8 @@ using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Tlv;
-using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Fido2.Cose;
+using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.Cryptography
 {
@@ -184,7 +184,7 @@ namespace Yubico.YubiKey.Cryptography
                 throw new ArgumentNullException(nameof(pivPublicKey));
             }
 
-            ReadOnlySpan<byte> pubPoint = (pivPublicKey is PivEccPublicKey eccKey)
+            ReadOnlySpan<byte> pubPoint = pivPublicKey is PivEccPublicKey eccKey
                 ? eccKey.PublicPoint : ReadOnlySpan<byte>.Empty;
 
             ECDsa = ConvertPublicKey(pubPoint.ToArray());
@@ -289,7 +289,7 @@ namespace Yubico.YubiKey.Cryptography
         /// for <c>isStandardSignature</c>. That argument defaults to <c>true</c>
         /// so if the signature is formatted in the standard way, you can call
         /// this method with that argument missing. If the signature is the
-        /// concatentation of <c>r</c> and <c>s</c>, pass <c>false</c> for
+        /// concatenation of <c>r</c> and <c>s</c>, pass <c>false</c> for
         /// <c>isStandardSignature</c>.
         /// </remarks>
         /// <param name="dataToVerify">
@@ -303,7 +303,7 @@ namespace Yubico.YubiKey.Cryptography
         /// <param name="isStandardSignature">
         /// <c>true</c> if the signature is formatted as the BER encoding
         /// specified by most standards, or <c>false</c> if the signature is
-        /// formatted as the concatentation of <c>r</c> and <c>s</c>.
+        /// formatted as the concatenation of <c>r</c> and <c>s</c>.
         /// </param>
         /// <returns>
         /// A boolean, <c>true</c> if the signature verifies, <c>false</c> if it
@@ -332,7 +332,7 @@ namespace Yubico.YubiKey.Cryptography
         /// for <c>isStandardSignature</c>. That argument defaults to <c>true</c>
         /// so if the signature is formatted in the standard way, you can call
         /// this method with that argument missing. If the signature is the
-        /// concatentation of <c>r</c> and <c>s</c>, pass <c>false</c> for
+        /// concatenation of <c>r</c> and <c>s</c>, pass <c>false</c> for
         /// <c>isStandardSignature</c>.
         /// </remarks>
         /// <param name="digestToVerify">
@@ -344,7 +344,7 @@ namespace Yubico.YubiKey.Cryptography
         /// <param name="isStandardSignature">
         /// <c>true</c> if the signature is formatted as the BER encoding
         /// specified by most standards, or <c>false</c> if the signature is
-        /// formatted as the concatentation of <c>r</c> and <c>s</c>.
+        /// formatted as the concatenation of <c>r</c> and <c>s</c>.
         /// </param>
         /// <returns>
         /// A boolean, <c>true</c> if the signature verifies, <c>false</c> if it
@@ -365,7 +365,7 @@ namespace Yubico.YubiKey.Cryptography
             byte[] xCoordinate = Array.Empty<byte>();
             byte[] yCoordinate = Array.Empty<byte>();
 
-            if ((encodedEccPoint.Length >= MinEncodedPointLength) && (encodedEccPoint.Span[0] == EncodedPointTag))
+            if (encodedEccPoint.Length >= MinEncodedPointLength && encodedEccPoint.Span[0] == EncodedPointTag)
             {
                 int coordLength = (encodedEccPoint.Length - 1) / 2;
                 xCoordinate = encodedEccPoint.Slice(1, coordLength).ToArray();
@@ -412,9 +412,9 @@ namespace Yubico.YubiKey.Cryptography
                 _ => -1,
             };
 
-            if ((eccParams.Q.X.Length > 0) && (eccParams.Q.X.Length <= coordinateLength))
+            if (eccParams.Q.X.Length > 0 && eccParams.Q.X.Length <= coordinateLength)
             {
-                if ((eccParams.Q.Y.Length > 0) && (eccParams.Q.Y.Length <= coordinateLength))
+                if (eccParams.Q.Y.Length > 0 && eccParams.Q.Y.Length <= coordinateLength)
                 {
                     return toCheck;
                 }
@@ -474,7 +474,7 @@ namespace Yubico.YubiKey.Cryptography
                 }
 
                 // If we still have data and it is not too long, copy
-                if ((length > 0) && (length <= coordinateLength))
+                if (length > 0 && length <= coordinateLength)
                 {
                     rsValue[index..].CopyTo(signatureValue[(coordinateLength - length)..]);
                     return true;

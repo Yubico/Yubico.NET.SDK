@@ -97,12 +97,12 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
-            if ((offset + count) > data.Length)
+            if (offset + count > data.Length)
             {
                 throw new ArgumentException(ExceptionMessages.IncorrectDerivationLength);
             }
 
-            if (count > (_theBytes.Length - _offset))
+            if (count > _theBytes.Length - _offset)
             {
                 throw new ArgumentException(ExceptionMessages.IncorrectDerivationLength);
             }
@@ -111,9 +111,9 @@ namespace Yubico.YubiKey.TestUtilities
             _offset += count;
         }
 
-        // Build an object that is an implementaion of RandomNumberGenerator.
+        // Build an object that is an implementation of RandomNumberGenerator.
         // See the documentation for
-        // System.Security.Cryptogrpahy.RandomNumberGenerator.
+        // System.Security.Cryptography.RandomNumberGenerator.
         // This will build one of two objects. First, if you pass null for the
         // fixedBytes arg, it will build the default RandomNumberGenerator. This
         // will be an object that is created with a new seed every time. It will,

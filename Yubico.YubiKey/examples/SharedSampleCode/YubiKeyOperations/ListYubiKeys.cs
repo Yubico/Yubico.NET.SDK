@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System.Collections.Generic;
-using System.Linq;
 using System.Globalization;
+using System.Linq;
 using Yubico.YubiKey;
 
 namespace Yubico.YubiKey.Sample.SharedCode

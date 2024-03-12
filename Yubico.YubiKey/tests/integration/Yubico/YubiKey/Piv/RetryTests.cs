@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ChangePinAndPukRetryCounts(7, 8);
 
-                if (isOld == true)
+                if (isOld)
                 {
                     return;
                 }
@@ -73,7 +73,7 @@ namespace Yubico.YubiKey.Piv
                     collectorObj.KeyFlag = 0;
                     pivSession.VerifyPin();
 
-                    if (isOld == true)
+                    if (isOld)
                     {
                         return;
                     }

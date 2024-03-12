@@ -16,11 +16,11 @@ using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
+using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
-using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv;
-using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.Fido2
 {

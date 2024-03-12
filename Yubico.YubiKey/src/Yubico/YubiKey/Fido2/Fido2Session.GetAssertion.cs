@@ -15,8 +15,8 @@
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -64,7 +64,7 @@ namespace Yubico.YubiKey.Fido2
         /// <xref href="SdkAuthTokenLogic">the SDK AuthToken logic</xref> for
         /// more information on when to verify. If you do not provide a
         /// KeyCollector that can collect the PIN, and the method is not able to
-        /// perform because of an autentication failure, it will throw an
+        /// perform because of an authentication failure, it will throw an
         /// exception.
         /// </para>
         /// <para>

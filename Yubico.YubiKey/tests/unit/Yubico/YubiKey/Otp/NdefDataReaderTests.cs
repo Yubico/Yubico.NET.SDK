@@ -268,7 +268,7 @@ namespace Yubico.YubiKey.Otp
         [InlineData(18, "rtsp://", "/")]
         [InlineData(19, "urn:", "")]
         [InlineData(20, "pop:", "")]
-        [InlineData(21, "sip:" ,"")]
+        [InlineData(21, "sip:", "")]
         [InlineData(22, "sips:", "")]
         [InlineData(23, "tftp:", "")]
         [InlineData(24, "btspp://", "/")]

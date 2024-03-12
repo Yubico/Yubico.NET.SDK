@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Scp03.Commands
     /// See the <xref href="UsersManualScp03">User's Manual entry</xref> on SCP03.
     /// <para>
     /// This will execute the Delete Command. That is, there is a general purpose
-    /// command that can delete verious elements, including keys. However, this
+    /// command that can delete various elements, including keys. However, this
     /// class can build the general purpose delete command in a way that it will
     /// only be able to delete keys.
     /// </para>

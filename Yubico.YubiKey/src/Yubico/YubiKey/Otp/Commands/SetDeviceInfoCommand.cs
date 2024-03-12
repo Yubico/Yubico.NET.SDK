@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKey.Management.Commands;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Management.Commands;
 
 namespace Yubico.YubiKey.Otp.Commands
 {
@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Otp.Commands
         /// Initializes a new instance of the <see cref="SetDeviceInfoCommand"/> class.
         /// </summary>
         /// <param name="baseCommand">
-        /// An instance of the base class to use for intialization.
+        /// An instance of the base class to use for initialization.
         /// </param>
         public SetDeviceInfoCommand(SetDeviceInfoBaseCommand baseCommand) : base(baseCommand)
         {

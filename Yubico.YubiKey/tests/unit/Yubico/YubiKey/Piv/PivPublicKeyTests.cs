@@ -475,7 +475,7 @@ namespace Yubico.YubiKey.Piv
                         0x01, 0x00, 0x01
                 }),
 
-                PivAlgorithm.EccP256 => new Memory<byte>(new byte[] {
+            PivAlgorithm.EccP256 => new Memory<byte>(new byte[] {
                     0x7f, 0x49, 0x44,
                         0x86, 0x42,
                             0x04, 0x99,
@@ -485,7 +485,7 @@ namespace Yubico.YubiKey.Piv
                             0xD1, 0x59, 0xDE, 0x66, 0x01, 0x0E, 0x3F, 0x21, 0x13, 0x29, 0xC5, 0x98, 0x56, 0x07, 0xB5, 0x26
                     }),
 
-                _ => new Memory<byte>(new byte[] {
+            _ => new Memory<byte>(new byte[] {
                     0x7f, 0x49, 0x64,
                         0x86, 0x62,
                             0x04, 0x99,

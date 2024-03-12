@@ -180,7 +180,7 @@ namespace Yubico.YubiKey.Fido2
         /// </param>
         /// <param name="salt2">
         /// An optional second salt the YubiKey can use in combination with the
-        /// stored secret to build a secont value. If no arg is given, the
+        /// stored secret to build a second value. If no arg is given, the
         /// default of null will be used (the YubiKey will not build a second
         /// result).
         /// </param>
@@ -208,7 +208,7 @@ namespace Yubico.YubiKey.Fido2
 
             if (salt1.Length == HmacSecretSaltLength)
             {
-                int s2Len = (salt2 is null) ? HmacSecretSaltLength : salt2.Value.Length;
+                int s2Len = salt2 is null ? HmacSecretSaltLength : salt2.Value.Length;
                 _salt1 = salt1;
                 if (s2Len == HmacSecretSaltLength)
                 {
@@ -286,7 +286,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(authProtocol));
             }
-            if ((authProtocol.EncryptionKey is null) || (authProtocol.PlatformPublicKey is null))
+            if (authProtocol.EncryptionKey is null || authProtocol.PlatformPublicKey is null)
             {
                 throw new InvalidOperationException(ExceptionMessages.Fido2NotEncapsulated);
             }
@@ -319,5 +319,5 @@ namespace Yubico.YubiKey.Fido2
                 .Entry(TagPinProtocol, (int)authProtocol.Protocol)
                 .Encode();
         }
-   }
+    }
 }

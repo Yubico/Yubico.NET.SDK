@@ -24,15 +24,15 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
     // This sample key collector is specifically built for FIDO2 only.
     public class Fido2SampleKeyCollector
     {
-        // This allows the caller to specify what the operation is.
-        // Some messages (such as Touch) can contain more information if this is
-        // known.
-        public Fido2KeyCollectorOperation Operation { get; set; }
-
         public Fido2SampleKeyCollector()
         {
             Operation = Fido2KeyCollectorOperation.None;
         }
+
+        // This allows the caller to specify what the operation is.
+        // Some messages (such as Touch) can contain more information if this is
+        // known.
+        public Fido2KeyCollectorOperation Operation { get; set; }
 
         public virtual bool Fido2SampleKeyCollectorDelegate(KeyEntryData keyEntryData)
         {
@@ -41,17 +41,20 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 return false;
             }
 
-            if (keyEntryData.IsRetry == true)
+            if (keyEntryData.IsRetry)
             {
                 SampleMenu.WriteMessage(MessageType.Title, 0, "A previous entry was incorrect, do you want to retry?");
                 if (!(keyEntryData.RetriesRemaining is null))
                 {
-                    string retryString = ((int)keyEntryData.RetriesRemaining).ToString("D", CultureInfo.InvariantCulture);
-                    SampleMenu.WriteMessage(MessageType.Title, 0, "(retries remainin until blocked: " + retryString + ")");
+                    string retryString =
+                        ((int)keyEntryData.RetriesRemaining).ToString("D", CultureInfo.InvariantCulture);
+                    SampleMenu.WriteMessage(MessageType.Title, 0,
+                        "(retries remainin until blocked: " + retryString + ")");
                 }
+
                 SampleMenu.WriteMessage(MessageType.Title, 0, "y/n");
                 char[] answer = SampleMenu.ReadResponse(out int _);
-                if ((answer.Length == 0) || ((answer[0] != 'y') && (answer[0] != 'Y')))
+                if (answer.Length == 0 || (answer[0] != 'y' && answer[0] != 'Y'))
                 {
                     return false;
                 }
@@ -70,18 +73,22 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
                 case KeyEntryRequest.TouchRequest:
                     ReportOperation();
-                    SampleMenu.WriteMessage(MessageType.Title, 0, "touch the YubiKey's contact to complete the operation.\n");
+                    SampleMenu.WriteMessage(MessageType.Title, 0,
+                        "touch the YubiKey's contact to complete the operation.\n");
                     return true;
 
                 case KeyEntryRequest.EnrollFingerprint:
                     if (!(keyEntryData.LastBioEnrollSampleResult is null))
                     {
                         string lastResult = keyEntryData.LastBioEnrollSampleResult.LastEnrollSampleStatus.ToString();
-                        SampleMenu.WriteMessage(MessageType.Title, 0, "                      Sample result: " + lastResult);
+                        SampleMenu.WriteMessage(MessageType.Title, 0,
+                            "                      Sample result: " + lastResult);
                         SampleMenu.WriteMessage(
                             MessageType.Title, 0,
-                            "Number of good samples still needed: " + keyEntryData.LastBioEnrollSampleResult.RemainingSampleCount);
+                            "Number of good samples still needed: " +
+                            keyEntryData.LastBioEnrollSampleResult.RemainingSampleCount);
                     }
+
                     SampleMenu.WriteMessage(MessageType.Title, 0, "\nPlease provide a fingerprint sample.\n");
                     return true;
 
@@ -91,7 +98,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                     return true;
 
                 case KeyEntryRequest.SetFido2Pin:
-                    SampleMenu.WriteMessage(MessageType.Title, 0, "Setting the FIDO2 application's PIN, enter the PIN.");
+                    SampleMenu.WriteMessage(MessageType.Title, 0,
+                        "Setting the FIDO2 application's PIN, enter the PIN.");
                     collectedValue = SampleMenu.ReadResponse(out int _);
                     pinValue = ConvertCharArrayToByteArray(collectedValue);
                     keyEntryData.SubmitValue(pinValue);
@@ -142,7 +150,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                     break;
 
                 case Fido2KeyCollectorOperation.Reset:
-                    SampleMenu.WriteMessage(MessageType.Title, 0, "\nThe YubiKey is trying to reset the FIDO2 application,");
+                    SampleMenu.WriteMessage(MessageType.Title, 0,
+                        "\nThe YubiKey is trying to reset the FIDO2 application,");
                     break;
             }
         }

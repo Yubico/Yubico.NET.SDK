@@ -14,11 +14,11 @@
 
 using System;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -99,7 +99,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
             Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
 
-            int expectedLength = (protocol.Protocol == PinUvAuthProtocol.ProtocolOne) ? 32 : 48;
+            int expectedLength = protocol.Protocol == PinUvAuthProtocol.ProtocolOne ? 32 : 48;
             ReadOnlyMemory<byte> encryptedToken = getTokenRsp.GetData();
             Assert.Equal(expectedLength, encryptedToken.Length);
 
@@ -138,7 +138,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
 
-            int expectedLength = (protocol.Protocol == PinUvAuthProtocol.ProtocolOne) ? 32 : 48;
+            int expectedLength = protocol.Protocol == PinUvAuthProtocol.ProtocolOne ? 32 : 48;
             ReadOnlyMemory<byte> encryptedToken = getTokenRsp.GetData();
             Assert.Equal(expectedLength, encryptedToken.Length);
 
@@ -175,7 +175,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
 
-            int expectedLength = (protocol.Protocol == PinUvAuthProtocol.ProtocolOne) ? 32 : 48;
+            int expectedLength = protocol.Protocol == PinUvAuthProtocol.ProtocolOne ? 32 : 48;
             ReadOnlyMemory<byte> encryptedToken = getTokenRsp.GetData();
             Assert.Equal(expectedLength, encryptedToken.Length);
 
@@ -189,7 +189,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         private bool IsSupportedWithPermissions(int auth)
         {
             string keyToken = "pinUvAuthToken";
-            string keyAuth = (auth == Fido2AuthPin) ? "clientPin" : "uv";
+            string keyAuth = auth == Fido2AuthPin ? "clientPin" : "uv";
             var cmd = new GetInfoCommand();
             GetInfoResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);

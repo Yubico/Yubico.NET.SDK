@@ -18,6 +18,7 @@ using System.Globalization;
 namespace Yubico.YubiKey.Sample.SharedCode
 {
     public delegate void WriteToScreen(string? content);
+
     public delegate string? ReadFromScreen();
 
     public static class ReaderWriter
@@ -31,12 +32,12 @@ namespace Yubico.YubiKey.Sample.SharedCode
         private const int DefaultMaxInvalidCount = 3;
         private const int LowMaxInvalidCount = 1;
         private const int HighMaxInvalidCount = 5;
+        private readonly int _exitValue;
+        private readonly string[] _mainMenuStrings;
+        private readonly Array _mainMenuValues;
 
         private readonly int _maxInvalidCount;
         private int _invalidCount;
-        private readonly string[] _mainMenuStrings;
-        private readonly Array _mainMenuValues;
-        private readonly int _exitValue;
 
         // Create a new instance of the SampleMenu class.
         // Provide the max invalid count, this is the number of times in a row
@@ -54,7 +55,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
         public SampleMenu(int maxInvalidCount, Type mainMenuEnumType, int exitValue)
         {
             _maxInvalidCount = DefaultMaxInvalidCount;
-            if ((maxInvalidCount >= LowMaxInvalidCount) && (maxInvalidCount <= HighMaxInvalidCount))
+            if (maxInvalidCount >= LowMaxInvalidCount && maxInvalidCount <= HighMaxInvalidCount)
             {
                 _maxInvalidCount = maxInvalidCount;
             }
@@ -74,7 +75,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
         public int RunMainMenu(string title)
         {
             int indexChosen = RunMenu(title, _mainMenuStrings);
-            if ((indexChosen >= 0) && (indexChosen < _mainMenuStrings.Length))
+            if (indexChosen >= 0 && indexChosen < _mainMenuStrings.Length)
             {
                 object? returnValue = _mainMenuValues.GetValue(indexChosen);
                 if (!(returnValue is null))
@@ -117,7 +118,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
                 }
 
                 _ = ReadResponse(out int response);
-                if ((response > 0) && (response <= menuItems.Length))
+                if (response > 0 && response <= menuItems.Length)
                 {
                     // When writing the menu, counting begins at 1. So to get the
                     // index of the choice, subtract 1.
@@ -126,7 +127,6 @@ namespace Yubico.YubiKey.Sample.SharedCode
 
                 WriteMessage(MessageType.Special, 0, "Invalid response for this menu.");
                 _invalidCount++;
-
             } while (_invalidCount < _maxInvalidCount);
 
             WriteMessage(MessageType.Special, 0, "Too many invalid responses, exiting menu.");
@@ -136,7 +136,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
 
         // If the messageType is MessageType.Special, this is a special message.
         // Ignore the number and write out the message with a leading new line
-        // and three dashes, alonge with trailing three dashes and new line. For
+        // and three dashes, along with trailing three dashes and new line. For
         // example,
         //
         //   ---Message here---
@@ -162,7 +162,8 @@ namespace Yubico.YubiKey.Sample.SharedCode
                     break;
 
                 default:
-                    ReaderWriter.WriteLine("   " + numberToWrite.ToString("D1", CultureInfo.InvariantCulture) + " - " + message);
+                    ReaderWriter.WriteLine("   " + numberToWrite.ToString("D1", CultureInfo.InvariantCulture) + " - " +
+                                           message);
                     break;
             }
         }

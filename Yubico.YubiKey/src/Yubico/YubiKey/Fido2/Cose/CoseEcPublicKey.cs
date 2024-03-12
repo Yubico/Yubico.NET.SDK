@@ -34,7 +34,7 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// </para>
     /// <para>
     /// This class has multiple constructors. One constructs an empty object and allows the caller to set the key
-    /// parameters via the properties on this class. Another constructs a key based on the COSE form enocded in CBOR.
+    /// parameters via the properties on this class. Another constructs a key based on the COSE form encoded in CBOR.
     /// Lastly, there is a constructor that takes in a .NET representation of an EC public key used for interoperating
     /// with the .NET cryptographic library.
     /// </para>
@@ -157,8 +157,8 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// </exception>
         public CoseEcPublicKey(CoseEcCurve curve, ReadOnlyMemory<byte> xCoordinate, ReadOnlyMemory<byte> yCoordinate)
         {
-            if ((curve != CoseEcCurve.P256) || (xCoordinate.Length == 0) || (xCoordinate.Length > P256CoordinateLength)
-                || (yCoordinate.Length == 0) || (yCoordinate.Length > P256CoordinateLength))
+            if (curve != CoseEcCurve.P256 || xCoordinate.Length == 0 || xCoordinate.Length > P256CoordinateLength
+                || yCoordinate.Length == 0 || yCoordinate.Length > P256CoordinateLength)
             {
                 throw new ArgumentException(ExceptionMessages.InvalidPublicKeyData);
             }
@@ -248,7 +248,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <inheritdoc/>
         public override byte[] Encode()
         {
-            if ((_xCoordinate.Length != P256CoordinateLength) || (_yCoordinate.Length != P256CoordinateLength))
+            if (_xCoordinate.Length != P256CoordinateLength || _yCoordinate.Length != P256CoordinateLength)
             {
                 throw new InvalidOperationException(
                     string.Format(

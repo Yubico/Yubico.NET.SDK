@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             if (!(_slot == Slot.ShortPress ? otp.IsShortPressConfigured : otp.IsLongPressConfigured))
             {
                 Output.WriteLine(
-                    $"Slot[{ _slot }] is not programmed and can't be used for a challenge-response transaction.",
+                    $"Slot[{_slot}] is not programmed and can't be used for a challenge-response transaction.",
                     OutputLevel.Error);
                 Output.WriteLine("Aborted.", OutputLevel.Error);
                 return false;
@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             catch (Exception ex)
             {
                 Output.WriteLine(
-                    $"Error attempting to calculate challenge response: { ex.Message }.",
+                    $"Error attempting to calculate challenge response: {ex.Message}.",
                     OutputLevel.Error);
                 return false;
             }
@@ -80,8 +80,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 Output.WriteLine(
                     _digits.HasValue
-                    ? $"OTP Code is [{ result }]"
-                    : $"Response is [{ result }]");
+                    ? $"OTP Code is [{result}]"
+                    : $"Response is [{result}]");
             }
             else
             {
@@ -138,7 +138,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             if (exceptions.Count > 1)
             {
-                throw new AggregateException($"{ exceptions.Count } errors encountered.",
+                throw new AggregateException($"{exceptions.Count} errors encountered.",
                     exceptions);
             }
             else if (exceptions.Count == 1)

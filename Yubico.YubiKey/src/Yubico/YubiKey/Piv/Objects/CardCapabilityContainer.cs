@@ -13,11 +13,11 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
 using System.Globalization;
-using Yubico.YubiKey.Cryptography;
-using Yubico.Core.Tlv;
+using System.Security.Cryptography;
 using Yubico.Core.Logging;
+using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Objects
 {
@@ -352,7 +352,7 @@ namespace Yubico.YubiKey.Piv.Objects
                 _log.LogInformation("Decode data into CardCapabilityContainer: UniqueId.");
                 if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> encodedUniqueId, UniqueCardIdTag))
                 {
-                    if ((encodedUniqueId.Length == UniqueCardIdLength) &&
+                    if (encodedUniqueId.Length == UniqueCardIdLength &&
                         MemoryExtensions.SequenceEqual<byte>(encodedUniqueId.Slice(AidOffset, AidLength).Span, ApplicationIdentifier.Span))
                     {
                         var dest = new Memory<byte>(_uniqueCardIdentifier);
@@ -384,17 +384,17 @@ namespace Yubico.YubiKey.Piv.Objects
             Tuple<int, int, byte>[] elementList = GetFixedTupleArray();
 
             int index = 0;
-            while (returnValue && (index < elementList.Length))
+            while (returnValue && index < elementList.Length)
             {
                 if (elementList[index].Item2 == 0)
                 {
                     returnValue = tlvReader.TryReadValue(out ReadOnlyMemory<byte> currentValue, elementList[index].Item1) &&
-                              (currentValue.Length == elementList[index].Item2);
+                              currentValue.Length == elementList[index].Item2;
                 }
                 else
                 {
                     returnValue = tlvReader.TryReadByte(out byte currentValue, elementList[index].Item1) &&
-                        (currentValue == elementList[index].Item3);
+                        currentValue == elementList[index].Item3;
                 }
 
                 index++;

@@ -16,10 +16,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
+using Yubico.Core.Devices.Hid;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Otp.Commands;
-using Yubico.Core.Devices.Hid;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 "setstaticpassword" => SetStaticPassword(),
                 "swapslots" => SwapSlots(),
                 "printrandomstring" => PrintRandomBytes(),
-                _ => throw new ArgumentException($"Invalid command [{ Command }] specified")
+                _ => throw new ArgumentException($"Invalid command [{Command}] specified")
             };
         }
 
@@ -70,13 +70,13 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 var statusCmd = new ReadStatusCommand();
                 ReadStatusResponse? statusx = connection.SendCommand(statusCmd);
                 OtpStatus? data = statusx.GetData();
-                Output.WriteLine($"Data is { data }");
+                Output.WriteLine($"Data is {data}");
 
                 var cmd = new SwapSlotsCommand();
-                ReadStatusResponse reponse = connection.SendCommand(cmd);
-                OtpStatus status = reponse.GetData();
+                ReadStatusResponse response = connection.SendCommand(cmd);
+                OtpStatus status = response.GetData();
                 Output.WriteLine(status.ToString()!);
-                result = reponse.Status == ResponseStatus.Success;
+                result = response.Status == ResponseStatus.Success;
             }
             return result;
         }
@@ -103,7 +103,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 catch (Exception ex)
                 {
                     throw new PluginFailureException(
-                        $"Error [{ ex.Message }] executing command [{ Command }]",
+                        $"Error [{ex.Message}] executing command [{Command}]",
                         ex);
                 }
             }

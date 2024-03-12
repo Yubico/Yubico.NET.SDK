@@ -434,7 +434,7 @@ namespace Yubico.YubiKey.Cryptography
         /// For example,
         /// <code language="csharp">
         ///    using ICmacPrimitives cmacObj =
-        ///        CryptographyProviders.CmacPrimitivesCreater(CmacBlockCipherAlgorithm.Aes128);
+        ///        CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
         /// </code>
         /// </para>
         /// </remarks>

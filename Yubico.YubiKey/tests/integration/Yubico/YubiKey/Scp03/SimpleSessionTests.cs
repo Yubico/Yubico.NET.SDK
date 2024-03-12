@@ -13,11 +13,11 @@
 // limitations under the License.
 
 using System;
+using System.Net.NetworkInformation;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Piv.Commands;
-using System.Net.NetworkInformation;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Scp03
 {

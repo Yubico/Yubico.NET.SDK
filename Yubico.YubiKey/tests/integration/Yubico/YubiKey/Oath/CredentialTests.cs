@@ -14,8 +14,8 @@
 
 using System.Collections.Generic;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
 using Yubico.YubiKey.Oath.Commands;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath
 {
@@ -104,10 +104,10 @@ namespace Yubico.YubiKey.Oath
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Oath);
-            
-            var renameCommand = new RenameCommand(_fixture.TotpCredential, "Test", "test@example.com"); 
+
+            var renameCommand = new RenameCommand(_fixture.TotpCredential, "Test", "test@example.com");
             OathResponse response = connection.SendCommand(renameCommand);
-            
+
             Assert.Equal(ResponseStatus.Success, response.Status);
         }
 
@@ -138,7 +138,7 @@ namespace Yubico.YubiKey.Oath
 
             _fixture.TotpCredential.Issuer = "";
             _fixture.TotpCredential.AccountName = "test@example.com";
-            
+
             DeleteResponse response = connection.SendCommand(new DeleteCommand(_fixture.TotpCredential));
             Assert.Equal(ResponseStatus.Success, response.Status);
         }

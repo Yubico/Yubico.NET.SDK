@@ -330,11 +330,11 @@ namespace Yubico.YubiKey.Piv.Commands
         // If nextIndex is <= max, get 24 bytes. Return the new nextIndex, which
         // will be the incoming nextIndex + 24. The new nextIndex can be > max.
         // If the incoming nextIndex is good, we want to return bytes in the
-        // keyData buffer, so don't return -1. Only return -1 whant there will be
+        // keyData buffer, so don't return -1. Only return -1 when there will be
         // no bytes placed into the buffer.
         private static int GetNextKeyData(byte[] keyData, int nextIndex)
         {
-            if ((nextIndex < 0) || (nextIndex > 255))
+            if (nextIndex < 0 || nextIndex > 255)
             {
                 return -1;
             }

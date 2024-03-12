@@ -12,10 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Microsoft.Win32.SafeHandles;
 using System;
 using System.Runtime.ConstrainedExecution;
-
+using Microsoft.Win32.SafeHandles;
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.PlatformInterop

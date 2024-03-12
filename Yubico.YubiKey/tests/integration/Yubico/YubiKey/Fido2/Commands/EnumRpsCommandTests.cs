@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
+using Xunit;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.PinProtocols;
-using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {

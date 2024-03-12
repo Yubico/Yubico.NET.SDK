@@ -248,7 +248,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 return;
             }
 
-            bool compareResult = (data.Span[0] == 0xAC) && (data.Span[1] == 0x03) && (data.Span[2] == 0x80) && (data.Span[3] == 0x01);
+            bool compareResult = data.Span[0] == 0xAC && data.Span[1] == 0x03 && data.Span[2] == 0x80 && data.Span[3] == 0x01;
 
             Assert.True(compareResult);
         }
@@ -291,7 +291,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 return;
             }
 
-            bool compareResult = (data.Span[5] == 0xAA) && (data.Span[6] == 0x01) && (data.Span[7] == (byte)pinPolicy);
+            bool compareResult = data.Span[5] == 0xAA && data.Span[6] == 0x01 && data.Span[7] == (byte)pinPolicy;
 
             Assert.True(compareResult);
         }
@@ -334,7 +334,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 return;
             }
 
-            bool compareResult = (data.Span[8] == 0xAB) && (data.Span[9] == 0x01) && (data.Span[10] == (byte)touchPolicy);
+            bool compareResult = data.Span[8] == 0xAB && data.Span[9] == 0x01 && data.Span[10] == (byte)touchPolicy;
 
             Assert.True(compareResult);
         }

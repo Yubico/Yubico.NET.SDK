@@ -69,11 +69,11 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 Type = typeof(IEnumerable<string>),
                 Description =
                         "A list (or single one of) keyboard IDs to print lookup tables for. " +
-                        $"If you're adding a new layout, you'll need to edit { Path.GetFileName(GetSourceFile()) }. " +
+                        $"If you're adding a new layout, you'll need to edit {Path.GetFileName(GetSourceFile())}. " +
                         "If nothing is specified, all current supported layouts are printed."
             };
             Parameters["command"].Description =
-                "Possible values are 'info' and 'print'. The 'info' command prints a list of LCID IDs and bit values. "+
+                "Possible values are 'info' and 'print'. The 'info' command prints a list of LCID IDs and bit values. " +
                 "The 'print' command prints the lookup tables (generated C# code).";
 
             Converters[typeof(IEnumerable<string>)] = (s) => ParseStringCollection(s);
@@ -113,9 +113,9 @@ namespace Yubico.YubiKey.TestApp.Plugins
             }
 
             Output.WriteLine("LCID IDs and Bit Values:");
-            foreach((string ID, string LCID) in _keyboardLayouts.Select(kvp => (kvp.Key, kvp.Value.LCID)))
+            foreach ((string ID, string LCID) in _keyboardLayouts.Select(kvp => (kvp.Key, kvp.Value.LCID)))
             {
-                Output.WriteLine($"[{ ID }] => [{ LCID }]");
+                Output.WriteLine($"[{ID}] => [{LCID}]");
             }
 
             return true;
@@ -134,10 +134,10 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     "using System.Collections.Generic;" + Eol +
                     "using Yubico.Core.Devices.Hid;" + Eol + Eol +
                     "namespace Yubico.YubiKey.Otp" + Eol + "{" + Eol +
-                    $"    // Keyboard Mapping for { name }." + Eol +
+                    $"    // Keyboard Mapping for {name}." + Eol +
                     "    public sealed partial class HidCodeTranslator" + Eol +
                     "    {" + Eol +
-                    $"        private static HidCodeTranslator Get{ (name == "ModHex" ? name : name.ToUpper()) }()" + Eol +
+                    $"        private static HidCodeTranslator Get{(name == "ModHex" ? name : name.ToUpper())}()" + Eol +
                     "        {" + Eol +
                     "        var byChar = new Dictionary<char, byte>");
                 PrintItems("['{0}'] = 0x{1},");
@@ -147,7 +147,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 PrintItems("[0x{1}] = '{0}',");
 
                 Output.WriteLine(Eol + lineStart +
-                    $"return new HidCodeTranslator(byChar, byCode, KeyboardLayout.{ name });" + Eol +
+                    $"return new HidCodeTranslator(byChar, byCode, KeyboardLayout.{name});" + Eol +
                     "        }" + Eol +
                     "    }" + Eol + "}" + Eol);
 
@@ -172,7 +172,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                                 prefix = itemLineStart;
                                 linePosition = item.Length + prefix.Length;
                             }
-                            Output.Write($"{ prefix }{ item }");
+                            Output.Write($"{prefix}{item}");
                         }
                     }
                     Output.WriteLine(Eol + lineStart + "};");
@@ -240,7 +240,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 }
                 if (result != 1)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Got [{ result }] from [0x{ scanCode.ToString("x2") }] Shift [{ shifted }]");
+                    System.Diagnostics.Debug.WriteLine($"Got [{result}] from [0x{scanCode.ToString("x2")}] Shift [{shifted}]");
                 }
             }
             return results.ToArray();

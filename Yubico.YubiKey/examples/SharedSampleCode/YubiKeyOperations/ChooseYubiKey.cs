@@ -14,8 +14,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Globalization;
+using System.Linq;
 
 namespace Yubico.YubiKey.Sample.SharedCode
 {
@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
         // to select, even if yubiKeyChosen is not null (one has been previously
         // chosen), or there is only one YubiKey connected.
         // If alwaysAsk is false and yubiKeyChosen is null, choose.
-        // If alwaysAsk is false and yubuKeyChosen is not null, verify that the
+        // If alwaysAsk is false and yubiKeyChosen is not null, verify that the
         // YubiKey listed is still attached. If so, just return true. If not,
         // choose.
         // If alwaysAsk is false, to choose means don't ask the user to choose if
@@ -84,7 +84,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
                 for (int index = 0; index < yubiKeyArray.Length; index++)
                 {
                     if (!(yubiKeyArray[index].SerialNumber is null)
-                        && (yubiKeyChosen.SerialNumber == yubiKeyArray[index].SerialNumber))
+                        && yubiKeyChosen.SerialNumber == yubiKeyArray[index].SerialNumber)
                     {
                         return true;
                     }
@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
             // return value to null.
             yubiKeyChosen = null;
 
-            if ((yubiKeyArray.Length == 1) && (alwaysAsk == false))
+            if (yubiKeyArray.Length == 1 && alwaysAsk == false)
             {
                 yubiKeyChosen = yubiKeyArray[0];
                 return true;
@@ -112,7 +112,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
             }
 
             int indexChosen = menuObject.RunMenu("Which YubiKey do you want to use?", choices);
-            if ((indexChosen >= 0) && (indexChosen < yubiKeyArray.Length))
+            if (indexChosen >= 0 && indexChosen < yubiKeyArray.Length)
             {
                 yubiKeyChosen = yubiKeyArray[indexChosen];
                 return true;

@@ -104,7 +104,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 82, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -114,7 +114,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 83, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -124,7 +124,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 84, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -134,7 +134,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 85, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -144,7 +144,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 86, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -154,7 +154,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 87, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -164,7 +164,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 88, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -174,7 +174,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 89, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -184,7 +184,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 8A, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -194,7 +194,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 8B, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -204,7 +204,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 8C, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -214,7 +214,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 8D, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -224,7 +224,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 8E, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -234,7 +234,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 8F, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -244,7 +244,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 90, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -254,7 +254,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 91, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -264,7 +264,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 92, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -274,7 +274,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 93, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -284,7 +284,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 94, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -294,7 +294,7 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Slot 95, the retired key slots are meant for previously used Key
         /// Management keys to be
-        /// <br/>able to decrypt earlierencrypted documents or emails.
+        /// <br/>able to decrypt earlier encrypted documents or emails.
         /// <br/>In the YubiKey all 20 of the retired slots are fully available
         /// for use.
         /// <br/>This is only available on YubiKey version 4 and later.
@@ -329,9 +329,9 @@ namespace Yubico.YubiKey.Piv
             // something that is only dependent on some private const values, but
             // the slots are almost certainly never going to change. If they do
             // change, this code will need to be revisited.
-            return (((slotNumber >= Pin) && (slotNumber <= Retired20))
-                || ((slotNumber >= Authentication) && (slotNumber <= CardAuthentication))
-                || (slotNumber == Attestation));
+            return (slotNumber >= Pin && slotNumber <= Retired20)
+                || (slotNumber >= Authentication && slotNumber <= CardAuthentication)
+                || slotNumber == Attestation;
         }
 
         /// <summary>
@@ -370,10 +370,10 @@ namespace Yubico.YubiKey.Piv
         /// </returns>
         public static bool IsValidSlotNumberForGenerate(byte slotNumber)
         {
-            return ((slotNumber != Management)
-                && (((slotNumber >= Retired1) && (slotNumber <= Retired20))
-                || ((slotNumber >= Authentication) && (slotNumber <= CardAuthentication))
-                || (slotNumber == Attestation)));
+            return slotNumber != Management
+                && ((slotNumber >= Retired1 && slotNumber <= Retired20)
+                || (slotNumber >= Authentication && slotNumber <= CardAuthentication)
+                || slotNumber == Attestation);
         }
 
         /// <summary>
@@ -415,9 +415,9 @@ namespace Yubico.YubiKey.Piv
             // something that is only dependent on some private const values, but
             // the slots are almost certainly never going to change. If they do
             // change, this code will need to be revisited.
-            return ((slotNumber != Management)
-                && (((slotNumber >= Retired1) && (slotNumber <= Retired20))
-                || ((slotNumber >= Authentication) && (slotNumber <= CardAuthentication))));
+            return slotNumber != Management
+                && ((slotNumber >= Retired1 && slotNumber <= Retired20)
+                || (slotNumber >= Authentication && slotNumber <= CardAuthentication));
         }
     }
 }

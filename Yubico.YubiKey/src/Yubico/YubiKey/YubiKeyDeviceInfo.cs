@@ -286,48 +286,48 @@ namespace Yubico.YubiKey
             second ??= new YubiKeyDeviceInfo();
 
             return new YubiKeyDeviceInfo
-                {
-                    AvailableUsbCapabilities = AvailableUsbCapabilities | second.AvailableUsbCapabilities,
+            {
+                AvailableUsbCapabilities = AvailableUsbCapabilities | second.AvailableUsbCapabilities,
 
-                    EnabledUsbCapabilities = EnabledUsbCapabilities | second.EnabledUsbCapabilities,
+                EnabledUsbCapabilities = EnabledUsbCapabilities | second.EnabledUsbCapabilities,
 
-                    AvailableNfcCapabilities = AvailableNfcCapabilities | second.AvailableNfcCapabilities,
+                AvailableNfcCapabilities = AvailableNfcCapabilities | second.AvailableNfcCapabilities,
 
-                    EnabledNfcCapabilities = EnabledNfcCapabilities | second.EnabledNfcCapabilities,
+                EnabledNfcCapabilities = EnabledNfcCapabilities | second.EnabledNfcCapabilities,
 
-                    SerialNumber = SerialNumber ?? second.SerialNumber,
+                SerialNumber = SerialNumber ?? second.SerialNumber,
 
-                    IsFipsSeries = IsFipsSeries || second.IsFipsSeries,
+                IsFipsSeries = IsFipsSeries || second.IsFipsSeries,
 
-                    FormFactor =
+                FormFactor =
                         FormFactor != FormFactor.Unknown
                         ? FormFactor
                         : second.FormFactor,
 
-                    FirmwareVersion =
+                FirmwareVersion =
                         FirmwareVersion != new FirmwareVersion()
                         ? FirmwareVersion
                         : second.FirmwareVersion,
 
-                    AutoEjectTimeout =
+                AutoEjectTimeout =
                         DeviceFlags.HasFlag(DeviceFlags.TouchEject)
                         ? AutoEjectTimeout
                         : second.DeviceFlags.HasFlag(DeviceFlags.TouchEject)
                             ? second.AutoEjectTimeout
                             : default,
 
-                    ChallengeResponseTimeout =
+                ChallengeResponseTimeout =
                         ChallengeResponseTimeout != default
                         ? ChallengeResponseTimeout
                         : second.ChallengeResponseTimeout,
 
-                    DeviceFlags = DeviceFlags | second.DeviceFlags,
+                DeviceFlags = DeviceFlags | second.DeviceFlags,
 
-                    ConfigurationLocked =
+                ConfigurationLocked =
                         ConfigurationLocked != default
                         ? ConfigurationLocked
                         : second.ConfigurationLocked,
-                };
+            };
         }
 
         /// <summary>

@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public CredentialRetryPair(Credential credential, int retries)
         {
             Credential = credential;
-            
+
             if (retries < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(retries), ExceptionMessages.RetryCountNegative);

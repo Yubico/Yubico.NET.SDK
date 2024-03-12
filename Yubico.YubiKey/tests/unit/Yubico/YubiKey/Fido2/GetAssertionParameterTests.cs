@@ -63,6 +63,6 @@ namespace Yubico.YubiKey.Fido2
 
             byte[] encodedParams = assertionParams.CborEncode();
             Assert.Equal(0xA7, encodedParams[0]);
-       }
+        }
     }
 }

@@ -19,7 +19,7 @@ namespace Yubico.YubiKey
     /// <summary>
     /// This delegate defines the signature of a method that can be called to
     /// determine if an operation should cancel. The caller supplies a
-    /// commandByte and the Query reponds with <c>true</c> (the command should be
+    /// commandByte and the Query responds with <c>true</c> (the command should be
     /// canceled), or <c>false</c> (there is no current request that the command
     /// be canceled).
     /// </summary>
@@ -110,7 +110,7 @@ namespace Yubico.YubiKey
     /// Note that it would be possible for the Connection to supply a delegate to
     /// the TouchFingerprint object. In that way, when the user cancels, the
     /// KeyCollector contacts the TouchFingerprintTask, which then calls the
-    /// Connection delegate (callback) to indicate cancel. However, that ststem
+    /// Connection delegate (callback) to indicate cancel. However, that system
     /// proved problematic. There were too many race conditions and too many
     /// cases where it was not possible to accurately manage the lifetime of the
     /// Cancel callback. The main problem was that the TouchFingerprintTask

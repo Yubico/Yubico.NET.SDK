@@ -117,7 +117,7 @@ namespace Yubico.YubiKey.Piv.Commands
             int authTag = authReader.PeekTag();
             ReadOnlyMemory<byte> value = authReader.ReadValue(authTag);
 
-            if ((nestedTag != NestedTag) || ((authTag != MutualAuthTag) && (authTag != SingleAuthTag)))
+            if (nestedTag != NestedTag || (authTag != MutualAuthTag && authTag != SingleAuthTag))
             {
                 throw new MalformedYubiKeyResponseException()
                 {

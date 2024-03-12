@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Xunit;
 using Yubico.YubiKey.Management.Commands;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Management
 {
@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.Management
                 Assert.Equal(ResponseStatus.Success, setDeviceInfoResponse.Status);
             }
 
-            IYubiKeyDevice endingTestDevice = 
+            IYubiKeyDevice endingTestDevice =
                 TestDeviceSelection.RenewDeviceEnumeration(testDeviceSerialNumber);
 
             AssertDeviceInfoValueEquals(beginningTestDevice, endingTestDevice);
@@ -102,7 +102,8 @@ namespace Yubico.YubiKey.Management
         }
 
         private static SetDeviceInfoCommand CreateSetDeviceInfoCommand(IYubiKeyDeviceInfo deviceInfo) =>
-            new SetDeviceInfoCommand {
+            new SetDeviceInfoCommand
+            {
                 EnabledUsbCapabilities = deviceInfo.EnabledUsbCapabilities,
                 EnabledNfcCapabilities = deviceInfo.EnabledNfcCapabilities,
                 ChallengeResponseTimeout = deviceInfo.ChallengeResponseTimeout,

@@ -131,11 +131,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
     // the extensions (OID, etc.).
     public enum X500NameElement
     {
-        Country       = 0,
-        State         = 1,
-        Locality      = 2,
-        Organization  = 3,
-        CommonName    = 4,
+        Country = 0,
+        State = 1,
+        Locality = 2,
+        Organization = 3,
+        CommonName = 4,
     }
 
     public static class X500NameElementExtensions
@@ -189,22 +189,22 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         public static byte[] GetOid(this X500NameElement nameElement) => nameElement switch
         {
-            X500NameElement.Country       => new byte[] { 0x55, 0x04, 0x06 },
-            X500NameElement.State         => new byte[] { 0x55, 0x04, 0x08 },
-            X500NameElement.Locality      => new byte[] { 0x55, 0x04, 0x07 },
-            X500NameElement.Organization  => new byte[] { 0x55, 0x04, 0x0A },
-            X500NameElement.CommonName    => new byte[] { 0x55, 0x04, 0x03 },
+            X500NameElement.Country => new byte[] { 0x55, 0x04, 0x06 },
+            X500NameElement.State => new byte[] { 0x55, 0x04, 0x08 },
+            X500NameElement.Locality => new byte[] { 0x55, 0x04, 0x07 },
+            X500NameElement.Organization => new byte[] { 0x55, 0x04, 0x0A },
+            X500NameElement.CommonName => new byte[] { 0x55, 0x04, 0x03 },
             _ => throw new ArgumentException(X500NameBuilder.InvalidElementMessage),
         };
 
         // Is the given length valid for the specified nameElement?
         public static bool IsValidValueLength(this X500NameElement nameElement, int length) => nameElement switch
         {
-            X500NameElement.Country       => length == 2,
-            X500NameElement.State         => (length > 0) && (length < 32),
-            X500NameElement.Locality      => (length > 0) && (length < 32),
-            X500NameElement.Organization  => (length > 0) && (length < 64),
-            X500NameElement.CommonName    => (length > 0) && (length < 64),
+            X500NameElement.Country => length == 2,
+            X500NameElement.State => length > 0 && length < 32,
+            X500NameElement.Locality => length > 0 && length < 32,
+            X500NameElement.Organization => length > 0 && length < 64,
+            X500NameElement.CommonName => length > 0 && length < 64,
             _ => throw new ArgumentException(X500NameBuilder.InvalidElementMessage),
         };
     }

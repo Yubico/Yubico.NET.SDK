@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void Constructor_KeyTypeAes128_ObjectKeyTypeAes128()
         {
             CryptographicKeyType expectedKeyType = CryptographicKeyType.Aes128;
-            
+
             Credential cred = new Credential(
                 expectedKeyType,
                 "test key",
@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void Constructor_LabelTestKey_ObjectLabelTestKey()
         {
             string expectedLabel = "test key";
-            
+
             Credential cred = new Credential(
                 CryptographicKeyType.Aes128,
                 expectedLabel,
@@ -102,9 +102,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
             Credential cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "test key",
-                false);
-
-            cred.KeyType = expectedKeyType;
+                false)
+            {
+                KeyType = expectedKeyType
+            };
 
             Assert.Equal(expectedKeyType, cred.KeyType);
         }
@@ -161,9 +162,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
             Credential cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "old label",
-                false);
-
-            cred.Label = expectedLabel;
+                false)
+            {
+                Label = expectedLabel
+            };
 
             Assert.Equal(expectedLabel, cred.Label);
         }
@@ -208,9 +210,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
             Credential cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "test key",
-                false);
-
-            cred.TouchRequired = expectedTouch;
+                false)
+            {
+                TouchRequired = expectedTouch
+            };
 
             Assert.Equal(expectedTouch, cred.TouchRequired);
         }

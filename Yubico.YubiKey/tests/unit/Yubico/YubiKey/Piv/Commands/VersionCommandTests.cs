@@ -87,7 +87,7 @@ namespace Yubico.YubiKey.Piv.Commands
             var versionCommand = new VersionCommand();
 
             // Act
-            var versionResponse = versionCommand.CreateResponseForApdu(responseApdu);
+            VersionResponse? versionResponse = versionCommand.CreateResponseForApdu(responseApdu);
 
             // Assert
             Assert.True(versionResponse is VersionResponse);

@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKey.Cryptography;
-
 namespace Yubico.YubiKey.Piv
 {
     // This KeyCollector class can be used to provide the KeyCollector delegate
@@ -21,6 +19,19 @@ namespace Yubico.YubiKey.Piv
     // It is called Simple because it returns fixed, default values.
     public class SimpleKeyCollector
     {
+        private static readonly byte[] _pin =
+            { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+
+        private static readonly byte[] _puk =
+            { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
+
+        private static readonly byte[] _mgmtKey =
+        {
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
+            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
+        };
+
         private readonly bool _allowRetry;
 
         public SimpleKeyCollector(bool allowRetry)
@@ -35,7 +46,7 @@ namespace Yubico.YubiKey.Piv
                 return false;
             }
 
-            if (keyEntryData.IsRetry == true)
+            if (keyEntryData.IsRetry)
             {
                 if (_allowRetry == false)
                 {
@@ -82,18 +93,20 @@ namespace Yubico.YubiKey.Piv
                     break;
 
                 case KeyEntryRequest.AuthenticatePivManagementKey:
-                    if (keyEntryData.IsRetry == true)
+                    if (keyEntryData.IsRetry)
                     {
                         return false;
                     }
+
                     currentValue = CollectMgmtKey();
                     break;
 
                 case KeyEntryRequest.ChangePivManagementKey:
-                    if (keyEntryData.IsRetry == true)
+                    if (keyEntryData.IsRetry)
                     {
                         return false;
                     }
+
                     currentValue = CollectMgmtKey();
                     newValue = CollectMgmtKey();
                     break;
@@ -111,22 +124,9 @@ namespace Yubico.YubiKey.Piv
             return true;
         }
 
-        private static readonly byte[] _pin =
-            { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-
         public static byte[] CollectPin() => _pin;
 
-        private static readonly byte[] _puk =
-            { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
-
         public static byte[] CollectPuk() => _puk;
-
-        private static readonly byte[] _mgmtKey =
-        {
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
-            0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
-        };
 
         public static byte[] CollectMgmtKey() => _mgmtKey;
     }

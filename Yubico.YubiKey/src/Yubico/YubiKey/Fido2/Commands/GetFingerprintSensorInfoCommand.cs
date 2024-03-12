@@ -38,14 +38,14 @@ namespace Yubico.YubiKey.Fido2.Commands
         public GetFingerprintSensorInfoCommand()
             : base()
         {
-             _command = new BioEnrollmentCommand(SubCmdSensorInfo);
+            _command = new BioEnrollmentCommand(SubCmdSensorInfo);
         }
 
         /// <inheritdoc />
-         public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
+        public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
-         public GetFingerprintSensorInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-             new GetFingerprintSensorInfoResponse(responseApdu);
+        public GetFingerprintSensorInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new GetFingerprintSensorInfoResponse(responseApdu);
     }
 }

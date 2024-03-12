@@ -12,11 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKey.TestUtilities;
+using Xunit;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
-using Xunit;
 using Yubico.YubiKey.Fido2.PinProtocols;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {

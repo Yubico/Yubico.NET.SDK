@@ -146,7 +146,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new VerifyFipsModeCommand();
-            var response = command.CreateResponseForApdu(responseApdu);
+            VerifyFipsModeResponse? response = command.CreateResponseForApdu(responseApdu);
 
             _ = Assert.IsType<VerifyFipsModeResponse>(response);
         }

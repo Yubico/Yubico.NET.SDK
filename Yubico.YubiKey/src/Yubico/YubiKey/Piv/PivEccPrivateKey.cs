@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.Piv
         {
             var tlvReader = new TlvReader(encodedPrivateKey);
 
-            if ((tlvReader.HasData == false) || (tlvReader.PeekTag() != EccTag))
+            if (tlvReader.HasData == false || tlvReader.PeekTag() != EccTag)
             {
                 throw new ArgumentException(
                     string.Format(

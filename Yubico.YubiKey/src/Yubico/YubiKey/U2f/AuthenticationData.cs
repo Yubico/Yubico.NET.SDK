@@ -15,8 +15,8 @@
 using System;
 using System.Buffers.Binary;
 using System.Globalization;
-using Yubico.YubiKey.Cryptography;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -77,8 +77,8 @@ namespace Yubico.YubiKey.U2f
             : base(PayloadLength, AppIdOffset, ClientDataOffset, SignatureOffset)
         {
             _log.LogInformation("Create a new instance of U2F AuthenticationData by decoding.");
-            if ((encodedResponse.Length < MinEncodedLength)
-                || ((encodedResponse.Span[MsgUserPresenceOffset] & ~UserPresenceMask) != 0))
+            if (encodedResponse.Length < MinEncodedLength
+                || (encodedResponse.Span[MsgUserPresenceOffset] & ~UserPresenceMask) != 0)
             {
                 throw new ArgumentException(
                     string.Format(

@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Piv
         Default = 3,
 
         /// <summary>
-        /// The PIN, PUK, or management key is not the dafault value.<br/>
+        /// The PIN, PUK, or management key is not the default value.<br/>
         /// It is not possible to have the YubiKey report the actual value.
         /// </summary>
         NotDefault = 4,

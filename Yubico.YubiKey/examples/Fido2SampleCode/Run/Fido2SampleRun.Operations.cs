@@ -13,16 +13,16 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Sample.SharedCode;
+using System.Text;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
-using System.Globalization;
-using System.Linq;
+using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
 {
@@ -34,8 +34,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
     {
         public bool RunMenuItem(Fido2MainMenuItem menuItem)
         {
-            if ((menuItem >= Fido2MainMenuItem.MakeCredential)
-                &&(menuItem < Fido2MainMenuItem.Reset))
+            if (menuItem >= Fido2MainMenuItem.MakeCredential
+                && menuItem < Fido2MainMenuItem.Reset)
             {
                 SampleMenu.WriteMessage(
                     MessageType.Title, 0,
@@ -720,7 +720,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
             CredentialUserInfo userInfo = SelectCredential(credentialData, credentialCount);
 
-            if ((userInfo is null) || (userInfo.LargeBlobKey is null))
+            if (userInfo is null || userInfo.LargeBlobKey is null)
             {
                 SampleMenu.WriteMessage(
                     MessageType.Title, 0,
@@ -1077,7 +1077,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             return isValid;
         }
 
-        // If the input arg reportTempatesOnly is true, report only the
+        // If the input arg reportTemplatesOnly is true, report only the
         // templates. Otherwise, report all the info.
         private static void ReportBioInfo(
             BioModality modality,
@@ -1194,7 +1194,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 }
             }
 
-            return (index < _credentialList.Count) ? index : -1;
+            return index < _credentialList.Count ? index : -1;
         }
 
         // This does not build a real ClientDataHash. It builds something that
@@ -1490,7 +1490,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             }
             if (largeBlobReport)
             {
-                string lbKeyStatus = (userInfo.LargeBlobKey is null) ? "not available" : "available";
+                string lbKeyStatus = userInfo.LargeBlobKey is null ? "not available" : "available";
                 SampleMenu.WriteMessage(MessageType.Title, 0, "        Large Blob Key:     " + lbKeyStatus);
                 SampleMenu.WriteMessage(MessageType.Title, 0, "-----------");
             }
@@ -1498,7 +1498,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
         // Return the CredentialUserInfo for the credential of interest in the
         // credentialData List.
-        // If none is seleced, return null.
+        // If none is selected, return null.
         private CredentialUserInfo SelectCredential(
             IReadOnlyList<object> credentialData, int credentialCount)
         {

@@ -14,9 +14,9 @@
 
 using System;
 using Xunit;
-using Yubico.PlatformInterop;
 using Yubico.Core.Buffers;
 using Yubico.Core.Cryptography;
+using Yubico.PlatformInterop;
 
 namespace Yubico.YubiKey.Cryptography
 {

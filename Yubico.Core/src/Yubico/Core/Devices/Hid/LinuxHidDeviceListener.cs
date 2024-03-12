@@ -52,7 +52,7 @@ namespace Yubico.Core.Devices.Hid
         {
             _udevObject = udev_new();
             _monitorObject = ThrowIfFailedNull(udev_monitor_new_from_netlink(_udevObject, UdevMonitorName));
-            
+
             RemoveNonBlockingFlagOnUdevMonitorSocket();
 
             StartListening();
@@ -197,8 +197,8 @@ namespace Yubico.Core.Devices.Hid
         {
             IntPtr fd = udev_monitor_get_fd(_monitorObject);
 
-            int flags = ThrowIfFailedNegative(fcntl(fd, F_GETFL)); 
-            
+            int flags = ThrowIfFailedNegative(fcntl(fd, F_GETFL));
+
             // Remove the O_NONBLOCK flag to set the file descriptor to blocking mode.
             _ = ThrowIfFailedNegative(fcntl(fd, F_SETFL, flags & ~O_NONBLOCK));
         }

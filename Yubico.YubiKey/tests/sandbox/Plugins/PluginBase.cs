@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
         /// If your plugin
         /// </summary>
         /// <remarks>
-        /// requres this, the constructor should change the <c>Required</c>
+        /// requires this, the constructor should change the <c>Required</c>
         /// property of your <c>command</c> parameter to <c>true</c> in its
         /// constructor. If you don't use it at all, you can remove it from the
         /// <c>Parameters</c> collection property in your constructor.
@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 [typeof(Base32Bytes)] = (s) => Base32Bytes.Encode(s),
                 [typeof(Base16Bytes)] = (s) => Base16Bytes.Encode(s),
                 [typeof(Uri)] = (s) => new Uri(s),
-             };
+            };
 
         /// <summary>
         /// The method that actually performs the main task the plugin is

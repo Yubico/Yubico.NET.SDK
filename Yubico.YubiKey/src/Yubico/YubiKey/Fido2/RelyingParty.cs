@@ -13,12 +13,12 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Formats.Cbor;
 using System.Globalization;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Fido2.Cbor;
+using System.Text;
 using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -176,7 +176,7 @@ namespace Yubico.YubiKey.Fido2
         public bool IsMatchingRelyingPartyId(ReadOnlyMemory<byte> candidateHash) =>
             MemoryExtensions.SequenceEqual<byte>(candidateHash.Span, RelyingPartyIdHash.Span);
 
-        // Perform the approriate digest operation to generate the correct value.
+        // Perform the appropriate digest operation to generate the correct value.
         private void ComputeRelyingPartyIdHash()
         {
             using SHA256 digester = CryptographyProviders.Sha256Creator();

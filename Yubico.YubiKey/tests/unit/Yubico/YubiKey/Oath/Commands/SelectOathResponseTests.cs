@@ -47,8 +47,8 @@ namespace Yubico.YubiKey.Oath.Commands
             });
 
             var selectOathResponse = new SelectOathResponse(responseApdu);
-            var data = selectOathResponse.GetData();
-            
+            OathApplicationData? data = selectOathResponse.GetData();
+
             var version = new FirmwareVersion
             {
                 Major = 0x05,
@@ -56,9 +56,9 @@ namespace Yubico.YubiKey.Oath.Commands
                 Patch = 0x04
             };
 
-            var salt = new byte[] { 0xE3, 0x0E, 0xB3, 0x36, 0x5C, 0x8D, 0xF1, 0x44 };
-            var challenge = new byte[] { 0xF1, 0xD3, 0xDA, 0x89, 0x58, 0xE4, 0x40, 0x85 };
-            var algorithm = HashAlgorithm.Sha1;
+            byte[]? salt = new byte[] { 0xE3, 0x0E, 0xB3, 0x36, 0x5C, 0x8D, 0xF1, 0x44 };
+            byte[]? challenge = new byte[] { 0xF1, 0xD3, 0xDA, 0x89, 0x58, 0xE4, 0x40, 0x85 };
+            HashAlgorithm algorithm = HashAlgorithm.Sha1;
 
             Assert.Equal(SWConstants.Success, selectOathResponse.StatusWord);
             Assert.Equal(version, data.Version);
@@ -80,7 +80,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
 
             var selectOathResponse = new SelectOathResponse(responseApdu);
-            var data = selectOathResponse.GetData();
+            OathApplicationData? data = selectOathResponse.GetData();
 
             var version = new FirmwareVersion
             {
@@ -89,8 +89,8 @@ namespace Yubico.YubiKey.Oath.Commands
                 Patch = 0x04
             };
 
-            var salt = new byte[] { 0xC0, 0xE3, 0xAF, 0x27, 0xCC, 0x7A, 0x20, 0xEE };
-            var algorithm = HashAlgorithm.Sha1;
+            byte[]? salt = new byte[] { 0xC0, 0xE3, 0xAF, 0x27, 0xCC, 0x7A, 0x20, 0xEE };
+            HashAlgorithm algorithm = HashAlgorithm.Sha1;
 
             Assert.Equal(SWConstants.Success, selectOathResponse.StatusWord);
             Assert.Equal(version, data.Version);

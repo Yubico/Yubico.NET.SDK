@@ -15,9 +15,9 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography.X509Certificates;
-using Yubico.YubiKey.Cryptography;
-using Yubico.Core.Tlv;
 using Yubico.Core.Logging;
+using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -137,9 +137,9 @@ namespace Yubico.YubiKey.U2f
             int certLength = 1;
             if (encodedResponse.Length > MinEncodedLength)
             {
-                if ((encodedResponse.Span[MsgReservedOffset] == MsgReservedValue)
-                    && (encodedResponse.Span[MsgKeyHandleOffset] == KeyHandleLength)
-                    && (encodedResponse.Span[MsgPublicKeyOffset] == PublicKeyTag))
+                if (encodedResponse.Span[MsgReservedOffset] == MsgReservedValue
+                    && encodedResponse.Span[MsgKeyHandleOffset] == KeyHandleLength
+                    && encodedResponse.Span[MsgPublicKeyOffset] == PublicKeyTag)
                 {
                     ReadOnlyMemory<byte> certAndSig = encodedResponse.Slice(MsgCertOffset);
                     var tlvReader = new TlvReader(certAndSig);

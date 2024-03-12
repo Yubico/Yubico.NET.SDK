@@ -296,7 +296,7 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void CreateCommandApdu_GetP2Property_ReturnsZero()
         {
-            var command =new ConfigureSlotCommand();
+            var command = new ConfigureSlotCommand();
 
             byte p2 = command.CreateCommandApdu().P2;
 
@@ -325,7 +325,7 @@ namespace Yubico.YubiKey.Otp.Commands
             ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
             byte dataSlice = data.Slice(ConfigureSlotCommand.FixedDataLength
                                         + ConfigureSlotCommand.UidLength
-                                        + ConfigureSlotCommand.AesKeyLength 
+                                        + ConfigureSlotCommand.AesKeyLength
                                         + ConfigureSlotCommand.AccessCodeLength
                                         + 1).Span[0];
 
@@ -379,9 +379,9 @@ namespace Yubico.YubiKey.Otp.Commands
 
             ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
             ReadOnlySpan<byte> dataSlice = data.Slice(ConfigureSlotCommand.FixedDataLength
-                                                      + ConfigureSlotCommand.UidLength 
-                                                      + ConfigureSlotCommand.AesKeyLength 
-                                                      + ConfigureSlotCommand.AccessCodeLength 
+                                                      + ConfigureSlotCommand.UidLength
+                                                      + ConfigureSlotCommand.AesKeyLength
+                                                      + ConfigureSlotCommand.AccessCodeLength
                                                       + 4, 2).Span;
 
             short actualReserved = BinaryPrimitives.ReadInt16LittleEndian(dataSlice);

@@ -43,9 +43,9 @@ namespace Yubico.YubiKey
     // JUSTIFICATION: This class is a singleton, which means its lifetime will span the process lifetime. It contains
     // a lock which is disposable, so we must call its Dispose method at some point. The only reasonable time to do that
     // is in this class's finalizer. This analyzer doesn't seem to see this and still warns.
-    #pragma warning disable CA1001
+#pragma warning disable CA1001
     internal class ConnectionManager
-    #pragma warning restore CA1001
+#pragma warning restore CA1001
     {
         // Easy thread-safe singleton pattern using Lazy<>
         private static readonly Lazy<ConnectionManager> _instance =
@@ -318,5 +318,5 @@ namespace Yubico.YubiKey
                 _hashSetLock.ExitWriteLock();
             }
         }
-   }
+    }
 }

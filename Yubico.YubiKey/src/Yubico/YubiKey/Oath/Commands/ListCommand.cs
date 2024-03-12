@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Oath.Commands
     public class ListCommand : IYubiKeyCommand<ListResponse>
     {
         private const byte ListInstruction = 0xa1;
-        
+
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs.
         /// </summary>

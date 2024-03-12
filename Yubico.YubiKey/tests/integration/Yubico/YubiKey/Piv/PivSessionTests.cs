@@ -14,10 +14,10 @@
 
 using System.Linq;
 using System.Security.Cryptography;
+using Xunit;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -55,7 +55,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                 Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-                
+
                 collectorObj.KeyFlag = 1;
                 bool isVerified = pivSession.TryVerifyPin();
 
@@ -80,7 +80,7 @@ namespace Yubico.YubiKey.Piv
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-                
+
                 Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
                 bool isAuthenticated = pivSession.TryAuthenticateManagementKey(false);

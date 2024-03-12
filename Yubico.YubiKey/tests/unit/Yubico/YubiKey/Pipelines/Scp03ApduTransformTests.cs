@@ -16,11 +16,11 @@ using System;
 using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
+using Yubico.Core.Buffers;
+using Yubico.Core.Iso7816;
 using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Scp03;
-using Yubico.Core.Iso7816;
-using Yubico.Core.Buffers;
 
 namespace Yubico.YubiKey.Pipelines
 {

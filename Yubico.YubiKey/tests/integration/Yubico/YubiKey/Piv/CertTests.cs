@@ -14,9 +14,9 @@
 
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Xunit;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.Piv
 
             byte slotNumber = 0x8B;
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            LoadKeyAndCert (slotNumber, pivPrivateKey, certObj, testDevice);
+            LoadKeyAndCert(slotNumber, pivPrivateKey, certObj, testDevice);
 
             using (var pivSession = new PivSession(testDevice))
             {

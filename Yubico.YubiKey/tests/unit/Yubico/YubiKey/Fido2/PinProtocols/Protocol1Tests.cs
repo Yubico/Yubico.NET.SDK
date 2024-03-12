@@ -37,8 +37,8 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
 
             Assert.NotNull(p1.AuthenticatorPublicKey);
             Assert.NotNull(p1.PlatformPublicKey);
-            Assert.NotNull(p1.EncryptionKey);
-            Assert.NotNull(p1.AuthenticationKey);
+            _ = Assert.NotNull(p1.EncryptionKey);
+            _ = Assert.NotNull(p1.AuthenticationKey);
         }
 
         [Fact]

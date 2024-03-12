@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
             return Command.ToLower() switch
             {
                 "e2e" => BasicE2ETest(),
-                _ => throw new ArgumentException($"Invalid command [{ Command }] specified")
+                _ => throw new ArgumentException($"Invalid command [{Command}] specified")
             };
         }
 

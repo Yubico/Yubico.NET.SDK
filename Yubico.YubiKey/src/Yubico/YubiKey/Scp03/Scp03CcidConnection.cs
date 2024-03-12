@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
+using System.Linq;
+using Yubico.Core.Devices.SmartCard;
 using Yubico.YubiKey.Pipelines;
 using Yubico.YubiKey.Scp03;
-using Yubico.Core.Devices.SmartCard;
-using System.Linq;
 
 namespace Yubico.YubiKey
 {

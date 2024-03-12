@@ -20,7 +20,7 @@ namespace Yubico.YubiKey.Oath.Commands
 {
     public class DeleteCredentialCommandTests
     {
-        Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp, HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
+        readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp, HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
 
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.Oath.Commands
         public void CreateCommandApdu_ReturnsCorrectDataAndLength()
         {
             var command = new DeleteCommand { Credential = credential };
-            byte[] dataList = 
+            byte[] dataList =
             {
                 0x71, 0x1A, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F, 0x66,
                 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75, 0x74,
@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new DeleteCommand { Credential = credential };
-            var response = command.CreateResponseForApdu(responseApdu);
+            DeleteResponse? response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is DeleteResponse);
         }

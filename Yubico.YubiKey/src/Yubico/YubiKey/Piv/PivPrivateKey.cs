@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Piv
     /// Note that this class contains a <c>Clear</c> method. This class will hold
     /// copies of sensitive data (the private key data), and that data should be
     /// overwritten as soon as the object is no longer needed. Note that there
-    /// are SDK classes that take in a PivPrivateKey obejct as input, and copy a
+    /// are SDK classes that take in a PivPrivateKey object as input, and copy a
     /// reference. For example, look at
     /// <see cref="Commands.ImportAsymmetricKeyCommand"/>. You want to call the
     /// <c>Clear</c> method, but not before the SDK class is done with it. The
@@ -118,7 +118,7 @@ namespace Yubico.YubiKey.Piv
                 tag = encodedPrivateKey.Span[0];
             }
 
-            switch(tag)
+            switch (tag)
             {
                 default:
                     throw new ArgumentException(

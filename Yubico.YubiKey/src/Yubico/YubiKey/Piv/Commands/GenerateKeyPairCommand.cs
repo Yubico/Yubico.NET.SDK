@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using Yubico.Core.Iso7816;
 
@@ -296,13 +296,13 @@ namespace Yubico.YubiKey.Piv.Commands
             int length = data.Length;
             int valueLength = algorithmCount + pinPolicyCount + touchPolicyCount;
 
-            if ((PinPolicy == PivPinPolicy.Default) || (PinPolicy == PivPinPolicy.None))
+            if (PinPolicy == PivPinPolicy.Default || PinPolicy == PivPinPolicy.None)
             {
                 Array.Copy(data, indexTouchPolicy, data, indexPinPolicy, touchPolicyCount);
                 length -= pinPolicyCount;
                 valueLength -= pinPolicyCount;
             }
-            if ((TouchPolicy == PivTouchPolicy.Default) || (TouchPolicy == PivTouchPolicy.None))
+            if (TouchPolicy == PivTouchPolicy.Default || TouchPolicy == PivTouchPolicy.None)
             {
                 length -= touchPolicyCount;
                 valueLength -= touchPolicyCount;

@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Collections.Generic;
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
@@ -442,7 +442,7 @@ namespace Yubico.YubiKey.Fido2
             }
 
             // If the response is Success, we're done.
-            if ((rsp.Status == ResponseStatus.Success) || (rsp.CtapStatus == CtapStatus.NoCredentials))
+            if (rsp.Status == ResponseStatus.Success || rsp.CtapStatus == CtapStatus.NoCredentials)
             {
                 // After a credential has been deleted, the number of
                 // discoverable credentials can change. Hence, this operation can

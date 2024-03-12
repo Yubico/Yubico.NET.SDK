@@ -240,7 +240,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// If the YubiKey does not support "credMgmt" but does support
         /// "CredentialMgmtPreview", then pass <c>true</c> as the isPreview arg.
         /// Otherwise, either pass <c>false</c> to this method or call the
-        /// <c>CreateCommandApdu</c> method that takse no argument.
+        /// <c>CreateCommandApdu</c> method that take no argument.
         /// </para>
         /// </remarks>
         /// <param name="isPreview">

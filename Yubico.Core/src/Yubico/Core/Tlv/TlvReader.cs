@@ -788,8 +788,8 @@ namespace Yubico.Core.Tlv
         /// <para>
         /// The method will verify that the tag is expected. If it is, it will
         /// read the length, verify that there are enough bytes in the buffer to
-        /// read, then read the value (a byte array) and returning it as astring,
-        /// converting the bytes aray following the scheme specified by the
+        /// read, then read the value (a byte array) and returning it as a string,
+        /// converting the bytes array following the scheme specified by the
         /// encoding argument.
         /// </para>
         /// </remarks>

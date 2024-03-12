@@ -34,7 +34,7 @@ namespace Yubico.YubiKey.Fido2.Cose
     /// </para>
     /// <para>
     /// This class has multiple constructors. One constructs an empty object and allows the caller to set the key
-    /// parameters via the properties on this class. Another constructs a key based on the COSE form enocded in CBOR.
+    /// parameters via the properties on this class. Another constructs a key based on the COSE form encoded in CBOR.
     /// Lastly, there is a constructor that takes in a .NET representation of an EC public key used for interoperating
     /// with the .NET cryptographic library.
     /// </para>

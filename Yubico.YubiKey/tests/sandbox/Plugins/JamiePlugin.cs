@@ -73,10 +73,10 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 Output.WriteLine($"Data is {data}");
 
                 var cmd = new SwapSlotsCommand();
-                ReadStatusResponse reponse = connection.SendCommand(cmd);
-                OtpStatus status = reponse.GetData();
+                ReadStatusResponse response = connection.SendCommand(cmd);
+                OtpStatus status = response.GetData();
                 Output.WriteLine(status.ToString()!);
-                result = reponse.Status == ResponseStatus.Success;
+                result = response.Status == ResponseStatus.Success;
             }
             return result;
         }

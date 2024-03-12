@@ -335,7 +335,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
         /// <summary>
         /// &gt; [!WARNING]
-        /// &gt; This constructor is obsolete, use <c>PutDataComand()</c> or
+        /// &gt; This constructor is obsolete, use <c>PutDataCommand()</c> or
         /// &gt; <c>PutDataCommand(int, ReadOnlyMemory&lt;byte&gt;)</c> instead.
         ///
         /// Initializes a new instance of the <c>PutDataCommand</c> class. This

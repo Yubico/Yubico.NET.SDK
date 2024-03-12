@@ -176,7 +176,7 @@ namespace Yubico.YubiKey.Fido2
         public bool IsMatchingRelyingPartyId(ReadOnlyMemory<byte> candidateHash) =>
             MemoryExtensions.SequenceEqual<byte>(candidateHash.Span, RelyingPartyIdHash.Span);
 
-        // Perform the approriate digest operation to generate the correct value.
+        // Perform the appropriate digest operation to generate the correct value.
         private void ComputeRelyingPartyIdHash()
         {
             using SHA256 digester = CryptographyProviders.Sha256Creator();

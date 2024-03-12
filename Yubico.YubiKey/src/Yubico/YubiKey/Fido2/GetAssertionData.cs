@@ -48,7 +48,6 @@ namespace Yubico.YubiKey.Fido2
         private const string KeyUserName = "name";
         private const string KeyUserDisplayName = "displayName";
 
-        //        private readonly Logger _log = Log.GetLogger();
         private bool _disposed;
         private readonly byte[]? _keyData;
 

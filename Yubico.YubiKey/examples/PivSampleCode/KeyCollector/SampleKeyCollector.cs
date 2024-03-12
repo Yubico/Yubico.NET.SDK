@@ -146,7 +146,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter D for default value (" + defaultValueString + ")");
             char[] collectedValue = SampleMenu.ReadResponse(out int _);
 
-            if ((collectedValue.Length == 1) && (collectedValue[0] == 'D'))
+            if (collectedValue.Length == 1 && collectedValue[0] == 'D')
             {
                 return defaultValueString switch
                 {

@@ -136,9 +136,9 @@ namespace Yubico.YubiKey.Fido2
 
         private bool LocalKeyCollector(KeyEntryData arg)
         {
-            bool callCancel = (_callCancelCount == 0) ? false : true;
+            bool callCancel = _callCancelCount == 0 ? false : true;
 
-            if ((_callCancelCount > 0) && (!(arg.LastBioEnrollSampleResult is null)))
+            if (_callCancelCount > 0 && !(arg.LastBioEnrollSampleResult is null))
             {
                 if (arg.LastBioEnrollSampleResult.RemainingSampleCount != _callCancelCount)
                 {

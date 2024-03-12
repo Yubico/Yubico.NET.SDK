@@ -38,8 +38,8 @@ namespace Yubico.Core.Cryptography
             Span<byte> tag,
             ReadOnlySpan<byte> associatedData)
         {
-            if ((nonce.Length != NonceLength) || (ciphertext.Length != plaintext.Length)
-                || (tag.Length != AuthTagLength))
+            if (nonce.Length != NonceLength || ciphertext.Length != plaintext.Length
+                || tag.Length != AuthTagLength)
             {
                 throw new ArgumentException(ExceptionMessages.InvalidAesGcmInput);
             }
@@ -110,8 +110,8 @@ namespace Yubico.Core.Cryptography
             Span<byte> plaintext,
             ReadOnlySpan<byte> associatedData)
         {
-            if ((nonce.Length != NonceLength) || (plaintext.Length != ciphertext.Length)
-                || (tag.Length != AuthTagLength))
+            if (nonce.Length != NonceLength || plaintext.Length != ciphertext.Length
+                || tag.Length != AuthTagLength)
             {
                 throw new ArgumentException(ExceptionMessages.InvalidAesGcmInput);
             }

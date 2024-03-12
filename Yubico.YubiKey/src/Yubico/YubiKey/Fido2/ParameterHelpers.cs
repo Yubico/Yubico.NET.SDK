@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.Fido2
                 throw new ArgumentNullException();
             }
 
-            List<T> returnList = (currentList is null) ? new List<T>() : currentList;
+            List<T> returnList = currentList is null ? new List<T>() : currentList;
             returnList.Add(itemToAdd);
 
             return returnList;
@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.Fido2
             }
 
             Dictionary<string, TValue> returnDictionary =
-                (currentDictionary is null) ? new Dictionary<string, TValue>() : currentDictionary;
+                currentDictionary is null ? new Dictionary<string, TValue>() : currentDictionary;
 
             // If the key already exists, relpace the current value in the
             // dictionary with this one.
@@ -105,7 +105,7 @@ namespace Yubico.YubiKey.Fido2
         /// </returns>
         public static byte[] EncodeKeyValues<TValue>(IReadOnlyDictionary<string, TValue>? localData)
         {
-            if ((localData is null) || (localData.Count == 0))
+            if (localData is null || localData.Count == 0)
             {
                 return Array.Empty<byte>();
             }

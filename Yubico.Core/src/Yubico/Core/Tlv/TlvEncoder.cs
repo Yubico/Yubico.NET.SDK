@@ -126,7 +126,7 @@ namespace Yubico.Core.Tlv
         /// </param>
         public static void VerifyTag(int tag)
         {
-            if ((tag < 0) || (tag > MaximumTag))
+            if (tag < 0 || tag > MaximumTag)
             {
                 throw new TlvException(ExceptionMessages.TlvUnsupportedTag);
             }
@@ -148,7 +148,7 @@ namespace Yubico.Core.Tlv
         /// </param>
         public static void VerifyLength(int length)
         {
-            if ((length < 0) || (length > MaximumLength))
+            if (length < 0 || length > MaximumLength)
             {
                 throw new TlvException(ExceptionMessages.TlvUnsupportedLengthField);
             }

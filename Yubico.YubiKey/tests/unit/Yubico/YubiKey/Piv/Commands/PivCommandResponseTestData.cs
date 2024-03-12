@@ -318,7 +318,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             valueLen++;
                         }
                     }
-                    if ((format[index] == 0xFE) && (isCorrect == false))
+                    if (format[index] == 0xFE && isCorrect == false)
                     {
                         valueLen = 1;
                     }

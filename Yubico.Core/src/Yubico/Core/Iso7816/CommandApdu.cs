@@ -214,7 +214,7 @@ namespace Yubico.Core.Iso7816
         {
             int inclusiveUpperBound = GetInclusiveUpperBound(apduEncoding);
 
-            return (Ne == int.MaxValue) || (Ne >= 0 && Ne <= inclusiveUpperBound);
+            return Ne == int.MaxValue || (Ne >= 0 && Ne <= inclusiveUpperBound);
         }
 
         // Validates Nc, then returns the Lc field as a byte array in the given encoding.

@@ -169,7 +169,7 @@ namespace Yubico.YubiKey.TestUtilities
         // throw an exception.
         public RSA GetRsaObject()
         {
-            if ((Algorithm == PivAlgorithm.Rsa1024) || (Algorithm == PivAlgorithm.Rsa2048))
+            if (Algorithm == PivAlgorithm.Rsa1024 || Algorithm == PivAlgorithm.Rsa2048)
             {
                 RSA? rsaObject = _certificateObject.PublicKey.GetRSAPublicKey()!;
                 RSAParameters rsaParams = rsaObject.ExportParameters(false);

@@ -165,7 +165,7 @@ namespace Yubico.YubiKey.Fido2
             _log.LogInformation("Try to ToggleAlwaysUv.");
 
             OptionValue alwaysUvValue = AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.alwaysUv);
-            if ((alwaysUvValue != OptionValue.True) && (alwaysUvValue != OptionValue.False))
+            if (alwaysUvValue != OptionValue.True && alwaysUvValue != OptionValue.False)
             {
                 return false;
             }

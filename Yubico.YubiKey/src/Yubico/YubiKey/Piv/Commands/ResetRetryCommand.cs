@@ -149,8 +149,8 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </exception>
         public ResetRetryCommand(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin)
         {
-            if ((PivPinUtilities.IsValidPinLength(puk.Length) == false)
-             || (PivPinUtilities.IsValidPinLength(newPin.Length) == false))
+            if (PivPinUtilities.IsValidPinLength(puk.Length) == false
+             || PivPinUtilities.IsValidPinLength(newPin.Length) == false)
             {
                 throw new ArgumentException(
                     string.Format(

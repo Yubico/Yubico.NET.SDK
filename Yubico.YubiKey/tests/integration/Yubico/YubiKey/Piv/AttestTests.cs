@@ -199,7 +199,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // version 4 YubiKeys accept 1024-bit RSA keys, so don't test that.
-            if ((testDevice.FirmwareVersion.Major < 5) && (whichPair == BadAttestationPairs.KeyRsa1024CertValid))
+            if (testDevice.FirmwareVersion.Major < 5 && whichPair == BadAttestationPairs.KeyRsa1024CertValid)
             {
                 return true;
             }

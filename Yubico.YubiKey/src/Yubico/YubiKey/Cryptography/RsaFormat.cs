@@ -261,13 +261,13 @@ namespace Yubico.YubiKey.Cryptography
             digestAlgorithm = 0;
             digest = Array.Empty<byte>();
 
-            if ((formattedSignature.Length != 128) && (formattedSignature.Length != 256))
+            if (formattedSignature.Length != 128 && formattedSignature.Length != 256)
             {
                 return false;
             }
 
             // We expect to find 00 01 FF ... FF 00
-            if ((formattedSignature[0] != Pkcs1LeadByte) || (formattedSignature[1] != Pkcs1SignByte))
+            if (formattedSignature[0] != Pkcs1LeadByte || formattedSignature[1] != Pkcs1SignByte)
             {
                 return false;
             }
@@ -286,7 +286,7 @@ namespace Yubico.YubiKey.Cryptography
             // pad bytes, and because there are 2 leading bytes (00 01), that
             // means we need the index to be at least 10. Make sure there was a
             // non-FF byte, and that the first non-FF byte is 00.
-            if ((index < Pkcs1MinPadLength + 2) || (index >= formattedSignature.Length) || (formattedSignature[index] != Pkcs1Separator))
+            if (index < Pkcs1MinPadLength + 2 || index >= formattedSignature.Length || formattedSignature[index] != Pkcs1Separator)
             {
                 return false;
             }
@@ -651,7 +651,7 @@ namespace Yubico.YubiKey.Cryptography
             mPrimeAndH = Array.Empty<byte>();
             isVerified = false;
 
-            if ((formattedSignature.Length != 128) && (formattedSignature.Length != 256))
+            if (formattedSignature.Length != 128 && formattedSignature.Length != 256)
             {
                 return false;
             }
@@ -702,7 +702,7 @@ namespace Yubico.YubiKey.Cryptography
                 // Verify that all PS bytes are 0, and that the byte after PS is 01.
                 int index = Array.FindIndex<byte>(buffer, p => p != 0);
 
-                if ((index != psLength) || (buffer[psLength] != 1))
+                if (index != psLength || buffer[psLength] != 1)
                 {
                     return false;
                 }
@@ -826,7 +826,7 @@ namespace Yubico.YubiKey.Cryptography
             // There must be at least 8 bytes of pad, plus 3 extra bytes, the
             // leading 00 02, then the separator between pad and data: 00. If
             // there's too much data, we can't format.
-            if ((inputData.Length == 0) || (inputData.Length > buffer.Length - (Pkcs1MinPadLength + 3)))
+            if (inputData.Length == 0 || inputData.Length > buffer.Length - (Pkcs1MinPadLength + 3))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -914,7 +914,7 @@ namespace Yubico.YubiKey.Cryptography
             // Return this buffer if there is any error.
             outputData = Array.Empty<byte>();
 
-            if ((formattedData.Length != 128) && (formattedData.Length != 256))
+            if (formattedData.Length != 128 && formattedData.Length != 256)
             {
                 return false;
             }
@@ -944,7 +944,7 @@ namespace Yubico.YubiKey.Cryptography
             // byte was 0 (startIndex will be 0), or if the zero byte does not
             // allow for more than 8 pad bytes (startIndex will be < 10), this is
             // an error.
-            if (startIndex < (Pkcs1MinPadLength + 2))
+            if (startIndex < Pkcs1MinPadLength + 2)
             {
                 errorFlag |= 1;
             }
@@ -1076,7 +1076,7 @@ namespace Yubico.YubiKey.Cryptography
 
             int digestLength = digester.HashSize / 8;
 
-            if ((inputData.Length == 0) || (inputData.Length > (buffer.Length - ((2 * digestLength) + 2))))
+            if (inputData.Length == 0 || inputData.Length > buffer.Length - ((2 * digestLength) + 2))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -1344,7 +1344,7 @@ namespace Yubico.YubiKey.Cryptography
             // If the digest.Length is not digestLength, either isValid will be
             // false or the outputLength won't be totalLength. So this is where
             // digest.Length is checked.
-            if ((isValid == false) || (outputLength != totalLength))
+            if (isValid == false || outputLength != totalLength)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -1387,7 +1387,7 @@ namespace Yubico.YubiKey.Cryptography
                     returnValue = reader.TryReadValue(out value, expectedTag);
                 }
 
-                if ((returnValue == true) && ((readType & NoMoreData) != 0))
+                if (returnValue == true && (readType & NoMoreData) != 0)
                 {
                     // We want to make sure all the data has been read. We
                     // don't want a byte or more to be dangling at then end
@@ -1465,7 +1465,7 @@ namespace Yubico.YubiKey.Cryptography
 
                 bool sameOid = oid.Span.SequenceEqual(new Span<byte>(supportedOid));
 
-                if ((sameOid == false) || (digest.Length != digestLength) || (oidParams.Length != 0))
+                if (sameOid == false || digest.Length != digestLength || oidParams.Length != 0)
                 {
                     returnValue = false;
                 }

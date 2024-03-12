@@ -436,7 +436,7 @@ namespace Yubico.YubiKey.Piv
                 }
             }
 
-            return (certDer.Length > 0) && (certDer.Length < MaximumCertDerLength);
+            return certDer.Length > 0 && certDer.Length < MaximumCertDerLength;
         }
 
         // Does the cert in the object share the algorithm and key size?
@@ -511,8 +511,8 @@ namespace Yubico.YubiKey.Piv
 
                         if (index >= tags.Length)
                         {
-                            returnValue = (value[4].Length < MaximumValidityValueLength) &&
-                                          (value[5].Length < MaximumNameValueLength);
+                            returnValue = value[4].Length < MaximumValidityValueLength &&
+                                          value[5].Length < MaximumNameValueLength;
                         }
                     }
                 }

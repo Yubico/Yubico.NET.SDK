@@ -705,7 +705,7 @@ namespace Yubico.YubiKey.Fido2
 
         private byte[] EncodeAlgorithms(MakeCredentialParameters? localData)
         {
-            if ((localData is null) || (localData.Algorithms.Count == 0))
+            if (localData is null || localData.Algorithms.Count == 0)
             {
                 return Array.Empty<byte>();
             }

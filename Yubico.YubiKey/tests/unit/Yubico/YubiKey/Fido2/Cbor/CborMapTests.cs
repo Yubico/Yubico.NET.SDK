@@ -132,7 +132,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             cbor.ReadEndMap();
 
-            return (mapKeyOne == 0x03) && (mapKeyTwo == 0x04) && (valueOne.Length == 4) && (valueTwo.Length == 2);
+            return mapKeyOne == 0x03 && mapKeyTwo == 0x04 && valueOne.Length == 4 && valueTwo.Length == 2;
         }
 
         private static bool ReadMapX2(CborReader cbor)
@@ -155,7 +155,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             cbor.ReadEndMap();
 
-            return isValidOne && isValidTwo && (valueOne.Length == 4) && (valueTwo.Length == 2);
+            return isValidOne && isValidTwo && valueOne.Length == 4 && valueTwo.Length == 2;
         }
 
         private static bool ReadArrayX3(CborReader cbor)

@@ -147,7 +147,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 {
                     object? currentValue = ConvertValue<TValue>(entries[index]);
 
-                    if (!(currentValue is null) && (currentValue is TValue typedValue))
+                    if (!(currentValue is null) && currentValue is TValue typedValue)
                     {
                         returnValue.Add(typedValue);
                         continue;

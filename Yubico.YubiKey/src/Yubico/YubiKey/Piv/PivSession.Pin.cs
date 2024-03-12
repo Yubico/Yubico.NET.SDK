@@ -1339,7 +1339,7 @@ namespace Yubico.YubiKey.Piv
                     {
                         return;
                     }
-                    if (!adminData.PinProtected && (adminData.Salt is null))
+                    if (!adminData.PinProtected && adminData.Salt is null)
                     {
                         return;
                     }

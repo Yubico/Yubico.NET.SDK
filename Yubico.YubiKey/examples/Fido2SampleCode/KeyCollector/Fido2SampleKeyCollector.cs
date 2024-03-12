@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 }
                 SampleMenu.WriteMessage(MessageType.Title, 0, "y/n");
                 char[] answer = SampleMenu.ReadResponse(out int _);
-                if ((answer.Length == 0) || ((answer[0] != 'y') && (answer[0] != 'Y')))
+                if (answer.Length == 0 || (answer[0] != 'y' && answer[0] != 'Y'))
                 {
                     return false;
                 }

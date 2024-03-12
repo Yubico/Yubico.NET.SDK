@@ -192,11 +192,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // and KeyUsage, and their values are acceptable.
             int index = 0;
             int count = 2;
-            while ((index < signerCert.Extensions.Count) && (count < 2))
+            while (index < signerCert.Extensions.Count && count < 2)
             {
                 if (signerCert.Extensions[index] is X509BasicConstraintsExtension basicConstraints)
                 {
-                    if ((!basicConstraints.CertificateAuthority) || (basicConstraints.PathLengthConstraint < pathLength))
+                    if (!basicConstraints.CertificateAuthority || basicConstraints.PathLengthConstraint < pathLength)
                     {
                         return false;
                     }
@@ -265,7 +265,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // where each coordinate is exactly 48 bytes (384 bits) long.
             HashAlgorithmName signerHash = HashAlgorithmName.SHA256;
             if (string.Equals(signerCert.PublicKey.Oid.FriendlyName, "ECC", StringComparison.Ordinal)
-                && (signerCert.PublicKey.EncodedKeyValue.RawData.Length == 97))
+                && signerCert.PublicKey.EncodedKeyValue.RawData.Length == 97)
             {
                 signerHash = HashAlgorithmName.SHA384;
             }

@@ -114,7 +114,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                             }
                         }
 
-                        isValid = ((rValue.Length - offsetR) <= elementLength) && ((sValue.Length - offsetS) <= elementLength);
+                        isValid = rValue.Length - offsetR <= elementLength && sValue.Length - offsetS <= elementLength;
                     }
                 }
             }
@@ -150,7 +150,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // greater than zero and even.
         public static byte[] GetStandardDsaFromNonStandard(byte[] signature)
         {
-            if ((signature is null) || (signature.Length == 0))
+            if (signature is null || signature.Length == 0)
             {
                 throw new ArgumentNullException(nameof(signature));
             }
@@ -191,8 +191,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // The first half of the buffer is r, the second is s.
             // For each element, build an INTEGER: 02 len value.
             // If the msBit of value is set, prepend a 00 byte.
-            int startR = ((signature[offsetR] & 0x80) != 0) ? 1 : 0;
-            int startS = ((signature[offsetS] & 0x80) != 0) ? 1 : 0;
+            int startR = (signature[offsetR] & 0x80) != 0 ? 1 : 0;
+            int startS = (signature[offsetS] & 0x80) != 0 ? 1 : 0;
 
             byte[] rBuffer = new byte[elementLength + 1];
             byte[] sBuffer = new byte[elementLength + 1];

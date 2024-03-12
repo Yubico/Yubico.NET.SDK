@@ -241,10 +241,10 @@ namespace Yubico.YubiKey.Piv
                         // Algorithm
                         // One byte, no more, no less.
                         ThrowIfNotLength(value, 1);
-                        Debug.Assert((value.Span[0] == 0xFF) || (value.Span[0] == 0x03)
-                            || (value.Span[0] == 0x08) || (value.Span[0] == 0x0A) || (value.Span[0] == 0x0C)
-                            || (value.Span[0] == 0x06) || (value.Span[0] == 0x07)
-                            || (value.Span[0] == 0x11) || (value.Span[0] == 0x14));
+                        Debug.Assert(value.Span[0] == 0xFF || value.Span[0] == 0x03
+                            || value.Span[0] == 0x08 || value.Span[0] == 0x0A || value.Span[0] == 0x0C
+                            || value.Span[0] == 0x06 || value.Span[0] == 0x07
+                            || value.Span[0] == 0x11 || value.Span[0] == 0x14);
 
                         Algorithm = (PivAlgorithm)value.Span[0];
                         break;
@@ -253,8 +253,8 @@ namespace Yubico.YubiKey.Piv
                         // Policy: PIN and touch policy
                         // Two bytes, no more, no less.
                         ThrowIfNotLength(value, 2);
-                        Debug.Assert((value.Span[0] >= 0) && (value.Span[0] <= 3));
-                        Debug.Assert((value.Span[1] >= 0) && (value.Span[1] <= 3));
+                        Debug.Assert(value.Span[0] >= 0 && value.Span[0] <= 3);
+                        Debug.Assert(value.Span[1] >= 0 && value.Span[1] <= 3);
 
                         // If the value is 0, that means Default. Otherwise, the
                         // value should be 1, 2, or 3 for Never, Once, and
@@ -278,7 +278,7 @@ namespace Yubico.YubiKey.Piv
                         // One byte, no more, no less.
                         // 1 means generated, 2 means imported.
                         ThrowIfNotLength(value, 1);
-                        Debug.Assert((value.Span[0] == 1) || (value.Span[0] == 2));
+                        Debug.Assert(value.Span[0] == 1 || value.Span[0] == 2);
                         KeyStatus = (PivKeyStatus)value.Span[0];
                         break;
 

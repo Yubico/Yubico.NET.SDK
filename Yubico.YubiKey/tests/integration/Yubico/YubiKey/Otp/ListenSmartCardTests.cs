@@ -57,7 +57,7 @@ namespace Yubico.PlatformInterop
             {
                 _counter = 6;
             }
-            else if ((_counter > 6) || (_counter < 0))
+            else if (_counter > 6 || _counter < 0)
             {
                 _counter = 1;
             }

@@ -116,9 +116,8 @@ namespace Yubico.YubiKey
         /// <returns>A bool indicating whether the YubiKey was found.</returns>
         public static bool TryGetYubiKey(int serialNumber, out IYubiKeyDevice yubiKey)
         {
-            yubiKey = FindAll()
-                .FirstOrDefault(k => k.SerialNumber == serialNumber);
-            return yubiKey != default;
+            yubiKey = FindAll().FirstOrDefault(k => k.SerialNumber == serialNumber);
+            return yubiKey != null;
         }
 
         internal class YubicoDeviceWithInfo
@@ -136,10 +135,10 @@ namespace Yubico.YubiKey
                 Info = GetDeviceInfo();
             }
 
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
                 // Check for null and compare run-time types
-                if ((obj == null) || !GetType().Equals(obj.GetType()))
+                if (obj == null || !GetType().Equals(obj.GetType()))
                 {
                     return false;
                 }

@@ -245,7 +245,7 @@ namespace Yubico.YubiKey.TestUtilities
                     }
                     // If the algorithm is ECC there has to be a public key as
                     // well, or else we can't return a PEM key string.
-                    if ((Algorithm == PivAlgorithm.EccP256) || (Algorithm == PivAlgorithm.EccP384))
+                    if (Algorithm == PivAlgorithm.EccP256 || Algorithm == PivAlgorithm.EccP384)
                     {
                         if (_pivPublicKey.Algorithm == PivAlgorithm.None)
                         {
@@ -257,28 +257,28 @@ namespace Yubico.YubiKey.TestUtilities
                     break;
 
                 case KeyTypeRsaPublic:
-                    if ((Algorithm == PivAlgorithm.Rsa1024) || (Algorithm == PivAlgorithm.Rsa2048))
+                    if (Algorithm == PivAlgorithm.Rsa1024 || Algorithm == PivAlgorithm.Rsa2048)
                     {
                         returnValue = true;
                     }
                     break;
 
                 case KeyTypeRsaPrivate:
-                    if ((_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024) || (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048))
+                    if (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024 || _pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048)
                     {
                         returnValue = true;
                     }
                     break;
 
                 case KeyTypeECDsaPublic:
-                    if ((_pivPublicKey.Algorithm == PivAlgorithm.EccP256) || (_pivPublicKey.Algorithm == PivAlgorithm.EccP384))
+                    if (_pivPublicKey.Algorithm == PivAlgorithm.EccP256 || _pivPublicKey.Algorithm == PivAlgorithm.EccP384)
                     {
                         returnValue = true;
                     }
                     break;
 
                 case KeyTypeECDsaPrivate:
-                    if ((_pivPrivateKey.Algorithm == PivAlgorithm.EccP256) || (_pivPrivateKey.Algorithm == PivAlgorithm.EccP384))
+                    if (_pivPrivateKey.Algorithm == PivAlgorithm.EccP256 || _pivPrivateKey.Algorithm == PivAlgorithm.EccP384)
                     {
                         if (_pivPublicKey.Algorithm != PivAlgorithm.None)
                         {
@@ -319,7 +319,7 @@ namespace Yubico.YubiKey.TestUtilities
                 return PivPublicKey.Create(_pivPublicKey.PivEncodedPublicKey);
             }
 
-            if ((_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024) || (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048))
+            if (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024 || _pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048)
             {
                 byte[] primeP = Array.Empty<byte>();
                 byte[] primeQ = Array.Empty<byte>();
@@ -378,7 +378,7 @@ namespace Yubico.YubiKey.TestUtilities
 
             try
             {
-                if ((_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024) || (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048))
+                if (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024 || _pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048)
                 {
                     var rsaPrivate = (PivRsaPrivateKey)_pivPrivateKey;
                     rsaParams.P = rsaPrivate.PrimeP.ToArray();
@@ -393,7 +393,7 @@ namespace Yubico.YubiKey.TestUtilities
                     return RSA.Create(rsaParams);
                 }
 
-                if ((_pivPublicKey.Algorithm == PivAlgorithm.Rsa1024) || (_pivPublicKey.Algorithm == PivAlgorithm.Rsa2048))
+                if (_pivPublicKey.Algorithm == PivAlgorithm.Rsa1024 || _pivPublicKey.Algorithm == PivAlgorithm.Rsa2048)
                 {
                     var rsaPublic = (PivRsaPublicKey)_pivPublicKey;
                     rsaParams.Modulus = rsaPublic.Modulus.ToArray();
@@ -513,7 +513,7 @@ namespace Yubico.YubiKey.TestUtilities
 
             try
             {
-                if ((Algorithm == PivAlgorithm.Rsa1024) || (Algorithm == PivAlgorithm.Rsa2048))
+                if (Algorithm == PivAlgorithm.Rsa1024 || Algorithm == PivAlgorithm.Rsa2048)
                 {
                     using RSA rsaObject = GetRsaObject();
                     if (IsPrivate)
@@ -525,7 +525,7 @@ namespace Yubico.YubiKey.TestUtilities
                         encodedKey = rsaObject.ExportSubjectPublicKeyInfo();
                     }
                 }
-                else if ((Algorithm == PivAlgorithm.EccP256) || (Algorithm == PivAlgorithm.EccP384))
+                else if (Algorithm == PivAlgorithm.EccP256 || Algorithm == PivAlgorithm.EccP384)
                 {
                     using ECDsa eccObject = GetEccObject();
                     if (IsPrivate)
@@ -610,7 +610,7 @@ namespace Yubico.YubiKey.TestUtilities
                 Algorithm = _pivPublicKey.Algorithm;
             }
 
-            if ((exceptionOnNoData == true) && (Algorithm == PivAlgorithm.None))
+            if (exceptionOnNoData == true && Algorithm == PivAlgorithm.None)
             {
                 throw new InvalidOperationException(
                     string.Format(
@@ -883,7 +883,7 @@ namespace Yubico.YubiKey.TestUtilities
         private static int ReadTagLen(byte[] buffer, int offset, bool readValue)
         {
             // Make sure there are enough bytes to read.
-            if ((offset < 0) || (buffer.Length < offset + 2))
+            if (offset < 0 || buffer.Length < offset + 2)
             {
                 return -1;
             }
@@ -896,7 +896,7 @@ namespace Yubico.YubiKey.TestUtilities
             // beyond 83). This says the length is the next 1, 2, or 3 octets.
             int length = buffer[offset + 1];
             int increment = 2;
-            if ((length == 0x80) || (length > 0x83))
+            if (length == 0x80 || length > 0x83)
             {
                 return -1;
             }
@@ -935,7 +935,7 @@ namespace Yubico.YubiKey.TestUtilities
         private static bool VerifyPemHeaderAndFooter(char[] pemKeyString, char[] targetStart, char[] targetEnd)
         {
             bool returnValue = false;
-            if (pemKeyString.Length > (targetStart.Length + targetEnd.Length))
+            if (pemKeyString.Length > targetStart.Length + targetEnd.Length)
             {
                 if (CompareToTarget(pemKeyString, 0, targetStart) == true)
                 {

@@ -133,7 +133,7 @@ namespace Yubico.YubiKey.Piv
 
                 bool returnValue = signature1[10] == signature2[10];
 
-                if ((algorithm == PivAlgorithm.EccP256) || (algorithm == PivAlgorithm.EccP384))
+                if (algorithm == PivAlgorithm.EccP256 || algorithm == PivAlgorithm.EccP384)
                 {
                     returnValue = signature1[11] != signature2[11];
                 }

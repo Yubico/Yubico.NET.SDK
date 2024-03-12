@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Fido2
                 OptionValue ovMinPin = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
                 OptionValue ovCredMgmt = fido2Session.AuthenticatorInfo.GetOptionValue(
                     AuthenticatorOptions.credMgmt);
-                if ((ovMinPin != OptionValue.True) || (ovCredMgmt != OptionValue.True) || !isSupported)
+                if (ovMinPin != OptionValue.True || ovCredMgmt != OptionValue.True || !isSupported)
                 {
                     return;
                 }

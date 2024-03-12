@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Fido2
             Assert.NotNull(authInfo.Extensions);
             if (!(authInfo.Extensions is null))
             {
-                bool isValid = authInfo.Extensions.Contains<string>("credBlob") && (maxCredBlobLength > 0);
+                bool isValid = authInfo.Extensions.Contains<string>("credBlob") && maxCredBlobLength > 0;
                 Assert.True(isValid);
             }
         }

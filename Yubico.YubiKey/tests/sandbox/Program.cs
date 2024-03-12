@@ -179,7 +179,7 @@ namespace Yubico.YubiKey.TestApp
                            + "If you do not supply a full path, the current working "
                            + "directory is the starting point."),
             };
-            if (_plugin is null || ((_outputLevel ?? OutputLevel.Normal) == OutputLevel.Verbose))
+            if (_plugin is null || (_outputLevel ?? OutputLevel.Normal) == OutputLevel.Verbose)
             {
                 paramUsage.Add(("Plug-ins", string.Empty));
             }
@@ -193,7 +193,7 @@ namespace Yubico.YubiKey.TestApp
 
             foreach (PluginBase plugin in plugIns)
             {
-                if (_plugin is null && ((_outputLevel ?? OutputLevel.Normal) != OutputLevel.Verbose))
+                if (_plugin is null && (_outputLevel ?? OutputLevel.Normal) != OutputLevel.Verbose)
                 {
                     // If there's no plug-in selected, show all of them, but only
                     // descriptions so that we don't have pages of parameters.

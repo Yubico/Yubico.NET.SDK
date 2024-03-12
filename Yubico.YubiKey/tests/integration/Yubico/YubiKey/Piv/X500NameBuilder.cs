@@ -205,10 +205,10 @@ namespace Yubico.YubiKey.Piv
         public static bool IsValidValueLength(this X500NameElement nameElement, int length) => nameElement switch
         {
             X500NameElement.Country => length == 2,
-            X500NameElement.State => (length > 0) && (length < 32),
-            X500NameElement.Locality => (length > 0) && (length < 32),
-            X500NameElement.Organization => (length > 0) && (length < 64),
-            X500NameElement.CommonName => (length > 0) && (length < 64),
+            X500NameElement.State => length > 0 && length < 32,
+            X500NameElement.Locality => length > 0 && length < 32,
+            X500NameElement.Organization => length > 0 && length < 64,
+            X500NameElement.CommonName => length > 0 && length < 64,
             _ => throw new ArgumentException(X500NameBuilder.InvalidElementMessage),
         };
     }

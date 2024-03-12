@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Fido2
 
             var cmd = new GetBioModalityCommand();
             GetBioModalityResponse rsp = Connection.SendCommand(cmd);
-            int modality = (rsp.Status == ResponseStatus.Success) ? rsp.GetData() : 0;
+            int modality = rsp.Status == ResponseStatus.Success ? rsp.GetData() : 0;
 
             return modality switch
             {
@@ -79,7 +79,7 @@ namespace Yubico.YubiKey.Fido2
 
             var cmd = new GetFingerprintSensorInfoCommand();
             GetFingerprintSensorInfoResponse rsp = Connection.SendCommand(cmd);
-            return (rsp.Status == ResponseStatus.Success) ?
+            return rsp.Status == ResponseStatus.Success ?
                 rsp.GetData() : throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
         }
 
@@ -320,7 +320,7 @@ namespace Yubico.YubiKey.Fido2
                     generalErrorMsg = nextRsp.StatusMessage;
                 }
 
-                if ((status == CtapStatus.Ok) && !string.IsNullOrEmpty(returnName))
+                if (status == CtapStatus.Ok && !string.IsNullOrEmpty(returnName))
                 {
                     var nameCmd = new BioEnrollSetFriendlyNameCommand(templateId, returnName, currentToken, AuthProtocol);
                     Fido2Response nameRsp = Connection.SendCommand(nameCmd);
@@ -432,7 +432,7 @@ namespace Yubico.YubiKey.Fido2
                 removeRsp = Connection.SendCommand(removeCmd);
             }
 
-            return (removeRsp.Status == ResponseStatus.Success) || (removeRsp.CtapStatus == CtapStatus.InvalidOption);
+            return removeRsp.Status == ResponseStatus.Success || removeRsp.CtapStatus == CtapStatus.InvalidOption;
         }
     }
 }

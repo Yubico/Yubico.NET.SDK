@@ -84,7 +84,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
                 for (int index = 0; index < yubiKeyArray.Length; index++)
                 {
                     if (!(yubiKeyArray[index].SerialNumber is null)
-                        && (yubiKeyChosen.SerialNumber == yubiKeyArray[index].SerialNumber))
+                        && yubiKeyChosen.SerialNumber == yubiKeyArray[index].SerialNumber)
                     {
                         return true;
                     }
@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
             // return value to null.
             yubiKeyChosen = null;
 
-            if ((yubiKeyArray.Length == 1) && (alwaysAsk == false))
+            if (yubiKeyArray.Length == 1 && alwaysAsk == false)
             {
                 yubiKeyChosen = yubiKeyArray[0];
                 return true;
@@ -112,7 +112,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
             }
 
             int indexChosen = menuObject.RunMenu("Which YubiKey do you want to use?", choices);
-            if ((indexChosen >= 0) && (indexChosen < yubiKeyArray.Length))
+            if (indexChosen >= 0 && indexChosen < yubiKeyArray.Length)
             {
                 yubiKeyChosen = yubiKeyArray[indexChosen];
                 return true;

@@ -215,7 +215,7 @@ namespace Yubico.YubiKey.Otp
                 }
 
                 // RFC 2781 does say to give preference to big endian, so I guess that'll be the tie-breaker.
-                return (score[0] >= score[1]) ? (Encoding.BigEndianUnicode, false) : (Encoding.Unicode, false);
+                return score[0] >= score[1] ? (Encoding.BigEndianUnicode, false) : (Encoding.Unicode, false);
             }
         }
     }

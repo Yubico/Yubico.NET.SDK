@@ -246,7 +246,7 @@ namespace Yubico.YubiKey.Fido2
                         forceToken, PinUvAuthTokenPermissions.LargeBlobWrite, null);
                     currentToken.CopyTo(token.AsMemory());
 
-                    currentLength = (remaining >= maxFragmentLength) ? maxFragmentLength : remaining;
+                    currentLength = remaining >= maxFragmentLength ? maxFragmentLength : remaining;
 
                     byte[] dataToAuth = BuildDataToAuth(encodedArray, offset, currentLength, digester);
                     byte[] pinUvAuthParam = AuthProtocol.AuthenticateUsingPinToken(token, 0, currentToken.Length, dataToAuth);
@@ -264,7 +264,7 @@ namespace Yubico.YubiKey.Fido2
                         offset += currentLength;
                         forceToken = false;
                     }
-                    else if ((response.CtapStatus == CtapStatus.PinAuthInvalid) && !forceToken)
+                    else if (response.CtapStatus == CtapStatus.PinAuthInvalid && !forceToken)
                     {
                         forceToken = true;
                     }

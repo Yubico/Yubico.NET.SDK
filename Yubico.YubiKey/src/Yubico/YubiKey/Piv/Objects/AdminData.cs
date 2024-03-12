@@ -464,9 +464,9 @@ namespace Yubico.YubiKey.Piv.Objects
             // property to be null. It was set to null when we called Clear
             // before decoding.
             bool isValid = tlvReader.TryReadValue(out ReadOnlyMemory<byte> theTime, DateTag);
-            isValid = isValid && (theTime.Length <= 8);
+            isValid = isValid && theTime.Length <= 8;
 
-            if (isValid && (theTime.Length > 0))
+            if (isValid && theTime.Length > 0)
             {
                 var cpyObj = new Memory<byte>(new byte[8]);
                 theTime.CopyTo(cpyObj);

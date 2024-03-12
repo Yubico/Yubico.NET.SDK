@@ -147,7 +147,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidCallOrder));
             }
-            if ((currentPin.Length > MaximumPinLength) || (newPin.Length > MaximumPinLength))
+            if (currentPin.Length > MaximumPinLength || newPin.Length > MaximumPinLength)
             {
                 throw new ArgumentException(
                     string.Format(

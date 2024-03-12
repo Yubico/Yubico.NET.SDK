@@ -161,7 +161,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
         {
-            int count = (_offset == 0) ? CborMapCountInit : CborMapCountUpdate;
+            int count = _offset == 0 ? CborMapCountInit : CborMapCountUpdate;
             var cborWriter = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cborWriter.WriteStartMap(count);
             cborWriter.WriteInt32(CborKeySet);

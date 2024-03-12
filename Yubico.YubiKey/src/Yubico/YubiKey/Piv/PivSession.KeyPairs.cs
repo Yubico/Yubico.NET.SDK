@@ -415,7 +415,7 @@ namespace Yubico.YubiKey.Piv
         // will map the slot number to the appropriate DataTag.
         private static PivDataTag GetCertDataTagFromSlotNumber(byte slotNumber)
         {
-            if ((slotNumber >= PivSlot.Retired1) && (slotNumber <= PivSlot.Retired20))
+            if (slotNumber >= PivSlot.Retired1 && slotNumber <= PivSlot.Retired20)
             {
                 return PivDataTag.Retired1 + (slotNumber - PivSlot.Retired1);
             }

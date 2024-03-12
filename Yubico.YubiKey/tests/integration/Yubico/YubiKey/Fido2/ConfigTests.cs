@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Fido2
                 OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("ep");
 
                 bool expectedResult = false;
-                if ((optionValue == OptionValue.True) || (optionValue == OptionValue.False))
+                if (optionValue == OptionValue.True || optionValue == OptionValue.False)
                 {
                     expectedResult = true;
                 }
@@ -133,7 +133,7 @@ namespace Yubico.YubiKey.Fido2
                 OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
                 bool isSupported = fido2Session.AuthenticatorInfo.IsExtensionSupported("minPinLength");
 
-                bool expectedResult = (optionValue == OptionValue.True) && isSupported;
+                bool expectedResult = optionValue == OptionValue.True && isSupported;
 
                 var rpList = new List<string>(1)
                 {

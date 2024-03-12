@@ -223,9 +223,9 @@ namespace Yubico.YubiKey.U2f
             }
 
             YubiKeyDeviceInfo getData = rsp.GetData();
-            if ((!getData.IsFipsSeries) ||
-                (getData.FirmwareVersion >= new FirmwareVersion(5, 0, 0)) ||
-                (getData.FirmwareVersion < new FirmwareVersion(4, 0, 0)))
+            if (!getData.IsFipsSeries ||
+                getData.FirmwareVersion >= new FirmwareVersion(5, 0, 0) ||
+                getData.FirmwareVersion < new FirmwareVersion(4, 0, 0))
             {
                 return false;
             }

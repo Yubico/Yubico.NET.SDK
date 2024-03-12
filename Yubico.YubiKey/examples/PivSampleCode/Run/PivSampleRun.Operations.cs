@@ -661,7 +661,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 return false;
             }
-            if ((valueChars[0] != '8') && (valueChars[0] != '9'))
+            if (valueChars[0] != '8' && valueChars[0] != '9')
             {
                 return false;
             }
@@ -672,13 +672,13 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             hiVal = (byte)((hiVal - subVal) << 4);
 
-            if ((valueChars[1] < '0') || (valueChars[1] > '9'))
+            if (valueChars[1] < '0' || valueChars[1] > '9')
             {
                 subVal = 0x37;
-                if ((valueChars[1] < 'A') || (valueChars[1] > 'F'))
+                if (valueChars[1] < 'A' || valueChars[1] > 'F')
                 {
                     subVal = 0x57;
-                    if ((valueChars[1] < 'a') || (valueChars[1] > 'f'))
+                    if (valueChars[1] < 'a' || valueChars[1] > 'f')
                     {
                         return false;
                     }
@@ -688,11 +688,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             loVal -= subVal;
 
             slotNumber = (byte)(hiVal + loVal);
-            if ((slotNumber < 0x82) || (slotNumber > 0x9E))
+            if (slotNumber < 0x82 || slotNumber > 0x9E)
             {
                 return false;
             }
-            if ((slotNumber > 0x95) && (slotNumber < 0x9A))
+            if (slotNumber > 0x95 && slotNumber < 0x9A)
             {
                 return false;
             }
@@ -769,12 +769,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             SampleMenu.WriteMessage(MessageType.Title, 0, "PIN retry count? (1 to 255)");
             _ = SampleMenu.ReadResponse(out int response);
-            if ((response != 0) && (response <= 255))
+            if (response != 0 && response <= 255)
             {
                 newRetryCountPin = (byte)response;
                 SampleMenu.WriteMessage(MessageType.Title, 0, "PUK retry count? (1 to 255)");
                 _ = SampleMenu.ReadResponse(out response);
-                if ((response != 0) && (response <= 255))
+                if (response != 0 && response <= 255)
                 {
                     newRetryCountPuk = (byte)response;
                     return true;

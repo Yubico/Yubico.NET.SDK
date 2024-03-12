@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                     return false;
                 }
 
-                if ((credentials.Count == 1) && (alwaysAsk == false))
+                if (credentials.Count == 1 && alwaysAsk == false)
                 {
                     chosenCredential = credentials[0];
                     return true;
@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 }
 
                 int indexChosen = menuObject.RunMenu("Which Credential do you want to use?", choices);
-                if ((indexChosen >= 0) && (indexChosen < credentials.Count))
+                if (indexChosen >= 0 && indexChosen < credentials.Count)
                 {
                     chosenCredential = credentials[indexChosen];
                     return true;
@@ -98,7 +98,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
             int indexChosen = menuObject.RunMenu("How would you want to add it?", choices);
 
-            if ((indexChosen >= 0) && (indexChosen < choices.Length))
+            if (indexChosen >= 0 && indexChosen < choices.Length)
             {
                 index = indexChosen;
                 return true;
@@ -130,7 +130,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
             int indexChosen = menuObject.RunMenu("What kind of credential do you want to add?", choices);
 
-            if ((indexChosen >= 0) && (indexChosen < choices.Length))
+            if (indexChosen >= 0 && indexChosen < choices.Length)
             {
                 index = indexChosen;
                 return true;
@@ -159,7 +159,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
             int indexChosen = menuObject.RunMenu("How would you want to " + name + " it?", choices);
 
-            if ((indexChosen >= 0) && (indexChosen < choices.Length))
+            if (indexChosen >= 0 && indexChosen < choices.Length)
             {
                 index = indexChosen;
                 return true;

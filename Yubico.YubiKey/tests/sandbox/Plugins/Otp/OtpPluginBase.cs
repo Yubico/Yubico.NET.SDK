@@ -407,13 +407,13 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             _button = (bool?)GetParameter("button") ?? false;
             _text = (string?)GetParameter("text") ?? string.Empty;
             _uri = (Uri?)GetParameter("uri");
-            _encoding = ((bool?)GetParameter("utf16") ?? false) ? NdefTextEncoding.Utf16 : NdefTextEncoding.Utf8;
+            _encoding = (bool?)GetParameter("utf16") ?? false ? NdefTextEncoding.Utf16 : NdefTextEncoding.Utf8;
             _read = (bool?)GetParameter("read") ?? false;
             _lcid = (string?)GetParameter("languageid") ?? string.Empty;
             _imf = (int?)GetParameter("initialmovingfactor") ?? 0;
             _text = (string?)GetParameter("text") ?? string.Empty;
             _uri = (Uri?)GetParameter("uri");
-            _encoding = ((bool?)GetParameter("utf16") ?? false) ? NdefTextEncoding.Utf16 : NdefTextEncoding.Utf8;
+            _encoding = (bool?)GetParameter("utf16") ?? false ? NdefTextEncoding.Utf16 : NdefTextEncoding.Utf8;
             _read = (bool?)GetParameter("read") ?? false;
             _lcid = (string?)GetParameter("languageid") ?? string.Empty;
 

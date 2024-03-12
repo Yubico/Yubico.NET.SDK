@@ -112,7 +112,7 @@ namespace Yubico.YubiKey.Management.Commands
 
             set
             {
-                if ((value < ushort.MinValue) || (value > ushort.MaxValue))
+                if (value < ushort.MinValue || value > ushort.MaxValue)
                 {
                     throw new ArgumentOutOfRangeException(nameof(value));
                 }

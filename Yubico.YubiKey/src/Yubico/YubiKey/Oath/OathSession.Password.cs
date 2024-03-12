@@ -141,8 +141,8 @@ namespace Yubico.YubiKey.Oath
             {
                 return verifyResponse.GetData();
             }
-            if ((verifyResponse.StatusWord == SWConstants.InvalidCommandDataParameter)
-                || (verifyResponse.StatusWord == SWConstants.ReferenceDataUnusable))
+            if (verifyResponse.StatusWord == SWConstants.InvalidCommandDataParameter
+                || verifyResponse.StatusWord == SWConstants.ReferenceDataUnusable)
             {
                 return false;
             }

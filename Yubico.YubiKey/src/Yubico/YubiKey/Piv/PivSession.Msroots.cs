@@ -329,7 +329,7 @@ namespace Yubico.YubiKey.Piv
             {
                 maxLength = NewMaximumObjectLength;
             }
-            if (length > (maxLength * MsrootsObjectCount))
+            if (length > maxLength * MsrootsObjectCount)
             {
                 throw new ArgumentOutOfRangeException(
                     contentsName, length,

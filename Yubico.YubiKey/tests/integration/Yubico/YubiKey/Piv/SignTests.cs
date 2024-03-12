@@ -292,7 +292,7 @@ namespace Yubico.YubiKey.Piv
             // Leading 00 bytes?
             if (rValue.Length > integerLength)
             {
-                if ((rValue.Length > (integerLength + 1)) || (rValue.Span[0] != 0))
+                if (rValue.Length > integerLength + 1 || rValue.Span[0] != 0)
                 {
                     return false;
                 }
@@ -300,7 +300,7 @@ namespace Yubico.YubiKey.Piv
             }
             if (sValue.Length > integerLength)
             {
-                if ((sValue.Length > (integerLength + 1)) || (sValue.Span[0] != 0))
+                if (sValue.Length > integerLength + 1 || sValue.Span[0] != 0)
                 {
                     return false;
                 }

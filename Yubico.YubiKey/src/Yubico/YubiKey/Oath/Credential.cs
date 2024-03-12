@@ -642,14 +642,14 @@ namespace Yubico.YubiKey.Oath
                 return false;
             }
 
-            return (_issuer == credential._issuer)
-                && (_accountName == credential._accountName)
-                && (_secret == credential._secret)
-                && (_digits == credential._digits)
-                && (_counter == credential._counter)
-                && (_type == credential._type)
-                && (_period == credential._period)
-                && (_algorithm == credential._algorithm);
+            return _issuer == credential._issuer
+                && _accountName == credential._accountName
+                && _secret == credential._secret
+                && _digits == credential._digits
+                && _counter == credential._counter
+                && _type == credential._type
+                && _period == credential._period
+                && _algorithm == credential._algorithm;
         }
 
         public static bool operator ==(Credential lhs, Credential rhs)

@@ -39,7 +39,7 @@ namespace Yubico.YubiKey
 
         protected CcidConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication application, byte[]? applicationId)
         {
-            if ((applicationId is null) && (application == YubiKeyApplication.Unknown))
+            if (applicationId is null && application == YubiKeyApplication.Unknown)
             {
                 throw new NotSupportedException();
             }

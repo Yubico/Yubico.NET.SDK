@@ -40,11 +40,11 @@ namespace Yubico.YubiKey.Scp03
             byte[] hostChallenge,
             byte[] cardChallenge)
         {
-            if ((outputLenBits != 0x40) && (outputLenBits != 0x80))
+            if (outputLenBits != 0x40 && outputLenBits != 0x80)
             {
                 throw new SecureChannelException(ExceptionMessages.IncorrectDerivationLength);
             }
-            if ((hostChallenge.Length != 8) || (cardChallenge.Length != 8))
+            if (hostChallenge.Length != 8 || cardChallenge.Length != 8)
             {
                 throw new SecureChannelException(ExceptionMessages.InvalidChallengeLength);
             }

@@ -386,11 +386,11 @@ namespace Yubico.YubiKey.Piv.Commands
             byte[] pinData = new byte[] { 0xAA, 0x01, (byte)pinPolicy };
             byte[] touchData = new byte[] { 0xAB, 0x01, (byte)touchPolicy };
             var expected = new List<byte>(keyData.EncodedPrivateKey.ToArray());
-            if ((pinPolicy != PivPinPolicy.None) && (pinPolicy != PivPinPolicy.Default))
+            if (pinPolicy != PivPinPolicy.None && pinPolicy != PivPinPolicy.Default)
             {
                 expected.AddRange(pinData);
             }
-            if ((touchPolicy != PivTouchPolicy.None) && (touchPolicy != PivTouchPolicy.Default))
+            if (touchPolicy != PivTouchPolicy.None && touchPolicy != PivTouchPolicy.Default)
             {
                 expected.AddRange(touchData);
             }

@@ -399,7 +399,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
         protected override void OnShown(EventArgs e)
         {
-            _ = (_state < 3) ? _pinBox.Focus() : _newPinBox.Focus();
+            _ = _state < 3 ? _pinBox.Focus() : _newPinBox.Focus();
         }
 
         private void OkButton_Click(object sender, EventArgs e)
@@ -468,7 +468,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 return 0;
             }
 
-            if ((e.KeyValue < 0x21) || (e.KeyValue > 0x7E) || (currentLen >= 63))
+            if (e.KeyValue < 0x21 || e.KeyValue > 0x7E || currentLen >= 63)
             {
                 EndPinPopup(DialogResult.Retry);
                 return 0;

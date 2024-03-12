@@ -55,7 +55,7 @@ namespace Yubico.YubiKey.Piv
                 return false;
             }
 
-            if ((keyEntryData.IsRetry == true) && (RetryFlag == 0))
+            if (keyEntryData.IsRetry == true && RetryFlag == 0)
             {
                 if (!(keyEntryData.RetriesRemaining is null))
                 {

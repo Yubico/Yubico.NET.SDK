@@ -264,7 +264,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         {
             if (algIdParams.Length == 2)
             {
-                if ((algIdParams.Span[0] == 0x30) && (algIdParams.Span[1] == 0))
+                if (algIdParams.Span[0] == 0x30 && algIdParams.Span[1] == 0)
                 {
                     PssSaltLength = 20;
                 }

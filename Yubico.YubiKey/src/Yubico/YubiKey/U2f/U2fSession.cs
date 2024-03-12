@@ -473,8 +473,8 @@ namespace Yubico.YubiKey.U2f
                     {
                         Thread.Sleep(100);
                         response = Connection.SendCommand(command);
-                    } while ((response.Status == ResponseStatus.ConditionsNotSatisfied)
-                        && (timer.Elapsed < timeoutToUse));
+                    } while (response.Status == ResponseStatus.ConditionsNotSatisfied
+                        && timer.Elapsed < timeoutToUse);
 
                     // Did we break out because of timeout or because the
                     // response was something other than ConditionsNotSatisfied.
@@ -804,8 +804,8 @@ namespace Yubico.YubiKey.U2f
                     {
                         Thread.Sleep(100);
                         response = Connection.SendCommand(command);
-                    } while ((response.Status == ResponseStatus.ConditionsNotSatisfied)
-                        && (timer.Elapsed < timeoutToUse));
+                    } while (response.Status == ResponseStatus.ConditionsNotSatisfied
+                        && timer.Elapsed < timeoutToUse);
 
                     // Did we break out because of timeout or because the
                     // response was something other than ConditionsNotSatisfied.
@@ -908,7 +908,7 @@ namespace Yubico.YubiKey.U2f
                     secondsToUse++;
                 }
             }
-            return (secondsToUse == 0) ? TimeSpan.MaxValue : TimeSpan.FromSeconds(secondsToUse);
+            return secondsToUse == 0 ? TimeSpan.MaxValue : TimeSpan.FromSeconds(secondsToUse);
         }
     }
 }

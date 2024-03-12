@@ -301,7 +301,7 @@ namespace Yubico.YubiKey.Piv
         private static TlvReader? GetTlvReader(PivDataTag tag, ReadOnlyMemory<byte> encoding)
         {
             int expectedTag = PivPutDataTag;
-            if ((tag == PivDataTag.Discovery) || (tag == PivDataTag.BiometricGroupTemplate))
+            if (tag == PivDataTag.Discovery || tag == PivDataTag.BiometricGroupTemplate)
             {
                 expectedTag = (int)tag;
             }
@@ -341,7 +341,7 @@ namespace Yubico.YubiKey.Piv
             bool returnValue = true;
             int index = 0;
 
-            while ((returnValue == true) && (index < expectedFormat.Length))
+            while (returnValue == true && index < expectedFormat.Length)
             {
                 try
                 {

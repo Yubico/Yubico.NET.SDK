@@ -215,7 +215,7 @@ namespace Yubico.YubiKey.Piv.Commands
             get => _tag;
             set
             {
-                if ((value < MinimumVendorTag) || (value > MaximumVendorTag))
+                if (value < MinimumVendorTag || value > MaximumVendorTag)
                 {
                     if (value != BiometricGroupTemplateTag)
                     {

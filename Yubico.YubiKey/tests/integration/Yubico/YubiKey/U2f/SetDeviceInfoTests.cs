@@ -61,8 +61,8 @@ namespace Yubico.YubiKey.U2f
         {
             foreach (HidDevice currentDevice in devices)
             {
-                if ((currentDevice.VendorId == 0x1050) &&
-                    (currentDevice.UsagePage == HidUsagePage.Fido))
+                if (currentDevice.VendorId == 0x1050 &&
+                    currentDevice.UsagePage == HidUsagePage.Fido)
                 {
                     return currentDevice;
                 }

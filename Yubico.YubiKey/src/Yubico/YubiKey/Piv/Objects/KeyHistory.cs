@@ -189,7 +189,7 @@ namespace Yubico.YubiKey.Piv.Objects
                 return new byte[] { 0x53, 0x00 };
             }
 
-            if ((_onCardCerts == 0) && (_offCardCerts == 0) && (!(OffCardCertificateUrl is null)))
+            if (_onCardCerts == 0 && _offCardCerts == 0 && !(OffCardCertificateUrl is null))
             {
                 throw new InvalidOperationException(
                     string.Format(
@@ -314,7 +314,7 @@ namespace Yubico.YubiKey.Piv.Objects
         // the URL to null. Otherwise, leave it alone.
         private void SetOffCardUrlNullIfZeroCerts()
         {
-            if ((_onCardCerts == 0) && (_offCardCerts == 0))
+            if (_onCardCerts == 0 && _offCardCerts == 0)
             {
                 _offCardCertUrl = null;
                 _urlBytes = null;

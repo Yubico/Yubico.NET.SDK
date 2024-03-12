@@ -314,7 +314,7 @@ namespace Yubico.YubiKey.Fido2
 
                 // If the permissions requested require an RpId, then make sure there
                 // is one.
-                if ((allPermissions.GetRpIdRequirement() == RequirementValue.Required) && (rpId is null))
+                if (allPermissions.GetRpIdRequirement() == RequirementValue.Required && rpId is null)
                 {
                     throw new InvalidOperationException(ExceptionMessages.Fido2RelyingPartyMissing);
                 }
@@ -1008,7 +1008,7 @@ namespace Yubico.YubiKey.Fido2
 
             ObtainSharedSecret();
 
-            if (!permissions.HasValue || (permissions == PinUvAuthTokenPermissions.None))
+            if (!permissions.HasValue || permissions == PinUvAuthTokenPermissions.None)
             {
                 if (!string.IsNullOrEmpty(relyingPartyId))
                 {
@@ -1215,8 +1215,8 @@ namespace Yubico.YubiKey.Fido2
 
         private CtapStatus DoVerifyUv(PinUvAuthTokenPermissions permissions, string? relyingPartyId, out string statusMessage)
         {
-            if ((AuthenticatorInfo.GetOptionValue("pinUvAuthToken") != OptionValue.True)
-                || (AuthenticatorInfo.GetOptionValue("uv") != OptionValue.True))
+            if (AuthenticatorInfo.GetOptionValue("pinUvAuthToken") != OptionValue.True
+                || AuthenticatorInfo.GetOptionValue("uv") != OptionValue.True)
             {
                 statusMessage = "";
                 return CtapStatus.UnsupportedOption;

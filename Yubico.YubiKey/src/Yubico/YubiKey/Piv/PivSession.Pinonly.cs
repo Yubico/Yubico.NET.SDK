@@ -811,7 +811,7 @@ namespace Yubico.YubiKey.Piv
             // If the caller wants a Mode of None, we're going to ignore the
             // mgmtKeyAlgorithm arg, and we're going to want to clear the
             // YubiKey, so say it is a new algorithm.
-            bool newAlgorithm = (mgmtKeyAlgorithm != ManagementKeyAlgorithm) || (pinOnlyMode == PivPinOnlyMode.None);
+            bool newAlgorithm = mgmtKeyAlgorithm != ManagementKeyAlgorithm || pinOnlyMode == PivPinOnlyMode.None;
 
             // We're creating this variable so that we know which mode to set.
             // We might need to set a mode because the caller requests it and it
@@ -857,7 +857,7 @@ namespace Yubico.YubiKey.Piv
 
             // If the mgmt key has not yet been authenticated, then get it
             // using the KeyCollector.
-            if ((!currentMode.HasFlag(PivPinOnlyMode.PinProtected)) && (!currentMode.HasFlag(PivPinOnlyMode.PinDerived)))
+            if (!currentMode.HasFlag(PivPinOnlyMode.PinProtected) && !currentMode.HasFlag(PivPinOnlyMode.PinDerived))
             {
                 // Actually, before we do that, check to see if the requested is
                 // None. It's possible that one or both of the modes is
@@ -1146,7 +1146,7 @@ namespace Yubico.YubiKey.Piv
 
             try
             {
-                if (!isValid || (adminData.Salt is null))
+                if (!isValid || adminData.Salt is null)
                 {
                     return true;
                 }
@@ -1192,7 +1192,7 @@ namespace Yubico.YubiKey.Piv
                 isValid = TryReadObject<PinProtectedData>(out PinProtectedData pinProtect);
                 using (pinProtect)
                 {
-                    if (isValid && (!(pinProtect.ManagementKey is null)))
+                    if (isValid && !(pinProtect.ManagementKey is null))
                     {
                         var mgmtKey = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
                         if (MemoryExtensions.SequenceEqual(

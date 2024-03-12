@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
         public static bool GetFipsMode(IYubiKeyDevice yubiKey, out bool isFipsMode)
         {
             isFipsMode = false;
-            if ((yubiKey is null) || (!yubiKey.IsFipsSeries))
+            if (yubiKey is null || !yubiKey.IsFipsSeries)
             {
                 return false;
             }

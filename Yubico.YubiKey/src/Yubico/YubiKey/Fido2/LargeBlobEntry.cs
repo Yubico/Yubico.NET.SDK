@@ -176,7 +176,7 @@ namespace Yubico.YubiKey.Fido2
 
                 // Make sure the data includes the tag plus at least one byte,
                 // and that there is original data.
-                if ((OriginalDataLength > 0) && (Ciphertext.Length > GcmTagSize))
+                if (OriginalDataLength > 0 && Ciphertext.Length > GcmTagSize)
                 {
                     return;
                 }

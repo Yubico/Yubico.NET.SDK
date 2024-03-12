@@ -191,7 +191,7 @@ namespace Yubico.YubiKey.Fido2
             // determines that the caller is not allowed to get that data or it
             // is not available. So don't try to read any extensions unless we
             // know for sure there is data to read.
-            if (extensions && (offset < EncodedAuthenticatorData.Length))
+            if (extensions && offset < EncodedAuthenticatorData.Length)
             {
                 var extensionList = new Dictionary<string, byte[]>();
                 var cbor = new CborReader(EncodedAuthenticatorData[offset..], CborConformanceMode.Ctap2Canonical);
@@ -364,7 +364,7 @@ namespace Yubico.YubiKey.Fido2
                 if (Extensions.ContainsKey(KeyCredProtect))
                 {
                     byte[] encodedValue = Extensions[KeyCredProtect];
-                    if ((encodedValue.Length == 1) && (encodedValue[0] >= 1) && (encodedValue[0] <= 3))
+                    if (encodedValue.Length == 1 && encodedValue[0] >= 1 && encodedValue[0] <= 3)
                     {
                         return (CredProtectPolicy)encodedValue[0];
                     }

@@ -104,7 +104,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// </returns>
         public static byte[] EncodeStringArray(IReadOnlyList<string>? localData)
         {
-            if ((localData is null) || (localData.Count == 0))
+            if (localData is null || localData.Count == 0)
             {
                 return Array.Empty<byte>();
             }
@@ -141,7 +141,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// </returns>
         public static byte[] EncodeArrayOfObjects(IReadOnlyList<ICborEncode>? localData)
         {
-            if ((localData is null) || (localData.Count == 0))
+            if (localData is null || localData.Count == 0)
             {
                 return Array.Empty<byte>();
             }

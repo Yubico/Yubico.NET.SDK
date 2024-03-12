@@ -200,7 +200,7 @@ namespace Yubico.YubiKey.Fido2
                 Format = map.ReadTextString(KeyFormat);
                 AuthenticatorData = new AuthenticatorData(map.ReadByteString(KeyAuthData));
                 if (!(AuthenticatorData.CredentialPublicKey is CoseEcPublicKey)
-                    || (AuthenticatorData.CredentialPublicKey.Type != CoseKeyType.Ec2)
+                    || AuthenticatorData.CredentialPublicKey.Type != CoseKeyType.Ec2
                     || !map.Contains(KeyAttestationStatement)
                     || !ReadAttestation(map))
                 {
@@ -240,8 +240,8 @@ namespace Yubico.YubiKey.Fido2
             EncodedAttestationStatement = attest.Encoded;
             if (!Format.Equals(PackedString, StringComparison.Ordinal)
                 || !attest.Contains(AlgString) || !attest.Contains(SigString)
-                || (attest.Count > MaxAttestationMapCount)
-                || ((attest.Count == MaxAttestationMapCount) && !attest.Contains(X5cString)))
+                || attest.Count > MaxAttestationMapCount
+                || (attest.Count == MaxAttestationMapCount && !attest.Contains(X5cString)))
             {
                 return false;
             }
@@ -288,7 +288,7 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public bool VerifyAttestation(ReadOnlyMemory<byte> clientDataHash)
         {
-            if ((AttestationCertificates is null) || (AttestationCertificates.Count == 0))
+            if (AttestationCertificates is null || AttestationCertificates.Count == 0)
             {
                 throw new InvalidOperationException(ExceptionMessages.MissingCtap2Data);
             }

@@ -202,7 +202,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         //     03 bool
         private static byte[]? EncodeParams(int? minPinLength, IReadOnlyList<string>? rpIds, bool? forceChangePin)
         {
-            if ((minPinLength is null) && (rpIds is null) && (forceChangePin is null))
+            if (minPinLength is null && rpIds is null && forceChangePin is null)
             {
                 return null;
             }

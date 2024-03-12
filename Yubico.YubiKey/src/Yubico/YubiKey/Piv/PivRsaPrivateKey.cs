@@ -144,8 +144,8 @@ namespace Yubico.YubiKey.Piv
                         ExceptionMessages.InvalidPrivateKeyData)),
             };
 
-            if ((primeQ.Length != primeP.Length) || (exponentP.Length != primeP.Length)
-                || (exponentQ.Length != primeP.Length) || (coefficient.Length != primeP.Length))
+            if (primeQ.Length != primeP.Length || exponentP.Length != primeP.Length
+                || exponentQ.Length != primeP.Length || coefficient.Length != primeP.Length)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -200,7 +200,7 @@ namespace Yubico.YubiKey.Piv
 
                 int tag = tlvReader.PeekTag();
                 ReadOnlyMemory<byte> temp = tlvReader.ReadValue(tag);
-                if ((tag <= 0) || (tag > CrtComponentCount))
+                if (tag <= 0 || tag > CrtComponentCount)
                 {
                     continue;
                 }

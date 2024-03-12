@@ -288,9 +288,9 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
         {
             string versionNumber = _yubiKeyChosen.FirmwareVersion.ToString();
 
-            if ((_yubiKeyChosen.FirmwareVersion >= new FirmwareVersion(5, 0, 0))
-                || (_yubiKeyChosen.FirmwareVersion < new FirmwareVersion(4, 0, 0))
-                || (!_yubiKeyChosen.IsFipsSeries))
+            if (_yubiKeyChosen.FirmwareVersion >= new FirmwareVersion(5, 0, 0)
+                || _yubiKeyChosen.FirmwareVersion < new FirmwareVersion(4, 0, 0)
+                || !_yubiKeyChosen.IsFipsSeries)
             {
                 SampleMenu.WriteMessage(MessageType.Title, 0, "It is possible to reset the U2F application on only version 4");
                 SampleMenu.WriteMessage(MessageType.Title, 0, "FIPS series YubiKeys.");

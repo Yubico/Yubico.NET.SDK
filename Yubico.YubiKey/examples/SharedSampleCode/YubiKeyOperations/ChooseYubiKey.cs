@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
         // to select, even if yubiKeyChosen is not null (one has been previously
         // chosen), or there is only one YubiKey connected.
         // If alwaysAsk is false and yubiKeyChosen is null, choose.
-        // If alwaysAsk is false and yubuKeyChosen is not null, verify that the
+        // If alwaysAsk is false and yubiKeyChosen is not null, verify that the
         // YubiKey listed is still attached. If so, just return true. If not,
         // choose.
         // If alwaysAsk is false, to choose means don't ask the user to choose if

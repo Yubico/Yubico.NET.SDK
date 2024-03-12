@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
     /// Every credential in the YubiHSM Auth application contains two
     /// secrets: the credential password, and the cryptographic key(s). The
     /// requirements for the credential password are the same for every
-    /// credential. The caller is responsible for generating the cryptogrpahic
+    /// credential. The caller is responsible for generating the cryptographic
     /// key(s) with an appropriate RNG. The requirements for the
     /// key(s) vary based on the <see cref="Credential.KeyType"/>. Classes
     /// that inherit from this one will implement functionality related to the

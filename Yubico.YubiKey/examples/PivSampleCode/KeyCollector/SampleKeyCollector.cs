@@ -145,7 +145,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // Collect a value.
         // The name describes what to collect.
         // The defaultValueString is a string describing the default value and
-        // must be one of the private conts string values "Default...Sting".
+        // must be one of the private const string values "Default...String".
         public static byte[] CollectValue(string defaultValueString, string name)
         {
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter " + name);

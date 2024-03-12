@@ -316,7 +316,7 @@ namespace Yubico.YubiKey.Piv
         public int RetryCount { get; private set; }
 
         /// <summary>
-        /// How many PIN or PUK retries remain befroe the PIN or PUK will be
+        /// How many PIN or PUK retries remain before the PIN or PUK will be
         /// locked. If the slot is not PIN or PUK, this value will be -1,
         /// indicating the count is unknown.
         /// </summary>

@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Pipelines
     /// <remarks>
     /// Does an SCP03 Initialize Update / External Authenticate handshake at setup.
     ///
-    /// Commands and responses sent throught this pipeline are confidential and authenticated.
+    /// Commands and responses sent through this pipeline are confidential and authenticated.
     ///
     /// Requires pre-shared <see cref="StaticKeys"/>.
     /// </remarks>

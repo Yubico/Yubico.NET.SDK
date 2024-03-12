@@ -127,7 +127,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
                 // Now that it is decrypted, unpad.
                 // There are two unpad algorithms supported in the
-                // Yubico.YubiKey.Cryptogrpahy.RsaFormat class: PKCS 1 v1.5 and
+                // Yubico.YubiKey.Cryptography.RsaFormat class: PKCS 1 v1.5 and
                 // OAEP.
                 // If the padding scheme is OAEP there will be a digest algorithm
                 // specified. If the padding scheme is P1.5, there will not.

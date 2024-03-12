@@ -18,7 +18,7 @@ using Yubico.YubiKey.Scp03;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    /// A static class containing extension methods for YubiKeyDevide objects,
+    /// A static class containing extension methods for YubiKeyDevice objects,
     /// such as <see cref="WithScp03"/>.
     /// </summary>
     public static class YubiKeyDeviceExtensions

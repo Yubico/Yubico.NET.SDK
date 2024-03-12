@@ -247,7 +247,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                 return true;
             }
 
-            // Now that we know we have a vaild key handle, call on the YubiKey
+            // Now that we know we have a valid key handle, call on the YubiKey
             // to compute the signature.
             // Verifying a credential is a two-step process, get the YubiKey to
             // sign the data, and then verify the signature.
@@ -270,7 +270,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             // which is to determine if the credential authenticates. Discovering
             // that a credential does not authenticate is not an error, it is the
             // method successfully completing the task it was designed to do,
-            // namely, to determine if the crenential authenticates.
+            // namely, to determine if the credential authenticates.
             if (authenticationData.VerifySignature(
                 regData.UserPublicKey, regData.ApplicationId, regData.ClientDataHash))
             {

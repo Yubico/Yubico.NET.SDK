@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Otp.Commands
         /// Initializes a new instance of the <see cref="SetDeviceInfoCommand"/> class.
         /// </summary>
         /// <param name="baseCommand">
-        /// An instance of the base class to use for intialization.
+        /// An instance of the base class to use for initialization.
         /// </param>
         public SetDeviceInfoCommand(SetDeviceInfoBaseCommand baseCommand) : base(baseCommand)
         {

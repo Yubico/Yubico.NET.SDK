@@ -155,7 +155,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </param>
         /// <exception cref="Ctap2DataException">
         /// The <c>cborEncoding</c> is not a valid CBOR encoding, or it is not a
-        /// correct encoding for FIDO2 BioEnrollement data.
+        /// correct encoding for FIDO2 BioEnrollment data.
         /// </exception>
         public BioEnrollmentData(ReadOnlyMemory<byte> cborEncoding)
         {

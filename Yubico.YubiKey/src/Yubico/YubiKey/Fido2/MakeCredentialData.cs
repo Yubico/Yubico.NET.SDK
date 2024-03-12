@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Fido2
         /// <remarks>
         /// Use the public key in the zero'th element of the
         /// <see cref="AttestationCertificates"/> to verify this signature. If no
-        /// attestation certificate is provided, the authenticator asssumes the
+        /// attestation certificate is provided, the authenticator assumes the
         /// entity that must verify the signature will have access to the
         /// appropriate cert.
         /// <para>

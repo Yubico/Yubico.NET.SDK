@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// application, and the number of retries remaining.
         /// </summary>
         /// <returns>
-        /// The data in the reponse APDU, as a list of credentials and retry count.
+        /// The data in the response APDU, as a list of credentials and retry count.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the <see cref="IYubiKeyResponse.Status"/> is not equal to

@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <code>
     ///    Suppose the data is
     ///      04 02 55 44 02 01 7F
-    ///    It will be retruned by the GetDataCommand as
+    ///    It will be returned by the GetDataCommand as
     ///      53 07
     ///         04 02 55 44 02 01 7F
     /// </code>
@@ -223,7 +223,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
         /// <summary>
         /// &gt; [!WARNING]
-        /// &gt; This constructor is obsolete, use <c>GetDataComand()</c> or
+        /// &gt; This constructor is obsolete, use <c>GetDataCommand()</c> or
         /// &gt; <c>GetDataCommand(int)</c> instead.
         ///
         /// Initializes a new instance of the <c>GetDataCommand</c> class. This

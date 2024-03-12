@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.TestUtilities
         {
             const string delimiters = @",.:\- ";
 
-            // Dillema, how to deal with an empty parameter.
+            // Dilemma, how to deal with an empty parameter.
             // I could throw an exception, but I think I'll just return an empty
             // array.
             if (string.IsNullOrWhiteSpace(s))
@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.TestUtilities
                 return result.ToArray();
             }
 
-            // Next, let' see if it's delmited.
+            // Next, let' see if it's delimited.
             if (Regex.IsMatch(s, $"[{delimiters}]"))
             {
                 // Okay, it may be delimited. First, are there any illegal 

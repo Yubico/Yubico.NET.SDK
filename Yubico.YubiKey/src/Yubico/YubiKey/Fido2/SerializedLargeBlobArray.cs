@@ -109,7 +109,7 @@ namespace Yubico.YubiKey.Fido2
         /// or add entries. If you want to "edit" an existing entry, add a new
         /// entry with the updated information, then delete the previous version.
         /// <para>
-        /// Upon retrieval, each entry's blob data is still enrcypted. Use
+        /// Upon retrieval, each entry's blob data is still encrypted. Use
         /// <see cref="LargeBlobEntry.TryDecrypt"/> to see the actual data.
         /// </para>
         /// </remarks>

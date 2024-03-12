@@ -22,19 +22,21 @@ namespace Yubico.YubiKey.Piv
 {
     public class ManagementKeyTests
     {
-        private readonly ITestOutputHelper _output;
         private readonly byte[] _currentKey;
         private readonly byte[] _newKey;
+        private readonly ITestOutputHelper _output;
 
         public ManagementKeyTests(ITestOutputHelper output)
         {
             _output = output;
-            _currentKey = new byte[] {
+            _currentKey = new byte[]
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             };
-            _newKey = new byte[] {
+            _newKey = new byte[]
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
@@ -49,7 +51,6 @@ namespace Yubico.YubiKey.Piv
             bool expectedResult = false;
             if (testDevice.FirmwareVersion >= new FirmwareVersion(5, 4, 2))
             {
-
                 expectedResult = true;
             }
 
@@ -139,7 +140,7 @@ namespace Yubico.YubiKey.Piv
                 return false;
             }
 
-            if (keyEntryData.IsRetry == true)
+            if (keyEntryData.IsRetry)
             {
                 _output.WriteLine("Retry");
                 return false;

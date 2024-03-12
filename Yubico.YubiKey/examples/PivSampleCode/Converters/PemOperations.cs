@@ -187,7 +187,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             bool returnValue = false;
             if (pemKeyString.Length > targetStart.Length + targetEnd.Length)
             {
-                if (CompareToTarget(pemKeyString, 0, targetStart) == true)
+                if (CompareToTarget(pemKeyString, 0, targetStart))
                 {
                     returnValue = CompareToTarget(pemKeyString, pemKeyString.Length - targetEnd.Length, targetEnd);
                 }

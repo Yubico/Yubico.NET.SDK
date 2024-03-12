@@ -14,7 +14,6 @@
 
 using System;
 using System.Globalization;
-using System.Linq;
 using System.Security;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Oath.Commands;
@@ -49,9 +48,8 @@ namespace Yubico.YubiKey.Oath
 
             try
             {
-                if (KeyCollector!(keyEntryData) == true)
+                if (KeyCollector!(keyEntryData))
                 {
-
                     ReadOnlyMemory<byte> password = keyEntryData.GetCurrentValue();
                     var validateCommand = new ValidateCommand(password, _oathData);
                     ValidateResponse verifyResponse = Connection.SendCommand(validateCommand);
@@ -141,6 +139,7 @@ namespace Yubico.YubiKey.Oath
             {
                 return verifyResponse.GetData();
             }
+
             if (verifyResponse.StatusWord == SWConstants.InvalidCommandDataParameter
                 || verifyResponse.StatusWord == SWConstants.ReferenceDataUnusable)
             {
@@ -185,7 +184,7 @@ namespace Yubico.YubiKey.Oath
 
             try
             {
-                if (KeyCollector!(keyEntryData) == true)
+                if (KeyCollector!(keyEntryData))
                 {
                     ReadOnlyMemory<byte> currentPassword = keyEntryData.GetCurrentValue();
                     ReadOnlyMemory<byte> newPassword = keyEntryData.GetNewValue();
@@ -380,7 +379,7 @@ namespace Yubico.YubiKey.Oath
 
             try
             {
-                if (KeyCollector!(keyEntryData) == true)
+                if (KeyCollector!(keyEntryData))
                 {
                     if (!TryUnsetPassword(keyEntryData.GetCurrentValue()))
                     {
@@ -473,6 +472,7 @@ namespace Yubico.YubiKey.Oath
         /// A boolean, <c>true</c> if the OATH application is unset, and
         /// <c>false</c> otherwise.
         /// </returns>
-        public bool TryUnsetPassword(ReadOnlyMemory<byte> password) => TrySetPassword(password, ReadOnlyMemory<byte>.Empty);
+        public bool TryUnsetPassword(ReadOnlyMemory<byte> password) =>
+            TrySetPassword(password, ReadOnlyMemory<byte>.Empty);
     }
 }

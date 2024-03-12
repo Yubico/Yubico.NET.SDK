@@ -36,9 +36,10 @@ namespace Yubico.YubiKey.Piv.Commands
             byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(
-              new byte[] { 0x7C, 0x09, 0x81, 0x07, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
+                new byte[] { 0x7C, 0x09, 0x81, 0x07, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
-            _ = Assert.Throws<MalformedYubiKeyResponseException>(() => new InitializeAuthenticateManagementKeyResponse(responseApdu));
+            _ = Assert.Throws<MalformedYubiKeyResponseException>(() =>
+                new InitializeAuthenticateManagementKeyResponse(responseApdu));
         }
 
         [Fact]
@@ -47,9 +48,10 @@ namespace Yubico.YubiKey.Piv.Commands
             byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(
-              new byte[] { 0x78, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
+                new byte[] { 0x78, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
-            _ = Assert.Throws<MalformedYubiKeyResponseException>(() => new InitializeAuthenticateManagementKeyResponse(responseApdu));
+            _ = Assert.Throws<MalformedYubiKeyResponseException>(() =>
+                new InitializeAuthenticateManagementKeyResponse(responseApdu));
         }
 
         [Fact]
@@ -58,9 +60,10 @@ namespace Yubico.YubiKey.Piv.Commands
             byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(
-              new byte[] { 0x7C, 0x0A, 0x82, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
+                new byte[] { 0x7C, 0x0A, 0x82, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
-            _ = Assert.Throws<MalformedYubiKeyResponseException>(() => new InitializeAuthenticateManagementKeyResponse(responseApdu));
+            _ = Assert.Throws<MalformedYubiKeyResponseException>(() =>
+                new InitializeAuthenticateManagementKeyResponse(responseApdu));
         }
 
         [Fact]
@@ -69,9 +72,10 @@ namespace Yubico.YubiKey.Piv.Commands
             byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(
-              new byte[] { 0x7C, 0x0A, 0x81, 0x07, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
+                new byte[] { 0x7C, 0x0A, 0x81, 0x07, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
-            _ = Assert.Throws<MalformedYubiKeyResponseException>(() => new InitializeAuthenticateManagementKeyResponse(responseApdu));
+            _ = Assert.Throws<MalformedYubiKeyResponseException>(() =>
+                new InitializeAuthenticateManagementKeyResponse(responseApdu));
         }
 
         [Fact]
@@ -80,7 +84,7 @@ namespace Yubico.YubiKey.Piv.Commands
             byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(
-              new byte[] { 0x7C, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
+                new byte[] { 0x7C, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
             var response = new InitializeAuthenticateManagementKeyResponse(responseApdu);
 
@@ -93,7 +97,7 @@ namespace Yubico.YubiKey.Piv.Commands
             byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(
-              new byte[] { 0x7C, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
+                new byte[] { 0x7C, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
             var response = new InitializeAuthenticateManagementKeyResponse(responseApdu);
 
@@ -108,13 +112,13 @@ namespace Yubico.YubiKey.Piv.Commands
             byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             byte sw2 = unchecked((byte)SWConstants.Success);
             byte tag2 = 0x81;
-            if (isMutual == true)
+            if (isMutual)
             {
                 tag2 = 0x80;
             }
 
             var responseApdu = new ResponseApdu(
-              new byte[] { 0x7C, 0x0A, tag2, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
+                new byte[] { 0x7C, 0x0A, tag2, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
             var response = new InitializeAuthenticateManagementKeyResponse(responseApdu);
 
@@ -132,7 +136,7 @@ namespace Yubico.YubiKey.Piv.Commands
             var expected = new List<byte>(
                 new byte[8] { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88 });
             var responseApdu = new ResponseApdu(
-              new byte[] { 0x7C, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
+                new byte[] { 0x7C, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
 
             var response = new InitializeAuthenticateManagementKeyResponse(responseApdu);
 

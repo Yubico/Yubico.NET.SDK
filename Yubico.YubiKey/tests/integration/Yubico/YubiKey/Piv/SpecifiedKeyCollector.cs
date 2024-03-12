@@ -22,9 +22,9 @@ namespace Yubico.YubiKey.Piv
     // key at construction, and those are the only values it returns.
     public class SpecifiedKeyCollector
     {
+        private readonly byte[] _mgmtKey;
         private readonly byte[] _pin;
         private readonly byte[] _puk;
-        private readonly byte[] _mgmtKey;
 
         public SpecifiedKeyCollector(byte[] pin, byte[] puk, byte[] mgmtKey)
         {
@@ -45,7 +45,7 @@ namespace Yubico.YubiKey.Piv
                 return false;
             }
 
-            if (keyEntryData.IsRetry == true)
+            if (keyEntryData.IsRetry)
             {
                 return false;
             }
@@ -84,14 +84,14 @@ namespace Yubico.YubiKey.Piv
                     currentValue = _mgmtKey;
                     break;
 
-                    //                case KeyEntryRequest.ChangePivManagementKey:
-                    //                    if (keyEntryData.IsRetry == true)
-                    //                    {
-                    //                        return false;
-                    //                    }
-                    //                    currentValue = CollectMgmtKey();
-                    //                    newValue = CollectMgmtKey();
-                    //                    break;
+                //                case KeyEntryRequest.ChangePivManagementKey:
+                //                    if (keyEntryData.IsRetry == true)
+                //                    {
+                //                        return false;
+                //                    }
+                //                    currentValue = CollectMgmtKey();
+                //                    newValue = CollectMgmtKey();
+                //                    break;
             }
 
             if (newValue is null)

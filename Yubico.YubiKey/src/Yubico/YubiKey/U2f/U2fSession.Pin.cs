@@ -19,7 +19,6 @@ using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.U2f.Commands;
 
-
 namespace Yubico.YubiKey.U2f
 {
     // This portion of the U2fSession class contains code for PIN operations.
@@ -74,6 +73,7 @@ namespace Yubico.YubiKey.U2f
         public void SetPin()
         {
             _log.LogInformation("Set the U2F PIN using the KeyCollector.");
+
             if (TrySetPin())
             {
                 return;
@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.U2f
 
             try
             {
-                while (keyCollector(keyEntryData) == true)
+                while (keyCollector(keyEntryData))
                 {
                     if (TrySetPin(keyEntryData.GetCurrentValue()))
                     {
@@ -252,6 +252,7 @@ namespace Yubico.YubiKey.U2f
         public void ChangePin()
         {
             _log.LogInformation("Change the U2F PIN using the KeyCollector.");
+
             if (TryChangePin())
             {
                 return;
@@ -293,7 +294,7 @@ namespace Yubico.YubiKey.U2f
 
             try
             {
-                while (keyCollector(keyEntryData) == true)
+                while (keyCollector(keyEntryData))
                 {
                     if (TryChangePin(keyEntryData.GetCurrentValue(), keyEntryData.GetNewValue()))
                     {
@@ -442,7 +443,7 @@ namespace Yubico.YubiKey.U2f
 
             try
             {
-                while (keyCollector(keyEntryData) == true)
+                while (keyCollector(keyEntryData))
                 {
                     if (TryVerifyPin(keyEntryData.GetCurrentValue()))
                     {

@@ -75,9 +75,6 @@ namespace Yubico.YubiKey.TestUtilities
         private const int PublicStartLength = 26;
         private const int PublicEndLength = 24;
 
-        private PivPrivateKey _pivPrivateKey = new PivPrivateKey();
-        private PivPublicKey _pivPublicKey = new PivPublicKey();
-
         // Use these values in the method IsKeyAvailable to query whether a
         // particular key can be returned.
         public const int KeyTypePemPublic = 1;
@@ -89,8 +86,8 @@ namespace Yubico.YubiKey.TestUtilities
         public const int KeyTypePivPublic = 7;
         public const int KeyTypePivPrivate = 8;
 
-        public bool IsPrivate { get; private set; }
-        public PivAlgorithm Algorithm { get; private set; }
+        private PivPrivateKey _pivPrivateKey = new PivPrivateKey();
+        private PivPublicKey _pivPublicKey = new PivPublicKey();
 
         // Build a local key object from the "string". If the string is for a
         // private key, it will build a private key, if it is for a public key,
@@ -121,11 +118,11 @@ namespace Yubico.YubiKey.TestUtilities
         public KeyConverter(char[] pemKeyString)
         {
             // Search for the PublicKeyStart and End or PrivateKeyStart and End.
-            if (VerifyPemHeaderAndFooter(pemKeyString, PublicKeyStart.ToCharArray(), PublicKeyEnd.ToCharArray()) == true)
+            if (VerifyPemHeaderAndFooter(pemKeyString, PublicKeyStart.ToCharArray(), PublicKeyEnd.ToCharArray()))
             {
                 BuildPivPublicKey(pemKeyString);
             }
-            else if (VerifyPemHeaderAndFooter(pemKeyString, PrivateKeyStart.ToCharArray(), PrivateKeyEnd.ToCharArray()) == true)
+            else if (VerifyPemHeaderAndFooter(pemKeyString, PrivateKeyStart.ToCharArray(), PrivateKeyEnd.ToCharArray()))
             {
                 BuildPivPrivateKey(pemKeyString);
             }
@@ -141,6 +138,7 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 _pivPublicKey = PivPublicKey.Create(pivPublicKey.PivEncodedPublicKey);
             }
+
             SetProperties(true);
         }
 
@@ -158,6 +156,7 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 _pivPrivateKey = PivPrivateKey.Create(pivPrivateKey.EncodedPrivateKey);
             }
+
             SetProperties(true);
         }
 
@@ -172,10 +171,11 @@ namespace Yubico.YubiKey.TestUtilities
         // even if the RSA object contains the private key.
         public KeyConverter(RSA rsaObject, bool isPrivate)
         {
-            if (isPrivate == true)
+            if (isPrivate)
             {
                 BuildPivPrivateKey(rsaObject);
             }
+
             BuildPivPublicKey(rsaObject);
 
             SetProperties(true);
@@ -192,14 +192,18 @@ namespace Yubico.YubiKey.TestUtilities
         // even if the ECDsa object contains the private key.
         public KeyConverter(ECDsa eccObject, bool isPrivate)
         {
-            if (isPrivate == true)
+            if (isPrivate)
             {
                 BuildPivPrivateKey(eccObject);
             }
+
             BuildPivPublicKey(eccObject);
 
             SetProperties(true);
         }
+
+        public bool IsPrivate { get; private set; }
+        public PivAlgorithm Algorithm { get; private set; }
 
         // This lets you know if you will be able to get a particular key out of
         // this object.
@@ -236,6 +240,7 @@ namespace Yubico.YubiKey.TestUtilities
                     {
                         returnValue = true;
                     }
+
                     break;
 
                 case KeyTypePemPrivate:
@@ -243,6 +248,7 @@ namespace Yubico.YubiKey.TestUtilities
                     {
                         break;
                     }
+
                     // If the algorithm is ECC there has to be a public key as
                     // well, or else we can't return a PEM key string.
                     if (Algorithm == PivAlgorithm.EccP256 || Algorithm == PivAlgorithm.EccP384)
@@ -261,30 +267,37 @@ namespace Yubico.YubiKey.TestUtilities
                     {
                         returnValue = true;
                     }
+
                     break;
 
                 case KeyTypeRsaPrivate:
-                    if (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024 || _pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048)
+                    if (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024 ||
+                        _pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048)
                     {
                         returnValue = true;
                     }
+
                     break;
 
                 case KeyTypeECDsaPublic:
-                    if (_pivPublicKey.Algorithm == PivAlgorithm.EccP256 || _pivPublicKey.Algorithm == PivAlgorithm.EccP384)
+                    if (_pivPublicKey.Algorithm == PivAlgorithm.EccP256 ||
+                        _pivPublicKey.Algorithm == PivAlgorithm.EccP384)
                     {
                         returnValue = true;
                     }
+
                     break;
 
                 case KeyTypeECDsaPrivate:
-                    if (_pivPrivateKey.Algorithm == PivAlgorithm.EccP256 || _pivPrivateKey.Algorithm == PivAlgorithm.EccP384)
+                    if (_pivPrivateKey.Algorithm == PivAlgorithm.EccP256 ||
+                        _pivPrivateKey.Algorithm == PivAlgorithm.EccP384)
                     {
                         if (_pivPublicKey.Algorithm != PivAlgorithm.None)
                         {
                             returnValue = true;
                         }
                     }
+
                     break;
 
                 case KeyTypePivPublic:
@@ -292,6 +305,7 @@ namespace Yubico.YubiKey.TestUtilities
                     {
                         returnValue = true;
                     }
+
                     break;
 
                 case KeyTypePivPrivate:
@@ -299,6 +313,7 @@ namespace Yubico.YubiKey.TestUtilities
                     {
                         returnValue = true;
                     }
+
                     break;
             }
 
@@ -378,7 +393,8 @@ namespace Yubico.YubiKey.TestUtilities
 
             try
             {
-                if (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024 || _pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048)
+                if (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024 ||
+                    _pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048)
                 {
                     var rsaPrivate = (PivRsaPrivateKey)_pivPrivateKey;
                     rsaParams.P = rsaPrivate.PrimeP.ToArray();
@@ -442,8 +458,10 @@ namespace Yubico.YubiKey.TestUtilities
                             CultureInfo.CurrentCulture,
                             RequestedKeyMessage));
                 }
+
                 eccCurve = ECCurve.CreateFromValue("1.3.132.0.34");
             }
+
             var eccParams = new ECParameters
             {
                 Curve = (ECCurve)eccCurve
@@ -610,7 +628,7 @@ namespace Yubico.YubiKey.TestUtilities
                 Algorithm = _pivPublicKey.Algorithm;
             }
 
-            if (exceptionOnNoData == true && Algorithm == PivAlgorithm.None)
+            if (exceptionOnNoData && Algorithm == PivAlgorithm.None)
             {
                 throw new InvalidOperationException(
                     string.Format(
@@ -900,6 +918,7 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 return -1;
             }
+
             if (length > 0x80)
             {
                 int count = length & 0xf;
@@ -907,6 +926,7 @@ namespace Yubico.YubiKey.TestUtilities
                 {
                     return -1;
                 }
+
                 increment += count;
                 length = 0;
                 while (count > 0)
@@ -937,7 +957,7 @@ namespace Yubico.YubiKey.TestUtilities
             bool returnValue = false;
             if (pemKeyString.Length > targetStart.Length + targetEnd.Length)
             {
-                if (CompareToTarget(pemKeyString, 0, targetStart) == true)
+                if (CompareToTarget(pemKeyString, 0, targetStart))
                 {
                     returnValue = CompareToTarget(pemKeyString, pemKeyString.Length - targetEnd.Length, targetEnd);
                 }

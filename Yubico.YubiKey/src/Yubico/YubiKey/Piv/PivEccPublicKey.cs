@@ -56,11 +56,6 @@ namespace Yubico.YubiKey.Piv
 
         private Memory<byte> _publicPoint;
 
-        /// <summary>
-        /// Contains the public point: <c>04 || x-coordinate || y-coordinate</c>.
-        /// </summary>
-        public ReadOnlySpan<byte> PublicPoint => _publicPoint.Span;
-
         // The default constructor. We don't want it to be used by anyone outside
         // this class.
         private PivEccPublicKey()
@@ -100,6 +95,11 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
+        /// Contains the public point: <c>04 || x-coordinate || y-coordinate</c>.
+        /// </summary>
+        public ReadOnlySpan<byte> PublicPoint => _publicPoint.Span;
+
+        /// <summary>
         /// Try to create a new instance of an ECC public key object based on the
         /// encoding.
         /// </summary>
@@ -119,9 +119,8 @@ namespace Yubico.YubiKey.Piv
         /// True if the method was able to create a new RSA public key object,
         /// false otherwise.
         /// </returns>
-        internal static bool TryCreate(
-            out PivPublicKey publicKeyObject,
-            ReadOnlyMemory<byte> encodedPublicKey)
+        internal static bool TryCreate(out PivPublicKey publicKeyObject,
+                                       ReadOnlyMemory<byte> encodedPublicKey)
         {
             var returnValue = new PivEccPublicKey();
             publicKeyObject = returnValue;
@@ -130,15 +129,18 @@ namespace Yubico.YubiKey.Piv
             {
                 var tlvReader = new TlvReader(encodedPublicKey);
                 int tag = tlvReader.PeekTag(2);
+
                 if (tag == PublicKeyTag)
                 {
                     tlvReader = tlvReader.ReadNestedTlv(tag);
                 }
 
                 ReadOnlyMemory<byte> value = null;
-                while (tlvReader.HasData == true)
+
+                while (tlvReader.HasData)
                 {
                     tag = tlvReader.PeekTag();
+
                     if (tag != EccTag)
                     {
                         return false;
@@ -171,10 +173,12 @@ namespace Yubico.YubiKey.Piv
             {
                 case EccP256PublicKeySize:
                     Algorithm = PivAlgorithm.EccP256;
+
                     break;
 
                 case EccP384PublicKeySize:
                     Algorithm = PivAlgorithm.EccP384;
+
                     break;
 
                 default:
@@ -187,10 +191,12 @@ namespace Yubico.YubiKey.Piv
             }
 
             var tlvWriter = new TlvWriter();
+
             using (tlvWriter.WriteNestedTlv(PublicKeyTag))
             {
                 tlvWriter.WriteValue(EccTag, publicPoint);
             }
+
             PivEncodedKey = tlvWriter.Encode();
 
             // The Metadate encoded key is the contents of the nested. So set

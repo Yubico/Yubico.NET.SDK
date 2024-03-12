@@ -23,17 +23,15 @@ namespace Yubico.YubiKey.U2f
     // changed to 0x39.
     public class SimpleU2fKeyCollector
     {
-        private readonly ReadOnlyMemory<byte> _firstPin = new ReadOnlyMemory<byte>(new byte[] {
+        private readonly ReadOnlyMemory<byte> _firstPin = new ReadOnlyMemory<byte>(new byte[]
+        {
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36
         });
 
-        private readonly ReadOnlyMemory<byte> _secondPin = new ReadOnlyMemory<byte>(new byte[] {
+        private readonly ReadOnlyMemory<byte> _secondPin = new ReadOnlyMemory<byte>(new byte[]
+        {
             0x41, 0x42, 0x43, 0x44, 0x45, 0x46
         });
-
-        public ReadOnlyMemory<byte> CurrentPin { get; private set; }
-
-        public ReadOnlyMemory<byte> NewPin { get; private set; }
 
         // If the caller sets the input arg to true, then the YubiKey's U2F PIN
         // is alreadys set. So the current PIN is "123456" and the new PIN is
@@ -56,6 +54,10 @@ namespace Yubico.YubiKey.U2f
             }
         }
 
+        public ReadOnlyMemory<byte> CurrentPin { get; private set; }
+
+        public ReadOnlyMemory<byte> NewPin { get; private set; }
+
         public bool SimpleU2fKeyCollectorDelegate(KeyEntryData keyEntryData)
         {
             if (keyEntryData is null)
@@ -63,7 +65,7 @@ namespace Yubico.YubiKey.U2f
                 return false;
             }
 
-            if (keyEntryData.IsRetry == true)
+            if (keyEntryData.IsRetry)
             {
                 return false;
             }

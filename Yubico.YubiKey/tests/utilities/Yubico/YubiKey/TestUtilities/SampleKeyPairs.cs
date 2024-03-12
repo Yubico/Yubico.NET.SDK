@@ -137,7 +137,8 @@ namespace Yubico.YubiKey.TestUtilities
         // PivPrivateKey.
         public static PivPrivateKey GetPrivateKey(PivAlgorithm algorithm) => algorithm switch
         {
-            PivAlgorithm.Rsa1024 => PivPrivateKey.Create(new byte[] {
+            PivAlgorithm.Rsa1024 => PivPrivateKey.Create(new byte[]
+            {
                 0x01, 0x40,
                 0xdf, 0x2c, 0x15, 0xe7, 0x9f, 0xf7, 0xf0, 0xe4, 0x36, 0xfd, 0x93, 0x1f, 0xd7, 0x36, 0x20, 0x2e,
                 0x70, 0xd2, 0x51, 0xe4, 0x4a, 0x5d, 0xf8, 0xbb, 0xfd, 0x2d, 0x66, 0xd1, 0xe5, 0x1d, 0x5e, 0x92,
@@ -165,7 +166,8 @@ namespace Yubico.YubiKey.TestUtilities
                 0xfd, 0xda, 0x5b, 0xbb, 0xc1, 0x0a, 0x77, 0x73, 0x0a, 0xaa, 0x1e, 0xc5, 0x66, 0x42, 0x96, 0xcf
             }),
 
-            PivAlgorithm.Rsa2048 => PivPrivateKey.Create(new byte[] {
+            PivAlgorithm.Rsa2048 => PivPrivateKey.Create(new byte[]
+            {
                 0x02, 0x81, 0x80,
                 0xcf, 0xd5, 0x17, 0xb1, 0x3c, 0x65, 0x10, 0xb9, 0x02, 0xc8, 0x0b, 0xd8, 0xfb, 0xb3, 0x2d, 0xec,
                 0x5c, 0x33, 0x24, 0x50, 0xd6, 0x0f, 0x13, 0xb4, 0x31, 0xcb, 0x41, 0xfc, 0x7c, 0x60, 0xbf, 0x2a,
@@ -213,13 +215,15 @@ namespace Yubico.YubiKey.TestUtilities
                 0x39, 0x18, 0xc1, 0x5d, 0xd4, 0x66, 0x4b, 0x07, 0xc3, 0x79, 0x57, 0x20, 0xd6, 0x78, 0xad, 0xab,
             }),
 
-            PivAlgorithm.EccP256 => PivPrivateKey.Create(new byte[] {
+            PivAlgorithm.EccP256 => PivPrivateKey.Create(new byte[]
+            {
                 0x06, 0x20,
                 0xba, 0x29, 0x7a, 0xc6, 0x64, 0x62, 0xef, 0x6c, 0xd0, 0x89, 0x76, 0x5c, 0xbd, 0x46, 0x52, 0x2b,
                 0xb0, 0x48, 0x0e, 0x85, 0x49, 0x15, 0x85, 0xe7, 0x7a, 0x74, 0x3c, 0x8e, 0x03, 0x59, 0x8d, 0x3a
             }),
 
-            _ => PivPrivateKey.Create(new byte[] {
+            _ => PivPrivateKey.Create(new byte[]
+            {
                 0x06, 0x30,
                 0x47, 0x85, 0xde, 0x3a, 0xff, 0x10, 0x0d, 0x67, 0xa7, 0x26, 0x30, 0x62, 0x73, 0x45, 0xfd, 0xce,
                 0xeb, 0xb9, 0xbe, 0x4c, 0x93, 0x42, 0xcd, 0x6a, 0x84, 0xd6, 0x8e, 0x00, 0x70, 0x70, 0x4c, 0x66,
@@ -233,7 +237,8 @@ namespace Yubico.YubiKey.TestUtilities
         public static bool GetMatchingKeyAndCert(
             out X509Certificate2 cert, out PivPrivateKey privateKey)
         {
-            byte[] certDer = new byte[] {
+            byte[] certDer = new byte[]
+            {
                 0x30, 0x82, 0x03, 0xAE, 0x30, 0x82, 0x02, 0x96, 0xA0, 0x03, 0x02, 0x01, 0x02, 0x02, 0x09, 0x00,
                 0xCB, 0x4C, 0xB9, 0x7C, 0x9B, 0xF1, 0x88, 0xD6, 0x30, 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86,
                 0xF7, 0x0D, 0x01, 0x01, 0x0B, 0x05, 0x00, 0x30, 0x6C, 0x31, 0x0B, 0x30, 0x09, 0x06, 0x03, 0x55,
@@ -295,7 +300,8 @@ namespace Yubico.YubiKey.TestUtilities
                 0xDB, 0x0B, 0x22, 0x73, 0x9C, 0x98, 0x68, 0xE1, 0xFC, 0xDA, 0x5E, 0x8B, 0xB3, 0xDB, 0x28, 0x2A,
                 0x69, 0x00
             };
-            byte[] keyData = new byte[] {
+            byte[] keyData = new byte[]
+            {
                 0x01, 0x81, 0x80,
                 0xdf, 0x4d, 0x54, 0xdb, 0x53, 0x94, 0xe6, 0x62, 0x1b, 0xfb, 0xe7, 0x92, 0xe9, 0x5c, 0x57, 0xa1,
                 0xfb, 0xe9, 0x52, 0xb3, 0xba, 0x7b, 0x57, 0x9c, 0x03, 0xb4, 0xa5, 0x80, 0xe6, 0xe5, 0xbb, 0x9a,
@@ -363,7 +369,8 @@ namespace Yubico.YubiKey.TestUtilities
         // These keys and certs can be used for anything, they don't have to be
         // used in attestation. That is, if you are not dealing with attestation,
         // and you need a key and cert, these might work.
-        public static bool GetKeyAndCertPem(PivAlgorithm algorithm, bool validAttest, out string cert, out string privateKey)
+        public static bool GetKeyAndCertPem(PivAlgorithm algorithm, bool validAttest, out string cert,
+            out string privateKey)
         {
             switch (algorithm)
             {
@@ -373,7 +380,7 @@ namespace Yubico.YubiKey.TestUtilities
                     return false;
 
                 case PivAlgorithm.Rsa1024:
-                    if (validAttest == true)
+                    if (validAttest)
                     {
                         cert =
                             "-----BEGIN CERTIFICATE-----\n" +
@@ -416,6 +423,7 @@ namespace Yubico.YubiKey.TestUtilities
                             "BRl88HhQ1aHTDbx3b8ahshSdbhG6JLmGfZBdp18XPljnwQ==\n" +
                             "-----END CERTIFICATE-----";
                     }
+
                     privateKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBALG/a85wy36uf4Rm\n" +
@@ -437,7 +445,7 @@ namespace Yubico.YubiKey.TestUtilities
                     break;
 
                 case PivAlgorithm.Rsa2048:
-                    if (validAttest == true)
+                    if (validAttest)
                     {
                         cert =
                             "-----BEGIN CERTIFICATE-----\n" +
@@ -486,6 +494,7 @@ namespace Yubico.YubiKey.TestUtilities
                             "WvIT54DcVb+MwcRQvCyzgcWxekMtPg==\n" +
                             "-----END CERTIFICATE-----";
                     }
+
                     privateKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MIIEwAIBADANBgkqhkiG9w0BAQEFAASCBKowggSmAgEAAoIBAQDbf2A4p7asu6sn\n" +
@@ -519,7 +528,7 @@ namespace Yubico.YubiKey.TestUtilities
                     break;
 
                 case PivAlgorithm.EccP256:
-                    if (validAttest == true)
+                    if (validAttest)
                     {
                         cert =
                             "-----BEGIN CERTIFICATE-----\n" +
@@ -570,7 +579,7 @@ namespace Yubico.YubiKey.TestUtilities
                     break;
 
                 case PivAlgorithm.EccP384:
-                    if (validAttest == true)
+                    if (validAttest)
                     {
                         cert =
                             "-----BEGIN CERTIFICATE-----\n" +
@@ -611,6 +620,7 @@ namespace Yubico.YubiKey.TestUtilities
                             "e510vuxfCvR7kt74bSuKi3wxsCTLtMEfIh51k3xZsa4FoLO8mm4v\n" +
                             "-----END CERTIFICATE-----";
                     }
+
                     privateKey =
                         "-----BEGIN PRIVATE KEY-----\n" +
                         "MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDAKroxlCShQ6sz89gMc\n" +

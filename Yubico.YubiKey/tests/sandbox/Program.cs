@@ -56,6 +56,16 @@ namespace Yubico.YubiKey.TestApp
                 ["oath"] = (output) => new OathPlugin(output),
             };
 
+        #region IDisposable Implementation
+
+        public void Dispose()
+        {
+            _outputFile?.Dispose();
+            _outputFile = null;
+        }
+
+        #endregion
+
         static int Main(string[] args)
         {
             using var app = new Program();
@@ -112,6 +122,7 @@ namespace Yubico.YubiKey.TestApp
                 WriteLine("No plugin was selected on the command line or in a config file.", OutputLevel.Error);
                 return -1;
             }
+
             WriteLine($"Plugin [{_plugin.Name}] specified.");
 
             // Next, verify parameters.
@@ -151,7 +162,7 @@ namespace Yubico.YubiKey.TestApp
         // 2. Create a StringBuilder object and populate it with the lines.
         //     2a. Take the longest parameter name so that we can line up remarks
         //         on the same line.
-        //     2b. Get the width of the console so that we can intelligenty wrap
+        //     2b. Get the width of the console so that we can intelligently wrap
         //         text to the width of the console.
         //     2c. For each line in our line collection, break it down into words
         //         and print lines, wrapping smartly, indenting the next line.
@@ -166,18 +177,18 @@ namespace Yubico.YubiKey.TestApp
                 ("Global Parameters", string.Empty),
                 ("-?/Usage", "Prints out this message."),
                 ("-Config", "[file] Config file to get parameters from. Note "
-                           + "that command line parameters override parameters "
-                           + "in the config file."),
+                            + "that command line parameters override parameters "
+                            + "in the config file."),
                 ("-Plugin*", "[plugin name] The plugin to run with the given "
-                           + "parameters."),
+                             + "parameters."),
                 ("-q/Quiet", "[true/false] Supress output except for errors (to "
-                           + "stderr). If you call without a parameter, true is assumed."),
+                             + "stderr). If you call without a parameter, true is assumed."),
                 ("-v/Verbose", "[true/false] Show more informational output. "
-                           + "If you call without a parameter, true is assumed. "
-                           + "Verbose and quiet are mutually exclusive."),
+                               + "If you call without a parameter, true is assumed. "
+                               + "Verbose and quiet are mutually exclusive."),
                 ("-o/Output", "[file path] Write output to file. A parameter is required. "
-                           + "If you do not supply a full path, the current working "
-                           + "directory is the starting point."),
+                              + "If you do not supply a full path, the current working "
+                              + "directory is the starting point."),
             };
             if (_plugin is null || (_outputLevel ?? OutputLevel.Normal) == OutputLevel.Verbose)
             {
@@ -188,8 +199,8 @@ namespace Yubico.YubiKey.TestApp
             // just add that one. Otherwise, add all available plugins.
             var plugIns = new List<PluginBase>(
                 !(_plugin is null)
-                ? new[] { _plugin }
-                : _plugIns.Values.Select(p => p(this)));
+                    ? new[] { _plugin }
+                    : _plugIns.Values.Select(p => p(this)));
 
             foreach (PluginBase plugin in plugIns)
             {
@@ -211,11 +222,11 @@ namespace Yubico.YubiKey.TestApp
                             // If there's both a long and short name, show them both,
                             // separated by a slash. Otherwise, show the one.
                             string id = "-" + string.Join(
-                                '/',
-                                new[] { parameter.Shortcut, parameter.Name }
-                                    .Where(s => !string.IsNullOrWhiteSpace(s)))
-                                // If the parameter is required, we want to indicate that.
-                                + (parameter.Required ? "*" : string.Empty);
+                                                '/',
+                                                new[] { parameter.Shortcut, parameter.Name }
+                                                    .Where(s => !string.IsNullOrWhiteSpace(s)))
+                                            // If the parameter is required, we want to indicate that.
+                                            + (parameter.Required ? "*" : string.Empty);
                             paramUsage.Add((id, parameter.Description));
                         }
                     }
@@ -248,9 +259,10 @@ namespace Yubico.YubiKey.TestApp
                     WriteDescription(desc, maxFlagWidth);
                 }
             }
+
             WriteDescription(PluginBase.Eol
-                + "Parameters marked with asterisk are required. They can be "
-                + "specified either on the command line or in a config file.");
+                             + "Parameters marked with asterisk are required. They can be "
+                             + "specified either on the command line or in a config file.");
 
             // Step 3.
             if (asError)
@@ -281,9 +293,11 @@ namespace Yubico.YubiKey.TestApp
                     {
                         _ = sb!.Append(' ');
                     }
+
                     _ = sb!.Append(word);
                     position += word.Length + 1;
                 }
+
                 _ = sb.AppendLine();
             }
         }
@@ -296,7 +310,7 @@ namespace Yubico.YubiKey.TestApp
             for (int i = 0; i < args.Length; ++i)
             {
                 string arg = args[i];
-                // We should be at the boundry of a parameter. If we're not,
+                // We should be at the boundary of a parameter. If we're not,
                 // then there's a problem either with the input or our parsing
                 // of it.
                 if (arg[0] != '-' && arg[0] != '/')
@@ -315,8 +329,8 @@ namespace Yubico.YubiKey.TestApp
                 // If there is a next argument and it doesn't start with a
                 // slash or dash, then it is the parameter value.
                 else if (i < args.Length - 1
-                        && args[i + 1][0] != '-'
-                        && args[i + 1][0] != '/')
+                         && args[i + 1][0] != '-'
+                         && args[i + 1][0] != '/')
                 {
                     name = arg[1..];
                     value = args[i + 1];
@@ -363,6 +377,7 @@ namespace Yubico.YubiKey.TestApp
                         WriteLine($"Plugin is already [{_plugin.Name}].", OutputLevel.Verbose);
                         isSet = false;
                     }
+
                     break;
                 case "config":
                     // We'll error check this later when we try to read it.
@@ -375,14 +390,16 @@ namespace Yubico.YubiKey.TestApp
                         {
                             throw new ArgumentException("Can't set a null or empty string to config file.");
                         }
+
                         _configFile = value;
                     }
                     else
                     {
                         string message = $"Not setting [{value}] as config file. " +
-                            $"Config file is already [{_configFile}].";
+                                         $"Config file is already [{_configFile}].";
                         throw new ArgumentException(message);
                     }
+
                     break;
                 case "q":
                 case "quiet":
@@ -409,6 +426,7 @@ namespace Yubico.YubiKey.TestApp
                         throw new ArgumentException(
                             $"Can't set [{key}]. OutputLevel is already [{_outputLevel.Value}]");
                     }
+
                     break;
                 case "o":
                 case "output":
@@ -416,6 +434,7 @@ namespace Yubico.YubiKey.TestApp
                     {
                         throw new ArgumentException("You must supply a valid path for the output file.");
                     }
+
                     _outputFile = new StreamWriter(value, false, Encoding.UTF8, 256);
                     break;
                 default:
@@ -436,8 +455,10 @@ namespace Yubico.YubiKey.TestApp
                             OutputLevel.Verbose);
                         isSet = false;
                     }
+
                     break;
             }
+
             WriteLine($"Property [{key}] " + (isSet ? "set." : "not set."), OutputLevel.Verbose);
         }
 
@@ -476,6 +497,7 @@ namespace Yubico.YubiKey.TestApp
             {
                 throw new InvalidOperationException($"Plugin [{plugin}] not found.");
             }
+
             _plugin = getter(this);
         }
 
@@ -491,8 +513,8 @@ namespace Yubico.YubiKey.TestApp
                 .Where(p => !string.IsNullOrEmpty(p.Name))
                 .Select(p => new KeyValuePair<string, Parameter>(p.Name.ToLower(), p))
                 .Concat(plugin.Parameters.Values
-                .Where(p => !string.IsNullOrEmpty(p.Shortcut))
-                .Select(p => new KeyValuePair<string, Parameter>(p.Shortcut.ToLower(), p)))
+                    .Where(p => !string.IsNullOrEmpty(p.Shortcut))
+                    .Select(p => new KeyValuePair<string, Parameter>(p.Shortcut.ToLower(), p)))
                 .ToDictionary(pair => pair.Key, pair => pair.Value);
 
             // First, apply the parameters to the plugin.
@@ -502,6 +524,7 @@ namespace Yubico.YubiKey.TestApp
                 {
                     throw new ArgumentException($"Unexpected parameter [{kvp.Key}] for plugin [{plugin.Name}]");
                 }
+
                 if (!plugin.Converters.TryGetValue(parameter.Type, out Func<string, object>? converter))
                 {
                     string message = string.Format(
@@ -511,6 +534,7 @@ namespace Yubico.YubiKey.TestApp
                         parameter.Name);
                     throw new InvalidOperationException(message);
                 }
+
                 try
                 {
                     parameter.Value = converter(kvp.Value);
@@ -521,6 +545,7 @@ namespace Yubico.YubiKey.TestApp
                         $"Error: {ex.Message}, Parameter: {parameter.Name}, Value: {kvp.Value}, Type: {parameter.Type}",
                         ex);
                 }
+
                 WriteLine($"Parameter [{parameter.Name}] parsed as type [{parameter.Type}]", OutputLevel.Verbose);
             }
 
@@ -529,7 +554,8 @@ namespace Yubico.YubiKey.TestApp
             {
                 if (parameter.Value is null)
                 {
-                    throw new ArgumentException($"Required parameter [-{parameter.Shortcut} ({parameter.Name})] was not specified");
+                    throw new ArgumentException(
+                        $"Required parameter [-{parameter.Shortcut} ({parameter.Name})] was not specified");
                 }
             }
 
@@ -541,6 +567,7 @@ namespace Yubico.YubiKey.TestApp
         }
 
         #region IOutput Implementation
+
         public OutputLevel OutputLevel => _outputLevel ?? OutputLevel.Normal;
 
         public void Write(string output = "", OutputLevel level = OutputLevel.Normal)
@@ -550,6 +577,7 @@ namespace Yubico.YubiKey.TestApp
             {
                 ProcessBufferedOutput();
             }
+
             if (_bufferedOutput is null)
             {
                 if (level <= _outputLevel)
@@ -593,6 +621,7 @@ namespace Yubico.YubiKey.TestApp
                     {
                         Console.Error.Write(c);
                     }
+
                     Console.ResetColor();
                 }
                 else
@@ -601,6 +630,7 @@ namespace Yubico.YubiKey.TestApp
                     {
                         Console.Write(c);
                     }
+
                     _outputFile?.Write("********");
                 }
             }
@@ -620,24 +650,21 @@ namespace Yubico.YubiKey.TestApp
                 bufferedOutput.ForEach((item) => Write(item.message, item.level));
             }
         }
-        #endregion
 
-        #region IDisposable Implementation
-        public void Dispose()
-        {
-            _outputFile?.Dispose();
-            _outputFile = null;
-        }
         #endregion
 
         #region Private Fields
+
         private string _configFile = string.Empty;
         private StreamWriter? _outputFile;
+
         private readonly Dictionary<string, string> _rawParameters =
             new Dictionary<string, string>();
+
         private PluginBase? _plugin;
         private OutputLevel? _outputLevel;
         private List<(OutputLevel, string)>? _bufferedOutput = new List<(OutputLevel, string)>();
+
         #endregion
     }
 }

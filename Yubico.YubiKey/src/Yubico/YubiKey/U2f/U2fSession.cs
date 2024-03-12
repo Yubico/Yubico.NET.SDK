@@ -79,6 +79,45 @@ namespace Yubico.YubiKey.U2f
         private readonly Logger _log = Log.GetLogger();
         private bool _disposed;
 
+        // The default constructor is explicitly defined to show that we do not want it used.
+        // ReSharper disable once UnusedMember.Local
+        private U2fSession()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// Creates an instance of <see cref="U2fSession"/>, the object that represents the FIDO U2F application on the
+        /// YubiKey.
+        /// </summary>
+        /// <remarks>
+        /// Because this class implements <c>IDisposable</c>, use the <c>using</c> keyword. For example,
+        /// <code language="csharp">
+        ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
+        ///     using (var u2f = new U2fSession(yubiKeyToUse))
+        ///     {
+        ///         /* Perform U2F operations. */
+        ///     }
+        /// </code>
+        /// </remarks>
+        /// <param name="yubiKey">
+        /// The object that represents the actual YubiKey on which the U2F operations should be performed.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// The <paramref name="yubiKey"/> argument is <c>null</c>.
+        /// </exception>
+        public U2fSession(IYubiKeyDevice yubiKey)
+        {
+            _log.LogInformation("Create a new instance of U2fSession.");
+
+            if (yubiKey is null)
+            {
+                throw new ArgumentNullException(nameof(yubiKey));
+            }
+
+            Connection = yubiKey.Connect(YubiKeyApplication.FidoU2f);
+        }
+
         /// <summary>
         /// The object that represents the connection to the YubiKey. Most applications can ignore this, but it can be
         /// used to call command classes and send APDUs directly to the YubiKey during advanced scenarios.
@@ -151,41 +190,17 @@ namespace Yubico.YubiKey.U2f
         /// </remarks>
         public Func<KeyEntryData, bool>? KeyCollector { get; set; }
 
-        // The default constructor is explicitly defined to show that we do not want it used.
-        private U2fSession()
+        /// <inheritdoc />
+        public void Dispose()
         {
-            throw new NotImplementedException();
-        }
-
-        /// <summary>
-        /// Creates an instance of <see cref="U2fSession"/>, the object that represents the FIDO U2F application on the
-        /// YubiKey.
-        /// </summary>
-        /// <remarks>
-        /// Because this class implements <c>IDisposable</c>, use the <c>using</c> keyword. For example,
-        /// <code language="csharp">
-        ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
-        ///     using (var u2f = new U2fSession(yubiKeyToUse))
-        ///     {
-        ///         /* Perform U2F operations. */
-        ///     }
-        /// </code>
-        /// </remarks>
-        /// <param name="yubiKey">
-        /// The object that represents the actual YubiKey on which the U2F operations should be performed.
-        /// </param>
-        /// <exception cref="ArgumentNullException">
-        /// The <paramref name="yubiKey"/> argument is <c>null</c>.
-        /// </exception>
-        public U2fSession(IYubiKeyDevice yubiKey)
-        {
-            _log.LogInformation("Create a new instance of U2fSession.");
-            if (yubiKey is null)
+            if (_disposed)
             {
-                throw new ArgumentNullException(nameof(yubiKey));
+                return;
             }
 
-            Connection = yubiKey.Connect(YubiKeyApplication.FidoU2f);
+            Connection.Dispose();
+            KeyCollector = null;
+            _disposed = true;
         }
 
         /// <summary>
@@ -205,7 +220,7 @@ namespace Yubico.YubiKey.U2f
         /// </param>
         /// <param name="timeout">
         /// The amount of time this method will wait for user touch. The
-        /// recommended timeout is 5 seconds. The minumum is 1 second and the
+        /// recommended timeout is 5 seconds. The minimum is 1 second and the
         /// maximum is 30 seconds. If the input is greater than 30 seconds, this
         /// method will set the timeout to 30. If the timeout is greater than 0
         /// but less than one second, the method will set the timeout to 1
@@ -294,10 +309,9 @@ namespace Yubico.YubiKey.U2f
         /// method that directly verifies the PIN.
         /// </para>
         /// </remarks>
-        public RegistrationData Register(
-            ReadOnlyMemory<byte> applicationId,
-            ReadOnlyMemory<byte> clientDataHash,
-            TimeSpan timeout)
+        public RegistrationData Register(ReadOnlyMemory<byte> applicationId,
+                                         ReadOnlyMemory<byte> clientDataHash,
+                                         TimeSpan timeout)
         {
             _log.LogInformation("Register a new U2F credential.");
             RegisterResponse response = CommonRegister(applicationId, clientDataHash, timeout, true);
@@ -327,7 +341,7 @@ namespace Yubico.YubiKey.U2f
         /// </param>
         /// <param name="timeout">
         /// The amount of time this method will wait for user touch. The
-        /// recommended timeout is 5 seconds. The minumum is 1 second and the
+        /// recommended timeout is 5 seconds. The minimum is 1 second and the
         /// maximum is 30 seconds. If the input is greater than 30 seconds, this
         /// method will set the timeout to 30. If the timeout is greater than 0
         /// but less than one second, the method will set the timeout to 1
@@ -402,11 +416,10 @@ namespace Yubico.YubiKey.U2f
         /// <c>KeyCollector</c> will be necessary.
         /// </para>
         /// </remarks>
-        public bool TryRegister(
-            ReadOnlyMemory<byte> applicationId,
-            ReadOnlyMemory<byte> clientDataHash,
-            TimeSpan timeout,
-            [MaybeNullWhen(returnValue: false)] out RegistrationData registrationData)
+        public bool TryRegister(ReadOnlyMemory<byte> applicationId,
+                                ReadOnlyMemory<byte> clientDataHash,
+                                TimeSpan timeout,
+                                [MaybeNullWhen(returnValue: false)] out RegistrationData registrationData)
         {
             _log.LogInformation("Try to register a new U2F credential.");
             RegisterResponse response = CommonRegister(applicationId, clientDataHash, timeout, false);
@@ -414,23 +427,24 @@ namespace Yubico.YubiKey.U2f
             if (response.Status == ResponseStatus.Success)
             {
                 registrationData = response.GetData();
+
                 return true;
             }
 
             registrationData = null;
+
             return false;
         }
 
-        // This code actuall performs the Register. If throwOnCancel is true and
+        // This code actually performs the Register. If throwOnCancel is true and
         // if the PIN is needed and the user cancels, it will throw an exception.
         // This will return the RegisterResponse. The caller can check the
         // Status and if Success, get the RegistrationData. If not, either return
         // false or call GetData to force an exception.
-        private RegisterResponse CommonRegister(
-            ReadOnlyMemory<byte> applicationId,
-            ReadOnlyMemory<byte> clientDataHash,
-            TimeSpan timeout,
-            bool throwOnCancel)
+        private RegisterResponse CommonRegister(ReadOnlyMemory<byte> applicationId,
+                                                ReadOnlyMemory<byte> clientDataHash,
+                                                TimeSpan timeout,
+                                                bool throwOnCancel)
         {
             Task? touchMessageTask = null;
             var keyEntryData = new KeyEntryData();
@@ -466,15 +480,18 @@ namespace Yubico.YubiKey.U2f
                 }
 
                 var timer = new Stopwatch();
+
                 try
                 {
                     timer.Start();
+
                     do
                     {
                         Thread.Sleep(100);
                         response = Connection.SendCommand(command);
-                    } while (response.Status == ResponseStatus.ConditionsNotSatisfied
-                        && timer.Elapsed < timeoutToUse);
+                    }
+                    while (response.Status == ResponseStatus.ConditionsNotSatisfied
+                           && timer.Elapsed < timeoutToUse);
 
                     // Did we break out because of timeout or because the
                     // response was something other than ConditionsNotSatisfied.
@@ -492,6 +509,7 @@ namespace Yubico.YubiKey.U2f
                 {
                     timer.Stop();
                     touchMessageTask?.Wait();
+
                     if (!(KeyCollector is null))
                     {
                         keyEntryData.Request = KeyEntryRequest.Release;
@@ -549,14 +567,15 @@ namespace Yubico.YubiKey.U2f
         /// A boolean, <c>true</c> if the key handle matches, <c>false</c>
         /// otherwise.
         /// </returns>
-        public bool VerifyKeyHandle(
-            ReadOnlyMemory<byte> applicationId,
-            ReadOnlyMemory<byte> clientDataHash,
-            ReadOnlyMemory<byte> keyHandle
-            )
+        public bool VerifyKeyHandle(ReadOnlyMemory<byte> applicationId,
+                                    ReadOnlyMemory<byte> clientDataHash,
+                                    ReadOnlyMemory<byte> keyHandle)
         {
             _log.LogInformation("Verify a U2F key handle.");
-            var command = new AuthenticateCommand(U2fAuthenticationType.CheckOnly, applicationId, clientDataHash, keyHandle);
+
+            var command = new AuthenticateCommand(U2fAuthenticationType.CheckOnly, applicationId, clientDataHash,
+                keyHandle);
+
             AuthenticateResponse response = Connection.SendCommand(command);
 
             // The standard specifies that if the key handle matches, the token
@@ -644,7 +663,7 @@ namespace Yubico.YubiKey.U2f
         /// </param>
         /// <param name="timeout">
         /// The amount of time this method will wait for user touch. The
-        /// recommended timeout is 5 seconds. The minumum is 1 second and the
+        /// recommended timeout is 5 seconds. The minimum is 1 second and the
         /// maximum is 30 seconds. If the input is greater than 30 seconds, this
         /// method will set the timeout to 30. If the timeout is greater than 0
         /// but less than one second, the method will set the timeout to 1
@@ -669,14 +688,14 @@ namespace Yubico.YubiKey.U2f
         /// The input data was invalid (e.g. the appId was not 32 bytes) or else
         /// the key handle was not correct for the appId.
         /// </exception>
-        public AuthenticationData Authenticate(
-            ReadOnlyMemory<byte> applicationId,
-            ReadOnlyMemory<byte> clientDataHash,
-            ReadOnlyMemory<byte> keyHandle,
-            TimeSpan timeout,
-            bool requireProofOfPresence = true)
+        public AuthenticationData Authenticate(ReadOnlyMemory<byte> applicationId,
+                                               ReadOnlyMemory<byte> clientDataHash,
+                                               ReadOnlyMemory<byte> keyHandle,
+                                               TimeSpan timeout,
+                                               bool requireProofOfPresence = true)
         {
             _log.LogInformation("Authenticate a U2F credential.");
+
             AuthenticateResponse response = CommonAuthenticate(
                 applicationId, clientDataHash, keyHandle, timeout, requireProofOfPresence);
 
@@ -716,7 +735,7 @@ namespace Yubico.YubiKey.U2f
         /// </param>
         /// <param name="timeout">
         /// The amount of time this method will wait for user touch. The
-        /// recommended timeout is 5 seconds. The minumum is 1 second and the
+        /// recommended timeout is 5 seconds. The minimum is 1 second and the
         /// maximum is 30 seconds. If the input is greater than 30 seconds, this
         /// method will set the timeout to 30. If the timeout is greater than 0
         /// but less than one second, the method will set the timeout to 1
@@ -742,25 +761,27 @@ namespace Yubico.YubiKey.U2f
         /// <exception cref="TimeoutException">
         /// The user presence check timed out.
         /// </exception>
-        public bool TryAuthenticate(
-            ReadOnlyMemory<byte> applicationId,
-            ReadOnlyMemory<byte> clientDataHash,
-            ReadOnlyMemory<byte> keyHandle,
-            TimeSpan timeout,
-            [MaybeNullWhen(returnValue: false)] out AuthenticationData authenticationData,
-            bool requireProofOfPresence = true)
+        public bool TryAuthenticate(ReadOnlyMemory<byte> applicationId,
+                                    ReadOnlyMemory<byte> clientDataHash,
+                                    ReadOnlyMemory<byte> keyHandle,
+                                    TimeSpan timeout,
+                                    [MaybeNullWhen(returnValue: false)] out AuthenticationData authenticationData,
+                                    bool requireProofOfPresence = true)
         {
             _log.LogInformation("Try to authenticate a U2F credential.");
+
             AuthenticateResponse response = CommonAuthenticate(
                 applicationId, clientDataHash, keyHandle, timeout, requireProofOfPresence);
 
             if (response.Status == ResponseStatus.Success)
             {
                 authenticationData = response.GetData();
+
                 return true;
             }
 
             authenticationData = null;
+
             return false;
         }
 
@@ -768,20 +789,20 @@ namespace Yubico.YubiKey.U2f
         // AuthenticateResponse. The caller can check the Status and if Success,
         // get the AuthenticationData. If not, either return false or call
         // GetData to force an exception.
-        private AuthenticateResponse CommonAuthenticate(
-            ReadOnlyMemory<byte> applicationId,
-            ReadOnlyMemory<byte> clientDataHash,
-            ReadOnlyMemory<byte> keyHandle,
-            TimeSpan timeout,
-            bool requireProofOfPresence)
+        private AuthenticateResponse CommonAuthenticate(ReadOnlyMemory<byte> applicationId,
+                                                        ReadOnlyMemory<byte> clientDataHash,
+                                                        ReadOnlyMemory<byte> keyHandle,
+                                                        TimeSpan timeout,
+                                                        bool requireProofOfPresence)
         {
             Task? touchMessageTask = null;
             var keyEntryData = new KeyEntryData();
 
             TimeSpan timeoutToUse = GetTimeoutToUse(timeout);
 
-            U2fAuthenticationType authType = requireProofOfPresence ?
-                U2fAuthenticationType.EnforceUserPresence : U2fAuthenticationType.DontEnforceUserPresence;
+            U2fAuthenticationType authType = requireProofOfPresence
+                ? U2fAuthenticationType.EnforceUserPresence
+                : U2fAuthenticationType.DontEnforceUserPresence;
 
             var command = new AuthenticateCommand(authType, applicationId, clientDataHash, keyHandle);
             AuthenticateResponse response = Connection.SendCommand(command);
@@ -797,15 +818,18 @@ namespace Yubico.YubiKey.U2f
                 }
 
                 var timer = new Stopwatch();
+
                 try
                 {
                     timer.Start();
+
                     do
                     {
                         Thread.Sleep(100);
                         response = Connection.SendCommand(command);
-                    } while (response.Status == ResponseStatus.ConditionsNotSatisfied
-                        && timer.Elapsed < timeoutToUse);
+                    }
+                    while (response.Status == ResponseStatus.ConditionsNotSatisfied
+                           && timer.Elapsed < timeoutToUse);
 
                     // Did we break out because of timeout or because the
                     // response was something other than ConditionsNotSatisfied.
@@ -823,6 +847,7 @@ namespace Yubico.YubiKey.U2f
                 {
                     timer.Stop();
                     touchMessageTask?.Wait();
+
                     if (!(KeyCollector is null))
                     {
                         keyEntryData.Request = KeyEntryRequest.Release;
@@ -863,21 +888,9 @@ namespace Yubico.YubiKey.U2f
             using (SHA256 sha = CryptographyProviders.Sha256Creator())
             {
                 byte[] encodedString = Encoding.UTF8.GetBytes(data);
+
                 return sha.ComputeHash(encodedString);
             }
-        }
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            if (_disposed)
-            {
-                return;
-            }
-
-            Connection.Dispose();
-            KeyCollector = null;
-            _disposed = true;
         }
 
         private Func<KeyEntryData, bool> EnsureKeyCollector()
@@ -900,14 +913,17 @@ namespace Yubico.YubiKey.U2f
         private static TimeSpan GetTimeoutToUse(TimeSpan timeout)
         {
             double secondsToUse = MaxTimeoutSeconds;
+
             if (timeout.TotalSeconds < MaxTimeoutSeconds)
             {
                 secondsToUse = (double)timeout.Seconds;
+
                 if (timeout.Milliseconds != 0)
                 {
                     secondsToUse++;
                 }
             }
+
             return secondsToUse == 0 ? TimeSpan.MaxValue : TimeSpan.FromSeconds(secondsToUse);
         }
     }

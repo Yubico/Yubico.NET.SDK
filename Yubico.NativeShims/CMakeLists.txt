@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.13)
 
 project(Yubico.NativeShims VERSION 1.9.1)
 
@@ -14,22 +14,51 @@ elseif(WIN32)
     set(BACKEND "winscard")
 endif()
 
-# export list
-if(APPLE AND (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR
-   CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))
-    # clang + lld
-    string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
-        " -exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/exports.llvm")
-elseif(NOT MSVC)
-    # clang/gcc + gnu ld
-    string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
-        " -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/exports.gnu")
-else()
-#enable control flow guard for windows
-    string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
-        " /guard:cf /def:\"${CMAKE_CURRENT_SOURCE_DIR}/exports.msvc\"")
+if (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR
+    CMAKE_C_COMPILER_ID STREQUAL "AppleClang" OR
+    CMAKE_C_COMPILER_ID STREQUAL "GNU")
+
+    add_compile_options (-Wall -Wextra -Werror)
+    add_compile_options (-Wformat -Wformat-nonliteral -Wformat-security)
+    add_compile_options (-Wshadow)
+    add_compile_options (-Wcast-qual)
+    add_compile_options (-Wmissing-prototypes)
+    add_compile_options (-Wbad-function-cast)
+    add_compile_options (-pedantic -pedantic-errors)
+    add_compile_options (-fpie -fpic)
+    add_compile_options(-O2)
+    add_definitions (-D_FORTIFY_SOURCE=2)
 endif()
 
+check_c_compiler_flag("-fstack-protector-all" HAVE_STACK_PROTECTOR_ALL)
+if (HAVE_STACK_PROTECTOR_ALL)
+    message(STATUS "-fstack-protector-all support detected")
+    add_compile_options(-fstack-protector-all)
+    add_link_options(-fstack-protector-all)
+else ()
+    check_c_compiler_flag("-fstack-protector" HAVE_STACK_PROTECTOR)
+    if(HAVE_STACK_PROTECTOR)
+        message(STATUS "-fstack-protector support detected")
+        add_compile_options(-fstack-protector)
+        add_link_options(-fstack-protector)
+    else ()
+        message(WARNING "No stack protection supported.")
+    endif ()
+endif ()
+
+# export list
+if(APPLE AND 
+    (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))
+    add_link_options("-exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/exports.llvm")
+endif()
+if(UNIX)
+    add_compile_options("-fstack-protector-all" "-fPIC" "-fPIE") 
+    add_link_options("-Wl,-z, -Wl,-z,relro,-z,now,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/exports.gnu")
+endif()
+if(WIN32)
+    add_link_options("/guard:cf" "/def:${CMAKE_CURRENT_SOURCE_DIR}/exports.msvc")
+    add_compile_options("/GS" "/Gs")
+endif()
 
 #
 # Library dependencies

@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Fido2
             _testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Bio);
         }
 
-        //[Fact(Skip = "This test requires user interation to reset the FIDO2 application.")]
+        //[Fact(Skip = "This test requires user interaction to reset the FIDO2 application.")]
         [Fact]
         public void SetLargeBlob_Succeeds()
         {

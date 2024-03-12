@@ -516,7 +516,7 @@ namespace Yubico.Core.Tlv
         /// <para>
         /// Normally, a Dispose method overwrites sensitive data or releases
         /// resources (files, internet connections, etc.). However, the Dispose in
-        /// this class simpply calls the TlvWriter.EndNestedTlv.
+        /// this class simply calls the TlvWriter.EndNestedTlv.
         /// </para>
         /// <para>
         /// When we're building a schema, we want to make sure the elements that
@@ -527,7 +527,7 @@ namespace Yubico.Core.Tlv
         /// to a Nested TLV, we can call the End method. However, a decision was made
         /// not to expose the End method, but to use this "using" construction.
         /// The reason is so that code can be written to have a structure where
-        /// the indntations in the code match the schema.
+        /// the indentations in the code match the schema.
         /// </para>
         /// <para>
         /// Really, that's why it is done this way. To make the code have the same

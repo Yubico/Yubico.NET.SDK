@@ -258,7 +258,7 @@ namespace Yubico.YubiKey.Otp.Operations
         /// system to whatever internal scheme it uses, then to the letter "Y".
         /// </para>
         /// <para>
-        /// However, if you program your key with a keybaord setting, but then
+        /// However, if you program your key with a keyboard setting, but then
         /// someone uses the key on a system that has a German layout, the keyboard
         /// key that sends an HID usage ID of <c>0x1C</c> is the <c>[Z]</c> key.
         /// </para>

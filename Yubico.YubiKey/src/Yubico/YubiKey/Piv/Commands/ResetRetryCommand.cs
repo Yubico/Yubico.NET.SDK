@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using Yubico.Core.Iso7816;
 
@@ -91,23 +90,15 @@ namespace Yubico.YubiKey.Piv.Commands
     {
         private const byte PivResetRetryInstruction = 0x2C;
 
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs. For this
-        /// command it's PIV.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Piv
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Piv;
+        private readonly ReadOnlyMemory<byte> _newPin;
 
         private readonly ReadOnlyMemory<byte> _puk;
-
-        private readonly ReadOnlyMemory<byte> _newPin;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
         // Note that there is no object-initializer constructor. All the
         // constructor args are secret byte arrays.
+        // ReSharper disable once UnusedMember.Local
         private ResetRetryCommand()
         {
             throw new NotImplementedException();
@@ -150,7 +141,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public ResetRetryCommand(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin)
         {
             if (PivPinUtilities.IsValidPinLength(puk.Length) == false
-             || PivPinUtilities.IsValidPinLength(newPin.Length) == false)
+                || PivPinUtilities.IsValidPinLength(newPin.Length) == false)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -162,16 +153,26 @@ namespace Yubico.YubiKey.Piv.Commands
             _newPin = newPin;
         }
 
+        /// <summary>
+        /// Gets the YubiKeyApplication to which this command belongs. For this
+        /// command it's PIV.
+        /// </summary>
+        /// <value>
+        /// YubiKeyApplication.Piv
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Piv;
+
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = PivResetRetryInstruction,
-            P2 = PivSlot.Pin,
-            Data = PivPinUtilities.CopyTwoPinsWithPadding(_puk, _newPin),
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = PivResetRetryInstruction,
+                P2 = PivSlot.Pin,
+                Data = PivPinUtilities.CopyTwoPinsWithPadding(_puk, _newPin),
+            };
 
         /// <inheritdoc />
         public ResetRetryResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new ResetRetryResponse(responseApdu);
+            new ResetRetryResponse(responseApdu);
     }
 }

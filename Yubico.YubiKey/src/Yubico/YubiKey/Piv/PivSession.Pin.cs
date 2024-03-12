@@ -673,7 +673,7 @@ namespace Yubico.YubiKey.Piv
         /// </summary>
         /// <remarks>
         /// This is the same as <c>TryChangePin</c>, except this method will
-        /// throw an exception if the <c>KeyCollecter</c> indicates user
+        /// throw an exception if the <c>KeyCollector</c> indicates user
         /// cancellation.
         /// <para>
         /// See the <see cref="TryChangePin()"/> method for further documentation
@@ -894,7 +894,7 @@ namespace Yubico.YubiKey.Piv
         /// </summary>
         /// <remarks>
         /// This is the same as <c>TryChangePuk</c>, except this method will
-        /// throw an exception if the <c>KeyCollecter</c> indicates user
+        /// throw an exception if the <c>KeyCollector</c> indicates user
         /// cancellation.
         /// <para>
         /// See the <see cref="TryChangePuk()"/> method for further documentation
@@ -1097,7 +1097,7 @@ namespace Yubico.YubiKey.Piv
         /// </summary>
         /// <remarks>
         /// This is the same as <c>TryResetPin</c>, except this method will
-        /// throw an exception if the <c>KeyCollecter</c> indicates user
+        /// throw an exception if the <c>KeyCollector</c> indicates user
         /// cancellation.
         /// <para>
         /// See the <see cref="TryResetPin()"/> method for further documentation
@@ -1309,7 +1309,7 @@ namespace Yubico.YubiKey.Piv
 
             // If success, GetData returns null.
             // If wrong PUK, returns count.
-            // If error, throwse exception.
+            // If error, throws exception.
             keyEntryData.RetriesRemaining = resetResponse.GetData();
 
             return resetResponse.Status;

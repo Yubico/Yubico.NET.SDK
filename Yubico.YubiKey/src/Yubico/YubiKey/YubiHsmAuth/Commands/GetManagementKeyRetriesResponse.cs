@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// Gets the number of retries remaining for the management key.
         /// </summary>
         /// <returns>
-        /// The data in the reponse APDU, as an integer.
+        /// The data in the response APDU, as an integer.
         /// </returns>
         /// <exception cref="InvalidOperationException">
         /// Thrown when the <see cref="IYubiKeyResponse.Status"/> is not equal to

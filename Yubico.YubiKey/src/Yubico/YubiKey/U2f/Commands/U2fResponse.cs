@@ -46,7 +46,7 @@ namespace Yubico.YubiKey.U2f.Commands
         };
 
         /// <summary>
-        /// Buind a new instance of U2FResponse from the given response APDU
+        /// Bind a new instance of U2FResponse from the given response APDU
         /// </summary>
         /// <param name="responseApdu">
         /// The response from the YubiKey to the partner Command.

@@ -180,7 +180,7 @@ namespace Yubico.YubiKey.Fido2
         /// </param>
         /// <param name="salt2">
         /// An optional second salt the YubiKey can use in combination with the
-        /// stored secret to build a secont value. If no arg is given, the
+        /// stored secret to build a second value. If no arg is given, the
         /// default of null will be used (the YubiKey will not build a second
         /// result).
         /// </param>

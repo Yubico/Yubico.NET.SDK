@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Fido2
         /// <xref href="SdkAuthTokenLogic">the SDK AuthToken logic</xref> for
         /// more information on when to verify. If you do not provide a
         /// KeyCollector that can collect the PIN, and the method is not able to
-        /// perform because of an autentication failure, it will throw an
+        /// perform because of an authentication failure, it will throw an
         /// exception.
         /// </para>
         /// </remarks>

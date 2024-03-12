@@ -168,7 +168,7 @@ namespace Yubico.YubiKey.Piv
         /// <c>KeyCollector</c> to obtain the it. If that does succeeds, it will
         /// set ADMIN DATA to indicate the YubiKey is not PIN-protected, it will
         /// clear the contents of PRINTED, and it will return
-        /// <c>PivPinOnlyMode.None</c>. If the <c>KeyColletor</c> is not able to
+        /// <c>PivPinOnlyMode.None</c>. If the <c>KeyCollector</c> is not able to
         /// provide the management key, this method will not be able to reset the
         /// ADMIN DATA nor PRINTED (management key authentication is necessary to
         /// set a storage location), and will return <c>Unavailable</c>.
@@ -191,8 +191,8 @@ namespace Yubico.YubiKey.Piv
             PivPinOnlyMode returnValue = TryAuthenticatePinOnly(false);
 
             // If the result is None, or PinProtected, or PinDerived, or
-            // PinProtected | PinDerived, then everythng is fine, just return.
-            // In orther words, if it does not contain an Unavailable.
+            // PinProtected | PinDerived, then everything is fine, just return.
+            // In other words, if it does not contain an Unavailable.
             if (!returnValue.HasFlag(PivPinOnlyMode.PinProtectedUnavailable) &&
                 !returnValue.HasFlag(PivPinOnlyMode.PinDerivedUnavailable))
             {
@@ -223,7 +223,7 @@ namespace Yubico.YubiKey.Piv
 
             // If we reach this point, either PinProtectedUnavailable or
             // PinDerivedUnavailable is (or both are) set.
-            // If the returnValue contains PinDeriveed, then we know the ADMIN
+            // If the returnValue contains PinDerived, then we know the ADMIN
             // DATA is "correct", and the mgmt key was authenticated. But PRINTED
             // is incorrect.
             // Check adminData.PinProtected. If it is true, we want to reset the
@@ -683,7 +683,7 @@ namespace Yubico.YubiKey.Piv
         /// authenticate the management key. Even if the management key is already
         /// authenticated, this method will authenticate. It will try to
         /// authenticate using the PIN-only techniques, and if that does not
-        /// work, it will try to authenticate using the default managment key. If
+        /// work, it will try to authenticate using the default management key. If
         /// either of those techniques works, the user will not have to enter the
         /// management key. But if the YubiKey is not PIN-only, and the default
         /// management key does not authenticate, the method will call on the
@@ -1075,7 +1075,7 @@ namespace Yubico.YubiKey.Piv
                 (ReadOnlyMemory<byte>.Empty, mgmtKeyAlgorithm, true);
 
             // Call this method instead of the PivSession.Change method directly,
-            // becuase this method will update the current key with the new key.
+            // because this method will update the current key with the new key.
             specialKeyCollector.ChangeManagementKey(this, mgmtKeyAlgorithm);
             _ = BlockPinOrPuk(PivSlot.Puk);
             adminData.SetSalt(salt);
@@ -1130,7 +1130,7 @@ namespace Yubico.YubiKey.Piv
         // return true. This is because we're saying that although the ADMIN DATA
         // says PinDerived, because the PIN-derived key does not authenticate, it
         // really is not PIN-derived.
-        // The only way to get a false retun is if the PIN does not verify, and
+        // The only way to get a false return is if the PIN does not verify, and
         // even then, only if the ADMIN DATA says the mgmt key is PinDerived.
         private bool TryGetChangePinMode(
             ReadOnlyMemory<byte>pin, out PivPinOnlyMode mode, out int? retriesRemaining)
@@ -1280,7 +1280,7 @@ namespace Yubico.YubiKey.Piv
             // Derive a key of the appropriate length (based on algorithm), using
             // the pin and salt.
             // Return the salt.
-            // It is the repsonsibility of the caller to make sure the pin is the
+            // It is the responsibility of the caller to make sure the pin is the
             // correct length.
             public ReadOnlyMemory<byte> DeriveKeyData(
                 ReadOnlyMemory<byte> pin, ReadOnlyMemory<byte> salt, PivAlgorithm algorithm)

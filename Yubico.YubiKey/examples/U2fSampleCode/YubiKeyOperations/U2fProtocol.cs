@@ -45,7 +45,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
         // isVerified to false.
         // The return value indicates whether the method could complete its task
         // or not. If it can make the determination, it returns true. If it can't
-        // (we simply don't know if the keyHanlde matches or not), return false.
+        // (we simply don't know if the keyHandle matches or not), return false.
         // It is possible to return true and set isVerified to false. This
         // happens when the method was able to complete its task, it simply
         // determined that the keyHandle does not verify. That is, it is not an

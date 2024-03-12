@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         //   r || s
         //   where r and s are a fixed size.
         // The caller passes in the current signature along with the algorithm.
-        // This method will creae a new byte[] and fill it with the non-standard
+        // This method will create a new byte[] and fill it with the non-standard
         // signature. The algorithm is needed to determine the correct lengths of
         // r and s.
         // If the input argument signature is null or not a valid signature for

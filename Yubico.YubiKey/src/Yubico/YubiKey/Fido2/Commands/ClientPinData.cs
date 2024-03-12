@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         public ReadOnlyMemory<byte>? PinUvAuthToken { get; set; }
 
         /// <summary>
-        /// The number of PIN attemps remaining before the YubiKey's FIDO2 application is locked out.
+        /// The number of PIN attempts remaining before the YubiKey's FIDO2 application is locked out.
         /// </summary>
         public int? PinRetries { get; set; }
 

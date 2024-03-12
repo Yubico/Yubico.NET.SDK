@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <para>
     /// The data returned is not formatted, it is simply a byte array. It happens
     /// to be the x coordinate of an ECC point that is the result of an EC scalar
-    /// muliplication operation.
+    /// multiplication operation.
     /// </para>
     /// <para>
     /// <c>GetData</c> will throw an exception when the <c>Status</c>

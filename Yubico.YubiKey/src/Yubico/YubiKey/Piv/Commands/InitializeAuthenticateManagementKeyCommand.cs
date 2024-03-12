@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// Although it is one command, it can do four things: authenticate a
     /// management key (challenge-response), sign arbitrary data, RSA decryption,
     /// and EC Diffie-Hellman. The SDK breaks these four operations into separate
-    /// classes. This class is how you intialize the process of performing
+    /// classes. This class is how you initialize the process of performing
     /// "GENERAL AUTHENTICATE: management key".
     /// <para>
     /// The partner Response class is <see cref="InitializeAuthenticateManagementKeyResponse"/>.
@@ -187,7 +187,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// and "response". In mutual authentication, the YubiKey sends a "witness",
     /// which the application decrypts to generate the response. In single
     /// authentication, the YubiKey sends a "challenge" and the application
-    /// encrypts it to denerate the response. For the purposes of this
+    /// encrypts it to generate the response. For the purposes of this
     /// documentation, the "witness-response" and "challenge-response" are the
     /// same concept, namely a "challenge-response".
     /// </para>
@@ -326,7 +326,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <summary>
         /// Initializes a new instance of the
         /// InitializeAuthenticateManagementKeyCommand class for the specified
-        /// mutual or single autherntication, and a Triple-DES management key.
+        /// mutual or single authentication, and a Triple-DES management key.
         /// </summary>
         /// <remarks>
         /// This will build a Command object that can initiate the authentication
@@ -345,7 +345,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <summary>
         /// Initializes a new instance of the
         /// InitializeAuthenticateManagementKeyCommand class for the specified
-        /// mutual or single autherntication, and a management key of the
+        /// mutual or single authentication, and a management key of the
         /// specified algorithm.
         /// </summary>
         /// <remarks>

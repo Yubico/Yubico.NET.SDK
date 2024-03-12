@@ -135,7 +135,7 @@ namespace Yubico.YubiKey.Otp.Operations
         /// <para>
         /// The <see cref="Memory{T}"/> collection containing the key is used by
         /// the operation to program the YubiKey, but the source continues to be
-        /// owned by the caller. This means that the caller is reponsible for
+        /// owned by the caller. This means that the caller is responsible for
         /// clearing the memory after use to avoid exposing sensitive information.
         /// </para>
         /// <para>

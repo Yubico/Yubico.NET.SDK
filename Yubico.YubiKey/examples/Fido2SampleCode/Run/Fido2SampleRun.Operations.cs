@@ -1077,7 +1077,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             return isValid;
         }
 
-        // If the input arg reportTempatesOnly is true, report only the
+        // If the input arg reportTemplatesOnly is true, report only the
         // templates. Otherwise, report all the info.
         private static void ReportBioInfo(
             BioModality modality,
@@ -1498,7 +1498,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
         // Return the CredentialUserInfo for the credential of interest in the
         // credentialData List.
-        // If none is seleced, return null.
+        // If none is selected, return null.
         private CredentialUserInfo SelectCredential(
             IReadOnlyList<object> credentialData, int credentialCount)
         {

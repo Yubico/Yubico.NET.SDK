@@ -174,7 +174,7 @@ namespace Yubico.YubiKey.Piv.Commands
         ///   var command = new SetPinRetriesCommand()
         ///   {
         ///       PinRetryCount = 5,
-        ///       PukRetryCOunt = 2,
+        ///       PukRetryCount = 2,
         ///   };
         /// </code>
         /// </remarks>

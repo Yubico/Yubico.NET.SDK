@@ -318,7 +318,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// not found.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Authenticaiton failed and there are no retries remaining.
+        /// Authentication failed and there are no retries remaining.
         /// </exception>
         public bool TryDeleteCredential(string label)
         {

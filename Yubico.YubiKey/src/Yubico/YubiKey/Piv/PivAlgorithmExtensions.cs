@@ -81,12 +81,12 @@ namespace Yubico.YubiKey.Piv
         /// </code>
         /// Note that a Triple-DES key is made up of three DES keys, and each DES
         /// key is 8 bytes (64 bits). However, because there are 8 "parity bits"
-        /// in each DES key, the actual key strangth of a DES key is 56 bits.
+        /// in each DES key, the actual key strength of a DES key is 56 bits.
         /// That means the actual key strength of a Triple-DES key is 168 bits. In
         /// addition, because of certain attacks, it is possible to reduce the
         /// strength of a Triple-DES key to 112 bits (it takes the equivalent of
         /// a 112-bit brute-force attack to break a Triple-DES key). Nonetheless,
-        /// this extention will return 192 as the key length, in bits, of a
+        /// this extension will return 192 as the key length, in bits, of a
         /// Triple-DES key.
         /// </para>
         /// <para>

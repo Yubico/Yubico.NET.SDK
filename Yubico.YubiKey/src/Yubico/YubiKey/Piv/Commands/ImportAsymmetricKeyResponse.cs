@@ -30,7 +30,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <c>ResponseStatus.Success</c> means the command executed correctly. Other
     /// values represent various errors. For example, <c>ResponseStatus.AuthenticationRequired</c>
     /// indicates that the user verification (management key) failed, so the command
-    /// was not sucessful.
+    /// was not successful.
     /// </para>
     /// <para>
     /// Example:

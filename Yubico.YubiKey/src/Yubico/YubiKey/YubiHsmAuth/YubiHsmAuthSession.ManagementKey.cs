@@ -120,7 +120,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// (usually indicating user cancellation).
         /// </returns>
         /// <exception cref="SecurityException">
-        /// Authenticaiton failed and there are no retries remaining.
+        ///     Authentication failed and there are no retries remaining.
         /// </exception>
         /// <exception cref="InvalidOperationException">
         /// A key collector was not supplied (<see cref="KeyCollector"/> was

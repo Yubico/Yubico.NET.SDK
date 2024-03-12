@@ -289,7 +289,7 @@ namespace Yubico.YubiKey.Cryptography
         /// for <c>isStandardSignature</c>. That argument defaults to <c>true</c>
         /// so if the signature is formatted in the standard way, you can call
         /// this method with that argument missing. If the signature is the
-        /// concatentation of <c>r</c> and <c>s</c>, pass <c>false</c> for
+        /// concatenation of <c>r</c> and <c>s</c>, pass <c>false</c> for
         /// <c>isStandardSignature</c>.
         /// </remarks>
         /// <param name="dataToVerify">
@@ -303,7 +303,7 @@ namespace Yubico.YubiKey.Cryptography
         /// <param name="isStandardSignature">
         /// <c>true</c> if the signature is formatted as the BER encoding
         /// specified by most standards, or <c>false</c> if the signature is
-        /// formatted as the concatentation of <c>r</c> and <c>s</c>.
+        /// formatted as the concatenation of <c>r</c> and <c>s</c>.
         /// </param>
         /// <returns>
         /// A boolean, <c>true</c> if the signature verifies, <c>false</c> if it
@@ -332,7 +332,7 @@ namespace Yubico.YubiKey.Cryptography
         /// for <c>isStandardSignature</c>. That argument defaults to <c>true</c>
         /// so if the signature is formatted in the standard way, you can call
         /// this method with that argument missing. If the signature is the
-        /// concatentation of <c>r</c> and <c>s</c>, pass <c>false</c> for
+        /// concatenation of <c>r</c> and <c>s</c>, pass <c>false</c> for
         /// <c>isStandardSignature</c>.
         /// </remarks>
         /// <param name="digestToVerify">
@@ -344,7 +344,7 @@ namespace Yubico.YubiKey.Cryptography
         /// <param name="isStandardSignature">
         /// <c>true</c> if the signature is formatted as the BER encoding
         /// specified by most standards, or <c>false</c> if the signature is
-        /// formatted as the concatentation of <c>r</c> and <c>s</c>.
+        /// formatted as the concatenation of <c>r</c> and <c>s</c>.
         /// </param>
         /// <returns>
         /// A boolean, <c>true</c> if the signature verifies, <c>false</c> if it

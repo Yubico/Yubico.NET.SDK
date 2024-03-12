@@ -154,8 +154,8 @@ namespace Yubico.YubiKey.Scp03.Commands
         {
             // If the currentKeys' KVN is not the same as the newKeys' KVN, then
             // this command is adding a key set and P1 is zero. Otherwise, this
-            // comand is replacing a key, so set P1 to the KVN of the currentKeys.
-            _p1Value = (currentKeys.KeyVersionNumber == newKeys.KeyVersionNumber) ? currentKeys.KeyVersionNumber : (byte)0;
+            // command is replacing a key, so set P1 to the KVN of the currentKeys.
+            _p1Value = currentKeys.KeyVersionNumber == newKeys.KeyVersionNumber ? currentKeys.KeyVersionNumber : (byte)0;
 
             // Build the data portion of the APDU
             //  new kvn || ENC data || MAC data || DEK data

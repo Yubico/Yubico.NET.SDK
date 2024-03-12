@@ -89,7 +89,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// will throw an exception.
         /// </summary>
         /// <remarks>
-        /// This is genrally used to get a sub-map out. For example, one element
+        /// This is generally used to get a sub-map out. For example, one element
         /// of the main map is a map itself, a map of key/value pairs where each
         /// key is a string and each value is a boolean (or a string). So get the
         /// sub-map out (e.g. subMap = mainMap.ReadMap(4)), then get that

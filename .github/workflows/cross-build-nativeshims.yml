@@ -58,23 +58,23 @@ jobs:
           name: msbuild
           path: Yubico.NativeShims/msbuild/*
 
-  build-ubuntu:
-    name: Build Ubuntu
+  build-linux:
+    name: Build linux
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - run: |
           echo 'Running build script: Linux'
           cd Yubico.NativeShims
-          sh ./build-ubuntu.sh
+          sh ./build-linux.sh
       - uses: actions/upload-artifact@v4
         with:
-          name: ubuntu-x64
-          path: Yubico.NativeShims/ubuntu-x64/**
+          name: linux-x64
+          path: Yubico.NativeShims/linux-x64/**
       - uses: actions/upload-artifact@v4
         with:
-          name: ubuntu-arm64
-          path: Yubico.NativeShims/ubuntu-arm64/**
+          name: linux-arm64
+          path: Yubico.NativeShims/linux-arm64/**
 
   build-macos:
     name: Build macOS
@@ -97,7 +97,7 @@ jobs:
   pack:
     name: Package artifacts
     runs-on: windows-2019
-    needs: [build-windows, build-ubuntu, build-macos]
+    needs: [build-windows, build-linux, build-macos]
     steps:
       - uses: actions/download-artifact@v4
       - run: |

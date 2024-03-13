@@ -59,7 +59,7 @@ jobs:
           path: Yubico.NativeShims/msbuild/*
 
   build-linux:
-    name: Build linux
+    name: Build Linux
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

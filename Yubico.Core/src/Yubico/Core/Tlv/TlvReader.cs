@@ -1108,38 +1108,57 @@ namespace Yubico.Core.Tlv
             int fixedLength,
             bool throwIfFailed)
         {
-            value = Memory<byte>.Empty;
-
-            int result = ReadTagExpected(expectedTag);
-            if (result != ValidEncoding)
+            bool isValidTlv = IsValidTlv(expectedTag, fixedLength, out int resultCode);
+            if (isValidTlv)
             {
-                goto exit;
+                value = _encoding.Slice(_currentValueOffset, _currentLength);
+                _currentOffset = _currentValueOffset + _currentLength;
+
+                ResetState();
+                return true;
             }
 
-            result = ReadLength();
-            if (result != ValidEncoding)
-            {
-                goto exit;
-            }
-
-            result = VerifyValue(fixedLength);
-            if (result != ValidEncoding)
-            {
-                goto exit;
-            }
-
-            value = _encoding.Slice(_currentValueOffset, _currentLength);
-            _currentOffset = _currentValueOffset + _currentLength;
-
-        exit:
+            // We must reset the state before we throw or return as well, so ResetState() is duplicated but the
+            // intent is more clear that we need to reset the state in all (3) cases. 
             ResetState();
-
-            if (result != ValidEncoding && throwIfFailed)
+            if (throwIfFailed)
             {
-                ThrowOnFailedRead(result);
+                ThrowOnFailedRead(resultCode);
             }
 
-            return result == ValidEncoding;
+            value = Memory<byte>.Empty;
+            return false;
+        }
+
+        /// <summary>
+        /// Attempts to read and validate the expected tag, its length, and its value, indicating success through the return value and providing a result code.
+        /// </summary>
+        /// <param name="expectedTag">The tag expected to be read.</param>
+        /// <param name="fixedLength">The fixed length that the value is expected to adhere to.</param>
+        /// <param name="resultCode">Out parameter that returns the result code of the operation, indicating the specific outcome or error.</param>
+        /// <returns>Returns true if the tag, length, and value are successfully read and validated. Returns false if any validation fails, along with the appropriate result code.</returns>
+        private bool IsValidTlv(int expectedTag, int fixedLength, out int resultCode)
+        {
+            resultCode = ReadTagExpected(expectedTag);
+            if (resultCode != ValidEncoding)
+            {
+                return false;
+            }
+
+            resultCode = ReadLength();
+            if (resultCode != ValidEncoding)
+            {
+                return false;
+            }
+
+            resultCode = VerifyValue(fixedLength);
+            if (resultCode != ValidEncoding)
+            {
+                return false;
+            }
+
+            // Valid Tlv, we were able to read the tag, length and verify the value
+            return true;
         }
 
         // Read the tag, verifying the tag in the encoding is the same as the
@@ -1170,7 +1189,7 @@ namespace Yubico.Core.Tlv
             int result = ReadTag(tagLength);
             if (result == ValidEncoding && _currentTag != expectedTag)
             {
-                result = UnexpectedEncoding;
+                return UnexpectedEncoding;
             }
 
             return result;

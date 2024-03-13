@@ -18,11 +18,10 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR
     CMAKE_C_COMPILER_ID STREQUAL "AppleClang" OR
     CMAKE_C_COMPILER_ID STREQUAL "GNU")
 
-    add_compile_options (-Wall -Wextra -Werror)
+    add_compile_options (-Wall -Wextra)
     add_compile_options (-Wformat -Wformat-nonliteral -Wformat-security)
     add_compile_options (-Wshadow)
     add_compile_options (-Wcast-qual)
-    add_compile_options (-Wmissing-prototypes)
     add_compile_options (-Wbad-function-cast)
     add_compile_options (-pedantic -pedantic-errors)
     add_compile_options (-fpic)

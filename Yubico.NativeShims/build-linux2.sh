@@ -1,6 +1,6 @@
 #!/bin/bash
 
-apt-get update -qq && \
+sudo apt-get update -qq && \
 DEBIAN_FRONTEND=noninteractive apt-get install -yq \
     ca-certificates \
     gnupg \

@@ -1,11 +1,23 @@
 #!/bin/bash
 
-# Ensure vcpkg is up to date
+apt-get update -qq && \
+DEBIAN_FRONTEND=noninteractive apt-get install -yq \
+    ca-certificates \
+    gnupg \
+    software-properties-common \
+    build-essential \
+    pkg-config \
+    ninja-build \
+    zlib1g-dev \
+    libpcsclite-dev \
+
 pushd $VCPKG_INSTALLATION_ROOT
 git checkout master
+git restore .
 git pull
-./bootstrap-vcpkg.sh
-vcpkg integrate install
+# ./bootstrap-vcpkg.sh
+# vcpkg integrate install
+vcpkg x-update-baseline
 popd
 
 # Build for Linux amd64

@@ -2,13 +2,7 @@
 
 sudo apt-get update -qq && \
 DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
-    ca-certificates \
-    gnupg \
-    software-properties-common \
-    build-essential \
-    pkg-config \
     ninja-build \
-    zlib1g-dev \
     libpcsclite-dev \
 
 pushd $VCPKG_INSTALLATION_ROOT

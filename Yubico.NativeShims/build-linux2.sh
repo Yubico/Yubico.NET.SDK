@@ -1,7 +1,7 @@
 #!/bin/bash
 
 sudo apt-get update -qq && \
-DEBIAN_FRONTEND=noninteractive apt-get install -yq \
+DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
     ca-certificates \
     gnupg \
     software-properties-common \

@@ -76,14 +76,14 @@ jobs:
           name: linux-arm64
           path: Yubico.NativeShims/linux-arm64/**
   build-linux2:
-    name: Build Linux
+    name: Build Linux2
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
       - run: |
-          echo 'Running build script: Linux'
+          echo 'Running build script: Linux2'
           cd Yubico.NativeShims
-          sh ./build-linux2.sh
+          bash ./build-linux2.sh
       - uses: actions/upload-artifact@v4
         with:
           name: linux-x64-2

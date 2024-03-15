@@ -40,8 +40,28 @@ if (APPLE)
 elseif(UNIX)
     set(PLATFORM_LINUX true)
     set(BACKEND "pcsc")
-    find_package(PkgConfig REQUIRED)
     add_link_options("-Wl,-z,relro,-z,now,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/exports.gnu")
+
+    message(STATUS "OPENSSL AS VARIABLE: ${OPENSSL_ROOT_DIR}")
+    message(STATUS "OPENSSL PATH IN ENV: $ENV{OPENSSL_ROOT_DIR}")
+    message(STATUS "PKG_CONFIG_PATH AS VARIABLE: ${PKG_CONFIG_PATH}")
+    message(STATUS "PKG_CONFIG_PATH: $ENV{PKG_CONFIG_PATH}")
+    find_package(PkgConfig REQUIRED)
+    execute_process(COMMAND pkg-config --libs openssl
+                RESULT_VARIABLE PKG_CONFIG_RESULT
+                OUTPUT_VARIABLE PKG_CONFIG_OUTPUT)
+    message(STATUS "pkg-config result: ${PKG_CONFIG_RESULT}")
+    message(STATUS "pkg-config output: ${PKG_CONFIG_OUTPUT}")
+
+    if(VCPKG_TARGET_TRIPLET MATCHES "arm64-linux")
+        message(STATUS "Configuring for arm64-linux")
+        message(STATUS "SETTING OPENSSL CRYPTO LIBRARY: ${OPENSSL_ROOT_DIR}/lib/libcrypto.a")
+        message(STATUS "SETTING OPENSSL SSL LIBRARY: ${OPENSSL_ROOT_DIR}/lib/libssl.a")
+        message(STATUS "SETTING OPENSSL INCLUDE DIR: ${OPENSSL_ROOT_DIR}/include")
+        set(OPENSSL_CRYPTO_LIBRARY "${OPENSSL_ROOT_DIR}/lib/libcrypto.a")
+        set(OPENSSL_SSL_LIBRARY "${OPENSSL_ROOT_DIR}/lib/libssl.a")
+        set(OPENSSL_INCLUDE_DIR "${OPENSSL_ROOT_DIR}/include")
+    endif()
 elseif(WIN32)
     set(PLATFORM_WINDOWS true)
     set(BACKEND "winscard")
@@ -55,6 +75,7 @@ endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/pcscd.cmake)
 find_pcscd()
+message(STATUS "Looking for OpenSSL in: ${OPENSSL_ROOT_DIR}")
 
 find_package(OpenSSL REQUIRED)
 

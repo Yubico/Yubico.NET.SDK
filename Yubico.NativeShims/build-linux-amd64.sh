@@ -7,7 +7,6 @@
 set -e
 
 export VCPKG_INSTALLATION_ROOT=$GITHUB_WORKSPACE/vcpkg \
-    VCPKG_FORCE_SYSTEM_BINARIES=1 \
     PATH=/usr/local/bin:$VCPKG_ROOT:$PATH
 
 sudo apt-get update -qq && \
@@ -35,27 +34,23 @@ sudo apt-get update
 sudo apt-get install cmake
 
 git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && ${VCPKG_INSTALLATION_ROOT}/bootstrap-vcpkg.sh
-echo "vcpkg installed!!" && vcpkg --version
-
 sudo apt autoremove -yq
 
 build_target() {
     local target_triplet=$1
-    local build_dir=$2
-    local cross_toolchain_file=$3
+    local output_dir=$2
+    build_dir="build-$output_dir"
 
     rm -rf "$build_dir"
     mkdir -p "$build_dir"
        
-    echo "Building for $target_triplet ..."
-
     cmake -S . -B "$build_dir" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
-        -DVCPKG_TARGET_TRIPLET="$target_triplet"
+        -DVCPKG_TARGET_TRIPLET=$target_triplet
     
     cmake --build "$build_dir" -- -j $(nproc)
-    cp "$build_dir"/*.so ./"$build_dir"
+    cp "$build_dir"/*.so ./"$output_dir"
 }
 
 if [ ! -f ./CMakeLists.txt ]; then

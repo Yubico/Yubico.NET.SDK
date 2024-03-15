@@ -1,8 +1,8 @@
 #!/bin/bash
 
-cd ~/ && cp -r /mnt/c/Users/Dennis.Dyall/Documents/Work/Yubico.NET.SDK-private/Yubico.NativeShims/ . 
-echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/$USER
-echo 'set completion-ignore-case On' | sudo tee -a /etc/inputrc
+#cd ~/ && cp -r /mnt/c/Users/Dennis.Dyall/Documents/Work/Yubico.NET.SDK-private/Yubico.NativeShims/ . 
+#echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/$USER
+#echo 'set completion-ignore-case On' | sudo tee -a /etc/inputrc
 
 set -e
 
@@ -47,7 +47,8 @@ sudo apt autoremove -yq
 
 build_target() {
     local target_triplet=$1
-    local build_dir=$2
+    local output_dir=$2
+    build_dir="build-$output_dir"
 
     # export OPENSSL_ROOT_DIR=$(pwd)/linux-arm64/vcpkg_installed/arm64-linux
 
@@ -68,9 +69,8 @@ build_target() {
         -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="$(pwd)/cmake/aarch64-linux-gnu.toolchain.cmake" \
         -DOPENSSL_ROOT_DIR=$(pwd)/linux-arm64/vcpkg_installed/arm64-linux
 
-    
     cmake --build "$build_dir" -- -j $(nproc)
-    cp "$build_dir"/*.so ./"$build_dir"
+    cp "$build_dir"/*.so ./"$output_dir"
 }
 
 if [ ! -f ./CMakeLists.txt ]; then

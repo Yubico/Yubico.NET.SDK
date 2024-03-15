@@ -59,7 +59,7 @@ jobs:
           path: Yubico.NativeShims/msbuild/*
 
   build-linux-amd64:
-    name: Build Linux
+    name: Build Linux-amd64
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
@@ -72,7 +72,7 @@ jobs:
           name: linux-x64
           path: Yubico.NativeShims/linux-x64/**
   build-linux-arm64:
-    name: Build linux-x64
+    name: Build linux-arm64
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4

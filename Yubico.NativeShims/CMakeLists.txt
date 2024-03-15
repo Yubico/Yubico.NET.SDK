@@ -41,6 +41,18 @@ elseif(UNIX)
     set(PLATFORM_LINUX true)
     set(BACKEND "pcsc")
     add_link_options("-Wl,-z,relro,-z,now,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/exports.gnu")
+
+    message(STATUS "OPENSSL AS VARIABLE: ${OPENSSL_ROOT_DIR}")
+    message(STATUS "OPENSSL PATH IN ENV: $ENV{OPENSSL_ROOT_DIR}")
+    message(STATUS "PKG_CONFIG_PATH AS VARIABLE: ${PKG_CONFIG_PATH}")
+    message(STATUS "PKG_CONFIG_PATH: $ENV{PKG_CONFIG_PATH}")
+    find_package(PkgConfig REQUIRED)
+    execute_process(COMMAND pkg-config --libs openssl
+                RESULT_VARIABLE PKG_CONFIG_RESULT
+                OUTPUT_VARIABLE PKG_CONFIG_OUTPUT)
+    message(STATUS "pkg-config result: ${PKG_CONFIG_RESULT}")
+    message(STATUS "pkg-config output: ${PKG_CONFIG_OUTPUT}")
+
 elseif(WIN32)
     set(PLATFORM_WINDOWS true)
     set(BACKEND "winscard")

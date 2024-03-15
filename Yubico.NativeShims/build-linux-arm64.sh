@@ -30,9 +30,11 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
 
 wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
 echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
-sudo apt-get update -qq | DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq cmake
+sudo apt-get update
+sudo apt-get install cmake
 
 git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && ${VCPKG_INSTALLATION_ROOT}/bootstrap-vcpkg.sh
+echo "vcpkg installed!!" && vcpkg --version
 
 # Is this needed? Yes to install it. Unless we can find it from another source
 echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal main restricted universe multiverse

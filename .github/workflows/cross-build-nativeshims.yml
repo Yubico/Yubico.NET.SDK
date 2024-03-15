@@ -59,12 +59,12 @@ jobs:
           path: Yubico.NativeShims/msbuild/*
 
   build-linux-amd64:
-    name: Build Linux-amd64
+    name: Build Linux (amd64)
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
       - run: |
-          echo 'Running build script: Linux amd64'
+          echo 'Running build script: Linux (amd64)'
           cd Yubico.NativeShims
           sh ./build-linux-amd64.sh
       - uses: actions/upload-artifact@v4
@@ -72,12 +72,12 @@ jobs:
           name: linux-x64
           path: Yubico.NativeShims/linux-x64/**
   build-linux-arm64:
-    name: Build linux-arm64
+    name: Build Linux (arm64)
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v4
       - run: |
-          echo 'Running build script: Linux arm64'
+          echo 'Running build script: Linux (arm64)'
           cd Yubico.NativeShims
           sh ./build-linux-arm64.sh
       - uses: actions/upload-artifact@v4

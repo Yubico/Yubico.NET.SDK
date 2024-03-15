@@ -6,7 +6,7 @@
 
 #set -e
 
-export VCPKG_INSTALLATION_ROOT=~/vcpkg \
+export VCPKG_INSTALLATION_ROOT=$GITHUB_WORKSPACE/vcpkg \
     VCPKG_FORCE_SYSTEM_BINARIES=1 \
     PATH=/usr/local/bin:$PATH
 
@@ -28,18 +28,20 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
     g++-aarch64-linux-gnu \
     gcc-aarch64-linux-gnu
 
+echo "Installing latest Cmake"
 wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
 echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
 sudo apt-get update
 sudo apt-get install cmake
+echo "Cmake installed"
 
+echo "Installing VCPKG"
 git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && ${VCPKG_INSTALLATION_ROOT}/bootstrap-vcpkg.sh
+echo "VCPKG Installed"
 
 # Is this needed? Yes to install it. Unless we can find it from another source
-echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal main restricted universe multiverse
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-updates main restricted universe multiverse
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-security main restricted universe multiverse
-deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-backports main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list > /dev/null
+echo "Adding libpcsclite-dev:arm64 sources"
+echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list > /dev/null
 
 sudo dpkg --add-architecture arm64
 echo "dpkg --print-architecture"

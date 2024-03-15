@@ -6,9 +6,8 @@ echo 'set completion-ignore-case On' | sudo tee -a /etc/inputrc
 
 set -e
 
-export VCPKG_INSTALLATION_ROOT=~/vcpkg \
+export VCPKG_INSTALLATION_ROOT=$GITHUB_WORKSPACE/vcpkg \
     VCPKG_FORCE_SYSTEM_BINARIES=1 \
-    CMAKE_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake \
     PATH=/usr/local/bin:$VCPKG_ROOT:$PATH
 
 sudo apt-get update -qq && \

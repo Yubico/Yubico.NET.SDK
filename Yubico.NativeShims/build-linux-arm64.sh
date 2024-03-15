@@ -40,9 +40,13 @@ echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal main restrict
 deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-updates main restricted universe multiverse
 deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-security main restricted universe multiverse
 deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-backports main restricted universe multiverse" | sudo tee -a /etc/apt/sources.list > /dev/null
+
 sudo dpkg --add-architecture arm64
-sudo apt-get update -qq | DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq libpcsclite-dev:arm64 
-sudo apt autoremove -yq
+echo "dpkg --print-architecture"
+dpkg --print-architecture
+
+sudo apt-get update
+DEBIAN_FRONTEND=noninteractive sudo apt-get install libpcsclite-dev:arm64 
 
 build_target() {
     local target_triplet=$1

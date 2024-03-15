@@ -42,6 +42,7 @@ elseif(UNIX)
     set(BACKEND "pcsc")
     add_link_options("-Wl,-z,relro,-z,now,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/exports.gnu")
 
+    ##TODO REMOVE MESSAGES
     message(STATUS "OPENSSL AS VARIABLE: ${OPENSSL_ROOT_DIR}")
     message(STATUS "OPENSSL PATH IN ENV: $ENV{OPENSSL_ROOT_DIR}")
     message(STATUS "PKG_CONFIG_PATH AS VARIABLE: ${PKG_CONFIG_PATH}")
@@ -66,7 +67,7 @@ endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/pcscd.cmake)
 find_pcscd()
-message(STATUS "Looking for OpenSSL in: ${OPENSSL_ROOT_DIR}")
+message(STATUS "Looking for OpenSSL in: ${OPENSSL_ROOT_DIR}") #TODO REMOVE THIS
 
 find_package(OpenSSL REQUIRED)
 

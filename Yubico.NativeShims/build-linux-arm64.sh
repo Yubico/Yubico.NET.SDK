@@ -4,7 +4,7 @@
 # echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/$USER
 # echo 'set completion-ignore-case On' | sudo tee -a /etc/inputrc
 
-set -e
+#set -e
 
 export VCPKG_INSTALLATION_ROOT=~/vcpkg \
     VCPKG_FORCE_SYSTEM_BINARIES=1 \

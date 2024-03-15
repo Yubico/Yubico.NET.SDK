@@ -1,14 +1,14 @@
 #!/bin/bash
 
-#cd ~/ && cp -r /mnt/c/Users/Dennis.Dyall/Documents/Work/Yubico.NET.SDK-private/Yubico.NativeShims/ . 
-#echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/$USER
-#echo 'set completion-ignore-case On' | sudo tee -a /etc/inputrc
+# cd ~/ && cp -r /mnt/c/Users/Dennis.Dyall/Documents/Work/Yubico.NET.SDK-private/Yubico.NativeShims/ . 
+# echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/$USER
+# echo 'set completion-ignore-case On' | sudo tee -a /etc/inputrc
 
 set -e
 
-export VCPKG_INSTALLATION_ROOT=$GITHUB_WORKSPACE/vcpkg \
+export VCPKG_INSTALLATION_ROOT=~/vcpkg \
     VCPKG_FORCE_SYSTEM_BINARIES=1 \
-    PATH=/usr/local/bin:$VCPKG_ROOT:$PATH
+    PATH=/usr/local/bin:$PATH
 
 sudo apt-get update -qq && \
 DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
@@ -34,7 +34,6 @@ sudo apt-get update
 sudo apt-get install cmake
 
 git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && ${VCPKG_INSTALLATION_ROOT}/bootstrap-vcpkg.sh
-echo "vcpkg installed!!" && vcpkg --version
 
 # Is this needed? Yes to install it. Unless we can find it from another source
 echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal main restricted universe multiverse
@@ -47,22 +46,13 @@ sudo apt autoremove -yq
 
 build_target() {
     local target_triplet=$1
-    local output_dir=$2
-    build_dir="build-$output_dir"
-
-    # export OPENSSL_ROOT_DIR=$(pwd)/linux-arm64/vcpkg_installed/arm64-linux
-
-    echo "SSL DIR: $OPENSSL_ROOT_DIR"
+    build_dir="build-$target_triplet"
 
     rm -rf "$build_dir"
     mkdir -p "$build_dir"
 
-    export PKG_CONFIG_PATH="/usr/lib/aarch64-linux-gnu/pkgconfig:$(pwd)/${target_triplet}/vcpkg_installed/arm64-linux/lib/pkgconfig"
-
     echo "Building for $target_triplet ..."
-    echo "PKG_CONFIG_PATH DIR: $PKG_CONFIG_PATH"
-
-    cmake -S . -B "$build_dir" \
+    PKG_CONFIG_PATH="/usr/lib/aarch64-linux-gnu/pkgconfig:$(pwd)/${target_triplet}/vcpkg_installed/arm64-linux/lib/pkgconfig" cmake -S . -B "$build_dir" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
         -DVCPKG_TARGET_TRIPLET="$target_triplet" \
@@ -70,12 +60,12 @@ build_target() {
         -DOPENSSL_ROOT_DIR=$(pwd)/linux-arm64/vcpkg_installed/arm64-linux
 
     cmake --build "$build_dir" -- -j $(nproc)
-    cp "$build_dir"/*.so ./"$output_dir"
 }
 
 if [ ! -f ./CMakeLists.txt ]; then
     cd ~/Yubico.NativeShims
 fi
 
-build_target arm64-linux linux-arm64
+build_target arm64-linux
+cp build-arm64-linux/*.so ./linux-arm64
 

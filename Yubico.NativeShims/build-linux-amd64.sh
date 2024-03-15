@@ -7,7 +7,7 @@
 set -e
 
 export VCPKG_INSTALLATION_ROOT=$GITHUB_WORKSPACE/vcpkg \
-    PATH=/usr/local/bin:$VCPKG_ROOT:$PATH
+    PATH=/usr/local/bin:$PATH
 
 sudo apt-get update -qq && \
 DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
@@ -38,23 +38,23 @@ sudo apt autoremove -yq
 
 build_target() {
     local target_triplet=$1
-    local output_dir=$2
-    build_dir="build-$output_dir"
+    build_dir="build-$target_triplet"
 
     rm -rf "$build_dir"
     mkdir -p "$build_dir"
-       
+
+    echo "Building for $target_triplet ..."
     cmake -S . -B "$build_dir" \
         -DCMAKE_BUILD_TYPE=Release \
         -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
         -DVCPKG_TARGET_TRIPLET=$target_triplet
     
     cmake --build "$build_dir" -- -j $(nproc)
-    cp "$build_dir"/*.so ./"$output_dir"
 }
 
 if [ ! -f ./CMakeLists.txt ]; then
     cd ~/Yubico.NativeShims
 fi
 
-build_target x64-linux linux-x64
+build_target x64-linux
+cp build-x64-linux/*.so ./linux-x64

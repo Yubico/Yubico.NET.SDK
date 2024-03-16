@@ -1,12 +1,12 @@
 #!/bin/bash
 
-cd ~/ && cp -r /mnt/c/Users/Dennis.Dyall/Documents/Work/Yubico.NET.SDK-private/Yubico.NativeShims/ . 
-echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/$USER
-echo 'set completion-ignore-case On' | sudo tee -a /etc/inputrc
+# cd ~/ && cp -r /mnt/c/Users/Dennis.Dyall/Documents/Work/Yubico.NET.SDK-private/Yubico.NativeShims/ . 
+# echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/$USER
+# echo 'set completion-ignore-case On' | sudo tee -a /etc/inputrc
 
 # set -e
 
-export VCPKG_INSTALLATION_ROOT=~/vcpkg \
+export VCPKG_INSTALLATION_ROOT=$GITHUB_WORKSPACE/vcpkg \
     VCPKG_FORCE_SYSTEM_BINARIES=1 \
     PATH=/usr/local/bin:$VCPKG_INSTALLATION_ROOT:$PATH
 

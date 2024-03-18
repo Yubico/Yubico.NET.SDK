@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 export VCPKG_INSTALLATION_ROOT=$GITHUB_WORKSPACE/vcpkg \
     VCPKG_FORCE_SYSTEM_BINARIES=1 \
     PATH=/usr/local/bin:$VCPKG_INSTALLATION_ROOT:$PATH

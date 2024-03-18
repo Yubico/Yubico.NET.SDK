@@ -30,8 +30,8 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
 
 wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
 echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
-sudo apt-get update
-sudo apt-get install cmake
+sudo apt-get update -qq
+sudo apt-get install cmake -yq
 
 git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && ${VCPKG_INSTALLATION_ROOT}/bootstrap-vcpkg.sh
 sudo apt autoremove -yq
@@ -41,7 +41,7 @@ if [ ! -f ./CMakeLists.txt ]; then
     cd ~/Yubico.NativeShims
 fi
 
-build_dir="build-x64-linux"
+build_dir="linux-x64"
 rm -rf "$build_dir"
 mkdir -p "$build_dir"
 
@@ -52,6 +52,3 @@ cmake -S . -B "$build_dir" \
     -DVCPKG_TARGET_TRIPLET=x64-linux
 
 cmake --build "$build_dir" -- -j $(nproc)
-
-echo "Copying 
-cp $build_dir/*.so $(pwd)/linux-x64

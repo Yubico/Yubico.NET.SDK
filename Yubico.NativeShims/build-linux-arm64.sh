@@ -52,7 +52,7 @@ fi
 
 export PKG_CONFIG_PATH="/usr/lib/aarch64-linux-gnu/pkgconfig:$(pwd)/arm64-linux/vcpkg_installed/arm64-linux/lib/pkgconfig"
 
-build_dir=build-arm64
+build_dir=linux-arm64
 rm -rf "$build_dir"
 mkdir -p "$build_dir"
 
@@ -66,6 +66,4 @@ cmake -S . -B "$build_dir" \
     -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="$(pwd)/cmake/aarch64-linux-gnu.toolchain.cmake" \
     -DOPENSSL_ROOT_DIR=$(pwd)/linux-arm64/vcpkg_installed/arm64-linux
 
-
 cmake --build "$build_dir" -- -j $(nproc)
-cp "$build_dir"/*.so $(pwd)/linux-x64

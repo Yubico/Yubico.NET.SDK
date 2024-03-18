@@ -1,10 +1,6 @@
 #!/bin/bash
 
-# cd ~/ && cp -r /mnt/c/Users/Dennis.Dyall/Documents/Work/Yubico.NET.SDK-private/Yubico.NativeShims/ . 
-# echo "$USER ALL=(ALL:ALL) NOPASSWD: ALL" | sudo tee /etc/sudoers.d/$USER
-# echo 'set completion-ignore-case On' | sudo tee -a /etc/inputrc
-
-# set -e
+set -e
 
 export VCPKG_INSTALLATION_ROOT=$GITHUB_WORKSPACE/vcpkg \
     VCPKG_FORCE_SYSTEM_BINARIES=1 \
@@ -34,9 +30,7 @@ sudo apt-get update -qq
 sudo apt-get install cmake -yq
 
 git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && ${VCPKG_INSTALLATION_ROOT}/bootstrap-vcpkg.sh
-echo "vcpkg installed!!" && vcpkg --version
 
-# Is this needed? Yes to install it. Unless we can find it from another source
 echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal main restricted universe multiverse
 deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-updates main restricted universe multiverse
 deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-security main restricted universe multiverse
@@ -57,8 +51,6 @@ rm -rf "$build_dir"
 mkdir -p "$build_dir"
 
 echo "Building for arm64-linux ..."
-echo "PKG_CONFIG_PATH DIR: $PKG_CONFIG_PATH"
-
 cmake -S . -B "$build_dir" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \

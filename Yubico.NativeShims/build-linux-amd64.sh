@@ -34,7 +34,6 @@ sudo apt-get update -qq
 sudo apt-get install cmake -yq
 
 git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && ${VCPKG_INSTALLATION_ROOT}/bootstrap-vcpkg.sh
-sudo apt autoremove -yq
 
 ## Build
 if [ ! -f ./CMakeLists.txt ]; then

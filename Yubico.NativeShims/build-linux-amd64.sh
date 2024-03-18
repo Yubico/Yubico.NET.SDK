@@ -36,25 +36,22 @@ sudo apt-get install cmake
 git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && ${VCPKG_INSTALLATION_ROOT}/bootstrap-vcpkg.sh
 sudo apt autoremove -yq
 
-build_target() {
-    local target_triplet=$1
-    build_dir="build-$target_triplet"
-
-    rm -rf "$build_dir"
-    mkdir -p "$build_dir"
-
-    echo "Building for $target_triplet ..."
-    cmake -S . -B "$build_dir" \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
-        -DVCPKG_TARGET_TRIPLET=$target_triplet
-    
-    cmake --build "$build_dir" -- -j $(nproc)
-}
-
+## Build
 if [ ! -f ./CMakeLists.txt ]; then
     cd ~/Yubico.NativeShims
 fi
 
-build_target x64-linux
-cp build-x64-linux/*.so ./linux-x64
+build_dir="build-x64-linux"
+rm -rf "$build_dir"
+mkdir -p "$build_dir"
+
+echo "Building for x64-linux ..."
+cmake -S . -B "$build_dir" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
+    -DVCPKG_TARGET_TRIPLET=x64-linux
+
+cmake --build "$build_dir" -- -j $(nproc)
+
+echo "Copying 
+cp $build_dir/*.so $(pwd)/linux-x64

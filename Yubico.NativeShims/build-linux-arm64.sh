@@ -45,37 +45,27 @@ sudo dpkg --add-architecture arm64
 sudo apt-get update -qq
 sudo apt-get install libpcsclite-dev:arm64 -yq
 
-build_target() {
-    local target_triplet=$1
-    local build_dir=$2
-
-    # export OPENSSL_ROOT_DIR=$(pwd)/linux-arm64/vcpkg_installed/arm64-linux
-
-    echo "SSL DIR: $OPENSSL_ROOT_DIR"
-
-    rm -rf "$build_dir"
-    mkdir -p "$build_dir"
-
-    export PKG_CONFIG_PATH="/usr/lib/aarch64-linux-gnu/pkgconfig:$(pwd)/${target_triplet}/vcpkg_installed/arm64-linux/lib/pkgconfig"
-
-    echo "Building for $target_triplet ..."
-    echo "PKG_CONFIG_PATH DIR: $PKG_CONFIG_PATH"
-
-    cmake -S . -B "$build_dir" \
-        -DCMAKE_BUILD_TYPE=Release \
-        -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
-        -DVCPKG_TARGET_TRIPLET="$target_triplet" \
-        -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="$(pwd)/cmake/aarch64-linux-gnu.toolchain.cmake" \
-        -DOPENSSL_ROOT_DIR=$(pwd)/linux-arm64/vcpkg_installed/arm64-linux
-
-    
-    cmake --build "$build_dir" -- -j $(nproc)
-    #cp "$build_dir"/*.so ./"$build_dir"
-}
-
+## Build
 if [ ! -f ./CMakeLists.txt ]; then
     cd ~/Yubico.NativeShims
 fi
 
-build_target arm64-linux linux-arm64
+export PKG_CONFIG_PATH="/usr/lib/aarch64-linux-gnu/pkgconfig:$(pwd)/arm64-linux/vcpkg_installed/arm64-linux/lib/pkgconfig"
 
+build_dir=build-arm64
+rm -rf "$build_dir"
+mkdir -p "$build_dir"
+
+echo "Building for arm64-linux ..."
+echo "PKG_CONFIG_PATH DIR: $PKG_CONFIG_PATH"
+
+cmake -S . -B "$build_dir" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
+    -DVCPKG_TARGET_TRIPLET="arm64-linux" \
+    -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="$(pwd)/cmake/aarch64-linux-gnu.toolchain.cmake" \
+    -DOPENSSL_ROOT_DIR=$(pwd)/linux-arm64/vcpkg_installed/arm64-linux
+
+
+cmake --build "$build_dir" -- -j $(nproc)
+cp "$build_dir"/*.so $(pwd)/linux-x64

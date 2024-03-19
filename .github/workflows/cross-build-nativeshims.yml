@@ -24,10 +24,8 @@ on:
       version:
         description: 'Version'
         required: false
-        default: "0.0.0-prerelease.YYYMMDD.B"
+        default: "0.0.0-prerelease.YYYYMMDD.B"
         type: string
-
-
 
 jobs:
   build-windows:

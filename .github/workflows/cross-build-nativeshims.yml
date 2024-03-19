@@ -27,6 +27,8 @@ on:
         default: "0.0.0-prerelease.YYYMMDD.B"
         type: string
 
+
+
 jobs:
   build-windows:
     name: Build Windows
@@ -130,6 +132,8 @@ jobs:
     runs-on: windows-2019
     needs: pack
     environment: Internal NuGet feed
+    permissions:
+      packages: write
     if: ${{ github.event.inputs.push-to-dev == 'true' }}
     steps:
       - uses: actions/download-artifact@v4

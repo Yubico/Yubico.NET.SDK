@@ -17,7 +17,7 @@ if (APPLE OR UNIX)
         CMAKE_C_COMPILER_ID STREQUAL "AppleClang" OR
         CMAKE_C_COMPILER_ID STREQUAL "GNU")
 
-        add_compile_options (-Wall -Wextra)
+        add_compile_options (-Wall -Wextra -Werror)
         add_compile_options (-Wformat -Wformat-nonliteral -Wformat-security)
         add_compile_options (-Wshadow)
         add_compile_options (-Wcast-qual)

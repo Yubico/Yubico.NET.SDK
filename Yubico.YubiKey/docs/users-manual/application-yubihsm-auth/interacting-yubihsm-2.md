@@ -18,15 +18,15 @@ limitations under the License. -->
 
 # Interacting with a YubiHSM 2
 
-`Yubico.YubiKey.YubiHsmAuth` provides an easy way to programmatically manage the YubiHSM Auth application on the YubiKey. While this SDK also supports the calculation of session keys, it is instead recommended for developers to rely on the [YubiHSM SDK](https://developers.yubico.com/YubiHSM2/) for interactions with the YubiHSM 2.
+`Yubico.YubiKey.YubiHsmAuth` provides an easy way to programmatically manage the YubiHSM Auth application on the YubiKey. While this SDK also supports the calculation of session keys, it is instead recommended for developers to rely on the [YubiHSM SDK](https://docs.yubico.com/hardware/yubihsm-2/hsm-2-user-guide/) for interactions with the YubiHSM 2.
 
 ## YubiHSM SDK
 
-Once credentials are added to the YubiHSM Auth application, use the [YubiHSM SDK](https://developers.yubico.com/YubiHSM2/) (and bundled tools) to establish a secure session with a YubiHSM 2 device and perform operations on it.
+Once credentials are added to the YubiHSM Auth application, use the [YubiHSM SDK](https://docs.yubico.com/hardware/yubihsm-2/hsm-2-user-guide/) (and bundled tools) to establish a secure session with a YubiHSM 2 device and perform operations on it.
 
-The [YubiHSM Shell](https://developers.yubico.com/YubiHSM2/Component_Reference/yubihsm-shell/) tool supports authentication with YubiHSM Auth credentials in both interactive mode and command-line mode. Once the user is authenticated, all YubiHSM Shell commands can be used. Refer to [this guide](https://docs.yubico.com/hardware/yubikey/yk-5/tech-manual/yubihsm-auth.html#using-yubihsm-auth-with-yubihsm-shell) for more information.
+The [YubiHSM Shell](https://docs.yubico.com/hardware/yubihsm-2/hsm-2-user-guide/hsm2-sdk-tools-libraries.html#yubihsm-shell) tool supports authentication with YubiHSM Auth credentials in both interactive mode and command-line mode. Once the user is authenticated, all YubiHSM Shell commands can be used. Refer to [this guide](https://docs.yubico.com/hardware/yubikey/yk-5/tech-manual/yubihsm-auth.html#using-yubihsm-auth-with-yubihsm-shell) for more information.
 
-It is also possible to use low-level commands to communicate natively with a YubiHSM 2. The individual commands (documented [here](https://developers.yubico.com/YubiHSM2/Commands/)) are implemented by the [libyubihsm](https://developers.yubico.com/YubiHSM2/Component_Reference/libyubihsm/) C library.
+It is also possible to use low-level commands to communicate natively with a YubiHSM 2. The individual commands (documented [here](https://docs.yubico.com/hardware/yubihsm-2/hsm-2-user-guide/hsm2-cmd-reference.html)) are implemented by the [libyubihsm](https://docs.yubico.com/hardware/yubihsm-2/hsm-2-user-guide/hsm2-sdk-tools-libraries.html#libyubihsm) C library.
 
 ## YubiHSM 2 secure channel
 

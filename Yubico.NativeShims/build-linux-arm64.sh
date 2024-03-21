@@ -1,9 +1,11 @@
 #!/bin/bash
 
+# Set environment variables
 export VCPKG_INSTALLATION_ROOT=$GITHUB_WORKSPACE/vcpkg \
     VCPKG_FORCE_SYSTEM_BINARIES=1 \
     PATH=/usr/local/bin:$VCPKG_INSTALLATION_ROOT:$PATH
 
+# Install necessary packages
 sudo apt-get update -qq && \
 DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
     git \

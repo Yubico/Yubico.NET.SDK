@@ -144,7 +144,7 @@ Native_SCardGetStatusChange(
 
     if (readerStates == NULL)
     {
-        return SCARD_E_NO_MEMORY;
+        return (int32_t)SCARD_E_NO_MEMORY;
     }
 
     memset(readerStates, 0, cReaders * sizeof(SCARD_READERSTATE));
@@ -158,7 +158,7 @@ Native_SCardGetStatusChange(
         memcpy(readerStates[i].rgbAtr, rgReaderStates[i].rgbAtr, sizeof(readerStates[i].rgbAtr));
     }
 
-    int32_t result = SCardGetStatusChange(
+    int32_t result = (int32_t)SCardGetStatusChange(
         hContext,
         dwTimeout,
         readerStates,

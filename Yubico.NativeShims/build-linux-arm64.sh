@@ -22,13 +22,16 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install -yq \
     g++-aarch64-linux-gnu \
     gcc-aarch64-linux-gnu
 
+# Install latest version of CMake for Ubuntu 20.04
 wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/kitware-archive-keyring.gpg >/dev/null
 echo 'deb [signed-by=/usr/share/keyrings/kitware-archive-keyring.gpg] https://apt.kitware.com/ubuntu/ focal main' | sudo tee /etc/apt/sources.list.d/kitware.list >/dev/null
 sudo apt-get update -qq
 sudo apt-get install cmake -yq
 
+# Install VCPKG
 git clone https://github.com/Microsoft/vcpkg.git ${VCPKG_INSTALLATION_ROOT} && ${VCPKG_INSTALLATION_ROOT}/bootstrap-vcpkg.sh
 
+# Install arm64 version of libpcsclite
 echo "deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal main restricted universe multiverse
 deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-updates main restricted universe multiverse
 deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports/ focal-security main restricted universe multiverse
@@ -42,6 +45,7 @@ if [ ! -f ./CMakeLists.txt ]; then
     cd ~/Yubico.NativeShims
 fi
 
+# Add paths to our libraries so that CMake finds the correct arm64 ones
 export PKG_CONFIG_PATH="/usr/lib/aarch64-linux-gnu/pkgconfig:$(pwd)/arm64-linux/vcpkg_installed/arm64-linux/lib/pkgconfig"
 
 build_dir=linux-arm64

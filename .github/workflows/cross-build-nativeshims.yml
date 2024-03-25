@@ -36,7 +36,7 @@ jobs:
       - run: |
           echo 'Running build script: Windows'
           cd Yubico.NativeShims
-          ./build-windows.cmd
+          & ./build-windows.ps1
       - uses: actions/upload-artifact@v4
         with:
           name: win-x64

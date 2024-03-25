@@ -26,7 +26,7 @@ typedef struct
 
 #pragma pack()
 
-int32_t
+uint32_t
 NATIVEAPI
 Native_SCardEstablishContext(
     uint32_t dwScope,
@@ -41,7 +41,7 @@ Native_SCardEstablishContext(
     );
 }
 
-int32_t
+uint32_t
 NATIVEAPI
 Native_SCardReleaseContext(
     SCARDCONTEXT hContext
@@ -50,7 +50,7 @@ Native_SCardReleaseContext(
     return SCardReleaseContext(hContext);
 }
 
-int32_t
+uint32_t
 NATIVEAPI
 Native_SCardConnect(
     SCARDCONTEXT hContext,
@@ -74,7 +74,7 @@ Native_SCardConnect(
     return status;
 }
 
-int32_t
+uint32_t
 NATIVEAPI
 Native_SCardReconnect(
     SCARDHANDLE hCard,
@@ -96,7 +96,7 @@ Native_SCardReconnect(
     return status;
 }
 
-int32_t
+uint32_t
 NATIVEAPI
 Native_SCardDisconnect(
     SCARDHANDLE hCard,
@@ -109,7 +109,7 @@ Native_SCardDisconnect(
     );
 }
 
-int32_t
+uint32_t
 NATIVEAPI
 Native_SCardBeginTransaction(
     SCARDHANDLE hCard
@@ -118,7 +118,7 @@ Native_SCardBeginTransaction(
     return SCardBeginTransaction(hCard);
 }
 
-int32_t
+uint32_t
 NATIVEAPI
 Native_SCardEndTransaction(
     SCARDHANDLE hCard,
@@ -131,7 +131,7 @@ Native_SCardEndTransaction(
         );
 }
 
-int32_t
+uint32_t
 NATIVEAPI
 Native_SCardGetStatusChange(
     SCARDCONTEXT hContext,
@@ -144,7 +144,7 @@ Native_SCardGetStatusChange(
 
     if (readerStates == NULL)
     {
-        return (int32_t)SCARD_E_NO_MEMORY;
+        return SCARD_E_NO_MEMORY;
     }
 
     memset(readerStates, 0, cReaders * sizeof(SCARD_READERSTATE));
@@ -158,7 +158,7 @@ Native_SCardGetStatusChange(
         memcpy(readerStates[i].rgbAtr, rgReaderStates[i].rgbAtr, sizeof(readerStates[i].rgbAtr));
     }
 
-    int32_t result = (int32_t)SCardGetStatusChange(
+    uint32_t result = SCardGetStatusChange(
         hContext,
         dwTimeout,
         readerStates,
@@ -178,7 +178,7 @@ Native_SCardGetStatusChange(
     return result;
 }
 
-int32_t
+uint32_t
 NATIVEAPI
 Native_SCardTransmit(
     SCARDHANDLE hCard,
@@ -204,7 +204,7 @@ Native_SCardTransmit(
     return status;
 }
 
-int32_t
+uint32_t
 NATIVEAPI
 Native_SCardListReaders(
     SCARDCONTEXT hContext,
@@ -224,7 +224,7 @@ Native_SCardListReaders(
     return status;
 }
 
-int32_t
+uint32_t
 NATIVEAPI
 Native_SCardCancel(
     SCARDCONTEXT hContext

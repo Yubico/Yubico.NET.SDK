@@ -60,8 +60,6 @@ endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/pcscd.cmake)
 find_pcscd()
-message(STATUS "Looking for OpenSSL in: ${OPENSSL_ROOT_DIR}") #TODO REMOVE THIS
-
 find_package(OpenSSL REQUIRED)
 
 #

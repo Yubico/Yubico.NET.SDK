@@ -217,7 +217,7 @@ namespace Yubico.YubiKey.TestUtilities
         // But suppose you call this method with KeyTypeECDsaPublic, it will
         // return false, because this instance of KeyConverter will not be able
         // to build an ECDsa object from an RSA public key.
-        // Note that if you build a KeyConverter obejct using the constructor
+        // Note that if you build a KeyConverter object using the constructor
         // that takes in a PivPrivateKey and that key is an EC private key.
         // Calling this method with KeyTypeECDsaPrivate will return false. This
         // is because this class cannot build an ECDsa object from the data found

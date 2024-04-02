@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Scp03.Commands
         /// Constructs an EXTERNAL_AUTHENTICATE command, containing the provided data.
         /// </summary>
         /// <remarks>
-        /// Clients should not generally build this manaully. See <see cref="Pipelines.Scp03ApduTransform"/> for more.
+        /// Clients should not generally build this manually. See <see cref="Pipelines.Scp03ApduTransform"/> for more.
         /// </remarks>
         /// <param name="data">Data for the command</param>
         public ExternalAuthenticateCommand(byte[] data)

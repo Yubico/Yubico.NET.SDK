@@ -54,7 +54,7 @@ namespace Yubico.YubiKey.Fido2
     public enum EnterpriseAttestation
     {
         /// <summary>
-        /// No enterprise attesteation is requested or used.
+        /// No enterprise attestation is requested or used.
         /// </summary>
         None = 0,
 

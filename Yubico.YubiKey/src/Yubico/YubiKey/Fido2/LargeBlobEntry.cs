@@ -195,7 +195,7 @@ namespace Yubico.YubiKey.Fido2
         /// out argument (decrypted and decompressed).
         /// </summary>
         /// <remarks>
-        /// Because the data is encrpyted using AES-GCD, the ciphertext contains
+        /// Because the data is encrypted using AES-GCD, the ciphertext contains
         /// both the encrypted data and an "authentication tag". While any key
         /// will be able to decrypt the data and produce a result (some result),
         /// only the correct key will be able to authenticate the tag. Hence,
@@ -325,7 +325,7 @@ namespace Yubico.YubiKey.Fido2
             //   map
             //     01  byte string: ciphertext
             //     02  byte string: nonce
-            //     03  unsinged int : originalplaintext length
+            //     03  unsigned int : originalplaintext length
             return new CborMapWriter<int>()
                 .Entry(KeyCiphertext, Ciphertext)
                 .Entry(KeyNonce, Nonce)

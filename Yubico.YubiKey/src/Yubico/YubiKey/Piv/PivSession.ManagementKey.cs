@@ -284,7 +284,7 @@ namespace Yubico.YubiKey.Piv
         /// </summary>
         /// <remarks>
         /// This is the same as <c>TryAuthenticateManagementKey</c>, except this
-        /// method will throw an exception if the <c>KeyCollecter</c> indicates
+        /// method will throw an exception if the <c>KeyCollected</c> indicates
         /// user cancellation.
         /// <para>
         /// See the <see cref="TryAuthenticateManagementKey(bool)"/> method for
@@ -698,7 +698,7 @@ namespace Yubico.YubiKey.Piv
         /// </summary>
         /// <remarks>
         /// This is the same as <c>TryChangeManagementKey(PivTouchPolicy)</c>,
-        /// except this method will throw an exception if the <c>KeyCollecter</c>
+        /// except this method will throw an exception if the <c>KeyCollector</c>
         /// indicates user cancellation.
         /// <para>
         /// See the <see cref="TryChangeManagementKey(PivTouchPolicy)"/> method for

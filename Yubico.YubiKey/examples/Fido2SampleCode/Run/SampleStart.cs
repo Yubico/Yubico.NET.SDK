@@ -20,7 +20,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
     internal sealed class StartProgram
     {
         // To run this sample as a command-line application, simply run the
-        // exectuable created.
+        // executable created.
         //   $ Fido2Sample
         // To run it as a GUI application, run the executable with an argument of g.
         //   $ Fido2Sample g

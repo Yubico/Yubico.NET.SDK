@@ -99,7 +99,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </para>
         /// <para>
         /// If the Status property is <c>ResponseStatus.NoData</c>,
-        /// then that particular element is not availaible. For example, if you
+        /// then that particular element is not available. For example, if you
         /// request the cert in slot 9A, but there is no cert in slot 9A, then
         /// this will be the response. In this case, this method will throw an
         /// exception.

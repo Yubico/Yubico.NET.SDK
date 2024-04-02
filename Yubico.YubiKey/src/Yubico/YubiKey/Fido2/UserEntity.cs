@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.Fido2
     /// <para>
     /// The FIDO2 standard specifies that when communicating with the
     /// authenticator, the ID is not a required element, although it will likely
-    /// lead to interoperatbility issues if no value is given. This class will
+    /// lead to interoperability issues if no value is given. This class will
     /// require an ID.
     /// </para>
     /// <para>

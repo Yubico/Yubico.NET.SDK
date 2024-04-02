@@ -144,7 +144,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// The <c>authenticatorPublicKey</c> argument is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// The <c>authenticatorPublicKey</c> argument is not an approriate key
+        /// The <c>authenticatorPublicKey</c> argument is not an appropriate key
         /// object (e.g. wrong algorithm).
         /// </exception>
         /// <exception cref="InvalidOperationException">

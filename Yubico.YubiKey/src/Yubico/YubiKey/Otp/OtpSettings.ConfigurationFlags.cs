@@ -141,7 +141,7 @@ namespace Yubico.YubiKey.Otp
         /// </summary>
         /// <remarks>
         /// <para>
-        /// This accomodates some legacy systems that require mixed-case characters in passwords.
+        /// This accommodates some legacy systems that require mixed-case characters in passwords.
         /// </para>
         /// <para>
         /// This setting is incompatible with <see cref="SetOathHotp(bool)"/>.

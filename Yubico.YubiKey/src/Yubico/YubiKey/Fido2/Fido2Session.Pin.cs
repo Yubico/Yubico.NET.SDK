@@ -418,7 +418,7 @@ namespace Yubico.YubiKey.Fido2
         /// <see cref="AddPermissions"/>. If the <c>AuthToken</c> is expired,
         /// and an AuthToken is needed for a new operation, the SDK will obtain a
         /// new AuthToken, using the original permissions (and any new
-        /// permisisons needed by the operation) and the
+        /// permissions needed by the operation) and the
         /// <see cref="AuthTokenRelyingPartyId"/>.
         /// </para>
         /// <para>

@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// not include the authentication information in the command.
     ///</para>
     /// <para>
-    /// The numer of retries refers to how many times in a row the wrong value
+    /// The number of retries refers to how many times in a row the wrong value
     /// can be entered until the element is blocked. For example, suppose the PIN
     /// retry count is three. If you perform an operation or command that
     /// requires the PIN, and you provide the wrong PIN, the operation or command
@@ -174,7 +174,7 @@ namespace Yubico.YubiKey.Piv.Commands
         ///   var command = new SetPinRetriesCommand()
         ///   {
         ///       PinRetryCount = 5,
-        ///       PukRetryCOunt = 2,
+        ///       PukRetryCount = 2,
         ///   };
         /// </code>
         /// </remarks>

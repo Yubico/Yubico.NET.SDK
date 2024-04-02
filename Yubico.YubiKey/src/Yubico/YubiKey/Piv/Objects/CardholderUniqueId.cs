@@ -22,7 +22,7 @@ using Yubico.Core.Logging;
 namespace Yubico.YubiKey.Piv.Objects
 {
     /// <summary>
-    /// Use this class to process the CHUID (CardHolder Unique IDentifier) data.
+    /// Use this class to process the CHUID (CardHolder Unique Identifier) data.
     /// </summary>
     /// <remarks>
     /// A CHUID consists of five values:

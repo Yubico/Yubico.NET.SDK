@@ -74,7 +74,7 @@ namespace Yubico.YubiKey.Piv
         /// <see cref="Cryptography.RsaFormat"/> class to format the data. That
         /// class will be able to format the digest into either PKCS #1 v1.5 or a
         /// subset of PKCS #1 PSS. However, if that class does not support the
-        /// exact format you want, you will have to write yout own formatting
+        /// exact format you want, you will have to write your own formatting
         /// code and guarantee the input to this method is exactly 128 bytes
         /// (prepend pad bytes of 00 until the length is exactly 128 if needed).
         /// The signature will be a 128-byte block.
@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Piv
         /// <see cref="Cryptography.RsaFormat"/> class to format the data. That
         /// class will be able to format the digest into either PKCS #1 v1.5 or a
         /// subset of PKCS #1 PSS. However, if that class does not support the
-        /// exact format you want, you will have to write yout own formatting
+        /// exact format you want, you will have to write your own formatting
         /// code and guarantee the input to this method is exactly 256 bytes
         /// (prepend pad bytes of 00 until the length is exactly 256 if needed).
         /// The signature will be a 256-byte block.
@@ -289,7 +289,7 @@ namespace Yubico.YubiKey.Piv
         /// <para>
         /// The data returned is not formatted, nor encoded, it is simply a byte
         /// array. It happens to be the x coordinate of an ECC point that is the
-        /// result of an EC scalar muliplication operation.
+        /// result of an EC scalar multiplication operation.
         /// </para>
         /// <para>
         /// Key Agreement might require the PIN and/or touch, depending on the

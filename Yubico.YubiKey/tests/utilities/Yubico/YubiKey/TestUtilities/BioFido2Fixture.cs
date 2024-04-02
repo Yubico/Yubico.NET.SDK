@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         public bool HasCredentials { get; private set; }
 
-        // Find the YubkKey Bio, reset it, then set the PIN to "123456"
+        // Find the YubikKey Bio, reset it, then set the PIN to "123456"
         public BioFido2Fixture()
             : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
         {

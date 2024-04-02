@@ -119,7 +119,7 @@ However, Microsoft no longer recommends using this class. In the documentation f
 > "We don't recommend that you use the SecureString class for new development."
 
 They link to a doc describing their reasons. In that doc, they provide their
-recomendation:
+recommendation:
 
 > "The general approach of dealing with credentials is to avoid them and instead rely
 > on other means to authenticate, such as certificates or Windows authentication."
@@ -148,7 +148,7 @@ it smaller. However, this method will create a new buffer and copy the old data 
 new. You now have sensitive data in two buffers, make sure you overwrite both.
 
 To avoid resizing to make buffers bigger, determine the maximum size (an AES key is never
-longer than 64 btes, a PIV PIN is never longer than 8 bytes), allocate that size and
+longer than 64 bytes, a PIV PIN is never longer than 8 bytes), allocate that size and
 collect your data. If you need to look at a smaller section of the input, use a `Span`
 and slice.
 

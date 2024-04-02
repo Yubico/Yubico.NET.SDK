@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// Parses the data returned by the YubiKey after calling one of the
     /// <c>authenticatorCredentialManagement</c> subcommands. This class is
     /// relevant only to the <see cred="CredentialManagementResponse"/> class in
-    /// order to extract data from a reponse.
+    /// order to extract data from a response.
     /// </summary>
     /// <remarks>
     /// When a credential management subcommand is sent to the YubiKey, it

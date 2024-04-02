@@ -73,7 +73,7 @@ namespace Yubico.YubiKey.Fido2
             Dictionary<string, TValue> returnDictionary =
                 (currentDictionary is null) ? new Dictionary<string, TValue>() : currentDictionary;
 
-            // If the key already exists, relpace the current value in the
+            // If the key already exists, replace the current value in the
             // dictionary with this one.
             // This will add a new entry if there is no entry associated with the
             // given key.

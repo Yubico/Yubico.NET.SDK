@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using Microsoft.Extensions.Logging;
+using System.Threading.Tasks;
 using Yubico.Core.Devices;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
@@ -44,82 +45,84 @@ namespace Yubico.YubiKey
         /// <summary>
         /// An instance of a <see cref="YubiKeyDeviceListener"/>.
         /// </summary>
-        public static YubiKeyDeviceListener Instance => _lazyInstance.Value;
+        public static YubiKeyDeviceListener Instance => _lazyInstance ??= new YubiKeyDeviceListener();
 
-        private static readonly Lazy<YubiKeyDeviceListener> _lazyInstance =
-            new Lazy<YubiKeyDeviceListener>(() => new YubiKeyDeviceListener());
+        /// <summary>
+        /// Disposes and closes the singleton instance of <see cref="YubiKeyDeviceListener"/>.
+        /// </summary>
+        public static void ResetInstance()
+        {
+            if (_lazyInstance != null)
+            {
+                _lazyInstance.Dispose();
+                _lazyInstance = null;
+            }
+        }
 
-        private static readonly ReaderWriterLockSlim RwLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
+        private static YubiKeyDeviceListener? _lazyInstance;
 
-        private readonly ILogger _log = Log.GetLogger<YubiKeyDeviceListener>();
+        private readonly ReaderWriterLockSlim _rwLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
 
+        private readonly Logger _log = Log.GetLogger<YubiKeyDeviceListener>();
         private readonly Dictionary<IYubiKeyDevice, bool> _internalCache = new Dictionary<IYubiKeyDevice, bool>();
         private readonly HidDeviceListener _hidListener = HidDeviceListener.Create();
         private readonly SmartCardDeviceListener _smartCardListener = SmartCardDeviceListener.Create();
 
-        private readonly Thread? _listenerThread;
-        private readonly bool _isListening;
+        private readonly SemaphoreSlim _semaphore = new SemaphoreSlim(1);
+        private readonly Task _listenTask;
+        private readonly CancellationTokenSource _tokenSource = new CancellationTokenSource();
+        private CancellationToken CancellationToken => _tokenSource.Token;
+
+        private bool _isListening;
 
         private YubiKeyDeviceListener()
         {
-            _listenerThread = new Thread(ListenForChanges) { IsBackground = true };
-            _isListening = true;
+            _log.LogInformation("Creating YubiKeyDeviceListener instance.");
+
+            SetupDeviceListeners();
 
             _log.LogInformation("Performing initial cache population.");
             Update();
 
-            _listenerThread.Start();
+            _listenTask = ListenForChanges();
         }
 
         internal List<IYubiKeyDevice> GetAll() => _internalCache.Keys.ToList();
 
-        private void ListenForChanges()
+        private void ListenerHandler(object? sender, EventArgs e) => _semaphore.Release();
+
+        private void SetupDeviceListeners()
         {
-            using var updateEvent = new ManualResetEvent(false);
+            _smartCardListener.Arrived += ListenerHandler;
+            _smartCardListener.Removed += ListenerHandler;
+            _hidListener.Arrived += ListenerHandler;
+            _hidListener.Removed += ListenerHandler;
+        }
 
-            _log.LogInformation("YubiKey device listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
-
-            _smartCardListener.Arrived += (s, e) =>
-            {
-                _log.LogInformation("Arrival of smart card {SmartCard} is triggering update.", e.Device);
-                _ = updateEvent.Set();
-            };
-
-            _smartCardListener.Removed += (s, e) =>
-            {
-                _log.LogInformation("Removal of smart card {SmartCard} is triggering update.", e.Device);
-                _ = updateEvent.Set();
-            };
-
-            _hidListener.Arrived += (s, e) =>
-            {
-                _log.LogInformation("Arrival of HID {HidDevice} is triggering update.", e.Device);
-                _ = updateEvent.Set();
-            };
-
-            _hidListener.Removed += (s, e) =>
-            {
-                _log.LogInformation("Removal of HID {HidDevice} is triggering update.", e.Device);
-                _ = updateEvent.Set();
-            };
-
+        private async Task ListenForChanges()
+        {
+            _isListening = true;
             while (_isListening)
             {
-                _ = updateEvent.WaitOne();
-                Thread.Sleep(200); // I really dislike sleeps, but here, it does seem like a good idea to give the
-                                   // system some time to quiet down in terms of PnP activity.
-                _ = updateEvent.Reset();
-                Update();
+                try
+                {
+                    await _semaphore.WaitAsync(CancellationToken).ConfigureAwait(false);
+                    // Give events a chance to coalesce.
+                    await Task.Delay(200, CancellationToken).ConfigureAwait(false);
+                    Update();
+                    // Reset any outstanding events.
+                    _ = await _semaphore.WaitAsync(0, CancellationToken).ConfigureAwait(false);
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
             }
-
-            // KeepAlive seems to be necessary here as the collector doesn't know that it shouldn't dispose the
-            // event until the very end of this function/thread.
-            GC.KeepAlive(updateEvent);
         }
 
         private void Update()
         {
-            RwLock.EnterWriteLock();
+            _rwLock.EnterWriteLock();
             _log.LogInformation("Entering write-lock.");
 
             ResetCacheMarkers();
@@ -209,7 +212,7 @@ namespace Yubico.YubiKey
             }
 
             _log.LogInformation("Exiting write-lock.");
-            RwLock.ExitWriteLock();
+            _rwLock.ExitWriteLock();
         }
 
         private List<IDevice> GetDevices()
@@ -349,9 +352,7 @@ namespace Yubico.YubiKey
                 .GetLogger(typeof(YubiKeyDeviceListener).FullName!)
                 .LogWarning($"Exception caught: {exception}");
 
-        #region IDisposable Support
-
-        private bool _disposedValue;
+        private bool _isDisposed;
 
         /// <summary>
         /// Disposes the objects.
@@ -359,13 +360,38 @@ namespace Yubico.YubiKey
         /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
         {
-            if (!_disposedValue)
+            if (!_isDisposed)
             {
                 if (disposing)
                 {
-                    RwLock.Dispose();
+                    // Signal the listen thread that it's time to end.
+                    _tokenSource.Cancel();
+
+                    // Shut down the listener handlers.
+                    _hidListener.Arrived -= ListenerHandler;
+                    _hidListener.Removed -= ListenerHandler;
+                    if (_hidListener is IDisposable hidDisp)
+                    {
+                        hidDisp.Dispose();
+                    }
+
+                    _smartCardListener.Arrived -= ListenerHandler;
+                    _smartCardListener.Removed -= ListenerHandler;
+                    if (_smartCardListener is IDisposable scDisp)
+                    {
+                        scDisp.Dispose();
+                    }
+
+                    // Give the listen thread a moment (likely is already done).
+                    _ = !_listenTask.Wait(100);
+                    _listenTask.Dispose();
+
+                    // Get rid of synchronization objects.
+                    _rwLock.Dispose();
+                    _semaphore.Dispose();
+                    _tokenSource.Dispose();
                 }
-                _disposedValue = true;
+                _isDisposed = true;
             }
         }
 
@@ -385,7 +411,5 @@ namespace Yubico.YubiKey
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-
-        #endregion
     }
 }

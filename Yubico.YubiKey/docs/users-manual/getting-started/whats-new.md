@@ -21,17 +21,14 @@ Here you can find all of the updates and release notes for published versions of
 
 Release date: April 10th, 2024
 
-This is a release aimed to adress inconsistencies in dependencies (OpenSSL), compiler warnings and hardening. The objective of compiler options hardening is to produce application binaries (executables) with security mechanisms against potential attacks and/or misbehavior. 
+This is a release aimed to address inconsistencies in dependencies (OpenSSL), compiler warnings and hardening. The objective of compiler options hardening is to produce application binaries (executables) with security mechanisms against potential attacks and/or misbehavior. is to produce application binaries (executables) with security mechanisms against potential attacks and/or misbehavior. 
 
-This release also drops support for Linux x86 builds so that we can use the same version of OpenSSL on all platforms for the interopability layer Yubico.NativeShims.
+This release improves our native dependencies exposed through the `Yubico.NativeShims` package. We have also worked to improve the build and test experience of this repository by improving our automation and build files.
 
 Changes:  
-- **Yubico.NativeShims is being compiled with OpenSSL version 3.1.2 on all platforms**  
-  Previously, the build of for Yubico.NativeShims targetting x86 would compile using OpenSSL v1.1.1
-  on Ubuntu 18.04. This change upgrades the version of OpenSSL but effectively drops support
-  for Linux on x86.
-- **[Compilation hardening of Yubico.NativeShims](https://github.com/Yubico/Yubico.NET.SDK/pull/67)**   
-  Added commonly used compiler flags to increase security and code quality  
+- **Yubico.NativeShims targets OpenSSL version 3.x on all platforms** - OpenSSL v1.1.x has reached end-of-life. The SDK now removes this dependency on all platforms, now upgrading to the supported 3.x version.
+- **Dropped support for 32-bit Linux** - Yubico.NativeShims no longer builds for 32-bit (x86) Linux. We now depend on Ubuntu releases that contain OpenSSL 3.x by default. These newer releases no longer have mainstream support for this platform.
+- **[Compilation hardening of Yubico.NativeShims](https://github.com/Yubico/Yubico.NET.SDK/pull/67)** -  Added commonly used compiler flags to increase security and code quality  
   **MacOS / Linux:**  
   -Wformat: Warn about format string issues in printf-like functions.  
   -Wformat-nonliteral: Warn about format strings that are not string literals.  
@@ -53,7 +50,7 @@ Changes:
   /GS: Enable buffer security check  
   /Gs: Control stack security check 
 - [Addressed compiler warning concerning Runtime Identifiers (RID) ](https://github.com/Yubico/Yubico.NET.SDK/issues/59)
-- Adressed compiler warning concerning integer conversion in Yubico.NativeShims.pscs.c
+- **Enabled `dotnet format`** - The repository now uses `dotnet format` to ensure that pull requests adhere to the repository's coding standards. A pass of the tool has been run against the entire repository and a new baseline has been checked in.
   
 ## 1.9.x Releases
 

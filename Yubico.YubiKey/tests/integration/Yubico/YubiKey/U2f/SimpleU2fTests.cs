@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.U2f
             HidDevice deviceToUse = GetFidoHid(devices) ?? throw new InvalidOperationException();
             FidoConnection connection = new FidoConnection(deviceToUse) ?? throw new InvalidOperationException();
 
-            CommandApdu cmdApdu = new CommandApdu()
+            CommandApdu cmdApdu = new CommandApdu
             {
                 Ins = 0x77,
             };
@@ -103,7 +103,7 @@ namespace Yubico.YubiKey.U2f
             HidDevice deviceToUse = GetFidoHid(devices) ?? throw new InvalidOperationException();
             FidoConnection connection = new FidoConnection(deviceToUse) ?? throw new InvalidOperationException();
 
-            CommandApdu cmdApdu = new CommandApdu()
+            CommandApdu cmdApdu = new CommandApdu
             {
                 Ins = 0x06,
             };

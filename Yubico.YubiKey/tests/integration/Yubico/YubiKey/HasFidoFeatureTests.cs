@@ -14,6 +14,7 @@
 
 using System.Linq;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey
 {
@@ -22,19 +23,20 @@ namespace Yubico.YubiKey
         [Fact]
         public void HasFeature_ApplicationOTP_Correct()
         {
-            IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.All).First();
-            bool expectedResult = yubiKeyDevice.IsSkySeries ? false : true;
+            IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport().First();
 
             bool hasFeature = yubiKeyDevice.HasFeature(YubiKeyFeature.OtpApplication);
-
+            bool expectedResult = !yubiKeyDevice.IsSkySeries;
             Assert.Equal(hasFeature, expectedResult);
         }
 
         [Fact]
         public void HasFeature_ApplicationU2F_Correct()
         {
-            IYubiKeyDevice yubiKeyDevice = TestUtilities.IntegrationTestDeviceEnumeration.GetTestDevices().First();
+            IYubiKeyDevice yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevices().First();
             bool expectedResult = true;
+
+            //Can this be removed?
             if (!yubiKeyDevice.IsSkySeries && yubiKeyDevice.FirmwareVersion.Major < 3)
             {
                 expectedResult = false;
@@ -48,7 +50,7 @@ namespace Yubico.YubiKey
         [Fact]
         public void HasFeature_ApplicationFido2_Correct()
         {
-            IYubiKeyDevice yubiKeyDevice = TestUtilities.IntegrationTestDeviceEnumeration.GetTestDevices().First();
+            IYubiKeyDevice yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevices().First();
             bool expectedResult = true;
             if (!yubiKeyDevice.IsSkySeries && yubiKeyDevice.FirmwareVersion.Major < 5)
             {

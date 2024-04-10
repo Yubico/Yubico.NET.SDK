@@ -42,10 +42,9 @@ namespace Yubico.YubiKey.TestUtilities
 
         // Find the YubikKey Bio, reset it, then set the PIN to "123456"
         public BioFido2Fixture()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio)
         {
-            var newPin = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
-            _resetObj = new Fido2ResetForTest(SerialNumber, newPin);
+            _resetObj = new Fido2ResetForTest(SerialNumber);
             if (_resetObj.RunFido2Reset() != ResponseStatus.Success)
             {
                 throw new InvalidOperationException("Could not Reset the YubiKey");

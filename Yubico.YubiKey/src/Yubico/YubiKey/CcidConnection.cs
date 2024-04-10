@@ -21,7 +21,6 @@ using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.YubiKey.Pipelines;
-using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey
 {

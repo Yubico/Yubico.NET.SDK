@@ -66,10 +66,9 @@ namespace Yubico.YubiKey.TestUtilities
         public static IList<IYubiKeyDevice> GetTestDevices(Transport transport = Transport.All)
         {
             IEnumerable<IYubiKeyDevice> yubiKeyList = YubiKeyDevice.FindByTransport(transport);
-
             IEnumerable<IYubiKeyDevice> testYubiKeys = yubiKeyList
                 .Where(key => key.SerialNumber == null ||
-                !Instance.blockedSerialNumbers.Contains(key.SerialNumber.Value.ToString()));
+                              !Instance.blockedSerialNumbers.Contains(key.SerialNumber.Value.ToString()));
 
             return testYubiKeys.ToList();
         }

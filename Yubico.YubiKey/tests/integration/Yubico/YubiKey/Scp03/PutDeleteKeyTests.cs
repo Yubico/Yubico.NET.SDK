@@ -18,15 +18,18 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Scp03
 {
+    [TestCaseOrderer(PriorityOrderer.TypeName, PriorityOrderer.AssembyName)]
+    [Trait("Category", "Simple")]
     public class PutDeleteTests
     {
         [Fact]
+        [TestPriority(3)]
         public void PutKey_Succeeds()
         {
             using var staticKeys = new StaticKeys();
             IYubiKeyDevice device = IntegrationTestDeviceEnumeration.GetTestDevice(
                 Transport.SmartCard,
-                FirmwareVersion.V5_3_0);
+                minimumFirmwareVersion: FirmwareVersion.V5_3_0);
 
             using (var scp03Session = new Scp03Session(device, staticKeys))
             {
@@ -47,6 +50,7 @@ namespace Yubico.YubiKey.Scp03
         }
 
         [Fact]
+        [TestPriority(3)]
         public void ReplaceKey_Succeeds()
         {
             using StaticKeys staticKeys = GetKeySet(2);
@@ -63,6 +67,7 @@ namespace Yubico.YubiKey.Scp03
         }
 
         [Fact]
+        [TestPriority(0)]
         public void DeleteKey_Succeeds()
         {
             using StaticKeys staticKeys = GetKeySet(3);
@@ -71,8 +76,8 @@ namespace Yubico.YubiKey.Scp03
                 FirmwareVersion.V5_3_0);
 
             using var scp03Session = new Scp03Session(device, staticKeys);
-            scp03Session.DeleteKeySet(1, false);
-            scp03Session.DeleteKeySet(2, false);
+            scp03Session.DeleteKeySet(1);
+            scp03Session.DeleteKeySet(2);
 
             scp03Session.DeleteKeySet(3, true);
         }
@@ -87,13 +92,16 @@ namespace Yubico.YubiKey.Scp03
 
         private StaticKeys GetKeySet1()
         {
-            var key1 = new ReadOnlyMemory<byte>(new byte[] {
+            var key1 = new ReadOnlyMemory<byte>(new byte[]
+            {
                 0x11, 0x11, 0x11, 0x11, 0x49, 0x2f, 0x4d, 0x09, 0x22, 0xec, 0x3d, 0xb4, 0x6b, 0x20, 0x94, 0x7a
             });
-            var key2 = new ReadOnlyMemory<byte>(new byte[] {
+            var key2 = new ReadOnlyMemory<byte>(new byte[]
+            {
                 0x12, 0x12, 0x12, 0x12, 0x53, 0xB3, 0xE3, 0x78, 0x2A, 0x1D, 0xE5, 0xDC, 0x5A, 0xF4, 0xa6, 0x41
             });
-            var key3 = new ReadOnlyMemory<byte>(new byte[] {
+            var key3 = new ReadOnlyMemory<byte>(new byte[]
+            {
                 0x13, 0x13, 0x13, 0x13, 0x68, 0xDE, 0x7A, 0xB7, 0x74, 0x19, 0xBB, 0x7F, 0xB0, 0x55, 0x7d, 0x40
             });
 
@@ -102,13 +110,16 @@ namespace Yubico.YubiKey.Scp03
 
         private StaticKeys GetKeySet2()
         {
-            var key1 = new ReadOnlyMemory<byte>(new byte[] {
+            var key1 = new ReadOnlyMemory<byte>(new byte[]
+            {
                 0x21, 0x21, 0x21, 0x21, 0x20, 0x94, 0x7a, 0x49, 0x2f, 0x4d, 0x09, 0x22, 0xec, 0x3d, 0xb4, 0x6b
             });
-            var key2 = new ReadOnlyMemory<byte>(new byte[] {
+            var key2 = new ReadOnlyMemory<byte>(new byte[]
+            {
                 0x22, 0x22, 0x22, 0x22, 0xDC, 0x5A, 0xF4, 0xa6, 0x41, 0x53, 0xB3, 0xE3, 0x78, 0x2A, 0x1D, 0xE5
             });
-            var key3 = new ReadOnlyMemory<byte>(new byte[] {
+            var key3 = new ReadOnlyMemory<byte>(new byte[]
+            {
                 0x23, 0x23, 0x23, 0x23, 0x7d, 0x40, 0x68, 0xDE, 0x7A, 0xB7, 0x74, 0x19, 0xBB, 0x7F, 0xB0, 0x55
             });
 
@@ -120,13 +131,16 @@ namespace Yubico.YubiKey.Scp03
 
         private StaticKeys GetKeySet3()
         {
-            var key1 = new ReadOnlyMemory<byte>(new byte[] {
+            var key1 = new ReadOnlyMemory<byte>(new byte[]
+            {
                 0x21, 0x21, 0x21, 0x21, 0x20, 0xDC, 0x5A, 0xF4, 0xa6, 0x41, 0x94, 0x7a, 0x49, 0x2f, 0x4d, 0x09
             });
-            var key2 = new ReadOnlyMemory<byte>(new byte[] {
+            var key2 = new ReadOnlyMemory<byte>(new byte[]
+            {
                 0x22, 0x22, 0x22, 0x22, 0x22, 0xec, 0x3d, 0xb4, 0x6b, 0x53, 0xB3, 0xE3, 0x78, 0x2A, 0x1D, 0xE5
             });
-            var key3 = new ReadOnlyMemory<byte>(new byte[] {
+            var key3 = new ReadOnlyMemory<byte>(new byte[]
+            {
                 0x23, 0x23, 0x23, 0x23, 0x7A, 0xB7, 0x74, 0x19, 0x7d, 0x40, 0x68, 0xDE, 0xBB, 0x7F, 0xB0, 0x55
             });
 

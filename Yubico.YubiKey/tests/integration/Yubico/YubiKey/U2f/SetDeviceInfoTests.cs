@@ -14,10 +14,8 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 using Yubico.Core.Devices.Hid;
-using Yubico.Core.Iso7816;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
 
@@ -93,15 +91,15 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void SetLockCode_Succeeds()
         {
-            byte[] newCode = new byte[] {
+            byte[] newCode = {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48
             };
-            byte[] wrongCode = new byte[] {
+            byte[] wrongCode = {
                 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
                 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
             };
-            byte[] clearCode = new byte[] {
+            byte[] clearCode = {
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
             };

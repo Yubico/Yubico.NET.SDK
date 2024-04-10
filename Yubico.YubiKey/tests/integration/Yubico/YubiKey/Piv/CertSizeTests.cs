@@ -20,15 +20,9 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class CertSizeTests
     {
-        //        private readonly ITestOutputHelper _output;
-        //
-        //        public CertSizeTests (ITestOutputHelper output)
-        //        {
-        //            _output = output;
-        //        }
-
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
         public void SingleCertSize_3052(StandardTestDevice testDeviceType)
@@ -216,7 +210,7 @@ namespace Yubico.YubiKey.Piv
 
             DateTimeOffset notBefore = DateTimeOffset.Now;
             DateTimeOffset notAfter = notBefore.AddYears(1);
-            byte[] serialNumber = new byte[] { 0x02, 0x4A };
+            byte[] serialNumber = { 0x02, 0x4A };
 
             X509Certificate2 newCert = certRequest.Create(
                 caCert,
@@ -238,7 +232,7 @@ namespace Yubico.YubiKey.Piv
             X509Certificate2 certObj = cert.GetCertObject();
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             RSA dotnetObj = privateKey.GetRsaObject();
-            X509Certificate2 certCopy = RSACertificateExtensions.CopyWithPrivateKey(certObj, dotnetObj);
+            X509Certificate2 certCopy = certObj.CopyWithPrivateKey(dotnetObj);
 
             return certCopy;
         }

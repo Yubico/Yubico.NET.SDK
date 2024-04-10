@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.Piv
                 isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
-                byte[] putData = new byte[] { 0x53, 0x04, 0x11, 0x22, 0x33, 0x44 };
+                byte[] putData = { 0x53, 0x04, 0x11, 0x22, 0x33, 0x44 };
                 for (int index = 0; index < 5; index++)
                 {
                     var putCommand = new PutDataCommand(0x005fff11 + index, putData);
@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ResetApplication();
 
-                byte[] putData = new byte[] { 0x11, 0x22, 0x33, 0x44 };
+                byte[] putData = { 0x11, 0x22, 0x33, 0x44 };
                 pivSession.WriteMsroots(putData);
 
                 pivSession.WriteMsroots(ReadOnlySpan<byte>.Empty);
@@ -294,7 +294,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.Success, putResponse.Status);
             }
 
-            byte[] noData = new byte[] { 0x53, 0x00 };
+            byte[] noData = { 0x53, 0x00 };
             for (int index = 0; index < 5; index++)
             {
                 var putCommand = new PutDataCommand(0x005fff11 + index, noData);

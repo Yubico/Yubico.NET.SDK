@@ -13,24 +13,24 @@
 // limitations under the License.
 
 using Xunit;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
+    [Trait("Category", "RequiresBio")]
     public class GetKeyAgreeCommandTests : SimpleIntegrationTestConnection
     {
         public GetKeyAgreeCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio)
         {
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void GetKeyAgreeCommand_Succeeds()
         {
-            var cmd = new GetKeyAgreementCommand() { PinUvAuthProtocol = PinUvAuthProtocol.ProtocolTwo, };
+            var cmd = new GetKeyAgreementCommand { PinUvAuthProtocol = PinUvAuthProtocol.ProtocolTwo, };
             GetKeyAgreementResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 

@@ -18,6 +18,7 @@ using Yubico.Core.Devices.Hid;
 
 namespace Yubico.PlatformInterop
 {
+    [Trait("Category", "Simple")]
     public class ListenHidTests
     {
         private int _counter;

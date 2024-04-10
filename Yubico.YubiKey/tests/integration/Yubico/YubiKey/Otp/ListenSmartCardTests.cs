@@ -18,6 +18,7 @@ using Yubico.Core.Devices.SmartCard;
 
 namespace Yubico.PlatformInterop
 {
+    [Trait("Category", "Simple")]
     public class ListenSmartCardTests
     {
         private int _counter;

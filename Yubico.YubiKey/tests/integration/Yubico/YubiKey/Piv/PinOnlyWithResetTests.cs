@@ -27,6 +27,7 @@ namespace Yubico.YubiKey.Piv
     // set of bytes, followed by 2048 random bytes. If you want to get only
     // random bytes, skip the first SpecifiedStart bytes (get a random object and
     // generate that many bytes).
+    [Trait("Category", "Simple")]
     public class PinOnlyWithResetTests : IDisposable
     {
         private const int SpecifiedStart = 72;
@@ -696,7 +697,7 @@ namespace Yubico.YubiKey.Piv
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
                 });
-                bool isValid = pivSession.TryAuthenticateManagementKey(mgmtKey, true);
+                bool isValid = pivSession.TryAuthenticateManagementKey(mgmtKey);
             }
         }
 

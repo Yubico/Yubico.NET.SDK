@@ -17,9 +17,10 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath
 {
+    [Trait("Category", "Simple")]
     public sealed class SelectApplicationTests
     {
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         public void ConnectOathHasData(StandardTestDevice testDeviceType)
         {

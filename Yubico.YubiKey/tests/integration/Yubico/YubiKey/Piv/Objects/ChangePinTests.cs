@@ -19,6 +19,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class ChangePinTests
     {
         [Theory]

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 using Xunit;
 using Yubico.YubiKey.Fido2.Commands;
@@ -21,14 +20,15 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
+    [Trait("Category", "RequiresBio")]
     public class VerifyFpTests : SimpleIntegrationTestConnection
     {
         public VerifyFpTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio)
         {
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void VerifyUv_Succeeds()
         {
             using (var fido2Session = new Fido2Session(Device))

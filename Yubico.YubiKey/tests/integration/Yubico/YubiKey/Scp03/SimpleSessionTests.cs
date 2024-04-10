@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Net.NetworkInformation;
 using Xunit;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Piv.Commands;
@@ -23,7 +22,7 @@ namespace Yubico.YubiKey.Scp03
 {
     public class SimpleSessionTests
     {
-        private readonly byte[] _pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+        private readonly byte[] _pin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]

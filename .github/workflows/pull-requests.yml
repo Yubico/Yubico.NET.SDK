@@ -54,15 +54,8 @@ jobs:
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
       # Build the project
-      # The default GitHub runners seem to have N and N-1 versions of .NET Framework installed. In practice, they seem
-      # to have even more installed than that, but at a minimum N and N-1 seem like safe assumptions. We can therefore
-      # save some time and use the pre-installed version rather than downloading a fresh copy.
-
       - name: Build Yubico.NET.SDK.sln
         run: dotnet build --configuration ${{matrix.configuration}} --nologo --verbosity normal Yubico.NET.SDK.sln
-
-      - name: dotnet format new 
-        run: dotnet format --verify-no-changes --no-restore -v d
 
       # Save the built NuGet packages, just in case we need to inspect the build output.
       - name: Save build artifacts

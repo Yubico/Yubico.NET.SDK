@@ -19,17 +19,18 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class GenerateTests
     {
         [Fact]
         public void SimpleGenerate()
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(
-                Transport.SmartCard, FirmwareVersion.V5_3_0);
+                Transport.SmartCard, minimumFirmwareVersion: FirmwareVersion.V5_3_0);
+
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
             var scp03Keys = new StaticKeys();
-
             using (var pivSession = new PivSession(testDevice, scp03Keys))
             {
                 var collectorObj = new Simple39KeyCollector();

@@ -24,6 +24,7 @@ using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.TestUtilities;
+using Log = Yubico.Core.Logging.Log;
 
 namespace Yubico.YubiKey
 {
@@ -47,7 +48,7 @@ namespace Yubico.YubiKey
                     outputTemplate: "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
                 .CreateLogger();
 
-            Core.Logging.Log.LoggerFactory = LoggerFactory.Create(
+            Log.LoggerFactory = LoggerFactory.Create(
                 builder => builder
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));

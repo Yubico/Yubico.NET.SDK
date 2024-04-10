@@ -22,6 +22,7 @@ using Yubico.YubiKey.U2f.Commands;
 
 namespace Yubico.YubiKey.U2f
 {
+    [Trait("Category", "Elevated")]
     public class PinTests : IDisposable
     {
         private readonly FidoConnection _fidoConnection;
@@ -59,17 +60,12 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void SetPin_Succeeds()
         {
-            byte[] currentPin = new byte[] {
+            byte[] currentPin = {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
             };
-            byte[] newPin = new byte[] {
+            byte[] newPin = {
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46
             };
-
-            if (_fidoConnection is null)
-            {
-                return;
-            }
 
             var cmd = new GetDeviceInfoCommand();
             GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
@@ -103,37 +99,27 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void InvalidPin_CorrectError()
         {
-            byte[] currentPin = new byte[] {
+            byte[] currentPin = {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
             };
-            byte[] badPin = new byte[] {
+            byte[] badPin = {
                 0x41, 0x42, 0x43, 0x44
             };
 
-            if (_fidoConnection is null)
-            {
-                return;
-            }
-
             var setCmd = new SetPinCommand(currentPin, badPin);
             SetPinResponse setRsp = _fidoConnection.SendCommand(setCmd);
-            Assert.NotEqual(ResponseStatus.Success, setRsp.Status);
+            Assert.Equal(ResponseStatus.Failed, setRsp.Status);
         }
 
         [Fact]
         public void VerifyPin_Succeeds()
         {
-            byte[] correctPin = new byte[] {
+            byte[] correctPin = {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
             };
-            byte[] wrongPin = new byte[] {
+            byte[] wrongPin = {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37
             };
-
-            if (_fidoConnection is null)
-            {
-                return;
-            }
 
             var cmd = new GetDeviceInfoCommand();
             GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
@@ -164,18 +150,18 @@ namespace Yubico.YubiKey.U2f
         // This test will make block the YubiKey's U2F application. The only way
         // to unblock is to reset, but once a U2F application has been reset, it
         // is not possible to put that YubiKey back into FIPS mode.
-        [Fact]
-        public void WrongPin_ThreeTimes()
+        [SkippableFact]
+        public void WrongPin_ThreeTimes() // Not sure how to run this test
         {
-            byte[] correctPin = new byte[] {
+            byte[] correctPin = {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
             };
-            byte[] wrongPin = new byte[] {
+            byte[] wrongPin = {
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46
             };
 
             bool isValid = IsYubiKeyVersion4Fips(out bool isFipsMode);
-            Assert.True(isValid);
+            Skip.IfNot(isValid);
             if (!isFipsMode)
             {
                 isValid = SetU2fPin(correctPin);
@@ -210,11 +196,6 @@ namespace Yubico.YubiKey.U2f
         {
             isFipsMode = false;
 
-            if (_fidoConnection is null)
-            {
-                return false;
-            }
-
             var cmd = new GetDeviceInfoCommand();
             GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
             if (rsp.Status != ResponseStatus.Success)
@@ -224,8 +205,8 @@ namespace Yubico.YubiKey.U2f
 
             YubiKeyDeviceInfo getData = rsp.GetData();
             if (!getData.IsFipsSeries ||
-                getData.FirmwareVersion >= new FirmwareVersion(5, 0, 0) ||
-                getData.FirmwareVersion < new FirmwareVersion(4, 0, 0))
+                getData.FirmwareVersion >= new FirmwareVersion(5) ||
+                getData.FirmwareVersion < new FirmwareVersion(4))
             {
                 return false;
             }

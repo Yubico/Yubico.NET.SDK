@@ -19,6 +19,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class HistoryIntegrationTests
     {
         [Theory]
@@ -86,7 +87,7 @@ namespace Yubico.YubiKey.Piv
 
                     byte[] encodedHistory = historyCopy.Encode();
 
-                    bool isValid = MemoryExtensions.SequenceEqual<byte>(expected.Span, encodedHistory);
+                    bool isValid = expected.Span.SequenceEqual(encodedHistory);
                     Assert.True(isValid);
                 }
             }

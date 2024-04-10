@@ -176,33 +176,30 @@ namespace Yubico.YubiKey.Fido2
         {
             switch (option)
             {
+                case plat:
+                case rk:
+                case noMcGaPermissionsWithClientPin:
+                case makeCredUvNotRqd:
+                    return OptionValue.False;
+                case up:
+                    return OptionValue.True;
+                case clientPin:
+                case uv:
+                case pinUvAuthToken:
+                case largeBlobs:
+                case ep:
+                case bioEnroll:
+                case userVerificationMgmtPreview:
+                case uvBioEnroll:
+                case authnrCfg:
+                case uvAcfg:
+                case credMgmt:
+                case credentialMgmtPreview:
+                case setMinPINLength:
+                case alwaysUv:
+                    return OptionValue.NotSupported;
                 default:
                     return OptionValue.Unknown;
-
-                case "plat":
-                case "rk":
-                case "noMcGaPermissionsWithClientPin":
-                case "makeCredUvNotRqd":
-                    return OptionValue.False;
-
-                case "up":
-                    return OptionValue.True;
-
-                case "clientPin":
-                case "uv":
-                case "pinUvAuthToken":
-                case "largeBlobs":
-                case "ep":
-                case "bioEnroll":
-                case "userVerificationMgmtPreview":
-                case "uvBioEnroll":
-                case "authnrCfg":
-                case "uvAcfg":
-                case "credMgmt":
-                case "credentialMgmtPreview":
-                case "setMinPINLength":
-                case "alwaysUv":
-                    return OptionValue.NotSupported;
             }
         }
     }

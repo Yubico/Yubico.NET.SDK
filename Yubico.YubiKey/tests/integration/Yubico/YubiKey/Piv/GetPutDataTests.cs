@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Piv
             Assert.True(isValid);
 
             byte[] certDer = cert.GetRawCertData();
-            byte[] feData = new byte[] { 0xFE, 0x00 };
+            byte[] feData = { 0xFE, 0x00 };
             var tlvWriter = new TlvWriter();
             using (tlvWriter.WriteNestedTlv(0x53))
             {
@@ -105,8 +105,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Chuid_Auth_Req()
         {
-            byte[] chuidData = new byte[]
-            {
+            byte[] chuidData = {
                 0x53, 0x3b, 0x30, 0x19, 0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83,
                 0x68, 0x58, 0x21, 0x08, 0x42, 0x10, 0x84, 0x21, 0xc8, 0x42, 0x10, 0xc3, 0xeb, 0x34, 0x10, 0x39,
                 0x38, 0x37, 0x36, 0x35, 0x34, 0x33, 0x32, 0x49, 0x48, 0x47, 0x46, 0x45, 0x44, 0x43, 0x42, 0x35,
@@ -167,8 +166,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Capability_Auth_Req()
         {
-            byte[] capabilityData = new byte[]
-            {
+            byte[] capabilityData = {
                 0x53, 0x33, 0xF0, 0x15, 0xA0, 0x00, 0x00, 0x01, 0x16, 0xFF, 0x02, 0x21, 0x08, 0x42, 0x10, 0x84,
                 0x21, 0xc8, 0x42, 0x10, 0xc3, 0xeb, 0x34, 0x10, 0x39, 0xF1, 0x01, 0x21, 0xF2, 0x01, 0x21, 0xF3,
                 0x00, 0xF4, 0x01, 0x00, 0xF5, 0x01, 0x10, 0xF6, 0x00, 0xF7, 0x00, 0xFA, 0x00, 0xFB, 0x00, 0xFC,
@@ -235,8 +233,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Discovery_Auth_Req()
         {
-            byte[] discoveryData = new byte[]
-            {
+            byte[] discoveryData = {
                 0x7E, 0x12, 0x4F, 0x0B, 0xA0, 0x00, 0x00, 0x03, 0x08, 0x00, 0x00, 0x10, 0x00, 0x01, 0x00, 0x5F,
                 0x2F, 0x02, 0x40, 0x00,
             };
@@ -266,20 +263,16 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Printed_Auth_Req()
         {
-            byte[] printedData = new byte[]
-            {
+            byte[] printedData = {
                 0x53, 0x04, 0x04, 0x02, 0xd4, 0xe7
             };
-            byte[] key1 = new byte[]
-            {
+            byte[] key1 = {
                 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff
             };
-            byte[] key2 = new byte[]
-            {
+            byte[] key2 = {
                 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x11
             };
-            byte[] key3 = new byte[]
-            {
+            byte[] key3 = {
                 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x11, 0x22
             };
             var newKeys = new StaticKeys(key2, key1, key3)
@@ -383,8 +376,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Security_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] securityData = new byte[]
-            {
+            byte[] securityData = {
                 0x53, 0x08, 0xBA, 0x01, 0x11, 0xBB, 0x01, 0x22, 0xFE, 0x00
             };
 
@@ -442,8 +434,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void KeyHistory_Auth_Req()
         {
-            byte[] keyHistoryData = new byte[]
-            {
+            byte[] keyHistoryData = {
                 0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
             };
 
@@ -502,8 +493,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Iris_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] irisData = new byte[]
-            {
+            byte[] irisData = {
                 0x53, 0x05, 0xBC, 0x01, 0x11, 0xFE, 0x00
             };
 
@@ -602,8 +592,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Facial_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] facialData = new byte[]
-            {
+            byte[] facialData = {
                 0x53, 0x05, 0xBC, 0x01, 0x11, 0xFE, 0x00
             };
 
@@ -702,8 +691,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Fingerprint_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] fingerprintData = new byte[]
-            {
+            byte[] fingerprintData = {
                 0x53, 0x05, 0xBC, 0x01, 0x11, 0xFE, 0x00
             };
 
@@ -802,8 +790,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Bitgt_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] bitgtData = new byte[]
-            {
+            byte[] bitgtData = {
                 0x7F, 0x61, 0x07, 0x02, 0x01, 0x01, 0x7F, 0x60, 0x01, 0x01
             };
 
@@ -834,8 +821,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void SMSigner_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] smSignerData = new byte[]
-            {
+            byte[] smSignerData = {
                 0x53, 0x08, 0x70, 0x01, 0x11, 0x71, 0x01, 0x00, 0xFE, 0x00
             };
 
@@ -896,8 +882,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void PCRef_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] pcRefData = new byte[]
-            {
+            byte[] pcRefData = {
                 0x53, 0x0C, 0x99, 0x08, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0xFE, 0x00
             };
 
@@ -957,8 +942,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void AdminData_Auth_Req()
         {
-            byte[] adminData = new byte[]
-            {
+            byte[] adminData = {
                 0x53, 0x09, 0x80, 0x07, 0x81, 0x01, 0x00, 0x03, 0x02, 0x5C, 0x29
             };
 

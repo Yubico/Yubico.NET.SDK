@@ -22,6 +22,7 @@ namespace Yubico.YubiKey.Piv
 {
     public class CertTests
     {
+        [Trait("Category", "Simple")]
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
         public void GetCert_Succeeds(StandardTestDevice testDeviceType)

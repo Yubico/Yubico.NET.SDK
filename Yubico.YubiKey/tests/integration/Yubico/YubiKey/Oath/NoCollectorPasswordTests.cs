@@ -13,14 +13,13 @@
 // limitations under the License.
 
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using Xunit;
-using Yubico.YubiKey.Oath.Commands;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath
 {
+    [Trait("Category", "Simple")]
     public sealed class NoCollectorPasswordTests
     {
         [Fact]

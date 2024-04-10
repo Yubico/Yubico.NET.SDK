@@ -15,7 +15,46 @@ limitations under the License. -->
 # What's new in the SDK?
 
 Here you can find all of the updates and release notes for published versions of the SDK.
+## 1.10.x Releases
 
+### 1.10.0
+
+Release date: April 10th, 2024
+
+This is a release aimed to adress inconsistencies in dependencies (OpenSSL), compiler warnings and hardening. The objective of compiler options hardening is to produce application binaries (executables) with security mechanisms against potential attacks and/or misbehavior. 
+
+This release also drops support for Linux x86 builds so that we can use the same version of OpenSSL on all platforms for the interopability layer Yubico.NativeShims.
+
+Changes:  
+- **Yubico.NativeShims is being compiled with OpenSSL version 3.1.2 on all platforms**  
+  Previously, the build of for Yubico.NativeShims targetting x86 would compile using OpenSSL v1.1.1
+  on Ubuntu 18.04. This change upgrades the version of OpenSSL but effectively drops support
+  for Linux on x86.
+- **[Compilation hardening of Yubico.NativeShims](https://github.com/Yubico/Yubico.NET.SDK/pull/67)**   
+  Added commonly used compiler flags to increase security and code quality  
+  **MacOS / Linux:**  
+  -Wformat: Warn about format string issues in printf-like functions.  
+  -Wformat-nonliteral: Warn about format strings that are not string literals.  
+  -Wformat-security: Warn about potential security issues related to format strings.  
+  -Wall: Enable most warning messages  
+  -Wextra: Enable some additional warning messages not included in -Wall  
+  -Werror: Treat all warnings as errors  
+  -Wcast-qual: Warn when casting away const-ness  
+  -Wshadow: Warn when a local variable shadows another variable  
+  -pedantic: Issue warnings for language features beyond the C standard  
+  -pedantic-errors: Treat pedantic warnings as errors  
+  -Wbad-function-cast: Warn about dubious function pointer casts  
+  -O2: Optimize code for performance  
+  -fpic: Generate position-independent code  
+  -fstack-protector-all: Enable stack protection for all functions  
+  -D_FORTIFY_SOURCE=2: Enable runtime and compile-time checks for certain security-critical functions  
+  **Windows flags:** 
+  /guard:cf: Enable control flow guard security feature  
+  /GS: Enable buffer security check  
+  /Gs: Control stack security check 
+- [Addressed compiler warning concerning Runtime Identifiers (RID) ](https://github.com/Yubico/Yubico.NET.SDK/issues/59)
+- Adressed compiler warning concerning integer conversion in Yubico.NativeShims.pscs.c
+  
 ## 1.9.x Releases
 
 ### 1.9.1

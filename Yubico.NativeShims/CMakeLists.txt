@@ -1,33 +1,56 @@
-cmake_minimum_required(VERSION 3.10)
-
+cmake_minimum_required(VERSION 3.13)
 project(Yubico.NativeShims VERSION 1.9.1)
+include(CheckCCompilerFlag)
 
-if (APPLE)
-    set(PLATFORM_MACOS true)
-    set(BACKEND "macscard")
-elseif(UNIX)
-    set(PLATFORM_LINUX true)
-    set(BACKEND "pcsc")
-    find_package(PkgConfig REQUIRED)
+if (APPLE OR UNIX)
+    if (APPLE)
+        set(PLATFORM_MACOS true)
+        set(BACKEND "macscard")
+        add_link_options("-exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/exports.llvm")
+    elseif(UNIX)
+        find_package(PkgConfig REQUIRED)
+        set(PLATFORM_LINUX true)
+        set(BACKEND "pcsc")
+        add_link_options("-Wl,-z,relro,-z,now,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/exports.gnu")
+    endif()
+    if (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR
+        CMAKE_C_COMPILER_ID STREQUAL "AppleClang" OR
+        CMAKE_C_COMPILER_ID STREQUAL "GNU")
+
+        add_compile_options(-Wall -Wextra -Werror)
+        add_compile_options(-Wformat -Wformat-nonliteral -Wformat-security)
+        add_compile_options(-Wshadow)
+        add_compile_options(-Wcast-qual)
+        add_compile_options(-Wbad-function-cast)
+        add_compile_options(-pedantic -pedantic-errors)
+        add_compile_options(-fpic)
+        add_compile_options(-O2)
+        add_compile_definitions (-D_FORTIFY_SOURCE=2)
+        add_link_options(-fpic)
+
+        check_c_compiler_flag("-fstack-protector-all" HAVE_STACK_PROTECTOR_ALL)
+        if (HAVE_STACK_PROTECTOR_ALL)
+            message(STATUS "-fstack-protector-all support detected")
+            add_compile_options(-fstack-protector-all)
+            add_link_options(-fstack-protector-all)
+        else ()
+            check_c_compiler_flag("-fstack-protector" HAVE_STACK_PROTECTOR)
+            if(HAVE_STACK_PROTECTOR)
+                message(STATUS "-fstack-protector support detected")
+                add_compile_options(-fstack-protector)
+                add_link_options(-fstack-protector)
+            else ()
+                message(WARNING "No stack protection supported.")
+            endif ()
+        endif()
+    elseif()
+        message(WARNING "No compatible compiler found for setting additional security compiler flags.")
+    endif()
 elseif(WIN32)
     set(PLATFORM_WINDOWS true)
     set(BACKEND "winscard")
-endif()
-
-# export list
-if(APPLE AND (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR
-   CMAKE_C_COMPILER_ID STREQUAL "AppleClang"))
-    # clang + lld
-    string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
-        " -exported_symbols_list ${CMAKE_CURRENT_SOURCE_DIR}/exports.llvm")
-elseif(NOT MSVC)
-    # clang/gcc + gnu ld
-    string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
-        " -Wl,--version-script=${CMAKE_CURRENT_SOURCE_DIR}/exports.gnu")
-else()
-#enable control flow guard for windows
-    string(CONCAT CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS}
-        " /guard:cf /def:\"${CMAKE_CURRENT_SOURCE_DIR}/exports.msvc\"")
+    add_link_options("/guard:cf" "/def:${CMAKE_CURRENT_SOURCE_DIR}/exports.msvc")
+    add_compile_options("/GS" "/Gs")
 endif()
 
 
@@ -37,7 +60,6 @@ endif()
 
 include(${CMAKE_SOURCE_DIR}/cmake/pcscd.cmake)
 find_pcscd()
-
 find_package(OpenSSL REQUIRED)
 
 #

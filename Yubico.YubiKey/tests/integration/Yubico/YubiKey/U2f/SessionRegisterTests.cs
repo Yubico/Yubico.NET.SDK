@@ -15,10 +15,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Yubico.Core.Devices.Hid;
+using Xunit;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
-using Xunit;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -74,8 +73,8 @@ namespace Yubico.YubiKey.U2f
                     appId, clientDataHash, new TimeSpan(0, 0, 5), out RegistrationData? regDataQ);
                 Assert.True(isValid);
 
-//                RegistrationData regDataQ = u2fSession.Register(
-//                    appId, clientDataHash, TimeSpan.Zero);
+                //                RegistrationData regDataQ = u2fSession.Register(
+                //                    appId, clientDataHash, TimeSpan.Zero);
 
                 Assert.NotNull(regDataQ);
 
@@ -84,7 +83,7 @@ namespace Yubico.YubiKey.U2f
                     return;
                 }
 
-                var regData = (RegistrationData)regDataQ;
+                RegistrationData regData = regDataQ;
 
                 bool isVerified = regData.VerifySignature(appId, clientDataHash);
                 Assert.True(isVerified);

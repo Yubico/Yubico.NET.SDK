@@ -14,8 +14,8 @@
 
 using System;
 using System.Security.Cryptography.X509Certificates;
-using Yubico.YubiKey.Sample.SharedCode;
 using Yubico.YubiKey.Piv;
+using Yubico.YubiKey.Sample.SharedCode;
 
 namespace Yubico.YubiKey.Sample.PivSampleCode
 {

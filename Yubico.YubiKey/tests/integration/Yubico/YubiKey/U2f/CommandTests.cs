@@ -14,11 +14,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Xunit;
 using Yubico.Core.Devices.Hid;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
-using Xunit;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -57,13 +56,9 @@ namespace Yubico.YubiKey.U2f
         }
 
         [Fact]
+        [Trait("Category", "Simple")]
         public void RunGetDeviceInfo()
         {
-            if (_fidoConnection is null)
-            {
-                return;
-            }
-
             var cmd = new GetDeviceInfoCommand();
             GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
@@ -75,28 +70,18 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void RunSetDeviceInfo()
         {
-            if (_fidoConnection is null)
-            {
-                return;
-            }
-
             var cmd = new SetDeviceInfoCommand();
             Assert.Null(cmd.DeviceFlags);
-//            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
-//            Assert.Equal(ResponseStatus.Success, rsp.Status);
+            //            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
+            //            Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-//            YubiKeyDeviceInfo getData = rsp.GetData();
-//            Assert.False(getData.IsFipsSeries);
+            //            YubiKeyDeviceInfo getData = rsp.GetData();
+            //            Assert.False(getData.IsFipsSeries);
         }
 
         [Fact]
         public void VerifyFipsMode()
         {
-            if (_fidoConnection is null)
-            {
-                return;
-            }
-
             var cmd = new VerifyFipsModeCommand();
             VerifyFipsModeResponse rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
@@ -109,8 +94,8 @@ namespace Yubico.YubiKey.U2f
         {
             foreach (HidDevice currentDevice in devices)
             {
-                if ((currentDevice.VendorId == 0x1050) &&
-                    (currentDevice.UsagePage == HidUsagePage.Fido))
+                if (currentDevice.VendorId == 0x1050 &&
+                    currentDevice.UsagePage == HidUsagePage.Fido)
                 {
                     return currentDevice;
                 }

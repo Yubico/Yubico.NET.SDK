@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Formats.Cbor;
 using System.Collections.Generic;
-using System.Linq;
+using System.Formats.Cbor;
 using System.Globalization;
+using System.Linq;
 using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
@@ -695,8 +695,8 @@ namespace Yubico.YubiKey.Fido2
                 .Entry(TagUserEntity, UserEntity)
                 .Entry(TagAlgorithmsList, EncodeAlgorithms, this)
                 .OptionalEntry<IReadOnlyList<ICborEncode>>(TagExcludeList, CborHelpers.EncodeArrayOfObjects, ExcludeList)
-                .OptionalEntry<Dictionary<string,byte[]>>(TagExtensions, ParameterHelpers.EncodeKeyValues<byte[]>, _extensions)
-                .OptionalEntry<Dictionary<string,bool>>(TagOptions, ParameterHelpers.EncodeKeyValues<bool>, _options)
+                .OptionalEntry<Dictionary<string, byte[]>>(TagExtensions, ParameterHelpers.EncodeKeyValues<byte[]>, _extensions)
+                .OptionalEntry<Dictionary<string, bool>>(TagOptions, ParameterHelpers.EncodeKeyValues<bool>, _options)
                 .OptionalEntry(TagPinUvAuth, PinUvAuthParam)
                 .OptionalEntry(TagProtocol, (int?)Protocol)
                 .OptionalEntry(TagEnterpriseAttestation, (int?)EnterpriseAttestation)
@@ -705,7 +705,7 @@ namespace Yubico.YubiKey.Fido2
 
         private byte[] EncodeAlgorithms(MakeCredentialParameters? localData)
         {
-            if ((localData is null) || (localData.Algorithms.Count == 0))
+            if (localData is null || localData.Algorithms.Count == 0)
             {
                 return Array.Empty<byte>();
             }

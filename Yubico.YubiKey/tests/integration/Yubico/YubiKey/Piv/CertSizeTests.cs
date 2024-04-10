@@ -15,20 +15,14 @@
 using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class CertSizeTests
     {
-        //        private readonly ITestOutputHelper _output;
-        //
-        //        public CertSizeTests (ITestOutputHelper output)
-        //        {
-        //            _output = output;
-        //        }
-
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
         public void SingleCertSize_3052(StandardTestDevice testDeviceType)
@@ -51,7 +45,7 @@ namespace Yubico.YubiKey.Piv
             rng.GetBytes(extensionData, 0, extensionData.Length);
 
             X509Certificate2 newCert = GetCertWithRandomExtension(caCert, dotNetPublicKey, extensionData);
-//            _output.WriteLine ("cert size: {0} from extension = {1}", newCert.RawData.Length, extensionSize);
+            //            _output.WriteLine ("cert size: {0} from extension = {1}", newCert.RawData.Length, extensionSize);
 
             // A 3052-byte cert should work.
             using (var pivSession = new PivSession(testDevice))
@@ -71,7 +65,7 @@ namespace Yubico.YubiKey.Piv
             rng.GetBytes(extensionData, 0, extensionData.Length);
 
             newCert = GetCertWithRandomExtension(caCert, dotNetPublicKey, extensionData);
-//            _output.WriteLine ("cert size: {0} from extension = {1}", newCert.RawData.Length, extensionSize);
+            //            _output.WriteLine ("cert size: {0} from extension = {1}", newCert.RawData.Length, extensionSize);
 
             // A 3053-byte cert should throw an exception.
             using (var pivSession = new PivSession(testDevice))
@@ -121,7 +115,7 @@ namespace Yubico.YubiKey.Piv
                 {
                     pivSession.ImportPrivateKey(leafSlotNumber, pivPrivateKey);
                     pivSession.ImportCertificate(leafSlotNumber, newCert);
-//                    _output.WriteLine ("slot number: {0:X2}", (int)leafSlotNumber & 0xFF);
+                    //                    _output.WriteLine ("slot number: {0:X2}", (int)leafSlotNumber & 0xFF);
                 }
 
                 // The next storage should fail.
@@ -151,7 +145,7 @@ namespace Yubico.YubiKey.Piv
             rng.GetBytes(extensionData, 0, extensionData.Length);
 
             X509Certificate2 newCert = GetCertWithRandomExtension(caCert, dotNetPublicKey, extensionData);
-//            _output.WriteLine ("cert size: {0} from extension = {1}", newCert.RawData.Length, extensionSize);
+            //            _output.WriteLine ("cert size: {0} from extension = {1}", newCert.RawData.Length, extensionSize);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -167,28 +161,28 @@ namespace Yubico.YubiKey.Piv
                 {
                     pivSession.ImportPrivateKey(leafSlotNumber, pivPrivateKey);
                     pivSession.ImportCertificate(leafSlotNumber, newCert);
-//                    _output.WriteLine ("slot number: {0:X2}", (int)leafSlotNumber & 0xFF);
+                    //                    _output.WriteLine ("slot number: {0:X2}", (int)leafSlotNumber & 0xFF);
                 }
 
                 leafSlotNumber = 0x9A;
                 pivSession.ImportPrivateKey(leafSlotNumber, pivPrivateKey);
                 pivSession.ImportCertificate(leafSlotNumber, newCert);
-//                _output.WriteLine ("slot number: {0:X2}", (int)leafSlotNumber & 0xFF);
+                //                _output.WriteLine ("slot number: {0:X2}", (int)leafSlotNumber & 0xFF);
 
                 leafSlotNumber = 0x9C;
                 pivSession.ImportPrivateKey(leafSlotNumber, pivPrivateKey);
                 pivSession.ImportCertificate(leafSlotNumber, newCert);
-//                _output.WriteLine ("slot number: {0:X2}", (int)leafSlotNumber & 0xFF);
+                //                _output.WriteLine ("slot number: {0:X2}", (int)leafSlotNumber & 0xFF);
 
                 leafSlotNumber = 0x9D;
                 pivSession.ImportPrivateKey(leafSlotNumber, pivPrivateKey);
                 pivSession.ImportCertificate(leafSlotNumber, newCert);
-//                _output.WriteLine ("slot number: {0:X2}", (int)leafSlotNumber & 0xFF);
+                //                _output.WriteLine ("slot number: {0:X2}", (int)leafSlotNumber & 0xFF);
 
                 leafSlotNumber = 0x9E;
                 pivSession.ImportPrivateKey(leafSlotNumber, pivPrivateKey);
                 pivSession.ImportCertificate(leafSlotNumber, newCert);
-//                _output.WriteLine ("slot number: {0:X2}", (int)leafSlotNumber & 0xFF);
+                //                _output.WriteLine ("slot number: {0:X2}", (int)leafSlotNumber & 0xFF);
             }
         }
 
@@ -216,7 +210,7 @@ namespace Yubico.YubiKey.Piv
 
             DateTimeOffset notBefore = DateTimeOffset.Now;
             DateTimeOffset notAfter = notBefore.AddYears(1);
-            byte[] serialNumber = new byte[] { 0x02, 0x4A };
+            byte[] serialNumber = { 0x02, 0x4A };
 
             X509Certificate2 newCert = certRequest.Create(
                 caCert,
@@ -238,7 +232,7 @@ namespace Yubico.YubiKey.Piv
             X509Certificate2 certObj = cert.GetCertObject();
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             RSA dotnetObj = privateKey.GetRsaObject();
-            X509Certificate2 certCopy = RSACertificateExtensions.CopyWithPrivateKey(certObj, dotnetObj);
+            X509Certificate2 certCopy = certObj.CopyWithPrivateKey(dotnetObj);
 
             return certCopy;
         }

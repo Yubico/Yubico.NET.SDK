@@ -70,7 +70,7 @@ namespace Yubico.Core.Tlv
             _tagAndLength = BuildTagAndLength(tag, value.Length);
             _value = value.ToArray();
 
-            _encodedLength  = _tagAndLength.Length + _value.Length;
+            _encodedLength = _tagAndLength.Length + _value.Length;
         }
 
         /// <summary>
@@ -97,7 +97,7 @@ namespace Yubico.Core.Tlv
         override public bool TryEncode(Span<byte> encoding, int offset, out int bytesWritten)
         {
             bytesWritten = 0;
-            if (encoding.Length < (offset + _encodedLength))
+            if (encoding.Length < offset + _encodedLength)
             {
                 return false;
             }

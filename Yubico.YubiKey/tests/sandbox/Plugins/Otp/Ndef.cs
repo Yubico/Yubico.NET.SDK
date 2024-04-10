@@ -55,7 +55,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                     exceptions.Add(new InvalidOperationException(
                         "You cannot read and program an NDEF tag in the same operation."));
                 }
-                if(_slot != Slot.None)
+                if (_slot != Slot.None)
                 {
                     exceptions.Add(new InvalidOperationException(
                         "Setting the slot is not relevant when reading an NDEF tag."));
@@ -80,7 +80,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 Output.WriteLine(
                     _serialNumber.HasValue
-                        ? $"Touch YubiKey with serial number { _serialNumber.Value } to NFC reader."
+                        ? $"Touch YubiKey with serial number {_serialNumber.Value} to NFC reader."
                         : "Touch YubiKey to NFC reader.",
                     OutputLevel.Quiet);
                 var timer = Stopwatch.StartNew();
@@ -111,7 +111,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 throw exceptions.Count == 1
                     ? exceptions[0]
                     : new AggregateException(
-                        $"{ exceptions.Count } errors encountered.",
+                        $"{exceptions.Count} errors encountered.",
                         exceptions);
             }
 
@@ -136,8 +136,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
                 string labeled() =>
                     reader.Type == NdefDataType.Uri
-                    ? $"URI Read: { raw() }"
-                    : $"Text Read: { raw() }";
+                    ? $"URI Read: {raw()}"
+                    : $"Text Read: {raw()}";
 
                 string detailed() =>
                     reader.Type == NdefDataType.Uri
@@ -194,7 +194,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                     $"Path: { uri.AbsolutePath }"
                 });
             string textDetails(string text, string lcid, NdefTextEncoding encoding) =>
-                $"Text: { text + Eol }LCID: { lcid + Eol }Encoding: { encoding }";
+                $"Text: {text + Eol}LCID: {lcid + Eol}Encoding: {encoding}";
         }
     }
 }

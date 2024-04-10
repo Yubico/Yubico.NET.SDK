@@ -215,7 +215,7 @@ namespace Yubico.YubiKey.Otp.Commands
                                         + UpdateSlotCommand.AesKeyLength
                                         + UpdateSlotCommand.AccessCodeLength
                                         + 1).Span[0];
-            
+
             Assert.Equal(expectedFlags, (ExtendedFlags)dataSlice);
         }
 
@@ -251,7 +251,7 @@ namespace Yubico.YubiKey.Otp.Commands
                                         + UpdateSlotCommand.AesKeyLength
                                         + UpdateSlotCommand.AccessCodeLength
                                         + 3).Span[0];
-            
+
             Assert.Equal(expectedFlags, (ConfigurationFlags)dataSlice);
         }
 
@@ -267,10 +267,10 @@ namespace Yubico.YubiKey.Otp.Commands
 
             ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
-            Assert.DoesNotContain(data.ToArray().Take(UpdateSlotCommand.FixedDataLength 
-                                                      + UpdateSlotCommand.UidLength 
-                                                      + UpdateSlotCommand.AesKeyLength 
-                                                      + UpdateSlotCommand.AccessCodeLength 
+            Assert.DoesNotContain(data.ToArray().Take(UpdateSlotCommand.FixedDataLength
+                                                      + UpdateSlotCommand.UidLength
+                                                      + UpdateSlotCommand.AesKeyLength
+                                                      + UpdateSlotCommand.AccessCodeLength
                                                       + 1),
                                  currentByte => currentByte != 0);
         }

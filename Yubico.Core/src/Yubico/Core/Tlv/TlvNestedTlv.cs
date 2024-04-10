@@ -128,7 +128,7 @@ namespace Yubico.Core.Tlv
         override public bool TryEncode(Span<byte> encoding, int offset, out int bytesWritten)
         {
             bytesWritten = 0;
-            if (encoding.Length < (offset + _encodedLength))
+            if (encoding.Length < offset + _encodedLength)
             {
                 return false;
             }

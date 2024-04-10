@@ -40,18 +40,17 @@ namespace Yubico.Core.Devices.Hid
         #endregion
 
         #region Private fields
-        private static readonly Dictionary<KeyboardLayout, HidCodeTranslator> _lookup
-             = new Dictionary<KeyboardLayout, HidCodeTranslator>
-            {
-                [KeyboardLayout.en_US] = GetEN_US(),
-                [KeyboardLayout.en_UK] = GetEN_UK(),
-                [KeyboardLayout.de_DE] = GetDE_DE(),
-                [KeyboardLayout.fr_FR] = GetFR_FR(),
-                [KeyboardLayout.it_IT] = GetIT_IT(),
-                [KeyboardLayout.es_US] = GetES_US(),
-                [KeyboardLayout.sv_SE] = GetSV_SE(),
-                [KeyboardLayout.ModHex] = GetModHex()
-            };
+        private static readonly Dictionary<KeyboardLayout, HidCodeTranslator> _lookup = new Dictionary<KeyboardLayout, HidCodeTranslator>
+        {
+            [KeyboardLayout.en_US] = GetEN_US(),
+            [KeyboardLayout.en_UK] = GetEN_UK(),
+            [KeyboardLayout.de_DE] = GetDE_DE(),
+            [KeyboardLayout.fr_FR] = GetFR_FR(),
+            [KeyboardLayout.it_IT] = GetIT_IT(),
+            [KeyboardLayout.es_US] = GetES_US(),
+            [KeyboardLayout.sv_SE] = GetSV_SE(),
+            [KeyboardLayout.ModHex] = GetModHex()
+        };
         private readonly Dictionary<char, byte> _byChar;
         private readonly Dictionary<byte, char> _byCode;
         #endregion

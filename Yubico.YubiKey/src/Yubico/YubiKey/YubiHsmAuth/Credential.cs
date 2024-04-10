@@ -54,7 +54,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public CryptographicKeyType KeyType
         {
             get => _keyType;
-            
+
             set
             {
                 if (Enum.IsDefined(typeof(CryptographicKeyType), value)

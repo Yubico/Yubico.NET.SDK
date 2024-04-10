@@ -113,15 +113,15 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 throw new ArgumentNullException(nameof(outputBuffer));
             }
-            if ((inputCount == 0) || ((inputCount & 7) != 0))
+            if (inputCount == 0 || (inputCount & 7) != 0)
             {
                 throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.IncorrectPlaintextLength));
             }
-            if ((inputOffset < 0) || ((inputBuffer.Length - inputOffset) < inputCount) ||
-                (outputOffset < 0) || (outputBuffer.Length - outputOffset < inputCount))
+            if (inputOffset < 0 || inputBuffer.Length - inputOffset < inputCount ||
+                outputOffset < 0 || outputBuffer.Length - outputOffset < inputCount)
             {
                 throw new ArgumentException(
                     string.Format(

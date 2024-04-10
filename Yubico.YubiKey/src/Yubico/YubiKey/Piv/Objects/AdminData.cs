@@ -13,11 +13,11 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
-using System.Globalization;
 using System.Buffers.Binary;
-using Yubico.Core.Tlv;
+using System.Globalization;
+using System.Security.Cryptography;
 using Yubico.Core.Logging;
+using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.Piv.Objects
 {
@@ -464,9 +464,9 @@ namespace Yubico.YubiKey.Piv.Objects
             // property to be null. It was set to null when we called Clear
             // before decoding.
             bool isValid = tlvReader.TryReadValue(out ReadOnlyMemory<byte> theTime, DateTag);
-            isValid = isValid && (theTime.Length <= 8);
+            isValid = isValid && theTime.Length <= 8;
 
-            if (isValid && (theTime.Length > 0))
+            if (isValid && theTime.Length > 0)
             {
                 var cpyObj = new Memory<byte>(new byte[8]);
                 theTime.CopyTo(cpyObj);

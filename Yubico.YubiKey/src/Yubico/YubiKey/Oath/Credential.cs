@@ -15,11 +15,11 @@
 using System;
 using System.Collections.Specialized;
 using System.Diagnostics.CodeAnalysis;
-using System.Web;
 using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Web;
 using static System.Convert;
 
 namespace Yubico.YubiKey.Oath
@@ -94,7 +94,7 @@ namespace Yubico.YubiKey.Oath
                 }
 
                 _algorithm = value;
-            } 
+            }
         }
 
         /// <summary>
@@ -146,7 +146,8 @@ namespace Yubico.YubiKey.Oath
             get => _secret;
             set
             {
-                if (value != null) {
+                if (value != null)
+                {
 
                     var regexSecret = new Regex(@"[A-Za-z2-7=]*");
 
@@ -156,7 +157,7 @@ namespace Yubico.YubiKey.Oath
                     }
 
                 }
-                
+
                 _secret = value;
             }
         }
@@ -457,7 +458,7 @@ namespace Yubico.YubiKey.Oath
 
             string account = parsedAccount.Last();
 
-           return (period, issuer, account);
+            return (period, issuer, account);
         }
 
         /// <summary>
@@ -481,7 +482,7 @@ namespace Yubico.YubiKey.Oath
         {
             if (uri == null)
             {
-                throw new ArgumentNullException(nameof(uri)); 
+                throw new ArgumentNullException(nameof(uri));
             }
 
             if (!uri.IsAbsoluteUri || uriScheme != uri.Scheme)
@@ -502,7 +503,7 @@ namespace Yubico.YubiKey.Oath
             }
 
             NameValueCollection? parsedUri = HttpUtility.ParseQueryString(uriQuery);
-            
+
             string? defaultIssuer = parsedUri["issuer"];
             (string? issuer, string account) = ParseUriPath(uriPath, defaultIssuer);
 
@@ -641,14 +642,14 @@ namespace Yubico.YubiKey.Oath
                 return false;
             }
 
-            return (_issuer == credential._issuer) 
-                && (_accountName == credential._accountName)
-                && (_secret == credential._secret)
-                && (_digits == credential._digits)
-                && (_counter == credential._counter)
-                && (_type == credential._type)
-                && (_period == credential._period)
-                && (_algorithm == credential._algorithm);
+            return _issuer == credential._issuer
+                && _accountName == credential._accountName
+                && _secret == credential._secret
+                && _digits == credential._digits
+                && _counter == credential._counter
+                && _type == credential._type
+                && _period == credential._period
+                && _algorithm == credential._algorithm;
         }
 
         public static bool operator ==(Credential lhs, Credential rhs)

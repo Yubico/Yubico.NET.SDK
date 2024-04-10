@@ -33,7 +33,7 @@ namespace Yubico.YubiKey
             IEnumerable<TTestCase> testCases)
             where TTestCase : ITestCase
         {
-            return testCases.OrderBy(GetOrder); 
+            return testCases.OrderBy(GetOrder);
         }
 
         private static int GetOrder<TTestCase>(

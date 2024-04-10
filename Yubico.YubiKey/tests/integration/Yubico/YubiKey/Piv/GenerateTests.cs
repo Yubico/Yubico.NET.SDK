@@ -12,24 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Xunit;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Scp03;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class GenerateTests
     {
         [Fact]
         public void SimpleGenerate()
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(
-                Transport.SmartCard, FirmwareVersion.V5_3_0);
+                Transport.SmartCard, minimumFirmwareVersion: FirmwareVersion.V5_3_0);
+
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
             var scp03Keys = new StaticKeys();
-
             using (var pivSession = new PivSession(testDevice, scp03Keys))
             {
                 var collectorObj = new Simple39KeyCollector();
@@ -133,7 +134,7 @@ namespace Yubico.YubiKey.Piv
 
                 bool returnValue = signature1[10] == signature2[10];
 
-                if ((algorithm == PivAlgorithm.EccP256) || (algorithm == PivAlgorithm.EccP384))
+                if (algorithm == PivAlgorithm.EccP256 || algorithm == PivAlgorithm.EccP384)
                 {
                     returnValue = signature1[11] != signature2[11];
                 }

@@ -13,11 +13,12 @@
 // limitations under the License.
 
 using System.Security.Cryptography.X509Certificates;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class ImportTests
     {
         [Theory]
@@ -63,7 +64,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ImportPrivateKey(0x90, privateKey);
 
-                pivSession.ImportCertificate(0x90, cert );
+                pivSession.ImportCertificate(0x90, cert);
             }
         }
 

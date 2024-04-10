@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.Piv.Commands;
 using Xunit;
+using Yubico.YubiKey.Piv.Commands;
 
 namespace Yubico.YubiKey.Piv
 {

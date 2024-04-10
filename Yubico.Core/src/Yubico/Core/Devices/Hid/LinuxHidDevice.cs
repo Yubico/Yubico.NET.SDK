@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Runtime.InteropServices;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 
@@ -210,7 +210,7 @@ namespace Yubico.Core.Devices.Hid
 
                 // If the tag is 4, the value is the USAGE PAGE. If we already
                 // have a USAGE PAGE, ignore this one.
-                if ((tag == UsagePageTag) && (!usagePageFound))
+                if (tag == UsagePageTag && !usagePageFound)
                 {
                     usagePageValue = value;
                     usagePageFound = true;
@@ -218,7 +218,7 @@ namespace Yubico.Core.Devices.Hid
                 // If the tag is 8, the value is the USAGE. Go ahead and set the
                 // Usage property in this object. If we already have a USAGE,
                 // ignore this one.
-                else if ((tag == UsageTag) && (!usageFound))
+                else if (tag == UsageTag && !usageFound)
                 {
                     Usage = (short)value;
                     usageFound = true;
@@ -234,11 +234,11 @@ namespace Yubico.Core.Devices.Hid
             // If it is not a valid combo, don't set the UsagePage.
             // We set the Usage even though it might be one we don't support,
             // because if the UsagePage is Unknown, the Usage won't matter.
-            if ((usagePageValue == UsagePageGeneric) && (Usage == UsageKeyboard))
+            if (usagePageValue == UsagePageGeneric && Usage == UsageKeyboard)
             {
                 UsagePage = HidUsagePage.Keyboard;
             }
-            else if ((usagePageValue == UsagePageFido) && (Usage == UsageU2FDevice))
+            else if (usagePageValue == UsagePageFido && Usage == UsageU2FDevice)
             {
                 UsagePage = HidUsagePage.Fido;
             }
@@ -296,7 +296,7 @@ namespace Yubico.Core.Devices.Hid
 
             int newOffset = offset + length;
 
-            if ((length <= 4) && (length + offset <= descriptorLength))
+            if (length <= 4 && length + offset <= descriptorLength)
             {
                 for (int index = 0; index < length; index++)
                 {

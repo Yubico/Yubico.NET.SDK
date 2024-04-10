@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections.Generic;
 using System.Linq;
 using Yubico.YubiKey.TestUtilities;
 
@@ -24,7 +25,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
     /// <seealso cref="SimpleKeyCollector"/>
     public class YhaTestUtilities
     {
-        public static readonly FirmwareVersion MinimumFirmwareVersion = new FirmwareVersion(5, 4, 3);
+        private static readonly FirmwareVersion MinimumFirmwareVersion = new FirmwareVersion(5, 4, 3);
 
         #region default
         public static readonly byte[] DefaultMgmtKey =
@@ -39,7 +40,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
         public static readonly string DefaultCredLabel = "abc";
         public static readonly bool DefaultCredTouchRequired = false;
-        
+
         public static readonly byte[] DefaultHostChallenge =
             new byte[8] { 0, 1, 2, 3, 4, 5, 6, 7 };
         public static readonly byte[] DefaultHsmDeviceChallenge =
@@ -100,14 +101,13 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// into a known "control" state for performing integration
         /// tests with the YubiHSM Auth application.
         /// </summary>
-        public static IYubiKeyDevice GetCleanDevice(FirmwareVersion fwVersion)
+        private static IYubiKeyDevice GetCleanDevice(FirmwareVersion fwVersion)
         {
-            var testDevices = IntegrationTestDeviceEnumeration.GetTestDevices();
+            IList<IYubiKeyDevice>? testDevices = IntegrationTestDeviceEnumeration.GetTestDevices();
             IYubiKeyDevice testDevice = testDevices
-                .Where(d =>
-                    d.FirmwareVersion == fwVersion
-                    && d.SerialNumber.HasValue)
-                .First();
+                .First(d =>
+                    d.FirmwareVersion >= fwVersion &&
+                    d.SerialNumber.HasValue);
 
             testDevice = DeviceReset.EnableAllCapabilities(testDevice);
 

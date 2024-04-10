@@ -14,14 +14,13 @@
 
 using System;
 using System.Globalization;
+using System.Linq;
 using Yubico.Core.Buffers;
-using Yubico.YubiKey.InterIndustry.Commands;
-using Yubico.YubiKey.Pipelines;
-using Yubico.YubiKey.Scp03;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
-using System.Linq;
+using Yubico.YubiKey.InterIndustry.Commands;
+using Yubico.YubiKey.Pipelines;
 
 namespace Yubico.YubiKey
 {
@@ -39,7 +38,7 @@ namespace Yubico.YubiKey
 
         protected CcidConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication application, byte[]? applicationId)
         {
-            if ((applicationId is null) && (application == YubiKeyApplication.Unknown))
+            if (applicationId is null && application == YubiKeyApplication.Unknown)
             {
                 throw new NotSupportedException();
             }

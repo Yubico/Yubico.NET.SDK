@@ -42,7 +42,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         {
             using var otp = new OtpSession(_yubiKey!);
 
-            if (!Verify(otp, $"Type \"Yes\" to delete slot[{ _slot }] configuration."))
+            if (!Verify(otp, $"Type \"Yes\" to delete slot[{_slot}] configuration."))
             {
                 Output.WriteLine("Aborted.", OutputLevel.Error);
                 return false;
@@ -52,12 +52,12 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 otp.DeleteSlotConfiguration(_slot)
                     .UseCurrentAccessCode((SlotAccessCode)_currentAccessCode)
                     .Execute();
-                Output.WriteLine($"Configuration in OTP slot [{ _slot }] deleted.");
+                Output.WriteLine($"Configuration in OTP slot [{_slot}] deleted.");
             }
             catch (Exception ex)
             {
                 throw new PluginFailureException(
-                    $"Error executing OtpSession.DeleteSlotConfiguration: { ex.Message }.",
+                    $"Error executing OtpSession.DeleteSlotConfiguration: {ex.Message}.",
                     ex);
             }
 

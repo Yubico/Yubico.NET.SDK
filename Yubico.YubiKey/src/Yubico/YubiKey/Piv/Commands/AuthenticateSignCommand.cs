@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
-using System.Security.Cryptography;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Security.Cryptography;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
 

@@ -324,12 +324,12 @@ namespace Yubico.YubiKey.Piv.Commands
                 _privateKey.EncodedPrivateKey.CopyTo(apduData);
                 Array.Copy(_policy, 0, apduData, offset, maximumPolicyLength);
 
-                if ((PinPolicy == PivPinPolicy.Default) || (PinPolicy == PivPinPolicy.None))
+                if (PinPolicy == PivPinPolicy.Default || PinPolicy == PivPinPolicy.None)
                 {
                     Array.Copy(_policy, pinPolicyCount, apduData, offset, touchPolicyCount);
                     length -= pinPolicyCount;
                 }
-                if ((TouchPolicy == PivTouchPolicy.Default) || (TouchPolicy == PivTouchPolicy.None))
+                if (TouchPolicy == PivTouchPolicy.Default || TouchPolicy == PivTouchPolicy.None)
                 {
                     length -= touchPolicyCount;
                 }

@@ -97,12 +97,12 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
-            if ((offset + count) > data.Length)
+            if (offset + count > data.Length)
             {
                 throw new ArgumentException(ExceptionMessages.IncorrectDerivationLength);
             }
 
-            if (count > (_theBytes.Length - _offset))
+            if (count > _theBytes.Length - _offset)
             {
                 throw new ArgumentException(ExceptionMessages.IncorrectDerivationLength);
             }

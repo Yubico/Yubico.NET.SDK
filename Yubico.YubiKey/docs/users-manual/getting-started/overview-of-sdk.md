@@ -44,7 +44,7 @@ in the standard but not actually implemented in Framework 4.6.x.
 | ---- | ---- | ---- |
 | macOS | x64, arm64 | Catalina, Big Sur |
 | Windows | x86, x64, arm64 | Windows 10, Windows 11 |
-| Linux | x86, x64, arm64 | Debian, Ubuntu, RHEL, CentOS |
+| Linux | x64, arm64 | Debian, Ubuntu, RHEL, CentOS |
 
 ## Supported YubiKey applications
 

@@ -23,6 +23,7 @@ namespace Yubico.YubiKey.Fido2
     public class PinCollectionTests
     {
         [Fact]
+        [Trait("Category", "RequiresSetup")]
         public void PinOperations_Succeed()
         {
             // Assumption - the YubiKey returned has a new or reset FIDO2 application with no PIN set.
@@ -82,6 +83,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
+        [Trait("Category", "RequiresSetup")]
         public void UvOperations_Succeed()
         {
             // Test assumptions: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)
@@ -97,6 +99,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
+        [Trait("Category", "RequiresSetup")]
         public void InvalidPinFollowedByValidPin_Succeeds()
         {
             // Test assumption: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)

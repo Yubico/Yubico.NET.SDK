@@ -334,7 +334,7 @@ namespace Yubico.YubiKey.Piv.Commands
         // no bytes placed into the buffer.
         private static int GetNextKeyData(byte[] keyData, int nextIndex)
         {
-            if ((nextIndex < 0) || (nextIndex > 255))
+            if (nextIndex < 0 || nextIndex > 255)
             {
                 return -1;
             }

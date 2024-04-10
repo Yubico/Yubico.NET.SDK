@@ -20,7 +20,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
     class FakeHidDevice : IHidDevice
     {
         public DateTime LastAccessed { get; } = DateTime.Now;
-        public string Path { get; } = String.Empty;
+        public string Path { get; } = string.Empty;
         public string? ParentDeviceId { get; } = null;
         public short VendorId { get; }
         public short ProductId { get; }
@@ -43,7 +43,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         public void Create_ReturnsInstanceOfListener()
         {
             var listener = HidDeviceListener.Create();
-            Assert.IsAssignableFrom<HidDeviceListener>(listener);
+            _ = Assert.IsAssignableFrom<HidDeviceListener>(listener);
         }
 
         [Fact]
@@ -57,7 +57,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         public void OnArrived_WithEventListener_RaisesArrivedEvent()
         {
             var listener = new FakeHidListener();
-            Assert.Raises<HidDeviceEventArgs>(
+            _ = Assert.Raises<HidDeviceEventArgs>(
                 e => listener.Arrived += e,
                 e => listener.Arrived -= e,
                 () => listener.FireArrival());
@@ -74,7 +74,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         public void OnRemoved_WithEventListener_RaisesRemovedEvent()
         {
             var listener = new FakeHidListener();
-            Assert.Raises<HidDeviceEventArgs>(
+            _ = Assert.Raises<HidDeviceEventArgs>(
                 e => listener.Removed += e,
                 e => listener.Removed -= e,
                 () => listener.FireRemoval());

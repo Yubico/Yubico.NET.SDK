@@ -14,8 +14,8 @@
 
 using System;
 using System.Security.Cryptography;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv.Objects
 {
@@ -109,7 +109,7 @@ namespace Yubico.YubiKey.Piv.Objects
             using var admin = new AdminData();
             admin.SetSalt(fixedBytes);
 
-            Assert.NotNull(admin.Salt);
+            _ = Assert.NotNull(admin.Salt);
             if (!(admin.Salt is null))
             {
                 var salt = (ReadOnlyMemory<byte>)admin.Salt;
@@ -144,7 +144,7 @@ namespace Yubico.YubiKey.Piv.Objects
 
             using var admin = new AdminData();
             admin.SetSalt(fixedBytes);
-            Assert.NotNull(admin.Salt);
+            _ = Assert.NotNull(admin.Salt);
 
             admin.SetSalt(ReadOnlyMemory<byte>.Empty);
             Assert.Null(admin.Salt);
@@ -183,7 +183,7 @@ namespace Yubico.YubiKey.Piv.Objects
             using var admin = new AdminData();
             admin.PinLastUpdated = DateTime.UtcNow;
 
-            Assert.NotNull(admin.PinLastUpdated);
+            _ = Assert.NotNull(admin.PinLastUpdated);
         }
 
         [Fact]
@@ -365,7 +365,7 @@ namespace Yubico.YubiKey.Piv.Objects
             });
             long unixTimeSeconds = ((long)encoding.Span[30] & 255) << 24;
             unixTimeSeconds += ((long)encoding.Span[29] & 255) << 16;
-            unixTimeSeconds += ((long)encoding.Span[28] & 255) <<  8;
+            unixTimeSeconds += ((long)encoding.Span[28] & 255) << 8;
             unixTimeSeconds += (long)encoding.Span[27] & 255;
             var expectedOffset = DateTimeOffset.FromUnixTimeSeconds(unixTimeSeconds);
             DateTime expected = expectedOffset.UtcDateTime;

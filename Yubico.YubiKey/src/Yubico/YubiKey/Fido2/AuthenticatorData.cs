@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Formats.Cbor;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Fido2.PinProtocols;
@@ -191,7 +191,7 @@ namespace Yubico.YubiKey.Fido2
             // determines that the caller is not allowed to get that data or it
             // is not available. So don't try to read any extensions unless we
             // know for sure there is data to read.
-            if (extensions && (offset < EncodedAuthenticatorData.Length))
+            if (extensions && offset < EncodedAuthenticatorData.Length)
             {
                 var extensionList = new Dictionary<string, byte[]>();
                 var cbor = new CborReader(EncodedAuthenticatorData[offset..], CborConformanceMode.Ctap2Canonical);
@@ -290,7 +290,7 @@ namespace Yubico.YubiKey.Fido2
         /// <see cref="PinProtocols.PinUvAuthProtocolBase"/> used to create the
         /// <c>GetAssertion</c> parameters.
         /// </para>
-         /// <para>
+        /// <para>
         /// If you are getting assertions using
         /// <see cref="Fido2Session.GetAssertions"/>, you can use the
         /// <see cref="Fido2Session.AuthProtocol"/> property.
@@ -364,7 +364,7 @@ namespace Yubico.YubiKey.Fido2
                 if (Extensions.ContainsKey(KeyCredProtect))
                 {
                     byte[] encodedValue = Extensions[KeyCredProtect];
-                    if ((encodedValue.Length == 1) && (encodedValue[0] >= 1) && (encodedValue[0] <= 3))
+                    if (encodedValue.Length == 1 && encodedValue[0] >= 1 && encodedValue[0] <= 3)
                     {
                         return (CredProtectPolicy)encodedValue[0];
                     }

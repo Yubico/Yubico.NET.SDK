@@ -312,8 +312,6 @@ dotnet_diagnostic.CA2201.severity = none
 # CA2208: Instantiate argument exceptions correctly
 dotnet_diagnostic.CA2208.severity = none
 
-[**/YubiPosh/**/*.cs]
-
 # CA1014: Mark assemblies with CLSCompliantAttribute
 dotnet_diagnostic.CA1014.severity = none
 

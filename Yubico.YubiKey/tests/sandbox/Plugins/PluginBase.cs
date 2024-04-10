@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 [typeof(Base32Bytes)] = (s) => Base32Bytes.Encode(s),
                 [typeof(Base16Bytes)] = (s) => Base16Bytes.Encode(s),
                 [typeof(Uri)] = (s) => new Uri(s),
-             };
+            };
 
         /// <summary>
         /// The method that actually performs the main task the plugin is

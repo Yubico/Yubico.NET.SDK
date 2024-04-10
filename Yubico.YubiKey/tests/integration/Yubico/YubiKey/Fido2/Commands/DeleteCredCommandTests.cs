@@ -13,23 +13,24 @@
 // limitations under the License.
 
 using System;
+using Xunit;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
+    [Trait("Category", "RequiresBio")]
     public class DeleteCredCommandTests : SimpleIntegrationTestConnection
     {
         public DeleteCredCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio)
         {
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void DeleteCredCommand_Succeeds()
         {
-            byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            byte[] pin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
             var protocol = new PinUvAuthProtocolTwo();
             var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);

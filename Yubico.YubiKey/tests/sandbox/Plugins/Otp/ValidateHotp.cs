@@ -97,21 +97,21 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 catch (Exception ex)
                 {
                     exceptions.Add(new InvalidOperationException(
-                        $"Error decoding passcode digits: { ex.Message }",
+                        $"Error decoding passcode digits: {ex.Message}",
                         ex));
                 }
                 if (_password.Length != _digits)
                 {
                     exceptions.Add(new InvalidOperationException(
-                        $"Passcode supplied ({ _password }) is not the correct length. " +
-                        $"Expected { _digits } digits."));
+                        $"Passcode supplied ({_password}) is not the correct length. " +
+                        $"Expected {_digits} digits."));
                 }
             }
 
             if (_imf < 0 || _imf > 0xffff0)
             {
                 throw new InvalidOperationException(
-                    $"Invalid IMF ({ _imf }). IMF must be between 0 and 1048560 (0xffff0).");
+                    $"Invalid IMF ({_imf}). IMF must be between 0 and 1048560 (0xffff0).");
             }
             else
             {
@@ -127,7 +127,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 throw exceptions.Count == 1
                     ? exceptions[0]
                     : new AggregateException(
-                        $"{ exceptions.Count } errors encountered.",
+                        $"{exceptions.Count} errors encountered.",
                         exceptions);
             }
 

@@ -13,14 +13,14 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
-using System.Text;
-using System.Globalization;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Fido2.Commands;
-using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.TestUtilities
 {
@@ -42,10 +42,9 @@ namespace Yubico.YubiKey.TestUtilities
 
         // Find the YubikKey Bio, reset it, then set the PIN to "123456"
         public BioFido2Fixture()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio)
         {
-            var newPin = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
-            _resetObj = new Fido2ResetForTest(SerialNumber, newPin);
+            _resetObj = new Fido2ResetForTest(SerialNumber);
             if (_resetObj.RunFido2Reset() != ResponseStatus.Success)
             {
                 throw new InvalidOperationException("Could not Reset the YubiKey");
@@ -105,7 +104,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         // Get the UserEntity/MakeCredentialData pair out of the RpInfoList that
         // matches the given RP and User.
-        public Tuple<UserEntity,MakeCredentialData> MatchUser(RelyingParty relyingParty, UserEntity user)
+        public Tuple<UserEntity, MakeCredentialData> MatchUser(RelyingParty relyingParty, UserEntity user)
         {
             RpInfo rpInfo = MatchRelyingParty(relyingParty);
             UserEntity[] userArray = rpInfo.Users.Keys.ToArray<UserEntity>();

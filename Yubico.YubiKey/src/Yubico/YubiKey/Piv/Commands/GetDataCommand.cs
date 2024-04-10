@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Buffers.Binary;
-using System.Linq;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Piv.Commands
@@ -148,9 +148,9 @@ namespace Yubico.YubiKey.Piv.Commands
             get => _tag;
             set
             {
-                if ((value < MinimumVendorTag) || (value > MaximumVendorTag))
+                if (value < MinimumVendorTag || value > MaximumVendorTag)
                 {
-                    if ((value != DiscoveryTag) && (value != BiometricGroupTemplateTag))
+                    if (value != DiscoveryTag && value != BiometricGroupTemplateTag)
                     {
                         throw new ArgumentException(
                             string.Format(

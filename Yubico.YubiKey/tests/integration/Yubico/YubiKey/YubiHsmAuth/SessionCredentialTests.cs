@@ -222,7 +222,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
             // Preconditions
             IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
 
-            SimpleKeyCollector simpleKeyCollector = new SimpleKeyCollector()
+            SimpleKeyCollector simpleKeyCollector = new SimpleKeyCollector
             {
                 // Start with the incorrect management key, forcing a retry
                 UseDefaultValue = false,

@@ -16,8 +16,8 @@ using System;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
-using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.Fido2.Cose;
+using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.Cryptography
 {

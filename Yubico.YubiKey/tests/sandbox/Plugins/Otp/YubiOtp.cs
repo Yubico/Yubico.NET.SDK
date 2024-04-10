@@ -150,7 +150,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 throw exceptions.Count == 1
                     ? exceptions[0]
                     : new AggregateException(
-                        $"{ exceptions.Count } errors encountered.",
+                        $"{exceptions.Count} errors encountered.",
                         exceptions);
             }
 
@@ -198,7 +198,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             catch (Exception ex)
             {
                 throw new PluginFailureException(
-                    $"Error executing OtpSession.ConfigureYubicoOtp: { ex.Message }.",
+                    $"Error executing OtpSession.ConfigureYubicoOtp: {ex.Message}.",
                     ex);
             }
 
@@ -247,14 +247,14 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                         || (Output.OutputLevel == OutputLevel.Normal && generated))
                     {
                         Output.Write(
-                            $"{ sep }{ (generated ? "Generated " : string.Empty) }{ name }: ",
+                            $"{sep}{(generated ? "Generated " : string.Empty)}{name}: ",
                             OutputLevel.Quiet);
                         Output.WriteSensitive(value, OutputLevel.Quiet);
                         return true;
                     }
                     else if (generated)
                     {
-                        Output.Write($"{ sep }{ name.Replace(" ", null) }[", OutputLevel.Quiet);
+                        Output.Write($"{sep}{name.Replace(" ", null)}[", OutputLevel.Quiet);
                         Output.WriteSensitive(value, OutputLevel.Quiet);
                         Output.Write("]", OutputLevel.Quiet);
                         return true;
@@ -304,7 +304,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             catch (Exception ex)
             {
                 throw new InvalidOperationException(
-                    $"Sending credential to YubiCloud failed with error [{ ex.Message }]",
+                    $"Sending credential to YubiCloud failed with error [{ex.Message}]",
                     ex);
             }
 
@@ -325,11 +325,11 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                     if (errors.Length == 1)
                     {
                         throw new InvalidOperationException(
-                            $"Upload to Yubico OTP server failed with BAD_REQUEST ({ GetYubiOtpErrors(errors).First() }).");
+                            $"Upload to Yubico OTP server failed with BAD_REQUEST ({GetYubiOtpErrors(errors).First()}).");
                     }
                     IEnumerable<Exception> exceptions = GetYubiOtpErrors(errors)
                         .Select(e => new InvalidOperationException(
-                            $"Upload to Yubico OTP server failed with BAD_REQUEST ({ e })"));
+                            $"Upload to Yubico OTP server failed with BAD_REQUEST ({e})"));
                     throw new AggregateException(
                         "Errors encountered uploading to Yubico OTP server. See inner exceptions for details",
                         exceptions);

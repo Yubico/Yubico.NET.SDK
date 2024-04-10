@@ -15,7 +15,43 @@ limitations under the License. -->
 # What's new in the SDK?
 
 Here you can find all of the updates and release notes for published versions of the SDK.
+## 1.10.x Releases
 
+### 1.10.0
+
+Release date: April 10th, 2024
+
+This is a release aimed to address inconsistencies in dependencies (OpenSSL), compiler warnings and hardening. The objective of compiler options hardening is to produce application binaries (executables) with security mechanisms against potential attacks and/or misbehavior. is to produce application binaries (executables) with security mechanisms against potential attacks and/or misbehavior. 
+
+This release improves our native dependencies exposed through the `Yubico.NativeShims` package. We have also worked to improve the build and test experience of this repository by improving our automation and build files.
+
+Changes:  
+- **Yubico.NativeShims targets OpenSSL version 3.x on all platforms** - OpenSSL v1.1.x has reached end-of-life. The SDK now removes this dependency on all platforms, now upgrading to the supported 3.x version.
+- **Dropped support for 32-bit Linux** - Yubico.NativeShims no longer builds for 32-bit (x86) Linux. We now depend on Ubuntu releases that contain OpenSSL 3.x by default. These newer releases no longer have mainstream support for this platform.
+- **[Compilation hardening of Yubico.NativeShims](https://github.com/Yubico/Yubico.NET.SDK/pull/67)** -  Added commonly used compiler flags to increase security and code quality  
+  **MacOS / Linux:**  
+  -Wformat: Warn about format string issues in printf-like functions.  
+  -Wformat-nonliteral: Warn about format strings that are not string literals.  
+  -Wformat-security: Warn about potential security issues related to format strings.  
+  -Wall: Enable most warning messages  
+  -Wextra: Enable some additional warning messages not included in -Wall  
+  -Werror: Treat all warnings as errors  
+  -Wcast-qual: Warn when casting away const-ness  
+  -Wshadow: Warn when a local variable shadows another variable  
+  -pedantic: Issue warnings for language features beyond the C standard  
+  -pedantic-errors: Treat pedantic warnings as errors  
+  -Wbad-function-cast: Warn about dubious function pointer casts  
+  -O2: Optimize code for performance  
+  -fpic: Generate position-independent code  
+  -fstack-protector-all: Enable stack protection for all functions  
+  -D_FORTIFY_SOURCE=2: Enable runtime and compile-time checks for certain security-critical functions  
+  **Windows flags:** 
+  /guard:cf: Enable control flow guard security feature  
+  /GS: Enable buffer security check  
+  /Gs: Control stack security check 
+- [Addressed compiler warning concerning Runtime Identifiers (RID) ](https://github.com/Yubico/Yubico.NET.SDK/issues/59)
+- **Enabled `dotnet format`** - The repository now uses `dotnet format` to ensure that pull requests adhere to the repository's coding standards. A pass of the tool has been run against the entire repository and a new baseline has been checked in.
+  
 ## 1.9.x Releases
 
 ### 1.9.1

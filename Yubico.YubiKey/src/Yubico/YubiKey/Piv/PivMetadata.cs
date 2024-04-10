@@ -13,10 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.Piv
@@ -141,6 +139,140 @@ namespace Yubico.YubiKey.Piv
         private const int RetriesTag = 6;
 
         /// <summary>
+        /// The constructor that takes in the metadata encoding returned by the
+        /// YubiKey in response to the Get metadata command, along with the slot.
+        /// </summary>
+        /// <param name="responseData">
+        /// The data portion of the response APDU, this is the encoded metadata.
+        /// </param>
+        /// <param name="slotNumber">
+        /// The slot from which the metadata was retrieved.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        /// The specified slot is not valid for PIV metadata.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The data supplied is not valid PIV metadata.
+        /// </exception>
+        public PivMetadata(ReadOnlyMemory<byte> responseData, byte slotNumber)
+        {
+            if (PivSlot.IsValidSlotNumber(slotNumber) == false)
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidSlot,
+                        slotNumber));
+            }
+
+            Slot = slotNumber;
+            RetryCount = -1;
+            RetriesRemaining = -1;
+            PublicKey = new PivPublicKey();
+
+            var tlvReader = new TlvReader(responseData);
+
+            while (tlvReader.HasData)
+            {
+                int tag = tlvReader.PeekTag();
+                ReadOnlyMemory<byte> value = tlvReader.ReadValue(tag);
+
+                switch (tag)
+                {
+                    default:
+                        throw new InvalidOperationException(
+                            string.Format(
+                                CultureInfo.CurrentCulture,
+                                ExceptionMessages.InvalidApduResponseData));
+
+                    case AlgorithmTag:
+                        // Algorithm
+                        // One byte, no more, no less.
+                        ThrowIfNotLength(value, 1);
+
+                        Debug.Assert(value.Span[0] == 0xFF || value.Span[0] == 0x03
+                            || value.Span[0] == 0x08 || value.Span[0] == 0x0A || value.Span[0] == 0x0C
+                            || value.Span[0] == 0x06 || value.Span[0] == 0x07
+                            || value.Span[0] == 0x11 || value.Span[0] == 0x14);
+
+                        Algorithm = (PivAlgorithm)value.Span[0];
+
+                        break;
+
+                    case PolicyTag:
+                        // Policy: PIN and touch policy
+                        // Two bytes, no more, no less.
+                        ThrowIfNotLength(value, 2);
+                        Debug.Assert(value.Span[0] >= 0 && value.Span[0] <= 3);
+                        Debug.Assert(value.Span[1] >= 0 && value.Span[1] <= 3);
+
+                        // If the value is 0, that means Default. Otherwise, the
+                        // value should be 1, 2, or 3 for Never, Once, and
+                        // Always with PIN policy, and 1, 2, or 3 for Never,
+                        // Always, and Cached with touch policy.
+                        PinPolicy = PivPinPolicy.Default;
+
+                        if (value.Span[0] != 0)
+                        {
+                            PinPolicy = (PivPinPolicy)value.Span[0];
+                        }
+
+                        TouchPolicy = PivTouchPolicy.Default;
+
+                        if (value.Span[1] != 0)
+                        {
+                            TouchPolicy = (PivTouchPolicy)value.Span[1];
+                        }
+
+                        break;
+
+                    case OriginTag:
+                        // Origin: imported or generated
+                        // One byte, no more, no less.
+                        // 1 means generated, 2 means imported.
+                        ThrowIfNotLength(value, 1);
+                        Debug.Assert(value.Span[0] == 1 || value.Span[0] == 2);
+                        KeyStatus = (PivKeyStatus)value.Span[0];
+
+                        break;
+
+                    case PublicTag:
+                        // Public: public key partner to the private key in the
+                        // slot
+                        PublicKey = PivPublicKey.Create(value);
+
+                        break;
+
+                    case DefaultTag:
+                        // Default: whether the PIN/PUK/Mgmt key is default or not
+                        // One byte, no more, no less.
+                        // 0 is not default, 1 is default.
+                        ThrowIfNotLength(value, 1);
+
+                        KeyStatus = PivKeyStatus.Default;
+
+                        if (value.Span[0] == 0)
+                        {
+                            KeyStatus = PivKeyStatus.NotDefault;
+                        }
+
+                        break;
+
+                    case RetriesTag:
+                        // Retries: number of PIN or PUK retries, total and
+                        // remaining.
+                        // Two bytes, no more, no less.
+                        ThrowIfNotLength(value, 2);
+
+                        RetryCount = (int)value.Span[0];
+                        RetriesRemaining = (int)value.Span[1];
+
+                        break;
+                }
+            }
+        }
+
+        /// <summary>
         /// The slot for the metadata listed in this instance.
         /// </summary>
         public int Slot { get; private set; }
@@ -189,130 +321,6 @@ namespace Yubico.YubiKey.Piv
         /// indicating the count is unknown.
         /// </summary>
         public int RetriesRemaining { get; private set; }
-
-        /// <summary>
-        /// The constructor that takes in the metadata encoding returned by the
-        /// YubiKey in response to the Get metadata command, along with the slot.
-        /// </summary>
-        /// <param name="responseData">
-        /// The data portion of the response APDU, this is the encoded metadata.
-        /// </param>
-        /// <param name="slotNumber">
-        /// The slot from which the metadata was retrieved.
-        /// </param>
-        /// <exception cref="ArgumentException">
-        /// The specified slot is not valid for PIV metadata.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// The data supplied is not valid PIV metadata.
-        /// </exception>
-        public PivMetadata(ReadOnlyMemory<byte> responseData, byte slotNumber)
-        {
-            if (PivSlot.IsValidSlotNumber(slotNumber) == false)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidSlot,
-                        slotNumber));
-            }
-
-            Slot = slotNumber;
-            RetryCount = -1;
-            RetriesRemaining = -1;
-            PublicKey = new PivPublicKey();
-
-            var tlvReader = new TlvReader(responseData);
-
-            while (tlvReader.HasData == true)
-            {
-                int tag = tlvReader.PeekTag();
-                ReadOnlyMemory<byte> value = tlvReader.ReadValue(tag);
-
-                switch (tag)
-                {
-                    default:
-                        throw new InvalidOperationException(
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                ExceptionMessages.InvalidApduResponseData));
-
-                    case AlgorithmTag:
-                        // Algorithm
-                        // One byte, no more, no less.
-                        ThrowIfNotLength(value, 1);
-                        Debug.Assert((value.Span[0] == 0xFF) || (value.Span[0] == 0x03)
-                            || (value.Span[0] == 0x08) || (value.Span[0] == 0x0A) || (value.Span[0] == 0x0C)
-                            || (value.Span[0] == 0x06) || (value.Span[0] == 0x07)
-                            || (value.Span[0] == 0x11) || (value.Span[0] == 0x14));
-
-                        Algorithm = (PivAlgorithm)value.Span[0];
-                        break;
-
-                    case PolicyTag:
-                        // Policy: PIN and touch policy
-                        // Two bytes, no more, no less.
-                        ThrowIfNotLength(value, 2);
-                        Debug.Assert((value.Span[0] >= 0) && (value.Span[0] <= 3));
-                        Debug.Assert((value.Span[1] >= 0) && (value.Span[1] <= 3));
-
-                        // If the value is 0, that means Default. Otherwise, the
-                        // value should be 1, 2, or 3 for Never, Once, and
-                        // Always with PIN policy, and 1, 2, or 3 for Never,
-                        // Always, and Cached with touch policy.
-                        PinPolicy = PivPinPolicy.Default;
-                        if (value.Span[0] != 0)
-                        {
-                            PinPolicy = (PivPinPolicy)value.Span[0];
-                        }
-
-                        TouchPolicy = PivTouchPolicy.Default;
-                        if (value.Span[1] != 0)
-                        {
-                            TouchPolicy = (PivTouchPolicy)value.Span[1];
-                        }
-                        break;
-
-                    case OriginTag:
-                        // Origin: imported or generated
-                        // One byte, no more, no less.
-                        // 1 means generated, 2 means imported.
-                        ThrowIfNotLength(value, 1);
-                        Debug.Assert((value.Span[0] == 1) || (value.Span[0] == 2));
-                        KeyStatus = (PivKeyStatus)value.Span[0];
-                        break;
-
-                    case PublicTag:
-                        // Public: public key partner to the private key in the
-                        // slot
-                        PublicKey = PivPublicKey.Create(value);
-                        break;
-
-                    case DefaultTag:
-                        // Default: whether the PIN/PUK/Mgmt key is default or not
-                        // One byte, no more, no less.
-                        // 0 is not default, 1 is default.
-                        ThrowIfNotLength(value, 1);
-
-                        KeyStatus = PivKeyStatus.Default;
-                        if (value.Span[0] == 0)
-                        {
-                            KeyStatus = PivKeyStatus.NotDefault;
-                        }
-                        break;
-
-                    case RetriesTag:
-                        // Retries: number of PIN or PUK retries, total and
-                        // remaining.
-                        // Two bytes, no more, no less.
-                        ThrowIfNotLength(value, 2);
-
-                        RetryCount = (int)value.Span[0];
-                        RetriesRemaining = (int)value.Span[1];
-                        break;
-                }
-            }
-        }
 
         private static void ThrowIfNotLength(ReadOnlyMemory<byte> value, int length)
         {

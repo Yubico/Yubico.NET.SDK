@@ -217,7 +217,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_NullCurrentPin_CorrectException()
         {
             byte[] pin = GetPinArray(6, 0);
-           _ =  Assert.Throws<ArgumentException>(() => new ChangeReferenceDataCommand(0x80, null, pin));
+            _ = Assert.Throws<ArgumentException>(() => new ChangeReferenceDataCommand(0x80, null, pin));
         }
 
         [Fact]

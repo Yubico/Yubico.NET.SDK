@@ -184,8 +184,8 @@ namespace Yubico.YubiKey.U2f
             authData[0] = (byte)userPresence;
             authData[1] = (byte)(counter >> 24);
             authData[2] = (byte)(counter >> 16);
-            authData[3] = (byte)(counter >>  8);
-            authData[4] = (byte) counter;
+            authData[3] = (byte)(counter >> 8);
+            authData[4] = (byte)counter;
 
             Array.Copy(signature, 0, authData, 5, signature.Length);
 

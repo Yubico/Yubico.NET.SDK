@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
             IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
 
             bool mgmtKeyChanged = false;
-            
+
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
                 // Test
@@ -285,7 +285,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             // Preconditions
             IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-            SimpleKeyCollector keyCollector = new SimpleKeyCollector()
+            SimpleKeyCollector keyCollector = new SimpleKeyCollector
             {
                 UseDefaultValue = false,
             };

@@ -13,12 +13,13 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Piv.Objects;
 using Xunit;
+using Yubico.YubiKey.Piv.Objects;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class PinNoCollectorTests
     {
         [Theory]
@@ -56,7 +57,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.ResetApplication();
                 bool isValid = pivSession.TryVerifyPin(pin, out int? retriesRemaining);
                 Assert.False(isValid);
-                Assert.NotNull(retriesRemaining);
+                _ = Assert.NotNull(retriesRemaining);
                 if (!(retriesRemaining is null))
                 {
                     Assert.Equal(2, retriesRemaining);

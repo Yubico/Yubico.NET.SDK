@@ -15,12 +15,13 @@
 using System;
 using System.Linq;
 using System.Security.Cryptography;
+using Xunit;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class KeyAgreeTests
     {
         [Theory]

@@ -13,12 +13,12 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using Yubico.YubiKey.U2f.Commands;
 using Yubico.YubiKey.Sample.SharedCode;
+using Yubico.YubiKey.U2f.Commands;
 
 namespace Yubico.YubiKey.Sample.U2fSampleCode
 {

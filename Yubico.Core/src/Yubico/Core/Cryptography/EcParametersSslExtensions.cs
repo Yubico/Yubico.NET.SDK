@@ -80,7 +80,7 @@ namespace Yubico.Core.Cryptography
         /// <exception cref="NotSupportedException">
         /// This function only supports the NIST P256, P384, and P512 curves as of version 1.5.0.
         /// </exception>
-        public static int BitLength (this ECCurve curve) =>
+        public static int BitLength(this ECCurve curve) =>
             curve switch
             {
                 _ when curve.HasSameOid(ECCurve.NamedCurves.nistP256) => NistP256BitLength,

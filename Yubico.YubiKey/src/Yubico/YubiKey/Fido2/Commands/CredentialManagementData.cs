@@ -136,7 +136,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// Not all calls to get credential management data will return this
         /// element, hence, it can be null.
         /// </remarks>
-        public CredentialId? CredentialId {get; private set; }
+        public CredentialId? CredentialId { get; private set; }
 
         /// <summary>
         /// The public key for a credential returned.

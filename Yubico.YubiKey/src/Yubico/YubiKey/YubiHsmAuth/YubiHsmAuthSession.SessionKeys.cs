@@ -13,12 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Security;
-using System.Threading;
 using System.Threading.Tasks;
 using Yubico.YubiKey.YubiHsmAuth.Commands;
 
@@ -99,9 +97,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// The operation timed out waiting for touch.
         /// </exception>
         public SessionKeys GetAes128SessionKeys(string credentialLabel,
-            ReadOnlyMemory<byte> credentialPassword,
-            ReadOnlyMemory<byte> hostChallenge,
-            ReadOnlyMemory<byte> hsmDeviceChallenge)
+                                                ReadOnlyMemory<byte> credentialPassword,
+                                                ReadOnlyMemory<byte> hostChallenge,
+                                                ReadOnlyMemory<byte> hsmDeviceChallenge)
         {
             GetAes128SessionKeysCommand getKeysCmd =
                 new GetAes128SessionKeysCommand(
@@ -109,6 +107,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                     credentialPassword,
                     hostChallenge,
                     hsmDeviceChallenge);
+
             GetAes128SessionKeysResponse getKeysRsp =
                 Connection.SendCommand(getKeysCmd);
 
@@ -117,9 +116,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 if (getKeysRsp.Status == ResponseStatus.AuthenticationRequired)
                 {
                     throw new SecurityException(string.Format(
-                                    CultureInfo.CurrentCulture,
-                                    ExceptionMessages.YubiHsmAuthCredPasswordAuthFailed,
-                                    getKeysRsp.RetriesRemaining));
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.YubiHsmAuthCredPasswordAuthFailed,
+                        getKeysRsp.RetriesRemaining));
                 }
                 else if (getKeysRsp.Status == ResponseStatus.RetryWithTouch)
                 {
@@ -223,19 +222,19 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// The operation timed out waiting for touch.
         /// </exception>
         public bool TryGetAes128SessionKeys(string credentialLabel,
-            ReadOnlyMemory<byte> hostChallenge,
-            ReadOnlyMemory<byte> hsmDeviceChallenge,
-            [NotNullWhen(true)] out SessionKeys? sessionKeys)
+                                            ReadOnlyMemory<byte> hostChallenge,
+                                            ReadOnlyMemory<byte> hsmDeviceChallenge,
+                                            [NotNullWhen(true)] out SessionKeys? sessionKeys)
         {
             sessionKeys = null;
 
             // Check if this credential requires touch
-            bool touchRequired = 
+            bool touchRequired =
                 ListCredentials()
-                .Single(c => c.Credential.Label == credentialLabel)
-                .Credential.TouchRequired;
+                    .Single(c => c.Credential.Label == credentialLabel)
+                    .Credential.TouchRequired;
 
-            var keyCollector = GetKeyCollector();
+            Func<KeyEntryData, bool>? keyCollector = GetKeyCollector();
 
             var keyEntryData = new KeyEntryData()
             {
@@ -244,9 +243,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
             try
             {
-                while (keyCollector(keyEntryData) == true)
+                while (keyCollector(keyEntryData))
                 {
-                    GetAes128SessionKeysCommand getKeysCmd =
+                    var getKeysCmd =
                         new GetAes128SessionKeysCommand(
                             credentialLabel,
                             keyEntryData.GetCurrentValue(),
@@ -259,7 +258,8 @@ namespace Yubico.YubiKey.YubiHsmAuth
                         // new thread and send a touch request to the key collector
 
                         keyEntryData.Request = KeyEntryRequest.TouchRequest;
-                        var touchNotifyTask = Task.Run(() => keyCollector(keyEntryData));
+                        _ = Task.Run(() => keyCollector(keyEntryData));
+
                         // We ignore the return value, regardless. So no need to wait.
                     }
 
@@ -269,6 +269,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                     if (getKeysRsp.Status == ResponseStatus.Success)
                     {
                         sessionKeys = getKeysRsp.GetData();
+
                         return true;
                     }
 
@@ -288,6 +289,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                         keyEntryData.Request = KeyEntryRequest.AuthenticateYubiHsmAuthCredentialPassword;
                         keyEntryData.IsRetry = true;
                         keyEntryData.RetriesRemaining = getKeysRsp.RetriesRemaining;
+
                         continue;
                     }
                     else if (getKeysRsp.Status == ResponseStatus.RetryWithTouch)

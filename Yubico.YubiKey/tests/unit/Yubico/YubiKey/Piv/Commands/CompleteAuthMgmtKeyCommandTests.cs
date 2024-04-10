@@ -67,7 +67,8 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             byte successSw1 = unchecked((byte)(SWConstants.Success >> 8));
             byte successSw2 = unchecked((byte)SWConstants.Success);
-            byte[] apduMutual = new byte[] {
+            byte[] apduMutual = new byte[]
+            {
                 0x7C, 0x0A, 0x82, 0x08, 0xAC, 0x29, 0xA4, 0x5E, 0x1F, 0x42, 0x8A, 0x23, successSw1, successSw2
             };
 
@@ -196,7 +197,9 @@ namespace Yubico.YubiKey.Piv.Commands
         public void CreateCommandApduSingle_GetData_ReturnsCorrect()
         {
             var expected = new List<byte>(
-                new byte[12] { 0x7C, 0x0A, 0x82, 0x08, 0x54, 0xFE, 0xAA, 0x17, 0xAC, 0x05, 0x02, 0x36
+                new byte[12]
+                {
+                    0x7C, 0x0A, 0x82, 0x08, 0x54, 0xFE, 0xAA, 0x17, 0xAC, 0x05, 0x02, 0x36
                 });
 
             CommandApdu cmdApdu = GetCommandApdu(false, true);
@@ -212,10 +215,12 @@ namespace Yubico.YubiKey.Piv.Commands
         public void CreateCommandApduMutual_GetData_ReturnsCorrect()
         {
             var expected = new List<byte>(
-                new byte[24] {
+                new byte[24]
+                {
                     0x7C, 0x16, 0x80, 0x08, 0xD0, 0xFE, 0x1A, 0x35, 0xA4, 0xE9, 0x40, 0xF8,
-                    0x81, 0x08, 0xAC, 0x29, 0xA4, 0x5E, 0x1F, 0x42, 0x8A, 0x23, 0x82, 0x00 }
-                );
+                    0x81, 0x08, 0xAC, 0x29, 0xA4, 0x5E, 0x1F, 0x42, 0x8A, 0x23, 0x82, 0x00
+                }
+            );
 
             CommandApdu cmdApdu = GetCommandApdu(true, true);
 
@@ -243,10 +248,11 @@ namespace Yubico.YubiKey.Piv.Commands
 
             try
             {
-                if (isRandomFixed == true)
+                if (isRandomFixed)
                 {
                     replacement = RandomObjectUtility.SetRandomProviderFixedBytes(GetFixedBytes());
                 }
+
                 return new CompleteAuthenticateManagementKeyCommand(response, mgmtKey);
             }
             finally
@@ -266,7 +272,8 @@ namespace Yubico.YubiKey.Piv.Commands
             // Currently, setting to 256 seems to prevent problems when the
             // threading race goes bad (this is because the maximum block size of
             // an RSA encryption/signature is 256).
-            return new byte[256] {
+            return new byte[256]
+            {
                 0xA4, 0xC4, 0xD9, 0x23, 0x74, 0x59, 0x7F, 0x64,
                 0xA6, 0xD3, 0xCB, 0x2C, 0x10, 0xF0, 0xCD, 0x2D,
                 0x57, 0xE9, 0x9F, 0x58, 0xC8, 0x57, 0x10, 0x6E,
@@ -314,13 +321,14 @@ namespace Yubico.YubiKey.Piv.Commands
             byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             byte sw2 = unchecked((byte)SWConstants.Success);
             byte tag1 = 0x81;
-            if (isMutualAuth == true)
+            if (isMutualAuth)
             {
                 tag1 = 0x80;
             }
 
             var responseApdu = new ResponseApdu(
-                new byte[] {
+                new byte[]
+                {
                     0x7C, 0x0A, tag1, 0x08, 0x39, 0xA0, 0xA8, 0xE9, 0xF5, 0x28, 0x87, 0x75, sw1, sw2
                 });
 

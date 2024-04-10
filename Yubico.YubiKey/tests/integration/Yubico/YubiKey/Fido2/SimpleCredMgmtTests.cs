@@ -13,17 +13,18 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
 {
+    [Trait("Category", "FirmwareOrHardwareMissmatch")]
     public class SimpleCredMgmtTests : SimpleIntegrationTestConnection
     {
         public SimpleCredMgmtTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
+            : base(YubiKeyApplication.Fido2)
         {
         }
 
@@ -35,7 +36,10 @@ namespace Yubico.YubiKey.Fido2
                 fido2Session.KeyCollector = LocalKeyCollector;
 
                 (int credCount, int slotCount) = fido2Session.GetCredentialMetadata();
-                Assert.Equal(1, credCount);
+                Assert.Equal(1, credCount); /*Xunit.Sdk.EqualException
+Assert.Equal() Failure: Values differ
+Expected: 1
+Actual:   0*/
                 Assert.Equal(24, slotCount);
             }
         }
@@ -48,12 +52,12 @@ namespace Yubico.YubiKey.Fido2
                 fido2Session.KeyCollector = LocalKeyCollector;
 
                 IReadOnlyList<RelyingParty> rpList = fido2Session.EnumerateRelyingParties();
-                Assert.Equal(2, rpList.Count);
+                Assert.Equal(2, rpList.Count); //Failing test  Yubico.YubiKey.Fido2.Ctap2DataException: The FIDO2 info returned is invalid.
             }
         }
 
         [Fact]
-        public void EnumerateCreds_Succeeds()
+        public void EnumerateCreds_Succeeds() // Failing test, Yubico.YubiKey.Fido2.Ctap2DataException: The FIDO2 info returned is invalid.
         {
             using (var fido2Session = new Fido2Session(Device))
             {

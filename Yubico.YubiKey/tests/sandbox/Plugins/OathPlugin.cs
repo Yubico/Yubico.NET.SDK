@@ -46,7 +46,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
             IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindAll();
             IYubiKeyDevice? yubiKey = keys.First();
 
-                
+
             using var oathSession = new OathSession(yubiKey);
 
             // Copy URI string from Authenticator Test console and pass here.

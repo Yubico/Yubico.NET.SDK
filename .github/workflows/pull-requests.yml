@@ -33,7 +33,7 @@ jobs:
     # Even though we build for multiple platforms, we only need to run
     # on a single host operating system. This is because we utilize cross-
     # build functionality of the dotnet build system.
-    runs-on: windows-2019
+    runs-on: windows-latest
     # Build both Debug and ReleaseWithDocs configurations. Most people are probably building 'Debug' the most often. We
     # should be sure that Release also builds, and that our documentation also compiles successfully.
     strategy:
@@ -42,22 +42,24 @@ jobs:
 
     steps:
       # Checkout the local repository
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: run dotnet version
+        run: dotnet --version
 
       - name: Add local NuGet repository
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
       # Build the project
-      # The default GitHub runners seem to have N and N-1 versions of .NET Framework installed. In practice, they seem
-      # to have even more installed than that, but at a minimum N and N-1 seem like safe assumptions. We can therefore
-      # save some time and use the pre-installed version rather than downloading a fresh copy.
-
       - name: Build Yubico.NET.SDK.sln
         run: dotnet build --configuration ${{matrix.configuration}} --nologo --verbosity normal Yubico.NET.SDK.sln
 
       # Save the built NuGet packages, just in case we need to inspect the build output.
       - name: Save build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: Nuget Packages ${{matrix.configuration}}
           path: |
@@ -66,7 +68,7 @@ jobs:
             Yubico.YubiKey/src/bin/${{matrix.configuration}}/*.nupkg
 
       - name: Save build artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: Assemblies ${{matrix.configuration}}
           path: |

@@ -14,10 +14,10 @@
 
 using System;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Scp03.Commands;
-using Yubico.YubiKey.Scp03;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Scp03;
+using Yubico.YubiKey.Scp03.Commands;
 
 namespace Yubico.YubiKey.Pipelines
 {

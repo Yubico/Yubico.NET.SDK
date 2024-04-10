@@ -14,8 +14,8 @@
 
 using System;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Security.Principal;
+using System.Text;
 
 namespace Yubico.PlatformInterop
 {

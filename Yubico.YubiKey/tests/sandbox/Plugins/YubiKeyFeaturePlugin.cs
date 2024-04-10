@@ -65,12 +65,12 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
             if (result)
             {
-                Output.WriteLine($"The feature [{ feature }] is available on this YubiKey");
+                Output.WriteLine($"The feature [{feature}] is available on this YubiKey");
                 Output.WriteLine();
             }
             else
             {
-                Output.WriteLine($"The feature [{ feature }] is not available on this YubiKey");
+                Output.WriteLine($"The feature [{feature}] is not available on this YubiKey");
                 Output.WriteLine();
             }
         }

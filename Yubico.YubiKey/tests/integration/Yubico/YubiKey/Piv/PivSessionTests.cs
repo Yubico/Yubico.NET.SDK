@@ -14,13 +14,14 @@
 
 using System.Linq;
 using System.Security.Cryptography;
+using Xunit;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class PivSessionTests
     {
         [Theory]
@@ -55,7 +56,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                 Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
-                
+
                 collectorObj.KeyFlag = 1;
                 bool isVerified = pivSession.TryVerifyPin();
 
@@ -80,7 +81,7 @@ namespace Yubico.YubiKey.Piv
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-                
+
                 Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
                 bool isAuthenticated = pivSession.TryAuthenticateManagementKey(false);
@@ -408,7 +409,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void FixedBytes_Replace()
         {
-            byte[] fixedBytes = new byte[] {
+            byte[] fixedBytes = {
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
                 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
@@ -443,7 +444,7 @@ namespace Yubico.YubiKey.Piv
 
         private static bool TrySign(PivSession pivSession, byte slotNumber, ResponseStatus expectedStatus)
         {
-            byte[] dataToSign = new byte[] {
+            byte[] dataToSign = {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,

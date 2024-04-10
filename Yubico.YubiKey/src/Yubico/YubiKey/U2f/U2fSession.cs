@@ -21,10 +21,10 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.U2f.Commands;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
+using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.U2f.Commands;
 
 namespace Yubico.YubiKey.U2f
 {

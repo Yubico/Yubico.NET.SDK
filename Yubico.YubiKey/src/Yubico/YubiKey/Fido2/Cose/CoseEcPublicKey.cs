@@ -157,8 +157,8 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// </exception>
         public CoseEcPublicKey(CoseEcCurve curve, ReadOnlyMemory<byte> xCoordinate, ReadOnlyMemory<byte> yCoordinate)
         {
-            if ((curve != CoseEcCurve.P256) || (xCoordinate.Length == 0) || (xCoordinate.Length > P256CoordinateLength)
-                || (yCoordinate.Length == 0) || (yCoordinate.Length > P256CoordinateLength))
+            if (curve != CoseEcCurve.P256 || xCoordinate.Length == 0 || xCoordinate.Length > P256CoordinateLength
+                || yCoordinate.Length == 0 || yCoordinate.Length > P256CoordinateLength)
             {
                 throw new ArgumentException(ExceptionMessages.InvalidPublicKeyData);
             }
@@ -248,7 +248,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <inheritdoc/>
         public override byte[] Encode()
         {
-            if ((_xCoordinate.Length != P256CoordinateLength) || (_yCoordinate.Length != P256CoordinateLength))
+            if (_xCoordinate.Length != P256CoordinateLength || _yCoordinate.Length != P256CoordinateLength)
             {
                 throw new InvalidOperationException(
                     string.Format(

@@ -35,9 +35,10 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Issuer_SetToTestString_ReturnsTestString()
         {
-            Credential cred = new Credential();
-
-            cred.Issuer = DefaultTestIssuer;
+            Credential cred = new Credential
+            {
+                Issuer = DefaultTestIssuer
+            };
             string? actualIssuer = cred.Issuer;
 
             Assert.Equal(DefaultTestIssuer, actualIssuer);
@@ -58,9 +59,10 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Issuer_SetToNull_ReturnsNull()
         {
-            Credential cred = new Credential();
-
-            cred.Issuer = null;
+            Credential cred = new Credential
+            {
+                Issuer = null
+            };
             string? actualIssuer = cred.Issuer;
 
             Assert.Null(actualIssuer);
@@ -69,9 +71,10 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Issuer_SetToEmptyString_ReturnsNull()
         {
-            Credential cred = new Credential();
-
-            cred.Issuer = string.Empty;
+            Credential cred = new Credential
+            {
+                Issuer = string.Empty
+            };
             string? actualIssuer = cred.Issuer;
 
             Assert.Null(actualIssuer);
@@ -83,9 +86,10 @@ namespace Yubico.YubiKey.Oath
         [InlineData("\u2000\u2000\u2000")]
         public void Issuer_SetToWhiteSpace_ReturnsNull(string? issuerValue)
         {
-            Credential cred = new Credential();
-
-            cred.Issuer = issuerValue;
+            Credential cred = new Credential
+            {
+                Issuer = issuerValue
+            };
             string? actualIssuer = cred.Issuer;
 
             Assert.Null(actualIssuer);
@@ -98,12 +102,13 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_Totp15sIssuerAccount_ReturnsCorrectName()
         {
-            Credential cred = new Credential();
-
-            cred.Type = CredentialType.Totp;
-            cred.Period = CredentialPeriod.Period15;
-            cred.Issuer = DefaultTestIssuer;
-            cred.AccountName = DefaultTestAccount;
+            Credential cred = new Credential
+            {
+                Type = CredentialType.Totp,
+                Period = CredentialPeriod.Period15,
+                Issuer = DefaultTestIssuer,
+                AccountName = DefaultTestAccount
+            };
 
             string expectedName = $"15/{DefaultTestIssuer}:{DefaultTestAccount}";
 
@@ -114,12 +119,13 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_Totp30sIssuerAccount_ReturnsCorrectName()
         {
-            Credential cred = new Credential();
-
-            cred.Type = CredentialType.Totp;
-            cred.Period = CredentialPeriod.Period30;
-            cred.Issuer = DefaultTestIssuer;
-            cred.AccountName = DefaultTestAccount;
+            Credential cred = new Credential
+            {
+                Type = CredentialType.Totp,
+                Period = CredentialPeriod.Period30,
+                Issuer = DefaultTestIssuer,
+                AccountName = DefaultTestAccount
+            };
 
             string expectedName = $"{DefaultTestIssuer}:{DefaultTestAccount}";
 
@@ -130,11 +136,12 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_HotpIssuerAccount_ReturnsCorrectName()
         {
-            Credential cred = new Credential();
-
-            cred.Type = CredentialType.Hotp;
-            cred.Issuer = DefaultTestIssuer;
-            cred.AccountName = DefaultTestAccount;
+            Credential cred = new Credential
+            {
+                Type = CredentialType.Hotp,
+                Issuer = DefaultTestIssuer,
+                AccountName = DefaultTestAccount
+            };
 
             string expectedName = $"{DefaultTestIssuer}:{DefaultTestAccount}";
 
@@ -148,12 +155,13 @@ namespace Yubico.YubiKey.Oath
         [InlineData("      ")]
         public void Name_Totp15sAccount_ReturnsCorrectName(string? issuerValue)
         {
-            Credential cred = new Credential();
-
-            cred.Type = CredentialType.Totp;
-            cred.Period = CredentialPeriod.Period15;
-            cred.Issuer = issuerValue;
-            cred.AccountName = DefaultTestAccount;
+            Credential cred = new Credential
+            {
+                Type = CredentialType.Totp,
+                Period = CredentialPeriod.Period15,
+                Issuer = issuerValue,
+                AccountName = DefaultTestAccount
+            };
 
             string expectedName = $"15/{DefaultTestAccount}";
 
@@ -164,11 +172,12 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_Totp15sAccountDefaultIssuer_ReturnsCorrectName()
         {
-            Credential cred = new Credential();
-
-            cred.Type = CredentialType.Totp;
-            cred.Period = CredentialPeriod.Period15;
-            cred.AccountName = DefaultTestAccount;
+            Credential cred = new Credential
+            {
+                Type = CredentialType.Totp,
+                Period = CredentialPeriod.Period15,
+                AccountName = DefaultTestAccount
+            };
 
             string expectedName = $"15/{DefaultTestAccount}";
 
@@ -182,12 +191,13 @@ namespace Yubico.YubiKey.Oath
         [InlineData("      ")]
         public void Name_Totp30sAccount_ReturnsCorrectName(string? issuerValue)
         {
-            Credential cred = new Credential();
-
-            cred.Type = CredentialType.Totp;
-            cred.Period = CredentialPeriod.Period30;
-            cred.Issuer = issuerValue;
-            cred.AccountName = DefaultTestAccount;
+            Credential cred = new Credential
+            {
+                Type = CredentialType.Totp,
+                Period = CredentialPeriod.Period30,
+                Issuer = issuerValue,
+                AccountName = DefaultTestAccount
+            };
 
             string expectedName = $"{DefaultTestAccount}";
 
@@ -198,11 +208,12 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_Totp30sAccountDefaultIssuer_ReturnsCorrectName()
         {
-            Credential cred = new Credential();
-
-            cred.Type = CredentialType.Totp;
-            cred.Period = CredentialPeriod.Period30;
-            cred.AccountName = DefaultTestAccount;
+            Credential cred = new Credential
+            {
+                Type = CredentialType.Totp,
+                Period = CredentialPeriod.Period30,
+                AccountName = DefaultTestAccount
+            };
 
             string expectedName = $"{DefaultTestAccount}";
 
@@ -216,11 +227,12 @@ namespace Yubico.YubiKey.Oath
         [InlineData("      ")]
         public void Name_HotpAccount_ReturnsCorrectName(string? issuerValue)
         {
-            Credential cred = new Credential();
-
-            cred.Type = CredentialType.Hotp;
-            cred.Issuer = issuerValue;
-            cred.AccountName = DefaultTestAccount;
+            Credential cred = new Credential
+            {
+                Type = CredentialType.Hotp,
+                Issuer = issuerValue,
+                AccountName = DefaultTestAccount
+            };
 
             string expectedName = $"{DefaultTestAccount}";
 
@@ -231,10 +243,11 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_HotpAccountDefaultIssuer_ReturnsCorrectName()
         {
-            Credential cred = new Credential();
-
-            cred.Type = CredentialType.Hotp;
-            cred.AccountName = DefaultTestAccount;
+            Credential cred = new Credential
+            {
+                Type = CredentialType.Hotp,
+                AccountName = DefaultTestAccount
+            };
 
             string expectedName = $"{DefaultTestAccount}";
 
@@ -252,12 +265,13 @@ namespace Yubico.YubiKey.Oath
         [InlineData(CredentialType.Hotp, CredentialPeriod.Undefined, null, "1234567890123456789012345678901234567890123456789012345678901234")]
         public void Name_64ByteNameLength_ReturnsCorrectName(CredentialType credType, CredentialPeriod credPeriod, string? issuer, string account)
         {
-            Credential cred = new Credential();
-
-            cred.Type = credType;
-            cred.Period = credPeriod;
-            cred.Issuer = issuer;
-            cred.AccountName = account;
+            Credential cred = new Credential
+            {
+                Type = credType,
+                Period = credPeriod,
+                Issuer = issuer,
+                AccountName = account
+            };
 
             string actualCredName = cred.Name;
 
@@ -277,12 +291,13 @@ namespace Yubico.YubiKey.Oath
         [InlineData(CredentialType.Hotp, CredentialPeriod.Undefined, null, "12345678901234567890123456789012345678901234567890123456789012345")]
         public void Name_65ByteNameLength_ThrowsInvalidOperationException(CredentialType credType, CredentialPeriod credPeriod, string? issuer, string account)
         {
-            Credential cred = new Credential();
-
-            cred.Type = credType;
-            cred.Period = credPeriod;
-            cred.Issuer = issuer;
-            cred.AccountName = account;
+            Credential cred = new Credential
+            {
+                Type = credType,
+                Period = credPeriod,
+                Issuer = issuer,
+                AccountName = account
+            };
 
             _ = Assert.Throws<InvalidOperationException>(() => cred.Name);
         }
@@ -290,10 +305,11 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_CredTypeDefault_ThrowsInvalidOperationException()
         {
-            Credential cred = new Credential();
-
-            cred.Issuer = DefaultTestIssuer;
-            cred.AccountName = DefaultTestAccount;
+            Credential cred = new Credential
+            {
+                Issuer = DefaultTestIssuer,
+                AccountName = DefaultTestAccount
+            };
 
             _ = Assert.Throws<InvalidOperationException>(() => cred.Name);
         }
@@ -301,11 +317,12 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_CredTypeNone_ThrowsInvalidOperationException()
         {
-            Credential cred = new Credential();
-
-            cred.Type = CredentialType.None;
-            cred.Issuer = DefaultTestIssuer;
-            cred.AccountName = DefaultTestAccount;
+            Credential cred = new Credential
+            {
+                Type = CredentialType.None,
+                Issuer = DefaultTestIssuer,
+                AccountName = DefaultTestAccount
+            };
 
             _ = Assert.Throws<InvalidOperationException>(() => cred.Name);
         }
@@ -313,11 +330,12 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_TotpCredPeriodDefault_ThrowsInvalidOperationException()
         {
-            Credential cred = new Credential();
-
-            cred.Type = CredentialType.Totp;
-            cred.Issuer = DefaultTestIssuer;
-            cred.AccountName = DefaultTestAccount;
+            Credential cred = new Credential
+            {
+                Type = CredentialType.Totp,
+                Issuer = DefaultTestIssuer,
+                AccountName = DefaultTestAccount
+            };
 
             _ = Assert.Throws<InvalidOperationException>(() => cred.Name);
         }
@@ -325,12 +343,13 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_TotpCredPeriodUndefined_ThrowsInvalidOperationException()
         {
-            Credential cred = new Credential();
-
-            cred.Period = CredentialPeriod.Undefined;
-            cred.Type = CredentialType.Totp;
-            cred.Issuer = DefaultTestIssuer;
-            cred.AccountName = DefaultTestAccount;
+            Credential cred = new Credential
+            {
+                Period = CredentialPeriod.Undefined,
+                Type = CredentialType.Totp,
+                Issuer = DefaultTestIssuer,
+                AccountName = DefaultTestAccount
+            };
 
             _ = Assert.Throws<InvalidOperationException>(() => cred.Name);
         }
@@ -338,11 +357,12 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_Totp30sAccountDefault_ThrowsInvalidOperationException()
         {
-            Credential cred = new Credential();
-
-            cred.Type = CredentialType.Totp;
-            cred.Period = CredentialPeriod.Period30;
-            cred.Issuer = DefaultTestIssuer;
+            Credential cred = new Credential
+            {
+                Type = CredentialType.Totp,
+                Period = CredentialPeriod.Period30,
+                Issuer = DefaultTestIssuer
+            };
 
             _ = Assert.Throws<InvalidOperationException>(() => cred.Name);
         }
@@ -350,10 +370,11 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Name_HotpAccountDefault_ThrowsInvalidOperationException()
         {
-            Credential cred = new Credential();
-
-            cred.Type = CredentialType.Hotp;
-            cred.Issuer = DefaultTestIssuer;
+            Credential cred = new Credential
+            {
+                Type = CredentialType.Hotp,
+                Issuer = DefaultTestIssuer
+            };
 
             _ = Assert.Throws<InvalidOperationException>(() => cred.Name);
         }
@@ -363,8 +384,8 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void CredentialIssuerAndAccount_UriUnescape_ReturnsCorrectUnescapedStrings()
         {
-            var issuer = Uri.UnescapeDataString("Microsoft%3Ademo");
-            var account = Uri.UnescapeDataString("test%40outlook.com");
+            string? issuer = Uri.UnescapeDataString("Microsoft%3Ademo");
+            string? account = Uri.UnescapeDataString("test%40outlook.com");
 
             Assert.Equal("Microsoft:demo", issuer);
             Assert.Equal("test@outlook.com", account);
@@ -373,78 +394,78 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void CredentialParseLabel_TotpTypeAndDefaultPeriod_ReturnsCorrectlyParsedLabel()
         {
-            var label = "Microsoft:demo:test@outlook.com";
-            var parsedLabel = Credential.ParseLabel(label, CredentialType.Totp);
-            
-            Assert.Equal(CredentialPeriod.Period30, parsedLabel.period);
-            Assert.Equal("Microsoft:demo", parsedLabel.issuer);
-            Assert.Equal("test@outlook.com", parsedLabel.account);
+            string? label = "Microsoft:demo:test@outlook.com";
+            (CredentialPeriod period, string? issuer, string account) = Credential.ParseLabel(label, CredentialType.Totp);
+
+            Assert.Equal(CredentialPeriod.Period30, period);
+            Assert.Equal("Microsoft:demo", issuer);
+            Assert.Equal("test@outlook.com", account);
         }
 
         [Fact]
         public void CredentialParseLabel_TotpTypeAndNoDefaultPeriod_ReturnsCorrectlyParsedLabel()
         {
-            var label = "60/Microsoft:demo:test@outlook.com";
-            var parsedLabel = Credential.ParseLabel(label, CredentialType.Totp);
+            string? label = "60/Microsoft:demo:test@outlook.com";
+            (CredentialPeriod period, string? issuer, string account) = Credential.ParseLabel(label, CredentialType.Totp);
 
-            Assert.Equal(CredentialPeriod.Period60, parsedLabel.period);
-            Assert.Equal("Microsoft:demo", parsedLabel.issuer);
-            Assert.Equal("test@outlook.com", parsedLabel.account);
+            Assert.Equal(CredentialPeriod.Period60, period);
+            Assert.Equal("Microsoft:demo", issuer);
+            Assert.Equal("test@outlook.com", account);
         }
 
         [Fact]
         public void CredentialParseLabel_HotpType_ReturnsCorrectlyParsedLabel()
         {
-            var label = "60/Microsoft:demo:test@outlook.com";
-            var parsedLabel = Credential.ParseLabel(label, CredentialType.Hotp);
+            string? label = "60/Microsoft:demo:test@outlook.com";
+            (CredentialPeriod period, string? issuer, string account) = Credential.ParseLabel(label, CredentialType.Hotp);
 
-            Assert.Equal(CredentialPeriod.Undefined, parsedLabel.period);
-            Assert.Equal("60/Microsoft:demo", parsedLabel.issuer);
-            Assert.Equal("test@outlook.com", parsedLabel.account);
+            Assert.Equal(CredentialPeriod.Undefined, period);
+            Assert.Equal("60/Microsoft:demo", issuer);
+            Assert.Equal("test@outlook.com", account);
         }
 
         [Fact]
         public void CredentialParseLabel_HotpType_ReturnsCorrectlyParsedLabel_2()
         {
-            var label = "Microsoft:test@outlook.com";
-            var parsedLabel = Credential.ParseLabel(label, CredentialType.Hotp);
+            string? label = "Microsoft:test@outlook.com";
+            (CredentialPeriod period, string? issuer, string account) = Credential.ParseLabel(label, CredentialType.Hotp);
 
-            Assert.Equal(CredentialPeriod.Undefined, parsedLabel.period);
-            Assert.Equal("Microsoft", parsedLabel.issuer);
-            Assert.Equal("test@outlook.com", parsedLabel.account);
+            Assert.Equal(CredentialPeriod.Undefined, period);
+            Assert.Equal("Microsoft", issuer);
+            Assert.Equal("test@outlook.com", account);
         }
 
         [Fact]
         public void CredentialParseLabel_Totp15sAccount_ReturnsCorrectlyParsedLabel()
         {
-            var label = "15/test@outlook.com";
-            var parsedLabel = Credential.ParseLabel(label, CredentialType.Totp);
+            string? label = "15/test@outlook.com";
+            (CredentialPeriod period, string? issuer, string account) = Credential.ParseLabel(label, CredentialType.Totp);
 
-            Assert.Equal(CredentialPeriod.Period15, parsedLabel.period);
-            Assert.Null(parsedLabel.issuer);
-            Assert.Equal("test@outlook.com", parsedLabel.account);
+            Assert.Equal(CredentialPeriod.Period15, period);
+            Assert.Null(issuer);
+            Assert.Equal("test@outlook.com", account);
         }
 
         [Fact]
         public void CredentialParseLabel_Totp30sAccount_ReturnsCorrectlyParsedLabel()
         {
-            var label = "test@outlook.com";
-            var parsedLabel = Credential.ParseLabel(label, CredentialType.Totp);
+            string? label = "test@outlook.com";
+            (CredentialPeriod period, string? issuer, string account) = Credential.ParseLabel(label, CredentialType.Totp);
 
-            Assert.Equal(CredentialPeriod.Period30, parsedLabel.period);
-            Assert.Null(parsedLabel.issuer);
-            Assert.Equal("test@outlook.com", parsedLabel.account);
+            Assert.Equal(CredentialPeriod.Period30, period);
+            Assert.Null(issuer);
+            Assert.Equal("test@outlook.com", account);
         }
 
         [Fact]
         public void CredentialParseLabel_HotpAccount_ReturnsCorrectlyParsedLabel()
         {
-            var label = "test@outlook.com";
-            var parsedLabel = Credential.ParseLabel(label, CredentialType.Hotp);
+            string? label = "test@outlook.com";
+            (CredentialPeriod period, string? issuer, string account) = Credential.ParseLabel(label, CredentialType.Hotp);
 
-            Assert.Equal(CredentialPeriod.Undefined, parsedLabel.period);
-            Assert.Null(parsedLabel.issuer);
-            Assert.Equal("test@outlook.com", parsedLabel.account);
+            Assert.Equal(CredentialPeriod.Undefined, period);
+            Assert.Null(issuer);
+            Assert.Equal("test@outlook.com", account);
         }
 
         [Theory]
@@ -456,7 +477,7 @@ namespace Yubico.YubiKey.Oath
         [InlineData(CredentialType.Hotp, CredentialPeriod.Undefined, null, "1234567890123456789012345678901234567890123456789012345678901234", "1234567890123456789012345678901234567890123456789012345678901234")]
         public void CredentialParseLabel_TotalLength64_ReturnsCorrectlyParsedLabel(CredentialType type, CredentialPeriod period, string? issuer, string account, string label)
         {
-            var parsedLabel = Credential.ParseLabel(label, type);
+            (CredentialPeriod period, string? issuer, string account) parsedLabel = Credential.ParseLabel(label, type);
 
             Assert.Equal(period, parsedLabel.period);
             Assert.Equal(issuer, parsedLabel.issuer);

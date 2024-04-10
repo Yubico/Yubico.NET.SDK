@@ -174,7 +174,7 @@ namespace Yubico.YubiKey
             {
                 return 0;
             }
-            else if (other is null)
+            if (other is null)
             {
                 return 1;
             }
@@ -190,15 +190,11 @@ namespace Yubico.YubiKey
                     int patchComparison = Patch.CompareTo(other.Patch);
                     return patchComparison;
                 }
-                else
-                {
-                    return minorComparison;
-                }
+
+                return minorComparison;
             }
-            else
-            {
-                return majorComparison;
-            }
+
+            return majorComparison;
         }
     }
 }

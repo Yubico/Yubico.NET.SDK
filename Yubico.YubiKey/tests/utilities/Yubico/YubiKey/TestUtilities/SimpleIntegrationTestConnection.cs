@@ -34,7 +34,8 @@ namespace Yubico.YubiKey.TestUtilities
             _serialNumber ?? throw new InvalidOperationException("No serial number.");
 
         public SimpleIntegrationTestConnection(
-            YubiKeyApplication application, StandardTestDevice device = StandardTestDevice.Fw5)
+            YubiKeyApplication application,
+            StandardTestDevice device = StandardTestDevice.Fw5)
         {
             _device = IntegrationTestDeviceEnumeration.GetTestDevice(device);
             _connection = _device.Connect(application);

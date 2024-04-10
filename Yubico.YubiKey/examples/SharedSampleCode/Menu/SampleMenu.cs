@@ -55,7 +55,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
         public SampleMenu(int maxInvalidCount, Type mainMenuEnumType, int exitValue)
         {
             _maxInvalidCount = DefaultMaxInvalidCount;
-            if ((maxInvalidCount >= LowMaxInvalidCount) && (maxInvalidCount <= HighMaxInvalidCount))
+            if (maxInvalidCount >= LowMaxInvalidCount && maxInvalidCount <= HighMaxInvalidCount)
             {
                 _maxInvalidCount = maxInvalidCount;
             }
@@ -75,7 +75,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
         public int RunMainMenu(string title)
         {
             int indexChosen = RunMenu(title, _mainMenuStrings);
-            if ((indexChosen >= 0) && (indexChosen < _mainMenuStrings.Length))
+            if (indexChosen >= 0 && indexChosen < _mainMenuStrings.Length)
             {
                 object? returnValue = _mainMenuValues.GetValue(indexChosen);
                 if (!(returnValue is null))
@@ -118,7 +118,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
                 }
 
                 _ = ReadResponse(out int response);
-                if ((response > 0) && (response <= menuItems.Length))
+                if (response > 0 && response <= menuItems.Length)
                 {
                     // When writing the menu, counting begins at 1. So to get the
                     // index of the choice, subtract 1.

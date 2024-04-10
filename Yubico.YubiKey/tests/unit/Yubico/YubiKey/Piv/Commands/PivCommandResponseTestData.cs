@@ -14,8 +14,8 @@
 
 using System.Collections.Generic;
 using System.Security.Cryptography;
-using Yubico.YubiKey.TestUtilities;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -318,7 +318,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             valueLen++;
                         }
                     }
-                    if ((format[index] == 0xFE) && (isCorrect == false))
+                    if (format[index] == 0xFE && isCorrect == false)
                     {
                         valueLen = 1;
                     }

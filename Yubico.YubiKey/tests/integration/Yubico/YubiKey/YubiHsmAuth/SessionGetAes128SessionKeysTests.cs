@@ -23,6 +23,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         #region NonKeyCollector
         #region password
         [Fact]
+        [Trait("Category", "FirmwareOrHardwareMissmatch")]
         public void GetAes128SessionKeys_TouchNotRequired_ReturnsTrueAndSessionKeys()
         {
             // Preconditions
@@ -48,6 +49,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         }
 
         [Fact]
+        [Trait("Category", "Flaky")]
         public void GetAes128SessionKeys_WrongCredPassword_ThrowsSecurityException()
         {
             // Preconditions
@@ -74,6 +76,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         // It's recommended to use a debug break point in either the
         // key collector or GetAes128SessionKeys(...) so that you're
         // aware of when touch is about to be expected.
+        [Trait("Category", "RequiresStepDebug")]
         [Fact(Skip = "Requires user interaction")]
         public void GetAes128SessionKeys_TouchRequired_ReturnsSessionKeys()
         {

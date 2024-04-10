@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.Core.Devices.Hid;
 using Xunit;
 using Xunit.Abstractions;
+using Yubico.Core.Devices.Hid;
 
 namespace Yubico.PlatformInterop
 {
+    [Trait("Category", "Simple")]
     public class ListenHidTests
     {
         private int _counter;
@@ -57,7 +58,7 @@ namespace Yubico.PlatformInterop
             {
                 _counter = 6;
             }
-            else if ((_counter > 6) || (_counter < 0))
+            else if (_counter > 6 || _counter < 0)
             {
                 _counter = 1;
             }

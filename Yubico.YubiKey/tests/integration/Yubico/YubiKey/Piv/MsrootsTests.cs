@@ -16,10 +16,10 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using Yubico.YubiKey.Piv.Commands;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
 using Xunit.Abstractions;
+using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Piv
     {
         private readonly ITestOutputHelper _output;
 
-        public MsrootsTests (ITestOutputHelper output)
+        public MsrootsTests(ITestOutputHelper output)
         {
             _output = output;
         }
@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.Piv
                 isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
-                byte[] putData = new byte[] { 0x53, 0x04, 0x11, 0x22, 0x33, 0x44 };
+                byte[] putData = { 0x53, 0x04, 0x11, 0x22, 0x33, 0x44 };
                 for (int index = 0; index < 5; index++)
                 {
                     var putCommand = new PutDataCommand(0x005fff11 + index, putData);
@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ResetApplication();
 
-                byte[] putData = new byte[] { 0x11, 0x22, 0x33, 0x44 };
+                byte[] putData = { 0x11, 0x22, 0x33, 0x44 };
                 pivSession.WriteMsroots(putData);
 
                 pivSession.WriteMsroots(ReadOnlySpan<byte>.Empty);
@@ -132,11 +132,11 @@ namespace Yubico.YubiKey.Piv
 
                 FirmwareVersion versionNumber = versionResponse.GetData();
 
-//                int maxLength = 10175;
+                //                int maxLength = 10175;
                 int maxLength = 10150;
                 if (versionNumber.Major >= 4)
                 {
-//                    maxLength = 15295;
+                    //                    maxLength = 15295;
                     maxLength = 14000;
                 }
 
@@ -259,7 +259,7 @@ namespace Yubico.YubiKey.Piv
 
                 for (int bufferSize = 2806; bufferSize <= 2808; bufferSize++)
                 {
-                    _output.WriteLine ("buffer size: {0}", bufferSize);
+                    _output.WriteLine("buffer size: {0}", bufferSize);
 
                     pivSession.ResetApplication();
 
@@ -294,7 +294,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.Success, putResponse.Status);
             }
 
-            byte[] noData = new byte[] { 0x53, 0x00 };
+            byte[] noData = { 0x53, 0x00 };
             for (int index = 0; index < 5; index++)
             {
                 var putCommand = new PutDataCommand(0x005fff11 + index, noData);

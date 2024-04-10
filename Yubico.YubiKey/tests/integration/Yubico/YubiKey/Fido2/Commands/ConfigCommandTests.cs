@@ -12,21 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using Xunit;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
-using System.Collections.Generic;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
+    [Trait("Category", "RequiresBio")]
     public class ConfigCommandTests : NeedPinToken
     {
         public ConfigCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio, null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, null)
         {
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void EnableEnterpriseAttestationCommand_Succeeds()
         {
             var infoCmd = new GetInfoCommand();
@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.NotNull(authInfo.Options);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void ToggleAlwaysUvCommand_Succeeds()
         {
             var infoCmd = new GetInfoCommand();
@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.NotNull(authInfo.Options);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void SetMinPinLengthCommand_Pin_Succeeds()
         {
             var infoCmd = new GetInfoCommand();
@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.NotNull(authInfo.Options);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void SetMinPinLengthCommand_ForceChange_Succeeds()
         {
             var infoCmd = new GetInfoCommand();
@@ -125,8 +125,8 @@ namespace Yubico.YubiKey.Fido2.Commands
             authInfo = infoRsp.GetData();
             Assert.True(authInfo.ForcePinChange);
 
-            byte[] currentPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-            byte[] newPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
+            byte[] currentPin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            byte[] newPin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
 
             var changePinCmd = new ChangePinCommand(protocol, currentPin, newPin);
             ChangePinResponse changePinRsp = Connection.SendCommand(changePinCmd);
@@ -142,7 +142,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.Equal(ResponseStatus.Success, changePinRsp.Status);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void SetMinPinLengthCommand_AllNull_Succeeds()
         {
             var infoCmd = new GetInfoCommand();

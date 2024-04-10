@@ -13,16 +13,18 @@
 // limitations under the License.
 
 using System;
-using Yubico.Core.Devices.Hid;
-using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Otp.Operations;
 using Xunit;
+using Yubico.Core.Devices.Hid;
+using Yubico.YubiKey.Otp.Operations;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Otp
 {
     public class ConfigureStaticTests
     {
-        [Theory]
+
+        [Trait("Category", "Simple")]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void ConfigureStaticPassword_Succeeds(StandardTestDevice testDeviceType)
@@ -45,7 +47,7 @@ namespace Yubico.YubiKey.Otp
                 configObj = configObj.AllowManualUpdate(false);
                 configObj = configObj.AppendCarriageReturn(false);
                 configObj = configObj.SendTabFirst(false);
-                configObj = configObj.SetAllowUpdate(true);
+                configObj = configObj.SetAllowUpdate();
                 configObj = configObj.GeneratePassword(generatedPassword);
                 configObj.Execute();
             }

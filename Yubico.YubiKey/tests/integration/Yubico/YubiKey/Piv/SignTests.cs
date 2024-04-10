@@ -14,14 +14,15 @@
 
 using System;
 using System.Security.Cryptography;
+using Xunit;
+using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
-using Yubico.Core.Tlv;
-using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class SignTests
     {
         [Theory]
@@ -29,7 +30,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivPinPolicy.Never)]
         public void Sign_EccP256_Succeeds(PivPinPolicy pinPolicy)
         {
-            byte[] dataToSign = new byte[] {
+            byte[] dataToSign = {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20
             };
@@ -112,7 +113,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha256, 2)]
         [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha384, 2)]
         [InlineData(PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha512, 2)]
-        public void SignRsa_VerifyCSharp_Correct(PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm, int paddingScheme)
+        public void SignRsa_VerifyCSharp_Correct(PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm,
+            int paddingScheme)
         {
             int keySizeBits = RsaFormat.KeySizeBits1024;
             if (algorithm != PivAlgorithm.Rsa1024)
@@ -240,7 +242,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void NoKeyInSlot_Sign_Exception(StandardTestDevice testDeviceType)
         {
-            byte[] dataToSign = new byte[] {
+            byte[] dataToSign = {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20
             };
@@ -258,11 +260,12 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        public static bool LoadKey(PivAlgorithm algorithm, byte slotNumber, PivPinPolicy pinPolicy, PivTouchPolicy touchPolicy, IYubiKeyDevice testDevice)
+        public static bool LoadKey(PivAlgorithm algorithm, byte slotNumber, PivPinPolicy pinPolicy,
+            PivTouchPolicy touchPolicy, IYubiKeyDevice testDevice)
         {
             if (testDevice != null)
             {
-                if (testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv) == true)
+                if (testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv))
                 {
                     using (var pivSession = new PivSession(testDevice))
                     {
@@ -292,18 +295,21 @@ namespace Yubico.YubiKey.Piv
             // Leading 00 bytes?
             if (rValue.Length > integerLength)
             {
-                if ((rValue.Length > (integerLength + 1)) || (rValue.Span[0] != 0))
+                if (rValue.Length > integerLength + 1 || rValue.Span[0] != 0)
                 {
                     return false;
                 }
+
                 rValue = rValue[1..];
             }
+
             if (sValue.Length > integerLength)
             {
-                if ((sValue.Length > (integerLength + 1)) || (sValue.Span[0] != 0))
+                if (sValue.Length > integerLength + 1 || sValue.Span[0] != 0)
                 {
                     return false;
                 }
+
                 sValue = sValue[1..];
             }
 
@@ -320,7 +326,7 @@ namespace Yubico.YubiKey.Piv
         // Fill a byte array with "random" data. Up to 256 bytes.
         private static void GetArbitraryData(byte[] bufferToFill)
         {
-            byte[] arbitraryData = new byte[] {
+            byte[] arbitraryData = {
                 0x3E, 0xE8, 0xC1, 0xBE, 0xFB, 0x55, 0x48, 0x82, 0xE6, 0xAD, 0x9A, 0xBC, 0x84, 0x04, 0xF4, 0xA4,
                 0xF0, 0xE3, 0x08, 0x53, 0x02, 0x03, 0x01, 0x00, 0x01, 0x02, 0x41, 0x00, 0xAA, 0xA0, 0xBB, 0x04,
                 0x9E, 0xD7, 0xBA, 0x33, 0x0D, 0x44, 0x84, 0xEC, 0x30, 0x0A, 0xB0, 0x8E, 0xF2, 0x47, 0x1D, 0x89,

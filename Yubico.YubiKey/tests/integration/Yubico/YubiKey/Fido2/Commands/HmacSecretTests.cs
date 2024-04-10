@@ -14,12 +14,12 @@
 
 using System;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.PinProtocols;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
+    [Trait("Category", "RequiresBio")]
     public class HmacSecretTests : SimpleIntegrationTestConnection
     {
         private readonly byte[] _pin;
@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         private readonly AuthenticatorInfo _deviceInfo;
 
         public HmacSecretTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio)
         {
             _pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
@@ -63,7 +63,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             _deviceInfo = infoRsp.GetData();
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void MakeCredentialWithHmacSecret_Succeeds()
         {
             bool isValid = GetMakeCredentialParams(out MakeCredentialParameters makeParams);
@@ -79,10 +79,10 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.True(isValid);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void GetAssertionWithHmacSecret_Succeeds()
         {
-            byte[] salt1 = new byte[] {
+            byte[] salt1 = {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             };
@@ -90,7 +90,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             bool isValid = GetGetAssertionParams(out GetAssertionParameters assertionParams);
             Assert.True(isValid);
 
-            assertionParams.RequestHmacSecretExtension(salt1, null);
+            assertionParams.RequestHmacSecretExtension(salt1);
             assertionParams.EncodeHmacSecretExtension(_protocol);
 
             var cmd = new GetAssertionCommand(assertionParams);
@@ -101,14 +101,14 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.True(hmacSecret.Length == 32);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void GetAssertionWithTwoHmacSecrets_Succeeds()
         {
-            byte[] salt1 = new byte[] {
+            byte[] salt1 = {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             };
-            byte[] salt2 = new byte[] {
+            byte[] salt2 = {
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18
             };
@@ -210,7 +210,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 SetPinResponse setPinRsp = Connection.SendCommand(setPinCmd);
                 status = setPinRsp.Status;
 
-            } while(status == ResponseStatus.Success);
+            } while (status == ResponseStatus.Success);
 
             return false;
         }

@@ -340,7 +340,7 @@ namespace Yubico.YubiKey
             out IScp03YubiKeyConnection connection)
         {
             IYubiKeyConnection? returnValue = Connect(application, applicationId, scp03Keys);
-            if (!(returnValue is null) && (returnValue is IScp03YubiKeyConnection scp03Connection))
+            if (!(returnValue is null) && returnValue is IScp03YubiKeyConnection scp03Connection)
             {
                 connection = scp03Connection;
                 return true;
@@ -368,7 +368,7 @@ namespace Yubico.YubiKey
             _log.LogInformation(
                 "YubiKey {Serial} connecting to {Application} application" + (scp03Keys is null ? "." : " over SCP03."),
                 SerialNumber,
-                application is null ? (applicationId is null ? "Unknown" : applicationId.ToString())
+                application is null ? applicationId is null ? "Unknown" : applicationId.ToString()
                 : Enum.GetName(typeof(YubiKeyApplication), application));
 
             if (application is null)
@@ -377,7 +377,7 @@ namespace Yubico.YubiKey
                 {
                     _log.LogInformation("Connecting via the SmartCard interface.");
                     WaitForReclaimTimeout(Transport.SmartCard);
-                    return (scp03Keys is null) ?
+                    return scp03Keys is null ?
                         new CcidConnection(_smartCardDevice, applicationId)
                         : new Scp03CcidConnection(_smartCardDevice, applicationId, scp03Keys);
                 }

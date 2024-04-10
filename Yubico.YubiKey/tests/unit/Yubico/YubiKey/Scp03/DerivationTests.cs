@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.Scp03
         [Fact]
         public void Derive_GivenBadKey_ThrowsArgumentException()
         {
-            _ = Assert.Throws<ArgumentException>(() => Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM,0x40,  GetBadKey(), GetHostChallenge(), GetCardChallenge()));
+            _ = Assert.Throws<ArgumentException>(() => Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40, GetBadKey(), GetHostChallenge(), GetCardChallenge()));
         }
 
         [Fact]

@@ -12,11 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.InterIndustry.Commands;
+using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public sealed class SelectApplicationTests
     {
         [Theory]
@@ -30,10 +33,10 @@ namespace Yubico.YubiKey.Piv
             Assert.NotNull(connection);
 
             // Connect does not actually select the app.  We need a command for this.  It can be anything.
-            _ = connection!.SendCommand(new Piv.Commands.GetSerialNumberCommand());
+            _ = connection!.SendCommand(new GetSerialNumberCommand());
 
             Assert.NotNull(connection!.SelectApplicationData);
-            var data = Assert.IsType<InterIndustry.Commands.GenericSelectApplicationData>(connection.SelectApplicationData);
+            GenericSelectApplicationData? data = Assert.IsType<GenericSelectApplicationData>(connection.SelectApplicationData);
 
             Assert.False(data!.RawData.IsEmpty);
         }

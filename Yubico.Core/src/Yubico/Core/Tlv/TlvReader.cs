@@ -418,7 +418,7 @@ namespace Yubico.Core.Tlv
                 FixedLengthByte,
                 false);
 
-            if (isValid == true)
+            if (isValid)
             {
                 value = fullValue.Span[0];
             }
@@ -474,7 +474,7 @@ namespace Yubico.Core.Tlv
         {
             _ = CommonReadValue(out ReadOnlyMemory<byte> value, expectedTag, FixedLengthInt16, true);
 
-            if (bigEndian == true)
+            if (bigEndian)
             {
                 return BinaryPrimitives.ReadInt16BigEndian(value.Span);
             }
@@ -528,9 +528,9 @@ namespace Yubico.Core.Tlv
                 FixedLengthInt16,
                 false);
 
-            if (isValid == true)
+            if (isValid)
             {
-                if (bigEndian == true)
+                if (bigEndian)
                 {
                     value = BinaryPrimitives.ReadInt16BigEndian(fullValue.Span);
                 }
@@ -591,7 +591,7 @@ namespace Yubico.Core.Tlv
         {
             _ = CommonReadValue(out ReadOnlyMemory<byte> value, expectedTag, FixedLengthInt16, true);
 
-            if (bigEndian == true)
+            if (bigEndian)
             {
                 return BinaryPrimitives.ReadUInt16BigEndian(value.Span);
             }
@@ -646,9 +646,9 @@ namespace Yubico.Core.Tlv
                 FixedLengthInt16,
                 false);
 
-            if (isValid == true)
+            if (isValid)
             {
-                if (bigEndian == true)
+                if (bigEndian)
                 {
                     value = BinaryPrimitives.ReadUInt16BigEndian(fullValue.Span);
                 }
@@ -709,7 +709,7 @@ namespace Yubico.Core.Tlv
         {
             _ = CommonReadValue(out ReadOnlyMemory<byte> value, expectedTag, FixedLengthInt32, true);
 
-            if (bigEndian == true)
+            if (bigEndian)
             {
                 return BinaryPrimitives.ReadInt32BigEndian(value.Span);
             }
@@ -763,9 +763,9 @@ namespace Yubico.Core.Tlv
                 FixedLengthInt32,
                 false);
 
-            if (isValid == true)
+            if (isValid)
             {
-                if (bigEndian == true)
+                if (bigEndian)
                 {
                     value = BinaryPrimitives.ReadInt32BigEndian(fullValue.Span);
                 }
@@ -1108,38 +1108,57 @@ namespace Yubico.Core.Tlv
             int fixedLength,
             bool throwIfFailed)
         {
-            value = Memory<byte>.Empty;
-
-            int result = ReadTagExpected(expectedTag);
-            if (result != ValidEncoding)
+            bool isValidTlv = IsValidTlv(expectedTag, fixedLength, out int resultCode);
+            if (isValidTlv)
             {
-                goto exit;
+                value = _encoding.Slice(_currentValueOffset, _currentLength);
+                _currentOffset = _currentValueOffset + _currentLength;
+
+                ResetState();
+                return true;
             }
 
-            result = ReadLength();
-            if (result != ValidEncoding)
-            {
-                goto exit;
-            }
-
-            result = VerifyValue(fixedLength);
-            if (result != ValidEncoding)
-            {
-                goto exit;
-            }
-
-            value = _encoding.Slice(_currentValueOffset, _currentLength);
-            _currentOffset = _currentValueOffset + _currentLength;
-
-exit:
+            // We must reset the state before we throw or return as well, so ResetState() is duplicated but the
+            // intent is more clear that we need to reset the state in all (3) cases. 
             ResetState();
-
-            if ((result != ValidEncoding) && (throwIfFailed == true))
+            if (throwIfFailed)
             {
-                ThrowOnFailedRead(result);
+                ThrowOnFailedRead(resultCode);
             }
 
-            return result == ValidEncoding;
+            value = Memory<byte>.Empty;
+            return false;
+        }
+
+        /// <summary>
+        /// Attempts to read and validate the expected tag, its length, and its value, indicating success through the return value and providing a result code.
+        /// </summary>
+        /// <param name="expectedTag">The tag expected to be read.</param>
+        /// <param name="fixedLength">The fixed length that the value is expected to adhere to.</param>
+        /// <param name="resultCode">Out parameter that returns the result code of the operation, indicating the specific outcome or error.</param>
+        /// <returns>Returns true if the tag, length, and value are successfully read and validated. Returns false if any validation fails, along with the appropriate result code.</returns>
+        private bool IsValidTlv(int expectedTag, int fixedLength, out int resultCode)
+        {
+            resultCode = ReadTagExpected(expectedTag);
+            if (resultCode != ValidEncoding)
+            {
+                return false;
+            }
+
+            resultCode = ReadLength();
+            if (resultCode != ValidEncoding)
+            {
+                return false;
+            }
+
+            resultCode = VerifyValue(fixedLength);
+            if (resultCode != ValidEncoding)
+            {
+                return false;
+            }
+
+            // Valid Tlv, we were able to read the tag, length and verify the value
+            return true;
         }
 
         // Read the tag, verifying the tag in the encoding is the same as the
@@ -1168,9 +1187,9 @@ exit:
             }
 
             int result = ReadTag(tagLength);
-            if ((result == ValidEncoding) && (_currentTag != expectedTag))
+            if (result == ValidEncoding && _currentTag != expectedTag)
             {
-                result = UnexpectedEncoding;
+                return UnexpectedEncoding;
             }
 
             return result;
@@ -1184,7 +1203,7 @@ exit:
         //   UnexpectedEnd (not enough bytes to read)
         private int ReadTag(int tagLength)
         {
-            if ((tagLength <= 0) || (tagLength > MaximumTagLength))
+            if (tagLength <= 0 || tagLength > MaximumTagLength)
             {
                 return UnsupportedTag;
             }
@@ -1196,7 +1215,7 @@ exit:
 
             ResetState();
 
-            if ((_currentOffset + tagLength) > _encoding.Length)
+            if (_currentOffset + tagLength > _encoding.Length)
             {
                 return UnexpectedEnd;
             }
@@ -1228,7 +1247,7 @@ exit:
             }
 
             int count = 1;
-            if ((_currentOffset + _currentTagLength) < _encoding.Length)
+            if (_currentOffset + _currentTagLength < _encoding.Length)
             {
                 _currentLength = (int)_encoding.Span[_currentOffset + _currentTagLength];
                 if (_currentLength <= 0x7F)
@@ -1244,11 +1263,11 @@ exit:
             // If the initial length byte is 0x80, that is an unsupported value
             // (it's BER for indefinite length and we support DER only). In that
             // case, we would have set count to 0 (0x80 & 0x7F yields 0).
-            if ((count == 0) || (count > MaximumLengthCount))
+            if (count == 0 || count > MaximumLengthCount)
             {
                 return UnsupportedLength;
             }
-            if ((_currentOffset + _currentTagLength + count + 1) > _encoding.Length)
+            if (_currentOffset + _currentTagLength + count + 1 > _encoding.Length)
             {
                 return UnexpectedEnd;
             }
@@ -1289,7 +1308,7 @@ exit:
                     break;
             }
 
-            return (_currentValueOffset + _currentLength) <= _encoding.Length
+            return _currentValueOffset + _currentLength <= _encoding.Length
                 ? ValidEncoding
                 : UnexpectedEnd;
         }

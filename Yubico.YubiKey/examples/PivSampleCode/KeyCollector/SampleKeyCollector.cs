@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 return false;
             }
 
-            if (keyEntryData.IsRetry == true)
+            if (keyEntryData.IsRetry)
             {
                 if (!(keyEntryData.RetriesRemaining is null))
                 {
@@ -90,20 +90,25 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     break;
 
                 case KeyEntryRequest.AuthenticatePivManagementKey:
-                    if (keyEntryData.IsRetry == true)
+                    if (keyEntryData.IsRetry)
                     {
                         return false;
                     }
-                    currentValue = CollectValue(DefaultMgmtKeyString, "Management Key (24 bytes in hex, e.g. A1 29 07... or A12907...)");
+
+                    currentValue = CollectValue(DefaultMgmtKeyString,
+                        "Management Key (24 bytes in hex, e.g. A1 29 07... or A12907...)");
                     break;
 
                 case KeyEntryRequest.ChangePivManagementKey:
-                    if (keyEntryData.IsRetry == true)
+                    if (keyEntryData.IsRetry)
                     {
                         return false;
                     }
-                    currentValue = CollectValue(DefaultMgmtKeyString, "Current Management Key (24 bytes in hex, e.g. A1 29 07... or A12907...)");
-                    newValue = CollectValue(DefaultMgmtKeyString, "New Management Key (24 bytes in hex, e.g. A1 29 07... or A12907...)");
+
+                    currentValue = CollectValue(DefaultMgmtKeyString,
+                        "Current Management Key (24 bytes in hex, e.g. A1 29 07... or A12907...)");
+                    newValue = CollectValue(DefaultMgmtKeyString,
+                        "New Management Key (24 bytes in hex, e.g. A1 29 07... or A12907...)");
                     break;
             }
 
@@ -128,7 +133,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             string title = keyEntryData.RetriesRemaining + " tries remaining, continue?";
-            string[] menuItems = new string[] {
+            string[] menuItems = new string[]
+            {
                 "Yes, try again",
                 "No, cancel operation"
             };
@@ -146,13 +152,14 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             SampleMenu.WriteMessage(MessageType.Title, 0, "Enter D for default value (" + defaultValueString + ")");
             char[] collectedValue = SampleMenu.ReadResponse(out int _);
 
-            if ((collectedValue.Length == 1) && (collectedValue[0] == 'D'))
+            if (collectedValue.Length == 1 && collectedValue[0] == 'D')
             {
                 return defaultValueString switch
                 {
                     DefaultPinString => new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 },
                     DefaultPukString => new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 },
-                    DefaultMgmtKeyString => new byte[] {
+                    DefaultMgmtKeyString => new byte[]
+                    {
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
@@ -188,6 +195,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                             break;
                         }
                     }
+
                     indexV++;
                 }
 

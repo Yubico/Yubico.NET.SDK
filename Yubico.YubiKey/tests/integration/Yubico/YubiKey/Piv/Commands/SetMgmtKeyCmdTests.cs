@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void SetKey_ValidAes_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5,4,2))
+            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
             {
                 return;
             }
@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                byte[] keyData = new byte[] {
+                byte[] keyData = {
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
                 };
@@ -65,13 +65,13 @@ namespace Yubico.YubiKey.Piv.Commands
 
                 setRsp = pivSession.Connection.SendCommand(setCmd);
                 Assert.Equal(ResponseStatus.Success, setRsp.Status);
-           }
+            }
         }
 
         [Fact]
         public void SetKey_Aes256_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5,4,2))
+            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
             {
                 return;
             }
@@ -84,7 +84,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 bool isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
-                byte[] keyData = new byte[] {
+                byte[] keyData = {
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
@@ -100,7 +100,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void SetKey_TDes_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5,4,2))
+            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
             {
                 return;
             }
@@ -113,7 +113,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 bool isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
-                byte[] keyData = new byte[] {
+                byte[] keyData = {
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                     0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58

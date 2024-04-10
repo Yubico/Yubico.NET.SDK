@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
@@ -37,11 +37,12 @@ namespace Yubico.YubiKey.Fido2
         };
 
         public MinPinLenTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
+            : base(YubiKeyApplication.Fido2)
         {
         }
 
         [Fact]
+        [Trait("Category", "Simple")]
         public void GetMinPinFromCredential_Succeeds()
         {
             using (var fido2Session = new Fido2Session(Device))
@@ -51,7 +52,7 @@ namespace Yubico.YubiKey.Fido2
                 OptionValue ovMinPin = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
                 OptionValue ovCredMgmt = fido2Session.AuthenticatorInfo.GetOptionValue(
                     AuthenticatorOptions.credMgmt);
-                if ((ovMinPin != OptionValue.True) || (ovCredMgmt != OptionValue.True) || !isSupported)
+                if (ovMinPin != OptionValue.True || ovCredMgmt != OptionValue.True || !isSupported)
                 {
                     return;
                 }
@@ -64,7 +65,7 @@ namespace Yubico.YubiKey.Fido2
 
                 int? minPinLen = mcData!.AuthenticatorData.GetMinPinLengthExtension();
 
-                Assert.NotNull(minPinLen);
+                _ = Assert.NotNull(minPinLen);
 
                 DeleteAddedCredential(fido2Session);
             }
@@ -78,7 +79,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 _rp.Id
             };
-            bool isSet = fido2Session.TrySetPinConfig(null, rpList, null);
+            bool isSet = fido2Session.TrySetPinConfig(null, rpList);
             if (!isSet)
             {
                 return false;

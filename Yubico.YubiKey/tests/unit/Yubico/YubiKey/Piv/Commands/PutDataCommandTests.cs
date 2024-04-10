@@ -62,9 +62,10 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void SetProperties_Old_MatchesNew()
         {
-            var command = new PutDataCommand();
-
-            command.DataTag = (int)PivDataTag.Capability;
+            var command = new PutDataCommand
+            {
+                DataTag = (int)PivDataTag.Capability
+            };
 
 #pragma warning disable CS0618 // Testing an obsolete feature
             Assert.Equal(PivDataTag.Capability, command.Tag);
@@ -74,10 +75,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void SetProperties_New_MatchesOld()
         {
-            var command = new PutDataCommand();
-
+            var command = new PutDataCommand
+            {
 #pragma warning disable CS0618 // Testing an obsolete feature
-            command.Tag = PivDataTag.SecurityObject;
+                Tag = PivDataTag.SecurityObject
+            };
 #pragma warning restore CS0618
 
             Assert.Equal((int)PivDataTag.SecurityObject, command.DataTag);

@@ -211,7 +211,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
         private static CommandApdu GetPinRetriesCommandApdu(int cStyle, byte pinRetries, byte pukRetries)
         {
-            SetPinRetriesCommand command = GetCommandObject (cStyle, pinRetries, pukRetries);
+            SetPinRetriesCommand command = GetCommandObject(cStyle, pinRetries, pukRetries);
             CommandApdu returnValue = command.CreateCommandApdu();
 
             return returnValue;

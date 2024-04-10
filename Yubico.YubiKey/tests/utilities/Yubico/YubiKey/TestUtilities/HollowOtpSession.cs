@@ -34,7 +34,7 @@ namespace Yubico.YubiKey.TestUtilities
             Status = response.GetData();
         }
 
-       public OtpStatus Status { get; set; }
+        public OtpStatus Status { get; set; }
 
         public bool IsShortPressConfigured => Status.ShortPressConfigured;
 

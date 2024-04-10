@@ -13,11 +13,11 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
 using System.Globalization;
-using Yubico.YubiKey.Cryptography;
-using Yubico.Core.Tlv;
+using System.Security.Cryptography;
 using Yubico.Core.Logging;
+using Yubico.Core.Tlv;
+using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Piv.Objects
 {
@@ -340,9 +340,9 @@ namespace Yubico.YubiKey.Piv.Objects
                 _log.LogInformation("Decode data into CardholderUniqueId: TrailingElements.");
                 if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> signature, SignatureTag))
                 {
-                    if ((signature.Length == 0) && tlvReader.TryReadValue(out ReadOnlyMemory<byte> lrc, LrcTag))
+                    if (signature.Length == 0 && tlvReader.TryReadValue(out ReadOnlyMemory<byte> lrc, LrcTag))
                     {
-                        if ((lrc.Length == 0) && !tlvReader.HasData)
+                        if (lrc.Length == 0 && !tlvReader.HasData)
                         {
                             return true;
                         }

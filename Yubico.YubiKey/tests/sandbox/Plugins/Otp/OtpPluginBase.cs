@@ -95,9 +95,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "Keyboard",
                                 Shortcut = "kb",
                                 Description = "Keyboard layout to use for the static password. " +
-                                    $@"Choices are {
-                                        string.Join(',', Enum.GetNames(typeof(KeyboardLayout)))
-                                        } [default: ModHex]",
+                                    $@"Choices are {string.Join(',', Enum.GetNames(typeof(KeyboardLayout)))} [default: ModHex]",
                                 Type = typeof(KeyboardLayout)
                             }),
                         ParameterUse.CurrentAccessCode => new KeyValuePair<string, Parameter>(
@@ -341,7 +339,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Type = typeof(string)
                             }),
                         _ => throw new InvalidOperationException(
-                            $"Invalid value [{ p }] in { GetType().Name }.ParametersUsed collection.")
+                            $"Invalid value [{p}] in {GetType().Name}.ParametersUsed collection.")
                     })
                     // For now, I'll assume that this parameter will be available to all OTP plugins.
                     .Append(new KeyValuePair<string, Parameter>(
@@ -361,7 +359,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 throw new InvalidOperationException(
                     "Error building parameters object. Likely problem is incompatible "
-                    + $"parameters specified in class [{ GetType().Name }].",
+                    + $"parameters specified in class [{GetType().Name}].",
                     ex);
             }
         }
@@ -409,13 +407,13 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             _button = (bool?)GetParameter("button") ?? false;
             _text = (string?)GetParameter("text") ?? string.Empty;
             _uri = (Uri?)GetParameter("uri");
-            _encoding = ((bool?)GetParameter("utf16") ?? false) ? NdefTextEncoding.Utf16 : NdefTextEncoding.Utf8;
+            _encoding = (bool?)GetParameter("utf16") ?? false ? NdefTextEncoding.Utf16 : NdefTextEncoding.Utf8;
             _read = (bool?)GetParameter("read") ?? false;
             _lcid = (string?)GetParameter("languageid") ?? string.Empty;
             _imf = (int?)GetParameter("initialmovingfactor") ?? 0;
             _text = (string?)GetParameter("text") ?? string.Empty;
             _uri = (Uri?)GetParameter("uri");
-            _encoding = ((bool?)GetParameter("utf16") ?? false) ? NdefTextEncoding.Utf16 : NdefTextEncoding.Utf8;
+            _encoding = (bool?)GetParameter("utf16") ?? false ? NdefTextEncoding.Utf16 : NdefTextEncoding.Utf8;
             _read = (bool?)GetParameter("read") ?? false;
             _lcid = (string?)GetParameter("languageid") ?? string.Empty;
 
@@ -455,11 +453,11 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                         if (keys.Skip(1).Any())
                         {
                             string keystr = string.Join(", ", keys.Select(k => k.SerialNumber));
-                            subMessage = $" Keys found: [{ keystr }].";
+                            subMessage = $" Keys found: [{keystr}].";
                         }
                         else
                         {
-                            subMessage = $" Key found: [{ keys.First().SerialNumber }].";
+                            subMessage = $" Key found: [{keys.First().SerialNumber}].";
                         }
                     }
                     string exText = string.Format(message, serialNumber, subMessage);
@@ -494,7 +492,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 // user doesn't want to be prompted.
                 if (Output.OutputLevel >= OutputLevel.Normal)
                 {
-                    message ??= $"Slot[{ _slot }] is already programmed. { Eol }" +
+                    message ??= $"Slot[{_slot}] is already programmed. {Eol}" +
                         "Type \"Yes\" and press [Enter] to overwrite";
                     // This is an exception to the "Always use Output" rule.
                     // Outputing a prompt to type "yes" to a file would be worse
@@ -509,7 +507,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 else
                 {
                     Output.WriteLine(
-                        $"Slot[{ _slot }] is already programmed." + Eol +
+                        $"Slot[{_slot}] is already programmed." + Eol +
                         "Either select the [-force] option, or don't select [-quiet] to be prompted.",
                         OutputLevel.Error);
                 }

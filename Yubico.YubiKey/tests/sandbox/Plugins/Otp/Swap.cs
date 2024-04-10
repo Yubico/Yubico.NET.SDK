@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             }
             catch (Exception ex)
             {
-                throw new PluginFailureException($"Error executing OtpSession.SwapSlots: { ex.Message }.", ex);
+                throw new PluginFailureException($"Error executing OtpSession.SwapSlots: {ex.Message}.", ex);
             }
 
             return true;

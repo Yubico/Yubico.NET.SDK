@@ -26,10 +26,10 @@ namespace Yubico.YubiKey
     internal class TestSmartCardDevice : ISmartCardDevice
     {
         public readonly static ISmartCardDevice AnyInstance = new TestSmartCardDevice()
-            { Kind = SmartCardConnectionKind.Any };
+        { Kind = SmartCardConnectionKind.Any };
 
         public readonly static ISmartCardDevice NfcInstance = new TestSmartCardDevice()
-            { Kind = SmartCardConnectionKind.Nfc };
+        { Kind = SmartCardConnectionKind.Nfc };
 
         public DateTime LastAccessed { get; } = DateTime.Now;
         public string Path { get; } = string.Empty;

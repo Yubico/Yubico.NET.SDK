@@ -13,11 +13,11 @@
 // limitations under the License.
 #if WINDOWS
 using System;
-using System.Windows.Forms;
 using System.Drawing;
+using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Security.Cryptography;
+using System.Windows.Forms;
 using Yubico.YubiKey;
 using Yubico.YubiKey.Sample.SharedCode;
 
@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         public void RunSample()
         {
             using var tokenSource = new CancellationTokenSource();
-            var sampleRunTask = Task.Run( () => CreateSampleRunThread(), tokenSource.Token);
+            var sampleRunTask = Task.Run(() => CreateSampleRunThread(), tokenSource.Token);
             _ = _parentForm.ShowDialog();
             tokenSource.Cancel();
         }
@@ -125,7 +125,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         {
             Answered = true;
             Text = "FIDO2 Sample";
-            Size = new Size(600,660);
+            Size = new Size(600, 660);
             MaximizeBox = false;
             MinimizeBox = false;
             StartPosition = FormStartPosition.CenterScreen;
@@ -331,7 +331,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         public PinPopupForm(string message)
         {
             Text = "User Action Required";
-            Size = new Size(400,400);
+            Size = new Size(400, 400);
             MaximizeBox = false;
             MinimizeBox = false;
             ControlBox = true;
@@ -399,7 +399,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
         protected override void OnShown(EventArgs e)
         {
-            _ = (_state < 3) ? _pinBox.Focus() : _newPinBox.Focus();
+            _ = _state < 3 ? _pinBox.Focus() : _newPinBox.Focus();
         }
 
         private void OkButton_Click(object sender, EventArgs e)
@@ -468,7 +468,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 return 0;
             }
 
-            if ((e.KeyValue < 0x21) || (e.KeyValue > 0x7E) || (currentLen >= 63))
+            if (e.KeyValue < 0x21 || e.KeyValue > 0x7E || currentLen >= 63)
             {
                 EndPinPopup(DialogResult.Retry);
                 return 0;
@@ -571,7 +571,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         public FpTouchPopupForm(string message)
         {
             Text = "User Action Required";
-            Size = new Size(400,400);
+            Size = new Size(400, 400);
             MaximizeBox = false;
             MinimizeBox = false;
             ControlBox = true;

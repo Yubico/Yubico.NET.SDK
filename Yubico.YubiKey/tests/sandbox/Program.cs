@@ -18,8 +18,8 @@ using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text;
-using Yubico.YubiKey.TestApp.Plugins.Otp;
 using Yubico.YubiKey.TestApp.Plugins;
+using Yubico.YubiKey.TestApp.Plugins.Otp;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.TestApp
@@ -80,7 +80,7 @@ namespace Yubico.YubiKey.TestApp
             }
             catch (Exception ex)
             {
-                WriteLine($"Error parsing command line [{ ex.Message }].", OutputLevel.Error);
+                WriteLine($"Error parsing command line [{ex.Message}].", OutputLevel.Error);
                 Usage(true);
                 return -1;
             }
@@ -91,12 +91,12 @@ namespace Yubico.YubiKey.TestApp
                 try
                 {
                     ParseConfigFile();
-                    WriteLine($"Config file [{ _configFile }] parsed.");
+                    WriteLine($"Config file [{_configFile}] parsed.");
                 }
                 catch (Exception ex)
                 {
-                    WriteLine($"Error: { ex.Message }.", OutputLevel.Error);
-                    WriteLine($"File: { _configFile }", OutputLevel.Error);
+                    WriteLine($"Error: {ex.Message}.", OutputLevel.Error);
+                    WriteLine($"File: {_configFile}", OutputLevel.Error);
                     return -1;
                 }
             }
@@ -132,7 +132,7 @@ namespace Yubico.YubiKey.TestApp
             }
             catch (Exception ex)
             {
-                WriteLine($"Error processing parameters [{ ex.Message }].", OutputLevel.Error);
+                WriteLine($"Error processing parameters [{ex.Message}].", OutputLevel.Error);
                 return -1;
             }
 
@@ -140,17 +140,17 @@ namespace Yubico.YubiKey.TestApp
             // Nothing to it but to do it.
             //try
             //{
-                WriteLine("Calling plugins Execute() method.");
-                bool result = _plugin?.Execute() ?? false;
-                WriteLine($"Plugin's Execute() method returned [{ result }]", OutputLevel.Verbose);
-                returnValue = result ? 0 : -1;
+            WriteLine("Calling plugins Execute() method.");
+            bool result = _plugin?.Execute() ?? false;
+            WriteLine($"Plugin's Execute() method returned [{result}]", OutputLevel.Verbose);
+            returnValue = result ? 0 : -1;
             //}
             //catch (Exception ex)
             //{
             //    WriteLine($"Exception in plugin [{ _plugin.Name }]: { ex.Message }.", OutputLevel.Error);
             //    returnValue = -1;
             //}
-            Write($"Returning [{ returnValue }] to command shell.", OutputLevel.Verbose);
+            Write($"Returning [{returnValue}] to command shell.", OutputLevel.Verbose);
             return returnValue;
         }
 
@@ -190,7 +190,7 @@ namespace Yubico.YubiKey.TestApp
                               + "If you do not supply a full path, the current working "
                               + "directory is the starting point."),
             };
-            if (_plugin is null || ((_outputLevel ?? OutputLevel.Normal) == OutputLevel.Verbose))
+            if (_plugin is null || (_outputLevel ?? OutputLevel.Normal) == OutputLevel.Verbose)
             {
                 paramUsage.Add(("Plug-ins", string.Empty));
             }
@@ -204,7 +204,7 @@ namespace Yubico.YubiKey.TestApp
 
             foreach (PluginBase plugin in plugIns)
             {
-                if (_plugin is null && ((_outputLevel ?? OutputLevel.Normal) != OutputLevel.Verbose))
+                if (_plugin is null && (_outputLevel ?? OutputLevel.Normal) != OutputLevel.Verbose)
                 {
                     // If there's no plug-in selected, show all of them, but only
                     // descriptions so that we don't have pages of parameters.
@@ -214,7 +214,7 @@ namespace Yubico.YubiKey.TestApp
                 {
                     // If there is a plug-in selected, show all of its parameters
                     // and their descriptions, but no description for the plug-in.
-                    paramUsage.Add(($"{ plugin.Name } Parameters", string.Empty));
+                    paramUsage.Add(($"{plugin.Name} Parameters", string.Empty));
                     if (plugin.Parameters.Values.Any())
                     {
                         foreach (Parameter parameter in plugin.Parameters.Values)
@@ -255,7 +255,7 @@ namespace Yubico.YubiKey.TestApp
                 else
                 {
                     int spaces = maxFlagWidth - id.Length - 3;
-                    _ = sb.Append($"  { id }{ new string(' ', spaces)}");
+                    _ = sb.Append($"  {id}{new string(' ', spaces)}");
                     WriteDescription(desc, maxFlagWidth);
                 }
             }
@@ -306,7 +306,7 @@ namespace Yubico.YubiKey.TestApp
         // will collect parameters from here and just store them.
         private void ParseCommandline(string[] args)
         {
-            WriteLine($"Parsing command line parameters [{ string.Join(", ", args) }].", OutputLevel.Verbose);
+            WriteLine($"Parsing command line parameters [{string.Join(", ", args)}].", OutputLevel.Verbose);
             for (int i = 0; i < args.Length; ++i)
             {
                 string arg = args[i];
@@ -315,7 +315,7 @@ namespace Yubico.YubiKey.TestApp
                 // of it.
                 if (arg[0] != '-' && arg[0] != '/')
                 {
-                    throw new ArgumentException($"[{ arg[0] }] was unexpected.");
+                    throw new ArgumentException($"[{arg[0]}] was unexpected.");
                 }
 
                 // If the argument has a colon, then it can be assumed that the
@@ -347,7 +347,7 @@ namespace Yubico.YubiKey.TestApp
                 // It will just be easier if this isn't case sensitive.
                 name = name.ToLower();
 
-                WriteLine($"Parsed parameter name[{ name }], value[{ value }]", OutputLevel.Verbose);
+                WriteLine($"Parsed parameter name[{name}], value[{value}]", OutputLevel.Verbose);
 
                 // Since we're handling parameters from two different places,
                 // we'll use a common method.
@@ -361,7 +361,7 @@ namespace Yubico.YubiKey.TestApp
         // it's used to parse the config file.
         private void HandleParameter(string key, string value)
         {
-            Write($"Processing [{ key }] with value [{ value }]...", OutputLevel.Verbose);
+            Write($"Processing [{key}] with value [{value}]...", OutputLevel.Verbose);
             bool isSet = true;
 
             switch (key)
@@ -373,8 +373,8 @@ namespace Yubico.YubiKey.TestApp
                     }
                     else
                     {
-                        Write($"Not setting [{ value }] as plugin. ", OutputLevel.Verbose);
-                        WriteLine($"Plugin is already [{ _plugin.Name }].", OutputLevel.Verbose);
+                        Write($"Not setting [{value}] as plugin. ", OutputLevel.Verbose);
+                        WriteLine($"Plugin is already [{_plugin.Name}].", OutputLevel.Verbose);
                         isSet = false;
                     }
 
@@ -424,7 +424,7 @@ namespace Yubico.YubiKey.TestApp
                     else
                     {
                         throw new ArgumentException(
-                            $"Can't set [{ key }]. OutputLevel is already [{ _outputLevel.Value }]");
+                            $"Can't set [{key}]. OutputLevel is already [{_outputLevel.Value}]");
                     }
 
                     break;
@@ -449,9 +449,9 @@ namespace Yubico.YubiKey.TestApp
                     }
                     else
                     {
-                        Write($"Not setting [{ key }] as [{ value }]. ", OutputLevel.Verbose);
+                        Write($"Not setting [{key}] as [{value}]. ", OutputLevel.Verbose);
                         WriteLine(
-                            $"[{ key }] was already set, probably in your config file.",
+                            $"[{key}] was already set, probably in your config file.",
                             OutputLevel.Verbose);
                         isSet = false;
                     }
@@ -470,7 +470,7 @@ namespace Yubico.YubiKey.TestApp
         {
             if (!File.Exists(_configFile))
             {
-                throw new FileNotFoundException($"Specified config file [{ _configFile }] doesn't exist.");
+                throw new FileNotFoundException($"Specified config file [{_configFile}] doesn't exist.");
             }
 
             var configMap = new ExeConfigurationFileMap
@@ -495,7 +495,7 @@ namespace Yubico.YubiKey.TestApp
         {
             if (!_plugIns.TryGetValue(plugin, out Func<IOutput, PluginBase>? getter))
             {
-                throw new InvalidOperationException($"Plugin [{ plugin }] not found.");
+                throw new InvalidOperationException($"Plugin [{plugin}] not found.");
             }
 
             _plugin = getter(this);
@@ -522,7 +522,7 @@ namespace Yubico.YubiKey.TestApp
             {
                 if (!parameters.TryGetValue(kvp.Key, out Parameter? parameter))
                 {
-                    throw new ArgumentException($"Unexpected parameter [{ kvp.Key }] for plugin [{ plugin.Name }]");
+                    throw new ArgumentException($"Unexpected parameter [{kvp.Key}] for plugin [{plugin.Name}]");
                 }
 
                 if (!plugin.Converters.TryGetValue(parameter.Type, out Func<string, object>? converter))
@@ -542,7 +542,7 @@ namespace Yubico.YubiKey.TestApp
                 catch (Exception ex)
                 {
                     throw new InvalidOperationException(
-                        $"Error: { ex.Message }, Parameter: { parameter.Name }, Value: { kvp.Value }, Type: { parameter.Type }",
+                        $"Error: {ex.Message}, Parameter: {parameter.Name}, Value: {kvp.Value}, Type: {parameter.Type}",
                         ex);
                 }
 

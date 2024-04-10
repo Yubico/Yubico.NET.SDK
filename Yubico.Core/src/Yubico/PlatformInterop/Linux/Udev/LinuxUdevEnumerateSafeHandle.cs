@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Runtime.InteropServices;
 using System.Runtime.ConstrainedExecution;
+using System.Runtime.InteropServices;
 
 namespace Yubico.PlatformInterop
 {

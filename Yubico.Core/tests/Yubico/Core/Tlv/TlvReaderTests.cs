@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Text;
 using System.Linq;
+using System.Text;
 using Xunit;
 
 namespace Yubico.Core.Tlv.UnitTests
@@ -296,7 +296,7 @@ namespace Yubico.Core.Tlv.UnitTests
         {
             byte value0 = (byte)(value >> 24);
             byte value1 = (byte)(value >> 16);
-            byte value2 = (byte)(value >>  8);
+            byte value2 = (byte)(value >> 8);
             byte value3 = (byte)value;
             byte[] encoding = new byte[] { 0x01, 0x04, value0, value1, value2, value3 };
             if (bigEndian == false)

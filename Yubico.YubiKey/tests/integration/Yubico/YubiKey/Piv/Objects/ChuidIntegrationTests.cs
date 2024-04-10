@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Piv.Objects;
 using Xunit;
+using Yubico.YubiKey.Piv.Objects;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.Piv
                     chuid = pivSession.ReadObject<CardholderUniqueId>();
                     Assert.False(chuid.IsEmpty);
 
-                    bool isValid = MemoryExtensions.SequenceEqual<byte>(expected, chuid.GuidValue.Span);
+                    bool isValid = expected.SequenceEqual(chuid.GuidValue.Span);
                     Assert.True(isValid);
                 }
             }
@@ -112,7 +112,7 @@ namespace Yubico.YubiKey.Piv
                     chuid = pivSession.ReadObject<CardholderUniqueId>(0x5F0010);
                     Assert.False(chuid.IsEmpty);
 
-                    bool isValid = MemoryExtensions.SequenceEqual<byte>(expected, chuid.GuidValue.Span);
+                    bool isValid = expected.SequenceEqual(chuid.GuidValue.Span);
                     Assert.True(isValid);
                 }
             }
@@ -161,7 +161,7 @@ namespace Yubico.YubiKey.Piv
                     // Make sure that worked.
                     chuid = pivSession.ReadObject<CardholderUniqueId>();
                     Assert.False(chuid.IsEmpty);
-                    bool isValid = MemoryExtensions.SequenceEqual<byte>(expected, chuid.GuidValue.Span);
+                    bool isValid = expected.SequenceEqual(chuid.GuidValue.Span);
                     Assert.True(isValid);
 
                     // Now write an empty object.

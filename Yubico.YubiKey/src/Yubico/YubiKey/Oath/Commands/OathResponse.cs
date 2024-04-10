@@ -21,7 +21,7 @@ namespace Yubico.YubiKey.Oath.Commands
     /// or one of its derived classes to retrieve the full response.
     /// </summary>
     /// <seealso cref="Yubico.YubiKey.IYubiKeyResponse" />
-    public class OathResponse: YubiKeyResponse
+    public class OathResponse : YubiKeyResponse
     {
         public OathResponse(ResponseApdu responseApdu) :
                base(responseApdu)

@@ -14,12 +14,10 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
+using Xunit;
 using Yubico.Core.Devices.Hid;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.U2f.Commands;
-using Xunit;
-using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -61,8 +59,8 @@ namespace Yubico.YubiKey.U2f
         {
             foreach (HidDevice currentDevice in devices)
             {
-                if ((currentDevice.VendorId == 0x1050) &&
-                    (currentDevice.UsagePage == HidUsagePage.Fido))
+                if (currentDevice.VendorId == 0x1050 &&
+                    currentDevice.UsagePage == HidUsagePage.Fido)
                 {
                     return currentDevice;
                 }
@@ -74,8 +72,10 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void SetCRTimeout_Succeeds()
         {
-            var cmd = new SetDeviceInfoCommand();
-            cmd.ChallengeResponseTimeout = 0x20;
+            var cmd = new SetDeviceInfoCommand
+            {
+                ChallengeResponseTimeout = 0x20
+            };
             SetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
 
             Assert.Equal(ResponseStatus.Success, rsp.Status);
@@ -91,21 +91,23 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void SetLockCode_Succeeds()
         {
-            byte[] newCode = new byte[] {
+            byte[] newCode = {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48
             };
-            byte[] wrongCode = new byte[] {
+            byte[] wrongCode = {
                 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
                 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
             };
-            byte[] clearCode = new byte[] {
+            byte[] clearCode = {
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
             };
 
-            var cmd = new SetDeviceInfoCommand();
-            cmd.ChallengeResponseTimeout = 0x21;
+            var cmd = new SetDeviceInfoCommand
+            {
+                ChallengeResponseTimeout = 0x21
+            };
             SetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
@@ -114,8 +116,10 @@ namespace Yubico.YubiKey.U2f
             rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            cmd = new SetDeviceInfoCommand();
-            cmd.ChallengeResponseTimeout = 0x22;
+            cmd = new SetDeviceInfoCommand
+            {
+                ChallengeResponseTimeout = 0x22
+            };
             rsp = _fidoConnection.SendCommand(cmd);
             Assert.NotEqual(ResponseStatus.Success, rsp.Status);
 
@@ -149,8 +153,10 @@ namespace Yubico.YubiKey.U2f
         public void SetLegacyCRTimeout_Succeeds()
         {
             var cmd = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.Ccid, 0x21, true, 255);
-            cmd.YubiKeyInterfaces = YubiKeyCapabilities.All;
+                YubiKeyCapabilities.Ccid, 0x21, true, 255)
+            {
+                YubiKeyInterfaces = YubiKeyCapabilities.All
+            };
             YubiKeyResponse rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 

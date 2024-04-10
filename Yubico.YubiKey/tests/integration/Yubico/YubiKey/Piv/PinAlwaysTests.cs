@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System.Linq;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Piv
                 _ = pivSession.GenerateKeyPair(
                     slotNumber, PivAlgorithm.EccP256, PivPinPolicy.Always, PivTouchPolicy.Never);
 
-                byte[] dataToSign = new byte[] {
+                byte[] dataToSign = {
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
                     0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
                     0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78,
@@ -72,7 +72,7 @@ namespace Yubico.YubiKey.Piv
                 _ = pivSession.GenerateKeyPair(
                     slotNumber, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
 
-                byte[] dataToSign = new byte[] {
+                byte[] dataToSign = {
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
                     0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
                     0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78,

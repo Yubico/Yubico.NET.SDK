@@ -12,21 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections.Generic;
+using Xunit;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
-using System.Collections.Generic;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
+    [Trait("Category", "RequiresBio")]
     public class BioEnrollmentCommandTests : NeedPinToken
     {
         public BioEnrollmentCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio, null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, null)
         {
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void GetModalityCommand_Succeeds()
         {
             var cmd = new GetBioModalityCommand();
@@ -36,7 +37,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.Equal(1, modality);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void GetSensorInfoCommand_Succeeds()
         {
             var cmd = new GetFingerprintSensorInfoCommand();
@@ -48,7 +49,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.Equal(15, sensorInfo.MaxFriendlyNameBytes);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void BioEnrollBegin_Succeeds()
         {
             var protocol = new PinUvAuthProtocolTwo();
@@ -63,7 +64,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.Equal(BioEnrollSampleStatus.FpGood, enrollResult.LastEnrollSampleStatus);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void BioEnrollNextSample_Succeeds()
         {
             var protocol = new PinUvAuthProtocolTwo();
@@ -88,7 +89,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.Equal(0, enrollResult.RemainingSampleCount);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void BioEnrollCancel_Succeeds()
         {
             var protocol = new PinUvAuthProtocolTwo();
@@ -114,7 +115,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.Equal(ResponseStatus.Success, cancelRsp.Status);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void EnumerateEnrollmentsCommand_Succeeds()
         {
             var protocol = new PinUvAuthProtocolTwo();
@@ -131,7 +132,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             _ = Assert.Single(templateInfos);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void FriendlyNameCommand_Succeeds()
         {
             var protocol = new PinUvAuthProtocolTwo();
@@ -152,7 +153,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             Assert.Equal(ResponseStatus.Success, nameRsp.Status);
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void DeleteCommand_Succeeds()
         {
             var protocol = new PinUvAuthProtocolTwo();

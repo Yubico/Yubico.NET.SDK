@@ -13,9 +13,9 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
 using System.Collections.Generic;
 using System.Formats.Cbor;
+using System.Globalization;
 
 namespace Yubico.YubiKey.Fido2.Cbor
 {
@@ -98,9 +98,9 @@ namespace Yubico.YubiKey.Fido2.Cbor
         /// <returns>
         /// A new IDictionary representing this map.
         /// </returns>
-        public IReadOnlyDictionary<TKey,TValue> AsDictionary<TValue>()
+        public IReadOnlyDictionary<TKey, TValue> AsDictionary<TValue>()
         {
-            var returnValue = new Dictionary<TKey,TValue>(_dict.Count);
+            var returnValue = new Dictionary<TKey, TValue>(_dict.Count);
             foreach (KeyValuePair<TKey, object?> entry in _dict)
             {
                 object? currentValue = ConvertValue<TValue>(entry.Value);
@@ -147,7 +147,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 {
                     object? currentValue = ConvertValue<TValue>(entries[index]);
 
-                    if (!(currentValue is null) && (currentValue is TValue typedValue))
+                    if (!(currentValue is null) && currentValue is TValue typedValue)
                     {
                         returnValue.Add(typedValue);
                         continue;
@@ -223,8 +223,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 throw new InvalidCastException(null, overflowException);
             }
-
-            throw new InvalidCastException();
         }
 
         /// <summary>
@@ -247,7 +245,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 throw new InvalidCastException(null, overflowException);
             }
 
-            throw new InvalidCastException();
         }
 
         /// <summary>
@@ -265,8 +262,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 throw new InvalidCastException(null, overflowException);
             }
-
-            throw new InvalidCastException();
         }
 
         /// <summary>
@@ -288,8 +283,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 throw new InvalidCastException(null, overflowException);
             }
-
-            throw new InvalidCastException();
         }
 
         /// <summary>

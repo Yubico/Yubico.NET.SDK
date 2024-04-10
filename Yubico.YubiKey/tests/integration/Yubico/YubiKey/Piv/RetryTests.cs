@@ -18,6 +18,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class RetryTests
     {
         [Theory]
@@ -35,7 +36,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ChangePinAndPukRetryCounts(7, 8);
 
-                if (isOld == true)
+                if (isOld)
                 {
                     return;
                 }
@@ -73,7 +74,7 @@ namespace Yubico.YubiKey.Piv
                     collectorObj.KeyFlag = 0;
                     pivSession.VerifyPin();
 
-                    if (isOld == true)
+                    if (isOld)
                     {
                         return;
                     }

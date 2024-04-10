@@ -14,20 +14,20 @@
 
 using System;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.PinProtocols;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
+    [Trait("Category", "RequiresBio")]
     public class MakeCredentialCommandTests : NeedPinToken
     {
         public MakeCredentialCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Bio, null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, null)
         {
         }
 
-        [Fact]
+        [SkippableFact(typeof(DeviceNotFoundException))]
         public void MakeCredentialCommand_Succeeds()
         {
             var protocol = new PinUvAuthProtocolTwo();
@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             PinUvAuthProtocolBase protocol,
             out MakeCredentialParameters makeParams)
         {
-            byte[] clientDataHash = new byte[] {
+            byte[] clientDataHash = {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
             };
@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             {
                 Name = "SomeRpName",
             };
-            byte[] userId = new byte[] { 0x11, 0x22, 0x33, 0x44 };
+            byte[] userId = { 0x11, 0x22, 0x33, 0x44 };
             var user = new UserEntity(new ReadOnlyMemory<byte>(userId))
             {
                 Name = "SomeUserName",

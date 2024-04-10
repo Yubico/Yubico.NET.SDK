@@ -20,6 +20,7 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey.Oath
 {
     [TestCaseOrderer(PriorityOrderer.TypeName, PriorityOrderer.AssembyName)]
+    [Trait("Category", "Simple")]
     public sealed class OathSessionCredentialTests : IClassFixture<CredentialFixture>
     {
         // Shared object instance across tests.
@@ -99,8 +100,8 @@ namespace Yubico.YubiKey.Oath
                 Code data = oathSession.CalculateCredential(_fixture.TotpCredentialWithDefaultPeriod);
 
                 Assert.NotNull(data.Value);
-                Assert.NotNull(data.ValidFrom);
-                Assert.NotNull(data.ValidUntil);
+                _ = Assert.NotNull(data.ValidFrom);
+                _ = Assert.NotNull(data.ValidUntil);
 
                 int difference = (int)(data.ValidUntil! - data.ValidFrom!).Value.TotalSeconds;
 
@@ -122,8 +123,8 @@ namespace Yubico.YubiKey.Oath
                 Code data = oathSession.CalculateCredential(_fixture.HotpCredential);
 
                 Assert.NotNull(data.Value);
-                Assert.NotNull(data.ValidFrom);
-                Assert.NotNull(data.ValidUntil);
+                _ = Assert.NotNull(data.ValidFrom);
+                _ = Assert.NotNull(data.ValidUntil);
                 Assert.Equal(DateTimeOffset.MaxValue, data.ValidUntil);
             }
         }
@@ -146,8 +147,8 @@ namespace Yubico.YubiKey.Oath
                     CredentialPeriod.Period15);
 
                 Assert.NotNull(data.Value);
-                Assert.NotNull(data.ValidFrom);
-                Assert.NotNull(data.ValidUntil);
+                _ = Assert.NotNull(data.ValidFrom);
+                _ = Assert.NotNull(data.ValidUntil);
 
                 int difference = (int)(data.ValidUntil! - data.ValidFrom!).Value.TotalSeconds;
 
@@ -173,8 +174,8 @@ namespace Yubico.YubiKey.Oath
                     0);
 
                 Assert.NotNull(data.Value);
-                Assert.NotNull(data.ValidFrom);
-                Assert.NotNull(data.ValidUntil);
+                _ = Assert.NotNull(data.ValidFrom);
+                _ = Assert.NotNull(data.ValidUntil);
                 Assert.Equal(DateTimeOffset.MaxValue, data.ValidUntil);
             }
         }
@@ -330,11 +331,11 @@ namespace Yubico.YubiKey.Oath
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
+                //Why should this fail?
                 _ = Assert.Throws<InvalidOperationException>(() => oathSession.AddCredential(
                     "GitHub",
                     "test@gmail.com",
-                    CredentialType.Hotp,
-                    CredentialPeriod.Period30));
+                    CredentialType.Hotp));
             }
         }
 

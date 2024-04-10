@@ -24,7 +24,6 @@ namespace Yubico.YubiKey.Piv
     // agree.
     public sealed partial class PivSession : IDisposable
     {
-
         /// <summary>
         /// Create a digital signature using the key in the given slot.
         /// </summary>
@@ -363,6 +362,7 @@ namespace Yubico.YubiKey.Piv
             {
                 throw new ArgumentNullException(nameof(correspondentPublicKey));
             }
+
             if (!correspondentPublicKey.Algorithm.IsEcc())
             {
                 throw new ArgumentException(
@@ -389,11 +389,10 @@ namespace Yubico.YubiKey.Piv
         // Common code, this performs either Signing, Decryption, or Key
         // Agreement. Just pass in the actual command to run, along with some
         // other information.
-        private byte[] PerformPrivateKeyOperation(
-            byte slotNumber,
-            IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> command,
-            PivAlgorithm algorithm,
-            string algorithmExceptionMessage)
+        private byte[] PerformPrivateKeyOperation(byte slotNumber,
+                                                  IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> command,
+                                                  PivAlgorithm algorithm,
+                                                  string algorithmExceptionMessage)
         {
             bool pinRequired = true;
 
@@ -428,8 +427,8 @@ namespace Yubico.YubiKey.Piv
                 // PIN is not required.
                 // The only other case is Always which means we set the
                 // pinRequired to true, but we init that variable to true.
-                if ((metadata.PinPolicy == PivPinPolicy.Never) ||
-                    ((metadata.PinPolicy == PivPinPolicy.Once) && PinVerified))
+                if (metadata.PinPolicy == PivPinPolicy.Never ||
+                    (metadata.PinPolicy == PivPinPolicy.Once && PinVerified))
                 {
                     pinRequired = false;
                 }
@@ -466,7 +465,7 @@ namespace Yubico.YubiKey.Piv
                 }
             }
 
-            if (pinRequired == true)
+            if (pinRequired)
             {
                 // This is the verify method that will throw an exception if the
                 // user cancels.

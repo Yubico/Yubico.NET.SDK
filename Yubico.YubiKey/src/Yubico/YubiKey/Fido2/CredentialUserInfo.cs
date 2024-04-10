@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// The credential ID for a credential returned.
         /// </summary>
-        public CredentialId CredentialId {get; private set; }
+        public CredentialId CredentialId { get; private set; }
 
         /// <summary>
         /// The public key for a credential returned.

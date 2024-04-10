@@ -13,24 +13,24 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Fido2.Commands;
-using Yubico.YubiKey.Fido2.PinProtocols;
 using Xunit;
+using Yubico.YubiKey.Fido2.PinProtocols;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
+    [Trait("Category", "FirmwareOrHardwareMissmatch")]
     public class EnumCredsCommandTests : SimpleIntegrationTestConnection
     {
         public EnumCredsCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5)
+            : base(YubiKeyApplication.Fido2)
         {
         }
 
         [Fact]
         public void EnumCredsCommand_Succeeds()
         {
-            byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            byte[] pin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
             var protocol = new PinUvAuthProtocolTwo();
             var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
@@ -41,7 +41,10 @@ namespace Yubico.YubiKey.Fido2.Commands
             PinUvAuthTokenPermissions permissions = PinUvAuthTokenPermissions.CredentialManagement;
             var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, pin, permissions, null);
             GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
-            Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
+            Assert.Equal(ResponseStatus.Success, getTokenRsp.Status); /*Xunit.Sdk.EqualException
+Assert.Equal() Failure: Values differ
+Expected: Success
+Actual:   Failed*/
             ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
 
             var cmd = new EnumerateRpsBeginCommand(pinToken, protocol);
@@ -73,7 +76,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void EnumCredsCommand_Preview_Succeeds()
         {
-            byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            byte[] pin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
             var protocol = new PinUvAuthProtocolOne();
             var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
@@ -83,7 +86,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             protocol.Encapsulate(getKeyRsp.GetData());
             var getTokenCmd = new GetPinTokenCommand(protocol, pin);
             GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
-            Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
+            Assert.Equal(ResponseStatus.Success, getTokenRsp.Status); //Fail
             ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
 
             var cmd = new EnumerateRpsBeginCommand(pinToken, protocol)
@@ -109,7 +112,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             for (int index = 1; index < credCount; index++)
             {
-                var getNextCmd = new EnumerateCredentialsGetNextCommand()
+                var getNextCmd = new EnumerateCredentialsGetNextCommand
                 {
                     IsPreview = true
                 };

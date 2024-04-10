@@ -79,7 +79,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 Assert.True(isValid);
                 isValid = TestUInt32(encoding, flags);
                 Assert.True(isValid);
-                isValid = TestInt64 (encoding, flags);
+                isValid = TestInt64(encoding, flags);
                 Assert.True(isValid);
                 isValid = TestUInt64(encoding, flags);
                 Assert.True(isValid);

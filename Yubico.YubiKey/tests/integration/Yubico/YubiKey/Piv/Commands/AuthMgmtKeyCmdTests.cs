@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
@@ -24,6 +24,7 @@ namespace Yubico.YubiKey.Piv.Commands
     // set of bytes, followed by 2048 random bytes. If you want to get only
     // random bytes, skip the first SpecifiedStart bytes (get a random object and
     // generate that many bytes).
+    [Trait("Category", "Simple")]
     public class AuthMgmtKeyCmdTests : IDisposable
     {
         private readonly IYubiKeyDevice yubiKey;
@@ -42,14 +43,14 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void AuthKey_Default_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5,4,2))
+            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
             {
                 return;
             }
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                byte[] mgmtKey = new byte[] {
+                byte[] mgmtKey = {
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
@@ -69,19 +70,19 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void AuthKey_Aes_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5,4,2))
+            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
             {
                 return;
             }
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                byte[] defaultKey = new byte[] {
+                byte[] defaultKey = {
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
                 };
-                byte[] mgmtKey = new byte[] {
+                byte[] mgmtKey = {
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                     0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58

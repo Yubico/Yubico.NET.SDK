@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Scp03
 
             set
             {
-                if ((value != DefaultKvnValue) && ((value < MinimumKvnValue) || (value > MaximumKvnValue)))
+                if (value != DefaultKvnValue && (value < MinimumKvnValue || value > MaximumKvnValue))
                 {
                     throw new ArgumentException(ExceptionMessages.InvalidScp03Kvn);
                 }
@@ -201,7 +201,7 @@ namespace Yubico.YubiKey.Scp03
                     && ChannelMacKey.Span.SequenceEqual(compareKeys.ChannelMacKey.Span)
                     && DataEncryptionKey.Span.SequenceEqual(compareKeys.DataEncryptionKey.Span))
                 {
-                        return true;
+                    return true;
                 }
             }
 

@@ -13,11 +13,11 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
 using System.Globalization;
+using System.Security.Cryptography;
+using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Fido2.PinProtocols;
-using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {

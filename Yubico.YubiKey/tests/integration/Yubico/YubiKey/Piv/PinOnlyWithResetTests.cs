@@ -15,9 +15,9 @@
 using System;
 using System.Security;
 using System.Security.Cryptography;
+using Xunit;
 using Yubico.YubiKey.Piv.Objects;
 using Yubico.YubiKey.TestUtilities;
-using Xunit;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -27,6 +27,7 @@ namespace Yubico.YubiKey.Piv
     // set of bytes, followed by 2048 random bytes. If you want to get only
     // random bytes, skip the first SpecifiedStart bytes (get a random object and
     // generate that many bytes).
+    [Trait("Category", "Simple")]
     public class PinOnlyWithResetTests : IDisposable
     {
         private const int SpecifiedStart = 72;
@@ -111,7 +112,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Null(adminData.PinLastUpdated);
                 Assert.False(adminData.PinProtected);
                 Assert.True(adminData.PukBlocked);
-                Assert.NotNull(adminData.Salt);
+                _ = Assert.NotNull(adminData.Salt);
 
                 PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.True(pinProtect.IsEmpty);
@@ -134,7 +135,7 @@ namespace Yubico.YubiKey.Piv
 
             bool isBlocked = IsPukBlocked();
             Assert.True(isBlocked);
-         }
+        }
 
         [Fact]
         public void Run_SetPinDerived_UsesSalt()
@@ -148,7 +149,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
 
                 AdminData adminData = pivSession.ReadObject<AdminData>();
-                Assert.NotNull(adminData.Salt);
+                _ = Assert.NotNull(adminData.Salt);
                 if (!(adminData.Salt is null))
                 {
                     var result = (ReadOnlyMemory<byte>)adminData.Salt;
@@ -186,7 +187,7 @@ namespace Yubico.YubiKey.Piv
 
                 PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.False(pinProtect.IsEmpty);
-                Assert.NotNull(pinProtect.ManagementKey);
+                _ = Assert.NotNull(pinProtect.ManagementKey);
             }
 
             using (var pivSession = new PivSession(yubiKey))
@@ -272,7 +273,7 @@ namespace Yubico.YubiKey.Piv
 
                 PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.False(pinProtect.IsEmpty);
-                Assert.NotNull(pinProtect.ManagementKey);
+                _ = Assert.NotNull(pinProtect.ManagementKey);
                 if (!(pinProtect.ManagementKey is null))
                 {
                     var result = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
@@ -293,7 +294,7 @@ namespace Yubico.YubiKey.Piv
 
                 PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.False(pinProtect.IsEmpty);
-                Assert.NotNull(pinProtect.ManagementKey);
+                _ = Assert.NotNull(pinProtect.ManagementKey);
                 if (!(pinProtect.ManagementKey is null))
                 {
                     var result = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
@@ -317,7 +318,7 @@ namespace Yubico.YubiKey.Piv
                 PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
 
                 Assert.False(pinProtect.IsEmpty);
-                Assert.NotNull(pinProtect.ManagementKey);
+                _ = Assert.NotNull(pinProtect.ManagementKey);
                 if (!(pinProtect.ManagementKey is null))
                 {
                     var result = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
@@ -346,7 +347,7 @@ namespace Yubico.YubiKey.Piv
                 PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
 
                 Assert.False(pinProtect.IsEmpty);
-                Assert.NotNull(pinProtect.ManagementKey);
+                _ = Assert.NotNull(pinProtect.ManagementKey);
                 if (!(pinProtect.ManagementKey is null))
                 {
                     var result = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
@@ -696,7 +697,7 @@ namespace Yubico.YubiKey.Piv
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
                 });
-                bool isValid = pivSession.TryAuthenticateManagementKey(mgmtKey, true);
+                bool isValid = pivSession.TryAuthenticateManagementKey(mgmtKey);
             }
         }
 

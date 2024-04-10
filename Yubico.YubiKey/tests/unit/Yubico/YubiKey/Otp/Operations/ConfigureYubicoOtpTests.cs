@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.Otp.Operations
         [Fact]
         public void TestGeneratedAndSpecifiedKey()
         {
-          _ = _op.GenerateKey(new byte[ConfigureYubicoOtp.KeySize]);
+            _ = _op.GenerateKey(new byte[ConfigureYubicoOtp.KeySize]);
             InvalidOperationException ex =
                 Assert.Throws<InvalidOperationException>(() => _op.UseKey(_validKey));
             Assert.Equal(ExceptionMessages.CantSpecifyKeyAndGenerate, ex.Message);

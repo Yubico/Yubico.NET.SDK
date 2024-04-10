@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.Piv.Objects;
-using Yubico.YubiKey.Piv.Commands;
-using Yubico.YubiKey.TestUtilities;
 using Xunit;
+using Yubico.YubiKey.Piv.Commands;
+using Yubico.YubiKey.Piv.Objects;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -26,19 +26,19 @@ namespace Yubico.YubiKey.Piv
     {
         private const int AdminDataTag = 0x005FFF00;
         private const int PrintedTag = (int)PivDataTag.Printed;
-        private readonly bool _alternateAlgorithm = false;
+        private readonly bool _alternateAlgorithm;
         private readonly IYubiKeyDevice _yubiKey;
         private readonly SpecifiedKeyCollector _specifiedCollector;
         private readonly Simple39KeyCollector _collectorObj;
         private readonly ReadOnlyMemory<byte> _defaultManagementKey;
         private readonly ReadOnlyMemory<byte> _defaultPin;
 
-        private readonly byte[] _keyBytes = new byte[] {
+        private readonly byte[] _keyBytes = {
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
         };
-        private readonly byte[] _pinBytes = new byte[] {
+        private readonly byte[] _pinBytes = {
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36
         };
 
@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.Piv
             {
                 Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
 
-                bool isValid = pivSession.TryAuthenticateManagementKey(_defaultManagementKey, true);
+                bool isValid = pivSession.TryAuthenticateManagementKey(_defaultManagementKey);
                 Assert.True(isValid);
 
                 PivPinOnlyMode expectedMode = GetExpectedMode(PivPinOnlyMode.None, unavailable);
@@ -141,7 +141,7 @@ namespace Yubico.YubiKey.Piv
         {
             using (var pivSession = new PivSession(_yubiKey))
             {
-                bool isValid = pivSession.TryAuthenticateManagementKey(_defaultManagementKey, true);
+                bool isValid = pivSession.TryAuthenticateManagementKey(_defaultManagementKey);
                 Assert.True(isValid);
 
                 isValid = pivSession.TryVerifyPin(_defaultPin, out int? _);
@@ -181,7 +181,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(_yubiKey))
             {
                 pivSession.KeyCollector = _specifiedCollector.SpecifiedKeyCollectorDelegate;
-                bool isValid = pivSession.TryAuthenticateManagementKey(true);
+                bool isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
                 SetUnavailable(pivSession, unavailable);
@@ -281,7 +281,7 @@ namespace Yubico.YubiKey.Piv
 
         private void SetUnavailable(PivSession pivSession, PivPinOnlyMode unavailable)
         {
-            byte[] unexpectedData = new byte[] { 0x53, 0x04, 0x02, 0x02, 0x00, 0xff };
+            byte[] unexpectedData = { 0x53, 0x04, 0x02, 0x02, 0x00, 0xff };
 
             if (unavailable.HasFlag(PivPinOnlyMode.PinProtectedUnavailable))
             {

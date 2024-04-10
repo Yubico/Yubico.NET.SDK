@@ -95,18 +95,17 @@ namespace Yubico.PlatformInterop
         // Read count bytes. Place them into outputBuffer.
         [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "read", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern int read(
-            LinuxFileSafeHandle handle,
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)] byte[] outputBuffer,
-            int count);
+        public static extern int read(LinuxFileSafeHandle handle,
+                                      [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
+                                      byte[] outputBuffer,
+                                      int count);
 
         // Write the count bytes in inputBuffer.
         [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "write", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern int write(
-            int handle,
-            [MarshalAs(UnmanagedType.LPArray)] byte[] inputBuffer,
-            int count);
+        public static extern int write(int handle,
+                                       [MarshalAs(UnmanagedType.LPArray)] byte[] inputBuffer,
+                                       int count);
 
         [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "fcntl", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]

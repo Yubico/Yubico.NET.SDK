@@ -16,8 +16,8 @@ using System;
 using System.Globalization;
 using System.Security.Cryptography;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.Cryptography;
+using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -147,7 +147,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidCallOrder));
             }
-            if ((currentPin.Length > MaximumPinLength) || (newPin.Length > MaximumPinLength))
+            if (currentPin.Length > MaximumPinLength || newPin.Length > MaximumPinLength)
             {
                 throw new ArgumentException(
                     string.Format(

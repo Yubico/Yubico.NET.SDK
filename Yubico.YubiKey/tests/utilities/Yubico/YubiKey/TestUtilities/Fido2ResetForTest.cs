@@ -14,10 +14,11 @@
 
 using System;
 using System.Globalization;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2;
+using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.TestUtilities
 {
@@ -28,19 +29,12 @@ namespace Yubico.YubiKey.TestUtilities
     public class Fido2ResetForTest
     {
         private const int ReinsertTimeoutSeconds = 10;
+        private readonly KeyEntryData _keyEntryData = new KeyEntryData();
+        private readonly ReadOnlyMemory<byte> _pin;
+        private readonly bool _setPin;
         private readonly string ReinsertTimeoutString = ReinsertTimeoutSeconds.ToString(NumberFormatInfo.InvariantInfo);
 
         private IYubiKeyDevice? _yubiKeyDevice;
-        private readonly bool _setPin;
-        private readonly ReadOnlyMemory<byte> _pin;
-        private readonly KeyEntryData _keyEntryData = new KeyEntryData();
-
-
-        // Set the serial number using this property. If there is no serial
-        // number (the actual YubiKey's serial number is null), this will be 0.
-        public int SerialNumber { get; private set; }
-
-        public Func<KeyEntryData, bool> KeyCollector { get; private set; }
 
         private Fido2ResetForTest()
         {
@@ -69,12 +63,14 @@ namespace Yubico.YubiKey.TestUtilities
         // object will use the default key collector. Otherwise, pass in the
         // alternate key collector you want this object to use.
         public Fido2ResetForTest(
-            int? serialNumber, ReadOnlyMemory<byte>? newPin = null, Func<KeyEntryData, bool>? keyCollector = null)
+            int? serialNumber,
+            ReadOnlyMemory<byte>? newPin = null,
+            Func<KeyEntryData, bool>? keyCollector = null)
         {
             SerialNumber = serialNumber ?? 0;
             if (newPin is null)
             {
-                _pin = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
+                _pin = Encoding.UTF8.GetBytes("123456");
                 _setPin = false;
             }
             else
@@ -83,11 +79,20 @@ namespace Yubico.YubiKey.TestUtilities
                 {
                     throw new ArgumentException("PIN is too short");
                 }
+
                 _pin = new ReadOnlyMemory<byte>(newPin.Value.ToArray());
                 _setPin = true;
             }
+
             KeyCollector = keyCollector ?? ResetForTestKeyCollector;
         }
+
+
+        // Set the serial number using this property. If there is no serial
+        // number (the actual YubiKey's serial number is null), this will be 0.
+        private int SerialNumber { get; }
+
+        public Func<KeyEntryData, bool> KeyCollector { get; }
 
         public ResponseStatus RunFido2Reset()
         {
@@ -185,7 +190,7 @@ namespace Yubico.YubiKey.TestUtilities
                 var resetCmd = new ResetCommand();
                 ResetResponse resetRsp = fido2Session.Connection.SendCommand(resetCmd);
 
-                if ((resetRsp.Status == ResponseStatus.Success) && _setPin)
+                if (resetRsp.Status == ResponseStatus.Success && _setPin)
                 {
                     if (!fido2Session.TrySetPin(_pin))
                     {
@@ -260,11 +265,13 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 WriteMessageBox("The YubiKey removed is not the expected YubiKey." +
                                 "\nexpected serial number = " + SerialNumber.ToString(NumberFormatInfo.InvariantInfo) +
-                                "\n removed serial number = " + serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
+                                "\n removed serial number = " +
+                                serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
             }
             else
             {
-                WriteMessageBox(" removed serial number = " + serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
+                WriteMessageBox(" removed serial number = " +
+                                serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
             }
         }
 
@@ -276,11 +283,13 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 WriteMessageBox("The YubiKey inserted is not the expected YubiKey." +
                                 "\nexpected serial number = " + SerialNumber.ToString(NumberFormatInfo.InvariantInfo) +
-                                "\ninserted serial number = " + serialNumberInserted.ToString(NumberFormatInfo.InvariantInfo));
+                                "\ninserted serial number = " +
+                                serialNumberInserted.ToString(NumberFormatInfo.InvariantInfo));
             }
             else
             {
-                WriteMessageBox("inserted serial number = " + serialNumberInserted.ToString(NumberFormatInfo.InvariantInfo));
+                WriteMessageBox("inserted serial number = " +
+                                serialNumberInserted.ToString(NumberFormatInfo.InvariantInfo));
                 _yubiKeyDevice = eventArgs.Device;
             }
         }
@@ -302,21 +311,19 @@ namespace Yubico.YubiKey.TestUtilities
                 return false;
             }
 
-            if (keyEntryData.IsRetry == true)
+            if (keyEntryData.IsRetry)
             {
                 return false;
             }
 
             switch (keyEntryData.Request)
             {
-                default:
-                    break;
-
                 case KeyEntryRequest.Release:
                     return true;
 
                 case KeyEntryRequest.VerifyFido2Pin:
-                    ReadOnlyMemory<byte> toSubmit = pin ?? new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
+                    ReadOnlyMemory<byte> toSubmit =
+                        pin ?? new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
                     keyEntryData.SubmitValue(toSubmit.Span);
                     return true;
 
@@ -326,6 +333,14 @@ namespace Yubico.YubiKey.TestUtilities
             }
 
             return false;
+        }
+
+        public static bool DoReset(int? serialNum)
+        {
+            var fido2Reset = new Fido2ResetForTest(serialNum);
+            ResponseStatus status = fido2Reset.RunFido2Reset();
+
+            return status == ResponseStatus.Success;
         }
 
         private static void WriteMessageBox(string msg)

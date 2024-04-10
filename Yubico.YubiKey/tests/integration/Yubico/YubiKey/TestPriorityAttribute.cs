@@ -16,7 +16,7 @@ using System;
 
 namespace Yubico.YubiKey
 {
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Method)]
     public class TestPriorityAttribute : Attribute
     {
         public int Priority { get; private set; }

@@ -329,9 +329,9 @@ namespace Yubico.YubiKey.Piv
             // something that is only dependent on some private const values, but
             // the slots are almost certainly never going to change. If they do
             // change, this code will need to be revisited.
-            return (((slotNumber >= Pin) && (slotNumber <= Retired20))
-                || ((slotNumber >= Authentication) && (slotNumber <= CardAuthentication))
-                || (slotNumber == Attestation));
+            return (slotNumber >= Pin && slotNumber <= Retired20)
+                || (slotNumber >= Authentication && slotNumber <= CardAuthentication)
+                || slotNumber == Attestation;
         }
 
         /// <summary>
@@ -370,10 +370,10 @@ namespace Yubico.YubiKey.Piv
         /// </returns>
         public static bool IsValidSlotNumberForGenerate(byte slotNumber)
         {
-            return ((slotNumber != Management)
-                && (((slotNumber >= Retired1) && (slotNumber <= Retired20))
-                || ((slotNumber >= Authentication) && (slotNumber <= CardAuthentication))
-                || (slotNumber == Attestation)));
+            return slotNumber != Management
+                && ((slotNumber >= Retired1 && slotNumber <= Retired20)
+                || (slotNumber >= Authentication && slotNumber <= CardAuthentication)
+                || slotNumber == Attestation);
         }
 
         /// <summary>
@@ -415,9 +415,9 @@ namespace Yubico.YubiKey.Piv
             // something that is only dependent on some private const values, but
             // the slots are almost certainly never going to change. If they do
             // change, this code will need to be revisited.
-            return ((slotNumber != Management)
-                && (((slotNumber >= Retired1) && (slotNumber <= Retired20))
-                || ((slotNumber >= Authentication) && (slotNumber <= CardAuthentication))));
+            return slotNumber != Management
+                && ((slotNumber >= Retired1 && slotNumber <= Retired20)
+                || (slotNumber >= Authentication && slotNumber <= CardAuthentication));
         }
     }
 }

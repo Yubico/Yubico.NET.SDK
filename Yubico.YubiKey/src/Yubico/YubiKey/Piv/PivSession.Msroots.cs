@@ -13,11 +13,11 @@
 // limitations under the License.
 
 using System;
-using System.Security;
-using System.IO;
 using System.Globalization;
-using Yubico.YubiKey.Piv.Commands;
+using System.IO;
+using System.Security;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Piv.Commands;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -329,7 +329,7 @@ namespace Yubico.YubiKey.Piv
             {
                 maxLength = NewMaximumObjectLength;
             }
-            if (length > (maxLength * MsrootsObjectCount))
+            if (length > maxLength * MsrootsObjectCount)
             {
                 throw new ArgumentOutOfRangeException(
                     contentsName, length,

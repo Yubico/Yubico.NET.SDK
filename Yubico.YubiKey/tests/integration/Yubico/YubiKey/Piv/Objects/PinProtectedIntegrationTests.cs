@@ -13,12 +13,13 @@
 // limitations under the License.
 
 using System;
-using Yubico.YubiKey.TestUtilities;
-using Yubico.YubiKey.Piv.Objects;
 using Xunit;
+using Yubico.YubiKey.Piv.Objects;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class PinProtectedIntegrationTests
     {
         [Theory]
@@ -94,14 +95,14 @@ namespace Yubico.YubiKey.Piv
 
                     PinProtectedData pinProtectCopy = pivSession.ReadObject<PinProtectedData>();
 
-                    Assert.NotNull(pinProtectCopy.ManagementKey);
+                    _ = Assert.NotNull(pinProtectCopy.ManagementKey);
                     if (!(pinProtectCopy.ManagementKey is null))
                     {
                         var getData = (ReadOnlyMemory<byte>)pinProtectCopy.ManagementKey;
-                        bool isValid = MemoryExtensions.SequenceEqual<byte>(mgmtKey.Span, getData.Span);
+                        bool isValid = mgmtKey.Span.SequenceEqual(getData.Span);
                         Assert.True(isValid);
                     }
-                    
+
                 }
                 finally
                 {
@@ -112,7 +113,7 @@ namespace Yubico.YubiKey.Piv
 
         private Memory<byte> GetArbitraryMgmtKey()
         {
-            byte[] keyData = new byte[] {
+            byte[] keyData = {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
                 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68

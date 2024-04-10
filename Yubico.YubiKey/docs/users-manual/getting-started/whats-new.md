@@ -21,8 +21,6 @@ Here you can find all of the updates and release notes for published versions of
 
 Release date: April 10th, 2024
 
-This is a release aimed to address inconsistencies in dependencies (OpenSSL), compiler warnings and hardening. The objective of compiler options hardening is to produce application binaries (executables) with security mechanisms against potential attacks and/or misbehavior. is to produce application binaries (executables) with security mechanisms against potential attacks and/or misbehavior. 
-
 This release improves our native dependencies exposed through the `Yubico.NativeShims` package. We have also worked to improve the build and test experience of this repository by improving our automation and build files.
 
 Changes:  

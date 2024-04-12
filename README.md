@@ -13,7 +13,6 @@ See the License for the specific language governing permissions and
 limitations under the License. -->
 
 > Dev : ![tests-and-coverage-dev](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test-and-cover.yml/badge.svg?branch=develop)  
-> Main: ![tests-and-coverage-main](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test-and-cover.yml/badge.svg?branch=main)
 
 # .NET YubiKey SDK
 

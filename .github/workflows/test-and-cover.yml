@@ -20,6 +20,10 @@ on:
       - main
       - 'develop**'
       - 'release/**'
+  push:
+    branches:
+      - main
+      - 'develop**'
   
 jobs:
   test:

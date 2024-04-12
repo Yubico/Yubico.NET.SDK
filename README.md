@@ -12,8 +12,8 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-> Dev: ![tests-dev](https://github.com/Yubico/Yubico.NET.SDK-private/actions/workflows/test-and-cover.yml/badge.svg?branch=yesdk-1315-skip-unsuitable-tests)  
-> Main: ![tests-main](https://github.com/Yubico/Yubico.NET.SDK-private/actions/workflows/test-and-cover.yml/badge.svg?branch=main)
+> Dev: ![tests-and-coverage-dev](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test-and-cover.yml/badge.svg?branch=develop)  
+> Main: ![tests-and-coverage-main](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test-and-cover.yml/badge.svg?branch=main)
 
 # .NET YubiKey SDK
 

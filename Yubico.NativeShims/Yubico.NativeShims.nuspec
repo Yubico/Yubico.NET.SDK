@@ -10,7 +10,7 @@
 
             This is an internal package that is subject to change.
         </description>
-
+        <readme>docs/readme.md</readme>
         <dependencies>
             <group targetFramework=".NETFramework4.7" />
             <group targetFramework="netstandard2.0" />
@@ -36,5 +36,6 @@
         <file src="msbuild/Yubico.NativeShims.targets" target="buildTransitive/net47/Yubico.NativeShims.targets" />
         <file src="msbuild/_._" target="lib/net47/_._" />
         <file src="msbuild/_._" target="lib/netstandard20/_._" />
+        <file src="readme.md" target="docs/" />
     </files>
 </package>

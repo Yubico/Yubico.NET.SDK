@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: CI build for pull requests into main and develop
+name: Build pull request
 
 # Triggers build on pull requests and pushes to the main and develop branches.
 on:
@@ -28,11 +28,7 @@ on:
 jobs:
   build:
     # Give this job a friendly name to show in GitHub UI.
-    name: Build + Test the SDK
-
-    # Even though we build for multiple platforms, we only need to run
-    # on a single host operating system. This is because we utilize cross-
-    # build functionality of the dotnet build system.
+    name: Build and test
     runs-on: windows-latest
     # Build both Debug and ReleaseWithDocs configurations. Most people are probably building 'Debug' the most often. We
     # should be sure that Release also builds, and that our documentation also compiles successfully.
@@ -46,9 +42,6 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-
-      - name: run dotnet version
-        run: dotnet --version
 
       - name: Add local NuGet repository
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
@@ -77,12 +70,6 @@ jobs:
             Yubico.YubiKey/src/bin/${{matrix.configuration}}/**/*.dll
 
       # Test the project
-      #
-      # Here we call `dotnet test` on each individual test project that we want to have run as part of CI. We do this
-      # to skip running the integration tests which require actual YubiKeys to be present. We have tried using the filter
-      # capabilities of the `dotnet test` runner tool, however we have found that failures don't always register with
-      # GitHub when that is done.
-
       - name: Test Yubico.YubiKey
         run: dotnet test --configuration ${{matrix.configuration}} --verbosity normal --no-build --nologo Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj
 

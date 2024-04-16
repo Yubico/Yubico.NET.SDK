@@ -18,16 +18,18 @@ name: Build and publish
 on:
   push:
     branches:
-      - '*'
+      - 'dennisdyallo**'
   workflow_dispatch:
     inputs:
       push-to-dev:
         description: 'Push to internal NuGet'
+        required: false
         default: false
         type: boolean
       upload-docs:
         description: 'Push to documentation repository'
-        required: true
+        required: false
+        default: false
         type: boolean
       version:
         description: 'Version'

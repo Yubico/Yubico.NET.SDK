@@ -131,6 +131,7 @@ jobs:
             Yubico.YubiKey/examples/SharedSampleCode
       
   upload-docs:
+    name: Upload docs
     uses: ./.github/workflows/upload-docs.yml
 #if: ${{ github.event.inputs.upload-docs == 'true' }}
     with:

@@ -1,0 +1,39 @@
+name: 💡 Feature Request
+description: Suggest an idea for this project.
+title: "[Feature]: <title>"
+labels: ["enhancement"]
+projects: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to suggest a feature!
+  - type: checkboxes
+    attributes:
+      label: Is there an existing issue for this?
+      description: Please search to see if an issue already exists for the bug you encountered.
+      options:
+      - label: I have searched the existing issues
+        required: true
+  - type: textarea
+    id: feature-description
+    attributes:
+      label: Feature Description
+      description: Describe the feature you would like to see.
+      placeholder: Describe your feature here.
+    validations:
+      required: true
+  - type: textarea
+    id: motivation
+    attributes:
+      label: Motivation
+      description: What is the motivation or use case for this feature?
+      placeholder: Tell us why the feature is important.
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Code of Conduct
+      description: By submitting this issue, you agree to follow our [contribution guidelines](https://raw.githubusercontent.com/Yubico/Yubico.NET.SDK/043119ad1d19e0e6e66556c970a81d0c1aba36c8/CONTRIBUTING.md).
+      options:
+        - label: I agree to follow this project's contribution guidelines
+          required: true

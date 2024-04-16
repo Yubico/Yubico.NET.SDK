@@ -16,11 +16,22 @@ name: Build and publish
 
 # Triggers build on pushes to the main and develop branches.
 on:
-  push:
+  pull_request:
     branches:
       - 'main'
       - 'develop'
       - 'dennisdyallo**'
+    paths:
+      - '**.h'
+      - '**.c'
+      - '**.cs'
+      - '**.csproj'
+      - '**.sln'
+      - '.github/workflows/build-and-publish.yml'
+  push:
+    branches:
+      - 'main'
+      - 'develop'
     paths:
       - '**.h'
       - '**.c'

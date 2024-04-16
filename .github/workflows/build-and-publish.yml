@@ -20,6 +20,13 @@ on:
     branches:
       - 'main'
       - 'develop'
+    paths:
+      - '**.h'
+      - '**.c'
+      - '**.cs'
+      - '**.csproj'
+      - '**.sln'
+      - '.github/workflows/build-and-publish.yml'
 
   workflow_dispatch:
     inputs:

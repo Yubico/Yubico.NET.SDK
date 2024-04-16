@@ -20,6 +20,13 @@ on:
       - main
       - 'develop**'
       - 'release/**'
+    paths:
+      - '**.h'
+      - '**.c'
+      - '**.cs'
+      - '**.csproj'
+      - '**.sln'
+      - '.github/workflows/check-code-formatting.yml'
   
 jobs:
   check-code-formatting:

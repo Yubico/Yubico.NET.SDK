@@ -20,10 +20,23 @@ on:
       - main
       - 'develop**'
       - 'release/**'
+    paths:
+      - '**.h'
+      - '**.c'
+      - '**.cs'
+      - '**.csproj'
+      - '**.sln'
+      - '.github/workflows/test-and-cover.yml'
   push:
     branches:
       - main
-      - 'develop**'
+    paths:
+      - '**.h'
+      - '**.c'
+      - '**.cs'
+      - '**.csproj'
+      - '**.sln'
+      - '.github/workflows/test-and-cover.yml'
   
 jobs:
   test:

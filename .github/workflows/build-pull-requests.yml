@@ -21,9 +21,13 @@ on:
       - main
       - 'develop**'
       - 'release/**'
-  push:
-    branches:
-      - 'release/**'
+    paths:
+      - '**.h'
+      - '**.c'
+      - '**.cs'
+      - '**.csproj'
+      - '**.sln'
+      - '.github/workflows/build-pull-requests.yml'
 
 jobs:
   build:

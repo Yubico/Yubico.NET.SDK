@@ -1,0 +1,55 @@
+# Copyright 2021 Yubico AB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Upload documentation to GCP
+
+on: 
+  workflow_call:
+
+permissions:
+  id-token: write
+  contents: read
+
+env:
+  image_tag: 'yesdk-docserver'
+  registry_url: 'us-docker.pkg.dev'
+  project_id: 'support-cluster-769001'
+  repository_name: 'yesdk'
+  service_account: 'yesdk-ci-builder@support-cluster-769001.iam.gserviceaccount.com'
+
+jobs:
+  upload_docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: Documentation
+          path: Yubico.YubiKey/docs/_site/
+      - name: Build nginx image for documentation
+        run: |
+          docker build -t "${{ env.image_tag }}:${{ github.sha }}" .
+
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GLOBAL_GCP_WORKLOAD_IDENTITY_PROVIDER }} # Provided at organizational level
+          service_account: ${{ env.service_account }}
+
+      - name: Push Docker image to GCP
+        run: |
+          gcloud auth configure-docker ${{ env.registry_url }} --project ${{ env.project_id }}
+          docker tag "${{ env.image_tag }}:${{ github.sha }}" "${{ env.registry_url }}/${{ env.project_id }}/${{ env.repository_name }}/${{ env.image_tag }}:${{ github.sha }}"
+          docker push "${{ env.registry_url }}/${{ env.project_id }}/${{ env.repository_name }}/${{ env.image_tag }}:${{ github.sha }}"
+          echo "New image tag: ${{ github.sha }}"

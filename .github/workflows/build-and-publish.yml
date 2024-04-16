@@ -12,19 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Build and publish artifacts from main and develop
+name: Build and publish
 
 # Triggers build on pushes to the main and develop branches.
 on:
   push:
     branches:
-      - main
-      - 'develop**'
+      - 'main'
+      - 'develop'
+    paths:
+      - '**.h'
+      - '**.c'
+      - '**.cs'
+      - '**.csproj'
+      - '**.sln'
+      - '.github/workflows/build-and-publish.yml'
+
   workflow_dispatch:
     inputs:
       push-to-dev:
         description: 'Push to internal NuGet'
-        required: true
+        required: false
+        default: false
         type: boolean
       version:
         description: 'Version'
@@ -39,18 +48,16 @@ permissions:
   
 jobs:
   build:
-    # Give this job a friendly name to show in GitHub UI.
-    name: Build + Test the SDK
-
-    # Even though we build for multiple platforms, we only need to run
-    # on a single host operating system. This is because we utilize cross-
-    # build functionality of the dotnet build system.
+    name: Build
     runs-on: windows-2019
 
     steps:
       # Checkout the local repository
       - uses: actions/checkout@v4
-
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          
       - name: Add local NuGet repository
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
@@ -65,15 +72,17 @@ jobs:
           $versionProp.Save($file.FullName)
 
       # Build the project
-      # The default GitHub runners seem to have N and N-1 versions of .NET Framework installed. In practice, they seem
-      # to have even more installed than that, but at a minimum N and N-1 seem like safe assumptions. We can therefore
-      # save some time and use the pre-installed version rather than downloading a fresh copy.
-
       - name: Build Yubico.NET.SDK.sln
         run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity normal Yubico.NET.SDK.sln
 
-      # Upload artifacts
+      # Run tests 
+      - name: Test Yubico.YubiKey
+        run: dotnet test --configuration ReleaseWithDocs --verbosity normal --no-build --nologo Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj
 
+      - name: Test Yubico.Core
+        run: dotnet test --configuration ReleaseWithDocs --verbosity normal --no-build --nologo Yubico.Core/tests/Yubico.Core.UnitTests.csproj
+
+      # Upload artifacts
       - name: Save documentation artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -88,6 +97,15 @@ jobs:
             Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.nupkg
             Yubico.Core/src/bin/ReleaseWithDocs/*.nupkg
             Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
+      
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Symbols Packages
+          path: |
+            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.snupkg
+            Yubico.Core/src/bin/ReleaseWithDocs/*.snupkg
+            Yubico.YubiKey/src/bin/ReleaseWithDocs/*.snupkg
 
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
@@ -115,72 +133,16 @@ jobs:
           path: |
             Yubico.YubiKey/examples/PivSampleCode
             Yubico.YubiKey/examples/SharedSampleCode
-
-      # Test the project
-      #
-      # Here we call `dotnet test` on each individual test project that we want to have run as part of CI. We do this
-      # to skip running the integration tests which require actual YubiKeys to be present. We have tried using the filter
-      # capabilities of the `dotnet test` runner tool, however we have found that failures don't always register with
-      # GitHub when that is done.
-
-      - name: Test Yubico.YubiKey
-        run: dotnet test --configuration ReleaseWithDocs --verbosity normal --no-build --nologo Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj
-
-      - name: Test Yubico.Core
-        run: dotnet test --configuration ReleaseWithDocs --verbosity normal --no-build --nologo Yubico.Core/tests/Yubico.Core.UnitTests.csproj
-
-  publish_docs:
-    # Give this job a friendly name to show in GitHub UI.
-    name: Publish documentation
-
-    # Publish the docs using Ubuntu as the docker image we want to create is linux-based.
-    runs-on: ubuntu-latest
-
-    # Don't run this step until build completes.
-    needs: build
-
-    # Connection information for our docker image registry
-    env:
-      IMAGE_REGISTRY_URL: us-docker.pkg.dev
-      IMAGE_REGISTRY_PROJECT: support-cluster-769001
-      IMAGE_REPOSITORY: yesdk
-      IMAGE_NAME: yesdk-docserver
-
-    steps:
-      # Checkout the local repository as we need the Dockerfile and other things even for this step.
-      - uses: actions/checkout@v4
-
-      # Grab the just-built documentation artifact and inflate the archive at the expected location.
-      - uses: actions/download-artifact@v4
-        with:
-          name: Documentation
-          path: Yubico.YubiKey/docs/_site/
-
-      # Construct the docker image
-      - name: Docker build
-        run: |
-          docker build -t "${IMAGE_NAME}:${{ github.sha }}" .
       
-      # Authenticate to Google Cloud
-      - name: Authenticate
-        uses: google-github-actions/auth@v2
-        with:
-          workload_identity_provider: ${{ vars.GLOBAL_GCP_WORKLOAD_IDENTITY_PROVIDER }}
-          service_account: yesdk-ci-builder@support-cluster-769001.iam.gserviceaccount.com
-
-      # Push our docker image to GCP
-      - name: Push Docker image
-        run: |
-          gcloud auth configure-docker ${IMAGE_REGISTRY_URL} --project ${IMAGE_REGISTRY_PROJECT}
-          docker tag "${IMAGE_NAME}:${{ github.sha }}" "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
-          docker push "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
-          echo "New image tag: ${{ github.sha }}"
+  upload-docs:
+    name: Upload docs
+    uses: ./.github/workflows/upload-docs.yml
+    needs: build
 
   publish-internal:
     name: Publish to internal NuGet
     runs-on: windows-2019
     needs: build
-    environment: Internal NuGet feed
     if: ${{ github.event.inputs.push-to-dev }}
     steps:
       - uses: actions/download-artifact@v4

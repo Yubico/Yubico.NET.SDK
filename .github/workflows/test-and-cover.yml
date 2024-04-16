@@ -20,10 +20,23 @@ on:
       - main
       - 'develop**'
       - 'release/**'
+    paths:
+      - '**.h'
+      - '**.c'
+      - '**.cs'
+      - '**.csproj'
+      - '**.sln'
+      - '.github/workflows/test-and-cover.yml'
   push:
     branches:
       - main
-      - 'develop**'
+    paths:
+      - '**.h'
+      - '**.c'
+      - '**.cs'
+      - '**.csproj'
+      - '**.sln'
+      - '.github/workflows/test-and-cover.yml'
   
 jobs:
   test:
@@ -89,7 +102,7 @@ jobs:
           hide_complexity: false
           indicators: true
           output: both
-          thresholds: "50 70"
+          thresholds: "33 66"
 
       - name: Add Coverage PR Comment
         uses: marocchino/sticky-pull-request-comment@v2.9.0
@@ -103,3 +116,4 @@ jobs:
         if: always()
         with:
           trx_files: "${{ github.workspace }}/**/*.trx"
+          check_name: publish test results

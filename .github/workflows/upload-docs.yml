@@ -29,6 +29,9 @@ on:
       repository_name:
         required: true
         type: string
+        
+permissions:
+  id-token: write
 
 jobs:
   upload_docs:

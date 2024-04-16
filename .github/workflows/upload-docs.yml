@@ -22,34 +22,40 @@ permissions:
   contents: read
 
 env:
-  image_tag: 'yesdk-docserver'
-  registry_url: 'us-docker.pkg.dev'
-  project_id: 'support-cluster-769001'
-  repository_name: 'yesdk'
-  service_account: 'yesdk-ci-builder@support-cluster-769001.iam.gserviceaccount.com'
+  IMAGE_REGISTRY_URL: us-docker.pkg.dev
+  IMAGE_REGISTRY_PROJECT: support-cluster-769001
+  IMAGE_REPOSITORY: yesdk
+  IMAGE_NAME: yesdk-docserver
 
 jobs:
   upload_docs:
     runs-on: ubuntu-latest
     steps:
+      # Checkout the local repository as we need the Dockerfile and other things even for this step.
       - uses: actions/checkout@v4
+
+      # Grab the just-built documentation artifact and inflate the archive at the expected location.
       - uses: actions/download-artifact@v4
         with:
           name: Documentation
           path: Yubico.YubiKey/docs/_site/
-      - name: Build nginx image for documentation
-        run: |
-          docker build -t "${{ env.image_tag }}:${{ github.sha }}" .
 
-      - name: Authenticate to GCP
+      # Construct the docker image
+      - name: Docker build
+        run: |
+          docker build -t "${IMAGE_NAME}:${{ github.sha }}" .
+      
+      # Authenticate to Google Cloud
+      - name: Authenticate
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ vars.GLOBAL_GCP_WORKLOAD_IDENTITY_PROVIDER }} # Provided at organizational level
-          service_account: ${{ env.service_account }}
+          workload_identity_provider: ${{ vars.GLOBAL_GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: yesdk-ci-builder@support-cluster-769001.iam.gserviceaccount.com
 
-      - name: Push Docker image to GCP
+      # Push our docker image to GCP
+      - name: Push Docker image
         run: |
-          gcloud auth configure-docker ${{ env.registry_url }} --project ${{ env.project_id }}
-          docker tag "${{ env.image_tag }}:${{ github.sha }}" "${{ env.registry_url }}/${{ env.project_id }}/${{ env.repository_name }}/${{ env.image_tag }}:${{ github.sha }}"
-          docker push "${{ env.registry_url }}/${{ env.project_id }}/${{ env.repository_name }}/${{ env.image_tag }}:${{ github.sha }}"
+          gcloud auth configure-docker ${IMAGE_REGISTRY_URL} --project ${IMAGE_REGISTRY_PROJECT}
+          docker tag "${IMAGE_NAME}:${{ github.sha }}" "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
+          docker push "${IMAGE_REGISTRY_URL}/${IMAGE_REGISTRY_PROJECT}/${IMAGE_REPOSITORY}/${IMAGE_NAME}:${{ github.sha }}"
           echo "New image tag: ${{ github.sha }}"

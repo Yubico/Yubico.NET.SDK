@@ -133,12 +133,7 @@ jobs:
   upload-docs:
     name: Upload docs
     uses: ./.github/workflows/upload-docs.yml
-#if: ${{ github.event.inputs.upload-docs == 'true' }}
-    with:
-      image_tag: 'yesdk-docserver'
-      registry_url: 'us-docker.pkg.dev'
-      project_id: 'support-cluster-769001'
-      repository_name: 'yesdk'
+    #if: ${{ github.event.inputs.upload-docs == 'true' }}
     needs: build
 
   publish-internal:

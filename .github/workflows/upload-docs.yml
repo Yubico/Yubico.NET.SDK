@@ -16,22 +16,17 @@ name: Upload documentation to GCP
 
 on: 
   workflow_call:
-    inputs:
-      image_tag:
-        required: true
-        type: string
-      registry_url:
-        required: true
-        type: string
-      project_id:
-        required: true
-        type: string
-      repository_name:
-        required: true
-        type: string
-        
+
 permissions:
   id-token: write
+  contents: read
+
+env:
+  image_tag: 'yesdk-docserver'
+  registry_url: 'us-docker.pkg.dev'
+  project_id: 'support-cluster-769001'
+  repository_name: 'yesdk'
+  service_account: yesdk-ci-builder@support-cluster-769001.iam.gserviceaccount.com
 
 jobs:
   upload_docs:
@@ -44,14 +39,16 @@ jobs:
           path: Yubico.YubiKey/docs/_site/
       - name: Build nginx image for documentation
         run: |
-          docker build -t "${{ inputs.image_tag }}:${{ github.sha }}" .
+          docker build -t "${{ env.image_tag }}:${{ github.sha }}" .
+
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
           workload_identity_provider: ${{ vars.GLOBAL_GCP_WORKLOAD_IDENTITY_PROVIDER }} # Provided at organizational level
-          service_account: yesdk-ci-builder@support-cluster-769001.iam.gserviceaccount.com
+          service_account: $${{ env.service_account }}
       - name: Push Docker image to GCP
         run: |
-          gcloud auth configure-docker ${{ inputs.registry_url }} --project ${{ inputs.project_id }}
-          docker tag "${{ inputs.image_tag }}:${{ github.sha }}" "${{ inputs.registry_url }}/${{ inputs.project_id }}/${{ inputs.repository_name }}/${{ inputs.image_tag }}:${{ github.sha }}"
-          docker push "${{ inputs.registry_url }}/${{ inputs.project_id }}/${{ inputs.repository_name }}/${{ inputs.image_tag }}:${{ github.sha }}"
+          gcloud auth configure-docker ${{ env.registry_url }} --project ${{ env.project_id }}
+          docker tag "${{ env.image_tag }}:${{ github.sha }}" "${{ env.registry_url }}/${{ env.project_id }}/${{ env.repository_name }}/${{ env.image_tag }}:${{ github.sha }}"
+          docker push "${{ env.registry_url }}/${{ env.project_id }}/${{ env.repository_name }}/${{ env.image_tag }}:${{ github.sha }}"
+          echo "New image tag: ${{ github.sha }}"

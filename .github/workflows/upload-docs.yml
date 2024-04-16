@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Upload Documentation to GCP
+name: Upload documentation to GCP
 
 on: 
   workflow_call:
@@ -39,7 +39,7 @@ jobs:
         with:
           name: Documentation
           path: Yubico.YubiKey/docs/_site/
-      - name: Docker build
+      - name: Build nginx image for documentation
         run: |
           docker build -t "${{ inputs.image_tag }}:${{ github.sha }}" .
       - name: Authenticate to GCP

@@ -19,8 +19,7 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 
 **Test configuration**:
 * Firmware version:
-* Hardware:
-* SDK:
+* Yubikey model:
 
 # Checklist:
 

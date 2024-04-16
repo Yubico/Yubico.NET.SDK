@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Upload documentation
+name: Upload Documentation to GCP
 
 on: 
   workflow_call:
@@ -20,25 +20,35 @@ on:
       image_tag:
         required: true
         type: string
+      registry_url:
+        required: true
+        type: string
+      project_id:
+        required: true
+        type: string
+      repository_name:
+        required: true
+        type: string
 
 jobs:
   upload_docs:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
       - uses: actions/download-artifact@v4
         with:
           name: Documentation
           path: Yubico.YubiKey/docs/_site/
-      - name: Docker build nginx webserver
+      - name: Docker build
         run: |
           docker build -t "${{ inputs.image_tag }}:${{ github.sha }}" .
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v2
         with:
-          workload_identity_provider: ${{ vars.GLOBAL_GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          workload_identity_provider: ${{ vars.GLOBAL_GCP_WORKLOAD_IDENTITY_PROVIDER }} # Provided at organizational level
           service_account: yesdk-ci-builder@support-cluster-769001.iam.gserviceaccount.com
       - name: Push Docker image to GCP
         run: |
-          gcloud auth configure-docker ${{ env.IMAGE_REGISTRY_URL }} --project ${{ env.IMAGE_REGISTRY_PROJECT }}
-          docker tag "${{ inputs.image_tag }}:${{ github.sha }}" "${{ env.IMAGE_REGISTRY_URL }}/${{ env.IMAGE_REGISTRY_PROJECT }}/${{ env.IMAGE_REPOSITORY }}/${{ inputs.image_tag }}:${{ github.sha }}"
-          docker push "${{ env.IMAGE_REGISTRY_URL }}/${{ env.IMAGE_REGISTRY_PROJECT }}/${{ env.IMAGE_REPOSITORY }}/${{ inputs.image_tag }}:${{ github.sha }}"
+          gcloud auth configure-docker ${{ inputs.registry_url }} --project ${{ inputs.project_id }}
+          docker tag "${{ inputs.image_tag }}:${{ github.sha }}" "${{ inputs.registry_url }}/${{ inputs.project_id }}/${{ inputs.repository_name }}/${{ inputs.image_tag }}:${{ github.sha }}"
+          docker push "${{ inputs.registry_url }}/${{ inputs.project_id }}/${{ inputs.repository_name }}/${{ inputs.image_tag }}:${{ github.sha }}"

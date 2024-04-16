@@ -19,7 +19,7 @@ on:
   push:
     branches:
       - main
-      - 'develop**'
+      - '*'
   workflow_dispatch:
     inputs:
       push-to-dev:
@@ -118,6 +118,9 @@ jobs:
     if: ${{ github.event.inputs.upload-docs == 'true' }}
     with:
       image_tag: 'yesdk-docserver'
+      registry_url: 'us-docker.pkg.dev'
+      project_id: 'support-cluster-769001'
+      repository_name: 'yesdk'
     needs: build
 
   publish-internal:

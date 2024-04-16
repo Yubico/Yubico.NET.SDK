@@ -1,0 +1,44 @@
+# Copyright 2021 Yubico AB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: Upload documentation
+
+on: 
+  workflow_call:
+    inputs:
+      image_tag:
+        required: true
+        type: string
+
+jobs:
+  upload_docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: Documentation
+          path: Yubico.YubiKey/docs/_site/
+      - name: Docker build nginx webserver
+        run: |
+          docker build -t "${{ inputs.image_tag }}:${{ github.sha }}" .
+      - name: Authenticate to GCP
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ vars.GLOBAL_GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: yesdk-ci-builder@support-cluster-769001.iam.gserviceaccount.com
+      - name: Push Docker image to GCP
+        run: |
+          gcloud auth configure-docker ${{ env.IMAGE_REGISTRY_URL }} --project ${{ env.IMAGE_REGISTRY_PROJECT }}
+          docker tag "${{ inputs.image_tag }}:${{ github.sha }}" "${{ env.IMAGE_REGISTRY_URL }}/${{ env.IMAGE_REGISTRY_PROJECT }}/${{ env.IMAGE_REPOSITORY }}/${{ inputs.image_tag }}:${{ github.sha }}"
+          docker push "${{ env.IMAGE_REGISTRY_URL }}/${{ env.IMAGE_REGISTRY_PROJECT }}/${{ env.IMAGE_REPOSITORY }}/${{ inputs.image_tag }}:${{ github.sha }}"

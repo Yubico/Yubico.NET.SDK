@@ -71,6 +71,13 @@ jobs:
       - name: Build Yubico.NET.SDK.sln
         run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity normal Yubico.NET.SDK.sln
 
+      # Run tests 
+      - name: Test Yubico.YubiKey
+        run: dotnet test --configuration ReleaseWithDocs --verbosity normal --no-build --nologo Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj
+
+      - name: Test Yubico.Core
+        run: dotnet test --configuration ReleaseWithDocs --verbosity normal --no-build --nologo Yubico.Core/tests/Yubico.Core.UnitTests.csproj
+
       # Upload artifacts
       - name: Save documentation artifacts
         uses: actions/upload-artifact@v4
@@ -86,6 +93,15 @@ jobs:
             Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.nupkg
             Yubico.Core/src/bin/ReleaseWithDocs/*.nupkg
             Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
+      
+      - name: Save build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: Symbols Packages
+          path: |
+            Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.snupkg
+            Yubico.Core/src/bin/ReleaseWithDocs/*.snupkg
+            Yubico.YubiKey/src/bin/ReleaseWithDocs/*.snupkg
 
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
@@ -116,7 +132,7 @@ jobs:
       
   upload-docs:
     uses: ./.github/workflows/upload-docs.yml
-    if: ${{ github.event.inputs.upload-docs == 'true' }}
+#if: ${{ github.event.inputs.upload-docs == 'true' }}
     with:
       image_tag: 'yesdk-docserver'
       registry_url: 'us-docker.pkg.dev'

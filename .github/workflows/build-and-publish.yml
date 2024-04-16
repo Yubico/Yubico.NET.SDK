@@ -18,18 +18,14 @@ name: Build and publish
 on:
   push:
     branches:
-      - 'dennisdyallo**'
+      - 'main'
+
   workflow_dispatch:
     inputs:
       push-to-dev:
         description: 'Push to internal NuGet'
         required: false
         default: false
-        type: boolean
-      upload-docs:
-        description: 'Push to documentation repository'
-        required: false
-        default: true
         type: boolean
       version:
         description: 'Version'
@@ -133,7 +129,6 @@ jobs:
   upload-docs:
     name: Upload docs
     uses: ./.github/workflows/upload-docs.yml
-    #if: ${{ github.event.inputs.upload-docs == 'true' }}
     needs: build
 
   publish-internal:

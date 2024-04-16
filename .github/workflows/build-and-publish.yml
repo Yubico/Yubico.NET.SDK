@@ -29,7 +29,7 @@ on:
       upload-docs:
         description: 'Push to documentation repository'
         required: false
-        default: false
+        default: true
         type: boolean
       version:
         description: 'Version'
@@ -44,7 +44,7 @@ permissions:
   
 jobs:
   build:
-    name: Build and test
+    name: Build
     runs-on: windows-2019
 
     steps:

@@ -16,18 +16,6 @@ name: Build and publish
 
 # Triggers build on pushes to the main and develop branches.
 on:
-  pull_request:
-    branches:
-      - 'main'
-      - 'develop'
-      - 'dennisdyallo**'
-    paths:
-      - '**.h'
-      - '**.c'
-      - '**.cs'
-      - '**.csproj'
-      - '**.sln'
-      - '.github/workflows/build-and-publish.yml'
   push:
     branches:
       - 'main'
@@ -60,7 +48,7 @@ permissions:
   
 jobs:
   build:
-    name: Build
+    name: Build, test, save artefacts
     runs-on: windows-2019
 
     steps:

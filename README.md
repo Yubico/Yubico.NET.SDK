@@ -12,7 +12,10 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-> ![tests-and-coverage-dev](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test-and-cover.yml/badge.svg?branch=develop)  
+> ![build-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/build.yml/badge.svg?branch=develop) 
+> ![tests-and-coverage-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test-and-cover.yml/badge.svg?branch=develop) 
+> ![codeql-analysis-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/codeql-analysis.yml/badge.svg?branch=develop)  
+
 
 # .NET YubiKey SDK
 

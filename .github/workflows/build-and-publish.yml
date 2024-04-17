@@ -48,7 +48,7 @@ permissions:
   
 jobs:
   build:
-    name: Build
+    name: Build, test, save artefacts
     runs-on: windows-2019
 
     steps:

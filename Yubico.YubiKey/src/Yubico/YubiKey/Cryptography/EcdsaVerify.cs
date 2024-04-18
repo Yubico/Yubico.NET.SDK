@@ -405,10 +405,10 @@ namespace Yubico.YubiKey.Cryptography
         {
             ECParameters eccParams = toCheck.ExportParameters(false);
 
-            int coordinateLength = eccParams.Curve.Oid.FriendlyName switch
+            int coordinateLength = eccParams.Curve.Oid.Value switch
             {
-                NameP256 => (P256EncodedPointLength - 1) / 2,
-                NameP384 => (P384EncodedPointLength - 1) / 2,
+                OidP256 => (P256EncodedPointLength - 1) / 2,
+                OidP384 => (P384EncodedPointLength - 1) / 2,
                 _ => -1,
             };
 

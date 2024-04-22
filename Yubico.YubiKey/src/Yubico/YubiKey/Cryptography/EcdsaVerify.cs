@@ -110,8 +110,6 @@ namespace Yubico.YubiKey.Cryptography
         private const int P384KeySize = 384;
         private const string OidP256 = "1.2.840.10045.3.1.7";
         private const string OidP384 = "1.3.132.0.34";
-        private const string NameP256 = "nistP256";
-        private const string NameP384 = "nistP384";
 
         private const byte EncodedPointTag = 4;
         private const int SequenceTag = 0x30;

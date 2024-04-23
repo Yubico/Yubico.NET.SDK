@@ -41,10 +41,8 @@ on:
 jobs:
   test:
     runs-on: windows-2019
-
     steps:
       - uses: actions/checkout@v4
-      
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
@@ -105,37 +103,37 @@ jobs:
           name: code-coverage-results
           path: code-coverage-results.md
 
-  pr-comment-test-results: 
-    runs-on: ubuntu-latest
-    permissions:
-      checks: write
-      pull-requests: write
-    needs: test 
-    steps:
-      - name: Download test results
-        uses: actions/download-artifact@v3
-        with:
-          name: TestResults
-      - name: Add Test Results PR Comment
-        uses: EnricoMi/publish-unit-test-result-action@v2.16.1
-        if: always()
-        with:
-          trx_files: "${{ github.workspace }}/**/*.trx"
-
   pr-comment-coverage-results: 
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
+      contents: read
     needs: coverage 
     steps:
       - name: Download coverage results
         uses: actions/download-artifact@v4
-        with:
-          name: code-coverage-results
+      - name: run ls recursively
+        run: ls -R
       - name: Add Coverage PR Comment
         uses: marocchino/sticky-pull-request-comment@v2.9.0
         if: github.event_name == 'pull_request'
         with:
           recreate: true
           path: code-coverage-results.md
-          
+
+  pr-comment-test-results: 
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+      checks: write
+    needs: test 
+    steps:
+      - uses: actions/download-artifact@v4
+      - name: run ls recursively
+        run: ls -R
+      - name: Add Test Results PR Comment
+        uses: EnricoMi/publish-unit-test-result-action@v2.16.1
+        if: always()
+        with:
+          trx_files: "${{ github.workspace }}/**/*.trx"

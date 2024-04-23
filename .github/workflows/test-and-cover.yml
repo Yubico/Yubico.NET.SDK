@@ -66,11 +66,6 @@ jobs:
           path: '**/TestResults/*'
 
   coverage:
-    permissions:
-      contents: read
-      issues: read
-      checks: write
-      pull-requests: write
     runs-on: ubuntu-latest
     needs: test
     steps:
@@ -85,13 +80,13 @@ jobs:
           reports: "**/*.cobertura.xml" # REQUIRED # The coverage reports that should be parsed (separated by semicolon). Globbing is supported.
           targetdir: "${{ github.workspace }}" # REQUIRED # The directory where the generated report should be saved.
           reporttypes: "Cobertura" # The output formats and scope (separated by semicolon) Values: Badges, Clover, Cobertura, CsvSummary, Html, Html_Dark, Html_Light, Html_BlueRed, HtmlChart, HtmlInline, HtmlInline_AzurePipelines, HtmlInline_AzurePipelines_Dark, HtmlInline_AzurePipelines_Light, HtmlSummary, JsonSummary, Latex, LatexSummary, lcov, MarkdownSummary, MarkdownSummaryGithub, MarkdownDeltaSummary, MHtml, PngChart, SonarQube, TeamCitySummary, TextSummary, TextDeltaSummary, Xml, XmlSummary
-          verbosity: "Info" # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
+          verbosity: "Warning" # The verbosity level of the log messages. Values: Verbose, Info, Warning, Error, Off
           title: "Code Coverage" # Optional title.
           tag: "${{ github.run_number }}_${{ github.run_id }}" # Optional tag or build version.
           customSettings: "" # Optional custom settings (separated by semicolon). See: https://github.com/danielpalme/ReportGenerator/wiki/Settings.
           toolpath: "reportgeneratortool" # Default directory for installing the dotnet tool.
       
-      - name: Publish Code Coverage Report
+      - name: Code Coverage Summary Report
         uses: irongut/CodeCoverageSummary@v1.3.0
         with:
           filename: "Cobertura.xml"
@@ -104,6 +99,39 @@ jobs:
           output: both
           thresholds: "33 66"
 
+      - name: Upload Code Coverage Report
+        uses: actions/upload-artifact@v3
+        with:
+          name: code-coverage-results
+          path: code-coverage-results.md
+
+  pr-comment-test-results: 
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      pull-requests: write
+    needs: test 
+    steps:
+      - name: Download test results
+        uses: actions/download-artifact@v3
+        with:
+          name: TestResults
+      - name: Add Test Results PR Comment
+        uses: EnricoMi/publish-unit-test-result-action@v2.16.1
+        if: always()
+        with:
+          trx_files: "${{ github.workspace }}/**/*.trx"
+
+  pr-comment-coverage-results: 
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    needs: coverage 
+    steps:
+      - name: Download coverage results
+        uses: actions/download-artifact@v4
+        with:
+          name: code-coverage-results
       - name: Add Coverage PR Comment
         uses: marocchino/sticky-pull-request-comment@v2.9.0
         if: github.event_name == 'pull_request'
@@ -111,9 +139,3 @@ jobs:
           recreate: true
           path: code-coverage-results.md
           
-      - name: Publish Test Results
-        uses: EnricoMi/publish-unit-test-result-action@v2.16.1
-        if: always()
-        with:
-          trx_files: "${{ github.workspace }}/**/*.trx"
-          check_name: publish test results

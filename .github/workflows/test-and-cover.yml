@@ -100,7 +100,7 @@ jobs:
       - name: Upload Code Coverage Report
         uses: actions/upload-artifact@v3
         with:
-          name: code-coverage-results
+          name: CoverageResults
           path: code-coverage-results.md
 
   pr-comment-coverage-results: 
@@ -108,12 +108,17 @@ jobs:
     permissions:
       pull-requests: write
       contents: read
+      checks: write
     needs: coverage 
     steps:
       - name: Download coverage results
         uses: actions/download-artifact@v4
+        with:
+          name: CoverageResults
+          
       - name: run ls recursively
         run: ls -R
+
       - name: Add Coverage PR Comment
         uses: marocchino/sticky-pull-request-comment@v2.9.0
         if: github.event_name == 'pull_request'

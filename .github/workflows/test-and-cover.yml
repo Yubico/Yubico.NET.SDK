@@ -95,7 +95,7 @@ jobs:
           hide_complexity: false
           indicators: true
           output: both
-          thresholds: "33 66"
+          thresholds: "40 60"
 
       - name: Upload Code Coverage Report
         uses: actions/upload-artifact@v4

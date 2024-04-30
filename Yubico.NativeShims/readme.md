@@ -22,7 +22,8 @@ Yubico.NativeShims is a cross-platform C library designed to bridge the gap in n
 
 ### macOS Build
 
-- Requires XCode installation.
+- Requires XCode
+- pkg-config (brew install pkg-config) 
 - Navigate to Yubico.NativeShims folder and run `sh ./build-macos.sh`.
 
 ### Linux Build

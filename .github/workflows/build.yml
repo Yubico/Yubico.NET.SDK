@@ -52,12 +52,13 @@ jobs:
       pull-requests: write
       checks: write
       packages: read
+      contents: read
     uses: ./.github/workflows/test.yml
     with:
       build-coverage-report: false
 
   build-artifacts:
-    name: Build artefacts
+    name: Build artifacts
     runs-on: windows-2019
     needs: run-tests
     

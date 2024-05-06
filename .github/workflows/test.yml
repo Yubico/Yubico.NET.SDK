@@ -12,9 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Run tests and code coverage
+name: Run tests
 
 on:
+  workflow_dispatch:
+    inputs: 
+      build-coverage-report:
+        type: boolean
+        default: true
+        required: false
+        description: 'Whether or not to build a test coverage report'
   workflow_call:
     inputs: 
       build-coverage-report:

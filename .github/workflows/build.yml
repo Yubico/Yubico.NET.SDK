@@ -42,15 +42,25 @@ on:
         type: string
         
 permissions:
-  contents: read
   id-token: write
   packages: write
   
 jobs:
-  build:
-    name: Build, test, save artefacts
-    runs-on: windows-2019
+  run-tests:
+    name: Run tests
+    permissions:
+      pull-requests: write
+      checks: write
+      packages: read
+    uses: ./.github/workflows/test.yml
+    with:
+      build-coverage-report: false
 
+  build-artifacts:
+    name: Build artefacts
+    runs-on: windows-2019
+    needs: run-tests
+    
     steps:
       # Checkout the local repository
       - uses: actions/checkout@v4
@@ -74,13 +84,6 @@ jobs:
       # Build the project
       - name: Build Yubico.NET.SDK.sln
         run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity normal Yubico.NET.SDK.sln
-
-      # Run tests 
-      - name: Test Yubico.YubiKey
-        run: dotnet test --configuration ReleaseWithDocs --verbosity normal --no-build --nologo Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj
-
-      - name: Test Yubico.Core
-        run: dotnet test --configuration ReleaseWithDocs --verbosity normal --no-build --nologo Yubico.Core/tests/Yubico.Core.UnitTests.csproj
 
       # Upload artifacts
       - name: Save documentation artifacts
@@ -137,12 +140,12 @@ jobs:
   upload-docs:
     name: Upload docs
     uses: ./.github/workflows/upload-docs.yml
-    needs: build
+    needs: build-artifacts
 
   publish-internal:
     name: Publish to internal NuGet
     runs-on: windows-2019
-    needs: build
+    needs: build-artifacts
     if: ${{ github.event.inputs.push-to-dev }}
     steps:
       - uses: actions/download-artifact@v4

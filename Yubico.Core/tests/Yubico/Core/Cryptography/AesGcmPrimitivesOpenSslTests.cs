@@ -18,7 +18,7 @@ using Xunit;
 
 namespace Yubico.Core.Cryptography
 {
-    public class AesGcmTests
+    public class AesGcmPrimitivesOpenSslTests
     {
         [Fact]
         public void Instantiate_Succeeds()
@@ -42,23 +42,23 @@ namespace Yubico.Core.Cryptography
             IAesGcmPrimitives aesObj = AesGcmPrimitives.Create();
             aesObj.EncryptAndAuthenticate(keyData, nonce, plaintext, ciphertext, tag, associatedData);
 
-            bool isValid = MemoryExtensions.SequenceEqual(encryptedData.AsSpan(), ciphertext.AsSpan());
+            bool isValid = encryptedData.AsSpan().SequenceEqual(ciphertext.AsSpan());
             Assert.True(isValid);
-            isValid = MemoryExtensions.SequenceEqual(authTag.AsSpan(), tag.AsSpan());
+            isValid = authTag.AsSpan().SequenceEqual(tag.AsSpan());
             Assert.True(isValid);
 
             byte[] decryptedData = new byte[ciphertext.Length];
             bool isVerified = aesObj.DecryptAndVerify(keyData, nonce, ciphertext, tag, decryptedData, associatedData);
             Assert.True(isVerified);
 
-            isValid = MemoryExtensions.SequenceEqual(plaintext.AsSpan(), decryptedData.AsSpan());
+            isValid = plaintext.AsSpan().SequenceEqual(decryptedData.AsSpan());
             Assert.True(isValid);
         }
 
         [Fact]
-        public void RandomValues_Succeed()
+        public void Encrypt_Decrypt_Succeeds_RandomValues_Succeed()
         {
-            RandomNumberGenerator random = RandomNumberGenerator.Create();
+            var random = RandomNumberGenerator.Create();
             byte[] keyData = GetKeyData(random);
             byte[] nonce = GetNonce(random);
             byte[] plaintext = GetPlaintext(random, 50);
@@ -74,9 +74,9 @@ namespace Yubico.Core.Cryptography
             var aesGcm = new AesGcm(keyData);
             aesGcm.Encrypt(nonce, plaintext, ciphertextS, tagS, associatedData);
 
-            bool isValid = MemoryExtensions.SequenceEqual(ciphertextS.AsSpan(), ciphertext.AsSpan());
+            bool isValid = ciphertextS.AsSpan().SequenceEqual(ciphertext.AsSpan());
             Assert.True(isValid);
-            isValid = MemoryExtensions.SequenceEqual(tagS.AsSpan(), tag.AsSpan());
+            isValid = tagS.AsSpan().SequenceEqual(tag.AsSpan());
             Assert.True(isValid);
 
             byte[] decryptedData = new byte[ciphertext.Length];
@@ -86,9 +86,9 @@ namespace Yubico.Core.Cryptography
             byte[] decryptedDataS = new byte[ciphertextS.Length];
             aesGcm.Decrypt(nonce, ciphertextS, tag, decryptedDataS, associatedData);
 
-            isValid = MemoryExtensions.SequenceEqual(decryptedDataS.AsSpan(), decryptedData.AsSpan());
+            isValid = decryptedDataS.AsSpan().SequenceEqual(decryptedData.AsSpan());
             Assert.True(isValid);
-            isValid = MemoryExtensions.SequenceEqual(plaintext.AsSpan(), decryptedData.AsSpan());
+            isValid = plaintext.AsSpan().SequenceEqual(decryptedData.AsSpan());
             Assert.True(isValid);
         }
 

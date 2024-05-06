@@ -12,66 +12,70 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Tests and code coverage
+name: Run tests and code coverage
 
 on:
-  pull_request:
-    branches:
-      - main
-      - 'develop**'
-      - 'release/**'
-    paths:
-      - '**.h'
-      - '**.c'
-      - '**.cs'
-      - '**.csproj'
-      - '**.sln'
-      - '.github/workflows/test-and-cover.yml'
-  push:
-    branches:
-      - main
-    paths:
-      - '**.h'
-      - '**.c'
-      - '**.cs'
-      - '**.csproj'
-      - '**.sln'
-      - '.github/workflows/test-and-cover.yml'
+  workflow_call:
+    inputs: 
+      build-coverage-report:
+        type: boolean
+        default: true
+        required: false
+        description: 'Whether or not to build a test coverage report'
+        
+  schedule:
+    - cron: '0 0 * * *' # Every day at midnight
+
+# # Remove these comments to run tests on pull requests and pushes for the respective branches. 
+#  pull_request:
+#    branches:
+#      - main
+#      - 'develop**'
+#      - 'release**'
+#    paths:
+#      - '**.h'
+#      - '**.c'
+#      - '**.cs'
+#      - '**.csproj'
+#      - '**.sln'
+#      - '.github/workflows/test.yml'
+#  push:
+#    branches:
+#      - main
+#      - develop
+#    paths:
+#      - '**.h'
+#      - '**.c'
+#      - '**.cs'
+#      - '**.csproj'
+#      - '**.sln'
+#      - '.github/workflows/test.yml'
+
+permissions:
+  pull-requests: write
+  contents: read
+  checks: write
+  packages: read
   
 jobs:
-  test:
-    runs-on: windows-2019
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        with:
-          global-json-file: global.json
+  test-windows:
+    name: Tests
+    uses: ./.github/workflows/test-windows.yml
+  test-ubuntu:
+    name: Tests
+    uses: ./.github/workflows/test-ubuntu.yml
+  test-macos:
+    name: Tests
+    uses: ./.github/workflows/test-macos.yml
 
-      - name: Add local NuGet repository
-        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
-
-      - name: Test Yubico.YubiKey
-        run: dotnet test --configuration Release --nologo --logger trx --collect:"XPlat Code Coverage" Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --settings coverlet.runsettings.xml
-
-      - name: Test Yubico.Core
-        run: dotnet test --configuration Release --nologo --logger trx --collect:"XPlat Code Coverage" Yubico.Core/tests/Yubico.Core.UnitTests.csproj --settings coverlet.runsettings.xml
-
-      - name: Upload Test Result Files
-        uses: actions/upload-artifact@v4
-        with:
-          name: TestResults
-          if-no-files-found: error
-          path: '**/TestResults/*'
-
-  coverage:
+  build-coverage-report:
+    name: Build coverage report
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test-windows] # No need to gather coverage on all platforms
+
+    if: inputs.build-coverage-report == true
     steps:
       - uses: actions/download-artifact@v4
-        with:
-          name: TestResults
-          path: ${{ github.workspace }}
-
       - name: Combine Coverage Reports # This is because one report is produced per project, and we want one result for all of them.
         uses: danielpalme/ReportGenerator-GitHub-Action@5.2.4
         with:
@@ -104,41 +108,46 @@ jobs:
           path: code-coverage-results.md
 
   pr-comment-coverage-results: 
+    name: "Add PR Comment: Coverage Results"
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: read
-      checks: write
-    needs: coverage 
+    needs: build-coverage-report 
+
+    if: github.event_name == 'pull_request'
     steps:
       - name: Download coverage results
         uses: actions/download-artifact@v4
         with:
           name: CoverageResults
           
-      - name: run ls recursively
-        run: ls -R
-
-      - name: Add Coverage PR Comment
+      - name: Add PR Comment
         uses: marocchino/sticky-pull-request-comment@v2.9.0
-        if: github.event_name == 'pull_request'
         with:
           recreate: true
           path: code-coverage-results.md
 
   pr-comment-test-results: 
+    name: "Add PR Comment: Test Results"
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: read
-      checks: write
-    needs: test 
+    needs: [test-windows, test-ubuntu, test-macos] 
+
+    if: github.event_name == 'pull_request' 
     steps:
-      - uses: actions/download-artifact@v4
-      - name: run ls recursively
-        run: ls -R
-      - name: Add Test Results PR Comment
+      - uses: actions/download-artifact@v4 
+
+      - name: "Add PR Comment: Test Results (Windows)"
         uses: EnricoMi/publish-unit-test-result-action@v2.16.1
-        if: always()
         with:
-          trx_files: "${{ github.workspace }}/**/*.trx"
+          trx_files: "${{ github.workspace }}/TestResults-Windows/**/*.trx"
+          check_name: "Test Results: Windows"
+
+      - name: "Add PR Comment: Test Results (Ubuntu)"
+        uses: EnricoMi/publish-unit-test-result-action@v2.16.1
+        with:
+          trx_files: "${{ github.workspace }}/TestResults-Ubuntu/**/*.trx"
+          check_name: "Test Results: Ubuntu"
+
+      - name: "Add PR Comment: Test Results (MacOS)"
+        uses: EnricoMi/publish-unit-test-result-action@v2.16.1
+        with:
+          trx_files: "${{ github.workspace }}/TestResults-macOS/**/*.trx"
+          check_name: "Test Results: MacOS"

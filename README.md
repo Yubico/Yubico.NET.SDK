@@ -13,9 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License. -->
 
 > ![build-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/build.yml/badge.svg?branch=develop) 
-> ![tests-and-coverage-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test-and-cover.yml/badge.svg?branch=develop) 
+> ![tests-and-coverage-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test.yml/badge.svg?branch=develop) 
 > ![codeql-analysis-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/codeql-analysis.yml/badge.svg?branch=develop)  
-
 
 # .NET YubiKey SDK
 

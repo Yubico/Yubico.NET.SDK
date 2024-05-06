@@ -15,40 +15,65 @@
 name: Run tests and code coverage
 
 on:
-  pull_request:
-    branches:
-      - main
-      - 'develop**'
-      - 'release/**'
-    paths:
-      - '**.h'
-      - '**.c'
-      - '**.cs'
-      - '**.csproj'
-      - '**.sln'
-      - '.github/workflows/test.yml'
-  push:
-    branches:
-      - main
-      - develop
-    paths:
-      - '**.h'
-      - '**.c'
-      - '**.cs'
-      - '**.csproj'
-      - '**.sln'
-      - '.github/workflows/test.yml'
+  workflow_call:
+    inputs: 
+      build-coverage-report:
+        type: boolean
+        default: true
+        required: false
+        description: 'Whether or not to build a test coverage report'
+        
+  schedule:
+    - cron: '0 0 * * *' # Every day at midnight
 
+# # Remove these comments to run tests on pull requests and pushes for the respective branches. 
+#  pull_request:
+#    branches:
+#      - main
+#      - 'develop**'
+#      - 'release**'
+#    paths:
+#      - '**.h'
+#      - '**.c'
+#      - '**.cs'
+#      - '**.csproj'
+#      - '**.sln'
+#      - '.github/workflows/test.yml'
+#  push:
+#    branches:
+#      - main
+#      - develop
+#    paths:
+#      - '**.h'
+#      - '**.c'
+#      - '**.cs'
+#      - '**.csproj'
+#      - '**.sln'
+#      - '.github/workflows/test.yml'
+
+permissions:
+  pull-requests: write
+  contents: read
+  checks: write
+  packages: read
+  
 jobs:
   test-windows:
+    name: Tests
     uses: ./.github/workflows/test-windows.yml
   test-ubuntu:
+    name: Tests
     uses: ./.github/workflows/test-ubuntu.yml
   test-macos:
+    name: Tests
     uses: ./.github/workflows/test-macos.yml
-  coverage:
+
+  build-coverage-report:
+    name: Build coverage report
     runs-on: ubuntu-latest
-    needs: [test-windows]
+    needs: [test-windows] # No need to gather coverage on all platforms
+
+    if: inputs.build-coverage-report == true
     steps:
       - uses: actions/download-artifact@v4
       - name: Combine Coverage Reports # This is because one report is produced per project, and we want one result for all of them.
@@ -83,12 +108,10 @@ jobs:
           path: code-coverage-results.md
 
   pr-comment-coverage-results: 
+    name: "Add PR Comment: Coverage Results"
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: read
-      checks: write
-    needs: coverage 
+    needs: build-coverage-report 
+
     if: github.event_name == 'pull_request'
     steps:
       - name: Download coverage results
@@ -96,42 +119,34 @@ jobs:
         with:
           name: CoverageResults
           
-      - name: run ls recursively
-        run: ls -R
-
-      - name: Add Coverage PR Comment
+      - name: Add PR Comment
         uses: marocchino/sticky-pull-request-comment@v2.9.0
         with:
           recreate: true
           path: code-coverage-results.md
 
   pr-comment-test-results: 
+    name: "Add PR Comment: Test Results"
     runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-      contents: read
-      checks: write
-    needs: [test-windows, test-ubuntu, test-macOS] 
-    if: github.event_name == 'pull_request'
+    needs: [test-windows, test-ubuntu, test-macos] 
+
+    if: github.event_name == 'pull_request' 
     steps:
       - uses: actions/download-artifact@v4 
 
-      - name: run ls recursively
-        run: ls -R
-
-      - name: Add Test Results PR Comment (Windows)
+      - name: "Add PR Comment: Test Results (Windows)"
         uses: EnricoMi/publish-unit-test-result-action@v2.16.1
         with:
           trx_files: "${{ github.workspace }}/TestResults-Windows/**/*.trx"
           check_name: "Test Results: Windows"
 
-      - name: Add Test Results PR Comment (Ubuntu)
+      - name: "Add PR Comment: Test Results (Ubuntu)"
         uses: EnricoMi/publish-unit-test-result-action@v2.16.1
         with:
           trx_files: "${{ github.workspace }}/TestResults-Ubuntu/**/*.trx"
           check_name: "Test Results: Ubuntu"
 
-      - name: Add Test Results PR Comment (MacOS)
+      - name: "Add PR Comment: Test Results (MacOS)"
         uses: EnricoMi/publish-unit-test-result-action@v2.16.1
         with:
           trx_files: "${{ github.workspace }}/TestResults-macOS/**/*.trx"

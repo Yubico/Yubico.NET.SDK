@@ -19,7 +19,12 @@ on:
 
 jobs:
   test:
+    name: Ubuntu
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+      
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -35,10 +40,10 @@ jobs:
           sudo ln -s /usr/lib/x86_64-linux-gnu/libudev.so.1 /usr/lib/libudev.so
 
       - name: Test Yubico.YubiKey
-        run: dotnet test --nologo --logger trx --collect:"XPlat Code Coverage" Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --settings coverlet.runsettings.xml
-
+        run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
+  
       - name: Test Yubico.Core
-        run: dotnet test --nologo --logger trx --collect:"XPlat Code Coverage" Yubico.Core/tests/Yubico.Core.UnitTests.csproj --settings coverlet.runsettings.xml
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj            --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
 
       - name: Upload Test Result Files
         uses: actions/upload-artifact@v4

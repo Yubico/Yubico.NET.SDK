@@ -13,13 +13,20 @@
 # limitations under the License.
 
 # CodeQL static code analysis
-name: "CodeQL"
+name: "Run CodeQL"
 
 on:
   push:
     branches:
       - main
       - 'develop**'
+    paths:
+      - '**.h'
+      - '**.c'
+      - '**.cs'
+      - '**.csproj'
+      - '**.sln'
+      - '.github/workflows/codeql-analysis.yml'
   pull_request:
     branches:
       - main

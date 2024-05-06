@@ -21,14 +21,14 @@ on:
         type: boolean
         default: true
         required: false
-        description: 'Whether or not to build a test coverage report'
+        description: 'Build a test coverage report'
   workflow_call:
     inputs: 
       build-coverage-report:
         type: boolean
         default: true
         required: false
-        description: 'Whether or not to build a test coverage report'
+        description: 'Build a test coverage report'
         
   schedule:
     - cron: '0 0 * * *' # Every day at midnight

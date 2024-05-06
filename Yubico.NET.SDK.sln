@@ -31,8 +31,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\build.yml = .github\workflows\build.yml
 		.github\workflows\check-code-formatting.yml = .github\workflows\check-code-formatting.yml
 		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
-		.github\workflows\test-and-cover.yml = .github\workflows\test-and-cover.yml
 		.github\workflows\upload-docs.yml = .github\workflows\upload-docs.yml
+		.github\workflows\test.yml = .github\workflows\test.yml
+		.github\workflows\test-macos.yml = .github\workflows\test-macos.yml
+		.github\workflows\test-ubuntu.yml = .github\workflows\test-ubuntu.yml
+		.github\workflows\test-windows.yml = .github\workflows\test-windows.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.Core", "Yubico.Core", "{45D2A3BE-5111-4890-8898-2D43DB658A40}"

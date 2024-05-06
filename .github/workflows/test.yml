@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Tests and code coverage
+name: Run tests and code coverage
 
 on:
   pull_request:
@@ -26,7 +26,7 @@ on:
       - '**.cs'
       - '**.csproj'
       - '**.sln'
-      - '.github/workflows/test-and-cover.yml'
+      - '.github/workflows/test.yml'
   push:
     branches:
       - main
@@ -37,61 +37,20 @@ on:
       - '**.cs'
       - '**.csproj'
       - '**.sln'
-      - '.github/workflows/test-and-cover.yml'
-  
+      - '.github/workflows/test.yml'
+
 jobs:
-  test:
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [windows-latest, ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-dotnet@v4
-        with:
-          global-json-file: global.json
-
-      - name: Add local NuGet repository
-        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
-
-      - name: Install OpenSSL and link for macOS
-        if: matrix.os == 'macos-latest'
-        run: |
-          brew install openssl
-          sudo mkdir /usr/local/lib
-          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
-          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
-
-      - name: Install PCSC and link libUdev for Ubuntu
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update && sudo apt-get install pcscd -yq
-          sudo ln -s /usr/lib/x86_64-linux-gnu/libudev.so.1 /usr/lib/libudev.so
-
-      - name: Restore dotnet dependencies
-        run: |
-          dotnet restore
-
-      - name: Test Yubico.YubiKey
-        run: dotnet test --no-restore --nologo --logger trx --collect:"XPlat Code Coverage" Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --settings coverlet.runsettings.xml
-
-      - name: Test Yubico.Core
-        run: dotnet test --no-restore --nologo --logger trx --collect:"XPlat Code Coverage" Yubico.Core/tests/Yubico.Core.UnitTests.csproj --settings coverlet.runsettings.xml
-
-      - name: Upload Test Result Files
-        uses: actions/upload-artifact@v4
-        with:
-          name: TestResults-${{ matrix.os }}
-          if-no-files-found: error
-          path: '**/TestResults/*'
-
+  test-windows:
+    uses: ./.github/workflows/test-windows.yml
+  test-ubuntu:
+    uses: ./.github/workflows/test-ubuntu.yml
+  test-macos:
+    uses: ./.github/workflows/test-macos.yml
   coverage:
     runs-on: ubuntu-latest
-    needs: test
+    needs: [test-windows]
     steps:
       - uses: actions/download-artifact@v4
-
       - name: Combine Coverage Reports # This is because one report is produced per project, and we want one result for all of them.
         uses: danielpalme/ReportGenerator-GitHub-Action@5.2.4
         with:
@@ -152,15 +111,28 @@ jobs:
       pull-requests: write
       contents: read
       checks: write
-    needs: test 
+    needs: [test-windows, test-ubuntu, test-macOS] 
     if: github.event_name == 'pull_request'
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v4 
 
       - name: run ls recursively
         run: ls -R
 
-      - name: Add Test Results PR Comment
+      - name: Add Test Results PR Comment (Windows)
         uses: EnricoMi/publish-unit-test-result-action@v2.16.1
         with:
-          trx_files: "${{ github.workspace }}/**/*.trx"
+          trx_files: "${{ github.workspace }}/TestResults-Windows/**/*.trx"
+          check_name: "Test Results: Windows"
+
+      - name: Add Test Results PR Comment (Ubuntu)
+        uses: EnricoMi/publish-unit-test-result-action@v2.16.1
+        with:
+          trx_files: "${{ github.workspace }}/TestResults-Ubuntu/**/*.trx"
+          check_name: "Test Results: Ubuntu"
+
+      - name: Add Test Results PR Comment (MacOS)
+        uses: EnricoMi/publish-unit-test-result-action@v2.16.1
+        with:
+          trx_files: "${{ github.workspace }}/TestResults-macOS/**/*.trx"
+          check_name: "Test Results: MacOS"

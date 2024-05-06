@@ -44,6 +44,7 @@ on:
 permissions:
   id-token: write
   packages: write
+  contents: read
   
 jobs:
   run-tests:
@@ -58,7 +59,7 @@ jobs:
       build-coverage-report: false
 
   build-artifacts:
-    name: Build artifacts
+    name: Build artefacts
     runs-on: windows-2019
     needs: run-tests
     

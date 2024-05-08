@@ -40,18 +40,15 @@ on:
         required: false
         default: "0.0.0-prerelease.YYYYMMDD.B"
         type: string
-        
-permissions:
-  id-token: write
-  packages: read
-  contents: read
-  
+
 jobs:
   run-tests:
     name: Run tests
     permissions:
-      pull-requests: write
       checks: write
+      contents: read
+      packages: read
+      pull-requests: write
     uses: ./.github/workflows/test.yml
     with:
       build-coverage-report: false
@@ -60,7 +57,9 @@ jobs:
     name: Build artifacts
     runs-on: windows-2019
     needs: run-tests
-    
+    permissions:
+      contents: read
+      packages: read
     steps:
       # Checkout the local repository
       - uses: actions/checkout@v4
@@ -140,6 +139,9 @@ jobs:
   upload-docs:
     name: Upload docs
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    permissions:
+      id-token: write
+      contents: read
     uses: ./.github/workflows/upload-docs.yml
     needs: build-artifacts
 
@@ -149,6 +151,7 @@ jobs:
     needs: build-artifacts
     if: ${{ github.event.inputs.push-to-dev }}
     permissions:
+      contents: read
       packages: write
     steps:
       - uses: actions/download-artifact@v4

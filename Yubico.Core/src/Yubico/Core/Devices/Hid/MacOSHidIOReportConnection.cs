@@ -42,6 +42,13 @@ namespace Yubico.Core.Devices.Hid
         private readonly ConcurrentQueue<byte[]> _reportsQueue;
         private GCHandle _pinnedReportsQueue;
 
+        // We need this intermediate step. Passing the managed callbacks to marshalling directly actually lowers to a
+        // call to `new NativeMethods.IOHIDCallback((object) null, __methodptr(RemovalCallback))` which will go out of
+        // scope and be garbage collected. So we need to make sure the delegate instance has the same lifetime as the
+        // entire connect (i.e. this class's scope).
+        private readonly IOHIDReportCallback _reportDelegate = ReportCallback;
+        private readonly IOHIDCallback _removalDelegate = RemovalCallback;
+
         /// <summary>
         /// The correct size, in bytes, for the data buffer to be transmitted to the device.
         /// </summary>
@@ -128,7 +135,7 @@ namespace Yubico.Core.Devices.Hid
                 // Apple documentation here https://developer.apple.com/documentation/iokit/1588659-iohiddevicegetreport
                 // that this async methods should be used for "input reports", which is the type of report frame that
                 // FIDO uses.
-                IntPtr reportCallback = Marshal.GetFunctionPointerForDelegate<IOHIDReportCallback>(ReportCallback);
+                IntPtr reportCallback = Marshal.GetFunctionPointerForDelegate(_reportDelegate);
                 IOHIDDeviceRegisterInputReportCallback(
                     _deviceHandle,
                     _readBuffer,
@@ -136,7 +143,7 @@ namespace Yubico.Core.Devices.Hid
                     reportCallback,
                     GCHandle.ToIntPtr(_pinnedReportsQueue));
 
-                IntPtr callback = Marshal.GetFunctionPointerForDelegate<IOHIDCallback>(RemovalCallback);
+                IntPtr callback = Marshal.GetFunctionPointerForDelegate(_removalDelegate);
                 IOHIDDeviceRegisterRemovalCallback(_deviceHandle, callback, _deviceHandle);
             }
             finally

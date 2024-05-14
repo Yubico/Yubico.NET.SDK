@@ -27,22 +27,28 @@ on:
       - '**.csproj'
       - '**.sln'
       - '.github/workflows/build-pull-requests.yml'
-      
-permissions:
-  pull-requests: write
-  checks: write
-  contents: read
-  packages: read
-  
+       
 jobs:
   run-tests:
     name: Run tests
+    permissions:
+      pull-requests: write
+      checks: write
+      contents: read
+      packages: read
     uses: ./.github/workflows/test.yml
     with:
       build-coverage-report: true
     
   build-artifacts:
     name: Build artifacts
+    permissions:
+      pull-requests: write
+      checks: write
+      id-token: write
+      contents: read
+      packages: read
+      attestations: write
     runs-on: windows-latest
     needs: run-tests
     
@@ -75,3 +81,8 @@ jobs:
             Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/**/*.dll
             Yubico.Core/src/bin/ReleaseWithDocs/**/*.dll
             Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll
+
+      - name: Generate artifact attestation
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: Yubico.YubiKey/src/bin/ReleaseWithDocs/**/*.dll

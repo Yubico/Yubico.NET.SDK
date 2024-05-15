@@ -42,6 +42,9 @@ namespace Yubico.YubiKey
         public YubiKeyCapabilities EnabledNfcCapabilities => _yubiKeyInfo.EnabledNfcCapabilities;
 
         /// <inheritdoc />
+        public bool IsNfcRestricted => _yubiKeyInfo.IsNfcRestricted;
+        
+        /// <inheritdoc />
         public int? SerialNumber => _yubiKeyInfo.SerialNumber;
 
         /// <inheritdoc />
@@ -378,14 +381,14 @@ namespace Yubico.YubiKey
                     _log.LogInformation("Connecting via the SmartCard interface.");
                     WaitForReclaimTimeout(Transport.SmartCard);
                     return scp03Keys is null ?
-                        new CcidConnection(_smartCardDevice, applicationId)
-                        : new Scp03CcidConnection(_smartCardDevice, applicationId, scp03Keys);
+                        new SmartcardConnection(_smartCardDevice, applicationId)
+                        : new Scp03Connection(_smartCardDevice, applicationId, scp03Keys);
                 }
 
                 _log.LogInformation(
                     (applicationId is null ? "No application given." : "No smart card interface present.") +
                     "Unable to establish connection to YubiKey.");
-
+                
                 return null;
             }
 
@@ -395,7 +398,7 @@ namespace Yubico.YubiKey
                 {
                     _log.LogInformation("Connecting via the SmartCard interface.");
                     WaitForReclaimTimeout(Transport.SmartCard);
-                    return new Scp03CcidConnection(_smartCardDevice, (YubiKeyApplication)application, scp03Keys);
+                    return new Scp03Connection(_smartCardDevice, (YubiKeyApplication)application, scp03Keys);
                 }
 
                 return null;
@@ -424,7 +427,7 @@ namespace Yubico.YubiKey
             {
                 _log.LogInformation("Connecting via the SmartCard interface.");
                 WaitForReclaimTimeout(Transport.SmartCard);
-                return new CcidConnection(_smartCardDevice, (YubiKeyApplication)application);
+                return new SmartcardConnection(_smartCardDevice, (YubiKeyApplication)application);
             }
 
             _log.LogInformation("No smart card interface present. Unable to establish connection to YubiKey.");
@@ -504,6 +507,22 @@ namespace Yubico.YubiKey
                 AutoEjectTimeout = seconds,
             };
 
+            IYubiKeyResponse setConfigurationResponse = SendConfiguration(setCommand);
+
+            if (setConfigurationResponse.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(setConfigurationResponse.StatusMessage);
+            }
+        }
+
+        //TODO make documentation
+        public void SetIsNfcRestricted(bool enabled)
+        {
+            var setCommand = new MgmtCmd.SetDeviceInfoCommand
+            {
+                IsNfcRestricted = enabled
+            };
+            
             IYubiKeyResponse setConfigurationResponse = SendConfiguration(setCommand);
 
             if (setConfigurationResponse.Status != ResponseStatus.Success)
@@ -676,7 +695,7 @@ namespace Yubico.YubiKey
         {
             IYubiKeyConnection? connection = null;
             try
-            {
+            {       
                 IYubiKeyCommand<IYubiKeyResponse> command;
 
                 if (TryConnect(YubiKeyApplication.Management, out connection))

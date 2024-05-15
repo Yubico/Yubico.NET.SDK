@@ -38,6 +38,11 @@ namespace Yubico.YubiKey
         /// The NFC features that are currently enabled over NFC.
         /// </summary>
         public YubiKeyCapabilities EnabledNfcCapabilities { get; }
+        
+        /// <summary>
+        /// TODO
+        /// </summary>
+        public bool IsNfcRestricted { get; }
 
         /// <summary>
         /// The serial number of the YubiKey, if one is present.

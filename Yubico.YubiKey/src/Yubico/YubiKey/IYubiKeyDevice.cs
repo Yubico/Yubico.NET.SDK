@@ -662,5 +662,7 @@ namespace Yubico.YubiKey
             byte challengeResponseTimeout,
             bool touchEjectEnabled,
             int autoEjectTimeout = 0);
+
+        void SetIsNfcRestricted(bool enabled);
     }
 }

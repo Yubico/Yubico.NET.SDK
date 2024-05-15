@@ -39,6 +39,7 @@ namespace Yubico.YubiKey
         private const byte NfcPrePersCapabilitiesTag = 0x0d;
         private const byte NfcEnabledCapabilitiesTag = 0x0e;
         private const byte MoreDataTag = 0x10;
+        private const byte NfcRestrictedTag = 0x17;
         private const byte TemplateStorageVersionTag = 0x20;
         private const byte ImageProcessorVersionTag = 0x21;
 
@@ -102,6 +103,8 @@ namespace Yubico.YubiKey
 
         /// <inheritdoc />
         public bool ConfigurationLocked { get; set; }
+        
+        public bool IsNfcRestricted { get; set; }
 
         /// <summary>
         /// Constructs a default instance of YubiKeyDeviceInfo.
@@ -264,6 +267,10 @@ namespace Yubico.YubiKey
                         };
                         log.SensitiveLogInformation("ImageProcessorVersion: {ImageProcessorVersion}", deviceInfo.ImageProcessorVersion.ToString());
                         break;
+                    
+                    case NfcRestrictedTag:
+                        deviceInfo.IsNfcRestricted = tlvReader.ReadByte(NfcRestrictedTag) == 1;
+                        break;
 
                     default:
                         Debug.Assert(false, "Encountered an unrecognized tag in DeviceInfo. Ignoring.");
@@ -299,34 +306,31 @@ namespace Yubico.YubiKey
 
                 IsFipsSeries = IsFipsSeries || second.IsFipsSeries,
 
-                FormFactor =
-                        FormFactor != FormFactor.Unknown
-                        ? FormFactor
-                        : second.FormFactor,
+                FormFactor = FormFactor != FormFactor.Unknown
+                    ? FormFactor
+                    : second.FormFactor,
 
-                FirmwareVersion =
-                        FirmwareVersion != new FirmwareVersion()
-                        ? FirmwareVersion
-                        : second.FirmwareVersion,
+                FirmwareVersion = FirmwareVersion != new FirmwareVersion()
+                    ? FirmwareVersion
+                    : second.FirmwareVersion,
 
-                AutoEjectTimeout =
-                        DeviceFlags.HasFlag(DeviceFlags.TouchEject)
+                AutoEjectTimeout = DeviceFlags.HasFlag(DeviceFlags.TouchEject)
                         ? AutoEjectTimeout
                         : second.DeviceFlags.HasFlag(DeviceFlags.TouchEject)
                             ? second.AutoEjectTimeout
                             : default,
 
-                ChallengeResponseTimeout =
-                        ChallengeResponseTimeout != default
-                        ? ChallengeResponseTimeout
-                        : second.ChallengeResponseTimeout,
+                ChallengeResponseTimeout = ChallengeResponseTimeout != default
+                    ? ChallengeResponseTimeout
+                    : second.ChallengeResponseTimeout,
 
                 DeviceFlags = DeviceFlags | second.DeviceFlags,
 
-                ConfigurationLocked =
-                        ConfigurationLocked != default
-                        ? ConfigurationLocked
-                        : second.ConfigurationLocked,
+                ConfigurationLocked = ConfigurationLocked != default
+                    ? ConfigurationLocked
+                    : second.ConfigurationLocked,
+                
+                IsNfcRestricted = IsNfcRestricted || second.IsNfcRestricted
             };
         }
 

@@ -73,18 +73,21 @@ namespace Yubico.YubiKey
             try
             {
                 log.LogInformation("Attempting to read device info via the management command over the keyboard interface.");
-                using var KeyboardConnection = new KeyboardConnection(device);
+                using var connection = new KeyboardConnection(device);
+                yubiKeyDeviceInfo = DeviceInfoHelper.GetDeviceInfo(connection, new Management.Commands.GetPagedDeviceInfoCommand());
+                //TODO Handle exceptions? 
+                return true;
 
-                Otp.Commands.GetDeviceInfoResponse response = KeyboardConnection.SendCommand(new Otp.Commands.GetDeviceInfoCommand());
+                // Otp.Commands.GetDeviceInfoResponse response = keyboardConnection.SendCommand(new Otp.Commands.GetDeviceInfoCommand());
+                //
+                // if (response.Status == ResponseStatus.Success)
+                // {
+                //     yubiKeyDeviceInfo = response.GetData();
+                //     log.LogInformation("Successfully read device info via the keyboard management command.");
+                //     return true;
+                // }
 
-                if (response.Status == ResponseStatus.Success)
-                {
-                    yubiKeyDeviceInfo = response.GetData();
-                    log.LogInformation("Successfully read device info via the keyboard management command.");
-                    return true;
-                }
-
-                log.LogError("Failed to get device info from the keyboard management command: {Error} {Message}", response.StatusWord, response.StatusMessage);
+                // log.LogError("Failed to get device info from the keyboard management command: {Error} {Message}", response.StatusWord, response.StatusMessage);
             }
             catch (KeyboardConnectionException e)
             {

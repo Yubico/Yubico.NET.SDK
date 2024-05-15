@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Linq;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.YubiKey.Pipelines;
@@ -20,14 +19,14 @@ using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey
 {
-    internal class Scp03CcidConnection : CcidConnection, IScp03YubiKeyConnection
+    internal class Scp03Connection : SmartcardConnection, IScp03YubiKeyConnection
     {
         private bool _disposed;
 
         // If an Scp03ApduTransform is used, keep this copy so it can be disposed.
         private readonly Scp03ApduTransform _scp03ApduTransform;
 
-        public Scp03CcidConnection(
+        public Scp03Connection(
             ISmartCardDevice smartCardDevice,
             YubiKeyApplication yubiKeyApplication,
             StaticKeys scp03Keys)
@@ -36,7 +35,7 @@ namespace Yubico.YubiKey
             _scp03ApduTransform = SetObject(yubiKeyApplication, scp03Keys);
         }
 
-        public Scp03CcidConnection(ISmartCardDevice smartCardDevice, byte[] applicationId, StaticKeys scp03Keys)
+        public Scp03Connection(ISmartCardDevice smartCardDevice, byte[] applicationId, StaticKeys scp03Keys)
             : base(smartCardDevice, YubiKeyApplication.Unknown, applicationId)
         {
             YubiKeyApplication setError = YubiKeyApplication.Unknown;

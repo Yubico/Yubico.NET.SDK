@@ -71,9 +71,9 @@ namespace Yubico.YubiKey
             try
             {
                 log.LogInformation("Attempting to read device info via the FIDO interface management command.");
-                using var FidoConnection = new FidoConnection(device);
+                using var fidoConnection = new FidoConnection(device);
 
-                U2f.Commands.GetDeviceInfoResponse response = FidoConnection.SendCommand(new U2f.Commands.GetDeviceInfoCommand());
+                U2f.Commands.GetDeviceInfoResponse response = fidoConnection.SendCommand(new U2f.Commands.GetDeviceInfoCommand());
 
                 if (response.Status == ResponseStatus.Success)
                 {

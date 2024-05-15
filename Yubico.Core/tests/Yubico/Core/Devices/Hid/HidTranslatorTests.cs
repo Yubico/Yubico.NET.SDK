@@ -144,16 +144,18 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         }
 
 #if Windows
+#pragma warning disable CA1825
         [Theory]
         [MemberData(nameof(GetTestData))]
         public void GetChar_GivenHidCode_ReturnsCorrectChar(KeyboardLayout layout, (char, byte)[] testData)
         {
-            HidCodeTranslator hid = HidCodeTranslator.GetInstance(layout);
+            var hid = HidCodeTranslator.GetInstance(layout);
             foreach ((char ch, byte code) item in testData)
             {
                 Assert.Equal(item.ch, hid[item.code]);
             }
         }
+#pragma warning restore CA1825
 #endif
 
         public static IEnumerable<object[]> GetTestData()

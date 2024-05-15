@@ -14,14 +14,8 @@
 
 using System;
 using System.Linq;
-using System.Text;
-using System.Threading;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using Yubico.Core.Logging;
-using Yubico.YubiKey.Fido2;
-using Yubico.YubiKey.YubiHsmAuth;
-using Yubico.YubiKey.YubiHsmAuth.Commands;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
@@ -44,26 +38,21 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 builder => builder
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));
+            
+            
+            
+            
+            
+            IYubiKeyDevice? yubiKey = YubiKeyDevice.FindByTransport(Transport.All).First();
 
-            IYubiKeyDevice? yubiKey = YubiKeyDevice.FindAll().First();
+            // IYubiKeyDevice? yubiKey = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
 
-            Console.WriteLine($"YubiKey Version: {yubiKey.FirmwareVersion}");
+            Console.Error.WriteLine($"YubiKey Version: {yubiKey.FirmwareVersion}");
+            Console.Error.WriteLine("NFC Before Value: "+ yubiKey.IsNfcRestricted);
 
-            using (var hsmAuth = new YubiHsmAuthSession(yubiKey))
-            {
-                string label = "mycred";
-                byte[] password = new byte[16];
-                Encoding.ASCII.GetBytes("abc123").CopyTo(password, 0);
-                byte[] hostChallenge = { 0, 1, 2, 3, 4, 5, 6, 7 };
-                byte[] hsmDeviceChallenge = { 8, 9, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15 };
-
-                var command = new GetAes128SessionKeysCommand(label, password, hostChallenge, hsmDeviceChallenge);
-
-                Console.WriteLine("Calling calculate...");
-                GetAes128SessionKeysResponse? response = hsmAuth.Connection.SendCommand(command);
-                Console.WriteLine($"Calculate returned with {response.Status}");
-            }
-
+            yubiKey.SetIsNfcRestricted(true);
+            
+            Console.Error.WriteLine("NFC AFter Value: "+ yubiKey.IsNfcRestricted);
             return true;
         }
     }

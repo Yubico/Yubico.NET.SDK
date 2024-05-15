@@ -75,6 +75,7 @@ namespace Yubico.YubiKey
             Logger log = Log.GetLogger();
 
             log.LogInformation("FindByTransport {Transport}", transport);
+
             if (transport == Transport.None)
             {
                 throw new ArgumentException(ExceptionMessages.InvalidConnectionTypeNone, nameof(transport));
@@ -83,18 +84,14 @@ namespace Yubico.YubiKey
             // If the caller is looking only for HidFido, and this is Windows,
             // and the process is not running elevated, we can't use the YubiKey,
             // so throw an exception.
-            if (transport == Transport.HidFido)
+            if (transport == Transport.HidFido &&
+                SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows &&
+                !SdkPlatformInfo.IsElevated)
             {
-                if (SdkPlatformInfo.OperatingSystem == SdkPlatform.Windows)
-                {
-                    if (!SdkPlatformInfo.IsElevated)
-                    {
-                        throw new UnauthorizedAccessException(
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                ExceptionMessages.HidFidoWindowsNotElevated));
-                    }
-                }
+                throw new UnauthorizedAccessException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.HidFidoWindowsNotElevated));
             }
 
             // Return any key that has at least one overlapping available transport with the requested transports.

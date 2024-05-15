@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Management.Commands
@@ -22,6 +23,7 @@ namespace Yubico.YubiKey.Management.Commands
     /// <remarks>
     /// This class has a corresponding partner class <see cref="GetDeviceInfoResponse"/>
     /// </remarks>
+    [Obsolete("This class has been replaced by GetPagedDeviceInfoCommand")]
     public class GetDeviceInfoCommand : IYubiKeyCommand<GetDeviceInfoResponse>
     {
         private const byte GetDeviceInfoInstruction = 0x1D;

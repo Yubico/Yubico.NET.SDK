@@ -14,6 +14,7 @@
 
 using System;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Yubico.Core.Logging;
@@ -39,7 +40,12 @@ namespace Yubico.YubiKey
         private const byte NfcPrePersCapabilitiesTag = 0x0d;
         private const byte NfcEnabledCapabilitiesTag = 0x0e;
         private const byte MoreDataTag = 0x10;
+        // private const byte PartNumberTag = 0x13;
+        // private const byte FipsCapableTag = 0x14;
+        // private const byte FipsApprovedTag = 0x15;
+        // private const byte PinComplexityTag = 0x16;
         private const byte NfcRestrictedTag = 0x17;
+        // private const byte ResetBlockedTag = 0x18;
         private const byte TemplateStorageVersionTag = 0x20;
         private const byte ImageProcessorVersionTag = 0x21;
 
@@ -288,6 +294,125 @@ namespace Yubico.YubiKey
             return true;
         }
 
+        /// <summary>
+        /// Gets the YubiKey's device configuration details.
+        /// </summary>
+        /// <param name="responseApduData">
+        /// The ResponseApdu data as byte array returned by the YubiKey. The first byte
+        /// is the overall length of the TLV data, followed by the TLV data.
+        /// </param>
+        /// <returns>
+        /// On success, the <see cref="YubiKeyDeviceInfo"/> is returned using this out parameter.
+        /// <paramref name="responseApduData"/> did not meet formatting requirements.
+        /// </returns>
+        internal static YubiKeyDeviceInfo CreateFromResponseData(
+            Dictionary<int,ReadOnlyMemory<byte>> responseApduData)
+        {
+            bool fipsSeriesFlag = false;
+            bool skySeriesFlag = false;
+            
+            var deviceInfo = new YubiKeyDeviceInfo();
+            foreach (KeyValuePair<int, ReadOnlyMemory<byte>> tagValuePair in responseApduData)  
+            {
+                switch (tagValuePair.Key)
+                {
+                    case UsbPrePersCapabilitiesTag:
+                        deviceInfo.AvailableUsbCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+                        break;
+
+                    case SerialNumberTag:
+                        deviceInfo.SerialNumber = BinaryPrimitives.ReadInt32BigEndian(tagValuePair.Value.Span);
+                        break;
+
+                    case UsbEnabledCapabilitiesTag:
+                        deviceInfo.EnabledUsbCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+                        break;
+
+                    case FormFactorTag:
+                        byte formFactorValue = tagValuePair.Value.Span[0];
+                        deviceInfo.FormFactor = (FormFactor)(formFactorValue & FormFactorMask);
+                        fipsSeriesFlag = (formFactorValue & FipsMask) == FipsMask;
+                        skySeriesFlag = (formFactorValue & SkyMask) == SkyMask;
+                        break;
+
+                    case FirmwareVersionTag:
+                        ReadOnlySpan<byte> firmwareValue = tagValuePair.Value.Span;
+                        deviceInfo.FirmwareVersion = new FirmwareVersion
+                        {
+                            Major = firmwareValue[0],
+                            Minor = firmwareValue[1],
+                            Patch = firmwareValue[2]
+                        };
+                        break;
+
+                    case AutoEjectTimeoutTag:
+                        deviceInfo.AutoEjectTimeout = BinaryPrimitives.ReadUInt16BigEndian(tagValuePair.Value.Span);
+                        break;
+
+                    case ChallengeResponseTimeoutTag:
+                        deviceInfo.ChallengeResponseTimeout = tagValuePair.Value.Span[0];
+                        break;
+
+                    case DeviceFlagsTag:
+                        deviceInfo.DeviceFlags = (DeviceFlags)tagValuePair.Value.Span[0];
+                        break;
+
+                    case ConfigurationLockPresentTag:
+                        deviceInfo.ConfigurationLocked = tagValuePair.Value.Span[0] == 1;
+                        break;
+
+                    case NfcPrePersCapabilitiesTag:
+                        deviceInfo.AvailableNfcCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+                        break;
+
+                    case NfcEnabledCapabilitiesTag:
+                        deviceInfo.EnabledNfcCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+                        break;
+
+                    case TemplateStorageVersionTag:
+                        ReadOnlySpan<byte> fpChipVersion = tagValuePair.Value.Span;
+                        deviceInfo.TemplateStorageVersion = new TemplateStorageVersion
+                        {
+                            Major = fpChipVersion[0],
+                            Minor = fpChipVersion[1],
+                            Patch = fpChipVersion[2]
+                        };
+                        break;
+
+                    case ImageProcessorVersionTag:
+                        ReadOnlySpan<byte> ipChipVersion = tagValuePair.Value.Span;
+                        deviceInfo.ImageProcessorVersion = new ImageProcessorVersion
+                        {
+                            Major = ipChipVersion[0],
+                            Minor = ipChipVersion[1],
+                            Patch = ipChipVersion[2]
+                        };
+                        break;
+                    
+                    case NfcRestrictedTag:
+                        deviceInfo.IsNfcRestricted = tagValuePair.Value.Span[0] == 1;
+                        break;
+                    case IapDetectionTag:
+                    case MoreDataTag:
+                        // Ignore these tags for now
+                        break;
+
+                    //Todo add more cases, needs run test
+                    default:
+                        Debug.Assert(false, "Encountered an unrecognized tag in DeviceInfo. Ignoring.");
+                        break;
+                }
+            }
+            
+            deviceInfo.IsFipsSeries = deviceInfo.FirmwareVersion >= _fipsFlagInclusiveLowerBound
+                    ? fipsSeriesFlag
+                    : deviceInfo.IsFipsVersion;
+
+            deviceInfo.IsSkySeries |= skySeriesFlag;
+
+            return deviceInfo;
+        }
+        
         internal YubiKeyDeviceInfo Merge(YubiKeyDeviceInfo? second)
         {
             second ??= new YubiKeyDeviceInfo();

@@ -50,9 +50,9 @@ namespace Yubico.YubiKey
                 if (response.Status == ResponseStatus.Success)
                 {
                     Dictionary<int, ReadOnlyMemory<byte>> tlvData = response.GetData();
-                    foreach ((int tag, ReadOnlyMemory<byte> value) in tlvData)
+                    foreach (KeyValuePair<int, ReadOnlyMemory<byte>> tlv in tlvData)
                     {
-                        pages.Add(tag, value);
+                        pages.Add(tlv.Key, tlv.Value);
                     }
 
                     const int moreDataTag = 0x10;

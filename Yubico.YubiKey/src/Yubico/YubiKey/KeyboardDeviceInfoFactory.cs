@@ -17,6 +17,7 @@ using System.Diagnostics.CodeAnalysis;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.DeviceExtensions;
+using Yubico.YubiKey.Otp.Commands;
 
 namespace Yubico.YubiKey
 {
@@ -74,7 +75,7 @@ namespace Yubico.YubiKey
             {
                 log.LogInformation("Attempting to read device info via the management command over the keyboard interface.");
                 using var connection = new KeyboardConnection(device);
-                yubiKeyDeviceInfo = DeviceInfoHelper.GetDeviceInfo(connection, new Management.Commands.GetPagedDeviceInfoCommand());
+                yubiKeyDeviceInfo = DeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
                 //TODO Handle exceptions? 
                 return true;
 

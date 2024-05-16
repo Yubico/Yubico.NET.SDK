@@ -17,6 +17,7 @@ using System.Diagnostics.CodeAnalysis;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.DeviceExtensions;
+using Yubico.YubiKey.Management.Commands;
 
 namespace Yubico.YubiKey
 {
@@ -77,9 +78,9 @@ namespace Yubico.YubiKey
             return ykDeviceInfo;
         }
 
-        private static bool TryGetDeviceInfoFromManagement(ISmartCardDevice device,
-                                                           [MaybeNullWhen(returnValue: false)]
-                                                           out YubiKeyDeviceInfo yubiKeyDeviceInfo)
+        private static bool TryGetDeviceInfoFromManagement(
+            ISmartCardDevice device,
+            [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo yubiKeyDeviceInfo)
         {
             Logger log = Log.GetLogger();
 
@@ -87,7 +88,7 @@ namespace Yubico.YubiKey
             {
                 log.LogInformation("Attempting to read device info via the management application.");
                 using var connection = new SmartcardConnection(device, YubiKeyApplication.Management);
-                yubiKeyDeviceInfo = DeviceInfoHelper.GetDeviceInfo(connection, new Management.Commands.GetPagedDeviceInfoCommand());
+                yubiKeyDeviceInfo = DeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
 
                 log.LogInformation("Successfully read device info via management application.");
                 return true;

@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Management.Commands
     /// <remarks>
     /// This class has a corresponding partner class <see cref="GetDeviceInfoResponse"/>
     /// </remarks>
-    public sealed class GetPagedDeviceInfoCommand : IPagedGetDeviceInfoCommand<GetPagedDeviceInfoResponse>
+    public sealed class GetPagedDeviceInfoCommand : IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse>
     {
         private const byte GetDeviceInfoInstruction = 0x1D;
         public byte Page { get; set; }
@@ -56,20 +56,5 @@ namespace Yubico.YubiKey.Management.Commands
         public GetPagedDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new GetPagedDeviceInfoResponse(responseApdu);
     }
-
-    /// <summary>
-    /// TODO
-    /// </summary>
-    /// <typeparam name="T"></typeparam>
-    public interface IPagedGetDeviceInfoCommand<T> : IYubiKeyCommand<T> 
-        where T : IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>> 
-    {
-        public byte Page { get; set; }
-    } 
-    
-    // public interface IPagedGetDeviceInfoCommand : IYubiKeyCommand<IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>> 
-    // {
-    //     public byte Page { get; set; }
-    // } 
 }
 

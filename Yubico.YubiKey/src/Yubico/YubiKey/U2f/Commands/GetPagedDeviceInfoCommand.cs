@@ -13,14 +13,13 @@
 // limitations under the License.
 
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Management.Commands;
 
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
     /// Gets detailed information about the YubiKey and its current configuration.
     /// </summary>
-    public sealed class PagedGetPagedDeviceInfoCommand : IPagedGetDeviceInfoCommand<GetPagedDeviceInfoResponse>
+    public sealed class GetPagedDeviceInfoCommand : IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse>
     {
         private const byte GetDeviceInfoInstruction = 0xC2;
         public byte Page { get; set; }
@@ -34,9 +33,9 @@ namespace Yubico.YubiKey.U2f.Commands
         public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
 
         /// <summary>
-        /// Constructs an instance of the <see cref="PagedGetPagedDeviceInfoCommand" /> class.
+        /// Constructs an instance of the <see cref="GetPagedDeviceInfoCommand" /> class.
         /// </summary>
-        public PagedGetPagedDeviceInfoCommand()
+        public GetPagedDeviceInfoCommand()
         {
             
         }

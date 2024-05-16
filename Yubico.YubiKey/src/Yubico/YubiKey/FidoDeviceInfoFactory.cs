@@ -17,7 +17,7 @@ using System.Diagnostics.CodeAnalysis;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.DeviceExtensions;
-using Yubico.YubiKey.Management.Commands;
+using Yubico.YubiKey.U2f.Commands;
 
 namespace Yubico.YubiKey
 {
@@ -74,7 +74,7 @@ namespace Yubico.YubiKey
             {
                 log.LogInformation("Attempting to read device info via the FIDO interface management command.");
                 using var connection = new FidoConnection(device);
-                yubiKeyDeviceInfo = DeviceInfoHelper.GetDeviceInfo(connection, new GetPagedDeviceInfoCommand());
+                yubiKeyDeviceInfo = DeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
                 
                 log.LogInformation("Successfully read device info via FIDO interface management command.");
                 return true;

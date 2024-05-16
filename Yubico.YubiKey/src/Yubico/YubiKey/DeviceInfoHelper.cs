@@ -27,15 +27,12 @@ namespace Yubico.YubiKey
         /// paging through the data as needed until all configuration data is retrieved.
         /// This method processes the responses, accumulating TLV-encoded data into a single dictionary.
         /// </summary>
-        /// <typeparam name="T">The type of the YubiKey response which must include data.</typeparam>
+        /// <typeparam name="TCommand">The specific type of IGetPagedDeviceInfoCommand, e.g. GetPagedDeviceInfoCommand, which will then allow for returning the appropriate response.</typeparam>
         /// <param name="connection">The connection interface to communicate with a YubiKey.</param>
-        /// <param name="command">The command to be sent to the YubiKey. This command should be capable of handling pagination.</param>
         /// <returns>A YubiKeyDeviceInfo object containing all relevant device information.</returns>
         /// <exception cref="InvalidOperationException">Thrown when the command fails to retrieve successful response statuses from the YubiKey.</exception>
-        public static YubiKeyDeviceInfo GetDeviceInfo<T>(
-            IYubiKeyConnection connection,
-            IPagedGetDeviceInfoCommand<T> command) 
-            where T : IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>> 
+        public static YubiKeyDeviceInfo GetDeviceInfo<TCommand>(IYubiKeyConnection connection) 
+            where TCommand : IGetPagedDeviceInfoCommand<IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>>, new()
         {
             Logger log = Log.GetLogger();
             
@@ -45,8 +42,7 @@ namespace Yubico.YubiKey
             bool hasMoreData = true;
             while (hasMoreData)
             {
-                command.Page = (byte)page++;
-                T response = connection.SendCommand(command);
+                IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>> response = connection.SendCommand(new TCommand {Page = (byte)page++});
                 if (response.Status == ResponseStatus.Success)
                 {
                     Dictionary<int, ReadOnlyMemory<byte>> tlvData = response.GetData();

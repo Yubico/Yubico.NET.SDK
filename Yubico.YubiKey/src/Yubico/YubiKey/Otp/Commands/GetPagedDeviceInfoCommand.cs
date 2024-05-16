@@ -13,7 +13,7 @@
 // limitations under the License.
 
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Management.Commands;
+
 
 namespace Yubico.YubiKey.Otp.Commands
 {
@@ -21,9 +21,9 @@ namespace Yubico.YubiKey.Otp.Commands
     /// Gets detailed information about the YubiKey and its current configuration.
     /// </summary>
     /// <remarks>
-    /// This class has a corresponding partner class <see cref="GetDeviceInfoResponse"/>
+    /// This class has a corresponding partner class <see cref="GetPagedDeviceInfoResponse"/>
     /// </remarks>
-    public class PagedGetPagedDeviceInfoCommand : IPagedGetDeviceInfoCommand<GetPagedDeviceInfoResponse>
+    public class GetPagedDeviceInfoCommand : IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse>
     {
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs.
@@ -36,9 +36,9 @@ namespace Yubico.YubiKey.Otp.Commands
         public byte Page { get; set; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="PagedGetPagedDeviceInfoCommand"/> class.
+        /// Initializes a new instance of the <see cref="GetPagedDeviceInfoCommand"/> class.
         /// </summary>
-        public PagedGetPagedDeviceInfoCommand()
+        public GetPagedDeviceInfoCommand()
         {
             
         }

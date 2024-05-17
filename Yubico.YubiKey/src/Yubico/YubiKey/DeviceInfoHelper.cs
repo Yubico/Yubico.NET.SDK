@@ -16,12 +16,13 @@ using System;
 using System.Collections.Generic;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
-using Yubico.YubiKey.Management.Commands;
 
 namespace Yubico.YubiKey
 {
     internal static class DeviceInfoHelper
     {
+        private static readonly Logger Logger = Log.GetLogger();
+
         /// <summary>
         /// Fetches and aggregates device configuration details from a YubiKey using multiple APDU commands,
         /// paging through the data as needed until all configuration data is retrieved.
@@ -29,20 +30,19 @@ namespace Yubico.YubiKey
         /// </summary>
         /// <typeparam name="TCommand">The specific type of IGetPagedDeviceInfoCommand, e.g. GetPagedDeviceInfoCommand, which will then allow for returning the appropriate response.</typeparam>
         /// <param name="connection">The connection interface to communicate with a YubiKey.</param>
-        /// <returns>A YubiKeyDeviceInfo object containing all relevant device information.</returns>
-        /// <exception cref="InvalidOperationException">Thrown when the command fails to retrieve successful response statuses from the YubiKey.</exception>
-        public static YubiKeyDeviceInfo GetDeviceInfo<TCommand>(IYubiKeyConnection connection) 
+        /// <returns>A YubiKeyDeviceInfo? object containing all relevant device information if successful, otherwise null.</returns>
+        public static YubiKeyDeviceInfo? GetDeviceInfo<TCommand>(IYubiKeyConnection connection) 
             where TCommand : IGetPagedDeviceInfoCommand<IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>>, new()
         {
-            Logger log = Log.GetLogger();
-            
             int page = 0;
             var pages = new Dictionary<int, ReadOnlyMemory<byte>>();
-            
+
             bool hasMoreData = true;
             while (hasMoreData)
             {
-                IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>> response = connection.SendCommand(new TCommand {Page = (byte)page++});
+                IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>> response =
+                    connection.SendCommand(new TCommand { Page = (byte)page++ });
+
                 if (response.Status == ResponseStatus.Success)
                 {
                     Dictionary<int, ReadOnlyMemory<byte>> tlvData = response.GetData();
@@ -58,41 +58,38 @@ namespace Yubico.YubiKey
                 }
                 else
                 {
-                    log.LogError("Failed to get device info page-{Page}: {Error} {Message}",
-                        page, response.StatusWord, response.StatusMessage);
+                    Logger.LogError("Failed to get device info page-{Page}: {Error} {Message}", page,
+                        response.StatusWord, response.StatusMessage);
 
-                    return new YubiKeyDeviceInfo(); // TODO What to return here? Null? Empty? Exception? 
+                    return null;
                 }
             }
 
             return YubiKeyDeviceInfo.CreateFromResponseData(pages);
         }
-        
+
         /// <summary>
         /// Attempts to create a dictionary from a TLV-encoded byte array by parsing and extracting tag-value pairs.
         /// </summary>
         /// <param name="tlvData">The byte array containing TLV-encoded data.</param>
-        /// <param name="result">When successful, contains a dictionary mapping integer tags to their corresponding values as byte arrays.</param>
-        /// <returns>True if the dictionary was successfully created; false otherwise.</returns>
-        public static bool TryCreateApduDictionaryFromResponseData(
-            ReadOnlyMemory<byte> tlvData, out Dictionary<int, ReadOnlyMemory<byte>> result)
+        /// <returns>A dictionary mapping integer tags to their corresponding values as byte arrays.</returns>
+        public static Dictionary<int, ReadOnlyMemory<byte>>? CreateApduDictionaryFromResponseData(
+            ReadOnlyMemory<byte> tlvData)
         {
-            Logger log = Log.GetLogger();
-            result = new Dictionary<int, ReadOnlyMemory<byte>>();
-
             if (tlvData.IsEmpty)
             {
-                log.LogWarning("ResponseAPDU data was empty!");
-                return false;
+                Logger.LogWarning("ResponseAPDU data was empty!");
+                return null;
             }
 
             int tlvDataLength = tlvData.Span[0];
             if (tlvDataLength == 0 || 1 + tlvDataLength > tlvData.Length)
             {
-                log.LogWarning("TLV Data length was out of expected ranges. {Length}", tlvDataLength);
-                return false;
+                Logger.LogWarning("TLV Data length was out of expected ranges. {Length}", tlvDataLength);
+                return null;
             }
 
+            var result = new Dictionary<int, ReadOnlyMemory<byte>>();
             var tlvReader = new TlvReader(tlvData.Slice(1, tlvDataLength));
             while (tlvReader.HasData)
             {
@@ -101,7 +98,7 @@ namespace Yubico.YubiKey
                 result.Add(tag, value);
             }
 
-            return true;
+            return result;
         }
     }
 }

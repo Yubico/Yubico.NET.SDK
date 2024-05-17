@@ -663,6 +663,14 @@ namespace Yubico.YubiKey
             bool touchEjectEnabled,
             int autoEjectTimeout = 0);
 
+
+        /// <summary>
+        /// Sets the <see cref="IYubiKeyDeviceInfo.IsNfcRestricted"/> on the <see cref="YubiKeyDeviceInfo"/> 
+        /// <exception cref="InvalidOperationException">
+        /// The command failed to complete.
+        /// </exception>
+        /// </summary>
+        /// <param name="enabled">Set this value to true to enable, otherwise false</param>
         void SetIsNfcRestricted(bool enabled);
     }
 }

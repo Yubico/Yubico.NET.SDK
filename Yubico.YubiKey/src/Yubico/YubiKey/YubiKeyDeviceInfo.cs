@@ -109,7 +109,8 @@ namespace Yubico.YubiKey
 
         /// <inheritdoc />
         public bool ConfigurationLocked { get; set; }
-
+        
+        /// <inheritdoc />
         public bool IsNfcRestricted { get; set; }
 
         /// <summary>

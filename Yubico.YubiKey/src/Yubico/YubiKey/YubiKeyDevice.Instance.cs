@@ -515,7 +515,7 @@ namespace Yubico.YubiKey
             }
         }
 
-        //TODO make documentation
+        /// <inheritdoc/>
         public void SetIsNfcRestricted(bool enabled)
         {
             var setCommand = new MgmtCmd.SetDeviceInfoCommand

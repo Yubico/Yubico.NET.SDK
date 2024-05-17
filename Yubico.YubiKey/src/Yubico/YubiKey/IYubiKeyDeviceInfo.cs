@@ -40,11 +40,6 @@ namespace Yubico.YubiKey
         public YubiKeyCapabilities EnabledNfcCapabilities { get; }
 
         /// <summary>
-        /// TODO
-        /// </summary>
-        public bool IsNfcRestricted { get; }
-
-        /// <summary>
         /// The serial number of the YubiKey, if one is present.
         /// </summary>
         public int? SerialNumber { get; }
@@ -126,5 +121,10 @@ namespace Yubico.YubiKey
         /// Indicates whether or not the YubiKey's configuration has been locked by the user.
         /// </summary>
         public bool ConfigurationLocked { get; }
+        
+        /// <summary>
+        /// Indicates if this device has temporarily disabled NFC.
+        /// </summary>
+        public bool IsNfcRestricted { get; }
     }
 }

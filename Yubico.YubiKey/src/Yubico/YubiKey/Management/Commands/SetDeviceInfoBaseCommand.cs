@@ -103,7 +103,7 @@ namespace Yubico.YubiKey.Management.Commands
         public bool ResetAfterConfig { get; set; }
 
         /// <summary>
-        /// TODO
+        /// Allows setting of the <see cref="YubiKeyDeviceInfo.IsNfcRestricted"/> property
         /// </summary>
         public bool IsNfcRestricted { get; set; }
 

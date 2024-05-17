@@ -140,16 +140,15 @@ namespace Yubico.YubiKey
             ReadOnlyMemory<byte> responseApduData,
             [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo deviceInfo)
         {
-            Dictionary<int, ReadOnlyMemory<byte>>? data = GetDeviceInfoHelper.CreateApduDictionaryFromResponseData(responseApduData);
-
-            if (data is {})
+            Dictionary<int, ReadOnlyMemory<byte>>? data = GetDeviceInfoResponseHelper.CreateApduDictionaryFromResponseData(responseApduData);
+            if (data is null)
             {
-                deviceInfo = CreateFromResponseData(data);
-                return true;
+                deviceInfo = null;
+                return false;
             }
-
-            deviceInfo = null;
-            return false;
+            
+            deviceInfo = CreateFromResponseData(data);
+            return true;
         }
 
         /// <summary>

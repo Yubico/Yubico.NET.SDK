@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using Yubico.Core.Logging;
-using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey
 {
@@ -66,42 +65,6 @@ namespace Yubico.YubiKey
             }
 
             return YubiKeyDeviceInfo.CreateFromResponseData(pages);
-        }
-
-        /// <summary>
-        /// Attempts to create a dictionary from a TLV-encoded byte array by parsing and extracting tag-value pairs.
-        /// </summary>
-        /// <param name="tlvData">The byte array containing TLV-encoded data.</param>
-        /// <returns>A dictionary mapping integer tags to their corresponding values as byte arrays.</returns>
-        public static Dictionary<int, ReadOnlyMemory<byte>>? CreateApduDictionaryFromResponseData(
-            ReadOnlyMemory<byte> tlvData)
-        {
-            if (tlvData.IsEmpty)
-            {
-                Logger.LogWarning("ResponseAPDU data was empty!");
-                return null;
-            }
-
-            // Certain transports (such as OTP keyboard) may return a buffer that is larger than the
-            // overall TLV size. We want to make sure we're only parsing over real TLV data here, so
-            // check the first byte to get the overall TLV length and slice accordingly.
-            int tlvDataLength = tlvData.Span[0];
-            if (tlvDataLength == 0 || 1 + tlvDataLength > tlvData.Length)
-            {
-                Logger.LogWarning("TLV Data length was out of expected ranges. {Length}", tlvDataLength);
-                return null;
-            }
-
-            var result = new Dictionary<int, ReadOnlyMemory<byte>>();
-            var tlvReader = new TlvReader(tlvData.Slice(1, tlvDataLength));
-            while (tlvReader.HasData)
-            {
-                int tag = tlvReader.PeekTag();
-                ReadOnlyMemory<byte> value = tlvReader.ReadValue(tag);
-                result.Add(tag, value);
-            }
-
-            return result;
         }
     }
 }

@@ -74,11 +74,13 @@ namespace Yubico.YubiKey
             {
                 log.LogInformation("Attempting to read device info via the FIDO interface management command.");
                 using var connection = new FidoConnection(device);
-                yubiKeyDeviceInfo = DeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
                 
-                log.LogInformation("Successfully read device info via FIDO interface management command.");
-                return true;
-                //TODO Handle exceptions? 
+                yubiKeyDeviceInfo = DeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
+                if (yubiKeyDeviceInfo is {})
+                {
+                    log.LogInformation("Successfully read device info via FIDO interface management command.");
+                    return true;    
+                }
             }
             catch (NotImplementedException e)
             {

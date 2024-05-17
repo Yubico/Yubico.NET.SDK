@@ -75,20 +75,14 @@ namespace Yubico.YubiKey
             {
                 log.LogInformation("Attempting to read device info via the management command over the keyboard interface.");
                 using var connection = new KeyboardConnection(device);
+
                 yubiKeyDeviceInfo = DeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
-                //TODO Handle exceptions? 
-                return true;
-
-                // Otp.Commands.GetDeviceInfoResponse response = keyboardConnection.SendCommand(new Otp.Commands.GetDeviceInfoCommand());
-                //
-                // if (response.Status == ResponseStatus.Success)
-                // {
-                //     yubiKeyDeviceInfo = response.GetData();
-                //     log.LogInformation("Successfully read device info via the keyboard management command.");
-                //     return true;
-                // }
-
-                // log.LogError("Failed to get device info from the keyboard management command: {Error} {Message}", response.StatusWord, response.StatusMessage);
+                if (yubiKeyDeviceInfo is {})
+                {
+                    log.LogInformation("Successfully read device info via the keyboard management command.");
+                    return true;    
+                }
+                
             }
             catch (KeyboardConnectionException e)
             {
@@ -103,7 +97,7 @@ namespace Yubico.YubiKey
                 ErrorHandler(e, "The KeyboardTransform.HandleStatusInstruction has invalid StatusReport format " +
                     "or The GetDeviceInfoResponse.GetData response data length is too long.");
             }
-
+            
             log.LogWarning("Failed to read device info through the keyboard management command. This may be expected for older YubiKeys.");
             yubiKeyDeviceInfo = null;
             return false;
@@ -116,9 +110,9 @@ namespace Yubico.YubiKey
             try
             {
                 log.LogInformation("Attempting to read serial number through the keybaord interface.");
-                using var KeyboardConnection = new KeyboardConnection(device);
+                using var keyboardConnection = new KeyboardConnection(device);
 
-                Otp.Commands.GetSerialNumberResponse response = KeyboardConnection.SendCommand(new Otp.Commands.GetSerialNumberCommand());
+                Otp.Commands.GetSerialNumberResponse response = keyboardConnection.SendCommand(new Otp.Commands.GetSerialNumberCommand());
 
                 if (response.Status == ResponseStatus.Success)
                 {
@@ -154,9 +148,9 @@ namespace Yubico.YubiKey
             try
             {
                 log.LogInformation("Attempting to read firmware version through the keyboard interface.");
-                using var KeyboardConnection = new KeyboardConnection(device);
+                using var keyboardConnection = new KeyboardConnection(device);
 
-                Otp.Commands.ReadStatusResponse response = KeyboardConnection.SendCommand(new Otp.Commands.ReadStatusCommand());
+                Otp.Commands.ReadStatusResponse response = keyboardConnection.SendCommand(new Otp.Commands.ReadStatusCommand());
 
                 if (response.Status == ResponseStatus.Success)
                 {

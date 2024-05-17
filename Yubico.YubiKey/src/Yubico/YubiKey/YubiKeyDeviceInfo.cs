@@ -17,8 +17,6 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Yubico.Core.Logging;
-using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey
 {

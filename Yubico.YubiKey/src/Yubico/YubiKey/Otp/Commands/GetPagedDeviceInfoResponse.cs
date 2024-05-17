@@ -22,7 +22,8 @@ namespace Yubico.YubiKey.Otp.Commands
     /// The response to the <see cref="GetDeviceInfoCommand"/> command, containing the YubiKey's
     /// device configuration details.
     /// </summary>
-    public class GetPagedDeviceInfoResponse : OtpResponse, IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>
+    public class GetPagedDeviceInfoResponse : OtpResponse,
+                                              IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>
     {
         /// <summary>
         /// Constructs a GetPagedDeviceInfoResponse instance based on a ResponseApdu received from the YubiKey.
@@ -33,7 +34,6 @@ namespace Yubico.YubiKey.Otp.Commands
         public GetPagedDeviceInfoResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
 
         /// <summary>
@@ -58,15 +58,12 @@ namespace Yubico.YubiKey.Otp.Commands
                 };
             }
 
-            if (!DeviceInfoHelper.TryCreateApduDictionaryFromResponseData(ResponseApdu.Data, out Dictionary<int, ReadOnlyMemory<byte>> result))
+            Dictionary<int, ReadOnlyMemory<byte>>? result = DeviceInfoHelper.TryCreateApduDictionaryFromResponseData(ResponseApdu.Data);
+            
+            return result ?? throw new MalformedYubiKeyResponseException
             {
-                throw new MalformedYubiKeyResponseException
-                {
-                    ResponseClass = nameof(GetPagedDeviceInfoResponse),
-                };
-            }
-
-            return result;
+                ResponseClass = nameof(GetPagedDeviceInfoResponse),
+            };
         }
     }
 }

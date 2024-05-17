@@ -59,15 +59,12 @@ namespace Yubico.YubiKey.Management.Commands
                 };
             }
 
-            if (!DeviceInfoHelper.TryCreateApduDictionaryFromResponseData(ResponseApdu.Data, out Dictionary<int, ReadOnlyMemory<byte>> result))
+            Dictionary<int, ReadOnlyMemory<byte>>? result = DeviceInfoHelper.TryCreateApduDictionaryFromResponseData(ResponseApdu.Data);
+            
+            return result ?? throw new MalformedYubiKeyResponseException
             {
-                throw new MalformedYubiKeyResponseException
-                {
-                    ResponseClass = nameof(GetPagedDeviceInfoResponse),
-                };
-            }
-
-            return result;
+                ResponseClass = nameof(GetPagedDeviceInfoResponse),
+            };
         }
     }
 }

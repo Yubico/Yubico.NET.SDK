@@ -136,7 +136,7 @@ namespace Yubico.YubiKey
 
         public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand) where TResponse : IYubiKeyResponse
         {
-            using (IDisposable transaction = _smartCardConnection.BeginTransaction(out bool cardWasReset))
+            using (IDisposable _ = _smartCardConnection.BeginTransaction(out bool cardWasReset))
             {
                 if (cardWasReset)
                 {

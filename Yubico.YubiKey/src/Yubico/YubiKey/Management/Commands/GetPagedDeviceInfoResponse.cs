@@ -42,6 +42,7 @@ namespace Yubico.YubiKey.Management.Commands
         /// <returns>A dictionary mapping integer tags to their corresponding values as byte arrays.</returns>
         /// <exception cref="InvalidOperationException">Thrown when the response status is not successful.</exception>
         /// <exception cref="MalformedYubiKeyResponseException">Thrown when the APDU data length exceeds expected bounds or if the data conversion fails.</exception>
-        public Dictionary<int, ReadOnlyMemory<byte>> GetData() => GetDeviceInfoResponseHelper.ParseResponse(ResponseApdu, Status, StatusMessage, nameof(GetPagedDeviceInfoResponse));
+        public Dictionary<int, ReadOnlyMemory<byte>>
+            GetData() => GetDeviceInfoResponseHelper.ParseResponse(ResponseApdu, Status, StatusMessage, nameof(GetPagedDeviceInfoResponse));
     }
 }

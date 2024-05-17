@@ -80,9 +80,9 @@ namespace Yubico.YubiKey
 
                 YubiKeyFeature.ManagementApplication =>
                     yubiKeyDevice.FirmwareVersion >= new FirmwareVersion(5),
-                
+
                 YubiKeyFeature.ManagementNfcRestricted =>
-                    yubiKeyDevice.FirmwareVersion >= new FirmwareVersion(5,7),
+                    yubiKeyDevice.FirmwareVersion >= new FirmwareVersion(5, 7),
 
                 YubiKeyFeature.SerialNumberVisibilityControls =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V2_2_0

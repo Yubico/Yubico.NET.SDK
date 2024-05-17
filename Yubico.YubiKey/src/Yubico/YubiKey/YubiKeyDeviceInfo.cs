@@ -140,14 +140,18 @@ namespace Yubico.YubiKey
             ReadOnlyMemory<byte> responseApduData,
             [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo deviceInfo)
         {
-            Dictionary<int, ReadOnlyMemory<byte>>? data = GetDeviceInfoResponseHelper.CreateApduDictionaryFromResponseData(responseApduData);
+            Dictionary<int, ReadOnlyMemory<byte>>? data =
+                GetDeviceInfoResponseHelper.CreateApduDictionaryFromResponseData(responseApduData);
+
             if (data is null)
             {
                 deviceInfo = null;
+
                 return false;
             }
-            
+
             deviceInfo = CreateFromResponseData(data);
+
             return true;
         }
 
@@ -162,27 +166,30 @@ namespace Yubico.YubiKey
         /// On success, the <see cref="YubiKeyDeviceInfo"/> is returned using this out parameter.
         /// <paramref name="responseApduData"/> did not meet formatting requirements.
         /// </returns>
-        internal static YubiKeyDeviceInfo CreateFromResponseData(
-            Dictionary<int, ReadOnlyMemory<byte>> responseApduData)
+        internal static YubiKeyDeviceInfo CreateFromResponseData(Dictionary<int, ReadOnlyMemory<byte>> responseApduData)
         {
             bool fipsSeriesFlag = false;
             bool skySeriesFlag = false;
 
             var deviceInfo = new YubiKeyDeviceInfo();
+
             foreach (KeyValuePair<int, ReadOnlyMemory<byte>> tagValuePair in responseApduData)
             {
                 switch (tagValuePair.Key)
                 {
                     case UsbPrePersCapabilitiesTag:
                         deviceInfo.AvailableUsbCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+
                         break;
 
                     case SerialNumberTag:
                         deviceInfo.SerialNumber = BinaryPrimitives.ReadInt32BigEndian(tagValuePair.Value.Span);
+
                         break;
 
                     case UsbEnabledCapabilitiesTag:
                         deviceInfo.EnabledUsbCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+
                         break;
 
                     case FormFactorTag:
@@ -190,86 +197,101 @@ namespace Yubico.YubiKey
                         deviceInfo.FormFactor = (FormFactor)(formFactorValue & FormFactorMask);
                         fipsSeriesFlag = (formFactorValue & FipsMask) == FipsMask;
                         skySeriesFlag = (formFactorValue & SkyMask) == SkyMask;
+
                         break;
 
                     case FirmwareVersionTag:
                         ReadOnlySpan<byte> firmwareValue = tagValuePair.Value.Span;
+
                         deviceInfo.FirmwareVersion = new FirmwareVersion
                         {
                             Major = firmwareValue[0],
                             Minor = firmwareValue[1],
                             Patch = firmwareValue[2]
                         };
+
                         break;
 
                     case AutoEjectTimeoutTag:
                         deviceInfo.AutoEjectTimeout = BinaryPrimitives.ReadUInt16BigEndian(tagValuePair.Value.Span);
+
                         break;
 
                     case ChallengeResponseTimeoutTag:
                         deviceInfo.ChallengeResponseTimeout = tagValuePair.Value.Span[0];
+
                         break;
 
                     case DeviceFlagsTag:
                         deviceInfo.DeviceFlags = (DeviceFlags)tagValuePair.Value.Span[0];
+
                         break;
 
                     case ConfigurationLockPresentTag:
                         deviceInfo.ConfigurationLocked = tagValuePair.Value.Span[0] == 1;
+
                         break;
 
                     case NfcPrePersCapabilitiesTag:
                         deviceInfo.AvailableNfcCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+
                         break;
 
                     case NfcEnabledCapabilitiesTag:
                         deviceInfo.EnabledNfcCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+
                         break;
 
                     case TemplateStorageVersionTag:
                         ReadOnlySpan<byte> fpChipVersion = tagValuePair.Value.Span;
+
                         deviceInfo.TemplateStorageVersion = new TemplateStorageVersion
                         {
                             Major = fpChipVersion[0],
                             Minor = fpChipVersion[1],
                             Patch = fpChipVersion[2]
                         };
+
                         break;
 
                     case ImageProcessorVersionTag:
                         ReadOnlySpan<byte> ipChipVersion = tagValuePair.Value.Span;
+
                         deviceInfo.ImageProcessorVersion = new ImageProcessorVersion
                         {
                             Major = ipChipVersion[0],
                             Minor = ipChipVersion[1],
                             Patch = ipChipVersion[2]
                         };
+
                         break;
 
                     case NfcRestrictedTag:
                         deviceInfo.IsNfcRestricted = tagValuePair.Value.Span[0] == 1;
+
                         break;
                     case IapDetectionTag:
                     case MoreDataTag:
                     case PartNumberTag:
                     case FipsCapableTag:
-                    case FipsApprovedTag: 
+                    case FipsApprovedTag:
                     case PinComplexityTag:
                     case FreeFormTag:
-                    case HidInitDelay: 
+                    case HidInitDelay:
                     case ResetBlockedTag:
                         // Ignore these tags for now
                         break;
-        
+
                     default:
                         Debug.Assert(false, "Encountered an unrecognized tag in DeviceInfo. Ignoring.");
+
                         break;
                 }
             }
-            
+
             deviceInfo.IsFipsSeries = deviceInfo.FirmwareVersion >= _fipsFlagInclusiveLowerBound
-                    ? fipsSeriesFlag
-                    : deviceInfo.IsFipsVersion;
+                ? fipsSeriesFlag
+                : deviceInfo.IsFipsVersion;
 
             deviceInfo.IsSkySeries |= skySeriesFlag;
 
@@ -303,10 +325,10 @@ namespace Yubico.YubiKey
                     : second.FirmwareVersion,
 
                 AutoEjectTimeout = DeviceFlags.HasFlag(DeviceFlags.TouchEject)
-                        ? AutoEjectTimeout
-                        : second.DeviceFlags.HasFlag(DeviceFlags.TouchEject)
-                            ? second.AutoEjectTimeout
-                            : default,
+                    ? AutoEjectTimeout
+                    : second.DeviceFlags.HasFlag(DeviceFlags.TouchEject)
+                        ? second.AutoEjectTimeout
+                        : default,
 
                 ChallengeResponseTimeout = ChallengeResponseTimeout != default
                     ? ChallengeResponseTimeout
@@ -330,6 +352,7 @@ namespace Yubico.YubiKey
             && FirmwareVersion < _fipsExclusiveUpperBound;
 
         private static YubiKeyCapabilities GetYubiKeyCapabilities(ReadOnlySpan<byte> value) =>
+
             // Older firmware versions only encode this enumeration with one byte. If we see a single
             // byte in this element, it's OK. We will handle it here.
             value.Length == 1
@@ -337,6 +360,7 @@ namespace Yubico.YubiKey
                 : (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(value);
 
         /// <inheritdoc/>
-        public override string ToString() => $"{nameof(AvailableUsbCapabilities)}: {AvailableUsbCapabilities}, {nameof(EnabledUsbCapabilities)}: {EnabledUsbCapabilities}, {nameof(AvailableNfcCapabilities)}: {AvailableNfcCapabilities}, {nameof(EnabledNfcCapabilities)}: {EnabledNfcCapabilities}, {nameof(AutoEjectTimeout)}: {AutoEjectTimeout}, {nameof(DeviceFlags)}: {DeviceFlags}, {nameof(ConfigurationLocked)}: {ConfigurationLocked}";
+        public override string ToString() =>
+            $"{nameof(AvailableUsbCapabilities)}: {AvailableUsbCapabilities}, {nameof(EnabledUsbCapabilities)}: {EnabledUsbCapabilities}, {nameof(AvailableNfcCapabilities)}: {AvailableNfcCapabilities}, {nameof(EnabledNfcCapabilities)}: {EnabledNfcCapabilities}, {nameof(AutoEjectTimeout)}: {AutoEjectTimeout}, {nameof(DeviceFlags)}: {DeviceFlags}, {nameof(ConfigurationLocked)}: {ConfigurationLocked}";
     }
 }

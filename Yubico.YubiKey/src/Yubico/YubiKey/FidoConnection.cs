@@ -50,7 +50,6 @@ namespace Yubico.YubiKey
             where TResponse : IYubiKeyResponse
         {
             CommandApdu commandApdu = yubiKeyCommand.CreateCommandApdu();
-
             ResponseApdu responseApdu = _apduPipeline.Invoke(commandApdu, yubiKeyCommand.GetType(), typeof(TResponse));
 
             return yubiKeyCommand.CreateResponseForApdu(responseApdu);

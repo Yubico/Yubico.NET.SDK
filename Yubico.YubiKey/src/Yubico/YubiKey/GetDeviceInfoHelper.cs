@@ -30,13 +30,17 @@ namespace Yubico.YubiKey
         /// <typeparam name="TCommand">The specific type of IGetPagedDeviceInfoCommand, e.g. GetPagedDeviceInfoCommand, which will then allow for returning the appropriate response.</typeparam>
         /// <param name="connection">The connection interface to communicate with a YubiKey.</param>
         /// <returns>A YubiKeyDeviceInfo? object containing all relevant device information if successful, otherwise null.</returns>
-        public static YubiKeyDeviceInfo? GetDeviceInfo<TCommand>(IYubiKeyConnection connection)
-            where TCommand : IGetPagedDeviceInfoCommand<IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>>, new()
+        public static YubiKeyDeviceInfo? GetDeviceInfo<TCommand>(
+            IYubiKeyConnection connection)
+            where TCommand
+            : IGetPagedDeviceInfoCommand<IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>>,
+            new()
         {
             int page = 0;
             var combinedPages = new Dictionary<int, ReadOnlyMemory<byte>>();
 
             bool hasMoreData = true;
+
             while (hasMoreData)
             {
                 IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>> response =
@@ -45,19 +49,22 @@ namespace Yubico.YubiKey
                 if (response.Status == ResponseStatus.Success)
                 {
                     Dictionary<int, ReadOnlyMemory<byte>> tlvData = response.GetData();
+
                     foreach (KeyValuePair<int, ReadOnlyMemory<byte>> tlv in tlvData)
                     {
                         combinedPages.Add(tlv.Key, tlv.Value);
                     }
 
                     const int moreDataTag = 0x10;
+
                     hasMoreData = tlvData.TryGetValue(moreDataTag, out ReadOnlyMemory<byte> hasMoreDataByte)
                         && hasMoreDataByte.Span.Length == 1
                         && hasMoreDataByte.Span[0] == 1;
                 }
                 else
                 {
-                    Logger.LogError("Failed to get device info page-{Page}: {Error} {Message}", page,
+                    Logger.LogError(
+                        "Failed to get device info page-{Page}: {Error} {Message}", page,
                         response.StatusWord, response.StatusMessage);
 
                     return null;

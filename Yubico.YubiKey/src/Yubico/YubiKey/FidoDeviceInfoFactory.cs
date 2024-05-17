@@ -103,7 +103,6 @@ namespace Yubico.YubiKey
                 "Failed to read device info through the management interface. This may be expected for older YubiKeys.");
 
             deviceInfo = null;
-
             return false;
         }
 
@@ -128,7 +127,8 @@ namespace Yubico.YubiKey
                     return true;
                 }
 
-                log.LogError("Reading firmware version via FIDO failed with: {Error} {Message}", response.StatusWord,
+                log.LogError(
+                    "Reading firmware version via FIDO failed with: {Error} {Message}", response.StatusWord,
                     response.StatusMessage);
             }
             catch (NotImplementedException e)

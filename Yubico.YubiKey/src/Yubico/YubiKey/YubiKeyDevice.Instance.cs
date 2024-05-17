@@ -379,7 +379,7 @@ namespace Yubico.YubiKey
                 {
                     _log.LogInformation("Connecting via the SmartCard interface.");
                     WaitForReclaimTimeout(Transport.SmartCard);
-                    return scp03Keys is null 
+                    return scp03Keys is null
                         ? new SmartCardConnection(_smartCardDevice, applicationId)
                         : new Scp03Connection(_smartCardDevice, applicationId, scp03Keys);
                 }
@@ -524,7 +524,7 @@ namespace Yubico.YubiKey
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.NotSupportedByYubiKeyVersion));
             }
-            
+
             var command = new MgmtCmd.SetDeviceInfoCommand
             {
                 RestrictNfc = enabled

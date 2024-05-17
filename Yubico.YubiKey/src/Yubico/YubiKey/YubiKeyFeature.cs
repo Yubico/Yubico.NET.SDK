@@ -234,7 +234,7 @@ namespace Yubico.YubiKey
         /// Yubico.YubiKey.YubiHsmAuth namespace.
         /// </summary>
         YubiHsmAuthApplication,
-        
+
         /// <summary>
         /// Allows temporarily disabling NFC (added in 5.7) 
         /// </summary>

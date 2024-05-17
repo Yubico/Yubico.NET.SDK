@@ -40,12 +40,14 @@ namespace Yubico.YubiKey
         private const byte NfcPrePersCapabilitiesTag = 0x0d;
         private const byte NfcEnabledCapabilitiesTag = 0x0e;
         private const byte MoreDataTag = 0x10;
+        private const byte FreeFormTag = 0x11;
+        private const byte HidInitDelay = 0x12;
         private const byte PartNumberTag = 0x13;
         private const byte FipsCapableTag = 0x14;
         private const byte FipsApprovedTag = 0x15;
         private const byte PinComplexityTag = 0x16;
         private const byte NfcRestrictedTag = 0x17;
-        // private const byte ResetBlockedTag = 0x18;
+        private const byte ResetBlockedTag = 0x18;
         private const byte TemplateStorageVersionTag = 0x20;
         private const byte ImageProcessorVersionTag = 0x21;
 
@@ -255,6 +257,9 @@ namespace Yubico.YubiKey
                     case FipsCapableTag:
                     case FipsApprovedTag: 
                     case PinComplexityTag:
+                    case FreeFormTag:
+                    case HidInitDelay: 
+                    case ResetBlockedTag:
                         // Ignore these tags for now
                         break;
         
@@ -263,7 +268,7 @@ namespace Yubico.YubiKey
                         break;
                 }
             }
-
+            
             deviceInfo.IsFipsSeries = deviceInfo.FirmwareVersion >= _fipsFlagInclusiveLowerBound
                     ? fipsSeriesFlag
                     : deviceInfo.IsFipsVersion;

@@ -89,7 +89,7 @@ namespace Yubico.YubiKey
                 log.LogInformation("Attempting to read device info via the management application.");
                 using var connection = new SmartcardConnection(device, YubiKeyApplication.Management);
 
-                yubiKeyDeviceInfo = DeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
+                yubiKeyDeviceInfo = GetDeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
                 if (yubiKeyDeviceInfo is { })
                 {
                     log.LogInformation("Successfully read device info via management application.");

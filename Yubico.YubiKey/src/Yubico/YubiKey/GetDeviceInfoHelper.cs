@@ -19,7 +19,7 @@ using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey
 {
-    internal static class DeviceInfoHelper
+    internal static class GetDeviceInfoHelper
     {
         private static readonly Logger Logger = Log.GetLogger();
 
@@ -82,6 +82,9 @@ namespace Yubico.YubiKey
                 return null;
             }
 
+            // Certain transports (such as OTP keyboard) may return a buffer that is larger than the
+            // overall TLV size. We want to make sure we're only parsing over real TLV data here, so
+            // check the first byte to get the overall TLV length and slice accordingly.
             int tlvDataLength = tlvData.Span[0];
             if (tlvDataLength == 0 || 1 + tlvDataLength > tlvData.Length)
             {

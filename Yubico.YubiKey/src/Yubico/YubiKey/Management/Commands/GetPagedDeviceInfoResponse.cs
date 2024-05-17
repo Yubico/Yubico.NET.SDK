@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Management.Commands
                 };
             }
 
-            Dictionary<int, ReadOnlyMemory<byte>>? result = DeviceInfoHelper.CreateApduDictionaryFromResponseData(ResponseApdu.Data);
+            Dictionary<int, ReadOnlyMemory<byte>>? result = GetDeviceInfoHelper.CreateApduDictionaryFromResponseData(ResponseApdu.Data);
 
             return result ?? throw new MalformedYubiKeyResponseException
             {

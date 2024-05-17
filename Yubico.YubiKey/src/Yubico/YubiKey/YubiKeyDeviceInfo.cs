@@ -135,6 +135,7 @@ namespace Yubico.YubiKey
         /// True if the parsing and construction was successful, and false if
         /// <paramref name="responseApduData"/> did not meet formatting requirements.
         /// </returns>
+        [Obsolete("This has been replaced by CreateFromResponseData")]
         internal static bool TryCreateFromResponseData(
             ReadOnlyMemory<byte> responseApduData,
             [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo deviceInfo)

@@ -76,7 +76,7 @@ namespace Yubico.YubiKey
                 log.LogInformation("Attempting to read device info via the management command over the keyboard interface.");
                 using var connection = new KeyboardConnection(device);
 
-                yubiKeyDeviceInfo = DeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
+                yubiKeyDeviceInfo = GetDeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
                 if (yubiKeyDeviceInfo is { })
                 {
                     log.LogInformation("Successfully read device info via the keyboard management command.");

@@ -34,7 +34,7 @@ namespace Yubico.YubiKey
             where TCommand : IGetPagedDeviceInfoCommand<IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>>, new()
         {
             int page = 0;
-            var pages = new Dictionary<int, ReadOnlyMemory<byte>>();
+            var combinedPages = new Dictionary<int, ReadOnlyMemory<byte>>();
 
             bool hasMoreData = true;
             while (hasMoreData)
@@ -47,7 +47,7 @@ namespace Yubico.YubiKey
                     Dictionary<int, ReadOnlyMemory<byte>> tlvData = response.GetData();
                     foreach (KeyValuePair<int, ReadOnlyMemory<byte>> tlv in tlvData)
                     {
-                        pages.Add(tlv.Key, tlv.Value);
+                        combinedPages.Add(tlv.Key, tlv.Value);
                     }
 
                     const int moreDataTag = 0x10;
@@ -64,7 +64,7 @@ namespace Yubico.YubiKey
                 }
             }
 
-            return YubiKeyDeviceInfo.CreateFromResponseData(pages);
+            return YubiKeyDeviceInfo.CreateFromResponseData(combinedPages);
         }
     }
 }

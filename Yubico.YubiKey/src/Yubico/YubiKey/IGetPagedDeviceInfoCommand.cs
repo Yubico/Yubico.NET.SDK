@@ -22,5 +22,5 @@ namespace Yubico.YubiKey
         /// </summary>
         public byte Page { get; set; }
     }
-} 
-    
+}
+

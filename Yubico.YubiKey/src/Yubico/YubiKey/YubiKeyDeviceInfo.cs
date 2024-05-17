@@ -109,7 +109,7 @@ namespace Yubico.YubiKey
 
         /// <inheritdoc />
         public bool ConfigurationLocked { get; set; }
-        
+
         public bool IsNfcRestricted { get; set; }
 
         /// <summary>
@@ -273,7 +273,7 @@ namespace Yubico.YubiKey
                         };
                         log.SensitiveLogInformation("ImageProcessorVersion: {ImageProcessorVersion}", deviceInfo.ImageProcessorVersion.ToString());
                         break;
-                    
+
                     case NfcRestrictedTag:
                         deviceInfo.IsNfcRestricted = tlvReader.ReadByte(NfcRestrictedTag) == 1;
                         break;
@@ -306,13 +306,13 @@ namespace Yubico.YubiKey
         /// <paramref name="responseApduData"/> did not meet formatting requirements.
         /// </returns>
         internal static YubiKeyDeviceInfo CreateFromResponseData(
-            Dictionary<int,ReadOnlyMemory<byte>> responseApduData)
+            Dictionary<int, ReadOnlyMemory<byte>> responseApduData)
         {
             bool fipsSeriesFlag = false;
             bool skySeriesFlag = false;
-            
+
             var deviceInfo = new YubiKeyDeviceInfo();
-            foreach (KeyValuePair<int, ReadOnlyMemory<byte>> tagValuePair in responseApduData)  
+            foreach (KeyValuePair<int, ReadOnlyMemory<byte>> tagValuePair in responseApduData)
             {
                 switch (tagValuePair.Key)
                 {
@@ -388,7 +388,7 @@ namespace Yubico.YubiKey
                             Patch = ipChipVersion[2]
                         };
                         break;
-                    
+
                     case NfcRestrictedTag:
                         deviceInfo.IsNfcRestricted = tagValuePair.Value.Span[0] == 1;
                         break;
@@ -403,7 +403,7 @@ namespace Yubico.YubiKey
                         break;
                 }
             }
-            
+
             deviceInfo.IsFipsSeries = deviceInfo.FirmwareVersion >= _fipsFlagInclusiveLowerBound
                     ? fipsSeriesFlag
                     : deviceInfo.IsFipsVersion;
@@ -412,7 +412,7 @@ namespace Yubico.YubiKey
 
             return deviceInfo;
         }
-        
+
         internal YubiKeyDeviceInfo Merge(YubiKeyDeviceInfo? second)
         {
             second ??= new YubiKeyDeviceInfo();
@@ -454,7 +454,7 @@ namespace Yubico.YubiKey
                 ConfigurationLocked = ConfigurationLocked != default
                     ? ConfigurationLocked
                     : second.ConfigurationLocked,
-                
+
                 IsNfcRestricted = IsNfcRestricted || second.IsNfcRestricted
             };
         }

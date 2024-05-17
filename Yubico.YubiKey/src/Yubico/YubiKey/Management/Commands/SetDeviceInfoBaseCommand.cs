@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.Management.Commands
         /// updates. Useful if enabling or disabling capabilities.
         /// </summary>
         public bool ResetAfterConfig { get; set; }
-        
+
         /// <summary>
         /// TODO
         /// </summary>
@@ -112,7 +112,7 @@ namespace Yubico.YubiKey.Management.Commands
         /// </summary>
         protected SetDeviceInfoBaseCommand()
         {
-            
+
         }
 
         protected SetDeviceInfoBaseCommand(SetDeviceInfoBaseCommand baseCommand)
@@ -250,7 +250,7 @@ namespace Yubico.YubiKey.Management.Commands
             {
                 buffer.WriteValue(ConfigurationUnlockPresentTag, unlockCode);
             }
-            
+
             if (IsNfcRestricted)
             {
                 buffer.WriteByte(NfcRestrictedTag, 1);

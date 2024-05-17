@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.U2f.Commands
     /// device configuration details.
     /// </summary>
     /// 
-    public class GetPagedDeviceInfoResponse : YubiKeyResponse, IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>> 
+    public class GetPagedDeviceInfoResponse : YubiKeyResponse, IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>
     {
         /// <summary>
         /// Constructs a GetPagedDeviceInfoResponse instance based on a ResponseApdu received from the YubiKey.
@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.U2f.Commands
             }
 
             Dictionary<int, ReadOnlyMemory<byte>>? result = DeviceInfoHelper.CreateApduDictionaryFromResponseData(ResponseApdu.Data);
-            
+
             return result ?? throw new MalformedYubiKeyResponseException
             {
                 ResponseClass = nameof(GetPagedDeviceInfoResponse),

@@ -77,12 +77,12 @@ namespace Yubico.YubiKey
                 using var connection = new KeyboardConnection(device);
 
                 yubiKeyDeviceInfo = DeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
-                if (yubiKeyDeviceInfo is {})
+                if (yubiKeyDeviceInfo is { })
                 {
                     log.LogInformation("Successfully read device info via the keyboard management command.");
-                    return true;    
+                    return true;
                 }
-                
+
             }
             catch (KeyboardConnectionException e)
             {
@@ -97,7 +97,7 @@ namespace Yubico.YubiKey
                 ErrorHandler(e, "The KeyboardTransform.HandleStatusInstruction has invalid StatusReport format " +
                     "or The GetDeviceInfoResponse.GetData response data length is too long.");
             }
-            
+
             log.LogWarning("Failed to read device info through the keyboard management command. This may be expected for older YubiKeys.");
             yubiKeyDeviceInfo = null;
             return false;

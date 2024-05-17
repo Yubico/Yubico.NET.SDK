@@ -43,7 +43,7 @@ namespace Yubico.YubiKey
 
         /// <inheritdoc />
         public bool IsNfcRestricted => _yubiKeyInfo.IsNfcRestricted;
-        
+
         /// <inheritdoc />
         public int? SerialNumber => _yubiKeyInfo.SerialNumber;
 
@@ -388,7 +388,7 @@ namespace Yubico.YubiKey
                 _log.LogInformation(
                     (applicationId is null ? "No application given." : "No smart card interface present.") +
                     "Unable to establish connection to YubiKey.");
-                
+
                 return null;
             }
 
@@ -522,7 +522,7 @@ namespace Yubico.YubiKey
             {
                 IsNfcRestricted = enabled
             };
-            
+
             IYubiKeyResponse setConfigurationResponse = SendConfiguration(setCommand);
 
             if (setConfigurationResponse.Status != ResponseStatus.Success)
@@ -695,7 +695,7 @@ namespace Yubico.YubiKey
         {
             IYubiKeyConnection? connection = null;
             try
-            {       
+            {
                 IYubiKeyCommand<IYubiKeyResponse> command;
 
                 if (TryConnect(YubiKeyApplication.Management, out connection))

@@ -38,21 +38,21 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 builder => builder
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));
-            
-            
-            
-            
-            
+
+
+
+
+
             IYubiKeyDevice? yubiKey = YubiKeyDevice.FindByTransport(Transport.All).First();
 
             // IYubiKeyDevice? yubiKey = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
 
             Console.Error.WriteLine($"YubiKey Version: {yubiKey.FirmwareVersion}");
-            Console.Error.WriteLine("NFC Before Value: "+ yubiKey.IsNfcRestricted);
+            Console.Error.WriteLine("NFC Before Value: " + yubiKey.IsNfcRestricted);
 
             yubiKey.SetIsNfcRestricted(true);
-            
-            Console.Error.WriteLine("NFC AFter Value: "+ yubiKey.IsNfcRestricted);
+
+            Console.Error.WriteLine("NFC AFter Value: " + yubiKey.IsNfcRestricted);
             return true;
         }
     }

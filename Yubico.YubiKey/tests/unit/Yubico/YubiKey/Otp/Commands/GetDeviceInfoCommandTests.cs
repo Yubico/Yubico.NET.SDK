@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Otp.Commands
             var command = new GetPagedDeviceInfoCommand();
 
             int nc = command.CreateCommandApdu().Nc;
-            
+
             Assert.Equal(1, nc);
         }
 

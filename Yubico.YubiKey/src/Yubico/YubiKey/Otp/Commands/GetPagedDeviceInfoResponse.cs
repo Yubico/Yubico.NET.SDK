@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Otp.Commands
             }
 
             Dictionary<int, ReadOnlyMemory<byte>>? result = DeviceInfoHelper.CreateApduDictionaryFromResponseData(ResponseApdu.Data);
-            
+
             return result ?? throw new MalformedYubiKeyResponseException
             {
                 ResponseClass = nameof(GetPagedDeviceInfoResponse),

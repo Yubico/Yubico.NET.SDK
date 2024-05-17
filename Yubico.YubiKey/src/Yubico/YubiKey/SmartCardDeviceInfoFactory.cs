@@ -88,12 +88,12 @@ namespace Yubico.YubiKey
             {
                 log.LogInformation("Attempting to read device info via the management application.");
                 using var connection = new SmartcardConnection(device, YubiKeyApplication.Management);
-                
+
                 yubiKeyDeviceInfo = DeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
-                if (yubiKeyDeviceInfo is {})
+                if (yubiKeyDeviceInfo is { })
                 {
                     log.LogInformation("Successfully read device info via management application.");
-                    return true;    
+                    return true;
                 }
             }
             catch (Core.Iso7816.ApduException e)

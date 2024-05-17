@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Management.Commands
     public sealed class GetPagedDeviceInfoCommand : IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse>
     {
         private const byte GetDeviceInfoInstruction = 0x1D;
-        
+
         /// <inheritdoc />
         public byte Page { get; set; }
 
@@ -44,16 +44,16 @@ namespace Yubico.YubiKey.Management.Commands
         /// </summary>
         public GetPagedDeviceInfoCommand()
         {
-            
+
         }
-        
+
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() => new CommandApdu
         {
             Ins = GetDeviceInfoInstruction,
             P1 = Page
         };
-        
+
         /// <inheritdoc />
         public GetPagedDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new GetPagedDeviceInfoResponse(responseApdu);

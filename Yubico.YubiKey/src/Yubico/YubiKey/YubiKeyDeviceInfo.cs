@@ -109,7 +109,7 @@ namespace Yubico.YubiKey
 
         /// <inheritdoc />
         public bool ConfigurationLocked { get; set; }
-        
+
         /// <inheritdoc />
         public bool IsNfcRestricted { get; set; }
 
@@ -161,12 +161,11 @@ namespace Yubico.YubiKey
                 return false;
             }
 
-            var tlvReader = new TlvReader(responseApduData.Slice(1, tlvDataLength));
-
             deviceInfo = new YubiKeyDeviceInfo();
             bool fipsSeriesFlag = false;
             bool skySeriesFlag = false;
 
+            var tlvReader = new TlvReader(responseApduData.Slice(1, tlvDataLength));
             while (tlvReader.HasData)
             {
                 switch (tlvReader.PeekTag())

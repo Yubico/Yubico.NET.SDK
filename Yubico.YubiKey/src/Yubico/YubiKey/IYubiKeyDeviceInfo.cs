@@ -121,7 +121,7 @@ namespace Yubico.YubiKey
         /// Indicates whether or not the YubiKey's configuration has been locked by the user.
         /// </summary>
         public bool ConfigurationLocked { get; }
-        
+
         /// <summary>
         /// Indicates if this device has temporarily disabled NFC.
         /// </summary>

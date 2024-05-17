@@ -22,6 +22,8 @@ namespace Yubico.YubiKey.U2f.Commands
     public sealed class GetPagedDeviceInfoCommand : IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse>
     {
         private const byte GetDeviceInfoInstruction = 0xC2;
+
+        /// <inheritdoc />
         public byte Page { get; set; }
 
         /// <summary>

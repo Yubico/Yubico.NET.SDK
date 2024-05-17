@@ -33,6 +33,7 @@ namespace Yubico.YubiKey.Otp.Commands
         /// </value>
         public YubiKeyApplication Application => YubiKeyApplication.Otp;
 
+        /// <inheritdoc />
         public byte Page { get; set; }
 
         /// <summary>

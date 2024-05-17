@@ -22,8 +22,7 @@ namespace Yubico.YubiKey.Management.Commands
     /// The response to the <see cref="GetDeviceInfoCommand"/> command, containing the YubiKey's
     /// device configuration details.
     /// </summary>
-    public class GetPagedDeviceInfoResponse : YubiKeyResponse,
-                                            IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>
+    public class GetPagedDeviceInfoResponse : YubiKeyResponse, IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>
     {
         /// <summary>
         /// Constructs a GetPagedDeviceInfoResponse instance based on a ResponseApdu received from the YubiKey.

@@ -105,7 +105,7 @@ namespace Yubico.YubiKey.Management.Commands
         /// <summary>
         /// Allows setting of the <see cref="YubiKeyDeviceInfo.IsNfcRestricted"/> property
         /// </summary>
-        public bool IsNfcRestricted { get; set; }
+        public bool RestrictNfc { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SetDeviceInfoBaseCommand"/> class.
@@ -121,7 +121,7 @@ namespace Yubico.YubiKey.Management.Commands
             {
                 EnabledUsbCapabilities = baseCommand.EnabledUsbCapabilities;
                 EnabledNfcCapabilities = baseCommand.EnabledNfcCapabilities;
-                IsNfcRestricted = baseCommand.IsNfcRestricted;
+                RestrictNfc = baseCommand.RestrictNfc;
                 ChallengeResponseTimeout = baseCommand.ChallengeResponseTimeout;
                 AutoEjectTimeout = baseCommand.AutoEjectTimeout;
                 DeviceFlags = baseCommand.DeviceFlags;
@@ -251,7 +251,7 @@ namespace Yubico.YubiKey.Management.Commands
                 buffer.WriteValue(ConfigurationUnlockPresentTag, unlockCode);
             }
 
-            if (IsNfcRestricted)
+            if (RestrictNfc)
             {
                 buffer.WriteByte(NfcRestrictedTag, 1);
             }

@@ -472,5 +472,18 @@ namespace Yubico.YubiKey.Management.Commands
             // Assert
             Assert.True(response is YubiKeyResponse);
         }
+        
+        [Fact]
+        public void CreateCommandApdu_RestrictNfcPresent_EncodesCorrectTlv()
+        {
+            var command = new SetDeviceInfoCommand
+            {
+               RestrictNfc = true
+            };
+            
+            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+            const int nfcRestrictedTag = 0x17;
+            Assert.Equal(nfcRestrictedTag, data.Span[1]); 
+        }
     }
 }

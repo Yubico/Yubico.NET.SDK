@@ -34,7 +34,6 @@ namespace Yubico.YubiKey.Management.Commands
         private const byte NfcEnabledCapabilitiesTag = 0x0e;
         private const byte NfcRestrictedTag = 0x17;
 
-
         private byte[]? _lockCode;
         private byte[]? _unlockCode;
 
@@ -117,19 +116,21 @@ namespace Yubico.YubiKey.Management.Commands
 
         protected SetDeviceInfoBaseCommand(SetDeviceInfoBaseCommand baseCommand)
         {
-            if (!(baseCommand is null))
+            if (baseCommand is null)
             {
-                EnabledUsbCapabilities = baseCommand.EnabledUsbCapabilities;
-                EnabledNfcCapabilities = baseCommand.EnabledNfcCapabilities;
-                RestrictNfc = baseCommand.RestrictNfc;
-                ChallengeResponseTimeout = baseCommand.ChallengeResponseTimeout;
-                AutoEjectTimeout = baseCommand.AutoEjectTimeout;
-                DeviceFlags = baseCommand.DeviceFlags;
-                ResetAfterConfig = baseCommand.ResetAfterConfig;
-
-                _lockCode = baseCommand._lockCode;
-                _unlockCode = baseCommand._unlockCode;
+                return;
             }
+
+            EnabledUsbCapabilities = baseCommand.EnabledUsbCapabilities;
+            EnabledNfcCapabilities = baseCommand.EnabledNfcCapabilities;
+            ChallengeResponseTimeout = baseCommand.ChallengeResponseTimeout;
+            AutoEjectTimeout = baseCommand.AutoEjectTimeout;
+            DeviceFlags = baseCommand.DeviceFlags;
+            ResetAfterConfig = baseCommand.ResetAfterConfig;
+            RestrictNfc = baseCommand.RestrictNfc;
+
+            _lockCode = baseCommand._lockCode;
+            _unlockCode = baseCommand._unlockCode;
         }
 
         /// <summary>

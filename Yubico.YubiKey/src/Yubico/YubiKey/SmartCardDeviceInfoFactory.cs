@@ -34,63 +34,65 @@ namespace Yubico.YubiKey
 
             log.LogInformation("Getting device info for smart card {Device}.", device);
 
-            if (!TryGetDeviceInfoFromManagement(device, out YubiKeyDeviceInfo? ykDeviceInfo))
+            if (!TryGetDeviceInfoFromManagement(device, out YubiKeyDeviceInfo? deviceInfo))
             {
-                ykDeviceInfo = new YubiKeyDeviceInfo();
+                deviceInfo = new YubiKeyDeviceInfo();
             }
 
             // Manually fill in gaps, if necessary
             var defaultDeviceInfo = new YubiKeyDeviceInfo();
 
             // Build from OTP
-            if (ykDeviceInfo.SerialNumber == defaultDeviceInfo.SerialNumber
+            if (deviceInfo.SerialNumber == defaultDeviceInfo.SerialNumber
                 && TryGetSerialNumberFromOtp(device, out int? serialNumber))
             {
-                ykDeviceInfo.SerialNumber = serialNumber;
+                deviceInfo.SerialNumber = serialNumber;
             }
 
-            if (ykDeviceInfo.FirmwareVersion == defaultDeviceInfo.FirmwareVersion
+            if (deviceInfo.FirmwareVersion == defaultDeviceInfo.FirmwareVersion
                 && TryGetFirmwareVersionFromOtp(device, out FirmwareVersion? firmwareVersion))
             {
-                ykDeviceInfo.FirmwareVersion = firmwareVersion;
+                deviceInfo.FirmwareVersion = firmwareVersion;
             }
 
             // Build from PIV
-            if (ykDeviceInfo.SerialNumber == defaultDeviceInfo.SerialNumber
+            if (deviceInfo.SerialNumber == defaultDeviceInfo.SerialNumber
                 && TryGetSerialNumberFromPiv(device, out serialNumber))
             {
-                ykDeviceInfo.SerialNumber = serialNumber;
+                deviceInfo.SerialNumber = serialNumber;
             }
 
-            if (ykDeviceInfo.FirmwareVersion == defaultDeviceInfo.FirmwareVersion
+            if (deviceInfo.FirmwareVersion == defaultDeviceInfo.FirmwareVersion
                 && TryGetFirmwareVersionFromPiv(device, out firmwareVersion))
             {
-                ykDeviceInfo.FirmwareVersion = firmwareVersion;
+                deviceInfo.FirmwareVersion = firmwareVersion;
             }
 
-            if (ykDeviceInfo.FirmwareVersion < FirmwareVersion.V4_0_0 &&
-                ykDeviceInfo.AvailableUsbCapabilities == YubiKeyCapabilities.None)
+            if (deviceInfo.FirmwareVersion < FirmwareVersion.V4_0_0 &&
+                deviceInfo.AvailableUsbCapabilities == YubiKeyCapabilities.None)
             {
-                ykDeviceInfo.AvailableUsbCapabilities = YubiKeyCapabilities.Oath | YubiKeyCapabilities.OpenPgp |
-                    YubiKeyCapabilities.Piv | YubiKeyCapabilities.Ccid;
+                deviceInfo.AvailableUsbCapabilities = YubiKeyCapabilities.Oath | 
+                YubiKeyCapabilities.OpenPgp |
+                YubiKeyCapabilities.Piv | 
+                YubiKeyCapabilities.Ccid;
             }
 
-            return ykDeviceInfo;
+            return deviceInfo;
         }
 
         private static bool TryGetDeviceInfoFromManagement(
             ISmartCardDevice device,
-            [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo yubiKeyDeviceInfo)
+            [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo deviceInfo)
         {
             Logger log = Log.GetLogger();
 
             try
             {
                 log.LogInformation("Attempting to read device info via the management application.");
-                using var connection = new SmartcardConnection(device, YubiKeyApplication.Management);
+                using var connection = new SmartCardConnection(device, YubiKeyApplication.Management);
 
-                yubiKeyDeviceInfo = GetDeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
-                if (yubiKeyDeviceInfo is { })
+                deviceInfo = GetDeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
+                if (deviceInfo is { })
                 {
                     log.LogInformation("Successfully read device info via management application.");
                     return true;
@@ -105,7 +107,7 @@ namespace Yubico.YubiKey
             log.LogWarning(
                 "Failed to read device info through the management interface. This may be expected for older YubiKeys.");
 
-            yubiKeyDeviceInfo = null;
+            deviceInfo = null;
             return false;
         }
 
@@ -118,10 +120,10 @@ namespace Yubico.YubiKey
             try
             {
                 log.LogInformation("Attempting to read firmware version through OTP.");
-                using var ccidConnection = new SmartcardConnection(device, YubiKeyApplication.Otp);
+                using var connection = new SmartCardConnection(device, YubiKeyApplication.Otp);
 
                 Otp.Commands.ReadStatusResponse response =
-                    ccidConnection.SendCommand(new Otp.Commands.ReadStatusCommand());
+                    connection.SendCommand(new Otp.Commands.ReadStatusCommand());
 
                 if (response.Status == ResponseStatus.Success)
                 {
@@ -150,16 +152,15 @@ namespace Yubico.YubiKey
             return false;
         }
 
-        private static bool TryGetFirmwareVersionFromPiv(ISmartCardDevice device,
-                                                         [MaybeNullWhen(returnValue: false)]
-                                                         out FirmwareVersion firmwareVersion)
+        private static bool TryGetFirmwareVersionFromPiv(
+            ISmartCardDevice device, [MaybeNullWhen(returnValue: false)] out FirmwareVersion firmwareVersion)
         {
             Logger log = Log.GetLogger();
 
             try
             {
                 log.LogInformation("Attempting to read firmware version through the PIV application.");
-                using IYubiKeyConnection connection = new SmartcardConnection(device, YubiKeyApplication.Piv);
+                using var connection = new SmartCardConnection(device, YubiKeyApplication.Piv);
 
                 Piv.Commands.VersionResponse response = connection.SendCommand(new Piv.Commands.VersionCommand());
 
@@ -193,10 +194,10 @@ namespace Yubico.YubiKey
             try
             {
                 log.LogInformation("Attempting to read serial number through the OTP application.");
-                using var ccidConnection = new SmartcardConnection(device, YubiKeyApplication.Otp);
+                using var connection = new SmartCardConnection(device, YubiKeyApplication.Otp);
 
                 Otp.Commands.GetSerialNumberResponse response =
-                    ccidConnection.SendCommand(new Otp.Commands.GetSerialNumberCommand());
+                    connection.SendCommand(new Otp.Commands.GetSerialNumberCommand());
 
                 if (response.Status == ResponseStatus.Success)
                 {
@@ -233,7 +234,7 @@ namespace Yubico.YubiKey
             try
             {
                 log.LogInformation("Attempting to read serial number through the PIV application.");
-                using IYubiKeyConnection connection = new SmartcardConnection(device, YubiKeyApplication.Piv);
+                using var connection = new SmartCardConnection(device, YubiKeyApplication.Piv);
 
                 Piv.Commands.GetSerialNumberResponse response =
                     connection.SendCommand(new Piv.Commands.GetSerialNumberCommand());

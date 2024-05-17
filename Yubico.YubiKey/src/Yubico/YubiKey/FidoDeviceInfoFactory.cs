@@ -17,6 +17,7 @@ using System.Diagnostics.CodeAnalysis;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.DeviceExtensions;
+using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.U2f.Commands;
 
 namespace Yubico.YubiKey
@@ -64,9 +65,9 @@ namespace Yubico.YubiKey
             return ykDeviceInfo;
         }
 
-        private static bool TryGetDeviceInfoFromFido(IHidDevice device,
-                                                     [MaybeNullWhen(returnValue: false)]
-                                                     out YubiKeyDeviceInfo yubiKeyDeviceInfo)
+        private static bool TryGetDeviceInfoFromFido(
+            IHidDevice device,
+            [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo deviceInfo)
         {
             Logger log = Log.GetLogger();
 
@@ -75,8 +76,8 @@ namespace Yubico.YubiKey
                 log.LogInformation("Attempting to read device info via the FIDO interface management command.");
                 using var connection = new FidoConnection(device);
 
-                yubiKeyDeviceInfo = GetDeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
-                if (yubiKeyDeviceInfo is { })
+                deviceInfo = GetDeviceInfoHelper.GetDeviceInfo<GetPagedDeviceInfoCommand>(connection);
+                if (deviceInfo is { })
                 {
                     log.LogInformation("Successfully read device info via FIDO interface management command.");
                     return true;
@@ -101,24 +102,23 @@ namespace Yubico.YubiKey
             log.LogWarning(
                 "Failed to read device info through the management interface. This may be expected for older YubiKeys.");
 
-            yubiKeyDeviceInfo = null;
+            deviceInfo = null;
 
             return false;
         }
 
-        private static bool TryGetFirmwareVersionFromFido(IHidDevice device,
-                                                          [MaybeNullWhen(returnValue: false)]
-                                                          out FirmwareVersion firmwareVersion)
+        private static bool TryGetFirmwareVersionFromFido(
+            IHidDevice device,
+            [MaybeNullWhen(returnValue: false)] out FirmwareVersion firmwareVersion)
         {
             Logger log = Log.GetLogger();
 
             try
             {
                 log.LogInformation("Attempting to read firmware version through FIDO.");
-                using var fidoConnection = new FidoConnection(device);
+                using var connection = new FidoConnection(device);
 
-                Fido2.Commands.VersionResponse response =
-                    fidoConnection.SendCommand(new Fido2.Commands.VersionCommand());
+                VersionResponse response = connection.SendCommand(new VersionCommand());
 
                 if (response.Status == ResponseStatus.Success)
                 {

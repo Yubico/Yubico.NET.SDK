@@ -19,7 +19,7 @@ using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey
 {
-    internal class Scp03Connection : SmartcardConnection, IScp03YubiKeyConnection
+    internal class Scp03Connection : SmartCardConnection, IScp03YubiKeyConnection
     {
         private bool _disposed;
 

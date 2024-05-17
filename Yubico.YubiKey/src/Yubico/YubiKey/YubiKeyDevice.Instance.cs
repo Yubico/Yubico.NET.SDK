@@ -379,8 +379,8 @@ namespace Yubico.YubiKey
                 {
                     _log.LogInformation("Connecting via the SmartCard interface.");
                     WaitForReclaimTimeout(Transport.SmartCard);
-                    return scp03Keys is null ?
-                        new SmartcardConnection(_smartCardDevice, applicationId)
+                    return scp03Keys is null 
+                        ? new SmartCardConnection(_smartCardDevice, applicationId)
                         : new Scp03Connection(_smartCardDevice, applicationId, scp03Keys);
                 }
 
@@ -426,7 +426,7 @@ namespace Yubico.YubiKey
             {
                 _log.LogInformation("Connecting via the SmartCard interface.");
                 WaitForReclaimTimeout(Transport.SmartCard);
-                return new SmartcardConnection(_smartCardDevice, (YubiKeyApplication)application);
+                return new SmartCardConnection(_smartCardDevice, (YubiKeyApplication)application);
             }
 
             _log.LogInformation("No smart card interface present. Unable to establish connection to YubiKey.");

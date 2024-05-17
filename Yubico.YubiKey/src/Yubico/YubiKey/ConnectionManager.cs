@@ -179,7 +179,7 @@ namespace Yubico.YubiKey
                 {
                     IHidDevice { UsagePage: HidUsagePage.Fido } d => new FidoConnection(d),
                     IHidDevice { UsagePage: HidUsagePage.Keyboard } d => new KeyboardConnection(d),
-                    ISmartCardDevice d => new SmartcardConnection(d, application),
+                    ISmartCardDevice d => new SmartCardConnection(d, application),
                     _ => throw new NotSupportedException(ExceptionMessages.DeviceTypeNotRecognized)
                 };
 
@@ -266,7 +266,7 @@ namespace Yubico.YubiKey
                     return false;
                 }
 
-                connection = new SmartcardConnection(smartCardDevice, applicationId);
+                connection = new SmartCardConnection(smartCardDevice, applicationId);
                 _ = _openConnections.Add(yubiKeyDevice);
             }
             finally

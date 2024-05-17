@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Management.Commands
     /// <remarks>
     /// This class has a corresponding partner class <see cref="GetDeviceInfoResponse"/>
     /// </remarks>
-    [Obsolete("This class has been replaced by GetPagedDeviceInfoCommand")]
+    [Obsolete("This class has been replaced by nameof(GetPagedDeviceInfoCommand)")]
     public class GetDeviceInfoCommand : IYubiKeyCommand<GetDeviceInfoResponse>
     {
         private const byte GetDeviceInfoInstruction = 0x1D;

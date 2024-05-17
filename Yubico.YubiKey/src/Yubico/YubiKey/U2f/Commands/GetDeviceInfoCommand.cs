@@ -21,7 +21,8 @@ namespace Yubico.YubiKey.U2f.Commands
     /// Gets detailed information about the YubiKey and its current configuration.
     /// </summary>
     /// <remarks>
-    /// This class has a corresponding partner class <see cref="GetDeviceInfoResponse"/>
+    /// THIS CLASS IS OBSOLETE. 
+    /// It has been replaced by <see cref="GetPagedDeviceInfoResponse"/>
     /// </remarks>
     [Obsolete("This class has been replaced by GetPagedDeviceInfoCommand")]
     public sealed class GetDeviceInfoCommand : IYubiKeyCommand<GetDeviceInfoResponse>

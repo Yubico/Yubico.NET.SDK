@@ -666,11 +666,11 @@ namespace Yubico.YubiKey
 
         /// <summary>
         /// Sets the <see cref="IYubiKeyDeviceInfo.IsNfcRestricted"/> on the <see cref="YubiKeyDeviceInfo"/> 
+        /// </summary>
+        /// <param name="enabled">Set this value to true to enable, otherwise false</param>
         /// <exception cref="InvalidOperationException">
         /// The command failed to complete.
         /// </exception>
-        /// </summary>
-        /// <param name="enabled">Set this value to true to enable, otherwise false</param>
         void SetIsNfcRestricted(bool enabled);
     }
 }

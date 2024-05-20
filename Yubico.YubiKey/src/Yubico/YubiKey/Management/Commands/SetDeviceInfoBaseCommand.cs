@@ -24,16 +24,6 @@ namespace Yubico.YubiKey.Management.Commands
     /// </summary>
     public class SetDeviceInfoBaseCommand
     {
-        private const byte UsbEnabledCapabilitiesTag = 0x03;
-        private const byte AutoEjectTimeoutTag = 0x06;
-        private const byte ChallengeResponseTimeoutTag = 0x07;
-        private const byte DeviceFlagsTag = 0x08;
-        private const byte ConfigurationLockPresentTag = 0x0a;
-        private const byte ConfigurationUnlockPresentTag = 0x0b;
-        private const byte ResetAfterConfigTag = 0x0c;
-        private const byte NfcEnabledCapabilitiesTag = 0x0e;
-        private const byte NfcRestrictedTag = 0x17;
-
         private byte[]? _lockCode;
         private byte[]? _unlockCode;
 
@@ -214,49 +204,50 @@ namespace Yubico.YubiKey.Management.Commands
 
             if (EnabledUsbCapabilities is YubiKeyCapabilities usbCapabilities)
             {
-                buffer.WriteInt16(UsbEnabledCapabilitiesTag, (short)usbCapabilities);
+                buffer.WriteInt16(YubikeyDeviceInfoTags.UsbEnabledCapabilitiesTag, (short)usbCapabilities);
             }
 
             if (EnabledNfcCapabilities is YubiKeyCapabilities nfcCapabilities)
             {
-                buffer.WriteInt16(NfcEnabledCapabilitiesTag, (short)nfcCapabilities);
+                buffer.WriteInt16(YubikeyDeviceInfoTags.NfcEnabledCapabilitiesTag, (short)nfcCapabilities);
             }
 
             if (ChallengeResponseTimeout is byte crTimeout)
             {
-                buffer.WriteByte(ChallengeResponseTimeoutTag, crTimeout);
+                buffer.WriteByte(YubikeyDeviceInfoTags.ChallengeResponseTimeoutTag, crTimeout);
             }
 
             if (_autoEjectTimeout is ushort aeTimeout)
             {
-                buffer.WriteUInt16(AutoEjectTimeoutTag, aeTimeout);
+                buffer.WriteUInt16(YubikeyDeviceInfoTags.AutoEjectTimeoutTag, aeTimeout);
             }
 
             if (DeviceFlags is DeviceFlags deviceFlags)
             {
-                buffer.WriteByte(DeviceFlagsTag, (byte)deviceFlags);
+                buffer.WriteByte(YubikeyDeviceInfoTags.DeviceFlagsTag, (byte)deviceFlags);
             }
 
             if (ResetAfterConfig)
             {
-                buffer.WriteValue(ResetAfterConfigTag, ReadOnlySpan<byte>.Empty);
+                const int resetAfterConfigTag = 0x0c;
+                buffer.WriteValue(resetAfterConfigTag, ReadOnlySpan<byte>.Empty);
             }
 
             if (_lockCode is byte[] lockCode)
             {
-                buffer.WriteValue(ConfigurationLockPresentTag, lockCode);
+                buffer.WriteValue(YubikeyDeviceInfoTags.ConfigurationLockPresentTag, lockCode);
             }
 
             if (_unlockCode is byte[] unlockCode)
             {
-                buffer.WriteValue(ConfigurationUnlockPresentTag, unlockCode);
+                buffer.WriteValue(YubikeyDeviceInfoTags.ConfigurationUnlockPresentTag, unlockCode);
             }
 
             if (RestrictNfc)
             {
-                buffer.WriteByte(NfcRestrictedTag, 1);
+                buffer.WriteByte(YubikeyDeviceInfoTags.NfcRestrictedTag, 1);
             }
-
+            
             return buffer.Encode();
         }
     }

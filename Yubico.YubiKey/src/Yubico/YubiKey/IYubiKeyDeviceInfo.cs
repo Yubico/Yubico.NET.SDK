@@ -126,5 +126,15 @@ namespace Yubico.YubiKey
         /// Indicates if this device has temporarily disabled NFC.
         /// </summary>
         public bool IsNfcRestricted { get; }
+        
+        /// <summary>
+        /// The chip number, if available, otherwise empty string.
+        /// </summary>
+        string PartNumber { get; }
+        
+        /// <summary>
+        /// Whether or not pin complexity is enabled on the Yubikey.
+        /// </summary>
+        bool IsPinComplexityEnabled { get; }
     }
 }

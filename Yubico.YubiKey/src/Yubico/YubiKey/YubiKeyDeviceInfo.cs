@@ -17,6 +17,7 @@ using System.Buffers.Binary;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Text;
 
 namespace Yubico.YubiKey
 {
@@ -26,31 +27,7 @@ namespace Yubico.YubiKey
     /// </summary>
     public class YubiKeyDeviceInfo : IYubiKeyDeviceInfo
     {
-        private const byte UsbPrePersCapabilitiesTag = 0x01;
-        private const byte SerialNumberTag = 0x02;
-        private const byte UsbEnabledCapabilitiesTag = 0x03;
-        private const byte FormFactorTag = 0x04;
-        private const byte FirmwareVersionTag = 0x05;
-        private const byte AutoEjectTimeoutTag = 0x06;
-        private const byte ChallengeResponseTimeoutTag = 0x07;
-        private const byte DeviceFlagsTag = 0x08;
-        private const byte ConfigurationLockPresentTag = 0x0a;
-        private const byte NfcPrePersCapabilitiesTag = 0x0d;
-        private const byte NfcEnabledCapabilitiesTag = 0x0e;
-        private const byte MoreDataTag = 0x10;
-        private const byte FreeFormTag = 0x11;
-        private const byte HidInitDelay = 0x12;
-        private const byte PartNumberTag = 0x13;
-        private const byte FipsCapableTag = 0x14;
-        private const byte FipsApprovedTag = 0x15;
-        private const byte PinComplexityTag = 0x16;
-        private const byte NfcRestrictedTag = 0x17;
-        private const byte ResetBlockedTag = 0x18;
-        private const byte TemplateStorageVersionTag = 0x20;
-        private const byte ImageProcessorVersionTag = 0x21;
-
         // The IapFlags tag may be returned by the device, but it should be ignored.
-        private const byte IapDetectionTag = 0x0f;
 
         private const byte FipsMask = 0b1000_0000;
         private const byte SkyMask = 0b0100_0000;
@@ -112,6 +89,12 @@ namespace Yubico.YubiKey
 
         /// <inheritdoc />
         public bool IsNfcRestricted { get; set; }
+
+        /// <inheritdoc />
+        public string PartNumber { get; set; } = string.Empty;
+        
+        /// <inheritdoc />
+        public bool IsPinComplexityEnabled { get; set; }
 
         /// <summary>
         /// Constructs a default instance of YubiKeyDeviceInfo.
@@ -177,22 +160,22 @@ namespace Yubico.YubiKey
             {
                 switch (tagValuePair.Key)
                 {
-                    case UsbPrePersCapabilitiesTag:
+                    case YubikeyDeviceInfoTags.UsbPrePersCapabilitiesTag:
                         deviceInfo.AvailableUsbCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
 
                         break;
 
-                    case SerialNumberTag:
+                    case YubikeyDeviceInfoTags.SerialNumberTag:
                         deviceInfo.SerialNumber = BinaryPrimitives.ReadInt32BigEndian(tagValuePair.Value.Span);
 
                         break;
 
-                    case UsbEnabledCapabilitiesTag:
+                    case YubikeyDeviceInfoTags.UsbEnabledCapabilitiesTag:
                         deviceInfo.EnabledUsbCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
 
                         break;
 
-                    case FormFactorTag:
+                    case YubikeyDeviceInfoTags.FormFactorTag:
                         byte formFactorValue = tagValuePair.Value.Span[0];
                         deviceInfo.FormFactor = (FormFactor)(formFactorValue & FormFactorMask);
                         fipsSeriesFlag = (formFactorValue & FipsMask) == FipsMask;
@@ -200,7 +183,7 @@ namespace Yubico.YubiKey
 
                         break;
 
-                    case FirmwareVersionTag:
+                    case YubikeyDeviceInfoTags.FirmwareVersionTag:
                         ReadOnlySpan<byte> firmwareValue = tagValuePair.Value.Span;
 
                         deviceInfo.FirmwareVersion = new FirmwareVersion
@@ -212,37 +195,37 @@ namespace Yubico.YubiKey
 
                         break;
 
-                    case AutoEjectTimeoutTag:
+                    case YubikeyDeviceInfoTags.AutoEjectTimeoutTag:
                         deviceInfo.AutoEjectTimeout = BinaryPrimitives.ReadUInt16BigEndian(tagValuePair.Value.Span);
 
                         break;
 
-                    case ChallengeResponseTimeoutTag:
+                    case YubikeyDeviceInfoTags.ChallengeResponseTimeoutTag:
                         deviceInfo.ChallengeResponseTimeout = tagValuePair.Value.Span[0];
 
                         break;
 
-                    case DeviceFlagsTag:
+                    case YubikeyDeviceInfoTags.DeviceFlagsTag:
                         deviceInfo.DeviceFlags = (DeviceFlags)tagValuePair.Value.Span[0];
 
                         break;
 
-                    case ConfigurationLockPresentTag:
+                    case YubikeyDeviceInfoTags.ConfigurationLockPresentTag:
                         deviceInfo.ConfigurationLocked = tagValuePair.Value.Span[0] == 1;
 
                         break;
 
-                    case NfcPrePersCapabilitiesTag:
+                    case YubikeyDeviceInfoTags.NfcPrePersCapabilitiesTag:
                         deviceInfo.AvailableNfcCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
 
                         break;
 
-                    case NfcEnabledCapabilitiesTag:
+                    case YubikeyDeviceInfoTags.NfcEnabledCapabilitiesTag:
                         deviceInfo.EnabledNfcCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
 
                         break;
 
-                    case TemplateStorageVersionTag:
+                    case YubikeyDeviceInfoTags.TemplateStorageVersionTag:
                         ReadOnlySpan<byte> fpChipVersion = tagValuePair.Value.Span;
 
                         deviceInfo.TemplateStorageVersion = new TemplateStorageVersion
@@ -254,7 +237,7 @@ namespace Yubico.YubiKey
 
                         break;
 
-                    case ImageProcessorVersionTag:
+                    case YubikeyDeviceInfoTags.ImageProcessorVersionTag:
                         ReadOnlySpan<byte> ipChipVersion = tagValuePair.Value.Span;
 
                         deviceInfo.ImageProcessorVersion = new ImageProcessorVersion
@@ -266,19 +249,24 @@ namespace Yubico.YubiKey
 
                         break;
 
-                    case NfcRestrictedTag:
+                    case YubikeyDeviceInfoTags.NfcRestrictedTag:
                         deviceInfo.IsNfcRestricted = tagValuePair.Value.Span[0] == 1;
 
                         break;
-                    case IapDetectionTag:
-                    case MoreDataTag:
-                    case PartNumberTag:
-                    case FipsCapableTag:
-                    case FipsApprovedTag:
-                    case PinComplexityTag:
-                    case FreeFormTag:
-                    case HidInitDelay:
-                    case ResetBlockedTag:
+
+                    case YubikeyDeviceInfoTags.PartNumberTag:
+                        deviceInfo.PartNumber = Encoding.UTF8.GetString(tagValuePair.Value.Span.ToArray());
+                        break;
+                    case YubikeyDeviceInfoTags.PinComplexityTag:
+                        deviceInfo.IsPinComplexityEnabled = tagValuePair.Value.Span[0] == 1;;
+                        break;
+                    case YubikeyDeviceInfoTags.IapDetectionTag:
+                    case YubikeyDeviceInfoTags.MoreDataTag:
+                    case YubikeyDeviceInfoTags.FipsCapableTag:
+                    case YubikeyDeviceInfoTags.FipsApprovedTag:
+                    case YubikeyDeviceInfoTags.FreeFormTag:
+                    case YubikeyDeviceInfoTags.HidInitDelay:
+                    case YubikeyDeviceInfoTags.ResetBlockedTag:
                         // Ignore these tags for now
                         break;
 
@@ -340,7 +328,11 @@ namespace Yubico.YubiKey
                     ? ConfigurationLocked
                     : second.ConfigurationLocked,
 
-                IsNfcRestricted = IsNfcRestricted || second.IsNfcRestricted
+                IsNfcRestricted = IsNfcRestricted || second.IsNfcRestricted, 
+                PartNumber = (string.IsNullOrWhiteSpace(PartNumber)
+                        ? second.PartNumber : PartNumber) ?? string.Empty,
+                
+                IsPinComplexityEnabled = IsPinComplexityEnabled || second.IsPinComplexityEnabled,
             };
         }
 
@@ -360,7 +352,16 @@ namespace Yubico.YubiKey
                 : (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(value);
 
         /// <inheritdoc/>
-        public override string ToString() =>
-            $"{nameof(AvailableUsbCapabilities)}: {AvailableUsbCapabilities}, {nameof(EnabledUsbCapabilities)}: {EnabledUsbCapabilities}, {nameof(AvailableNfcCapabilities)}: {AvailableNfcCapabilities}, {nameof(EnabledNfcCapabilities)}: {EnabledNfcCapabilities}, {nameof(AutoEjectTimeout)}: {AutoEjectTimeout}, {nameof(DeviceFlags)}: {DeviceFlags}, {nameof(ConfigurationLocked)}: {ConfigurationLocked}";
+        public override string ToString() => //TODO Is this overload necessary?
+            $"{nameof(AvailableUsbCapabilities)}: {AvailableUsbCapabilities}, " +
+            $"{nameof(EnabledUsbCapabilities)}: {EnabledUsbCapabilities}, " +
+            $"{nameof(AvailableNfcCapabilities)}: {AvailableNfcCapabilities}, " +
+            $"{nameof(EnabledNfcCapabilities)}: {EnabledNfcCapabilities}, " +
+            $"{nameof(IsNfcRestricted)}: {IsNfcRestricted}, " +
+            $"{nameof(AutoEjectTimeout)}: {AutoEjectTimeout}, " +
+            $"{nameof(DeviceFlags)}: {DeviceFlags}, " +
+            $"{nameof(ConfigurationLocked)}: {ConfigurationLocked}, " + 
+            $"{nameof(PartNumber)}: {PartNumber}, " +
+            $"{nameof(IsPinComplexityEnabled)}: {IsPinComplexityEnabled}";
     }
 }

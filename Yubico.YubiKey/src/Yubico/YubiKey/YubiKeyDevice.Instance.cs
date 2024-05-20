@@ -45,6 +45,12 @@ namespace Yubico.YubiKey
         public bool IsNfcRestricted => _yubiKeyInfo.IsNfcRestricted;
 
         /// <inheritdoc />
+        public string PartNumber => _yubiKeyInfo.PartNumber;
+
+        /// <inheritdoc />
+        public bool IsPinComplexityEnabled => _yubiKeyInfo.IsPinComplexityEnabled;
+
+        /// <inheritdoc />
         public int? SerialNumber => _yubiKeyInfo.SerialNumber;
 
         /// <inheritdoc />

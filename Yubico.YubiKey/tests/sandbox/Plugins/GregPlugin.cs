@@ -52,7 +52,6 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
             yubiKey.SetIsNfcRestricted(true);
 
-            Console.Error.WriteLine("NFC AFter Value: " + yubiKey.IsNfcRestricted);
             return true;
         }
     }

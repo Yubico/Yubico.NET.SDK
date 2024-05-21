@@ -65,7 +65,7 @@ namespace Yubico.YubiKey
         Scp03,
 
         /// <summary>
-        /// The YubiKey is capable of switching USB interfaces without the length reclaim timeout.
+        /// The YubiKey is capable of switching USB interfaces without the lengthy 3-second reclaim timeout.
         /// </summary>
         FastUsbReclaim,
 
@@ -241,7 +241,7 @@ namespace Yubico.YubiKey
         YubiHsmAuthApplication,
 
         /// <summary>
-        /// Allows temporarily disabling NFC (added in 5.7)
+        /// Allows temporarily disabling NFC until the next time the YubiKey is powered over USB.
         /// </summary>
         ManagementNfcRestricted,
     }

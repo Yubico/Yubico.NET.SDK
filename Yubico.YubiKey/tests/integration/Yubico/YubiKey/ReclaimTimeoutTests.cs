@@ -42,6 +42,9 @@ namespace Yubico.YubiKey
         [Fact]
         public void SwitchingBetweenTransports_ForcesThreeSecondWait()
         {
+            // Force the old behavior even for newer YubiKeys.
+            AppContext.SetSwitch(YubiKeyCompatSwitches.UseOldReclaimTimeoutBehavior, true);
+
             using Logger? log = new LoggerConfiguration()
                 .Enrich.With(new ThreadIdEnricher())
                 .WriteTo.Console(

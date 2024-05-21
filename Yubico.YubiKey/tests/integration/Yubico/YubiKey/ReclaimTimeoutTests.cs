@@ -57,7 +57,7 @@ namespace Yubico.YubiKey
                     .AddFilter(level => level >= LogLevel.Information));
 
             // TEST ASSUMPTION: This test requires FIDO. On Windows, that means this test case must run elevated (admin).
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5Fips);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
 
             // Ensure all interfaces are active
             if (testDevice.EnabledUsbCapabilities != YubiKeyCapabilities.All)

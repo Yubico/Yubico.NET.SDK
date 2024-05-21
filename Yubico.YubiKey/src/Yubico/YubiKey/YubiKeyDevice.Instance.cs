@@ -1044,7 +1044,7 @@ namespace Yubico.YubiKey
 
         private bool CanFastReclaim()
         {
-            if (AppContext.TryGetSwitch(YubiKeyCompatSwitches.UseOldReclaimTimeoutBehavior, out bool useOldBehavior) ||
+            if (AppContext.TryGetSwitch(YubiKeyCompatSwitches.UseOldReclaimTimeoutBehavior, out bool useOldBehavior) &&
                 useOldBehavior)
             {
                 return false;

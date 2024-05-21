@@ -14,10 +14,9 @@
 
 using System;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Yubico.Core.Logging;
-using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey
 {
@@ -39,6 +38,14 @@ namespace Yubico.YubiKey
         private const byte NfcPrePersCapabilitiesTag = 0x0d;
         private const byte NfcEnabledCapabilitiesTag = 0x0e;
         private const byte MoreDataTag = 0x10;
+        private const byte FreeFormTag = 0x11;
+        private const byte HidInitDelay = 0x12;
+        private const byte PartNumberTag = 0x13;
+        private const byte FipsCapableTag = 0x14;
+        private const byte FipsApprovedTag = 0x15;
+        private const byte PinComplexityTag = 0x16;
+        private const byte NfcRestrictedTag = 0x17;
+        private const byte ResetBlockedTag = 0x18;
         private const byte TemplateStorageVersionTag = 0x20;
         private const byte ImageProcessorVersionTag = 0x21;
 
@@ -103,6 +110,9 @@ namespace Yubico.YubiKey
         /// <inheritdoc />
         public bool ConfigurationLocked { get; set; }
 
+        /// <inheritdoc />
+        public bool IsNfcRestricted { get; set; }
+
         /// <summary>
         /// Constructs a default instance of YubiKeyDeviceInfo.
         /// </summary>
@@ -125,160 +135,167 @@ namespace Yubico.YubiKey
         /// True if the parsing and construction was successful, and false if
         /// <paramref name="responseApduData"/> did not meet formatting requirements.
         /// </returns>
+        [Obsolete("This has been replaced by CreateFromResponseData")]
         internal static bool TryCreateFromResponseData(
             ReadOnlyMemory<byte> responseApduData,
             [MaybeNullWhen(returnValue: false)] out YubiKeyDeviceInfo deviceInfo)
         {
-            Logger log = Log.GetLogger();
+            Dictionary<int, ReadOnlyMemory<byte>>? data =
+                GetDeviceInfoResponseHelper.CreateApduDictionaryFromResponseData(responseApduData);
 
-            // Certain transports (such as OTP keyboard) may return a buffer that is larger than the
-            // overall TLV size. We want to make sure we're only parsing over real TLV data here, so
-            // check the first byte to get the overall TLV length and slice accordingly.
-
-            if (responseApduData.IsEmpty)
+            if (data is null)
             {
-                log.LogWarning("ResponseAPDU data was empty!");
                 deviceInfo = null;
+
                 return false;
             }
 
-            int tlvDataLength = responseApduData.Span[0];
+            deviceInfo = CreateFromResponseData(data);
 
-            if (tlvDataLength == 0 || 1 + tlvDataLength > responseApduData.Length)
-            {
-                log.LogWarning("TLV Data length was out of expected ranges. {Length}", tlvDataLength);
-                deviceInfo = null;
-                return false;
-            }
+            return true;
+        }
 
-            var tlvReader = new TlvReader(responseApduData.Slice(1, tlvDataLength));
-
-            deviceInfo = new YubiKeyDeviceInfo();
+        /// <summary>
+        /// Gets the YubiKey's device configuration details.
+        /// </summary>
+        /// <param name="responseApduData">
+        /// The ResponseApdu data as byte array returned by the YubiKey. The first byte
+        /// is the overall length of the TLV data, followed by the TLV data.
+        /// </param>
+        /// <returns>
+        /// On success, the <see cref="YubiKeyDeviceInfo"/> is returned using this out parameter.
+        /// <paramref name="responseApduData"/> did not meet formatting requirements.
+        /// </returns>
+        internal static YubiKeyDeviceInfo CreateFromResponseData(Dictionary<int, ReadOnlyMemory<byte>> responseApduData)
+        {
             bool fipsSeriesFlag = false;
             bool skySeriesFlag = false;
 
-            while (tlvReader.HasData)
+            var deviceInfo = new YubiKeyDeviceInfo();
+
+            foreach (KeyValuePair<int, ReadOnlyMemory<byte>> tagValuePair in responseApduData)
             {
-                switch (tlvReader.PeekTag())
+                switch (tagValuePair.Key)
                 {
                     case UsbPrePersCapabilitiesTag:
-                        ReadOnlySpan<byte> usbValue = tlvReader.ReadValue(UsbPrePersCapabilitiesTag).Span;
-                        deviceInfo.AvailableUsbCapabilities = GetYubiKeyCapabilities(usbValue);
-                        log.SensitiveLogInformation("Available capabilities (USB): {Capabilities}", deviceInfo.AvailableUsbCapabilities);
+                        deviceInfo.AvailableUsbCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+
                         break;
 
                     case SerialNumberTag:
-                        deviceInfo.SerialNumber = tlvReader.ReadInt32(SerialNumberTag, true);
-                        log.SensitiveLogInformation("SerialNumber: {SerialNumber}", deviceInfo.SerialNumber);
+                        deviceInfo.SerialNumber = BinaryPrimitives.ReadInt32BigEndian(tagValuePair.Value.Span);
+
                         break;
 
                     case UsbEnabledCapabilitiesTag:
-                        ReadOnlySpan<byte> usbEnabledValue = tlvReader.ReadValue(UsbEnabledCapabilitiesTag).Span;
-                        deviceInfo.EnabledUsbCapabilities = GetYubiKeyCapabilities(usbEnabledValue);
-                        log.SensitiveLogInformation("Enabled capabilities (USB): {Capabilities}", deviceInfo.EnabledUsbCapabilities);
+                        deviceInfo.EnabledUsbCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+
                         break;
 
                     case FormFactorTag:
-                        byte formFactorValue = tlvReader.ReadByte(FormFactorTag);
+                        byte formFactorValue = tagValuePair.Value.Span[0];
                         deviceInfo.FormFactor = (FormFactor)(formFactorValue & FormFactorMask);
                         fipsSeriesFlag = (formFactorValue & FipsMask) == FipsMask;
                         skySeriesFlag = (formFactorValue & SkyMask) == SkyMask;
-                        log.SensitiveLogInformation("FormFactor {FormFactor}, FIPS {Fips}, SKY {Sky}", deviceInfo.FormFactor, fipsSeriesFlag, skySeriesFlag);
+
                         break;
 
                     case FirmwareVersionTag:
-                        ReadOnlySpan<byte> firmwareValue = tlvReader.ReadValue(FirmwareVersionTag).Span;
+                        ReadOnlySpan<byte> firmwareValue = tagValuePair.Value.Span;
+
                         deviceInfo.FirmwareVersion = new FirmwareVersion
                         {
                             Major = firmwareValue[0],
                             Minor = firmwareValue[1],
                             Patch = firmwareValue[2]
                         };
-                        log.SensitiveLogInformation("FirmwareVersion: {FirmwareVersion}", deviceInfo.FirmwareVersion.ToString());
+
                         break;
 
                     case AutoEjectTimeoutTag:
-                        deviceInfo.AutoEjectTimeout = tlvReader.ReadUInt16(AutoEjectTimeoutTag);
-                        log.SensitiveLogInformation("AutoEjectTimeout: {AutoEjectTimeout}", deviceInfo.AutoEjectTimeout);
+                        deviceInfo.AutoEjectTimeout = BinaryPrimitives.ReadUInt16BigEndian(tagValuePair.Value.Span);
+
                         break;
 
                     case ChallengeResponseTimeoutTag:
-                        deviceInfo.ChallengeResponseTimeout =
-                            tlvReader.ReadByte(ChallengeResponseTimeoutTag);
-                        log.SensitiveLogInformation("ChallengeResponseTimeout: {ChallengeResponseTimeout}", deviceInfo.ChallengeResponseTimeout);
+                        deviceInfo.ChallengeResponseTimeout = tagValuePair.Value.Span[0];
+
                         break;
 
                     case DeviceFlagsTag:
-                        deviceInfo.DeviceFlags = (DeviceFlags)tlvReader.ReadByte(DeviceFlagsTag);
-                        log.SensitiveLogInformation("DeviceFlags: {DeviceFlags}", deviceInfo.DeviceFlags);
+                        deviceInfo.DeviceFlags = (DeviceFlags)tagValuePair.Value.Span[0];
+
                         break;
 
                     case ConfigurationLockPresentTag:
-                        deviceInfo.ConfigurationLocked =
-                            tlvReader.ReadByte(ConfigurationLockPresentTag) == 1;
-                        log.SensitiveLogInformation("ConfigurationLocked: {ConfigurationLocked}", deviceInfo.ConfigurationLocked);
+                        deviceInfo.ConfigurationLocked = tagValuePair.Value.Span[0] == 1;
+
                         break;
 
                     case NfcPrePersCapabilitiesTag:
-                        ReadOnlySpan<byte> nfcValue = tlvReader.ReadValue(NfcPrePersCapabilitiesTag).Span;
-                        deviceInfo.AvailableNfcCapabilities = GetYubiKeyCapabilities(nfcValue);
-                        log.SensitiveLogInformation("AvailableNfcCapabilities: {AvailableNfcCapabilities}", deviceInfo.AvailableNfcCapabilities);
+                        deviceInfo.AvailableNfcCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+
                         break;
 
                     case NfcEnabledCapabilitiesTag:
-                        ReadOnlySpan<byte> nfcEnabledValue = tlvReader.ReadValue(NfcEnabledCapabilitiesTag).Span;
-                        deviceInfo.EnabledNfcCapabilities = GetYubiKeyCapabilities(nfcEnabledValue);
-                        log.SensitiveLogInformation("EnabledNfcCapabilities: {EnabledNfcCapabilities}", deviceInfo.EnabledNfcCapabilities);
-                        break;
+                        deviceInfo.EnabledNfcCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
 
-                    case IapDetectionTag:
-                        // The YubiKey may provide a TLV that represents the state of the iAP flags.
-                        // This data is reserved for future use, and is not meant to be used.
-                        // Therefore we will swallow this value, advancing the reader to the next TLV.
-                        _ = tlvReader.ReadByte(IapDetectionTag);
-                        break;
-
-                    case MoreDataTag:
-                        // Ignore this tag for now.
-                        _ = (int)tlvReader.ReadByte(MoreDataTag);
                         break;
 
                     case TemplateStorageVersionTag:
-                        ReadOnlySpan<byte> fpChipVersion = tlvReader.ReadValue(TemplateStorageVersionTag).Span;
-                        deviceInfo.TemplateStorageVersion = new TemplateStorageVersion()
+                        ReadOnlySpan<byte> fpChipVersion = tagValuePair.Value.Span;
+
+                        deviceInfo.TemplateStorageVersion = new TemplateStorageVersion
                         {
                             Major = fpChipVersion[0],
                             Minor = fpChipVersion[1],
                             Patch = fpChipVersion[2]
                         };
-                        log.SensitiveLogInformation("TemplateStorageVersion: {TemplateStorageVersion}", deviceInfo.TemplateStorageVersion.ToString());
+
                         break;
 
                     case ImageProcessorVersionTag:
-                        ReadOnlySpan<byte> ipChipVersion = tlvReader.ReadValue(ImageProcessorVersionTag).Span;
-                        deviceInfo.ImageProcessorVersion = new ImageProcessorVersion()
+                        ReadOnlySpan<byte> ipChipVersion = tagValuePair.Value.Span;
+
+                        deviceInfo.ImageProcessorVersion = new ImageProcessorVersion
                         {
                             Major = ipChipVersion[0],
                             Minor = ipChipVersion[1],
                             Patch = ipChipVersion[2]
                         };
-                        log.SensitiveLogInformation("ImageProcessorVersion: {ImageProcessorVersion}", deviceInfo.ImageProcessorVersion.ToString());
+
+                        break;
+
+                    case NfcRestrictedTag:
+                        deviceInfo.IsNfcRestricted = tagValuePair.Value.Span[0] == 1;
+
+                        break;
+                    case IapDetectionTag:
+                    case MoreDataTag:
+                    case PartNumberTag:
+                    case FipsCapableTag:
+                    case FipsApprovedTag:
+                    case PinComplexityTag:
+                    case FreeFormTag:
+                    case HidInitDelay:
+                    case ResetBlockedTag:
+                        // Ignore these tags for now
                         break;
 
                     default:
                         Debug.Assert(false, "Encountered an unrecognized tag in DeviceInfo. Ignoring.");
+
                         break;
                 }
             }
 
-            deviceInfo.IsFipsSeries =
-                deviceInfo.FirmwareVersion >= _fipsFlagInclusiveLowerBound
+            deviceInfo.IsFipsSeries = deviceInfo.FirmwareVersion >= _fipsFlagInclusiveLowerBound
                 ? fipsSeriesFlag
                 : deviceInfo.IsFipsVersion;
 
             deviceInfo.IsSkySeries |= skySeriesFlag;
 
-            return true;
+            return deviceInfo;
         }
 
         internal YubiKeyDeviceInfo Merge(YubiKeyDeviceInfo? second)
@@ -299,34 +316,31 @@ namespace Yubico.YubiKey
 
                 IsFipsSeries = IsFipsSeries || second.IsFipsSeries,
 
-                FormFactor =
-                        FormFactor != FormFactor.Unknown
-                        ? FormFactor
-                        : second.FormFactor,
+                FormFactor = FormFactor != FormFactor.Unknown
+                    ? FormFactor
+                    : second.FormFactor,
 
-                FirmwareVersion =
-                        FirmwareVersion != new FirmwareVersion()
-                        ? FirmwareVersion
-                        : second.FirmwareVersion,
+                FirmwareVersion = FirmwareVersion != new FirmwareVersion()
+                    ? FirmwareVersion
+                    : second.FirmwareVersion,
 
-                AutoEjectTimeout =
-                        DeviceFlags.HasFlag(DeviceFlags.TouchEject)
-                        ? AutoEjectTimeout
-                        : second.DeviceFlags.HasFlag(DeviceFlags.TouchEject)
-                            ? second.AutoEjectTimeout
-                            : default,
+                AutoEjectTimeout = DeviceFlags.HasFlag(DeviceFlags.TouchEject)
+                    ? AutoEjectTimeout
+                    : second.DeviceFlags.HasFlag(DeviceFlags.TouchEject)
+                        ? second.AutoEjectTimeout
+                        : default,
 
-                ChallengeResponseTimeout =
-                        ChallengeResponseTimeout != default
-                        ? ChallengeResponseTimeout
-                        : second.ChallengeResponseTimeout,
+                ChallengeResponseTimeout = ChallengeResponseTimeout != default
+                    ? ChallengeResponseTimeout
+                    : second.ChallengeResponseTimeout,
 
                 DeviceFlags = DeviceFlags | second.DeviceFlags,
 
-                ConfigurationLocked =
-                        ConfigurationLocked != default
-                        ? ConfigurationLocked
-                        : second.ConfigurationLocked,
+                ConfigurationLocked = ConfigurationLocked != default
+                    ? ConfigurationLocked
+                    : second.ConfigurationLocked,
+
+                IsNfcRestricted = IsNfcRestricted || second.IsNfcRestricted
             };
         }
 
@@ -338,6 +352,7 @@ namespace Yubico.YubiKey
             && FirmwareVersion < _fipsExclusiveUpperBound;
 
         private static YubiKeyCapabilities GetYubiKeyCapabilities(ReadOnlySpan<byte> value) =>
+
             // Older firmware versions only encode this enumeration with one byte. If we see a single
             // byte in this element, it's OK. We will handle it here.
             value.Length == 1
@@ -345,6 +360,7 @@ namespace Yubico.YubiKey
                 : (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(value);
 
         /// <inheritdoc/>
-        public override string ToString() => $"{nameof(AvailableUsbCapabilities)}: {AvailableUsbCapabilities}, {nameof(EnabledUsbCapabilities)}: {EnabledUsbCapabilities}, {nameof(AvailableNfcCapabilities)}: {AvailableNfcCapabilities}, {nameof(EnabledNfcCapabilities)}: {EnabledNfcCapabilities}, {nameof(AutoEjectTimeout)}: {AutoEjectTimeout}, {nameof(DeviceFlags)}: {DeviceFlags}, {nameof(ConfigurationLocked)}: {ConfigurationLocked}";
+        public override string ToString() =>
+            $"{nameof(AvailableUsbCapabilities)}: {AvailableUsbCapabilities}, {nameof(EnabledUsbCapabilities)}: {EnabledUsbCapabilities}, {nameof(AvailableNfcCapabilities)}: {AvailableNfcCapabilities}, {nameof(EnabledNfcCapabilities)}: {EnabledNfcCapabilities}, {nameof(AutoEjectTimeout)}: {AutoEjectTimeout}, {nameof(DeviceFlags)}: {DeviceFlags}, {nameof(ConfigurationLocked)}: {ConfigurationLocked}";
     }
 }

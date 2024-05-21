@@ -17,12 +17,12 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f.Commands
 {
-    public class GetDeviceInfoCommandTests
+    public class GetPagedDeviceInfoCommandTests
     {
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
-            var command = new GetDeviceInfoCommand();
+            var command = new GetPagedDeviceInfoCommand();
 
             Assert.Equal(0, command.CreateCommandApdu().Cla);
         }
@@ -30,7 +30,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void CreateCommandApdu_GetInsProperty_Returns0xC2()
         {
-            var command = new GetDeviceInfoCommand();
+            var command = new GetPagedDeviceInfoCommand();
 
             Assert.Equal(0xC2, command.CreateCommandApdu().Ins);
         }
@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void CreateCommandApdu_GetP1Property_ReturnsZero()
         {
-            var command = new GetDeviceInfoCommand();
+            var command = new GetPagedDeviceInfoCommand();
 
             Assert.Equal(0, command.CreateCommandApdu().P1);
         }
@@ -46,35 +46,35 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void CreateCommandApdu_GetP2Property_ReturnsZero()
         {
-            var command = new GetDeviceInfoCommand();
+            var command = new GetPagedDeviceInfoCommand();
 
             Assert.Equal(0, command.CreateCommandApdu().P2);
         }
 
         [Fact]
-        public void CreateCommandApdu_GetNcProperty_ReturnsZero()
+        public void CreateCommandApdu_GetNc_WithNewCommand_ReturnsCorrectLengthOfOnlyOne()
         {
-            var command = new GetDeviceInfoCommand();
+            var command = new GetPagedDeviceInfoCommand();
 
-            Assert.Equal(0, command.CreateCommandApdu().Nc);
+            Assert.Equal(1, command.CreateCommandApdu().Nc);
         }
 
         [Fact]
-        public void CreateCommandApdu_GetDataProperty_ReturnsEmpty()
+        public void CreateCommandApdu_GetData_WithNewCommand_ReturnsLengthOfOnlyOne()
         {
-            var command = new GetDeviceInfoCommand();
+            var command = new GetPagedDeviceInfoCommand();
 
-            Assert.True(command.CreateCommandApdu().Data.IsEmpty);
+            Assert.Equal(1, command.CreateCommandApdu().Data.Length);
         }
 
         [Fact]
         public void CreateResponseApdu_ReturnsCorrectType()
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var command = new GetDeviceInfoCommand();
-            GetDeviceInfoResponse? response = command.CreateResponseForApdu(responseApdu);
+            var command = new GetPagedDeviceInfoCommand();
+            GetPagedDeviceInfoResponse? response = command.CreateResponseForApdu(responseApdu);
 
-            _ = Assert.IsType<GetDeviceInfoResponse>(response);
+            Assert.NotNull(response);
         }
     }
 }

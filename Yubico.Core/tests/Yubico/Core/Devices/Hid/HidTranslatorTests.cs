@@ -32,7 +32,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [InlineData(KeyboardLayout.sv_SE)]
         public void GetHidCodes_GivenKeyboardLayout_ReturnsCorrectInstance(KeyboardLayout layout)
         {
-            HidCodeTranslator hid = HidCodeTranslator.GetInstance(layout);
+            var hid = HidCodeTranslator.GetInstance(layout);
             Assert.Equal(layout, hid.Layout);
         }
 
@@ -46,7 +46,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [InlineData(KeyboardLayout.sv_SE, new byte[] { 0x9c, 0x18, 0x05, 0x0c, 0x06, 0x12, 0x9e })]
         public void GetHidCodes_GivenString_ReturnsCorrectCodes(KeyboardLayout layout, byte[] expected)
         {
-            HidCodeTranslator hid = HidCodeTranslator.GetInstance(layout);
+            var hid = HidCodeTranslator.GetInstance(layout);
             string s = "Yubico!";
             byte[] actual = hid.GetHidCodes(s);
             Assert.Equal(expected, actual);
@@ -62,7 +62,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [InlineData(KeyboardLayout.sv_SE, new byte[] { 0x9c, 0x18, 0x05, 0x0c, 0x06, 0x12, 0x9e })]
         public void GetHidCodes_GivenCharArray_ReturnsCorrectCodes(KeyboardLayout layout, byte[] expected)
         {
-            HidCodeTranslator hid = HidCodeTranslator.GetInstance(layout);
+            var hid = HidCodeTranslator.GetInstance(layout);
             char[] s = { 'Y', 'u', 'b', 'i', 'c', 'o', '!' };
             byte[] actual = hid.GetHidCodes(s);
             Assert.Equal(expected, actual);
@@ -79,7 +79,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         public void GetString_GivenHidCodes_ReturnsCorrectString(KeyboardLayout layout, byte[] input)
         {
             string expected = "Yubico!";
-            HidCodeTranslator hid = HidCodeTranslator.GetInstance(layout);
+            var hid = HidCodeTranslator.GetInstance(layout);
             string actual = hid.GetString(input);
             Assert.Equal(expected, actual);
         }
@@ -97,8 +97,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Since ModHex is a subset of all supported keyboard layouts, this
             // will confirm that all ModHex HID codes are the same in non-ModHex
             // layouts.
-            HidCodeTranslator testHid = HidCodeTranslator.GetInstance(layout);
-            HidCodeTranslator modHexHid = HidCodeTranslator.GetInstance(KeyboardLayout.ModHex);
+            var testHid = HidCodeTranslator.GetInstance(layout);
+            var modHexHid = HidCodeTranslator.GetInstance(KeyboardLayout.ModHex);
             foreach (byte code in modHexHid.SupportedHidCodes)
             {
                 Assert.Equal(modHexHid[code], testHid[code]);
@@ -117,8 +117,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         {
             // Since ModHex is a subset of all keyboard layouts, this will confirm
             // that all ModHex chars are the same in non-ModHex layouts.
-            HidCodeTranslator testHid = HidCodeTranslator.GetInstance(layout);
-            HidCodeTranslator modHexHid = HidCodeTranslator.GetInstance(KeyboardLayout.ModHex);
+            var testHid = HidCodeTranslator.GetInstance(layout);
+            var modHexHid = HidCodeTranslator.GetInstance(KeyboardLayout.ModHex);
             foreach (char ch in modHexHid.SupportedCharacters)
             {
                 Assert.Equal(modHexHid[ch], testHid[ch]);
@@ -137,23 +137,25 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         {
             // Since ModHex is a subset of all keyboard layouts, this will confirm
             // that all ModHex chars are the same in non-ModHex layouts.
-            HidCodeTranslator hid = HidCodeTranslator.GetInstance(KeyboardLayout.ModHex);
+            var hid = HidCodeTranslator.GetInstance(KeyboardLayout.ModHex);
             byte[] modHexCodes = hid.SupportedHidCodes;
             string decoded = HidCodeTranslator.GetInstance(layout).GetString(modHexCodes);
             Assert.Equal(hid.SupportedCharactersString, decoded);
         }
 
 #if Windows
+#pragma warning disable CA1825
         [Theory]
         [MemberData(nameof(GetTestData))]
         public void GetChar_GivenHidCode_ReturnsCorrectChar(KeyboardLayout layout, (char, byte)[] testData)
         {
-            HidCodeTranslator hid = HidCodeTranslator.GetInstance(layout);
+            var hid = HidCodeTranslator.GetInstance(layout);
             foreach ((char ch, byte code) item in testData)
             {
                 Assert.Equal(item.ch, hid[item.code]);
             }
         }
+#pragma warning restore CA1825
 #endif
 
         public static IEnumerable<object[]> GetTestData()

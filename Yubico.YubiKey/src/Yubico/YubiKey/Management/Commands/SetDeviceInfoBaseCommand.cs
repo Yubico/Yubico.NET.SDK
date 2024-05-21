@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Management.Commands
         private const byte ConfigurationUnlockPresentTag = 0x0b;
         private const byte ResetAfterConfigTag = 0x0c;
         private const byte NfcEnabledCapabilitiesTag = 0x0e;
-
+        private const byte NfcRestrictedTag = 0x17;
 
         private byte[]? _lockCode;
         private byte[]? _unlockCode;
@@ -101,28 +101,36 @@ namespace Yubico.YubiKey.Management.Commands
         /// </summary>
         public bool ResetAfterConfig { get; set; }
 
+        /// <summary>
+        /// Allows setting of the <see cref="YubiKeyDeviceInfo.IsNfcRestricted"/> property
+        /// </summary>
+        public bool RestrictNfc { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SetDeviceInfoBaseCommand"/> class.
         /// </summary>
         protected SetDeviceInfoBaseCommand()
         {
+
         }
 
         protected SetDeviceInfoBaseCommand(SetDeviceInfoBaseCommand baseCommand)
         {
-            if (!(baseCommand is null))
+            if (baseCommand is null)
             {
-                EnabledUsbCapabilities = baseCommand.EnabledUsbCapabilities;
-                EnabledNfcCapabilities = baseCommand.EnabledNfcCapabilities;
-                ChallengeResponseTimeout = baseCommand.ChallengeResponseTimeout;
-                AutoEjectTimeout = baseCommand.AutoEjectTimeout;
-                DeviceFlags = baseCommand.DeviceFlags;
-                ResetAfterConfig = baseCommand.ResetAfterConfig;
-
-                _lockCode = baseCommand._lockCode;
-                _unlockCode = baseCommand._unlockCode;
+                return;
             }
+
+            EnabledUsbCapabilities = baseCommand.EnabledUsbCapabilities;
+            EnabledNfcCapabilities = baseCommand.EnabledNfcCapabilities;
+            ChallengeResponseTimeout = baseCommand.ChallengeResponseTimeout;
+            AutoEjectTimeout = baseCommand.AutoEjectTimeout;
+            DeviceFlags = baseCommand.DeviceFlags;
+            ResetAfterConfig = baseCommand.ResetAfterConfig;
+            RestrictNfc = baseCommand.RestrictNfc;
+
+            _lockCode = baseCommand._lockCode;
+            _unlockCode = baseCommand._unlockCode;
         }
 
         /// <summary>
@@ -242,6 +250,11 @@ namespace Yubico.YubiKey.Management.Commands
             if (_unlockCode is byte[] unlockCode)
             {
                 buffer.WriteValue(ConfigurationUnlockPresentTag, unlockCode);
+            }
+
+            if (RestrictNfc)
+            {
+                buffer.WriteByte(NfcRestrictedTag, 1);
             }
 
             return buffer.Encode();

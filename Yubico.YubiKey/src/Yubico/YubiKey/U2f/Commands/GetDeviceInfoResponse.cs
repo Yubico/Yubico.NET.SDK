@@ -21,6 +21,7 @@ namespace Yubico.YubiKey.U2f.Commands
     /// The response to the <see cref="GetDeviceInfoCommand"/> command, containing the YubiKey's
     /// device configuration details.
     /// </summary>
+    [Obsolete("This class has been replaced by GetPagedDeviceInfoResponse")]
     public sealed class GetDeviceInfoResponse : U2fResponse, IYubiKeyResponseWithData<YubiKeyDeviceInfo>
     {
 
@@ -51,7 +52,7 @@ namespace Yubico.YubiKey.U2f.Commands
 
             if (ResponseApdu.Data.Length > 255)
             {
-                throw new MalformedYubiKeyResponseException()
+                throw new MalformedYubiKeyResponseException
                 {
                     ResponseClass = nameof(GetDeviceInfoResponse),
                     ActualDataLength = ResponseApdu.Data.Length
@@ -60,7 +61,7 @@ namespace Yubico.YubiKey.U2f.Commands
 
             if (!YubiKeyDeviceInfo.TryCreateFromResponseData(ResponseApdu.Data, out YubiKeyDeviceInfo? deviceInfo))
             {
-                throw new MalformedYubiKeyResponseException()
+                throw new MalformedYubiKeyResponseException
                 {
                     ResponseClass = nameof(GetDeviceInfoResponse),
                 };

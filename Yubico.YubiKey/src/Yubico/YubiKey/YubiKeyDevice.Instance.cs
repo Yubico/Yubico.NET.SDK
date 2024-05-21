@@ -42,6 +42,9 @@ namespace Yubico.YubiKey
         public YubiKeyCapabilities EnabledNfcCapabilities => _yubiKeyInfo.EnabledNfcCapabilities;
 
         /// <inheritdoc />
+        public bool IsNfcRestricted => _yubiKeyInfo.IsNfcRestricted;
+
+        /// <inheritdoc />
         public int? SerialNumber => _yubiKeyInfo.SerialNumber;
 
         /// <inheritdoc />
@@ -82,7 +85,6 @@ namespace Yubico.YubiKey
         internal bool HasSmartCard => !(_smartCardDevice is null);
         internal bool HasHidFido => !(_hidFidoDevice is null);
         internal bool HasHidKeyboard => !(_hidKeyboardDevice is null);
-
         internal bool IsNfcDevice { get; private set; }
 
         private ISmartCardDevice? _smartCardDevice;
@@ -377,9 +379,9 @@ namespace Yubico.YubiKey
                 {
                     _log.LogInformation("Connecting via the SmartCard interface.");
                     WaitForReclaimTimeout(Transport.SmartCard);
-                    return scp03Keys is null ?
-                        new CcidConnection(_smartCardDevice, applicationId)
-                        : new Scp03CcidConnection(_smartCardDevice, applicationId, scp03Keys);
+                    return scp03Keys is null
+                        ? new SmartCardConnection(_smartCardDevice, applicationId)
+                        : new Scp03Connection(_smartCardDevice, applicationId, scp03Keys);
                 }
 
                 _log.LogInformation(
@@ -395,7 +397,7 @@ namespace Yubico.YubiKey
                 {
                     _log.LogInformation("Connecting via the SmartCard interface.");
                     WaitForReclaimTimeout(Transport.SmartCard);
-                    return new Scp03CcidConnection(_smartCardDevice, (YubiKeyApplication)application, scp03Keys);
+                    return new Scp03Connection(_smartCardDevice, (YubiKeyApplication)application, scp03Keys);
                 }
 
                 return null;
@@ -424,7 +426,7 @@ namespace Yubico.YubiKey
             {
                 _log.LogInformation("Connecting via the SmartCard interface.");
                 WaitForReclaimTimeout(Transport.SmartCard);
-                return new CcidConnection(_smartCardDevice, (YubiKeyApplication)application);
+                return new SmartCardConnection(_smartCardDevice, (YubiKeyApplication)application);
             }
 
             _log.LogInformation("No smart card interface present. Unable to establish connection to YubiKey.");
@@ -434,17 +436,17 @@ namespace Yubico.YubiKey
         /// <inheritdoc/>
         public void SetEnabledNfcCapabilities(YubiKeyCapabilities yubiKeyCapabilities)
         {
-            var setCommand = new MgmtCmd.SetDeviceInfoCommand
+            var command = new MgmtCmd.SetDeviceInfoCommand
             {
                 EnabledNfcCapabilities = yubiKeyCapabilities,
                 ResetAfterConfig = true,
             };
 
-            IYubiKeyResponse setConfigurationResponse = SendConfiguration(setCommand);
+            IYubiKeyResponse response = SendConfiguration(command);
 
-            if (setConfigurationResponse.Status != ResponseStatus.Success)
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(setConfigurationResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
         }
 
@@ -456,17 +458,17 @@ namespace Yubico.YubiKey
                 throw new InvalidOperationException(ExceptionMessages.MustEnableOneAvailableUsbCapability);
             }
 
-            var setCommand = new MgmtCmd.SetDeviceInfoCommand
+            var command = new MgmtCmd.SetDeviceInfoCommand
             {
                 EnabledUsbCapabilities = yubiKeyCapabilities,
                 ResetAfterConfig = true,
             };
 
-            IYubiKeyResponse setConfigurationResponse = SendConfiguration(setCommand);
+            IYubiKeyResponse response = SendConfiguration(command);
 
-            if (setConfigurationResponse.Status != ResponseStatus.Success)
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(setConfigurationResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
         }
 
@@ -478,16 +480,16 @@ namespace Yubico.YubiKey
                 throw new ArgumentOutOfRangeException(nameof(seconds));
             }
 
-            var setCommand = new MgmtCmd.SetDeviceInfoCommand
+            var command = new MgmtCmd.SetDeviceInfoCommand
             {
                 ChallengeResponseTimeout = (byte)seconds,
             };
 
-            IYubiKeyResponse setConfigurationResponse = SendConfiguration(setCommand);
+            IYubiKeyResponse response = SendConfiguration(command);
 
-            if (setConfigurationResponse.Status != ResponseStatus.Success)
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(setConfigurationResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
         }
 
@@ -499,32 +501,54 @@ namespace Yubico.YubiKey
                 throw new ArgumentOutOfRangeException(nameof(seconds));
             }
 
-            var setCommand = new MgmtCmd.SetDeviceInfoCommand
+            var command = new MgmtCmd.SetDeviceInfoCommand
             {
                 AutoEjectTimeout = seconds,
             };
 
-            IYubiKeyResponse setConfigurationResponse = SendConfiguration(setCommand);
+            IYubiKeyResponse response = SendConfiguration(command);
 
-            if (setConfigurationResponse.Status != ResponseStatus.Success)
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(setConfigurationResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+        }
+
+        /// <inheritdoc/>
+        public void SetIsNfcRestricted(bool enabled)
+        {
+            if (!this.HasFeature(YubiKeyFeature.ManagementNfcRestricted))
+            {
+                throw new NotSupportedException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.NotSupportedByYubiKeyVersion));
+            }
+
+            var command = new MgmtCmd.SetDeviceInfoCommand
+            {
+                RestrictNfc = enabled
+            };
+
+            IYubiKeyResponse response = SendConfiguration(command);
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
             }
         }
 
         /// <inheritdoc/>
         public void SetDeviceFlags(DeviceFlags deviceFlags)
         {
-            var setCommand = new MgmtCmd.SetDeviceInfoCommand
+            var command = new MgmtCmd.SetDeviceInfoCommand
             {
                 DeviceFlags = deviceFlags,
             };
 
-            IYubiKeyResponse setConfigurationResponse = SendConfiguration(setCommand);
-
-            if (setConfigurationResponse.Status != ResponseStatus.Success)
+            IYubiKeyResponse response = SendConfiguration(command);
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(setConfigurationResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
         }
 
@@ -549,14 +573,13 @@ namespace Yubico.YubiKey
                     nameof(lockCode));
             }
 
-            var setCommand = new MgmtCmd.SetDeviceInfoCommand();
-            setCommand.SetLockCode(lockCode);
+            var command = new MgmtCmd.SetDeviceInfoCommand();
+            command.SetLockCode(lockCode);
 
-            IYubiKeyResponse setConfigurationResponse = SendConfiguration(setCommand);
-
-            if (setConfigurationResponse.Status != ResponseStatus.Success)
+            IYubiKeyResponse response = SendConfiguration(command);
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(setConfigurationResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
         }
 
@@ -574,15 +597,15 @@ namespace Yubico.YubiKey
                         nameof(lockCode));
             }
 
-            var setCommand = new MgmtCmd.SetDeviceInfoCommand();
-            setCommand.ApplyLockCode(lockCode);
-            setCommand.SetLockCode(_lockCodeAllZeros.Span);
+            var command = new MgmtCmd.SetDeviceInfoCommand();
+            command.ApplyLockCode(lockCode);
+            command.SetLockCode(_lockCodeAllZeros.Span);
 
-            IYubiKeyResponse setConfigurationResponse = SendConfiguration(setCommand);
+            IYubiKeyResponse response = SendConfiguration(command);
 
-            if (setConfigurationResponse.Status != ResponseStatus.Success)
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(setConfigurationResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
         }
 
@@ -634,7 +657,7 @@ namespace Yubico.YubiKey
             }
             #endregion
 
-            IYubiKeyResponse setConfigurationResponse;
+            IYubiKeyResponse response;
 
             // Newer YubiKeys should use SetDeviceInfo
             if (FirmwareVersion.Major >= 5)
@@ -653,7 +676,7 @@ namespace Yubico.YubiKey
                     ResetAfterConfig = true,
                 };
 
-                setConfigurationResponse = SendConfiguration(setDeviceInfoCommand);
+                response = SendConfiguration(setDeviceInfoCommand);
             }
             else
             {
@@ -663,12 +686,12 @@ namespace Yubico.YubiKey
                     touchEjectEnabled,
                     autoEjectTimeout);
 
-                setConfigurationResponse = SendConfiguration(setLegacyDeviceConfigCommand);
+                response = SendConfiguration(setLegacyDeviceConfigCommand);
             }
 
-            if (setConfigurationResponse.Status != ResponseStatus.Success)
+            if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(setConfigurationResponse.StatusMessage);
+                throw new InvalidOperationException(response.StatusMessage);
             }
         }
 

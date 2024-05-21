@@ -59,12 +59,12 @@ namespace Yubico.YubiKey.U2f
         [Trait("Category", "Simple")]
         public void RunGetDeviceInfo()
         {
-            var cmd = new GetDeviceInfoCommand();
-            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
+            var cmd = new GetPagedDeviceInfoCommand();
+            GetPagedDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            YubiKeyDeviceInfo getData = rsp.GetData();
-            Assert.False(getData.IsFipsSeries);
+            var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
+            Assert.False(deviceInfo.IsFipsSeries);
         }
 
         [Fact]

@@ -24,7 +24,7 @@ using Yubico.YubiKey.Pipelines;
 
 namespace Yubico.YubiKey
 {
-    internal class CcidConnection : IYubiKeyConnection
+    internal class SmartCardConnection : IYubiKeyConnection
     {
         private readonly Logger _log = Log.GetLogger();
 
@@ -36,7 +36,7 @@ namespace Yubico.YubiKey
 
         public ISelectApplicationData? SelectApplicationData { get; set; }
 
-        protected CcidConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication application, byte[]? applicationId)
+        protected SmartCardConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication application, byte[]? applicationId)
         {
             if (applicationId is null && application == YubiKeyApplication.Unknown)
             {
@@ -53,7 +53,7 @@ namespace Yubico.YubiKey
             _apduPipeline = new CommandChainingTransform(_apduPipeline);
         }
 
-        public CcidConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication yubiKeyApplication)
+        public SmartCardConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication yubiKeyApplication)
             : this(smartCardDevice, yubiKeyApplication, null)
         {
             if (yubiKeyApplication == YubiKeyApplication.Fido2)
@@ -67,7 +67,7 @@ namespace Yubico.YubiKey
             SelectApplication();
         }
 
-        public CcidConnection(ISmartCardDevice smartCardDevice, byte[] applicationId)
+        public SmartCardConnection(ISmartCardDevice smartCardDevice, byte[] applicationId)
             : this(smartCardDevice, YubiKeyApplication.Unknown, applicationId)
         {
             if (applicationId.SequenceEqual(YubiKeyApplication.Fido2.GetIso7816ApplicationId()))
@@ -136,7 +136,7 @@ namespace Yubico.YubiKey
 
         public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand) where TResponse : IYubiKeyResponse
         {
-            using (IDisposable transaction = _smartCardConnection.BeginTransaction(out bool cardWasReset))
+            using (IDisposable _ = _smartCardConnection.BeginTransaction(out bool cardWasReset))
             {
                 if (cardWasReset)
                 {

@@ -45,12 +45,12 @@ namespace Yubico.YubiKey
 
             if (!(application is null))
             {
-                return new Scp03CcidConnection(GetSmartCardDevice(), (YubiKeyApplication)application, StaticKeys);
+                return new Scp03Connection(GetSmartCardDevice(), (YubiKeyApplication)application, StaticKeys);
             }
 
             if (!(applicationId is null))
             {
-                return new Scp03CcidConnection(GetSmartCardDevice(), applicationId, StaticKeys);
+                return new Scp03Connection(GetSmartCardDevice(), applicationId, StaticKeys);
             }
 
             return null;

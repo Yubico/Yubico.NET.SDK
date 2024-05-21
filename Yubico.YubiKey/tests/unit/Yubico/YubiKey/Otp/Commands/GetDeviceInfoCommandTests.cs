@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
-            var command = new GetDeviceInfoCommand();
+            var command = new GetPagedDeviceInfoCommand();
 
             byte cla = command.CreateCommandApdu().Cla;
 
@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void CreateCommandApdu_GetInsProperty_ReturnsHex01()
         {
-            var command = new GetDeviceInfoCommand();
+            var command = new GetPagedDeviceInfoCommand();
 
             byte ins = command.CreateCommandApdu().Ins;
 
@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void CreateCommandApdu_GetP1Property_ReturnsHex13()
         {
-            var command = new GetDeviceInfoCommand();
+            var command = new GetPagedDeviceInfoCommand();
 
             byte p1 = command.CreateCommandApdu().P1;
 
@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void CreateCommandApdu_GetP2Property_ReturnsZero()
         {
-            var command = new GetDeviceInfoCommand();
+            var command = new GetPagedDeviceInfoCommand();
 
             byte p2 = command.CreateCommandApdu().P2;
 
@@ -61,29 +61,29 @@ namespace Yubico.YubiKey.Otp.Commands
         }
 
         [Fact]
-        public void CreateCommandApdu_GetData_ReturnsEmpty()
+        public void CreateCommandApdu_GetData_WithNewCommand_ReturnsLengthOfOnlyOne()
         {
-            var command = new GetDeviceInfoCommand();
+            var command = new GetPagedDeviceInfoCommand();
 
             ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
-            Assert.True(data.IsEmpty);
+            Assert.Equal(1, data.Length);
         }
 
         [Fact]
-        public void CreateCommandApdu_GetNc_ReturnsZero()
+        public void CreateCommandApdu_GetNc_WithNewCommand_ReturnsCorrectLengthOfOnlyOne()
         {
-            var command = new GetDeviceInfoCommand();
+            var command = new GetPagedDeviceInfoCommand();
 
             int nc = command.CreateCommandApdu().Nc;
 
-            Assert.Equal(0, nc);
+            Assert.Equal(1, nc);
         }
 
         [Fact]
         public void CreateCommandApdu_GetNe_ReturnsZero()
         {
-            var command = new GetDeviceInfoCommand();
+            var command = new GetPagedDeviceInfoCommand();
 
             int ne = command.CreateCommandApdu().Ne;
 
@@ -95,13 +95,13 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             // Arrange
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var command = new GetDeviceInfoCommand();
+            var command = new GetPagedDeviceInfoCommand();
 
             // Act
-            GetDeviceInfoResponse? response = command.CreateResponseForApdu(responseApdu);
+            GetPagedDeviceInfoResponse? response = command.CreateResponseForApdu(responseApdu);
 
             // Assert
-            Assert.True(response is GetDeviceInfoResponse);
+            Assert.NotNull(response);
         }
     }
 }

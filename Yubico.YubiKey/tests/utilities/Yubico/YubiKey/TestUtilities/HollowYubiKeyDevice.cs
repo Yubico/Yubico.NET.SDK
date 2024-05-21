@@ -50,6 +50,8 @@ namespace Yubico.YubiKey.TestUtilities
         /// <inheritdoc />
         public YubiKeyCapabilities EnabledNfcCapabilities { get; private set; }
 
+        public bool IsNfcRestricted { get; }
+
         /// <inheritdoc />
         public int? SerialNumber { get; private set; }
 
@@ -234,6 +236,11 @@ namespace Yubico.YubiKey.TestUtilities
         }
 
         public void SetLegacyDeviceConfiguration(YubiKeyCapabilities yubiKeyInterfaces, byte challengeResponseTimeout, bool touchEjectEnabled, int autoEjectTimeout = 0)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetIsNfcRestricted(bool enabled)
         {
             throw new NotImplementedException();
         }

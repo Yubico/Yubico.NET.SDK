@@ -173,7 +173,7 @@ namespace Yubico.YubiKey.Piv
         /// <xref href="UsersManualPivObjects"> PIV data objects</xref>.
         /// </para>
         /// <para>
-        /// This is the same as the <see cref="ReadObject()"/> method that takes no
+        /// This is the same as the <see cref="ReadObject{T}()"/> method that takes no
         /// arguments, except this one will get the data in the storage location
         /// specified by <c>dataTag</c>, as opposed to the defined data tag for
         /// the class <c>T</c>. This method will still expect the data to be

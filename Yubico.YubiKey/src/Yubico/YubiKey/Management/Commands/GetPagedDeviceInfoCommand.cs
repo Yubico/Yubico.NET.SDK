@@ -13,9 +13,10 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using Yubico.Core.Iso7816;
 
-namespace Yubico.YubiKey.Otp.Commands
+namespace Yubico.YubiKey.Management.Commands
 {
     /// <summary>
     /// Gets detailed information about the YubiKey and its current configuration.
@@ -23,34 +24,39 @@ namespace Yubico.YubiKey.Otp.Commands
     /// <remarks>
     /// This class has a corresponding partner class <see cref="GetDeviceInfoResponse"/>
     /// </remarks>
-    [Obsolete("This class has been replaced by GetPagedDeviceInfoCommand")]
-    public class GetDeviceInfoCommand : IYubiKeyCommand<GetDeviceInfoResponse>
+    public sealed class GetPagedDeviceInfoCommand : IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse>
     {
+        private const byte GetDeviceInfoInstruction = 0x1D;
+
+        /// <inheritdoc />
+        public byte Page { get; set; }
+
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs.
         /// </summary>
         /// <value>
-        /// YubiKeyApplication.Otp
+        /// <see cref="YubiKeyApplication.Management"/>
         /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Otp;
+        public YubiKeyApplication Application => YubiKeyApplication.Management;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="GetDeviceInfoCommand"/> class.
         /// </summary>
-        public GetDeviceInfoCommand()
+        public GetPagedDeviceInfoCommand()
         {
 
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
+        public CommandApdu CreateCommandApdu() => new CommandApdu
         {
-            Ins = OtpConstants.RequestSlotInstruction,
-            P1 = OtpConstants.GetDeviceInfoSlot
+            Ins = GetDeviceInfoInstruction,
+            P1 = Page
         };
 
         /// <inheritdoc />
-        public GetDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetDeviceInfoResponse(responseApdu);
+        public GetPagedDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new GetPagedDeviceInfoResponse(responseApdu);
     }
 }
+

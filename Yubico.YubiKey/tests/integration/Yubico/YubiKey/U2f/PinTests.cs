@@ -67,11 +67,11 @@ namespace Yubico.YubiKey.U2f
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46
             };
 
-            var cmd = new GetDeviceInfoCommand();
-            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
+            var cmd = new GetPagedDeviceInfoCommand();
+            GetPagedDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            YubiKeyDeviceInfo getData = rsp.GetData();
+            var getData = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
             if (!getData.IsFipsSeries)
             {
                 return;
@@ -121,11 +121,11 @@ namespace Yubico.YubiKey.U2f
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37
             };
 
-            var cmd = new GetDeviceInfoCommand();
-            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
+            var cmd = new GetPagedDeviceInfoCommand();
+            GetPagedDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            YubiKeyDeviceInfo getData = rsp.GetData();
+            var getData = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
             if (!getData.IsFipsSeries)
             {
                 return;
@@ -196,14 +196,15 @@ namespace Yubico.YubiKey.U2f
         {
             isFipsMode = false;
 
-            var cmd = new GetDeviceInfoCommand();
-            GetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
+            var cmd = new GetPagedDeviceInfoCommand();
+            GetPagedDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
             if (rsp.Status != ResponseStatus.Success)
             {
                 return false;
             }
 
-            YubiKeyDeviceInfo getData = rsp.GetData();
+            var getData = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
+
             if (!getData.IsFipsSeries ||
                 getData.FirmwareVersion >= new FirmwareVersion(5) ||
                 getData.FirmwareVersion < new FirmwareVersion(4))

@@ -1001,6 +1001,12 @@ namespace Yubico.YubiKey
         // failures (i.e. exceptions).
         private void WaitForReclaimTimeout(Transport newTransport)
         {
+            // Newer YubiKeys are able to switch interfaces much, much faster. Maybe this is being paranoid, but we
+            // should still probably wait a few milliseconds for things to stabilize. But definitely not the full
+            // three seconds! For older keys, we use a value of 3.01 seconds to give us a little wiggle room as the
+            // YubiKey's measurement for the reclaim timout is likely not as accurate as our system clock.
+            TimeSpan reclaimTimeout = CanFastReclaim() ? TimeSpan.FromMilliseconds(100) : TimeSpan.FromSeconds(3.01);
+
             // We're only affected by the reclaim timeout if we're switching USB transports.
             if (_lastActiveTransport == newTransport)
             {
@@ -1016,13 +1022,10 @@ namespace Yubico.YubiKey
                 _lastActiveTransport,
                 newTransport);
 
-            // We use 3.01 seconds to give us a little wiggle room as the YubiKey's measurement
-            // for the reclaim timeout is likely not as accurate as the system's clock.
-            var reclaimTimeout = TimeSpan.FromSeconds(3.01);
             TimeSpan timeSinceLastActivation = DateTime.Now - GetLastActiveTime();
 
             // If we haven't already waited the duration of the reclaim timeout, we need to do so.
-            // Otherwise we've already waited and can immediately switch the transport.
+            // Otherwise, we've already waited and can immediately switch the transport.
             if (timeSinceLastActivation < reclaimTimeout)
             {
                 TimeSpan waitNeeded = reclaimTimeout - timeSinceLastActivation;
@@ -1037,6 +1040,17 @@ namespace Yubico.YubiKey
             _lastActiveTransport = newTransport;
 
             _log.LogInformation("Reclaim timeout has lapsed. It is safe to switch USB transports.");
+        }
+
+        private bool CanFastReclaim()
+        {
+            if (AppContext.TryGetSwitch(YubiKeyCompatSwitches.UseOldReclaimTimeoutBehavior, out bool useOldBehavior) ||
+                useOldBehavior)
+            {
+                return false;
+            }
+
+            return this.HasFeature(YubiKeyFeature.FastUsbReclaim);
         }
     }
 }

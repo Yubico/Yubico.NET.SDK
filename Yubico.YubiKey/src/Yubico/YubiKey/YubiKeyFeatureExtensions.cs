@@ -94,6 +94,9 @@ namespace Yubico.YubiKey
                         || HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath)
                         || HasApplication(yubiKeyDevice, YubiKeyCapabilities.OpenPgp)),
 
+                YubiKeyFeature.FastUsbReclaim =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_6_0;
+
                 YubiKeyFeature.YubiHsmAuthApplication =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_4_3
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.YubiHsmAuth),

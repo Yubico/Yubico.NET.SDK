@@ -247,7 +247,7 @@ namespace Yubico.YubiKey.Management.Commands
             {
                 buffer.WriteByte(YubikeyDeviceInfoTags.NfcRestrictedTag, 1);
             }
-            
+
             return buffer.Encode();
         }
     }

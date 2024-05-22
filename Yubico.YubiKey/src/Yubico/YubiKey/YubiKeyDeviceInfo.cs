@@ -27,8 +27,6 @@ namespace Yubico.YubiKey
     /// </summary>
     public class YubiKeyDeviceInfo : IYubiKeyDeviceInfo
     {
-        // The IapFlags tag may be returned by the device, but it should be ignored.
-
         private const byte FipsMask = 0b1000_0000;
         private const byte SkyMask = 0b0100_0000;
         private const byte FormFactorMask = unchecked((byte)~(FipsMask | SkyMask));
@@ -98,7 +96,7 @@ namespace Yubico.YubiKey
 
         /// <inheritdoc />
         public string PartNumber { get; set; } = string.Empty;
-        
+
         /// <inheritdoc />
         public bool IsPinComplexityEnabled { get; set; }
 
@@ -159,7 +157,6 @@ namespace Yubico.YubiKey
         {
             bool fipsSeriesFlag = false;
             bool skySeriesFlag = false;
-
             var deviceInfo = new YubiKeyDeviceInfo();
 
             foreach (KeyValuePair<int, ReadOnlyMemory<byte>> tagValuePair in responseApduData)
@@ -168,27 +165,19 @@ namespace Yubico.YubiKey
                 {
                     case YubikeyDeviceInfoTags.UsbPrePersCapabilitiesTag:
                         deviceInfo.AvailableUsbCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
-
                         break;
-
                     case YubikeyDeviceInfoTags.SerialNumberTag:
                         deviceInfo.SerialNumber = BinaryPrimitives.ReadInt32BigEndian(tagValuePair.Value.Span);
-
                         break;
-
                     case YubikeyDeviceInfoTags.UsbEnabledCapabilitiesTag:
                         deviceInfo.EnabledUsbCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
-
                         break;
-
                     case YubikeyDeviceInfoTags.FormFactorTag:
                         byte formFactorValue = tagValuePair.Value.Span[0];
                         deviceInfo.FormFactor = (FormFactor)(formFactorValue & FormFactorMask);
                         fipsSeriesFlag = (formFactorValue & FipsMask) == FipsMask;
                         skySeriesFlag = (formFactorValue & SkyMask) == SkyMask;
-
                         break;
-
                     case YubikeyDeviceInfoTags.FirmwareVersionTag:
                         ReadOnlySpan<byte> firmwareValue = tagValuePair.Value.Span;
 
@@ -200,37 +189,25 @@ namespace Yubico.YubiKey
                         };
 
                         break;
-
                     case YubikeyDeviceInfoTags.AutoEjectTimeoutTag:
                         deviceInfo.AutoEjectTimeout = BinaryPrimitives.ReadUInt16BigEndian(tagValuePair.Value.Span);
-
                         break;
-
                     case YubikeyDeviceInfoTags.ChallengeResponseTimeoutTag:
                         deviceInfo.ChallengeResponseTimeout = tagValuePair.Value.Span[0];
-
                         break;
-
                     case YubikeyDeviceInfoTags.DeviceFlagsTag:
                         deviceInfo.DeviceFlags = (DeviceFlags)tagValuePair.Value.Span[0];
-
                         break;
 
                     case YubikeyDeviceInfoTags.ConfigurationLockPresentTag:
                         deviceInfo.ConfigurationLocked = tagValuePair.Value.Span[0] == 1;
-
                         break;
-
                     case YubikeyDeviceInfoTags.NfcPrePersCapabilitiesTag:
                         deviceInfo.AvailableNfcCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
-
                         break;
-
                     case YubikeyDeviceInfoTags.NfcEnabledCapabilitiesTag:
                         deviceInfo.EnabledNfcCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
-
                         break;
-
                     case YubikeyDeviceInfoTags.TemplateStorageVersionTag:
                         ReadOnlySpan<byte> fpChipVersion = tagValuePair.Value.Span;
 
@@ -242,7 +219,6 @@ namespace Yubico.YubiKey
                         };
 
                         break;
-
                     case YubikeyDeviceInfoTags.ImageProcessorVersionTag:
                         ReadOnlySpan<byte> ipChipVersion = tagValuePair.Value.Span;
 
@@ -254,14 +230,11 @@ namespace Yubico.YubiKey
                         };
 
                         break;
-
                     case YubikeyDeviceInfoTags.NfcRestrictedTag:
                         deviceInfo.IsNfcRestricted = tagValuePair.Value.Span[0] == 1;
-
                         break;
-
                     case YubikeyDeviceInfoTags.PartNumberTag:
-                        deviceInfo.PartNumber = Encoding.UTF8.GetString(tagValuePair.Value.Span.ToArray());
+                        deviceInfo.PartNumber = GetPartNumber(tagValuePair.Value.Span);
                         break;
                     case YubikeyDeviceInfoTags.PinComplexityTag:
                         deviceInfo.IsPinComplexityEnabled = tagValuePair.Value.Span[0] == 1;
@@ -274,17 +247,13 @@ namespace Yubico.YubiKey
                         break;
                     case YubikeyDeviceInfoTags.IapDetectionTag:
                     case YubikeyDeviceInfoTags.MoreDataTag:
-                    case YubikeyDeviceInfoTags.FipsCapableTag:
-                    case YubikeyDeviceInfoTags.FipsApprovedTag:
                     case YubikeyDeviceInfoTags.FreeFormTag:
                     case YubikeyDeviceInfoTags.HidInitDelay:
                     case YubikeyDeviceInfoTags.ResetBlockedTag:
                         // Ignore these tags for now
                         break;
-
                     default:
                         Debug.Assert(false, "Encountered an unrecognized tag in DeviceInfo. Ignoring.");
-
                         break;
                 }
             }
@@ -298,6 +267,19 @@ namespace Yubico.YubiKey
             return deviceInfo;
         }
 
+        private static string GetPartNumber(ReadOnlySpan<byte> valueSpan)
+        {
+            try
+            {
+                var encoding = new UTF8Encoding(encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
+                return encoding.GetString(valueSpan.ToArray());
+            }
+            catch (DecoderFallbackException)
+            {
+                return string.Empty;
+            }
+        }
+
         internal YubiKeyDeviceInfo Merge(YubiKeyDeviceInfo? second)
         {
             second ??= new YubiKeyDeviceInfo();
@@ -305,16 +287,12 @@ namespace Yubico.YubiKey
             return new YubiKeyDeviceInfo
             {
                 AvailableUsbCapabilities = AvailableUsbCapabilities | second.AvailableUsbCapabilities,
-
                 EnabledUsbCapabilities = EnabledUsbCapabilities | second.EnabledUsbCapabilities,
-
                 AvailableNfcCapabilities = AvailableNfcCapabilities | second.AvailableNfcCapabilities,
-
                 EnabledNfcCapabilities = EnabledNfcCapabilities | second.EnabledNfcCapabilities,
                 FipsApproved = FipsApproved | second.FipsApproved,
                 FipsCapable = FipsCapable | second.FipsCapable,
                 SerialNumber = SerialNumber ?? second.SerialNumber,
-
                 IsFipsSeries = IsFipsSeries || second.IsFipsSeries,
 
                 FormFactor = FormFactor != FormFactor.Unknown
@@ -341,10 +319,11 @@ namespace Yubico.YubiKey
                     ? ConfigurationLocked
                     : second.ConfigurationLocked,
 
-                IsNfcRestricted = IsNfcRestricted || second.IsNfcRestricted, 
+                IsNfcRestricted = IsNfcRestricted || second.IsNfcRestricted,
                 PartNumber = (string.IsNullOrWhiteSpace(PartNumber)
-                        ? second.PartNumber : PartNumber) ?? string.Empty,
-                
+                    ? second.PartNumber
+                    : PartNumber) ?? string.Empty,
+
                 IsPinComplexityEnabled = IsPinComplexityEnabled || second.IsPinComplexityEnabled,
             };
         }
@@ -406,7 +385,7 @@ namespace Yubico.YubiKey
             $"{nameof(IsNfcRestricted)}: {IsNfcRestricted}, " +
             $"{nameof(AutoEjectTimeout)}: {AutoEjectTimeout}, " +
             $"{nameof(DeviceFlags)}: {DeviceFlags}, " +
-            $"{nameof(ConfigurationLocked)}: {ConfigurationLocked}, " + 
+            $"{nameof(ConfigurationLocked)}: {ConfigurationLocked}, " +
             $"{nameof(PartNumber)}: {PartNumber}, " +
             $"{nameof(IsPinComplexityEnabled)}: {IsPinComplexityEnabled}";
     }

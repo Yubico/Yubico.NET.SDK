@@ -43,7 +43,7 @@ namespace Yubico.YubiKey
 
         /// <inheritdoc />
         public YubiKeyCapabilities FipsApproved => _yubiKeyInfo.FipsApproved;
-        
+
         /// <inheritdoc />
         public YubiKeyCapabilities FipsCapable => _yubiKeyInfo.FipsCapable;
 

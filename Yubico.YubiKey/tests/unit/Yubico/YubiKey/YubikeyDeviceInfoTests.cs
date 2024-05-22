@@ -163,13 +163,13 @@ namespace Yubico.YubiKey
         {
             byte[] versionAsBytes = version is { } ? VersionToBytes(version) : VersionToBytes(FirmwareVersion.V2_2_0);
             var tlvs = new Dictionary<int, ReadOnlyMemory<byte>> { { tag, data } };
-            
+
             const int versionTag = 0x5;
             if (tag != versionTag)
             {
                 tlvs.Add(versionTag, versionAsBytes);
             }
-            
+
             YubiKeyDeviceInfo info = data.Length == 0
                 ? new YubiKeyDeviceInfo()
                 : YubiKeyDeviceInfo.CreateFromResponseData(tlvs);

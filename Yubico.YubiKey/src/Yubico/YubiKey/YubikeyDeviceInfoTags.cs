@@ -37,7 +37,7 @@ namespace Yubico.YubiKey
         internal const byte HidInitDelay = 0x12; //TODO RW
         internal const byte PartNumberTag = 0x13;
         internal const byte FipsCapableTag = 0x14;
-        internal const byte FipsApprovedTag = 0x15; 
+        internal const byte FipsApprovedTag = 0x15;
         internal const byte PinComplexityTag = 0x16;
         internal const byte NfcRestrictedTag = 0x17;
         internal const byte ResetBlockedTag = 0x18; //TODO R

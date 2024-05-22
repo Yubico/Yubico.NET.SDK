@@ -38,12 +38,12 @@ namespace Yubico.YubiKey
         /// The NFC features that are currently enabled over NFC.
         /// </summary>
         public YubiKeyCapabilities EnabledNfcCapabilities { get; }
-        
+
         /// <summary>
         /// The FipsApproved setting for the respective applications
         /// </summary>
         public YubiKeyCapabilities FipsApproved { get; }
-        
+
         /// <summary>
         /// The FipsCapable setting for the respective applications
         /// </summary>

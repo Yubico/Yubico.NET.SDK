@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         /// <inheritdoc />
         public YubiKeyCapabilities FipsApproved { get; private set; }
-       
+
         /// <inheritdoc />
         public YubiKeyCapabilities FipsCapable { get; private set; }
 

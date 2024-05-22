@@ -21,31 +21,27 @@ namespace Yubico.YubiKey
 {
     public class YubikeyDeviceInfoTests
     {
-        [Fact]
-        public void CreateFromResponseData_Returns_ExpectedFipsCapable()
-        {
-            Assert.Equal(YubiKeyCapabilities.None, DefaultInfo.FipsCapable);
-            Assert.Equal(YubiKeyCapabilities.Fido2, WithDeviceInfo(0x14, FromHex("0001")).FipsCapable);
-            Assert.Equal(YubiKeyCapabilities.Piv, WithDeviceInfo(0x14, FromHex("0002")).FipsCapable);
-            Assert.Equal(YubiKeyCapabilities.OpenPgp, WithDeviceInfo(0x14, FromHex("0004")).FipsCapable);
-            Assert.Equal(YubiKeyCapabilities.Oath, WithDeviceInfo(0x14, FromHex("0008")).FipsCapable);
-            Assert.Equal(YubiKeyCapabilities.YubiHsmAuth, WithDeviceInfo(0x14, FromHex("0010")).FipsCapable);
-            Assert.Equal(YubiKeyCapabilities.Piv | YubiKeyCapabilities.Oath,
-                WithDeviceInfo(0x14, FromHex("000A")).FipsCapable);
-        }
+        [Theory]
+        [InlineData(YubiKeyCapabilities.None, "0000")]
+        [InlineData(YubiKeyCapabilities.Fido2, "0001")]
+        [InlineData(YubiKeyCapabilities.Piv, "0002")]
+        [InlineData(YubiKeyCapabilities.OpenPgp, "0004")]
+        [InlineData(YubiKeyCapabilities.Oath, "0008")]
+        [InlineData(YubiKeyCapabilities.YubiHsmAuth, "0010")]
+        [InlineData(YubiKeyCapabilities.Piv | YubiKeyCapabilities.Oath, "000A")]
+        public void CreateFromResponseData_Returns_ExpectedFipsCapable(YubiKeyCapabilities expected, string? data = null) 
+            => Assert.Equal(expected, WithDeviceInfo(0x14, FromHex(data)).FipsCapable);
 
-        [Fact]
-        public void CreateFromResponseData_Returns_ExpectedFipsApproved()
-        {
-            Assert.Equal(YubiKeyCapabilities.None, DefaultInfo.FipsApproved);
-            Assert.Equal(YubiKeyCapabilities.Fido2, WithDeviceInfo(0x15, FromHex("0001")).FipsApproved);
-            Assert.Equal(YubiKeyCapabilities.Piv, WithDeviceInfo(0x15, FromHex("0002")).FipsApproved);
-            Assert.Equal(YubiKeyCapabilities.OpenPgp, WithDeviceInfo(0x15, FromHex("0004")).FipsApproved);
-            Assert.Equal(YubiKeyCapabilities.Oath, WithDeviceInfo(0x15, FromHex("0008")).FipsApproved);
-            Assert.Equal(YubiKeyCapabilities.YubiHsmAuth, WithDeviceInfo(0x15, FromHex("0010")).FipsApproved);
-            Assert.Equal(YubiKeyCapabilities.Piv | YubiKeyCapabilities.Oath,
-                WithDeviceInfo(0x15, FromHex("000A")).FipsApproved);
-        }
+        [Theory]
+        [InlineData(YubiKeyCapabilities.None, "0000")]
+        [InlineData(YubiKeyCapabilities.Fido2, "0001")]
+        [InlineData(YubiKeyCapabilities.Piv, "0002")]
+        [InlineData(YubiKeyCapabilities.OpenPgp, "0004")]
+        [InlineData(YubiKeyCapabilities.Oath, "0008")]
+        [InlineData(YubiKeyCapabilities.YubiHsmAuth, "0010")]
+        [InlineData(YubiKeyCapabilities.Piv | YubiKeyCapabilities.Oath, "000A")]
+        public void CreateFromResponseData_Returns_ExpectedFipsApproved(YubiKeyCapabilities expected, string? data = null)
+            => Assert.Equal(expected, WithDeviceInfo(0x15, FromHex(data)).FipsApproved);
 
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedSerialNumber()

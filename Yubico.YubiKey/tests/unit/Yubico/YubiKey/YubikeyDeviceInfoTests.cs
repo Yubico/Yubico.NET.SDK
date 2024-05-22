@@ -29,7 +29,8 @@ namespace Yubico.YubiKey
         [InlineData(YubiKeyCapabilities.Oath, "0008")]
         [InlineData(YubiKeyCapabilities.YubiHsmAuth, "0010")]
         [InlineData(YubiKeyCapabilities.Piv | YubiKeyCapabilities.Oath, "000A")]
-        public void CreateFromResponseData_Returns_ExpectedFipsCapable(YubiKeyCapabilities expected, string? data = null) 
+        public void CreateFromResponseData_Returns_ExpectedFipsCapable(
+            YubiKeyCapabilities expected, string? data = null)
             => Assert.Equal(expected, WithDeviceInfo(0x14, FromHex(data)).FipsCapable);
 
         [Theory]
@@ -40,13 +41,14 @@ namespace Yubico.YubiKey
         [InlineData(YubiKeyCapabilities.Oath, "0008")]
         [InlineData(YubiKeyCapabilities.YubiHsmAuth, "0010")]
         [InlineData(YubiKeyCapabilities.Piv | YubiKeyCapabilities.Oath, "000A")]
-        public void CreateFromResponseData_Returns_ExpectedFipsApproved(YubiKeyCapabilities expected, string? data = null)
+        public void CreateFromResponseData_Returns_ExpectedFipsApproved(
+            YubiKeyCapabilities expected, string? data = null)
             => Assert.Equal(expected, WithDeviceInfo(0x15, FromHex(data)).FipsApproved);
 
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedSerialNumber()
         {
-            Assert.Null(DefaultInfo.SerialNumber);
+            Assert.Null(DefaultDeviceInfo.SerialNumber);
             Assert.Equal(123456789, WithDeviceInfo(0x02, FromHex("075BCD15")).SerialNumber);
         }
 
@@ -75,7 +77,7 @@ namespace Yubico.YubiKey
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedConfigurationLocked()
         {
-            Assert.False(DefaultInfo.ConfigurationLocked);
+            Assert.False(DefaultDeviceInfo.ConfigurationLocked);
             Assert.True(WithDeviceInfo(0x0a, FromHex("01")).ConfigurationLocked);
             Assert.False(WithDeviceInfo(0x0a, FromHex("00")).ConfigurationLocked);
         }
@@ -83,16 +85,16 @@ namespace Yubico.YubiKey
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedFipsSeries()
         {
-            Assert.False(DefaultInfo.IsFipsSeries);
-            Assert.True(WithDeviceInfo(0x04, FromHex("80")).IsFipsSeries);
-            Assert.True(WithDeviceInfo(0x04, FromHex("C0")).IsFipsSeries);
-            Assert.False(WithDeviceInfo(0x04, FromHex("40")).IsFipsSeries);
+            Assert.False(DefaultDeviceInfo.IsFipsSeries);
+            Assert.True(WithDeviceInfo(0x04, FromHex("80"), FirmwareVersion.V5_4_2).IsFipsSeries);
+            Assert.True(WithDeviceInfo(0x04, FromHex("C0"), FirmwareVersion.V5_4_2).IsFipsSeries);
+            Assert.False(WithDeviceInfo(0x04, FromHex("40"), FirmwareVersion.V5_4_2).IsFipsSeries);
         }
 
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedIsSkySeries()
         {
-            Assert.False(DefaultInfo.IsSkySeries);
+            Assert.False(DefaultDeviceInfo.IsSkySeries);
             Assert.True(WithDeviceInfo(0x04, FromHex("40")).IsSkySeries);
             Assert.True(WithDeviceInfo(0x04, FromHex("C0")).IsSkySeries);
             Assert.False(WithDeviceInfo(0x04, FromHex("80")).IsSkySeries);
@@ -102,7 +104,7 @@ namespace Yubico.YubiKey
         public void CreateFromResponseData_Returns_ExpectedPartNumber()
         {
             // Valid UTF-8
-            Assert.Equal("", DefaultInfo.PartNumber);
+            Assert.Equal("", DefaultDeviceInfo.PartNumber);
             Assert.Equal("", WithDeviceInfo(0x13, Array.Empty<byte>()).PartNumber);
             Assert.Equal("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=+-",
                 WithDeviceInfo(0x13,
@@ -129,7 +131,7 @@ namespace Yubico.YubiKey
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedPinComplexity()
         {
-            Assert.False(DefaultInfo.IsPinComplexityEnabled);
+            Assert.False(DefaultDeviceInfo.IsPinComplexityEnabled);
             Assert.False(WithDeviceInfo(0x16, FromHex("00")).IsPinComplexityEnabled);
             Assert.True(WithDeviceInfo(0x16, FromHex("01")).IsPinComplexityEnabled);
         }
@@ -144,24 +146,39 @@ namespace Yubico.YubiKey
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedFpsVersion()
         {
-            Assert.Null(DefaultInfo.TemplateStorageVersion);
+            Assert.Null(DefaultDeviceInfo.TemplateStorageVersion);
             Assert.Equal(new FirmwareVersion(5, 6, 6), WithDeviceInfo(0x20, FromHex("050606")).TemplateStorageVersion);
         }
 
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedStmVersion()
         {
-            Assert.Null(DefaultInfo.ImageProcessorVersion);
+            Assert.Null(DefaultDeviceInfo.ImageProcessorVersion);
             Assert.Equal(new FirmwareVersion(7, 0, 5), WithDeviceInfo(0x21, FromHex("070005")).ImageProcessorVersion);
         }
 
-        private static YubiKeyDeviceInfo DefaultInfo => new YubiKeyDeviceInfo();
+        private static YubiKeyDeviceInfo DefaultDeviceInfo => new YubiKeyDeviceInfo();
 
-        private static YubiKeyDeviceInfo WithDeviceInfo(int tag, byte[] data) =>
-            data.Length == 0
+        private static YubiKeyDeviceInfo WithDeviceInfo(int tag, byte[] data, FirmwareVersion? version = null)
+        {
+            byte[] versionAsBytes = version is { } ? VersionToBytes(version) : VersionToBytes(FirmwareVersion.V2_2_0);
+            var tlvs = new Dictionary<int, ReadOnlyMemory<byte>> { { tag, data } };
+            
+            const int versionTag = 0x5;
+            if (tag != versionTag)
+            {
+                tlvs.Add(versionTag, versionAsBytes);
+            }
+            
+            YubiKeyDeviceInfo info = data.Length == 0
                 ? new YubiKeyDeviceInfo()
-                : YubiKeyDeviceInfo.CreateFromResponseData(new Dictionary<int, ReadOnlyMemory<byte>>()
-                    { { tag, data } });
+                : YubiKeyDeviceInfo.CreateFromResponseData(tlvs);
+
+            return info;
+        }
+
+        private static byte[] VersionToBytes(FirmwareVersion version) =>
+            new[] { version.Major, version.Minor, version.Patch };
 
         private static byte[] FromHex(string? hex) => hex != null ? Base16.DecodeText(hex) : Array.Empty<byte>();
     }

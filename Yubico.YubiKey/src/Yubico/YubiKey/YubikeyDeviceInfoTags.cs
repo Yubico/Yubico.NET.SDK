@@ -31,6 +31,7 @@ namespace Yubico.YubiKey
         internal const byte ConfigurationUnlockPresentTag = 0x0b;
         internal const byte NfcPrePersCapabilitiesTag = 0x0d;
         internal const byte NfcEnabledCapabilitiesTag = 0x0e;
+        internal const byte IapDetectionTag = 0x0f; //TODO RW
         internal const byte MoreDataTag = 0x10;
         internal const byte FreeFormTag = 0x11; //TODO R
         internal const byte HidInitDelay = 0x12; //TODO RW
@@ -42,6 +43,5 @@ namespace Yubico.YubiKey
         internal const byte ResetBlockedTag = 0x18; //TODO R
         internal const byte TemplateStorageVersionTag = 0x20; //FPS version tag
         internal const byte ImageProcessorVersionTag = 0x21; //STM version tag
-        internal const byte IapDetectionTag = 0x0f; //TODO RW
     }
 }

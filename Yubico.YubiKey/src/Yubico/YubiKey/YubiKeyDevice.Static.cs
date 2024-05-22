@@ -142,7 +142,7 @@ namespace Yubico.YubiKey
 
                 var objDeviceWithInfo = (YubicoDeviceWithInfo)obj;
                 int? objSerialNumber = objDeviceWithInfo.Info.SerialNumber;
-                
+
                 int? thisSerialNumber = Info.SerialNumber;
                 return thisSerialNumber.HasValue
                     && objSerialNumber.HasValue

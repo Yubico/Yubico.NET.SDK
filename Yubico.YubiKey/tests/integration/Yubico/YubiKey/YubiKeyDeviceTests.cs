@@ -461,7 +461,7 @@ namespace Yubico.YubiKey
 
             Assert.Equal(expectedTimeout, testDevice.ChallengeResponseTimeout);
         }
-        
+
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]

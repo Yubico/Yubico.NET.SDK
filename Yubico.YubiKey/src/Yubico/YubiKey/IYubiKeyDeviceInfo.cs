@@ -38,6 +38,16 @@ namespace Yubico.YubiKey
         /// The NFC features that are currently enabled over NFC.
         /// </summary>
         public YubiKeyCapabilities EnabledNfcCapabilities { get; }
+        
+        /// <summary>
+        /// The FipsApproved setting for the respective applications
+        /// </summary>
+        public YubiKeyCapabilities FipsApproved { get; }
+        
+        /// <summary>
+        /// The FipsCapable setting for the respective applications
+        /// </summary>
+        public YubiKeyCapabilities FipsCapable { get; }
 
         /// <summary>
         /// The serial number of the YubiKey, if one is present.
@@ -79,12 +89,14 @@ namespace Yubico.YubiKey
         /// The version of the chip/firmware storing the fingerprints (the second
         /// secure element). If there is no template storage chip, this will be
         /// null.
+        /// <remarks>This field is also known as the "FpsVersion"</remarks>
         /// </summary>
         public TemplateStorageVersion? TemplateStorageVersion { get; }
 
         /// <summary>
         /// The version of the chip/firmware performing the image processing. If
         /// there is no image processing chip, this will be null.
+        /// <remarks>This field is also known as the "StmVersion"</remarks>
         /// </summary>
         public ImageProcessorVersion? ImageProcessorVersion { get; }
 
@@ -126,12 +138,12 @@ namespace Yubico.YubiKey
         /// Indicates if this device has temporarily disabled NFC.
         /// </summary>
         public bool IsNfcRestricted { get; }
-        
+
         /// <summary>
         /// The chip number, if available, otherwise empty string.
         /// </summary>
         string PartNumber { get; }
-        
+
         /// <summary>
         /// Whether or not pin complexity is enabled on the Yubikey.
         /// </summary>

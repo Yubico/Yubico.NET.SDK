@@ -465,11 +465,20 @@ namespace Yubico.YubiKey
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
-        public void Gets_new_Fields( //TODO make tests that make sense
+        public void Gets_new_Fields( //TODO tests that make sense
             StandardTestDevice testDeviceType)
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             Assert.False(string.IsNullOrWhiteSpace(testDevice.PartNumber));
+        }
+        
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        public void Gets_new_Fields2( //TODO tests that make sense
+            StandardTestDevice testDeviceType)
+        {
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            Assert.True(testDevice.FipsCapable > 0);
         }
 
         private static IYubiKeyDevice ResetDeviceInfo(IYubiKeyDevice testDevice)

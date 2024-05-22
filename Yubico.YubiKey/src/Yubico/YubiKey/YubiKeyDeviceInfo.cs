@@ -55,6 +55,12 @@ namespace Yubico.YubiKey
         public YubiKeyCapabilities EnabledNfcCapabilities { get; set; }
 
         /// <inheritdoc />
+        public YubiKeyCapabilities FipsApproved { get; set; }
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities FipsCapable { get; set; }
+
+        /// <inheritdoc />
         public int? SerialNumber { get; set; }
 
         /// <inheritdoc />
@@ -258,7 +264,13 @@ namespace Yubico.YubiKey
                         deviceInfo.PartNumber = Encoding.UTF8.GetString(tagValuePair.Value.Span.ToArray());
                         break;
                     case YubikeyDeviceInfoTags.PinComplexityTag:
-                        deviceInfo.IsPinComplexityEnabled = tagValuePair.Value.Span[0] == 1;;
+                        deviceInfo.IsPinComplexityEnabled = tagValuePair.Value.Span[0] == 1;
+                        break;
+                    case YubikeyDeviceInfoTags.FipsCapableTag:
+                        deviceInfo.FipsCapable = GetFipsCapabilities(tagValuePair.Value.Span);
+                        break;
+                    case YubikeyDeviceInfoTags.FipsApprovedTag:
+                        deviceInfo.FipsApproved = GetFipsCapabilities(tagValuePair.Value.Span);
                         break;
                     case YubikeyDeviceInfoTags.IapDetectionTag:
                     case YubikeyDeviceInfoTags.MoreDataTag:
@@ -299,7 +311,8 @@ namespace Yubico.YubiKey
                 AvailableNfcCapabilities = AvailableNfcCapabilities | second.AvailableNfcCapabilities,
 
                 EnabledNfcCapabilities = EnabledNfcCapabilities | second.EnabledNfcCapabilities,
-
+                FipsApproved = FipsApproved | second.FipsApproved,
+                FipsCapable = FipsCapable | second.FipsCapable,
                 SerialNumber = SerialNumber ?? second.SerialNumber,
 
                 IsFipsSeries = IsFipsSeries || second.IsFipsSeries,
@@ -342,6 +355,39 @@ namespace Yubico.YubiKey
         private bool IsFipsVersion =>
             FirmwareVersion >= _fipsInclusiveLowerBound
             && FirmwareVersion < _fipsExclusiveUpperBound;
+
+        private static YubiKeyCapabilities GetFipsCapabilities(ReadOnlySpan<byte> value)
+        {
+            YubiKeyCapabilities capabilities = 0;
+
+            int fips = BinaryPrimitives.ReadInt16BigEndian(value);
+            if ((fips & 0b0000_0001) != 0)
+            {
+                capabilities |= YubiKeyCapabilities.Fido2;
+            }
+
+            if ((fips & 0b0000_0010) != 0)
+            {
+                capabilities |= YubiKeyCapabilities.Piv;
+            }
+
+            if ((fips & 0b0000_0100) != 0)
+            {
+                capabilities |= YubiKeyCapabilities.OpenPgp;
+            }
+
+            if ((fips & 0b0000_1000) != 0)
+            {
+                capabilities |= YubiKeyCapabilities.Oath;
+            }
+
+            if ((fips & 0b0001_0000) != 0)
+            {
+                capabilities |= YubiKeyCapabilities.YubiHsmAuth;
+            }
+
+            return capabilities;
+        }
 
         private static YubiKeyCapabilities GetYubiKeyCapabilities(ReadOnlySpan<byte> value) =>
 

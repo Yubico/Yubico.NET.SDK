@@ -17,7 +17,7 @@ namespace Yubico.YubiKey
     /// <summary>
     /// Device info tags that can be accessed in the device
     /// </summary>
-    internal static class YubikeyDeviceInfoTags
+    internal static class YubikeyDeviceManagementTags
     {
         internal const byte UsbPrePersCapabilitiesTag = 0x01;
         internal const byte SerialNumberTag = 0x02;
@@ -29,6 +29,7 @@ namespace Yubico.YubiKey
         internal const byte DeviceFlagsTag = 0x08;
         internal const byte ConfigurationLockPresentTag = 0x0a;
         internal const byte ConfigurationUnlockPresentTag = 0x0b;
+        internal const byte ResetAfterConfigTag = 0x0c;
         internal const byte NfcPrePersCapabilitiesTag = 0x0d;
         internal const byte NfcEnabledCapabilitiesTag = 0x0e;
         internal const byte IapDetectionTag = 0x0f; //TODO RW

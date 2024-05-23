@@ -167,22 +167,22 @@ namespace Yubico.YubiKey
                 ReadOnlySpan<byte> tlv = tagValuePair.Value.Span;
                 switch (tagValuePair.Key)
                 {
-                    case YubikeyDeviceInfoTags.UsbPrePersCapabilitiesTag:
+                    case YubikeyDeviceManagementTags.UsbPrePersCapabilitiesTag:
                         deviceInfo.AvailableUsbCapabilities = GetYubiKeyCapabilities(tlv);
                         break;
-                    case YubikeyDeviceInfoTags.SerialNumberTag:
+                    case YubikeyDeviceManagementTags.SerialNumberTag:
                         deviceInfo.SerialNumber = BinaryPrimitives.ReadInt32BigEndian(tlv);
                         break;
-                    case YubikeyDeviceInfoTags.UsbEnabledCapabilitiesTag:
+                    case YubikeyDeviceManagementTags.UsbEnabledCapabilitiesTag:
                         deviceInfo.EnabledUsbCapabilities = GetYubiKeyCapabilities(tlv);
                         break;
-                    case YubikeyDeviceInfoTags.FormFactorTag:
+                    case YubikeyDeviceManagementTags.FormFactorTag:
                         byte formFactorValue = tlv[0];
                         deviceInfo.FormFactor = (FormFactor)(formFactorValue & FormFactorMask);
                         fipsSeriesFlag = (formFactorValue & FipsMask) == FipsMask;
                         skySeriesFlag = (formFactorValue & SkyMask) == SkyMask;
                         break;
-                    case YubikeyDeviceInfoTags.FirmwareVersionTag:
+                    case YubikeyDeviceManagementTags.FirmwareVersionTag:
                         deviceInfo.FirmwareVersion = new FirmwareVersion
                         {
                             Major = tlv[0],
@@ -191,25 +191,25 @@ namespace Yubico.YubiKey
                         };
 
                         break;
-                    case YubikeyDeviceInfoTags.AutoEjectTimeoutTag:
+                    case YubikeyDeviceManagementTags.AutoEjectTimeoutTag:
                         deviceInfo.AutoEjectTimeout = BinaryPrimitives.ReadUInt16BigEndian(tlv);
                         break;
-                    case YubikeyDeviceInfoTags.ChallengeResponseTimeoutTag:
+                    case YubikeyDeviceManagementTags.ChallengeResponseTimeoutTag:
                         deviceInfo.ChallengeResponseTimeout = tlv[0];
                         break;
-                    case YubikeyDeviceInfoTags.DeviceFlagsTag:
+                    case YubikeyDeviceManagementTags.DeviceFlagsTag:
                         deviceInfo.DeviceFlags = (DeviceFlags)tlv[0];
                         break;
-                    case YubikeyDeviceInfoTags.ConfigurationLockPresentTag:
+                    case YubikeyDeviceManagementTags.ConfigurationLockPresentTag:
                         deviceInfo.ConfigurationLocked = tlv[0] == 1;
                         break;
-                    case YubikeyDeviceInfoTags.NfcPrePersCapabilitiesTag:
+                    case YubikeyDeviceManagementTags.NfcPrePersCapabilitiesTag:
                         deviceInfo.AvailableNfcCapabilities = GetYubiKeyCapabilities(tlv);
                         break;
-                    case YubikeyDeviceInfoTags.NfcEnabledCapabilitiesTag:
+                    case YubikeyDeviceManagementTags.NfcEnabledCapabilitiesTag:
                         deviceInfo.EnabledNfcCapabilities = GetYubiKeyCapabilities(tlv);
                         break;
-                    case YubikeyDeviceInfoTags.TemplateStorageVersionTag:
+                    case YubikeyDeviceManagementTags.TemplateStorageVersionTag:
                         deviceInfo.TemplateStorageVersion = new TemplateStorageVersion
                         {
                             Major = tlv[0],
@@ -217,7 +217,7 @@ namespace Yubico.YubiKey
                             Patch = tlv[2]
                         };
                         break;
-                    case YubikeyDeviceInfoTags.ImageProcessorVersionTag:
+                    case YubikeyDeviceManagementTags.ImageProcessorVersionTag:
                         deviceInfo.ImageProcessorVersion = new ImageProcessorVersion
                         {
                             Major = tlv[0],
@@ -225,28 +225,28 @@ namespace Yubico.YubiKey
                             Patch = tlv[2]
                         };
                         break;
-                    case YubikeyDeviceInfoTags.NfcRestrictedTag:
+                    case YubikeyDeviceManagementTags.NfcRestrictedTag:
                         deviceInfo.IsNfcRestricted = tlv[0] == 1;
                         break;
-                    case YubikeyDeviceInfoTags.PartNumberTag:
+                    case YubikeyDeviceManagementTags.PartNumberTag:
                         deviceInfo.PartNumber = GetPartNumber(tlv);
                         break;
-                    case YubikeyDeviceInfoTags.PinComplexityTag:
+                    case YubikeyDeviceManagementTags.PinComplexityTag:
                         deviceInfo.IsPinComplexityEnabled = tlv[0] == 1;
                         break;
-                    case YubikeyDeviceInfoTags.FipsCapableTag:
+                    case YubikeyDeviceManagementTags.FipsCapableTag:
                         deviceInfo.FipsCapable = GetFipsCapabilities(tlv);
                         break;
-                    case YubikeyDeviceInfoTags.FipsApprovedTag:
+                    case YubikeyDeviceManagementTags.FipsApprovedTag:
                         deviceInfo.FipsApproved = GetFipsCapabilities(tlv);
                         break;
-                    case YubikeyDeviceInfoTags.ResetBlockedTag:
+                    case YubikeyDeviceManagementTags.ResetBlockedTag:
                         deviceInfo.ResetBlocked = GetYubiKeyCapabilities(tlv);
                         break;
-                    case YubikeyDeviceInfoTags.IapDetectionTag:
-                    case YubikeyDeviceInfoTags.MoreDataTag:
-                    case YubikeyDeviceInfoTags.FreeFormTag:
-                    case YubikeyDeviceInfoTags.HidInitDelay:
+                    case YubikeyDeviceManagementTags.IapDetectionTag:
+                    case YubikeyDeviceManagementTags.MoreDataTag:
+                    case YubikeyDeviceManagementTags.FreeFormTag:
+                    case YubikeyDeviceManagementTags.HidInitDelay:
                         // Ignore these tags for now
                         break;
                     default:

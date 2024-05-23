@@ -178,6 +178,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk Programming Guide", "Sd
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\secure-channel-protocol-3.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\secure-channel-protocol-3.md
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\sensitive-data.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\sensitive-data.md
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\threads.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\threads.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\appcompat.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\appcompat.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{BA394A0D-B336-4B6E-83B8-B41FC165D6D9}"

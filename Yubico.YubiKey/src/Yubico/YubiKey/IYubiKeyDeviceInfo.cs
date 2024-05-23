@@ -52,7 +52,7 @@ namespace Yubico.YubiKey
         /// <summary>
         /// The reset blocked status for each application.
         /// </summary>
-        YubiKeyCapabilities ResetBlocked { get; }
+        public YubiKeyCapabilities ResetBlocked { get; }
 
         /// <summary>
         /// The serial number of the YubiKey, if one is present.

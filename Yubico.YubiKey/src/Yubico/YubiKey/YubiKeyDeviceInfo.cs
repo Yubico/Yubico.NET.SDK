@@ -57,6 +57,9 @@ namespace Yubico.YubiKey
 
         /// <inheritdoc />
         public YubiKeyCapabilities FipsCapable { get; set; }
+        
+        /// <inheritdoc />
+        public YubiKeyCapabilities ResetBlocked { get; set; }
 
         /// <inheritdoc />
         public int? SerialNumber { get; set; }
@@ -161,95 +164,89 @@ namespace Yubico.YubiKey
 
             foreach (KeyValuePair<int, ReadOnlyMemory<byte>> tagValuePair in responseApduData)
             {
+                ReadOnlySpan<byte> tlv = tagValuePair.Value.Span;
                 switch (tagValuePair.Key)
                 {
                     case YubikeyDeviceInfoTags.UsbPrePersCapabilitiesTag:
-                        deviceInfo.AvailableUsbCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+                        deviceInfo.AvailableUsbCapabilities = GetYubiKeyCapabilities(tlv);
                         break;
                     case YubikeyDeviceInfoTags.SerialNumberTag:
-                        deviceInfo.SerialNumber = BinaryPrimitives.ReadInt32BigEndian(tagValuePair.Value.Span);
+                        deviceInfo.SerialNumber = BinaryPrimitives.ReadInt32BigEndian(tlv);
                         break;
                     case YubikeyDeviceInfoTags.UsbEnabledCapabilitiesTag:
-                        deviceInfo.EnabledUsbCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+                        deviceInfo.EnabledUsbCapabilities = GetYubiKeyCapabilities(tlv);
                         break;
                     case YubikeyDeviceInfoTags.FormFactorTag:
-                        byte formFactorValue = tagValuePair.Value.Span[0];
+                        byte formFactorValue = tlv[0];
                         deviceInfo.FormFactor = (FormFactor)(formFactorValue & FormFactorMask);
                         fipsSeriesFlag = (formFactorValue & FipsMask) == FipsMask;
                         skySeriesFlag = (formFactorValue & SkyMask) == SkyMask;
                         break;
                     case YubikeyDeviceInfoTags.FirmwareVersionTag:
-                        ReadOnlySpan<byte> firmwareValue = tagValuePair.Value.Span;
-
                         deviceInfo.FirmwareVersion = new FirmwareVersion
                         {
-                            Major = firmwareValue[0],
-                            Minor = firmwareValue[1],
-                            Patch = firmwareValue[2]
+                            Major = tlv[0],
+                            Minor = tlv[1],
+                            Patch = tlv[2]
                         };
 
                         break;
                     case YubikeyDeviceInfoTags.AutoEjectTimeoutTag:
-                        deviceInfo.AutoEjectTimeout = BinaryPrimitives.ReadUInt16BigEndian(tagValuePair.Value.Span);
+                        deviceInfo.AutoEjectTimeout = BinaryPrimitives.ReadUInt16BigEndian(tlv);
                         break;
                     case YubikeyDeviceInfoTags.ChallengeResponseTimeoutTag:
-                        deviceInfo.ChallengeResponseTimeout = tagValuePair.Value.Span[0];
+                        deviceInfo.ChallengeResponseTimeout = tlv[0];
                         break;
                     case YubikeyDeviceInfoTags.DeviceFlagsTag:
-                        deviceInfo.DeviceFlags = (DeviceFlags)tagValuePair.Value.Span[0];
+                        deviceInfo.DeviceFlags = (DeviceFlags)tlv[0];
                         break;
-
                     case YubikeyDeviceInfoTags.ConfigurationLockPresentTag:
-                        deviceInfo.ConfigurationLocked = tagValuePair.Value.Span[0] == 1;
+                        deviceInfo.ConfigurationLocked = tlv[0] == 1;
                         break;
                     case YubikeyDeviceInfoTags.NfcPrePersCapabilitiesTag:
-                        deviceInfo.AvailableNfcCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+                        deviceInfo.AvailableNfcCapabilities = GetYubiKeyCapabilities(tlv);
                         break;
                     case YubikeyDeviceInfoTags.NfcEnabledCapabilitiesTag:
-                        deviceInfo.EnabledNfcCapabilities = GetYubiKeyCapabilities(tagValuePair.Value.Span);
+                        deviceInfo.EnabledNfcCapabilities = GetYubiKeyCapabilities(tlv);
                         break;
                     case YubikeyDeviceInfoTags.TemplateStorageVersionTag:
-                        ReadOnlySpan<byte> fpChipVersion = tagValuePair.Value.Span;
-
                         deviceInfo.TemplateStorageVersion = new TemplateStorageVersion
                         {
-                            Major = fpChipVersion[0],
-                            Minor = fpChipVersion[1],
-                            Patch = fpChipVersion[2]
+                            Major = tlv[0],
+                            Minor = tlv[1],
+                            Patch = tlv[2]
                         };
-
                         break;
                     case YubikeyDeviceInfoTags.ImageProcessorVersionTag:
-                        ReadOnlySpan<byte> ipChipVersion = tagValuePair.Value.Span;
-
                         deviceInfo.ImageProcessorVersion = new ImageProcessorVersion
                         {
-                            Major = ipChipVersion[0],
-                            Minor = ipChipVersion[1],
-                            Patch = ipChipVersion[2]
+                            Major = tlv[0],
+                            Minor = tlv[1],
+                            Patch = tlv[2]
                         };
-
                         break;
                     case YubikeyDeviceInfoTags.NfcRestrictedTag:
-                        deviceInfo.IsNfcRestricted = tagValuePair.Value.Span[0] == 1;
+                        deviceInfo.IsNfcRestricted = tlv[0] == 1;
                         break;
                     case YubikeyDeviceInfoTags.PartNumberTag:
-                        deviceInfo.PartNumber = GetPartNumber(tagValuePair.Value.Span);
+                        deviceInfo.PartNumber = GetPartNumber(tlv);
                         break;
                     case YubikeyDeviceInfoTags.PinComplexityTag:
-                        deviceInfo.IsPinComplexityEnabled = tagValuePair.Value.Span[0] == 1;
+                        deviceInfo.IsPinComplexityEnabled = tlv[0] == 1;
                         break;
                     case YubikeyDeviceInfoTags.FipsCapableTag:
-                        deviceInfo.FipsCapable = GetFipsCapabilities(tagValuePair.Value.Span);
+                        deviceInfo.FipsCapable = GetFipsCapabilities(tlv);
                         break;
                     case YubikeyDeviceInfoTags.FipsApprovedTag:
-                        deviceInfo.FipsApproved = GetFipsCapabilities(tagValuePair.Value.Span);
+                        deviceInfo.FipsApproved = GetFipsCapabilities(tlv);
+                        break;
+                    case YubikeyDeviceInfoTags.ResetBlockedTag:
+                        deviceInfo.ResetBlocked = GetYubiKeyCapabilities(tlv);
                         break;
                     case YubikeyDeviceInfoTags.IapDetectionTag:
                     case YubikeyDeviceInfoTags.MoreDataTag:
                     case YubikeyDeviceInfoTags.FreeFormTag:
                     case YubikeyDeviceInfoTags.HidInitDelay:
-                    case YubikeyDeviceInfoTags.ResetBlockedTag:
                         // Ignore these tags for now
                         break;
                     default:
@@ -266,7 +263,7 @@ namespace Yubico.YubiKey
 
             return deviceInfo;
         }
-
+        
         private static string GetPartNumber(ReadOnlySpan<byte> valueSpan)
         {
             try
@@ -276,6 +273,7 @@ namespace Yubico.YubiKey
             }
             catch (DecoderFallbackException)
             {
+                // Handle similar to other SDKS
                 return string.Empty;
             }
         }
@@ -292,6 +290,7 @@ namespace Yubico.YubiKey
                 EnabledNfcCapabilities = EnabledNfcCapabilities | second.EnabledNfcCapabilities,
                 FipsApproved = FipsApproved | second.FipsApproved,
                 FipsCapable = FipsCapable | second.FipsCapable,
+                ResetBlocked = ResetBlocked | second.ResetBlocked,
                 SerialNumber = SerialNumber ?? second.SerialNumber,
                 IsFipsSeries = IsFipsSeries || second.IsFipsSeries,
 

@@ -31,7 +31,7 @@ namespace Yubico.YubiKey
         [InlineData(YubiKeyCapabilities.Piv | YubiKeyCapabilities.Oath, "000A")]
         public void CreateFromResponseData_Returns_ExpectedFipsCapable(
             YubiKeyCapabilities expected, string? data = null)
-            => Assert.Equal(expected, WithDeviceInfo(0x14, FromHex(data)).FipsCapable);
+            => Assert.Equal(expected, DeviceInfoFor(0x14, FromHex(data)).FipsCapable);
 
         [Theory]
         [InlineData(YubiKeyCapabilities.None, "0000")]
@@ -43,19 +43,20 @@ namespace Yubico.YubiKey
         [InlineData(YubiKeyCapabilities.Piv | YubiKeyCapabilities.Oath, "000A")]
         public void CreateFromResponseData_Returns_ExpectedFipsApproved(
             YubiKeyCapabilities expected, string? data = null)
-            => Assert.Equal(expected, WithDeviceInfo(0x15, FromHex(data)).FipsApproved);
+            => Assert.Equal(expected, DeviceInfoFor(0x15, FromHex(data)).FipsApproved);
 
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedSerialNumber()
         {
-            Assert.Null(DefaultDeviceInfo.SerialNumber);
-            Assert.Equal(123456789, WithDeviceInfo(0x02, FromHex("075BCD15")).SerialNumber);
+            const int serialNumberTag = 0x02;
+            Assert.Null(DeviceInfoFor(serialNumberTag).SerialNumber);
+            Assert.Equal(123456789, DeviceInfoFor(serialNumberTag, FromHex("075BCD15")).SerialNumber);
         }
 
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedFirmwareVersion()
         {
-            Assert.Equal(new FirmwareVersion(5, 3, 4), WithDeviceInfo(0x05, FromHex("050304")).FirmwareVersion);
+            Assert.Equal(new FirmwareVersion(5, 3, 4), DeviceInfoFor(0x05, FromHex("050304")).FirmwareVersion);
         }
 
         [Theory]
@@ -71,99 +72,116 @@ namespace Yubico.YubiKey
         [InlineData(FormFactor.UsbCNano, "84")]
         public void CreateFromResponseData_WithDifferentFormFactor_Returns_ExpectedFormFactor(
             FormFactor expected,
-            string? data = null) =>
-            Assert.Equal(expected, WithDeviceInfo(0x04, FromHex(data)).FormFactor);
+            string? data = null)
+        {
+            const int formFactorTag = 0x04;
+            Assert.Equal(expected, DeviceInfoFor(formFactorTag, FromHex(data)).FormFactor);
+        }
 
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedConfigurationLocked()
         {
-            Assert.False(DefaultDeviceInfo.ConfigurationLocked);
-            Assert.True(WithDeviceInfo(0x0a, FromHex("01")).ConfigurationLocked);
-            Assert.False(WithDeviceInfo(0x0a, FromHex("00")).ConfigurationLocked);
+            const int configurationLockedTag = 0x0a;
+            Assert.False(DeviceInfoFor(configurationLockedTag).ConfigurationLocked);
+            Assert.True(DeviceInfoFor(configurationLockedTag, FromHex("01")).ConfigurationLocked);
+            Assert.False(DeviceInfoFor(configurationLockedTag, FromHex("00")).ConfigurationLocked);
         }
 
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedFipsSeries()
         {
-            Assert.False(DefaultDeviceInfo.IsFipsSeries);
-            Assert.True(WithDeviceInfo(0x04, FromHex("80"), FirmwareVersion.V5_4_2).IsFipsSeries);
-            Assert.True(WithDeviceInfo(0x04, FromHex("C0"), FirmwareVersion.V5_4_2).IsFipsSeries);
-            Assert.False(WithDeviceInfo(0x04, FromHex("40"), FirmwareVersion.V5_4_2).IsFipsSeries);
+            const int formFactorTag = 0x04;
+            Assert.False(DeviceInfoFor(formFactorTag).IsFipsSeries);
+            Assert.True(DeviceInfoFor(formFactorTag, FromHex("80"), FirmwareVersion.V5_4_2).IsFipsSeries);
+            Assert.True(DeviceInfoFor(formFactorTag, FromHex("C0"), FirmwareVersion.V5_4_2).IsFipsSeries);
+            Assert.False(DeviceInfoFor(formFactorTag, FromHex("40"), FirmwareVersion.V5_4_2).IsFipsSeries);
         }
 
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedIsSkySeries()
         {
-            Assert.False(DefaultDeviceInfo.IsSkySeries);
-            Assert.True(WithDeviceInfo(0x04, FromHex("40")).IsSkySeries);
-            Assert.True(WithDeviceInfo(0x04, FromHex("C0")).IsSkySeries);
-            Assert.False(WithDeviceInfo(0x04, FromHex("80")).IsSkySeries);
+            const int formFactorTag = 0x04;
+            Assert.False(DeviceInfoFor(formFactorTag).IsSkySeries);
+            Assert.True(DeviceInfoFor(formFactorTag, FromHex("40")).IsSkySeries);
+            Assert.True(DeviceInfoFor(formFactorTag, FromHex("C0")).IsSkySeries);
+            Assert.False(DeviceInfoFor(formFactorTag, FromHex("80")).IsSkySeries);
         }
 
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedPartNumber()
         {
+            const int partNumberTag = 0x13;
+
             // Valid UTF-8
-            Assert.Equal("", DefaultDeviceInfo.PartNumber);
-            Assert.Equal("", WithDeviceInfo(0x13, Array.Empty<byte>()).PartNumber);
+            Assert.Equal("", DeviceInfoFor(partNumberTag).PartNumber);
             Assert.Equal("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=+-",
-                WithDeviceInfo(0x13,
+                DeviceInfoFor(partNumberTag,
                     FromHex("6162636465666768696A6B6C6D6E6F707172737475767778797A41" +
                             "42434445464748494A4B4C4D4E4F505152535455565758595A303132333435363738395" +
                             "F3D2B2D")).PartNumber);
             Assert.Equal("ÖÄÅöäåěščřžýáíúůĚŠČŘŽÝÁÍÚŮ",
-                WithDeviceInfo(0x13, FromHex("C396C384C385C3B6C3A4C3A5C49BC5A1C48DC599C5BEC3BDC3A1C3" +
-                                             "ADC3BAC5AFC49AC5A0C48CC598C5BDC39DC381C38DC39AC5AE")).PartNumber);
-            Assert.Equal("😀", WithDeviceInfo(0x13, FromHex("F09F9880")).PartNumber);
+                DeviceInfoFor(partNumberTag, FromHex("C396C384C385C3B6C3A4C3A5C49BC5A1C48DC599C5BEC3BDC3A1C3" +
+                                                     "ADC3BAC5AFC49AC5A0C48CC598C5BDC39DC381C38DC39AC5AE")).PartNumber);
+            Assert.Equal("😀", DeviceInfoFor(partNumberTag, FromHex("F09F9880")).PartNumber);
             Assert.Equal("0123456789ABCDEF",
-                WithDeviceInfo(0x13, FromHex("30313233343536373839414243444546")).PartNumber);
+                DeviceInfoFor(partNumberTag, FromHex("30313233343536373839414243444546")).PartNumber);
 
             // Invalid UTF-8
-            Assert.Equal("", WithDeviceInfo(0x13, FromHex("c328")).PartNumber);
-            Assert.Equal("", WithDeviceInfo(0x13, FromHex("a0a1")).PartNumber);
-            Assert.Equal("", WithDeviceInfo(0x13, FromHex("e228a1")).PartNumber);
-            Assert.Equal("", WithDeviceInfo(0x13, FromHex("e28228")).PartNumber);
-            Assert.Equal("", WithDeviceInfo(0x13, FromHex("f0288cbc")).PartNumber);
-            Assert.Equal("", WithDeviceInfo(0x13, FromHex("f09028bc")).PartNumber);
-            Assert.Equal("", WithDeviceInfo(0x13, FromHex("f0288c28")).PartNumber);
+            Assert.Equal("", DeviceInfoFor(partNumberTag, FromHex("c328")).PartNumber);
+            Assert.Equal("", DeviceInfoFor(partNumberTag, FromHex("a0a1")).PartNumber);
+            Assert.Equal("", DeviceInfoFor(partNumberTag, FromHex("e228a1")).PartNumber);
+            Assert.Equal("", DeviceInfoFor(partNumberTag, FromHex("e28228")).PartNumber);
+            Assert.Equal("", DeviceInfoFor(partNumberTag, FromHex("f0288cbc")).PartNumber);
+            Assert.Equal("", DeviceInfoFor(partNumberTag, FromHex("f09028bc")).PartNumber);
+            Assert.Equal("", DeviceInfoFor(partNumberTag, FromHex("f0288c28")).PartNumber);
         }
 
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedPinComplexity()
         {
-            Assert.False(DefaultDeviceInfo.IsPinComplexityEnabled);
-            Assert.False(WithDeviceInfo(0x16, FromHex("00")).IsPinComplexityEnabled);
-            Assert.True(WithDeviceInfo(0x16, FromHex("01")).IsPinComplexityEnabled);
+            const int pinComplexityTag = 0x16;
+            Assert.False(DeviceInfoFor(pinComplexityTag).IsPinComplexityEnabled);
+            Assert.False(DeviceInfoFor(pinComplexityTag, FromHex("00")).IsPinComplexityEnabled);
+            Assert.True(DeviceInfoFor(pinComplexityTag, FromHex("01")).IsPinComplexityEnabled);
         }
 
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedResetBlocked()
         {
-            // Assert.Equal(0, DefaultInfo.IsResetBlocked); TODO
-            // Assert.Equal(1056, infoOf(0x18, fromHex("0420")).IsResetBlocked); TODO
+            const int resetBlockedTag = 0x18;
+            Assert.Equal(YubiKeyCapabilities.None, DeviceInfoFor(resetBlockedTag).ResetBlocked);
+            Assert.Equal(YubiKeyCapabilities.Oath | YubiKeyCapabilities.Fido2,
+                DeviceInfoFor(resetBlockedTag, FromHex("0220")).ResetBlocked);
         }
 
         [Fact]
-        public void CreateFromResponseData_Returns_ExpectedFpsVersion()
+        public void CreateFromResponseData_Returns_ExpectedTemplateStorageVersion()
         {
-            Assert.Null(DefaultDeviceInfo.TemplateStorageVersion);
-            Assert.Equal(new FirmwareVersion(5, 6, 6), WithDeviceInfo(0x20, FromHex("050606")).TemplateStorageVersion);
+            const int templateStorageVersionTag = 0x20;
+            Assert.Null(DeviceInfoFor(templateStorageVersionTag).TemplateStorageVersion);
+            Assert.Equal(new FirmwareVersion(5, 6, 6),
+                DeviceInfoFor(templateStorageVersionTag, FromHex("050606")).TemplateStorageVersion);
         }
 
         [Fact]
-        public void CreateFromResponseData_Returns_ExpectedStmVersion()
+        public void CreateFromResponseData_Returns_ExpectedImageProcessorVersion()
         {
-            Assert.Null(DefaultDeviceInfo.ImageProcessorVersion);
-            Assert.Equal(new FirmwareVersion(7, 0, 5), WithDeviceInfo(0x21, FromHex("070005")).ImageProcessorVersion);
+            const int imageProcessorVersionTag = 0x21;
+            Assert.Null(DeviceInfoFor(imageProcessorVersionTag).ImageProcessorVersion);
+            Assert.Equal(new FirmwareVersion(7, 0, 5),
+                DeviceInfoFor(imageProcessorVersionTag, FromHex("070005")).ImageProcessorVersion);
         }
 
-        private static YubiKeyDeviceInfo DefaultDeviceInfo => new YubiKeyDeviceInfo();
+        private static YubiKeyDeviceInfo DeviceInfoFor(int tag, FirmwareVersion? version = null) =>
+            DeviceInfoFor(tag, Array.Empty<byte>());
 
-        private static YubiKeyDeviceInfo WithDeviceInfo(int tag, byte[] data, FirmwareVersion? version = null)
+        private static YubiKeyDeviceInfo DeviceInfoFor(int tag, byte[] data, FirmwareVersion? version = null)
         {
-            byte[] versionAsBytes = version is { } ? VersionToBytes(version) : VersionToBytes(FirmwareVersion.V2_2_0);
+            byte[] versionAsBytes = version is { }
+                ? VersionToBytes(version)
+                : VersionToBytes(FirmwareVersion.V2_2_0);
+
             var tlvs = new Dictionary<int, ReadOnlyMemory<byte>> { { tag, data } };
-
             const int versionTag = 0x5;
             if (tag != versionTag)
             {
@@ -172,7 +190,7 @@ namespace Yubico.YubiKey
 
             YubiKeyDeviceInfo info = data.Length == 0
                 ? new YubiKeyDeviceInfo()
-                : YubiKeyDeviceInfo.CreateFromResponseData(tlvs);
+                : YubiKeyDeviceInfo.CreateFromResponseData(tlvs); //We're testing this method
 
             return info;
         }

@@ -40,14 +40,19 @@ namespace Yubico.YubiKey
         public YubiKeyCapabilities EnabledNfcCapabilities { get; }
 
         /// <summary>
-        /// The FipsApproved setting for the respective applications
+        /// The FipsApproved setting for the respective applications.
         /// </summary>
         public YubiKeyCapabilities FipsApproved { get; }
 
         /// <summary>
-        /// The FipsCapable setting for the respective applications
+        /// The FipsCapable setting for the respective applications.
         /// </summary>
         public YubiKeyCapabilities FipsCapable { get; }
+        
+        /// <summary>
+        /// The reset blocked status for each application.
+        /// </summary>
+        YubiKeyCapabilities ResetBlocked { get; }
 
         /// <summary>
         /// The serial number of the YubiKey, if one is present.

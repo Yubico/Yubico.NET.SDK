@@ -48,6 +48,9 @@ namespace Yubico.YubiKey
         public YubiKeyCapabilities FipsCapable => _yubiKeyInfo.FipsCapable;
 
         /// <inheritdoc />
+        public YubiKeyCapabilities ResetBlocked => _yubiKeyInfo.ResetBlocked;
+
+        /// <inheritdoc />
         public bool IsNfcRestricted => _yubiKeyInfo.IsNfcRestricted;
 
         /// <inheritdoc />
@@ -55,6 +58,7 @@ namespace Yubico.YubiKey
 
         /// <inheritdoc />
         public bool IsPinComplexityEnabled => _yubiKeyInfo.IsPinComplexityEnabled;
+
 
         /// <inheritdoc />
         public int? SerialNumber => _yubiKeyInfo.SerialNumber;

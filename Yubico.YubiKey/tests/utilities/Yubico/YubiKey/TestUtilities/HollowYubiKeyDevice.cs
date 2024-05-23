@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// <inheritdoc />
         public YubiKeyCapabilities FipsCapable { get; private set; }
 
-        public YubiKeyCapabilities ResetBlocked { get; private set;}
+        public YubiKeyCapabilities ResetBlocked { get; private set; }
 
         public bool IsNfcRestricted { get; } = false;
         public string PartNumber { get; } = string.Empty;

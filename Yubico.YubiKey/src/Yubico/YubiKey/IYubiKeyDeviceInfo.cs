@@ -48,7 +48,7 @@ namespace Yubico.YubiKey
         /// The FipsCapable setting for the respective applications.
         /// </summary>
         public YubiKeyCapabilities FipsCapable { get; }
-        
+
         /// <summary>
         /// The reset blocked status for each application.
         /// </summary>

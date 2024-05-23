@@ -57,7 +57,7 @@ namespace Yubico.YubiKey
 
         /// <inheritdoc />
         public YubiKeyCapabilities FipsCapable { get; set; }
-        
+
         /// <inheritdoc />
         public YubiKeyCapabilities ResetBlocked { get; set; }
 
@@ -263,7 +263,7 @@ namespace Yubico.YubiKey
 
             return deviceInfo;
         }
-        
+
         private static string GetPartNumber(ReadOnlySpan<byte> valueSpan)
         {
             try

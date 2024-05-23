@@ -31,7 +31,10 @@ namespace Yubico.YubiKey
         [InlineData(YubiKeyCapabilities.Piv | YubiKeyCapabilities.Oath, "000A")]
         public void CreateFromResponseData_Returns_ExpectedFipsCapable(
             YubiKeyCapabilities expected, string? data = null)
-            => Assert.Equal(expected, DeviceInfoFor(0x14, FromHex(data)).FipsCapable);
+        {
+            const int fipsCapableTag = 0x14;
+            Assert.Equal(expected, DeviceInfoFor(fipsCapableTag, FromHex(data)).FipsCapable);
+        }
 
         [Theory]
         [InlineData(YubiKeyCapabilities.None, "0000")]
@@ -43,7 +46,10 @@ namespace Yubico.YubiKey
         [InlineData(YubiKeyCapabilities.Piv | YubiKeyCapabilities.Oath, "000A")]
         public void CreateFromResponseData_Returns_ExpectedFipsApproved(
             YubiKeyCapabilities expected, string? data = null)
-            => Assert.Equal(expected, DeviceInfoFor(0x15, FromHex(data)).FipsApproved);
+        {
+            const int fipsApprovedTag = 0x15;
+            Assert.Equal(expected, DeviceInfoFor(fipsApprovedTag, FromHex(data)).FipsApproved);
+        }
 
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedSerialNumber()

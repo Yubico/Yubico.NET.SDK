@@ -59,7 +59,6 @@ namespace Yubico.YubiKey
         /// <inheritdoc />
         public bool IsPinComplexityEnabled => _yubiKeyInfo.IsPinComplexityEnabled;
 
-
         /// <inheritdoc />
         public int? SerialNumber => _yubiKeyInfo.SerialNumber;
 

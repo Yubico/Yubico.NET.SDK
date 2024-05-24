@@ -695,6 +695,43 @@ namespace Yubico.YubiKey
             }
         }
 
+        /// <inheritdoc />
+        /// <exception cref="NotSupportedException">
+        /// The YubiKey does not support this feature.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        /// The value is less than `6` or greater than `255`.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The YubiKey encountered an error and could not set the setting.
+        /// </exception>
+        public void SetTemporaryTouchThreshold(int value)
+        {
+            if (!this.HasFeature(YubiKeyFeature.TemporaryTouchThreshold))
+            {
+                throw new NotSupportedException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.NotSupportedByYubiKeyVersion));
+            }
+
+            if (value < 6 || value > 255)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value));
+            }
+
+            var command = new MgmtCmd.SetDeviceInfoCommand
+            {
+                TemporaryTouchThreshold = value
+            };
+
+            IYubiKeyResponse response = SendConfiguration(command);
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+        }
+
         private IYubiKeyResponse SendConfiguration(MgmtCmd.SetDeviceInfoBaseCommand baseCommand)
         {
             IYubiKeyConnection? connection = null;

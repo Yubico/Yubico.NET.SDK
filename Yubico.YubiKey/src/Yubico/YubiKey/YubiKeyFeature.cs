@@ -69,6 +69,11 @@ namespace Yubico.YubiKey
         /// </summary>
         FastUsbReclaim,
 
+        /// <summary>
+        /// The YubiKey allows temporarily adjusting the sensitivity of the capacitive touch sensor.
+        /// </summary>
+        TemporaryTouchThreshold,
+
         // OTP application features
 
         /// <summary>

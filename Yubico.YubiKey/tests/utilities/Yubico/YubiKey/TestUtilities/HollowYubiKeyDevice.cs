@@ -244,5 +244,10 @@ namespace Yubico.YubiKey.TestUtilities
         {
             throw new NotImplementedException();
         }
+
+        public void SetTemporaryTouchThreshold(int value)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

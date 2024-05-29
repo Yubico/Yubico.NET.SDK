@@ -38,6 +38,7 @@ namespace Yubico.YubiKey
         internal static readonly FirmwareVersion V4_4_0 = new FirmwareVersion(4, 4, 0);
         internal static readonly FirmwareVersion V4_5_0 = new FirmwareVersion(4, 5, 0);
         internal static readonly FirmwareVersion V5_3_0 = new FirmwareVersion(5, 3, 0);
+        internal static readonly FirmwareVersion V5_3_1 = new FirmwareVersion(5, 3, 1);
         internal static readonly FirmwareVersion V5_4_2 = new FirmwareVersion(5, 4, 2);
         internal static readonly FirmwareVersion V5_4_3 = new FirmwareVersion(5, 4, 3);
         internal static readonly FirmwareVersion V5_6_0 = new FirmwareVersion(5, 6, 0);

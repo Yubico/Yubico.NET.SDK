@@ -33,9 +33,11 @@ namespace Yubico.YubiKey.Management.Commands
         private const byte ResetAfterConfigTag = 0x0c;
         private const byte NfcEnabledCapabilitiesTag = 0x0e;
         private const byte NfcRestrictedTag = 0x17;
+        private const byte TempTouchThresholdTag = 0x85;
 
         private byte[]? _lockCode;
         private byte[]? _unlockCode;
+        private ushort? _autoEjectTimeout;
 
         /// <summary>
         /// The length that a configuration lock code must be.
@@ -59,8 +61,6 @@ namespace Yubico.YubiKey.Management.Commands
         /// timeout.  <see langword="null"/> to leave unchanged.
         /// </summary>
         public byte? ChallengeResponseTimeout { get; set; }
-
-        private ushort? _autoEjectTimeout;
 
         /// <summary>
         /// The CCID auto-eject timeout (in seconds). This field is only meaningful if the
@@ -105,6 +105,26 @@ namespace Yubico.YubiKey.Management.Commands
         /// Allows setting of the <see cref="YubiKeyDeviceInfo.IsNfcRestricted"/> property
         /// </summary>
         public bool RestrictNfc { get; set; }
+
+        /// <summary>
+        /// Temporarily set the threshold at which a capacitive touch should be considered active.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The field is using arbitrary units and has a default value of `6`. A higher value increases the sensor
+        /// threshold which has the effect of decreasing the sensitivity of the sensor. Lower values increase the
+        /// sensitivity, but callers cannot reduce the threshold below the default value of `6` which is locked in at
+        /// manufacturing time.
+        /// </para>
+        /// <para>
+        /// The value set here is only valid until the next time the YubiKey is power cycled. It does not persist.
+        /// </para>
+        /// <para>
+        /// You should typically not ever need to adjust this value. This is primarily used in the context of automatic
+        /// provisioning and testing where the YubiKey is being "touched" by electrically grounding the sensor.
+        /// </para>
+        /// </remarks>
+        public int? TemporaryTouchThreshold { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SetDeviceInfoBaseCommand"/> class.
@@ -255,6 +275,11 @@ namespace Yubico.YubiKey.Management.Commands
             if (RestrictNfc)
             {
                 buffer.WriteByte(NfcRestrictedTag, 1);
+            }
+
+            if (TemporaryTouchThreshold.HasValue)
+            {
+                buffer.WriteByte(TempTouchThresholdTag, (byte)TemporaryTouchThreshold.Value);
             }
 
             return buffer.Encode();

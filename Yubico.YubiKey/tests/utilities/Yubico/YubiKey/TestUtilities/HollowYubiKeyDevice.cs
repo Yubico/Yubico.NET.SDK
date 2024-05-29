@@ -50,7 +50,17 @@ namespace Yubico.YubiKey.TestUtilities
         /// <inheritdoc />
         public YubiKeyCapabilities EnabledNfcCapabilities { get; private set; }
 
-        public bool IsNfcRestricted { get; }
+        /// <inheritdoc />
+        public YubiKeyCapabilities FipsApproved { get; private set; }
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities FipsCapable { get; private set; }
+
+        public YubiKeyCapabilities ResetBlocked { get; private set; }
+
+        public bool IsNfcRestricted { get; } = false;
+        public string? PartNumber { get; }
+        public bool IsPinComplexityEnabled { get; } = false;
 
         /// <inheritdoc />
         public int? SerialNumber { get; private set; }
@@ -84,6 +94,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         /// <inheritdoc />
         public bool ConfigurationLocked { get; private set; }
+
         #endregion
 
         // If no arg is given, the object will never authenticate or verify PIV
@@ -235,7 +246,9 @@ namespace Yubico.YubiKey.TestUtilities
             throw new NotImplementedException();
         }
 
-        public void SetLegacyDeviceConfiguration(YubiKeyCapabilities yubiKeyInterfaces, byte challengeResponseTimeout, bool touchEjectEnabled, int autoEjectTimeout = 0)
+        public void SetLegacyDeviceConfiguration(
+            YubiKeyCapabilities yubiKeyInterfaces, byte challengeResponseTimeout, bool touchEjectEnabled,
+            int autoEjectTimeout = 0)
         {
             throw new NotImplementedException();
         }

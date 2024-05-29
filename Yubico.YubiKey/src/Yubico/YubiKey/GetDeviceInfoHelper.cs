@@ -40,7 +40,6 @@ namespace Yubico.YubiKey
             var combinedPages = new Dictionary<int, ReadOnlyMemory<byte>>();
 
             bool hasMoreData = true;
-
             while (hasMoreData)
             {
                 IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>> response =

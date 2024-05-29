@@ -139,17 +139,14 @@ namespace Yubico.YubiKey
                 {
                     return false;
                 }
-                else
-                {
-                    int? thisSerialNumber = Info.SerialNumber;
 
-                    var objDeviceWithInfo = (YubicoDeviceWithInfo)obj;
-                    int? objSerialNumber = objDeviceWithInfo.Info.SerialNumber;
+                var objDeviceWithInfo = (YubicoDeviceWithInfo)obj;
+                int? objSerialNumber = objDeviceWithInfo.Info.SerialNumber;
 
-                    return thisSerialNumber.HasValue
-                        && objSerialNumber.HasValue
-                        && thisSerialNumber.Value == objSerialNumber.Value;
-                }
+                int? thisSerialNumber = Info.SerialNumber;
+                return thisSerialNumber.HasValue
+                    && objSerialNumber.HasValue
+                    && thisSerialNumber.Value == objSerialNumber.Value;
             }
 
             public override int GetHashCode() => Info.SerialNumber.GetHashCode();

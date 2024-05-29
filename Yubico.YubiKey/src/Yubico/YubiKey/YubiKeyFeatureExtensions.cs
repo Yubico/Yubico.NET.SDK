@@ -79,10 +79,10 @@ namespace Yubico.YubiKey
                     HasApplication(yubiKeyDevice, YubiKeyCapabilities.Fido2),
 
                 YubiKeyFeature.ManagementApplication =>
-                    yubiKeyDevice.FirmwareVersion >= new FirmwareVersion(5),
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_0_0,
 
                 YubiKeyFeature.ManagementNfcRestricted =>
-                    yubiKeyDevice.FirmwareVersion >= new FirmwareVersion(5, 7),
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_7_0,
 
                 YubiKeyFeature.SerialNumberVisibilityControls =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V2_2_0

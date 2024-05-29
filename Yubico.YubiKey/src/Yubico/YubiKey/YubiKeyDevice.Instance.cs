@@ -54,7 +54,7 @@ namespace Yubico.YubiKey
         public bool IsNfcRestricted => _yubiKeyInfo.IsNfcRestricted;
 
         /// <inheritdoc />
-        public string PartNumber => _yubiKeyInfo.PartNumber;
+        public string? PartNumber => _yubiKeyInfo.PartNumber;
 
         /// <inheritdoc />
         public bool IsPinComplexityEnabled => _yubiKeyInfo.IsPinComplexityEnabled;
@@ -970,7 +970,6 @@ namespace Yubico.YubiKey
                 + "- Available NFC Capabilities: " + AvailableNfcCapabilities + EOL
                 + "- Enabled USB Capabilities: " + EnabledUsbCapabilities + EOL
                 + "- Enabled NFC Capabilities: " + EnabledNfcCapabilities + EOL;
-            // TODO Which fields go here and which dont?
             return res;
         }
         #endregion

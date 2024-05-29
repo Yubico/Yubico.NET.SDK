@@ -119,27 +119,20 @@ namespace Yubico.YubiKey
             const int partNumberTag = 0x13;
 
             // Valid UTF-8
-            Assert.Equal("", DeviceInfoFor(partNumberTag).PartNumber);
-            Assert.Equal("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=+-",
-                DeviceInfoFor(partNumberTag,
-                    FromHex("6162636465666768696A6B6C6D6E6F707172737475767778797A41" +
-                            "42434445464748494A4B4C4D4E4F505152535455565758595A303132333435363738395" +
-                            "F3D2B2D")).PartNumber);
-            Assert.Equal("ÖÄÅöäåěščřžýáíúůĚŠČŘŽÝÁÍÚŮ",
-                DeviceInfoFor(partNumberTag, FromHex("C396C384C385C3B6C3A4C3A5C49BC5A1C48DC599C5BEC3BDC3A1C3" +
-                                                     "ADC3BAC5AFC49AC5A0C48CC598C5BDC39DC381C38DC39AC5AE")).PartNumber);
+            Assert.Null(DeviceInfoFor(partNumberTag).PartNumber);
+            Assert.Equal("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=+-", DeviceInfoFor(partNumberTag, FromHex("6162636465666768696A6B6C6D6E6F707172737475767778797A4142434445464748494A4B4C4D4E4F505152535455565758595A303132333435363738395F3D2B2D")).PartNumber);
+            Assert.Equal("ÖÄÅöäåěščřžýáíúůĚŠČŘŽÝÁÍÚŮ", DeviceInfoFor(partNumberTag, FromHex("C396C384C385C3B6C3A4C3A5C49BC5A1C48DC599C5BEC3BDC3A1C3ADC3BAC5AFC49AC5A0C48CC598C5BDC39DC381C38DC39AC5AE")).PartNumber);
             Assert.Equal("😀", DeviceInfoFor(partNumberTag, FromHex("F09F9880")).PartNumber);
-            Assert.Equal("0123456789ABCDEF",
-                DeviceInfoFor(partNumberTag, FromHex("30313233343536373839414243444546")).PartNumber);
+            Assert.Equal("0123456789ABCDEF", DeviceInfoFor(partNumberTag, FromHex("30313233343536373839414243444546")).PartNumber);
 
             // Invalid UTF-8
-            Assert.Equal("", DeviceInfoFor(partNumberTag, FromHex("c328")).PartNumber);
-            Assert.Equal("", DeviceInfoFor(partNumberTag, FromHex("a0a1")).PartNumber);
-            Assert.Equal("", DeviceInfoFor(partNumberTag, FromHex("e228a1")).PartNumber);
-            Assert.Equal("", DeviceInfoFor(partNumberTag, FromHex("e28228")).PartNumber);
-            Assert.Equal("", DeviceInfoFor(partNumberTag, FromHex("f0288cbc")).PartNumber);
-            Assert.Equal("", DeviceInfoFor(partNumberTag, FromHex("f09028bc")).PartNumber);
-            Assert.Equal("", DeviceInfoFor(partNumberTag, FromHex("f0288c28")).PartNumber);
+            Assert.Null(DeviceInfoFor(partNumberTag, FromHex("c328")).PartNumber);
+            Assert.Null(DeviceInfoFor(partNumberTag, FromHex("a0a1")).PartNumber);
+            Assert.Null(DeviceInfoFor(partNumberTag, FromHex("e228a1")).PartNumber);
+            Assert.Null(DeviceInfoFor(partNumberTag, FromHex("e28228")).PartNumber);
+            Assert.Null(DeviceInfoFor(partNumberTag, FromHex("f0288cbc")).PartNumber);
+            Assert.Null(DeviceInfoFor(partNumberTag, FromHex("f09028bc")).PartNumber);
+            Assert.Null(DeviceInfoFor(partNumberTag, FromHex("f0288c28")).PartNumber);
         }
 
         [Fact]
@@ -165,7 +158,7 @@ namespace Yubico.YubiKey
         {
             const int templateStorageVersionTag = 0x20;
             Assert.Null(DeviceInfoFor(templateStorageVersionTag).TemplateStorageVersion);
-            Assert.Equal(new FirmwareVersion(5, 6, 6),
+            Assert.Equal(new TemplateStorageVersion(5, 6, 6),
                 DeviceInfoFor(templateStorageVersionTag, FromHex("050606")).TemplateStorageVersion);
         }
 
@@ -174,7 +167,7 @@ namespace Yubico.YubiKey
         {
             const int imageProcessorVersionTag = 0x21;
             Assert.Null(DeviceInfoFor(imageProcessorVersionTag).ImageProcessorVersion);
-            Assert.Equal(new FirmwareVersion(7, 0, 5),
+            Assert.Equal(new ImageProcessorVersion(7, 0, 5),
                 DeviceInfoFor(imageProcessorVersionTag, FromHex("070005")).ImageProcessorVersion);
         }
 

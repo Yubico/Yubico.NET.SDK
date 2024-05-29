@@ -42,7 +42,7 @@ namespace Yubico.YubiKey
         internal const byte PinComplexityTag = 0x16;
         internal const byte NfcRestrictedTag = 0x17;
         internal const byte ResetBlockedTag = 0x18;
-        internal const byte TemplateStorageVersionTag = 0x20; //FPS version tag
-        internal const byte ImageProcessorVersionTag = 0x21; //STM version tag
+        internal const byte TemplateStorageVersionTag = 0x20; // FPS version tag
+        internal const byte ImageProcessorVersionTag = 0x21; // STM version tag
     }
 }

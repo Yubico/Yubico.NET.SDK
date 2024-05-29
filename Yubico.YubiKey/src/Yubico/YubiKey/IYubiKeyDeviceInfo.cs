@@ -40,17 +40,17 @@ namespace Yubico.YubiKey
         public YubiKeyCapabilities EnabledNfcCapabilities { get; }
 
         /// <summary>
-        /// The FipsApproved setting for the respective applications.
+        /// The set of YubiKey applications that are currently configured to meet FIPS requirements.
         /// </summary>
         public YubiKeyCapabilities FipsApproved { get; }
 
         /// <summary>
-        /// The FipsCapable setting for the respective applications.
+        /// The set of YubiKey applications that are capable of being put into FIPS mode.
         /// </summary>
         public YubiKeyCapabilities FipsCapable { get; }
 
         /// <summary>
-        /// The reset blocked status for each application.
+        /// The set of YubiKey applications that are blocked from being reset.
         /// </summary>
         public YubiKeyCapabilities ResetBlocked { get; }
 
@@ -94,14 +94,14 @@ namespace Yubico.YubiKey
         /// The version of the chip/firmware storing the fingerprints (the second
         /// secure element). If there is no template storage chip, this will be
         /// null.
-        /// <remarks>This field is also known as the "FpsVersion"</remarks>
+        /// <remarks>This field is also known as the "FPS Version".</remarks>
         /// </summary>
         public TemplateStorageVersion? TemplateStorageVersion { get; }
 
         /// <summary>
         /// The version of the chip/firmware performing the image processing. If
         /// there is no image processing chip, this will be null.
-        /// <remarks>This field is also known as the "StmVersion"</remarks>
+        /// <remarks>This field is also known as the "STM Version".</remarks>
         /// </summary>
         public ImageProcessorVersion? ImageProcessorVersion { get; }
 
@@ -140,17 +140,19 @@ namespace Yubico.YubiKey
         public bool ConfigurationLocked { get; }
 
         /// <summary>
-        /// Indicates if this device has temporarily disabled NFC.
+        /// Indicates if the devices NFC connectivity is temporarily disabled
         /// </summary>
         public bool IsNfcRestricted { get; }
 
         /// <summary>
-        /// The chip number, if available, otherwise empty string.
+        /// The part number for the Secure Element processor, if available, otherwise `null`
         /// </summary>
-        string PartNumber { get; }
+        string? PartNumber { get; }
 
         /// <summary>
         /// Whether or not pin complexity is enabled on the Yubikey.
+        /// For more information see
+        /// <a href="https://docs.yubico.com/hardware/yubikey/yk-tech-manual/5.7-firmware-specifics.html#pin-complexity">this documentation on pin complexity</a> 
         /// </summary>
         bool IsPinComplexityEnabled { get; }
     }

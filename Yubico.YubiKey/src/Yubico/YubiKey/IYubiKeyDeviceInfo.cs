@@ -140,7 +140,7 @@ namespace Yubico.YubiKey
         public bool ConfigurationLocked { get; }
 
         /// <summary>
-        /// Indicates if the devices NFC connectivity is temporarily disabled
+        /// Indicates if the NFC connectivity on the device is temporarily disabled
         /// </summary>
         public bool IsNfcRestricted { get; }
 

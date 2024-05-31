@@ -89,15 +89,15 @@ namespace Yubico.YubiKey.Piv.Commands
         // Create one List with all three elements, then remove the PIN and/or
         // touch policy bytes if one or both are default.
         // These are the indices where the actual values go.
-        private const int indexValueLength = 1;
-        private const int algorithmCount = 3;
-        private const int indexAlgorithmByte = 4;
-        private const int indexPinPolicy = 5;
-        private const int indexPinPolicyByte = 7;
-        private const int pinPolicyCount = 3;
-        private const int indexTouchPolicy = 8;
-        private const int indexTouchPolicyByte = 10;
-        private const int touchPolicyCount = 3;
+        private const int IndexValueLength = 1;
+        private const int AlgorithmCount = 3;
+        private const int IndexAlgorithmByte = 4;
+        private const int IndexPinPolicy = 5;
+        private const int IndexPinPolicyByte = 7;
+        private const int PinPolicyCount = 3;
+        private const int IndexTouchPolicy = 8;
+        private const int IndexTouchPolicyByte = 10;
+        private const int TouchPolicyCount = 3;
 
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs. For this
@@ -286,29 +286,28 @@ namespace Yubico.YubiKey.Piv.Commands
                         ExceptionMessages.InvalidAlgorithm));
             }
 
-            byte[] data = new byte[]
-            {
+            byte[] data = {
                 0xAC, 0x09, 0x80, 0x01, 0x00, 0xAA, 0x01, 0x00, 0xAB, 0x01, 0x00
             };
-            data[indexAlgorithmByte] = (byte)Algorithm;
-            data[indexTouchPolicyByte] = (byte)TouchPolicy;
-            data[indexPinPolicyByte] = (byte)PinPolicy;
+            data[IndexAlgorithmByte] = (byte)Algorithm;
+            data[IndexTouchPolicyByte] = (byte)TouchPolicy;
+            data[IndexPinPolicyByte] = (byte)PinPolicy;
             int length = data.Length;
-            int valueLength = algorithmCount + pinPolicyCount + touchPolicyCount;
+            int valueLength = AlgorithmCount + PinPolicyCount + TouchPolicyCount;
 
             if (PinPolicy == PivPinPolicy.Default || PinPolicy == PivPinPolicy.None)
             {
-                Array.Copy(data, indexTouchPolicy, data, indexPinPolicy, touchPolicyCount);
-                length -= pinPolicyCount;
-                valueLength -= pinPolicyCount;
+                Array.Copy(data, IndexTouchPolicy, data, IndexPinPolicy, TouchPolicyCount);
+                length -= PinPolicyCount;
+                valueLength -= PinPolicyCount;
             }
             if (TouchPolicy == PivTouchPolicy.Default || TouchPolicy == PivTouchPolicy.None)
             {
-                length -= touchPolicyCount;
-                valueLength -= touchPolicyCount;
+                length -= TouchPolicyCount;
+                valueLength -= TouchPolicyCount;
             }
 
-            data[indexValueLength] = (byte)valueLength;
+            data[IndexValueLength] = (byte)valueLength;
             Span<byte> returnValue = data.AsSpan(0, length);
             return returnValue.ToArray();
         }

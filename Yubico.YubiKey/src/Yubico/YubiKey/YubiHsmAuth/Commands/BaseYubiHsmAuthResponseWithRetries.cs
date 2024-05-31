@@ -78,10 +78,8 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                                 ResponseStatusMessages.YubiHsmAuthAuthenticationRequired,
                                 RetriesRemaining));
                 }
-                else
-                {
-                    return base.StatusCodeMap;
-                }
+
+                return base.StatusCodeMap;
             }
         }
 

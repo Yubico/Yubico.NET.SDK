@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.TestUtilities
         private const int CertificateEndLength = 25;
 
         private readonly X509Certificate2 _certificateObject;
-        private bool disposedValue;
+        private bool _disposedValue;
 
         // Get the algorithm of the subject public key.
         public PivAlgorithm Algorithm { get; private set; }
@@ -244,19 +244,21 @@ namespace Yubico.YubiKey.TestUtilities
                 384 => PivAlgorithm.EccP384,
                 1024 => PivAlgorithm.Rsa1024,
                 2048 => PivAlgorithm.Rsa2048,
+                3072 => PivAlgorithm.Rsa3072,
+                4096 => PivAlgorithm.Rsa4096,
                 _ => throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm),
             };
         }
 
         protected virtual void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (!_disposedValue)
             {
                 if (disposing)
                 {
                     _certificateObject.Dispose();
                 }
-                disposedValue = true;
+                _disposedValue = true;
             }
         }
 

@@ -25,19 +25,27 @@ namespace Yubico.YubiKey.TestUtilities
     /// </summary>
     public sealed class IntegrationTestDeviceEnumeration
     {
-        private static readonly Lazy<IntegrationTestDeviceEnumeration> _singleInstance
+        private static readonly Lazy<IntegrationTestDeviceEnumeration> SingleInstance
             = new Lazy<IntegrationTestDeviceEnumeration>(() => new IntegrationTestDeviceEnumeration());
 
-        private static IntegrationTestDeviceEnumeration Instance => _singleInstance.Value;
-        private readonly static string yubicoAppDataSubDirectory = "Yubico";
-        private readonly static string blockListFileName = "BlockList.txt";
-        private readonly HashSet<string> blockedSerialNumbers = new HashSet<string>();
+        private static IntegrationTestDeviceEnumeration Instance => SingleInstance.Value;
+        private readonly static string YubicoAppDataSubDirectory = "Yubico";
+        private const string BlockListFileName = "BlockList.txt";
+        private readonly HashSet<string> _blockedSerialNumbers;
+        private readonly HashSet<string> _allowedSerialNumbers;
 
         private IntegrationTestDeviceEnumeration()
         {
-            string blockListFilePath = GetPath(yubicoAppDataSubDirectory, blockListFileName);
-            blockedSerialNumbers = File.Exists(blockListFilePath)
-                ? new HashSet<string>(File.ReadLines(blockListFilePath)) : new HashSet<string>();
+            var blockListFilePath = GetPath(YubicoAppDataSubDirectory, BlockListFileName);
+            _blockedSerialNumbers = File.Exists(blockListFilePath)
+                ? new HashSet<string>(File.ReadLines(blockListFilePath)) 
+                : new HashSet<string>();
+
+            var allowedKeys = Environment.GetEnvironmentVariable("YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS")
+                ?.Split(':') ?? Array.Empty<string>();
+            _allowedSerialNumbers = allowedKeys.Any() 
+                ? new HashSet<string>(allowedKeys) 
+                : new HashSet<string>();
         }
 
         private static string GetPath(string appDataSubDirectory, string filename) =>
@@ -66,11 +74,15 @@ namespace Yubico.YubiKey.TestUtilities
         public static IList<IYubiKeyDevice> GetTestDevices(Transport transport = Transport.All)
         {
             IEnumerable<IYubiKeyDevice> yubiKeyList = YubiKeyDevice.FindByTransport(transport);
-            IEnumerable<IYubiKeyDevice> testYubiKeys = yubiKeyList
-                .Where(key => key.SerialNumber == null ||
-                              !Instance.blockedSerialNumbers.Contains(key.SerialNumber.Value.ToString()));
 
+            IEnumerable<IYubiKeyDevice> testYubiKeys = yubiKeyList
+                .Where(IsNotBlockedKey)
+                .Where(IsAllowedKey);
+            
             return testYubiKeys.ToList();
+            
+            static bool IsNotBlockedKey(IYubiKeyDevice key) => key.SerialNumber == null || !Instance._blockedSerialNumbers.Contains(key.SerialNumber.Value.ToString());
+            static bool IsAllowedKey(IYubiKeyDevice key) => key.SerialNumber == null || Instance._allowedSerialNumbers.Contains(key.SerialNumber.Value.ToString());
         }
 
         /// <summary>

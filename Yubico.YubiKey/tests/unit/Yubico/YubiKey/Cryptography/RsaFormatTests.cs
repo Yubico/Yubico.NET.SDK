@@ -247,11 +247,14 @@ namespace Yubico.YubiKey.Cryptography
                 _ => CryptographyProviders.Sha512Creator(),
             };
 
-            PivAlgorithm algorithm = PivAlgorithm.Rsa1024;
-            if (keySize == 2048)
+            PivAlgorithm algorithm = keySize switch
             {
-                algorithm = PivAlgorithm.Rsa2048;
-            }
+                 1024 => PivAlgorithm.Rsa1024,
+                 2048 => PivAlgorithm.Rsa2048,
+                 3072 => PivAlgorithm.Rsa3072,
+                 4096 => PivAlgorithm.Rsa4096,
+                 _ => throw new Exception("TODO")
+            };
 
             HashAlgorithmName hashAlg = digestAlgorithm switch
             {
@@ -334,12 +337,15 @@ namespace Yubico.YubiKey.Cryptography
                 RsaFormat.Sha384 => CryptographyProviders.Sha384Creator(),
                 _ => CryptographyProviders.Sha512Creator(),
             };
-
-            PivAlgorithm algorithm = PivAlgorithm.Rsa1024;
-            if (keySize == 2048)
+            
+            PivAlgorithm algorithm = keySize switch
             {
-                algorithm = PivAlgorithm.Rsa2048;
-            }
+                1024 => PivAlgorithm.Rsa1024,
+                2048 => PivAlgorithm.Rsa2048,
+                3072 => PivAlgorithm.Rsa3072,
+                4096 => PivAlgorithm.Rsa4096,
+                _ => throw new Exception("TODO")
+            };
 
             HashAlgorithmName hashAlg = digestAlgorithm switch
             {
@@ -421,11 +427,14 @@ namespace Yubico.YubiKey.Cryptography
             KeyConverter? publicKey = null;
             KeyConverter? privateKey = null;
 
-            PivAlgorithm algorithm = PivAlgorithm.Rsa1024;
-            if (keySize == 2048)
+            PivAlgorithm algorithm = keySize switch
             {
-                algorithm = PivAlgorithm.Rsa2048;
-            }
+                1024 => PivAlgorithm.Rsa1024,
+                2048 => PivAlgorithm.Rsa2048,
+                3072 => PivAlgorithm.Rsa3072,
+                4096 => PivAlgorithm.Rsa4096,
+                _ => throw new Exception("TODO")
+            };
 
             RSAEncryptionPadding padding = RSAEncryptionPadding.Pkcs1;
             if (format != 1)
@@ -496,11 +505,14 @@ namespace Yubico.YubiKey.Cryptography
             KeyConverter? publicKey = null;
             KeyConverter? privateKey = null;
 
-            PivAlgorithm algorithm = PivAlgorithm.Rsa1024;
-            if (keySize == 2048)
+            PivAlgorithm algorithm = keySize switch
             {
-                algorithm = PivAlgorithm.Rsa2048;
-            }
+                1024 => PivAlgorithm.Rsa1024,
+                2048 => PivAlgorithm.Rsa2048,
+                3072 => PivAlgorithm.Rsa3072,
+                4096 => PivAlgorithm.Rsa4096,
+                _ => throw new Exception("TODO")
+            };
 
             RSAEncryptionPadding padding = RSAEncryptionPadding.Pkcs1;
             if (format != 1)

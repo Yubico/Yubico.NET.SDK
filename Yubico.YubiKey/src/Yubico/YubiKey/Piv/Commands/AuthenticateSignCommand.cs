@@ -96,6 +96,8 @@ namespace Yubico.YubiKey.Piv.Commands
 
         private const int Rsa1024DigestDataLength = 128;
         private const int Rsa2048DigestDataLength = 256;
+        private const int Rsa3072DigestDataLength = 384;
+        private const int Rsa4096DigestDataLength = 512;
         private const int EccP256DigestDataLength = 32;
         private const int EccP384DigestDataLength = 48;
 
@@ -176,6 +178,8 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 Rsa1024DigestDataLength => PivAlgorithm.Rsa1024,
                 Rsa2048DigestDataLength => PivAlgorithm.Rsa2048,
+                Rsa3072DigestDataLength => PivAlgorithm.Rsa3072,
+                Rsa4096DigestDataLength => PivAlgorithm.Rsa4096,
                 EccP256DigestDataLength => PivAlgorithm.EccP256,
                 EccP384DigestDataLength => PivAlgorithm.EccP384,
                 _ => throw new ArgumentException(

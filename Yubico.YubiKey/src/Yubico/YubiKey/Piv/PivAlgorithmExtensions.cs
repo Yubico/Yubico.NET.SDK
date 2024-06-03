@@ -43,6 +43,8 @@ namespace Yubico.YubiKey.Piv
         {
             PivAlgorithm.Rsa1024 => true,
             PivAlgorithm.Rsa2048 => true,
+            PivAlgorithm.Rsa3072 => true,
+            PivAlgorithm.Rsa4096 => true,
             PivAlgorithm.EccP256 => true,
             PivAlgorithm.EccP384 => true,
             _ => false,
@@ -104,6 +106,8 @@ namespace Yubico.YubiKey.Piv
         {
             PivAlgorithm.Rsa1024 => 1024,
             PivAlgorithm.Rsa2048 => 2048,
+            PivAlgorithm.Rsa3072 => 3072,
+            PivAlgorithm.Rsa4096 => 4096,
             PivAlgorithm.EccP256 => 256,
             PivAlgorithm.EccP384 => 384,
             PivAlgorithm.TripleDes => 192,
@@ -138,6 +142,8 @@ namespace Yubico.YubiKey.Piv
         {
             PivAlgorithm.Rsa1024 => true,
             PivAlgorithm.Rsa2048 => true,
+            PivAlgorithm.Rsa3072 => true,
+            PivAlgorithm.Rsa4096 => true,
             _ => false,
         };
 

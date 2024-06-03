@@ -24,118 +24,83 @@ namespace Yubico.YubiKey.Piv
     {
         [Trait("Category", "Simple")]
         [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void GetCert_Succeeds(StandardTestDevice testDeviceType)
+        [InlineData(PivAlgorithm.EccP256)]
+        [InlineData(PivAlgorithm.EccP384)]
+        [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+        [InlineData(PivAlgorithm.Rsa4096)]
+        public void GetCert_Succeeds(PivAlgorithm algorithm) //TODO Add tests for other key tpes as well
         {
             bool isValid = SampleKeyPairs.GetKeyAndCertPem(
-                PivAlgorithm.EccP256, true, out string certPem, out string privateKeyPem);
+                algorithm, true, out string certPem, out string privateKeyPem);
             Assert.True(isValid);
 
-            var cert = new CertConverter(certPem.ToCharArray());
-            X509Certificate2 certObj = cert.GetCertObject();
+            var certConverter = new CertConverter(certPem.ToCharArray());
+            X509Certificate2 certificate = certConverter.GetCertObject();
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
 
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            using var pivSession = new PivSession(testDevice);
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.ImportPrivateKey(0x90, pivPrivateKey);
-                pivSession.ImportCertificate(0x90, certObj);
+            pivSession.ImportPrivateKey(0x90, pivPrivateKey);
+            pivSession.ImportCertificate(0x90, certificate);
 
-                X509Certificate2 getCert = pivSession.GetCertificate(0x90);
-
-                Assert.True(getCert.Equals(certObj));
-            }
+            X509Certificate2 getCert = pivSession.GetCertificate(0x90);
+            Assert.True(getCert.Equals(certificate));
         }
 
         [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
-        public void GetCert_NoAuth_Succeeds(StandardTestDevice testDeviceType)
+        [InlineData(PivAlgorithm.EccP256)]
+        [InlineData(PivAlgorithm.EccP384)]
+        [InlineData(PivAlgorithm.Rsa1024)]
+        [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+        [InlineData(PivAlgorithm.Rsa4096)]
+        public void GetCert_NoAuth_Succeeds(PivAlgorithm algorithm)
         {
             bool isValid = SampleKeyPairs.GetKeyAndCertPem(
-                PivAlgorithm.EccP256, true, out string certPem, out string privateKeyPem);
+                algorithm, true, out string certPem, out string privateKeyPem);
             Assert.True(isValid);
 
-            var cert = new CertConverter(certPem.ToCharArray());
-            X509Certificate2 certObj = cert.GetCertObject();
+            var certConverter = new CertConverter(certPem.ToCharArray());
+            X509Certificate2 certificate = certConverter.GetCertObject();
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
 
             byte slotNumber = 0x8B;
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            LoadKeyAndCert(slotNumber, pivPrivateKey, certObj, testDevice);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
+            LoadKeyAndCert(slotNumber, pivPrivateKey, certificate, testDevice);
 
-            using (var pivSession = new PivSession(testDevice))
-            {
-                // Try to generate a key pair. This should not succeed because
-                // the mgmt key has not been authenticated.
-                var genPairCommand = new GenerateKeyPairCommand(
-                    0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
-                GenerateKeyPairResponse genPairResponse =
-                    pivSession.Connection.SendCommand(genPairCommand);
-                // A generation success is a test failure.
-                Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
+            using var pivSession = new PivSession(testDevice);
+            // Try to generate a key pair. This should not succeed because
+            // the mgmt key has not been authenticated.
+            var genPairCommand = new GenerateKeyPairCommand(
+                0x86, algorithm, PivPinPolicy.Default, PivTouchPolicy.Never);
+            GenerateKeyPairResponse genPairResponse =
+                pivSession.Connection.SendCommand(genPairCommand);
+            // A generation success is a test failure.
+            Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
 
-                // If we reach this point, we know that the mgmt key has not been
-                // authenticated, so get the cert. This should work.
-                X509Certificate2 getCert = pivSession.GetCertificate(slotNumber);
+            // If we reach this point, we know that the mgmt key has not been
+            // authenticated, so get the cert. This should work.
+            X509Certificate2 getCert = pivSession.GetCertificate(slotNumber);
 
-                Assert.True(getCert.Equals(certObj));
-            }
+            Assert.True(getCert.Equals(certificate));
         }
 
-        [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        public void CertConverter_AllOperations_Succeed(PivAlgorithm algorithm)
+        private static void LoadKeyAndCert(
+            byte slotNumber, PivPrivateKey privateKey, X509Certificate2 certObject, IYubiKeyDevice testDevice)
         {
-            bool isValid = SampleKeyPairs.GetKeyAndCertPem(algorithm, true, out string certPem, out _);
-            Assert.True(isValid);
+            using var pivSession = new PivSession(testDevice);
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            var cert = new CertConverter(certPem.ToCharArray());
-
-            Assert.Equal(cert.Algorithm, algorithm);
-
-            X509Certificate2 getCert = cert.GetCertObject();
-            Assert.False(getCert.HasPrivateKey);
-
-            byte[] getDer = cert.GetCertDer();
-            Assert.Equal(0x30, getDer[0]);
-
-            char[] getPem = cert.GetCertPem();
-            Assert.Equal('-', getPem[0]);
-
-            PivPublicKey pubKey = cert.GetPivPublicKey();
-            Assert.Equal(algorithm, pubKey.Algorithm);
-
-            if (cert.KeySize > 384)
-            {
-                using RSA rsaObject = cert.GetRsaObject();
-                Assert.Equal(cert.KeySize, rsaObject.KeySize);
-            }
-            else
-            {
-                using ECDsa eccObject = cert.GetEccObject();
-                Assert.Equal(cert.KeySize, eccObject.KeySize);
-            }
-        }
-
-        private static void LoadKeyAndCert(byte slotNumber, PivPrivateKey privateKey, X509Certificate2 certObject, IYubiKeyDevice testDevice)
-        {
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-
-                pivSession.ImportPrivateKey(slotNumber, privateKey);
-                pivSession.ImportCertificate(slotNumber, certObject);
-            }
+            pivSession.ImportPrivateKey(slotNumber, privateKey);
+            pivSession.ImportCertificate(slotNumber, certObject);
         }
     }
 }

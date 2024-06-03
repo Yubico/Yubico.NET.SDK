@@ -107,6 +107,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.EccP384)]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        
+[InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHex87(PivAlgorithm algorithm)
         {
             CommandApdu cmdApdu = GetSignCommandApdu(0x90, algorithm);
@@ -121,6 +123,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.EccP384)]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        
+[InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetP1Property_ReturnsAlgorithm(PivAlgorithm algorithm)
         {
             CommandApdu cmdApdu = GetSignCommandApdu(0x91, algorithm);
@@ -163,6 +167,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.EccP384)]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        
+[InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetNeProperty_ReturnsZero(PivAlgorithm algorithm)
         {
             CommandApdu cmdApdu = GetSignCommandApdu(0x95, algorithm);
@@ -177,6 +183,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.EccP384)]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+[InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetData_ReturnsCorrect(PivAlgorithm algorithm)
         {
             byte[] prefix = GetDigestDataPrefix(algorithm);

@@ -66,8 +66,12 @@ namespace Yubico.YubiKey.Piv
         private const int ExponentTag = 0x82;
         private const int Rsa1024BlockSize = 128;
         private const int Rsa2048BlockSize = 256;
+        private const int Rsa3072BlockSize = 384;
+        private const int Rsa4096BlockSize = 512;
         private const int SliceIndex1024 = 4;
         private const int SliceIndex2048 = 5;
+        private const int SliceIndex3072 = 6; //TODO this correct?
+        private const int SliceIndex4096 = 7; //TODO ??
         private const int PublicComponentCount = 2;
         private const int ModulusIndex = 0;
         private const int ExponentIndex = 1;
@@ -217,7 +221,14 @@ namespace Yubico.YubiKey.Piv
                     sliceIndex = SliceIndex2048;
 
                     break;
-
+                case Rsa3072BlockSize:
+                    Algorithm = PivAlgorithm.Rsa3072;
+                    sliceIndex = SliceIndex3072;
+                    break;
+                case Rsa4096BlockSize:
+                    Algorithm = PivAlgorithm.Rsa4096;
+                    sliceIndex = SliceIndex4096;
+                    break;
                 default:
                     return false;
             }

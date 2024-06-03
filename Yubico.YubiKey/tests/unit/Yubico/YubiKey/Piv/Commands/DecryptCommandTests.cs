@@ -24,6 +24,8 @@ namespace Yubico.YubiKey.Piv.Commands
     {
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+        [InlineData(PivAlgorithm.Rsa4096)]
         [InlineData(PivAlgorithm.Rsa2048)]
         public void ClassType_DerivedFromPivCommand_IsTrue(PivAlgorithm algorithm)
         {
@@ -102,6 +104,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+[InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(PivAlgorithm algorithm)
         {
             CommandApdu cmdApdu = GetDecryptCommandApdu(0x86, algorithm);
@@ -114,6 +118,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+[InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHex87(PivAlgorithm algorithm)
         {
             CommandApdu cmdApdu = GetDecryptCommandApdu(0x90, algorithm);
@@ -126,6 +132,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+[InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetP1Property_ReturnsAlgorithm(PivAlgorithm algorithm)
         {
             CommandApdu cmdApdu = GetDecryptCommandApdu(0x91, algorithm);
@@ -162,6 +170,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+[InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetNeProperty_ReturnsZero(PivAlgorithm algorithm)
         {
             CommandApdu cmdApdu = GetDecryptCommandApdu(0x95, algorithm);
@@ -172,8 +182,10 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa2048)]
         [InlineData(PivAlgorithm.Rsa1024)]
+        [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+[InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetData_ReturnsCorrect(PivAlgorithm algorithm)
         {
             byte[] prefix = GetDecryptDataPrefix(algorithm);

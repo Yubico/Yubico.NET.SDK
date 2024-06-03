@@ -74,6 +74,8 @@ namespace Yubico.YubiKey.Piv
 
         [Theory]
         [InlineData(PivAlgorithm.Rsa2048, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa3072, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa4096, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccP256, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccP384, StandardTestDevice.Fw5)]
         public void AttestGenerated(PivAlgorithm algorithm, StandardTestDevice testDeviceType)
@@ -123,6 +125,8 @@ namespace Yubico.YubiKey.Piv
 
         [Theory]
         [InlineData(PivAlgorithm.Rsa2048, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa3072, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa4096, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccP256, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccP384, StandardTestDevice.Fw5)]
         public void LoadInvalidCert_Attest_ThrowsException(PivAlgorithm algorithm, StandardTestDevice testDeviceType)
@@ -164,7 +168,7 @@ namespace Yubico.YubiKey.Piv
         // the YubiKey will generate attestation statements with them nonetheless.
         [Theory]
         [InlineData(BadAttestationPairs.KeyRsa1024CertValid, StandardTestDevice.Fw5)]
-        [InlineData(BadAttestationPairs.KeyRsa2048CertVersion1, StandardTestDevice.Fw5)]
+        [InlineData(BadAttestationPairs.KeyRsa2048CertVersion1, StandardTestDevice.Fw5)] //TODO
         [InlineData(BadAttestationPairs.KeyEccP256CertVersion1, StandardTestDevice.Fw5)]
         [InlineData(BadAttestationPairs.KeyEccP384CertVersion1, StandardTestDevice.Fw5)]
         [InlineData(BadAttestationPairs.KeyRsa2048CertBigName, StandardTestDevice.Fw5)]

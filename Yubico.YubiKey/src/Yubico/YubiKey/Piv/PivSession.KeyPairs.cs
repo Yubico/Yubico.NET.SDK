@@ -124,7 +124,7 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
         /// </exception>
-        public PivPublicKey GenerateKeyPair(byte slotNumber,
+        public PivPublicKey GenerateKeyPair(byte slotNumber, //TODO dont try on incapable keys
                                             PivAlgorithm algorithm,
                                             PivPinPolicy pinPolicy = PivPinPolicy.Default,
                                             PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
@@ -234,6 +234,21 @@ namespace Yubico.YubiKey.Piv
                                      PivPinPolicy pinPolicy = PivPinPolicy.Default,
                                      PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
         {
+            if (privateKey == null)
+            {
+                throw new ArgumentNullException(nameof(privateKey));
+            }
+            
+            switch (privateKey.Algorithm)
+            {
+                case PivAlgorithm.Rsa3072:
+                    _yubiKeyDevice.ThrowOnMissingFeature(YubiKeyFeature.PivRsa3072);
+                    break;
+                case PivAlgorithm.Rsa4096:
+                    _yubiKeyDevice.ThrowOnMissingFeature(YubiKeyFeature.PivRsa4096);
+                    break;
+            }
+
             if (ManagementKeyAuthenticated == false)
             {
                 AuthenticateManagementKey();

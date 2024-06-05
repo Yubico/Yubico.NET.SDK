@@ -15,10 +15,8 @@
 using System;
 using System.Globalization;
 using System.Security;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Tlv;
-using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 
 namespace Yubico.YubiKey.Piv

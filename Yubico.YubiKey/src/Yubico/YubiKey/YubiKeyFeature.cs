@@ -189,6 +189,18 @@ namespace Yubico.YubiKey
         /// supported by the PIV Application on the YubiKey.
         /// </summary>
         PivRsa2048,
+        
+        /// <summary>
+        /// The cryptographic RSA algorithm with the key size 3072 bits
+        /// supported by the PIV Application on the YubiKey.
+        /// </summary>
+        PivRsa3072,
+        
+        /// <summary>
+        /// The cryptographic RSA algorithm with the key size 4096 bits
+        /// supported by the PIV Application on the YubiKey.
+        /// </summary>
+        PivRsa4096,
 
         /// <summary>
         /// The cryptographic ECC algorithm with the parameters P-256,

@@ -76,7 +76,7 @@ namespace Yubico.YubiKey
         /// it does not support SCP03.
         /// </exception>
         [Obsolete("The WithScp03 extension will be deprecated, please specify SCP03 during the Connect call.", error: false)]
-        public static IYubiKeyDevice WithScp03(this YubiKeyDevice device, StaticKeys scp03Keys) =>
+        public static IYubiKeyDevice WithScp03(this YubiKeyDevice device, StaticKeys scp03Keys) => // TOdo remove?
             GetScp03Device(device, scp03Keys);
 
         /// <summary>

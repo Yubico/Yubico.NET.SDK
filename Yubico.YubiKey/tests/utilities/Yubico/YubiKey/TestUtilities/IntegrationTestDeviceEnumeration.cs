@@ -14,8 +14,10 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using Xunit.Sdk;
 using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey.TestUtilities
@@ -46,6 +48,9 @@ namespace Yubico.YubiKey.TestUtilities
             _allowedSerialNumbers = allowedKeys.Any() 
                 ? new HashSet<string>(allowedKeys) 
                 : new HashSet<string>();
+            
+            Debug.WriteLine("Loaded {0} keys(s) to block list ({1})", _blockedSerialNumbers.Count, string.Join(",", _blockedSerialNumbers));
+            Debug.WriteLine("Loaded {0} keys(s) to allow list ({1})", _allowedSerialNumbers.Count, string.Join(",", _allowedSerialNumbers));
         }
 
         private static string GetPath(string appDataSubDirectory, string filename) =>
@@ -73,9 +78,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// <returns>The allow list for Yubikey</returns>
         public static IList<IYubiKeyDevice> GetTestDevices(Transport transport = Transport.All)
         {
-            IEnumerable<IYubiKeyDevice> yubiKeyList = YubiKeyDevice.FindByTransport(transport);
-
-            IEnumerable<IYubiKeyDevice> testYubiKeys = yubiKeyList
+            IEnumerable<IYubiKeyDevice> testYubiKeys = YubiKeyDevice.FindByTransport(transport)
                 .Where(IsNotBlockedKey)
                 .Where(IsAllowedKey);
             
@@ -97,7 +100,9 @@ namespace Yubico.YubiKey.TestUtilities
         /// <c>false</c>, the method will examine all YubiKeys, whether the
         /// serial number is visible or not.</param>
         /// <returns>A YubiKey that was found.</returns>
-        public static IYubiKeyDevice GetTestDevice(StandardTestDevice testDeviceType, bool requireSerialNumber = true)
+        public static IYubiKeyDevice GetTestDevice(
+            StandardTestDevice testDeviceType,
+            bool requireSerialNumber = true)
         {
             if (requireSerialNumber)
             {
@@ -126,43 +131,6 @@ namespace Yubico.YubiKey.TestUtilities
                 if (currentDevice.FirmwareVersion >= minimumFirmwareVersion)
                 {
                     return currentDevice;
-                }
-            }
-
-            throw new InvalidOperationException("No matching YubiKey found.");
-        }
-
-        /// <summary>
-        /// Get YubiKey test device connected using SCP03 (with the default
-        /// static keys). Find the first one, regardless of the type (Fw5, Fw5C,
-        /// Bio, etc.).
-        /// </summary>
-        /// <remarks>
-        /// Note that SCP03 is available on 5.3 and later YubiKeys.
-        /// </remarks>
-        /// <param name="testDeviceType">The type of the device.</param>
-        /// <returns>A YubiKey that was found.</returns>
-        public static IYubiKeyDevice GetScp03TestDevice()
-        {
-            return GetScp03TestDevice(new StaticKeys());
-        }
-
-        /// <summary>
-        /// Get YubiKey test device connected using SCP03 and the given key set.
-        /// </summary>
-        public static IYubiKeyDevice GetScp03TestDevice(StaticKeys staticKeys)
-        {
-            IList<IYubiKeyDevice> deviceList = GetTestDevices(Transport.SmartCard);
-            foreach (IYubiKeyDevice currentDevice in deviceList)
-            {
-                if (currentDevice.FirmwareVersion >= FirmwareVersion.V5_3_0)
-                {
-                    if (currentDevice is YubiKeyDevice ykDevice)
-                    {
-#pragma warning disable CS0618 // Specifically testing this soon-to-be-deprecated feature
-                        return ykDevice.WithScp03(staticKeys);
-#pragma warning restore CS0618
-                    }
                 }
             }
 

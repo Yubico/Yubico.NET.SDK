@@ -91,8 +91,8 @@ namespace Yubico.YubiKey
                 YubiKeyFeature.Scp03 =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0
                     && (HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv)
-                        || HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath)
-                        || HasApplication(yubiKeyDevice, YubiKeyCapabilities.OpenPgp)),
+                    || HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath)
+                    || HasApplication(yubiKeyDevice, YubiKeyCapabilities.OpenPgp)),
 
                 YubiKeyFeature.FastUsbReclaim =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_6_0,
@@ -177,8 +177,9 @@ namespace Yubico.YubiKey
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
 
                 YubiKeyFeature.PivAesManagementKey =>
-                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_4_2
-                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_4_2 ||
+                    (yubiKeyDevice.FirmwareVersion == new FirmwareVersion(0, 8, 8)
+                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv)),
 
                 YubiKeyFeature.PivMetadata =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0
@@ -190,6 +191,14 @@ namespace Yubico.YubiKey
 
                 YubiKeyFeature.PivRsa2048 =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V3_1_0
+                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
+
+                YubiKeyFeature.PivRsa3072 =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_7_0
+                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
+
+                YubiKeyFeature.PivRsa4096 =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_7_0
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
 
                 YubiKeyFeature.PivEccP256 =>
@@ -231,6 +240,23 @@ namespace Yubico.YubiKey
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.UnknownYubiKeyFeature))
             };
+        }
+
+        /// <summary>
+        /// Throws a <see cref="NotSupportedException"/> if the YubiKey doesn't support the requested feature
+        /// </summary>
+        /// <param name="yubiKeyDevice"></param>
+        /// <param name="feature"></param>
+        /// <exception cref="NotSupportedException"></exception>
+        public static void ThrowOnMissingFeature(this IYubiKeyDevice yubiKeyDevice, YubiKeyFeature feature)
+        {
+            if (!HasFeature(yubiKeyDevice, feature))
+            {
+                throw new NotSupportedException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.NotSupportedByYubiKeyVersion));
+            }
         }
 
         // Checks to see if a particular application is available (meaning: paid-for, instead of simply enabled) on the

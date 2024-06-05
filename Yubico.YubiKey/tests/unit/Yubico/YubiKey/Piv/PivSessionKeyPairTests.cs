@@ -151,7 +151,7 @@ namespace Yubico.YubiKey.Piv
             {
                 var simpleCollector = new SimpleKeyCollector(false);
                 pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
-                bool isValid = SampleKeyPairs.GetMatchingKeyAndCert(out X509Certificate2 cert, out _);
+                bool isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out X509Certificate2 cert, out _);
 
                 _ = Assert.Throws<ArgumentException>(() => pivSession.ImportCertificate(0x81, cert));
             }
@@ -162,15 +162,13 @@ namespace Yubico.YubiKey.Piv
         {
             var yubiKey = new HollowYubiKeyDevice(true);
 
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                var simpleCollector = new SimpleKeyCollector(false);
-                pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
+            using var pivSession = new PivSession(yubiKey);
+            var simpleCollector = new SimpleKeyCollector(false);
+            pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
 
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-                _ = Assert.Throws<ArgumentNullException>(() => pivSession.ImportCertificate(0x85, null));
+            _ = Assert.Throws<ArgumentNullException>(() => pivSession.ImportCertificate(0x85, null));
 #pragma warning restore CS8625 // Testing null input.
-            }
         }
 
         [Fact]
@@ -178,12 +176,10 @@ namespace Yubico.YubiKey.Piv
         {
             var yubiKey = new HollowYubiKeyDevice();
 
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                bool isValid = SampleKeyPairs.GetMatchingKeyAndCert(out X509Certificate2 cert, out _);
-                Assert.True(isValid);
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.ImportCertificate(0x85, cert));
-            }
+            using var pivSession = new PivSession(yubiKey);
+            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out X509Certificate2 cert, out _);
+            Assert.True(isValid);
+            _ = Assert.Throws<InvalidOperationException>(() => pivSession.ImportCertificate(0x85, cert));
         }
 
         [Fact]
@@ -194,7 +190,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                bool isValid = SampleKeyPairs.GetMatchingKeyAndCert(out X509Certificate2 cert, out _);
+                bool isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out X509Certificate2 cert, out _);
                 Assert.True(isValid);
                 _ = Assert.Throws<OperationCanceledException>(() => pivSession.ImportCertificate(0x85, cert));
             }
@@ -205,15 +201,10 @@ namespace Yubico.YubiKey.Piv
         {
             var yubiKey = new HollowYubiKeyDevice(true);
 
-            using (var pivSession = new PivSession(yubiKey))
-            {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.GetCertificate(0x81));
-            }
+            using var pivSession = new PivSession(yubiKey);
+            _ = Assert.Throws<ArgumentException>(() => pivSession.GetCertificate(0x81));
         }
 
-        public static bool ReturnFalseKeyCollectorDelegate(KeyEntryData _)
-        {
-            return false;
-        }
+        private static bool ReturnFalseKeyCollectorDelegate(KeyEntryData _) => false;
     }
 }

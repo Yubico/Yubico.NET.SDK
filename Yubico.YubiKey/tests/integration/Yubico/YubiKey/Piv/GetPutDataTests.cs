@@ -24,14 +24,15 @@ namespace Yubico.YubiKey.Piv
 {
     public class GetPutDataTests
     {
-        [Fact]
-        public void Cert_Auth_Req()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Cert_Auth_Req(StandardTestDevice testDeviceType)
         {
-            bool isValid = SampleKeyPairs.GetMatchingKeyAndCert(
+            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, 
                 out X509Certificate2 cert, out PivPrivateKey privateKey);
             Assert.True(isValid);
 
-            byte[] certDer = cert.GetRawCertData();
+            var certDer = cert.GetRawCertData();
             byte[] feData = { 0xFE, 0x00 };
             var tlvWriter = new TlvWriter();
             using (tlvWriter.WriteNestedTlv(0x53))
@@ -41,10 +42,10 @@ namespace Yubico.YubiKey.Piv
                 tlvWriter.WriteEncoded(feData);
             }
 
-            byte[] certData = tlvWriter.Encode();
+            var certData = tlvWriter.Encode();
             tlvWriter.Clear();
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice();
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -102,8 +103,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Chuid_Auth_Req()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Chuid_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] chuidData = {
                 0x53, 0x3b, 0x30, 0x19, 0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83,
@@ -112,9 +114,9 @@ namespace Yubico.YubiKey.Piv
                 0x08, 0x32, 0x30, 0x33, 0x30, 0x30, 0x31, 0x30, 0x31, 0x3e, 0x00, 0xfe, 0x00
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice();
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using (var pivSession = new PivSession(testDevice))
+            using (var pivSession = new PivSession(testDevice, new StaticKeys()))
             {
                 pivSession.ResetApplication();
 
@@ -163,8 +165,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Capability_Auth_Req()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Capability_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] capabilityData = {
                 0x53, 0x33, 0xF0, 0x15, 0xA0, 0x00, 0x00, 0x01, 0x16, 0xFF, 0x02, 0x21, 0x08, 0x42, 0x10, 0x84,
@@ -173,7 +176,7 @@ namespace Yubico.YubiKey.Piv
                 0x00, 0xFD, 0x00, 0xFE, 0x00
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice();
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -230,15 +233,16 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Discovery_Auth_Req()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Discovery_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] discoveryData = {
                 0x7E, 0x12, 0x4F, 0x0B, 0xA0, 0x00, 0x00, 0x03, 0x08, 0x00, 0x00, 0x10, 0x00, 0x01, 0x00, 0x5F,
                 0x2F, 0x02, 0x40, 0x00,
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice();
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -260,8 +264,9 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void Printed_Auth_Req()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void Printed_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] printedData = {
                 0x53, 0x04, 0x04, 0x02, 0xd4, 0xe7
@@ -280,7 +285,7 @@ namespace Yubico.YubiKey.Piv
                 KeyVersionNumber = 2
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice(newKeys);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -300,7 +305,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(ResponseStatus.AuthenticationRequired, getDataResponse.Status);
             }
 
-            using (var pivSession = new PivSession(testDevice))
+            using (var pivSession = new PivSession(testDevice, newKeys))
             {
                 // Verify the PIN
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -372,7 +377,8 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
+        [Trait("Category", "Simple")]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         public void Security_Auth_Req(StandardTestDevice testDeviceType)
         {
@@ -431,14 +437,15 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void KeyHistory_Auth_Req()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void KeyHistory_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] keyHistoryData = {
                 0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice();
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -489,7 +496,8 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
+        [Trait("Category", "Simple")]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         public void Iris_Auth_Req(StandardTestDevice testDeviceType)
         {
@@ -588,7 +596,8 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [Trait("Category", "Simple")]
         [InlineData(StandardTestDevice.Fw5)]
         public void Facial_Auth_Req(StandardTestDevice testDeviceType)
         {
@@ -686,8 +695,9 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(7, getData.Length);
             }
         }
-
-        [Theory]
+        
+        [Trait("Category", "Simple")]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         public void Fingerprint_Auth_Req(StandardTestDevice testDeviceType)
         {
@@ -785,8 +795,9 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(7, getData.Length);
             }
         }
-
-        [Theory]
+        
+        [Trait("Category", "Simple")]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         public void Bitgt_Auth_Req(StandardTestDevice testDeviceType)
         {
@@ -816,8 +827,9 @@ namespace Yubico.YubiKey.Piv
 #pragma warning restore CS0618 // Type or member is obsolete
             }
         }
-
-        [Theory]
+        
+        [Trait("Category", "Simple")]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         public void SMSigner_Auth_Req(StandardTestDevice testDeviceType)
         {
@@ -878,7 +890,8 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
+        [Trait("Category", "Simple")]
+        [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         public void PCRef_Auth_Req(StandardTestDevice testDeviceType)
         {
@@ -887,7 +900,6 @@ namespace Yubico.YubiKey.Piv
             };
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
             using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
@@ -939,14 +951,15 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Fact]
-        public void AdminData_Auth_Req()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void AdminData_Auth_Req(StandardTestDevice testDeviceType)
         {
             byte[] adminData = {
                 0x53, 0x09, 0x80, 0x07, 0x81, 0x01, 0x00, 0x03, 0x02, 0x5C, 0x29
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice();
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {

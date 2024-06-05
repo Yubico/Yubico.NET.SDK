@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Scp03
         private readonly byte[] _pin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
         [Theory]
-        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Fips)]
         public void SessionSetupAndUse_Succeeds(StandardTestDevice testDeviceType)
         {
             IYubiKeyDevice device = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);

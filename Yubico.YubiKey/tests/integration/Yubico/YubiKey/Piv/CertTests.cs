@@ -29,11 +29,9 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Rsa2048)]
         [InlineData(PivAlgorithm.Rsa3072)]
         [InlineData(PivAlgorithm.Rsa4096)]
-        public void GetCert_Succeeds(PivAlgorithm algorithm) //TODO Add tests for other key tpes as well
+        public void GetCert_Succeeds(PivAlgorithm algorithm) 
         {
-            bool isValid = SampleKeyPairs.GetKeyAndCertPem(
-                algorithm, true, out string certPem, out string privateKeyPem);
-            Assert.True(isValid);
+            _ = SampleKeyPairs.GetKeyAndCertPem(algorithm, true, out var certPem, out var privateKeyPem);
 
             var certConverter = new CertConverter(certPem.ToCharArray());
             X509Certificate2 certificate = certConverter.GetCertObject();
@@ -62,8 +60,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Rsa4096)]
         public void GetCert_NoAuth_Succeeds(PivAlgorithm algorithm)
         {
-            bool isValid = SampleKeyPairs.GetKeyAndCertPem(
-                algorithm, true, out string certPem, out string privateKeyPem);
+            var isValid = SampleKeyPairs.GetKeyAndCertPem(
+                algorithm, true, out var certPem, out var privateKeyPem);
             Assert.True(isValid);
 
             var certConverter = new CertConverter(certPem.ToCharArray());

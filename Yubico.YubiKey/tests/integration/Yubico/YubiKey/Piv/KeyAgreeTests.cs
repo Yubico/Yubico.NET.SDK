@@ -31,20 +31,18 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384, PivPinPolicy.Never, StandardTestDevice.Fw5)]
         public void KeyAgree_Succeeds(PivAlgorithm algorithm, PivPinPolicy pinPolicy, StandardTestDevice testDeviceType)
         {
-            // Get the correspondent public key.
             SampleKeyPairs.GetPemKeyPair(algorithm, out string publicKeyPem, out _);
-            var publicKey = new KeyConverter(publicKeyPem.ToCharArray());
-            PivPublicKey pivPublicKey = publicKey.GetPivPublicKey();
+            var keyConverter = new KeyConverter(publicKeyPem.ToCharArray());
+            var pivPublicKey = keyConverter.GetPivPublicKey();
             var eccPublicKey = (PivEccPublicKey)pivPublicKey;
-            int expectedSecretLength = (eccPublicKey.PublicPoint.Length - 1) / 2;
+            var expectedSecretLength = (eccPublicKey.PublicPoint.Length - 1) / 2;
 
-            bool isValid = SampleKeyPairs.GetKeyAndCertPem(algorithm, true, out _, out string privateKeyPem);
+            var isValid = SampleKeyPairs.GetKeyAndCertPem(algorithm, true, out _, out string privateKeyPem);
             Assert.True(isValid);
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-
             using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();

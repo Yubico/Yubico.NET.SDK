@@ -18,6 +18,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Scp03
 {
+    // Todo these tests seem to require a Fips key as well. And that DeleteKeyCommandTEsts have run
     [TestCaseOrderer(PriorityOrderer.TypeName, PriorityOrderer.AssembyName)]
     [Trait("Category", "Simple")]
     public class PutDeleteTests

@@ -51,7 +51,7 @@ The YubiKey is manufactured with the standard default PIN, PUK, and managment ke
 
 * PIN: "123456"
 * PUK: "12345678"
-* Management Key: (Firmware Version 5.4 and below: Triple-DES / 5.7 and above: AES-192), 0x010203040506070801020304050607080102030405060708\
+* Management Key: (Firmware Version 5.6 and below: Triple-DES / 5.7 and above: AES-192), 0x010203040506070801020304050607080102030405060708\
 0102030405060708 three times
 
 Note that the PIV standard specifies these default/initial values and that even on

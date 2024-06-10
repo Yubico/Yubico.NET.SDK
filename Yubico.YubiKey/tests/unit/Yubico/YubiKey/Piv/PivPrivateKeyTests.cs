@@ -460,7 +460,7 @@ namespace Yubico.YubiKey.Piv
         }
 
         // if tag is 01, get the primeP, if 02, get primeQ, and so on.
-        private static Memory<byte> GetRsaComponent(PivAlgorithm algorithm, int tag)
+        private static Memory<byte> GetRsaComponent(PivAlgorithm algorithm, int tag) //TODO fix unit tests
         {
             int start = 2;
             int count = 64;

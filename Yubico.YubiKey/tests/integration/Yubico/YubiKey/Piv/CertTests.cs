@@ -34,11 +34,10 @@ namespace Yubico.YubiKey.Piv
             _ = SampleKeyPairs.GetKeyAndCertPem(algorithm, true, out var certPem, out var privateKeyPem);
 
             var certConverter = new CertConverter(certPem.ToCharArray());
-            X509Certificate2 certificate = certConverter.GetCertObject();
+            var certificate = certConverter.GetCertObject();
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
-            PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
-
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
+            var pivPrivateKey = privateKey.GetPivPrivateKey();
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
 
             using var pivSession = new PivSession(testDevice);
             var collectorObj = new Simple39KeyCollector();
@@ -47,7 +46,7 @@ namespace Yubico.YubiKey.Piv
             pivSession.ImportPrivateKey(0x90, pivPrivateKey);
             pivSession.ImportCertificate(0x90, certificate);
 
-            X509Certificate2 getCert = pivSession.GetCertificate(0x90);
+            var getCert = pivSession.GetCertificate(0x90);
             Assert.True(getCert.Equals(certificate));
         }
 
@@ -65,12 +64,12 @@ namespace Yubico.YubiKey.Piv
             Assert.True(isValid);
 
             var certConverter = new CertConverter(certPem.ToCharArray());
-            X509Certificate2 certificate = certConverter.GetCertObject();
+            var certificate = certConverter.GetCertObject();
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
-            PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
+            var pivPrivateKey = privateKey.GetPivPrivateKey();
 
             byte slotNumber = 0x8B;
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
             LoadKeyAndCert(slotNumber, pivPrivateKey, certificate, testDevice);
 
             using var pivSession = new PivSession(testDevice);
@@ -78,14 +77,14 @@ namespace Yubico.YubiKey.Piv
             // the mgmt key has not been authenticated.
             var genPairCommand = new GenerateKeyPairCommand(
                 0x86, algorithm, PivPinPolicy.Default, PivTouchPolicy.Never);
-            GenerateKeyPairResponse genPairResponse =
+            var genPairResponse =
                 pivSession.Connection.SendCommand(genPairCommand);
             // A generation success is a test failure.
             Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
 
             // If we reach this point, we know that the mgmt key has not been
             // authenticated, so get the cert. This should work.
-            X509Certificate2 getCert = pivSession.GetCertificate(slotNumber);
+            var getCert = pivSession.GetCertificate(slotNumber);
 
             Assert.True(getCert.Equals(certificate));
         }

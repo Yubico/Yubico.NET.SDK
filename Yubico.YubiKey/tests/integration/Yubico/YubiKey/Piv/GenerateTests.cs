@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Xunit;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.Scp03;
@@ -22,7 +23,7 @@ namespace Yubico.YubiKey.Piv
     [Trait("Category", "Simple")]
     public class GenerateTests
     {
-        [Theory]
+        [SkippableTheory(typeof(NotSupportedException))]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
         [InlineData(PivAlgorithm.Rsa3072)]
@@ -47,7 +48,7 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        [Theory]
+        [SkippableTheory(typeof(NotSupportedException))]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
         [InlineData(PivAlgorithm.Rsa3072)]

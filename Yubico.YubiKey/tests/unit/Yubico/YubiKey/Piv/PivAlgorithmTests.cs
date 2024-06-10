@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Rsa1024, 1024)]
         [InlineData(PivAlgorithm.Rsa2048, 2048)]
         [InlineData(PivAlgorithm.Rsa3072, 3072)]
-        [InlineData(PivAlgorithm.Rsa4096, 3072)]
+        [InlineData(PivAlgorithm.Rsa4096, 4096)]
         [InlineData(PivAlgorithm.EccP256, 256)]
         [InlineData(PivAlgorithm.EccP384, 384)]
         [InlineData(PivAlgorithm.None, 0)]

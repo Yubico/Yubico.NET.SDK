@@ -235,7 +235,7 @@ namespace Yubico.YubiKey.Piv
 
             ResetAuthenticationStatus();
 
-            ManagementKeyAlgorithm = PivAlgorithm.TripleDes;
+            ManagementKeyAlgorithm = PivAlgorithm.TripleDes; //Todo this is only default for keys < 5.7
 
             if (yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey))
             {

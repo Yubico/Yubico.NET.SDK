@@ -49,12 +49,8 @@ namespace Yubico.YubiKey.Piv
             ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
 
             var keyObject = PivPublicKey.Create(keyData);
+            
             Assert.NotNull(keyObject);
-            if (keyObject is null)
-            {
-                return;
-            }
-
             Assert.Equal(algorithm, keyObject.Algorithm);
         }
 
@@ -62,7 +58,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
         [InlineData(PivAlgorithm.Rsa3072)]
-[InlineData(PivAlgorithm.Rsa4096)]
+        [InlineData(PivAlgorithm.Rsa4096)]
         [InlineData(PivAlgorithm.EccP256)]
         [InlineData(PivAlgorithm.EccP384)]
         public void Create_SetsEncodedCorrectly(PivAlgorithm algorithm)
@@ -72,13 +68,8 @@ namespace Yubico.YubiKey.Piv
 
             var keyObject = PivPublicKey.Create(keyData);
             Assert.NotNull(keyObject);
-            if (keyObject is null)
-            {
-                return;
-            }
-
+            
             ReadOnlyMemory<byte> getKeyData = keyObject.PivEncodedPublicKey;
-
             bool compareResult = encoding.Span.SequenceEqual(getKeyData.Span);
 
             Assert.True(compareResult);

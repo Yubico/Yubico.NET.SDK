@@ -204,7 +204,7 @@ namespace Yubico.YubiKey.TestUtilities
                                                  "Z3McbfcguzFzNcp74vKiOTaMhmy/" +
                                                  "-----END PRIVATE KEY-----";
 
-        private const string Cert1024 = "-----BEGIN CERTIFICATE-----" +
+        private const string CertRsa1024 = "-----BEGIN CERTIFICATE-----" +
                                         "MIICDjCCAXcCFGwJuW73tplobguDN0FmsjxtKEHvMA0GCSqGSIb3DQEBCwUAMEYx" +
                                         "CzAJBgNVBAYTAlNFMRIwEAYDVQQIDAlTdG9ja2hvbG0xEjAQBgNVBAcMCVN0b2Nr" +
                                         "aG9sbTEPMA0GA1UECgwGWXViaWNvMB4XDTI0MDYwNDEwMTkzMloXDTI0MDYwNDEw" +
@@ -219,22 +219,28 @@ namespace Yubico.YubiKey.TestUtilities
                                         "QiI=" +
                                         "-----END CERTIFICATE-----";
 
-        private const string Cert2048 = "-----BEGIN CERTIFICATE-----" +
-                                        "MIICDjCCAXcCFGwJuW73tplobguDN0FmsjxtKEHvMA0GCSqGSIb3DQEBCwUAMEYx" +
+        private const string CertRsa2048 =
+                                        "-----BEGIN CERTIFICATE-----" +
+                                        "MIIDEzCCAfsCFC+WImHvRezTDqI59Ffg3ac9++ahMA0GCSqGSIb3DQEBCwUAMEYx" +
                                         "CzAJBgNVBAYTAlNFMRIwEAYDVQQIDAlTdG9ja2hvbG0xEjAQBgNVBAcMCVN0b2Nr" +
-                                        "aG9sbTEPMA0GA1UECgwGWXViaWNvMB4XDTI0MDYwNDEwMTkzMloXDTI0MDYwNDEw" +
-                                        "MTkzMlowRjELMAkGA1UEBhMCU0UxEjAQBgNVBAgMCVN0b2NraG9sbTESMBAGA1UE" +
-                                        "BwwJU3RvY2tob2xtMQ8wDQYDVQQKDAZZdWJpY28wgZ8wDQYJKoZIhvcNAQEBBQAD" +
-                                        "gY0AMIGJAoGBAMVku7bV03lmAXGROPk983n3Ffn3hUntAnlOrBe/UrR230/8JmSR" +
-                                        "vdnpaPPvvG0U98RSsXwFIoSkqTFyxSEQ0RmfLDpbSTMb/0/4r49LYtrbpykeXbfq" +
-                                        "UoMoTKdu6k9kT3waa6K0H7OChuF3n1PbaoGhufpWH3XcSgKH2YxUyR2dAgMBAAEw" +
-                                        "DQYJKoZIhvcNAQELBQADgYEAmUzNnXcNgYDMQ+XVsOQzhuiwVZOCEGQue0s5hDFC" +
-                                        "Os6y1/cvHRRefWsPuxTIqNgV6VmZInyoVHoep6MWfptQYqseMNI1/WJCUr2OnC/d" +
-                                        "GYBQTDCxdlboL4qSk9BonzEMP9D+Gg+h2hrfej9Al1/UwRHcp14cgATwtXZSOlNI" +
-                                        "QiI=" +
+                                        "aG9sbTEPMA0GA1UECgwGWXViaWNvMB4XDTI0MDYwNDEwMTk1MFoXDTI0MDYwNDEw" +
+                                        "MTk1MFowRjELMAkGA1UEBhMCU0UxEjAQBgNVBAgMCVN0b2NraG9sbTESMBAGA1UE" +
+                                        "BwwJU3RvY2tob2xtMQ8wDQYDVQQKDAZZdWJpY28wggEiMA0GCSqGSIb3DQEBAQUA" +
+                                        "A4IBDwAwggEKAoIBAQC9SYufzFhPfgw/r95ADcnn3abZdKHFwLv9/6iDbSKfssa1" +
+                                        "FoINzI5uGJ6wohiamr1fL7jjKzIpD9mVqOKaJf4XUAD/A5rEX57ucq7M3Mz8r3MI" +
+                                        "+8iL3yF0LX+7V7EIl2Bn1sdCFTesSkbvtBmqgfitupZ1MzPJRY2FACs3MiMaeg2U" +
+                                        "ShTtoZ+IbPd+dn/BMqw/2cudQ1J2qyENMpij6DzyNWAqIEHX06KPOzhh+bcB70AF" +
+                                        "qgjalgZK+KAb9LadalhaMBAT9NPX1X5td0fVmRDFFMRhx8HnSNnSvMbuRwyDAbvV" +
+                                        "nz+UfB1Hrq/WrzF4NM4W08vRKuitN2btxVrLoaMRAgMBAAEwDQYJKoZIhvcNAQEL" +
+                                        "BQADggEBAKv4tbsNVdNuM+EZwew9aMO/SjDMG3dzJlPAoB1t56nhRPpu1WKl7Ws/" +
+                                        "s7RETf9X1AUR3vdHroGh9IIBQi8kXXPnTgI7piXCHXJvf46EXkhItiZ2YG/8acG2" +
+                                        "sJcSVLBYkYKlUb8Y3oKdHtaDfHrXM9rTkwIHVcu9KOq4Dv7azsts+D1t7xGoXJKo" +
+                                        "8thBpg6+SPQs86N6V0JU5l1nC2C1NKRQtgrxaURf4gPKpPDepN8Y0rlevbs8X2Xp" +
+                                        "sBqR5dH4k9xwj8/GZURuNq36fwyyZAgXoc9de2SWjYwGmyMwQOE2aGO5pXL8LOT9" +
+                                        "R480m6XPlN+Bp9jEYU5PWfnzcztjpkA=" +
                                         "-----END CERTIFICATE-----";
 
-        private const string Cert3072 = "-----BEGIN CERTIFICATE-----" +
+        private const string CertRsa3072 = "-----BEGIN CERTIFICATE-----" +
                                         "MIIEbzCCAtcCFDaL3lZCak/LZYFzH9X3Ib3CpmmLMA0GCSqGSIb3DQEBCwUAMHQx" +
                                         "CzAJBgNVBAYTAlNFMQ4wDAYDVQQIDAVTdGhsbTEMMAoGA1UEBwwDU3dlMQ4wDAYD" +
                                         "VQQKDAVZdWJpYzEPMA0GA1UECwwGWXViaWNvMQ8wDQYDVQQDDAZZdWJpY28xFTAT" +
@@ -261,7 +267,7 @@ namespace Yubico.YubiKey.TestUtilities
                                         "pPPfz8xaiBIh2lHu7FxUp5jjmsQ1QdCgr7wYOwjl9YQd3XQ=" +
                                         "-----END CERTIFICATE-----";
 
-        private const string Cert4096 = "-----BEGIN CERTIFICATE-----" +
+        private const string CertRsa4096 = "-----BEGIN CERTIFICATE-----" +
                                         "MIIFbzCCA1cCFGYdlOTmPdtfwrih5P9gZlJDO7SUMA0GCSqGSIb3DQEBCwUAMHQx" +
                                         "CzAJBgNVBAYTAlNFMQ4wDAYDVQQIDAVTdGhsbTEMMAoGA1UEBwwDU3dlMQ4wDAYD" +
                                         "VQQKDAVZdWJpYzEPMA0GA1UECwwGWXViaWNvMQ8wDQYDVQQDDAZZdWJpY28xFTAT" +
@@ -294,7 +300,7 @@ namespace Yubico.YubiKey.TestUtilities
                                         "I3oS" +
                                         "-----END CERTIFICATE-----";
 
-        private const string KeyEccPublicP257 = "-----BEGIN PUBLIC KEY-----" +
+        private const string KeyEccPublicP256 = "-----BEGIN PUBLIC KEY-----" +
                                                 "MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEgE3OZMV7eQ+b+qFSDdQ5TCQ9pgg2" +
                                                 "9dxmUGX87owhbBHgU+RrlNd5Xi/qfcjl0qD1yJuM0vg5m4NjqT3zx6q0+Q==" +
                                                 "-----END PUBLIC KEY-----";
@@ -327,7 +333,7 @@ namespace Yubico.YubiKey.TestUtilities
             switch (algorithm)
             {
                 case PivAlgorithm.EccP256:
-                    publicKey = KeyEccPublicP257;
+                    publicKey = KeyEccPublicP256;
                     privateKey = KeyEccPrivateP256;
 
                     break;
@@ -365,45 +371,16 @@ namespace Yubico.YubiKey.TestUtilities
             }
         }
 
-        // Get a private key for the given algorithm. Return the key as a PivPrivateKey.
-        public static PivPrivateKey GetPrivateKey(PivAlgorithm algorithm)
-        {
-            return algorithm switch
-            {
-                PivAlgorithm.Rsa1024 => GetPivPrivateKey(KeyRsaPrivate1024),
-                PivAlgorithm.Rsa2048 => GetPivPrivateKey(KeyRsaPrivate2048),
-                PivAlgorithm.Rsa3072 => GetPivPrivateKey(KeyRsaPrivate3072),
-                PivAlgorithm.Rsa4096 => GetPivPrivateKey(KeyRsaPrivate4096),
-                PivAlgorithm.EccP256 => GetPivPrivateKey(KeyEccPrivateP256),
-                PivAlgorithm.EccP384 => GetPivPrivateKey(KeyEccPrivateP384),
-                _ => throw new ArgumentException("No key / cert mapped", nameof(algorithm))
-            };
-        }
 
         // This gets a private key with a cert that contains the public key
         // partner. This can only get one key and cert (the same one each time)
         public static bool GetMatchingKeyAndCert(
             PivAlgorithm algorithm,
-            out X509Certificate2 cert, out PivPrivateKey privateKey)
+            out X509Certificate2 cert, 
+            out PivPrivateKey privateKey)
         {
-            switch (algorithm)
-            {
-                case PivAlgorithm.Rsa2048:
-                    cert = GetCert(Cert2048);
-                    privateKey = GetPivPrivateKey(KeyRsaPrivate2048);
-                    break;
-                case PivAlgorithm.Rsa3072:
-                    cert = new CertConverter(Cert3072.ToCharArray()).GetCertObject();
-                    privateKey = GetPivPrivateKey(KeyRsaPrivate3072);
-                    break;
-                case PivAlgorithm.Rsa4096:
-                    cert = new CertConverter(Cert4096.ToCharArray()).GetCertObject();
-                    privateKey = GetPivPrivateKey(KeyRsaPrivate4096);
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(algorithm), algorithm, null);
-            }
-
+            cert = GetCert(algorithm);
+            privateKey = GetPivPrivateKey(algorithm);
             return true;
         }
         
@@ -421,7 +398,7 @@ namespace Yubico.YubiKey.TestUtilities
         // These keys and certs can be used for anything, they don't have to be
         // used in attestation. That is, if you are not dealing with attestation,
         // and you need a key and cert, these might work.
-        public static bool GetKeyAndCertPem(
+        public static bool GetKeyAndCertPem( 
             PivAlgorithm algorithm,
             bool validAttest,
             out string cert,
@@ -434,7 +411,7 @@ namespace Yubico.YubiKey.TestUtilities
                     privateKey = "nokey";
                     return false;
 
-                case PivAlgorithm.Rsa1024:
+                case PivAlgorithm.Rsa1024: //Todo might have to regen cert with correct CA extensions
                     if (validAttest)
                     {
                         cert =
@@ -479,23 +456,7 @@ namespace Yubico.YubiKey.TestUtilities
                             "-----END CERTIFICATE-----";
                     }
 
-                    privateKey =
-                        "-----BEGIN PRIVATE KEY-----" +
-                        "MIICdwIBADANBgkqhkiG9w0BAQEFAASCAmEwggJdAgEAAoGBALG/a85wy36uf4Rm" +
-                        "wpI/lSUi4bcueGJYodpUS99AnBeI6HFEK2jBf0niKPXhkHnO/CuajF8yfa67hkHx" +
-                        "C+7O102JIpkp6erHm6pXiSL2CezWt6Zy7Aaj8LYa8Nj8Gl3ikOBbMBG9zdA8xVUq" +
-                        "JzYkJFvn+lJSS9RHAa04L7nU08ivAgMBAAECgYBxAADJfWvhXY4z3iBUWZe3xDU6" +
-                        "/5AI9c/vvSd/BtQ1IhSj7XKrZlhF4EGqD3yJ88zc66PR4YeFTjJMObIcX+L/l0Ki" +
-                        "Yx+OyjthW7b9pVEjrUBc1Cbj26r8PzRCEM41zZy6jLB6M1Oi71hRYU6ZaetBnp2T" +
-                        "U2A5yUWoF2YT9VMSAQJBAOyEDRayskWsv9FIb9j0p42fLnhfMp4oUMvAQBQfRPEl" +
-                        "0wgbPHG2KHKeZCkpEkn1D6VFu8JAVkXNaz77Op9LiV0CQQDAY/5Gt+Wrjekz6myM" +
-                        "rDhRhoOmX6eSFCTzqOvZVLc/jy4aMLYC3VGmyiHOEXD5ONyE+LSKnbJxrK3vriKh" +
-                        "Cl17AkEA2KNXzcueaR2DkXHVKRdnhdwhV5ZzKdTptMeCqiu+HVg1BT7VTZ65S8tz" +
-                        "GRSKsP1r+El4YsRFgahXrJe3qYMp7QJBAL+TEoGC3y0sG3p5xWtyloX/xxolh+w7" +
-                        "KOyEWY3JAMxGm+ayeJtznLnT70OONIvGpje2m7in/SeahnzzTkJD2v8CQHWezzo3" +
-                        "m6NRXXDkbY7cLTnkk9zkQwkOjZO+/ChlQ6trrJ7UAKGL5Gj8x3gXbBrbU5mv7xL/" +
-                        "Py1ySQ4xSMT/gB0=" +
-                        "-----END PRIVATE KEY-----";
+                    privateKey = KeyRsaPrivate1024;
 
                     break;
 
@@ -550,194 +511,18 @@ namespace Yubico.YubiKey.TestUtilities
                             "-----END CERTIFICATE-----";
                     }
 
-                    privateKey =
-                        "-----BEGIN PRIVATE KEY-----" +
-                        "MIIEwAIBADANBgkqhkiG9w0BAQEFAASCBKowggSmAgEAAoIBAQDbf2A4p7asu6sn" +
-                        "9Afk4B8mcZ1AkJqYp5VBf6A2xRXEsDxD/qBf8cTheaE6B6oL0zSz9Lfgub/X/A+e" +
-                        "8MscMbIDDm+9aaxFdo2AUQqPZ5F08rxRrLDTkyihwYcUciF4KO+24B5Ge5V3s6Tp" +
-                        "Klyu8IBeDH0NjZ7dsQ/krJVlGdwFSHWm3a1Ai4yJMzeh8Iq5gL6043vtD9A2bQzM" +
-                        "4kUWw9QhwJ/mMi9LR/YLxT3UACBvKUqrVFY5dxiccRsP97eR68P57ooseRrjprQ3" +
-                        "Gl/1ILw9W+VOqpXsuqA0lzFe0ag56IUufH168ua2eCzHyed0sugbuIx6yWD5duS4" +
-                        "TzP/rCSBAgMBAAECggEBAIRS/NoK2Yi2to8mgZ/MMVtGwQtMYbbHyKYs35RFKkNi" +
-                        "D2LaXSqaIRvg7H6EYlIwqKQYUsXqlSoLLguelIPRvcQz7s8cpptVxiZmNNyRDlKX" +
-                        "h0ohtpRGMgeaGOoNh/ndi+4OnJHXLRt1tGRQgoGAQZLxKm6CQxTZCoDMPmAtv8N6" +
-                        "dobrCgF4dmDZ2bPjGszn/c51tjdN2l8JtgOxp6LD+cK0sdkQCctn8W+xJLhXrBcX" +
-                        "JwJGqczX7cH9hvLRnCvTOJbRsb24b1YTPML4rQVkLzdtTWySCI5V6miWSl7q7HV/" +
-                        "kyloRv2Eqos0erat6Z2tyVCvuJRo1y5m0qnpd/+JXZUCgYEA75LITbF4XoC1MLpA" +
-                        "ZchbtUukHfjmiIUmiDX2QkopeyrCOEOwiDHMrq54/ZbIxwnePXHgyEhycDHyxki1" +
-                        "l7XlVgmqg8gX0lHFc0P6bNKSEQMIp+aKF2ZFFqNKV3I4gZnLL4+5+52ddWPsk1Qd" +
-                        "dVRdvbdtuzR6k0v2tGvd3jkRCvcCgYEA6ow0Nbrs5lJ2EQcbzB7Tpi/jJwAuKu/f" +
-                        "rKS2Z1HtqhqH9I9O7o2QbCoCMZKiJgpYRpdpy7h3cGAAUvLp7nniLiQJDrwtNQLk" +
-                        "arItdaoxLZyQhI8yEOBJ0lRbCq5ugbFN+NilJwQuSVM5uyNPcxgqdYGHFqF44LGQ" +
-                        "OZ/XCC7uNkcCgYEA7RKunpuRRstNAgQ9d7tWbUiGBpbo4o4IvF/R6nVjKRv+CBmL" +
-                        "1qqZJv9GgYO1+ajdQKaxTuDKRhZXbTpEYPXCFWsJTtEyKZF7t/28EfYqTyVWangr" +
-                        "jM5KbgV2qqRAIJflRpKO89xcFe+lC4IAiLvM69FZiBh9d8eDQbVAYAjOwa8CgYEA" +
-                        "xWCtQxYF7CEyyEuSIelDNRQRdS2arHlmYpPOCA6TEVX4WV8MDoZFJjEH3Y3HNHn6" +
-                        "JZWf61dV89RmEWfoYs5g/3FFygejh3vimsNMrDtH3Vlm6JbUjA0jMoPYhZma1ztN" +
-                        "IX+3I6lKBlyqNYiWgIWynWYeN3Y1Eel7NHMFcxaDUlsCgYEAvZ4e7yo9iz9gmtri" +
-                        "hlD0QnuM/5MLdczSwtDeZuGnalOAWWPGWMPp+SJ7t2sU+Xe/ytVGDQWmc/tzKoGG" +
-                        "rG7dSk9mkT4rod2gfKZdHdAsTQjvbx8lrezSgRHGYQF991Z4GTSTO2pe3r/LwhjP" +
-                        "iZZjh4mwb45JukjeGimRP9H3aio=" +
-                        "-----END PRIVATE KEY-----";
-
+                    privateKey = KeyRsaPrivate2048;
+                    
                     break;
                 case PivAlgorithm.Rsa3072:
-                    cert =
-                        "-----BEGIN CERTIFICATE-----" +
-                        "MIIEbzCCAtcCFDaL3lZCak/LZYFzH9X3Ib3CpmmLMA0GCSqGSIb3DQEBCwUAMHQx" +
-                        "CzAJBgNVBAYTAlNFMQ4wDAYDVQQIDAVTdGhsbTEMMAoGA1UEBwwDU3dlMQ4wDAYD" +
-                        "VQQKDAVZdWJpYzEPMA0GA1UECwwGWXViaWNvMQ8wDQYDVQQDDAZZdWJpY28xFTAT" +
-                        "BgkqhkiG9w0BCQEWBnl1YmljbzAeFw0yNDA1MzExMTM0NTFaFw0yNDA1MzExMTM0" +
-                        "NTFaMHQxCzAJBgNVBAYTAlNFMQ4wDAYDVQQIDAVTdGhsbTEMMAoGA1UEBwwDU3dl" +
-                        "MQ4wDAYDVQQKDAVZdWJpYzEPMA0GA1UECwwGWXViaWNvMQ8wDQYDVQQDDAZZdWJp" +
-                        "Y28xFTATBgkqhkiG9w0BCQEWBnl1YmljbzCCAaIwDQYJKoZIhvcNAQEBBQADggGP" +
-                        "ADCCAYoCggGBAJkmD7ofsaSSUFuj/97PSjjwgDw+zXEpe+KjsrbrqXTmhcWsXmVd" +
-                        "GF+AEAkzYiwCPj5fWSB3nkgbUZM8pFp7riWfSJUBIxg7Arw/coHN5GRZyc5i1lRq" +
-                        "++jhBS3UB1TAcEbrsvZEUXPj24DHeuDvG7CWFTaXNRawYUqM2fQMRJnuXXsVKTbh" +
-                        "BBUx1IQAMVah/m7Zu2DlO/gPJc7kA+fG7FcfvX+lZ1l6iOq2jVABZ2Q3IyjVpejM" +
-                        "HLTlkBByxJnx9D7v1bYdHEfBmEO6JrhCID876GH1DHuW7LmyUyGH+j1ImWvS7jvF" +
-                        "JQnGVN1FBJRQ/zOXA9zPklRhdxsqVs1CE6L1dLVFXFZKUPmGpmKWmv8+yV9o3Nw7" +
-                        "SqGs/WfsZ/cErVy/TxWi+b5pebJOwip6tpkt4N5KIMqDG9aRXWKLRnIVY8TE4nTJ" +
-                        "LEZvh3+4wNuwPCJ6hgAos9+zqfzFmQwig0OM22tMvPnLQmXzkIHufzCftR3lh7y/" +
-                        "+UFptIyC/lkVIQIDAQABMA0GCSqGSIb3DQEBCwUAA4IBgQBTiQTbmwu1wM//Qvd0" +
-                        "WE0uxaYkDI25cyu5eH4dCo9QUDo2xk/CMuNt4xAk7CLBEqhzzMDdnD5SQKNN1Rgk" +
-                        "pIoZfyzbrsFd2JlcDIm8ZAxYITAPp9cDZqrM9mFjaWGFSenay3yqP5JcT68FuEwp" +
-                        "RtbVM2fWTyRJvjcfCcZMdefFhOmcdaoPy/EjcR5iRvBkyYfengAShPsEzeWC51jp" +
-                        "JkjNISJdZ3CnCk8XQv333RC9S0iLKTEA3zZOIQtJRBbrdfg6tM7w8eNsID6usa0L" +
-                        "ALD8vMmZCXrI1DXQ/yJRL/gZwui7HrMI8xw2KBUvn84sSg7Vi8RZdBF164N0XoUR" +
-                        "sNe8CQFIpyrwCYJROjU0GbnNTLTSBsZ6WLFJI8LhkzJRCjB/vYHJjihmaIBacmCK" +
-                        "beg7amRY9+lz+dfh89IqfHM6Y2N2dubBz37l2YZwZ3rrmoST4fLbuj0UU/mwRano" +
-                        "pPPfz8xaiBIh2lHu7FxUp5jjmsQ1QdCgr7wYOwjl9YQd3XQ=" +
-                        "-----END CERTIFICATE-----";
-                    privateKey =
-                        "-----BEGIN PRIVATE KEY-----" +
-                        "MIIG/AIBADANBgkqhkiG9w0BAQEFAASCBuYwggbiAgEAAoIBgQCZJg+6H7GkklBb" +
-                        "o//ez0o48IA8Ps1xKXvio7K266l05oXFrF5lXRhfgBAJM2IsAj4+X1kgd55IG1GT" +
-                        "PKRae64ln0iVASMYOwK8P3KBzeRkWcnOYtZUavvo4QUt1AdUwHBG67L2RFFz49uA" +
-                        "x3rg7xuwlhU2lzUWsGFKjNn0DESZ7l17FSk24QQVMdSEADFWof5u2btg5Tv4DyXO" +
-                        "5APnxuxXH71/pWdZeojqto1QAWdkNyMo1aXozBy05ZAQcsSZ8fQ+79W2HRxHwZhD" +
-                        "uia4QiA/O+hh9Qx7luy5slMhh/o9SJlr0u47xSUJxlTdRQSUUP8zlwPcz5JUYXcb" +
-                        "KlbNQhOi9XS1RVxWSlD5hqZilpr/PslfaNzcO0qhrP1n7Gf3BK1cv08Vovm+aXmy" +
-                        "TsIqeraZLeDeSiDKgxvWkV1ii0ZyFWPExOJ0ySxGb4d/uMDbsDwieoYAKLPfs6n8" +
-                        "xZkMIoNDjNtrTLz5y0Jl85CB7n8wn7Ud5Ye8v/lBabSMgv5ZFSECAwEAAQKCAYAt" +
-                        "tQnZk0753n8kMpiRf41X3BNxp466GNb0B8Y1SLVNAeXn3q9XkkbNbdObY14H421/" +
-                        "QQbBJWI0hA6/IkitBp+tc9H+QpYeS7Jfy5HZwsDI4HFV6vKrxDhFwy7ABDlh5oM7" +
-                        "72l8jVw/+b/Puflm+4XomIphPhSmnmKTFOGRsD2jMVxt+R1RVyvYRYR3FvWitPtS" +
-                        "SyJc412YBbFTg4LU4G41/G+akpt7PZJydqRLPfgFFV2leMoo5g4lQSRTfGVHysmT" +
-                        "y3rCaajzDg27FEx0OL7UdhLer1wYYRWdT9lQ9kkVY9wrNf6G+VTFlIsSj1yXAtBk" +
-                        "qL018BEijndLhU3Vnm104ZRsG9W9ySrZaX2FhAx17ssvg/qHnS3u5vFcOPIBoGWC" +
-                        "+B/BvhnhWWSY+tWVLZIfPl4HQuQ2WivJb//X831JWRZYMbCFhh4NtirJO+bZf7b0" +
-                        "hgCFIqWLLp8yWTZ5xx1Z7R4kd1uks4/XdC1Sr87Lu7Rcwd0Y+ALt04oh0PTG7ZcC" +
-                        "gcEA0ItLpF9Ewi3nvHVglSc3piRv3elGnuiMK45ESc08M+4Dll8a50jTAIkjcMvN" +
-                        "avTgHbYVk3xkGn3LZsea0+T9qtRvQJ5xsyleOk4Jy3NqNRN63cYJ9BhDEW+cCTrC" +
-                        "TNlTdsaOP2+7Atz7g+Oh1DtnKJ8Lpcc2VhHGC+nH4u8KEAhkpQ5+YzakM0aiDF6R" +
-                        "sQBIThMq2Zw33t/huBBVuVzJs9saRPTJvDPk7dwD7gi1MWWhCDaB1cWtxhsAhHeq" +
-                        "zP7rAoHBALv/tpB06nUrtMEQ6UkQpY6kV45gTMDOrdlwKiJbgUPxuKd6TsC4jlW8" +
-                        "YFZXk6AUCFGa77r5KJOxc/Y87kKdf63dnN1mjpRNBxrO83GtjAc+A8m3r5tERevi" +
-                        "rNq1NEKugcRW8KZgo93HEEfh8NiQsHIg8LKooUnKIXNBA5qsJ5Z/Qt11jioNW33s" +
-                        "pqkx6RmZiGlB1oTQmZW//pJvFgMJlflIzHut1ypcpowY37xfElyKKGRDP+YIr84t" +
-                        "HN0iGUXxIwKBwFj2IxWCgn1nQcT2OXZHHYklYAdFPRgK0ci+zsjA4V6xuRwLhBmH" +
-                        "ymMfHVw/xGhM/9IM29VnqfhXE07L9XNQ6xlVuAPT02L/UbADnFAK8xKjNbWnhpV3" +
-                        "SB0HBIQ3aa2Iw/8WIpZTHm7RQAX6NA2qLY55kmlsuvQqbtakKt3W5O8D9ZMnxKik" +
-                        "JZWuGvC14uaj3TRZHt1ns7nCvbJcXYVOXMj5vZIO7oP3i0AgrBh95HWnCfPL9MTx" +
-                        "p/iriiP4PIdocwKBwG+kiL86ny1b+iiZKWCZgSe3UsObTplFY5p38J2cp6Q4vQbA" +
-                        "LFpofyZNCwzbTzDGFLaZgvoPEti6jfnR71AiBfuzWn9kcxGAuNJjydBdVoXKfydg" +
-                        "bOmQ3tEZOLtc1p8u0KNPWfQD+ewvVezKMWP6cL4l76q5V6bhYYH3PvOwfoXyJzwq" +
-                        "nnU8n3OlgMeDe0EXmxme3oza8AotDTnavECrhaOXZs+fyeI/SSxzbRKJhvbrmNcJ" +
-                        "1L1/tR+ETNrJcCbH7wKBwCQ2darkzREjCficN8VdYacoWfa2SsJLo+mk6Nw/E2OD" +
-                        "LGG8m3VXEi4wxTCxZV0t7HoRR4NvB/Co3ag1dxxHu86cVmQxtWGvujQ4XdfBAUHo" +
-                        "cIEq73PMyHurNMZRyoa/B5rCcrDQVm7NW+p23GS9VoVsdnWqynk/OVG32zSe3arz" +
-                        "XN4jazgcSBhhKL/tl9LInGYXNjN2M8icSwntvWKD2V337UfpP82/gqbjs1MDOd0A" +
-                        "tMaBxdHK1Tub2v2ww5i80w==" +
-                        "-----END PRIVATE KEY-----";
+                    cert = CertRsa3072;
+                    privateKey = KeyRsaPrivate3072;
+                    
                     break;
                 case PivAlgorithm.Rsa4096:
-                    cert =
-                        "-----BEGIN CERTIFICATE-----" +
-                        "MIIFbzCCA1cCFGYdlOTmPdtfwrih5P9gZlJDO7SUMA0GCSqGSIb3DQEBCwUAMHQx" +
-                        "CzAJBgNVBAYTAlNFMQ4wDAYDVQQIDAVTdGhsbTEMMAoGA1UEBwwDU3dlMQ4wDAYD" +
-                        "VQQKDAVZdWJpYzEPMA0GA1UECwwGWXViaWNvMQ8wDQYDVQQDDAZZdWJpY28xFTAT" +
-                        "BgkqhkiG9w0BCQEWBnl1YmljbzAeFw0yNDA1MzExMjQxMjZaFw0yNDA1MzExMjQx" +
-                        "MjZaMHQxCzAJBgNVBAYTAlNFMQ4wDAYDVQQIDAVTdGhsbTEMMAoGA1UEBwwDU3dl" +
-                        "MQ4wDAYDVQQKDAVZdWJpYzEPMA0GA1UECwwGWXViaWNvMQ8wDQYDVQQDDAZZdWJp" +
-                        "Y28xFTATBgkqhkiG9w0BCQEWBnl1YmljbzCCAiIwDQYJKoZIhvcNAQEBBQADggIP" +
-                        "ADCCAgoCggIBALgRMzoEl5riGOVEdDXR6zFcVWdDwv+KqnOF+jYisaQ3TcZhYQ11" +
-                        "DAXDRUube3eMGso3i4GGxakIkT5BTROkJwrqrRLaeCvhgEmh2Os0kXde31Z6TAXr" +
-                        "QgWSr3w9vCP0DkEqRM7VyEnYPoNSQhxy8ZdVAVYRMePWYGDXIRfQi7OSAVGRL1Jd" +
-                        "xCW/umAoqFa+i79oCVlGOwgEKlbM5hCptu/cX7GsRQVUOXAHU49PUKAyoGe7Ery9" +
-                        "d9hOVtpnsJpAK6lm+ExhIcNnJ4uo5UrPnt5g0W94rnOrvFFxLp/jufL7BdXgFV6/" +
-                        "AswxUEEsqTTv6wg4vhjIUns3zsr3vSg9YmFbyFUe0pURnH/V54wEoE5qWtf/i9E+" +
-                        "mypRbmcVGhc7MDcxWmEeVdND1IjsUg6mXZ5bmA2ZEgr/g0WaF1QLFOfYwAp8ozvI" +
-                        "Yut1fgYGdihYCHr0boi/0SUOHd5MdGGMjyTJ2zgc9C08oF2OXKY7JVVWzFKGCbJt" +
-                        "wGqXWY/Og0CZV+pkFlaHab3SwLCUBE44Vb5MHRtrwlXiBVb0alYDHjkkg/jNqUPD" +
-                        "4Ax+GkN1jy7Zic4y7yPUQtgHCSsSciGdaLU+CsY5EXfLUqS1auVmYU9HVNxCPD+S" +
-                        "tHKvNPBEjo9gEIrW4tQj2wbdzgikgcbYyNfKP/DbTJnka5QtkLf9mRCXAgMBAAEw" +
-                        "DQYJKoZIhvcNAQELBQADggIBAJpqIBlRkPwN3woPoGFzGCesLWfBHxDbD2Kk+1Tm" +
-                        "xtBh+flC3hzuiWHkOO6KWcSfvPq1IlJX3JZhh+p9eF/Qt3UIUliqrFqv4SgDPmbM" +
-                        "d+w3ZAe+VV1NnKcGOGdLweEkldxeauBU2QuUi1D/j13JJbJIVfraAf9zxyhdkzKr" +
-                        "T3qj8ebZptOnmGqAE7afBIFEw65jF00lQAdrNVdea1WHlbjGWYUmMbuGGAWuVuJI" +
-                        "U7FckbLNHcVeAt8Cms8SgoiEBr5YxWnWko/EZzClLxlxS7YL4nnZ/WZj3J30FLbc" +
-                        "L2miduxeZGTDUjxBXlmVPP36ukFcR9HmQ/ydSTlGyAGqlbwMx/GrIb7jQmcfGcjN" +
-                        "zoP7Dsia4z+coROmB2TMP/nfozDyx5V60DcG4kpT5HSs7MlzUhZm6ydp3gQqRGZZ" +
-                        "DKjd7W8ZxvOG6Bl0Lh3qIPNfOPjEIOestA1Irzs0rVV8zBrVJTrctNtahBiZpXyq" +
-                        "CzfrswHU1tnQgcqPrFfQQ4jR0Ovz1DdArFK0J5mwW0TI3DZU8c2UE1zNtwUG0Al/" +
-                        "J9sZSq2jp5tX0sZJoPYiMBW0VN76YyqsjfHcyxNTn3BX+eT7jdVx4fLkrh68YPeO" +
-                        "xthHfyKfPt5uM1X0v+lnLZgo+0Ulra9Wvgccj1J3r9g5paT2WIEKXLHLI1BeO6MC" +
-                        "I3oS" +
-                        "-----END CERTIFICATE-----";
-                    privateKey =
-                        "-----BEGIN PRIVATE KEY-----" +
-                        "MIIJQQIBADANBgkqhkiG9w0BAQEFAASCCSswggknAgEAAoICAQC4ETM6BJea4hjl" +
-                        "RHQ10esxXFVnQ8L/iqpzhfo2IrGkN03GYWENdQwFw0VLm3t3jBrKN4uBhsWpCJE+" +
-                        "QU0TpCcK6q0S2ngr4YBJodjrNJF3Xt9WekwF60IFkq98Pbwj9A5BKkTO1chJ2D6D" +
-                        "UkIccvGXVQFWETHj1mBg1yEX0IuzkgFRkS9SXcQlv7pgKKhWvou/aAlZRjsIBCpW" +
-                        "zOYQqbbv3F+xrEUFVDlwB1OPT1CgMqBnuxK8vXfYTlbaZ7CaQCupZvhMYSHDZyeL" +
-                        "qOVKz57eYNFveK5zq7xRcS6f47ny+wXV4BVevwLMMVBBLKk07+sIOL4YyFJ7N87K" +
-                        "970oPWJhW8hVHtKVEZx/1eeMBKBOalrX/4vRPpsqUW5nFRoXOzA3MVphHlXTQ9SI" +
-                        "7FIOpl2eW5gNmRIK/4NFmhdUCxTn2MAKfKM7yGLrdX4GBnYoWAh69G6Iv9ElDh3e" +
-                        "THRhjI8kyds4HPQtPKBdjlymOyVVVsxShgmybcBql1mPzoNAmVfqZBZWh2m90sCw" +
-                        "lAROOFW+TB0ba8JV4gVW9GpWAx45JIP4zalDw+AMfhpDdY8u2YnOMu8j1ELYBwkr" +
-                        "EnIhnWi1PgrGORF3y1KktWrlZmFPR1TcQjw/krRyrzTwRI6PYBCK1uLUI9sG3c4I" +
-                        "pIHG2MjXyj/w20yZ5GuULZC3/ZkQlwIDAQABAoICABBO9DmR8JcreZM1E0Rorflf" +
-                        "Br4Ygq1x7S10U5/6R1nKZwMXQhCw+MWF8JzRtzwqikq1mZAUKQbGy7+dUr8iJ/qc" +
-                        "O+ttg4CeNGfRuQHV7YS+P8GBiNZsnecXTdV1m50zFK3XZeaBihzPPD98YuXyyGiY" +
-                        "T0vMSDeGMsUOkOlzc8oPbjutrM8UBoeY5JV8F+lfoDG8Sp/BswQNAm25+v32jrVs" +
-                        "n00c4bZAKSEKge/Ma9NVyPqH2HgnVvf8sOgdXPtXVi1maMRNRgvySgGvKQNA2mc1" +
-                        "/Guik92LYl5A54wJEqk7O0aHQFcQ5QzC2pGu64SiNGVmsAkYFQUpahJ3pfQ4kOYl" +
-                        "qQVIfIRtvfiktSwUVLPx1SUXTHRxH0zTctOjTz1+aHJhlwI1CB/zZIThE+Y2d+gZ" +
-                        "q2Z08pbqVfRCuTY0ttuBNyLoNv0BZfZRh1xqCQve0cZgk95L9IBzzj4XjqpTMy/E" +
-                        "risu69v8Z0/uT78mb2PbWXwvCdF2lg/B8H55kWqcNHj3JRNqoJwOPQVKpQlJRHx0" +
-                        "NAIrtxSBkRNEPdHmxyZA5SFK7/rQ6Rm0hQNkbAkk+GPqE0yqfPxj6UvMTznaxvQ8" +
-                        "CBoB4t7tzZp4VLjcUaMqYK1nBsfcCrv31YTuuVNpcuUpXBxSk8JDUqRmroN2/e1+" +
-                        "8GYgWrx8ZT3LL2Q1TVCRAoIBAQD9flRMfBJyE7pM4IDPrY+iDR/Ywoy5MXgx/X/8" +
-                        "e2hr0K62jXGUVdF+cveDi6rJFGrsnKUROzA0iuRAyTAomCdANN5SHhjiyWqe//iN" +
-                        "Dxm3P/RBpmbPUjMsK3R/l/3iVvGceulnDcWYo0Ovn4OwBqQosTU+dTyFZ3IqE3Y2" +
-                        "d9NEIrbsobXedlaNvAL83HT3GckYHOiNiqOIuaCCUCbCOmUSsoKh5kTB9ojZBsWL" +
-                        "EFQZYe447kNxacY/D2Y/Z458+GdW+zIsBVTdZgrB19yME0rX+Pm8rNgL0wBOvQMG" +
-                        "1ijJ7QetdBsqDZEPwcegrSnKbNf52M9fnqwWtwRoBIpns10ZAoIBAQC54yGeQu4i" +
-                        "Cvjk3tYYG1aCR4qmqSXfUbbeccxdOc0UHhAypZ5NGaYtjHHQ7chuFSA2We+MGtyW" +
-                        "C1IOSEVS+pY3K2rVp94lolVT+vSt71PnmFagjcrY8bs+i3AGgw4YtRWVJNkQE0OJ" +
-                        "627+Ya91Ia1dYR6vWoZX5JTJ2NdPRPQpPWcVdJpTDI5kFoTiwHB/arQAkLOv4Quv" +
-                        "qhynVH0fEoiZJFRaR6iDGhAgDKB6sA7Tqb6yPJv0IehlZoLKG6oqtfQht9DE6FYl" +
-                        "tQDj9XTbbdhPsXXHchdQBuT9IEXdSfs5nsgBwlg3h9pG/BqDFtXu+B52AEnuaR+v" +
-                        "/AvFkNxImOEvAoIBABGAoHdrdaaUwB9AvQQZ2rn4qANCY48B4GerNiQLrUkMbpPC" +
-                        "Ll5skntlmrtlcFRT6ZIOusL20DxAfsQOYBndb5BaViNbWqKF/6ucxt+OdFsXuliy" +
-                        "EZUs+sWI9pE8wFXZZPNF9UmdRNBmLW052VDVFI6OtbtrQtN/Mf2/vEDEgzzIHNM3" +
-                        "0yPaDd3ZZmdpHVZWXHEixdfIA8ST9IYq3JI6j/H7i1N8X7D4wbgiZI9WgEgEX/tk" +
-                        "UBnLkNmXyZqFHux4BkKWM3+gmpxyyDlcGyk8x8UjtrKVSJGAbxwApu3Y6ZYPnKEY" +
-                        "TCvaJfLtkUgBzMniPANPOfpDLWSgHFjGP3wrgTkCggEAUgZm1EYmfIEo+R1XjcWq" +
-                        "c8yL4yTqoFOXhSrkChMyanklnqO0acMysBC0PIRgmCrcTv96k/Faex89sy2y4X3Q" +
-                        "AUI4X1U20paCXo9znrjn5l8zgp9u7jIk9OFkqor0EnT9tBVRbyWA/QAVt0x1txMI" +
-                        "RBdSCgDBHVGxUixMPh9oOjZtIWuVmaYFwyaotsJCIgd8rG8tyyNcG8TN5gyDNc3g" +
-                        "1urQChJqyocarHnF6r17nWzeyBm0m5LG0M/eUL7KZRRrSOGqzujS8sqfPPgX+6fJ" +
-                        "9siQ91Rh8x9HtmaiTZaStAdbrGMMuFxLNl2SeVv/RPbZwio4dWqP4AExVJmqiqJj" +
-                        "YwKCAQBB5mPlC6fKCzKBDCPLwlCB38OrFv7CANpGFlRoAc8JefSwN07Yc5hTNB5h" +
-                        "F7Ck76eiJL2qi5JsR5C1IBPZJ093iurrXHsp9wdCnBbNvoH77i2lmOzfPAp+0ygb" +
-                        "XuKCTC5QWDV9Xmx800ZhDup5i5WjtJfEUWpdlDR/+SyJV6EnudutRanf4UINAob7" +
-                        "ljYNdPc4oqwfI4vzqrlJL4nRBG4Z6xmiwb4s2+RvrAYOMJ8M3M2DbAcoJmGddyYh" +
-                        "asEVYcdQMyBDvBoRdtvChSbvnsUFe3wvN9korHHDsy0Etf3nE36RVwcNeFxXd/WM" +
-                        "Z3McbfcguzFzNcp74vKiOTaMhmy/" +
-                        "-----END PRIVATE KEY-----";
+                    cert = CertRsa4096;
+                    privateKey = KeyRsaPrivate4096;
+                    
                     break;
                 case PivAlgorithm.EccP256:
                     if (validAttest)
@@ -781,12 +566,7 @@ namespace Yubico.YubiKey.TestUtilities
                             "-----END CERTIFICATE-----";
                     }
 
-                    privateKey =
-                        "-----BEGIN PRIVATE KEY-----" +
-                        "MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQgIEdISnMgVtpVb28B" +
-                        "8mxlrQ7eHtw8WbtvuV6BaK6jm/yhRANCAASATc5kxXt5D5v6oVIN1DlMJD2mCDb1" +
-                        "3GZQZfzujCFsEeBT5GuU13leL+p9yOXSoPXIm4zS+Dmbg2OpPfPHqrT5" +
-                        "-----END PRIVATE KEY-----";
+                    privateKey = KeyEccPrivateP256;
 
                     break;
 
@@ -833,13 +613,7 @@ namespace Yubico.YubiKey.TestUtilities
                             "-----END CERTIFICATE-----";
                     }
 
-                    privateKey =
-                        "-----BEGIN PRIVATE KEY-----" +
-                        "MIG2AgEAMBAGByqGSM49AgEGBSuBBAAiBIGeMIGbAgEBBDAKroxlCShQ6sz89gMc" +
-                        "K09DIyI8kxaRZt9GlCMmbbmVpGhqhQLvwVdowQkA0xQ9A3+hZANiAAQMJtrJS7oU" +
-                        "Vxb9ofXTeGWHRzDyz+DEzktNNP32w1lk4W1xJYR7R0UjuhDiRkc7wC4e3UWN+wHU" +
-                        "GLtodeuMLnnxvp40psR3k/SVUbCn6UP0QFF/JOTv9fGtqfccBGVNHt8=" +
-                        "-----END PRIVATE KEY-----";
+                    privateKey = KeyEccPrivateP384;
 
                     break;
             }
@@ -847,11 +621,38 @@ namespace Yubico.YubiKey.TestUtilities
             return true;
         }
 
-        private static KeyConverter GetPrivateKeyConverter(string pemString) =>
-            new KeyConverter(pemString.ToCharArray());
-        private static PivPrivateKey GetPivPrivateKey(string pemString) =>
-            new KeyConverter(pemString.ToCharArray()).GetPivPrivateKey();
+        public static PivPublicKey GetPivPublicKey(PivAlgorithm algorithm) => ConvertPemKeyString(GetPemKeyString(algorithm)).GetPivPublicKey();
+
+        // Get a private key for the given algorithm. Return the key as a PivPrivateKey.
+        public static PivPrivateKey GetPivPrivateKey(PivAlgorithm algorithm) => ConvertPemKeyString(GetPemKeyString(algorithm)).GetPivPrivateKey();
+
+        public static X509Certificate2 GetCert(PivAlgorithm algorithm) => ConvertPemCertString(GetPemCertString(algorithm)).GetCertObject();
         
-        private static X509Certificate2 GetCert(string pemString) => new CertConverter(pemString.ToCharArray()).GetCertObject();
+        public static KeyConverter ConvertPemKeyString(string pemString) =>
+            new KeyConverter(pemString.ToCharArray());
+        
+        public static CertConverter ConvertPemCertString(string pemString) =>
+            new CertConverter(pemString.ToCharArray());
+        private static string GetPemCertString(PivAlgorithm algorithm) =>
+            algorithm switch
+            {
+                PivAlgorithm.Rsa1024 => CertRsa1024,
+                PivAlgorithm.Rsa2048 => CertRsa2048,
+                PivAlgorithm.Rsa3072 => CertRsa3072,
+                PivAlgorithm.Rsa4096 => CertRsa4096,
+                _ => throw new ArgumentException("No cert mapped", nameof(algorithm))
+            };
+        
+        private static string GetPemKeyString(PivAlgorithm algorithm) =>
+            algorithm switch
+            {
+                PivAlgorithm.Rsa1024 => KeyRsaPrivate1024,
+                PivAlgorithm.Rsa2048 => KeyRsaPrivate2048,
+                PivAlgorithm.Rsa3072 => KeyRsaPrivate3072,
+                PivAlgorithm.Rsa4096 => KeyRsaPrivate4096,
+                PivAlgorithm.EccP256 => KeyEccPrivateP256,
+                PivAlgorithm.EccP384 => KeyEccPrivateP384,
+                _ => throw new ArgumentException("No key mapped", nameof(algorithm))
+            };
     }
 }

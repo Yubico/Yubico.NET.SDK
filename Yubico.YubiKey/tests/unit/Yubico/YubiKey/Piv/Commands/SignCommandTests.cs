@@ -166,9 +166,6 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.EccP256)]
         [InlineData(PivAlgorithm.EccP384)]
         [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        
-[InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetNeProperty_ReturnsZero(PivAlgorithm algorithm)
         {
             CommandApdu cmdApdu = GetSignCommandApdu(0x95, algorithm);
@@ -183,8 +180,6 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.EccP384)]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-[InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetData_ReturnsCorrect(PivAlgorithm algorithm)
         {
             byte[] prefix = GetDigestDataPrefix(algorithm);

@@ -258,11 +258,11 @@ namespace Yubico.YubiKey
                         ExceptionMessages.NotSupportedByYubiKeyVersion));
             }
         }
-
+        
         // Checks to see if a particular application is available (meaning: paid-for, instead of simply enabled) on the
         // YubiKey over either USB or NFC.
         private static bool HasApplication(IYubiKeyDevice yubiKeyDevice, YubiKeyCapabilities capability) =>
-            yubiKeyDevice.AvailableNfcCapabilities.HasFlag(capability)
-            || yubiKeyDevice.AvailableUsbCapabilities.HasFlag(capability);
+            yubiKeyDevice.AvailableNfcCapabilities.HasFlag(capability) || 
+            yubiKeyDevice.AvailableUsbCapabilities.HasFlag(capability);
     }
 }

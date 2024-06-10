@@ -145,11 +145,10 @@ namespace Yubico.YubiKey.TestUtilities
         {
             switch (Algorithm)
             {
-                default:
-                    throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
-
                 case PivAlgorithm.Rsa1024:
                 case PivAlgorithm.Rsa2048:
+                case PivAlgorithm.Rsa3072:
+                case PivAlgorithm.Rsa4096:
                     RSA? rsaObject = _certificateObject.PublicKey.GetRSAPublicKey()!;
                     RSAParameters rsaParams = rsaObject.ExportParameters(false);
                     return new PivRsaPublicKey(rsaParams.Modulus, rsaParams.Exponent);
@@ -157,6 +156,9 @@ namespace Yubico.YubiKey.TestUtilities
                 case PivAlgorithm.EccP256:
                 case PivAlgorithm.EccP384:
                     return new PivEccPublicKey(_certificateObject.PublicKey.EncodedKeyValue.RawData);
+                
+                default:
+                    throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
             }
         }
 
@@ -169,15 +171,15 @@ namespace Yubico.YubiKey.TestUtilities
         // throw an exception.
         public RSA GetRsaObject()
         {
-            if (Algorithm == PivAlgorithm.Rsa1024 || Algorithm == PivAlgorithm.Rsa2048)
+            if (!Algorithm.IsRsa())
             {
-                RSA? rsaObject = _certificateObject.PublicKey.GetRSAPublicKey()!;
-                RSAParameters rsaParams = rsaObject.ExportParameters(false);
-
-                return RSA.Create(rsaParams);
+                throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
             }
 
-            throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
+            RSA? rsaObject = _certificateObject.PublicKey.GetRSAPublicKey()!;
+            RSAParameters rsaParams = rsaObject.ExportParameters(false);
+
+            return RSA.Create(rsaParams);
         }
 
         // Return a new ECDsa object.

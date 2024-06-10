@@ -155,16 +155,8 @@ namespace Yubico.YubiKey.Piv
             // This will verify the slot number and dataToSign length. If one or
             // both are incorrect, the call will throw an exception.
             var signCommand = new AuthenticateSignCommand(dataToSign, slotNumber);
-            switch (signCommand.Algorithm)
-            {
-                case PivAlgorithm.Rsa3072:
-                    _yubiKeyDevice.ThrowOnMissingFeature(YubiKeyFeature.PivRsa3072);
-                    break;
-                case PivAlgorithm.Rsa4096:
-                    _yubiKeyDevice.ThrowOnMissingFeature(YubiKeyFeature.PivRsa4096);
-                    break;
-            }
-            
+            _yubiKeyDevice.ThrowIfUnsupportedAlgorithm(signCommand.Algorithm);
+
             return PerformPrivateKeyOperation(
                 slotNumber,
                 signCommand,

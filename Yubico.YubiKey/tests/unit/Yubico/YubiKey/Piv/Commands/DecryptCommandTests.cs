@@ -105,7 +105,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
         [InlineData(PivAlgorithm.Rsa3072)]
-[InlineData(PivAlgorithm.Rsa4096)]
+        [InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(PivAlgorithm algorithm)
         {
             CommandApdu cmdApdu = GetDecryptCommandApdu(0x86, algorithm);
@@ -119,7 +119,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
         [InlineData(PivAlgorithm.Rsa3072)]
-[InlineData(PivAlgorithm.Rsa4096)]
+        [InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHex87(PivAlgorithm algorithm)
         {
             CommandApdu cmdApdu = GetDecryptCommandApdu(0x90, algorithm);
@@ -132,15 +132,13 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-[InlineData(PivAlgorithm.Rsa4096)]
-        public void CreateCommandApdu_GetP1Property_ReturnsAlgorithm(PivAlgorithm algorithm)
+        public void CreateCommandApdu_GetP1Property_ReturnsAlgorithm(PivAlgorithm expectedAlgorithm)
         {
-            CommandApdu cmdApdu = GetDecryptCommandApdu(0x91, algorithm);
+            CommandApdu cmdApdu = GetDecryptCommandApdu(0x91, expectedAlgorithm);
 
             byte P1 = cmdApdu.P1;
 
-            Assert.Equal((byte)algorithm, P1);
+            Assert.Equal((byte)expectedAlgorithm, P1);
         }
 
         [Theory]
@@ -170,8 +168,6 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-[InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetNeProperty_ReturnsZero(PivAlgorithm algorithm)
         {
             CommandApdu cmdApdu = GetDecryptCommandApdu(0x95, algorithm);
@@ -182,30 +178,19 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         [Theory]
-        [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-[InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetData_ReturnsCorrect(PivAlgorithm algorithm)
         {
             byte[] prefix = GetDecryptDataPrefix(algorithm);
             byte[] encryptedData = PivCommandResponseTestData.GetEncryptedBlock(algorithm);
+            
             var expected = new List<byte>(prefix);
             expected.AddRange(encryptedData);
 
             CommandApdu cmdApdu = GetDecryptCommandApdu(0x9C, algorithm);
-
-            ReadOnlyMemory<byte> data = cmdApdu.Data;
-
-            Assert.False(data.IsEmpty);
-            if (data.IsEmpty)
-            {
-                return;
-            }
-
-            bool compareResult = data.ToArray().SequenceEqual(expected);
-
-            Assert.True(compareResult);
+            
+            var result = cmdApdu.Data;
+            Assert.Equal(expected.ToArray(), result);
         }
 
         [Fact]

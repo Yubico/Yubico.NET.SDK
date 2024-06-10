@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Piv
             var collectorObj = new Simple39KeyCollector();
             pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            PivPrivateKey privateKey = SampleKeyPairs.GetPrivateKey(algorithm);
+            PivPrivateKey privateKey = SampleKeyPairs.GetPivPrivateKey(algorithm);
             pivSession.ImportPrivateKey(slotNumber, privateKey);
         }
 

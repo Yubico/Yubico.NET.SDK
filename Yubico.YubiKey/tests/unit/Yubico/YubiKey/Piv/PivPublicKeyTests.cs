@@ -118,8 +118,9 @@ namespace Yubico.YubiKey.Piv
         public void CreateRsa_SetsExponentCorrectly(PivAlgorithm algorithm)
         {
             ReadOnlyMemory<byte> keyData = SampleKeyPairs.GetPivPublicKey(algorithm).PivEncodedPublicKey;
-            var keyObject = PivPublicKey.Create(keyData);
             ReadOnlyMemory<byte> exponent = GetExponent();
+
+            var keyObject = PivPublicKey.Create(keyData);
 
             Assert.NotNull(keyObject);
             Assert.True(keyObject is PivRsaPublicKey);

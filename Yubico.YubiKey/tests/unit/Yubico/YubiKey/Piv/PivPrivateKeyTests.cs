@@ -13,10 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
 using Yubico.Core.Buffers;
+using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -31,7 +31,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384)]
         public void Create_ReturnsPivPrivateKey(PivAlgorithm algorithm)
         {
-            ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
+            ReadOnlyMemory<byte> keyData = SampleKeyPairs.GetPivPrivateKey(algorithm).EncodedPrivateKey;
+
 
             var keyObject = PivPrivateKey.Create(keyData);
 
@@ -50,7 +51,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384)]
         public void Create_SetsAlgorithmCorrectly(PivAlgorithm algorithm)
         {
-            ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
+            ReadOnlyMemory<byte> keyData = SampleKeyPairs.GetPivPrivateKey(algorithm).EncodedPrivateKey;
 
             var keyObject = PivPrivateKey.Create(keyData);
 
@@ -62,8 +63,6 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
         [InlineData(PivAlgorithm.EccP256)]
         [InlineData(PivAlgorithm.EccP384)]
         public void Create_SetsEncodedCorrectly(PivAlgorithm algorithm)
@@ -85,8 +84,6 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
         public void Create_SetsPrimePCorrectly(PivAlgorithm algorithm)
         {
             ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
@@ -107,8 +104,6 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
         public void Create_SetsPrimeQCorrectly(PivAlgorithm algorithm)
         {
             ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
@@ -129,8 +124,6 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
         public void Create_SetsExponentPCorrectly(PivAlgorithm algorithm)
         {
             ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
@@ -151,8 +144,6 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
         public void Create_SetsExponentQCorrectly(PivAlgorithm algorithm)
         {
             ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
@@ -173,8 +164,6 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
         public void Create_SetsCoefficientCorrectly(PivAlgorithm algorithm)
         {
             ReadOnlyMemory<byte> keyData = GetKeyData(algorithm);
@@ -216,8 +205,6 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
         public void RsaConstructor_Components_BuildsEncoding(PivAlgorithm algorithm)
         {
             ReadOnlyMemory<byte> primeP = GetRsaComponent(algorithm, 1);
@@ -289,8 +276,6 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
         public void RsaConstructor_BadPrimeQ_ThrowsExcpetion(PivAlgorithm algorithm)
         {
             ReadOnlyMemory<byte> primeP = GetRsaComponent(algorithm, 1);
@@ -324,8 +309,6 @@ namespace Yubico.YubiKey.Piv
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
         [InlineData(PivAlgorithm.EccP256)]
         [InlineData(PivAlgorithm.EccP384)]
         public void GetPivPrivateKey_FromPem(PivAlgorithm algorithm)

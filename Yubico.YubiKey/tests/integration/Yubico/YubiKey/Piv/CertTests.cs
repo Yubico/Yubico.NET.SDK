@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Security.Cryptography;
+using System;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
 using Yubico.YubiKey.Piv.Commands;
@@ -20,16 +20,16 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class CertTests
     {
-        [Trait("Category", "Simple")]
-        [Theory]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        public void GetCert_Succeeds(PivAlgorithm algorithm) 
+        [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP256)]
+        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.EccP384)]
+        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.Rsa2048)]
+        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.Rsa3072)]
+        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.Rsa4096)]
+        public void GetCert_Succeeds(StandardTestDevice targetDevice, PivAlgorithm algorithm) 
         {
             _ = SampleKeyPairs.GetKeyAndCertPem(algorithm, true, out var certPem, out var privateKeyPem);
 
@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Piv
             var certificate = certConverter.GetCertObject();
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             var pivPrivateKey = privateKey.GetPivPrivateKey();
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(targetDevice);
 
             using var pivSession = new PivSession(testDevice);
             var collectorObj = new Simple39KeyCollector();
@@ -50,14 +50,14 @@ namespace Yubico.YubiKey.Piv
             Assert.True(getCert.Equals(certificate));
         }
 
-        [Theory]
-        [InlineData(PivAlgorithm.EccP256)]
-        [InlineData(PivAlgorithm.EccP384)]
-        [InlineData(PivAlgorithm.Rsa1024)]
-        [InlineData(PivAlgorithm.Rsa2048)]
-        [InlineData(PivAlgorithm.Rsa3072)]
-        [InlineData(PivAlgorithm.Rsa4096)]
-        public void GetCert_NoAuth_Succeeds(PivAlgorithm algorithm)
+        [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP256)]
+        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.EccP384)]
+        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.Rsa1024)]
+        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.Rsa2048)]
+        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.Rsa3072)]
+        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.Rsa4096)]
+        public void GetCert_NoAuth_Succeeds(StandardTestDevice targetDevice, PivAlgorithm algorithm)
         {
             var isValid = SampleKeyPairs.GetKeyAndCertPem(
                 algorithm, true, out var certPem, out var privateKeyPem);
@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.Piv
             var pivPrivateKey = privateKey.GetPivPrivateKey();
 
             byte slotNumber = 0x8B;
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(targetDevice);
             LoadKeyAndCert(slotNumber, pivPrivateKey, certificate, testDevice);
 
             using var pivSession = new PivSession(testDevice);

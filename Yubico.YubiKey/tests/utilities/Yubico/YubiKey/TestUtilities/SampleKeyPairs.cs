@@ -325,9 +325,9 @@ namespace Yubico.YubiKey.TestUtilities
                                                  "-----END PRIVATE KEY-----";
 
         // Get a matching key pair. Return the keys as strings, the PEM key data.
-        public static void
-            GetPemKeyPair(
-                PivAlgorithm algorithm, out string publicKey,
+        public static void GetPemKeyPair(
+                PivAlgorithm algorithm,
+                out string publicKey,
                 out string privateKey) 
         {
             switch (algorithm)

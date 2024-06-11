@@ -28,24 +28,23 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Rsa2048)]
         [InlineData(PivAlgorithm.Rsa3072)]
         [InlineData(PivAlgorithm.Rsa4096)]
-        public void SimpleGenerate(PivAlgorithm algorithm)
+        [InlineData(PivAlgorithm.Rsa1024, true)]
+        [InlineData(PivAlgorithm.Rsa2048, true)]
+        [InlineData(PivAlgorithm.Rsa3072, true)]
+        [InlineData(PivAlgorithm.Rsa4096, true)]
+        public void SimpleGenerate(PivAlgorithm expectedAlgorithm, bool useScp03=false)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(
-                Transport.SmartCard, minimumFirmwareVersion: FirmwareVersion.V5_3_0);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(Transport.SmartCard, FirmwareVersion.V5_3_0);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            var scp03Keys = new StaticKeys(); //Keep scp03 keys?
-            using (var pivSession = new PivSession(testDevice))
-            {
-                var collectorObj = new Simple39KeyCollector();
-                pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
+            using var pivSession = useScp03 ? new PivSession(testDevice, new StaticKeys()) : new PivSession(testDevice);
+            var collectorObj = new Simple39KeyCollector();
+            pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(
-                    PivSlot.Retired12, algorithm);
+            var result = pivSession.GenerateKeyPair(PivSlot.Retired12, expectedAlgorithm);
 
-                Assert.Equal(algorithm, publicKey.Algorithm);
-            }
+            Assert.Equal(expectedAlgorithm, result.Algorithm);
         }
 
         [SkippableTheory(typeof(NotSupportedException))]
@@ -95,9 +94,9 @@ namespace Yubico.YubiKey.Piv
         {
             using var pivSession = new PivSession(yubiKey);
             
-            byte[] digestData = GetDigestData(algorithm);
+            var digestData = GetDigestData(algorithm);
             var signCommand = new AuthenticateSignCommand(digestData, slotNumber);
-            AuthenticateSignResponse signResponse = pivSession.Connection.SendCommand(signCommand);
+            var signResponse = pivSession.Connection.SendCommand(signCommand);
 
             return signResponse.Status == ResponseStatus.Success;
         }
@@ -116,7 +115,7 @@ namespace Yubico.YubiKey.Piv
 
             var digestData = GetDigestData(algorithm);
             var signCommand = new AuthenticateSignCommand(digestData, slotNumber);
-            AuthenticateSignResponse signResponse = pivSession.Connection.SendCommand(signCommand);
+            var signResponse = pivSession.Connection.SendCommand(signCommand);
             if (signResponse.Status != ResponseStatus.Success)
             {
                 return false;
@@ -133,7 +132,7 @@ namespace Yubico.YubiKey.Piv
 
             var signature2 = signResponse.GetData();
 
-            bool returnValue = signature1[10] == signature2[10];
+            var returnValue = signature1[10] == signature2[10];
 
             if (algorithm == PivAlgorithm.EccP256 || algorithm == PivAlgorithm.EccP384)
             {

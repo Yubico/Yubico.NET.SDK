@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Piv
     [Trait("Category", "Simple")]
     public class ImportTests
     {
-        [Theory]
+        [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
         [InlineData(PivAlgorithm.Rsa1024, 0x86, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.Rsa2048, 0x9a, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.Rsa3072, 0x90, StandardTestDevice.Fw5)]
@@ -42,7 +42,8 @@ namespace Yubico.YubiKey.Piv
             pivSession.ImportPrivateKey(slotNumber, privateKey);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
+        [InlineData(PivAlgorithm.Rsa1024, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.Rsa2048, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.Rsa3072, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.Rsa4096, StandardTestDevice.Fw5)]
@@ -65,7 +66,8 @@ namespace Yubico.YubiKey.Piv
             pivSession.ImportCertificate(0x90, cert);
         }
 
-        [Theory]
+        [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
+        [InlineData(PivAlgorithm.Rsa1024, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.Rsa2048, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.Rsa3072, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.Rsa4096, StandardTestDevice.Fw5)]

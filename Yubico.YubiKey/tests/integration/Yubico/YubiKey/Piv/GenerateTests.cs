@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Rsa2048)]
         [InlineData(PivAlgorithm.Rsa3072)]
         [InlineData(PivAlgorithm.Rsa4096)]
-        public void GenerateAndSign(PivAlgorithm algorithm) 
+        public void GenerateAndSign(PivAlgorithm algorithm)
         {
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(Transport.SmartCard, FirmwareVersion.V5_3_0);
 

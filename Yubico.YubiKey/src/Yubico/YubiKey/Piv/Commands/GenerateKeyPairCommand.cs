@@ -261,7 +261,6 @@ namespace Yubico.YubiKey.Piv.Commands
         public CommandApdu CreateCommandApdu() => new CommandApdu
         {
             Ins = PivGenerateKeyPairInstruction,
-            P1 = (byte)Algorithm, //TODO only on >= v5.7?
             P2 = SlotNumber,
             Data = BuildGenerateKeyPairApduData(),
         };

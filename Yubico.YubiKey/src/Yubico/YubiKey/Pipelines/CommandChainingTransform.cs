@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.Pipelines
                 throw new ArgumentNullException(nameof(command));
             }
 
-            if (command.Data.IsEmpty || command.Data.Length <= MaxSize) //TODO WHY KEEP ISEMPTY
+            if (command.Data.IsEmpty || command.Data.Length <= MaxSize)
             {
                 return _pipeline.Invoke(command, commandType, responseType);
             }

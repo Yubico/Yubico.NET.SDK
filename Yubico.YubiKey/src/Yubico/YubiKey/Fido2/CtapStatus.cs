@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.Fido2
         PinAuthInvalid = 0x33,
         PowerCycleRequired = 0x34,
         PinNotSet = 0x35,
-        PinPolicyViolation = 0x37, //TODO 
+        PinPolicyViolation = 0x37,
         PinRequired = 0x36,
         TokenExpired = 0x38,
         RequestTooLarge = 0x39,

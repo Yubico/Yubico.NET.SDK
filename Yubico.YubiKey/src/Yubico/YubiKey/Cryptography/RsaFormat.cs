@@ -78,6 +78,23 @@ namespace Yubico.YubiKey.Cryptography
         /// supported sizes.
         /// </summary>
         public const int KeySizeBits2048 = 2048;
+        
+        /// <summary>
+        /// Use this value to indicate the key size, in bits, is 3072. The
+        /// <c>KeySizeBits</c> values listed in this class are the sizes
+        /// supported and provided as a convenience to the user to verify the
+        /// supported sizes.
+        /// </summary>
+        public const int KeySizeBits3072 = 3072;
+
+        /// <summary>
+        /// Use this value to indicate the key size, in bits, is 4096. The
+        /// <c>KeySizeBits</c> values listed in this class are the sizes
+        /// supported and provided as a convenience to the user to verify the
+        /// supported sizes.
+        /// </summary>
+        public const int KeySizeBits4096 = 4096;
+
 
         /// <summary>
         /// Use this value to indicate the digest algorithm is SHA-1.
@@ -1567,17 +1584,23 @@ namespace Yubico.YubiKey.Cryptography
                 counter[3]++;
             }
         }
-
-        private static byte[] GetKeySizeBuffer(int keySizeBits) =>
-            keySizeBits switch
+        
+        private static byte[] GetKeySizeBuffer(int keySizeBits)
+        {
+            switch(keySizeBits)
             {
-                KeySizeBits1024 => new byte[KeySizeBits1024 / 8],
-                KeySizeBits2048 => new byte[KeySizeBits2048 / 8],
-                _ => throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.IncorrectRsaKeyLength)),
-            };
+                case KeySizeBits1024:
+                case KeySizeBits2048:
+                case KeySizeBits3072:
+                case KeySizeBits4096:
+                    return new byte[keySizeBits / 8];
+                default:
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.IncorrectRsaKeyLength));
+            }
+        }
 
         private static HashAlgorithm GetHashAlgorithm(int digestAlgorithm) =>
             digestAlgorithm switch

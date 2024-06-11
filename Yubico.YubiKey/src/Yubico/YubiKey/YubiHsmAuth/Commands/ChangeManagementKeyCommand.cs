@@ -14,7 +14,6 @@
 
 using System;
 using System.Globalization;
-using System.Text;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
 

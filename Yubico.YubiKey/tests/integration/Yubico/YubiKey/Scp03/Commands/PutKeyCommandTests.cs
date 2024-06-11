@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Scp03.Commands
             byte[] newKey3 = {
                 0xdd, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xee, 0xff, 0x11, 0x22
             };
- 
+
             var currentKeys = new StaticKeys(key2, key1, key3);
             var newKeys = new StaticKeys(newKey2, newKey1, newKey3)
             {
@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Scp03.Commands
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
-            
+
             Assert.True(isValid);
             Assert.NotNull(connection);
 
@@ -132,7 +132,7 @@ namespace Yubico.YubiKey.Scp03.Commands
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
-            
+
             Assert.True(isValid);
             Assert.NotNull(connection);
 

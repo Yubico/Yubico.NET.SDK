@@ -464,7 +464,7 @@ namespace Yubico.YubiKey.TestUtilities
         {
             cert = GetCert(algorithm);
             privateKey = GetPivPrivateKey(algorithm);
-            
+
             return true;
         }
 
@@ -495,7 +495,7 @@ namespace Yubico.YubiKey.TestUtilities
                     cert = "nocert";
                     privateKey = "nokey";
                     publicKey = "nokey";
-                    
+
                     return false;
 
                 case PivAlgorithm.Rsa1024:

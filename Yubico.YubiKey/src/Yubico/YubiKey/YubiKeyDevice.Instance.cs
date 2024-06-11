@@ -533,7 +533,7 @@ namespace Yubico.YubiKey
         public void SetIsNfcRestricted(bool enabled)
         {
             this.ThrowOnMissingFeature(YubiKeyFeature.ManagementNfcRestricted);
-            
+
             var command = new MgmtCmd.SetDeviceInfoCommand
             {
                 RestrictNfc = enabled

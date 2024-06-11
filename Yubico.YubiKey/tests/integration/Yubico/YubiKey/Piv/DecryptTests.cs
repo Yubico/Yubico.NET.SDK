@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Piv
                 0x5a, 0xa7, 0x94, 0xde, 0x68, 0x1b, 0xaa, 0x8b, 0x58, 0x95, 0x04, 0x22, 0xd6, 0xfc, 0x3f, 0xbc
             };
 
-            SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _,out _,  out var privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out _, out var privateKeyPem);
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             var pivPrivateKey = privateKey.GetPivPrivateKey();
 
@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Piv
                 0x21, 0x00, 0xC5, 0xCD, 0x80, 0x23, 0x17, 0x2D, 0xB0, 0xFE, 0x9D, 0xF0, 0x28, 0x6C, 0x50, 0xBD
             };
 
-            SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out _, out var privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out _, out var privateKeyPem);
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             var pivPrivateKey = privateKey.GetPivPrivateKey();
 
@@ -126,7 +126,7 @@ namespace Yubico.YubiKey.Piv
             var dataToEncrypt = new byte[16];
             GetArbitraryData(dataToEncrypt);
 
-            SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out var pubKeyPem, out var priKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out var pubKeyPem, out var priKeyPem);
             var pubKey = new KeyConverter(pubKeyPem.ToCharArray());
             var priKey = new KeyConverter(priKeyPem.ToCharArray());
 

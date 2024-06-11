@@ -13,9 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Piv.Commands

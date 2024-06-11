@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Parse_FromRsaClass(StandardTestDevice testDeviceType)
         {
-            SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out string publicKeyPem, out string privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out string publicKeyPem, out string privateKeyPem);
 
             var publicKey = new KeyConverter(publicKeyPem.ToCharArray());
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
@@ -99,7 +99,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384, 384)]
         public void UseKeyConverter(PivAlgorithm algorithm, int keySize)
         {
-            SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicPem, out string privatePem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicPem, out string privatePem);
 
             var publicKey = new KeyConverter(publicPem.ToCharArray());
             Assert.Equal(algorithm, publicKey.Algorithm);

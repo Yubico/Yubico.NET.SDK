@@ -249,11 +249,11 @@ namespace Yubico.YubiKey.Cryptography
 
             PivAlgorithm algorithm = keySize switch
             {
-                 1024 => PivAlgorithm.Rsa1024,
-                 2048 => PivAlgorithm.Rsa2048,
-                 3072 => PivAlgorithm.Rsa3072,
-                 4096 => PivAlgorithm.Rsa4096,
-                 _ => throw new Exception("Unsupported keysize")
+                1024 => PivAlgorithm.Rsa1024,
+                2048 => PivAlgorithm.Rsa2048,
+                3072 => PivAlgorithm.Rsa3072,
+                4096 => PivAlgorithm.Rsa4096,
+                _ => throw new Exception("Unsupported keysize")
             };
 
             HashAlgorithmName hashAlg = digestAlgorithm switch
@@ -270,7 +270,7 @@ namespace Yubico.YubiKey.Cryptography
                 padding = RSASignaturePadding.Pss;
             }
 
-            SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicKeyPem, out string privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicKeyPem, out string privateKeyPem);
 
             try
             {
@@ -337,7 +337,7 @@ namespace Yubico.YubiKey.Cryptography
                 RsaFormat.Sha384 => CryptographyProviders.Sha384Creator(),
                 _ => CryptographyProviders.Sha512Creator(),
             };
-            
+
             PivAlgorithm algorithm = GetPivAlgorithmByKeySize(keySize);
 
             HashAlgorithmName hashAlg = digestAlgorithm switch
@@ -354,7 +354,7 @@ namespace Yubico.YubiKey.Cryptography
                 padding = RSASignaturePadding.Pss;
             }
 
-            SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicKeyPem, out string privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicKeyPem, out string privateKeyPem);
 
             try
             {
@@ -434,7 +434,7 @@ namespace Yubico.YubiKey.Cryptography
                 };
             }
 
-            SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicKeyPem, out string privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicKeyPem, out string privateKeyPem);
 
             try
             {
@@ -505,7 +505,7 @@ namespace Yubico.YubiKey.Cryptography
                 };
             }
 
-            SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicKeyPem, out string privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicKeyPem, out string privateKeyPem);
             try
             {
                 publicKey = new KeyConverter(publicKeyPem.ToCharArray());

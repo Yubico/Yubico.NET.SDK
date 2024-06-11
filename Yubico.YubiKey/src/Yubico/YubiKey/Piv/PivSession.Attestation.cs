@@ -385,12 +385,12 @@ namespace Yubico.YubiKey.Piv
                     keySize = 2048;
                     algorithm = "RSA";
                     break;
-                
+
                 case PivAlgorithm.Rsa3072:
                     keySize = 3072;
                     algorithm = "RSA";
                     break;
-                
+
                 case PivAlgorithm.Rsa4096:
                     keySize = 4096;
                     algorithm = "RSA";

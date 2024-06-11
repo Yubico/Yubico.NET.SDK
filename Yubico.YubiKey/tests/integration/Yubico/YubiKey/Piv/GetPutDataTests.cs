@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Cert_Auth_Req(StandardTestDevice testDeviceType)
         {
-            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, 
+            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048,
                 out X509Certificate2 cert, out PivPrivateKey privateKey);
             Assert.True(isValid);
 
@@ -695,7 +695,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(7, getData.Length);
             }
         }
-        
+
         [Trait("Category", "Simple")]
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
@@ -795,7 +795,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.Equal(7, getData.Length);
             }
         }
-        
+
         [Trait("Category", "Simple")]
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
@@ -827,7 +827,7 @@ namespace Yubico.YubiKey.Piv
 #pragma warning restore CS0618 // Type or member is obsolete
             }
         }
-        
+
         [Trait("Category", "Simple")]
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]

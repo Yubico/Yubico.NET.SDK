@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.Scp03.Commands
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
-            
+
             Assert.True(isValid);
             Assert.NotNull(connection);
 
@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.Scp03.Commands
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
-            
+
             Assert.True(isValid);
             Assert.NotNull(connection);
 
@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.Scp03.Commands
 
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
-            
+
             Assert.True(isValid);
             Assert.NotNull(connection);
 

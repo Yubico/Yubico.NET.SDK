@@ -60,13 +60,13 @@ namespace Yubico.YubiKey.Piv
         /// 2048 bits.
         /// </summary>
         Rsa2048 = 0x07,
-        
+
         /// <summary>
         /// Indicates that the algorithm is RSA and the key size (modulus size) is
         /// 3072 bits.
         /// </summary>
         Rsa3072 = 0x05,
-        
+
         /// <summary>
         /// Indicates that the algorithm is RSA and the key size (modulus size) is
         /// 4096 bits.

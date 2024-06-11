@@ -25,14 +25,14 @@ namespace Yubico.YubiKey.Piv
     {
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP256)]
-        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.EccP384)]
-        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.Rsa2048)]
-        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.Rsa3072)]
-        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.Rsa4096)]
-        public void GetCert_Succeeds(StandardTestDevice targetDevice, PivAlgorithm algorithm) 
+        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP384)]
+        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048)]
+        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072)]
+        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096)]
+        public void GetCert_Succeeds(StandardTestDevice targetDevice, PivAlgorithm algorithm)
         {
             _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out var certPem, out string _, out var privateKeyPem);
-            
+
             var certConverter = new CertConverter(certPem.ToCharArray());
             var certificate = certConverter.GetCertObject();
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
@@ -52,11 +52,11 @@ namespace Yubico.YubiKey.Piv
 
         [SkippableTheory(typeof(NotSupportedException), typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP256)]
-        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.EccP384)]
-        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.Rsa1024)]
-        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.Rsa2048)]
-        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.Rsa3072)]
-        [InlineData(StandardTestDevice.Fw5,PivAlgorithm.Rsa4096)]
+        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP384)]
+        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024)]
+        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048)]
+        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072)]
+        [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096)]
         public void GetCert_NoAuth_Succeeds(StandardTestDevice targetDevice, PivAlgorithm algorithm)
         {
             var isValid = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out var certPem, out _, out var privateKeyPem);

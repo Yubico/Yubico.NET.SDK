@@ -13,10 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using Xunit;
 using Yubico.YubiKey.Fido2.Cose;
 using Yubico.YubiKey.Piv;

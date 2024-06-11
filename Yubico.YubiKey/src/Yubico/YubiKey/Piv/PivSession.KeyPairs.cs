@@ -130,7 +130,7 @@ namespace Yubico.YubiKey.Piv
                                             PivTouchPolicy touchPolicy = PivTouchPolicy.Default)
         {
             _yubiKeyDevice.ThrowIfUnsupportedAlgorithm(algorithm);
-            
+
             if (ManagementKeyAuthenticated == false)
             {
                 AuthenticateManagementKey();

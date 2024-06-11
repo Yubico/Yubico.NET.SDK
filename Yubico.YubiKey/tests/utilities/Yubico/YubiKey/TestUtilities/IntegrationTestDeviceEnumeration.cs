@@ -33,21 +33,21 @@ namespace Yubico.YubiKey.TestUtilities
         private static IntegrationTestDeviceEnumeration Instance => SingleInstance.Value;
         private const string YubikeyIntegrationtestAllowedKeysName = "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS";
         public readonly HashSet<string> AllowedSerialNumbers;
-        
+
         public IntegrationTestDeviceEnumeration(string? configDirectory = null)
         {
             string whitelistFileName = $"{YubikeyIntegrationtestAllowedKeysName}.txt";
             var whiteListFilePath = Path.Combine(configDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Yubico", whitelistFileName);
-            
+
             CreateIfMissing(whiteListFilePath);
 
             AllowedSerialNumbers = File.Exists(whiteListFilePath)
-                ? new HashSet<string>(File.ReadLines(whiteListFilePath)) 
+                ? new HashSet<string>(File.ReadLines(whiteListFilePath))
                 : new HashSet<string>();
 
             var allowedKeys = Environment.GetEnvironmentVariable(YubikeyIntegrationtestAllowedKeysName)
                 ?.Split(':') ?? Array.Empty<string>();
-            
+
             foreach (string allowedKey in allowedKeys)
             {
                 _ = AllowedSerialNumbers.Add(allowedKey);
@@ -70,7 +70,7 @@ namespace Yubico.YubiKey.TestUtilities
             _ = Directory.CreateDirectory(Path.GetDirectoryName(whiteListFilePath)!);
             if (!File.Exists(whiteListFilePath))
             {
-                var file  = File.Create(whiteListFilePath);
+                var file = File.Create(whiteListFilePath);
                 file.Close();
             }
         }
@@ -97,7 +97,7 @@ namespace Yubico.YubiKey.TestUtilities
             return YubiKeyDevice
                 .FindByTransport(transport)
                 .Where(IsAllowedKey).ToList();
-            
+
             static bool IsAllowedKey(IYubiKeyDevice key) => key.SerialNumber == null || Instance.AllowedSerialNumbers.Contains(key.SerialNumber.Value.ToString());
         }
 

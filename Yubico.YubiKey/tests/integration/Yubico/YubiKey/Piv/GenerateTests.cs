@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Rsa2048, true)]
         [InlineData(PivAlgorithm.Rsa3072, true)]
         [InlineData(PivAlgorithm.Rsa4096, true)]
-        public void SimpleGenerate(PivAlgorithm expectedAlgorithm, bool useScp03=false)
+        public void SimpleGenerate(PivAlgorithm expectedAlgorithm, bool useScp03 = false)
         {
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(Transport.SmartCard, FirmwareVersion.V5_3_0);
 
@@ -52,18 +52,18 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Rsa2048)]
         [InlineData(PivAlgorithm.Rsa3072)]
         [InlineData(PivAlgorithm.Rsa4096)]
-        public void GenerateAndSign(PivAlgorithm algorithm) //Sign and verify should be done with all algos, 
+        public void GenerateAndSign(PivAlgorithm algorithm) 
         {
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(Transport.SmartCard, FirmwareVersion.V5_3_0);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
             Assert.True(testDevice is YubiKeyDevice);
-//             if (testDevice is YubiKeyDevice device)
-//             {
-// #pragma warning disable CS0618 // Specifically testing this feature
-//                 // testDevice = device.WithScp03(new StaticKeys());
-// #pragma warning restore CS0618 //todo make specific test for Scp03?
-//             }
+            //             if (testDevice is YubiKeyDevice device) 
+            //             {
+            // #pragma warning disable CS0618 // Specifically testing this feature
+            //                 // testDevice = device.WithScp03(new StaticKeys());
+            // #pragma warning restore CS0618 //
+            //             }
 
             var isValid = DoGenerate(testDevice, 0x86, algorithm, PivPinPolicy.Once, PivTouchPolicy.Never);
             Assert.True(isValid);
@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Piv
             IYubiKeyDevice yubiKey, byte slotNumber, PivAlgorithm algorithm)
         {
             using var pivSession = new PivSession(yubiKey);
-            
+
             var digestData = GetDigestData(algorithm);
             var signCommand = new AuthenticateSignCommand(digestData, slotNumber);
             var signResponse = pivSession.Connection.SendCommand(signCommand);
@@ -105,7 +105,7 @@ namespace Yubico.YubiKey.Piv
             IYubiKeyDevice yubiKey, byte slotNumber, PivAlgorithm algorithm)
         {
             using var pivSession = new PivSession(yubiKey);
-            
+
             var collectorObj = new Simple39KeyCollector();
             pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
             if (pivSession.TryVerifyPin() == false)
@@ -162,7 +162,7 @@ namespace Yubico.YubiKey.Piv
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
                 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f
             },
-            
+
             PivAlgorithm.Rsa3072 => new byte[] {
                 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -189,7 +189,7 @@ namespace Yubico.YubiKey.Piv
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f,
                 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f
             },
-            
+
             PivAlgorithm.Rsa4096 => new byte[] {
                 0x00, 0x01, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,

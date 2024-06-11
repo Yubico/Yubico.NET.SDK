@@ -183,12 +183,12 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             byte[] prefix = GetDecryptDataPrefix(algorithm);
             byte[] encryptedData = PivCommandResponseTestData.GetEncryptedBlock(algorithm);
-            
+
             var expected = new List<byte>(prefix);
             expected.AddRange(encryptedData);
 
             CommandApdu cmdApdu = GetDecryptCommandApdu(0x9C, algorithm);
-            
+
             var result = cmdApdu.Data;
             Assert.Equal(expected.ToArray(), result);
         }

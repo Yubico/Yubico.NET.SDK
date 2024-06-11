@@ -43,8 +43,8 @@ namespace Yubico.YubiKey.Piv
                 PivAlgorithm.Rsa4096 => device.HasFeature(YubiKeyFeature.PivRsa4096),
                 _ => true
             };
-            
-            if(!isSupported)
+
+            if (!isSupported)
             {
                 throw new NotSupportedException(
                     string.Format(

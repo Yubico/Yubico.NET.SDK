@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Parse_FromRsaClass(StandardTestDevice testDeviceType)
         {
-            SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out string publicKeyPem, out string privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out string publicKeyPem, out string privateKeyPem);
 
             var publicKey = new KeyConverter(publicKeyPem.ToCharArray());
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());

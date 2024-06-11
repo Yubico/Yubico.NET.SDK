@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
         [InlineData(PivAlgorithm.Rsa3072)]
-[InlineData(PivAlgorithm.Rsa4096)]
+        [InlineData(PivAlgorithm.Rsa4096)]
         public void ClassType_DerivedFromPivCommand_IsTrue(PivAlgorithm algorithm)
         {
             byte[] pubKey = GetPublicKey(algorithm);

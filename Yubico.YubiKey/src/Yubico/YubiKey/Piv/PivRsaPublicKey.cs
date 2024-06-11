@@ -223,12 +223,12 @@ namespace Yubico.YubiKey.Piv
                 case Rsa3072BlockSize:
                     Algorithm = PivAlgorithm.Rsa3072;
                     sliceIndex = SliceIndex3072;
-                    
+
                     break;
                 case Rsa4096BlockSize:
                     Algorithm = PivAlgorithm.Rsa4096;
                     sliceIndex = SliceIndex4096;
-                    
+
                     break;
                 default:
                     return false;

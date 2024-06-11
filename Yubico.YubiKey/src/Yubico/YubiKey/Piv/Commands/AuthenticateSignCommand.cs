@@ -170,8 +170,8 @@ namespace Yubico.YubiKey.Piv.Commands
             SlotNumber = slotNumber;
 
             // Determine the algorithm based on the length of the digest data.
-            // Currently the length of the data must be 128 (RSA-1024), 256
-            // (RSA-2048), 32 (ECC-P256), or 48 (ECC-P384).
+            // Currently, the length of the data must be 128 (RSA-1024), 256
+            // (RSA-2048), 384 (RSA-3072), 512 (RSA-4096), 32 (ECC-P256), or 48 (ECC-P384).
             // Return the PivAlgorithm, or if the length is not supported, throw an
             // exception.
             Algorithm = digestData.Length switch

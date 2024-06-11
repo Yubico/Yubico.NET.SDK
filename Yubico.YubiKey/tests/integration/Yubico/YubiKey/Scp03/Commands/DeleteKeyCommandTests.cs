@@ -17,7 +17,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Scp03.Commands
 {
-    [Trait("Category", "Simple")] //TOdo these tests dont work with Non FIPS key so far.
+    [Trait("Category", "Simple")]
     public class DeleteKeyCommandTests
     {
         [SkippableTheory(typeof(DeviceNotFoundException))]

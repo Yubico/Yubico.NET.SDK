@@ -31,13 +31,13 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384, PivPinPolicy.Never, StandardTestDevice.Fw5)]
         public void KeyAgree_Succeeds(PivAlgorithm algorithm, PivPinPolicy pinPolicy, StandardTestDevice testDeviceType)
         {
-            SampleKeyPairs.GetPemKeyPair(algorithm, out string publicKeyPem, out _);
+            SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicKeyPem, out _);
             var keyConverter = new KeyConverter(publicKeyPem.ToCharArray());
             var pivPublicKey = keyConverter.GetPivPublicKey();
             var eccPublicKey = (PivEccPublicKey)pivPublicKey;
             var expectedSecretLength = (eccPublicKey.PublicPoint.Length - 1) / 2;
 
-            var isValid = SampleKeyPairs.GetKeyAndCertPem(algorithm, true, out _, out string privateKeyPem);
+            var isValid = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out _, out _, out string privateKeyPem);
             Assert.True(isValid);
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
@@ -67,7 +67,7 @@ namespace Yubico.YubiKey.Piv
         public void KeyAgree_MatchesCSharp(PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm, StandardTestDevice testDeviceType)
         {
             // Build the correspondent objects.
-            bool isValid = SampleKeyPairs.GetKeyAndCertPem(algorithm, true, out _, out string privateKeyPem);
+            bool isValid = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out _, out _, out string privateKeyPem);
             Assert.True(isValid);
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
 
@@ -80,7 +80,7 @@ namespace Yubico.YubiKey.Piv
             privateKey.Clear();
 
             // Build the YubiKey objects.
-            SampleKeyPairs.GetPemKeyPair(algorithm, out _, out privateKeyPem);
+            SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out _, out privateKeyPem);
             privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
 
@@ -125,7 +125,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void NoKeyInSlot_KeyAgree_Exception(StandardTestDevice testDeviceType)
         {
-            SampleKeyPairs.GetPemKeyPair(PivAlgorithm.EccP384, out string publicKeyPem, out _);
+            SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.EccP384, false, out _, out string publicKeyPem, out _);
             var publicKey = new KeyConverter(publicKeyPem.ToCharArray());
             PivPublicKey pivPublicKey = publicKey.GetPivPublicKey();
 

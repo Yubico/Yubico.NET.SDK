@@ -20,8 +20,7 @@ namespace Yubico.YubiKey.Scp03.Commands
 {
     public class PutKeyCommandTests
     {
-        //These may require that DeleteKeyCommandTests have been run first.
-        //Todo fix non fips scp03?
+        // These may require that DeleteKeyCommandTests have been run first.
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5Fips)]
         [InlineData(StandardTestDevice.Fw5)]

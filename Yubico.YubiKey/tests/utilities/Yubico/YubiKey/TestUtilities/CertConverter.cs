@@ -143,23 +143,17 @@ namespace Yubico.YubiKey.TestUtilities
         // This method will return a new object, it will not return a reference.
         public PivPublicKey GetPivPublicKey()
         {
-            switch (Algorithm)
+            if (Algorithm.IsRsa())
             {
-                case PivAlgorithm.Rsa1024:
-                case PivAlgorithm.Rsa2048:
-                case PivAlgorithm.Rsa3072:
-                case PivAlgorithm.Rsa4096:
-                    RSA? rsaObject = _certificateObject.PublicKey.GetRSAPublicKey()!;
-                    RSAParameters rsaParams = rsaObject.ExportParameters(false);
-                    return new PivRsaPublicKey(rsaParams.Modulus, rsaParams.Exponent);
-
-                case PivAlgorithm.EccP256:
-                case PivAlgorithm.EccP384:
-                    return new PivEccPublicKey(_certificateObject.PublicKey.EncodedKeyValue.RawData);
-                
-                default:
-                    throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
+                RSA? rsaObject = _certificateObject.PublicKey.GetRSAPublicKey()!;
+                RSAParameters rsaParams = rsaObject.ExportParameters(false);
+                return new PivRsaPublicKey(rsaParams.Modulus, rsaParams.Exponent);
             }
+            if (Algorithm.IsEcc())
+            {
+                return new PivEccPublicKey(_certificateObject.PublicKey.EncodedKeyValue.RawData);
+            }
+            throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
         }
 
         // Return a new RSA object.

@@ -189,7 +189,8 @@ namespace Yubico.YubiKey.Piv
                         // Algorithm
                         // One byte, no more, no less.
                         ThrowIfNotLength(value, 1);
-                        Debug.Assert(Enum.IsDefined(typeof(PivAlgorithm), (PivAlgorithm)value.Span[0]));
+                        bool isKnownAlgorithm = Enum.IsDefined(typeof(PivAlgorithm), (PivAlgorithm)value.Span[0]);
+                        Debug.Assert(isKnownAlgorithm);
                         Algorithm = (PivAlgorithm)value.Span[0];
 
                         break;

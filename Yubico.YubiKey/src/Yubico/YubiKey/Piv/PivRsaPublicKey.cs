@@ -70,13 +70,13 @@ namespace Yubico.YubiKey.Piv
         private const int Rsa4096BlockSize = 512;
         private const int SliceIndex1024 = 4;
         private const int SliceIndex2048 = 5;
-        private const int SliceIndex3072 = 6; //TODO this correct?
-        private const int SliceIndex4096 = 7; //TODO ??
+        private const int SliceIndex3072 = 6;
+        private const int SliceIndex4096 = 7;
         private const int PublicComponentCount = 2;
         private const int ModulusIndex = 0;
         private const int ExponentIndex = 1;
 
-        private readonly byte[] _exponentF4 = new byte[] { 0x01, 0x00, 0x01 };
+        private readonly byte[] _exponentF4 = { 0x01, 0x00, 0x01 };
 
         private Memory<byte> _modulus;
 
@@ -207,13 +207,12 @@ namespace Yubico.YubiKey.Piv
         // return false.
         private bool LoadRsaPublicKey(ReadOnlySpan<byte> modulus, ReadOnlySpan<byte> publicExponent)
         {
-            int sliceIndex = SliceIndex1024;
-
+            int sliceIndex;
             switch (modulus.Length)
             {
                 case Rsa1024BlockSize:
                     Algorithm = PivAlgorithm.Rsa1024;
-
+                    sliceIndex = SliceIndex1024;
                     break;
 
                 case Rsa2048BlockSize:
@@ -224,10 +223,12 @@ namespace Yubico.YubiKey.Piv
                 case Rsa3072BlockSize:
                     Algorithm = PivAlgorithm.Rsa3072;
                     sliceIndex = SliceIndex3072;
+                    
                     break;
                 case Rsa4096BlockSize:
                     Algorithm = PivAlgorithm.Rsa4096;
                     sliceIndex = SliceIndex4096;
+                    
                     break;
                 default:
                     return false;
@@ -246,7 +247,6 @@ namespace Yubico.YubiKey.Piv
             }
 
             var tlvWriter = new TlvWriter();
-
             using (tlvWriter.WriteNestedTlv(PublicKeyTag))
             {
                 tlvWriter.WriteValue(ModulusTag, modulus);
@@ -255,7 +255,7 @@ namespace Yubico.YubiKey.Piv
 
             PivEncodedKey = tlvWriter.Encode();
 
-            // The Metadate encoded key is the contents of the nested. So set
+            // The Metadata encoded key is the contents of the nested. So set
             // that to be a slice of the EncodedKey.
             YubiKeyEncodedKey = PivEncodedKey[sliceIndex..];
 

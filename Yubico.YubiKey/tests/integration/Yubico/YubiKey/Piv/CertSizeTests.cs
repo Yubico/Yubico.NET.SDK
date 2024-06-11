@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Piv
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
             using X509Certificate2 caCert = GetCACert();
 
-            SampleKeyPairs.GetPemKeyPair(PivAlgorithm.Rsa2048, out string pubKey, out string priKey);
+            SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out string pubKey, out string priKey);
             var convertPublic = new KeyConverter(pubKey.ToCharArray());
             RSA dotNetPublicKey = convertPublic.GetRsaObject();
             var convertPrivate = new KeyConverter(priKey.ToCharArray());
@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Piv
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
             using X509Certificate2 caCert = GetCACert();
 
-            SampleKeyPairs.GetPemKeyPair(PivAlgorithm.Rsa2048, out string pubKey, out string priKey);
+            SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out string pubKey, out string priKey);
             var convertPublic = new KeyConverter(pubKey.ToCharArray());
             RSA dotNetPublicKey = convertPublic.GetRsaObject();
             var convertPrivate = new KeyConverter(priKey.ToCharArray());
@@ -132,7 +132,7 @@ namespace Yubico.YubiKey.Piv
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
             using X509Certificate2 caCert = GetCACert();
 
-            SampleKeyPairs.GetPemKeyPair(PivAlgorithm.Rsa2048, out string pubKey, out string priKey);
+            SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out string pubKey, out string priKey);
             var convertPublic = new KeyConverter(pubKey.ToCharArray());
             RSA dotNetPublicKey = convertPublic.GetRsaObject();
             var convertPrivate = new KeyConverter(priKey.ToCharArray());
@@ -225,8 +225,8 @@ namespace Yubico.YubiKey.Piv
         // a CA cert.
         private static X509Certificate2 GetCACert()
         {
-            _ = SampleKeyPairs.GetKeyAndCertPem(
-                PivAlgorithm.Rsa2048, true, out string certPem, out string privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(
+                PivAlgorithm.Rsa2048, true, out string certPem, out _, out string privateKeyPem);
 
             var cert = new CertConverter(certPem.ToCharArray());
             X509Certificate2 certObj = cert.GetCertObject();

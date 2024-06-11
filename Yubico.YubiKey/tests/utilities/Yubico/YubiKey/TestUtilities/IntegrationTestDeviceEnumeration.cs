@@ -31,33 +31,49 @@ namespace Yubico.YubiKey.TestUtilities
             = new Lazy<IntegrationTestDeviceEnumeration>(() => new IntegrationTestDeviceEnumeration());
 
         private static IntegrationTestDeviceEnumeration Instance => SingleInstance.Value;
-        private readonly static string YubicoAppDataSubDirectory = "Yubico";
-        private const string BlockListFileName = "BlockList.txt";
-        private readonly HashSet<string> _blockedSerialNumbers;
-        private readonly HashSet<string> _allowedSerialNumbers;
-
-        private IntegrationTestDeviceEnumeration()
+        private const string YubikeyIntegrationtestAllowedKeysName = "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS";
+        public readonly HashSet<string> AllowedSerialNumbers;
+        
+        public IntegrationTestDeviceEnumeration(string? configDirectory = null)
         {
-            var blockListFilePath = GetPath(YubicoAppDataSubDirectory, BlockListFileName);
-            _blockedSerialNumbers = File.Exists(blockListFilePath)
-                ? new HashSet<string>(File.ReadLines(blockListFilePath)) 
+            string whitelistFileName = $"{YubikeyIntegrationtestAllowedKeysName}.txt";
+            var whiteListFilePath = Path.Combine(configDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Yubico", whitelistFileName);
+            
+            CreateIfMissing(whiteListFilePath);
+
+            AllowedSerialNumbers = File.Exists(whiteListFilePath)
+                ? new HashSet<string>(File.ReadLines(whiteListFilePath)) 
                 : new HashSet<string>();
 
-            var allowedKeys = Environment.GetEnvironmentVariable("YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS")
+            var allowedKeys = Environment.GetEnvironmentVariable(YubikeyIntegrationtestAllowedKeysName)
                 ?.Split(':') ?? Array.Empty<string>();
-            _allowedSerialNumbers = allowedKeys.Any() 
-                ? new HashSet<string>(allowedKeys) 
-                : new HashSet<string>();
             
-            Debug.WriteLine("Loaded {0} keys(s) to block list ({1})", _blockedSerialNumbers.Count, string.Join(",", _blockedSerialNumbers));
-            Debug.WriteLine("Loaded {0} keys(s) to allow list ({1})", _allowedSerialNumbers.Count, string.Join(",", _allowedSerialNumbers));
+            foreach (string allowedKey in allowedKeys)
+            {
+                _ = AllowedSerialNumbers.Add(allowedKey);
+            }
+
+            if (!AllowedSerialNumbers.Any())
+            {
+                throw new TestClassException("In order to prevent you from accidentally wiping your own important keys," +
+                                             "you must add your whitelisted Yubikeys serial number to either the environment variable " +
+                                             $"'{YubikeyIntegrationtestAllowedKeysName}' or to the file {whitelistFileName} at {whiteListFilePath}\n" +
+                                             "For the environment variable, they should be added as a colon separated string, e.g: 1232332:347233\n" +
+                                             "For the file, they should be added line by line, e.g: 1232332\n347233");
+            }
+
+            Debug.WriteLine("Loaded {0} keys(s) to allow list ({1})", AllowedSerialNumbers.Count, string.Join(",", AllowedSerialNumbers));
         }
 
-        private static string GetPath(string appDataSubDirectory, string filename) =>
-            Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                appDataSubDirectory,
-                filename);
+        private static void CreateIfMissing(string whiteListFilePath)
+        {
+            _ = Directory.CreateDirectory(Path.GetDirectoryName(whiteListFilePath)!);
+            if (!File.Exists(whiteListFilePath))
+            {
+                var file  = File.Create(whiteListFilePath);
+                file.Close();
+            }
+        }
 
         /// <summary>
         /// Enumerates all YubiKey test devices on a system, using a provided block list
@@ -78,14 +94,11 @@ namespace Yubico.YubiKey.TestUtilities
         /// <returns>The allow list for Yubikey</returns>
         public static IList<IYubiKeyDevice> GetTestDevices(Transport transport = Transport.All)
         {
-            IEnumerable<IYubiKeyDevice> testYubiKeys = YubiKeyDevice.FindByTransport(transport)
-                .Where(IsNotBlockedKey)
-                .Where(IsAllowedKey);
+            return YubiKeyDevice
+                .FindByTransport(transport)
+                .Where(IsAllowedKey).ToList();
             
-            return testYubiKeys.ToList();
-            
-            static bool IsNotBlockedKey(IYubiKeyDevice key) => key.SerialNumber == null || !Instance._blockedSerialNumbers.Contains(key.SerialNumber.Value.ToString());
-            static bool IsAllowedKey(IYubiKeyDevice key) => key.SerialNumber == null || Instance._allowedSerialNumbers.Contains(key.SerialNumber.Value.ToString());
+            static bool IsAllowedKey(IYubiKeyDevice key) => key.SerialNumber == null || Instance.AllowedSerialNumbers.Contains(key.SerialNumber.Value.ToString());
         }
 
         /// <summary>

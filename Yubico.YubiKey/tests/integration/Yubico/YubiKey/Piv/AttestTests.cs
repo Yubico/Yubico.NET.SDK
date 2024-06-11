@@ -168,7 +168,7 @@ namespace Yubico.YubiKey.Piv
         // the YubiKey will generate attestation statements with them nonetheless.
         [Theory]
         [InlineData(BadAttestationPairs.KeyRsa1024CertValid, StandardTestDevice.Fw5)]
-        [InlineData(BadAttestationPairs.KeyRsa2048CertVersion1, StandardTestDevice.Fw5)] //TODO
+        [InlineData(BadAttestationPairs.KeyRsa2048CertVersion1, StandardTestDevice.Fw5)]
         [InlineData(BadAttestationPairs.KeyEccP256CertVersion1, StandardTestDevice.Fw5)]
         [InlineData(BadAttestationPairs.KeyEccP384CertVersion1, StandardTestDevice.Fw5)]
         [InlineData(BadAttestationPairs.KeyRsa2048CertBigName, StandardTestDevice.Fw5)]
@@ -283,7 +283,7 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                if (SampleKeyPairs.GetKeyAndCertPem(algorithm, isValidCert, out string certPem, out string privateKeyPem) == false)
+                if (SampleKeyPairs.GetKeysAndCertPem(algorithm, isValidCert, out string certPem, out _, out string privateKeyPem) == false)
                 {
                     return false;
                 }

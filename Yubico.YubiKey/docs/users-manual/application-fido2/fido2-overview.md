@@ -28,7 +28,7 @@ There are two FIDO standards that the YubiKey currently implements:
 - FIDO U2F
 - FIDO2
 
-These standards a related. U2F can be thought of as "version 1" of the standard, and FIDO2
+These standards are related. U2F can be thought of as "version 1" of the standard, and FIDO2
 is "version 2". "U2F" stands for "Universal Second Factor" authentication.
 
 The SDK treats each version as a separate application, even though there is some overlap

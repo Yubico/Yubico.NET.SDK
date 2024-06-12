@@ -18,26 +18,46 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using Xunit.Sdk;
-using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey.TestUtilities
 {
     /// <summary>
     /// Exposes methods that ensure integration tests only run on YubiKeys intended for testing.
+    /// Enumerates all YubiKey test devices on a system
+    /// <remarks>
+    /// Instructions for setting up the whitelist file:
+    ///
+    /// The user needs to go to the LocalApplicationData location and create a folder
+    /// called "Yubico" and a text file called "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt" inside the Yubico folder
+    /// (Both case-insensitive).
+    ///
+    /// The whitelist text file should be in the C:\Users\&lt;username&gt;\AppData\Local\Yubico
+    /// for Windows users and /Users/&lt;username&gt;/.local/share/Yubico for macOS users.
+    ///
+    /// The whitelist file contains the serial numbers of YubiKeys to be allowed to run integration tests.
+    /// Each serial number should be on a separate line.
+    ///
+    /// If you prefer to use environment variables instead, you can add the allowed serial numbers to the
+    /// YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS in a colon-separated string. E.g: 1223344:3443343
+    /// </remarks>
     /// </summary>
     public sealed class IntegrationTestDeviceEnumeration
     {
+        public readonly HashSet<string> AllowedSerialNumbers;
+        
         private static readonly Lazy<IntegrationTestDeviceEnumeration> SingleInstance
             = new Lazy<IntegrationTestDeviceEnumeration>(() => new IntegrationTestDeviceEnumeration());
 
         private static IntegrationTestDeviceEnumeration Instance => SingleInstance.Value;
         private const string YubikeyIntegrationtestAllowedKeysName = "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS";
-        public readonly HashSet<string> AllowedSerialNumbers;
+        private readonly string _whitelistFileName = $"{YubikeyIntegrationtestAllowedKeysName}.txt";
 
         public IntegrationTestDeviceEnumeration(string? configDirectory = null)
         {
-            string whitelistFileName = $"{YubikeyIntegrationtestAllowedKeysName}.txt";
-            var whiteListFilePath = Path.Combine(configDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Yubico", whitelistFileName);
+            var whiteListFilePath = Path.Combine(
+                configDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Yubico", 
+                _whitelistFileName);
 
             CreateIfMissing(whiteListFilePath);
 
@@ -57,7 +77,7 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 throw new TestClassException("In order to prevent you from accidentally wiping your own important keys," +
                                              "you must add your whitelisted Yubikeys serial number to either the environment variable " +
-                                             $"'{YubikeyIntegrationtestAllowedKeysName}' or to the file {whitelistFileName} at {whiteListFilePath}\n" +
+                                             $"'{YubikeyIntegrationtestAllowedKeysName}' or to the file {_whitelistFileName} at {whiteListFilePath}\n" +
                                              "For the environment variable, they should be added as a colon separated string, e.g: 1232332:347233\n" +
                                              "For the file, they should be added line by line, e.g: 1232332\n347233");
             }
@@ -68,37 +88,28 @@ namespace Yubico.YubiKey.TestUtilities
         private static void CreateIfMissing(string whiteListFilePath)
         {
             _ = Directory.CreateDirectory(Path.GetDirectoryName(whiteListFilePath)!);
-            if (!File.Exists(whiteListFilePath))
+            if (File.Exists(whiteListFilePath))
             {
-                var file = File.Create(whiteListFilePath);
-                file.Close();
+                return;
             }
-        }
 
+            var file = File.Create(whiteListFilePath);
+            file.Close();
+        }
+        
         /// <summary>
-        /// Enumerates all YubiKey test devices on a system, using a provided block list
+        /// Enumerates all YubiKey test devices on a system.
         /// </summary>
-        /// <remarks>
-        /// Instructions of setting up the blocklist.txt.
-        ///
-        /// The user needs to go to the LocalApplicationData location and create a folder
-        /// called "Yubico" and a text file called "BlockList.txt" inside the Yubico Folder
-        /// (Both case-insensitive).
-        ///
-        /// The block list text file should be in the C:\Users\<username>\AppData\Local\Yubico
-        /// and /Users/<username>/.local/share/Yubico for mac user.
-        ///
-        /// The block list file contains the serial numbers of YubiKeys to be blocked.
-        /// Each serial number should be on a separate line.
-        /// </remarks>
-        /// <returns>The allow list for Yubikey</returns>
+        /// <returns>The whitelist filtered list of available Yubikeys</returns>
         public static IList<IYubiKeyDevice> GetTestDevices(Transport transport = Transport.All)
         {
             return YubiKeyDevice
                 .FindByTransport(transport)
                 .Where(IsAllowedKey).ToList();
 
-            static bool IsAllowedKey(IYubiKeyDevice key) => key.SerialNumber == null || Instance.AllowedSerialNumbers.Contains(key.SerialNumber.Value.ToString());
+            static bool IsAllowedKey(IYubiKeyDevice key) 
+                => key.SerialNumber == null || 
+                   Instance.AllowedSerialNumbers.Contains(key.SerialNumber.Value.ToString());
         }
 
         /// <summary>
@@ -112,20 +123,18 @@ namespace Yubico.YubiKey.TestUtilities
         /// arg is given, then this method will require serial numbers. If
         /// <c>false</c>, the method will examine all YubiKeys, whether the
         /// serial number is visible or not.</param>
-        /// <returns>A YubiKey that was found.</returns>
+        /// <returns>The whitelist filtered YubiKey that was found.</returns>
         public static IYubiKeyDevice GetTestDevice(
             StandardTestDevice testDeviceType,
             bool requireSerialNumber = true)
         {
+            var devices = GetTestDevices();
             if (requireSerialNumber)
             {
-                return GetTestDevices()
-                    .Where(d => d.SerialNumber.HasValue)
-                    .SelectRequiredTestDevice(testDeviceType);
+                devices = devices.Where(d => d.SerialNumber.HasValue).ToList();
             }
 
-            return GetTestDevices()
-                .SelectRequiredTestDevice(testDeviceType);
+            return devices.SelectRequiredTestDevice(testDeviceType);
         }
 
         /// <summary>
@@ -135,7 +144,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// <param name="transport">The transport the device must support.</param>
         /// <param name="minimumFirmwareVersion">The earliest version number the
         /// caller is willing to accept.</param>
-        /// <returns>A YubiKey that was found.</returns>
+        /// <returns>The whitelist filtered YubiKey that was found.</returns>
         public static IYubiKeyDevice GetTestDevice(Transport transport, FirmwareVersion minimumFirmwareVersion)
         {
             IList<IYubiKeyDevice> deviceList = GetTestDevices(transport);

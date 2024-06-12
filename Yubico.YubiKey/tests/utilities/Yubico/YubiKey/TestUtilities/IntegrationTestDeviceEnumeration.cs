@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.TestUtilities
     public sealed class IntegrationTestDeviceEnumeration
     {
         public readonly HashSet<string> AllowedSerialNumbers;
-        
+
         private static readonly Lazy<IntegrationTestDeviceEnumeration> SingleInstance
             = new Lazy<IntegrationTestDeviceEnumeration>(() => new IntegrationTestDeviceEnumeration());
 
@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.TestUtilities
         {
             var whiteListFilePath = Path.Combine(
                 configDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "Yubico", 
+                "Yubico",
                 _whitelistFileName);
 
             CreateIfMissing(whiteListFilePath);
@@ -75,14 +75,16 @@ namespace Yubico.YubiKey.TestUtilities
 
             if (!AllowedSerialNumbers.Any())
             {
-                throw new TestClassException("In order to prevent you from accidentally wiping your own important keys," +
-                                             "you must add your whitelisted Yubikeys serial number to either the environment variable " +
-                                             $"'{YubikeyIntegrationtestAllowedKeysName}' or to the file {_whitelistFileName} at {whiteListFilePath}\n" +
-                                             "For the environment variable, they should be added as a colon separated string, e.g: 1232332:347233\n" +
-                                             "For the file, they should be added line by line, e.g: 1232332\n347233");
+                throw new TestClassException(
+                    "In order to prevent you from accidentally wiping your own important keys," +
+                    "you must add your whitelisted Yubikeys serial number to either the environment variable " +
+                    $"'{YubikeyIntegrationtestAllowedKeysName}' or to the file {_whitelistFileName} at {whiteListFilePath}\n" +
+                    "For the environment variable, they should be added as a colon separated string, e.g: 1232332:347233\n" +
+                    "For the file, they should be added line by line, e.g: 1232332\n347233");
             }
 
-            Debug.WriteLine("Loaded {0} keys(s) to allow list ({1})", AllowedSerialNumbers.Count, string.Join(",", AllowedSerialNumbers));
+            Debug.WriteLine("Loaded {0} keys(s) to allow list ({1})", AllowedSerialNumbers.Count,
+                string.Join(",", AllowedSerialNumbers));
         }
 
         private static void CreateIfMissing(string whiteListFilePath)
@@ -96,7 +98,7 @@ namespace Yubico.YubiKey.TestUtilities
             var file = File.Create(whiteListFilePath);
             file.Close();
         }
-        
+
         /// <summary>
         /// Enumerates all YubiKey test devices on a system.
         /// </summary>
@@ -107,8 +109,8 @@ namespace Yubico.YubiKey.TestUtilities
                 .FindByTransport(transport)
                 .Where(IsAllowedKey).ToList();
 
-            static bool IsAllowedKey(IYubiKeyDevice key) 
-                => key.SerialNumber == null || 
+            static bool IsAllowedKey(IYubiKeyDevice key)
+                => key.SerialNumber == null ||
                    Instance.AllowedSerialNumbers.Contains(key.SerialNumber.Value.ToString());
         }
 

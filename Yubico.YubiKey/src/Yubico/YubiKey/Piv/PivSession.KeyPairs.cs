@@ -124,6 +124,9 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
         /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
+        /// </exception>
         public PivPublicKey GenerateKeyPair(byte slotNumber,
                                             PivAlgorithm algorithm,
                                             PivPinPolicy pinPolicy = PivPinPolicy.Default,
@@ -230,6 +233,9 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="SecurityException">
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
+        /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
         /// </exception>
         public void ImportPrivateKey(byte slotNumber,
                                      PivPrivateKey privateKey,

@@ -75,6 +75,8 @@ namespace Yubico.YubiKey.Piv
         /// <code>
         ///     Rsa1024    1024
         ///     Rsa2048    2048
+        ///     Rsa3072    3072
+        ///     Rsa4096    4096
         ///     EccP256     256
         ///     EccP384     384
         ///     TripleDes   192

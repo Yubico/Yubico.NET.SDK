@@ -18,8 +18,7 @@ using System.Globalization;
 namespace Yubico.YubiKey.Piv
 {
     /// <summary>
-    /// Provides extension methods for the <see cref="PivSession"/> class, adding functionality
-    /// to check and handle unsupported algorithms for YubiKey devices.
+    /// This class provides extension methods for the <see cref="PivSession"/> class.
     /// </summary>
     public static class PivSessionExtensions
     {

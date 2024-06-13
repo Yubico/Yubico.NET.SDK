@@ -216,7 +216,7 @@ namespace Yubico.YubiKey.Piv
         /// The <c>yubiKey</c> argument is null.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// This exception can be thrown when unable to determine the management key type.
+        /// This exception is thrown when unable to determine the management key type.
         /// </exception>
         public PivSession(IYubiKeyDevice yubiKey, StaticKeys scp03Keys)
             : this(scp03Keys, yubiKey)

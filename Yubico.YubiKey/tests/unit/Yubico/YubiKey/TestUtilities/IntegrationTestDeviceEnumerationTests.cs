@@ -14,6 +14,8 @@
 
 using System;
 using System.IO;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Sdk;
 
@@ -25,13 +27,8 @@ namespace Yubico.YubiKey.TestUtilities
         public void Constructor_ShouldThrowException_And_CreateAllowlistFile_IfNotExists()
         {
             // Arrange
-            string customDir = Path.Combine(Path.GetTempPath(), "CustomYubicoConfig");
-            string allowlistFilePath = Path.Combine(customDir, "Yubico", "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
-
-            if (Directory.Exists(customDir))
-            {
-                Directory.Delete(customDir, true);
-            }
+            string customDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            string allowlistFilePath = Path.Combine(customDir, "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
 
             Environment.SetEnvironmentVariable("YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS", null);
 
@@ -42,23 +39,24 @@ namespace Yubico.YubiKey.TestUtilities
             });
 
             // Assert
+            Thread.Sleep(500);
             Assert.True(File.Exists(allowlistFilePath));
             Assert.Contains("must add your allow-listed Yubikeys serial number", exception.Message);
         }
 
         [Fact]
-        public void Constructor_ShouldThrowException_IfNoAllowlistedKeys()
+        public async Task Constructor_ShouldThrowException_IfNoAllowlistedKeys()
         {
             // Arrange
-            string customDir = Path.Combine(Path.GetTempPath(), "CustomYubicoConfig");
-            string allowlistFilePath = Path.Combine(customDir, "Yubico", "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
+            string customDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            string allowlistFilePath = Path.Combine(customDir, "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
 
-            if (!Directory.Exists(customDir))
-            {
-                _ = Directory.CreateDirectory(customDir);
-            }
+            _ = Directory.CreateDirectory(customDir);
 
-            File.WriteAllText(allowlistFilePath, string.Empty);
+            // Wait 500 ms for directory to be created
+            await Task.Delay(500);
+            await File.WriteAllTextAsync(allowlistFilePath, string.Empty);
+
             Environment.SetEnvironmentVariable("YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS", null);
 
             // Act & Assert
@@ -72,19 +70,19 @@ namespace Yubico.YubiKey.TestUtilities
         }
 
         [Fact]
-        public void Constructor_ShouldLoadAllowlistedKeys_FromFile()
+        public async Task Constructor_ShouldLoadAllowlistedKeys_FromFile()
         {
             // Arrange
-            string customDir = Path.Combine(Path.GetTempPath(), "CustomYubicoConfig");
-            string allowlistFilePath = Path.Combine(customDir, "Yubico", "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
+            string customDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            string allowlistFilePath = Path.Combine(customDir, "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
             var allowlistedKeys = new[] { "123456", "7891011" };
 
-            if (!Directory.Exists(customDir))
-            {
-                _ = Directory.CreateDirectory(customDir);
-            }
+            // Wait 500 ms for directory to be created
+            _ = Directory.CreateDirectory(customDir);
 
-            File.WriteAllLines(allowlistFilePath, allowlistedKeys);
+            await Task.Delay(500);
+            await File.WriteAllLinesAsync(allowlistFilePath, allowlistedKeys);
+
             Environment.SetEnvironmentVariable("YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS", null);
 
             // Act
@@ -92,23 +90,24 @@ namespace Yubico.YubiKey.TestUtilities
 
             // Assert
             Assert.Equal(allowlistedKeys.Length, integrationTestDeviceEnumeration.AllowedSerialNumbers.Count);
-            Assert.All(allowlistedKeys, key => Assert.Contains(key, integrationTestDeviceEnumeration.AllowedSerialNumbers));
+            Assert.All(allowlistedKeys,
+                key => Assert.Contains(key, integrationTestDeviceEnumeration.AllowedSerialNumbers));
         }
 
         [Fact]
-        public void Constructor_ShouldLoadAllowlistedKeys_FromEnvironmentVariable()
+        public async Task Constructor_ShouldLoadAllowlistedKeys_FromEnvironmentVariable()
         {
             // Arrange
-            string customDir = Path.Combine(Path.GetTempPath(), "CustomYubicoConfig");
-            string allowlistFilePath = Path.Combine(customDir, "Yubico", "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
+            string customDir = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+            string allowlistFilePath = Path.Combine(customDir, "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt");
             var envAllowlistedKeys = "123456:7891011";
 
-            if (!Directory.Exists(customDir))
-            {
-                _ = Directory.CreateDirectory(customDir);
-            }
+            _ = Directory.CreateDirectory(customDir);
 
-            File.WriteAllText(allowlistFilePath, string.Empty); // Ensure the file exists but is empty
+            // Wait 500 ms for directory to be created
+            await Task.Delay(500);
+            await File.WriteAllTextAsync(allowlistFilePath, string.Empty);
+
             Environment.SetEnvironmentVariable("YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS", envAllowlistedKeys);
 
             // Act

@@ -75,7 +75,7 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 throw new TestClassException(
                     "In order to prevent you from accidentally wiping your own important keys," +
-                    "you must add your allowlisted Yubikeys serial number to either the environment variable " +
+                    "you must add your allow-listed Yubikeys serial number to either the environment variable " +
                     $"'{YubikeyIntegrationtestAllowedKeysName}' or to the file {_allowlistFileName} at {allowListFilePath}\n" +
                     "For the environment variable, they should be added as a colon separated string, e.g: 1232332:347233\n" +
                     "For the file, they should be added line by line, e.g: 1232332\n347233");

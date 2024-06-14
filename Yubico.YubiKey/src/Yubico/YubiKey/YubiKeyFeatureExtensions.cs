@@ -243,7 +243,7 @@ namespace Yubico.YubiKey
         }
 
         /// <summary>
-        /// Throws a <see cref="NotSupportedException"/> if the YubiKey doesn't support the requested feature
+        /// Throws a <see cref="NotSupportedException"/> if the YubiKey doesn't support the requested feature. 
         /// </summary>
         /// <param name="yubiKeyDevice"></param>
         /// <param name="feature"></param>

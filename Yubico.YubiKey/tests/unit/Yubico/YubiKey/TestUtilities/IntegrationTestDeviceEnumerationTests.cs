@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.TestUtilities
 
             // Assert
             Assert.True(File.Exists(whitelistFilePath));
-            Assert.Contains("must add your whitelisted Yubikeys serial number", exception.Message);
+            Assert.Contains("must add your allow-listed Yubikeys serial number", exception.Message);
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.TestUtilities
             });
 
             // Assert
-            Assert.Contains("must add your whitelisted Yubikeys serial number", exception.Message);
+            Assert.Contains("must add your allow-listed Yubikeys serial number", exception.Message);
         }
 
         [Fact]

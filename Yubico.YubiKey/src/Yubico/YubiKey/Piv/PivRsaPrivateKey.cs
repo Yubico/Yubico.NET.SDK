@@ -56,6 +56,8 @@ namespace Yubico.YubiKey.Piv
         private const int CoefficientTag = 0x05;
         private const int Rsa1024CrtBlockSize = 64;
         private const int Rsa2048CrtBlockSize = 128;
+        private const int Rsa3072CrtBlockSize = 192;
+        private const int Rsa4096CrtBlockSize = 256;
         private const int CrtComponentCount = 5;
 
         private Memory<byte> _primeP;
@@ -138,6 +140,8 @@ namespace Yubico.YubiKey.Piv
             {
                 Rsa1024CrtBlockSize => PivAlgorithm.Rsa1024,
                 Rsa2048CrtBlockSize => PivAlgorithm.Rsa2048,
+                Rsa3072CrtBlockSize => PivAlgorithm.Rsa3072,
+                Rsa4096CrtBlockSize => PivAlgorithm.Rsa4096,
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
@@ -181,7 +185,6 @@ namespace Yubico.YubiKey.Piv
         public static PivRsaPrivateKey CreateRsaPrivateKey(ReadOnlyMemory<byte> encodedPrivateKey)
         {
             var tlvReader = new TlvReader(encodedPrivateKey);
-
             var valueArray = new ReadOnlyMemory<byte>[CrtComponentCount];
 
             int index = 0;

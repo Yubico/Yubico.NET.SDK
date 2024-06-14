@@ -14,7 +14,6 @@
 
 using Yubico.Core.Iso7816;
 
-
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>

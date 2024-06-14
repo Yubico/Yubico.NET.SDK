@@ -215,6 +215,9 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="ArgumentNullException">
         /// The <c>yubiKey</c> argument is null.
         /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// This exception is thrown when unable to determine the management key type.
+        /// </exception>
         public PivSession(IYubiKeyDevice yubiKey, StaticKeys scp03Keys)
             : this(scp03Keys, yubiKey)
         {
@@ -235,22 +238,25 @@ namespace Yubico.YubiKey.Piv
 
             ResetAuthenticationStatus();
 
-            ManagementKeyAlgorithm = PivAlgorithm.TripleDes;
-
-            if (yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey))
-            {
-                var getMetadataCmd = new GetMetadataCommand(PivSlot.Management);
-                GetMetadataResponse getMetadataRsp = Connection.SendCommand(getMetadataCmd);
-
-                if (getMetadataRsp.Status == ResponseStatus.Success)
-                {
-                    PivMetadata metadata = getMetadataRsp.GetData();
-                    ManagementKeyAlgorithm = metadata.Algorithm;
-                }
-            }
+            ManagementKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey)
+                ? GetManagementKeyAlgorithm()
+                : PivAlgorithm.TripleDes; // Default for keys with firmware version < 5.7
 
             _yubiKeyDevice = yubiKey;
             _disposed = false;
+        }
+
+        private PivAlgorithm GetManagementKeyAlgorithm()
+        {
+            GetMetadataResponse response = Connection.SendCommand(new GetMetadataCommand(PivSlot.Management));
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+
+            PivMetadata metadata = response.GetData();
+            return metadata.Algorithm;
+
         }
 
         /// <summary>

@@ -15,10 +15,8 @@
 using System;
 using System.Globalization;
 using System.Security;
-using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Yubico.Core.Tlv;
-using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
 
 namespace Yubico.YubiKey.Piv
@@ -385,6 +383,16 @@ namespace Yubico.YubiKey.Piv
             {
                 case PivAlgorithm.Rsa2048:
                     keySize = 2048;
+                    algorithm = "RSA";
+                    break;
+
+                case PivAlgorithm.Rsa3072:
+                    keySize = 3072;
+                    algorithm = "RSA";
+                    break;
+
+                case PivAlgorithm.Rsa4096:
+                    keySize = 4096;
                     algorithm = "RSA";
                     break;
 

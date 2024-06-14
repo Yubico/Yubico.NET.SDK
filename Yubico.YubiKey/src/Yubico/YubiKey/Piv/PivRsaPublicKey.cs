@@ -64,15 +64,11 @@ namespace Yubico.YubiKey.Piv
         private const int ValidExponentLength = 3;
         private const int ModulusTag = 0x81;
         private const int ExponentTag = 0x82;
-        private const int Rsa1024BlockSize = 128;
-        private const int Rsa2048BlockSize = 256;
-        private const int SliceIndex1024 = 4;
-        private const int SliceIndex2048 = 5;
         private const int PublicComponentCount = 2;
         private const int ModulusIndex = 0;
         private const int ExponentIndex = 1;
 
-        private readonly byte[] _exponentF4 = new byte[] { 0x01, 0x00, 0x01 };
+        private readonly byte[] _exponentF4 = { 0x01, 0x00, 0x01 };
 
         private Memory<byte> _modulus;
 
@@ -203,27 +199,26 @@ namespace Yubico.YubiKey.Piv
         // return false.
         private bool LoadRsaPublicKey(ReadOnlySpan<byte> modulus, ReadOnlySpan<byte> publicExponent)
         {
-            int sliceIndex = SliceIndex1024;
-
-            switch (modulus.Length)
+            int keySize = modulus.Length * 8;
+            switch (keySize)
             {
-                case Rsa1024BlockSize:
+                case 1024:
                     Algorithm = PivAlgorithm.Rsa1024;
-
                     break;
-
-                case Rsa2048BlockSize:
+                case 2048:
                     Algorithm = PivAlgorithm.Rsa2048;
-                    sliceIndex = SliceIndex2048;
-
                     break;
-
+                case 3072:
+                    Algorithm = PivAlgorithm.Rsa3072;
+                    break;
+                case 4096:
+                    Algorithm = PivAlgorithm.Rsa4096;
+                    break;
                 default:
                     return false;
             }
 
-            // Make sure the msBit of the modulus is set to verify that the bit
-            // length is really 1024 or 2048.
+            // Make sure the most significant bit of the modulus is positive
             if ((modulus[0] & 0x80) == 0)
             {
                 return false;
@@ -235,7 +230,6 @@ namespace Yubico.YubiKey.Piv
             }
 
             var tlvWriter = new TlvWriter();
-
             using (tlvWriter.WriteNestedTlv(PublicKeyTag))
             {
                 tlvWriter.WriteValue(ModulusTag, modulus);
@@ -244,9 +238,13 @@ namespace Yubico.YubiKey.Piv
 
             PivEncodedKey = tlvWriter.Encode();
 
-            // The Metadate encoded key is the contents of the nested. So set
-            // that to be a slice of the EncodedKey.
-            YubiKeyEncodedKey = PivEncodedKey[sliceIndex..];
+            // Since the public key is nested within the TLV structure, 
+            // we must offset by {keyOffsetIndex} to access the public key.
+            // The keyOffsetIndex is 4 or 5 for the RSA key sizes we support.
+            // The offset of 4 is correct for up to 128 bytes of data (size of RSA1024)
+            // The offset of 5 is correct for up to 64 KiB of data - large enough to accomodate any existing larger RSA key sizes.
+            int keyOffsetIndex = Algorithm == PivAlgorithm.Rsa1024 ? 4 : 5;
+            YubiKeyEncodedKey = PivEncodedKey[keyOffsetIndex..];
 
             _modulus = new Memory<byte>(modulus.ToArray());
             _publicExponent = new Memory<byte>(_exponentF4);

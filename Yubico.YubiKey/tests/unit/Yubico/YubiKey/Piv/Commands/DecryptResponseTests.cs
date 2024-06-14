@@ -67,6 +67,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+        [InlineData(PivAlgorithm.Rsa4096)]
         public void GetData_ReturnsDecrypted(PivAlgorithm algorithm)
         {
             byte[] decryptedData = GetDecryptedData(algorithm);
@@ -97,6 +99,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+        [InlineData(PivAlgorithm.Rsa4096)]
         public void GetData_Success_NoExceptionThrown(PivAlgorithm algorithm)
         {
             ResponseApdu responseApdu = GetResponseApdu(algorithm);

@@ -14,63 +14,102 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using Yubico.YubiKey.Scp03;
+using Xunit.Sdk;
 
 namespace Yubico.YubiKey.TestUtilities
 {
     /// <summary>
     /// Exposes methods that ensure integration tests only run on YubiKeys intended for testing.
+    /// Enumerates all YubiKey test devices on a system
+    /// <remarks>
+    /// Instructions for setting up the allow-list file:
+    ///
+    /// The user needs to add their Yubikeys serial numbers to the allow-list file which is located at
+    /// C:\Users\&lt;username&gt;\AppData\Local\Yubico\YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt for Windows users
+    /// and /Users/&lt;username&gt;/.local/share/Yubico/YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS.txt for macOS users.
+    /// The SDK attempts to create the file if it doesn't already exist.
+    ///
+    /// The allow-list file contains the serial numbers of YubiKeys to be allowed to run integration tests.
+    /// Each serial number should be on a separate line.
+    ///
+    /// If you prefer to use environment variables instead, you can add the allowed serial numbers to the
+    /// YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS in a colon-separated string. E.g: 1223344:3443343
+    /// </remarks>
     /// </summary>
     public sealed class IntegrationTestDeviceEnumeration
     {
-        private static readonly Lazy<IntegrationTestDeviceEnumeration> _singleInstance
+        public readonly HashSet<string> AllowedSerialNumbers;
+
+        private static readonly Lazy<IntegrationTestDeviceEnumeration> SingleInstance
             = new Lazy<IntegrationTestDeviceEnumeration>(() => new IntegrationTestDeviceEnumeration());
 
-        private static IntegrationTestDeviceEnumeration Instance => _singleInstance.Value;
-        private readonly static string yubicoAppDataSubDirectory = "Yubico";
-        private readonly static string blockListFileName = "BlockList.txt";
-        private readonly HashSet<string> blockedSerialNumbers = new HashSet<string>();
+        private static IntegrationTestDeviceEnumeration Instance => SingleInstance.Value;
+        private const string YubikeyIntegrationtestAllowedKeysName = "YUBIKEY_INTEGRATIONTEST_ALLOWEDKEYS";
+        private readonly string _allowlistFileName = $"{YubikeyIntegrationtestAllowedKeysName}.txt";
 
-        private IntegrationTestDeviceEnumeration()
+        public IntegrationTestDeviceEnumeration(string? configDirectory = null)
         {
-            string blockListFilePath = GetPath(yubicoAppDataSubDirectory, blockListFileName);
-            blockedSerialNumbers = File.Exists(blockListFilePath)
-                ? new HashSet<string>(File.ReadLines(blockListFilePath)) : new HashSet<string>();
+            var allowListFilePath = Path.Combine(
+                configDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "Yubico",
+                _allowlistFileName);
+
+            CreateIfMissing(allowListFilePath);
+
+            AllowedSerialNumbers = File.Exists(allowListFilePath)
+                ? new HashSet<string>(File.ReadLines(allowListFilePath))
+                : new HashSet<string>();
+
+            var allowedKeys = Environment.GetEnvironmentVariable(YubikeyIntegrationtestAllowedKeysName)
+                ?.Split(':') ?? Array.Empty<string>();
+
+            foreach (string allowedKey in allowedKeys)
+            {
+                _ = AllowedSerialNumbers.Add(allowedKey);
+            }
+
+            if (!AllowedSerialNumbers.Any())
+            {
+                throw new TestClassException(
+                    "In order to prevent you from accidentally wiping your own important keys," +
+                    "you must add your allow-listed Yubikeys serial number to either the environment variable " +
+                    $"'{YubikeyIntegrationtestAllowedKeysName}' or to the file {_allowlistFileName} at {allowListFilePath}\n" +
+                    "For the environment variable, they should be added as a colon separated string, e.g: 1232332:347233\n" +
+                    "For the file, they should be added line by line, e.g: 1232332\n347233");
+            }
+
+            Debug.WriteLine("Loaded {0} keys(s) to allow list ({1})", AllowedSerialNumbers.Count,
+                string.Join(",", AllowedSerialNumbers));
         }
 
-        private static string GetPath(string appDataSubDirectory, string filename) =>
-            Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                appDataSubDirectory,
-                filename);
+        private static void CreateIfMissing(string allowListFilePath)
+        {
+            _ = Directory.CreateDirectory(Path.GetDirectoryName(allowListFilePath)!);
+            if (File.Exists(allowListFilePath))
+            {
+                return;
+            }
+
+            var file = File.Create(allowListFilePath);
+            file.Close();
+        }
 
         /// <summary>
-        /// Enumerates all YubiKey test devices on a system, using a provided block list
+        /// Enumerates all YubiKey test devices on a system.
         /// </summary>
-        /// <remarks>
-        /// Instructions of setting up the blocklist.txt.
-        ///
-        /// The user needs to go to the LocalApplicationData location and create a folder
-        /// called "Yubico" and a text file called "BlockList.txt" inside the Yubico Folder
-        /// (Both case-insensitive).
-        ///
-        /// The block list text file should be in the C:\Users\<username>\AppData\Local\Yubico
-        /// and /Users/<username>/.local/share/Yubico for mac user.
-        ///
-        /// The block list file contains the serial numbers of YubiKeys to be blocked.
-        /// Each serial number should be on a separate line.
-        /// </remarks>
-        /// <returns>The allow list for Yubikey</returns>
+        /// <returns>The allow-list filtered list of available Yubikeys</returns>
         public static IList<IYubiKeyDevice> GetTestDevices(Transport transport = Transport.All)
         {
-            IEnumerable<IYubiKeyDevice> yubiKeyList = YubiKeyDevice.FindByTransport(transport);
-            IEnumerable<IYubiKeyDevice> testYubiKeys = yubiKeyList
-                .Where(key => key.SerialNumber == null ||
-                              !Instance.blockedSerialNumbers.Contains(key.SerialNumber.Value.ToString()));
+            return YubiKeyDevice
+                .FindByTransport(transport)
+                .Where(IsAllowedKey).ToList();
 
-            return testYubiKeys.ToList();
+            static bool IsAllowedKey(IYubiKeyDevice key)
+                => key.SerialNumber == null ||
+                   Instance.AllowedSerialNumbers.Contains(key.SerialNumber.Value.ToString());
         }
 
         /// <summary>
@@ -84,18 +123,18 @@ namespace Yubico.YubiKey.TestUtilities
         /// arg is given, then this method will require serial numbers. If
         /// <c>false</c>, the method will examine all YubiKeys, whether the
         /// serial number is visible or not.</param>
-        /// <returns>A YubiKey that was found.</returns>
-        public static IYubiKeyDevice GetTestDevice(StandardTestDevice testDeviceType, bool requireSerialNumber = true)
+        /// <returns>The allow-list filtered YubiKey that was found.</returns>
+        public static IYubiKeyDevice GetTestDevice(
+            StandardTestDevice testDeviceType,
+            bool requireSerialNumber = true)
         {
+            var devices = GetTestDevices();
             if (requireSerialNumber)
             {
-                return GetTestDevices()
-                    .Where(d => d.SerialNumber.HasValue)
-                    .SelectRequiredTestDevice(testDeviceType);
+                devices = devices.Where(d => d.SerialNumber.HasValue).ToList();
             }
 
-            return GetTestDevices()
-                .SelectRequiredTestDevice(testDeviceType);
+            return devices.SelectRequiredTestDevice(testDeviceType);
         }
 
         /// <summary>
@@ -105,7 +144,7 @@ namespace Yubico.YubiKey.TestUtilities
         /// <param name="transport">The transport the device must support.</param>
         /// <param name="minimumFirmwareVersion">The earliest version number the
         /// caller is willing to accept.</param>
-        /// <returns>A YubiKey that was found.</returns>
+        /// <returns>The allow-list filtered YubiKey that was found.</returns>
         public static IYubiKeyDevice GetTestDevice(Transport transport, FirmwareVersion minimumFirmwareVersion)
         {
             IList<IYubiKeyDevice> deviceList = GetTestDevices(transport);
@@ -114,43 +153,6 @@ namespace Yubico.YubiKey.TestUtilities
                 if (currentDevice.FirmwareVersion >= minimumFirmwareVersion)
                 {
                     return currentDevice;
-                }
-            }
-
-            throw new InvalidOperationException("No matching YubiKey found.");
-        }
-
-        /// <summary>
-        /// Get YubiKey test device connected using SCP03 (with the default
-        /// static keys). Find the first one, regardless of the type (Fw5, Fw5C,
-        /// Bio, etc.).
-        /// </summary>
-        /// <remarks>
-        /// Note that SCP03 is available on 5.3 and later YubiKeys.
-        /// </remarks>
-        /// <param name="testDeviceType">The type of the device.</param>
-        /// <returns>A YubiKey that was found.</returns>
-        public static IYubiKeyDevice GetScp03TestDevice()
-        {
-            return GetScp03TestDevice(new StaticKeys());
-        }
-
-        /// <summary>
-        /// Get YubiKey test device connected using SCP03 and the given key set.
-        /// </summary>
-        public static IYubiKeyDevice GetScp03TestDevice(StaticKeys staticKeys)
-        {
-            IList<IYubiKeyDevice> deviceList = GetTestDevices(Transport.SmartCard);
-            foreach (IYubiKeyDevice currentDevice in deviceList)
-            {
-                if (currentDevice.FirmwareVersion >= FirmwareVersion.V5_3_0)
-                {
-                    if (currentDevice is YubiKeyDevice ykDevice)
-                    {
-#pragma warning disable CS0618 // Specifically testing this soon-to-be-deprecated feature
-                        return ykDevice.WithScp03(staticKeys);
-#pragma warning restore CS0618
-                    }
                 }
             }
 

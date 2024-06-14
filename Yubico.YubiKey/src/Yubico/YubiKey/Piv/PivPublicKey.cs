@@ -82,15 +82,15 @@ namespace Yubico.YubiKey.Piv
         protected Memory<byte> YubiKeyEncodedKey { get; set; }
 
         /// <summary>
-        /// Contains the TLV encoding of the public key. If there is no encoded
-        /// public key, this will be a buffer of length 0.
+        /// Contains the TLV encoding of the public key. 
+        /// If there is no encoded public key, this will be a buffer of length 0.
         /// </summary>
         public ReadOnlyMemory<byte> PivEncodedPublicKey => PivEncodedKey;
 
         /// <summary>
         /// Contains the TLV encoding of the public key as represented by the
-        /// <c>GET METADATA</c> command. If there is no encoded public key, this
-        /// will be a buffer of length 0.
+        /// <c>GET METADATA</c> command. 
+        /// If there is no encoded public key, this will be a buffer of length 0.
         /// </summary>
         public ReadOnlyMemory<byte> YubiKeyEncodedPublicKey => YubiKeyEncodedKey;
 

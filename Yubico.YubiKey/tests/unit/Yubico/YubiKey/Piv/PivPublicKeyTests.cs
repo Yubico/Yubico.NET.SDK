@@ -249,16 +249,16 @@ namespace Yubico.YubiKey.Piv
         private static Memory<byte> GetModulus(PivAlgorithm algorithm)
         {
             Memory<byte> keyData = GetCorrectEncoding(algorithm);
-            
+
             int start = 7;
             int count = 128;
-            
+
             if (algorithm == PivAlgorithm.Rsa2048)
             {
                 start = 9;
                 count = 256;
             }
-            
+
             if (algorithm == PivAlgorithm.Rsa3072)
             {
                 start = 9;
@@ -388,7 +388,7 @@ namespace Yubico.YubiKey.Piv
 
             PivAlgorithm.Rsa2048 => new Memory<byte>(new byte[]
             {
-                0x7F, 0x49, 0x82, 0x01, 0x09, 
+                0x7F, 0x49, 0x82, 0x01, 0x09,
                     0x81, 0x82, 0x01, 0x00,
                         0xF1, 0x50, 0xBE, 0xFB, 0xB0, 0x9C, 0xAD, 0xFE, 0xF8, 0x0A, 0x3D, 0x10, 0x8C, 0x36, 0x92, 0xDC,
                         0x34, 0xB7, 0x09, 0x86, 0x42, 0xC9, 0xCD, 0x00, 0x55, 0xD1, 0xA4, 0xA0, 0x40, 0x61, 0x5A, 0x2A,
@@ -409,7 +409,7 @@ namespace Yubico.YubiKey.Piv
                     0x82, 0x03,
                         0x01, 0x00, 0x01
             }),
-            
+
             PivAlgorithm.Rsa3072 => new Memory<byte>(new byte[]
             {
                 0x7F, 0x49, 0x82, 0x01, 0x89,

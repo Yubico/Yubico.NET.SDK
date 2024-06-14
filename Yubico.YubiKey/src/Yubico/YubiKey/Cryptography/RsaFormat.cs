@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.Cryptography
         /// supported sizes.
         /// </summary>
         public const int KeySizeBits2048 = 2048;
-        
+
         /// <summary>
         /// Use this value to indicate the key size, in bits, is 3072. The
         /// <c>KeySizeBits</c> values listed in this class are the sizes
@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Cryptography
         /// supported sizes.
         /// </summary>
         public const int KeySizeBits3072 = 3072;
-        
+
         /// <summary>
         /// Use this value to indicate the key size, in bits, is 4096. The
         /// <c>KeySizeBits</c> values listed in this class are the sizes

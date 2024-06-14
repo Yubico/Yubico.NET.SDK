@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.Cryptography
         /// supported sizes.
         /// </summary>
         public const int KeySizeBits2048 = 2048;
-
+        
         /// <summary>
         /// Use this value to indicate the key size, in bits, is 3072. The
         /// <c>KeySizeBits</c> values listed in this class are the sizes
@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Cryptography
         /// supported sizes.
         /// </summary>
         public const int KeySizeBits3072 = 3072;
-
+        
         /// <summary>
         /// Use this value to indicate the key size, in bits, is 4096. The
         /// <c>KeySizeBits</c> values listed in this class are the sizes
@@ -94,7 +94,6 @@ namespace Yubico.YubiKey.Cryptography
         /// supported sizes.
         /// </summary>
         public const int KeySizeBits4096 = 4096;
-
 
         /// <summary>
         /// Use this value to indicate the digest algorithm is SHA-1.
@@ -327,16 +326,19 @@ namespace Yubico.YubiKey.Cryptography
             {
                 var tlvReader = new TlvReader(digestInfo);
 
-                isValid = TryReadDer(true, ReadNestedNoMoreData, SequenceTag, tlvReader, out TlvReader infoReader,
+                isValid = TryReadDer(
+                    true, ReadNestedNoMoreData, SequenceTag, tlvReader, out TlvReader infoReader,
                     out _);
 
                 isValid = TryReadDer(isValid, ReadNested, SequenceTag, infoReader, out TlvReader oidReader, out _);
                 isValid = TryReadDer(isValid, ReadValue, OidTag, oidReader, out _, out ReadOnlyMemory<byte> oid);
 
-                isValid = TryReadDer(isValid, ReadValueNoMoreData, NullTag, oidReader, out _,
+                isValid = TryReadDer(
+                    isValid, ReadValueNoMoreData, NullTag, oidReader, out _,
                     out ReadOnlyMemory<byte> oidParams);
 
-                isValid = TryReadDer(isValid, ReadValueNoMoreData, OctetTag, infoReader, out _,
+                isValid = TryReadDer(
+                    isValid, ReadValueNoMoreData, OctetTag, infoReader, out _,
                     out ReadOnlyMemory<byte> digestData);
 
                 isValid = TryParseOid(isValid, oid, oidParams, digestData, out digestAlgorithm);
@@ -1138,11 +1140,13 @@ namespace Yubico.YubiKey.Cryptography
             inputData.CopyTo(bufferAsSpan[(buffer.Length - inputData.Length)..]);
 
             // Use the seed to mask the DB.
-            PerformMgf1(buffer, 1, digestLength, buffer, digestLength + 1, buffer.Length - (digestLength + 1),
+            PerformMgf1(
+                buffer, 1, digestLength, buffer, digestLength + 1, buffer.Length - (digestLength + 1),
                 digester);
 
             // Use the masked DB to mask the seed.
-            PerformMgf1(buffer, digestLength + 1, buffer.Length - (digestLength + 1), buffer, 1, digestLength,
+            PerformMgf1(
+                buffer, digestLength + 1, buffer.Length - (digestLength + 1), buffer, 1, digestLength,
                 digester);
 
             return buffer;
@@ -1262,11 +1266,13 @@ namespace Yubico.YubiKey.Cryptography
             try
             {
                 // Use the masked DB to unmask the seed.
-                PerformMgf1(buffer, digestLength + 1, buffer.Length - (digestLength + 1), buffer, 1, digestLength,
+                PerformMgf1(
+                    buffer, digestLength + 1, buffer.Length - (digestLength + 1), buffer, 1, digestLength,
                     digester);
 
                 // Use the seed to unmask the DB.
-                PerformMgf1(buffer, 1, digestLength, buffer, digestLength + 1, buffer.Length - (digestLength + 1),
+                PerformMgf1(
+                    buffer, 1, digestLength, buffer, digestLength + 1, buffer.Length - (digestLength + 1),
                     digester);
 
                 // Verify the DB

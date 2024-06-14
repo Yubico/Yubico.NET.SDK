@@ -54,12 +54,11 @@ The YubiKey is manufactured with the standard default PIN, PUK, and managment ke
 * Management Key: (Firmware Version 5.6 and below: Triple-DES / 5.7 and above: AES-192), 0x010203040506070801020304050607080102030405060708\
 0102030405060708 three times
 
-Note that the PIV standard specifies these default/initial values. For firmware 5.4 YubiKeys
-YubiKeys that allow AES, the default management key is Triple-DES. For firmware 5.7 and above 
-YubiKeys the default management key is AES-192.
+Note that the PIV standard specifies these default/initial values. For firmware 5.4 YubiKeys that allow AES, the default management key is Triple-DES. For firmware 5.7 and above 
+YubiKeys, the default management key is AES-192.
 
-Upon receipt of the YubiKey, it is a good idea to change them from the default values. See
-[PivSession.TryChangePin](xref:Yubico.YubiKey.Piv.PivSession.TryChangePin%2a) and
+Upon receipt of the YubiKey, it is a good idea to change the PIN, PUK, and management key from the default values. See
+[PivSession.TryChangePin](xref:Yubico.YubiKey.Piv.PivSession.TryChangePin%2a), [PivSession.TryChangePuk](xref:Yubico.YubiKey.Piv.PivSession.TryChangePuk), and
 [PivSession.TryChangeManagementKey](xref:Yubico.YubiKey.Piv.PivSession.TryChangeManagementKey%2a).
 
 ### Entering binary data

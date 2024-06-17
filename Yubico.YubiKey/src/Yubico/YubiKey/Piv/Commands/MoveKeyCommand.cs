@@ -56,14 +56,14 @@ namespace Yubico.YubiKey.Piv.Commands
         public YubiKeyApplication Application => YubiKeyApplication.Piv;
 
         /// <summary>
-        /// 
+        /// This will create and validate the <see cref="CommandApdu"/>.
         /// </summary>
-        /// <exception cref="InvalidOperationException">An exception will be thrown upon invalid slot usage.</exception>
+        /// <exception cref="InvalidOperationException">An exception will be thrown upon invalid slot usage.
+        /// Either one of the slots were the <see cref="PivSlot.Attestation"/> or the source and destination slot were the same.</exception>
         /// <returns>The <see cref="CommandApdu"/> that targets the Move-operation with the correct parameters</returns>
         public CommandApdu CreateCommandApdu()
         {
-            ValidateSlot(SourceSlot);
-            ValidateSlot(DestinationSlot);
+            ValidateSlots(SourceSlot, DestinationSlot);
 
             return new CommandApdu
             {
@@ -71,6 +71,19 @@ namespace Yubico.YubiKey.Piv.Commands
                 P1 = DestinationSlot,
                 P2 = SourceSlot,
             };
+        }
+
+        private static void ValidateSlots(byte sourceSlot, byte destinationSlot)
+        {
+            if (sourceSlot == destinationSlot)
+            {
+                throw new InvalidOperationException(string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.InvalidSlots));
+            }
+            
+            ValidateSlot(sourceSlot);
+            ValidateSlot(destinationSlot);
         }
 
         private static void ValidateSlot(byte slot)
@@ -88,7 +101,8 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <summary>
         /// Creates the <see cref="MoveKeyResponse"/> from the <see cref="ResponseApdu"/> data.
         /// </summary>
-        /// <param name="responseApdu">The return data with which the Yubikey responded to the <see cref="MoveKeyCommand"/></param>
+        /// <param name="responseApdu">The return data with which the Yubikey responded
+        /// to the <see cref="MoveKeyCommand"/></param>
         /// <returns>
         /// The <see cref="MoveKeyResponse"/> for the <see cref="MoveKeyCommand"/>
         /// </returns>

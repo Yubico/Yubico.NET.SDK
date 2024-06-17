@@ -16,8 +16,18 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
+    /// <summary>
+    /// The <see cref="MoveKeyResponse"/> for the corresponding <see cref="MoveKeyCommand"/>
+    /// <seealso cref="MoveKeyResponse"/>
+    /// </summary>
     public class MoveKeyResponse : PivResponse
     {
+        /// <summary>
+        /// The constructor for the <see cref="MoveKeyResponse"/>
+        /// </summary>
+        /// <param name="responseApdu">The return data with which the Yubikey responded
+        /// to the <see cref="MoveKeyCommand"/></param>
+        /// <seealso cref="MoveKeyCommand"/>
         public MoveKeyResponse(ResponseApdu responseApdu) : base(responseApdu)
         {
         }

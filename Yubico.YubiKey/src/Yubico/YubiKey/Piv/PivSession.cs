@@ -497,5 +497,52 @@ namespace Yubico.YubiKey.Piv
 
             return true;
         }
+
+        /// <summary>
+        /// Moves a key from one slot to another.
+        /// The source slot must not be the <see cref="PivSlot.Attestation"/>-slot and the destination slot must be empty.
+        /// </summary>
+        /// <remarks>Internally this method attempts to authenticate to the Yubikey by calling
+        /// <see cref="AuthenticateManagementKey"/> which may in turn throw its' own exceptions.
+        /// </remarks>
+        /// <param name="sourceSlot">The Yubikey slot of the key you want to move. This must be a valid slot number.</param>
+        /// <param name="destinationSlot">The target Yubikey slot for the key you want to move. This must be a valid slot number.</param>
+        /// <exception cref="InvalidOperationException">
+        /// There is no <c>KeyCollector</c> loaded, the key provided was not a
+        /// valid Triple-DES key, or the YubiKey had some other error, such as
+        /// unreliable connection.
+        /// </exception>
+        /// <exception cref="MalformedYubiKeyResponseException">
+        /// The YubiKey returned malformed data and authentication, either single
+        /// or double, could not be performed.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        /// The user canceled management key collection.
+        /// </exception>
+        /// <exception cref="SecurityException">
+        /// Mutual authentication was performed and the YubiKey was not
+        /// authenticated.
+        /// </exception>
+        /// <exception cref="NotSupportedException">Thrown when the Yubikey doesn't support the Move-operation.</exception>
+        public void MoveKey(byte sourceSlot, byte destinationSlot)
+        {
+            _yubiKeyDevice.ThrowOnMissingFeature(YubiKeyFeature.PivMoveOrDeleteKey);
+            
+            if (!ManagementKeyAuthenticated)
+            {
+                AuthenticateManagementKey();
+            }
+
+            _log.LogDebug("Moving key from {{sourceSlot}} to {destinationSlot}", sourceSlot, destinationSlot);
+            var command = new MoveKeyCommand(sourceSlot, destinationSlot);
+            MoveKeyResponse response  = Connection.SendCommand(command);
+
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+            
+            _log.LogInformation("Successfully moved key from {{sourceSlot}} to {destinationSlot}", sourceSlot, destinationSlot);
+        }
     }
 }

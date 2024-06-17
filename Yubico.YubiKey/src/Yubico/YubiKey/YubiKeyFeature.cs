@@ -261,5 +261,10 @@ namespace Yubico.YubiKey
         /// Allows temporarily disabling NFC until the next time the YubiKey is powered over USB.
         /// </summary>
         ManagementNfcRestricted,
+        
+        /// <summary>
+        /// Support for deleting PIV keys or moving PIV keys between slots.
+        /// </summary>
+        PivMoveOrDeleteKey
     }
 }

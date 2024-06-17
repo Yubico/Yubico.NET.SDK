@@ -52,10 +52,9 @@ namespace Yubico.YubiKey.TestUtilities
 
         public IntegrationTestDeviceEnumeration(string? configDirectory = null)
         {
-            var allowListFilePath = Path.Combine(
-                configDirectory ?? Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "Yubico",
-                _allowlistFileName);
+            var defaultDirectory =
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Yubico");
+            var allowListFilePath = Path.Combine(configDirectory ?? defaultDirectory, _allowlistFileName);
 
             CreateIfMissing(allowListFilePath);
 
@@ -87,11 +86,12 @@ namespace Yubico.YubiKey.TestUtilities
 
         private static void CreateIfMissing(string allowListFilePath)
         {
-            _ = Directory.CreateDirectory(Path.GetDirectoryName(allowListFilePath)!);
             if (File.Exists(allowListFilePath))
             {
                 return;
             }
+
+            _ = Directory.CreateDirectory(Path.GetDirectoryName(allowListFilePath)!);
 
             var file = File.Create(allowListFilePath);
             file.Close();

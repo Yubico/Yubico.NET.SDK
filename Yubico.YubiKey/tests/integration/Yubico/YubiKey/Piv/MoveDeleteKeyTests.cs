@@ -72,6 +72,32 @@ namespace Yubico.YubiKey.Piv
             var dataToSign = GetRandomDataBuffer(expectedAlgorithm);
             pivSession.Sign(destinationSlot, dataToSign);
         }
+        
+        [SkippableTheory(typeof(NotSupportedException))]
+        [InlineData(PivAlgorithm.Rsa1024)]
+        [InlineData(PivAlgorithm.Rsa2048)]
+        [InlineData(PivAlgorithm.Rsa3072)]
+        [InlineData(PivAlgorithm.Rsa4096)]
+        [InlineData(PivAlgorithm.EccP256)]
+        [InlineData(PivAlgorithm.EccP384)]
+        public void DeleteKey_WithImportedKey(PivAlgorithm expectedAlgorithm)
+        {
+            const byte slotToDelete = PivSlot.Retired1; 
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5, false);
+            
+            using var pivSession = new PivSession(testDevice);
+            pivSession.KeyCollector = new Simple39KeyCollector().Simple39KeyCollectorDelegate;
+            
+            var expectedKey = SampleKeyPairs.GetPivPrivateKey(expectedAlgorithm);
+            pivSession.ImportPrivateKey(PivSlot.Retired1, expectedKey);
+            Assert.NotNull(pivSession.GetMetadata(slotToDelete));
+            
+            pivSession.DeleteKey(slotToDelete);
+
+            // Key has been deleted and thus returns no data on the slot query
+            Assert.Throws<InvalidOperationException>(() => pivSession.GetMetadata(slotToDelete));
+        }
+
 
         private static byte[] GetRandomDataBuffer(PivAlgorithm expectedAlgorithm)
         {

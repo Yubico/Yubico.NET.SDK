@@ -376,18 +376,19 @@ namespace Yubico.YubiKey.Piv
         {
             _log.LogInformation("GetMetadata for slot number {0:X2}.", slotNumber);
 
-            if (_yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))
+            if (!_yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))
             {
-                var metadataCommand = new GetMetadataCommand(slotNumber);
-                GetMetadataResponse metadataResponse = Connection.SendCommand(metadataCommand);
-
-                return metadataResponse.GetData();
+                throw new NotSupportedException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.NotSupportedByYubiKeyVersion));
             }
 
-            throw new NotSupportedException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.NotSupportedByYubiKeyVersion));
+            var metadataCommand = new GetMetadataCommand(slotNumber);
+            GetMetadataResponse metadataResponse = Connection.SendCommand(metadataCommand);
+
+            return metadataResponse.GetData();
+
         }
 
         /// <summary>
@@ -543,6 +544,11 @@ namespace Yubico.YubiKey.Piv
             }
             
             _log.LogInformation("Successfully moved key from {{sourceSlot}} to {destinationSlot}", sourceSlot, destinationSlot);
+        }
+
+        public void DeleteKey(byte targetSlot)
+        {
+            throw new NotImplementedException();
         }
     }
 }

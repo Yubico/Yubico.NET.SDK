@@ -531,7 +531,7 @@ namespace Yubico.YubiKey.Piv
                 AuthenticateManagementKey();
             }
 
-            _log.LogDebug("Moving key from {{sourceSlot}} to {destinationSlot}", sourceSlot, destinationSlot);
+            _log.LogDebug("Moving key from {sourceSlot} to {destinationSlot}", sourceSlot, destinationSlot);
             var command = new MoveKeyCommand(sourceSlot, destinationSlot);
             MoveKeyResponse response = Connection.SendCommand(command);
 
@@ -541,7 +541,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             _log.LogInformation(
-                "Successfully moved key from {{sourceSlot}} to {destinationSlot}", sourceSlot, destinationSlot);
+                "Successfully moved key from {sourceSlot} to {destinationSlot}", sourceSlot, destinationSlot);
         }
 
         /// <summary>
@@ -592,7 +592,7 @@ namespace Yubico.YubiKey.Piv
 
             string logMessage = response.Status == ResponseStatus.Success
                 ? "Successfully deleted key at slot {targetSlot}."
-                : "No data received from Yubikey after attempted delete on slot {targetSlot},indicating that was likely empty to begin with.";
+                : "No data received from Yubikey after attempted delete on slot {targetSlot}, indicating that was likely empty to begin with.";
             
             _log.LogInformation(logMessage, slotToClear);
         }

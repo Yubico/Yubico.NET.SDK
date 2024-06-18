@@ -584,6 +584,9 @@ namespace Yubico.YubiKey.TestUtilities
         public static X509Certificate2 GetCert(PivAlgorithm algorithm) =>
             ConvertPemCertString(GetPemCertString(algorithm)).GetCertObject();
         
+        public static KeyConverter GetKeyConverter(PivAlgorithm algorithm) =>
+            new KeyConverter(GetPemPrivateKeyString(algorithm).ToCharArray());
+        
         public static KeyConverter ConvertPemKeyString(string pemString) =>
             new KeyConverter(pemString.ToCharArray());
 

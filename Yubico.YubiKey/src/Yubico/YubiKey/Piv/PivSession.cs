@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security;
+using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.InterIndustry.Commands;
@@ -367,6 +368,68 @@ namespace Yubico.YubiKey.Piv
             GetMetadataResponse metadataResponse = Connection.SendCommand(metadataCommand);
 
             return metadataResponse.GetData();
+        }
+
+        /// <summary>
+        /// Get information about YubiKey Bio multi-protocol.
+        /// </summary>
+        /// <remarks>
+        /// This feature is available only on YubiKeys Bio multi-protocol 6.6 and later. If you call
+        /// this method on an incompatible YubiKey, it will throw a <c>NotSupportedException</c>.
+        /// <code language="csharp">
+        ///     IEnumerable&lt;IYubiKeyDevice&gt; list = YubiKey.FindByTransport(Transport.UsbSmartCard);
+        ///     IYubiKeyDevice yubiKey = list.First();
+        ///
+        ///     using (var pivSession = new PivSession(yubiKey))
+        ///     {
+        ///         try
+        ///         {
+        ///             var bioMetaData = PivSession.GetBioMetadata();
+        ///             // use bioMetaData
+        ///         }
+        ///         catch (NotSupportedException e) {
+        ///             // this device does not support Bio multi-protocol metadata
+        ///         }
+        ///     }
+        /// </code>
+        /// <para>
+        /// See the User's Manual
+        /// <xref href="UsersManualPivCommands#get-bio-metadata"> entry on getting bio metadata</xref>
+        /// for specific information about what information is returned.
+        /// </para>
+        /// </remarks>
+        /// <returns>
+        /// A new instance of a <c>PivBioMetadata</c> object containing information
+        /// about the given slot.
+        /// </returns>
+        /// <exception cref="NotSupportedException">
+        /// The queried YubiKey does not support bio metadata.
+        /// </exception>
+        /// <exception cref="ApduException">
+        /// The operation could not be completed.
+        /// </exception>
+        public PivBioMetadata GetBioMetadata()
+        {
+            _log.LogInformation("GetBioMetadata");
+
+            try
+            {
+                var getBioMetadataCommand = new GetBioMetadataCommand();
+                GetBioMetadataResponse getBioMetadataResponse = Connection.SendCommand(getBioMetadataCommand);
+
+                return getBioMetadataResponse.GetData();
+            }
+            catch (ApduException e)
+            {
+                if (e.SW == SWConstants.DataNotFound)
+                {
+                    throw new NotSupportedException(
+                       string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.BiometricVerificationNotSupported));
+                }
+                throw e;
+            }
         }
 
         /// <summary>

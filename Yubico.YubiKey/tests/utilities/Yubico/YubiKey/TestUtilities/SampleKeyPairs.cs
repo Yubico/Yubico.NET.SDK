@@ -567,34 +567,46 @@ namespace Yubico.YubiKey.TestUtilities
 
                     privateKey = KeyEccPrivateP384;
                     publicKey = KeyEccPublicP384;
-
                     break;
             }
 
             return true;
         }
 
-        public static PivPublicKey GetPivPublicKey(PivAlgorithm algorithm) =>
-            ConvertPemKeyString(GetPemPrivateKeyString(algorithm)).GetPivPublicKey();
+        public static PivPublicKey GetPivPublicKey(PivAlgorithm algorithm)
+        {
+            return ConvertPemKeyString(GetPemPrivateKeyString(algorithm)).GetPivPublicKey();
+        }
 
         // Get a private key for the given algorithm. Return the key as a PivPrivateKey.
-        public static PivPrivateKey GetPivPrivateKey(PivAlgorithm algorithm) =>
-            ConvertPemKeyString(GetPemPrivateKeyString(algorithm)).GetPivPrivateKey();
+        public static PivPrivateKey GetPivPrivateKey(PivAlgorithm algorithm)
+        {
+            return ConvertPemKeyString(GetPemPrivateKeyString(algorithm)).GetPivPrivateKey();
+        }
 
-        public static X509Certificate2 GetCert(PivAlgorithm algorithm) =>
-            ConvertPemCertString(GetPemCertString(algorithm)).GetCertObject();
-        
-        public static KeyConverter GetKeyConverter(PivAlgorithm algorithm) =>
-            new KeyConverter(GetPemPrivateKeyString(algorithm).ToCharArray());
-        
-        public static KeyConverter ConvertPemKeyString(string pemString) =>
-            new KeyConverter(pemString.ToCharArray());
+        public static X509Certificate2 GetCert(PivAlgorithm algorithm)
+        {
+            return ConvertPemCertString(GetPemCertString(algorithm)).GetCertObject();
+        }
 
-        public static CertConverter ConvertPemCertString(string pemString) =>
-            new CertConverter(pemString.ToCharArray());
+        public static KeyConverter GetKeyConverter(PivAlgorithm algorithm)
+        {
+            return new KeyConverter(GetPemPrivateKeyString(algorithm).ToCharArray());
+        }
 
-        private static string GetPemCertString(PivAlgorithm algorithm) =>
-            algorithm switch
+        public static KeyConverter ConvertPemKeyString(string pemString)
+        {
+            return new KeyConverter(pemString.ToCharArray());
+        }
+
+        public static CertConverter ConvertPemCertString(string pemString)
+        {
+            return new CertConverter(pemString.ToCharArray());
+        }
+
+        private static string GetPemCertString(PivAlgorithm algorithm)
+        {
+            return algorithm switch
             {
                 PivAlgorithm.Rsa1024 => CertRsa1024,
                 PivAlgorithm.Rsa2048 => CertRsa2048,
@@ -602,9 +614,11 @@ namespace Yubico.YubiKey.TestUtilities
                 PivAlgorithm.Rsa4096 => CertRsa4096,
                 _ => throw new ArgumentException("No cert mapped", nameof(algorithm))
             };
+        }
 
-        private static string GetPemPrivateKeyString(PivAlgorithm algorithm) =>
-            algorithm switch
+        private static string GetPemPrivateKeyString(PivAlgorithm algorithm)
+        {
+            return algorithm switch
             {
                 PivAlgorithm.Rsa1024 => KeyRsaPrivate1024,
                 PivAlgorithm.Rsa2048 => KeyRsaPrivate2048,
@@ -614,5 +628,6 @@ namespace Yubico.YubiKey.TestUtilities
                 PivAlgorithm.EccP384 => KeyEccPrivateP384,
                 _ => throw new ArgumentException("No key mapped", nameof(algorithm))
             };
+        }
     }
 }

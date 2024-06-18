@@ -34,6 +34,8 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </summary>
         public byte DestinationSlot { get; set; }
 
+        private const byte MoveOrDeleteInstruction = 0xF6;
+
         /// <summary>
         /// Constructor for the <see cref="MoveKeyCommand"/> which is used to move a PIV key from one slot to another.
         /// The source slot must not be the <see cref="PivSlot.Attestation"/>-slot and the destination slot must be empty.
@@ -67,7 +69,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
             return new CommandApdu
             {
-                Ins = 0xF6,
+                Ins = MoveOrDeleteInstruction,
                 P1 = DestinationSlot,
                 P2 = SourceSlot,
             };

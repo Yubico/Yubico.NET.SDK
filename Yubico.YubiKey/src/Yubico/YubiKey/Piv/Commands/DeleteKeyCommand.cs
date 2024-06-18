@@ -29,6 +29,8 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </summary>
         public byte SlotToClear { get; set; }
 
+        private const byte MoveOrDeleteInstruction = 0xF6;
+
         /// <summary>
         /// Constructor for the <see cref="DeleteKeyCommand"/> which is used to delete a PIV key from a slot.
         /// </summary>
@@ -55,9 +57,9 @@ namespace Yubico.YubiKey.Piv.Commands
         public CommandApdu CreateCommandApdu() =>
             new CommandApdu
             {
-                Ins = 0xF6,
-                P1 = 0xFF,
-                P2 = SlotToClear,
+                Ins = MoveOrDeleteInstruction,
+                P1 = 0xFF, // Will be cleared
+                P2 = SlotToClear
             };
 
         /// <summary>

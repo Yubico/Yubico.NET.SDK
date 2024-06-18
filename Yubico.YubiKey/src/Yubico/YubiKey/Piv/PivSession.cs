@@ -546,12 +546,12 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Deletes any key at a slot.
+        /// Deletes/clears any key at a given <see cref="PivSlot"/>.
         /// </summary>
         /// <remarks>Internally this method attempts to authenticate to the Yubikey by calling
         /// <see cref="AuthenticateManagementKey"/> which may in turn throw its' own exceptions.
         /// </remarks>
-        /// <param name="targetSlot">The Yubikey slot of the key you want to delete. This must be a valid slot number.</param>
+        /// <param name="slotToClear">The Yubikey slot of the key you want to clear. This must be a valid slot number.</param>
         /// <seealso cref="PivSlot"/>
         /// <exception cref="InvalidOperationException">
         /// There is no <c>KeyCollector</c> loaded, the key provided was not a valid Triple-DES key, or the YubiKey
@@ -567,7 +567,8 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not authenticated.
         /// </exception>
         /// <exception cref="NotSupportedException">Thrown when the Yubikey doesn't support the Delete-operation.</exception>
-        public void DeleteKey(byte targetSlot)
+        /// <seealso cref="AuthenticateManagementKey"/>
+        public void DeleteKey(byte slotToClear)
         {
             _yubiKeyDevice.ThrowOnMissingFeature(YubiKeyFeature.PivMoveOrDeleteKey);
             
@@ -576,8 +577,8 @@ namespace Yubico.YubiKey.Piv
                 AuthenticateManagementKey();
             }
 
-            _log.LogDebug("Deleting key at slot {{targetSlot}}", targetSlot);
-            var command = new DeleteKeyCommand(targetSlot);
+            _log.LogDebug("Deleting key at slot {{targetSlot}}", slotToClear);
+            var command = new DeleteKeyCommand(slotToClear);
             DeleteKeyResponse response  = Connection.SendCommand(command);
 
             if (response.Status != ResponseStatus.Success)
@@ -585,7 +586,7 @@ namespace Yubico.YubiKey.Piv
                 throw new InvalidOperationException(response.StatusMessage);
             }
             
-            _log.LogInformation("Successfully deleted key at slot {{targetSlot}}.", targetSlot);
+            _log.LogInformation("Successfully deleted key at slot {{targetSlot}}.", slotToClear);
         }
     }
 }

@@ -18,7 +18,8 @@ namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
     /// The <see cref="MoveKeyResponse"/> for the corresponding <see cref="MoveKeyCommand"/>
-    /// <seealso cref="MoveKeyResponse"/>
+    /// <seealso cref="PivResponse"/>
+    /// <seealso cref="YubiKeyResponse"/>
     /// </summary>
     public class MoveKeyResponse : PivResponse
     {

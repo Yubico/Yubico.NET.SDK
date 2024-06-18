@@ -79,7 +79,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 throw new InvalidOperationException(string.Format(
                     CultureInfo.CurrentCulture,
-                    ExceptionMessages.InvalidSlots));
+                    ExceptionMessages.InvalidSlotsSameSourceAndDestinationSlotsCannotBeTheSame));
             }
             
             ValidateSlot(sourceSlot);
@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
         private static void ValidateSlot(byte slot)
         {
-            if (!PivSlot.IsValidSlotNumber(slot) || slot == PivSlot.Attestation)
+            if (slot == PivSlot.Attestation)
             {
                 throw new InvalidOperationException(
                     string.Format(

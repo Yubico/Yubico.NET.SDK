@@ -357,9 +357,9 @@ namespace Yubico.YubiKey {
             }
         }
         
-        internal static string InvalidSlots {
+        internal static string InvalidSlotsSameSourceAndDestinationSlotsCannotBeTheSame {
             get {
-                return ResourceManager.GetString("InvalidSlots", resourceCulture);
+                return ResourceManager.GetString("InvalidSlotsSameSourceAndDestinationSlotsCannotBeTheSame", resourceCulture);
             }
         }
         

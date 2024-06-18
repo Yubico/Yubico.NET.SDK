@@ -47,6 +47,15 @@ namespace Yubico.YubiKey.Piv.Commands
             SourceSlot = sourceSlot;
             DestinationSlot = destinationSlot;
         }
+        
+        /// <summary>
+        /// Constructor for the <see cref="MoveKeyCommand"/> which is used to move a PIV key from one slot to another.
+        /// The source slot must not be the <see cref="PivSlot.Attestation"/>-slot and the destination slot must be empty.
+        /// </summary>
+        public MoveKeyCommand()
+        {
+            
+        }
 
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs. For this

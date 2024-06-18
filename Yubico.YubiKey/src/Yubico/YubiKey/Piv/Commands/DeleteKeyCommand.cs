@@ -41,6 +41,11 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
+        /// Constructor for the <see cref="DeleteKeyCommand"/> which is used to delete a PIV key from a slot.
+        /// </summary>
+        public DeleteKeyCommand() { }
+
+        /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs. For this command it's PIV.
         /// </summary>
         /// <value>

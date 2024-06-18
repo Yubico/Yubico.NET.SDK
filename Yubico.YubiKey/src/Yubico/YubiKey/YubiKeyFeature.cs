@@ -213,6 +213,11 @@ namespace Yubico.YubiKey
         /// specified in FIPS 186-4 supported by the PIV Application on the YubiKey.
         /// </summary>
         PivEccP384,
+        
+        /// <summary>
+        /// Support for deleting PIV keys or moving PIV keys between slots.
+        /// </summary>
+        PivMoveOrDeleteKey,
 
         /// <summary>
         /// The touch policy refers to whether use of the management key will
@@ -260,11 +265,6 @@ namespace Yubico.YubiKey
         /// <summary>
         /// Allows temporarily disabling NFC until the next time the YubiKey is powered over USB.
         /// </summary>
-        ManagementNfcRestricted,
-        
-        /// <summary>
-        /// Support for deleting PIV keys or moving PIV keys between slots.
-        /// </summary>
-        PivMoveOrDeleteKey
+        ManagementNfcRestricted
     }
 }

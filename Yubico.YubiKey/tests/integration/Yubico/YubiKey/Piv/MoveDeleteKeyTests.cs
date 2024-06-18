@@ -18,6 +18,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
+    [Trait("Category", "Simple")]
     public class MoveDeleteKeyTests
     {
         [SkippableTheory(typeof(NotSupportedException))]
@@ -28,27 +29,36 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP256)]
         [InlineData(PivAlgorithm.EccP384)]
         public void MoveKey_WithGenerate(PivAlgorithm expectedAlgorithm)
-        {   
-            const byte sourceSlot = PivSlot.Retired1; 
+        {
+            // Arrange
+            const byte sourceSlot = PivSlot.Retired1;
             const byte destinationSlot = PivSlot.Retired20;
+
             var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
-            
             using var pivSession = new PivSession(testDevice);
             var collectorObj = new Simple39KeyCollector();
             pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-            
-            var expectedKey = pivSession.GenerateKeyPair(PivSlot.Retired1, expectedAlgorithm, PivPinPolicy.None);
+
+            DeleteKeys(pivSession, sourceSlot, destinationSlot);
+
+            var expectedKey = pivSession.GenerateKeyPair(sourceSlot, expectedAlgorithm, PivPinPolicy.None);
             var generatedKey = pivSession.GetMetadata(sourceSlot);
             Assert.Equal(expectedKey.YubiKeyEncodedPublicKey, generatedKey.PublicKey.YubiKeyEncodedPublicKey);
-               
+
+            // Act
             pivSession.MoveKey(sourceSlot, destinationSlot);
+
+            // Assert
+            // Moved key slot should now be empty
+            Assert.Throws<InvalidOperationException>(() => pivSession.GetMetadata(sourceSlot));
+
             // var destinationMetadata = pivSession.GetMetadata(destinationSlot);
             // Assert.Equal(expectedKey.PivEncodedPublicKey, destinationMetadata.PublicKey.PivEncodedPublicKey);  FALSE -- why?
-            
+
             var dataToSign = GetRandomDataBuffer(expectedAlgorithm);
             pivSession.Sign(destinationSlot, dataToSign);
         }
-        
+
         [SkippableTheory(typeof(NotSupportedException))]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
@@ -58,21 +68,30 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384)]
         public void MoveKey_WithImportedKey(PivAlgorithm expectedAlgorithm)
         {
-            const byte sourceSlot = PivSlot.Retired1; 
+            // Arrange
+            const byte sourceSlot = PivSlot.Retired1;
             const byte destinationSlot = PivSlot.Retired20;
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5, false);
-            
+
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
             using var pivSession = new PivSession(testDevice);
             pivSession.KeyCollector = new Simple39KeyCollector().Simple39KeyCollectorDelegate;
-            
+
+            DeleteKeys(pivSession, sourceSlot, destinationSlot);
+
             var expectedKey = SampleKeyPairs.GetPivPrivateKey(expectedAlgorithm);
-            pivSession.ImportPrivateKey(PivSlot.Retired1, expectedKey);
-            pivSession.MoveKey(sourceSlot, destinationSlot);
+            pivSession.ImportPrivateKey(sourceSlot, expectedKey);
             
+            // Act
+            pivSession.MoveKey(sourceSlot, destinationSlot);
+
+            // Assert
+            // Moved key slot should now be empty
+            Assert.Throws<InvalidOperationException>(() => pivSession.GetMetadata(sourceSlot));
+
             var dataToSign = GetRandomDataBuffer(expectedAlgorithm);
             pivSession.Sign(destinationSlot, dataToSign);
         }
-        
+
         [SkippableTheory(typeof(NotSupportedException))]
         [InlineData(PivAlgorithm.Rsa1024)]
         [InlineData(PivAlgorithm.Rsa2048)]
@@ -82,22 +101,23 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384)]
         public void DeleteKey_WithImportedKey(PivAlgorithm expectedAlgorithm)
         {
-            const byte slotToDelete = PivSlot.Retired1; 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5, false);
-            
+            // Arrange
+            const byte slotToDelete = PivSlot.Retired1;
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
+
             using var pivSession = new PivSession(testDevice);
             pivSession.KeyCollector = new Simple39KeyCollector().Simple39KeyCollectorDelegate;
-            
+
             var expectedKey = SampleKeyPairs.GetPivPrivateKey(expectedAlgorithm);
-            pivSession.ImportPrivateKey(PivSlot.Retired1, expectedKey);
-            Assert.NotNull(pivSession.GetMetadata(slotToDelete));
-            
+            pivSession.ImportPrivateKey(slotToDelete, expectedKey);
+
+            // Act
             pivSession.DeleteKey(slotToDelete);
 
+            // Assert
             // Key has been deleted and thus returns no data on the slot query
             Assert.Throws<InvalidOperationException>(() => pivSession.GetMetadata(slotToDelete));
         }
-
 
         private static byte[] GetRandomDataBuffer(PivAlgorithm expectedAlgorithm)
         {
@@ -111,10 +131,16 @@ namespace Yubico.YubiKey.Piv
                 PivAlgorithm.EccP384 => new byte[48],
                 _ => throw new ArgumentException("what are you trying to do")
             };
-            
+
             Random.Shared.NextBytes(dataToSign);
             dataToSign[0] &= 0x7F;
             return dataToSign;
+        }
+
+        private static void DeleteKeys(PivSession pivSession, byte sourceSlot, byte destinationSlot)
+        {
+            pivSession.DeleteKey(sourceSlot);
+            pivSession.DeleteKey(destinationSlot);
         }
     }
 }

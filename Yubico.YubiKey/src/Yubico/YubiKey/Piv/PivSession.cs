@@ -256,7 +256,6 @@ namespace Yubico.YubiKey.Piv
 
             PivMetadata metadata = response.GetData();
             return metadata.Algorithm;
-
         }
 
         /// <summary>
@@ -388,7 +387,6 @@ namespace Yubico.YubiKey.Piv
             GetMetadataResponse metadataResponse = Connection.SendCommand(metadataCommand);
 
             return metadataResponse.GetData();
-
         }
 
         /// <summary>
@@ -527,7 +525,7 @@ namespace Yubico.YubiKey.Piv
         public void MoveKey(byte sourceSlot, byte destinationSlot)
         {
             _yubiKeyDevice.ThrowOnMissingFeature(YubiKeyFeature.PivMoveOrDeleteKey);
-            
+
             if (!ManagementKeyAuthenticated)
             {
                 AuthenticateManagementKey();
@@ -535,14 +533,15 @@ namespace Yubico.YubiKey.Piv
 
             _log.LogDebug("Moving key from {{sourceSlot}} to {destinationSlot}", sourceSlot, destinationSlot);
             var command = new MoveKeyCommand(sourceSlot, destinationSlot);
-            MoveKeyResponse response  = Connection.SendCommand(command);
+            MoveKeyResponse response = Connection.SendCommand(command);
 
             if (response.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(response.StatusMessage);
             }
-            
-            _log.LogInformation("Successfully moved key from {{sourceSlot}} to {destinationSlot}", sourceSlot, destinationSlot);
+
+            _log.LogInformation(
+                "Successfully moved key from {{sourceSlot}} to {destinationSlot}", sourceSlot, destinationSlot);
         }
 
         /// <summary>
@@ -554,8 +553,9 @@ namespace Yubico.YubiKey.Piv
         /// <param name="slotToClear">The Yubikey slot of the key you want to clear. This must be a valid slot number.</param>
         /// <seealso cref="PivSlot"/>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded, the key provided was not a valid Triple-DES key, or the YubiKey
-        /// had some other error, such as unreliable connection.
+        /// Either the call to the Yubikey was unsuccessful or 
+        /// there wasn't any <c>KeyCollector</c> loaded, the key provided was not a valid Triple-DES key, or the YubiKey
+        /// had some other error, such as unreliable connection. Refer to the specific exception message.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
         /// The YubiKey returned malformed data and authentication, either single or double, could not be performed.
@@ -571,22 +571,30 @@ namespace Yubico.YubiKey.Piv
         public void DeleteKey(byte slotToClear)
         {
             _yubiKeyDevice.ThrowOnMissingFeature(YubiKeyFeature.PivMoveOrDeleteKey);
-            
+
             if (!ManagementKeyAuthenticated)
             {
                 AuthenticateManagementKey();
             }
 
-            _log.LogDebug("Deleting key at slot {{targetSlot}}", slotToClear);
+            _log.LogDebug("Deleting key at slot {targetSlot}", slotToClear);
             var command = new DeleteKeyCommand(slotToClear);
-            DeleteKeyResponse response  = Connection.SendCommand(command);
+            DeleteKeyResponse response = Connection.SendCommand(command);
 
-            if (response.Status != ResponseStatus.Success)
+            bool unsuccessfulStatus = 
+                response.Status != ResponseStatus.Success && 
+                response.Status != ResponseStatus.NoData;
+
+            if (unsuccessfulStatus)
             {
                 throw new InvalidOperationException(response.StatusMessage);
             }
+
+            string logMessage = response.Status == ResponseStatus.Success
+                ? "Successfully deleted key at slot {targetSlot}."
+                : "No data received from Yubikey after attempted delete on slot {targetSlot},indicating that was likely empty to begin with.";
             
-            _log.LogInformation("Successfully deleted key at slot {{targetSlot}}.", slotToClear);
+            _log.LogInformation(logMessage, slotToClear);
         }
     }
 }

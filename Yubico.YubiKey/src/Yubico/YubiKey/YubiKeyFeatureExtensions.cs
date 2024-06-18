@@ -208,7 +208,7 @@ namespace Yubico.YubiKey
                 YubiKeyFeature.PivEccP384 =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V4_2_4
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
-                
+
                 YubiKeyFeature.PivMoveOrDeleteKey =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_7_0
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),

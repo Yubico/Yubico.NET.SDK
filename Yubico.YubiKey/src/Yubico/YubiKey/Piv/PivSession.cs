@@ -581,8 +581,8 @@ namespace Yubico.YubiKey.Piv
             var command = new DeleteKeyCommand(slotToClear);
             DeleteKeyResponse response = Connection.SendCommand(command);
 
-            bool unsuccessfulStatus = 
-                response.Status != ResponseStatus.Success && 
+            bool unsuccessfulStatus =
+                response.Status != ResponseStatus.Success &&
                 response.Status != ResponseStatus.NoData;
 
             if (unsuccessfulStatus)
@@ -593,7 +593,7 @@ namespace Yubico.YubiKey.Piv
             string logMessage = response.Status == ResponseStatus.Success
                 ? "Successfully deleted key at slot {targetSlot}."
                 : "No data received from Yubikey after attempted delete on slot {targetSlot}, indicating that was likely empty to begin with.";
-            
+
             _log.LogInformation(logMessage, slotToClear);
         }
     }

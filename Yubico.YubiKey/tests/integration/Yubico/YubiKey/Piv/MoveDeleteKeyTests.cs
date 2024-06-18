@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.Piv
             var generatedKeyPair = pivSession.GenerateKeyPair(sourceSlot, expectedAlgorithm, PivPinPolicy.None);
             var metadataForKeyPair = pivSession.GetMetadata(sourceSlot);
             Assert.Equal(generatedKeyPair.YubiKeyEncodedPublicKey, metadataForKeyPair.PublicKey.YubiKeyEncodedPublicKey);
-            
+
             // Act
             pivSession.MoveKey(sourceSlot, destinationSlot);
 
@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.Piv
             Assert.Throws<InvalidOperationException>(() => pivSession.GetMetadata(sourceSlot));
 
             var destinationMetadata = pivSession.GetMetadata(destinationSlot);
-            Assert.Equal(generatedKeyPair.PivEncodedPublicKey, destinationMetadata.PublicKey.PivEncodedPublicKey);  
+            Assert.Equal(generatedKeyPair.PivEncodedPublicKey, destinationMetadata.PublicKey.PivEncodedPublicKey);
         }
 
         [SkippableTheory(typeof(NotSupportedException))]
@@ -78,18 +78,18 @@ namespace Yubico.YubiKey.Piv
             var keyConverter = SampleKeyPairs.GetKeyConverter(expectedAlgorithm);
             var importedPrivateKey = keyConverter.GetPivPrivateKey();
             var importedPublicKey = keyConverter.GetPivPublicKey();
-            
+
             pivSession.ImportPrivateKey(sourceSlot, importedPrivateKey);
-            
+
             // Act
             pivSession.MoveKey(sourceSlot, destinationSlot);
 
             // Assert
             // Moved key slot should now be empty
             Assert.Throws<InvalidOperationException>(() => pivSession.GetMetadata(sourceSlot));
-            
+
             var destinationMetadata = pivSession.GetMetadata(destinationSlot);
-            Assert.Equal(importedPublicKey.PivEncodedPublicKey, destinationMetadata.PublicKey.PivEncodedPublicKey);  
+            Assert.Equal(importedPublicKey.PivEncodedPublicKey, destinationMetadata.PublicKey.PivEncodedPublicKey);
         }
 
         [SkippableTheory(typeof(NotSupportedException))]

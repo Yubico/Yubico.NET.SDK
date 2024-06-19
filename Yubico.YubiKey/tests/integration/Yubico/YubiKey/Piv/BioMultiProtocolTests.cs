@@ -22,7 +22,7 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
 {
-    public class PivBioMultiProtocolTests
+    public class BioMultiProtocolTests
     {
         /// <summary>
         /// Verify authentication with YubiKey Bio Multi-protocol
@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.Piv
         /// <param name="testDeviceType"></param>
         [SkippableTheory(typeof(NotSupportedException))]
         [InlineData(StandardTestDevice.Fw5)]
-        public void PivBioMultiProtocol_Authenticate(StandardTestDevice testDeviceType)
+        public void BioMultiProtocol_Authenticate(StandardTestDevice testDeviceType)
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             using (var pivSession = new PivSession(testDevice))

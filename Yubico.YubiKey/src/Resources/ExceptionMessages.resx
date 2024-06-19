@@ -276,6 +276,9 @@
   <data name="InvalidSlot" xml:space="preserve">
     <value>Slot number {0:X2} is not valid for the given operation on the given YubiKey.</value>
   </data>
+  <data name="InvalidSlotsSameSourceAndDestinationSlotsCannotBeTheSame" xml:space="preserve">
+    <value>Source and destination slots cannot be the same.</value>
+  </data>
   <data name="InvalidAlgorithm" xml:space="preserve">
     <value>The given algorithm is not valid for the given command.</value>
   </data>

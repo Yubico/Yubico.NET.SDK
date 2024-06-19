@@ -277,7 +277,7 @@ namespace Yubico.YubiKey.Piv
                 _ => CryptographyProviders.Sha384Creator(),
             };
 
-            _ = digester.TransformFinalBlock(dataToSign, 0, dataToSign.Length);
+            digester.TransformFinalBlock(dataToSign, 0, dataToSign.Length);
 
             _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string pubKeyPem, out string priKeyPem);
             var pubKey = new KeyConverter(pubKeyPem.ToCharArray());

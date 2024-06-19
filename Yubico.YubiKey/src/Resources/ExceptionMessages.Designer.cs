@@ -357,18 +357,18 @@ namespace Yubico.YubiKey {
             }
         }
         
+        internal static string InvalidVerifyUvArguments {
+            get {
+                return ResourceManager.GetString("InvalidVerifyUvArguments", resourceCulture);
+            }
+        }
+
         internal static string InvalidSlotsSameSourceAndDestinationSlotsCannotBeTheSame {
             get {
                 return ResourceManager.GetString("InvalidSlotsSameSourceAndDestinationSlotsCannotBeTheSame", resourceCulture);
             }
         }
-
-        internal static string InvalidVerifyUvArguments {
-            get {
-                return ResourceManager.GetString("InvalidVerifyUvArguments", resourceCulture);
-            }
-        }        
-
+        
         internal static string InvalidAlgorithm {
             get {
                 return ResourceManager.GetString("InvalidAlgorithm", resourceCulture);
@@ -391,7 +391,7 @@ namespace Yubico.YubiKey {
             get {
                 return ResourceManager.GetString("InvalidTemporaryPinLength", resourceCulture);
             }
-        }  
+        }         
         
         internal static string InvalidPivPutDataLength {
             get {
@@ -428,7 +428,7 @@ namespace Yubico.YubiKey {
                 return ResourceManager.GetString("NotSupportedByYubiKeyVersion", resourceCulture);
             }
         }
-
+        
         internal static string BiometricVerificationNotSupported {
             get {
                 return ResourceManager.GetString("BiometricVerificationNotSupported", resourceCulture);

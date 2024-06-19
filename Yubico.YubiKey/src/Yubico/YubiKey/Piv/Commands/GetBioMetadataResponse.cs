@@ -63,12 +63,16 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <returns>
         /// The data in the response APDU, presented as a PivBioMetadata object.
         /// </returns>
+        /// <exception cref="NotSupportedException">
+        /// Thrown when the device does not support Bio Metadata.
+        /// </exception>
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
         public PivBioMetadata GetData() => Status switch
         {
             ResponseStatus.Success => new PivBioMetadata(ResponseApdu.Data.ToArray()),
+            ResponseStatus.NoData => throw new NotSupportedException("Bio metadata not supported by this YubiKey"),
             _ => throw new InvalidOperationException(StatusMessage),
         };
     }

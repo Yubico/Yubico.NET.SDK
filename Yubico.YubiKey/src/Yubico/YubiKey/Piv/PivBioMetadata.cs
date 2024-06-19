@@ -65,12 +65,6 @@ namespace Yubico.YubiKey.Piv
 
                 switch (tag)
                 {
-                    default:
-                        throw new InvalidOperationException(
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                ExceptionMessages.InvalidApduResponseData));
-
                     case BioConfiguredTag:
                         isConfigured = value.Span[0] == 1;
                         break;
@@ -82,19 +76,27 @@ namespace Yubico.YubiKey.Piv
                     case TemporaryPinTag:
                         hasTemporaryPin = value.Span[0] == 1;
                         break;
-                }
 
-                if (isConfigured == null  || attemptsRemaining == null || hasTemporaryPin == null) {
-                    throw new InvalidOperationException(
+                    default:
+                        throw new InvalidOperationException(
                             string.Format(
                                 CultureInfo.CurrentCulture,
                                 ExceptionMessages.InvalidApduResponseData));
                 }
-
-                IsConfigured = (bool) isConfigured;
-                AttemptsRemaining = (int) attemptsRemaining;
-                HasTemporaryPin = (bool) hasTemporaryPin;
             }
+
+
+            if (isConfigured == null || attemptsRemaining == null || hasTemporaryPin == null)
+            {
+                throw new InvalidOperationException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidApduResponseData));
+            }
+
+            IsConfigured = (bool)isConfigured;
+            AttemptsRemaining = (int)attemptsRemaining;
+            HasTemporaryPin = (bool)hasTemporaryPin;
         }
 
 

@@ -429,9 +429,9 @@ namespace Yubico.YubiKey {
             }
         }
         
-        internal static string BiometricVerificationNotSupported {
+        internal static string BioMetadataNotSupported {
             get {
-                return ResourceManager.GetString("BiometricVerificationNotSupported", resourceCulture);
+                return ResourceManager.GetString("BioMetadataNotSupported", resourceCulture);
             }
         }
         

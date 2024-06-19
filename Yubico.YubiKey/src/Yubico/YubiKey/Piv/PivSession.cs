@@ -411,25 +411,7 @@ namespace Yubico.YubiKey.Piv
         public PivBioMetadata GetBioMetadata()
         {
             _log.LogInformation("GetBioMetadata");
-
-            try
-            {
-                var getBioMetadataCommand = new GetBioMetadataCommand();
-                GetBioMetadataResponse getBioMetadataResponse = Connection.SendCommand(getBioMetadataCommand);
-
-                return getBioMetadataResponse.GetData();
-            }
-            catch (ApduException e)
-            {
-                if (e.SW == SWConstants.DataNotFound)
-                {
-                    throw new NotSupportedException(
-                       string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.BiometricVerificationNotSupported));
-                }
-                throw e;
-            }
+            return Connection.SendCommand(new GetBioMetadataCommand()).GetData();
         }
 
         /// <summary>

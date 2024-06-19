@@ -14,12 +14,13 @@
 
 
 using System;
+using System.Globalization;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// The response to the get bio metadata command, containing information about a
+    /// The response to <see cref="GetBioMetadataCommand"/>, containing Bio Metadata about a
     /// particular key.
     /// </summary>
     /// <remarks>
@@ -72,7 +73,9 @@ namespace Yubico.YubiKey.Piv.Commands
         public PivBioMetadata GetData() => Status switch
         {
             ResponseStatus.Success => new PivBioMetadata(ResponseApdu.Data.ToArray()),
-            ResponseStatus.NoData => throw new NotSupportedException("Bio metadata not supported by this YubiKey"),
+            ResponseStatus.NoData => throw new NotSupportedException(string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.BioMetadataNotSupported)),
             _ => throw new InvalidOperationException(StatusMessage),
         };
     }

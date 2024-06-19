@@ -24,7 +24,6 @@ namespace Yubico.YubiKey.Piv
 {
     public class PivBioMultiProtocolTests
     {
-
         /// <summary>
         /// Verify authentication with YubiKey Bio Multi-protocol
         /// </summary>

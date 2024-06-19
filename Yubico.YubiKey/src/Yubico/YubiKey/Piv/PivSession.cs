@@ -226,7 +226,10 @@ namespace Yubico.YubiKey.Piv
 
         private PivSession(StaticKeys? scp03Keys, IYubiKeyDevice yubiKey)
         {
-            _log.LogInformation("Create a new instance of PivSession" + (scp03Keys is null ? "." : " over SCP03"));
+            _log.LogInformation(
+                "Create a new instance of PivSession" + (scp03Keys is null
+                    ? "."
+                    : " over SCP03"));
 
             if (yubiKey is null)
             {
@@ -433,6 +436,10 @@ namespace Yubico.YubiKey.Piv
             }
 
             ResetAuthenticationStatus();
+
+            // As resetting the PIV application resets the management key,
+            // the management key must be updated to account for the case when the previous management key type
+            // was not the default key type.
             UpdateManagementKey(_yubiKeyDevice);
         }
 

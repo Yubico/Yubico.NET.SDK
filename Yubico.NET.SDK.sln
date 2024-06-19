@@ -30,7 +30,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		.github\workflows\build-nativeshims.yml = .github\workflows\build-nativeshims.yml
 		.github\workflows\build-pull-requests.yml = .github\workflows\build-pull-requests.yml
 		.github\workflows\build.yml = .github\workflows\build.yml
-		.github\workflows\check-code-formatting.yml = .github\workflows\check-code-formatting.yml
 		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
 		.github\workflows\upload-docs.yml = .github\workflows\upload-docs.yml
 		.github\workflows\test.yml = .github\workflows\test.yml

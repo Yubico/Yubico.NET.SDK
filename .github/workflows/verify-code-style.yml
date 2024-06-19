@@ -17,7 +17,7 @@ name: Check code formatting
 on:
   pull_request:
     branches:
-      - main
+      - 'main'
       - 'develop**'
       - 'release/**'
     paths:
@@ -29,7 +29,7 @@ on:
       - '.github/workflows/check-code-formatting.yml'
 
 jobs:
-  check-code-formatting:
+  verify-code-style:
     name: "Verify code style"
     runs-on: windows-2019
     

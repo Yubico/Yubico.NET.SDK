@@ -612,6 +612,8 @@ namespace Yubico.YubiKey.TestUtilities
                 PivAlgorithm.Rsa2048 => CertRsa2048,
                 PivAlgorithm.Rsa3072 => CertRsa3072,
                 PivAlgorithm.Rsa4096 => CertRsa4096,
+                PivAlgorithm.EccP256 => CertEccP256,
+                PivAlgorithm.EccP384 => CertEccP384,
                 _ => throw new ArgumentException("No cert mapped", nameof(algorithm))
             };
         }

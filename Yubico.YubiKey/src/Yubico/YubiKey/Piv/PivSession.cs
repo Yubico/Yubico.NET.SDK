@@ -238,7 +238,7 @@ namespace Yubico.YubiKey.Piv
                 : yubiKey.ConnectScp03(YubiKeyApplication.Piv, scp03Keys);
 
             ResetAuthenticationStatus();
-            GetManagementKey(yubiKey);
+            UpdateManagementKey(yubiKey);
 
             _yubiKeyDevice = yubiKey;
             _disposed = false;
@@ -433,7 +433,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             ResetAuthenticationStatus();
-            GetManagementKey(_yubiKeyDevice);
+            UpdateManagementKey(_yubiKeyDevice);
         }
 
         /// <summary>
@@ -492,7 +492,7 @@ namespace Yubico.YubiKey.Piv
         ///     <see cref="AuthenticateManagementKey" /> which may in turn throw its' own exceptions.
         /// </remarks>
         /// <param name="slotToClear">The Yubikey slot of the key you want to clear. This must be a valid slot number.</param>
-        /// <seealso cref="PivSlot"/>
+        /// <seealso cref="PivSlot" />
         /// <exception cref="InvalidOperationException">
         ///     Either the call to the Yubikey was unsuccessful or
         ///     there wasn't any <c>KeyCollector</c> loaded, the key provided was not a valid Triple-DES key, or the YubiKey
@@ -595,7 +595,7 @@ namespace Yubico.YubiKey.Piv
                     ExceptionMessages.ApplicationResetFailure));
         }
 
-        private void GetManagementKey(IYubiKeyDevice yubiKey) =>
+        private void UpdateManagementKey(IYubiKeyDevice yubiKey) =>
             ManagementKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey)
                 ? GetManagementKeyAlgorithm()
                 : PivAlgorithm.TripleDes; // Default for keys with firmware version < 5.7

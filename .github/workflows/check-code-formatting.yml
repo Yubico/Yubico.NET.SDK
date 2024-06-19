@@ -27,7 +27,7 @@ on:
       - '**.csproj'
       - '**.sln'
       - '.github/workflows/check-code-formatting.yml'
-  
+
 jobs:
   check-code-formatting:
     runs-on: windows-2019
@@ -45,5 +45,8 @@ jobs:
       - name: Build Yubico.NET.SDK.sln
         run: dotnet build --nologo --verbosity normal Yubico.NET.SDK.sln
 
-      - name: Check for correct formatting 
+      - name: "Add DOTNET to path explicitly to address bug where it cannot be found"
+        run: echo "$(dirname $(readlink $(which dotnet)))" >> GITHUB_PATH
+        
+      - name: Check for correct formatting
         run: dotnet format --verify-no-changes --no-restore -v d

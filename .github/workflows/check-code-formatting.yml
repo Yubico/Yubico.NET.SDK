@@ -30,8 +30,9 @@ on:
 
 jobs:
   check-code-formatting:
+    name: "Verify code style"
     runs-on: windows-2019
-
+    
     steps:
       - uses: actions/checkout@v4
 
@@ -47,6 +48,6 @@ jobs:
 
       - name: "Add DOTNET to path explicitly to address bug where it cannot be found"
         run: echo "$(dirname $(readlink $(which dotnet)))" >> GITHUB_PATH
-        
+
       - name: Check for correct formatting
         run: dotnet format --verify-no-changes --no-restore -v d

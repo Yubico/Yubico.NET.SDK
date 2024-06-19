@@ -1364,10 +1364,10 @@ namespace Yubico.YubiKey.Piv
                 try
                 {
                     // This will use PBKDF2, with the PRF of HMAC with SHA-1.
-                    #pragma warning disable CA5379, CA5387 // These warnings complain about SHA-1 and <100,000 iterations, but we use it to be backwards-compatible.
+#pragma warning disable CA5379, CA5387 // These warnings complain about SHA-1 and <100,000 iterations, but we use it to be backwards-compatible.
                     using var kdf = new Rfc2898DeriveBytes(pinData, saltData, iterations: 10000);
                     result = kdf.GetBytes(newLength);
-                    #pragma warning restore CA5379, CA5387
+#pragma warning restore CA5379, CA5387
                     Array.Copy(result, _keyBuffer, newLength);
                     KeyData = _keyData.Slice(start: 0, newLength);
                 }

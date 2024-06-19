@@ -556,7 +556,7 @@ namespace Yubico.YubiKey.Piv
             ManagementKeyAuthenticationResult = AuthenticateManagementKeyResult.Unauthenticated;
             PinVerified = false;
         }
-        
+
         // Block the PIN or PUK
         // To get the PIN or PUK into a blocked state, try to change it. Each
         // time the current PIN/PUK entered is incorrect, the retries remaining

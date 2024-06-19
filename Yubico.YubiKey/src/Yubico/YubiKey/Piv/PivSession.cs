@@ -33,19 +33,19 @@ namespace Yubico.YubiKey.Piv
     ///         Generally you will choose the YubiKey to use by building an instance of
     ///         <see cref="IYubiKeyDevice" />. This object will represent the actual hardware.
     ///         <code language="csharp">
-    ///   IYubiKeyDevice SelectYubiKey()
-    ///   {
-    ///       IEnumerable&lt;IYubiKeyDevice&gt; yubiKeyList = YubiKey.FindAll();
-    ///       foreach (IYubiKeyDevice current in yubiKeyList)
-    ///       {
-    ///           /* determine which YubiKey to use */
-    ///           if(selected)
-    ///           {
-    ///               return current;
-    ///           }
-    ///       }
-    ///   }
-    /// </code>
+    ///             IYubiKeyDevice SelectYubiKey()
+    ///             {
+    ///                 IEnumerable&lt;IYubiKeyDevice&gt; yubiKeyList = YubiKey.FindAll();
+    ///                 foreach (IYubiKeyDevice current in yubiKeyList)
+    ///                 {
+    ///                     /* determine which YubiKey to use */
+    ///                     if(selected)
+    ///                     {
+    ///                         return current;
+    ///                     }
+    ///                 }
+    ///             }
+    ///         </code>
     ///     </para>
     ///     <para>
     ///         Once you have the YubiKey to use, you will build an instance of this
@@ -53,12 +53,12 @@ namespace Yubico.YubiKey.Piv
     ///         Because this class implements <c>IDisposable</c>, use the <c>using</c>
     ///         keyword. For example,
     ///         <code language="csharp">
-    ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
-    ///     using (var piv = new PivSession(yubiKeyToUse))
-    ///     {
-    ///         /* Perform PIV operations. */
-    ///     }
-    /// </code>
+    ///             IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
+    ///             using (var piv = new PivSession(yubiKeyToUse))
+    ///             {
+    ///                 /* Perform PIV operations. */
+    ///             }
+    ///         </code>
     ///     </para>
     ///     <para>
     ///         If this class is used as part of a <c>using</c> expression, when the
@@ -98,11 +98,11 @@ namespace Yubico.YubiKey.Piv
     ///         that do need it. You will need to set the appropriate property after
     ///         instantiating this class.
     ///         <code language="csharp">
-    ///   using (var pivSession = new PivSession(yubiKeyToUse))
-    ///   {
-    ///       KeyCollector = SomeCollectorDelegate;
-    ///   };
-    /// </code>
+    ///             using (var pivSession = new PivSession(yubiKeyToUse))
+    ///             {
+    ///                 KeyCollector = SomeCollectorDelegate;
+    ///             };
+    ///         </code>
     ///     </para>
     ///     <para>
     ///         You supply the delegate as the <c>KeyCollector</c> property. See also the
@@ -113,16 +113,16 @@ namespace Yubico.YubiKey.Piv
     ///         Note that the YubiKey is manufactured with default PIN, PUK, and
     ///         management key values. This is a requirement of the PIV standard.
     ///         <code>
-    ///    management key (hex): 01 02 03 04 05 06 07 08
-    ///                          01 02 03 04 05 06 07 08
-    ///                          01 02 03 04 05 06 07 08
-    /// 
-    ///    PIN (hex): 31 32 33 34 35 36
-    ///    as an ASCII string, this would be "123456"
-    /// 
-    ///    PUK (hex): 31 32 33 34 35 36 37 38
-    ///    as an ASCII string, this would be "12345678"
-    /// </code>
+    ///             management key (hex): 01 02 03 04 05 06 07 08
+    ///                                   01 02 03 04 05 06 07 08
+    ///                                   01 02 03 04 05 06 07 08
+    ///             
+    ///             PIN (hex): 31 32 33 34 35 36
+    ///             as an ASCII string, this would be "123456"
+    ///             
+    ///             PUK (hex): 31 32 33 34 35 36 37 38
+    ///             as an ASCII string, this would be "12345678"
+    ///         </code>
     ///     </para>
     ///     <para>
     ///         The PIN, PUK, and management key are supplied as byte arrays. The reason
@@ -163,12 +163,12 @@ namespace Yubico.YubiKey.Piv
         ///     Because this class implements <c>IDisposable</c>, use the <c>using</c>
         ///     keyword. For example,
         ///     <code language="csharp">
-        ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
-        ///     using (var piv = new PivSession(yubiKeyToUse))
-        ///     {
-        ///         /* Perform PIV operations. */
-        ///     }
-        /// </code>
+        ///         IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
+        ///         using (var piv = new PivSession(yubiKeyToUse))
+        ///         {
+        ///             /* Perform PIV operations. */
+        ///         }
+        ///     </code>
         /// </remarks>
         /// <param name="yubiKey">
         ///     The object that represents the actual YubiKey which will perform the
@@ -195,15 +195,15 @@ namespace Yubico.YubiKey.Piv
         ///         Because this class implements <c>IDisposable</c>, use the <c>using</c>
         ///         keyword. For example,
         ///         <code language="csharp">
-        ///     IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
-        ///     // Assume you have some method that obtains the appropriate SCP03
-        ///     // key set.
-        ///     using StaticKeys scp03Keys = CollectScp03Keys();
-        ///     using (var piv = new PivSession(yubiKeyToUse, scp03Keys))
-        ///     {
-        ///         /* Perform PIV operations. */
-        ///     }
-        /// </code>
+        ///             IYubiKeyDevice yubiKeyToUse = SelectYubiKey();
+        ///             // Assume you have some method that obtains the appropriate SCP03
+        ///             // key set.
+        ///             using StaticKeys scp03Keys = CollectScp03Keys();
+        ///             using (var piv = new PivSession(yubiKeyToUse, scp03Keys))
+        ///             {
+        ///                 /* Perform PIV operations. */
+        ///             }
+        ///         </code>
         ///     </para>
         /// </remarks>
         /// <param name="yubiKey">
@@ -306,23 +306,6 @@ namespace Yubico.YubiKey.Piv
             _disposed = true;
         }
 
-        private void GetManagementKey(IYubiKeyDevice yubiKey) =>
-            ManagementKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey)
-                ? GetManagementKeyAlgorithm()
-                : PivAlgorithm.TripleDes; // Default for keys with firmware version < 5.7
-
-        private PivAlgorithm GetManagementKeyAlgorithm()
-        {
-            GetMetadataResponse response = Connection.SendCommand(new GetMetadataCommand(PivSlot.Management));
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-
-            PivMetadata metadata = response.GetData();
-            return metadata.Algorithm;
-        }
-
         // Reset any fields and properties related to authentication or
         // verification to the initial state: not authenticated, verified, etc.
         private void ResetAuthenticationStatus()
@@ -340,18 +323,18 @@ namespace Yubico.YubiKey.Piv
         ///     this method on an earlier YubiKey, it will throw an exception. A good
         ///     idea is to verify that the version number is valid before calling.
         ///     <code language="csharp">
-        ///     IEnumerable&lt;IYubiKeyDevice&gt; list = YubiKey.FindByTransport(Transport.UsbSmartCard);
-        ///     IYubiKeyDevice yubiKey = list.First();
-        /// 
-        ///     using (var pivSession = new PivSession(yubiKey))
-        ///     {
-        ///         if (yubiKey.FirmwareVersion &gt;= new FirmwareVersion(5, 3, 0))
+        ///         IEnumerable&lt;IYubiKeyDevice&gt; list = YubiKey.FindByTransport(Transport.UsbSmartCard);
+        ///         IYubiKeyDevice yubiKey = list.First();
+        ///     
+        ///         using (var pivSession = new PivSession(yubiKey))
         ///         {
-        ///             PivMetadata metadataSlot9A =
-        ///                 pivSession.GetMetadata(PivSlot.Authentication);
+        ///             if (yubiKey.FirmwareVersion &gt;= new FirmwareVersion(5, 3, 0))
+        ///             {
+        ///                 PivMetadata metadataSlot9A =
+        ///                     pivSession.GetMetadata(PivSlot.Authentication);
+        ///             }
         ///         }
-        ///     }
-        /// </code>
+        ///     </code>
         ///     <para>
         ///         See the User's Manual
         ///         <xref href="UsersManualPivCommands#get-metadata"> entry on getting metadata</xref>
@@ -461,8 +444,8 @@ namespace Yubico.YubiKey.Piv
         ///     Internally this method attempts to authenticate to the Yubikey by calling
         ///     <see cref="AuthenticateManagementKey" /> which may in turn throw its' own exceptions.
         /// </remarks>
-        /// <param name="sourceSlot">The Yubikey slot of the key you want to delete. This must be a valid slot number.</param>
-        /// <param name="destinationSlot">The target Yubikey slot for the key you want to delete. This must be a valid slot number.</param>
+        /// <param name="sourceSlot">The Yubikey slot of the key you want to move. This must be a valid slot number.</param>
+        /// <param name="destinationSlot">The target Yubikey slot for the key you want to move. This must be a valid slot number.</param>
         /// <exception cref="InvalidOperationException">
         ///     There is no <c>KeyCollector</c> loaded, the key provided was not a
         ///     valid Triple-DES key, or the YubiKey had some other error, such as
@@ -509,7 +492,7 @@ namespace Yubico.YubiKey.Piv
         ///     <see cref="AuthenticateManagementKey" /> which may in turn throw its' own exceptions.
         /// </remarks>
         /// <param name="slotToClear">The Yubikey slot of the key you want to clear. This must be a valid slot number.</param>
-        /// <seealso cref="PivSlot" />
+        /// <seealso cref="PivSlot"/>
         /// <exception cref="InvalidOperationException">
         ///     Either the call to the Yubikey was unsuccessful or
         ///     there wasn't any <c>KeyCollector</c> loaded, the key provided was not a valid Triple-DES key, or the YubiKey
@@ -525,6 +508,7 @@ namespace Yubico.YubiKey.Piv
         ///     Mutual authentication was performed and the YubiKey was not authenticated.
         /// </exception>
         /// <exception cref="NotSupportedException">Thrown when the Yubikey doesn't support the Delete-operation.</exception>
+        /// <seealso cref="PivSlot" />
         /// <seealso cref="AuthenticateManagementKey" />
         public void DeleteKey(byte slotToClear)
         {
@@ -609,6 +593,23 @@ namespace Yubico.YubiKey.Piv
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.ApplicationResetFailure));
+        }
+
+        private void GetManagementKey(IYubiKeyDevice yubiKey) =>
+            ManagementKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey)
+                ? GetManagementKeyAlgorithm()
+                : PivAlgorithm.TripleDes; // Default for keys with firmware version < 5.7
+
+        private PivAlgorithm GetManagementKeyAlgorithm()
+        {
+            GetMetadataResponse response = Connection.SendCommand(new GetMetadataCommand(PivSlot.Management));
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+
+            PivMetadata metadata = response.GetData();
+            return metadata.Algorithm;
         }
     }
 }

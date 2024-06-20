@@ -31,6 +31,7 @@ is the one calling the YubiKey. The keys, data, and firmware running on the Yubi
 * [Get the serial number](#get-the-serial-number)
 * [Get the firmware version number](#get-the-firmware-version-number)
 * [Get metadata](#get-metadata)
+* [Get BIO metadata](#get-bio-metadata)
 * [Verify the PIN](#verify)
 * [Authenticate: management key](#authenticate-management-key)
 * [Set PIN retries](#set-pin-retries)
@@ -171,6 +172,34 @@ elements are returned for each slot.
 ### APDU
 
 [Technical APDU Details](apdu/metadata.md)
+___
+## Get Bio metadata
+
+This gets YubiKey's biometric metadata. 
+
+### Available
+
+YubiKey Bio Multi-protocol 5.6 and later.
+
+### SDK Classes
+
+[GetBioMetadataCommand](xref:Yubico.YubiKey.Piv.Commands.GetBioMetadataCommand)
+
+[GetBioMetadataResponse](xref:Yubico.YubiKey.Piv.Commands.GetBioMetadataResponse)
+
+### Output
+
+#### Table 1: List of Metadata Elements
+|   Name            |                  Meaning                                 |                              Data                                 |
+| :---------------: | :------------------------------------------------------: | :---------------------------------------------------------------: |
+|  IsConfigured     |  Is this device configured for biometric verification    |  bool                                                             |
+|  RetriesRemaining |  Number of remaining retries for biometric verification  |  integer, zero value means the biometric verification is blocked  |
+|  HasTemporaryPin  |  Whether a temporary PIN is generated                    |  bool                                                             |
+
+
+### APDU
+
+[Technical APDU Details](apdu/bio-metadata.md)
 ___
 ## Verify
 

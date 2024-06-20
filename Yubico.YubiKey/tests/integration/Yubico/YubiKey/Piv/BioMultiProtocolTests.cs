@@ -15,6 +15,7 @@
 using System;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Xunit;
 using Yubico.PlatformInterop;
 using Yubico.YubiKey.Piv.Commands;
@@ -35,7 +36,7 @@ namespace Yubico.YubiKey.Piv
         /// </remarks>
         /// <param name="testDeviceType"></param>
         [SkippableTheory(typeof(NotSupportedException))]
-        [InlineData(StandardTestDevice.Fw5)]
+        [InlineData(StandardTestDevice.Fw5Bio)]
         public void BioMultiProtocol_Authenticate(StandardTestDevice testDeviceType)
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
@@ -45,7 +46,7 @@ namespace Yubico.YubiKey.Piv
                 var connection = pivSession.Connection;
 
                 Assert.True(VerifyUv(connection, false, false).IsEmpty);
-                Assert.False(pivSession.GetBioMetadata().HasTemporaryPin);                
+                Assert.False(pivSession.GetBioMetadata().HasTemporaryPin);
 
                 // check verified state
                 Assert.True(VerifyUv(connection, false, true).IsEmpty);
@@ -61,7 +62,67 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        private ReadOnlyMemory<byte> VerifyUv(IYubiKeyConnection connection, bool requestTemporaryPin, bool checkOnly)
+        /// <summary>
+        /// Verify that UVRemainingAttempts value in results is correctly reported
+        /// </summary>
+        /// <remarks>
+        /// To run the test, create a PIN and enroll at least one fingerprint.
+        /// The test will try to authenticate several times.
+        /// for fingerprint authentication.
+        /// <para>
+        /// Tests with devices without Bio Metadata are skipped.
+        /// </remarks>
+        /// <param name="testDeviceType"></param>
+        [SkippableTheory(typeof(NotSupportedException))]
+        [InlineData(StandardTestDevice.Fw5Bio)]
+        public void BioMultiProtocol_UVRemainingAttempts(StandardTestDevice testDeviceType)
+        {
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            using (var pivSession = new PivSession(testDevice))
+            {
+                var connection = pivSession.Connection;
+                int? attemptsRemaining;
+
+                var response = VerifyUv(connection, false, false);
+
+                Assert.Equal(3, pivSession.GetBioMetadata().AttemptsRemaining);
+
+                response = VerifyUv(connection, false, false, out attemptsRemaining);
+                Assert.True(response.IsEmpty);
+                Assert.Equal(2, attemptsRemaining);
+
+                response = VerifyUv(connection, false, false, out attemptsRemaining);
+                Assert.True(response.IsEmpty);
+                Assert.Equal(1, attemptsRemaining);
+
+                // this last attempt will invalidate the biometric verification
+                response = VerifyUv(connection, false, false, out attemptsRemaining);
+                Assert.True(response.IsEmpty);
+                Assert.Null(attemptsRemaining);
+                Assert.Equal(0, pivSession.GetBioMetadata().AttemptsRemaining);
+
+                // authenticate with PIN 
+                Assert.Null(VerifyPin(connection));
+            }
+        }
+
+        // helper methods
+        private ReadOnlyMemory<byte> VerifyUv(
+            IYubiKeyConnection connection,
+            bool requestTemporaryPin,
+            bool checkOnly,
+            out int? remainingAttempts)
+        {
+            var command = new VerifyUvCommand(requestTemporaryPin, checkOnly);
+            var response = connection.SendCommand(command);
+            remainingAttempts = response.RetriesRemaining;
+            return response.GetData();
+        }
+
+        private ReadOnlyMemory<byte> VerifyUv(
+            IYubiKeyConnection connection,
+            bool requestTemporaryPin,
+            bool checkOnly)
         {
             var command = new VerifyUvCommand(requestTemporaryPin, checkOnly);
             var response = connection.SendCommand(command);
@@ -72,6 +133,15 @@ namespace Yubico.YubiKey.Piv
         {
             var command = new VerifyTemporaryPinCommand(temporaryPin);
             _ = connection.SendCommand(command).GetData();
+        }
+
+        private int? VerifyPin(
+            IYubiKeyConnection connection)
+        {
+            byte[] pin = Encoding.ASCII.GetBytes("12345678");
+            var command = new VerifyPinCommand(pin);
+            var response = connection.SendCommand(command);
+            return response.GetData();
         }
     }
 }

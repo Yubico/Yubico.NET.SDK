@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Piv
 
         /// <summary>
         /// The constructor that takes in the bio metadata encoding returned by the
-        /// YubiKey in response to the Get bio metadata command.
+        /// YubiKey in response to the get bio metadata command.
         /// </summary>
         /// <param name="responseData">
         /// The data portion of the response APDU, this is the encoded bio metadata.
@@ -104,8 +104,8 @@ namespace Yubico.YubiKey.Piv
         /// Indicates whether biometrics are configured or not (fingerprints enrolled or not).
         /// A false return value indicates a YubiKey Bio without biometrics configured and hence the
         /// client should fallback to a PIN based authentication.
-        /// @return true if biometrics are configured or not.
         /// </summary>
+        /// <returns>true if biometrics are configured or not.</returns>
         public bool IsConfigured { get; private set; }
 
         /// <summary>
@@ -118,11 +118,10 @@ namespace Yubico.YubiKey.Piv
         public int AttemptsRemaining { get; private set; }
 
         /// <summary>
-        /// Indicates whether biometrics are configured or not (fingerprints enrolled or not).
-        /// A false return value indicates a YubiKey Bio without biometrics configured and hence the
-        /// client should fallback to a PIN based authentication.
-        /// @return true if biometrics are configured or not.
+        /// Indicates whether a temporary PIN has been generated in the YubiKey in relation to a 
+        /// successful biometric match.
         /// </summary>
+        /// <returns>true if a temporary PIN has been generated.</returns>
         public bool HasTemporaryPin { get; private set; }
     }
 }

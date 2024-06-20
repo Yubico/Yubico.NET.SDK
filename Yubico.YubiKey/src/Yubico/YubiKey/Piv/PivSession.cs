@@ -374,7 +374,7 @@ namespace Yubico.YubiKey.Piv
         /// Get information about YubiKey Bio multi-protocol.
         /// </summary>
         /// <remarks>
-        /// This feature is available only on YubiKeys Bio multi-protocol 6.6 and later. If you call
+        /// This feature is available only on YubiKeys Bio multi-protocol (FW 5.6 and later). If you call
         /// this method on an incompatible YubiKey, it will throw a <c>NotSupportedException</c>.
         /// <code language="csharp">
         ///     IEnumerable&lt;IYubiKeyDevice&gt; list = YubiKey.FindByTransport(Transport.UsbSmartCard);
@@ -399,8 +399,7 @@ namespace Yubico.YubiKey.Piv
         /// </para>
         /// </remarks>
         /// <returns>
-        /// A new instance of a <c>PivBioMetadata</c> object containing information
-        /// about the given slot.
+        /// A new instance of a <c>PivBioMetadata</c> object.
         /// </returns>
         /// <exception cref="NotSupportedException">
         /// The queried YubiKey does not support bio metadata.

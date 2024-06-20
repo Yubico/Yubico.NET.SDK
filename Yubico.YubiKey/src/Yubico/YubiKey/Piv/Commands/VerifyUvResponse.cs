@@ -19,11 +19,11 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// The response to verifying the PIN.
+    /// The response to biometric verification.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// This is the partner Response class to <see cref="VerifyPinCommand"/>.
+    /// This is the partner Response class to <see cref="VerifyUvCommand"/>.
     /// </para>
     /// <para>
     /// To determine the result of the command, first look at the
@@ -39,14 +39,15 @@ namespace Yubico.YubiKey.Piv.Commands
     ///
     /// <item>
     /// <term><see cref="ResponseStatus.Success"/></term>
-    /// <description>The PIN verified. GetData returns <c>null</c>.</description>
+    /// <description>The biometric authentication succeeded. GetData returns temporary pin if requested.
+    /// </description>
     /// </item>
     ///
     /// <item>
     /// <term><see cref="ResponseStatus.AuthenticationRequired"/></term>
-    /// <description>The PIN did not verify. GetData returns the number
-    /// of retries remaining. If the number of retries is 0, the PIN
-    /// is blocked.</description>
+    /// <description>The biometric authentication failed. GetData returns null. <see cref="RetriesRemaining"/> 
+    /// returns the number of retries remaining. If the number of retries is 0, the biometric authentication is 
+    /// blocked and the client should use PIN authentication <see cref="VerifyPinCommand"/>.</description>
     /// </item>
     /// </list>
     ///
@@ -54,30 +55,50 @@ namespace Yubico.YubiKey.Piv.Commands
     /// Example:
     /// </para>
     /// <code language="csharp">
-    ///   /* This example assumes the application has a method to collect a PIN.
-    ///    */
-    ///   byte[] pin;<br/>
-    ///
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
-    ///   pin = CollectPin();
-    ///   var verifyPinCommand = new VerifyPinCommand(pin);
-    ///   VerifyPinResponse verifyPinResponse = connection.SendCommand(verifyPinCommand);<br/>
-    ///   if (resetRetryResponse.Status == ResponseStatus.AuthenticationRequired)
+    ///   var verifyUvCommand = new VerifyUvCommand(false, false);
+    ///   VerifyUvResponse verifyUvResponse = connection.SendCommand(verifyUvCommand);<br/>
+    ///   if (verifyUvResponse.Status == ResponseStatus.AuthenticationRequired)
     ///   {
-    ///     int retryCount = resetRetryResponse.GetData();
+    ///     int retryCount = verifyUvResponse.UVAttemptsRemaining;
     ///     /* report the retry count */
     ///   }
-    ///   else if (verifyPinResponse.Status != ResponseStatus.Success)
+    ///   else if (verifyUvResponse.Status != ResponseStatus.Success)
     ///   {
     ///     // Handle error
     ///   }
-    ///
-    ///   CryptographicOperations.ZeroMemory(pin)
     /// </code>
     /// </remarks>
     public sealed class VerifyUvResponse : PivResponse, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
     {
         private readonly bool _requestTemporaryPin;
+
+        /// <summary>
+        /// Indicates how many biometric match retries are left (biometric match retry counter) until a biometric
+        /// verification is blocked. 
+        /// </summary>
+        /// <remarks>
+        /// The value is returned only if a authentication failed. To get remaining biometric attempts when not
+        /// performing authentication, use <see cref="PivBioMetadata.AttemptsRemaining"/>.
+        /// </remarks>
+        public int? RetriesRemaining
+        {
+            get
+            {
+                if (Status == ResponseStatus.AuthenticationRequired)
+                {
+                    if (PivPinUtilities.HasRetryCount(StatusWord))
+                    {
+                        return PivPinUtilities.GetRetriesRemaining(StatusWord);
+                    }
+                    if (StatusWord == SWConstants.AuthenticationMethodBlocked)
+                    {
+                        return 0;
+                    }
+                }
+                return null;
+            }
+        }
 
         /// <inheritdoc />
         protected override ResponseStatusPair StatusCodeMap
@@ -88,10 +109,10 @@ namespace Yubico.YubiKey.Piv.Commands
                 {
                     case short statusWord when PivPinUtilities.HasRetryCount(statusWord):
                         int remainingRetries = PivPinUtilities.GetRetriesRemaining(statusWord);
-                        return new ResponseStatusPair(ResponseStatus.AuthenticationRequired, string.Format(CultureInfo.CurrentCulture, ResponseStatusMessages.PivPinPukFailedWithRetries, remainingRetries));
+                        return new ResponseStatusPair(ResponseStatus.AuthenticationRequired, string.Format(CultureInfo.CurrentCulture, ResponseStatusMessages.PivBioUVFailedWithRetries, remainingRetries));
 
                     case SWConstants.AuthenticationMethodBlocked:
-                        return new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivPinPukBlocked);
+                        return new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivBioUvBlocked);
 
                     case SWConstants.SecurityStatusNotSatisfied:
                         return new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivSecurityStatusNotSatisfied);
@@ -103,7 +124,7 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        /// Constructs a VerifyPinResponse based on a ResponseApdu received from
+        /// Constructs a VerifyUvResponse based on a ResponseApdu received from
         /// the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
@@ -119,7 +140,7 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        /// Gets the number of PIN retries remaining, if applicable.
+        /// Gets the temporary PIN if requested.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -137,14 +158,14 @@ namespace Yubico.YubiKey.Piv.Commands
         ///
         /// <item>
         /// <term><see cref="ResponseStatus.Success"/></term>
-        /// <description>The PIN verified. GetData returns <c>null</c>.</description>
+        /// <description>The biometric authentication succeeded. If requested, GetData returns the temporary PIN.</description>
         /// </item>
         ///
         /// <item>
         /// <term><see cref="ResponseStatus.AuthenticationRequired"/></term>
-        /// <description>The PIN did not verify. GetData returns the number
-        /// of retries remaining. If the number of retries is 0, the PIN
-        /// is blocked.</description>
+        /// <description>The biometric authentication did not succeed. <see cref="RetriesRemaining"/> contains number of
+        /// of retries remaining. If the number of retries is 0 the biometric authentication is blocked and the 
+        /// client should use PIN authentication (<see cref="VerifyPinCommand"/>).</description>
         /// </item>
         /// </list>
         /// </remarks>
@@ -164,14 +185,12 @@ namespace Yubico.YubiKey.Piv.Commands
                 throw new InvalidOperationException(StatusMessage);
             }
 
-            if (!_requestTemporaryPin)
-            {
-                return ReadOnlyMemory<byte>.Empty;
-            }
-            else 
+            if (_requestTemporaryPin)
             {
                 return ResponseApdu.Data;
             }
+
+            return ReadOnlyMemory<byte>.Empty;
         }
     }
 }

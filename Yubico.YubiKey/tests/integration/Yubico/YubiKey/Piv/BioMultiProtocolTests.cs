@@ -76,13 +76,12 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(testDevice))
             {
                 var connection = pivSession.Connection;
-                int? attemptsRemaining;
 
                 var response = VerifyUv(connection, false, false);
 
                 Assert.Equal(3, pivSession.GetBioMetadata().AttemptsRemaining);
 
-                response = VerifyUv(connection, false, false, out attemptsRemaining);
+                response = VerifyUv(connection, false, false, out int? attemptsRemaining);
                 Assert.True(response.IsEmpty);
                 Assert.Equal(2, attemptsRemaining);
 
@@ -124,7 +123,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(pivSession.GetBioMetadata().HasTemporaryPin);
 
                 // use invalid temporary pin
-                Assert.False(VerifyTemporaryPin(connection, 
+                Assert.False(VerifyTemporaryPin(connection,
                     Encoding.ASCII.GetBytes("0102030405060708")));
                 Assert.False(pivSession.GetBioMetadata().HasTemporaryPin);
 
@@ -132,7 +131,7 @@ namespace Yubico.YubiKey.Piv
                 temporaryPin = VerifyUv(connection, true, false);
                 Assert.False(temporaryPin.IsEmpty);
                 Assert.True(pivSession.GetBioMetadata().HasTemporaryPin);
-                
+
                 Assert.True(VerifyTemporaryPin(connection, temporaryPin));
                 Assert.True(pivSession.GetBioMetadata().HasTemporaryPin);
             }

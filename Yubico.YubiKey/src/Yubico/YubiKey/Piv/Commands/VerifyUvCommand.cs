@@ -90,14 +90,18 @@ namespace Yubico.YubiKey.Piv.Commands
         public CommandApdu CreateCommandApdu()
         {
             ReadOnlyMemory<byte> data = ReadOnlyMemory<byte>.Empty;
-            if (!_checkOnly) {
+            if (!_checkOnly)
+            {
                 const byte GetTemporaryPinTag = 0x02;
                 const byte VerifyUvTag = 0x03;
 
                 var tlvWriter = new TlvWriter();
-                if (_requestTemporaryPin) {
+                if (_requestTemporaryPin)
+                {
                     tlvWriter.WriteValue(GetTemporaryPinTag, null);
-                } else {
+                }
+                else
+                {
                     tlvWriter.WriteValue(VerifyUvTag, null);
                 }
                 data = tlvWriter.Encode();

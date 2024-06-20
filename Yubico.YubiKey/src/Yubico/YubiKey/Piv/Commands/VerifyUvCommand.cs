@@ -61,7 +61,10 @@ namespace Yubico.YubiKey.Piv.Commands
         /// Initializes a new instance of the VerifyUvCommand class.
         /// </summary>
         /// <param name="requestTemporaryPin">
-        /// After successful match generate a temporary PIN.
+        /// After successful match generate a temporary PIN. Certain conditions may 
+        /// lead to the clearing of the temporary PIN, such as fingerprint mismatch, 
+        /// PIV PIN failed verification, timeout, power loss, failed attempt to verify 
+        /// against the set value.
         /// </param>
         /// <param name="checkOnly">
         /// Check verification state of biometrics, don't perform UV.

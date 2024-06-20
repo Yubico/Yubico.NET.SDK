@@ -31,7 +31,7 @@ is the one calling the YubiKey. The keys, data, and firmware running on the Yubi
 * [Get the serial number](#get-the-serial-number)
 * [Get the firmware version number](#get-the-firmware-version-number)
 * [Get metadata](#get-metadata)
-* [Get BIO metadata](#get-bio-metadata)
+* [Get Bio metadata](#get-bio-metadata)
 * [Verify the PIN](#verify)
 * [Authenticate: management key](#authenticate-management-key)
 * [Set PIN retries](#set-pin-retries)

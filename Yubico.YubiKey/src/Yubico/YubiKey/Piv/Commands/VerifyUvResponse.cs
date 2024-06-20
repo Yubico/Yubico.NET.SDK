@@ -45,7 +45,7 @@ namespace Yubico.YubiKey.Piv.Commands
     ///
     /// <item>
     /// <term><see cref="ResponseStatus.AuthenticationRequired"/></term>
-    /// <description>The biometric authentication failed. GetData returns null. <see cref="RetriesRemaining"/> 
+    /// <description>The biometric authentication failed. GetData returns null. <see cref="AttemptsRemaining"/> 
     /// returns the number of retries remaining. If the number of retries is 0, the biometric authentication is 
     /// blocked and the client should use PIN authentication <see cref="VerifyPinCommand"/>.</description>
     /// </item>
@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// The value is returned only if a authentication failed. To get remaining biometric attempts when not
         /// performing authentication, use <see cref="PivBioMetadata.AttemptsRemaining"/>.
         /// </remarks>
-        public int? RetriesRemaining
+        public int? AttemptsRemaining
         {
             get
             {
@@ -163,7 +163,7 @@ namespace Yubico.YubiKey.Piv.Commands
         ///
         /// <item>
         /// <term><see cref="ResponseStatus.AuthenticationRequired"/></term>
-        /// <description>The biometric authentication did not succeed. <see cref="RetriesRemaining"/> contains number of
+        /// <description>The biometric authentication did not succeed. <see cref="AttemptsRemaining"/> contains number of
         /// of retries remaining. If the number of retries is 0 the biometric authentication is blocked and the 
         /// client should use PIN authentication (<see cref="VerifyPinCommand"/>).</description>
         /// </item>

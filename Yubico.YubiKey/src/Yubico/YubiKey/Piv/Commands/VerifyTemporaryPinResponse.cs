@@ -19,17 +19,11 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// The response to verifying the PIN.
+    /// The response to verifying the temporary PIN.
     /// </summary>
     /// <remarks>
     /// <para>
-    /// This is the partner Response class to <see cref="VerifyPinCommand"/>.
-    /// </para>
-    /// <para>
-    /// To determine the result of the command, first look at the
-    /// <see cref="YubiKeyResponse.Status"/>. If <c>Status</c> is not one of
-    /// the following values then an error has occurred and <see cref="GetData"/>
-    /// will throw an exception.
+    /// This is the partner Response class to <see cref="VerifyTemporaryPinCommand"/>.
     /// </para>
     /// <list type="table">
     /// <listheader>
@@ -39,14 +33,13 @@ namespace Yubico.YubiKey.Piv.Commands
     ///
     /// <item>
     /// <term><see cref="ResponseStatus.Success"/></term>
-    /// <description>The PIN verified. GetData returns <c>null</c>.</description>
+    /// <description>The temporary PIN verified. GetData returns <c>null</c>.</description>
     /// </item>
     ///
     /// <item>
     /// <term><see cref="ResponseStatus.AuthenticationRequired"/></term>
-    /// <description>The PIN did not verify. GetData returns the number
-    /// of retries remaining. If the number of retries is 0, the PIN
-    /// is blocked.</description>
+    /// <description>The temporary PIN did not verify. The temporary PIN is cleared from the YubiKey,
+    /// the session is not authenticated.</description>
     /// </item>
     /// </list>
     ///
@@ -54,54 +47,28 @@ namespace Yubico.YubiKey.Piv.Commands
     /// Example:
     /// </para>
     /// <code language="csharp">
-    ///   /* This example assumes the application has a method to collect a PIN.
+    ///   /* This example assumes the application has obtained a temporary PIN by calling
+    ///    * VerifyUvCommand(true, false).
     ///    */
-    ///   byte[] pin;<br/>
+    ///   byte[] temporaryPin = ...;<br/>
     ///
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
-    ///   pin = CollectPin();
-    ///   var verifyPinCommand = new VerifyPinCommand(pin);
-    ///   VerifyPinResponse verifyPinResponse = connection.SendCommand(verifyPinCommand);<br/>
-    ///   if (resetRetryResponse.Status == ResponseStatus.AuthenticationRequired)
+    ///   var verifyTemporaryPinCommand = new VerifyTemporaryPinCommand(temporaryPin);
+    ///   VerifyTemporaryPinResponse verifyResponse = connection.SendCommand(verifyTemporaryPinCommand);<br/>
+    ///   if (verifyResponse.Status == ResponseStatus.Success)
     ///   {
-    ///     int retryCount = resetRetryResponse.GetData();
-    ///     /* report the retry count */
+    ///     /* session is authenticated */
     ///   }
-    ///   else if (verifyPinResponse.Status != ResponseStatus.Success)
+    ///   else 
     ///   {
-    ///     // Handle error
+    ///     /* authentication failed, application has to retry */
     ///   }
-    ///
-    ///   CryptographicOperations.ZeroMemory(pin)
     /// </code>
     /// </remarks>
-    public sealed class VerifyTemporaryPinResponse : PivResponse, IYubiKeyResponseWithData<int?>
+    public sealed class VerifyTemporaryPinResponse : PivResponse
     {
-        /// <inheritdoc />
-        protected override ResponseStatusPair StatusCodeMap
-        {
-            get
-            {
-                switch (StatusWord)
-                {
-                    case short statusWord when PivPinUtilities.HasRetryCount(statusWord):
-                        int remainingRetries = PivPinUtilities.GetRetriesRemaining(statusWord);
-                        return new ResponseStatusPair(ResponseStatus.AuthenticationRequired, string.Format(CultureInfo.CurrentCulture, ResponseStatusMessages.PivPinPukFailedWithRetries, remainingRetries));
-
-                    case SWConstants.AuthenticationMethodBlocked:
-                        return new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivPinPukBlocked);
-
-                    case SWConstants.SecurityStatusNotSatisfied:
-                        return new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivSecurityStatusNotSatisfied);
-
-                    default:
-                        return base.StatusCodeMap;
-                }
-            }
-        }
-
         /// <summary>
-        /// Constructs a VerifyPinResponse based on a ResponseApdu received from
+        /// Constructs a VerifyTemporaryPinResponse based on a ResponseApdu received from
         /// the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
@@ -110,66 +77,6 @@ namespace Yubico.YubiKey.Piv.Commands
         public VerifyTemporaryPinResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-        }
-
-        /// <summary>
-        /// Gets the number of PIN retries remaining, if applicable.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// First look at the
-        /// <see cref="YubiKeyResponse.Status"/>. If <c>Status</c> is not one of
-        /// the following values then an error has occurred and <see cref="GetData"/>
-        /// will throw an exception.
-        /// </para>
-        ///
-        /// <list type="table">
-        /// <listheader>
-        /// <term>Status</term>
-        /// <description>Description</description>
-        /// </listheader>
-        ///
-        /// <item>
-        /// <term><see cref="ResponseStatus.Success"/></term>
-        /// <description>The PIN verified. GetData returns <c>null</c>.</description>
-        /// </item>
-        ///
-        /// <item>
-        /// <term><see cref="ResponseStatus.AuthenticationRequired"/></term>
-        /// <description>The PIN did not verify. GetData returns the number
-        /// of retries remaining. If the number of retries is 0, the PIN
-        /// is blocked.</description>
-        /// </item>
-        /// </list>
-        /// </remarks>
-        /// <returns>
-        /// <c>null</c> if the PIN verifies, or the number of retries remaining if
-        /// the PIN does not verify.
-        /// </returns>
-        /// <exception cref="InvalidOperationException">
-        /// Thrown if <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>
-        /// or <see cref="ResponseStatus.AuthenticationRequired"/>.
-        /// </exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Readability, avoiding nested conditionals.")]
-        public int? GetData()
-        {
-            if (Status != ResponseStatus.Success && Status != ResponseStatus.AuthenticationRequired)
-            {
-                throw new InvalidOperationException(StatusMessage);
-            }
-
-            if (PivPinUtilities.HasRetryCount(StatusWord))
-            {
-                return PivPinUtilities.GetRetriesRemaining(StatusWord);
-            }
-            else if (StatusWord == SWConstants.AuthenticationMethodBlocked)
-            {
-                return 0;
-            }
-            else
-            {
-                return null;
-            }
         }
     }
 }

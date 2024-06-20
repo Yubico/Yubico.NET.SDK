@@ -21,65 +21,41 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// Verify the PIV PIN.
+    /// Verify the PIV Bio temporary PIN.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="VerifyPinResponse"/>.
+    /// The partner Response class is <see cref="VerifyTemporaryPinResponse"/>.
     /// <para>
-    /// Some operations require the user enter a PIN. Use this class to build a
-    /// command to verify the PIN. This will generally be used in conjunction
-    /// with other commands that require the PIN. But it is possible to simply
-    /// use this command to verify the PIN only.
-    /// </para>
-    /// <para>
-    /// The PIN starts out as a default value: "123456", which in ASCII is the
-    /// 6-byte sequence <c>0x31 32 33 34 35 36</c>. Generally, the first thing
-    /// done when a YubiKey is initialized for PIV is to change the PIN (along
-    /// with the PUK and management key). The PIN must be 6 to 8 bytes.
-    /// Ultimately the bytes that make up the PIN can be any binary value, but
-    /// are generally input from a keyboard, so are usually made up of ASCII
-    /// characters.
-    /// </para>
-    /// <para>
-    /// The PIN you pass in must be 6 to 8 bytes long. If the actual PIN
-    /// collected is less than 6  or more than 8 bytes long, it will be invalid.
-    /// </para>
-    /// <para>
-    /// Note that with PIV there is also a PUK (PIN Unblocking Key). This command
-    /// cannot verify a PUK.
-    /// </para>
-    /// <para>
-    /// When you pass a PIN to this class (the PIN to verify), the class will
-    /// copy a reference to the object passed in, it will not copy the value.
-    /// Because of this, you cannot overwrite the PIN until this object is done
-    /// with it. It will be safe to overwrite the PIN after calling
-    /// <c>connection.SendCommand</c>. See the User's Manual
-    /// <xref href="UsersManualSensitive"> entry on sensitive data</xref> for
-    /// more information on this topic.
+    /// When using biometric verification, clients can request a temporary PIN
+    /// by calling <see cref="VerifyUvCommand"/> with requestTemporaryPin=true.
     /// </para>
     /// <para>
     /// Example:
     /// </para>
     /// <code language="csharp">
     ///   /* This example assumes the application has a method to collect a PIN.
-    ///    */
-    ///   byte[] pin;<br/>
-    ///
-    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
-    ///   pin = CollectPin();
-    ///   var verifyPinCommand = new VerifyPinCommand(pin);
-    ///   VerifyPinResponse verifyPinResponse = connection.SendCommand(verifyPinCommand);<br/>
-    ///   if (resetRetryResponse.Status == ResponseStatus.AuthenticationRequired)
+    ///   */
+    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);
+    ///   
+    ///   // request temporary PIN
+    ///   var verifyUvCommand = new VerifyUvCommand(true, false);
+    ///   
+    ///   // a biometric verification will be performed
+    ///   var verifyUvResponse = connection.SendCommand(verifyUvCommand);
+    ///   
+    ///   if (verifyUvResponse.Status == ResponseStatus.Success) 
     ///   {
-    ///     int retryCount = resetRetryResponse.GetData();
-    ///     /* report the retry count */
+    ///     var temporaryPin = verifyUvResponse.GetData();
+    ///     
+    ///     // using temporary PIN will not request biometric verification
+    ///     
+    ///     var verifyTemporaryPinCommand = new VerifyTemporaryPin(temporaryPin);
+    ///     var verifyResponse = connection.SendCommand(verifyTemporaryPinCommand);
+    ///     if (verifyResponse == ResponseStatus.Success) 
+    ///     {
+    ///         // session is authenticated
+    ///     }
     ///   }
-    ///   else if (verifyPinResponse.Status != ResponseStatus.Success)
-    ///   {
-    ///     // Handle error
-    ///   }
-    ///
-    ///   CryptographicOperations.ZeroMemory(pin)
     /// </code>
     /// </remarks>
     public sealed class VerifyTemporaryPinCommand : IYubiKeyCommand<VerifyTemporaryPinResponse>
@@ -89,7 +65,6 @@ namespace Yubico.YubiKey.Piv.Commands
         private const int TemporaryPinLength = 16;
 
         private readonly ReadOnlyMemory<byte> _temporaryPin;
-
 
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs. For this
@@ -110,22 +85,21 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        /// Initializes a new instance of the VerifyPinCommand class which will
-        /// use the given PIN.
+        /// Initializes a new instance of the VerifyTemporaryPinCommand class which will
+        /// use the given temporary PIN.
         /// </summary>
         /// <remarks>
-        /// In order to verify a PIN, the caller must supply the PIN. In this
-        /// class, the PIN is supplied as <c>ReadOnlyMemory&lt;byte&gt;</c>. It
-        /// is possible to pass a <c>byte[]</c>, because it will be automatically
-        /// cast.
+        /// In order to verify a temporary PIN, the caller must supply the temporary PIN.
+        /// In this class, the temporary PIN is supplied as <c>ReadOnlyMemory&lt;byte&gt;</c>.
+        /// It is possible to pass a <c>byte[]</c>, because it will be automatically cast.
         /// <para>
-        /// This class will copy references to the PIN (not the values. This
-        /// means that you can overwrite the PIN in your byte array only after
-        /// this class is done with it. It will no longer need the PIN after
+        /// This class will copy references to the temporary PIN (not the values. This
+        /// means that you can overwrite the temporary PIN in your byte array only after
+        /// this class is done with it. It will no longer need the temporary PIN after
         /// calling <c>connection.SendCommand</c>.
         /// </para>
         /// <para>
-        /// A PIN is 6 to 8 bytes long.
+        /// A temporary PIN is 16 bytes long.
         /// </para>
         /// </remarks>
         /// <param name="temporaryPin">

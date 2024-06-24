@@ -65,7 +65,7 @@ namespace Yubico.YubiKey.Piv.Commands
     ///   }
     ///   else if (verifyUvResponse.Status != ResponseStatus.Success)
     ///   {
-    ///     // Handle error
+    ///     /* handle error */
     ///   }
     /// </code>
     /// </remarks>

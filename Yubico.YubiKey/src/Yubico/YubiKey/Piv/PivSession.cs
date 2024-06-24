@@ -378,17 +378,16 @@ namespace Yubico.YubiKey.Piv
         /// this method on an incompatible YubiKey, it will throw a <c>NotSupportedException</c>.
         /// <code language="csharp">
         ///     IEnumerable&lt;IYubiKeyDevice&gt; list = YubiKey.FindByTransport(Transport.UsbSmartCard);
-        ///     IYubiKeyDevice yubiKey = list.First();
-        ///
+        ///     IYubiKeyDevice yubiKey = list.First();<br/>
         ///     using (var pivSession = new PivSession(yubiKey))
         ///     {
         ///         try
         ///         {
         ///             var bioMetaData = PivSession.GetBioMetadata();
-        ///             // use bioMetaData
+        ///             /* use bioMetaData */
         ///         }
         ///         catch (NotSupportedException e) {
-        ///             // this device does not support Bio multi-protocol metadata
+        ///             /* this device does not support Bio multi-protocol metadata */
         ///         }
         ///     }
         /// </code>

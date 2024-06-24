@@ -51,7 +51,6 @@ namespace Yubico.YubiKey.Piv.Commands
     ///    * VerifyUvCommand(true, false).
     ///    */
     ///   byte[] temporaryPin = ...;<br/>
-    ///
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   var verifyTemporaryPinCommand = new VerifyTemporaryPinCommand(temporaryPin);
     ///   VerifyTemporaryPinResponse verifyResponse = connection.SendCommand(verifyTemporaryPinCommand);<br/>

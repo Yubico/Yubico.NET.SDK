@@ -35,25 +35,20 @@ namespace Yubico.YubiKey.Piv.Commands
     /// <code language="csharp">
     ///   /* This example assumes the application has a method to collect a PIN.
     ///   */
-    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);
-    ///   
-    ///   // request temporary PIN
-    ///   var verifyUvCommand = new VerifyUvCommand(true, false);
-    ///   
-    ///   // a biometric verification will be performed
+    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
+    ///   /* request temporary PIN */
+    ///   var verifyUvCommand = new VerifyUvCommand(true, false);<br/>
+    ///   /* a biometric verification will be performed */
     ///   var verifyUvResponse = connection.SendCommand(verifyUvCommand);
-    ///   
     ///   if (verifyUvResponse.Status == ResponseStatus.Success) 
     ///   {
-    ///     var temporaryPin = verifyUvResponse.GetData();
-    ///     
-    ///     // using temporary PIN will not request biometric verification
-    ///     
+    ///     var temporaryPin = verifyUvResponse.GetData();<br/>
+    ///     /* using temporary PIN will not request biometric verification */
     ///     var verifyTemporaryPinCommand = new VerifyTemporaryPin(temporaryPin);
     ///     var verifyResponse = connection.SendCommand(verifyTemporaryPinCommand);
     ///     if (verifyResponse == ResponseStatus.Success) 
     ///     {
-    ///         // session is authenticated
+    ///         /* session is authenticated */
     ///     }
     ///   }
     /// </code>

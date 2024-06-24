@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Piv.Commands
     ///   VerifyUvResponse verifyUvResponse = connection.SendCommand(verifyUvCommand);<br/>
     ///   if (verifyUvResponse.Status == ResponseStatus.AuthenticationRequired)
     ///   {
-    ///     int retryCount = verifyUvResponse.UVAttemptsRemaining;
+    ///     int retryCount = verifyUvResponse.AttemptsRemaining;
     ///     /* report the retry count */
     ///   }
     ///   else if (verifyUvResponse.Status != ResponseStatus.Success)

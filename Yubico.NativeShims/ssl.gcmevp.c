@@ -6,7 +6,7 @@ typedef void* Native_EVP_CIPHER_CTX;
 
 Native_EVP_CIPHER_CTX
 NATIVEAPI
-Native_EVP_CIPHER_CTX_new()
+Native_EVP_CIPHER_CTX_new(void)
 {
     return EVP_CIPHER_CTX_new();
 }

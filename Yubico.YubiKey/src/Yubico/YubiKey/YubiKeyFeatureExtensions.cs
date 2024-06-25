@@ -97,6 +97,9 @@ namespace Yubico.YubiKey
                 YubiKeyFeature.FastUsbReclaim =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_6_0,
 
+                YubiKeyFeature.DeviceReset =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_6_0,
+
                 YubiKeyFeature.TemporaryTouchThreshold =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_1,
 

@@ -74,6 +74,11 @@ namespace Yubico.YubiKey
         /// </summary>
         TemporaryTouchThreshold,
 
+        /// <summary>
+        ///     The YubiKey supports proprietary reset.
+        /// </summary>
+        DeviceReset,
+
         // OTP application features
 
         /// <summary>

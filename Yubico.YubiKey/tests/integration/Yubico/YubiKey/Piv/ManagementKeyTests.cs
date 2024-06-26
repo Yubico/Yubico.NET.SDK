@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
 using Xunit;
 using Xunit.Abstractions;
 using Yubico.YubiKey.TestUtilities;
@@ -36,6 +35,7 @@ namespace Yubico.YubiKey.Piv
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             };
+
             _newKey = new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -47,45 +47,69 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void HasFeature_ReturnsCorrect()
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
 
-            bool expectedResult = false;
-            if (testDevice.FirmwareVersion >= new FirmwareVersion(5, 4, 2))
-            {
-                expectedResult = true;
-            }
+            var expectedResult = testDevice.FirmwareVersion >= new FirmwareVersion(major: 5, minor: 4, patch: 2);
 
-            bool hasFeature = testDevice.HasFeature(YubiKeyFeature.PivAesManagementKey);
+            var hasFeature = testDevice.HasFeature(YubiKeyFeature.PivAesManagementKey);
 
             Assert.Equal(hasFeature, expectedResult);
+        }
+
+        [Fact]
+        public void GetManagementAlgorithm_WhenReset_ReturnsCorrectType()
+        {
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
+            var shouldBeTripleDes = testDevice.FirmwareVersion < FirmwareVersion.V5_7_0;
+            var defaultManagementKeyType = shouldBeTripleDes
+                ? PivAlgorithm.TripleDes
+                : PivAlgorithm.Aes192;
+
+            var alternativeManagementKeyType = !shouldBeTripleDes
+                ? PivAlgorithm.TripleDes
+                : PivAlgorithm.Aes192;
+
+            using var session = new PivSession(testDevice);
+            session.KeyCollector = TestKeyCollectorDelegate;
+
+            session.ResetApplication();
+            session.ChangeManagementKey(PivTouchPolicy.None, alternativeManagementKeyType);
+            var firstCheckKeyType = session.ManagementKeyAlgorithm;
+
+            Assert.Equal(alternativeManagementKeyType, firstCheckKeyType);
+
+            session.AuthenticateManagementKey();
+            session.ResetApplication();
+
+            var secondCheckKeyType = session.ManagementKeyAlgorithm;
+            Assert.Equal(defaultManagementKeyType, secondCheckKeyType);
         }
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
         public void RandomKey_Authenticates(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            int count = 10;
-
-            bool isValid = false;
-            for (int index = 0; index < count; index++)
+            var isValid = false;
+            var count = 10;
+            for (var index = 0; index < count; index++)
             {
                 GetRandomMgmtKey();
-                isValid = ChangeMgmtKey(testDevice);
-                if (isValid == false)
+                isValid = ChangeMgmtKey(testDevice, PivAlgorithm.TripleDes);
+                if (!isValid)
                 {
                     break;
                 }
 
-                isValid = VerifyMgmtKey(false, testDevice);
-                if (isValid == false)
+                isValid = VerifyMgmtKey(isMutual: false, testDevice);
+                if (!isValid)
                 {
                     break;
                 }
 
-                isValid = VerifyMgmtKey(true, testDevice);
-                if (isValid == false)
+                isValid = VerifyMgmtKey(isMutual: true, testDevice);
+                if (!isValid)
                 {
                     break;
                 }
@@ -105,36 +129,32 @@ namespace Yubico.YubiKey.Piv
             }
         }
 
-        private bool ChangeMgmtKey(IYubiKeyDevice testDevice)
+        private bool ChangeMgmtKey(IYubiKeyDevice testDevice, PivAlgorithm managementKeyType)
         {
-            using (var pivSession = new PivSession(testDevice))
+            using var pivSession = new PivSession(testDevice);
+            pivSession.KeyCollector = TestKeyCollectorDelegate;
+            var isChanged = pivSession.TryChangeManagementKey(PivTouchPolicy.Default, managementKeyType);
+            if (isChanged)
             {
-                pivSession.KeyCollector = TestKeyCollectorDelegate;
-                bool isChanged = pivSession.TryChangeManagementKey();
-                if (isChanged)
-                {
-                    Array.Copy(_newKey, _currentKey, 24);
-                }
-
-                return isChanged;
+                Array.Copy(_newKey, _currentKey, length: 24);
             }
+
+            return isChanged;
         }
 
         private static void ResetPiv(IYubiKeyDevice testDevice)
         {
-            using (var pivSession = new PivSession(testDevice))
-            {
-                pivSession.ResetApplication();
-            }
+            using var pivSession = new PivSession(testDevice);
+            pivSession.ResetApplication();
         }
 
         private void GetRandomMgmtKey()
         {
-            using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
+            using var random = RandomObjectUtility.GetRandomObject(fixedBytes: null);
             random.GetBytes(_newKey);
         }
 
-        public bool TestKeyCollectorDelegate(KeyEntryData keyEntryData)
+        private bool TestKeyCollectorDelegate(KeyEntryData? keyEntryData)
         {
             if (keyEntryData is null)
             {

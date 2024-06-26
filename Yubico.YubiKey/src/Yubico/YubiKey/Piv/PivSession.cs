@@ -226,7 +226,10 @@ namespace Yubico.YubiKey.Piv
 
         private PivSession(StaticKeys? scp03Keys, IYubiKeyDevice yubiKey)
         {
-            _log.LogInformation("Create a new instance of PivSession" + (scp03Keys is null ? "." : " over SCP03"));
+            _log.LogInformation(
+                "Create a new instance of PivSession" + (scp03Keys is null
+                    ? "."
+                    : " over SCP03"));
 
             if (yubiKey is null)
             {
@@ -238,10 +241,7 @@ namespace Yubico.YubiKey.Piv
                 : yubiKey.ConnectScp03(YubiKeyApplication.Piv, scp03Keys);
 
             ResetAuthenticationStatus();
-
-            ManagementKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey)
-                ? GetManagementKeyAlgorithm()
-                : PivAlgorithm.TripleDes; // Default for keys with firmware version < 5.7
+            UpdateManagementKey(yubiKey);
 
             _yubiKeyDevice = yubiKey;
             _disposed = false;
@@ -307,6 +307,15 @@ namespace Yubico.YubiKey.Piv
             Connection.Dispose();
 
             _disposed = true;
+        }
+
+        // Reset any fields and properties related to authentication or
+        // verification to the initial state: not authenticated, verified, etc.
+        private void ResetAuthenticationStatus()
+        {
+            ManagementKeyAuthenticated = false;
+            ManagementKeyAuthenticationResult = AuthenticateManagementKeyResult.Unauthenticated;
+            PinVerified = false;
         }
 
         /// <summary>
@@ -409,29 +418,29 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ResetApplication()
         {
-            _log.LogInformation("Reset the PIV application.");
+            _log.LogInformation("Resetting the PIV application.");
 
             // To reset, both the PIN and PUK must be blocked.
-            if (BlockPinOrPuk(PivSlot.Pin))
+            TryBlock(PivSlot.Pin);
+            TryBlock(PivSlot.Puk);
+
+            var resetCommand = new ResetPivCommand();
+            ResetPivResponse resetResponse = Connection.SendCommand(resetCommand);
+
+            if (resetResponse.Status != ResponseStatus.Success)
             {
-                if (BlockPinOrPuk(PivSlot.Puk))
-                {
-                    var resetCommand = new ResetPivCommand();
-                    ResetPivResponse resetResponse = Connection.SendCommand(resetCommand);
-
-                    if (resetResponse.Status == ResponseStatus.Success)
-                    {
-                        ResetAuthenticationStatus();
-
-                        return;
-                    }
-                }
+                throw new SecurityException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.ApplicationResetFailure));
             }
 
-            throw new SecurityException(
-                string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.ApplicationResetFailure));
+            ResetAuthenticationStatus();
+
+            // As resetting the PIV application resets the management key,
+            // the management key must be updated to account for the case when the previous management key type
+            // was not the default key type.
+            UpdateManagementKey(_yubiKeyDevice);
         }
 
         /// <summary>
@@ -490,6 +499,7 @@ namespace Yubico.YubiKey.Piv
         ///     <see cref="AuthenticateManagementKey" /> which may in turn throw its' own exceptions.
         /// </remarks>
         /// <param name="slotToClear">The Yubikey slot of the key you want to clear. This must be a valid slot number.</param>
+        /// <seealso cref="PivSlot" />
         /// <exception cref="InvalidOperationException">
         ///     Either the call to the Yubikey was unsuccessful or
         ///     there wasn't any <c>KeyCollector</c> loaded, the key provided was not a valid Triple-DES key, or the YubiKey
@@ -536,27 +546,6 @@ namespace Yubico.YubiKey.Piv
             _log.LogInformation(logMessage, slotToClear);
         }
 
-        private PivAlgorithm GetManagementKeyAlgorithm()
-        {
-            GetMetadataResponse response = Connection.SendCommand(new GetMetadataCommand(PivSlot.Management));
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-
-            PivMetadata metadata = response.GetData();
-            return metadata.Algorithm;
-        }
-
-        // Reset any fields and properties related to authentication or
-        // verification to the initial state: not authenticated, verified, etc.
-        private void ResetAuthenticationStatus()
-        {
-            ManagementKeyAuthenticated = false;
-            ManagementKeyAuthenticationResult = AuthenticateManagementKeyResult.Unauthenticated;
-            PinVerified = false;
-        }
-
         // Block the PIN or PUK
         // To get the PIN or PUK into a blocked state, try to change it. Each
         // time the current PIN/PUK entered is incorrect, the retries remaining
@@ -598,6 +587,36 @@ namespace Yubico.YubiKey.Piv
             while (retriesRemaining > 0);
 
             return true;
+        }
+
+        private void TryBlock(byte slot)
+        {
+            if (BlockPinOrPuk(slot))
+            {
+                return;
+            }
+
+            throw new SecurityException(
+                string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.ApplicationResetFailure));
+        }
+
+        private void UpdateManagementKey(IYubiKeyDevice yubiKey) =>
+            ManagementKeyAlgorithm = yubiKey.HasFeature(YubiKeyFeature.PivAesManagementKey)
+                ? GetManagementKeyAlgorithm()
+                : PivAlgorithm.TripleDes; // Default for keys with firmware version < 5.7
+
+        private PivAlgorithm GetManagementKeyAlgorithm()
+        {
+            GetMetadataResponse response = Connection.SendCommand(new GetMetadataCommand(PivSlot.Management));
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+
+            PivMetadata metadata = response.GetData();
+            return metadata.Algorithm;
         }
     }
 }

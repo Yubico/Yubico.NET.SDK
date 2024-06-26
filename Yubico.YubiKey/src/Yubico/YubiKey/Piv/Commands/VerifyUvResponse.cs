@@ -56,14 +56,14 @@ namespace Yubico.YubiKey.Piv.Commands
     /// </para>
     /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
-    ///   var verifyUvCommand = new VerifyUvCommand(false, false);
-    ///   VerifyUvResponse verifyUvResponse = connection.SendCommand(verifyUvCommand);<br/>
-    ///   if (verifyUvResponse.Status == ResponseStatus.AuthenticationRequired)
+    ///   var command = new VerifyUvCommand(false, false);
+    ///   VerifyUvResponse response = connection.SendCommand(command);<br/>
+    ///   if (response.Status == ResponseStatus.AuthenticationRequired)
     ///   {
-    ///     int retryCount = verifyUvResponse.AttemptsRemaining;
+    ///     int retryCount = response.AttemptsRemaining;
     ///     /* report the retry count */
     ///   }
-    ///   else if (verifyUvResponse.Status != ResponseStatus.Success)
+    ///   else if (response.Status != ResponseStatus.Success)
     ///   {
     ///     /* handle error */
     ///   }

@@ -52,9 +52,9 @@ namespace Yubico.YubiKey.Piv.Commands
     ///    */
     ///   byte[] temporaryPin = ...;<br/>
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
-    ///   var verifyTemporaryPinCommand = new VerifyTemporaryPinCommand(temporaryPin);
-    ///   VerifyTemporaryPinResponse verifyResponse = connection.SendCommand(verifyTemporaryPinCommand);<br/>
-    ///   if (verifyResponse.Status == ResponseStatus.Success)
+    ///   var command = new VerifyTemporaryPinCommand(temporaryPin);
+    ///   VerifyTemporaryPinResponse response = connection.SendCommand(command);<br/>
+    ///   if (response.Status == ResponseStatus.Success)
     ///   {
     ///     /* session is authenticated */
     ///   }

@@ -36,11 +36,11 @@ namespace Yubico.YubiKey.Piv.Commands
     /// </para>
     /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
-    ///   GetBioMetadataCommand bioMetadataCommand = new GetBioMetadataCommand();
-    ///   GetBioMetadataResponse bioMetadataResponse = connection.SendCommand(bioMetadataCommand);<br/>
-    ///   if (bioMetadataResponse.Status == ResponseStatus.Success)
+    ///   GetBioMetadataCommand command = new GetBioMetadataCommand();
+    ///   GetBioMetadataResponse response = connection.SendCommand(command);<br/>
+    ///   if (response.Status == ResponseStatus.Success)
     ///   {
-    ///       PivBioMetadata bioMetadata = bioMetadataResponse.GetData();
+    ///       PivBioMetadata data = response.GetData();
     ///   }
     /// </code>
     /// </remarks>
@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Piv.Commands
     {
         private const byte PivMetadataInstruction = 0xF7;
 
-        private const byte SlotOccAuth = 0x96;
+        private const byte OnCardComparisonAuthenticationSlot = 0x96;
 
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs. For this
@@ -72,7 +72,7 @@ namespace Yubico.YubiKey.Piv.Commands
             return new CommandApdu
             {
                 Ins = PivMetadataInstruction,
-                P2 = SlotOccAuth,
+                P2 = OnCardComparisonAuthenticationSlot,
             };
         }
 

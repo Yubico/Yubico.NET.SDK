@@ -33,11 +33,10 @@ namespace Yubico.YubiKey.Piv.Commands
     public sealed class VerifyUvCommand : IYubiKeyCommand<VerifyUvResponse>
     {
         private const byte PivVerifyInstruction = 0x20;
-        private const byte SlotOccAuth = 0x96;
+        private const byte OnCardComparisonAuthenticationSlot = 0x96;
 
-        private readonly bool _requestTemporaryPin;
-        private readonly bool _checkOnly;
-
+        public bool RequestTemporaryPin { get; set; }
+        public bool CheckOnly { get; set; }
 
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs. For this
@@ -48,17 +47,27 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </value>
         public YubiKeyApplication Application => YubiKeyApplication.Piv;
 
-        // The default constructor explicitly defined. We don't want it to be
-        // used.
-        // Note that there is no object-initializer constructor. the only
-        // constructor input is a secret byte arrays.
-        private VerifyUvCommand()
+        /// <summary>
+        /// Initializes a new instance of the <c>VerifyUvCommand</c> class.
+        /// </summary>
+        /// <remarks>
+        /// This constructor is provided for those developers who want to use the
+        /// object initializer pattern. For example:
+        /// <code language="csharp">
+        ///   var command = new VerifyUvCommand()
+        ///   {
+        ///       CheckOnly = true;
+        ///   };
+        /// </code>
+        /// <para>
+        /// </para>
+        /// </remarks>
+        public VerifyUvCommand()
         {
-            throw new NotImplementedException();
         }
 
         /// <summary>
-        /// Initializes a new instance of the VerifyUvCommand class.
+        /// Initializes a new instance of the <c>VerifyUvCommand</c> class.
         /// </summary>
         /// <param name="requestTemporaryPin">
         /// After successful match generate a temporary PIN. Certain conditions may 
@@ -70,9 +79,54 @@ namespace Yubico.YubiKey.Piv.Commands
         /// Check verification state of biometrics, don't perform UV.
         /// </param>        
         /// <exception cref="ArgumentException">
-        /// The PIN is an invalid length.
+        /// The PIN is an invalid length or requestTemporaryPin and checkOnly are both
+        /// set to true.
         /// </exception>
         public VerifyUvCommand(bool requestTemporaryPin, bool checkOnly)
+        {
+            ValidateParameters(requestTemporaryPin, checkOnly);
+
+            RequestTemporaryPin = requestTemporaryPin;
+            CheckOnly = checkOnly;
+        }
+
+        /// <inheritdoc />
+        public CommandApdu CreateCommandApdu()
+        {
+            ValidateParameters(RequestTemporaryPin, CheckOnly);
+
+            if (CheckOnly)
+            {
+                return new CommandApdu
+                {
+                    Ins = PivVerifyInstruction,
+                    P2 = OnCardComparisonAuthenticationSlot,
+                };
+            }
+
+            var tlvWriter = new TlvWriter();
+            if (RequestTemporaryPin)
+            {
+                const byte GetTemporaryPinTag = 0x02;
+                tlvWriter.WriteValue(GetTemporaryPinTag, null);
+            }
+            else
+            {
+                const byte VerifyUvTag = 0x03;
+                tlvWriter.WriteValue(VerifyUvTag, null);
+            }
+
+            ReadOnlyMemory<byte> data = tlvWriter.Encode();
+            return new CommandApdu
+            {
+                Ins = PivVerifyInstruction,
+                P2 = OnCardComparisonAuthenticationSlot,
+                Data = data
+            };
+        }
+
+        /// <inheritdoc />
+        public void ValidateParameters(bool requestTemporaryPin, bool checkOnly)
         {
             if (requestTemporaryPin && checkOnly)
             {
@@ -82,40 +136,10 @@ namespace Yubico.YubiKey.Piv.Commands
                         ExceptionMessages.InvalidVerifyUvArguments
                         ));
             }
-            _requestTemporaryPin = requestTemporaryPin;
-            _checkOnly = checkOnly;
-        }
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu()
-        {
-            ReadOnlyMemory<byte> data = ReadOnlyMemory<byte>.Empty;
-            if (!_checkOnly)
-            {
-                const byte GetTemporaryPinTag = 0x02;
-                const byte VerifyUvTag = 0x03;
-
-                var tlvWriter = new TlvWriter();
-                if (_requestTemporaryPin)
-                {
-                    tlvWriter.WriteValue(GetTemporaryPinTag, null);
-                }
-                else
-                {
-                    tlvWriter.WriteValue(VerifyUvTag, null);
-                }
-                data = tlvWriter.Encode();
-            }
-            return new CommandApdu
-            {
-                Ins = PivVerifyInstruction,
-                P2 = SlotOccAuth,
-                Data = data,
-            };
         }
 
         /// <inheritdoc />
         public VerifyUvResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new VerifyUvResponse(responseApdu, _requestTemporaryPin);
+          new VerifyUvResponse(responseApdu, RequestTemporaryPin);
     }
 }

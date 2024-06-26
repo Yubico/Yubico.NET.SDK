@@ -16,6 +16,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.Piv.Commands;
 
 namespace Yubico.YubiKey.Piv
 {
@@ -40,7 +41,7 @@ namespace Yubico.YubiKey.Piv
 
         /// <summary>
         /// The constructor that takes in the bio metadata encoding returned by the
-        /// YubiKey in response to the get bio metadata command.
+        /// YubiKey in response to the <see cref="GetBioMetadataCommand"/>.
         /// </summary>
         /// <param name="responseData">
         /// The data portion of the response APDU, this is the encoded bio metadata.
@@ -94,9 +95,9 @@ namespace Yubico.YubiKey.Piv
                             ExceptionMessages.InvalidApduResponseData));
             }
 
-            IsConfigured = (bool)isConfigured;
-            AttemptsRemaining = (int)attemptsRemaining;
-            HasTemporaryPin = (bool)hasTemporaryPin;
+            IsConfigured = isConfigured.Value;
+            AttemptsRemaining = attemptsRemaining.Value;
+            HasTemporaryPin = hasTemporaryPin.Value;
         }
 
 

@@ -36,11 +36,11 @@ namespace Yubico.YubiKey.Piv.Commands
     /// </para>
     /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
-    ///   GetBioMetadataCommand bioMetadataCommand = new GetBioMetadataCommand();
-    ///   GetBioMetadataResponse bioMetadataResponse = connection.SendCommand(bioMetadataCommand);<br/>
-    ///   if (bioMetadataResponse.Status == ResponseStatus.Success)
+    ///   GetBioMetadataCommand command = new GetBioMetadataCommand();
+    ///   GetBioMetadataResponse response = connection.SendCommand(command);<br/>
+    ///   if (response.Status == ResponseStatus.Success)
     ///   {
-    ///       PivBioMetadata bioMetadata = bioMetadataResponse.GetData();
+    ///       PivBioMetadata data = response.GetData();
     ///   }
     /// </code>
     /// </remarks>

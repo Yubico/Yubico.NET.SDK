@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.Piv.Commands
     public sealed class VerifyTemporaryPinCommand : IYubiKeyCommand<VerifyTemporaryPinResponse>
     {
         private const byte PivVerifyInstruction = 0x20;
-        private const byte SlotOccAuth = 0x96;
+        private const byte OnCardComparisonAuthenticationSlot = 0x96;
         private const int TemporaryPinLength = 16;
 
         private readonly ReadOnlyMemory<byte> _temporaryPin;
@@ -122,11 +122,12 @@ namespace Yubico.YubiKey.Piv.Commands
             const byte VerifyTemporaryPinTag = 0x01;
             var tlvWriter = new TlvWriter();
             tlvWriter.WriteValue(VerifyTemporaryPinTag, _temporaryPin.Span);
+            ReadOnlyMemory<byte> data = tlvWriter.Encode();
             return new CommandApdu
             {
                 Ins = PivVerifyInstruction,
-                P2 = SlotOccAuth,
-                Data = tlvWriter.Encode()
+                P2 = OnCardComparisonAuthenticationSlot,
+                Data = data
             };
         }
 

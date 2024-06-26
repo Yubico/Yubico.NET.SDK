@@ -333,6 +333,12 @@ namespace Yubico.YubiKey {
             }
         }
         
+        internal static string PinComplexityViolation {
+            get {
+                return ResourceManager.GetString("PinComplexityViolation", resourceCulture);
+            }
+        }
+        
         internal static string YubiKeyNotAuthenticatedInPiv {
             get {
                 return ResourceManager.GetString("YubiKeyNotAuthenticatedInPiv", resourceCulture);

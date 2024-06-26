@@ -264,6 +264,9 @@
   <data name="NoMoreRetriesRemaining" xml:space="preserve">
     <value>There are no retries remaining for a PIN, PUK, or other authentication element.</value>
   </data>
+  <data name="PinComplexityViolation" xml:space="preserve">
+    <value>The provided PIN or PUK value violates current complexity conditions.</value>
+  </data>  
   <data name="YubiKeyNotAuthenticatedInPiv" xml:space="preserve">
     <value>PIV management key mutual authentication failed because the YubiKey did not authenticate.</value>
   </data>

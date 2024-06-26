@@ -538,6 +538,15 @@ namespace Yubico.YubiKey {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The request was rejected because the PIN and/or UV was not verified..
+        /// </summary>
+        internal static string Fido2PinComplexityViolation {
+            get {
+                return ResourceManager.GetString("Fido2PinComplexityViolation", resourceCulture);
+            }
+        }
+
+        /// <summary>
         ///   Looks up a localized string similar to The FIDO2 reset command must be sent within 10 seconds of the YubiKey being removed and reinserted..
         /// </summary>
         internal static string Fido2ResetProcess {

@@ -777,6 +777,9 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="SecurityException">
         /// The remaining retries count indicates the PIN is blocked.
         /// </exception>
+        /// <exception cref="ArgumentException">
+        /// The new PIN value is violating PIN complexity.
+        /// </exception> 
         public bool TryChangePin(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin,
                                  out int? retriesRemaining)
         {
@@ -797,6 +800,15 @@ namespace Yubico.YubiKey.Piv
                     UpdateAdminData();
 
                     return true;
+                }
+                else if (changeResponse.Status == ResponseStatus.ConditionsNotSatisfied)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.PinComplexityViolation
+                        )
+                    );
                 }
 
                 retriesRemaining = changeResponse.GetData();
@@ -985,6 +997,16 @@ namespace Yubico.YubiKey.Piv
             _log.LogInformation("Try to change the PIV PUK with supplied PUKs.");
             var changeCommand = new ChangeReferenceDataCommand(PivSlot.Puk, currentPuk, newPuk);
             ChangeReferenceDataResponse changeResponse = Connection.SendCommand(changeCommand);
+
+            if (changeResponse.Status == ResponseStatus.ConditionsNotSatisfied)
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.PinComplexityViolation
+                    )
+                );
+            }
 
             retriesRemaining = changeResponse.GetData();
 

@@ -105,10 +105,10 @@ namespace Yubico.YubiKey.Piv.Commands
             }
 
             var tlvWriter = new TlvWriter();
+            const byte getTemporaryPinTag = 0x02;
             if (RequestTemporaryPin)
             {
-                const byte GetTemporaryPinTag = 0x02;
-                tlvWriter.WriteValue(GetTemporaryPinTag, null);
+                tlvWriter.WriteValue(getTemporaryPinTag, null);
             }
             else
             {
@@ -125,8 +125,7 @@ namespace Yubico.YubiKey.Piv.Commands
             };
         }
 
-        /// <inheritdoc />
-        public void ValidateParameters(bool requestTemporaryPin, bool checkOnly)
+        private static void ValidateParameters(bool requestTemporaryPin, bool checkOnly)
         {
             if (requestTemporaryPin && checkOnly)
             {

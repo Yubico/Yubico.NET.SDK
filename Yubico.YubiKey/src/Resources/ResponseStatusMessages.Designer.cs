@@ -626,6 +626,15 @@ namespace Yubico.YubiKey {
                 return ResourceManager.GetString("PivPinPukBlocked", resourceCulture);
             }
         }
+
+        /// <summary>
+        ///   Looks up a localized string similar to Maximum number of retries for user verification (PIN or PUK) exceeded. 0 retries remaining..
+        /// </summary>
+        internal static string PivBioUvBlocked {
+            get {
+                return ResourceManager.GetString("PivBioUvBlocked", resourceCulture);
+            }
+        }        
         
         /// <summary>
         ///   Looks up a localized string similar to User verification (PIN or PUK) failed. Retries remaining: {0}..
@@ -633,6 +642,15 @@ namespace Yubico.YubiKey {
         internal static string PivPinPukFailedWithRetries {
             get {
                 return ResourceManager.GetString("PivPinPukFailedWithRetries", resourceCulture);
+            }
+        }
+
+        /// <summary>
+        ///   Looks up a localized string similar to User verification (PIN or PUK) failed. Retries remaining: {0}..
+        /// </summary>
+        internal static string PivBioUVFailedWithRetries {
+            get {
+                return ResourceManager.GetString("PivBioUVFailedWithRetries", resourceCulture);
             }
         }
         

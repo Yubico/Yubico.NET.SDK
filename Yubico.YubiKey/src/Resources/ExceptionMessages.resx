@@ -279,6 +279,9 @@
   <data name="InvalidSlotsSameSourceAndDestinationSlotsCannotBeTheSame" xml:space="preserve">
     <value>Source and destination slots cannot be the same.</value>
   </data>
+  <data name="InvalidVerifyUvArguments" xml:space="preserve">
+    <value>Cannot request temporary pin when doing check-only verification.</value>
+  </data>
   <data name="InvalidAlgorithm" xml:space="preserve">
     <value>The given algorithm is not valid for the given command.</value>
   </data>
@@ -288,6 +291,9 @@
   <data name="InvalidPinPukLength" xml:space="preserve">
     <value>A PIN or PUK must be 6, 7, or 8 characters long.</value>
   </data>
+  <data name="InvalidTemporaryPinLength" xml:space="preserve">
+    <value>The temporary PIN length is invalid.</value>
+  </data>  
   <data name="InvalidPivPutDataLength" xml:space="preserve">
     <value>The length of input to a Put Data operation, {0}, was invalid, the maximum is {1}.</value>
   </data>
@@ -305,6 +311,9 @@
   </data>
   <data name="NotSupportedByYubiKeyVersion" xml:space="preserve">
     <value>This operation is not supported by this version of YubiKey.</value>
+  </data>
+  <data name="BioMetadataNotSupported" xml:space="preserve">
+    <value>This YubiKey does not support bio metadata.</value>
   </data>
   <data name="InvalidDataEncoding" xml:space="preserve">
     <value>The data provided does not match the expected encoding.</value>

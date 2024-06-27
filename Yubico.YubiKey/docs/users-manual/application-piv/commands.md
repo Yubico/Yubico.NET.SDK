@@ -31,7 +31,9 @@ is the one calling the YubiKey. The keys, data, and firmware running on the Yubi
 * [Get the serial number](#get-the-serial-number)
 * [Get the firmware version number](#get-the-firmware-version-number)
 * [Get metadata](#get-metadata)
+* [Get Bio metadata](#get-bio-metadata)
 * [Verify the PIN](#verify)
+* [Biometric verification](#biometric-verification)
 * [Authenticate: management key](#authenticate-management-key)
 * [Set PIN retries](#set-pin-retries)
 * [Change reference data](#change-reference-data) (change the PIN or PUK)
@@ -172,6 +174,34 @@ elements are returned for each slot.
 
 [Technical APDU Details](apdu/metadata.md)
 ___
+## Get Bio metadata
+
+This gets YubiKey's biometric metadata. 
+
+### Available
+
+YubiKey Bio Multi-protocol 5.6 and later.
+
+### SDK Classes
+
+[GetBioMetadataCommand](xref:Yubico.YubiKey.Piv.Commands.GetBioMetadataCommand)
+
+[GetBioMetadataResponse](xref:Yubico.YubiKey.Piv.Commands.GetBioMetadataResponse)
+
+### Output
+
+#### Table 1: List of Metadata Elements
+|   Name            |                  Meaning                                 |                              Data                                 |
+| :---------------: | :------------------------------------------------------: | :---------------------------------------------------------------: |
+|  IsConfigured     |  Is this device configured for biometric verification    |  bool                                                             |
+|  RetriesRemaining |  Number of remaining retries for biometric verification  |  integer, zero value means the biometric verification is blocked  |
+|  HasTemporaryPin  |  Whether a temporary PIN is generated                    |  bool                                                             |
+
+
+### APDU
+
+[Technical APDU Details](apdu/bio-metadata.md)
+___
 ## Verify
 
 Verify a PIN.
@@ -259,6 +289,58 @@ value and `GetData` will throw an exception.
 
 [Technical APDU Details](apdu/verify.md)
 ___
+## Biometric verification
+
+With biometric verification, the users can authenticate the PIV session with a successful match of a fingerprint. To be able to execute the biometric verification, the YubiKey has to have biometrics configured and must not be blocked for using biometrics. Clients can verify the conditions by reading the properties of biometric metadata (see [Get Bio metadata](#get-bio-metadata)).
+
+The YubiKey keeps track of failed biometric matches and will block the biometric authentication if there are more than three such failures. In that case the client should use the PIN verification as soon as possible. The number of remaining biometric matches is returned in the command response's `AttemptsRemaining` property. The value is present only after a failed match.
+
+Clients can also request to generate a temporary PIN which can be used with the `VerifyTemporaryPinCommand` for authentication without the need of a biometric match. The temporary PIN is stored in YubiKey's RAM and is invalidated after the PIV session is closed or an attempt of using a wrong temporary PIN. For `PIN_OR_MATCH_ALWAYS` slot policy, the temporary PIN can be used only once.
+
+### Available
+
+YubiKey Bio Multi-Protocol keys.
+
+### SDK Classes
+
+[VerifyUvCommand](xref:Yubico.YubiKey.Piv.Commands.VerifyUvCommand)
+
+[VerifyUvResponse](xref:Yubico.YubiKey.Piv.Commands.VerifyUvResponse)
+
+[VerifyTemporaryPinCommand](xref:Yubico.YubiKey.Piv.Commands.VerifyTemporaryPinCommand)
+
+[VerifyTemporaryPinResponse](xref:Yubico.YubiKey.Piv.Commands.VerifyTemporaryPinResponse)
+
+### Input
+
+#### VerifyUvCommand
+
+Two boolean values:
+- request temporary PIN\
+if true, the YubiKey will wait for the user to perform a biometric verification (match an enrolled fingerprint) and, on success, generate a temporary PIN.
+- check only\
+when true, the YubiKey verifies internally that the biometric state is valid. No biometric verification is performed on the YubiKey. 
+
+A client application would typically call the command with `false`, `false` parameters - this will make the YubiKey request the biometric verification from the users.
+
+#### VerifyTemporaryPinCommand
+The temporary PIN is the only parameter.
+
+### Output
+
+#### VerifyUvResponse
+If temporary PIN was requested and the status is Success, the returned value is the temporary PIN.
+In case of failure (for example the fingerprint did not match), the clients should read the `AttemptsRemaining` property which contains number of remaining biometric attempts.
+
+#### VerifyTemporaryPinResponse
+No output. The Status will be Success if the temporary PIN was verified.
+
+### APDU
+
+[Technical APDU Details for VerifyUvCommand](apdu/verify-uv.md)
+
+[Technical APDU Details for VerifyTemporaryPinCommand](apdu/verify-temporary-pin.md)
+___
 ## Authenticate: management key
 
 The Authenticate command can be used to perform several cryptographic operations:
@@ -284,9 +366,9 @@ app knows it is communicating with the appropriate YubiKey. Maybe the app wants 
 it will not call on an attacker's YubiKey to perform a sensitive operation. This section
 will refer to this action as <b>YubiKey Authentication</b>.
 
-Hence, the authenticate managment key command can actually perform two different
+Hence, the authenticate management key command can actually perform two different
 operations: "single authentication" (Client Authentication only), or "mutual authentication"
-(Client Authentication and YubiKey Authenticaiton). How you call the API
+(Client Authentication and YubiKey Authentication). How you call the API
 determines which operation will be performed.
 
 The authentication is done using "challenge-response". Note that the word "response" is

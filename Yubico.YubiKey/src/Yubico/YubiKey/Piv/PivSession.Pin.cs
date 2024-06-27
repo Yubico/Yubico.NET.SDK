@@ -1302,10 +1302,6 @@ namespace Yubico.YubiKey.Piv
 
                         return true;
                     }
-                    else if (status == ResponseStatus.ConditionsNotSatisfied)
-                    {
-                        _log.LogInformation("PIN complexity violated.");
-                    }
 
                     if ((keyEntryData.RetriesRemaining ?? 1) == 0)
                     {
@@ -1315,7 +1311,14 @@ namespace Yubico.YubiKey.Piv
                                 ExceptionMessages.NoMoreRetriesRemaining));
                     }
 
-                    keyEntryData.IsRetry = true;
+                    if (status == ResponseStatus.ConditionsNotSatisfied)
+                    {
+                        keyEntryData.IsViolatingPinComplexity = true;
+                    }
+                    else
+                    {
+                        keyEntryData.IsRetry = true;
+                    }
                 }
             }
             finally

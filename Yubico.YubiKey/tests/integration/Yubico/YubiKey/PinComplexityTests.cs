@@ -16,6 +16,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Security;
 using System.Text;
 using System.Threading;
 using Microsoft.Extensions.Logging;
@@ -52,22 +53,28 @@ namespace Yubico.YubiKey
             using var pivSession = new PivSession(testDevice);
             pivSession.ResetApplication();
 
-            Assert.True(pivSession.TryChangePin(currentPin: defaultPin, newPin: complexPin, out _));
-            _ = Assert.Throws<ArgumentException>(() => pivSession.TryChangePin(currentPin: complexPin, newPin: invalidPin, out _));
+            Assert.True(pivSession.TryChangePin(defaultPin, complexPin, out _));
+            int? retriesRemaining = 3;
+            var e = Assert.Throws<SecurityException>(() => pivSession.TryChangePin(complexPin, invalidPin, out retriesRemaining));
+            Assert.Equal(ExceptionMessages.PinComplexityViolation, e.Message);
+            Assert.Null(retriesRemaining);
         }
 
         [SkippableFact]
         public void SettingInvalidPivPuk_Throws()
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5Fips);
-
             Skip.IfNot(testDevice.IsPinComplexityEnabled);
 
             using var pivSession = new PivSession(testDevice);
             pivSession.ResetApplication();
 
-            Assert.True(pivSession.TryChangePuk(currentPuk: defaultPuk, newPuk: complexPuk, out _));
-            _ = Assert.Throws<ArgumentException>(() => pivSession.TryChangePuk(currentPuk: complexPuk, newPuk: invalidPuk, out _));
+            Assert.True(pivSession.TryChangePuk(defaultPuk, complexPuk, out _));
+            int? retriesRemaining = 3;
+
+            var e = Assert.Throws<SecurityException>(() => pivSession.TryChangePuk(complexPuk, invalidPuk, out retriesRemaining));
+            Assert.Equal(ExceptionMessages.PinComplexityViolation, e.Message);
+            Assert.Null(retriesRemaining);
         }
 
         [SkippableFact]
@@ -79,11 +86,13 @@ namespace Yubico.YubiKey
             using var fido2Session = new Fido2Session(testDevice);
 
             // set violating PIN
-            _ = Assert.Throws<ArgumentException>(() => fido2Session.TrySetPin(invalidPin));
+            var fido2Exception = Assert.Throws<Fido2Exception>(() => fido2Session.TrySetPin(invalidPin));
+            Assert.Equal(CtapStatus.PinPolicyViolation, fido2Exception.Status);
             // set complex PIN to be able to try to change it later
             Assert.True(fido2Session.TrySetPin(complexPin));
             // change to violating PIN
-            _ = Assert.Throws<ArgumentException>(() => fido2Session.TryChangePin(complexPin, invalidPin));
+            fido2Exception = Assert.Throws<Fido2Exception>(() => fido2Session.TryChangePin(complexPin, invalidPin));
+            Assert.Equal(CtapStatus.PinPolicyViolation, fido2Exception.Status);
         }
     }
 }

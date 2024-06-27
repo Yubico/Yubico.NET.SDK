@@ -565,9 +565,6 @@ namespace Yubico.YubiKey.Fido2
         /// <c>True</c> on success, <c>False</c> if the YubiKey has a PIN already set, and an exception for all
         /// other kinds of failures.
         /// </returns>
-        /// <exception cref="ArgumentException">
-        /// The provided PIN violates PIN complexity.
-        /// </exception>
         public bool TrySetPin(ReadOnlyMemory<byte> newPin)
         {
             _log.LogInformation("Try to set PIN (use supplied PIN).");
@@ -592,18 +589,7 @@ namespace Yubico.YubiKey.Fido2
                 return false; // PIN is already set.
             }
 
-            if (GetCtapError(result) == CtapStatus.PinPolicyViolation)
-            {
-                // PIN complexity violation
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.PinComplexityViolation
-                    )
-                );
-            }
-
-            throw new Fido2Exception(result.StatusMessage);
+            throw new Fido2Exception(GetCtapError(result), result.StatusMessage);
         }
 
         /// <summary>
@@ -734,9 +720,6 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="Fido2Exception">
         /// The YubiKey returned an error indicating that the change PIN request could not be completed.
         /// </exception>
-        /// <exception cref="ArgumentException">
-        /// The provided new PIN violates PIN complexity.
-        /// </exception>
         public bool TryChangePin(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin)
         {
             _log.LogInformation("Try to change PIN (use supplied PIN values).");
@@ -759,18 +742,7 @@ namespace Yubico.YubiKey.Fido2
                 return false; // PIN is invalid
             }
 
-            if (GetCtapError(result) == CtapStatus.PinPolicyViolation)
-            {
-                // PIN complexity violation
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.PinComplexityViolation
-                    )
-                );
-            }
-
-            throw new Fido2Exception(result.StatusMessage);
+            throw new Fido2Exception(GetCtapError(result), result.StatusMessage);
         }
 
         /// <summary>

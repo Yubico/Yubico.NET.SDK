@@ -777,9 +777,6 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="SecurityException">
         /// The remaining retries count indicates the PIN is blocked.
         /// </exception>
-        /// <exception cref="ArgumentException">
-        /// The new PIN value is violating PIN complexity.
-        /// </exception> 
         public bool TryChangePin(ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin,
                                  out int? retriesRemaining)
         {
@@ -803,12 +800,13 @@ namespace Yubico.YubiKey.Piv
                 }
                 else if (changeResponse.Status == ResponseStatus.ConditionsNotSatisfied)
                 {
-                    throw new ArgumentException(
+                    throw new SecurityException(
                         string.Format(
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.PinComplexityViolation
                         )
                     );
+
                 }
 
                 retriesRemaining = changeResponse.GetData();
@@ -1000,7 +998,8 @@ namespace Yubico.YubiKey.Piv
 
             if (changeResponse.Status == ResponseStatus.ConditionsNotSatisfied)
             {
-                throw new ArgumentException(
+                retriesRemaining = null;
+                throw new SecurityException(
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.PinComplexityViolation
@@ -1232,6 +1231,16 @@ namespace Yubico.YubiKey.Piv
             var resetCommand = new ResetRetryCommand(puk, newPin);
             ResetRetryResponse resetResponse = Connection.SendCommand(resetCommand);
 
+            if (resetResponse.Status == ResponseStatus.ConditionsNotSatisfied)
+            {
+                throw new SecurityException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.PinComplexityViolation
+                    )
+                );
+            }
+
             retriesRemaining = resetResponse.GetData();
 
             if ((retriesRemaining ?? 1) == 0)
@@ -1291,6 +1300,10 @@ namespace Yubico.YubiKey.Piv
                         }
 
                         return true;
+                    }
+                    else if (status == ResponseStatus.ConditionsNotSatisfied)
+                    {
+                        _log.LogInformation("PIN complexity violated.");
                     }
 
                     if ((keyEntryData.RetriesRemaining ?? 1) == 0)

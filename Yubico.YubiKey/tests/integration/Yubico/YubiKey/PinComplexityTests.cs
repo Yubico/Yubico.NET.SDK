@@ -91,7 +91,7 @@ namespace Yubico.YubiKey
             var e = Assert.Throws<SecurityException>(() => pivSession.TryResetPin(defaultPuk, invalidPin, out retriesRemaining));
             Assert.Equal(ExceptionMessages.PinComplexityViolation, e.Message);
             Assert.Null(retriesRemaining);
-        }        
+        }
 
         [SkippableFact]
         public void SetFido2PinToInvalidValue_ThrowsFido2Exception()

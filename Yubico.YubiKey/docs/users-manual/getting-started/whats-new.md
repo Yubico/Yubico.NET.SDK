@@ -28,6 +28,7 @@ Features:
   - NFC connectivity can now be temporarily disabled with [SetIsNfcRestricted()](xref:Yubico.YubiKey.YubiKeyDevice.SetIsNfcRestricted%28System.Boolean%29) ([#91](https://github.com/Yubico/Yubico.NET.SDK/pull/91)).
   - Additional property pages on the YubiKey are now read into [YubiKeyDeviceInfo](xref:Yubico.YubiKey.YubiKeyDeviceInfo) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
   - PIN complexity status can be checked with [IsPinComplexityEnabled](xref:Yubico.YubiKey.YubiKeyDevice.IsPinComplexityEnabled) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
+  - PIN complexity specific error messages ([#112](https://github.com/Yubico/Yubico.NET.SDK/pull/112)).
   - The set of YubiKey applications that are capable of being put into FIPS mode can be retrieved with [FipsCapable](xref:Yubico.YubiKey.YubiKeyDevice.FipsCapable). The set of YubiKey applications that are in FIPS mode can be retrieved with [FipsApproved](xref:Yubico.YubiKey.YubiKeyDevice.FipsApproved) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
   - The part number for a key’s Secure Element processor, if available, can be retrieved with [PartNumber](xref:Yubico.YubiKey.YubiKeyDevice.PartNumber) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
   - The set of YubiKey applications that are blocked from being reset can be retrieved with [ResetBlocked](xref:Yubico.YubiKey.YubiKeyDevice.ResetBlocked) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
@@ -35,7 +36,7 @@ Features:
   - PIV: Keys can be moved between the different slots on the YubiKey. Any key except the **attestation key** can be moved from one slot to another ([#103](https://github.com/Yubico/Yubico.NET.SDK/pull/103)).
 - Support for YubiKey Bio/Bio Multi-Protocol Edition keys:
   - Get bio metadata ([#108](https://github.com/Yubico/Yubico.NET.SDK/pull/108))
-  - Get bio pin policy ([#108](https://github.com/Yubico/Yubico.NET.SDK/pull/108))
+  - Added new verification policy enum values (PIN_OR_MATCH_ONCE, PIN_OR_MATCH_ALWAYS) ([#108](https://github.com/Yubico/Yubico.NET.SDK/pull/108))
   - Bio user verification ([#108](https://github.com/Yubico/Yubico.NET.SDK/pull/108))
   - Device Reset ([#110](https://github.com/Yubico/Yubico.NET.SDK/pull/110))
 - The USB reclaim speed, which controls the time it takes to switch from one YubiKey application to another, has been reduced for compatible YubiKeys. To use the previous 3-second reclaim timeout for all keys, see [UseOldReclaimTimeoutBehavior](xref:Yubico.YubiKey.YubiKeyCompatSwitches.UseOldReclaimTimeoutBehavior) ([#93](https://github.com/Yubico/Yubico.NET.SDK/pull/93)).

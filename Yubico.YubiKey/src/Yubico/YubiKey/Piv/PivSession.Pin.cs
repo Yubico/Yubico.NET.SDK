@@ -1233,6 +1233,7 @@ namespace Yubico.YubiKey.Piv
 
             if (resetResponse.Status == ResponseStatus.ConditionsNotSatisfied)
             {
+                retriesRemaining = null;
                 throw new SecurityException(
                     string.Format(
                         CultureInfo.CurrentCulture,

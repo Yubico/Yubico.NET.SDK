@@ -45,7 +45,7 @@ namespace Yubico.YubiKey
         private readonly ReadOnlyMemory<byte> invalidPuk = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("33333333"));
 
         [SkippableFact]
-        public void SettingInvalidPivPin_Throws()
+        public void ChangePivPinToInvalidValue_ThrowsSecurityException()
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5Fips);
             Skip.IfNot(testDevice.IsPinComplexityEnabled);
@@ -61,7 +61,7 @@ namespace Yubico.YubiKey
         }
 
         [SkippableFact]
-        public void SettingInvalidPivPuk_Throws()
+        public void ChangePivPukToInvalidValue_ThrowsSecurityException()
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5Fips);
             Skip.IfNot(testDevice.IsPinComplexityEnabled);
@@ -78,7 +78,23 @@ namespace Yubico.YubiKey
         }
 
         [SkippableFact]
-        public void SettingInvalidFido2Pin_Throws()
+        public void ResetPivPinToInvalidValue_ThrowsSecurityException()
+        {
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5Fips);
+            Skip.IfNot(testDevice.IsPinComplexityEnabled);
+
+            using var pivSession = new PivSession(testDevice);
+            pivSession.ResetApplication();
+
+            Assert.True(pivSession.TryResetPin(defaultPuk, complexPin, out _));
+            int? retriesRemaining = 3;
+            var e = Assert.Throws<SecurityException>(() => pivSession.TryResetPin(defaultPuk, invalidPin, out retriesRemaining));
+            Assert.Equal(ExceptionMessages.PinComplexityViolation, e.Message);
+            Assert.Null(retriesRemaining);
+        }        
+
+        [SkippableFact]
+        public void SetFido2PinToInvalidValue_ThrowsFido2Exception()
         {
             IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5Fips);
             Skip.IfNot(testDevice.IsPinComplexityEnabled);

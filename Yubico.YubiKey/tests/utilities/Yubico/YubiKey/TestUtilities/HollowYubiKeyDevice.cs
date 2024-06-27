@@ -262,5 +262,10 @@ namespace Yubico.YubiKey.TestUtilities
         {
             throw new NotImplementedException();
         }
+
+        public void DeviceReset()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -105,10 +105,10 @@ namespace Yubico.YubiKey.Piv.Commands
             }
 
             var tlvWriter = new TlvWriter();
-            const byte getTemporaryPinTag = 0x02;
+            const byte GetTemporaryPinTag = 0x02;
             if (RequestTemporaryPin)
             {
-                tlvWriter.WriteValue(getTemporaryPinTag, null);
+                tlvWriter.WriteValue(GetTemporaryPinTag, null);
             }
             else
             {

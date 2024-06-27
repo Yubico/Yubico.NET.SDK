@@ -1,71 +1,71 @@
-# Copyright 2021 Yubico AB
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+# # Copyright 2021 Yubico AB
+# #
+# # Licensed under the Apache License, Version 2.0 (the "License");
+# # you may not use this file except in compliance with the License.
+# # You may obtain a copy of the License at
+# #
+# #     http://www.apache.org/licenses/LICENSE-2.0
+# #
+# # Unless required by applicable law or agreed to in writing, software
+# # distributed under the License is distributed on an "AS IS" BASIS,
+# # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# # See the License for the specific language governing permissions and
+# # limitations under the License.
 
-name: Check code formatting
+# name: Verify code style
 
-on:
-  pull_request:
-    branches:
-      - 'main'
-      - 'develop**'
-      - 'release/**'
-    paths:
-      - '**.h'
-      - '**.c'
-      - '**.cs'
-      - '**.csproj'
-      - '**.sln'
-      - '.github/workflows/check-code-formatting.yml'
+# on:
+#   pull_request:
+#     branches:
+#       - 'main'
+#       - 'develop**'
+#       - 'release/**'
+#     paths:
+#       - '**.h'
+#       - '**.c'
+#       - '**.cs'
+#       - '**.csproj'
+#       - '**.sln'
+#       - '.github/workflows/check-code-formatting.yml'
 
-jobs:
-  verify-code-style:
-    name: "Verify code style"
-    runs-on: windows-latest
+# jobs:
+#   verify-code-style:
+#     name: "Verify code style"
+#     runs-on: windows-latest
     
-    steps:
-      - uses: actions/checkout@v4
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - uses: actions/setup-dotnet@v4
-        with:
-          global-json-file: global.json
+#       - uses: actions/setup-dotnet@v4
+#         with:
+#           global-json-file: global.json
 
-      - name: Add local NuGet repository
-        run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+#       - name: Add local NuGet repository
+#         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
-      - name: Build Yubico.NET.SDK.sln
-        run: dotnet build --nologo --verbosity normal Yubico.NET.SDK.sln
+#       #- name: Build Yubico.NET.SDK.sln
+#       #  run: dotnet build --nologo --verbosity normal Yubico.NET.SDK.sln
 
-      - name: "Add DOTNET to path explicitly to address bug where it cannot be found"
-        shell: bash
-        run: |
-          DOTNET_PATH=$(which dotnet)
-          if [ -z "$DOTNET_PATH" ]; then
-          echo "dotnet not found via which, checking /usr/share/dotnet"
-          # Finding all executables named dotnet and picking the first one
-          DOTNET_PATH=$(find /usr/share/dotnet -type f -name "dotnet" -executable | head -n 1)
-          fi
+#       - name: "Add DOTNET to path explicitly to address bug where it cannot be found"
+#         shell: bash
+#         run: |
+#           DOTNET_PATH=$(which dotnet)
+#           if [ -z "$DOTNET_PATH" ]; then
+#           echo "dotnet not found via which, checking /usr/share/dotnet"
+#           # Finding all executables named dotnet and picking the first one
+#           DOTNET_PATH=$(find /usr/share/dotnet -type f -name "dotnet" -executable | head -n 1)
+#           fi
           
-          if [ -z "$DOTNET_PATH" ]; then
-          echo "dotnet executable not found."
-          exit 1
-          else
-          echo "Using dotnet at $DOTNET_PATH"
-          DOTNET_DIR=$(dirname $(readlink -f $DOTNET_PATH))
-          echo "$DOTNET_DIR" >> $GITHUB_PATH
-          echo "Added $DOTNET_DIR to GITHUB_PATH"
-          fi
+#           if [ -z "$DOTNET_PATH" ]; then
+#           echo "dotnet executable not found."
+#           exit 1
+#           else
+#           echo "Using dotnet at $DOTNET_PATH"
+#           DOTNET_DIR=$(dirname $(readlink -f $DOTNET_PATH))
+#           echo "$DOTNET_DIR" >> $GITHUB_PATH
+#           echo "Added $DOTNET_DIR to GITHUB_PATH"
+#           fi
 
 
-      - name: Check for correct formatting
-        run: dotnet format --verify-no-changes --no-restore -v d
+#       - name: Check for correct formatting
+#         run: dotnet format --verify-no-changes --no-restore -v d

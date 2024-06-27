@@ -762,8 +762,8 @@ namespace Yubico.YubiKey
             {
                 if (TryConnect(YubiKeyApplication.Management, out connection))
                 {
-                    var resetCommand = new MgmtCmd.DeviceResetCommand();
-                    IYubiKeyResponse response = connection.SendCommand(resetCommand);
+                    var command = new MgmtCmd.DeviceResetCommand();
+                    IYubiKeyResponse response = connection.SendCommand(command);
                     if (response.Status != ResponseStatus.Success)
                     {
                         throw new InvalidOperationException(response.StatusMessage);

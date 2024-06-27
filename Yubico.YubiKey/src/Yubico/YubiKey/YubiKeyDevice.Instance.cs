@@ -741,6 +741,45 @@ namespace Yubico.YubiKey
             }
         }
 
+        /// <inheritdoc />
+        /// <exception cref="NotSupportedException">
+        /// The YubiKey does not support this feature.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        /// The YubiKey encountered an error and could not set the setting.
+        /// </exception>
+        public void DeviceReset()
+        {
+            if (!this.HasFeature(YubiKeyFeature.DeviceReset))
+            {
+                throw new NotSupportedException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.NotSupportedByYubiKeyVersion));
+            }
+            IYubiKeyConnection? connection = null;
+            try
+            {
+                if (TryConnect(YubiKeyApplication.Management, out connection))
+                {
+                    var command = new MgmtCmd.DeviceResetCommand();
+                    IYubiKeyResponse response = connection.SendCommand(command);
+                    if (response.Status != ResponseStatus.Success)
+                    {
+                        throw new InvalidOperationException(response.StatusMessage);
+                    }
+                }
+                else
+                {
+                    throw new NotSupportedException(ExceptionMessages.NoInterfaceAvailable);
+                }
+            }
+            finally
+            {
+                connection?.Dispose();
+            }
+        }
+
         private IYubiKeyResponse SendConfiguration(MgmtCmd.SetDeviceInfoBaseCommand baseCommand)
         {
             IYubiKeyConnection? connection = null;
@@ -1049,7 +1088,7 @@ namespace Yubico.YubiKey
             // Newer YubiKeys are able to switch interfaces much, much faster. Maybe this is being paranoid, but we
             // should still probably wait a few milliseconds for things to stabilize. But definitely not the full
             // three seconds! For older keys, we use a value of 3.01 seconds to give us a little wiggle room as the
-            // YubiKey's measurement for the reclaim timout is likely not as accurate as our system clock.
+            // YubiKey's measurement for the reclaim timeout is likely not as accurate as our system clock.
             TimeSpan reclaimTimeout = CanFastReclaim() ? TimeSpan.FromMilliseconds(100) : TimeSpan.FromSeconds(3.01);
 
             // We're only affected by the reclaim timeout if we're switching USB transports.

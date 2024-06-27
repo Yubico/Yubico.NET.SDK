@@ -693,5 +693,15 @@ namespace Yubico.YubiKey
         /// </remarks>
         /// <param name="value">The touch threshold to apply to the YubiKey. Must be a value greater than `6`.</param>
         void SetTemporaryTouchThreshold(int value);
+
+        /// <summary>
+        /// Perform device wide reset.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Only available on YubiKey Bio Multi-protocol.
+        /// </para>
+        /// </remarks>
+        void DeviceReset();
     }
 }

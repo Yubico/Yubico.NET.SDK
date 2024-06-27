@@ -48,14 +48,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 return false;
             }
 
-            if (keyEntryData.IsViolatingPinComplexity)
-            {
-                if (GetUserInputOnPinComplexityViolation(keyEntryData) == false)
-                {
-                    return false;
-                }
-            }
-
             if (keyEntryData.IsRetry)
             {
                 if (!(keyEntryData.RetriesRemaining is null))
@@ -141,20 +133,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             string title = keyEntryData.RetriesRemaining + " tries remaining, continue?";
-            string[] menuItems = new string[]
-            {
-                "Yes, try again",
-                "No, cancel operation"
-            };
-            int response = _menuObject.RunMenu(title, menuItems);
-            return response == 0;
-        }
-
-        private bool GetUserInputOnPinComplexityViolation(KeyEntryData keyEntryData)
-        {
-            SampleMenu.WriteMessage(MessageType.Special, 0, "The provided value violates PIN complexity.");
-
-            string title = "Try again?";
             string[] menuItems = new string[]
             {
                 "Yes, try again",

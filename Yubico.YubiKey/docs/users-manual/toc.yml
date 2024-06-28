@@ -54,6 +54,8 @@
     href: sdk-programming-guide/commands.md
   - name: Device notifications
     href: sdk-programming-guide/device-notifications.md
+  - name: PIN Complexity policy
+    href: sdk-programming-guide/pin-complexity-policy.md
 
 - name: "Application: OTP"
   homepage: application-otp/otp-overview.md

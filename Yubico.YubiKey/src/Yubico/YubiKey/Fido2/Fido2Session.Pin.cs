@@ -538,10 +538,8 @@ namespace Yubico.YubiKey.Fido2
                             keyEntryData.IsViolatingPinComplexity = true;
                             continue;
                         }
-                        else
-                        {
-                            throw e;
-                        }
+
+                        throw;
                     }
                     throw new SecurityException(ExceptionMessages.PinAlreadySet);
                 }
@@ -701,10 +699,8 @@ namespace Yubico.YubiKey.Fido2
                             keyEntryData.IsViolatingPinComplexity = true;
                             continue;
                         }
-                        else
-                        {
-                            throw e;
-                        }
+
+                        throw;
                     }
 
                     keyEntryData.IsRetry = true;

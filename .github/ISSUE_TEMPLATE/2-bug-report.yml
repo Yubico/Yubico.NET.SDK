@@ -44,7 +44,7 @@ body:
     attributes:
       label: Version
       description: What version of our SDK are you using?
-      placeholder: 1.10.0
+      placeholder: 1.11.0
     validations:
       required: true
   - type: input
@@ -52,7 +52,7 @@ body:
     attributes:
       label: Version
       description: What version of our firmware are you running?
-      placeholder: 5.4.3
+      placeholder: 5.7.0
     validations:
       required: true
   - type: textarea

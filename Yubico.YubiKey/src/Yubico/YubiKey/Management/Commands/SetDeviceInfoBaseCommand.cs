@@ -138,6 +138,7 @@ namespace Yubico.YubiKey.Management.Commands
             DeviceFlags = baseCommand.DeviceFlags;
             ResetAfterConfig = baseCommand.ResetAfterConfig;
             RestrictNfc = baseCommand.RestrictNfc;
+            TemporaryTouchThreshold = baseCommand.TemporaryTouchThreshold;
 
             _lockCode = baseCommand._lockCode;
             _unlockCode = baseCommand._unlockCode;

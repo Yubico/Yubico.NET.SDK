@@ -25,7 +25,7 @@ namespace Yubico.YubiKey
 {
     /// <summary>
     /// Tests device that it will not accept PINs or PUKs which violate PIN complexity
-    /// Before running the tests reset the device
+    /// Before running the tests, reset the FIDO2/PIV application on the device
     /// </summary>
     public class PinComplexityTests
     {
@@ -98,11 +98,70 @@ namespace Yubico.YubiKey
             // set violating PIN
             var fido2Exception = Assert.Throws<Fido2Exception>(() => fido2Session.TrySetPin(_invalidPin));
             Assert.Equal(CtapStatus.PinPolicyViolation, fido2Exception.Status);
+            
             // set complex PIN to be able to try to change it later
             Assert.True(fido2Session.TrySetPin(_complexPin));
+            
             // change to violating PIN
             fido2Exception = Assert.Throws<Fido2Exception>(() => fido2Session.TryChangePin(_complexPin, _invalidPin));
             Assert.Equal(CtapStatus.PinPolicyViolation, fido2Exception.Status);
+        }
+
+        [SkippableFact]
+        public void SetFido2PinToInvalidValue_WithKeyCollector_ThrowsFido2Exception()
+        {
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5Fips);
+            Skip.IfNot(testDevice.IsPinComplexityEnabled);
+
+            using var fido2Session = new Fido2Session(testDevice);
+            var pinComplexityKeyCollector = new PinComplexityKeyCollector
+            {
+                NewPin = _invalidPin
+            };
+
+            fido2Session.KeyCollector = pinComplexityKeyCollector.Fido2SampleKeyCollectorDelegate;
+
+            // set violating PIN
+            var fido2Exception = Assert.Throws<Fido2Exception>(() => fido2Session.TrySetPin());
+            Assert.Equal(CtapStatus.PinPolicyViolation, fido2Exception.Status);
+
+            // set complex PIN to be able to try to change it later
+            pinComplexityKeyCollector.NewPin = _complexPin;
+            Assert.True(fido2Session.TrySetPin());
+
+            // change to violating PIN
+            pinComplexityKeyCollector.NewPin = _invalidPin;
+            fido2Exception = Assert.Throws<Fido2Exception>(() => fido2Session.TryChangePin());
+            Assert.Equal(CtapStatus.PinPolicyViolation, fido2Exception.Status);
+        }
+
+        private class PinComplexityKeyCollector
+        {
+            public ReadOnlyMemory<byte> NewPin { get; set; }
+            private ReadOnlyMemory<byte> _currentPin;
+
+            public bool Fido2SampleKeyCollectorDelegate(KeyEntryData keyEntryData)
+            {
+                if (keyEntryData.IsViolatingPinComplexity)
+                {
+                    throw new Fido2Exception(CtapStatus.PinPolicyViolation, "Test Pin Complexity");
+                }
+
+                switch (keyEntryData.Request)
+                {
+                    case KeyEntryRequest.SetFido2Pin:
+                        keyEntryData.SubmitValue(NewPin.ToArray());
+                        _currentPin = NewPin;
+                        return true;
+                    case KeyEntryRequest.VerifyFido2Pin:
+                        return true;
+                    case KeyEntryRequest.ChangeFido2Pin:
+                        keyEntryData.SubmitValues(_currentPin.ToArray(), NewPin.ToArray());
+                        return true;
+                    default:
+                        return false;
+                }
+            }
         }
     }
 }

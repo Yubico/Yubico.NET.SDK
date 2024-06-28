@@ -48,23 +48,17 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 return false;
             }
 
-            if (keyEntryData.IsViolatingPinComplexity)
+            if (keyEntryData.IsViolatingPinComplexity &&
+                !GetUserInputOnPinComplexityViolation(keyEntryData))
             {
-                if (GetUserInputOnPinComplexityViolation(keyEntryData) == false)
-                {
-                    return false;
-                }
+                return false;
             }
 
-            if (keyEntryData.IsRetry)
+            if (keyEntryData.IsRetry &&
+                keyEntryData.RetriesRemaining.HasValue &&
+                !GetUserInputOnRetries(keyEntryData))
             {
-                if (!(keyEntryData.RetriesRemaining is null))
-                {
-                    if (GetUserInputOnRetries(keyEntryData) == false)
-                    {
-                        return false;
-                    }
-                }
+                return false;
             }
 
             byte[] currentValue;

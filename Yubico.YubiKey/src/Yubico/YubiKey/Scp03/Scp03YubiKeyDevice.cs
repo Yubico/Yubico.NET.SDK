@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Diagnostics.CodeAnalysis;
 using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey
@@ -45,12 +43,12 @@ namespace Yubico.YubiKey
 
             if (!(application is null))
             {
-                return new Scp03CcidConnection(GetSmartCardDevice(), (YubiKeyApplication)application, StaticKeys);
+                return new Scp03Connection(GetSmartCardDevice(), (YubiKeyApplication)application, StaticKeys);
             }
 
             if (!(applicationId is null))
             {
-                return new Scp03CcidConnection(GetSmartCardDevice(), applicationId, StaticKeys);
+                return new Scp03Connection(GetSmartCardDevice(), applicationId, StaticKeys);
             }
 
             return null;

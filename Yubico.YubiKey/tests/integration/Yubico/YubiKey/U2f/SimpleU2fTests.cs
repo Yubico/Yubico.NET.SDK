@@ -68,12 +68,12 @@ namespace Yubico.YubiKey.U2f
             var connection = new FidoConnection(deviceToUse!);
             Assert.NotNull(connection);
 
-            var cmd = new GetDeviceInfoCommand();
-            GetDeviceInfoResponse rsp = connection.SendCommand(cmd);
+            var cmd = new GetPagedDeviceInfoCommand();
+            GetPagedDeviceInfoResponse rsp = connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            YubiKeyDeviceInfo deviceInfo = rsp.GetData();
-            Assert.False(deviceInfo.ConfigurationLocked);
+            var getData = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
+            Assert.False(getData.ConfigurationLocked);
         }
 
         [Fact]
@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.U2f
             HidDevice deviceToUse = GetFidoHid(devices) ?? throw new InvalidOperationException();
             FidoConnection connection = new FidoConnection(deviceToUse) ?? throw new InvalidOperationException();
 
-            CommandApdu cmdApdu = new CommandApdu
+            var cmdApdu = new CommandApdu
             {
                 Ins = 0x77,
             };
@@ -103,7 +103,7 @@ namespace Yubico.YubiKey.U2f
             HidDevice deviceToUse = GetFidoHid(devices) ?? throw new InvalidOperationException();
             FidoConnection connection = new FidoConnection(deviceToUse) ?? throw new InvalidOperationException();
 
-            CommandApdu cmdApdu = new CommandApdu
+            var cmdApdu = new CommandApdu
             {
                 Ins = 0x06,
             };
@@ -176,7 +176,7 @@ namespace Yubico.YubiKey.U2f
             IYubiKeyConnection connection = new FidoConnection(deviceToUse!);
             Assert.NotNull(connection);
 
-            EchoCommand echoCommand = new EchoCommand(sendData);
+            var echoCommand = new EchoCommand(sendData);
 
             EchoResponse echoResponse = connection.SendCommand(echoCommand);
             ReadOnlyMemory<byte> echoData = echoResponse.GetData();

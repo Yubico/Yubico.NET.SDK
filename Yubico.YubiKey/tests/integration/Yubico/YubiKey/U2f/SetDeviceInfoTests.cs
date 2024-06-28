@@ -80,11 +80,11 @@ namespace Yubico.YubiKey.U2f
 
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            var getCmd = new GetDeviceInfoCommand();
-            GetDeviceInfoResponse getRsp = _fidoConnection.SendCommand(getCmd);
+            var getCmd = new GetPagedDeviceInfoCommand();
+            GetPagedDeviceInfoResponse getRsp = _fidoConnection.SendCommand(getCmd);
             Assert.Equal(ResponseStatus.Success, getRsp.Status);
 
-            YubiKeyDeviceInfo getData = getRsp.GetData();
+            var getData = YubiKeyDeviceInfo.CreateFromResponseData(getRsp.GetData());
             Assert.False(getData.IsFipsSeries);
         }
 
@@ -141,11 +141,11 @@ namespace Yubico.YubiKey.U2f
             rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            var getCmd = new GetDeviceInfoCommand();
-            GetDeviceInfoResponse getRsp = _fidoConnection.SendCommand(getCmd);
+            var getCmd = new GetPagedDeviceInfoCommand();
+            GetPagedDeviceInfoResponse getRsp = _fidoConnection.SendCommand(getCmd);
             Assert.Equal(ResponseStatus.Success, getRsp.Status);
 
-            YubiKeyDeviceInfo getData = getRsp.GetData();
+            var getData = YubiKeyDeviceInfo.CreateFromResponseData(getRsp.GetData());
             Assert.Equal(0x24, getData.ChallengeResponseTimeout);
         }
 
@@ -160,11 +160,11 @@ namespace Yubico.YubiKey.U2f
             YubiKeyResponse rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            var getCmd = new GetDeviceInfoCommand();
-            GetDeviceInfoResponse getRsp = _fidoConnection.SendCommand(getCmd);
+            var getCmd = new GetPagedDeviceInfoCommand();
+            GetPagedDeviceInfoResponse getRsp = _fidoConnection.SendCommand(getCmd);
             Assert.Equal(ResponseStatus.Success, getRsp.Status);
 
-            YubiKeyDeviceInfo getData = getRsp.GetData();
+            var getData = YubiKeyDeviceInfo.CreateFromResponseData(getRsp.GetData());
             Assert.False(getData.IsFipsSeries);
         }
     }

@@ -662,5 +662,46 @@ namespace Yubico.YubiKey
             byte challengeResponseTimeout,
             bool touchEjectEnabled,
             int autoEjectTimeout = 0);
+
+
+        /// <summary>
+        /// Sets the <see cref="IYubiKeyDeviceInfo.IsNfcRestricted"/> on the <see cref="YubiKeyDeviceInfo"/>
+        /// </summary>
+        /// <param name="enabled">Set this value to true to enable, otherwise false</param>
+        /// <exception cref="InvalidOperationException">
+        /// The command failed to complete.
+        /// </exception>
+        void SetIsNfcRestricted(bool enabled);
+
+        /// <summary>
+        /// Temporarily set the threshold at which a capacitive touch should be considered active.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The field is using arbitrary units and has a default value of `6`. A higher value increases the sensor
+        /// threshold which has the effect of decreasing the sensitivity of the sensor. Lower values increase the
+        /// sensitivity, but callers cannot reduce the threshold below the default value of `6` which is locked in at
+        /// manufacturing time. The value should not be any higher than `255`.
+        /// </para>
+        /// <para>
+        /// The value set here is only valid until the next time the YubiKey is power cycled. It does not persist.
+        /// </para>
+        /// <para>
+        /// You should typically not ever need to adjust this value. This is primarily used in the context of automatic
+        /// provisioning and testing where the YubiKey is being "touched" by electrically grounding the sensor.
+        /// </para>
+        /// </remarks>
+        /// <param name="value">The touch threshold to apply to the YubiKey. Must be a value greater than `6`.</param>
+        void SetTemporaryTouchThreshold(int value);
+
+        /// <summary>
+        /// Perform device wide reset.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Only available on YubiKey Bio Multi-protocol.
+        /// </para>
+        /// </remarks>
+        void DeviceReset();
     }
 }

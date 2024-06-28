@@ -13,8 +13,8 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Concurrent;
 using System.Globalization;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using Yubico.Core.Buffers;
@@ -35,8 +35,19 @@ namespace Yubico.Core.Devices.Hid
         private readonly MacOSHidDevice _device;
         private readonly IntPtr _loopId;
         private readonly Logger _log = Log.GetLogger();
+
         private readonly byte[] _readBuffer;
-        private readonly GCHandle _readHandle;
+        private GCHandle _readHandle;
+
+        private readonly ConcurrentQueue<byte[]> _reportsQueue;
+        private GCHandle _pinnedReportsQueue;
+
+        // We need this intermediate step. Passing the managed callbacks to marshalling directly actually lowers to a
+        // call to `new NativeMethods.IOHIDCallback((object) null, __methodptr(RemovalCallback))` which will go out of
+        // scope and be garbage collected. So we need to make sure the delegate instance has the same lifetime as the
+        // entire connect (i.e. this class's scope).
+        private readonly IOHIDReportCallback _reportDelegate = ReportCallback;
+        private readonly IOHIDCallback _removalDelegate = RemovalCallback;
 
         /// <summary>
         /// The correct size, in bytes, for the data buffer to be transmitted to the device.
@@ -67,8 +78,14 @@ namespace Yubico.Core.Devices.Hid
             byte[] cstr = Encoding.UTF8.GetBytes($"fido2-loopid-{entryId}");
             _loopId = CFStringCreateWithCString(IntPtr.Zero, cstr, 0);
 
+            // The following buffer must be pinned because the native function must retain a pointer (i.e. the address)
             _readBuffer = new byte[64];
             _readHandle = GCHandle.Alloc(_readBuffer, GCHandleType.Pinned);
+
+            // This object is marshalled using a normal handle since .NET is on the other side and is capable of using
+            // the GCHandle (i.e. we do not need the address)
+            _reportsQueue = new ConcurrentQueue<byte[]>();
+            _pinnedReportsQueue = GCHandle.Alloc(_reportsQueue);
 
             SetupConnection();
 
@@ -118,15 +135,15 @@ namespace Yubico.Core.Devices.Hid
                 // Apple documentation here https://developer.apple.com/documentation/iokit/1588659-iohiddevicegetreport
                 // that this async methods should be used for "input reports", which is the type of report frame that
                 // FIDO uses.
-                IntPtr reportCallback = Marshal.GetFunctionPointerForDelegate<IOHIDReportCallback>(ReportCallback);
+                IntPtr reportCallback = Marshal.GetFunctionPointerForDelegate(_reportDelegate);
                 IOHIDDeviceRegisterInputReportCallback(
                     _deviceHandle,
                     _readBuffer,
                     _readBuffer.Length,
                     reportCallback,
-                    GCHandle.ToIntPtr(_readHandle));
+                    GCHandle.ToIntPtr(_pinnedReportsQueue));
 
-                IntPtr callback = Marshal.GetFunctionPointerForDelegate<IOHIDCallback>(RemovalCallback);
+                IntPtr callback = Marshal.GetFunctionPointerForDelegate(_removalDelegate);
                 IOHIDDeviceRegisterRemovalCallback(_deviceHandle, callback, _deviceHandle);
             }
             finally
@@ -150,49 +167,50 @@ namespace Yubico.Core.Devices.Hid
         /// </exception>
         public byte[] GetReport()
         {
-            try
+            if (_reportsQueue.TryDequeue(out byte[] report))
             {
-                IntPtr runLoop = CFRunLoopGetCurrent();
-
-                IOHIDDeviceScheduleWithRunLoop(_deviceHandle, runLoop, _loopId);
-
-                // The YubiKey has a reclaim timeout of 3 seconds. This can cause the SDK some trouble if we just
-                // switched out of a different USB interface (like Keyboard or CCID). We previously used a fairly
-                // tight timeout of 4 seconds, but that seemed to not always work. 6 seconds (double the timeout)
-                // seems like a more reasonable timeout for the operating system.
-                int runLoopResult = CFRunLoopRunInMode(_loopId, 6, true);
-
-                _device.LogDeviceAccessTime();
-
-                if (runLoopResult != kCFRunLoopRunHandledSource)
-                {
-                    throw new PlatformApiException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.WrongIOKitRunLoopMode,
-                            runLoopResult));
-                }
-
-                IOHIDDeviceUnscheduleFromRunLoop(_deviceHandle, runLoop, _loopId);
-
+                // If there's already a report in the queue (i.e. the callback beat us to calling GetReport) return
+                // that one immediately.
                 _log.SensitiveLogInformation(
                     "GetReport returned buffer: {Report}",
-                    Hex.BytesToHex(_readBuffer));
+                    Hex.BytesToHex(report));
 
-                // Return a copy of the report
-                return _readBuffer.ToArray();
+                return report;
             }
-            finally
+
+            // Otherwise start up the IO runloop and see if we find more reports to pick up.
+            IntPtr runLoop = CFRunLoopGetCurrent();
+
+            IOHIDDeviceScheduleWithRunLoop(_deviceHandle, runLoop, _loopId);
+
+            // The YubiKey has a reclaim timeout of 3 seconds. This can cause the SDK some trouble if we just
+            // switched out of a different USB interface (like Keyboard or CCID). We previously used a fairly
+            // tight timeout of 4 seconds, but that seemed to not always work. 6 seconds (double the timeout)
+            // seems like a more reasonable timeout for the operating system.
+            int runLoopResult = CFRunLoopRunInMode(_loopId, 6, true);
+
+            _device.LogDeviceAccessTime();
+
+            if (runLoopResult != kCFRunLoopRunHandledSource)
             {
-                IOHIDDeviceRegisterInputReportCallback(
-                    _deviceHandle,
-                    _readBuffer,
-                    _readBuffer.Length,
-                    IntPtr.Zero,
-                    IntPtr.Zero);
-
-                IOHIDDeviceRegisterRemovalCallback(_deviceHandle, IntPtr.Zero, IntPtr.Zero);
+                throw new PlatformApiException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.WrongIOKitRunLoopMode,
+                        runLoopResult));
             }
+
+            IOHIDDeviceUnscheduleFromRunLoop(_deviceHandle, runLoop, _loopId);
+
+            // We should be guaranteed to have a report here - otherwise the runloop would have timed out
+            // and the PlatformApiException above would have been thrown.
+            _ = _reportsQueue.TryDequeue(out report);
+
+            _log.SensitiveLogInformation(
+                "GetReport returned buffer: {Report}",
+                Hex.BytesToHex(report));
+
+            return report;
         }
 
         /// <summary>
@@ -232,7 +250,7 @@ namespace Yubico.Core.Devices.Hid
 
             log.LogInformation("MacOSHidIOReportConnection.ReportCallback has been called.");
 
-            if (result != 0 || type != IOKitHidConstants.kIOHidReportTypeOutput || reportId != 0 || reportLength < 0)
+            if (result != 0 || type != IOKitHidConstants.kIOHidReportTypeInput || reportId != 0 || reportLength < 0)
             {
                 // Something went wrong. We don't currently signal, just continue.
                 log.LogWarning(
@@ -242,19 +260,10 @@ namespace Yubico.Core.Devices.Hid
                     type,
                     reportId,
                     reportLength);
-
-                return;
             }
 
-            byte[] buffer = (byte[])GCHandle.FromIntPtr(context).Target;
-            long length = Math.Min(buffer.Length, reportLength);
-            log.LogInformation(
-                "Buffer length determined to be {Length} bytes. (buffer.Length was {BufferLength}, and reportLength was {ReportLength}",
-                length,
-                buffer.Length,
-                reportLength);
-
-            Array.Copy(report, buffer, length);
+            var reportsQueue = (ConcurrentQueue<byte[]>)GCHandle.FromIntPtr(context).Target;
+            reportsQueue.Enqueue(report);
         }
 
         /// <summary>
@@ -324,9 +333,23 @@ namespace Yubico.Core.Devices.Hid
                 // Dispose managed state here
             }
 
+            IOHIDDeviceRegisterInputReportCallback(
+                _deviceHandle,
+                _readBuffer,
+                _readBuffer.Length,
+                IntPtr.Zero,
+                IntPtr.Zero);
+
+            IOHIDDeviceRegisterRemovalCallback(_deviceHandle, IntPtr.Zero, IntPtr.Zero);
+
             if (_readHandle.IsAllocated)
             {
                 _readHandle.Free();
+            }
+
+            if (_pinnedReportsQueue.IsAllocated)
+            {
+                _pinnedReportsQueue.Free();
             }
 
             if (_deviceHandle != IntPtr.Zero)

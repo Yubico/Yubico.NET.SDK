@@ -150,11 +150,15 @@ namespace Yubico.YubiKey.Piv
         /// <exception cref="SecurityException">
         /// The remaining retries count indicates the PIN is blocked.
         /// </exception>
+        /// <exception cref="NotSupportedException">
+        /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
+        /// </exception>
         public byte[] Sign(byte slotNumber, ReadOnlyMemory<byte> dataToSign)
         {
             // This will verify the slot number and dataToSign length. If one or
             // both are incorrect, the call will throw an exception.
             var signCommand = new AuthenticateSignCommand(dataToSign, slotNumber);
+            _yubiKeyDevice.ThrowIfUnsupportedAlgorithm(signCommand.Algorithm);
 
             return PerformPrivateKeyOperation(
                 slotNumber,

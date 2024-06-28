@@ -17,15 +17,14 @@ using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Scp03.Commands
 {
+    [Trait("Category", "Simple")]
     public class DeleteKeyCommandTests
     {
-        [Fact]
-        public void DeleteKey_One_Succeeds()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void DeleteKey_One_Succeeds(StandardTestDevice testDeviceType)
         {
-            byte[] applicationId = {
-                0xA0, 0x00, 0x00, 0x01, 0x51, 0x00, 0x00, 0x00
-            };
-
             byte[] key1 = {
                 0x33, 0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd,
             };
@@ -40,9 +39,9 @@ namespace Yubico.YubiKey.Scp03.Commands
                 KeyVersionNumber = 3
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice(currentKeys);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
 
-            bool isValid = testDevice.TryConnect(applicationId, out IYubiKeyConnection? connection);
             Assert.True(isValid);
             Assert.NotNull(connection);
 
@@ -51,13 +50,11 @@ namespace Yubico.YubiKey.Scp03.Commands
             Assert.Equal(ResponseStatus.Success, rsp.Status);
         }
 
-        [Fact]
-        public void DeleteKey_Two_Succeeds()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void DeleteKey_Two_Succeeds(StandardTestDevice testDeviceType)
         {
-            byte[] applicationId = {
-                0xA0, 0x00, 0x00, 0x01, 0x51, 0x00, 0x00, 0x00
-            };
-
             byte[] key1 = {
                 0x33, 0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd,
             };
@@ -72,9 +69,9 @@ namespace Yubico.YubiKey.Scp03.Commands
                 KeyVersionNumber = 3
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice(currentKeys);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
 
-            bool isValid = testDevice.TryConnect(applicationId, out IYubiKeyConnection? connection);
             Assert.True(isValid);
             Assert.NotNull(connection);
 
@@ -83,13 +80,11 @@ namespace Yubico.YubiKey.Scp03.Commands
             Assert.Equal(ResponseStatus.Success, rsp.Status);
         }
 
-        [Fact]
-        public void DeleteKey_Three_Succeeds()
+        [SkippableTheory(typeof(DeviceNotFoundException))]
+        [InlineData(StandardTestDevice.Fw5Fips)]
+        [InlineData(StandardTestDevice.Fw5)]
+        public void DeleteKey_Three_Succeeds(StandardTestDevice testDeviceType)
         {
-            byte[] applicationId = {
-                0xA0, 0x00, 0x00, 0x01, 0x51, 0x00, 0x00, 0x00
-            };
-
             byte[] key1 = {
                 0x33, 0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd,
             };
@@ -104,9 +99,9 @@ namespace Yubico.YubiKey.Scp03.Commands
                 KeyVersionNumber = 3
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetScp03TestDevice(currentKeys);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
 
-            bool isValid = testDevice.TryConnect(applicationId, out IYubiKeyConnection? connection);
             Assert.True(isValid);
             Assert.NotNull(connection);
 

@@ -258,9 +258,15 @@
   <data name="PivPinPukBlocked" xml:space="preserve">
     <value>Maximum number of retries for user verification (PIN or PUK) exceeded. 0 retries remaining.</value>
   </data>
+  <data name="PivBioUvBlocked" xml:space="preserve">
+    <value>Maximum number of retries for biometric user verification exceeded. 0 retries remaining.</value>
+  </data>
   <data name="PivPinPukFailedWithRetries" xml:space="preserve">
     <value>User verification (PIN or PUK) failed. Retries remaining: {0}.</value>
   </data>
+  <data name="PivBioUVFailedWithRetries" xml:space="preserve">
+    <value>User biometric verification failed. Retries remaining: {0}.</value>
+  </data>  
   <data name="PivSecurityStatusNotSatisfied" xml:space="preserve">
     <value>User verification (PIN, PUK, or Management Key) or presence (touch) requirement not satisfied.</value>
   </data>
@@ -287,6 +293,9 @@
   </data>
   <data name="Fido2PinNotVerified" xml:space="preserve">
     <value>The request was rejected because the PIN and/or UV was not verified.</value>
+  </data>
+  <data name="Fido2PinComplexityViolation" xml:space="preserve">
+    <value>The request was rejected because the PIN violates PIN complexity setting.</value>
   </data>
   <data name="Fido2PinBlocked" xml:space="preserve">
     <value>The request was rejected because the PIN and/or the UV was blocked.</value>

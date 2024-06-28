@@ -6,7 +6,7 @@ typedef void* Native_BIGNUM;
 
 Native_BIGNUM
 NATIVEAPI
-Native_BN_new()
+Native_BN_new(void)
 {
     return BN_new();
 }

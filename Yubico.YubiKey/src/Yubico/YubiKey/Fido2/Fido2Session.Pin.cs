@@ -522,17 +522,27 @@ namespace Yubico.YubiKey.Fido2
 
             try
             {
-                if (!keyCollector(keyEntryData))
+                while (keyCollector(keyEntryData))
                 {
-                    return false; // User cancellation
-                }
+                    try
+                    {
+                        if (TrySetPin(keyEntryData.GetCurrentValue()))
+                        {
+                            return true;
+                        }
+                    }
+                    catch (Fido2Exception e)
+                    {
+                        if (e.Status == CtapStatus.PinPolicyViolation)
+                        {
+                            keyEntryData.IsViolatingPinComplexity = true;
+                            continue;
+                        }
 
-                if (TrySetPin(keyEntryData.GetCurrentValue()))
-                {
-                    return true;
+                        throw;
+                    }
+                    throw new SecurityException(ExceptionMessages.PinAlreadySet);
                 }
-
-                throw new SecurityException(ExceptionMessages.PinAlreadySet);
             }
             finally
             {
@@ -541,6 +551,8 @@ namespace Yubico.YubiKey.Fido2
                 keyEntryData.Request = KeyEntryRequest.Release;
                 _ = keyCollector(keyEntryData);
             }
+
+            return false;
         }
 
         /// <summary>
@@ -589,7 +601,7 @@ namespace Yubico.YubiKey.Fido2
                 return false; // PIN is already set.
             }
 
-            throw new Fido2Exception(result.StatusMessage);
+            throw new Fido2Exception(GetCtapError(result), result.StatusMessage);
         }
 
         /// <summary>
@@ -673,9 +685,22 @@ namespace Yubico.YubiKey.Fido2
             {
                 while (keyCollector(keyEntryData))
                 {
-                    if (TryChangePin(keyEntryData.GetCurrentValue(), keyEntryData.GetNewValue()))
+                    try
                     {
-                        return true;
+                        if (TryChangePin(keyEntryData.GetCurrentValue(), keyEntryData.GetNewValue()))
+                        {
+                            return true;
+                        }
+                    }
+                    catch (Fido2Exception e)
+                    {
+                        if (e.Status == CtapStatus.PinPolicyViolation)
+                        {
+                            keyEntryData.IsViolatingPinComplexity = true;
+                            continue;
+                        }
+
+                        throw;
                     }
 
                     keyEntryData.IsRetry = true;
@@ -742,7 +767,7 @@ namespace Yubico.YubiKey.Fido2
                 return false; // PIN is invalid
             }
 
-            throw new Fido2Exception(result.StatusMessage);
+            throw new Fido2Exception(GetCtapError(result), result.StatusMessage);
         }
 
         /// <summary>

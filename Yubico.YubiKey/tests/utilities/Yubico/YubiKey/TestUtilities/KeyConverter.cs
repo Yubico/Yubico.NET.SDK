@@ -393,8 +393,7 @@ namespace Yubico.YubiKey.TestUtilities
 
             try
             {
-                if (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024 ||
-                    _pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048)
+                if (_pivPrivateKey.Algorithm.IsRsa())
                 {
                     var rsaPrivate = (PivRsaPrivateKey)_pivPrivateKey;
                     rsaParams.P = rsaPrivate.PrimeP.ToArray();
@@ -409,7 +408,7 @@ namespace Yubico.YubiKey.TestUtilities
                     return RSA.Create(rsaParams);
                 }
 
-                if (_pivPublicKey.Algorithm == PivAlgorithm.Rsa1024 || _pivPublicKey.Algorithm == PivAlgorithm.Rsa2048)
+                if (_pivPublicKey.Algorithm.IsRsa())
                 {
                     var rsaPublic = (PivRsaPublicKey)_pivPublicKey;
                     rsaParams.Modulus = rsaPublic.Modulus.ToArray();

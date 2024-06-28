@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Piv.Objects
     /// Data Object.
     /// </summary>
     /// <remarks>
-    /// Generally you will use one of the <see cref="PivSession.ReadObject()"/> methods to
+    /// Generally you will use one of the <see cref="PivSession.ReadObject{T}()"/> methods to
     /// get the specified data out of a YubiKey. The formatted data will be
     /// parsed and the resulting object will present the data in a more readable
     /// form. You can then update the data and call

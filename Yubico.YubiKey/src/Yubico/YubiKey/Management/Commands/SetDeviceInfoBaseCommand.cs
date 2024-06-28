@@ -24,18 +24,9 @@ namespace Yubico.YubiKey.Management.Commands
     /// </summary>
     public class SetDeviceInfoBaseCommand
     {
-        private const byte UsbEnabledCapabilitiesTag = 0x03;
-        private const byte AutoEjectTimeoutTag = 0x06;
-        private const byte ChallengeResponseTimeoutTag = 0x07;
-        private const byte DeviceFlagsTag = 0x08;
-        private const byte ConfigurationLockPresentTag = 0x0a;
-        private const byte ConfigurationUnlockPresentTag = 0x0b;
-        private const byte ResetAfterConfigTag = 0x0c;
-        private const byte NfcEnabledCapabilitiesTag = 0x0e;
-
-
         private byte[]? _lockCode;
         private byte[]? _unlockCode;
+        private ushort? _autoEjectTimeout;
 
         /// <summary>
         /// The length that a configuration lock code must be.
@@ -60,7 +51,6 @@ namespace Yubico.YubiKey.Management.Commands
         /// </summary>
         public byte? ChallengeResponseTimeout { get; set; }
 
-        private ushort? _autoEjectTimeout;
 
         /// <summary>
         /// The CCID auto-eject timeout (in seconds). This field is only meaningful if the
@@ -101,28 +91,56 @@ namespace Yubico.YubiKey.Management.Commands
         /// </summary>
         public bool ResetAfterConfig { get; set; }
 
+        /// <summary>
+        /// Allows setting of the <see cref="YubiKeyDeviceInfo.IsNfcRestricted"/> property
+        /// </summary>
+        public bool RestrictNfc { get; set; }
+
+        /// <summary>
+        /// Temporarily set the threshold at which a capacitive touch should be considered active.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// The field is using arbitrary units and has a default value of `6`. A higher value increases the sensor
+        /// threshold which has the effect of decreasing the sensitivity of the sensor. Lower values increase the
+        /// sensitivity, but callers cannot reduce the threshold below the default value of `6` which is locked in at
+        /// manufacturing time.
+        /// </para>
+        /// <para>
+        /// The value set here is only valid until the next time the YubiKey is power cycled. It does not persist.
+        /// </para>
+        /// <para>
+        /// You should typically not ever need to adjust this value. This is primarily used in the context of automatic
+        /// provisioning and testing where the YubiKey is being "touched" by electrically grounding the sensor.
+        /// </para>
+        /// </remarks>
+        public int? TemporaryTouchThreshold { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SetDeviceInfoBaseCommand"/> class.
         /// </summary>
         protected SetDeviceInfoBaseCommand()
         {
+
         }
 
         protected SetDeviceInfoBaseCommand(SetDeviceInfoBaseCommand baseCommand)
         {
-            if (!(baseCommand is null))
+            if (baseCommand is null)
             {
-                EnabledUsbCapabilities = baseCommand.EnabledUsbCapabilities;
-                EnabledNfcCapabilities = baseCommand.EnabledNfcCapabilities;
-                ChallengeResponseTimeout = baseCommand.ChallengeResponseTimeout;
-                AutoEjectTimeout = baseCommand.AutoEjectTimeout;
-                DeviceFlags = baseCommand.DeviceFlags;
-                ResetAfterConfig = baseCommand.ResetAfterConfig;
-
-                _lockCode = baseCommand._lockCode;
-                _unlockCode = baseCommand._unlockCode;
+                return;
             }
+
+            EnabledUsbCapabilities = baseCommand.EnabledUsbCapabilities;
+            EnabledNfcCapabilities = baseCommand.EnabledNfcCapabilities;
+            ChallengeResponseTimeout = baseCommand.ChallengeResponseTimeout;
+            AutoEjectTimeout = baseCommand.AutoEjectTimeout;
+            DeviceFlags = baseCommand.DeviceFlags;
+            ResetAfterConfig = baseCommand.ResetAfterConfig;
+            RestrictNfc = baseCommand.RestrictNfc;
+
+            _lockCode = baseCommand._lockCode;
+            _unlockCode = baseCommand._unlockCode;
         }
 
         /// <summary>
@@ -206,42 +224,52 @@ namespace Yubico.YubiKey.Management.Commands
 
             if (EnabledUsbCapabilities is YubiKeyCapabilities usbCapabilities)
             {
-                buffer.WriteInt16(UsbEnabledCapabilitiesTag, (short)usbCapabilities);
+                buffer.WriteInt16(YubikeyDeviceManagementTags.UsbEnabledCapabilitiesTag, (short)usbCapabilities);
             }
 
             if (EnabledNfcCapabilities is YubiKeyCapabilities nfcCapabilities)
             {
-                buffer.WriteInt16(NfcEnabledCapabilitiesTag, (short)nfcCapabilities);
+                buffer.WriteInt16(YubikeyDeviceManagementTags.NfcEnabledCapabilitiesTag, (short)nfcCapabilities);
             }
 
             if (ChallengeResponseTimeout is byte crTimeout)
             {
-                buffer.WriteByte(ChallengeResponseTimeoutTag, crTimeout);
+                buffer.WriteByte(YubikeyDeviceManagementTags.ChallengeResponseTimeoutTag, crTimeout);
             }
 
             if (_autoEjectTimeout is ushort aeTimeout)
             {
-                buffer.WriteUInt16(AutoEjectTimeoutTag, aeTimeout);
+                buffer.WriteUInt16(YubikeyDeviceManagementTags.AutoEjectTimeoutTag, aeTimeout);
             }
 
             if (DeviceFlags is DeviceFlags deviceFlags)
             {
-                buffer.WriteByte(DeviceFlagsTag, (byte)deviceFlags);
+                buffer.WriteByte(YubikeyDeviceManagementTags.DeviceFlagsTag, (byte)deviceFlags);
             }
 
             if (ResetAfterConfig)
             {
-                buffer.WriteValue(ResetAfterConfigTag, ReadOnlySpan<byte>.Empty);
+                buffer.WriteValue(YubikeyDeviceManagementTags.ResetAfterConfigTag, ReadOnlySpan<byte>.Empty);
             }
 
             if (_lockCode is byte[] lockCode)
             {
-                buffer.WriteValue(ConfigurationLockPresentTag, lockCode);
+                buffer.WriteValue(YubikeyDeviceManagementTags.ConfigurationLockPresentTag, lockCode);
             }
 
             if (_unlockCode is byte[] unlockCode)
             {
-                buffer.WriteValue(ConfigurationUnlockPresentTag, unlockCode);
+                buffer.WriteValue(YubikeyDeviceManagementTags.ConfigurationUnlockPresentTag, unlockCode);
+            }
+
+            if (RestrictNfc)
+            {
+                buffer.WriteByte(YubikeyDeviceManagementTags.NfcRestrictedTag, 1);
+            }
+
+            if (TemporaryTouchThreshold.HasValue)
+            {
+                buffer.WriteByte(YubikeyDeviceManagementTags.TempTouchThresholdTag, (byte)TemporaryTouchThreshold.Value);
             }
 
             return buffer.Encode();

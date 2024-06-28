@@ -13,10 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Buffers.Binary;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Piv.Commands
@@ -38,7 +35,7 @@ namespace Yubico.YubiKey.Piv.Commands
     /// will not need to use this command. For example, if you want to get a
     /// certificate from a YubiKey, use <see cref="PivSession.GetCertificate"/>.
     /// Or if you want to store/retrieve Key History, use
-    /// <see cref="PivSession.ReadObject()"/> and <see cref="PivSession.WriteObject"/>
+    /// <see cref="PivSession.ReadObject{T}()"/> and <see cref="PivSession.WriteObject"/>
     /// along with the <see cref="Piv.Objects.KeyHistory"/> class. Under the
     /// covers, these APIs will ultimately call this command. But the application
     /// that uses the SDK can simply make the specific API calls, rather than use

@@ -12,8 +12,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-> Dev: ![tests-dev](https://github.com/Yubico/Yubico.NET.SDK-private/actions/workflows/test-and-cover.yml/badge.svg?branch=yesdk-1315-skip-unsuitable-tests)  
-> Main: ![tests-main](https://github.com/Yubico/Yubico.NET.SDK-private/actions/workflows/test-and-cover.yml/badge.svg?branch=main)
+> ![build-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/build.yml/badge.svg) 
+> ![tests-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test.yml/badge.svg) 
+> ![tests-windows-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test-windows.yml/badge.svg) 
+> ![tests-ubuntu-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test-ubuntu.yml/badge.svg) 
+> ![tests-macos-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/test-macos.yml/badge.svg) 
+> ![codeql-analysis-action-status](https://github.com/Yubico/Yubico.NET.SDK/actions/workflows/codeql-analysis.yml/badge.svg)  
 
 # .NET YubiKey SDK
 

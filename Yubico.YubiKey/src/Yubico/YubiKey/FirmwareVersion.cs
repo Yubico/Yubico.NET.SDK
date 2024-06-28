@@ -20,8 +20,8 @@ namespace Yubico.YubiKey
     public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquatable<FirmwareVersion>
     {
         #region Frequently Used Versions
-        // Note that these are for internal use. Later, we want to have something
-        // that allows users to query for specific capabilities instead of versions.
+        // Note that these are for internal use. It's expected that SDK users should call `.HasFeature` on the
+        // YubiKey device to check for features instead of FW versions.
         internal static readonly FirmwareVersion All = new FirmwareVersion(1, 0, 0);
         internal static readonly FirmwareVersion V2_0_0 = new FirmwareVersion(2, 0, 0);
         internal static readonly FirmwareVersion V2_1_0 = new FirmwareVersion(2, 1, 0);
@@ -37,9 +37,13 @@ namespace Yubico.YubiKey
         internal static readonly FirmwareVersion V4_3_4 = new FirmwareVersion(4, 3, 4);
         internal static readonly FirmwareVersion V4_4_0 = new FirmwareVersion(4, 4, 0);
         internal static readonly FirmwareVersion V4_5_0 = new FirmwareVersion(4, 5, 0);
+        internal static readonly FirmwareVersion V5_0_0 = new FirmwareVersion(5, 0, 0);
         internal static readonly FirmwareVersion V5_3_0 = new FirmwareVersion(5, 3, 0);
+        internal static readonly FirmwareVersion V5_3_1 = new FirmwareVersion(5, 3, 1);
         internal static readonly FirmwareVersion V5_4_2 = new FirmwareVersion(5, 4, 2);
         internal static readonly FirmwareVersion V5_4_3 = new FirmwareVersion(5, 4, 3);
+        internal static readonly FirmwareVersion V5_6_0 = new FirmwareVersion(5, 6, 0);
+        internal static readonly FirmwareVersion V5_7_0 = new FirmwareVersion(5, 7, 0);
         #endregion
 
         public byte Major { get; set; }

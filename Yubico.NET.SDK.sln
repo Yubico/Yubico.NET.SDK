@@ -20,16 +20,23 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE.txt = LICENSE.txt
 		nginx.conf = nginx.conf
 		README.md = README.md
+		global.json = global.json
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{8FFE6A2D-4DC1-4CC0-8B96-E6CE11F29B3E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{14C2FBE2-2204-46A5-9FE8-A770CB5A0261}"
 	ProjectSection(SolutionItems) = preProject
-		.github\workflows\build-and-publish-after-merge.yml = .github\workflows\build-and-publish-after-merge.yml
+		.github\workflows\build-nativeshims.yml = .github\workflows\build-nativeshims.yml
+		.github\workflows\build-pull-requests.yml = .github\workflows\build-pull-requests.yml
+		.github\workflows\build.yml = .github\workflows\build.yml
 		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
-		.github\workflows\cross-build-nativeshims.yml = .github\workflows\cross-build-nativeshims.yml
-		.github\workflows\pull-requests.yml = .github\workflows\pull-requests.yml
+		.github\workflows\upload-docs.yml = .github\workflows\upload-docs.yml
+		.github\workflows\test.yml = .github\workflows\test.yml
+		.github\workflows\test-macos.yml = .github\workflows\test-macos.yml
+		.github\workflows\test-ubuntu.yml = .github\workflows\test-ubuntu.yml
+		.github\workflows\test-windows.yml = .github\workflows\test-windows.yml
+		.github\workflows\verify-code-style.yml = .github\workflows\verify-code-style.yml
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Yubico.Core", "Yubico.Core", "{45D2A3BE-5111-4890-8898-2D43DB658A40}"
@@ -172,6 +179,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk Programming Guide", "Sd
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\secure-channel-protocol-3.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\secure-channel-protocol-3.md
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\sensitive-data.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\sensitive-data.md
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\threads.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\threads.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\appcompat.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\appcompat.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{BA394A0D-B336-4B6E-83B8-B41FC165D6D9}"

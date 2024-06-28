@@ -12,28 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: Check code formatting
+name: Test on Windows
 
 on:
-  pull_request:
-    branches:
-      - main
-      - 'develop**'
-      - 'release/**'
-  
+  workflow_dispatch:
+  workflow_call:
+
 jobs:
-  check-code-formatting:
-    runs-on: windows-2019
-
+  test:
+    name: Windows
+    runs-on: windows-latest
+    permissions:
+      packages: read
+      contents: read
+      
     steps:
-      # Checkout the local repository
       - uses: actions/checkout@v4
-
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
       - name: Add local NuGet repository
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
+ 
+      - name: Test Yubico.YubiKey
+        run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
+  
+      - name: Test Yubico.Core
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj            --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
 
-      - name: Build Yubico.NET.SDK.sln
-        run: dotnet build --configuration Release --nologo --verbosity normal Yubico.NET.SDK.sln
-
-      - name: Check for correct formatting 
-        run: dotnet format --verify-no-changes --no-restore -v d
+      - name: Upload Test Result Files
+        uses: actions/upload-artifact@v4
+        with:
+          name: TestResults-Windows
+          path: '**/TestResults/*'

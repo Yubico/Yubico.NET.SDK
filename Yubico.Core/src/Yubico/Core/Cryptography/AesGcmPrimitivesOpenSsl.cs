@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
 using Yubico.PlatformInterop;
@@ -44,7 +43,6 @@ namespace Yubico.Core.Cryptography
                 throw new ArgumentException(ExceptionMessages.InvalidAesGcmInput);
             }
 
-            int outputLength;
             byte[] keyBytes = keyData.ToArray();
             byte[] dataToEncrypt = plaintext.ToArray();
             byte[] encryptedData = new byte[plaintext.Length];
@@ -55,6 +53,8 @@ namespace Yubico.Core.Cryptography
                 using SafeEvpCipherCtx ctx = NativeMethods.EvpCipherCtxNew();
 
                 int status = NativeMethods.EvpAes256GcmInit(true, ctx, keyBytes, nonce.ToArray());
+                int outputLength;
+
                 if (status != 0)
                 {
                     // The OpenSSL Wiki documents AES-GCM, and says to pass in

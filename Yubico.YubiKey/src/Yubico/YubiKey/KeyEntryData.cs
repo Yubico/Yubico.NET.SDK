@@ -137,6 +137,11 @@ namespace Yubico.YubiKey
         public bool IsRetry { get; set; }
 
         /// <summary>
+        /// Indicates if the current request for an item has violated PIN complexity.
+        /// </summary>
+        public bool IsViolatingPinComplexity { get; set; }
+
+        /// <summary>
         /// This is the result of the last fingerprint sample. This will be null
         /// if the <c>Request</c> is for something other than
         /// <see cref="KeyEntryRequest.EnrollFingerprint"/> or if it is the first
@@ -221,6 +226,7 @@ namespace Yubico.YubiKey
             _currentValue = Memory<byte>.Empty;
             _newValue = Memory<byte>.Empty;
             IsRetry = false;
+            IsViolatingPinComplexity = false;
         }
 
         /// <summary>
@@ -340,6 +346,7 @@ namespace Yubico.YubiKey
             LastBioEnrollSampleResult = null;
             SignalUserCancel = null;
             IsRetry = false;
+            IsViolatingPinComplexity = false;
         }
     }
 }

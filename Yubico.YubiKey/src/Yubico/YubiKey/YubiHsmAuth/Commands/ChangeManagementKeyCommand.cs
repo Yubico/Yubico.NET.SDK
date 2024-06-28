@@ -14,7 +14,6 @@
 
 using System;
 using System.Globalization;
-using System.Text;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
 
@@ -89,7 +88,8 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// <exception cref="ArgumentException">
         /// Thrown when a management key has an invalid length.
         /// </exception>
-        public ChangeManagementKeyCommand(ReadOnlyMemory<byte> currentManagementKey,
+        public ChangeManagementKeyCommand(
+            ReadOnlyMemory<byte> currentManagementKey,
             ReadOnlyMemory<byte> newManagementKey)
         {
             _currentManagementKey = currentManagementKey.Length == ValidManagementKeyLength

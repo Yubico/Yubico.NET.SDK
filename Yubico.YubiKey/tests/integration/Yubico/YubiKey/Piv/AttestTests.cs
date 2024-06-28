@@ -74,6 +74,8 @@ namespace Yubico.YubiKey.Piv
 
         [Theory]
         [InlineData(PivAlgorithm.Rsa2048, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa3072, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa4096, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccP256, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccP384, StandardTestDevice.Fw5)]
         public void AttestGenerated(PivAlgorithm algorithm, StandardTestDevice testDeviceType)
@@ -123,6 +125,8 @@ namespace Yubico.YubiKey.Piv
 
         [Theory]
         [InlineData(PivAlgorithm.Rsa2048, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa3072, StandardTestDevice.Fw5)]
+        [InlineData(PivAlgorithm.Rsa4096, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccP256, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccP384, StandardTestDevice.Fw5)]
         public void LoadInvalidCert_Attest_ThrowsException(PivAlgorithm algorithm, StandardTestDevice testDeviceType)
@@ -279,7 +283,7 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                if (SampleKeyPairs.GetKeyAndCertPem(algorithm, isValidCert, out string certPem, out string privateKeyPem) == false)
+                if (SampleKeyPairs.GetKeysAndCertPem(algorithm, isValidCert, out string certPem, out _, out string privateKeyPem) == false)
                 {
                     return false;
                 }

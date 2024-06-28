@@ -131,10 +131,18 @@ namespace Yubico.Core.Devices.SmartCard
 
             try
             {
+                SCARD_SHARE shareMode = SCARD_SHARE.SHARED;
+
+                if (AppContext.TryGetSwitch(CoreCompatSwitches.OpenSmartCardHandlesExclusively, out bool enabled) &&
+                    enabled)
+                {
+                    shareMode = SCARD_SHARE.EXCLUSIVE;
+                }
+
                 result = SCardConnect(
                     context,
                     _readerName,
-                    SCARD_SHARE.EXCLUSIVE,
+                    shareMode,
                     SCARD_PROTOCOL.Tx,
                     out cardHandle,
                     out SCARD_PROTOCOL activeProtocol);

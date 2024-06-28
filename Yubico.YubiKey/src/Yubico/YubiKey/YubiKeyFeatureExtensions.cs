@@ -79,7 +79,10 @@ namespace Yubico.YubiKey
                     HasApplication(yubiKeyDevice, YubiKeyCapabilities.Fido2),
 
                 YubiKeyFeature.ManagementApplication =>
-                    yubiKeyDevice.FirmwareVersion >= new FirmwareVersion(5),
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_0_0,
+
+                YubiKeyFeature.ManagementNfcRestricted =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_7_0,
 
                 YubiKeyFeature.SerialNumberVisibilityControls =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V2_2_0
@@ -88,8 +91,17 @@ namespace Yubico.YubiKey
                 YubiKeyFeature.Scp03 =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0
                     && (HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv)
-                        || HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath)
-                        || HasApplication(yubiKeyDevice, YubiKeyCapabilities.OpenPgp)),
+                    || HasApplication(yubiKeyDevice, YubiKeyCapabilities.Oath)
+                    || HasApplication(yubiKeyDevice, YubiKeyCapabilities.OpenPgp)),
+
+                YubiKeyFeature.FastUsbReclaim =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_6_0,
+
+                YubiKeyFeature.DeviceReset =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_6_0,
+
+                YubiKeyFeature.TemporaryTouchThreshold =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_1,
 
                 YubiKeyFeature.YubiHsmAuthApplication =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_4_3
@@ -168,8 +180,9 @@ namespace Yubico.YubiKey
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
 
                 YubiKeyFeature.PivAesManagementKey =>
-                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_4_2
-                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_4_2 ||
+                    (yubiKeyDevice.FirmwareVersion == new FirmwareVersion(0, 8, 8)
+                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv)),
 
                 YubiKeyFeature.PivMetadata =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0
@@ -183,12 +196,24 @@ namespace Yubico.YubiKey
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V3_1_0
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
 
+                YubiKeyFeature.PivRsa3072 =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_7_0
+                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
+
+                YubiKeyFeature.PivRsa4096 =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_7_0
+                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
+
                 YubiKeyFeature.PivEccP256 =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V4_2_4
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
 
                 YubiKeyFeature.PivEccP384 =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V4_2_4
+                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
+
+                YubiKeyFeature.PivMoveOrDeleteKey =>
+                    yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_7_0
                     && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
 
                 YubiKeyFeature.PivManagementKeyTouchPolicy =>
@@ -224,10 +249,27 @@ namespace Yubico.YubiKey
             };
         }
 
+        /// <summary>
+        /// Throws a <see cref="NotSupportedException"/> if the YubiKey doesn't support the requested feature. 
+        /// </summary>
+        /// <param name="yubiKeyDevice"></param>
+        /// <param name="feature"></param>
+        /// <exception cref="NotSupportedException"></exception>
+        public static void ThrowOnMissingFeature(this IYubiKeyDevice yubiKeyDevice, YubiKeyFeature feature)
+        {
+            if (!HasFeature(yubiKeyDevice, feature))
+            {
+                throw new NotSupportedException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.NotSupportedByYubiKeyVersion));
+            }
+        }
+
         // Checks to see if a particular application is available (meaning: paid-for, instead of simply enabled) on the
         // YubiKey over either USB or NFC.
         private static bool HasApplication(IYubiKeyDevice yubiKeyDevice, YubiKeyCapabilities capability) =>
-            yubiKeyDevice.AvailableNfcCapabilities.HasFlag(capability)
-            || yubiKeyDevice.AvailableUsbCapabilities.HasFlag(capability);
+            yubiKeyDevice.AvailableNfcCapabilities.HasFlag(capability) ||
+            yubiKeyDevice.AvailableUsbCapabilities.HasFlag(capability);
     }
 }

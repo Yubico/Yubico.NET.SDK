@@ -98,10 +98,10 @@ namespace Yubico.YubiKey
             // set violating PIN
             var fido2Exception = Assert.Throws<Fido2Exception>(() => fido2Session.TrySetPin(_invalidPin));
             Assert.Equal(CtapStatus.PinPolicyViolation, fido2Exception.Status);
-            
+
             // set complex PIN to be able to try to change it later
             Assert.True(fido2Session.TrySetPin(_complexPin));
-            
+
             // change to violating PIN
             fido2Exception = Assert.Throws<Fido2Exception>(() => fido2Session.TryChangePin(_complexPin, _invalidPin));
             Assert.Equal(CtapStatus.PinPolicyViolation, fido2Exception.Status);
@@ -119,7 +119,7 @@ namespace Yubico.YubiKey
                 NewPin = _invalidPin
             };
 
-            fido2Session.KeyCollector = pinComplexityKeyCollector.Fido2SampleKeyCollectorDelegate;
+            fido2Session.KeyCollector = pinComplexityKeyCollector.KeyCollectorDelegate;
 
             // set violating PIN
             var fido2Exception = Assert.Throws<Fido2Exception>(() => fido2Session.TrySetPin());
@@ -140,7 +140,7 @@ namespace Yubico.YubiKey
             public ReadOnlyMemory<byte> NewPin { get; set; }
             private ReadOnlyMemory<byte> _currentPin;
 
-            public bool Fido2SampleKeyCollectorDelegate(KeyEntryData keyEntryData)
+            public bool KeyCollectorDelegate(KeyEntryData keyEntryData)
             {
                 if (keyEntryData.IsViolatingPinComplexity)
                 {

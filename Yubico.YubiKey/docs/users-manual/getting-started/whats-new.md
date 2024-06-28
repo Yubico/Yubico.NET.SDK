@@ -19,16 +19,23 @@ Here you can find all of the updates and release notes for published versions of
 ## 1.11.x Releases
 ### 1.11.0
 
-Release date: June 27th, 2024
+Release date: June 28th, 2024
 
-This release introduces significant enhancements and new features for the latest YubiKeys, including support for firmware version 5.7, which allows for temporary disabling of NFC connectivity and checking PIN complexity status. It also expands RSA key support in PIV to 3072 and 4096 bit keys, and includes improvements for YubiKey Bio and Multi-Protocol Edition keys. Additionally, there are optimizations in USB reclaim speed and adjustments to the touch sensor sensitivity. Several command classes have been deprecated due to changes in how device info is read by the SDK, and integration test guardrails have been implemented for better security.
+This release introduces significant enhancements and new features for the latest YubiKeys, including support for
+firmware version 5.7, which allows for temporary disabling of NFC connectivity and checking PIN complexity status.
+It also expands RSA key support in PIV to 3072 and 4096-bit keys, and includes improvements for YubiKey Bio and
+Multi-Protocol Edition keys.
+Additionally, there are optimizations in USB reclaim speed and adjustments to the touch sensor sensitivity and a few bug
+fixes.
+Several command classes have been deprecated due to changes in how device info is read by the SDK, and integration test
+guardrails have been implemented for better security.
 
 Features:
 - Support for YubiKeys with the latest firmware (version 5.7): 
   - NFC connectivity can now be temporarily disabled with [SetIsNfcRestricted()](xref:Yubico.YubiKey.YubiKeyDevice.SetIsNfcRestricted%28System.Boolean%29) ([#91](https://github.com/Yubico/Yubico.NET.SDK/pull/91)).
   - Additional property pages on the YubiKey are now read into [YubiKeyDeviceInfo](xref:Yubico.YubiKey.YubiKeyDeviceInfo) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
   - PIN complexity status can be checked with [IsPinComplexityEnabled](xref:Yubico.YubiKey.YubiKeyDevice.IsPinComplexityEnabled) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
-  - PIN complexity specific error messages ([#112](https://github.com/Yubico/Yubico.NET.SDK/pull/112)).
+  - PIN complexity specific error messages and exceptions ([#112](https://github.com/Yubico/Yubico.NET.SDK/pull/112)).
   - The set of YubiKey applications that are capable of being put into FIPS mode can be retrieved with [FipsCapable](xref:Yubico.YubiKey.YubiKeyDevice.FipsCapable). The set of YubiKey applications that are in FIPS mode can be retrieved with [FipsApproved](xref:Yubico.YubiKey.YubiKeyDevice.FipsApproved) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
   - The part number for a key’s Secure Element processor, if available, can be retrieved with [PartNumber](xref:Yubico.YubiKey.YubiKeyDevice.PartNumber) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).
   - The set of YubiKey applications that are blocked from being reset can be retrieved with [ResetBlocked](xref:Yubico.YubiKey.YubiKeyDevice.ResetBlocked) ([#92](https://github.com/Yubico/Yubico.NET.SDK/pull/92)).

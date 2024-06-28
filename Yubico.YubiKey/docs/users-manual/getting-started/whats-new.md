@@ -56,7 +56,7 @@ Bug fixes:
 
 Miscellaneous:
 - The way that YubiKey device info is read by the SDK has changed, and as a result, the following GetDeviceInfo command classes have been deprecated ([#91](https://github.com/Yubico/Yubico.NET.SDK/pull/91)): 
-  - [Yubico.YubiKey.Management.Commands.GetDeviceInfoCommand](Yubico.YubiKey.Management.Commands.GetDeviceInfoCommand)
+  - [Yubico.YubiKey.Management.Commands.GetDeviceInfoCommand](xref:Yubico.YubiKey.Management.Commands.GetDeviceInfoCommand)
   - [Yubico.YubiKey.Otp.Commands.GetDeviceInfoCommand](xref:Yubico.YubiKey.Otp.Commands.GetDeviceInfoCommand)
   - [Yubico.YubiKey.U2f.Commands.GetDeviceInfoCommand](xref:Yubico.YubiKey.U2f.Commands.GetDeviceInfoCommand)
   - [Yubico.YubiKey.Management.Commands.GetDeviceInfoResponse](xref:Yubico.YubiKey.Management.Commands.GetDeviceInfoResponse)

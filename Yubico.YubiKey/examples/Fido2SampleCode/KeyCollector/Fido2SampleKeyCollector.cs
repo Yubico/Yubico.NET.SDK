@@ -41,6 +41,18 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 return false;
             }
 
+            if (keyEntryData.IsViolatingPinComplexity)
+            {
+                SampleMenu.WriteMessage(MessageType.Special, 0, "The provided value violates PIN complexity.");
+
+                SampleMenu.WriteMessage(MessageType.Title, 0, "Try again? y/n");
+                char[] answer = SampleMenu.ReadResponse(out int _);
+                if (answer.Length == 0 || (answer[0] != 'y' && answer[0] != 'Y'))
+                {
+                    return false;
+                }
+            }
+
             if (keyEntryData.IsRetry)
             {
                 SampleMenu.WriteMessage(MessageType.Title, 0, "A previous entry was incorrect, do you want to retry?");
@@ -49,7 +61,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                     string retryString =
                         ((int)keyEntryData.RetriesRemaining).ToString("D", CultureInfo.InvariantCulture);
                     SampleMenu.WriteMessage(MessageType.Title, 0,
-                        "(retries remainin until blocked: " + retryString + ")");
+                        "(retries remaining until blocked: " + retryString + ")");
                 }
 
                 SampleMenu.WriteMessage(MessageType.Title, 0, "y/n");

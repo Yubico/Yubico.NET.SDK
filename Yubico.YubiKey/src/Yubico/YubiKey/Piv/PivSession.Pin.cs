@@ -798,6 +798,16 @@ namespace Yubico.YubiKey.Piv
 
                     return true;
                 }
+                else if (changeResponse.Status == ResponseStatus.ConditionsNotSatisfied)
+                {
+                    throw new SecurityException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.PinComplexityViolation
+                        )
+                    );
+
+                }
 
                 retriesRemaining = changeResponse.GetData();
             }
@@ -985,6 +995,17 @@ namespace Yubico.YubiKey.Piv
             _log.LogInformation("Try to change the PIV PUK with supplied PUKs.");
             var changeCommand = new ChangeReferenceDataCommand(PivSlot.Puk, currentPuk, newPuk);
             ChangeReferenceDataResponse changeResponse = Connection.SendCommand(changeCommand);
+
+            if (changeResponse.Status == ResponseStatus.ConditionsNotSatisfied)
+            {
+                retriesRemaining = null;
+                throw new SecurityException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.PinComplexityViolation
+                    )
+                );
+            }
 
             retriesRemaining = changeResponse.GetData();
 
@@ -1210,6 +1231,17 @@ namespace Yubico.YubiKey.Piv
             var resetCommand = new ResetRetryCommand(puk, newPin);
             ResetRetryResponse resetResponse = Connection.SendCommand(resetCommand);
 
+            if (resetResponse.Status == ResponseStatus.ConditionsNotSatisfied)
+            {
+                retriesRemaining = null;
+                throw new SecurityException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.PinComplexityViolation
+                    )
+                );
+            }
+
             retriesRemaining = resetResponse.GetData();
 
             if ((retriesRemaining ?? 1) == 0)
@@ -1234,7 +1266,7 @@ namespace Yubico.YubiKey.Piv
         // Command/Response operations (Change or Reset).
         // If the mode is not None, then set the YubiKey to that mode.
         private bool TryChangeReference(KeyEntryRequest request,
-                                        Func<KeyEntryData, ResponseStatus> CommandResponse,
+                                        Func<KeyEntryData, ResponseStatus> commandResponse,
                                         PivPinOnlyMode mode)
         {
             if (KeyCollector is null)
@@ -1254,7 +1286,7 @@ namespace Yubico.YubiKey.Piv
             {
                 while (KeyCollector(keyEntryData))
                 {
-                    ResponseStatus status = CommandResponse(keyEntryData);
+                    ResponseStatus status = commandResponse(keyEntryData);
 
                     if (status == ResponseStatus.Success)
                     {
@@ -1279,7 +1311,14 @@ namespace Yubico.YubiKey.Piv
                                 ExceptionMessages.NoMoreRetriesRemaining));
                     }
 
-                    keyEntryData.IsRetry = true;
+                    if (status == ResponseStatus.ConditionsNotSatisfied)
+                    {
+                        keyEntryData.IsViolatingPinComplexity = true;
+                    }
+                    else
+                    {
+                        keyEntryData.IsRetry = true;
+                    }
                 }
             }
             finally
@@ -1297,12 +1336,9 @@ namespace Yubico.YubiKey.Piv
         // TryChangeReference. It executes the ChangeReference command and response.
         private ResponseStatus ChangePinOrPuk(KeyEntryData keyEntryData)
         {
-            byte slotNumber = PivSlot.Puk;
-
-            if (keyEntryData.Request == KeyEntryRequest.ChangePivPin)
-            {
-                slotNumber = PivSlot.Pin;
-            }
+            byte slotNumber = keyEntryData.Request == KeyEntryRequest.ChangePivPin
+                ? PivSlot.Pin
+                : PivSlot.Puk;
 
             var changeCommand = new ChangeReferenceDataCommand(
                 slotNumber, keyEntryData.GetCurrentValue(), keyEntryData.GetNewValue());
@@ -1349,25 +1385,28 @@ namespace Yubico.YubiKey.Piv
         // If the mgmt key is not authenticated, it will do nothing.
         private void UpdateAdminData()
         {
-            if (ManagementKeyAuthenticated)
+            if (!ManagementKeyAuthenticated)
             {
-                bool isValid = TryReadObject<AdminData>(out AdminData adminData);
+                _log.LogDebug("Unauthenticated attempt to update AdminData failed.");
+                return;
+            }
 
-                using (adminData)
+            bool isValid = TryReadObject(out AdminData adminData);
+
+            using (adminData)
+            {
+                if (!isValid || adminData.IsEmpty)
                 {
-                    if (!isValid || adminData.IsEmpty)
-                    {
-                        return;
-                    }
-
-                    if (!adminData.PinProtected && adminData.Salt is null)
-                    {
-                        return;
-                    }
-
-                    adminData.PinLastUpdated = DateTime.UtcNow;
-                    WriteObject(adminData);
+                    return;
                 }
+
+                if (!adminData.PinProtected && adminData.Salt is null)
+                {
+                    return;
+                }
+
+                adminData.PinLastUpdated = DateTime.UtcNow;
+                WriteObject(adminData);
             }
         }
     }

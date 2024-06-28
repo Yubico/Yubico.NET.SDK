@@ -294,6 +294,9 @@
   <data name="Fido2PinNotVerified" xml:space="preserve">
     <value>The request was rejected because the PIN and/or UV was not verified.</value>
   </data>
+  <data name="Fido2PinComplexityViolation" xml:space="preserve">
+    <value>The request was rejected because the PIN violates PIN complexity setting.</value>
+  </data>
   <data name="Fido2PinBlocked" xml:space="preserve">
     <value>The request was rejected because the PIN and/or the UV was blocked.</value>
   </data>

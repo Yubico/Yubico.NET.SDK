@@ -86,7 +86,7 @@ jobs:
           path: Yubico.NativeShims/linux-arm64/*.so
   build-macos:
     name: Build macOS
-    runs-on: macos-latest
+    runs-on: macos-12
     steps:
       - uses: actions/checkout@v4
       - run: |

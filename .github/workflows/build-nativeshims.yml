@@ -54,7 +54,7 @@ jobs:
           name: nuspec
           path: | 
             Yubico.NativeShims/*.nuspec
-            readme.md
+            Yubico.NativeShims/readme.md
       - uses: actions/upload-artifact@v4
         with:
           name: msbuild
@@ -113,7 +113,8 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
       - run: |
-          mv nuspec/*.* .
+          mv nuspec/*.nuspec .
+          mv nuspec/readme.md .
           $nuspec = [xml](gc Yubico.NativeShims.nuspec)
           $repo = $nuspec.CreateElement("repository")
           $repo.SetAttribute("url","https://github.com/${{ github.repository }}")

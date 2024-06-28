@@ -60,6 +60,10 @@ cmake -S . -B "$build_dir" \
     -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
     -DVCPKG_TARGET_TRIPLET="arm64-linux" \
     -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE="$(pwd)/cmake/aarch64-linux-gnu.toolchain.cmake" \
-    -DOPENSSL_ROOT_DIR=$(pwd)/linux-arm64/vcpkg_installed/arm64-linux
+    -DOPENSSL_ROOT_DIR=$(pwd)/linux-arm64/vcpkg_installed/arm64-linux \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DOPENSSL_NO_DEBUG=ON \
+    -DOPENSSL_NO_TESTS=ON \
+    -DOPENSSL_NO_DOCS=ON
 
 cmake --build "$build_dir" -- -j $(nproc)

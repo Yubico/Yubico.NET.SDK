@@ -46,6 +46,10 @@ echo "Building for x64-linux ..."
 cmake -S . -B "$build_dir" \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
-    -DVCPKG_TARGET_TRIPLET=x64-linux
+    -DVCPKG_TARGET_TRIPLET=x64-linux \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DOPENSSL_NO_DEBUG=ON \
+    -DOPENSSL_NO_TESTS=ON \
+    -DOPENSSL_NO_DOCS=ON
 
 cmake --build "$build_dir" -- -j $(nproc)

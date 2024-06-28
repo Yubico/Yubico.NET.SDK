@@ -13,7 +13,11 @@ cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake \
     -DVCPKG_TARGET_TRIPLET=x64-osx \
-    -DCMAKE_OSX_ARCHITECTURES=x86_64
+    -DCMAKE_OSX_ARCHITECTURES=x86_64 \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DOPENSSL_NO_DEBUG=ON \
+    -DOPENSSL_NO_TESTS=ON \
+    -DOPENSSL_NO_DOCS=ON
 
 cmake --build ./build64
 mkdir osx-x64
@@ -25,7 +29,11 @@ cmake \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake \
     -DVCPKG_TARGET_TRIPLET=arm64-osx \
-    -DCMAKE_OSX_ARCHITECTURES=arm64
+    -DCMAKE_OSX_ARCHITECTURES=arm64 \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DOPENSSL_NO_DEBUG=ON \
+    -DOPENSSL_NO_TESTS=ON \
+    -DOPENSSL_NO_DOCS=ON
 
 cmake --build ./buildarm
 mkdir osx-arm64

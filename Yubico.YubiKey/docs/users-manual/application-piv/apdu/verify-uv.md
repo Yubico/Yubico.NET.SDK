@@ -22,9 +22,9 @@ CLA | INS | P1 | P2 | Lc | Data | Le
 00 | 20 | 00 | 96 | *variable* | *variable* | (absent)
 
 The data bytes vary:
-- none  - for checking the biometric state
-- 02 00 - if temporary PIN has been requested
-- 03 00 - if biometric verification has been requested
+- none  - the biometric state has been checked
+- 02 00 - a temporary PIN has been requested
+- 03 00 - biometric verification has been requested
 
 ### Response APDU info
 
@@ -55,5 +55,5 @@ Data | SW1 | SW2
 :---: | :---: | :---:
 (no data) | 63 | C0 - C2
 
-If the biometric match failed, then the error is `63 CX` where *X* is the number of
-retries remaining. In the case of C0, the biometric verification becomes blocked.
+If the biometric match failed, the error is `63 CX` where *X* is the number of
+retries remaining. In the case of `C0`, the biometric verification becomes blocked.

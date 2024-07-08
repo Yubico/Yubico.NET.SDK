@@ -16,42 +16,60 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-# PIN Complexity policy
+# PIN complexity policy
 
-Since firmware 5.7, the YubiKey can enforce usage of non-trivial PINs in its applications, this feature has been named _PIN complexity policy_ and is derived from the current Revision 3 of SP 800-63 (specifically SP 800-63B-3) with additional consideration of Revision 4 of SP 800-63 (specifically SP 800-63B-4).
+PIN complexity is an optional feature available on YubiKeys with firmware version 5.7 or later. If PIN complexity is enabled, the YubiKey will block the usage of non-trivial PINs, such as `11111111`, `password`, or `12345678`. 
 
-If PIN complexity has been enforced, the YubiKey will refuse to set or change values of following, if they violate the policy:
-- PIV PIN and PUK
-- FIDO2 PIN
+YubiKeys can also be programmed during the pre-registration process to refuse other specific values. For more information on PIN complexity and the full PIN blocklist, see the <a href="https://docs.yubico.com/hardware/yubikey/yk-tech-manual/5.7-firmware-specifics.html#pin-complexity">YubiKey Technical Manual</a>.
 
-That means that simple values such as `11111111`, `password` or `12345678` will be refused. The YubiKey can also be programmed during the pre-registration to refuse other specific values. More information can be found in our <a href="https://docs.yubico.com/hardware/yubikey/yk-tech-manual/5.7-firmware-specifics.html#pin-complexity">online documentation</a> for the firmware version 5.7 additions.
+> [!NOTE]
+> PIN complexity policy is derived from the current Revision 3 of <a href="https://pages.nist.gov/800-63-3/sp800-63-3.html">NIST SP 800-63</a> (specifically SP 800-63B-3), with additional consideration of <a href="https://pages.nist.gov/800-63-4/sp800-63.html">Revision 4 of SP 800-63</a> (specifically SP 800-63B-4).
 
-The SDK has support for getting information about the feature and also a way how to let the client know that an error is related to PIN complexity.
+For the SDK, PIN complexity enablement means that the YubiKey will refuse to set or change the following values if they violate the policy:
 
-## Read current PIN complexity status
-The PIN complexity enforcement status is part of the `IYubiKeyDeviceInfo` through `bool IsPinComplexityEnabled` property.
+- [PIV PIN and PUK](xref:UsersManualPinPukMgmtKey)
+- [FIDO2 PIN](xref:TheFido2Pin)
 
-## Handle PIN complexity errors
-The SDK can be used to create a variety of applications. If those support setting or changing PINs, they should handle the situation when a YubiKey refuses the user value because it is violating the PIN complexity.
+## Managing PIN complexity with the SDK
 
-The SDK communicates this by throwing specific Exceptions.
+PIN complexity can be managed by the SDK in two ways: 
 
-### PIV Session
-In PIV session the exception thrown during PIN complexity violations is `SecurityException` with a specific message: `ExceptionMessages.PinComplexityViolation`.
+1. Reading the current PIN complexity status of a key.
+1. Handling PIN complexity-related errors.
 
-If the application uses `KeyCollectors`, the violation is reported through `KeyEntryData.IsViolatingPinComplexity`.
+### Reading the current PIN complexity status
 
-The violations are reported for following operations:
-- `PivSession.ChangePin()`
-- `PivSession.ChangePuk()`
-- `PivSession.ResetPin()`
+To verify whether PIN complexity is enabled for a particular YubiKey, check the [IsPinComplexityEnabled](xref:Yubico.YubiKey.IYubiKeyDeviceInfo.IsPinComplexityEnabled) property, which is part of the [IYubiKeyDeviceInfo](xref:Yubico.YubiKey.IYubiKeyDeviceInfo) interface.
 
-### FIDO2 Session
-In the FIDO2 application, `Fido2Exception` with `Status` of `CtapStatus.PinPolicyViolation` is thrown after a PIN complexity was violated. For `KeyCollectors`, `KeyEntryData.IsViolatingPinComplexity` will be set to `true` for these situations.
+### Handling PIN complexity errors
 
-This applies to following `Fido2Session` operations:
-- `Fido2Session.SetPin()`
-- `Fido2Session.ChangePin()`
+Applications that support setting or changing PINs should be able to handle the situation when a YubiKey refuses the user value because it violates the PIN complexity policy.
 
-## Example code
-You can find examples of code in the `PivSampleCode` and `Fido2SampleCode` examples as well in `PinComplexityTests` integration tests.
+The SDK communicates PIN complexity violations by throwing specific exceptions.
+
+#### PivSession exceptions
+
+During a [PivSession](xref:Yubico.YubiKey.Piv.PivSession), PIN complexity violations result in a `System.Security.SecurityException` with the message, `ExceptionMessages.PinComplexityViolation`.
+
+If the application uses a [KeyCollector](xref:UsersManualKeyCollector), the violation is reported through the [KeyEntryData.IsViolatingPinComplexity](xref:Yubico.YubiKey.KeyEntryData.IsViolatingPinComplexity) property.
+
+PIN complexity violations are reported for following PIV operations:
+
+- [PivSession.ChangePin()](xref:Yubico.YubiKey.Piv.PivSession.ChangePin)
+- [PivSession.ChangePuk()](xref:Yubico.YubiKey.Piv.PivSession.ChangePuk)
+- [PivSession.ResetPin()](xref:Yubico.YubiKey.Piv.PivSession.ResetPin)
+
+#### Fido2Session exceptions
+
+During a [Fido2Session](xref:Yubico.YubiKey.Fido2.Fido2Session), PIN complexity violations result in a [Fido2Exception](xref:Yubico.YubiKey.Fido2.Fido2Exception) object with a [Status](xref:Yubico.YubiKey.Fido2.Fido2Exception.Status) of [CtapStatus.PinPolicyViolation](xref:Yubico.YubiKey.Fido2.CtapStatus.PinPolicyViolation).
+
+If the application uses a [KeyCollector](xref:UsersManualKeyCollector), the violation is reported through the [KeyEntryData.IsViolatingPinComplexity](xref:Yubico.YubiKey.KeyEntryData.IsViolatingPinComplexity) property.
+
+PIN complexity violations are reported for following FIDO2 operations:
+
+- [Fido2Session.SetPin()](xref:Yubico.YubiKey.Fido2.Fido2Session.SetPin)
+- [Fido2Session.ChangePin()](xref:Yubico.YubiKey.Fido2.Fido2Session.ChangePin)
+
+### Example code
+
+For code samples demonstrating how to handle PIN complexity violations, see the [PivSampleCode](https://github.com/Yubico/Yubico.NET.SDK/blob/main/Yubico.YubiKey/examples/PivSampleCode/KeyCollector/SampleKeyCollector.cs), [Fido2SampleCode](https://github.com/Yubico/Yubico.NET.SDK/blob/main/Yubico.YubiKey/examples/Fido2SampleCode/KeyCollector/Fido2SampleKeyCollector.cs), and [PinComplexityTests](https://github.com/Yubico/Yubico.NET.SDK/blob/main/Yubico.YubiKey/tests/integration/Yubico/YubiKey/PinComplexityTests.cs) integration tests.

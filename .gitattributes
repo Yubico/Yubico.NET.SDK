@@ -138,7 +138,7 @@ TODO              text
 .gitkeep       export-ignore
 
 # CSharp
-*.cs text diff=csharp
+*.cs text diff=csharp eol=crlf
 
 # Visual Studio
 

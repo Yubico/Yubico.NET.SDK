@@ -209,13 +209,13 @@ namespace Yubico.YubiKey
 
         /// <summary>
         ///     The cryptographic ECC algorithm with the parameters P-256,
-        ///     specified in FIPS 186-4 supported by the PIV Application on the YubiKey.
+        ///     specified in FIPS 186-4, supported by the PIV Application on the YubiKey.
         /// </summary>
         PivEccP256,
 
         /// <summary>
         ///     The cryptographic ECC algorithm with the parameters P-384,
-        ///     specified in FIPS 186-4 supported by the PIV Application on the YubiKey.
+        ///     specified in FIPS 186-4, supported by the PIV Application on the YubiKey.
         /// </summary>
         PivEccP384,
 

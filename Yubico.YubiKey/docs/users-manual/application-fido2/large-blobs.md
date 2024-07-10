@@ -141,6 +141,7 @@ this credential. However, you will most likely not save it, but instead get the
     gaParams.AddExtension("largeBlobKey", new byte[] { 0xF5 });
     IReadOnlyList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
 ```
+
 If a credential was made with the "largeBlobKey" extension then
 [assertions[i].LargeBlobKey](xref:Yubico.YubiKey.Fido2.GetAssertionData.LargeBlobKey) will
 not be null, and will contain the same large blob key that was returned by the make
@@ -159,7 +160,7 @@ This means that to store large blobs, the caller must build each entry, combine 
 entries into a single buffer encoded following the CBOR rules, then use SHA-256 to
 digest the encoding, and store the concatenation of the two.
 
-Most of this work is done by the SDK using the 
+Most of this work is done by the SDK using the
 [SerializedLargeBlobArray](xref:Yubico.YubiKey.Fido2.SerializedLargeBlobArray) class
 and the `Fido2Session.SetSerializedLargeBlobArray` method.
 

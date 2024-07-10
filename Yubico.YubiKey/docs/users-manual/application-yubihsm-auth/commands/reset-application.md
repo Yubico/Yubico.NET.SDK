@@ -18,13 +18,17 @@ limitations under the License. -->
 
 # Reset application
 
-Reset the YubiHSM Auth application. All credentials will be deleted, the management key will be reset to the default value (all zeros), and the management key retry counter will be reset to 8.
+Reset the YubiHSM Auth application. All credentials will be deleted, the management key will be reset to the default
+value (all zeros), and the management key retry counter will be reset to 8.
 
 ## Available
 
 All YubiKeys with the YubiHSM Auth application (included in firmware version 5.4.3 and later).
 > [!NOTE]
-> Use the .NET API's [HasFeature()](xref:Yubico.YubiKey.YubiKeyFeatureExtensions.HasFeature%28Yubico.YubiKey.IYubiKeyDevice%2CYubico.YubiKey.YubiKeyFeature%29) method to check if a key has the YubiHSM Auth application.
+> Use the .NET
+>
+API's [HasFeature()](xref:Yubico.YubiKey.YubiKeyFeatureExtensions.HasFeature%28Yubico.YubiKey.IYubiKeyDevice%2CYubico.YubiKey.YubiKeyFeature%29)
+> method to check if a key has the YubiHSM Auth application.
 
 ## SDK classes
 
@@ -41,14 +45,14 @@ None.
 
 ## Command APDU
 
-| CLA | INS | P1 | P2 | Lc | Data | Le |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 00 | 06 | de | ad | (absent) | (absent) | (absent) |
+| CLA | INS | P1 | P2 |    Lc    |   Data   |    Le    |
+|:---:|:---:|:--:|:--:|:--------:|:--------:|:--------:|
+| 00  | 06  | de | ad | (absent) | (absent) | (absent) |
 
 ## Response APDU
 
 Total Length: 2\
 
-| Data | SW1 | SW2 |
-| :---: | :---: | :---: |
-| (no data) | 90 | 00 |
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 90  | 00  |

@@ -93,6 +93,7 @@ As such, it will likely be required that you create a symbolic link from your sh
 library directory, typically `/usr/lib`, to the real location of libudev.
 
 For example:
+
 ```shell
 # On Debian and Ubuntu, libraries are usually stored in an x86_64 subdirectory:
 sudo ln -s /usr/lib/linux-x86_64/libudev.so.1 /usr/lib/libudev.so

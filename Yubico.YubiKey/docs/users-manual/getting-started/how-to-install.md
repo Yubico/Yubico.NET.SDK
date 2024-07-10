@@ -53,7 +53,7 @@ Adding the SDK to your project using Visual Studio can be done in a few steps:
 4. Click on the `Install` button. NuGet will display a list of the SDK's dependencies. Click `Accept`.
    NuGet will then display the license information for the project and dependencies. Read and
    accept the license agreements to continue.
-   
+
 Now your project is ready to use the YubiKey SDK! Start by adding
 
 ```c#
@@ -80,7 +80,6 @@ dotnet add <path/to/your/project.csproj> package Yubico.YubiKey
 
 > [!NOTE]
 > In order to install a pre-release version of the SDK, include the `--prerelease` parameter.
-
 
 ### Editing your project manually
 

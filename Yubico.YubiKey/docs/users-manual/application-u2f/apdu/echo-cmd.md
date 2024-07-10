@@ -25,6 +25,6 @@ CLA | INS | P1 | P2 | Lc | Data | Le
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-*data* | 90 | 00
+|  Data  | SW1 | SW2 |
+|:------:|:---:|:---:|
+| *data* | 90  | 00  |

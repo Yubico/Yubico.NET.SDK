@@ -33,12 +33,12 @@ Note that with a version 5 FIPS series YubiKey, it is possible to set a PIN on t
 application. Version 4 series YubiKeys do not have the FIDO2 application, and it is not
 possible to set a FIDO2 PIN on a non-FIPS version 5 series YubiKey.
 
-|   YubiKey   |   U2F Available   |   FIDO2 Available   |   U2F PIN   |   FIDO2 PIN   |
-| :---------: | :---------------: | :-----------------: | :---------: | :-----------: |
-|     v 4     |        yes        |         no          |      no     |       -       |
-|  v 4 FIPS   |        yes        |         no          |     yes     |       -       |
-|     v 5     |        yes        |         yes         |      no     |      no       |
-|  v 5 FIPS   |        yes        |         yes         |      no     |      yes      |
-|     SKY     |        yes        |         yes         |      no     |      no       |
+| YubiKey  | U2F Available | FIDO2 Available | U2F PIN | FIDO2 PIN |
+|:--------:|:-------------:|:---------------:|:-------:|:---------:|
+|   v 4    |      yes      |       no        |   no    |     -     |
+| v 4 FIPS |      yes      |       no        |   yes   |     -     |
+|   v 5    |      yes      |       yes       |   no    |    no     |
+| v 5 FIPS |      yes      |       yes       |   no    |    yes    |
+|   SKY    |      yes      |       yes       |   no    |    no     |
 
 To learn more about the U2F PIN, see the article on [FIDO U2F and FIPS](fips-mode.md).

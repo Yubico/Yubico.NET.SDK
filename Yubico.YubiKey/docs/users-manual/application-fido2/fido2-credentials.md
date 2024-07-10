@@ -205,7 +205,7 @@ According to the standard, these are the required elements:
 - ClientDataHash
 - RelyingParty
 
-The following are optional in the FIDO2 standard, but required by the YubiKey.  Remember,
+The following are optional in the FIDO2 standard, but required by the YubiKey. Remember,
 if you use `Fido2Session.GetAssertions`, you should not supply these parameters. If you
 do, they will be ignored.
 

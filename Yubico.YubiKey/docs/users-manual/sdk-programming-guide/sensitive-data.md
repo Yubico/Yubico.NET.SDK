@@ -83,7 +83,7 @@ offered to the customer.
 If your application does that, you are trading security for usability. Sometimes that is
 unavoidable. Simply be aware that sensitive data is hanging around and make sure you
 overwrite it as soon as possible. For example, create an option to specify the caching
-time (15 seconds? 1 minute?) and overwrite after that time has passed. 
+time (15 seconds? 1 minute?) and overwrite after that time has passed.
 
 ### Control the buffer
 

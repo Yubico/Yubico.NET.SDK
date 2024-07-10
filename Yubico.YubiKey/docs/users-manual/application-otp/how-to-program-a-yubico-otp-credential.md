@@ -18,27 +18,35 @@ limitations under the License. -->
 
 # How to program a slot with a Yubico OTP credential
 
-To program a [slot](xref:OtpSlots) with a [Yubico OTP](xref:OtpYubicoOtp) credential, you will use a [ConfigureYubicoOtp](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp) instance. It is instantiated by calling the factory method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
+To program a [slot](xref:OtpSlots) with a [Yubico OTP](xref:OtpYubicoOtp) credential, you will use
+a [ConfigureYubicoOtp](xref:Yubico.YubiKey.Otp.Operations.ConfigureYubicoOtp) instance. It is instantiated by calling
+the factory method of the same name on your [OtpSession](xref:Yubico.YubiKey.Otp.OtpSession) instance.
 
-First, a clarification of terms is needed. “Yubico OTP” is both an OTP credential type and a [challenge-response](xref:OtpChallengeResponse) algorithm. In this context, we are referring to the credential type. A Yubico OTP credential is touch-activated. When you touch the YubiKey, it will emit a binary challenge using [ModHex](xref:OtpModhex) characters.
+First, a clarification of terms is needed. “Yubico OTP” is both an OTP credential type and
+a [challenge-response](xref:OtpChallengeResponse) algorithm. In this context, we are referring to the credential type. A
+Yubico OTP credential is touch-activated. When you touch the YubiKey, it will emit a binary challenge
+using [ModHex](xref:OtpModhex) characters.
 
 A Yubico OTP credential contains the following three parts, which must be set during instantiation:
 
 * Public ID
 
-   The public ID is a prefix that is prepended to the actual challenge; it is not used to generate the challenge. The serial number of the YubiKey is often used to generate this ID.
+  The public ID is a prefix that is prepended to the actual challenge; it is not used to generate the challenge. The
+  serial number of the YubiKey is often used to generate this ID.
 
 * Private ID
 
-   The private ID is a six-byte value that is used as part of the algorithm to create a challenge and as a way to validate identity.
+  The private ID is a six-byte value that is used as part of the algorithm to create a challenge and as a way to
+  validate identity.
 
 * Key
 
-   The key is a 16-byte AES key that is used as the primary secret for the credential.
+  The key is a 16-byte AES key that is used as the primary secret for the credential.
 
-## ConfigureYubicoOtp example  
+## ConfigureYubicoOtp example
 
-You can configure the [ShortPress](xref:Yubico.YubiKey.Otp.Slot.ShortPress) slot of your YubiKey with a Yubico OTP credential as follows:
+You can configure the [ShortPress](xref:Yubico.YubiKey.Otp.Slot.ShortPress) slot of your YubiKey with a Yubico OTP
+credential as follows:
 
 ```C#
 using (OtpSession otp = new OtpSession(yKey))
@@ -52,7 +60,8 @@ using (OtpSession otp = new OtpSession(yKey))
 }
 ```
 
-In this example, we’re configuring a Yubico OTP credential using the serial number of the YubiKey to generate the public ID and supplying an existing private ID and AES key.
+In this example, we’re configuring a Yubico OTP credential using the serial number of the YubiKey to generate the public
+ID and supplying an existing private ID and AES key.
 
 You can also generate a new private ID and AES key to use instead:
 
@@ -72,12 +81,16 @@ using (OtpSession otp = new OtpSession(yKey))
 }
 ```
 
-The API does not own the object where secrets are stored. Because of this, you must still provide the place to put the generated information. Once you have done what is needed with the data, you should clear the memory where it is located.
+The API does not own the object where secrets are stored. Because of this, you must still provide the place to put the
+generated information. Once you have done what is needed with the data, you should clear the memory where it is located.
 
 ## Slot reconfiguration and access codes
 
-If a slot is protected by an access code and you wish to reconfigure it with a Yubico OTP credential, you must provide that access code with ``UseCurrentAccessCode()`` during the ``ConfigureYubicoOtp()`` operation. Otherwise, the operation will fail and throw the following exception:
+If a slot is protected by an access code and you wish to reconfigure it with a Yubico OTP credential, you must provide
+that access code with ``UseCurrentAccessCode()`` during the ``ConfigureYubicoOtp()`` operation. Otherwise, the operation
+will fail and throw the following exception:
 
 ```System.InvalidOperationException has been thrown. YubiKey Operation Failed. [Warning, state of non-volatile memory is unchanged.]```
 
-For more information on slot access codes, please see [How to set, reset, remove, and use slot access codes](xref:OtpSlotAccessCodes).
+For more information on slot access codes, please
+see [How to set, reset, remove, and use slot access codes](xref:OtpSlotAccessCodes).

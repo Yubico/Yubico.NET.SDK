@@ -50,33 +50,33 @@ the following:
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 90 | 00
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 90  | 00  
 
 #### Response APDU when the input is not encoded correctly
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 6F | 11
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 6F  | 11  
 
 #### Response APDU when no protocol is given
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 6F | 14
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 6F  | 14  
 
 #### Response APDU when an unsupported protocol is specified
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 6F | 33
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 6F  | 33  

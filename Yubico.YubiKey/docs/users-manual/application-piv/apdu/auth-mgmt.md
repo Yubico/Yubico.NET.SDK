@@ -12,7 +12,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Authenticate: management key<br/>single authentication
 
 ### Command APDU Info (First Call)
@@ -32,24 +31,24 @@ The value in P2 is 9B, the slot for the management key.
 Total Length: 14\
 Data Length: 12
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-7C 0A 81 08 \<*Client Authentication Challenge (8 bytes)*\> | 90 | 00
+|                            Data                             | SW1 | SW2 |
+:-----------------------------------------------------------:|:---:|:---:
+| 7C 0A 81 08 \<*Client Authentication Challenge (8 bytes)*\> | 90  | 00  |
 
 ### Command APDU Info (Second Call)
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 87 | xx | 9B | 0C | 7C 0A 82 08 \<*Client Authentication Response (8 bytes)*\> | (absent)
+| CLA | INS | P1 | P2 | Lc | Data | Le |
+|:---: | :---: | :---: | :---: | :---: | :---:|
+|00 | 87 | xx | 9B | 0C | 7C 0A 82 08 \<*Client Authentication Response (8 bytes)*\> | (absent)|
 
 ### Response APDU Info (Second Response)
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(absent) | 90 | 00
+|   Data   | SW1 | SW2 |
+|:--------:|:---:|:---:|
+| (absent) | 90  | 00  |
 
 #### Second Response APDU: Key Not Authenticated
 
@@ -106,25 +105,27 @@ Data | SW1 | SW2
 
 CLA | INS | P1 | P2 | Lc | Data | Le
 :---: | :---: | :---: | :---: | :---: | :---:
-00 | 87 | xx | 9B | 18 | 7C 16 80 08 \<*Client Authentication Response (8 bytes)*\> 81 08 \<*YubiKey Authentication Challenge (8 bytes)*\> 82 00 | (absent)
+00 | 87 | xx | 9B | 18 | 7C 16 80 08 \<*Client Authentication Response (8 bytes)*\> 81 08 \<*YubiKey Authentication
+Challenge (8 bytes)*\> 82 00 | (absent)
 
 ### Response APDU Info (Second Response)
 
 Total Length: 14\
 Data Length: 12
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-7C 0A 82 08 \<*YubiKey Authentication Response (8 bytes)*\> | 90 | 00
+| Data | SW1 | SW2 |
+
+|:-----------------------------------------------------------:| :---: | :---:|
+|7C 0A 82 08 \<*YubiKey Authentication Response (8 bytes)*\> | 90 | 00|
 
 #### Second Response APDU: Key Not Authenticated
 
 Total Length: 2\
 Data Length: 0
 
-Total Length | Data Length | Data | SW1 | SW2
-:---: | :---: | :---:
-(absent) | 69 | 82
+| Total Length | Data Length | Data | SW1 | SW2|
+|:---: | :---: | :---:|
+|(absent) | 69 | 82|
 
 ### Examples
 

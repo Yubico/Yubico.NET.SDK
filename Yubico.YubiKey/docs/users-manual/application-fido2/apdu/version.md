@@ -27,6 +27,7 @@ The data is 8 random bytes.
 Total Length: 5\
 Data Length: 3
 
-Data | SW1 | SW2
-:---: | :---: | :---:
+         Data          | SW1 | SW2
+
+:---------------------:| :---: | :---:
 *major, minor, patch* | 90 | 00

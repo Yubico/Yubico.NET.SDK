@@ -29,15 +29,15 @@ The data is the PIN itself, there is no further encoding.
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 90 | 00
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 90  | 00  
 
 #### Response APDU for an incorrect PIN
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 63 | C0
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 63  | C0  

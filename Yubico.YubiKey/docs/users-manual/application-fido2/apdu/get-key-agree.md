@@ -44,8 +44,9 @@ the following:
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-Data | SW1 | SW2
-:---: | :---: | :---:
+      Data      | SW1 | SW2
+
+:--------------:| :---: | :---:
 *encoded info* | 90 | 00
 
 The info returned is CBOR encoded. It has a structure similar to the
@@ -61,7 +62,7 @@ following.
 ```
 
 The integers describe the algorithm and curve, and the byte strings are
-the x- and y-coordinates of the public key. 
+the x- and y-coordinates of the public key.
 
 The lengths of the byte string are dependent on the algorithm.
 Currently only one algorithm is supported, ECDH using the NIST curve
@@ -74,15 +75,15 @@ response will be 80 bytes.
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 6F | 14
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 6F  | 14  
 
 #### Response APDU when an unsupported protocol is specified
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 6F | 33
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 6F  | 33  

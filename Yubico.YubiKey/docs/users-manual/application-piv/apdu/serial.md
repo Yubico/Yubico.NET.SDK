@@ -25,10 +25,9 @@ CLA | INS | P1 | P2 | Lc | Data | Le
 Total Length: 6\
 Data Length: 4
 
-                      Data                      | SW1 | SW2
-
-:----------------------------------------------:| :---: | :---:
-*big endian bytes of the 32-bit serial number* | 90 | 00
+|                      Data                      | SW1 | SW2 |
+|:----------------------------------------------:|:---:|:---:|
+| *big endian bytes of the 32-bit serial number* | 90  | 00  |
 
 ### Examples
 

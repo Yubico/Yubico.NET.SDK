@@ -29,10 +29,9 @@ values): `9A, 9C, 9D, 9E, 82, 93, 84, 85, 86, 87, 88, 89, 8A, 8B, 8C, 8D, 8E, 8F
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-| Data | SW1 | SW2 |
-
-|:-------------:| :---: | :---: |
-*certificate* | 90 | 00 |
+|     Data      | SW1 | SW2 |
+|:-------------:|:---:|:---:|
+| *certificate* | 90  | 00  |
 
 Note that the certificate will be returned over multiple commands. Each return command
 will be able to return up to 256 bytes. To get more bytes of a return, call the GET

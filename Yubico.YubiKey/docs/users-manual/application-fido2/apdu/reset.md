@@ -35,9 +35,9 @@ which is the command "`authenticatorReset`". There are no command parameters.
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 90  | 00  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 90  | 00  |
 
 #### Response APDU when the YubiKey denies the request
 
@@ -48,9 +48,9 @@ reset command over NFC.
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 6F  | 27  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 6F  | 27  |
 
 #### Response APDU when the YubiKey is not allowed to be reset
 

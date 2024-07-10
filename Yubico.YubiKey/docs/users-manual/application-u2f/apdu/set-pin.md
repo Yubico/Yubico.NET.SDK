@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Inner command APDU info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 44 | 00 | 00 | *data len* | *data* | (absent)
+| CLA | INS | P1 | P2 |     Lc     |  Data  |    Le    |
+|:---:|:---:|:--:|:--:|:----------:|:------:|:--------:|
+| 00  | 44  | 00 | 00 | *data len* | *data* | (absent) |
 
 The data is encoded as
 
@@ -39,36 +39,36 @@ If there is no current PIN, then the data will be encoded as
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 90  | 00  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 90  | 00  |
 
 #### Response APDU for current PIN incorrect
 
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 63  | C0  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 63  | C0  |
 
 #### Response APDU for blocked PIN
 
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 69  | 83  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 83  |
 
 #### Response APDU for new PIN invalid length
 
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 67  | 00  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 67  | 00  |
 
 #### Response APDU for PIN not supported
 
@@ -79,6 +79,6 @@ response.
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 6D  | 00  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 6D  | 00  |

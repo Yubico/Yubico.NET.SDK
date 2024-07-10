@@ -16,18 +16,18 @@ limitations under the License. -->
 
 ### Inner command APDU info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | C2 | 00 | 00 | (absent) | (absent) | (absent)
+| CLA | INS | P1 | P2 |    Lc    |   Data   |    Le    |
+|:---:|:---:|:--:|:--:|:--------:|:--------:|:--------:|
+| 00  | C2  | 00 | 00 | (absent) | (absent) | (absent) |
 
 ### Response APDU info
 
 Total Length: 49\
 Data Length: 47
 
-  Data  | SW1 | SW2 
-:------:|:---:|:---:
- *data* | 90  | 00  
+|  Data  | SW1 | SW2 |
+|:------:|:---:|:---:|
+| *data* | 90  | 00  |
 
 The data is a byte array with the first byte the length and the
 following bytes a series of TLVs. See

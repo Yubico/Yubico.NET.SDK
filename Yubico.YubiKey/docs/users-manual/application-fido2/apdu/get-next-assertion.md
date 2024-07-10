@@ -36,10 +36,9 @@ command parameters.
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-      Data      | SW1 | SW2
-
-:--------------:| :---: | :---:
-*encoded info* | 90 | 00
+|      Data      | SW1 | SW2 |
+|:--------------:|:---:|:---:|
+| *encoded info* | 90  | 00  |
 
 The info returned is CBOR encoded. It has a structure similar to the
 following.

@@ -316,9 +316,9 @@ Resets the application to just-installed state.
 
 ### Command APDU info
 
- CLA  | INS  |  P1  |  P2  |    Lc    |   Data   |
-:----:|:----:|:----:|:----:|:--------:|:--------:|
- 0x00 | 0x04 | 0xde | 0xad | (absent) | (absent) |
+| CLA  | INS  |  P1  |  P2  |    Lc    |   Data   |
+|:----:|:----:|:----:|:----:|:--------:|:--------:|
+| 0x00 | 0x04 | 0xde | 0xad | (absent) | (absent) |
 
 ### Response APDU info
 

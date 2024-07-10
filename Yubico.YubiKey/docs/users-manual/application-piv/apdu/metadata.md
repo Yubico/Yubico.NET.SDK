@@ -29,10 +29,9 @@ CLA | INS | P1 | P2 | Lc | Data | Le
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-           Data           | SW1 | SW2
-
-:------------------------:| :---: | :---:
-*metadata as set of TLV* | 90 | 00
+|           Data           | SW1 | SW2 |
+|:------------------------:|:---:|:---:|
+| *metadata as set of TLV* | 90  | 00  |
 
 The data consists of a set of TLVs. The possible valid tags (T of TLV) are listed in the
 table below. The length (L of TLV) is one, two, or three bytes, using the DER encoding

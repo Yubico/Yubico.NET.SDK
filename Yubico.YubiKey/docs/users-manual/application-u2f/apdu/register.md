@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Inner command APDU info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 01 | 00 | 00 | 64 | *data* | (absent)
+| CLA | INS | P1 | P2 | Lc |  Data  |    Le    |
+|:---:|:---:|:--:|:--:|:--:|:------:|:--------:|
+| 00  | 01  | 00 | 00 | 64 | *data* | (absent) |
 
 The data is
 
@@ -36,10 +36,9 @@ hash of the origin data. Each is a SHA-256 message digest so each is 32 byte lon
 Total Length: 2\
 Data Length: 0
 
-        Data        | SW1 | SW2
-
-:------------------:| :---: | :---:
-*encoded response* | 90 | 00
+|        Data        | SW1 | SW2 |
+|:------------------:|:---:|:---:|
+| *encoded response* | 90  | 00  |
 
 where the encoded response is
 
@@ -52,33 +51,33 @@ where the encoded response is
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 63  | C0  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 63  | C0  |
 
 #### Response APDU for blocked PIN
 
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 69  | 83  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 83  |
 
 #### Response APDU for touch required
 
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 69  | 85  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 85  |
 
 #### Response APDU for incorrect data length
 
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 67  | 00  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 67  | 00  |

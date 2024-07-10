@@ -40,18 +40,18 @@ The new key data is formatted as follows
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 90  | 00  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 90  | 00  |
 
 #### Response APDU for SET MANAGEMENT KEY (authentication failed)
 
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 69  | 82  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 82  |
 
 ### Examples
 

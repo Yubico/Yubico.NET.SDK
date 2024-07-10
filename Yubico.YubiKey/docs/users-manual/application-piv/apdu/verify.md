@@ -27,18 +27,18 @@ CLA | INS | P1 | P2 | Lc | Data | Le
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 90  | 00  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 90  | 00  |
 
 #### Response APDU for VERIFY (Invalid PIN)
 
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 63  | C4  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 63  | C4  |
 
 If the PIN entered is incorrect, then the error is `63 CX` where *X* is the number of
 retries remaining. In the above, there are 4 retries remaining.
@@ -48,9 +48,9 @@ retries remaining. In the above, there are 4 retries remaining.
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 69  | 83  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 83  |
 
 Whe the YubiKey returns this Status Word, it is not saying the PIN is incorrect. It is
 simply reporting that there are no retries remaining and the PIN is blocked. Maybe the PIN

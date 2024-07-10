@@ -30,10 +30,9 @@ specifies only this combination of INS, P1, and P2.
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-     Data      | SW1 | SW2
-
-:-------------:| :---: | :---:
-*data object* | 90 | 00
+|     Data      | SW1 | SW2 |
+|:-------------:|:---:|:---:|
+| *data object* | 90  | 00  |
 
 The data object will be a TLV with a tag of `7E` or `53`. If the Get Data command
 requested "Discovery" (data tag of `7E`), then the TLV will be `73 L V`. Otherwise it will
@@ -44,18 +43,18 @@ be `53 L V`.
 Total Length: *2*\
 Data Length: *0*
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 6A  | 82  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 6A  | 82  |
 
 ### Response APDU info: security status not satisfied
 
 Total Length: *2*\
 Data Length: *0*
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 69  | 82  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 82  |
 
 ### Examples
 

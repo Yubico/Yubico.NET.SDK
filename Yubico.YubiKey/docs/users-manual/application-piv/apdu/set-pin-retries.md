@@ -27,18 +27,18 @@ CLA | INS | P1 | P2 | Lc | Data | Le
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 90  | 00  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 90  | 00  |
 
 #### Response APDU for SET PIN RETRIES (authentication failed)
 
 Total Length: 2\
 Data Length: 0
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 69  | 82  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 82  |
 
 ### Examples
 

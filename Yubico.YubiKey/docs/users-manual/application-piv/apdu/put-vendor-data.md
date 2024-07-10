@@ -34,9 +34,9 @@ Data Length: 0
 Total Length: *2*\
 Data Length: *0*
 
-   Data    | SW1 | SW2 
-:---------:|:---:|:---:
- (no data) | 69  | 82  
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 82  |
 
 ### Examples
 

@@ -16,9 +16,9 @@ limitations under the License. -->
 
 ### Inner command APDU info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 02 | *control byte* | 00 | *length* | *data* | (absent)
+| CLA | INS |       P1       | P2 |    Lc    |  Data  |    Le    |
+|:---:|:---:|:--------------:|:--:|:--------:|:------:|:--------:|
+| 00  | 02  | *control byte* | 00 | *length* | *data* | (absent) |
 
 The control byte is either `03` (enforce user presence), `07` (check only), or `08`
 (don't enforce user presence).

@@ -17,9 +17,9 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// The <see cref="DeleteKeyCommand"/> is used to Delete a PIV key from the target slot
+    /// The <see cref="DeleteKeyCommand"/> is used to delete a PIV key from the target slot.
     /// <remarks>
-    /// Any key, including the attestation key can be deleted.
+    /// Any key, including the attestation key, can be deleted.
     /// </remarks>
     /// </summary>
     public class DeleteKeyCommand : IYubiKeyCommand<DeleteKeyResponse>
@@ -32,21 +32,21 @@ namespace Yubico.YubiKey.Piv.Commands
         private const byte MoveOrDeleteInstruction = 0xF6;
 
         /// <summary>
-        /// Constructor for the <see cref="DeleteKeyCommand"/> which is used to delete a PIV key from a slot.
+        /// Constructor for the <see cref="DeleteKeyCommand"/>, which is used to delete a PIV key from a slot.
         /// </summary>
-        /// <param name="slotToClear">The Yubikey slot of the key you want to clear.</param>
+        /// <param name="slotToClear">The YubiKey slot of the key you want to clear.</param>
         public DeleteKeyCommand(byte slotToClear)
         {
             SlotToClear = slotToClear;
         }
 
         /// <summary>
-        /// Constructor for the <see cref="DeleteKeyCommand"/> which is used to delete a PIV key from a slot.
+        /// Constructor for the <see cref="DeleteKeyCommand"/>, which is used to delete a PIV key from a slot.
         /// </summary>
         public DeleteKeyCommand() { }
 
         /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs. For this command it's PIV.
+        /// Gets the YubiKeyApplication to which this command belongs. For this command, it's PIV.
         /// </summary>
         /// <value>
         /// YubiKeyApplication.Piv
@@ -54,10 +54,10 @@ namespace Yubico.YubiKey.Piv.Commands
         public YubiKeyApplication Application => YubiKeyApplication.Piv;
 
         /// <summary>
-        /// Constructs a <see cref="CommandApdu"/> for the Delete-operation.
+        /// Constructs a <see cref="CommandApdu"/> for the delete operation.
         /// </summary>
         /// <returns>
-        /// The <see cref="CommandApdu"/> that targets the Delete-operation with the correct parameters.
+        /// The <see cref="CommandApdu"/> that targets the delete operation with the correct parameters.
         /// </returns>
         public CommandApdu CreateCommandApdu() =>
             new CommandApdu

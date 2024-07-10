@@ -20,25 +20,25 @@ namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
     /// The <see cref="MoveKeyCommand"/> is used to move a PIV key from one slot to another.
-    /// The source slot must not be the <see cref="PivSlot.Attestation"/>-slot and the destination slot must be empty.
+    /// The source slot must not be the <see cref="PivSlot.Attestation"/> slot, and the destination slot must be empty.
     /// </summary>
     public class MoveKeyCommand : IYubiKeyCommand<MoveKeyResponse>
     {
         /// <summary>
-        /// The Yubikey slot of the key you want to move. This must be a valid slot number.
+        /// The YubiKey slot of the key you want to move. This must be a valid slot number.
         /// </summary>
         public byte SourceSlot { get; set; }
 
         /// <summary>
-        /// The target Yubikey slot for the key you want to move. This must be a valid slot number.
+        /// The target YubiKey slot for the key you want to move. This must be a valid slot number.
         /// </summary>
         public byte DestinationSlot { get; set; }
 
         private const byte MoveOrDeleteInstruction = 0xF6;
 
         /// <summary>
-        /// Constructor for the <see cref="MoveKeyCommand"/> which is used to move a PIV key from one slot to another.
-        /// The source slot must not be the <see cref="PivSlot.Attestation"/>-slot and the destination slot must be empty.
+        /// Constructor for the <see cref="MoveKeyCommand"/>, which is used to move a PIV key from one slot to another.
+        /// The source slot must not be the <see cref="PivSlot.Attestation"/> slot, and the destination slot must be empty.
         /// </summary>
         /// <param name="sourceSlot">The Yubikey slot of the key you want to move. This must be a valid slot number.</param>
         /// <param name="destinationSlot">The target Yubikey slot for the key you want to move. This must be a valid slot number.</param>
@@ -49,8 +49,8 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        /// Constructor for the <see cref="MoveKeyCommand"/> which is used to move a PIV key from one slot to another.
-        /// The source slot must not be the <see cref="PivSlot.Attestation"/>-slot and the destination slot must be empty.
+        /// Constructor for the <see cref="MoveKeyCommand"/>, which is used to move a PIV key from one slot to another.
+        /// The source slot must not be the <see cref="PivSlot.Attestation"/> slot, and the destination slot must be empty.
         /// </summary>
         public MoveKeyCommand()
         {
@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
         /// <summary>
         /// Gets the YubiKeyApplication to which this command belongs. For this
-        /// command it's PIV.
+        /// command, it's PIV.
         /// </summary>
         /// <value>
         /// YubiKeyApplication.Piv
@@ -67,11 +67,11 @@ namespace Yubico.YubiKey.Piv.Commands
         public YubiKeyApplication Application => YubiKeyApplication.Piv;
 
         /// <summary>
-        /// This will create and validate the <see cref="CommandApdu"/>.
+        /// Creates and validates the <see cref="CommandApdu"/>.
         /// </summary>
         /// <exception cref="InvalidOperationException">An exception will be thrown upon invalid slot usage.
         /// Either one of the slots were the <see cref="PivSlot.Attestation"/> or the source and destination slot were the same.</exception>
-        /// <returns>The <see cref="CommandApdu"/> that targets the Move-operation with the correct parameters</returns>
+        /// <returns>The <see cref="CommandApdu"/> that targets the Move operation with the correct parameters</returns>
         public CommandApdu CreateCommandApdu()
         {
             ValidateSlots(SourceSlot, DestinationSlot);

@@ -18,18 +18,17 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
-    /// The response to the <see cref="GetDeviceInfoCommand"/> command, containing the YubiKey's
-    /// device configuration details.
+    ///     The response to the <see cref="GetDeviceInfoCommand" /> command, containing the YubiKey's
+    ///     device configuration details.
     /// </summary>
     [Obsolete("This class has been replaced by GetPagedDeviceInfoResponse")]
     public sealed class GetDeviceInfoResponse : U2fResponse, IYubiKeyResponseWithData<YubiKeyDeviceInfo>
     {
-
         /// <summary>
-        /// Constructs a GetDeviceInfoResponse instance based on a ResponseApdu received from the YubiKey.
+        ///     Constructs a GetDeviceInfoResponse instance based on a ResponseApdu received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
+        ///     The ResponseApdu returned by the YubiKey.
         /// </param>
         public GetDeviceInfoResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -37,11 +36,11 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <summary>
-        /// Gets the <see cref="YubiKeyDeviceInfo"/> class that contains details about the current
-        /// configuration of the YubiKey.
+        ///     Gets the <see cref="YubiKeyDeviceInfo" /> class that contains details about the current
+        ///     configuration of the YubiKey.
         /// </summary>
         /// <returns>
-        /// The data in the response APDU, presented as a YubiKeyDeviceInfo class.
+        ///     The data in the response APDU, presented as a YubiKeyDeviceInfo class.
         /// </returns>
         public YubiKeyDeviceInfo GetData()
         {
@@ -63,7 +62,7 @@ namespace Yubico.YubiKey.U2f.Commands
             {
                 throw new MalformedYubiKeyResponseException
                 {
-                    ResponseClass = nameof(GetDeviceInfoResponse),
+                    ResponseClass = nameof(GetDeviceInfoResponse)
                 };
             }
 

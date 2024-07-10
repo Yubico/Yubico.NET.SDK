@@ -20,32 +20,32 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Piv
 {
     /// <summary>
-    /// This class holds an RSA private key.
+    ///     This class holds an RSA private key.
     /// </summary>
     /// <remarks>
-    /// At its foundation, an RSA private key consists of a modulus and private
-    /// exponent. However, to improve performance, the primeP, primeQ, exponentP,
-    /// exponentQ, and coefficient can be used to make the computations. These
-    /// are the elements of the Chinese Remainder Theorem method of computing RSA
-    /// private key operations. These are the elements needed by the YubiKey.
-    /// There are several ways to create an encoded key, however, this class only
-    /// supports the encoding scheme specified by Yubico.
-    /// <code>
+    ///     At its foundation, an RSA private key consists of a modulus and private
+    ///     exponent. However, to improve performance, the primeP, primeQ, exponentP,
+    ///     exponentQ, and coefficient can be used to make the computations. These
+    ///     are the elements of the Chinese Remainder Theorem method of computing RSA
+    ///     private key operations. These are the elements needed by the YubiKey.
+    ///     There are several ways to create an encoded key, however, this class only
+    ///     supports the encoding scheme specified by Yubico.
+    ///     <code>
     ///   TLV || TLV || TLV || TLV || TLV
     ///   01 length prime P || 02 length prime Q ||
     ///   03 length prime p Exponent dP || 04 length prime q Exponent dQ ||
     /// </code>
-    /// <para>
-    /// The YubiKey supports only 1024-bit and 2048-bit RSA keys. Each element in
-    /// the private key will be half that size. So for a 1024-bit RSA key pair,
-    /// the CRT components are each 512 bits (64 bytes) long, and for a 2048-bit
-    /// RSA key pair, the CRT components are each 1024 bits (128 bytes) long.
-    /// </para>
-    /// <para>
-    /// You can build an object from either the encoded private key, and then
-    /// examine each component, or you can build an object from the components,
-    /// then then examine the encoding.
-    /// </para>
+    ///     <para>
+    ///         The YubiKey supports only 1024-bit and 2048-bit RSA keys. Each element in
+    ///         the private key will be half that size. So for a 1024-bit RSA key pair,
+    ///         the CRT components are each 512 bits (64 bytes) long, and for a 2048-bit
+    ///         RSA key pair, the CRT components are each 1024 bits (128 bytes) long.
+    ///     </para>
+    ///     <para>
+    ///         You can build an object from either the encoded private key, and then
+    ///         examine each component, or you can build an object from the components,
+    ///         then then examine the encoding.
+    ///     </para>
     /// </remarks>
     public sealed class PivRsaPrivateKey : PivPrivateKey
     {
@@ -60,40 +60,15 @@ namespace Yubico.YubiKey.Piv
         private const int Rsa4096CrtBlockSize = 256;
         private const int CrtComponentCount = 5;
 
-        private Memory<byte> _primeP;
-
-        /// <summary>
-        /// Contains the prime p portion of the RSA private key.
-        /// </summary>
-        public ReadOnlySpan<byte> PrimeP => _primeP.Span;
-
-        private Memory<byte> _primeQ;
-
-        /// <summary>
-        /// Contains the prime q portion of the RSA private key.
-        /// </summary>
-        public ReadOnlySpan<byte> PrimeQ => _primeQ.Span;
+        private Memory<byte> _coefficient;
 
         private Memory<byte> _exponentP;
 
-        /// <summary>
-        /// Contains the exponent p portion of the RSA private key.
-        /// </summary>
-        public ReadOnlySpan<byte> ExponentP => _exponentP.Span;
-
         private Memory<byte> _exponentQ;
 
-        /// <summary>
-        /// Contains the exponent q portion of the RSA private key.
-        /// </summary>
-        public ReadOnlySpan<byte> ExponentQ => _exponentQ.Span;
+        private Memory<byte> _primeP;
 
-        private Memory<byte> _coefficient;
-
-        /// <summary>
-        /// Contains the coefficient portion of the RSA private key.
-        /// </summary>
-        public ReadOnlySpan<byte> Coefficient => _coefficient.Span;
+        private Memory<byte> _primeQ;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -103,31 +78,31 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Create a new instance of an RSA private key object based on the
-        /// given CRT components.
+        ///     Create a new instance of an RSA private key object based on the
+        ///     given CRT components.
         /// </summary>
         /// <param name="primeP">
-        /// The prime p as a canonical byte array. It must be 64 bytes (512
-        /// bits) or 128 bytes (1024 bits) long.
+        ///     The prime p as a canonical byte array. It must be 64 bytes (512
+        ///     bits) or 128 bytes (1024 bits) long.
         /// </param>
         /// <param name="primeQ">
-        /// The prime q as a canonical byte array. It must be 64 bytes (512
-        /// bits) or 128 bytes (1024 bits) long.
+        ///     The prime q as a canonical byte array. It must be 64 bytes (512
+        ///     bits) or 128 bytes (1024 bits) long.
         /// </param>
         /// <param name="exponentP">
-        /// The exponent p as a canonical byte array. It must be 64 bytes (512
-        /// bits) or 128 bytes (1024 bits) long.
+        ///     The exponent p as a canonical byte array. It must be 64 bytes (512
+        ///     bits) or 128 bytes (1024 bits) long.
         /// </param>
         /// <param name="exponentQ">
-        /// The exponent q as a canonical byte array. It must be 64 bytes (512
-        /// bits) or 128 bytes (1024 bits) long.
+        ///     The exponent q as a canonical byte array. It must be 64 bytes (512
+        ///     bits) or 128 bytes (1024 bits) long.
         /// </param>
         /// <param name="coefficient">
-        /// The CRT coefficient as a canonical byte array. It must be 64 bytes
-        /// (512 bits) or 128 bytes (1024 bits) long.
+        ///     The CRT coefficient as a canonical byte array. It must be 64 bytes
+        ///     (512 bits) or 128 bytes (1024 bits) long.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// The key data supplied is not a supported length.
+        ///     The key data supplied is not a supported length.
         /// </exception>
         public PivRsaPrivateKey(
             ReadOnlySpan<byte> primeP,
@@ -145,7 +120,7 @@ namespace Yubico.YubiKey.Piv
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPrivateKeyData)),
+                        ExceptionMessages.InvalidPrivateKeyData))
             };
 
             if (primeQ.Length != primeP.Length || exponentP.Length != primeP.Length
@@ -173,14 +148,39 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Create a new instance of an RSA private key object based on the
-        /// encoding.
+        ///     Contains the prime p portion of the RSA private key.
+        /// </summary>
+        public ReadOnlySpan<byte> PrimeP => _primeP.Span;
+
+        /// <summary>
+        ///     Contains the prime q portion of the RSA private key.
+        /// </summary>
+        public ReadOnlySpan<byte> PrimeQ => _primeQ.Span;
+
+        /// <summary>
+        ///     Contains the exponent p portion of the RSA private key.
+        /// </summary>
+        public ReadOnlySpan<byte> ExponentP => _exponentP.Span;
+
+        /// <summary>
+        ///     Contains the exponent q portion of the RSA private key.
+        /// </summary>
+        public ReadOnlySpan<byte> ExponentQ => _exponentQ.Span;
+
+        /// <summary>
+        ///     Contains the coefficient portion of the RSA private key.
+        /// </summary>
+        public ReadOnlySpan<byte> Coefficient => _coefficient.Span;
+
+        /// <summary>
+        ///     Create a new instance of an RSA private key object based on the
+        ///     encoding.
         /// </summary>
         /// <param name="encodedPrivateKey">
-        /// The PIV TLV encoding.
+        ///     The PIV TLV encoding.
         /// </param>
         /// <returns>
-        /// A new instance of a PivRsaPrivateKey object based on the encoding.
+        ///     A new instance of a PivRsaPrivateKey object based on the encoding.
         /// </returns>
         public static PivRsaPrivateKey CreateRsaPrivateKey(ReadOnlyMemory<byte> encodedPrivateKey)
         {
@@ -207,6 +207,7 @@ namespace Yubico.YubiKey.Piv
                 {
                     continue;
                 }
+
                 if (valueArray[tag - 1].IsEmpty == false)
                 {
                     continue;

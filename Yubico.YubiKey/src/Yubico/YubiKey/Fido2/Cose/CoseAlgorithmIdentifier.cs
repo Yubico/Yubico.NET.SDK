@@ -15,44 +15,44 @@
 namespace Yubico.YubiKey.Fido2.Cose
 {
     /// <summary>
-    /// Represents a COSE algorithm identifier.
+    ///     Represents a COSE algorithm identifier.
     /// </summary>
     public enum CoseAlgorithmIdentifier
     {
         /// <summary>
-        /// No algorithm specified.
+        ///     No algorithm specified.
         /// </summary>
         None = 0,
 
         /// <summary>
-        /// ECDSA with SHA-256 using the NIST P-256 curve.
+        ///     ECDSA with SHA-256 using the NIST P-256 curve.
         /// </summary>
         ES256 = -7,
 
         /// <summary>
-        /// ECDH with key derivation function HKDF using SHA-256.
+        ///     ECDH with key derivation function HKDF using SHA-256.
         /// </summary>
         ECDHwHKDF256 = -25,
 
         /// <summary>
-        /// ECDSA with SHA-384 using the NIST P-384 curve.
+        ///     ECDSA with SHA-384 using the NIST P-384 curve.
         /// </summary>
         ES384 = -35,
 
         /// <summary>
-        /// ECDSA with SHA-512 using the NIST P-521 curve.
+        ///     ECDSA with SHA-512 using the NIST P-521 curve.
         /// </summary>
         ES512 = -36,
 
         /// <summary>
-        /// ECDSA using the Ed25519 curve and "Pure" EdDSA which uses no digest
-        /// algorithm.
+        ///     ECDSA using the Ed25519 curve and "Pure" EdDSA which uses no digest
+        ///     algorithm.
         /// </summary>
         EdDSA = -8,
 
         /// <summary>
-        /// RSASSA-PKCS1-v1_5 with SHA-256
+        ///     RSASSA-PKCS1-v1_5 with SHA-256
         /// </summary>
-        RS256 = -257,
+        RS256 = -257
     }
 }

@@ -15,144 +15,147 @@
 namespace Yubico.YubiKey
 {
     /// <summary>
-    /// Detailed device and capabilities information for a YubiKey.
+    ///     Detailed device and capabilities information for a YubiKey.
     /// </summary>
     public interface IYubiKeyDeviceInfo
     {
         /// <summary>
-        /// The paid-for YubiKey features that are available over USB (and Lightning).
+        ///     The paid-for YubiKey features that are available over USB (and Lightning).
         /// </summary>
         public YubiKeyCapabilities AvailableUsbCapabilities { get; }
 
         /// <summary>
-        /// The USB features that are currently enabled over USB (and Lightning).
+        ///     The USB features that are currently enabled over USB (and Lightning).
         /// </summary>
         public YubiKeyCapabilities EnabledUsbCapabilities { get; }
 
         /// <summary>
-        /// The paid-for YubiKey features that are available over NFC.
+        ///     The paid-for YubiKey features that are available over NFC.
         /// </summary>
         public YubiKeyCapabilities AvailableNfcCapabilities { get; }
 
         /// <summary>
-        /// The NFC features that are currently enabled over NFC.
+        ///     The NFC features that are currently enabled over NFC.
         /// </summary>
         public YubiKeyCapabilities EnabledNfcCapabilities { get; }
 
         /// <summary>
-        /// The set of YubiKey applications that are currently configured to meet FIPS requirements.
+        ///     The set of YubiKey applications that are currently configured to meet FIPS requirements.
         /// </summary>
         public YubiKeyCapabilities FipsApproved { get; }
 
         /// <summary>
-        /// The set of YubiKey applications that are capable of being put into FIPS mode.
+        ///     The set of YubiKey applications that are capable of being put into FIPS mode.
         /// </summary>
         public YubiKeyCapabilities FipsCapable { get; }
 
         /// <summary>
-        /// The set of YubiKey applications that are blocked from being reset.
+        ///     The set of YubiKey applications that are blocked from being reset.
         /// </summary>
         public YubiKeyCapabilities ResetBlocked { get; }
 
         /// <summary>
-        /// The serial number of the YubiKey, if one is present.
+        ///     The serial number of the YubiKey, if one is present.
         /// </summary>
         public int? SerialNumber { get; }
 
         /// <summary>
-        /// Indicates whether or not the YubiKey is a FIPS Series device.
+        ///     Indicates whether or not the YubiKey is a FIPS Series device.
         /// </summary>
         /// <remarks>
-        /// When using a YubiKey FIPS Series device as an authenticator in a FIPS environment,
-        /// all of the sub-modules must be in a FIPS approved mode of operation for the
-        /// YubiKey FIPS Series device as a whole to be considered as operating in a FIPS
-        /// approved mode. This value does not determine whether the YubiKey is in a FIPS
-        /// approved mode.
+        ///     When using a YubiKey FIPS Series device as an authenticator in a FIPS environment,
+        ///     all of the sub-modules must be in a FIPS approved mode of operation for the
+        ///     YubiKey FIPS Series device as a whole to be considered as operating in a FIPS
+        ///     approved mode. This value does not determine whether the YubiKey is in a FIPS
+        ///     approved mode.
         /// </remarks>
         public bool IsFipsSeries { get; }
 
         /// <summary>
-        /// Indicates whether or not this device is a "Security Key by Yubico" series device.
+        ///     Indicates whether or not this device is a "Security Key by Yubico" series device.
         /// </summary>
         /// <remarks>
-        /// Security Key Series devices only support the U2F and FIDO2 applications. This property helps differentiate
-        /// these devices from a standard YubiKey that only has these two applications enabled.
+        ///     Security Key Series devices only support the U2F and FIDO2 applications. This property helps differentiate
+        ///     these devices from a standard YubiKey that only has these two applications enabled.
         /// </remarks>
         public bool IsSkySeries { get; }
 
         /// <summary>
-        /// The form-factor of the YubiKey.
+        ///     The form-factor of the YubiKey.
         /// </summary>
         public FormFactor FormFactor { get; }
 
         /// <summary>
-        /// The version of the firmware currently running on the YubiKey.
+        ///     The version of the firmware currently running on the YubiKey.
         /// </summary>
         public FirmwareVersion FirmwareVersion { get; }
 
         /// <summary>
-        /// The version of the chip/firmware storing the fingerprints (the second
-        /// secure element). If there is no template storage chip, this will be
-        /// null.
-        /// <remarks>This field is also known as the "FPS Version".</remarks>
+        ///     The version of the chip/firmware storing the fingerprints (the second
+        ///     secure element). If there is no template storage chip, this will be
+        ///     null.
+        ///     <remarks>This field is also known as the "FPS Version".</remarks>
         /// </summary>
         public TemplateStorageVersion? TemplateStorageVersion { get; }
 
         /// <summary>
-        /// The version of the chip/firmware performing the image processing. If
-        /// there is no image processing chip, this will be null.
-        /// <remarks>This field is also known as the "STM Version".</remarks>
+        ///     The version of the chip/firmware performing the image processing. If
+        ///     there is no image processing chip, this will be null.
+        ///     <remarks>This field is also known as the "STM Version".</remarks>
         /// </summary>
         public ImageProcessorVersion? ImageProcessorVersion { get; }
 
         /// <summary>
-        /// The CCID auto-eject timeout (in seconds).
+        ///     The CCID auto-eject timeout (in seconds).
         /// </summary>
         /// <remarks>
-        /// <para>
-        /// This field is only meaningful if <see cref="Yubico.YubiKey.DeviceFlags.TouchEject"/> in
-        /// <see cref="DeviceFlags"/> is set. A value of <c>0</c> means that the timeout
-        /// is disabled (the smart card will not be ejected automatically).
-        /// </para>
-        /// <para>
-        /// The range is <see cref="ushort.MinValue"/> through <see cref="ushort.MaxValue"/>.
-        /// </para>
+        ///     <para>
+        ///         This field is only meaningful if <see cref="Yubico.YubiKey.DeviceFlags.TouchEject" /> in
+        ///         <see cref="DeviceFlags" /> is set. A value of <c>0</c> means that the timeout
+        ///         is disabled (the smart card will not be ejected automatically).
+        ///     </para>
+        ///     <para>
+        ///         The range is <see cref="ushort.MinValue" /> through <see cref="ushort.MaxValue" />.
+        ///     </para>
         /// </remarks>
         public int AutoEjectTimeout { get; }
 
         /// <summary>
-        /// The period of time (in seconds) after which the OTP challenge-response command
-        /// should timeout.
+        ///     The period of time (in seconds) after which the OTP challenge-response command
+        ///     should timeout.
         /// </summary>
         /// <remarks>
-        /// The default value for the timeout is 15 seconds.
+        ///     The default value for the timeout is 15 seconds.
         /// </remarks>
         public byte ChallengeResponseTimeout { get; }
 
         /// <summary>
-        /// Device flags that can control device-global behavior.
+        ///     Device flags that can control device-global behavior.
         /// </summary>
         public DeviceFlags DeviceFlags { get; }
 
         /// <summary>
-        /// Indicates whether or not the YubiKey's configuration has been locked by the user.
+        ///     Indicates whether or not the YubiKey's configuration has been locked by the user.
         /// </summary>
         public bool ConfigurationLocked { get; }
 
         /// <summary>
-        /// Indicates if the NFC connectivity on the device is temporarily disabled
+        ///     Indicates if the NFC connectivity on the device is temporarily disabled
         /// </summary>
         public bool IsNfcRestricted { get; }
 
         /// <summary>
-        /// The part number for the Secure Element processor, if available, otherwise `null`
+        ///     The part number for the Secure Element processor, if available, otherwise `null`
         /// </summary>
         string? PartNumber { get; }
 
         /// <summary>
-        /// Whether or not pin complexity is enabled on the Yubikey.
-        /// For more information see
-        /// <a href="https://docs.yubico.com/hardware/yubikey/yk-tech-manual/5.7-firmware-specifics.html#pin-complexity">this documentation on pin complexity</a> 
+        ///     Whether or not pin complexity is enabled on the Yubikey.
+        ///     For more information see
+        ///     <a href="https://docs.yubico.com/hardware/yubikey/yk-tech-manual/5.7-firmware-specifics.html#pin-complexity">
+        ///         this
+        ///         documentation on pin complexity
+        ///     </a>
         /// </summary>
         bool IsPinComplexityEnabled { get; }
     }

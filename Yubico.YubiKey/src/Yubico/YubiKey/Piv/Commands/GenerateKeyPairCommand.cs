@@ -19,51 +19,51 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// Generate a new asymmetric key pair.
+    ///     Generate a new asymmetric key pair.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="GenerateKeyPairResponse"/>.
-    /// <para>
-    /// In order to generate a key pair, you must authenticate the management
-    /// key. The management key is not part of this command. For information on
-    /// how to authenticate a management key in order to perform operations, see
-    /// the User's Manual entry on
-    /// <xref href="UsersManualPivAccessControl"> PIV commands access control</xref>.
-    /// </para>
-    /// <para>
-    /// When you generate a key pair, you specify which slot will hold this new
-    /// key. If there is a key in that slot already, this command will replace
-    /// it. That old key will be gone and there will be nothing you can do to
-    /// recover it. Hence, use this command with caution.
-    /// </para>
-    /// <para>
-    /// Note that this command will generate a key pair, and from the Response
-    /// class you can retrieve the public key. However, you will still need to
-    /// obtain a certificate for this private key outside of this SDK. Once you
-    /// have the certificate, you can load it into the YubiKey using the Put Data
-    /// command.
-    /// </para>
-    /// <para>
-    /// The PIN policy determines whether using the private key to sign or
-    /// decrypt will require authenticating with the PIN or not. By default, the
-    /// PIN policy is always require a PIN in order to use the key in that slot.
-    /// See the User's Manual entry on
-    /// <xref href="UsersManualPivPinTouchPolicy"> PIN and touch policies </xref>
-    /// for more information.
-    /// </para>
-    /// <para>
-    /// Similarly, the touch policy determines whether using the private key will
-    /// require touch or not. The default is never.
-    /// </para>
-    /// <para>
-    /// Example:
-    /// </para>
-    /// <code language="csharp">
-    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
+    ///     The partner Response class is <see cref="GenerateKeyPairResponse" />.
+    ///     <para>
+    ///         In order to generate a key pair, you must authenticate the management
+    ///         key. The management key is not part of this command. For information on
+    ///         how to authenticate a management key in order to perform operations, see
+    ///         the User's Manual entry on
+    ///         <xref href="UsersManualPivAccessControl"> PIV commands access control</xref>.
+    ///     </para>
+    ///     <para>
+    ///         When you generate a key pair, you specify which slot will hold this new
+    ///         key. If there is a key in that slot already, this command will replace
+    ///         it. That old key will be gone and there will be nothing you can do to
+    ///         recover it. Hence, use this command with caution.
+    ///     </para>
+    ///     <para>
+    ///         Note that this command will generate a key pair, and from the Response
+    ///         class you can retrieve the public key. However, you will still need to
+    ///         obtain a certificate for this private key outside of this SDK. Once you
+    ///         have the certificate, you can load it into the YubiKey using the Put Data
+    ///         command.
+    ///     </para>
+    ///     <para>
+    ///         The PIN policy determines whether using the private key to sign or
+    ///         decrypt will require authenticating with the PIN or not. By default, the
+    ///         PIN policy is always require a PIN in order to use the key in that slot.
+    ///         See the User's Manual entry on
+    ///         <xref href="UsersManualPivPinTouchPolicy"> PIN and touch policies </xref>
+    ///         for more information.
+    ///     </para>
+    ///     <para>
+    ///         Similarly, the touch policy determines whether using the private key will
+    ///         require touch or not. The default is never.
+    ///     </para>
+    ///     <para>
+    ///         Example:
+    ///     </para>
+    ///     <code language="csharp">
+    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br />
     ///   var generateKeyPairCommand = new GenerateKeyPairCommand(
     ///       PivSlot.Signing, PivAlgorithm.EccP384, PivPinPolicy.Default, PivTouchPolicy.Default);
     ///   GenerateKeyPairResponse generateKeyPairResponse =
-    ///       connection.SendCommand(generateKeyPairCommand);<br/>
+    ///       connection.SendCommand(generateKeyPairCommand);<br />
     ///   if (generateKeyPairCommand.Status != ResponseStatus.Success)
     ///   {
     ///     // Handle error
@@ -96,120 +96,44 @@ namespace Yubico.YubiKey.Piv.Commands
         private const int IndexTouchPolicy = 8;
         private const int IndexTouchPolicyByte = 10;
         private const int TouchPolicyCount = 3;
-
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs. For this
-        /// command it's PIV.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Piv
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Piv;
+        private PivAlgorithm _algorithm;
 
         // These are needed so we can make the check on the set of the property.
         private byte _slotNumber;
-        private PivAlgorithm _algorithm;
 
         /// <summary>
-        /// The slot for which a key pair will be generated.
-        /// </summary>
-        /// <value>
-        /// The slot number, see <see cref="PivSlot"/>
-        /// </value>
-        /// <exception cref="ArgumentException">
-        /// The slot specified is not valid for public key operations.
-        /// </exception>
-        public byte SlotNumber
-        {
-            get => _slotNumber;
-            set
-            {
-                if (PivSlot.IsValidSlotNumberForGenerate(value) == false)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidSlot,
-                            value));
-                }
-                _slotNumber = value;
-            }
-        }
-
-        /// <summary>
-        /// The algorithm (and size) of the key to generate.
-        /// </summary>
-        /// <value>
-        /// The algorithm.
-        /// </value>
-        /// <exception cref="ArgumentException">
-        /// The algorithm specified is not valid for key pair generation.
-        /// </exception>
-        public PivAlgorithm Algorithm
-        {
-            get => _algorithm;
-            set
-            {
-                if (value.IsValidAlgorithmForGenerate() == false)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidAlgorithm));
-                }
-                _algorithm = value;
-            }
-        }
-
-        /// <summary>
-        /// The PIN policy the key will have. None is equivalent to Default.
-        /// </summary>
-        /// <value>
-        /// The PIN policy.
-        /// </value>
-        public PivPinPolicy PinPolicy { get; set; }
-
-        /// <summary>
-        /// The touch policy the key will have. None is equivalent to Default.
-        /// </summary>
-        /// <value>
-        /// The touch policy.
-        /// </value>
-        public PivTouchPolicy TouchPolicy { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the GenerateKeyPairCommand class. This command
-        /// takes the slot number, algorithm, and PIN and touch policies as input.
+        ///     Initializes a new instance of the GenerateKeyPairCommand class. This command
+        ///     takes the slot number, algorithm, and PIN and touch policies as input.
         /// </summary>
         /// <remarks>
-        /// The slot number must be for a slot that holds an asymmetric key. See
-        /// the User's Manual
-        /// <xref href="UsersManualPivSlots"> entry on PIV slots </xref> and
-        /// <see cref="PivSlot"/>.
-        /// <para>
-        /// Note that the <c>algorithm</c> argument is of type
-        /// <see cref="PivAlgorithm"/>,
-        /// which includes <c>None</c>, <c>TripleDes</c>, and <c>Pin</c>.
-        /// However, the only allowed values for this command are <c>Rsa1024</c>,
-        /// <c>Rsa2048</c>, <c>EccP256</c>, and <c>EccP384</c>.
-        /// </para>
-        /// <para>
-        /// Both the touch policy and pin policy <c>enum</c> arguments have
-        /// <c>None</c> as a possible value. This command, will treat a policy of
-        /// <c>None</c> the same as <c>Default</c>.
-        /// </para>
+        ///     The slot number must be for a slot that holds an asymmetric key. See
+        ///     the User's Manual
+        ///     <xref href="UsersManualPivSlots"> entry on PIV slots </xref> and
+        ///     <see cref="PivSlot" />.
+        ///     <para>
+        ///         Note that the <c>algorithm</c> argument is of type
+        ///         <see cref="PivAlgorithm" />,
+        ///         which includes <c>None</c>, <c>TripleDes</c>, and <c>Pin</c>.
+        ///         However, the only allowed values for this command are <c>Rsa1024</c>,
+        ///         <c>Rsa2048</c>, <c>EccP256</c>, and <c>EccP384</c>.
+        ///     </para>
+        ///     <para>
+        ///         Both the touch policy and pin policy <c>enum</c> arguments have
+        ///         <c>None</c> as a possible value. This command, will treat a policy of
+        ///         <c>None</c> the same as <c>Default</c>.
+        ///     </para>
         /// </remarks>
         /// <param name="slotNumber">
-        /// The slot which will hold the private key.
+        ///     The slot which will hold the private key.
         /// </param>
         /// <param name="algorithm">
-        /// The algorithm (and size) of the key to generate.
+        ///     The algorithm (and size) of the key to generate.
         /// </param>
         /// <param name="pinPolicy">
-        /// The PIN policy the key will have.
+        ///     The PIN policy the key will have.
         /// </param>
         /// <param name="touchPolicy">
-        /// The touch policy the key will have.
+        ///     The touch policy the key will have.
         /// </param>
         public GenerateKeyPairCommand(
             byte slotNumber,
@@ -224,14 +148,14 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        /// Initializes a new instance of the <c>GenerateKeyPairCommand</c> class.
-        /// This command will set the <c>PinPolicy</c> and <c>TouchPolicy</c>
-        /// to the defaults.
+        ///     Initializes a new instance of the <c>GenerateKeyPairCommand</c> class.
+        ///     This command will set the <c>PinPolicy</c> and <c>TouchPolicy</c>
+        ///     to the defaults.
         /// </summary>
         /// <remarks>
-        /// This constructor is provided for those developers who want to use the
-        /// object initializer pattern. For example:
-        /// <code language="csharp">
+        ///     This constructor is provided for those developers who want to use the
+        ///     object initializer pattern. For example:
+        ///     <code language="csharp">
         ///   var command = new GenerateKeyPairCommand()
         ///   {
         ///       SlotNumber = PivSlot.Authentication,
@@ -239,13 +163,13 @@ namespace Yubico.YubiKey.Piv.Commands
         ///       PinPolicy = PivPinPolicy.Once,
         ///   };
         /// </code>
-        /// <para>
-        /// There is no default slot number or algorithm, hence, for this command
-        /// to be valid, the slot number and algorithm must be specified. So if
-        /// you create an object using this constructor, you must set the
-        /// SlotNumber and Algorithm properties at some time before using it.
-        /// Otherwise you will get an exception when you do use it.
-        /// </para>
+        ///     <para>
+        ///         There is no default slot number or algorithm, hence, for this command
+        ///         to be valid, the slot number and algorithm must be specified. So if
+        ///         you create an object using this constructor, you must set the
+        ///         SlotNumber and Algorithm properties at some time before using it.
+        ///         Otherwise you will get an exception when you do use it.
+        ///     </para>
         /// </remarks>
         public GenerateKeyPairCommand()
         {
@@ -255,13 +179,96 @@ namespace Yubico.YubiKey.Piv.Commands
             TouchPolicy = PivTouchPolicy.Default;
         }
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
+        /// <summary>
+        ///     The slot for which a key pair will be generated.
+        /// </summary>
+        /// <value>
+        ///     The slot number, see <see cref="PivSlot" />
+        /// </value>
+        /// <exception cref="ArgumentException">
+        ///     The slot specified is not valid for public key operations.
+        /// </exception>
+        public byte SlotNumber
         {
-            Ins = PivGenerateKeyPairInstruction,
-            P2 = SlotNumber,
-            Data = BuildGenerateKeyPairApduData(),
-        };
+            get => _slotNumber;
+            set
+            {
+                if (PivSlot.IsValidSlotNumberForGenerate(value) == false)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidSlot,
+                            value));
+                }
+
+                _slotNumber = value;
+            }
+        }
+
+        /// <summary>
+        ///     The algorithm (and size) of the key to generate.
+        /// </summary>
+        /// <value>
+        ///     The algorithm.
+        /// </value>
+        /// <exception cref="ArgumentException">
+        ///     The algorithm specified is not valid for key pair generation.
+        /// </exception>
+        public PivAlgorithm Algorithm
+        {
+            get => _algorithm;
+            set
+            {
+                if (value.IsValidAlgorithmForGenerate() == false)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidAlgorithm));
+                }
+
+                _algorithm = value;
+            }
+        }
+
+        /// <summary>
+        ///     The PIN policy the key will have. None is equivalent to Default.
+        /// </summary>
+        /// <value>
+        ///     The PIN policy.
+        /// </value>
+        public PivPinPolicy PinPolicy { get; set; }
+
+        /// <summary>
+        ///     The touch policy the key will have. None is equivalent to Default.
+        /// </summary>
+        /// <value>
+        ///     The touch policy.
+        /// </value>
+        public PivTouchPolicy TouchPolicy { get; set; }
+
+        /// <summary>
+        ///     Gets the YubiKeyApplication to which this command belongs. For this
+        ///     command it's PIV.
+        /// </summary>
+        /// <value>
+        ///     YubiKeyApplication.Piv
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Piv;
+
+        /// <inheritdoc />
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = PivGenerateKeyPairInstruction,
+                P2 = SlotNumber,
+                Data = BuildGenerateKeyPairApduData()
+            };
+
+        /// <inheritdoc />
+        public GenerateKeyPairResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new GenerateKeyPairResponse(responseApdu, SlotNumber, Algorithm);
 
         // Build a byte array that contains the data portion of the APDU.
         // This will build a list that does or does not contain the PIN and
@@ -276,6 +283,7 @@ namespace Yubico.YubiKey.Piv.Commands
                         ExceptionMessages.InvalidSlot,
                         _slotNumber));
             }
+
             if (_algorithm.IsValidAlgorithmForGenerate() == false)
             {
                 throw new InvalidOperationException(
@@ -284,9 +292,11 @@ namespace Yubico.YubiKey.Piv.Commands
                         ExceptionMessages.InvalidAlgorithm));
             }
 
-            byte[] data = {
+            byte[] data =
+            {
                 0xAC, 0x09, 0x80, 0x01, 0x00, 0xAA, 0x01, 0x00, 0xAB, 0x01, 0x00
             };
+
             data[IndexAlgorithmByte] = (byte)Algorithm;
             data[IndexTouchPolicyByte] = (byte)TouchPolicy;
             data[IndexPinPolicyByte] = (byte)PinPolicy;
@@ -299,6 +309,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 length -= PinPolicyCount;
                 valueLength -= PinPolicyCount;
             }
+
             if (TouchPolicy == PivTouchPolicy.Default || TouchPolicy == PivTouchPolicy.None)
             {
                 length -= TouchPolicyCount;
@@ -306,12 +317,8 @@ namespace Yubico.YubiKey.Piv.Commands
             }
 
             data[IndexValueLength] = (byte)valueLength;
-            Span<byte> returnValue = data.AsSpan(0, length);
+            Span<byte> returnValue = data.AsSpan(start: 0, length);
             return returnValue.ToArray();
         }
-
-        /// <inheritdoc />
-        public GenerateKeyPairResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new GenerateKeyPairResponse(responseApdu, SlotNumber, Algorithm);
     }
 }

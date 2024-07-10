@@ -17,16 +17,13 @@ using Yubico.YubiKey.Management.Commands;
 
 namespace Yubico.YubiKey.Otp.Commands
 {
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public class SetLegacyDeviceConfigCommand : SetLegacyDeviceConfigBase, IYubiKeyCommand<OtpResponse>
     {
-        /// <inheritdoc />
-        public YubiKeyApplication Application => YubiKeyApplication.Otp;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="SetLegacyDeviceConfigCommand"/> class.
+        ///     Initializes a new instance of the <see cref="SetLegacyDeviceConfigCommand" /> class.
         /// </summary>
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public SetLegacyDeviceConfigCommand(
             YubiKeyCapabilities yubiKeyInterfaces,
             byte challengeResponseTimeout,
@@ -37,19 +34,22 @@ namespace Yubico.YubiKey.Otp.Commands
         }
 
         /// <summary>
-        /// Creates a new <see cref="SetLegacyDeviceConfigCommand"/> from another object which derives from
-        /// <see cref="SetLegacyDeviceConfigBase"/>.
+        ///     Creates a new <see cref="SetLegacyDeviceConfigCommand" /> from another object which derives from
+        ///     <see cref="SetLegacyDeviceConfigBase" />.
         /// </summary>
         /// <remarks>
-        /// This constructor can be useful to switch between different application-specific
-        /// implementations of the same base command.
+        ///     This constructor can be useful to switch between different application-specific
+        ///     implementations of the same base command.
         /// </remarks>
         /// <param name="baseCommand">
-        /// The SetLegacyDeviceConfig base command object to copy from.
+        ///     The SetLegacyDeviceConfig base command object to copy from.
         /// </param>
         public SetLegacyDeviceConfigCommand(SetLegacyDeviceConfigBase baseCommand) : base(baseCommand)
         {
         }
+
+        /// <inheritdoc />
+        public YubiKeyApplication Application => YubiKeyApplication.Otp;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() =>
@@ -57,11 +57,10 @@ namespace Yubico.YubiKey.Otp.Commands
             {
                 Ins = OtpConstants.RequestSlotInstruction,
                 P1 = OtpConstants.WriteDeviceConfig,
-                Data = GetDataForApdu(),
+                Data = GetDataForApdu()
             };
 
         /// <inheritdoc />
-        public OtpResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ReadStatusResponse(responseApdu);
+        public OtpResponse CreateResponseForApdu(ResponseApdu responseApdu) => new ReadStatusResponse(responseApdu);
     }
 }

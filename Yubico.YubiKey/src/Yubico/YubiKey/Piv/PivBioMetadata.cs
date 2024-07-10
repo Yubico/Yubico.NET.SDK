@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics;
 using System.Globalization;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Piv.Commands;
@@ -21,15 +20,15 @@ using Yubico.YubiKey.Piv.Commands;
 namespace Yubico.YubiKey.Piv
 {
     /// <summary>
-    /// This class parses the response data from the PIV Get Bio Metadata command. It
-    /// holds data about Bio multi-protocol key.
+    ///     This class parses the response data from the PIV Get Bio Metadata command. It
+    ///     holds data about Bio multi-protocol key.
     /// </summary>
     /// <remarks>
-    /// The response to the
-    /// <see cref="Commands.GetBioMetadataCommand"/> is
-    /// <see cref="Commands.GetBioMetadataResponse"/>.
-    /// Call the <c>GetData</c> method in the response object to get the
-    /// metadata. An instance of this class will be returned.
+    ///     The response to the
+    ///     <see cref="Commands.GetBioMetadataCommand" /> is
+    ///     <see cref="Commands.GetBioMetadataResponse" />.
+    ///     Call the <c>GetData</c> method in the response object to get the
+    ///     metadata. An instance of this class will be returned.
     /// </remarks>
     public class PivBioMetadata
     {
@@ -40,24 +39,22 @@ namespace Yubico.YubiKey.Piv
         private const int TemporaryPinTag = 0x08;
 
         /// <summary>
-        /// The constructor that takes in the bio metadata encoding returned by the
-        /// YubiKey in response to the <see cref="GetBioMetadataCommand"/>.
+        ///     The constructor that takes in the bio metadata encoding returned by the
+        ///     YubiKey in response to the <see cref="GetBioMetadataCommand" />.
         /// </summary>
         /// <param name="responseData">
-        /// The data portion of the response APDU, this is the encoded bio metadata.
+        ///     The data portion of the response APDU, this is the encoded bio metadata.
         /// </param>
         /// <exception cref="InvalidOperationException">
-        /// The data supplied is not valid PIV bio metadata.
+        ///     The data supplied is not valid PIV bio metadata.
         /// </exception>
         public PivBioMetadata(ReadOnlyMemory<byte> responseData)
         {
-
             var tlvReader = new TlvReader(responseData);
 
             bool? isConfigured = null;
             int? attemptsRemaining = null;
             bool? hasTemporaryPin = null;
-
 
             while (tlvReader.HasData)
             {
@@ -86,13 +83,12 @@ namespace Yubico.YubiKey.Piv
                 }
             }
 
-
             if (isConfigured == null || attemptsRemaining == null || hasTemporaryPin == null)
             {
                 throw new InvalidOperationException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidApduResponseData));
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidApduResponseData));
             }
 
             IsConfigured = isConfigured.Value;
@@ -100,27 +96,26 @@ namespace Yubico.YubiKey.Piv
             HasTemporaryPin = hasTemporaryPin.Value;
         }
 
-
         /// <summary>
-        /// Indicates whether biometrics are configured or not (fingerprints enrolled or not).
-        /// A false return value indicates a YubiKey Bio without biometrics configured and hence the
-        /// client should fallback to a PIN based authentication.
+        ///     Indicates whether biometrics are configured or not (fingerprints enrolled or not).
+        ///     A false return value indicates a YubiKey Bio without biometrics configured and hence the
+        ///     client should fallback to a PIN based authentication.
         /// </summary>
         /// <returns>true if biometrics are configured or not.</returns>
         public bool IsConfigured { get; private set; }
 
         /// <summary>
-        /// Returns value of biometric match retry counter which states how many biometric match retries
-        /// are left until a YubiKey Bio is blocked.
-        /// If this method returns 0 and {@link #isConfigured()} returns true, the device is blocked for
-        /// biometric match and the client should invoke PIN based authentication to reset the biometric
-        /// match retry counter.
+        ///     Returns value of biometric match retry counter which states how many biometric match retries
+        ///     are left until a YubiKey Bio is blocked.
+        ///     If this method returns 0 and {@link #isConfigured()} returns true, the device is blocked for
+        ///     biometric match and the client should invoke PIN based authentication to reset the biometric
+        ///     match retry counter.
         /// </summary>
         public int AttemptsRemaining { get; private set; }
 
         /// <summary>
-        /// Indicates whether a temporary PIN has been generated in the YubiKey in relation to a 
-        /// successful biometric match.
+        ///     Indicates whether a temporary PIN has been generated in the YubiKey in relation to a
+        ///     successful biometric match.
         /// </summary>
         /// <returns>true if a temporary PIN has been generated.</returns>
         public bool HasTemporaryPin { get; private set; }

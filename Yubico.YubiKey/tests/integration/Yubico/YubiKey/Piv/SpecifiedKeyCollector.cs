@@ -29,13 +29,13 @@ namespace Yubico.YubiKey.Piv
         public SpecifiedKeyCollector(byte[] pin, byte[] puk, byte[] mgmtKey)
         {
             _pin = new byte[pin.Length];
-            Array.Copy(pin, 0, _pin, 0, pin.Length);
+            Array.Copy(pin, sourceIndex: 0, _pin, destinationIndex: 0, pin.Length);
 
             _puk = new byte[puk.Length];
-            Array.Copy(puk, 0, _puk, 0, puk.Length);
+            Array.Copy(puk, sourceIndex: 0, _puk, destinationIndex: 0, puk.Length);
 
             _mgmtKey = new byte[mgmtKey.Length];
-            Array.Copy(mgmtKey, 0, _mgmtKey, 0, mgmtKey.Length);
+            Array.Copy(mgmtKey, sourceIndex: 0, _mgmtKey, destinationIndex: 0, mgmtKey.Length);
         }
 
         public bool SpecifiedKeyCollectorDelegate(KeyEntryData keyEntryData)
@@ -84,14 +84,14 @@ namespace Yubico.YubiKey.Piv
                     currentValue = _mgmtKey;
                     break;
 
-                    //                case KeyEntryRequest.ChangePivManagementKey:
-                    //                    if (keyEntryData.IsRetry == true)
-                    //                    {
-                    //                        return false;
-                    //                    }
-                    //                    currentValue = CollectMgmtKey();
-                    //                    newValue = CollectMgmtKey();
-                    //                    break;
+                //                case KeyEntryRequest.ChangePivManagementKey:
+                //                    if (keyEntryData.IsRetry == true)
+                //                    {
+                //                        return false;
+                //                    }
+                //                    currentValue = CollectMgmtKey();
+                //                    newValue = CollectMgmtKey();
+                //                    break;
             }
 
             if (newValue is null)

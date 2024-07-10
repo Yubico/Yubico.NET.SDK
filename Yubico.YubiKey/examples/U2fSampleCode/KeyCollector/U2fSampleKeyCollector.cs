@@ -59,48 +59,50 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
 
                 case KeyEntryRequest.TouchRequest:
                     ReportOperation();
-                    SampleMenu.WriteMessage(MessageType.Title, 0,
+                    SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                         "touch the YubiKey's contact to complete the operation.\n");
                     return true;
 
                 case KeyEntryRequest.SetU2fPin:
-                    SampleMenu.WriteMessage(MessageType.Title, 0,
+                    SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                         "Setting the U2F application on the YubiKey to have a PIN, enter the PIN.");
                     collectedValue = SampleMenu.ReadResponse(out int _);
                     pinValue = ConvertCharArrayToByteArray(collectedValue);
                     keyEntryData.SubmitValue(pinValue);
-                    Array.Fill<char>(collectedValue, '0');
+                    Array.Fill(collectedValue, value: '0');
                     CryptographicOperations.ZeroMemory(pinValue);
                     break;
 
                 case KeyEntryRequest.VerifyU2fPin:
                     if (Operation == U2fKeyCollectorOperation.Register)
                     {
-                        SampleMenu.WriteMessage(MessageType.Title, 0,
+                        SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                             "Enter the PIN in order to complete registration.");
                     }
                     else
                     {
-                        SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the PIN in order to verify.");
+                        SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
+                            "Enter the PIN in order to verify.");
                     }
 
                     collectedValue = SampleMenu.ReadResponse(out int _);
                     pinValue = ConvertCharArrayToByteArray(collectedValue);
                     keyEntryData.SubmitValue(pinValue);
-                    Array.Fill<char>(collectedValue, '0');
+                    Array.Fill(collectedValue, value: '0');
                     CryptographicOperations.ZeroMemory(pinValue);
                     break;
 
                 case KeyEntryRequest.ChangeU2fPin:
-                    SampleMenu.WriteMessage(MessageType.Title, 0, "Changing the U2F PIN, enter the current PIN.");
+                    SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
+                        "Changing the U2F PIN, enter the current PIN.");
                     collectedValue = SampleMenu.ReadResponse(out int _);
                     byte[] currentPin = ConvertCharArrayToByteArray(collectedValue);
-                    Array.Fill<char>(collectedValue, '0');
-                    SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the new PIN.");
+                    Array.Fill(collectedValue, value: '0');
+                    SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter the new PIN.");
                     collectedValue = SampleMenu.ReadResponse(out int _);
                     byte[] newPin = ConvertCharArrayToByteArray(collectedValue);
                     keyEntryData.SubmitValues(currentPin, newPin);
-                    Array.Fill<char>(collectedValue, '0');
+                    Array.Fill(collectedValue, value: '0');
                     CryptographicOperations.ZeroMemory(currentPin);
                     CryptographicOperations.ZeroMemory(newPin);
                     break;
@@ -113,21 +115,18 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
         {
             switch (Operation)
             {
-                default:
-                    break;
-
                 case U2fKeyCollectorOperation.Register:
-                    SampleMenu.WriteMessage(MessageType.Title, 0,
+                    SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                         "The YubiKey is trying to register a U2F credential,");
                     break;
 
                 case U2fKeyCollectorOperation.Authenticate:
-                    SampleMenu.WriteMessage(MessageType.Title, 0,
+                    SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                         "The YubiKey is trying to authenticate a U2F credential,");
                     break;
 
                 case U2fKeyCollectorOperation.Reset:
-                    SampleMenu.WriteMessage(MessageType.Title, 0,
+                    SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                         "The YubiKey is trying to reset the U2F application,");
                     break;
             }

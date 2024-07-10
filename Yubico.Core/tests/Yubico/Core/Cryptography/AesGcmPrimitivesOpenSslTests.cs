@@ -23,67 +23,67 @@ namespace Yubico.Core.Cryptography
         [Fact]
         public void Instantiate_Succeeds()
         {
-            IAesGcmPrimitives aesObj = AesGcmPrimitives.Create();
+            var aesObj = AesGcmPrimitives.Create();
             Assert.NotNull(aesObj);
         }
 
         [Fact]
         public void Encrypt_Decrypt_Succeeds()
         {
-            byte[] keyData = GetKeyData(null);
-            byte[] nonce = GetNonce(null);
-            byte[] plaintext = GetPlaintext(null);
-            byte[] ciphertext = new byte[plaintext.Length];
-            byte[] tag = new byte[16];
-            byte[] associatedData = GetAssociatedData(plaintext.Length);
-            byte[] encryptedData = GetEncryptedData();
-            byte[] authTag = GetAuthTag();
+            var keyData = GetKeyData(random: null);
+            var nonce = GetNonce(random: null);
+            var plaintext = GetPlaintext(random: null);
+            var ciphertext = new byte[plaintext.Length];
+            var tag = new byte[16];
+            var associatedData = GetAssociatedData(plaintext.Length);
+            var encryptedData = GetEncryptedData();
+            var authTag = GetAuthTag();
 
-            IAesGcmPrimitives aesObj = AesGcmPrimitives.Create();
+            var aesObj = AesGcmPrimitives.Create();
             aesObj.EncryptAndAuthenticate(keyData, nonce, plaintext, ciphertext, tag, associatedData);
 
-            bool isValid = encryptedData.AsSpan().SequenceEqual(ciphertext.AsSpan());
+            var isValid = encryptedData.AsSpan().SequenceEqual(ciphertext.AsSpan());
             Assert.True(isValid);
             isValid = authTag.AsSpan().SequenceEqual(tag.AsSpan());
             Assert.True(isValid);
 
-            byte[] decryptedData = new byte[ciphertext.Length];
-            bool isVerified = aesObj.DecryptAndVerify(keyData, nonce, ciphertext, tag, decryptedData, associatedData);
+            var decryptedData = new byte[ciphertext.Length];
+            var isVerified = aesObj.DecryptAndVerify(keyData, nonce, ciphertext, tag, decryptedData, associatedData);
             Assert.True(isVerified);
 
             isValid = plaintext.AsSpan().SequenceEqual(decryptedData.AsSpan());
             Assert.True(isValid);
         }
 
-        [SkippableFact(typeof(System.PlatformNotSupportedException))]
+        [SkippableFact(typeof(PlatformNotSupportedException))]
         public void Encrypt_Decrypt_Succeeds_RandomValues_Succeed()
         {
             var random = RandomNumberGenerator.Create();
-            byte[] keyData = GetKeyData(random);
-            byte[] nonce = GetNonce(random);
-            byte[] plaintext = GetPlaintext(random, 50);
-            byte[] ciphertext = new byte[plaintext.Length];
-            byte[] ciphertextS = new byte[plaintext.Length];
-            byte[] tag = new byte[16];
-            byte[] tagS = new byte[16];
-            byte[] associatedData = GetAssociatedData(plaintext.Length);
+            var keyData = GetKeyData(random);
+            var nonce = GetNonce(random);
+            var plaintext = GetPlaintext(random, dataLength: 50);
+            var ciphertext = new byte[plaintext.Length];
+            var ciphertextS = new byte[plaintext.Length];
+            var tag = new byte[16];
+            var tagS = new byte[16];
+            var associatedData = GetAssociatedData(plaintext.Length);
 
-            IAesGcmPrimitives aesObj = AesGcmPrimitives.Create();
+            var aesObj = AesGcmPrimitives.Create();
             aesObj.EncryptAndAuthenticate(keyData, nonce, plaintext, ciphertext, tag, associatedData);
 
             var aesGcm = new AesGcm(keyData);
             aesGcm.Encrypt(nonce, plaintext, ciphertextS, tagS, associatedData);
 
-            bool isValid = ciphertextS.AsSpan().SequenceEqual(ciphertext.AsSpan());
+            var isValid = ciphertextS.AsSpan().SequenceEqual(ciphertext.AsSpan());
             Assert.True(isValid);
             isValid = tagS.AsSpan().SequenceEqual(tag.AsSpan());
             Assert.True(isValid);
 
-            byte[] decryptedData = new byte[ciphertext.Length];
-            bool isVerified = aesObj.DecryptAndVerify(keyData, nonce, ciphertext, tag, decryptedData, associatedData);
+            var decryptedData = new byte[ciphertext.Length];
+            var isVerified = aesObj.DecryptAndVerify(keyData, nonce, ciphertext, tag, decryptedData, associatedData);
             Assert.True(isVerified);
 
-            byte[] decryptedDataS = new byte[ciphertextS.Length];
+            var decryptedDataS = new byte[ciphertextS.Length];
             aesGcm.Decrypt(nonce, ciphertextS, tag, decryptedDataS, associatedData);
 
             isValid = decryptedDataS.AsSpan().SequenceEqual(decryptedData.AsSpan());
@@ -94,7 +94,8 @@ namespace Yubico.Core.Cryptography
 
         private static byte[] GetKeyData(RandomNumberGenerator? random)
         {
-            byte[] keyBytes = new byte[] {
+            byte[] keyBytes =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
@@ -108,7 +109,8 @@ namespace Yubico.Core.Cryptography
 
         private static byte[] GetNonce(RandomNumberGenerator? random)
         {
-            byte[] nonceBytes = new byte[] {
+            byte[] nonceBytes =
+            {
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
                 0x41, 0x42, 0x43, 0x44
             };
@@ -123,7 +125,8 @@ namespace Yubico.Core.Cryptography
             byte[] dataToEncrypt;
             if (dataLength == 18)
             {
-                dataToEncrypt = new byte[] {
+                dataToEncrypt = new byte[]
+                {
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
                     0x51, 0x52
@@ -141,10 +144,11 @@ namespace Yubico.Core.Cryptography
 
         private static byte[] GetAssociatedData(int originalSize)
         {
-            byte[] associatedData = new byte[] {
+            byte[] associatedData =
+            {
                 0x62, 0x6c, 0x6f, 0x62,
                 (byte)originalSize,
-                (byte)(originalSize >>  8),
+                (byte)(originalSize >> 8),
                 (byte)(originalSize >> 16),
                 (byte)(originalSize >> 24), 0, 0, 0, 0
             };
@@ -154,7 +158,8 @@ namespace Yubico.Core.Cryptography
 
         private static byte[] GetEncryptedData()
         {
-            byte[] encryptedData = new byte[] {
+            byte[] encryptedData =
+            {
                 0xea, 0x6a, 0x01, 0x13, 0x8d, 0x78, 0xa6, 0xa7,
                 0xec, 0x57, 0x91, 0x13, 0xbe, 0xe1, 0xcd, 0x75,
                 0xba, 0x87
@@ -165,7 +170,8 @@ namespace Yubico.Core.Cryptography
 
         private static byte[] GetAuthTag()
         {
-            byte[] authTag = new byte[] {
+            byte[] authTag =
+            {
                 0xba, 0x13, 0x8f, 0x68, 0xaf, 0xc7, 0xff, 0x26,
                 0x5f, 0x75, 0x25, 0xb2, 0xcc, 0xe9, 0x6b, 0xae
             };

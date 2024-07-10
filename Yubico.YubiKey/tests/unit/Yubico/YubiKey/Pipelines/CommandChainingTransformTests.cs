@@ -15,7 +15,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Microsoft.VisualStudio.TestPlatform.ObjectModel.Client;
 using Moq;
 using Xunit;
 using Yubico.Core.Iso7816;
@@ -61,7 +60,10 @@ namespace Yubico.YubiKey.Pipelines
 
             // Act
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            void Action() => _ = transform.Invoke(null, typeof(object), typeof(object));
+            void Action()
+            {
+                _ = transform.Invoke(command: null, typeof(object), typeof(object));
+            }
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             // Assert
@@ -99,7 +101,7 @@ namespace Yubico.YubiKey.Pipelines
             var commandApdu = new CommandApdu();
 
             // Act
-            ResponseApdu actualResponse = transform.Invoke(commandApdu, typeof(object), typeof(object));
+            var actualResponse = transform.Invoke(commandApdu, typeof(object), typeof(object));
 
             // Assert
             Assert.Same(expectedResponse, actualResponse);
@@ -136,7 +138,7 @@ namespace Yubico.YubiKey.Pipelines
             var commandApdu = new CommandApdu { Data = new byte[] { 0, 1, 2, 3 } };
 
             // Act
-            ResponseApdu actualResponse = transform.Invoke(commandApdu, typeof(object), typeof(object));
+            var actualResponse = transform.Invoke(commandApdu, typeof(object), typeof(object));
 
             // Assert
             Assert.Same(expectedResponse, actualResponse);
@@ -150,7 +152,7 @@ namespace Yubico.YubiKey.Pipelines
             // Arrange
             var mockTransform = new Mock<IApduTransform>();
             var transform = new CommandChainingTransform(mockTransform.Object) { MaxSize = 4 };
-            var commandApdu = new CommandApdu { Data = Enumerable.Repeat<byte>(0xFF, 16).ToArray() };
+            var commandApdu = new CommandApdu { Data = Enumerable.Repeat<byte>(element: 0xFF, count: 16).ToArray() };
 
             _ = mockTransform
                 .Setup(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
@@ -176,7 +178,7 @@ namespace Yubico.YubiKey.Pipelines
                 Ins = 1,
                 P1 = 2,
                 P2 = 3,
-                Data = Enumerable.Repeat<byte>(0xFF, 16).ToArray()
+                Data = Enumerable.Repeat<byte>(element: 0xFF, count: 16).ToArray()
             };
 
             _ = mockTransform
@@ -187,11 +189,11 @@ namespace Yubico.YubiKey.Pipelines
             _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
 
             // Assert
-            foreach (CommandApdu apdu in observedApdus)
+            foreach (var apdu in observedApdus)
             {
-                Assert.Equal(1, apdu.Ins);
-                Assert.Equal(2, apdu.P1);
-                Assert.Equal(3, apdu.P2);
+                Assert.Equal(expected: 1, apdu.Ins);
+                Assert.Equal(expected: 2, apdu.P1);
+                Assert.Equal(expected: 3, apdu.P2);
             }
         }
 
@@ -216,9 +218,9 @@ namespace Yubico.YubiKey.Pipelines
             _ = transform.Invoke(commandApdu, typeof(object), typeof(object));
 
             // Assert
-            Assert.Equal(new byte[] { 1, 2, 3, 4 }, observedApdus[0]);
-            Assert.Equal(new byte[] { 5, 6, 7, 8 }, observedApdus[1]);
-            Assert.Equal(new byte[] { 9, 10 }, observedApdus[2]);
+            Assert.Equal(new byte[] { 1, 2, 3, 4 }, observedApdus[index: 0]);
+            Assert.Equal(new byte[] { 5, 6, 7, 8 }, observedApdus[index: 1]);
+            Assert.Equal(new byte[] { 9, 10 }, observedApdus[index: 2]);
         }
     }
 }

@@ -24,17 +24,25 @@ namespace Yubico.YubiKey.TestUtilities
         public HollowOtpSession() : this(FirmwareVersion.V5_4_3) { }
 
         public HollowOtpSession(FirmwareVersion version)
-            : this(new HollowYubiKeyDevice { FirmwareVersion = version }) { }
+            : this(new HollowYubiKeyDevice { FirmwareVersion = version })
+        {
+        }
 
         public HollowOtpSession(IYubiKeyDevice yubiKey)
         {
             YubiKey = yubiKey;
             Connection = yubiKey.Connect(YubiKeyApplication.Otp);
-            ReadStatusResponse response = Connection.SendCommand(new ReadStatusCommand());
+            var response = Connection.SendCommand(new ReadStatusCommand());
             Status = response.GetData();
         }
 
         public OtpStatus Status { get; set; }
+        private FirmwareVersion FirmwareVersion => Status.FirmwareVersion;
+        private IYubiKeyDevice YubiKey { get; }
+
+        private IYubiKeyConnection Connection { get; }
+
+        private Slot Slot { get; }
 
         public bool IsShortPressConfigured => Status.ShortPressConfigured;
 
@@ -45,38 +53,48 @@ namespace Yubico.YubiKey.TestUtilities
         public bool LongPressRequiresTouch => Status.LongPressRequiresTouch;
 
         FirmwareVersion IOtpSession.FirmwareVersion => FirmwareVersion;
-        FirmwareVersion FirmwareVersion => Status.FirmwareVersion;
 
         IYubiKeyDevice IOtpSession.YubiKey => YubiKey;
-        IYubiKeyDevice YubiKey { get; set; }
 
-        IYubiKeyConnection Connection { get; set; }
+        public CalculateChallengeResponse CalculateChallengeResponse(Slot slot)
+        {
+            return new CalculateChallengeResponse(Connection, this, Slot);
+        }
 
-        Slot Slot { get; set; }
+        public ConfigureChallengeResponse ConfigureChallengeResponse(Slot slot)
+        {
+            return new ConfigureChallengeResponse(Connection, this, Slot);
+        }
 
-        public CalculateChallengeResponse CalculateChallengeResponse(Slot slot) =>
-            new CalculateChallengeResponse(Connection, this, Slot);
+        public ConfigureHotp ConfigureHotp(Slot slot)
+        {
+            return new ConfigureHotp(Connection, this, Slot);
+        }
 
-        public ConfigureChallengeResponse ConfigureChallengeResponse(Slot slot) =>
-            new ConfigureChallengeResponse(Connection, this, Slot);
+        public ConfigureNdef ConfigureNdef(Slot slot)
+        {
+            return new ConfigureNdef(Connection, this, Slot);
+        }
 
-        public ConfigureHotp ConfigureHotp(Slot slot) =>
-            new ConfigureHotp(Connection, this, Slot);
+        public ConfigureStaticPassword ConfigureStaticPassword(Slot slot)
+        {
+            return new ConfigureStaticPassword(Connection, this, Slot);
+        }
 
-        public ConfigureNdef ConfigureNdef(Slot slot) =>
-            new ConfigureNdef(Connection, this, Slot);
+        public ConfigureYubicoOtp ConfigureYubicoOtp(Slot slot)
+        {
+            return new ConfigureYubicoOtp(Connection, this, Slot);
+        }
 
-        public ConfigureStaticPassword ConfigureStaticPassword(Slot slot) =>
-            new ConfigureStaticPassword(Connection, this, Slot);
+        public DeleteSlotConfiguration DeleteSlotConfiguration(Slot slot)
+        {
+            return new DeleteSlotConfiguration(Connection, this, Slot);
+        }
 
-        public ConfigureYubicoOtp ConfigureYubicoOtp(Slot slot) =>
-            new ConfigureYubicoOtp(Connection, this, Slot);
-
-        public DeleteSlotConfiguration DeleteSlotConfiguration(Slot slot) =>
-            new DeleteSlotConfiguration(Connection, this, Slot);
-
-        public UpdateSlot UpdateSlot(Slot slot) =>
-            new UpdateSlot(Connection, this, Slot);
+        public UpdateSlot UpdateSlot(Slot slot)
+        {
+            return new UpdateSlot(Connection, this, Slot);
+        }
 
         public NdefDataReader ReadNdefTag()
         {
@@ -93,6 +111,9 @@ namespace Yubico.YubiKey.TestUtilities
             throw new NotImplementedException();
         }
 
-        public void Dispose() => Connection.Dispose();
+        public void Dispose()
+        {
+            Connection.Dispose();
+        }
     }
 }

@@ -15,31 +15,31 @@
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
-    /// This enum lists all the possible "credProtect" extension policies
-    /// supported by the FIDO2 standard.
+    ///     This enum lists all the possible "credProtect" extension policies
+    ///     supported by the FIDO2 standard.
     /// </summary>
     public enum CredProtectPolicy
     {
         /// <summary>
-        /// No policy is specified.
+        ///     No policy is specified.
         /// </summary>
         None = 0,
 
         /// <summary>
-        /// This policy specifies that the RP is not requiring UV.
+        ///     This policy specifies that the RP is not requiring UV.
         /// </summary>
         UserVerificationOptional = 1,
 
         /// <summary>
-        /// This policy specifies that UV is optional if a credential ID is
-        /// supplied at the time of Get Assertion, but required if no credential
-        /// ID is supplied.
+        ///     This policy specifies that UV is optional if a credential ID is
+        ///     supplied at the time of Get Assertion, but required if no credential
+        ///     ID is supplied.
         /// </summary>
         UserVerificationOptionalWithCredentialIDList = 2,
 
         /// <summary>
-        /// This policy specifies that UV is required to get an assertion.
+        ///     This policy specifies that UV is required to get an assertion.
         /// </summary>
-        UserVerificationRequired = 3,
+        UserVerificationRequired = 3
     }
 }

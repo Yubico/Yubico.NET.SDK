@@ -45,12 +45,12 @@ namespace Yubico.YubiKey.Fido2.Commands
                 SWConstants.Success);
             var response = new ClientPinResponse(apdu);
 
-            ClientPinData data = response.GetData();
+            var data = response.GetData();
 
             Assert.True(data.PinUvAuthToken!.Value.Span.SequenceEqual(new byte[] { 3, 2, 1 }));
-            Assert.Equal(8, data.PinRetries);
-            Assert.Equal(true, data.PowerCycleState);
-            Assert.Equal(8, data.UvRetries);
+            Assert.Equal(expected: 8, data.PinRetries);
+            Assert.Equal(expected: true, data.PowerCycleState);
+            Assert.Equal(expected: 8, data.UvRetries);
         }
 
         [Fact]

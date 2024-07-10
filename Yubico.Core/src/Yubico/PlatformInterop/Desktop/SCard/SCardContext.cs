@@ -19,14 +19,13 @@ using Microsoft.Win32.SafeHandles;
 namespace Yubico.PlatformInterop
 {
     /// <summary>
-    /// A safe-handle wrapper for the SCard context handle.
+    ///     A safe-handle wrapper for the SCard context handle.
     /// </summary>
     internal class SCardContext : SafeHandleZeroOrMinusOneIsInvalid
     {
         public SCardContext() :
             base(true)
         {
-
         }
 
         public SCardContext(IntPtr handle) :

@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
@@ -39,11 +39,11 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
-            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
+            var data = listCredentialsResponse.GetData();
 
             Assert.Empty(data);
             Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
@@ -55,7 +55,8 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new byte[] {
+            var responseApdu = new ResponseApdu(new byte[]
+            {
                 0x72, 0x1B, 0x21, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F,
                 0x66, 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75,
                 0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D,
@@ -64,16 +65,16 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
-            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
+            var data = listCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
             _ = Assert.Single(data);
-            Assert.Equal("Microsoft", data[0].Issuer);
-            Assert.Equal("test@outlook.com", data[0].AccountName);
-            Assert.Equal(CredentialType.Totp, data[0].Type);
-            Assert.Equal(CredentialPeriod.Period30, data[0].Period);
-            Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
+            Assert.Equal("Microsoft", data[index: 0].Issuer);
+            Assert.Equal("test@outlook.com", data[index: 0].AccountName);
+            Assert.Equal(CredentialType.Totp, data[index: 0].Type);
+            Assert.Equal(CredentialPeriod.Period30, data[index: 0].Period);
+            Assert.Equal(HashAlgorithm.Sha1, data[index: 0].Algorithm);
         }
 
         [Fact]
@@ -82,7 +83,8 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new byte[] {
+            var responseApdu = new ResponseApdu(new byte[]
+            {
                 0x72, 0x41, 0x21,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x30,
@@ -96,15 +98,16 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
-            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
+            var data = listCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
             _ = Assert.Single(data);
-            Assert.Equal("1234567890123456789012345678901234567890123456789012345678901234", data[0].AccountName);
-            Assert.Equal(CredentialType.Totp, data[0].Type);
-            Assert.Equal(CredentialPeriod.Period30, data[0].Period);
-            Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
+            Assert.Equal("1234567890123456789012345678901234567890123456789012345678901234",
+                data[index: 0].AccountName);
+            Assert.Equal(CredentialType.Totp, data[index: 0].Type);
+            Assert.Equal(CredentialPeriod.Period30, data[index: 0].Period);
+            Assert.Equal(HashAlgorithm.Sha1, data[index: 0].Algorithm);
         }
 
         [Fact]
@@ -113,7 +116,8 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new byte[] {
+            var responseApdu = new ResponseApdu(new byte[]
+            {
                 0x72, 0x11, 0x21, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75,
                 0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D,
                 sw1, sw2
@@ -121,17 +125,17 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
-            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
+            var data = listCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
             _ = Assert.Single(data);
-            Assert.Null(data[0].Issuer);
-            Assert.Equal("test@outlook.com", data[0].AccountName);
-            Assert.Equal("test@outlook.com", data[0].Name);
-            Assert.Equal(CredentialType.Totp, data[0].Type);
-            Assert.Equal(CredentialPeriod.Period30, data[0].Period);
-            Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
+            Assert.Null(data[index: 0].Issuer);
+            Assert.Equal("test@outlook.com", data[index: 0].AccountName);
+            Assert.Equal("test@outlook.com", data[index: 0].Name);
+            Assert.Equal(CredentialType.Totp, data[index: 0].Type);
+            Assert.Equal(CredentialPeriod.Period30, data[index: 0].Period);
+            Assert.Equal(HashAlgorithm.Sha1, data[index: 0].Algorithm);
         }
 
         [Fact]
@@ -140,7 +144,8 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new byte[] {
+            var responseApdu = new ResponseApdu(new byte[]
+            {
                 0x72, 0x1B, 0x21, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F,
                 0x66, 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75,
                 0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D, 0x72,
@@ -151,23 +156,23 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
-            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
+            var data = listCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
-            Assert.Equal(2, data.Count);
+            Assert.Equal(expected: 2, data.Count);
 
-            Assert.Equal("Microsoft", data[0].Issuer);
-            Assert.Equal("test@outlook.com", data[0].AccountName);
-            Assert.Equal(CredentialType.Totp, data[0].Type);
-            Assert.Equal(CredentialPeriod.Period30, data[0].Period);
-            Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
+            Assert.Equal("Microsoft", data[index: 0].Issuer);
+            Assert.Equal("test@outlook.com", data[index: 0].AccountName);
+            Assert.Equal(CredentialType.Totp, data[index: 0].Type);
+            Assert.Equal(CredentialPeriod.Period30, data[index: 0].Period);
+            Assert.Equal(HashAlgorithm.Sha1, data[index: 0].Algorithm);
 
-            Assert.Equal("Google", data[1].Issuer);
-            Assert.Equal("test@gmail.com", data[1].AccountName);
-            Assert.Equal(CredentialType.Hotp, data[1].Type);
-            Assert.Equal(CredentialPeriod.Undefined, data[1].Period);
-            Assert.Equal(HashAlgorithm.Sha256, data[1].Algorithm);
+            Assert.Equal("Google", data[index: 1].Issuer);
+            Assert.Equal("test@gmail.com", data[index: 1].AccountName);
+            Assert.Equal(CredentialType.Hotp, data[index: 1].Type);
+            Assert.Equal(CredentialPeriod.Undefined, data[index: 1].Period);
+            Assert.Equal(HashAlgorithm.Sha256, data[index: 1].Algorithm);
         }
 
         [Fact]
@@ -176,7 +181,8 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new byte[] {
+            var responseApdu = new ResponseApdu(new byte[]
+            {
                 0x72, 0x1E, 0x21, 0x36, 0x30, 0x2F, 0x4D, 0x69, 0x63, 0x72,
                 0x6F, 0x73, 0x6F, 0x66, 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74,
                 0x40, 0x6F, 0x75, 0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63,
@@ -185,16 +191,16 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
-            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
+            var data = listCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
             _ = Assert.Single(data);
-            Assert.Equal("Microsoft", data[0].Issuer);
-            Assert.Equal("test@outlook.com", data[0].AccountName);
-            Assert.Equal(CredentialType.Totp, data[0].Type);
-            Assert.Equal(CredentialPeriod.Period60, data[0].Period);
-            Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
+            Assert.Equal("Microsoft", data[index: 0].Issuer);
+            Assert.Equal("test@outlook.com", data[index: 0].AccountName);
+            Assert.Equal(CredentialType.Totp, data[index: 0].Type);
+            Assert.Equal(CredentialPeriod.Period60, data[index: 0].Period);
+            Assert.Equal(HashAlgorithm.Sha1, data[index: 0].Algorithm);
         }
 
         [Fact]
@@ -203,7 +209,8 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new byte[] {
+            var responseApdu = new ResponseApdu(new byte[]
+            {
                 0x72, 0x20, 0x21, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F,
                 0x66, 0x74, 0x3A, 0x64, 0x65, 0x6D, 0x6F, 0x3A, 0x74, 0x65,
                 0x73, 0x74, 0x40, 0x6F, 0x75, 0x74, 0x6C, 0x6F, 0x6F, 0x6B,
@@ -212,16 +219,16 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var listCredentialsResponse = new ListResponse(responseApdu);
 
-            System.Collections.Generic.List<Credential>? data = listCredentialsResponse.GetData();
+            var data = listCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, listCredentialsResponse.StatusWord);
 
             _ = Assert.Single(data);
-            Assert.Equal("Microsoft:demo", data[0].Issuer);
-            Assert.Equal("test@outlook.com", data[0].AccountName);
-            Assert.Equal(CredentialType.Totp, data[0].Type);
-            Assert.Equal(CredentialPeriod.Period30, data[0].Period);
-            Assert.Equal(HashAlgorithm.Sha1, data[0].Algorithm);
+            Assert.Equal("Microsoft:demo", data[index: 0].Issuer);
+            Assert.Equal("test@outlook.com", data[index: 0].AccountName);
+            Assert.Equal(CredentialType.Totp, data[index: 0].Type);
+            Assert.Equal(CredentialPeriod.Period30, data[index: 0].Period);
+            Assert.Equal(HashAlgorithm.Sha1, data[index: 0].Algorithm);
         }
 
         [Fact]

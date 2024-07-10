@@ -50,7 +50,8 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                     // If there are no YubiKeys, this will return false. In that
                     // case, we don't want to exit, we just want to report the
                     // result and run through the main menu again.
-                    _ = ChooseYubiKey.RunChooseYubiKey(true, _menuObject, Transport.SmartCard, ref _yubiKeyChosen);
+                    _ = ChooseYubiKey.RunChooseYubiKey(alwaysAsk: true, _menuObject, Transport.SmartCard,
+                        ref _yubiKeyChosen);
                     break;
 
                 case OathMainMenuItem.GetOathCredentials:
@@ -115,10 +116,10 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
         // Collect a credential.
         private void RunDefaultCollectCredential()
         {
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter issuer");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter issuer");
             _ = SampleMenu.ReadResponse(out string issuer);
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter account name");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter account name");
             _ = SampleMenu.ReadResponse(out string account);
 
             _ = ChooseCredentialProperties.RunChooseTypeOption(_menuObject, out CredentialType? type);
@@ -127,7 +128,8 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
             if (type == CredentialType.Totp)
             {
-                _ = ChooseCredentialProperties.RunChoosePeriodOption(_menuObject, out CredentialPeriod? credentialPeriod);
+                _ = ChooseCredentialProperties.RunChoosePeriodOption(_menuObject,
+                    out CredentialPeriod? credentialPeriod);
                 period = (CredentialPeriod)credentialPeriod;
             }
 
@@ -174,7 +176,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             {
                 _ = ChooseCredential.RunChooseCredential(
                     _yubiKeyChosen,
-                    true,
+                    alwaysAsk: true,
                     _menuObject,
                     out _credentialChosen);
             }
@@ -195,7 +197,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             {
                 _ = ChooseCredential.RunChooseCredential(
                     _yubiKeyChosen,
-                    true,
+                    alwaysAsk: true,
                     _menuObject,
                     out _credentialChosen);
             }
@@ -216,7 +218,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             {
                 _ = ChooseCredential.RunChooseCredential(
                     _yubiKeyChosen,
-                    true,
+                    alwaysAsk: true,
                     _menuObject,
                     out _credentialChosen);
 
@@ -227,20 +229,18 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                     "Yubico",
                     "testRename@example.com");
             }
-            else
-            {
-                RunCollectCredential(_menuObject,
-                    out Credential credential,
-                    out string newIssuer,
-                    out string newAccount);
 
-                return RenameCredential.RunRenameCredential(
-                    _yubiKeyChosen,
-                    SampleKeyCollector.SampleKeyCollectorDelegate,
-                    credential,
-                    newIssuer,
-                    newAccount);
-            }
+            RunCollectCredential(_menuObject,
+                out Credential credential,
+                out string newIssuer,
+                out string newAccount);
+
+            return RenameCredential.RunRenameCredential(
+                _yubiKeyChosen,
+                SampleKeyCollector.SampleKeyCollectorDelegate,
+                credential,
+                newIssuer,
+                newAccount);
         }
 
         // Collect a credential.
@@ -250,10 +250,10 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             out string newIssuer,
             out string newAccount)
         {
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter current issuer");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter current issuer");
             _ = SampleMenu.ReadResponse(out string currentIssuer);
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter current account name");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter current account name");
             _ = SampleMenu.ReadResponse(out string currentAccount);
 
             _ = ChooseCredentialProperties.RunChooseTypeOption(menuObject, out CredentialType? type);
@@ -262,14 +262,15 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
             if (type == CredentialType.Totp)
             {
-                _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject, out CredentialPeriod? credentialPeriod);
+                _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject,
+                    out CredentialPeriod? credentialPeriod);
                 period = credentialPeriod.Value;
             }
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter new issuer");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter new issuer");
             _ = SampleMenu.ReadResponse(out string issuer);
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter new account name");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter new account name");
             _ = SampleMenu.ReadResponse(out string account);
 
             newIssuer = issuer;

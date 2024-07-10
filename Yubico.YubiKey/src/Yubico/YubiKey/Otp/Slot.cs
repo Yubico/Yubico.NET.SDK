@@ -15,26 +15,27 @@
 namespace Yubico.YubiKey.Otp
 {
     /// <summary>
-    /// An identifier for the configurable OTP slots.
+    ///     An identifier for the configurable OTP slots.
     /// </summary>
     public enum Slot : byte
     {
         /// <summary>
-        /// This is the default state for the <see cref="Slot"/> enumeration.
-        /// If an operation is requested that requires a slot, this value will
-        /// cause an exception.
+        ///     This is the default state for the <see cref="Slot" /> enumeration.
+        ///     If an operation is requested that requires a slot, this value will
+        ///     cause an exception.
         /// </summary>
         None = 0,
+
         /// <summary>
-        /// Refers to the configuration slot that is activated by a short duration touch of the YubiKey.
-        /// This is also sometimes referred to as "Slot 1".
+        ///     Refers to the configuration slot that is activated by a short duration touch of the YubiKey.
+        ///     This is also sometimes referred to as "Slot 1".
         /// </summary>
         ShortPress = 1,
 
         /// <summary>
-        /// Refers to the configuration slot that is activated by a longer duration touch of the YubiKey.
-        /// This is also sometimes referred to as "Slot 2".
+        ///     Refers to the configuration slot that is activated by a longer duration touch of the YubiKey.
+        ///     This is also sometimes referred to as "Slot 2".
         /// </summary>
-        LongPress = 2,
+        LongPress = 2
     }
 }

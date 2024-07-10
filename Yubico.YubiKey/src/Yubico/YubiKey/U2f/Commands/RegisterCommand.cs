@@ -13,34 +13,33 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
-    /// Creates a U2F registration on the device.
+    ///     Creates a U2F registration on the device.
     /// </summary>
     /// <remarks>
-    /// <p>
-    /// The partner Response class is <see cref="RegisterResponse"/>.
-    /// </p>
-    /// <p>
-    /// This command will generally initially return a <see cref="ResponseStatus.ConditionsNotSatisfied"/>
-    /// and will not return success until the user confirms presence by touching the device. Clients should
-    /// repeatedly send the command as long as they receive this status.
-    /// </p>
-    /// <p>
-    /// Example:
-    /// </p>
-    /// <code language="csharp">
+    ///     <p>
+    ///         The partner Response class is <see cref="RegisterResponse" />.
+    ///     </p>
+    ///     <p>
+    ///         This command will generally initially return a <see cref="ResponseStatus.ConditionsNotSatisfied" />
+    ///         and will not return success until the user confirms presence by touching the device. Clients should
+    ///         repeatedly send the command as long as they receive this status.
+    ///     </p>
+    ///     <p>
+    ///         Example:
+    ///     </p>
+    ///     <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.FidoU2f);
     ///   byte[] challenge = new byte[32];
     ///   RandomNumberGenerator.Fill(challenge);
     ///   byte[] appId = new byte[32];
     ///   RandomNumberGenerator.Fill(appId);
     ///   RegisterCommand registerCommand = new RegisterCommand(challenge, appId);
-    ///   <br/>
+    ///   <br />
     ///   RegisterResponse registerResponse;
     ///   do
     ///   {
@@ -60,15 +59,15 @@ namespace Yubico.YubiKey.U2f.Commands
         private const int PayloadLength = ClientDataHashLength + AppIdHashLength;
 
         /// <summary>
-        /// Creates an instance of the command.
+        ///     Creates an instance of the command.
         /// </summary>
         /// <remarks>
-        /// This constructor is provided for those developers who want to use the
-        /// object initializer pattern.
-        /// <para>
-        /// Set the <c>ApplicationId</c> and <c>ClientDataHash</c> properties
-        /// before sending the command to the YubiKey.
-        /// </para>
+        ///     This constructor is provided for those developers who want to use the
+        ///     object initializer pattern.
+        ///     <para>
+        ///         Set the <c>ApplicationId</c> and <c>ClientDataHash</c> properties
+        ///         before sending the command to the YubiKey.
+        ///     </para>
         /// </remarks>
         public RegisterCommand()
             : base(U2fRegisterCommandInstruction, PayloadLength, AppIdOffset, ClientDataOffset)
@@ -76,15 +75,20 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <summary>
-        /// Creates an instance of the command with the given client data hash and app ID.
+        ///     Creates an instance of the command with the given client data hash and app ID.
         /// </summary>
         /// <remarks>
-        /// The app ID is specifically the SHA256 hash of the site origin's 'effective domain'.
-        /// For example, it is the SHA256 hash of "acme.org" if the origin is 'https://acme.org:8443'.
+        ///     The app ID is specifically the SHA256 hash of the site origin's 'effective domain'.
+        ///     For example, it is the SHA256 hash of "acme.org" if the origin is 'https://acme.org:8443'.
         /// </remarks>
-        /// <param name="applicationId">The SHA256 hash of the Relying Party ID.
-        /// Must be 32 bytes long. This is the hash of the origin data.</param>
-        /// <param name="clientDataHash">The <c>clientDataHash</c> or "challenge" in the CTAP2 and U2F specifications. Must be 32 bytes long.</param>
+        /// <param name="applicationId">
+        ///     The SHA256 hash of the Relying Party ID.
+        ///     Must be 32 bytes long. This is the hash of the origin data.
+        /// </param>
+        /// <param name="clientDataHash">
+        ///     The <c>clientDataHash</c> or "challenge" in the CTAP2 and U2F specifications. Must be 32
+        ///     bytes long.
+        /// </param>
         public RegisterCommand(ReadOnlyMemory<byte> applicationId, ReadOnlyMemory<byte> clientDataHash)
             : this()
         {
@@ -93,7 +97,6 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <inheritdoc />
-        public RegisterResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new RegisterResponse(responseApdu);
+        public RegisterResponse CreateResponseForApdu(ResponseApdu responseApdu) => new RegisterResponse(responseApdu);
     }
 }

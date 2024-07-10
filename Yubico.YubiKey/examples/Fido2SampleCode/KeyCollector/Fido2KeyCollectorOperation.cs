@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
 {
     public enum Fido2KeyCollectorOperation
@@ -22,6 +20,6 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         MakeCredential = 1,
         GetAssertion = 2,
         Reset = 3,
-        Verify = 4,
+        Verify = 4
     }
 }

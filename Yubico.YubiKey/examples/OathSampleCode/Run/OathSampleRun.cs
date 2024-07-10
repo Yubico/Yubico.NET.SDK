@@ -22,10 +22,10 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
     public partial class OathSampleRun
     {
         private readonly SampleMenu _menuObject;
-        private IYubiKeyDevice _yubiKeyChosen;
         private Credential _credentialChosen;
-        private int? _optionIndex;
         private int? _index;
+        private int? _optionIndex;
+        private IYubiKeyDevice _yubiKeyChosen;
 
         // Provide the max invalid count, this is the number of times in a row
         // the a user can type an invalid response to a menu request before
@@ -66,7 +66,6 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 {
                     menuItem = RunMenuItem(menuItem);
                 }
-
             } while (menuItem != OathMainMenuItem.Exit);
         }
 
@@ -90,7 +89,8 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                     return true;
 
                 default:
-                    return ChooseYubiKey.RunChooseYubiKey(false, _menuObject, Transport.UsbSmartCard, ref _yubiKeyChosen);
+                    return ChooseYubiKey.RunChooseYubiKey(alwaysAsk: false, _menuObject, Transport.UsbSmartCard,
+                        ref _yubiKeyChosen);
             }
         }
     }

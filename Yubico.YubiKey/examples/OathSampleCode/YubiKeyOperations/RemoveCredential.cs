@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             _ = outputList.AppendLine($"Type      : {credential.Type}");
             _ = outputList.AppendLine($"Period    : {(int?)credential.Period}sec");
 
-            SampleMenu.WriteMessage(MessageType.Special, 0, outputList.ToString());
+            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, outputList.ToString());
         }
     }
 }

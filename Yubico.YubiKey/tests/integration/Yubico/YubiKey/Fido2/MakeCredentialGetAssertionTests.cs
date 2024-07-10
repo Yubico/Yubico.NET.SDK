@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Xunit;
@@ -23,20 +22,22 @@ namespace Yubico.YubiKey.Fido2
 {
     public class MakeCredentialGetAssertionTests
     {
-        static readonly byte[] _clientDataHash = {
+        private static readonly byte[] _clientDataHash =
+        {
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
         };
 
-        static readonly RelyingParty _rp = new RelyingParty("relyingparty1");
+        private static readonly RelyingParty _rp = new RelyingParty("relyingparty1");
 
         // This test requires user to touch the device.
-        [Fact, Trait("Category", "RequiresTouch")]
+        [Fact]
+        [Trait("Category", "RequiresTouch")]
         public void MakeCredential_NonDiscoverable_GetAssertion_Succeeds()
         {
-            IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
+            var yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
 
-            bool isValid = Fido2ResetForTest.DoReset(yubiKeyDevice.SerialNumber);
+            var isValid = Fido2ResetForTest.DoReset(yubiKeyDevice.SerialNumber);
             Assert.True(isValid);
 
             using (var fido2 = new Fido2Session(yubiKeyDevice))
@@ -59,7 +60,7 @@ namespace Yubico.YubiKey.Fido2
                     ClientDataHash = _clientDataHash
                 };
 
-                MakeCredentialData mcData = fido2.MakeCredential(mcParams);
+                var mcData = fido2.MakeCredential(mcParams);
 
                 Assert.True(mcData.VerifyAttestation(_clientDataHash));
 
@@ -68,10 +69,10 @@ namespace Yubico.YubiKey.Fido2
 
                 gaParams.AllowCredential(mcData.AuthenticatorData.CredentialId!);
 
-                IReadOnlyList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
+                var assertions = fido2.GetAssertions(gaParams);
 
-                GetAssertionData assertion = Assert.Single(assertions);
-                Assert.Equal(1, assertion.NumberOfCredentials);
+                var assertion = Assert.Single(assertions);
+                Assert.Equal(expected: 1, assertion.NumberOfCredentials);
                 // Assert.Equal() Failure: Values differ
                 // Expected: 1
                 // Actual:   null
@@ -85,12 +86,13 @@ namespace Yubico.YubiKey.Fido2
         }
 
         // This test requires user to touch the device.
-        [Fact, Trait("Category", "RequiresTouch")]
+        [Fact]
+        [Trait("Category", "RequiresTouch")]
         public void MakeCredential_NoName_GetAssertion_Succeeds()
         {
-            IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
+            var yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
 
-            bool isValid = Fido2ResetForTest.DoReset(yubiKeyDevice.SerialNumber);
+            var isValid = Fido2ResetForTest.DoReset(yubiKeyDevice.SerialNumber);
             Assert.True(isValid);
 
             using (var fido2 = new Fido2Session(yubiKeyDevice))
@@ -108,35 +110,39 @@ namespace Yubico.YubiKey.Fido2
                 {
                     ClientDataHash = _clientDataHash
                 };
-                mcParams.AddOption(AuthenticatorOptions.rk, true);
+                mcParams.AddOption(AuthenticatorOptions.rk, optionValue: true);
 
-                MakeCredentialData mcData = fido2.MakeCredential(mcParams);
+                var mcData = fido2.MakeCredential(mcParams);
 
                 Assert.True(mcData.VerifyAttestation(_clientDataHash));
 
                 // Call GetAssertion
                 var gaParams = new GetAssertionParameters(_rp, _clientDataHash);
 
-                IReadOnlyList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
+                var assertions = fido2.GetAssertions(gaParams);
 
                 _ = Assert.Single(assertions);
             }
         }
 
         // This test requires user to touch the device.
-        [Fact, Trait("Category", "RequiresTouch")]
+        [Fact]
+        [Trait("Category", "RequiresTouch")]
         public void MakeCredential_MultipleCredentials_GetAssertion_ReturnsMultipleAssertions()
         {
-            IYubiKeyDevice yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
+            var yubiKeyDevice = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
 
-            bool isValid = Fido2ResetForTest.DoReset(yubiKeyDevice.SerialNumber);
+            var isValid = Fido2ResetForTest.DoReset(yubiKeyDevice.SerialNumber);
             Assert.True(isValid);
 
             using (var fido2 = new Fido2Session(yubiKeyDevice))
             {
                 // Set up a key collector
                 fido2.KeyCollector = KeyCollector;
-                int startCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!; //RemainingDiscoverableCredentials is NULL on my two keys I tried with (USBA 5.4.3 Keychain and Nano)
+                var startCount =
+                    (int)fido2.AuthenticatorInfo
+                        .RemainingDiscoverableCredentials
+                    !; //RemainingDiscoverableCredentials is NULL on my two keys I tried with (USBA 5.4.3 Keychain and Nano)
 
                 // Verify the PIN
                 fido2.VerifyPin(); //Never completes on my 5.7 
@@ -158,7 +164,7 @@ namespace Yubico.YubiKey.Fido2
                 {
                     ClientDataHash = _clientDataHash
                 };
-                mcParams1.AddOption(AuthenticatorOptions.rk, true);
+                mcParams1.AddOption(AuthenticatorOptions.rk, optionValue: true);
                 mcParams1.AddCredProtectExtension(
                     CredProtectPolicy.UserVerificationRequired,
                     fido2.AuthenticatorInfo);
@@ -167,36 +173,36 @@ namespace Yubico.YubiKey.Fido2
                 {
                     ClientDataHash = _clientDataHash
                 };
-                mcParams2.AddOption(AuthenticatorOptions.rk, true);
+                mcParams2.AddOption(AuthenticatorOptions.rk, optionValue: true);
                 mcParams2.AddCredProtectExtension(
                     CredProtectPolicy.UserVerificationOptionalWithCredentialIDList,
                     fido2.AuthenticatorInfo);
 
-                MakeCredentialData mcData = fido2.MakeCredential(mcParams1);
+                var mcData = fido2.MakeCredential(mcParams1);
                 Assert.True(mcData.VerifyAttestation(_clientDataHash));
-                CredentialId cred1 = mcData.AuthenticatorData.CredentialId!;
-                CredProtectPolicy cpPolicy = mcData.AuthenticatorData.GetCredProtectExtension();
+                var cred1 = mcData.AuthenticatorData.CredentialId!;
+                var cpPolicy = mcData.AuthenticatorData.GetCredProtectExtension();
                 Assert.Equal(CredProtectPolicy.UserVerificationRequired, cpPolicy);
 
-                int midCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!;
+                var midCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!;
                 Assert.True(startCount - midCount == 1);
 
                 mcData = fido2.MakeCredential(mcParams2);
                 Assert.True(mcData.VerifyAttestation(_clientDataHash));
-                CredentialId cred2 = mcData.AuthenticatorData.CredentialId!;
+                var cred2 = mcData.AuthenticatorData.CredentialId!;
                 cpPolicy = mcData.AuthenticatorData.GetCredProtectExtension();
                 Assert.Equal(CredProtectPolicy.UserVerificationOptionalWithCredentialIDList, cpPolicy);
 
-                int endCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!;
+                var endCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!;
                 Assert.True(startCount - endCount == 2);
 
                 // Call GetAssertion
                 var gaParams = new GetAssertionParameters(_rp, _clientDataHash);
 
-                IReadOnlyList<GetAssertionData> assertions = fido2.GetAssertions(gaParams);
+                var assertions = fido2.GetAssertions(gaParams);
 
-                Assert.Equal(2, assertions.Count);
-                Assert.Equal(2, assertions[0].NumberOfCredentials);
+                Assert.Equal(expected: 2, assertions.Count);
+                Assert.Equal(expected: 2, assertions[index: 0].NumberOfCredentials);
             }
         }
 

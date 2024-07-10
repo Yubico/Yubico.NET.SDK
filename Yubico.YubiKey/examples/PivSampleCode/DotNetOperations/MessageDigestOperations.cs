@@ -47,13 +47,13 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 "SHA256" => CryptographyProviders.Sha256Creator(),
                 "SHA384" => CryptographyProviders.Sha384Creator(),
                 "SHA512" => CryptographyProviders.Sha512Creator(),
-                _ => throw new ArgumentException("Unsupported by sample code"),
+                _ => throw new ArgumentException("Unsupported by sample code")
             };
 
             byte[] digest = new byte[digester.HashSize / 8];
 
-            _ = digester.TransformFinalBlock(dataToDigest, 0, dataToDigest.Length);
-            Array.Copy(digester.Hash, 0, digest, 0, digest.Length);
+            _ = digester.TransformFinalBlock(dataToDigest, inputOffset: 0, dataToDigest.Length);
+            Array.Copy(digester.Hash, sourceIndex: 0, digest, destinationIndex: 0, digest.Length);
 
             return digest;
         }

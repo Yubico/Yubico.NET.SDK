@@ -17,45 +17,45 @@ using System;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    /// The communication methods a YubiKey may use to connect with a host device.
+    ///     The communication methods a YubiKey may use to connect with a host device.
     /// </summary>
     [Flags]
     public enum Transport
     {
         /// <summary>
-        /// This flag is equivalent to all flags being disabled.
+        ///     This flag is equivalent to all flags being disabled.
         /// </summary>
         None = 0,
 
         /// <summary>
-        /// USB HID class keyboard.
+        ///     USB HID class keyboard.
         /// </summary>
         HidKeyboard = 0x01,
 
         /// <summary>
-        /// FIDO U2F authenticator device.
+        ///     FIDO U2F authenticator device.
         /// </summary>
         HidFido = 0x02,
 
         /// <summary>
-        /// Smart card connection over USB.
+        ///     Smart card connection over USB.
         /// </summary>
         UsbSmartCard = 0x04,
 
         /// <summary>
-        /// Smart card connection over NFC.
+        ///     Smart card connection over NFC.
         /// </summary>
         NfcSmartCard = 0x08,
 
         /// <summary>
-        /// A convenience member that combines <see cref="UsbSmartCard"/> and
-        /// <see cref="NfcSmartCard"/>.
+        ///     A convenience member that combines <see cref="UsbSmartCard" /> and
+        ///     <see cref="NfcSmartCard" />.
         /// </summary>
         SmartCard = UsbSmartCard | NfcSmartCard,
 
         /// <summary>
-        /// A convenience member that combines all flags.
+        ///     A convenience member that combines all flags.
         /// </summary>
-        All = SmartCard | HidKeyboard | HidFido,
+        All = SmartCard | HidKeyboard | HidFido
     }
 }

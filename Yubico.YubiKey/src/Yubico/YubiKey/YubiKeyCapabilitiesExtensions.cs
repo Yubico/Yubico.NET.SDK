@@ -12,14 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Yubico.YubiKey
 {
     internal static class YubiKeyCapabilitiesExtensions
     {
-        public static YubiKeyCapabilities ToDeviceInfoCapabilities(
-            this YubiKeyCapabilities yubiKeyCapabilities)
+        public static YubiKeyCapabilities ToDeviceInfoCapabilities(this YubiKeyCapabilities yubiKeyCapabilities)
         {
             if (yubiKeyCapabilities.HasFlag(YubiKeyCapabilities.All))
             {

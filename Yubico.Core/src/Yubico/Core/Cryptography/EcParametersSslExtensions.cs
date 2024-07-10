@@ -25,13 +25,13 @@ namespace Yubico.Core.Cryptography
         private const int NistP521BitLength = 521;
 
         /// <summary>
-        /// Converts an ECParameters structure into the OpenSSL data types for the public key: EC_GROUP and EC_POINT
+        ///     Converts an ECParameters structure into the OpenSSL data types for the public key: EC_GROUP and EC_POINT
         /// </summary>
         /// <param name="parameters">
-        /// The .NET representation of an elliptic curve and point.
+        ///     The .NET representation of an elliptic curve and point.
         /// </param>
         /// <returns>
-        /// A tuple of the OpenSSL group and point. Both are needed to represent the public key.
+        ///     A tuple of the OpenSSL group and point. Both are needed to represent the public key.
         /// </returns>
         public static (SafeEcGroup group, SafeEcPoint point) ToSslPublicKey(this ECParameters parameters)
         {
@@ -46,17 +46,18 @@ namespace Yubico.Core.Cryptography
         }
 
         /// <summary>
-        /// Converts a .NET named curve structure into its corresponding OpenSSL curve identifier.
+        ///     Converts a .NET named curve structure into its corresponding OpenSSL curve identifier.
         /// </summary>
         /// <param name="curve">
-        /// The .NET representation of a named elliptic curve.
+        ///     The .NET representation of a named elliptic curve.
         /// </param>
         /// <returns>
-        /// The OpenSSL curve ID (sometimes referred to as "NID")
+        ///     The OpenSSL curve ID (sometimes referred to as "NID")
         /// </returns>
         /// <exception cref="NotSupportedException">
-        /// This function only supports the NIST P256, P384, and P512 curves as of version 1.5.0.
+        ///     This function only supports the NIST P256, P384, and P512 curves as of version 1.5.0.
         /// </exception>
+
         // Curve IDs from include/openssl/obj_mac.h
         public static int ToSslCurveId(this ECCurve curve) =>
             curve switch
@@ -68,17 +69,17 @@ namespace Yubico.Core.Cryptography
             };
 
         /// <summary>
-        /// Return the bit length of the curve. This will be the bit length of
-        /// the private value and each coordinate of a point in the curve.
+        ///     Return the bit length of the curve. This will be the bit length of
+        ///     the private value and each coordinate of a point in the curve.
         /// </summary>
         /// <param name="curve">
-        /// The .NET representation of a named elliptic curve.
+        ///     The .NET representation of a named elliptic curve.
         /// </param>
         /// <returns>
-        /// The curve's bit length.
+        ///     The curve's bit length.
         /// </returns>
         /// <exception cref="NotSupportedException">
-        /// This function only supports the NIST P256, P384, and P512 curves as of version 1.5.0.
+        ///     This function only supports the NIST P256, P384, and P512 curves as of version 1.5.0.
         /// </exception>
         public static int BitLength(this ECCurve curve) =>
             curve switch

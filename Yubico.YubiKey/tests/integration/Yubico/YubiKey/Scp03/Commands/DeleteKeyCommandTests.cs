@@ -25,28 +25,31 @@ namespace Yubico.YubiKey.Scp03.Commands
         [InlineData(StandardTestDevice.Fw5)]
         public void DeleteKey_One_Succeeds(StandardTestDevice testDeviceType)
         {
-            byte[] key1 = {
-                0x33, 0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd,
+            byte[] key1 =
+            {
+                0x33, 0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd
             };
-            byte[] key2 = {
-                0x33, 0xee, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xff,
+            byte[] key2 =
+            {
+                0x33, 0xee, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xff
             };
-            byte[] key3 = {
-                0x33, 0xdd, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xee, 0xff, 0x11,
+            byte[] key3 =
+            {
+                0x33, 0xdd, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xee, 0xff, 0x11
             };
             var currentKeys = new StaticKeys(key2, key1, key3)
             {
                 KeyVersionNumber = 3
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out var connection);
 
             Assert.True(isValid);
             Assert.NotNull(connection);
 
-            var cmd = new DeleteKeyCommand(1, false);
-            Scp03Response rsp = connection!.SendCommand(cmd);
+            var cmd = new DeleteKeyCommand(keyVersionNumber: 1, isLastKey: false);
+            var rsp = connection!.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
         }
 
@@ -55,28 +58,31 @@ namespace Yubico.YubiKey.Scp03.Commands
         [InlineData(StandardTestDevice.Fw5)]
         public void DeleteKey_Two_Succeeds(StandardTestDevice testDeviceType)
         {
-            byte[] key1 = {
-                0x33, 0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd,
+            byte[] key1 =
+            {
+                0x33, 0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd
             };
-            byte[] key2 = {
-                0x33, 0xee, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xff,
+            byte[] key2 =
+            {
+                0x33, 0xee, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xff
             };
-            byte[] key3 = {
-                0x33, 0xdd, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xee, 0xff, 0x11,
+            byte[] key3 =
+            {
+                0x33, 0xdd, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xee, 0xff, 0x11
             };
             var currentKeys = new StaticKeys(key2, key1, key3)
             {
                 KeyVersionNumber = 3
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out var connection);
 
             Assert.True(isValid);
             Assert.NotNull(connection);
 
-            var cmd = new DeleteKeyCommand(2, false);
-            Scp03Response rsp = connection!.SendCommand(cmd);
+            var cmd = new DeleteKeyCommand(keyVersionNumber: 2, isLastKey: false);
+            var rsp = connection!.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
         }
 
@@ -85,28 +91,31 @@ namespace Yubico.YubiKey.Scp03.Commands
         [InlineData(StandardTestDevice.Fw5)]
         public void DeleteKey_Three_Succeeds(StandardTestDevice testDeviceType)
         {
-            byte[] key1 = {
-                0x33, 0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd,
+            byte[] key1 =
+            {
+                0x33, 0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd
             };
-            byte[] key2 = {
-                0x33, 0xee, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xff,
+            byte[] key2 =
+            {
+                0x33, 0xee, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xff
             };
-            byte[] key3 = {
-                0x33, 0xdd, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xee, 0xff, 0x11,
+            byte[] key3 =
+            {
+                0x33, 0xdd, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xee, 0xff, 0x11
             };
             var currentKeys = new StaticKeys(key2, key1, key3)
             {
                 KeyVersionNumber = 3
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
-            var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out IScp03YubiKeyConnection? connection);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys, out var connection);
 
             Assert.True(isValid);
             Assert.NotNull(connection);
 
-            var cmd = new DeleteKeyCommand(3, true);
-            Scp03Response rsp = connection!.SendCommand(cmd);
+            var cmd = new DeleteKeyCommand(keyVersionNumber: 3, isLastKey: true);
+            var rsp = connection!.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
         }
     }

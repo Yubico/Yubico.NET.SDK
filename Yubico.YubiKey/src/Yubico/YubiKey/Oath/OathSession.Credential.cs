@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Security;
 using Yubico.YubiKey.Oath.Commands;
 
@@ -24,18 +23,18 @@ namespace Yubico.YubiKey.Oath
     public sealed partial class OathSession : IDisposable
     {
         /// <summary>
-        /// Gets all configured credentials on the YubiKey.
+        ///     Gets all configured credentials on the YubiKey.
         /// </summary>
         /// <returns>
-        /// The list of credentials.
+        ///     The list of credentials.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded if the authentication is required or
-        /// the <c>ListCommand</c> failed.
+        ///     There is no <c>KeyCollector</c> loaded if the authentication is required or
+        ///     the <c>ListCommand</c> failed.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
-        /// an incorrect password was provided if authentication is required.
+        ///     Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
+        ///     an incorrect password was provided if authentication is required.
         /// </exception>
         public IList<Credential> GetCredentials()
         {
@@ -59,27 +58,27 @@ namespace Yubico.YubiKey.Oath
         }
 
         /// <summary>
-        /// Gets OTP (One-Time Password) values for all configured credentials on the YubiKey.
+        ///     Gets OTP (One-Time Password) values for all configured credentials on the YubiKey.
         /// </summary>
         /// <remarks>
-        /// <see cref="CalculateAllCredentialsCommand"/> doesn't return a <see cref="Code"/> for
-        /// HOTP credentials and credentials requiring touch. They will need to be calculated
-        /// separately using <see cref="CalculateCredentialCommand"/>.
+        ///     <see cref="CalculateAllCredentialsCommand" /> doesn't return a <see cref="Code" /> for
+        ///     HOTP credentials and credentials requiring touch. They will need to be calculated
+        ///     separately using <see cref="CalculateCredentialCommand" />.
         /// </remarks>
         /// <param name="responseFormat">
-        /// Full or truncated <see cref="ResponseFormat"/> to receive back. The default value is Truncated.
+        ///     Full or truncated <see cref="ResponseFormat" /> to receive back. The default value is Truncated.
         /// </param>
         /// <returns>
-        /// The dictionary of <see cref="Credential"/> and <see cref="Code"/> pairs.
+        ///     The dictionary of <see cref="Credential" /> and <see cref="Code" /> pairs.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// There is no <see cref="KeyCollector"/> loaded if the authentication is required,
-        /// the <see cref="CalculateAllCredentialsCommand"/> failed, or the
-        /// <see cref="CalculateCredentialCommand"/> failed.
+        ///     There is no <see cref="KeyCollector" /> loaded if the authentication is required,
+        ///     the <see cref="CalculateAllCredentialsCommand" /> failed, or the
+        ///     <see cref="CalculateCredentialCommand" /> failed.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Unable to verify password either because <see cref="KeyCollector"/> was canceled by the user or
-        /// an incorrect password was provided if authentication is required.
+        ///     Unable to verify password either because <see cref="KeyCollector" /> was canceled by the user or
+        ///     an incorrect password was provided if authentication is required.
         /// </exception>
         public IDictionary<Credential, Code> CalculateAllCredentials(
             ResponseFormat responseFormat = ResponseFormat.Truncated)
@@ -104,27 +103,27 @@ namespace Yubico.YubiKey.Oath
         }
 
         /// <summary>
-        /// Gets an OTP (One-Time Password) value for the specific credential on the YubiKey.
+        ///     Gets an OTP (One-Time Password) value for the specific credential on the YubiKey.
         /// </summary>
         /// <param name="credential">
-        /// The <see cref="Credential"/> on the YubiKey to calculate.
+        ///     The <see cref="Credential" /> on the YubiKey to calculate.
         /// </param>
         /// <param name="responseFormat">
-        /// Full or truncated <see cref="ResponseFormat"/> to receive back. The default value is Truncated.
+        ///     Full or truncated <see cref="ResponseFormat" /> to receive back. The default value is Truncated.
         /// </param>
         /// <returns>
-        /// The <see cref="Code"/> for the requested credential.
+        ///     The <see cref="Code" /> for the requested credential.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// Provided credential is null. 
+        ///     Provided credential is null.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded if the authentication is required or
-        /// the <c>CalculateCredentialCommand</c> failed.
+        ///     There is no <c>KeyCollector</c> loaded if the authentication is required or
+        ///     the <c>CalculateCredentialCommand</c> failed.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
-        /// an incorrect password was provided if authentication is required.
+        ///     Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
+        ///     an incorrect password was provided if authentication is required.
         /// </exception>
         public Code CalculateCredential(
             Credential credential,
@@ -150,35 +149,35 @@ namespace Yubico.YubiKey.Oath
         }
 
         /// <summary>
-        /// Gets an OTP code for the specific credential.
+        ///     Gets an OTP code for the specific credential.
         /// </summary>
         /// <param name="issuer">
-        /// The issuer is an optional string indicating the provider or service.
+        ///     The issuer is an optional string indicating the provider or service.
         /// </param>
         /// <param name="account">
-        /// The account name that usually is the user's email address.
+        ///     The account name that usually is the user's email address.
         /// </param>
         /// <param name="type">
-        /// Indicates the <see cref="CredentialType"/> of the credential as either HOTP or TOTP.
+        ///     Indicates the <see cref="CredentialType" /> of the credential as either HOTP or TOTP.
         /// </param>
         /// <param name="period">
-        /// Indicates the <see cref="CredentialPeriod"/> of the credential in seconds for TOTP code.
-        /// It can only be 15, 30, or 60 seconds. For HOTP should be set to zero
-        /// (<see cref="CredentialPeriod.Undefined"/>).
+        ///     Indicates the <see cref="CredentialPeriod" /> of the credential in seconds for TOTP code.
+        ///     It can only be 15, 30, or 60 seconds. For HOTP should be set to zero
+        ///     (<see cref="CredentialPeriod.Undefined" />).
         /// </param>
         /// <param name="responseFormat">
-        /// Full or truncated <see cref="ResponseFormat"/> to receive back. The default value is Truncated.
+        ///     Full or truncated <see cref="ResponseFormat" /> to receive back. The default value is Truncated.
         /// </param>
         /// <returns>
-        /// The <see cref="Code"/> for the requested credential.
+        ///     The <see cref="Code" /> for the requested credential.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded if the authentication is required,
-        /// the <c>CalculateCredentialCommand</c> failed, or the provided account, type, or period is invalid.
+        ///     There is no <c>KeyCollector</c> loaded if the authentication is required,
+        ///     the <c>CalculateCredentialCommand</c> failed, or the provided account, type, or period is invalid.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
-        /// an incorrect password was provided if authentication is required.
+        ///     Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
+        ///     an incorrect password was provided if authentication is required.
         /// </exception>
         public Code CalculateCredential(
             string? issuer,
@@ -194,21 +193,21 @@ namespace Yubico.YubiKey.Oath
         }
 
         /// <summary>
-        /// Adds a new credential or overwrites the existing one on the YubiKey.
+        ///     Adds a new credential or overwrites the existing one on the YubiKey.
         /// </summary>
         /// <param name="credential">
-        /// The <see cref="Credential"/> to add to the YubiKey.
+        ///     The <see cref="Credential" /> to add to the YubiKey.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// Provided credential is null. 
+        ///     Provided credential is null.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded if the authentication is required,
-        /// some credential properties are not supported on this YubiKey, or the <c>PutCommand</c> failed. 
+        ///     There is no <c>KeyCollector</c> loaded if the authentication is required,
+        ///     some credential properties are not supported on this YubiKey, or the <c>PutCommand</c> failed.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
-        /// an incorrect password was provided if authentication is required.
+        ///     Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
+        ///     an incorrect password was provided if authentication is required.
         /// </exception>
         public void AddCredential(Credential credential)
         {
@@ -245,49 +244,49 @@ namespace Yubico.YubiKey.Oath
         }
 
         /// <summary>
-        /// Adds a new credential or overwrites the existing one on the YubiKey with default parameters.
+        ///     Adds a new credential or overwrites the existing one on the YubiKey with default parameters.
         /// </summary>
         /// <remarks>
-        /// If type and period properties are not modified, this will add a TOTP credential
-        /// with default parameters like:
-        /// Type - TOTP,
-        /// Period - 30 seconds,
-        /// Algorithm - SHA-1,
-        /// Digits - 6,
-        /// No secret,
-        /// No touch.
+        ///     If type and period properties are not modified, this will add a TOTP credential
+        ///     with default parameters like:
+        ///     Type - TOTP,
+        ///     Period - 30 seconds,
+        ///     Algorithm - SHA-1,
+        ///     Digits - 6,
+        ///     No secret,
+        ///     No touch.
         /// </remarks>
         /// <param name="issuer">
-        /// The issuer is an optional string indicating the provider or service.
+        ///     The issuer is an optional string indicating the provider or service.
         /// </param>
         /// <param name="account">
-        /// The account name that usually is the user's email address.
+        ///     The account name that usually is the user's email address.
         /// </param>
         /// <param name="type">
-        /// Indicates the <see cref="CredentialType"/> of the credential as either HOTP or TOTP.
-        /// The default value is TOTP.
+        ///     Indicates the <see cref="CredentialType" /> of the credential as either HOTP or TOTP.
+        ///     The default value is TOTP.
         /// </param>
         /// <param name="period">
-        /// Indicates the <see cref="CredentialPeriod"/> of the credential in seconds for TOTP code.
-        /// It can only be 15, 30, or 60 seconds. For HOTP should be set to zero
-        /// (<see cref="CredentialPeriod.Undefined"/>). The default value is 30.
+        ///     Indicates the <see cref="CredentialPeriod" /> of the credential in seconds for TOTP code.
+        ///     It can only be 15, 30, or 60 seconds. For HOTP should be set to zero
+        ///     (<see cref="CredentialPeriod.Undefined" />). The default value is 30.
         /// </param>
         /// <returns>
-        /// The <see cref="Credential"/> that was created and added to the YubiKey.
+        ///     The <see cref="Credential" /> that was created and added to the YubiKey.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded if the authentication is required,
-        /// the <c>PutCommand</c> failed, or the provided account, type, or period is invalid.
+        ///     There is no <c>KeyCollector</c> loaded if the authentication is required,
+        ///     the <c>PutCommand</c> failed, or the provided account, type, or period is invalid.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
-        /// an incorrect password was provided if authentication is required.
+        ///     Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
+        ///     an incorrect password was provided if authentication is required.
         /// </exception>
         public Credential AddCredential(
-          string? issuer,
-          string account,
-          CredentialType type = CredentialType.Totp,
-          CredentialPeriod period = CredentialPeriod.Period30)
+            string? issuer,
+            string account,
+            CredentialType type = CredentialType.Totp,
+            CredentialPeriod period = CredentialPeriod.Period30)
         {
             var credential = new Credential(issuer, account, type, period);
             AddCredential(credential);
@@ -296,34 +295,34 @@ namespace Yubico.YubiKey.Oath
         }
 
         /// <summary>
-        /// Adds a credential from the string that received from the QR reader or manually from the server.
+        ///     Adds a credential from the string that received from the QR reader or manually from the server.
         /// </summary>
         /// <remarks>
-        /// This method parses an 'otpauth://' Uri string that received from the QR reader or 
-        /// manually from the server, as specified by
-        /// https://github.com/google/google-authenticator/wiki/Key-Uri-Format
+        ///     This method parses an 'otpauth://' Uri string that received from the QR reader or
+        ///     manually from the server, as specified by
+        ///     https://github.com/google/google-authenticator/wiki/Key-Uri-Format
         /// </remarks>
         /// <param name="stringFromURI">
-        /// The string that received from the QR reader or manually from the server.
+        ///     The string that received from the QR reader or manually from the server.
         /// </param>
         /// <returns>
-        /// The <see cref="Credential"/> that was created and added to the YubiKey.
+        ///     The <see cref="Credential" /> that was created and added to the YubiKey.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// Provided string is null, empty, or consists only of white-space characters.  
+        ///     Provided string is null, empty, or consists only of white-space characters.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded if the authentication is required,
-        /// some credential properties are not supported on this YubiKey, the <c>PutCommand</c> failed,
-        /// or the URI string is invalid or it contains invalid elements.   
+        ///     There is no <c>KeyCollector</c> loaded if the authentication is required,
+        ///     some credential properties are not supported on this YubiKey, the <c>PutCommand</c> failed,
+        ///     or the URI string is invalid or it contains invalid elements.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
-        /// an incorrect password was provided if authentication is required.
+        ///     Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
+        ///     an incorrect password was provided if authentication is required.
         /// </exception>
-#pragma warning disable CA1054 // Justification: In this case, URI parameter should be a string
+        #pragma warning disable CA1054 // Justification: In this case, URI parameter should be a string
         public Credential AddCredential(string stringFromURI)
-#pragma warning restore CA1054
+            #pragma warning restore CA1054
         {
             if (string.IsNullOrWhiteSpace(stringFromURI))
             {
@@ -337,21 +336,21 @@ namespace Yubico.YubiKey.Oath
         }
 
         /// <summary>
-        /// Removes an existing credential from the YubiKey.
+        ///     Removes an existing credential from the YubiKey.
         /// </summary>
         /// <param name="credential">
-        /// The <see cref="Credential"/> to remove from the YubiKey.
+        ///     The <see cref="Credential" /> to remove from the YubiKey.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// Provided credential is null. 
+        ///     Provided credential is null.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded if the authentication is required or
-        /// the <c>DeleteCommand</c> failed. 
+        ///     There is no <c>KeyCollector</c> loaded if the authentication is required or
+        ///     the <c>DeleteCommand</c> failed.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
-        /// an incorrect password was provided if authentication is required.
+        ///     Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
+        ///     an incorrect password was provided if authentication is required.
         /// </exception>
         public void RemoveCredential(Credential credential)
         {
@@ -371,33 +370,33 @@ namespace Yubico.YubiKey.Oath
         }
 
         /// <summary>
-        /// Removes an existing credential from the YubiKey.
+        ///     Removes an existing credential from the YubiKey.
         /// </summary>
         /// <param name="issuer">
-        /// The issuer is an optional string indicating the provider or service.
+        ///     The issuer is an optional string indicating the provider or service.
         /// </param>
         /// <param name="account">
-        /// The account name that usually is the user's email address.
+        ///     The account name that usually is the user's email address.
         /// </param>
         /// <param name="type">
-        /// Indicates the <see cref="CredentialType"/> of the credential as either HOTP or TOTP.
-        /// The default value is TOTP.
+        ///     Indicates the <see cref="CredentialType" /> of the credential as either HOTP or TOTP.
+        ///     The default value is TOTP.
         /// </param>
         /// <param name="period">
-        /// Indicates the <see cref="CredentialPeriod"/> of the credential in seconds for TOTP code.
-        /// It can only be 15, 30, or 60 seconds. For HOTP should be set to zero
-        /// (<see cref="CredentialPeriod.Undefined"/>). The default value is 30.
+        ///     Indicates the <see cref="CredentialPeriod" /> of the credential in seconds for TOTP code.
+        ///     It can only be 15, 30, or 60 seconds. For HOTP should be set to zero
+        ///     (<see cref="CredentialPeriod.Undefined" />). The default value is 30.
         /// </param>
         /// <returns>
-        /// The <c>Credential</c> that was removed from the YubiKey.
+        ///     The <c>Credential</c> that was removed from the YubiKey.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded if the authentication is required,
-        /// the <c>DeleteCommand</c> failed, or the provided account, type, or period is invalid.
+        ///     There is no <c>KeyCollector</c> loaded if the authentication is required,
+        ///     the <c>DeleteCommand</c> failed, or the provided account, type, or period is invalid.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
-        /// an incorrect password was provided if authentication is required.
+        ///     Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
+        ///     an incorrect password was provided if authentication is required.
         /// </exception>
         public Credential RemoveCredential(
             string? issuer,
@@ -419,31 +418,31 @@ namespace Yubico.YubiKey.Oath
         }
 
         /// <summary>
-        /// Renames an existing credential on the YubiKey by setting new issuer and account names.
+        ///     Renames an existing credential on the YubiKey by setting new issuer and account names.
         /// </summary>
         /// <remarks>
-        /// This command is only available on the YubiKeys with firmware version 5.3.0 and later.
+        ///     This command is only available on the YubiKeys with firmware version 5.3.0 and later.
         /// </remarks>
         /// <param name="credential">
-        /// The <c>Credential</c> to rename.
+        ///     The <c>Credential</c> to rename.
         /// </param>
         /// <param name="newIssuer">
-        /// The new issuer to set on the credential. The issuer is optional and can be null.
+        ///     The new issuer to set on the credential. The issuer is optional and can be null.
         /// </param>
         /// <param name="newAccount">
-        /// The new account name to set on the credential.
+        ///     The new account name to set on the credential.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// The credential to rename is null. Or the new account name to set is null, empty,
-        /// or consists only of white-space characters.
+        ///     The credential to rename is null. Or the new account name to set is null, empty,
+        ///     or consists only of white-space characters.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded if the authentication is required,
-        /// the <c>RenameCommand</c> is not supported on this YubiKey, or the <c>RenameCommand</c> failed. 
+        ///     There is no <c>KeyCollector</c> loaded if the authentication is required,
+        ///     the <c>RenameCommand</c> is not supported on this YubiKey, or the <c>RenameCommand</c> failed.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
-        /// an incorrect password was provided if authentication is required.
+        ///     Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
+        ///     an incorrect password was provided if authentication is required.
         /// </exception>
         public void RenameCredential(Credential credential, string? newIssuer, string newAccount)
         {
@@ -468,48 +467,48 @@ namespace Yubico.YubiKey.Oath
         }
 
         /// <summary>
-        /// Renames an existing credential on the YubiKey by setting new issuer and account names.
+        ///     Renames an existing credential on the YubiKey by setting new issuer and account names.
         /// </summary>
         /// <remarks>
-        /// This command is only available on the YubiKeys with firmware version 5.3.0 and later.
+        ///     This command is only available on the YubiKeys with firmware version 5.3.0 and later.
         /// </remarks>
         /// <param name="currentIssuer">
-        /// The current credential's issuer.
+        ///     The current credential's issuer.
         /// </param>
         /// <param name="currentAccount">
-        /// The current credential's account name.
+        ///     The current credential's account name.
         /// </param>
         /// <param name="newIssuer">
-        /// The new issuer to set on the credential. The issuer is optional and can be null.
+        ///     The new issuer to set on the credential. The issuer is optional and can be null.
         /// </param>
         /// <param name="newAccount">
-        /// The new account name to set on the credential.
+        ///     The new account name to set on the credential.
         /// </param>
         /// <param name="currentType">
-        /// Indicates the <see cref="CredentialType"/> of the current credential as either HOTP or TOTP.
-        /// The default value is TOTP.
+        ///     Indicates the <see cref="CredentialType" /> of the current credential as either HOTP or TOTP.
+        ///     The default value is TOTP.
         /// </param>
         /// <param name="currentPeriod">
-        /// Indicates the <see cref="CredentialPeriod"/> of the current credential in seconds for TOTP code.
-        /// It can only be 15, 30, or 60 seconds. For HOTP should be set to zero
-        /// (<see cref="CredentialPeriod.Undefined"/>). The default value is 30.
+        ///     Indicates the <see cref="CredentialPeriod" /> of the current credential in seconds for TOTP code.
+        ///     It can only be 15, 30, or 60 seconds. For HOTP should be set to zero
+        ///     (<see cref="CredentialPeriod.Undefined" />). The default value is 30.
         /// </param>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded if the authentication is required,
-        /// the <c>RenameCommand</c> is not supported on this YubiKey, the <c>RenameCommand</c> failed,
-        /// or the provided current or new account, type, or period is invalid.
+        ///     There is no <c>KeyCollector</c> loaded if the authentication is required,
+        ///     the <c>RenameCommand</c> is not supported on this YubiKey, the <c>RenameCommand</c> failed,
+        ///     or the provided current or new account, type, or period is invalid.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
-        /// an incorrect password was provided if authentication is required.
+        ///     Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
+        ///     an incorrect password was provided if authentication is required.
         /// </exception>
         public Credential RenameCredential(
-          string? currentIssuer,
-          string currentAccount,
-          string? newIssuer,
-          string newAccount,
-          CredentialType currentType = CredentialType.Totp,
-          CredentialPeriod currentPeriod = CredentialPeriod.Period30)
+            string? currentIssuer,
+            string currentAccount,
+            string? newIssuer,
+            string newAccount,
+            CredentialType currentType = CredentialType.Totp,
+            CredentialPeriod currentPeriod = CredentialPeriod.Period30)
         {
             var credential = new Credential
             {

@@ -20,16 +20,13 @@ using static Yubico.PlatformInterop.NativeMethods;
 namespace Yubico.PlatformInterop
 {
     /// <summary>
-    /// A safe-handle wrapper for the SCard card handle.
+    ///     A safe-handle wrapper for the SCard card handle.
     /// </summary>
     internal class SCardCardHandle : SafeHandleZeroOrMinusOneIsInvalid
     {
-        public SCARD_DISPOSITION ReleaseDisposition { get; set; } = SCARD_DISPOSITION.RESET_CARD;
-
         public SCardCardHandle() :
             base(true)
         {
-
         }
 
         public SCardCardHandle(IntPtr handle) :
@@ -37,6 +34,8 @@ namespace Yubico.PlatformInterop
         {
             SetHandle(handle);
         }
+
+        public SCARD_DISPOSITION ReleaseDisposition { get; set; } = SCARD_DISPOSITION.RESET_CARD;
 
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         protected override bool ReleaseHandle() =>

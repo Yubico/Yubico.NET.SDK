@@ -22,10 +22,25 @@ namespace Yubico.YubiKey.Scp03
 {
     public class SessionTests
     {
-        private static byte[] GetChallenge() => Hex.HexToBytes("360CB43F4301B894");
-        private static byte[] GetCorrectInitializeUpdate() => Hex.HexToBytes("8050000008360CB43F4301B894");
-        private static byte[] GetInitializeUpdateResponse() => Hex.HexToBytes("010B001F002500000000FF0360CAAFA4DAC615236ADD5607216F3E115C9000");
-        private static byte[] GetCorrectExternalAuthenticate() => Hex.HexToBytes("848233001045330AB30BB1A079A8E7F77376DB9F2C");
+        private static byte[] GetChallenge()
+        {
+            return Hex.HexToBytes("360CB43F4301B894");
+        }
+
+        private static byte[] GetCorrectInitializeUpdate()
+        {
+            return Hex.HexToBytes("8050000008360CB43F4301B894");
+        }
+
+        private static byte[] GetInitializeUpdateResponse()
+        {
+            return Hex.HexToBytes("010B001F002500000000FF0360CAAFA4DAC615236ADD5607216F3E115C9000");
+        }
+
+        private static byte[] GetCorrectExternalAuthenticate()
+        {
+            return Hex.HexToBytes("848233001045330AB30BB1A079A8E7F77376DB9F2C");
+        }
 
         private static StaticKeys GetStaticKeys()
         {
@@ -46,29 +61,31 @@ namespace Yubico.YubiKey.Scp03
         [Fact]
         public void BuildInitializeUpdate_GivenNullHostChallenge_ThrowsArgumentNullException()
         {
-            Session sess = GetSession();
+            var sess = GetSession();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => sess.BuildInitializeUpdate(0, null));
+            _ = Assert.Throws<ArgumentNullException>(() =>
+                sess.BuildInitializeUpdate(keyVersionNumber: 0, hostChallenge: null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
         [Fact]
         public void BuildInitializeUpdate_GivenHostChallengeWrongLength_ThrowsArgumentException()
         {
-            byte[] hostChallengeWrongLength = new byte[9];
-            Session sess = GetSession();
-            _ = Assert.Throws<ArgumentException>(() => sess.BuildInitializeUpdate(0, hostChallengeWrongLength));
+            var hostChallengeWrongLength = new byte[9];
+            var sess = GetSession();
+            _ = Assert.Throws<ArgumentException>(() =>
+                sess.BuildInitializeUpdate(keyVersionNumber: 0, hostChallengeWrongLength));
         }
 
         [Fact]
         public void BuildInitializeUpdate_GivenHostChallenge_BuildsCorrectInitializeUpdate()
         {
             // Arrange
-            Session sess = GetSession();
+            var sess = GetSession();
 
             // Act
-            InitializeUpdateCommand initializeUpdateCommand = sess.BuildInitializeUpdate(0, GetChallenge());
-            byte[] initializeUpdateCommandBytes = initializeUpdateCommand.CreateCommandApdu().AsByteArray();
+            var initializeUpdateCommand = sess.BuildInitializeUpdate(keyVersionNumber: 0, GetChallenge());
+            var initializeUpdateCommandBytes = initializeUpdateCommand.CreateCommandApdu().AsByteArray();
 
             // Assert
             Assert.Equal(initializeUpdateCommandBytes, GetCorrectInitializeUpdate());
@@ -77,31 +94,34 @@ namespace Yubico.YubiKey.Scp03
         [Fact]
         public void LoadInitializeUpdate_GivenNullInitializeUpdateResponse_ThrowsArgumentNullException()
         {
-            Session sess = GetSession();
-            InitializeUpdateCommand initializeUpdateCommand = sess.BuildInitializeUpdate(0, GetChallenge());
+            var sess = GetSession();
+            var initializeUpdateCommand = sess.BuildInitializeUpdate(keyVersionNumber: 0, GetChallenge());
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => sess.LoadInitializeUpdateResponse(null, GetStaticKeys()));
+            _ = Assert.Throws<ArgumentNullException>(() =>
+                sess.LoadInitializeUpdateResponse(initializeUpdateResponse: null, GetStaticKeys()));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
         [Fact]
         public void LoadInitializeUpdate_GivenNullStaticKeys_ThrowsArgumentNullException()
         {
-            Session sess = GetSession();
-            InitializeUpdateCommand initializeUpdateCommand = sess.BuildInitializeUpdate(0, GetChallenge());
+            var sess = GetSession();
+            var initializeUpdateCommand = sess.BuildInitializeUpdate(keyVersionNumber: 0, GetChallenge());
             var correctResponse = new InitializeUpdateResponse(new ResponseApdu(GetInitializeUpdateResponse()));
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => sess.LoadInitializeUpdateResponse(correctResponse, null));
+            _ = Assert.Throws<ArgumentNullException>(() =>
+                sess.LoadInitializeUpdateResponse(correctResponse, staticKeys: null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
         [Fact]
         public void LoadInitializeUpdate_CalledBeforeBuildInitializeUpdate_ThrowsInvalidOperationException()
         {
-            Session sess = GetSession();
+            var sess = GetSession();
             var correctResponse = new InitializeUpdateResponse(new ResponseApdu(GetInitializeUpdateResponse()));
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<InvalidOperationException>(() => sess.LoadInitializeUpdateResponse(correctResponse, GetStaticKeys()));
+            _ = Assert.Throws<InvalidOperationException>(() =>
+                sess.LoadInitializeUpdateResponse(correctResponse, GetStaticKeys()));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -109,13 +129,15 @@ namespace Yubico.YubiKey.Scp03
         public void Session_GivenInitializeUpdateResponse_BuildsCorrectExternalAuthenticate()
         {
             // Arrange
-            Session sess = GetSession();
-            InitializeUpdateCommand initializeUpdateCommand = sess.BuildInitializeUpdate(0, GetChallenge());
-            sess.LoadInitializeUpdateResponse(initializeUpdateCommand.CreateResponseForApdu(new ResponseApdu(GetInitializeUpdateResponse())), GetStaticKeys());
+            var sess = GetSession();
+            var initializeUpdateCommand = sess.BuildInitializeUpdate(keyVersionNumber: 0, GetChallenge());
+            sess.LoadInitializeUpdateResponse(
+                initializeUpdateCommand.CreateResponseForApdu(new ResponseApdu(GetInitializeUpdateResponse())),
+                GetStaticKeys());
 
             // Act
-            ExternalAuthenticateCommand externalAuthenticateCommand = sess.BuildExternalAuthenticate();
-            byte[] externalAuthenticateCommandBytes = externalAuthenticateCommand.CreateCommandApdu().AsByteArray();
+            var externalAuthenticateCommand = sess.BuildExternalAuthenticate();
+            var externalAuthenticateCommandBytes = externalAuthenticateCommand.CreateCommandApdu().AsByteArray();
 
             // Assert
             Assert.Equal(externalAuthenticateCommandBytes, GetCorrectExternalAuthenticate());

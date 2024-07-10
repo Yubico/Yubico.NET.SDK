@@ -19,6 +19,6 @@ namespace Yubico.Core.Devices.Hid
         Unknown = 0,
 
         Fido = unchecked((short)0xF1D0),
-        Keyboard = 1,
+        Keyboard = 1
     }
 }

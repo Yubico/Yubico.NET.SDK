@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 
 namespace Yubico.YubiKey.Sample.SharedCode
@@ -63,7 +62,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
             // Are there any?
             if (yubiKeyArray.Length == 0)
             {
-                SampleMenu.WriteMessage(MessageType.Special, 0, "No YubiKeys found");
+                SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "No YubiKeys found");
                 return false;
             }
 
@@ -118,7 +117,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
                 return true;
             }
 
-            SampleMenu.WriteMessage(MessageType.Special, 0, "Invalid response");
+            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "Invalid response");
             return false;
         }
     }

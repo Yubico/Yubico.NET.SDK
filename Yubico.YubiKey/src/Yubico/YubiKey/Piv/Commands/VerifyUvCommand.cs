@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
@@ -21,66 +20,54 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// Authenticate with YubiKey Bio multi-protocol capabilities.
+    ///     Authenticate with YubiKey Bio multi-protocol capabilities.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="VerifyUvResponse"/>.
-    /// <para>
-    /// Before calling this method, clients must verify that the authenticator is bio-capable and
-    /// not blocked for bio matching.
-    /// </para>
+    ///     The partner Response class is <see cref="VerifyUvResponse" />.
+    ///     <para>
+    ///         Before calling this method, clients must verify that the authenticator is bio-capable and
+    ///         not blocked for bio matching.
+    ///     </para>
     /// </remarks>
     public sealed class VerifyUvCommand : IYubiKeyCommand<VerifyUvResponse>
     {
         private const byte PivVerifyInstruction = 0x20;
         private const byte OnCardComparisonAuthenticationSlot = 0x96;
 
-        public bool RequestTemporaryPin { get; set; }
-        public bool CheckOnly { get; set; }
-
         /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs. For this
-        /// command it's PIV.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Piv
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Piv;
-
-        /// <summary>
-        /// Initializes a new instance of the <c>VerifyUvCommand</c> class.
+        ///     Initializes a new instance of the <c>VerifyUvCommand</c> class.
         /// </summary>
         /// <remarks>
-        /// This constructor is provided for those developers who want to use the
-        /// object initializer pattern. For example:
-        /// <code language="csharp">
+        ///     This constructor is provided for those developers who want to use the
+        ///     object initializer pattern. For example:
+        ///     <code language="csharp">
         ///   var command = new VerifyUvCommand()
         ///   {
         ///       CheckOnly = true;
         ///   };
         /// </code>
-        /// <para>
-        /// </para>
+        ///     <para>
+        ///     </para>
         /// </remarks>
         public VerifyUvCommand()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <c>VerifyUvCommand</c> class.
+        ///     Initializes a new instance of the <c>VerifyUvCommand</c> class.
         /// </summary>
         /// <param name="requestTemporaryPin">
-        /// After successful match generate a temporary PIN. Certain conditions may 
-        /// lead to the clearing of the temporary PIN, such as fingerprint mismatch, 
-        /// PIV PIN failed verification, timeout, power loss, failed attempt to verify 
-        /// against the set value.
+        ///     After successful match generate a temporary PIN. Certain conditions may
+        ///     lead to the clearing of the temporary PIN, such as fingerprint mismatch,
+        ///     PIV PIN failed verification, timeout, power loss, failed attempt to verify
+        ///     against the set value.
         /// </param>
         /// <param name="checkOnly">
-        /// Check verification state of biometrics, don't perform UV.
-        /// </param>        
+        ///     Check verification state of biometrics, don't perform UV.
+        /// </param>
         /// <exception cref="ArgumentException">
-        /// The PIN is an invalid length or requestTemporaryPin and checkOnly are both
-        /// set to true.
+        ///     The PIN is an invalid length or requestTemporaryPin and checkOnly are both
+        ///     set to true.
         /// </exception>
         public VerifyUvCommand(bool requestTemporaryPin, bool checkOnly)
         {
@@ -89,6 +76,18 @@ namespace Yubico.YubiKey.Piv.Commands
             RequestTemporaryPin = requestTemporaryPin;
             CheckOnly = checkOnly;
         }
+
+        public bool RequestTemporaryPin { get; set; }
+        public bool CheckOnly { get; set; }
+
+        /// <summary>
+        ///     Gets the YubiKeyApplication to which this command belongs. For this
+        ///     command it's PIV.
+        /// </summary>
+        /// <value>
+        ///     YubiKeyApplication.Piv
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Piv;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
@@ -100,7 +99,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 return new CommandApdu
                 {
                     Ins = PivVerifyInstruction,
-                    P2 = OnCardComparisonAuthenticationSlot,
+                    P2 = OnCardComparisonAuthenticationSlot
                 };
             }
 
@@ -108,12 +107,12 @@ namespace Yubico.YubiKey.Piv.Commands
             const byte GetTemporaryPinTag = 0x02;
             if (RequestTemporaryPin)
             {
-                tlvWriter.WriteValue(GetTemporaryPinTag, null);
+                tlvWriter.WriteValue(GetTemporaryPinTag, value: null);
             }
             else
             {
                 const byte VerifyUvTag = 0x03;
-                tlvWriter.WriteValue(VerifyUvTag, null);
+                tlvWriter.WriteValue(VerifyUvTag, value: null);
             }
 
             ReadOnlyMemory<byte> data = tlvWriter.Encode();
@@ -124,6 +123,10 @@ namespace Yubico.YubiKey.Piv.Commands
                 Data = data
             };
         }
+
+        /// <inheritdoc />
+        public VerifyUvResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new VerifyUvResponse(responseApdu, RequestTemporaryPin);
 
         private static void ValidateParameters(bool requestTemporaryPin, bool checkOnly)
         {
@@ -136,9 +139,5 @@ namespace Yubico.YubiKey.Piv.Commands
                         ));
             }
         }
-
-        /// <inheritdoc />
-        public VerifyUvResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new VerifyUvResponse(responseApdu, RequestTemporaryPin);
     }
 }

@@ -32,12 +32,13 @@ namespace Yubico.YubiKey.U2f
             {
                 if (!SdkPlatformInfo.IsElevated)
                 {
-                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
-                    Assert.True(false);
+                    _ = Assert.Throws<UnauthorizedAccessException>(() =>
+                        YubiKeyDevice.FindByTransport(Transport.HidFido));
+                    Assert.True(condition: false);
                 }
             }
 
-            IEnumerable<IYubiKeyDevice> yubiKeys = YubiKeyDevice.FindByTransport(Transport.HidFido);
+            var yubiKeys = YubiKeyDevice.FindByTransport(Transport.HidFido);
             var yubiKeyList = yubiKeys.ToList();
 
             Assert.NotEmpty(yubiKeyList);
@@ -50,26 +51,27 @@ namespace Yubico.YubiKey.U2f
             {
                 if (!SdkPlatformInfo.IsElevated)
                 {
-                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
-                    Assert.True(false);
+                    _ = Assert.Throws<UnauthorizedAccessException>(() =>
+                        YubiKeyDevice.FindByTransport(Transport.HidFido));
+                    Assert.True(condition: false);
                 }
             }
 
-            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
+            var devices = HidDevice.GetHidDevices();
             Assert.NotNull(devices);
 
-            HidDevice? deviceToUse = GetFidoHid(devices);
+            var deviceToUse = GetFidoHid(devices);
             Assert.NotNull(deviceToUse);
             if (deviceToUse is null)
             {
-                Assert.True(false);
+                Assert.True(condition: false);
             }
 
             var connection = new FidoConnection(deviceToUse!);
             Assert.NotNull(connection);
 
             var cmd = new GetPagedDeviceInfoCommand();
-            GetPagedDeviceInfoResponse rsp = connection.SendCommand(cmd);
+            var rsp = connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
             var getData = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
@@ -79,41 +81,41 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void U2fHid_CommandIns0x77_ReturnsInvalidCommand()
         {
-            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices() ?? throw new InvalidOperationException();
-            HidDevice deviceToUse = GetFidoHid(devices) ?? throw new InvalidOperationException();
-            FidoConnection connection = new FidoConnection(deviceToUse) ?? throw new InvalidOperationException();
+            var devices = HidDevice.GetHidDevices() ?? throw new InvalidOperationException();
+            var deviceToUse = GetFidoHid(devices) ?? throw new InvalidOperationException();
+            var connection = new FidoConnection(deviceToUse) ?? throw new InvalidOperationException();
 
             var cmdApdu = new CommandApdu
             {
-                Ins = 0x77,
+                Ins = 0x77
             };
 
             var cmd = new U2fHidTestingCommand(cmdApdu);
-            U2fHidTestingResponse rsp = connection.SendCommand(cmd);
+            var rsp = connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Failed, rsp.Status);
             Assert.Equal(SWConstants.CommandNotAllowed, rsp.StatusWord);
-            Assert.Equal(1, rsp.rspApdu.Data.Length);
-            Assert.Equal((byte)U2fHidStatus.Ctap1ErrInvalidCommand, rsp.rspApdu.Data.Span[0]);
+            Assert.Equal(expected: 1, rsp.rspApdu.Data.Length);
+            Assert.Equal((byte)U2fHidStatus.Ctap1ErrInvalidCommand, rsp.rspApdu.Data.Span[index: 0]);
         }
 
         [Fact]
         public void U2fHid_U2fInitNoData_ReturnsInvalidDataLength()
         {
-            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices() ?? throw new InvalidOperationException();
-            HidDevice deviceToUse = GetFidoHid(devices) ?? throw new InvalidOperationException();
-            FidoConnection connection = new FidoConnection(deviceToUse) ?? throw new InvalidOperationException();
+            var devices = HidDevice.GetHidDevices() ?? throw new InvalidOperationException();
+            var deviceToUse = GetFidoHid(devices) ?? throw new InvalidOperationException();
+            var connection = new FidoConnection(deviceToUse) ?? throw new InvalidOperationException();
 
             var cmdApdu = new CommandApdu
             {
-                Ins = 0x06,
+                Ins = 0x06
             };
 
             var cmd = new U2fHidTestingCommand(cmdApdu);
-            U2fHidTestingResponse rsp = connection.SendCommand(cmd);
+            var rsp = connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Failed, rsp.Status);
             Assert.Equal(SWConstants.WrongLength, rsp.StatusWord);
-            Assert.Equal(1, rsp.rspApdu.Data.Length);
-            Assert.Equal((byte)U2fHidStatus.Ctap1ErrInvalidLength, rsp.rspApdu.Data.Span[0]);
+            Assert.Equal(expected: 1, rsp.rspApdu.Data.Length);
+            Assert.Equal((byte)U2fHidStatus.Ctap1ErrInvalidLength, rsp.rspApdu.Data.Span[index: 0]);
         }
 
         [Fact]
@@ -123,29 +125,30 @@ namespace Yubico.YubiKey.U2f
             {
                 if (!SdkPlatformInfo.IsElevated)
                 {
-                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
-                    Assert.True(false);
+                    _ = Assert.Throws<UnauthorizedAccessException>(() =>
+                        YubiKeyDevice.FindByTransport(Transport.HidFido));
+                    Assert.True(condition: false);
                 }
             }
 
-            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
+            var devices = HidDevice.GetHidDevices();
             Assert.NotNull(devices);
 
-            HidDevice? deviceToUse = GetFidoHid(devices);
+            var deviceToUse = GetFidoHid(devices);
             Assert.NotNull(deviceToUse);
             if (deviceToUse is null)
             {
-                Assert.False(true);
+                Assert.False(condition: true);
             }
 
             var connection = new FidoConnection(deviceToUse!);
             Assert.NotNull(connection);
 
             var cmd = new GetProtocolVersionCommand();
-            GetProtocolVersionResponse rsp = connection.SendCommand(cmd);
+            var rsp = connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            string appVersion = rsp.GetData();
+            var appVersion = rsp.GetData();
             Assert.False(string.IsNullOrEmpty(appVersion));
         }
 
@@ -158,19 +161,20 @@ namespace Yubico.YubiKey.U2f
             {
                 if (!SdkPlatformInfo.IsElevated)
                 {
-                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
-                    Assert.True(false);
+                    _ = Assert.Throws<UnauthorizedAccessException>(() =>
+                        YubiKeyDevice.FindByTransport(Transport.HidFido));
+                    Assert.True(condition: false);
                 }
             }
 
-            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
+            var devices = HidDevice.GetHidDevices();
             Assert.NotNull(devices);
 
-            HidDevice? deviceToUse = GetFidoHid(devices);
+            var deviceToUse = GetFidoHid(devices);
             Assert.NotNull(deviceToUse);
             if (deviceToUse is null)
             {
-                Assert.True(false);
+                Assert.True(condition: false);
             }
 
             IYubiKeyConnection connection = new FidoConnection(deviceToUse!);
@@ -178,15 +182,15 @@ namespace Yubico.YubiKey.U2f
 
             var echoCommand = new EchoCommand(sendData);
 
-            EchoResponse echoResponse = connection.SendCommand(echoCommand);
-            ReadOnlyMemory<byte> echoData = echoResponse.GetData();
+            var echoResponse = connection.SendCommand(echoCommand);
+            var echoData = echoResponse.GetData();
 
             Assert.True(echoCommand.Data.Span.SequenceEqual(echoData.Span));
         }
 
         private static HidDevice? GetFidoHid(IEnumerable<HidDevice> devices)
         {
-            foreach (HidDevice currentDevice in devices)
+            foreach (var currentDevice in devices)
             {
                 if (currentDevice.VendorId == 0x1050 &&
                     currentDevice.UsagePage == HidUsagePage.Fido)
@@ -202,26 +206,31 @@ namespace Yubico.YubiKey.U2f
         {
             public U2fHidTestingResponse(ResponseApdu responseApdu) :
                 base(responseApdu)
-            { }
+            {
+            }
 
             public ResponseApdu rspApdu => ResponseApdu;
         }
 
         private class U2fHidTestingCommand : IYubiKeyCommand<U2fHidTestingResponse>
         {
-            public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
-
-            public CommandApdu CommandApdu { get; set; }
-
             public U2fHidTestingCommand(CommandApdu commandApdu)
             {
                 CommandApdu = commandApdu;
             }
 
-            public CommandApdu CreateCommandApdu() => CommandApdu;
+            public CommandApdu CommandApdu { get; }
+            public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
 
-            public U2fHidTestingResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-                new U2fHidTestingResponse(responseApdu);
+            public CommandApdu CreateCommandApdu()
+            {
+                return CommandApdu;
+            }
+
+            public U2fHidTestingResponse CreateResponseForApdu(ResponseApdu responseApdu)
+            {
+                return new U2fHidTestingResponse(responseApdu);
+            }
         }
     }
 }

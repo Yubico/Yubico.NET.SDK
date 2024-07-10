@@ -14,24 +14,24 @@
 
 name: Verify code style
 on:
-    workflow_dispatch:
-#   pull_request:
-#     branches:
-#       - 'main'
-#       - 'develop**'
-#       - 'release/**'
-    # paths:
-    #   - '**.h'
-    #   - '**.c'
-    #   - '**.cs'
-    #   - '**.csproj'
-    #   - '**.sln'
-    #   - '.github/workflows/check-code-formatting.yml'
+  workflow_dispatch:
+  #   pull_request:
+  #     branches:
+  #       - 'main'
+  #       - 'develop**'
+  #       - 'release/**'
+  # paths:
+  #   - '**.h'
+  #   - '**.c'
+  #   - '**.cs'
+  #   - '**.csproj'
+  #   - '**.sln'
+  #   - '.github/workflows/check-code-formatting.yml'
 jobs:
   verify-code-style:
     name: "Verify code style"
     runs-on: windows-latest
-  
+    
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -50,7 +50,7 @@ jobs:
           # Finding all executables named dotnet and picking the first one
           DOTNET_PATH=$(find /usr/share/dotnet -type f -name "dotnet" -executable | head -n 1)
           fi
-        
+          
           if [ -z "$DOTNET_PATH" ]; then
           echo "dotnet executable not found."
           exit 1

@@ -33,49 +33,55 @@ namespace Yubico.YubiKey.Pipelines
                 throw new ArgumentNullException(nameof(command));
             }
 
-            if (command.AsByteArray().SequenceEqual(new SelectApplicationCommand(YubiKeyApplication.Piv).CreateCommandApdu().AsByteArray()))
+            if (command.AsByteArray().SequenceEqual(new SelectApplicationCommand(YubiKeyApplication.Piv)
+                    .CreateCommandApdu().AsByteArray()))
             {
                 return new ResponseApdu(Hex.HexToBytes("9000"));
             }
-            else if (command.AsByteArray().SequenceEqual(Hex.HexToBytes("8050FF0008360CB43F4301B894")))
+
+            if (command.AsByteArray().SequenceEqual(Hex.HexToBytes("8050FF0008360CB43F4301B894")))
             {
-                return new ResponseApdu(Hex.HexToBytes("010B001F002500000000FF0360CAAFA4DAC615236ADD5607216F3E115C9000"));
+                return new ResponseApdu(
+                    Hex.HexToBytes("010B001F002500000000FF0360CAAFA4DAC615236ADD5607216F3E115C9000"));
             }
-            else if (command.AsByteArray().SequenceEqual(Hex.HexToBytes("848233001045330AB30BB1A079A8E7F77376DB9F2C")))
+
+            if (command.AsByteArray().SequenceEqual(Hex.HexToBytes("848233001045330AB30BB1A079A8E7F77376DB9F2C")))
             {
                 return new ResponseApdu(Hex.HexToBytes("9000"));
             }
-            else if (command.AsByteArray().SequenceEqual(Hex.HexToBytes("84FD0000181CE4E3D8F32D986A886DDBC90C8DB22553C2C04391250CCE")))
+
+            if (command.AsByteArray()
+                .SequenceEqual(Hex.HexToBytes("84FD0000181CE4E3D8F32D986A886DDBC90C8DB22553C2C04391250CCE")))
             {
                 return new ResponseApdu(Hex.HexToBytes("5F67E9E059DF3C52809DC9F6DDFBEF3E4C45691B2C8CDDD89000"));
             }
-            else
-            {
-                string apduHex = Hex.BytesToHex(command.AsByteArray());
-                throw new SecureChannelException($"Error: received unexpected APDU {apduHex}");
-                // return new ResponseApdu(Hex.HexToBytes("6a80"));
-            }
+
+            var apduHex = Hex.BytesToHex(command.AsByteArray());
+            throw new SecureChannelException($"Error: received unexpected APDU {apduHex}");
+            // return new ResponseApdu(Hex.HexToBytes("6a80"));
         }
+
         public void Setup()
         {
-
         }
+
         public void Cleanup()
         {
-
         }
     }
 
     public class RandomNumberGeneratorFixture : RandomNumberGenerator
     {
         private readonly byte[] bytesToGenerate = Hex.HexToBytes("360CB43F4301B894"); // host challenge
+
         public override void GetBytes(byte[] arr)
         {
             if (arr is null)
             {
                 throw new ArgumentNullException(nameof(arr));
             }
-            for (int i = 0; i < bytesToGenerate.Length; i++)
+
+            for (var i = 0; i < bytesToGenerate.Length; i++)
             {
                 arr[i] = bytesToGenerate[i];
             }
@@ -84,14 +90,21 @@ namespace Yubico.YubiKey.Pipelines
 
     public class Scp03ApduTransformTests
     {
-        private static IApduTransform GetPipeline() => new PipelineFixture();
-        private static StaticKeys GetStaticKeys() => new StaticKeys();
+        private static IApduTransform GetPipeline()
+        {
+            return new PipelineFixture();
+        }
+
+        private static StaticKeys GetStaticKeys()
+        {
+            return new StaticKeys();
+        }
 
         [Fact]
         public void Constructor_GivenNullPipeline_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new Scp03ApduTransform(null, GetStaticKeys()));
+            _ = Assert.Throws<ArgumentNullException>(() => new Scp03ApduTransform(pipeline: null, GetStaticKeys()));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -99,7 +112,7 @@ namespace Yubico.YubiKey.Pipelines
         public void Constructor_GivenNullStaticKeys_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new Scp03ApduTransform(GetPipeline(), null));
+            _ = Assert.Throws<ArgumentNullException>(() => new Scp03ApduTransform(GetPipeline(), staticKeys: null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -112,12 +125,13 @@ namespace Yubico.YubiKey.Pipelines
             pipeline.Setup(fakeRng);
 
             // Act
-            ResponseApdu responseApdu = pipeline.Invoke(new VersionCommand().CreateCommandApdu(), typeof(object), typeof(object));
+            var responseApdu =
+                pipeline.Invoke(new VersionCommand().CreateCommandApdu(), typeof(object), typeof(object));
             var versionResponse = new VersionResponse(responseApdu);
-            FirmwareVersion fwv = versionResponse.GetData();
+            var fwv = versionResponse.GetData();
 
             // Assert
-            Assert.Equal(5, fwv.Major);
+            Assert.Equal(expected: 5, fwv.Major);
         }
     }
 }

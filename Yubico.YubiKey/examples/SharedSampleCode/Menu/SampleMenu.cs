@@ -110,7 +110,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
 
             do
             {
-                WriteMessage(MessageType.Title, 0, title);
+                WriteMessage(MessageType.Title, numberToWrite: 0, title);
                 for (int index = 0; index < menuItems.Length; index++)
                 {
                     // When printing out the choices, begin counting at 1.
@@ -125,11 +125,11 @@ namespace Yubico.YubiKey.Sample.SharedCode
                     return response - 1;
                 }
 
-                WriteMessage(MessageType.Special, 0, "Invalid response for this menu.");
+                WriteMessage(MessageType.Special, numberToWrite: 0, "Invalid response for this menu.");
                 _invalidCount++;
             } while (_invalidCount < _maxInvalidCount);
 
-            WriteMessage(MessageType.Special, 0, "Too many invalid responses, exiting menu.");
+            WriteMessage(MessageType.Special, numberToWrite: 0, "Too many invalid responses, exiting menu.");
 
             return -1;
         }

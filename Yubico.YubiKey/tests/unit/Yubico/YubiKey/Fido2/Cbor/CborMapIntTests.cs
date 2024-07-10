@@ -20,13 +20,31 @@ namespace Yubico.YubiKey.Fido2.Cbor
 {
     public class CborMapIntTests
     {
+        private readonly long[] _longValues =
+        {
+            -1, 0x05,
+            -7, 0x05,
+            -23, 0x05,
+            -24, 0x05,
+            -25, 0x05,
+            -256, 0x05,
+            -32767, 0x05,
+            -32768, 0x05,
+            -16000000, 0x05,
+            -8380000, 0x05,
+            -2147483648, 0x05,
+            -2147483649, 0x04,
+            -9223372036854775808, 0x04
+        };
+
         // Each pair is (number to test, flag)
         // where the flag indicates whether it is readable as
         //   int       0x01
         //   uint      0x02
         //   long      0x04
         //   ulong     0x08
-        private readonly ulong[] _ulongValues = new ulong[] {
+        private readonly ulong[] _ulongValues =
+        {
             0, 0x0F,
             1, 0x0F,
             2, 0x0F,
@@ -48,33 +66,18 @@ namespace Yubico.YubiKey.Fido2.Cbor
             0x420a57ce911d03d5, 0x0C,
             0xc20a57ce911d03d5, 0x08
         };
-        private readonly long[] _longValues = new long[] {
-            -1, 0x05,
-            -7, 0x05,
-            -23, 0x05,
-            -24, 0x05,
-            -25, 0x05,
-            -256, 0x05,
-            -32767, 0x05,
-            -32768, 0x05,
-            -16000000, 0x05,
-            -8380000, 0x05,
-            -2147483648, 0x05,
-            -2147483649, 0x04,
-            -9223372036854775808, 0x04
-        };
 
         [Theory]
         [InlineData(true)]
         [InlineData(false)]
         public void ReadIntegers_Success(bool isSigned)
         {
-            int index = 0;
+            var index = 0;
             bool isValid;
 
             do
             {
-                byte[] encoding = GetNextEncoding(isSigned, ref index, out int flags);
+                var encoding = GetNextEncoding(isSigned, ref index, out var flags);
                 isValid = TestInt32(encoding, flags);
                 Assert.True(isValid);
                 isValid = TestUInt32(encoding, flags);
@@ -86,26 +89,26 @@ namespace Yubico.YubiKey.Fido2.Cbor
             } while (index > 0);
         }
 
-        bool TestInt32(byte[] encoding, int flags)
+        private bool TestInt32(byte[] encoding, int flags)
         {
             var cborMap = new CborMap<int>(encoding);
-            bool isSigned = cborMap.ReadBoolean(1);
-            int index = cborMap.ReadInt32(2);
+            var isSigned = cborMap.ReadBoolean(key: 1);
+            var index = cborMap.ReadInt32(key: 2);
 
             if ((flags & 0x01) != 0)
             {
-                int getValue = cborMap.ReadInt32(3);
+                var getValue = cborMap.ReadInt32(key: 3);
                 if (isSigned)
                 {
-                    long expectedValue = _longValues[index];
-                    if ((long)getValue == expectedValue)
+                    var expectedValue = _longValues[index];
+                    if (getValue == expectedValue)
                     {
                         return true;
                     }
                 }
                 else
                 {
-                    ulong expectedValue = _ulongValues[index];
+                    var expectedValue = _ulongValues[index];
                     if ((ulong)getValue == expectedValue)
                     {
                         return true;
@@ -117,7 +120,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             try
             {
-                _ = cborMap.ReadInt32(3);
+                _ = cborMap.ReadInt32(key: 3);
             }
             catch (InvalidCastException)
             {
@@ -127,27 +130,27 @@ namespace Yubico.YubiKey.Fido2.Cbor
             return false;
         }
 
-        bool TestUInt32(byte[] encoding, int flags)
+        private bool TestUInt32(byte[] encoding, int flags)
         {
             var cborMap = new CborMap<int>(encoding);
-            bool isSigned = cborMap.ReadBoolean(1);
-            int index = cborMap.ReadInt32(2);
+            var isSigned = cborMap.ReadBoolean(key: 1);
+            var index = cborMap.ReadInt32(key: 2);
 
             if ((flags & 0x02) != 0)
             {
-                uint getValue = cborMap.ReadUInt32(3);
+                var getValue = cborMap.ReadUInt32(key: 3);
                 if (isSigned)
                 {
-                    long expectedValue = _longValues[index];
-                    if ((long)getValue == expectedValue)
+                    var expectedValue = _longValues[index];
+                    if (getValue == expectedValue)
                     {
                         return true;
                     }
                 }
                 else
                 {
-                    ulong expectedValue = _ulongValues[index];
-                    if ((ulong)getValue == expectedValue)
+                    var expectedValue = _ulongValues[index];
+                    if (getValue == expectedValue)
                     {
                         return true;
                     }
@@ -158,7 +161,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             try
             {
-                _ = cborMap.ReadUInt32(3);
+                _ = cborMap.ReadUInt32(key: 3);
             }
             catch (InvalidCastException)
             {
@@ -168,18 +171,18 @@ namespace Yubico.YubiKey.Fido2.Cbor
             return false;
         }
 
-        bool TestInt64(byte[] encoding, int flags)
+        private bool TestInt64(byte[] encoding, int flags)
         {
             var cborMap = new CborMap<int>(encoding);
-            bool isSigned = cborMap.ReadBoolean(1);
-            int index = cborMap.ReadInt32(2);
+            var isSigned = cborMap.ReadBoolean(key: 1);
+            var index = cborMap.ReadInt32(key: 2);
 
             if ((flags & 0x04) != 0)
             {
-                long getValue = cborMap.ReadInt64(3);
+                var getValue = cborMap.ReadInt64(key: 3);
                 if (isSigned)
                 {
-                    long expectedValue = _longValues[index];
+                    var expectedValue = _longValues[index];
                     if (getValue == expectedValue)
                     {
                         return true;
@@ -187,7 +190,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 }
                 else
                 {
-                    ulong expectedValue = _ulongValues[index];
+                    var expectedValue = _ulongValues[index];
                     if ((ulong)getValue == expectedValue)
                     {
                         return true;
@@ -199,7 +202,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             try
             {
-                _ = cborMap.ReadInt64(3);
+                _ = cborMap.ReadInt64(key: 3);
             }
             catch (InvalidCastException)
             {
@@ -209,18 +212,18 @@ namespace Yubico.YubiKey.Fido2.Cbor
             return false;
         }
 
-        bool TestUInt64(byte[] encoding, int flags)
+        private bool TestUInt64(byte[] encoding, int flags)
         {
             var cborMap = new CborMap<int>(encoding);
-            bool isSigned = cborMap.ReadBoolean(1);
-            int index = cborMap.ReadInt32(2);
+            var isSigned = cborMap.ReadBoolean(key: 1);
+            var index = cborMap.ReadInt32(key: 2);
 
             if ((flags & 0x08) != 0)
             {
-                ulong getValue = cborMap.ReadUInt64(3);
+                var getValue = cborMap.ReadUInt64(key: 3);
                 if (isSigned)
                 {
-                    long expectedValue = _longValues[index];
+                    var expectedValue = _longValues[index];
                     if ((long)getValue == expectedValue)
                     {
                         return true;
@@ -228,7 +231,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 }
                 else
                 {
-                    ulong expectedValue = _ulongValues[index];
+                    var expectedValue = _ulongValues[index];
                     if (getValue == expectedValue)
                     {
                         return true;
@@ -240,7 +243,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             try
             {
-                _ = cborMap.ReadUInt64(3);
+                _ = cborMap.ReadUInt64(key: 3);
             }
             catch (InvalidCastException)
             {
@@ -253,16 +256,16 @@ namespace Yubico.YubiKey.Fido2.Cbor
         private byte[] GetNextEncoding(bool isSigned, ref int index, out int flags)
         {
             var cborWriter = new CborWriter();
-            cborWriter.WriteStartMap(3);
-            cborWriter.WriteInt32(1);
+            cborWriter.WriteStartMap(definiteLength: 3);
+            cborWriter.WriteInt32(value: 1);
             cborWriter.WriteBoolean(isSigned);
-            cborWriter.WriteInt32(2);
+            cborWriter.WriteInt32(value: 2);
             cborWriter.WriteInt32(index);
-            cborWriter.WriteInt32(3);
+            cborWriter.WriteInt32(value: 3);
 
             if (isSigned)
             {
-                long currentValue = _longValues[index];
+                var currentValue = _longValues[index];
                 flags = (int)_longValues[index + 1];
                 index += 2;
                 cborWriter.WriteInt64(currentValue);
@@ -274,7 +277,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
             }
             else
             {
-                ulong currentValue = _ulongValues[index];
+                var currentValue = _ulongValues[index];
                 flags = (int)_ulongValues[index + 1];
                 index += 2;
                 cborWriter.WriteUInt64(currentValue);
@@ -284,6 +287,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                     index = -1;
                 }
             }
+
             cborWriter.WriteEndMap();
 
             return cborWriter.Encode();

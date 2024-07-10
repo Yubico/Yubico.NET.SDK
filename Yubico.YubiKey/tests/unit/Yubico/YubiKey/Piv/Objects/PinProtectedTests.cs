@@ -14,7 +14,6 @@
 
 using System;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv.Objects
 {
@@ -33,7 +32,7 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var pinProtect = new PinProtectedData();
 
-            Assert.Equal(0x005FC109, pinProtect.DataTag);
+            Assert.Equal(expected: 0x005FC109, pinProtect.DataTag);
         }
 
         [Fact]
@@ -41,8 +40,8 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var pinProtect = new PinProtectedData();
 
-            int definedTag = pinProtect.GetDefinedDataTag();
-            Assert.Equal(0x005FC109, definedTag);
+            var definedTag = pinProtect.GetDefinedDataTag();
+            Assert.Equal(expected: 0x005FC109, definedTag);
         }
 
         [Fact]
@@ -59,8 +58,8 @@ namespace Yubico.YubiKey.Piv.Objects
             using var pinProtect = new PinProtectedData();
             pinProtect.DataTag = 0x005FC109;
 
-            int definedTag = pinProtect.GetDefinedDataTag();
-            Assert.Equal(0x005FC109, definedTag);
+            var definedTag = pinProtect.GetDefinedDataTag();
+            Assert.Equal(expected: 0x005FC109, definedTag);
         }
 
         [Fact]
@@ -75,7 +74,7 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void SetMgmtKey_NotEmpty()
         {
-            Memory<byte> mgmtKey = GetArbitraryMgmtKey();
+            var mgmtKey = GetArbitraryMgmtKey();
 
             using var pinProtect = new PinProtectedData();
             pinProtect.SetManagementKey(mgmtKey);
@@ -86,7 +85,7 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void SetMgmtKey_DataSame()
         {
-            Memory<byte> mgmtKey = GetArbitraryMgmtKey();
+            var mgmtKey = GetArbitraryMgmtKey();
 
             using var pinProtect = new PinProtectedData();
             pinProtect.SetManagementKey(mgmtKey);
@@ -95,7 +94,7 @@ namespace Yubico.YubiKey.Piv.Objects
             if (!(pinProtect.ManagementKey is null))
             {
                 var getData = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
-                bool isValid = MemoryExtensions.SequenceEqual<byte>(mgmtKey.Span, getData.Span);
+                var isValid = mgmtKey.Span.SequenceEqual(getData.Span);
                 Assert.True(isValid);
             }
         }
@@ -103,8 +102,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void SetMgmtKey_Invalid_Throws()
         {
-            Memory<byte> mgmtKey = GetArbitraryMgmtKey();
-            mgmtKey = mgmtKey.Slice(0, 23);
+            var mgmtKey = GetArbitraryMgmtKey();
+            mgmtKey = mgmtKey.Slice(start: 0, length: 23);
 
             using var pinProtect = new PinProtectedData();
 
@@ -117,31 +116,33 @@ namespace Yubico.YubiKey.Piv.Objects
             var expected = new Span<byte>(new byte[] { 0x53, 0x00 });
             using var pinProtect = new PinProtectedData();
 
-            byte[] encoding = pinProtect.Encode();
-            bool isValid = MemoryExtensions.SequenceEqual(expected, encoding);
+            var encoding = pinProtect.Encode();
+            var isValid = expected.SequenceEqual(encoding);
             Assert.True(isValid);
         }
 
         [Fact]
         public void Encode_NoKey_Correct()
         {
-            var expected = new Span<byte>(new byte[] {
+            var expected = new Span<byte>(new byte[]
+            {
                 0x53, 0x02, 0x88, 0x00
             });
 
             using var pinProtect = new PinProtectedData();
             pinProtect.SetManagementKey(ReadOnlyMemory<byte>.Empty);
 
-            byte[] encoded = pinProtect.Encode();
+            var encoded = pinProtect.Encode();
 
-            bool isValid = MemoryExtensions.SequenceEqual<byte>(expected, encoded);
+            var isValid = expected.SequenceEqual(encoded);
             Assert.True(isValid);
         }
 
         [Fact]
         public void Encode_WithKey_Correct()
         {
-            var expected = new Span<byte>(new byte[] {
+            var expected = new Span<byte>(new byte[]
+            {
                 0x53, 0x1C, 0x88, 0x1A, 0x89, 0x18,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
@@ -151,21 +152,22 @@ namespace Yubico.YubiKey.Piv.Objects
             using var pinProtect = new PinProtectedData();
             pinProtect.SetManagementKey(GetArbitraryMgmtKey());
 
-            byte[] encoded = pinProtect.Encode();
+            var encoded = pinProtect.Encode();
 
-            bool isValid = MemoryExtensions.SequenceEqual<byte>(expected, encoded);
+            var isValid = expected.SequenceEqual(encoded);
             Assert.True(isValid);
         }
 
         [Fact]
         public void TryDecode_NoKey_ReturnsTrue()
         {
-            var encodedData = new Memory<byte>(new byte[] {
+            var encodedData = new Memory<byte>(new byte[]
+            {
                 0x53, 0x02, 0x88, 0x00
             });
 
             using var pinProtect = new PinProtectedData();
-            bool isValid = pinProtect.TryDecode(encodedData);
+            var isValid = pinProtect.TryDecode(encodedData);
 
             Assert.True(isValid);
         }
@@ -173,7 +175,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_NoKey_IsEmptyFalse()
         {
-            var encodedData = new Memory<byte>(new byte[] {
+            var encodedData = new Memory<byte>(new byte[]
+            {
                 0x53, 0x02, 0x88, 0x00
             });
 
@@ -186,7 +189,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_NoKey_CorrectMgmtKey()
         {
-            var encodedData = new Memory<byte>(new byte[] {
+            var encodedData = new Memory<byte>(new byte[]
+            {
                 0x53, 0x02, 0x88, 0x00
             });
 
@@ -199,7 +203,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void TryDecode_Full_ReturnsTrue()
         {
-            var encodedData = new Memory<byte>(new byte[] {
+            var encodedData = new Memory<byte>(new byte[]
+            {
                 0x53, 0x1C, 0x88, 0x1A, 0x89, 0x18,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
@@ -207,7 +212,7 @@ namespace Yubico.YubiKey.Piv.Objects
             });
 
             using var pinProtect = new PinProtectedData();
-            bool isValid = pinProtect.TryDecode(encodedData);
+            var isValid = pinProtect.TryDecode(encodedData);
 
             Assert.True(isValid);
         }
@@ -215,7 +220,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_Full_IsEmptyFalse()
         {
-            var encodedData = new Memory<byte>(new byte[] {
+            var encodedData = new Memory<byte>(new byte[]
+            {
                 0x53, 0x1C, 0x88, 0x1A, 0x89, 0x18,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
@@ -231,7 +237,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_Full_MgmtKeyCorrect()
         {
-            var encodedData = new Memory<byte>(new byte[] {
+            var encodedData = new Memory<byte>(new byte[]
+            {
                 0x53, 0x1C, 0x88, 0x1A, 0x89, 0x18,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
@@ -245,14 +252,15 @@ namespace Yubico.YubiKey.Piv.Objects
             if (!(pinProtect.ManagementKey is null))
             {
                 var getData = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
-                bool isValid = MemoryExtensions.SequenceEqual<byte>(encodedData[6..].Span, getData.Span);
+                var isValid = encodedData[6..].Span.SequenceEqual(getData.Span);
                 Assert.True(isValid);
             }
         }
 
         private Memory<byte> GetArbitraryMgmtKey()
         {
-            byte[] keyData = new byte[] {
+            byte[] keyData =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
                 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68

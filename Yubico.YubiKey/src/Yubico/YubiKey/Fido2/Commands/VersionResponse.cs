@@ -18,15 +18,15 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Response to a command to get the firmware version.
+    ///     Response to a command to get the firmware version.
     /// </summary>
     /// <remarks>
-    /// <p>
-    /// This is the partner Response class to <see cref="VersionCommand"/>.
-    /// </p>
-    /// <p>
-    /// The data returned is <see cref="FirmwareVersion"/>.
-    /// </p>
+    ///     <p>
+    ///         This is the partner Response class to <see cref="VersionCommand" />.
+    ///     </p>
+    ///     <p>
+    ///         The data returned is <see cref="FirmwareVersion" />.
+    ///     </p>
     /// </remarks>
     internal class VersionResponse : Fido2Response, IYubiKeyResponseWithData<FirmwareVersion>
     {
@@ -35,10 +35,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         public VersionResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public FirmwareVersion GetData()
         {
             if (ResponseApdu.SW != SWConstants.Success)
@@ -53,7 +52,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             ReadOnlySpan<byte> responseApduData = ResponseApdu.Data.Span;
 
-            return new FirmwareVersion()
+            return new FirmwareVersion
             {
                 Major = responseApduData[13],
                 Minor = responseApduData[14],

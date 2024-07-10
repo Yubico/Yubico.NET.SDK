@@ -21,35 +21,25 @@ using static Yubico.PlatformInterop.NativeMethods;
 namespace Yubico.Core.Devices.Hid
 {
     /// <summary>
-    /// macOS implementation of the keyboard feature report connection.
+    ///     macOS implementation of the keyboard feature report connection.
     /// </summary>
     internal sealed class MacOSHidFeatureReportConnection : IHidConnection
     {
         private readonly MacOSHidDevice _device;
         private readonly long _entryId;
-        private IntPtr _deviceHandle;
         private readonly Logger _log = Log.GetLogger();
+        private IntPtr _deviceHandle;
 
         private bool _isDisposed;
 
         /// <summary>
-        /// The correct size, in bytes, for the data buffer to be transmitted to the keyboard.
-        /// </summary>
-        public int InputReportSize { get; }
-
-        /// <summary>
-        /// The correct size, in bytes, for the data buffer to be received from the keyboard.
-        /// </summary>
-        public int OutputReportSize { get; }
-
-        /// <summary>
-        /// Constructs an instance of the MacOSHidFeatureReportConnection class.
+        ///     Constructs an instance of the MacOSHidFeatureReportConnection class.
         /// </summary>
         /// <param name="device">
-        /// The device object from which this connection originates.
+        ///     The device object from which this connection originates.
         /// </param>
         /// <param name="entryId">
-        /// The IOKit registry entry identifier representing the device we're trying to connect to.
+        ///     The IOKit registry entry identifier representing the device we're trying to connect to.
         /// </param>
         public MacOSHidFeatureReportConnection(MacOSHidDevice device, long entryId)
         {
@@ -68,57 +58,24 @@ namespace Yubico.Core.Devices.Hid
                 OutputReportSize);
         }
 
-        private void SetupConnection()
-        {
-            int deviceEntry = 0;
-            try
-            {
-                IntPtr matchingDictionary = IORegistryEntryIDMatching((ulong)_entryId);
-                deviceEntry = IOServiceGetMatchingService(0, matchingDictionary);
-
-                if (deviceEntry == 0)
-                {
-                    _log.LogError("Failed to find a matching device entry in the IO registry.");
-                    throw new PlatformApiException(ExceptionMessages.IOKitRegistryEntryNotFound);
-                }
-
-                _deviceHandle = IOHIDDeviceCreate(IntPtr.Zero, deviceEntry);
-
-                if (_deviceHandle == IntPtr.Zero)
-                {
-                    _log.LogError("Failed to open the device handle.");
-                    throw new PlatformApiException(ExceptionMessages.IOKitCannotOpenDevice);
-                }
-
-                int result = IOHIDDeviceOpen(_deviceHandle, 0);
-                _log.IOKitApiCall(nameof(IOHIDDeviceOpen), (kern_return_t)result);
-
-                if (result != 0)
-                {
-                    throw new PlatformApiException(
-                        nameof(IOHIDDeviceOpen),
-                        result,
-                        ExceptionMessages.IOKitCannotOpenDevice);
-                }
-            }
-            finally
-            {
-                if (deviceEntry != 0)
-                {
-                    _log.LogDebug("Releasing deviceEntry object.");
-                    _ = IOObjectRelease(deviceEntry);
-                }
-            }
-        }
+        /// <summary>
+        ///     The correct size, in bytes, for the data buffer to be transmitted to the keyboard.
+        /// </summary>
+        public int InputReportSize { get; }
 
         /// <summary>
-        /// Reads a report from the keyboard interface.
+        ///     The correct size, in bytes, for the data buffer to be received from the keyboard.
+        /// </summary>
+        public int OutputReportSize { get; }
+
+        /// <summary>
+        ///     Reads a report from the keyboard interface.
         /// </summary>
         /// <returns>
-        /// A buffer that contains the data received from the keyboard.
+        ///     A buffer that contains the data received from the keyboard.
         /// </returns>
         /// <exception cref="PlatformApiException">
-        /// Thrown when the underlying IOKit framework reports an error. See the exception message for details.
+        ///     Thrown when the underlying IOKit framework reports an error. See the exception message for details.
         /// </exception>
         public byte[] GetReport()
         {
@@ -130,9 +87,9 @@ namespace Yubico.Core.Devices.Hid
             int result = IOHIDDeviceGetReport(
                 _deviceHandle,
                 IOKitHidConstants.kIOHidReportTypeFeature,
-                0,
-               buffer,
-               ref bufferSize);
+                reportID: 0,
+                buffer,
+                ref bufferSize);
 
             _device.LogDeviceAccessTime();
 
@@ -154,13 +111,13 @@ namespace Yubico.Core.Devices.Hid
         }
 
         /// <summary>
-        /// Sends a buffer to the keyboard device.
+        ///     Sends a buffer to the keyboard device.
         /// </summary>
         /// <param name="report">
-        /// The buffer to send.
+        ///     The buffer to send.
         /// </param>
         /// <exception cref="PlatformApiException">
-        /// Thrown when the underlying IOKit framework reports an error. See the exception message for details.
+        ///     Thrown when the underlying IOKit framework reports an error. See the exception message for details.
         /// </exception>
         public void SetReport(byte[] report)
         {
@@ -171,7 +128,7 @@ namespace Yubico.Core.Devices.Hid
             int result = IOHIDDeviceSetReport(
                 _deviceHandle,
                 IOKitHidConstants.kIOHidReportTypeFeature,
-                0,
+                reportID: 0,
                 report,
                 report.Length);
 
@@ -185,6 +142,59 @@ namespace Yubico.Core.Devices.Hid
                     nameof(IOHIDDeviceSetReport),
                     result,
                     ExceptionMessages.IOKitOperationFailed);
+            }
+        }
+
+        /// <summary>
+        ///     Disposes this object and all of the underlying platform handles for this connection.
+        /// </summary>
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void SetupConnection()
+        {
+            int deviceEntry = 0;
+            try
+            {
+                IntPtr matchingDictionary = IORegistryEntryIDMatching((ulong)_entryId);
+                deviceEntry = IOServiceGetMatchingService(masterPort: 0, matchingDictionary);
+
+                if (deviceEntry == 0)
+                {
+                    _log.LogError("Failed to find a matching device entry in the IO registry.");
+                    throw new PlatformApiException(ExceptionMessages.IOKitRegistryEntryNotFound);
+                }
+
+                _deviceHandle = IOHIDDeviceCreate(IntPtr.Zero, deviceEntry);
+
+                if (_deviceHandle == IntPtr.Zero)
+                {
+                    _log.LogError("Failed to open the device handle.");
+                    throw new PlatformApiException(ExceptionMessages.IOKitCannotOpenDevice);
+                }
+
+                int result = IOHIDDeviceOpen(_deviceHandle, options: 0);
+                _log.IOKitApiCall(nameof(IOHIDDeviceOpen), (kern_return_t)result);
+
+                if (result != 0)
+                {
+                    throw new PlatformApiException(
+                        nameof(IOHIDDeviceOpen),
+                        result,
+                        ExceptionMessages.IOKitCannotOpenDevice);
+                }
+            }
+            finally
+            {
+                if (deviceEntry != 0)
+                {
+                    _log.LogDebug("Releasing deviceEntry object.");
+                    _ = IOObjectRelease(deviceEntry);
+                }
             }
         }
 
@@ -202,7 +212,7 @@ namespace Yubico.Core.Devices.Hid
 
             if (_deviceHandle != IntPtr.Zero)
             {
-                _ = IOHIDDeviceClose(_deviceHandle, 0);
+                _ = IOHIDDeviceClose(_deviceHandle, options: 0);
                 _deviceHandle = IntPtr.Zero;
             }
 
@@ -213,16 +223,6 @@ namespace Yubico.Core.Devices.Hid
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: false);
-        }
-
-        /// <summary>
-        /// Disposes this object and all of the underlying platform handles for this connection.
-        /// </summary>
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

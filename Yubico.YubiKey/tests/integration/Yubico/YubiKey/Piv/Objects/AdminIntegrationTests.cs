@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ReadAdmin_IsEmpty_Correct(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ResetApplication();
 
-                AdminData admin = pivSession.ReadObject<AdminData>();
+                var admin = pivSession.ReadObject<AdminData>();
 
                 Assert.True(admin.IsEmpty);
             }
@@ -45,7 +45,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteAdminData_Read_NotEmpty(StandardTestDevice testDeviceType)
         {
-            byte[] salt = {
+            byte[] salt =
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             };
@@ -56,7 +57,7 @@ namespace Yubico.YubiKey.Piv
             admin.SetSalt(salt);
             admin.PinLastUpdated = DateTime.UtcNow;
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -68,7 +69,7 @@ namespace Yubico.YubiKey.Piv
                     pivSession.ResetApplication();
                     pivSession.WriteObject(admin);
 
-                    AdminData adminCopy = pivSession.ReadObject<AdminData>();
+                    var adminCopy = pivSession.ReadObject<AdminData>();
                     Assert.False(adminCopy.IsEmpty);
                 }
                 finally
@@ -82,7 +83,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteAdminData_Read_Correct(StandardTestDevice testDeviceType)
         {
-            byte[] salt = {
+            byte[] salt =
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             };
@@ -93,7 +95,7 @@ namespace Yubico.YubiKey.Piv
             admin.SetSalt(salt);
             admin.PinLastUpdated = DateTime.UtcNow;
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -105,7 +107,7 @@ namespace Yubico.YubiKey.Piv
                     pivSession.ResetApplication();
                     pivSession.WriteObject(admin);
 
-                    AdminData adminCopy = pivSession.ReadObject<AdminData>();
+                    var adminCopy = pivSession.ReadObject<AdminData>();
                     _ = Assert.NotNull(adminCopy.Salt);
                     _ = Assert.NotNull(adminCopy.PinLastUpdated);
 
@@ -113,7 +115,7 @@ namespace Yubico.YubiKey.Piv
                     {
                         var cmpObj = (ReadOnlyMemory<byte>)adminCopy.Salt;
                         var expected = new Span<byte>(salt);
-                        bool isValid = expected.SequenceEqual(cmpObj.Span);
+                        var isValid = expected.SequenceEqual(cmpObj.Span);
                         Assert.True(isValid);
                     }
 

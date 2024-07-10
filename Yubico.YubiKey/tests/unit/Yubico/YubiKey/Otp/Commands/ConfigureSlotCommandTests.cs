@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand();
 
-            Slot otpSlot = command.OtpSlot;
+            var otpSlot = command.OtpSlot;
 
             Assert.Equal(Slot.ShortPress, otpSlot);
         }
@@ -37,7 +37,10 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand();
 
-            void Action() => _ = command.OtpSlot = (Slot)0x5; // Some invalid slot
+            void Action()
+            {
+                _ = command.OtpSlot = (Slot)0x5;
+            } // Some invalid slot
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -48,7 +51,7 @@ namespace Yubico.YubiKey.Otp.Commands
             TicketFlags expectedFlags = TicketFlags.AppendDelayToOtp;
 
             var command = new ConfigureSlotCommand { TicketFlags = expectedFlags };
-            TicketFlags actualFlags = command.TicketFlags;
+            var actualFlags = command.TicketFlags;
 
             Assert.Equal(expectedFlags, actualFlags);
         }
@@ -58,8 +61,8 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             ConfigurationFlags expectedFlags = ConfigurationFlags.ChallengeResponse;
 
-            var command = new ConfigureSlotCommand() { ConfigurationFlags = expectedFlags };
-            ConfigurationFlags actualFlags = command.ConfigurationFlags;
+            var command = new ConfigureSlotCommand { ConfigurationFlags = expectedFlags };
+            var actualFlags = command.ConfigurationFlags;
 
             Assert.Equal(expectedFlags, actualFlags);
         }
@@ -69,8 +72,8 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             ExtendedFlags expectedFlags = ExtendedFlags.Dormant;
 
-            var command = new ConfigureSlotCommand() { ExtendedFlags = expectedFlags };
-            ExtendedFlags actualFlags = command.ExtendedFlags;
+            var command = new ConfigureSlotCommand { ExtendedFlags = expectedFlags };
+            var actualFlags = command.ExtendedFlags;
 
             Assert.Equal(expectedFlags, actualFlags);
         }
@@ -80,7 +83,10 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand();
 
-            void Action() => command.SetFixedData(new byte[17]);
+            void Action()
+            {
+                command.SetFixedData(new byte[17]);
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -88,12 +94,12 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void SetFixedData_ZeroBufferGiven_PlacedCorrectlyInDataBuffer()
         {
-            byte[] expectedFixed = new byte[SlotConfigureBase.FixedDataLength];
+            var expectedFixed = new byte[SlotConfigureBase.FixedDataLength];
             var command = new ConfigureSlotCommand();
 
             command.SetFixedData(Array.Empty<byte>());
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            ReadOnlySpan<byte> dataSlice = data.Slice(0, SlotConfigureBase.FixedDataLength).Span;
+            var data = command.CreateCommandApdu().Data;
+            var dataSlice = data.Slice(start: 0, SlotConfigureBase.FixedDataLength).Span;
 
             Assert.True(dataSlice.SequenceEqual(expectedFixed));
         }
@@ -105,12 +111,12 @@ namespace Yubico.YubiKey.Otp.Commands
             var command = new ConfigureSlotCommand();
 
             command.SetFixedData(new byte[expectedValidFixedDataLength]);
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            byte dataSlice = data.Slice(
+            var data = command.CreateCommandApdu().Data;
+            var dataSlice = data.Slice(
                 SlotConfigureBase.FixedDataLength
                 + SlotConfigureBase.UidLength
                 + SlotConfigureBase.AesKeyLength
-                + SlotConfigureBase.AccessCodeLength).Span[0];
+                + SlotConfigureBase.AccessCodeLength).Span[index: 0];
 
             Assert.Equal(expectedValidFixedDataLength, dataSlice);
         }
@@ -120,7 +126,10 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand();
 
-            void Action() => command.SetUid(Array.Empty<byte>());
+            void Action()
+            {
+                command.SetUid(Array.Empty<byte>());
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -128,12 +137,12 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void SetUid_ValidBuffer_PlacedCorrectlyInDataBuffer()
         {
-            byte[] expectedUid = Enumerable.Repeat((byte)0xFF, ConfigureSlotCommand.UidLength).ToArray();
+            var expectedUid = Enumerable.Repeat((byte)0xFF, SlotConfigureBase.UidLength).ToArray();
             var command = new ConfigureSlotCommand();
 
             command.SetUid(expectedUid);
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            ReadOnlySpan<byte> dataSlice = data.Slice(ConfigureSlotCommand.FixedDataLength, ConfigureSlotCommand.UidLength).Span;
+            var data = command.CreateCommandApdu().Data;
+            var dataSlice = data.Slice(SlotConfigureBase.FixedDataLength, SlotConfigureBase.UidLength).Span;
 
             Assert.True(dataSlice.SequenceEqual(expectedUid));
         }
@@ -143,7 +152,10 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand();
 
-            void Action() => command.SetAccessCode(Array.Empty<byte>());
+            void Action()
+            {
+                command.SetAccessCode(Array.Empty<byte>());
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -151,15 +163,15 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void SetAccessCode_ValidBuffer_PlacedCorrectlyInDataBuffer()
         {
-            byte[] expectedAccessCode = Enumerable.Repeat((byte)0xFF, UpdateSlotCommand.AccessCodeLength).ToArray();
+            var expectedAccessCode = Enumerable.Repeat((byte)0xFF, SlotConfigureBase.AccessCodeLength).ToArray();
             var command = new ConfigureSlotCommand();
 
             command.SetAccessCode(expectedAccessCode);
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            ReadOnlySpan<byte> dataSlice = data.Slice(ConfigureSlotCommand.FixedDataLength
-                                                       + ConfigureSlotCommand.UidLength
-                                                       + ConfigureSlotCommand.AesKeyLength,
-                                                         ConfigureSlotCommand.AccessCodeLength).Span;
+            var data = command.CreateCommandApdu().Data;
+            var dataSlice = data.Slice(SlotConfigureBase.FixedDataLength
+                                       + SlotConfigureBase.UidLength
+                                       + SlotConfigureBase.AesKeyLength,
+                SlotConfigureBase.AccessCodeLength).Span;
 
             Assert.True(dataSlice.SequenceEqual(expectedAccessCode));
         }
@@ -169,7 +181,10 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand();
 
-            void Action() => command.ApplyCurrentAccessCode(Array.Empty<byte>());
+            void Action()
+            {
+                command.ApplyCurrentAccessCode(Array.Empty<byte>());
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -177,12 +192,12 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void ApplyCurrentAccessCode_ValidBuffer_PlacedCorrectlyInDataBuffer()
         {
-            byte[] expectedAccessCode = Enumerable.Repeat((byte)0xFF, UpdateSlotCommand.AccessCodeLength).ToArray();
+            var expectedAccessCode = Enumerable.Repeat((byte)0xFF, SlotConfigureBase.AccessCodeLength).ToArray();
             var command = new ConfigureSlotCommand();
 
             command.ApplyCurrentAccessCode(expectedAccessCode);
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            ReadOnlySpan<byte> dataSlice = data.Slice(52, ConfigureSlotCommand.AccessCodeLength).Span;
+            var data = command.CreateCommandApdu().Data;
+            var dataSlice = data.Slice(start: 52, SlotConfigureBase.AccessCodeLength).Span;
 
             Assert.True(dataSlice.SequenceEqual(expectedAccessCode));
         }
@@ -193,10 +208,10 @@ namespace Yubico.YubiKey.Otp.Commands
             var command = new ConfigureSlotCommand();
             _ = command.CreateCommandApdu();
 
-            command.ApplyCurrentAccessCode(Enumerable.Repeat((byte)0xFF, ConfigureSlotCommand.AccessCodeLength).ToArray());
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+            command.ApplyCurrentAccessCode(Enumerable.Repeat((byte)0xFF, SlotConfigureBase.AccessCodeLength).ToArray());
+            var data = command.CreateCommandApdu().Data;
 
-            Assert.Equal(58, data.Length);
+            Assert.Equal(expected: 58, data.Length);
         }
 
         [Fact]
@@ -204,10 +219,10 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand();
 
-            command.ApplyCurrentAccessCode(Enumerable.Repeat((byte)0xFF, ConfigureSlotCommand.AccessCodeLength).ToArray());
-            CommandApdu apdu = command.CreateCommandApdu();
+            command.ApplyCurrentAccessCode(Enumerable.Repeat((byte)0xFF, SlotConfigureBase.AccessCodeLength).ToArray());
+            var apdu = command.CreateCommandApdu();
 
-            Assert.Equal(58, apdu.Nc);
+            Assert.Equal(expected: 58, apdu.Nc);
         }
 
         [Fact]
@@ -215,7 +230,10 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand();
 
-            void Action() => command.SetAesKey(Array.Empty<byte>());
+            void Action()
+            {
+                command.SetAesKey(Array.Empty<byte>());
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -223,14 +241,14 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void CreateCommandApdu_AesKey_PlacedCorrectlyInDataBuffer()
         {
-            byte[] expectedAesKey = Enumerable.Repeat((byte)0xFF, ConfigureSlotCommand.AesKeyLength).ToArray();
+            var expectedAesKey = Enumerable.Repeat((byte)0xFF, SlotConfigureBase.AesKeyLength).ToArray();
             var command = new ConfigureSlotCommand();
 
             command.SetAesKey(expectedAesKey);
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            ReadOnlySpan<byte> dataSlice = data.Slice(ConfigureSlotCommand.FixedDataLength
-                                                      + ConfigureSlotCommand.UidLength,
-                                                        ConfigureSlotCommand.AesKeyLength).Span;
+            var data = command.CreateCommandApdu().Data;
+            var dataSlice = data.Slice(SlotConfigureBase.FixedDataLength
+                                       + SlotConfigureBase.UidLength,
+                SlotConfigureBase.AesKeyLength).Span;
 
             Assert.True(dataSlice.SequenceEqual(expectedAesKey));
         }
@@ -240,7 +258,10 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand();
 
-            void Action() => command.SetAccessCode(Array.Empty<byte>());
+            void Action()
+            {
+                command.SetAccessCode(Array.Empty<byte>());
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -248,15 +269,15 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void CreateCommandApdu_AccessCode_PlacedCorrectlyInDataBuffer()
         {
-            byte[] expectedAccessCode = Enumerable.Repeat((byte)0xFF, ConfigureSlotCommand.AccessCodeLength).ToArray();
+            var expectedAccessCode = Enumerable.Repeat((byte)0xFF, SlotConfigureBase.AccessCodeLength).ToArray();
             var command = new ConfigureSlotCommand();
 
             command.SetAccessCode(expectedAccessCode);
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            ReadOnlySpan<byte> dataSlice = data.Slice(ConfigureSlotCommand.FixedDataLength
-                                                      + ConfigureSlotCommand.UidLength
-                                                      + ConfigureSlotCommand.AesKeyLength,
-                                                        ConfigureSlotCommand.AccessCodeLength).Span;
+            var data = command.CreateCommandApdu().Data;
+            var dataSlice = data.Slice(SlotConfigureBase.FixedDataLength
+                                       + SlotConfigureBase.UidLength
+                                       + SlotConfigureBase.AesKeyLength,
+                SlotConfigureBase.AccessCodeLength).Span;
 
             Assert.True(dataSlice.SequenceEqual(expectedAccessCode));
         }
@@ -266,9 +287,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand();
 
-            byte cla = command.CreateCommandApdu().Cla;
+            var cla = command.CreateCommandApdu().Cla;
 
-            Assert.Equal(0, cla);
+            Assert.Equal(expected: 0, cla);
         }
 
         [Fact]
@@ -276,9 +297,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand();
 
-            byte ins = command.CreateCommandApdu().Ins;
+            var ins = command.CreateCommandApdu().Ins;
 
-            Assert.Equal(1, ins);
+            Assert.Equal(expected: 1, ins);
         }
 
         [Theory]
@@ -288,7 +309,7 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand { OtpSlot = otpSlot };
 
-            byte p1 = command.CreateCommandApdu().P1;
+            var p1 = command.CreateCommandApdu().P1;
 
             Assert.Equal(expectedSlotValue, p1);
         }
@@ -298,9 +319,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand();
 
-            byte p2 = command.CreateCommandApdu().P2;
+            var p2 = command.CreateCommandApdu().P2;
 
-            Assert.Equal(0, p2);
+            Assert.Equal(expected: 0, p2);
         }
 
         [Fact]
@@ -308,26 +329,26 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand();
 
-            int nc = command.CreateCommandApdu().Nc;
+            var nc = command.CreateCommandApdu().Nc;
 
-            Assert.Equal(58, nc);
+            Assert.Equal(expected: 58, nc);
         }
 
         [Fact]
         public void CreateCommandApdu_ExtendedFlags_PlacedCorrectlyInDataBuffer()
         {
             ExtendedFlags expectedFlags = ExtendedFlags.AllowUpdate;
-            var command = new ConfigureSlotCommand()
+            var command = new ConfigureSlotCommand
             {
                 ExtendedFlags = expectedFlags
             };
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            byte dataSlice = data.Slice(ConfigureSlotCommand.FixedDataLength
-                                        + ConfigureSlotCommand.UidLength
-                                        + ConfigureSlotCommand.AesKeyLength
-                                        + ConfigureSlotCommand.AccessCodeLength
-                                        + 1).Span[0];
+            var data = command.CreateCommandApdu().Data;
+            var dataSlice = data.Slice(SlotConfigureBase.FixedDataLength
+                                       + SlotConfigureBase.UidLength
+                                       + SlotConfigureBase.AesKeyLength
+                                       + SlotConfigureBase.AccessCodeLength
+                                       + 1).Span[index: 0];
 
             Assert.Equal(expectedFlags, (ExtendedFlags)dataSlice);
         }
@@ -336,17 +357,17 @@ namespace Yubico.YubiKey.Otp.Commands
         public void CreateCommandApdu_TicketFlags_PlacedCorrectlyInDataBuffer()
         {
             TicketFlags expectedFlags = TicketFlags.AppendCarriageReturn;
-            var command = new ConfigureSlotCommand()
+            var command = new ConfigureSlotCommand
             {
                 TicketFlags = expectedFlags
             };
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            byte dataSlice = data.Slice(ConfigureSlotCommand.FixedDataLength
-                                        + ConfigureSlotCommand.UidLength
-                                        + ConfigureSlotCommand.AesKeyLength
-                                        + ConfigureSlotCommand.AccessCodeLength
-                                        + 2).Span[0];
+            var data = command.CreateCommandApdu().Data;
+            var dataSlice = data.Slice(SlotConfigureBase.FixedDataLength
+                                       + SlotConfigureBase.UidLength
+                                       + SlotConfigureBase.AesKeyLength
+                                       + SlotConfigureBase.AccessCodeLength
+                                       + 2).Span[index: 0];
 
             Assert.Equal(expectedFlags, (TicketFlags)dataSlice);
         }
@@ -356,17 +377,17 @@ namespace Yubico.YubiKey.Otp.Commands
         public void CreateCommandApdu_ConfigurationFlags_PlacedCorrectlyInDataBuffer()
         {
             ConfigurationFlags expectedFlags = ConfigurationFlags.AllowHidTrigger;
-            var command = new ConfigureSlotCommand()
+            var command = new ConfigureSlotCommand
             {
                 ConfigurationFlags = expectedFlags
             };
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            byte dataSlice = data.Slice(ConfigureSlotCommand.FixedDataLength
-                                        + ConfigureSlotCommand.UidLength
-                                        + ConfigureSlotCommand.AesKeyLength
-                                        + ConfigureSlotCommand.AccessCodeLength
-                                        + 3).Span[0];
+            var data = command.CreateCommandApdu().Data;
+            var dataSlice = data.Slice(SlotConfigureBase.FixedDataLength
+                                       + SlotConfigureBase.UidLength
+                                       + SlotConfigureBase.AesKeyLength
+                                       + SlotConfigureBase.AccessCodeLength
+                                       + 3).Span[index: 0];
 
             Assert.Equal(expectedFlags, (ConfigurationFlags)dataSlice);
         }
@@ -377,14 +398,14 @@ namespace Yubico.YubiKey.Otp.Commands
             const short expectedReserved = 0;
             var command = new ConfigureSlotCommand();
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            ReadOnlySpan<byte> dataSlice = data.Slice(ConfigureSlotCommand.FixedDataLength
-                                                      + ConfigureSlotCommand.UidLength
-                                                      + ConfigureSlotCommand.AesKeyLength
-                                                      + ConfigureSlotCommand.AccessCodeLength
-                                                      + 4, 2).Span;
+            var data = command.CreateCommandApdu().Data;
+            var dataSlice = data.Slice(SlotConfigureBase.FixedDataLength
+                                       + SlotConfigureBase.UidLength
+                                       + SlotConfigureBase.AesKeyLength
+                                       + SlotConfigureBase.AccessCodeLength
+                                       + 4, length: 2).Span;
 
-            short actualReserved = BinaryPrimitives.ReadInt16LittleEndian(dataSlice);
+            var actualReserved = BinaryPrimitives.ReadInt16LittleEndian(dataSlice);
 
             Assert.Equal(expectedReserved, actualReserved);
         }
@@ -394,16 +415,16 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureSlotCommand();
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            ReadOnlySpan<byte> dataSlice = data.Slice(ConfigureSlotCommand.FixedDataLength
-                                                      + ConfigureSlotCommand.UidLength
-                                                      + ConfigureSlotCommand.AesKeyLength
-                                                      + ConfigureSlotCommand.AccessCodeLength
-                                                      + 6, 2).Span;
+            var data = command.CreateCommandApdu().Data;
+            var dataSlice = data.Slice(SlotConfigureBase.FixedDataLength
+                                       + SlotConfigureBase.UidLength
+                                       + SlotConfigureBase.AesKeyLength
+                                       + SlotConfigureBase.AccessCodeLength
+                                       + 6, length: 2).Span;
 
-            short actualCrc = BinaryPrimitives.ReadInt16LittleEndian(dataSlice);
+            var actualCrc = BinaryPrimitives.ReadInt16LittleEndian(dataSlice);
 
-            Assert.Equal(20245, actualCrc);
+            Assert.Equal(expected: 20245, actualCrc);
         }
 
         [Fact]

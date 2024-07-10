@@ -14,12 +14,12 @@
 
 using System;
 using Yubico.YubiKey.Otp;
-using Yubico.YubiKey.Otp.Operations;
 
 namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class Delete : OtpPluginBase
     {
+        public Delete(IOutput output) : base(output) { }
         public override string Name => "Delete";
 
         public override string Description => "Delete the configuration from an OTP slot.";
@@ -28,8 +28,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             ParameterUse.Slot
             | ParameterUse.Force
             | ParameterUse.CurrentAccessCode;
-
-        public Delete(IOutput output) : base(output) { }
 
         public override void HandleParameters()
         {
@@ -47,6 +45,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Output.WriteLine("Aborted.", OutputLevel.Error);
                 return false;
             }
+
             try
             {
                 otp.DeleteSlotConfiguration(_slot)

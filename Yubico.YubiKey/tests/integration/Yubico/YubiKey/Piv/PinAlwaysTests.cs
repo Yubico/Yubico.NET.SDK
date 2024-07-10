@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void PinAlways_Sign_Succeeds(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             byte slotNumber = 0x9A;
 
@@ -38,18 +38,19 @@ namespace Yubico.YubiKey.Piv
                 _ = pivSession.GenerateKeyPair(
                     slotNumber, PivAlgorithm.EccP256, PivPinPolicy.Always, PivTouchPolicy.Never);
 
-                byte[] dataToSign = {
+                byte[] dataToSign =
+                {
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
                     0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
                     0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78,
                     0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88
                 };
 
-                byte[] signature1 = pivSession.Sign(slotNumber, dataToSign);
-                Assert.Equal(0x30, signature1[0]);
+                var signature1 = pivSession.Sign(slotNumber, dataToSign);
+                Assert.Equal(expected: 0x30, signature1[0]);
 
-                byte[] signature2 = pivSession.Sign(slotNumber, dataToSign);
-                bool isSame = signature1.SequenceEqual(signature2);
+                var signature2 = pivSession.Sign(slotNumber, dataToSign);
+                var isSame = signature1.SequenceEqual(signature2);
                 Assert.False(isSame);
             }
         }
@@ -58,7 +59,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Slot9C_Default_Sign_Succeeds(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             byte slotNumber = 0x9C;
 
@@ -72,18 +73,19 @@ namespace Yubico.YubiKey.Piv
                 _ = pivSession.GenerateKeyPair(
                     slotNumber, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
 
-                byte[] dataToSign = {
+                byte[] dataToSign =
+                {
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
                     0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68,
                     0x71, 0x72, 0x73, 0x74, 0x75, 0x76, 0x77, 0x78,
                     0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88
                 };
 
-                byte[] signature1 = pivSession.Sign(slotNumber, dataToSign);
-                Assert.Equal(0x30, signature1[0]);
+                var signature1 = pivSession.Sign(slotNumber, dataToSign);
+                Assert.Equal(expected: 0x30, signature1[0]);
 
-                byte[] signature2 = pivSession.Sign(slotNumber, dataToSign);
-                bool isSame = signature1.SequenceEqual(signature2);
+                var signature2 = pivSession.Sign(slotNumber, dataToSign);
+                var isSame = signature1.SequenceEqual(signature2);
                 Assert.False(isSame);
             }
         }

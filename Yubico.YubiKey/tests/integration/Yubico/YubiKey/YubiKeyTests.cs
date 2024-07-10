@@ -42,7 +42,7 @@ namespace Yubico.YubiKey
         {
             var keys = YubiKeyDevice.FindByTransport().ToList();
 
-            foreach (IYubiKeyDevice key in keys)
+            foreach (var key in keys)
             {
                 var concrete = key as YubiKeyDevice;
                 Assert.NotNull(concrete);
@@ -58,7 +58,7 @@ namespace Yubico.YubiKey
         {
             var keys = YubiKeyDevice.FindByTransport().ToList();
 
-            foreach (IYubiKeyDevice key in keys)
+            foreach (var key in keys)
             {
                 var concrete = key as YubiKeyDevice;
                 Assert.NotNull(concrete);
@@ -73,7 +73,7 @@ namespace Yubico.YubiKey
         {
             var keys = YubiKeyDevice.FindByTransport().ToList();
 
-            foreach (IYubiKeyDevice key in keys)
+            foreach (var key in keys)
             {
                 var concrete = key as YubiKeyDevice;
                 Assert.NotNull(concrete);
@@ -89,7 +89,7 @@ namespace Yubico.YubiKey
         {
             var keys = YubiKeyDevice.FindByTransport().ToList();
 
-            foreach (IYubiKeyDevice key in keys)
+            foreach (var key in keys)
             {
                 var concrete = key as YubiKeyDevice;
                 Assert.NotNull(concrete);
@@ -109,7 +109,7 @@ namespace Yubico.YubiKey
         {
             var keys = YubiKeyDevice.FindByTransport(transport).ToList();
 
-            foreach (IYubiKeyDevice key in keys)
+            foreach (var key in keys)
             {
                 var concrete = key as YubiKeyDevice;
                 Assert.NotNull(concrete);
@@ -143,7 +143,7 @@ namespace Yubico.YubiKey
         {
             var keys = YubiKeyDevice.FindByTransport(transport).ToList();
 
-            foreach (IYubiKeyDevice key in keys)
+            foreach (var key in keys)
             {
                 var concrete = key as YubiKeyDevice;
                 Assert.NotNull(concrete);
@@ -192,24 +192,26 @@ namespace Yubico.YubiKey
         [Fact]
         public void GetYubiKeys_SingleTransport_RapidSwitching()
         {
-            int numberOfRounds = 40;
+            var numberOfRounds = 40;
 
             var rand = new Random();
             Transport[] transportValues =
-                new[] { /*Transport.HidFido,*/ Transport.HidKeyboard, Transport.SmartCard };
+            {
+                /*Transport.HidFido,*/ Transport.HidKeyboard, Transport.SmartCard
+            };
 
             var transportTestValues = new Transport[numberOfRounds];
-            for (int i = 0; i < transportTestValues.Length; i++)
+            for (var i = 0; i < transportTestValues.Length; i++)
             {
-                int randIndex = rand.Next(transportValues.Length);
+                var randIndex = rand.Next(transportValues.Length);
                 transportTestValues[i] = transportValues[randIndex];
             }
 
             var sw = new Stopwatch();
 
             List<IYubiKeyDevice> keys;
-            int n = 0;
-            foreach (Transport ct in transportTestValues)
+            var n = 0;
+            foreach (var ct in transportTestValues)
             {
                 _testOutputHelper.WriteLine("{0,-5}{1}",
                     $"{++n}:",

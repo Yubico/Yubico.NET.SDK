@@ -17,42 +17,42 @@ using System;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    /// Miscellaneous flags representing various settings available on the YubiKey.
+    ///     Miscellaneous flags representing various settings available on the YubiKey.
     /// </summary>
-    /// <seealso cref="Yubico.YubiKey.YubiKeyDeviceInfo"/>
+    /// <seealso cref="Yubico.YubiKey.YubiKeyDeviceInfo" />
     [Flags]
-#pragma warning disable CA1711 // Justification: Keep using the variable name "DeviceFlags"
+    #pragma warning disable CA1711 // Justification: Keep using the variable name "DeviceFlags"
     public enum DeviceFlags
-#pragma warning restore CA1711
+        #pragma warning restore CA1711
     {
         /// <summary>
-        /// No device flags are set.
+        ///     No device flags are set.
         /// </summary>
         None = 0x00,
 
         /// <summary>
-        /// USB remote wakeup is enabled.
+        ///     USB remote wakeup is enabled.
         /// </summary>
         RemoteWakeup = 0x40,
 
         /// <summary>
-        /// The CCID touch-eject feature is enabled.
+        ///     The CCID touch-eject feature is enabled.
         /// </summary>
         /// <remarks>
-        /// <para>
-        /// For the CCID connection, the YubiKey behaves as a smart card reader and smart
-        /// card. When this flag is disabled, the smart card is always present in the smart
-        /// card reader. When enabled, the smart card will be ejected by default,
-        /// and the user is required to touch the YubiKey to insert the smart card. For
-        /// this to take effect, all <see cref="YubiKeyCapabilities"/> which do not depend
-        /// on the CCID connection (such as <c>Fido2</c>, <c>FidoU2f</c>, and <c>Otp</c>)
-        /// must be disabled.
-        /// </para>
-        /// <para>
-        /// To automatically eject the smart card following a touch, see
-        /// <see cref="IYubiKeyDeviceInfo.AutoEjectTimeout"/>.
-        /// </para>
+        ///     <para>
+        ///         For the CCID connection, the YubiKey behaves as a smart card reader and smart
+        ///         card. When this flag is disabled, the smart card is always present in the smart
+        ///         card reader. When enabled, the smart card will be ejected by default,
+        ///         and the user is required to touch the YubiKey to insert the smart card. For
+        ///         this to take effect, all <see cref="YubiKeyCapabilities" /> which do not depend
+        ///         on the CCID connection (such as <c>Fido2</c>, <c>FidoU2f</c>, and <c>Otp</c>)
+        ///         must be disabled.
+        ///     </para>
+        ///     <para>
+        ///         To automatically eject the smart card following a touch, see
+        ///         <see cref="IYubiKeyDeviceInfo.AutoEjectTimeout" />.
+        ///     </para>
         /// </remarks>
-        TouchEject = 0x80,
+        TouchEject = 0x80
     }
 }

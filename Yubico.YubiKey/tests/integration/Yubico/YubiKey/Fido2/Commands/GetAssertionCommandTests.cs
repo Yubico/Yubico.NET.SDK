@@ -22,7 +22,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     public class GetAssertionCommandTests : NeedPinToken
     {
         public GetAssertionCommandTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, pin: null)
         {
         }
 
@@ -31,17 +31,17 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             var protocol = new PinUvAuthProtocolTwo();
 
-            bool isValid = GetParams(protocol, out GetAssertionParameters assertionParams);
+            var isValid = GetParams(protocol, out var assertionParams);
             Assert.True(isValid);
 
             var cmd = new GetAssertionCommand(assertionParams);
-            GetAssertionResponse rsp = Connection.SendCommand(cmd);
+            var rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
-            GetAssertionData cData = rsp.GetData();
+            var cData = rsp.GetData();
             if (!(cData.NumberOfCredentials is null) && cData.NumberOfCredentials > 0)
             {
-                int count = (int)cData.NumberOfCredentials;
-                for (int index = 1; index < count; index++)
+                var count = (int)cData.NumberOfCredentials;
+                for (var index = 1; index < count; index++)
                 {
                     var nextCmd = new GetNextAssertionCommand();
                     rsp = Connection.SendCommand(nextCmd);
@@ -49,37 +49,39 @@ namespace Yubico.YubiKey.Fido2.Commands
                     cData = rsp.GetData();
                 }
             }
-            Assert.Equal(48, cData.CredentialId.Id.Length);
+
+            Assert.Equal(expected: 48, cData.CredentialId.Id.Length);
         }
 
         private bool GetParams(
             PinUvAuthProtocolBase protocol,
             out GetAssertionParameters assertionParams)
         {
-            byte[] clientDataHash = {
+            byte[] clientDataHash =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
             };
 
             var rp = new RelyingParty("SomeRpId")
             {
-                Name = "SomeRpName",
+                Name = "SomeRpName"
             };
 
             assertionParams = new GetAssertionParameters(rp, clientDataHash);
 
-            if (!GetPinToken(protocol, PinUvAuthTokenPermissions.None, out byte[] pinToken))
+            if (!GetPinToken(protocol, PinUvAuthTokenPermissions.None, out var pinToken))
             {
                 return false;
             }
 
-            byte[] pinUvAuthParam = protocol.AuthenticateUsingPinToken(pinToken, clientDataHash);
+            var pinUvAuthParam = protocol.AuthenticateUsingPinToken(pinToken, clientDataHash);
 
             assertionParams.Protocol = protocol.Protocol;
             assertionParams.PinUvAuthParam = pinUvAuthParam;
 
             //assertionParams.AddOption("rk", true);
-            assertionParams.AddOption("up", true);
+            assertionParams.AddOption("up", optionValue: true);
             //assertionParams.AddOption("uv", false);
 
             return true;

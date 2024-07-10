@@ -15,24 +15,22 @@
 using System;
 using System.Buffers.Binary;
 using System.Linq;
-using System.Security.Cryptography;
 using Xunit;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath.Commands
 {
     public class CalculateAllCredentialsCommandTests
     {
-        readonly byte[] _fixedBytes = new byte[8] { 0xF1, 0x03, 0xDA, 0x89, 0x58, 0xE4, 0x40, 0x85 };
+        private readonly byte[] _fixedBytes = new byte[8] { 0xF1, 0x03, 0xDA, 0x89, 0x58, 0xE4, 0x40, 0x85 };
 
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
             var command = new CalculateAllCredentialsCommand();
 
-            Assert.Equal(0, command.CreateCommandApdu().Cla);
+            Assert.Equal(expected: 0, command.CreateCommandApdu().Cla);
         }
 
         [Fact]
@@ -40,7 +38,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new CalculateAllCredentialsCommand();
 
-            Assert.Equal(0xa4, command.CreateCommandApdu().Ins);
+            Assert.Equal(expected: 0xa4, command.CreateCommandApdu().Ins);
         }
 
         [Fact]
@@ -48,7 +46,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new CalculateAllCredentialsCommand();
 
-            Assert.Equal(0, command.CreateCommandApdu().P1);
+            Assert.Equal(expected: 0, command.CreateCommandApdu().P1);
         }
 
         [Fact]
@@ -56,7 +54,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new CalculateAllCredentialsCommand(ResponseFormat.Full);
 
-            Assert.Equal(0, command.CreateCommandApdu().P2);
+            Assert.Equal(expected: 0, command.CreateCommandApdu().P2);
         }
 
         [Fact]
@@ -64,7 +62,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new CalculateAllCredentialsCommand(ResponseFormat.Truncated);
 
-            Assert.Equal(0x01, command.CreateCommandApdu().P2);
+            Assert.Equal(expected: 0x01, command.CreateCommandApdu().P2);
         }
 
         [Fact]
@@ -72,13 +70,13 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new CalculateAllCredentialsCommand();
 
-            Assert.Equal(0, command.CreateCommandApdu().Ne);
+            Assert.Equal(expected: 0, command.CreateCommandApdu().Ne);
         }
 
         [Fact]
         public void CreateCommandApdu_ReturnsCorrectLength()
         {
-            RandomObjectUtility utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
 
             try
             {
@@ -86,10 +84,10 @@ namespace Yubico.YubiKey.Oath.Commands
 
                 byte[] dataList = { 0x74, 0x08 };
 
-                int timePeriod = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (int)CredentialPeriod.Period30;
-                byte[] bytes = BitConverter.GetBytes(timePeriod);
-                byte[] challenge = bytes.Concat(new byte[8 - bytes.Length]).ToArray();
-                byte[]? newDataList = dataList.Concat(challenge).ToArray();
+                var timePeriod = (int)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (int)CredentialPeriod.Period30;
+                var bytes = BitConverter.GetBytes(timePeriod);
+                var challenge = bytes.Concat(new byte[8 - bytes.Length]).ToArray();
+                var newDataList = dataList.Concat(challenge).ToArray();
 
                 Assert.Equal(newDataList.Length, command.CreateCommandApdu().Nc);
             }
@@ -102,7 +100,7 @@ namespace Yubico.YubiKey.Oath.Commands
         [Fact]
         public void CreateCommandApdu_ReturnsCorrectData()
         {
-            RandomObjectUtility utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
 
             try
             {
@@ -111,11 +109,11 @@ namespace Yubico.YubiKey.Oath.Commands
                 byte[] dataList = { 0x74, 0x08 };
 
                 ulong timePeriod = (uint)DateTimeOffset.UtcNow.ToUnixTimeSeconds() / (uint)CredentialPeriod.Period30;
-                byte[] bytes = new byte[8];
+                var bytes = new byte[8];
                 BinaryPrimitives.WriteUInt64BigEndian(bytes, timePeriod);
-                byte[]? newDataList = dataList.Concat(bytes).ToArray();
+                var newDataList = dataList.Concat(bytes).ToArray();
 
-                ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+                var data = command.CreateCommandApdu().Data;
 
                 Assert.True(data.Span.SequenceEqual(newDataList));
             }
@@ -130,7 +128,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new CalculateAllCredentialsCommand();
-            CalculateAllCredentialsResponse? response = command.CreateResponseForApdu(responseApdu);
+            var response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is CalculateAllCredentialsResponse);
         }

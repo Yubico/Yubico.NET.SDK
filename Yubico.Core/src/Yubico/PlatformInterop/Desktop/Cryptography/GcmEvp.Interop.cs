@@ -32,19 +32,23 @@ namespace Yubico.PlatformInterop
         {
             Unknown = 0,
             GetTag = 16,
-            SetTag = 17,
+            SetTag = 17
         }
 
         // EVP_CIPHER_CTX* EVP_CIPHER_CTX_new(void);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EVP_CIPHER_CTX_new", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_EVP_CIPHER_CTX_new", ExactSpelling = true,
+            CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern IntPtr EvpCipherCtxNewIntPtr();
 
         public static SafeEvpCipherCtx EvpCipherCtxNew() =>
-            new SafeEvpCipherCtx(EvpCipherCtxNewIntPtr(), true);
+            new SafeEvpCipherCtx(EvpCipherCtxNewIntPtr(), ownsHandle: true);
 
         // void EVP_CIPHER_CTX_free(EVP_CIPHER_CTX* c);
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EVP_CIPHER_CTX_free", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_EVP_CIPHER_CTX_free", ExactSpelling = true,
+            CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern void EvpCipherCtxFree(IntPtr ctx);
 
@@ -55,12 +59,17 @@ namespace Yubico.PlatformInterop
         // We'll set the type in the C code, the impl will be null, so the C#
         // call just needs the ctx, key, and nonce.
         // This returns 1 for success, or 0 for an error.
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EVP_Aes256Gcm_Init", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_EVP_Aes256Gcm_Init", ExactSpelling = true,
+            CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern int EvpAes256GcmInit(int isEncrypt, IntPtr ctx, byte[] key, byte[] nonce);
 
         public static int EvpAes256GcmInit(bool isEncrypt, SafeEvpCipherCtx ctx, byte[] key, byte[] nonce) =>
-            EvpAes256GcmInit(isEncrypt ? 1 : 0, ctx.DangerousGetHandle(), key, nonce);
+            EvpAes256GcmInit(
+                isEncrypt
+                    ? 1
+                    : 0, ctx.DangerousGetHandle(), key, nonce);
 
         // int EVP_EncryptUpdate(
         //     EVP_CIPHER_CTX* c, unsigned char* out, int* outLen,
@@ -70,7 +79,8 @@ namespace Yubico.PlatformInterop
         // The OpenSSL Wiki says that if this is AES-GCM and the output is null,
         // then the input will be considered the AAD.
         // This returns 1 for success, or 0 for an error.
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EVP_Update", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_EVP_Update", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern int EvpUpdate(IntPtr ctx, byte[]? output, out int outLen, byte[] input, int inLen);
 
@@ -86,7 +96,8 @@ namespace Yubico.PlatformInterop
         // This returns 1 for success, or 0 for an error.
         // When performing AES-GCM, this is when the auth tag is computed. There
         // should be no data returned in the output buffer.
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EVP_Final_ex", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_EVP_Final_ex", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern int EvpFinal(IntPtr ctx, byte[] output, out int outLen);
 
@@ -112,7 +123,9 @@ namespace Yubico.PlatformInterop
         // means increasing from one function to two. But this "ctrl" function
         // can be called with at least 20 different flags, so if we ever need to
         // use more flags, we would just keep adding functions.
-        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EVP_CIPHER_CTX_ctrl", ExactSpelling = true, CharSet = CharSet.Ansi)]
+        [DllImport(
+            Libraries.NativeShims, EntryPoint = "Native_EVP_CIPHER_CTX_ctrl", ExactSpelling = true,
+            CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern int EvpCipherCtxCtrl(IntPtr ctx, int cmd, int p1, byte[] p2);
 

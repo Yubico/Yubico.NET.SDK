@@ -1364,10 +1364,10 @@ namespace Yubico.YubiKey.Piv
                 try
                 {
                     // This will use PBKDF2, with the PRF of HMAC with SHA-1.
-#pragma warning disable CA5379, CA5387 // These warnings complain about SHA-1 and <100,000 iterations, but we use it to be backwards-compatible.
+                    #pragma warning disable CA5379, CA5387 // These warnings complain about SHA-1 and <100,000 iterations, but we use it to be backwards-compatible.
                     using var kdf = new Rfc2898DeriveBytes(pinData, saltData, iterations: 10000);
                     result = kdf.GetBytes(newLength);
-#pragma warning restore CA5379, CA5387
+                    #pragma warning restore CA5379, CA5387
                     Array.Copy(result, _keyBuffer, newLength);
                     KeyData = _keyData.Slice(start: 0, newLength);
                 }
@@ -1482,7 +1482,9 @@ namespace Yubico.YubiKey.Piv
             // If generating new key data, this will reject weak keys.
             public void SetKeyData(int setFlag, ReadOnlyMemory<byte> keyData, bool isNewKey, PivAlgorithm algorithm)
             {
-                MgmtKeyHolder dest = isNewKey ? _newKey : _currentKey;
+                MgmtKeyHolder dest = isNewKey
+                    ? _newKey
+                    : _currentKey;
 
                 if (setFlag == SetKeyDataBuffer)
                 {
@@ -1518,7 +1520,9 @@ namespace Yubico.YubiKey.Piv
             // result if a salt is given.
             public ReadOnlyMemory<byte> DeriveKeyData(ReadOnlyMemory<byte> salt, PivAlgorithm algorithm, bool isNewKey)
             {
-                MgmtKeyHolder dest = isNewKey ? _newKey : _currentKey;
+                MgmtKeyHolder dest = isNewKey
+                    ? _newKey
+                    : _currentKey;
 
                 return dest.DeriveKeyData(_pinMemory.Slice(start: 0, _pinLength), salt, algorithm);
             }

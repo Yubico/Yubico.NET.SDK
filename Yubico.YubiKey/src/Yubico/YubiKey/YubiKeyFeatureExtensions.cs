@@ -18,13 +18,13 @@ using System.Globalization;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    /// A static class containing the <see cref="HasFeature"/> extension method.
+    ///     A static class containing the <see cref="HasFeature" /> extension method.
     /// </summary>
     public static class YubiKeyFeatureExtensions
     {
         /// <summary>
-        /// Feature presence detection. Used to query whether or not a particular YubiKey feature is available for this
-        /// device.
+        ///     Feature presence detection. Used to query whether or not a particular YubiKey feature is available for this
+        ///     device.
         /// </summary>
         /// <param name="yubiKeyDevice">The YubiKey device to query.</param>
         /// <param name="feature">The name of the feature that you wish to query.</param>
@@ -32,20 +32,19 @@ namespace Yubico.YubiKey
         /// <exception cref="ArgumentNullException">The YubiKey device was null.</exception>
         /// <exception cref="ArgumentException">An unknown feature was queried.</exception>
         /// <remarks>
-        /// Use this API to programmatically detect if a particular feature is present on a YubiKey. If your application
-        /// needs to deal with a heterogeneous deployment of YubiKeys across major releases, this method allows you to
-        /// switch on whether a certain feature is present or not. This method is meant to be more accurate than querying
-        /// firmware versions directly, as it will be kept up to date with all YubiKey releases.
+        ///     Use this API to programmatically detect if a particular feature is present on a YubiKey. If your application
+        ///     needs to deal with a heterogeneous deployment of YubiKeys across major releases, this method allows you to
+        ///     switch on whether a certain feature is present or not. This method is meant to be more accurate than querying
+        ///     firmware versions directly, as it will be kept up to date with all YubiKey releases.
         /// </remarks>
         /// <example>
-        /// Get the number of total tries a user has to enter the PIN of the PIV application:
-        ///
-        /// <code language="csharp">
+        ///     Get the number of total tries a user has to enter the PIN of the PIV application:
+        ///     <code language="csharp">
         /// public int GetPinTries(YubiKeyDevice yubiKeyDevice)
         /// {
         ///   if (!yubiKeyDevice.HasFeature(YubiKeyFeature.PivMetadata))
         ///     throw new NotSupportedException("The PIV metadata command is not supported on this YubiKey.");
-        ///
+        /// 
         ///   using PivSession piv = new PivSession(yubiKeyDevice);
         ///   var metadata = piv.GetMetadata(PivSlot.Pin);
         ///   return metadata.RetryCount;
@@ -181,8 +180,8 @@ namespace Yubico.YubiKey
 
                 YubiKeyFeature.PivAesManagementKey =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_4_2 ||
-                    (yubiKeyDevice.FirmwareVersion == new FirmwareVersion(0, 8, 8)
-                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv)),
+                    yubiKeyDevice.FirmwareVersion == new FirmwareVersion(major: 0, minor: 8, patch: 8)
+                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
 
                 YubiKeyFeature.PivMetadata =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0
@@ -250,7 +249,7 @@ namespace Yubico.YubiKey
         }
 
         /// <summary>
-        /// Throws a <see cref="NotSupportedException"/> if the YubiKey doesn't support the requested feature. 
+        ///     Throws a <see cref="NotSupportedException" /> if the YubiKey doesn't support the requested feature.
         /// </summary>
         /// <param name="yubiKeyDevice"></param>
         /// <param name="feature"></param>

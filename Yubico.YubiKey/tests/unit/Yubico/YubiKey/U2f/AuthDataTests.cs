@@ -13,13 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Xunit;
-using Yubico.Core.Buffers;
-using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -28,7 +22,7 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void IncorrectUserPresence_Throws()
         {
-            byte[] authData = RegistrationDataTests.GetGoodAuthDataArray();
+            var authData = RegistrationDataTests.GetGoodAuthDataArray();
             authData[0] = 0x81;
 
             _ = Assert.Throws<ArgumentException>(() => new AuthenticationData(authData));
@@ -37,7 +31,7 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void EncodedCounter_CorrectInAuthData()
         {
-            byte[] authData = RegistrationDataTests.GetGoodAuthDataArray();
+            var authData = RegistrationDataTests.GetGoodAuthDataArray();
             authData[1] = 0;
             authData[2] = 0;
             authData[3] = 0x14;
@@ -45,13 +39,13 @@ namespace Yubico.YubiKey.U2f
 
             var authenticationData = new AuthenticationData(authData);
 
-            Assert.Equal(0x1486, authenticationData.Counter);
+            Assert.Equal(expected: 0x1486, authenticationData.Counter);
         }
 
         [Fact]
         public void UserPresenceSet_VerifiedTrue()
         {
-            byte[] authData = RegistrationDataTests.GetGoodAuthDataArray();
+            var authData = RegistrationDataTests.GetGoodAuthDataArray();
             authData[0] = 0x01;
 
             var authenticationData = new AuthenticationData(authData);
@@ -62,7 +56,7 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void UserPresenceNotSet_VerifiedFalse()
         {
-            byte[] authData = RegistrationDataTests.GetGoodAuthDataArray();
+            var authData = RegistrationDataTests.GetGoodAuthDataArray();
             authData[0] = 0x00;
 
             var authenticationData = new AuthenticationData(authData);
@@ -73,14 +67,14 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void VerifySignature_GivenCorrectData_ReturnsTrue()
         {
-            byte[] appId = RegistrationDataTests.GetAppIdArray(true);
-            byte[] clientDataHash = RegistrationDataTests.GetClientDataHashArray(true);
-            byte[] userPublicKey = RegistrationDataTests.GetPubKeyArray(true);
-            byte[] authData = RegistrationDataTests.GetGoodAuthDataArray();
+            var appId = RegistrationDataTests.GetAppIdArray(isValid: true);
+            var clientDataHash = RegistrationDataTests.GetClientDataHashArray(isValid: true);
+            var userPublicKey = RegistrationDataTests.GetPubKeyArray(isValid: true);
+            var authData = RegistrationDataTests.GetGoodAuthDataArray();
 
             var authenticationData = new AuthenticationData(authData);
 
-            bool isVerified = authenticationData.VerifySignature(userPublicKey, appId, clientDataHash);
+            var isVerified = authenticationData.VerifySignature(userPublicKey, appId, clientDataHash);
             Assert.True(isVerified);
         }
     }

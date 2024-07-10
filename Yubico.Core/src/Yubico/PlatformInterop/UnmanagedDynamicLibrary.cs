@@ -21,21 +21,29 @@ namespace Yubico.PlatformInterop
 {
     internal abstract class UnmanagedDynamicLibrary : IDisposable
     {
-        private bool disposedValue;
         protected readonly SafeLibraryHandle _handle;
-
-        public static UnmanagedDynamicLibrary Open(string fileName) => SdkPlatformInfo.OperatingSystem switch
-        {
-            SdkPlatform.Windows => new WindowsUnmanagedDynamicLibrary(fileName),
-            SdkPlatform.MacOS => new MacOSUnmanagedDynamicLibrary(fileName),
-            SdkPlatform.Linux => new LinuxUnmanagedDynamicLibrary(fileName),
-            _ => throw new PlatformNotSupportedException()
-        };
+        private bool disposedValue;
 
         protected UnmanagedDynamicLibrary(SafeLibraryHandle handle)
         {
             _handle = handle;
         }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
+        public static UnmanagedDynamicLibrary Open(string fileName) =>
+            SdkPlatformInfo.OperatingSystem switch
+            {
+                SdkPlatform.Windows => new WindowsUnmanagedDynamicLibrary(fileName),
+                SdkPlatform.MacOS => new MacOSUnmanagedDynamicLibrary(fileName),
+                SdkPlatform.Linux => new LinuxUnmanagedDynamicLibrary(fileName),
+                _ => throw new PlatformNotSupportedException()
+            };
 
         public void GetFunction<TDelegate>(string functionName, out TDelegate d) where TDelegate : class
         {
@@ -51,6 +59,7 @@ namespace Yubico.PlatformInterop
             Debug.Assert(temp is TDelegate);
             d = temp!;
         }
+
         public abstract bool TryGetFunction<TDelegate>(string functionName, out TDelegate? d) where TDelegate : class;
 
         private void Dispose(bool disposing)
@@ -64,13 +73,6 @@ namespace Yubico.PlatformInterop
 
                 disposedValue = true;
             }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

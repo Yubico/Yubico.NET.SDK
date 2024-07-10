@@ -21,6 +21,8 @@ namespace Yubico.YubiKey.TestApp.Converters
         public byte[] Value { get; set; } = Array.Empty<byte>();
 
         public static explicit operator byte[](BytesBase bytes)
-            => bytes.Value;
+        {
+            return bytes.Value;
+        }
     }
 }

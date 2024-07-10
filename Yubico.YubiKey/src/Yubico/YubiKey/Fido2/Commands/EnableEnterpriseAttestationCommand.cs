@@ -14,31 +14,27 @@
 
 using System;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Fido2.Cbor;
 using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Make sure the enterprise attestation feature is enabled.
+    ///     Make sure the enterprise attestation feature is enabled.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="Fido2Response"/>. This command
-    /// does not return any data, it only returns "success" or "failure", and has
-    /// some FIDO2-specific error information.
-    /// <para>
-    /// If the feature is already enabled, this command does nothing and returns
-    /// success.
-    /// </para>
+    ///     The partner Response class is <see cref="Fido2Response" />. This command
+    ///     does not return any data, it only returns "success" or "failure", and has
+    ///     some FIDO2-specific error information.
+    ///     <para>
+    ///         If the feature is already enabled, this command does nothing and returns
+    ///         success.
+    ///     </para>
     /// </remarks>
     public class EnableEnterpriseAttestationCommand : IYubiKeyCommand<Fido2Response>
     {
         private const int SubCmdEnableEnterpriseAttestation = 0x01;
 
         private readonly ConfigCommand _command;
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -48,28 +44,30 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// Constructs a new instance of <see cref="EnableEnterpriseAttestationCommand"/>.
+        ///     Constructs a new instance of <see cref="EnableEnterpriseAttestationCommand" />.
         /// </summary>
         /// <param name="pinUvAuthToken">
-        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        /// key.
+        ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
+        ///     key.
         /// </param>
         /// <param name="authProtocol">
-        /// The Auth Protocol used to build the Auth Token.
+        ///     The Auth Protocol used to build the Auth Token.
         /// </param>
         public EnableEnterpriseAttestationCommand(
             ReadOnlyMemory<byte> pinUvAuthToken,
             PinUvAuthProtocolBase authProtocol)
         {
             _command = new ConfigCommand(
-                SubCmdEnableEnterpriseAttestation, null, pinUvAuthToken, authProtocol);
+                SubCmdEnableEnterpriseAttestation, subCommandParams: null, pinUvAuthToken, authProtocol);
         }
+
+        /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
-        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ConfigResponse(responseApdu);
+        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) => new ConfigResponse(responseApdu);
     }
 }

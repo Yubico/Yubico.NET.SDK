@@ -18,21 +18,22 @@ using System.Globalization;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    /// Applies a configuration to one of the two configurable OTP slots.
+    ///     Applies a configuration to one of the two configurable OTP slots.
     /// </summary>
     public class ConfigureSlotCommand : SlotConfigureBase
     {
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override byte ShortPressCode => OtpConstants.ConfigureShortPressSlot;
-        /// <inheritdoc/>
+
+        /// <inheritdoc />
         protected override byte LongPressCode => OtpConstants.ConfigureLongPressSlot;
 
         /// <summary>
-        /// A fixed data field used to set any static configuration content.
+        ///     A fixed data field used to set any static configuration content.
         /// </summary>
         /// <exception cref="ArgumentException">
-        /// Thrown if the length of the contents of parameter <paramref name="fixedData"/> is greater
-        /// than <see cref="SlotConfigureBase.FixedDataLength"/>.
+        ///     Thrown if the length of the contents of parameter <paramref name="fixedData" /> is greater
+        ///     than <see cref="SlotConfigureBase.FixedDataLength" />.
         /// </exception>
         /// <remarks>For static passwords, this is also used as part of the password.</remarks>
         public void SetFixedData(ReadOnlySpan<byte> fixedData)
@@ -53,6 +54,7 @@ namespace Yubico.YubiKey.Otp.Commands
 
             Span<byte> target = ConfigurationBuffer.Slice(FixedDataOffset, FixedDataLength);
             fixedData.CopyTo(target);
+
             // If the data is less than the buffer, make sure the rest is empty.
             if (fixedData.Length < FixedDataLength)
             {
@@ -61,11 +63,12 @@ namespace Yubico.YubiKey.Otp.Commands
                     target[i] = 0;
                 }
             }
+
             ConfigurationBuffer[FixedSizeOffset] = (byte)fixedData.Length;
         }
 
         /// <summary>
-        /// The user (or private) ID used by the OTP generator.
+        ///     The user (or private) ID used by the OTP generator.
         /// </summary>
         /// <remarks>For static passwords, this is also used as part of the password.</remarks>
         public void SetUid(ReadOnlySpan<byte> uid)
@@ -85,7 +88,7 @@ namespace Yubico.YubiKey.Otp.Commands
         }
 
         /// <summary>
-        /// The AES key with which the OTP is encrypted.
+        ///     The AES key with which the OTP is encrypted.
         /// </summary>
         /// <remarks>For static passwords, this is also used as part of the password.</remarks>
         public void SetAesKey(ReadOnlySpan<byte> aesKey)

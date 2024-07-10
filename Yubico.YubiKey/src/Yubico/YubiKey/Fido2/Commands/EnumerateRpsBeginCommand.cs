@@ -19,25 +19,25 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Begin the process of getting information on all the relying parties
-    /// represented in credentials on the YubiKey.
+    ///     Begin the process of getting information on all the relying parties
+    ///     represented in credentials on the YubiKey.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="EnumerateRpsBeginResponse"/>.
-    /// <para>
-    /// This returns the total number of relying parties represented in the set
-    /// of credentials, along with  information on the "first" relying party. If
-    /// there is only one RP, then you have all the information you need. If
-    /// there are more RPs, then you can get information on all of them by
-    /// calling the <c>enumerateRPsGetNextRP</c> subcommand.
-    /// </para>
-    /// <para>
-    /// Note that if there are no credentials associated with the given relying
-    /// party, the response will be "No Data"
-    /// (Status = ResponseStatus.NoData, and
-    /// CtapStatus = CtapStatus.NoCredentials). In this case, calling the
-    /// <c>response.GetData()</c> method will result in an exception.
-    /// </para>
+    ///     The partner Response class is <see cref="EnumerateRpsBeginResponse" />.
+    ///     <para>
+    ///         This returns the total number of relying parties represented in the set
+    ///         of credentials, along with  information on the "first" relying party. If
+    ///         there is only one RP, then you have all the information you need. If
+    ///         there are more RPs, then you can get information on all of them by
+    ///         calling the <c>enumerateRPsGetNextRP</c> subcommand.
+    ///     </para>
+    ///     <para>
+    ///         Note that if there are no credentials associated with the given relying
+    ///         party, the response will be "No Data"
+    ///         (Status = ResponseStatus.NoData, and
+    ///         CtapStatus = CtapStatus.NoCredentials). In this case, calling the
+    ///         <c>response.GetData()</c> method will result in an exception.
+    ///     </para>
     /// </remarks>
     public class EnumerateRpsBeginCommand : CredentialMgmtSubCommand, IYubiKeyCommand<EnumerateRpsBeginResponse>
     {
@@ -51,18 +51,19 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// Constructs a new instance of <see cref="EnumerateRpsBeginCommand"/>.
+        ///     Constructs a new instance of <see cref="EnumerateRpsBeginCommand" />.
         /// </summary>
         /// <param name="pinUvAuthToken">
-        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        /// key.
+        ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
+        ///     key.
         /// </param>
         /// <param name="authProtocol">
-        /// The Auth Protocol used to build the Auth Token.
+        ///     The Auth Protocol used to build the Auth Token.
         /// </param>
-        public EnumerateRpsBeginCommand(
-            ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
-            : base(new CredentialManagementCommand(SubCmdEnumerateRpsBegin, null, pinUvAuthToken, authProtocol))
+        public EnumerateRpsBeginCommand(ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
+            : base(
+                new CredentialManagementCommand(
+                    SubCmdEnumerateRpsBegin, subCommandParams: null, pinUvAuthToken, authProtocol))
         {
         }
 

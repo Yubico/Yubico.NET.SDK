@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
@@ -25,7 +24,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void SetPassword_Succeeds()
         {
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKeyDevice);
+            var isValid = SelectSupport.TrySelectYubiKey(out var yubiKeyDevice);
             Assert.True(isValid);
 
             using (var oathSession = new OathSession(yubiKeyDevice))
@@ -35,7 +34,8 @@ namespace Yubico.YubiKey.Oath
                 Assert.False(oathSession.IsPasswordProtected);
 
                 var newCred = new Credential(
-                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp, HashAlgorithm.Sha256);
+                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp,
+                    HashAlgorithm.Sha256);
                 oathSession.AddCredential(newCred);
             }
 
@@ -43,10 +43,10 @@ namespace Yubico.YubiKey.Oath
             {
                 Assert.False(oathSession.IsPasswordProtected);
 
-                IList<Credential> credentialList = oathSession.GetCredentials();
+                var credentialList = oathSession.GetCredentials();
                 _ = Assert.Single(credentialList);
 
-                Credential cred = credentialList[0];
+                var cred = credentialList[index: 0];
                 _ = Assert.NotNull(cred.Algorithm);
                 if (!(cred.Algorithm is null))
                 {
@@ -59,11 +59,11 @@ namespace Yubico.YubiKey.Oath
                 var password = new ReadOnlyMemory<byte>(new byte[] { 0x61, 0x62, 0x63, 0x64 });
 
                 Assert.False(oathSession.IsPasswordProtected);
-                bool isSet = oathSession.TrySetPassword(ReadOnlyMemory<byte>.Empty, password);
+                var isSet = oathSession.TrySetPassword(ReadOnlyMemory<byte>.Empty, password);
                 Assert.True(isSet);
                 Assert.True(oathSession.IsPasswordProtected);
 
-                IList<Credential> credentialList = oathSession.GetCredentials();
+                var credentialList = oathSession.GetCredentials();
                 _ = Assert.Single(credentialList);
             }
 
@@ -79,13 +79,13 @@ namespace Yubico.YubiKey.Oath
 
                 var password = new ReadOnlyMemory<byte>(new byte[] { 0x61, 0x62, 0x63, 0x64 });
 
-                bool isVerified = oathSession.TryVerifyPassword(password);
+                var isVerified = oathSession.TryVerifyPassword(password);
                 Assert.True(isVerified);
 
-                IList<Credential> credentialList = oathSession.GetCredentials();
+                var credentialList = oathSession.GetCredentials();
                 _ = Assert.Single(credentialList);
 
-                Credential cred = credentialList[0];
+                var cred = credentialList[index: 0];
                 _ = Assert.NotNull(cred.Algorithm);
                 if (!(cred.Algorithm is null))
                 {
@@ -100,7 +100,7 @@ namespace Yubico.YubiKey.Oath
                 var wrongPassword = new ReadOnlyMemory<byte>(new byte[] { 0x71, 0x62, 0x63, 0x64 });
                 var newPassword = new ReadOnlyMemory<byte>(new byte[] { 0x61, 0x72, 0x63, 0x64 });
 
-                bool isSet = oathSession.TrySetPassword(wrongPassword, newPassword);
+                var isSet = oathSession.TrySetPassword(wrongPassword, newPassword);
                 Assert.False(isSet);
                 _ = Assert.Throws<InvalidOperationException>(() => oathSession.GetCredentials());
             }
@@ -113,13 +113,13 @@ namespace Yubico.YubiKey.Oath
                 var wrongPassword = new ReadOnlyMemory<byte>(new byte[] { 0x71, 0x62, 0x63, 0x64 });
                 var newPassword = new ReadOnlyMemory<byte>(new byte[] { 0x61, 0x72, 0x63, 0x64 });
 
-                bool isVerified = oathSession.TryVerifyPassword(password);
+                var isVerified = oathSession.TryVerifyPassword(password);
                 Assert.True(isVerified);
 
-                bool isSet = oathSession.TrySetPassword(wrongPassword, newPassword);
+                var isSet = oathSession.TrySetPassword(wrongPassword, newPassword);
                 Assert.False(isSet);
 
-                IList<Credential> credentialList = oathSession.GetCredentials();
+                var credentialList = oathSession.GetCredentials();
                 _ = Assert.Single(credentialList);
             }
 
@@ -130,13 +130,13 @@ namespace Yubico.YubiKey.Oath
                 var password = new ReadOnlyMemory<byte>(new byte[] { 0x61, 0x62, 0x63, 0x64 });
                 var newPassword = new ReadOnlyMemory<byte>(new byte[] { 0x61, 0x72, 0x63, 0x64 });
 
-                bool isVerified = oathSession.TryVerifyPassword(password);
+                var isVerified = oathSession.TryVerifyPassword(password);
                 Assert.True(isVerified);
 
-                bool isSet = oathSession.TrySetPassword(ReadOnlyMemory<byte>.Empty, newPassword);
+                var isSet = oathSession.TrySetPassword(ReadOnlyMemory<byte>.Empty, newPassword);
                 Assert.False(isSet);
 
-                IList<Credential> credentialList = oathSession.GetCredentials();
+                var credentialList = oathSession.GetCredentials();
                 _ = Assert.Single(credentialList);
 
                 oathSession.ResetApplication();
@@ -146,7 +146,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void UnsetPassword_Succeeds()
         {
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKeyDevice);
+            var isValid = SelectSupport.TrySelectYubiKey(out var yubiKeyDevice);
             Assert.True(isValid);
 
             using (var oathSession = new OathSession(yubiKeyDevice))
@@ -156,7 +156,8 @@ namespace Yubico.YubiKey.Oath
                 Assert.False(oathSession.IsPasswordProtected);
 
                 var newCred = new Credential(
-                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp, HashAlgorithm.Sha256);
+                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp,
+                    HashAlgorithm.Sha256);
                 oathSession.AddCredential(newCred);
             }
 
@@ -165,7 +166,7 @@ namespace Yubico.YubiKey.Oath
                 var password = new ReadOnlyMemory<byte>(new byte[] { 0x61, 0x62, 0x63, 0x64 });
 
                 Assert.False(oathSession.IsPasswordProtected);
-                bool isSet = oathSession.TrySetPassword(ReadOnlyMemory<byte>.Empty, password);
+                var isSet = oathSession.TrySetPassword(ReadOnlyMemory<byte>.Empty, password);
                 Assert.True(isSet);
                 Assert.True(oathSession.IsPasswordProtected);
             }
@@ -178,20 +179,20 @@ namespace Yubico.YubiKey.Oath
 
                 var password = new ReadOnlyMemory<byte>(new byte[] { 0x61, 0x62, 0x63, 0x64 });
 
-                bool isUnset = oathSession.TryUnsetPassword(password);
+                var isUnset = oathSession.TryUnsetPassword(password);
                 Assert.True(isUnset);
                 Assert.False(oathSession.IsPasswordProtected);
 
-                IList<Credential> credentialList = oathSession.GetCredentials();
+                var credentialList = oathSession.GetCredentials();
                 _ = Assert.Single(credentialList);
             }
 
             using (var oathSession = new OathSession(yubiKeyDevice))
             {
-                IList<Credential> credentialList = oathSession.GetCredentials();
+                var credentialList = oathSession.GetCredentials();
                 _ = Assert.Single(credentialList);
 
-                Credential cred = credentialList[0];
+                var cred = credentialList[index: 0];
                 _ = Assert.NotNull(cred.Algorithm);
                 if (!(cred.Algorithm is null))
                 {
@@ -205,7 +206,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void UnsetPassword_WrongPassword_ReturnsFalse()
         {
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKeyDevice);
+            var isValid = SelectSupport.TrySelectYubiKey(out var yubiKeyDevice);
             Assert.True(isValid);
 
             using (var oathSession = new OathSession(yubiKeyDevice))
@@ -215,7 +216,8 @@ namespace Yubico.YubiKey.Oath
                 Assert.False(oathSession.IsPasswordProtected);
 
                 var newCred = new Credential(
-                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp, HashAlgorithm.Sha256);
+                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp,
+                    HashAlgorithm.Sha256);
                 oathSession.AddCredential(newCred);
             }
 
@@ -224,7 +226,7 @@ namespace Yubico.YubiKey.Oath
                 var password = new ReadOnlyMemory<byte>(new byte[] { 0x61, 0x62, 0x63, 0x64 });
 
                 Assert.False(oathSession.IsPasswordProtected);
-                bool isSet = oathSession.TrySetPassword(ReadOnlyMemory<byte>.Empty, password);
+                var isSet = oathSession.TrySetPassword(ReadOnlyMemory<byte>.Empty, password);
                 Assert.True(isSet);
                 Assert.True(oathSession.IsPasswordProtected);
             }
@@ -237,7 +239,7 @@ namespace Yubico.YubiKey.Oath
 
                 var password = new ReadOnlyMemory<byte>(new byte[] { 0x71, 0x62, 0x63, 0x64 });
 
-                bool isUnset = oathSession.TryUnsetPassword(password);
+                var isUnset = oathSession.TryUnsetPassword(password);
                 Assert.False(isUnset);
                 Assert.True(oathSession.IsPasswordProtected);
 
@@ -250,7 +252,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void VerifyPassword_UnsetNoCurrent_Succeeds()
         {
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKeyDevice);
+            var isValid = SelectSupport.TrySelectYubiKey(out var yubiKeyDevice);
             Assert.True(isValid);
 
             using (var oathSession = new OathSession(yubiKeyDevice))
@@ -260,7 +262,8 @@ namespace Yubico.YubiKey.Oath
                 Assert.False(oathSession.IsPasswordProtected);
 
                 var newCred = new Credential(
-                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp, HashAlgorithm.Sha256);
+                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp,
+                    HashAlgorithm.Sha256);
                 oathSession.AddCredential(newCred);
             }
 
@@ -269,7 +272,7 @@ namespace Yubico.YubiKey.Oath
                 var password = new ReadOnlyMemory<byte>(new byte[] { 0x61, 0x62, 0x63, 0x64 });
 
                 Assert.False(oathSession.IsPasswordProtected);
-                bool isSet = oathSession.TrySetPassword(ReadOnlyMemory<byte>.Empty, password);
+                var isSet = oathSession.TrySetPassword(ReadOnlyMemory<byte>.Empty, password);
                 Assert.True(isSet);
                 Assert.True(oathSession.IsPasswordProtected);
             }
@@ -282,10 +285,10 @@ namespace Yubico.YubiKey.Oath
 
                 var password = new ReadOnlyMemory<byte>(new byte[] { 0x61, 0x62, 0x63, 0x64 });
 
-                bool isVerified = oathSession.TryVerifyPassword(password);
+                var isVerified = oathSession.TryVerifyPassword(password);
                 Assert.True(isVerified);
 
-                bool isUnset = oathSession.TryUnsetPassword(ReadOnlyMemory<byte>.Empty);
+                var isUnset = oathSession.TryUnsetPassword(ReadOnlyMemory<byte>.Empty);
                 Assert.False(isUnset);
                 Assert.True(oathSession.IsPasswordProtected);
 
@@ -293,16 +296,16 @@ namespace Yubico.YubiKey.Oath
                 Assert.True(isUnset);
                 Assert.False(oathSession.IsPasswordProtected);
 
-                IList<Credential> credentialList = oathSession.GetCredentials();
+                var credentialList = oathSession.GetCredentials();
                 _ = Assert.Single(credentialList);
             }
 
             using (var oathSession = new OathSession(yubiKeyDevice))
             {
-                IList<Credential> credentialList = oathSession.GetCredentials();
+                var credentialList = oathSession.GetCredentials();
                 _ = Assert.Single(credentialList);
 
-                Credential cred = credentialList[0];
+                var cred = credentialList[index: 0];
                 _ = Assert.NotNull(cred.Algorithm);
                 if (!(cred.Algorithm is null))
                 {
@@ -316,7 +319,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void PasswordNotSet_Verify_ReturnsFalse()
         {
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKeyDevice);
+            var isValid = SelectSupport.TrySelectYubiKey(out var yubiKeyDevice);
             Assert.True(isValid);
 
             using (var oathSession = new OathSession(yubiKeyDevice))
@@ -326,11 +329,12 @@ namespace Yubico.YubiKey.Oath
 
                 var password = new ReadOnlyMemory<byte>(new byte[] { 0x61, 0x62, 0x63, 0x64 });
 
-                bool isVerified = oathSession.TryVerifyPassword(password);
+                var isVerified = oathSession.TryVerifyPassword(password);
                 Assert.False(isVerified);
 
                 var newCred = new Credential(
-                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp, HashAlgorithm.Sha256);
+                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp,
+                    HashAlgorithm.Sha256);
                 oathSession.AddCredential(newCred);
             }
 
@@ -338,7 +342,7 @@ namespace Yubico.YubiKey.Oath
             {
                 Assert.False(oathSession.IsPasswordProtected);
 
-                IList<Credential> credentialList = oathSession.GetCredentials();
+                var credentialList = oathSession.GetCredentials();
                 _ = Assert.Single(credentialList);
 
                 oathSession.ResetApplication();
@@ -348,7 +352,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void Verify_WrongPassword_ReturnsFalse()
         {
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKeyDevice);
+            var isValid = SelectSupport.TrySelectYubiKey(out var yubiKeyDevice);
             Assert.True(isValid);
 
             using (var oathSession = new OathSession(yubiKeyDevice))
@@ -358,7 +362,7 @@ namespace Yubico.YubiKey.Oath
 
                 var password = new ReadOnlyMemory<byte>(new byte[] { 0x61, 0x62, 0x63, 0x64 });
 
-                bool isSet = oathSession.TrySetPassword(ReadOnlyMemory<byte>.Empty, password);
+                var isSet = oathSession.TrySetPassword(ReadOnlyMemory<byte>.Empty, password);
                 Assert.True(isSet);
                 Assert.True(oathSession.IsPasswordProtected);
             }
@@ -369,7 +373,7 @@ namespace Yubico.YubiKey.Oath
 
                 var password = new ReadOnlyMemory<byte>(new byte[] { 0x62, 0x62, 0x62, 0x62 });
 
-                bool isVerified = oathSession.TryVerifyPassword(password);
+                var isVerified = oathSession.TryVerifyPassword(password);
                 Assert.False(isVerified);
 
                 oathSession.ResetApplication();
@@ -379,7 +383,7 @@ namespace Yubico.YubiKey.Oath
         [Fact]
         public void KeyCollector_WrongPassword_ReturnsFalse()
         {
-            bool isValid = SelectSupport.TrySelectYubiKey(out IYubiKeyDevice yubiKeyDevice);
+            var isValid = SelectSupport.TrySelectYubiKey(out var yubiKeyDevice);
             Assert.True(isValid);
 
             var simpleCollector = new SimpleOathKeyCollector();
@@ -391,7 +395,7 @@ namespace Yubico.YubiKey.Oath
 
                 var password = new ReadOnlyMemory<byte>(new byte[] { 0x61, 0x62, 0x63, 0x64 });
 
-                bool isSet = oathSession.TrySetPassword(ReadOnlyMemory<byte>.Empty, password);
+                var isSet = oathSession.TrySetPassword(ReadOnlyMemory<byte>.Empty, password);
                 Assert.True(isSet);
                 Assert.True(oathSession.IsPasswordProtected);
             }
@@ -401,7 +405,7 @@ namespace Yubico.YubiKey.Oath
                 oathSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
 
                 Assert.True(oathSession.IsPasswordProtected);
-                bool isVerified = oathSession.TryVerifyPassword();
+                var isVerified = oathSession.TryVerifyPassword();
                 Assert.False(isVerified);
 
                 oathSession.ResetApplication();

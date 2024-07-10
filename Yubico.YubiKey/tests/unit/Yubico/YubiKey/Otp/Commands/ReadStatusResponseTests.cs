@@ -24,7 +24,10 @@ namespace Yubico.YubiKey.Otp.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void action() => _ = new ReadStatusResponse(null);
+            static void action()
+            {
+                _ = new ReadStatusResponse(responseApdu: null);
+            }
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             _ = Assert.Throws<ArgumentNullException>(action);
@@ -33,8 +36,8 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var readStatusResponse = new ReadStatusResponse(responseApdu);
@@ -45,8 +48,8 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var readStatusResponse = new ReadStatusResponse(responseApdu);
@@ -60,7 +63,10 @@ namespace Yubico.YubiKey.Otp.Commands
             var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
             var readStatusResponse = new ReadStatusResponse(responseApdu);
 
-            void action() => _ = readStatusResponse.GetData();
+            void action()
+            {
+                _ = readStatusResponse.GetData();
+            }
 
             _ = Assert.Throws<InvalidOperationException>(action);
         }
@@ -71,7 +77,10 @@ namespace Yubico.YubiKey.Otp.Commands
             var responseApdu = new ResponseApdu(new byte[] { 0x00, 0x00, 0x90, 0x00 });
             var readStatusResponse = new ReadStatusResponse(responseApdu);
 
-            void action() => _ = readStatusResponse.GetData();
+            void action()
+            {
+                _ = readStatusResponse.GetData();
+            }
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(action);
         }
@@ -79,9 +88,10 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void GetData_ResponseApduWithCorrectData_ReturnsCorrectData()
         {
-            var expectedFirmwareVersion = new FirmwareVersion() { Major = 5, Minor = 3, Patch = 1 };
+            var expectedFirmwareVersion = new FirmwareVersion { Major = 5, Minor = 3, Patch = 1 };
             byte expectedSequenceNumber = 0x42;
-            var responseApdu = new ResponseApdu(new byte[] {
+            var responseApdu = new ResponseApdu(new byte[]
+            {
                 expectedFirmwareVersion.Major,
                 expectedFirmwareVersion.Minor,
                 expectedFirmwareVersion.Patch,
@@ -89,14 +99,15 @@ namespace Yubico.YubiKey.Otp.Commands
                 0b0001_0101,
                 0x00,
                 0b1001_0000,
-                0x00 });
+                0x00
+            });
             var readStatusResponse = new ReadStatusResponse(responseApdu);
 
-            OtpStatus otpStatus = readStatusResponse.GetData();
+            var otpStatus = readStatusResponse.GetData();
 
             Assert.Equal(expectedFirmwareVersion, otpStatus.FirmwareVersion);
             Assert.Equal(expectedSequenceNumber, otpStatus.SequenceNumber);
-            Assert.Equal(0, otpStatus.TouchLevel);
+            Assert.Equal(expected: 0, otpStatus.TouchLevel);
             Assert.True(otpStatus.ShortPressConfigured);
             Assert.False(otpStatus.LongPressConfigured);
             Assert.True(otpStatus.ShortPressRequiresTouch);

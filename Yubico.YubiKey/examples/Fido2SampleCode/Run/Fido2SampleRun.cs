@@ -22,11 +22,11 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
     // on the classes that perform each of the sample operations.
     public partial class Fido2SampleRun
     {
+        private readonly List<MakeCredentialData> _credentialList;
+        private readonly Fido2SampleKeyCollector _keyCollector;
         private readonly SampleMenu _menuObject;
         private bool _chosenByUser;
         private IYubiKeyDevice _yubiKeyChosen;
-        private readonly Fido2SampleKeyCollector _keyCollector;
-        private readonly List<MakeCredentialData> _credentialList;
 
         // Provide the max invalid count, this is the number of times in a row
         // the a user can type an invalid response to a menu request before
@@ -67,7 +67,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 if (displayGuiMessage)
                 {
                     SampleMenu.WriteMessage(
-                        MessageType.Title, 0,
+                        MessageType.Title, numberToWrite: 0,
                         "To run this sample as a GUI application, call the executable with an argument of g.\n" +
                         "For example,\n" +
                         "  $ Fido2Sample.exe g\n");
@@ -91,7 +91,6 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                         menuItem = Fido2MainMenuItem.Exit;
                     }
                 }
-
             } while (menuItem != Fido2MainMenuItem.Exit);
         }
 
@@ -116,7 +115,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                     }
 
                     return ChooseYubiKey.RunChooseYubiKey(
-                        false,
+                        alwaysAsk: false,
                         _menuObject,
                         Transport.HidFido,
                         ref _yubiKeyChosen);
@@ -127,7 +126,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         private bool RunChooseYubiKey()
         {
             _chosenByUser = ChooseYubiKey.RunChooseYubiKey(
-                true,
+                alwaysAsk: true,
                 _menuObject,
                 Transport.HidFido,
                 ref _yubiKeyChosen);

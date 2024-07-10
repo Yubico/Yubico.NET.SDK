@@ -24,15 +24,15 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new VersionResponse(null));
+            _ = Assert.Throws<ArgumentNullException>(() => new VersionResponse(responseApdu: null));
 #pragma warning restore CS8625
         }
 
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var versionResponse = new VersionResponse(responseApdu);
@@ -43,8 +43,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var versionResponse = new VersionResponse(responseApdu);
@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
             var versionResponse = new VersionResponse(responseApdu);
 
-            Assert.Equal(23, versionResponse.GetData().Major);
+            Assert.Equal(expected: 23, versionResponse.GetData().Major);
         }
 
         [Fact]
@@ -69,8 +69,8 @@ namespace Yubico.YubiKey.Piv.Commands
 
             var versionResponse = new VersionResponse(responseApdu);
 
-            Assert.Equal(12, versionResponse.GetData().Minor);
-            Assert.Equal(12, versionResponse.GetData().Minor);
+            Assert.Equal(expected: 12, versionResponse.GetData().Minor);
+            Assert.Equal(expected: 12, versionResponse.GetData().Minor);
         }
 
         [Fact]
@@ -80,15 +80,15 @@ namespace Yubico.YubiKey.Piv.Commands
 
             var versionResponse = new VersionResponse(responseApdu);
 
-            Assert.Equal(97, versionResponse.GetData().Patch);
+            Assert.Equal(expected: 97, versionResponse.GetData().Patch);
         }
 
         [Fact]
         public void Constructor_FailResponseApdu_SetsStatusWordCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
-            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            byte sw1 = SWConstants.WarningNvmUnchanged >> 8;
+            var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var versionResponse = new VersionResponse(responseApdu);
 
@@ -98,9 +98,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_FailResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
-            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            byte sw1 = SWConstants.WarningNvmUnchanged >> 8;
+            var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var versionResponse = new VersionResponse(responseApdu);
 
@@ -110,9 +110,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Construct_FailResponseApdu_ExceptionOnGetData()
         {
-            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
-            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            byte sw1 = SWConstants.WarningNvmUnchanged >> 8;
+            var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var versionResponse = new VersionResponse(responseApdu);
 
@@ -122,8 +122,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void FailResponseApdu_WithData_ExceptionOnGetData()
         {
-            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
-            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+            byte sw1 = SWConstants.WarningNvmUnchanged >> 8;
+            var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var versionResponse = new VersionResponse(responseApdu);
@@ -134,14 +134,13 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Construct_ShortResponseApdu_ExceptionOnGetData()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, sw1, sw2 });
 
             var versionResponse = new VersionResponse(responseApdu);
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(() => versionResponse.GetData());
         }
-
     }
 }

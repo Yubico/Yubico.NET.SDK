@@ -16,18 +16,6 @@ namespace Yubico.YubiKey.Oath
 {
     public class CredentialFixture
     {
-        public Credential TotpCredential { get; private set; }
-
-        public Credential HotpCredential { get; private set; }
-
-        public Credential TotpWithTouchCredential { get; private set; }
-
-        public Credential TotpWithSha512Credential { get; private set; }
-
-        public Credential TotpCredentialWithDefaultPeriod { get; private set; }
-
-        public Credential CredentialToDelete { get; private set; }
-
         public CredentialFixture()
         {
             TotpCredential = new Credential
@@ -36,7 +24,7 @@ namespace Yubico.YubiKey.Oath
                 AccountName = "test@outlook.com",
                 Type = CredentialType.Totp,
                 Period = CredentialPeriod.Period15,
-                Algorithm = HashAlgorithm.Sha1,
+                Algorithm = HashAlgorithm.Sha1
             };
 
             HotpCredential = new Credential
@@ -45,7 +33,7 @@ namespace Yubico.YubiKey.Oath
                 AccountName = "test@icloud.com",
                 Type = CredentialType.Hotp,
                 Period = CredentialPeriod.Undefined,
-                Algorithm = HashAlgorithm.Sha1,
+                Algorithm = HashAlgorithm.Sha1
             };
 
             TotpWithTouchCredential = new Credential
@@ -64,7 +52,7 @@ namespace Yubico.YubiKey.Oath
                 AccountName = "test@yubico.com",
                 Type = CredentialType.Totp,
                 Period = CredentialPeriod.Period30,
-                Algorithm = HashAlgorithm.Sha512,
+                Algorithm = HashAlgorithm.Sha512
             };
 
             TotpCredentialWithDefaultPeriod = new Credential
@@ -73,7 +61,7 @@ namespace Yubico.YubiKey.Oath
                 AccountName = "test@gmail.com",
                 Type = CredentialType.Totp,
                 Period = CredentialPeriod.Period30,
-                Algorithm = HashAlgorithm.Sha1,
+                Algorithm = HashAlgorithm.Sha1
             };
 
             CredentialToDelete = new Credential
@@ -82,8 +70,20 @@ namespace Yubico.YubiKey.Oath
                 AccountName = "test@gmail.com",
                 Type = CredentialType.Hotp,
                 Period = CredentialPeriod.Undefined,
-                Algorithm = HashAlgorithm.Sha1,
+                Algorithm = HashAlgorithm.Sha1
             };
         }
+
+        public Credential TotpCredential { get; private set; }
+
+        public Credential HotpCredential { get; private set; }
+
+        public Credential TotpWithTouchCredential { get; private set; }
+
+        public Credential TotpWithSha512Credential { get; private set; }
+
+        public Credential TotpCredentialWithDefaultPeriod { get; private set; }
+
+        public Credential CredentialToDelete { get; private set; }
     }
 }

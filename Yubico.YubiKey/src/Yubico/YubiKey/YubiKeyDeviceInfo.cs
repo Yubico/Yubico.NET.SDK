@@ -22,8 +22,8 @@ using System.Text;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    /// This class can be used in commands to set and retrieve
-    /// detailed device and capabilities information for a YubiKey.
+    ///     This class can be used in commands to set and retrieve
+    ///     detailed device and capabilities information for a YubiKey.
     /// </summary>
     public class YubiKeyDeviceInfo : IYubiKeyDeviceInfo
     {
@@ -39,6 +39,21 @@ namespace Yubico.YubiKey
 
         private static readonly FirmwareVersion _fipsFlagInclusiveLowerBound =
             FirmwareVersion.V5_4_2;
+
+        /// <summary>
+        ///     Constructs a default instance of YubiKeyDeviceInfo.
+        /// </summary>
+        public YubiKeyDeviceInfo()
+        {
+            FirmwareVersion = new FirmwareVersion();
+        }
+
+        /// <summary>
+        ///     The firmware version is known to be a FIPS Series device.
+        /// </summary>
+        private bool IsFipsVersion =>
+            FirmwareVersion >= _fipsInclusiveLowerBound
+            && FirmwareVersion < _fipsExclusiveUpperBound;
 
         /// <inheritdoc />
         public YubiKeyCapabilities AvailableUsbCapabilities { get; set; }
@@ -104,26 +119,18 @@ namespace Yubico.YubiKey
         public bool IsPinComplexityEnabled { get; set; }
 
         /// <summary>
-        /// Constructs a default instance of YubiKeyDeviceInfo.
-        /// </summary>
-        public YubiKeyDeviceInfo()
-        {
-            FirmwareVersion = new FirmwareVersion();
-        }
-
-        /// <summary>
-        /// Gets the YubiKey's device configuration details.
+        ///     Gets the YubiKey's device configuration details.
         /// </summary>
         /// <param name="responseApduData">
-        /// The ResponseApdu data as byte array returned by the YubiKey. The first byte
-        /// is the overall length of the TLV data, followed by the TLV data.
+        ///     The ResponseApdu data as byte array returned by the YubiKey. The first byte
+        ///     is the overall length of the TLV data, followed by the TLV data.
         /// </param>
         /// <param name="deviceInfo">
-        /// On success, the <see cref="YubiKeyDeviceInfo"/> is returned using this out parameter.
+        ///     On success, the <see cref="YubiKeyDeviceInfo" /> is returned using this out parameter.
         /// </param>
         /// <returns>
-        /// True if the parsing and construction was successful, and false if
-        /// <paramref name="responseApduData"/> did not meet formatting requirements.
+        ///     True if the parsing and construction was successful, and false if
+        ///     <paramref name="responseApduData" /> did not meet formatting requirements.
         /// </returns>
         [Obsolete("This has been replaced by CreateFromResponseData")]
         internal static bool TryCreateFromResponseData(
@@ -146,15 +153,15 @@ namespace Yubico.YubiKey
         }
 
         /// <summary>
-        /// Gets the YubiKey's device configuration details.
+        ///     Gets the YubiKey's device configuration details.
         /// </summary>
         /// <param name="responseApduData">
-        /// The ResponseApdu data as byte array returned by the YubiKey. The first byte
-        /// is the overall length of the TLV data, followed by the TLV data.
+        ///     The ResponseApdu data as byte array returned by the YubiKey. The first byte
+        ///     is the overall length of the TLV data, followed by the TLV data.
         /// </param>
         /// <returns>
-        /// On success, the <see cref="YubiKeyDeviceInfo"/> is returned using this out parameter.
-        /// <paramref name="responseApduData"/> did not meet formatting requirements.
+        ///     On success, the <see cref="YubiKeyDeviceInfo" /> is returned using this out parameter.
+        ///     <paramref name="responseApduData" /> did not meet formatting requirements.
         /// </returns>
         internal static YubiKeyDeviceInfo CreateFromResponseData(Dictionary<int, ReadOnlyMemory<byte>> responseApduData)
         {
@@ -216,6 +223,7 @@ namespace Yubico.YubiKey
                             Minor = value[1],
                             Patch = value[2]
                         };
+
                         break;
                     case YubikeyDeviceManagementTags.ImageProcessorVersionTag:
                         deviceInfo.ImageProcessorVersion = new ImageProcessorVersion
@@ -224,6 +232,7 @@ namespace Yubico.YubiKey
                             Minor = value[1],
                             Patch = value[2]
                         };
+
                         break;
                     case YubikeyDeviceManagementTags.NfcRestrictedTag:
                         deviceInfo.IsNfcRestricted = value[0] == 1;
@@ -250,7 +259,7 @@ namespace Yubico.YubiKey
                         // Ignore these tags for now
                         break;
                     default:
-                        Debug.Assert(false, "Encountered an unrecognized tag in DeviceInfo. Ignoring.");
+                        Debug.Assert(condition: false, "Encountered an unrecognized tag in DeviceInfo. Ignoring.");
                         break;
                 }
             }
@@ -270,6 +279,7 @@ namespace Yubico.YubiKey
             {
                 return null;
             }
+
             try
             {
                 // .NET defaults to decode without error detection, this is to detect an error in the decoding when
@@ -326,16 +336,9 @@ namespace Yubico.YubiKey
 
                 IsNfcRestricted = IsNfcRestricted || second.IsNfcRestricted,
                 PartNumber = PartNumber ?? second.PartNumber,
-                IsPinComplexityEnabled = IsPinComplexityEnabled || second.IsPinComplexityEnabled,
+                IsPinComplexityEnabled = IsPinComplexityEnabled || second.IsPinComplexityEnabled
             };
         }
-
-        /// <summary>
-        /// The firmware version is known to be a FIPS Series device.
-        /// </summary>
-        private bool IsFipsVersion =>
-            FirmwareVersion >= _fipsInclusiveLowerBound
-            && FirmwareVersion < _fipsExclusiveUpperBound;
 
         private static YubiKeyCapabilities GetFipsCapabilities(ReadOnlySpan<byte> value)
         {
@@ -378,7 +381,7 @@ namespace Yubico.YubiKey
                 ? (YubiKeyCapabilities)value[0]
                 : (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(value);
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public override string ToString() =>
             $"{nameof(AvailableUsbCapabilities)}: {AvailableUsbCapabilities}, " +
             $"{nameof(EnabledUsbCapabilities)}: {EnabledUsbCapabilities}, " +

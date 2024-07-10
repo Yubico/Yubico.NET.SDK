@@ -23,10 +23,10 @@ namespace Yubico.Core.Buffers
         [Fact]
         public void GetStrings_EmptyASCII_ReturnsZeroLengthArray()
         {
-            byte[] asciiBytes = Array.Empty<byte>();
-            string[] expectedStrings = Array.Empty<string>();
+            var asciiBytes = Array.Empty<byte>();
+            var expectedStrings = Array.Empty<string>();
 
-            string[] actualStrings = MultiString.GetStrings(asciiBytes, Encoding.ASCII);
+            var actualStrings = MultiString.GetStrings(asciiBytes, Encoding.ASCII);
 
             Assert.Equal(expectedStrings, actualStrings);
         }
@@ -34,10 +34,10 @@ namespace Yubico.Core.Buffers
         [Fact]
         public void GetStrings_SingleASCIIStringDoubleNull_ReturnsSingleElementArray()
         {
-            byte[] asciiBytes = Encoding.ASCII.GetBytes("Test string1\0\0");
+            var asciiBytes = Encoding.ASCII.GetBytes("Test string1\0\0");
             string[] expectedStrings = { "Test string1" };
 
-            string[] actualStrings = MultiString.GetStrings(asciiBytes, Encoding.ASCII);
+            var actualStrings = MultiString.GetStrings(asciiBytes, Encoding.ASCII);
 
             Assert.Equal(expectedStrings, actualStrings);
         }
@@ -45,9 +45,9 @@ namespace Yubico.Core.Buffers
         [Fact]
         public void GetStrings_MultipleASCIIString_ReturnsArray()
         {
-            byte[] asciiBytes = Encoding.ASCII.GetBytes("Test string1\0Test string2\0Test string3\0\0");
+            var asciiBytes = Encoding.ASCII.GetBytes("Test string1\0Test string2\0Test string3\0\0");
             string[] expectedStrings = { "Test string1", "Test string2", "Test string3" };
-            string[] actualStrings = MultiString.GetStrings(asciiBytes, Encoding.ASCII);
+            var actualStrings = MultiString.GetStrings(asciiBytes, Encoding.ASCII);
 
             Assert.Equal(expectedStrings, actualStrings);
         }
@@ -55,7 +55,7 @@ namespace Yubico.Core.Buffers
         [Fact]
         public void GetBytes_EmptyArray_ReturnsEmptyArray()
         {
-            byte[] array = MultiString.GetBytes(Array.Empty<string>(), Encoding.ASCII);
+            var array = MultiString.GetBytes(Array.Empty<string>(), Encoding.ASCII);
 
             Assert.Equal(Array.Empty<byte>(), array);
         }
@@ -63,9 +63,9 @@ namespace Yubico.Core.Buffers
         [Fact]
         public void GetBytes_OneString_ReturnsArrayWithDoubleNullEnding()
         {
-            string[] strings = new string[] { "a" };
-            byte[] expectedBytes = Encoding.ASCII.GetBytes("a\0\0");
-            byte[] actualBytes = MultiString.GetBytes(strings, Encoding.ASCII);
+            string[] strings = { "a" };
+            var expectedBytes = Encoding.ASCII.GetBytes("a\0\0");
+            var actualBytes = MultiString.GetBytes(strings, Encoding.ASCII);
 
             Assert.Equal(expectedBytes, actualBytes);
         }
@@ -73,9 +73,9 @@ namespace Yubico.Core.Buffers
         [Fact]
         public void GetBytes_MultipleStrings_SeparatedByNullAndEndsInDoubleNull()
         {
-            string[] strings = new string[] { "a", "b", "c" };
-            byte[] expectedBytes = Encoding.ASCII.GetBytes("a\0b\0c\0\0");
-            byte[] actualBytes = MultiString.GetBytes(strings, Encoding.ASCII);
+            string[] strings = { "a", "b", "c" };
+            var expectedBytes = Encoding.ASCII.GetBytes("a\0b\0c\0\0");
+            var actualBytes = MultiString.GetBytes(strings, Encoding.ASCII);
 
             Assert.Equal(expectedBytes, actualBytes);
         }

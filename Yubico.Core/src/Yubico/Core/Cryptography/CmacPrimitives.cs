@@ -15,17 +15,17 @@
 namespace Yubico.Core.Cryptography
 {
     /// <summary>
-    /// Factory class that will return the <c>Yubico.Core</c> implementation of
-    /// the <see cref="ICmacPrimitives"/> interface.
+    ///     Factory class that will return the <c>Yubico.Core</c> implementation of
+    ///     the <see cref="ICmacPrimitives" /> interface.
     /// </summary>
     public static class CmacPrimitives
     {
         /// <summary>
-        /// Creates a new instance of an implementation of the low level CMAC
-        /// functions.
+        ///     Creates a new instance of an implementation of the low level CMAC
+        ///     functions.
         /// </summary>
         /// <returns>
-        /// A new instance of the default implementation of the interface.
+        ///     A new instance of the default implementation of the interface.
         /// </returns>
         public static ICmacPrimitives Create(CmacBlockCipherAlgorithm algorithm) =>
             new CmacPrimitivesOpenSsl(algorithm);

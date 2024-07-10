@@ -19,12 +19,12 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Pipelines
 {
     /// <summary>
-    /// Represents an ApduPipeline backed by a direct connection
-    /// to a specific application on a smartcard.
+    ///     Represents an ApduPipeline backed by a direct connection
+    ///     to a specific application on a smartcard.
     /// </summary>
     internal class SmartCardTransform : IApduTransform
     {
-        readonly ISmartCardConnection _smartCardConnection;
+        private readonly ISmartCardConnection _smartCardConnection;
 
         public SmartCardTransform(ISmartCardConnection smartCardConnection)
         {
@@ -38,14 +38,13 @@ namespace Yubico.YubiKey.Pipelines
 
         public void Cleanup()
         {
-
         }
 
-        public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType) => _smartCardConnection.Transmit(command);
+        public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType) =>
+            _smartCardConnection.Transmit(command);
 
         public void Setup()
         {
-
         }
     }
 }

@@ -17,8 +17,8 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    /// Base class for all OTP responses. Use this class to represent the status of an OTP command,
-    /// or one of its derived classes to retrieve the full response.
+    ///     Base class for all OTP responses. Use this class to represent the status of an OTP command,
+    ///     or one of its derived classes to retrieve the full response.
     /// </summary>
     /// <seealso cref="Yubico.YubiKey.IYubiKeyResponse" />
     public class OtpResponse : YubiKeyResponse
@@ -26,7 +26,6 @@ namespace Yubico.YubiKey.Otp.Commands
         public OtpResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
     }
 }

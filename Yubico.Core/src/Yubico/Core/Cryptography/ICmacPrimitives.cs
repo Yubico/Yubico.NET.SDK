@@ -13,52 +13,51 @@
 // limitations under the License.
 
 using System;
-using Yubico.PlatformInterop;
 
 namespace Yubico.Core.Cryptography
 {
     /// <summary>
-    /// An interface exposing AES-GCM primitive operations.
+    ///     An interface exposing AES-GCM primitive operations.
     /// </summary>
     public interface ICmacPrimitives : IDisposable
     {
         /// <summary>
-        /// Initialize the object to perform CMAC with the given key.
+        ///     Initialize the object to perform CMAC with the given key.
         /// </summary>
         /// <remarks>
-        /// The key length must match the algorithm specified at instantiation.
-        /// To know the required key length, in bytes, use the
-        /// <c>CmacBlockCipherAlgorithm</c> extension <c>KeyLength</c>.
+        ///     The key length must match the algorithm specified at instantiation.
+        ///     To know the required key length, in bytes, use the
+        ///     <c>CmacBlockCipherAlgorithm</c> extension <c>KeyLength</c>.
         /// </remarks>
         /// <param name="keyData">
-        /// The key to be used in the CMAC operations.
+        ///     The key to be used in the CMAC operations.
         /// </param>
         public void CmacInit(ReadOnlySpan<byte> keyData);
 
         /// <summary>
-        /// Continue the CMAC operation with the given input data.
+        ///     Continue the CMAC operation with the given input data.
         /// </summary>
         /// <remarks>
-        /// Call this with the next amount of data that is to be processed. When
-        /// there is no more data to process, call <c>Final</c>.
+        ///     Call this with the next amount of data that is to be processed. When
+        ///     there is no more data to process, call <c>Final</c>.
         /// </remarks>
         /// <param name="dataToMac">
-        /// The next amount of data to process.
+        ///     The next amount of data to process.
         /// </param>
         public void CmacUpdate(ReadOnlySpan<byte> dataToMac);
 
         /// <summary>
-        /// Complete the CMAC process, generating the result.
+        ///     Complete the CMAC process, generating the result.
         /// </summary>
         /// <remarks>
-        /// Call this with there is no more data to process. This method will
-        /// fill the provided <c>macBuffer</c> with the resulting CMAC value. The
-        /// Span must be the exact length of the result. To know the required
-        /// output size, in bytes, use the <c>CmacBlockCipherAlgorithm</c>
-        /// extension <c>MacLength</c>.
+        ///     Call this with there is no more data to process. This method will
+        ///     fill the provided <c>macBuffer</c> with the resulting CMAC value. The
+        ///     Span must be the exact length of the result. To know the required
+        ///     output size, in bytes, use the <c>CmacBlockCipherAlgorithm</c>
+        ///     extension <c>MacLength</c>.
         /// </remarks>
         /// <param name="macBuffer">
-        /// The Span into which the method will place the result.
+        ///     The Span into which the method will place the result.
         /// </param>
         public void CmacFinal(Span<byte> macBuffer);
     }

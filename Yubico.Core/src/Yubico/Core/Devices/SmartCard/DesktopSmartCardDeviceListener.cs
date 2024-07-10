@@ -19,13 +19,12 @@ using System.Linq;
 using System.Threading;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
-
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.SmartCard
 {
     /// <summary>
-    /// A listener class for smart card related events.
+    ///     A listener class for smart card related events.
     /// </summary>
     internal class DesktopSmartCardDeviceListener : SmartCardDeviceListener, IDisposable
     {
@@ -34,14 +33,14 @@ namespace Yubico.Core.Devices.SmartCard
         // The resource manager context.
         private SCardContext _context;
 
-        // The active smart card readers.
-        private SCARD_READER_STATE[] _readerStates;
-
         private bool _isListening;
         private Thread? _listenerThread;
 
+        // The active smart card readers.
+        private SCARD_READER_STATE[] _readerStates;
+
         /// <summary>
-        /// Constructs a <see cref="SmartCardDeviceListener"/>.
+        ///     Constructs a <see cref="SmartCardDeviceListener" />.
         /// </summary>
         public DesktopSmartCardDeviceListener()
         {
@@ -59,7 +58,9 @@ namespace Yubico.Core.Devices.SmartCard
                 _context = new SCardContext(IntPtr.Zero);
                 _readerStates = Array.Empty<SCARD_READER_STATE>();
                 Status = DeviceListenerStatus.Error;
-                _log.LogWarning("SmartCardDeviceListener dormant as SDK was unable to establish a context to the PCSC service.");
+                _log.LogWarning(
+                    "SmartCardDeviceListener dormant as SDK was unable to establish a context to the PCSC service.");
+
                 return;
             }
 
@@ -70,7 +71,7 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         /// <summary>
-        /// Starts listening for all actions within a certain manager context.
+        ///     Starts listening for all actions within a certain manager context.
         /// </summary>
         private void StartListening()
         {
@@ -80,6 +81,7 @@ namespace Yubico.Core.Devices.SmartCard
                 {
                     IsBackground = true
                 };
+
                 _isListening = true;
                 Status = DeviceListenerStatus.Started;
                 _listenerThread.Start();
@@ -93,59 +95,18 @@ namespace Yubico.Core.Devices.SmartCard
         // will terminate the thread.
         private void ListenForReaderChanges()
         {
-            _log.LogInformation("Smart card listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
+            _log.LogInformation(
+                "Smart card listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
 
             bool usePnpWorkaround = UsePnpWorkaround();
 
-            while (_isListening && CheckForUpdates(-1, usePnpWorkaround))
+            while (_isListening && CheckForUpdates(timeout: -1, usePnpWorkaround))
             {
-
             }
         }
 
-        #region IDisposable Support
-
-        private bool _disposedValue; // To detect redundant calls
-
         /// <summary>
-        /// Disposes the objects.
-        /// </summary>
-        /// <param name="disposing"></param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!_disposedValue)
-            {
-                if (disposing)
-                {
-                    uint _ = SCardCancel(_context);
-                    _context.Dispose();
-                    StopListening();
-                }
-                _disposedValue = true;
-            }
-        }
-
-        ~DesktopSmartCardDeviceListener()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(false);
-        }
-
-        // This code added to correctly implement the disposable pattern.
-        /// <summary>
-        /// Calls Dispose(true).
-        /// </summary>
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        #endregion
-
-        /// <summary>
-        /// Stops listening for all actions within a certain manager context.
+        ///     Stops listening for all actions within a certain manager context.
         /// </summary>
         private void StopListening()
         {
@@ -188,8 +149,11 @@ namespace Yubico.Core.Devices.SmartCard
             while (ReaderListChangeDetected(ref newStates, usePnpWorkaround))
             {
                 SCARD_READER_STATE[] eventStateList = GetReaderStateList();
-                SCARD_READER_STATE[] addedReaderStates = eventStateList.Except(newStates, new ReaderStateComparer()).ToArray();
-                SCARD_READER_STATE[] removedReaderStates = newStates.Except(eventStateList, new ReaderStateComparer()).ToArray();
+                SCARD_READER_STATE[] addedReaderStates =
+                    eventStateList.Except(newStates, new ReaderStateComparer()).ToArray();
+
+                SCARD_READER_STATE[] removedReaderStates =
+                    newStates.Except(eventStateList, new ReaderStateComparer()).ToArray();
 
                 // Don't get status changes if there are no updates in state list.
                 if (!addedReaderStates.Any() && !removedReaderStates.Any())
@@ -200,7 +164,8 @@ namespace Yubico.Core.Devices.SmartCard
                 var readerStateList = newStates.ToList();
                 readerStateList.AddRange(addedReaderStates);
 
-                SCARD_READER_STATE[] updatedStates = readerStateList.Except(removedReaderStates, new ReaderStateComparer()).ToArray();
+                SCARD_READER_STATE[] updatedStates =
+                    readerStateList.Except(removedReaderStates, new ReaderStateComparer()).ToArray();
 
                 // Special handle readers with cards in them
                 if (sendEvents)
@@ -216,8 +181,11 @@ namespace Yubico.Core.Devices.SmartCard
                 // have been dealt with.
                 if (addedReaderStates.Any())
                 {
-                    _log.LogInformation("Additional smart card readers were found. Calling GetStatusChange for more information.");
-                    getStatusChangeResult = SCardGetStatusChange(_context, 0, updatedStates, updatedStates.Length);
+                    _log.LogInformation(
+                        "Additional smart card readers were found. Calling GetStatusChange for more information.");
+
+                    getStatusChangeResult = SCardGetStatusChange(
+                        _context, timeout: 0, updatedStates, updatedStates.Length);
 
                     if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
                     {
@@ -227,7 +195,9 @@ namespace Yubico.Core.Devices.SmartCard
 
                     if (UpdateContextIfNonCritical(getStatusChangeResult))
                     {
-                        _log.LogInformation("GetStatusChange indicated non-critical status {Status:X}.", getStatusChangeResult);
+                        _log.LogInformation(
+                            "GetStatusChange indicated non-critical status {Status:X}.", getStatusChangeResult);
+
                         return true;
                     }
 
@@ -240,7 +210,7 @@ namespace Yubico.Core.Devices.SmartCard
 
             if (RelevantChangesDetected(newStates))
             {
-                getStatusChangeResult = SCardGetStatusChange(_context, 0, newStates, newStates.Length);
+                getStatusChangeResult = SCardGetStatusChange(_context, timeout: 0, newStates, newStates.Length);
                 if (getStatusChangeResult == ErrorCode.SCARD_E_CANCELLED)
                 {
                     _log.LogInformation("GetStatusChange indicated SCARD_E_CANCELLED.");
@@ -249,7 +219,9 @@ namespace Yubico.Core.Devices.SmartCard
 
                 if (UpdateContextIfNonCritical(getStatusChangeResult))
                 {
-                    _log.LogInformation("GetStatusChange indicated non-critical status {Status:X}.", getStatusChangeResult);
+                    _log.LogInformation(
+                        "GetStatusChange indicated non-critical status {Status:X}.", getStatusChangeResult);
+
                     return true;
                 }
 
@@ -280,14 +252,16 @@ namespace Yubico.Core.Devices.SmartCard
         // us of the change.
         private bool UsePnpWorkaround()
         {
-            SCARD_READER_STATE[] testState = SCARD_READER_STATE.CreateFromReaderNames(new[] { "\\\\?\\Pnp\\Notifications" });
-            _ = SCardGetStatusChange(_context, 0, testState, testState.Length);
+            SCARD_READER_STATE[] testState =
+                SCARD_READER_STATE.CreateFromReaderNames(new[] { "\\\\?\\Pnp\\Notifications" });
+
+            _ = SCardGetStatusChange(_context, timeout: 0, testState, testState.Length);
             bool usePnpWorkaround = testState[0].EventState.HasFlag(SCARD_STATE.UNKNOWN);
             return usePnpWorkaround;
         }
 
         /// <summary>
-        /// Checks if reader state list contains any changes.
+        ///     Checks if reader state list contains any changes.
         /// </summary>
         /// <param name="newStates">Reader states to check.</param>
         /// <param name="usePnpWorkaround">Use ListReaders instead of relying on the \\?\Pnp\Notifications device.</param>
@@ -296,7 +270,7 @@ namespace Yubico.Core.Devices.SmartCard
         {
             if (usePnpWorkaround)
             {
-                uint result = SCardListReaders(_context, null, out string[] readerNames);
+                uint result = SCardListReaders(_context, groups: null, out string[] readerNames);
                 if (result != ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
                 {
                     _log.SCardApiCall(nameof(SCardListReaders), result);
@@ -314,7 +288,7 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         /// <summary>
-        /// Determines whether the relevant changes in state list detected.
+        ///     Determines whether the relevant changes in state list detected.
         /// </summary>
         /// <param name="newStates">States to check.</param>
         /// <returns>True if changes detected in states.</returns>
@@ -328,6 +302,7 @@ namespace Yubico.Core.Devices.SmartCard
                 {
                     return true;
                 }
+
                 if (diffState.HasFlag(SCARD_STATE.PRESENT) && newStates[i].EventState.HasFlag(SCARD_STATE.PRESENT))
                 {
                     return true;
@@ -338,13 +313,17 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         /// <summary>
-        /// Determines whether the relevant changes in state list detected and creates arrived and removed devices.
+        ///     Determines whether the relevant changes in state list detected and creates arrived and removed devices.
         /// </summary>
         /// <param name="originalStates">Original states used to get Atr values for removal events.</param>
         /// <param name="newStates">State list to check for changes.</param>
         /// <param name="arrivedDevices">List where new arrived devices will be added.</param>
         /// <param name="removedDevices">List where new removed devices will be added.</param>
-        private static void DetectRelevantChanges(SCARD_READER_STATE[] originalStates, SCARD_READER_STATE[] newStates, List<ISmartCardDevice> arrivedDevices, List<ISmartCardDevice> removedDevices)
+        private static void DetectRelevantChanges(
+            SCARD_READER_STATE[] originalStates,
+            SCARD_READER_STATE[] newStates,
+            List<ISmartCardDevice> arrivedDevices,
+            List<ISmartCardDevice> removedDevices)
         {
             foreach (SCARD_READER_STATE entry in newStates)
             {
@@ -352,22 +331,26 @@ namespace Yubico.Core.Devices.SmartCard
 
                 if (diffState.HasFlag(SCARD_STATE.PRESENT) && entry.CurrentState.HasFlag(SCARD_STATE.PRESENT))
                 {
-                    IEnumerable<SCARD_READER_STATE> states = originalStates.Where(e => e.ReaderName == entry.ReaderName);
+                    IEnumerable<SCARD_READER_STATE>
+                        states = originalStates.Where(e => e.ReaderName == entry.ReaderName);
+
                     ISmartCardDevice smartCardDevice =
                         SmartCardDevice.Create(entry.ReaderName, states.FirstOrDefault().Atr);
+
                     removedDevices.Add(smartCardDevice);
                 }
                 else if (diffState.HasFlag(SCARD_STATE.PRESENT) && entry.EventState.HasFlag(SCARD_STATE.PRESENT))
                 {
                     ISmartCardDevice smartCardDevice =
                         SmartCardDevice.Create(entry.ReaderName, entry.Atr);
+
                     arrivedDevices.Add(smartCardDevice);
                 }
             }
         }
 
         /// <summary>
-        /// Updates the current status and event status if reader's event status has changed.
+        ///     Updates the current status and event status if reader's event status has changed.
         /// </summary>
         /// <param name="states">State list to check for changes.</param>
         private static void UpdateCurrentlyKnownState(ref SCARD_READER_STATE[] states)
@@ -379,7 +362,7 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         /// <summary>
-        /// Updates the current context.
+        ///     Updates the current context.
         /// </summary>
         private void UpdateCurrentContext()
         {
@@ -391,12 +374,14 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         /// <summary>
-        /// Gets readers within the current context.
+        ///     Gets readers within the current context.
         /// </summary>
-        /// <returns><see cref="SCARD_READER_STATE"/></returns>
+        /// <returns>
+        ///     <see cref="SCARD_READER_STATE" />
+        /// </returns>
         private SCARD_READER_STATE[] GetReaderStateList()
         {
-            uint result = SCardListReaders(_context, null, out string[] readerNames);
+            uint result = SCardListReaders(_context, groups: null, out string[] readerNames);
             if (result != ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
             {
                 _log.SCardApiCall(nameof(SCardListReaders), result);
@@ -414,7 +399,7 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         /// <summary>
-        /// Fires all created events.
+        ///     Fires all created events.
         /// </summary>
         /// <param name="arrivedDevices">List of arrival devices.</param>
         /// <param name="removedDevices">List of removal devices.</param>
@@ -432,7 +417,7 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         /// <summary>
-        /// Checks if context need to be updated.
+        ///     Checks if context need to be updated.
         /// </summary>
         /// <param name="errorCode"></param>
         /// <returns>true if context updated</returns>
@@ -454,8 +439,52 @@ namespace Yubico.Core.Devices.SmartCard
         {
             public bool Equals(SCARD_READER_STATE x, SCARD_READER_STATE y) => x.ReaderName == y.ReaderName;
 
-            [SuppressMessage("Globalization", "CA1307:Specify StringComparison for clarity", Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
+            [SuppressMessage(
+                "Globalization", "CA1307:Specify StringComparison for clarity",
+                Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
             public int GetHashCode(SCARD_READER_STATE obj) => obj.ReaderName.GetHashCode();
         }
+
+        #region IDisposable Support
+
+        private bool _disposedValue; // To detect redundant calls
+
+        /// <summary>
+        ///     Disposes the objects.
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!_disposedValue)
+            {
+                if (disposing)
+                {
+                    uint _ = SCardCancel(_context);
+                    _context.Dispose();
+                    StopListening();
+                }
+
+                _disposedValue = true;
+            }
+        }
+
+        ~DesktopSmartCardDeviceListener()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(false);
+        }
+
+        // This code added to correctly implement the disposable pattern.
+        /// <summary>
+        ///     Calls Dispose(true).
+        /// </summary>
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
     }
 }

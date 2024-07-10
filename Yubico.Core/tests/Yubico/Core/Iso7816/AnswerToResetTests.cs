@@ -22,7 +22,7 @@ namespace Yubico.Core.Iso7816.UnitTests
         public void Equality_SameInstance_EqualToItself()
         {
             var atr1 = new AnswerToReset(new byte[] { 1, 2, 3, 4 });
-            AnswerToReset atr2 = atr1;
+            var atr2 = atr1;
 
             Assert.True(atr1.Equals(atr2));
             Assert.True(atr2.Equals(atr1));
@@ -58,7 +58,7 @@ namespace Yubico.Core.Iso7816.UnitTests
         public void ToString_PrettyPrintsAtrValue()
         {
             var atr1 = new AnswerToReset(new byte[] { 1, 2, 10, 255 });
-            string expectedString = "01-02-0A-FF";
+            var expectedString = "01-02-0A-FF";
 
             Assert.Equal(expectedString, atr1.ToString());
         }

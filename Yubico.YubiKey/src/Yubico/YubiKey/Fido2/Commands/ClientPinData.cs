@@ -18,57 +18,58 @@ using Yubico.YubiKey.Fido2.Cose;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// The results of a call to the <see cref="ClientPinCommand" /> command class.
+    ///     The results of a call to the <see cref="ClientPinCommand" /> command class.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// This class contains all of the data that can be returned in a <see cref="ClientPinResponse" /> response. Since
-    /// this response may represent one of several different sub-responses, not all of the properties will be set to
-    /// a value. Which property is set depends on what kind of client PIN subcommand was issued.
-    /// </para>
-    /// <para>
-    /// It is often more convenient to issue a subcommand directly through its command class representation. That
-    /// command class will have a partner response class that will only return the set of information that is relevant
-    /// to that subcommand. It is recommended that you use this approach rather than using <see cref="ClientPinCommand"/>,
-    /// <see cref="ClientPinResponse"/>, and <see cref="ClientPinData"/> directly.
-    /// </para>
+    ///     <para>
+    ///         This class contains all of the data that can be returned in a <see cref="ClientPinResponse" /> response. Since
+    ///         this response may represent one of several different sub-responses, not all of the properties will be set to
+    ///         a value. Which property is set depends on what kind of client PIN subcommand was issued.
+    ///     </para>
+    ///     <para>
+    ///         It is often more convenient to issue a subcommand directly through its command class representation. That
+    ///         command class will have a partner response class that will only return the set of information that is relevant
+    ///         to that subcommand. It is recommended that you use this approach rather than using
+    ///         <see cref="ClientPinCommand" />,
+    ///         <see cref="ClientPinResponse" />, and <see cref="ClientPinData" /> directly.
+    ///     </para>
     /// </remarks>
     public class ClientPinData
     {
         /// <summary>
-        /// Used to convey the authenticator's public key to the client / platform.
+        ///     Used to convey the authenticator's public key to the client / platform.
         /// </summary>
         public CoseKey? KeyAgreement { get; set; }
 
         /// <summary>
-        /// The pinUvAuthToken, encrypted by calling `encrypt` on the PIN/UV auto protocol with the shared secret as
-        /// the key.
+        ///     The pinUvAuthToken, encrypted by calling `encrypt` on the PIN/UV auto protocol with the shared secret as
+        ///     the key.
         /// </summary>
         public ReadOnlyMemory<byte>? PinUvAuthToken { get; set; }
 
         /// <summary>
-        /// The number of PIN attempts remaining before the YubiKey's FIDO2 application is locked out.
+        ///     The number of PIN attempts remaining before the YubiKey's FIDO2 application is locked out.
         /// </summary>
         public int? PinRetries { get; set; }
 
         /// <summary>
-        /// Indicates whether the YubiKey requires a power cycle before any future PIN operations can continue.
+        ///     Indicates whether the YubiKey requires a power cycle before any future PIN operations can continue.
         /// </summary>
         /// <remarks>
-        /// <para>
-        /// Present and `true` if the YubiKey needs to be power cycled (unplugged and re-plugged in), `false` if no
-        /// power cycle is needed, and `null` if no information was given.
-        /// </para>
-        /// <para>
-        /// This field is only valid in response to the `getRetries` subcommand. The YubiKey will return this when an
-        /// authentication has been blocked due to excessive retries. The power cycle behavior is a security property
-        /// of the FIDO2 PIN protocol, and helps prevent automated attacks against the PIN.
-        /// </para>
+        ///     <para>
+        ///         Present and `true` if the YubiKey needs to be power cycled (unplugged and re-plugged in), `false` if no
+        ///         power cycle is needed, and `null` if no information was given.
+        ///     </para>
+        ///     <para>
+        ///         This field is only valid in response to the `getRetries` subcommand. The YubiKey will return this when an
+        ///         authentication has been blocked due to excessive retries. The power cycle behavior is a security property
+        ///         of the FIDO2 PIN protocol, and helps prevent automated attacks against the PIN.
+        ///     </para>
         /// </remarks>
         public bool? PowerCycleState { get; set; }
 
         /// <summary>
-        /// The number of User Verification retries remaining before a lockout of the YubiKey will occur.
+        ///     The number of User Verification retries remaining before a lockout of the YubiKey will occur.
         /// </summary>
         public int? UvRetries { get; set; }
     }

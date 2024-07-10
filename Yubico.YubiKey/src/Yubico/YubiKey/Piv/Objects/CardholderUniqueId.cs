@@ -15,6 +15,7 @@
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
+using System.Text;
 using Yubico.Core.Logging;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
@@ -22,54 +23,64 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.Piv.Objects
 {
     /// <summary>
-    /// Use this class to process the CHUID (CardHolder Unique Identifier) data.
+    ///     Use this class to process the CHUID (CardHolder Unique Identifier) data.
     /// </summary>
     /// <remarks>
-    /// A CHUID consists of five values:
-    /// <list type="bullet">
-    /// <item><description>FASC-N (Federal Agency SmartCredential Number)</description></item>
-    /// <item><description>GUID (Global Unique Identifier)</description></item>
-    /// <item><description>Expiration Date</description></item>
-    /// <item><description>Issuer Asymmetric Signature</description></item>
-    /// <item><description>LRC (error code)</description></item>
-    /// </list>
-    /// <para>
-    /// For the YubiKey, the FASC-N and Expiration Date are fixed. That is, the
-    /// FASC-N and Expiration Date are the same for all YubiKeys.
-    /// </para>
-    /// <para>
-    /// The YubiKey does not use the signature value, and the PIV standard does
-    /// not use the LRC. Hence, those two values are "empty".
-    /// </para>
-    /// <para>
-    /// You can set the GUID to any 16-byte value you want, but it is generally a
-    /// random value. That is so each YubiKey has a different GUID.
-    /// </para>
-    /// <para>
-    /// You will generally get the current CHUID for a YubiKey using one of the
-    /// <c>PivSession.ReadObject</c> methods. Upon manufacture, the CHUID is
-    /// "empty", so the <c>CardHolderUniqueId</c> object will be empty as well
-    /// (the <see cref="PivDataObject.IsEmpty"/> property will be <c>true</c>).
-    /// You can then set the GUID (or have a random GUID generated for you) and
-    /// then store the CHUID using the <c>PivSession.WriteObject</c> method.
-    /// </para>
-    /// <para>
-    /// It is also possible the CHUID is already set on the YubiKey. In that
-    /// case, call one of the <c>PivSession.ReadObject</c> methods and the
-    /// resulting object will have <c>IsEmpty</c> set to <c>false</c> and you can
-    /// see the GUID that is on the YubiKey.
-    /// </para>
-    /// <para>
-    /// Finally, you can create a new <c>CardholderUniqueId</c> object by calling
-    /// the constructor directly, then set the GUID and call
-    /// <c>PivSession.WriteObject</c>. That will, of course, overwrite the CHUID
-    /// on the YubiKey, if there is one. Because that might not be something you
-    /// want to do, this is the most dangerous option.
-    /// </para>
-    /// <para>
-    /// See also the user's manual entry on
-    /// <xref href="UsersManualPivObjects"> PIV data objects</xref>.
-    /// </para>
+    ///     A CHUID consists of five values:
+    ///     <list type="bullet">
+    ///         <item>
+    ///             <description>FASC-N (Federal Agency SmartCredential Number)</description>
+    ///         </item>
+    ///         <item>
+    ///             <description>GUID (Global Unique Identifier)</description>
+    ///         </item>
+    ///         <item>
+    ///             <description>Expiration Date</description>
+    ///         </item>
+    ///         <item>
+    ///             <description>Issuer Asymmetric Signature</description>
+    ///         </item>
+    ///         <item>
+    ///             <description>LRC (error code)</description>
+    ///         </item>
+    ///     </list>
+    ///     <para>
+    ///         For the YubiKey, the FASC-N and Expiration Date are fixed. That is, the
+    ///         FASC-N and Expiration Date are the same for all YubiKeys.
+    ///     </para>
+    ///     <para>
+    ///         The YubiKey does not use the signature value, and the PIV standard does
+    ///         not use the LRC. Hence, those two values are "empty".
+    ///     </para>
+    ///     <para>
+    ///         You can set the GUID to any 16-byte value you want, but it is generally a
+    ///         random value. That is so each YubiKey has a different GUID.
+    ///     </para>
+    ///     <para>
+    ///         You will generally get the current CHUID for a YubiKey using one of the
+    ///         <c>PivSession.ReadObject</c> methods. Upon manufacture, the CHUID is
+    ///         "empty", so the <c>CardHolderUniqueId</c> object will be empty as well
+    ///         (the <see cref="PivDataObject.IsEmpty" /> property will be <c>true</c>).
+    ///         You can then set the GUID (or have a random GUID generated for you) and
+    ///         then store the CHUID using the <c>PivSession.WriteObject</c> method.
+    ///     </para>
+    ///     <para>
+    ///         It is also possible the CHUID is already set on the YubiKey. In that
+    ///         case, call one of the <c>PivSession.ReadObject</c> methods and the
+    ///         resulting object will have <c>IsEmpty</c> set to <c>false</c> and you can
+    ///         see the GUID that is on the YubiKey.
+    ///     </para>
+    ///     <para>
+    ///         Finally, you can create a new <c>CardholderUniqueId</c> object by calling
+    ///         the constructor directly, then set the GUID and call
+    ///         <c>PivSession.WriteObject</c>. That will, of course, overwrite the CHUID
+    ///         on the YubiKey, if there is one. Because that might not be something you
+    ///         want to do, this is the most dangerous option.
+    ///     </para>
+    ///     <para>
+    ///         See also the user's manual entry on
+    ///         <xref href="UsersManualPivObjects"> PIV data objects</xref>.
+    ///     </para>
     /// </remarks>
     public sealed class CardholderUniqueId : PivDataObject
     {
@@ -86,41 +97,24 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int SignatureTag = 0x3E;
         private const int LrcTag = 0xFE;
 
-        private bool _disposed;
-        private readonly Logger _log = Log.GetLogger();
-
-        /// <summary>
-        /// The "Federal Agency Smart Credential Number" (FASC-N). This is a fixed
-        /// 25-byte value for every YubiKey, and is a Non-Federal Issuer number.
-        /// </summary>
-        public ReadOnlyMemory<byte> FascNumber { get; private set; }
-
-        private readonly byte[] _fascNumber = new byte[] {
+        private readonly byte[] _fascNumber =
+        {
             0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83, 0x68, 0x58, 0x21, 0x08,
             0x42, 0x10, 0x84, 0x21, 0xc8, 0x42, 0x10, 0xc3, 0xeb
         };
 
-        /// <summary>
-        /// The "Global Unique Identifier" (GUID). If there is no CHUID, this is
-        /// "empty" (Guid.Length will be 0). This is a 16-byte value.
-        /// </summary>
-        public ReadOnlyMemory<byte> GuidValue { get; private set; }
-
         private readonly byte[] _guidValue = new byte[GuidLength];
+        private readonly Logger _log = Log.GetLogger();
+
+        private bool _disposed;
 
         /// <summary>
-        /// The PIV card's expiration date. This is a fixed value for every
-        /// YubiKey: Jan 1, 2030.
-        /// </summary>
-        public DateTime ExpirationDate { get; private set; }
-
-        /// <summary>
-        /// Build a new object. This will not get a CHUID from any YubiKey, it
-        /// will only build an "empty" object.
+        ///     Build a new object. This will not get a CHUID from any YubiKey, it
+        ///     will only build an "empty" object.
         /// </summary>
         /// <remarks>
-        /// To read the CHUID data out of a YubiKey, call the
-        /// <see cref="PivSession.ReadObject{PivObject}()"/> method.
+        ///     To read the CHUID data out of a YubiKey, call the
+        ///     <see cref="PivSession.ReadObject{PivObject}()" /> method.
         /// </remarks>
         public CardholderUniqueId()
         {
@@ -134,20 +128,38 @@ namespace Yubico.YubiKey.Piv.Objects
             ExpirationDate = new DateTime(FixedDateYear, FixedDateMonth, FixedDateDay);
         }
 
+        /// <summary>
+        ///     The "Federal Agency Smart Credential Number" (FASC-N). This is a fixed
+        ///     25-byte value for every YubiKey, and is a Non-Federal Issuer number.
+        /// </summary>
+        public ReadOnlyMemory<byte> FascNumber { get; }
+
+        /// <summary>
+        ///     The "Global Unique Identifier" (GUID). If there is no CHUID, this is
+        ///     "empty" (Guid.Length will be 0). This is a 16-byte value.
+        /// </summary>
+        public ReadOnlyMemory<byte> GuidValue { get; }
+
+        /// <summary>
+        ///     The PIV card's expiration date. This is a fixed value for every
+        ///     YubiKey: Jan 1, 2030.
+        /// </summary>
+        public DateTime ExpirationDate { get; private set; }
+
         /// <inheritdoc />
         public override int GetDefinedDataTag() => ChuidDefinedDataTag;
 
         /// <summary>
-        /// Set the Guid with a random, 16-byte value.
+        ///     Set the Guid with a random, 16-byte value.
         /// </summary>
         /// <remarks>
-        /// This method will use the random number generator built by
-        /// <see cref="CryptographyProviders"/> to generate 16 random bytes as
-        /// the new GUID.
-        /// <para>
-        /// If there is a GUID value already in this object, this method will
-        /// overwrite it.
-        /// </para>
+        ///     This method will use the random number generator built by
+        ///     <see cref="CryptographyProviders" /> to generate 16 random bytes as
+        ///     the new GUID.
+        ///     <para>
+        ///         If there is a GUID value already in this object, this method will
+        ///         overwrite it.
+        ///     </para>
         /// </remarks>
         public void SetRandomGuid()
         {
@@ -156,25 +168,25 @@ namespace Yubico.YubiKey.Piv.Objects
 
             using (RandomNumberGenerator randomObject = CryptographyProviders.RngCreator())
             {
-                randomObject.GetBytes(_guidValue, 0, GuidLength);
+                randomObject.GetBytes(_guidValue, offset: 0, GuidLength);
             }
 
             IsEmpty = false;
         }
 
         /// <summary>
-        /// Set the Guid with the given value. If the array is not exactly 16
-        /// bytes, this method will throw an exception.
+        ///     Set the Guid with the given value. If the array is not exactly 16
+        ///     bytes, this method will throw an exception.
         /// </summary>
         /// <remarks>
-        /// If there is a GUID value already in this object, this method will
-        /// overwrite it.
+        ///     If there is a GUID value already in this object, this method will
+        ///     overwrite it.
         /// </remarks>
         /// <param name="guidValue">
-        /// The GUID to use.
+        ///     The GUID to use.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// The data is not exactly 16 bytes.
+        ///     The data is not exactly 16 bytes.
         /// </exception>
         public void SetGuid(ReadOnlySpan<byte> guidValue)
         {
@@ -192,7 +204,6 @@ namespace Yubico.YubiKey.Piv.Objects
             var dest = new Span<byte>(_guidValue);
             guidValue.CopyTo(dest);
             IsEmpty = false;
-            return;
         }
 
         /// <inheritdoc />
@@ -221,7 +232,7 @@ namespace Yubico.YubiKey.Piv.Objects
             {
                 tlvWriter.WriteValue(FascNumberTag, FascNumber.Span);
                 tlvWriter.WriteValue(GuidTag, GuidValue.Span);
-                tlvWriter.WriteString(ExpirationDateTag, FixedDate, System.Text.Encoding.ASCII);
+                tlvWriter.WriteString(ExpirationDateTag, FixedDate, Encoding.ASCII);
                 tlvWriter.WriteValue(SignatureTag, emptySpan);
                 tlvWriter.WriteValue(LrcTag, emptySpan);
             }
@@ -279,7 +290,7 @@ namespace Yubico.YubiKey.Piv.Objects
                 _log.LogInformation("Decode data into CardholderUniqueId: FascNumber.");
                 if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> encodedFascn, FascNumberTag))
                 {
-                    if (MemoryExtensions.SequenceEqual<byte>(encodedFascn.Span, FascNumber.Span))
+                    if (encodedFascn.Span.SequenceEqual(FascNumber.Span))
                     {
                         var dest = new Memory<byte>(_fascNumber);
                         encodedFascn.CopyTo(dest);
@@ -320,7 +331,7 @@ namespace Yubico.YubiKey.Piv.Objects
             if (isValid)
             {
                 _log.LogInformation("Decode data into CardholderUniqueId: ExpirationDate.");
-                if (tlvReader.TryReadString(out string theDate, ExpirationDateTag, System.Text.Encoding.ASCII))
+                if (tlvReader.TryReadString(out string theDate, ExpirationDateTag, Encoding.ASCII))
                 {
                     if (theDate.Equals(FixedDate, StringComparison.Ordinal))
                     {

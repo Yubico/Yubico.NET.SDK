@@ -21,15 +21,15 @@ namespace Yubico.PlatformInterop
     // This class represents the C libudev "struct udev *" class.
     internal class LinuxUdevSafeHandle : SafeHandle
     {
-        public override bool IsInvalid => handle == IntPtr.Zero;
-
         public LinuxUdevSafeHandle()
-            : base(IntPtr.Zero, true)
+            : base(IntPtr.Zero, ownsHandle: true)
         {
         }
 
+        public override bool IsInvalid => handle == IntPtr.Zero;
+
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-        override protected bool ReleaseHandle()
+        protected override bool ReleaseHandle()
         {
             _ = NativeMethods.udev_unref(handle);
             return true;

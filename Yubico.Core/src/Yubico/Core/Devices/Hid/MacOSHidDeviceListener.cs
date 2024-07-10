@@ -21,14 +21,13 @@ using static Yubico.PlatformInterop.NativeMethods;
 namespace Yubico.Core.Devices.Hid
 {
     /// <summary>
-    /// A MacOS implementation of the HID device listener
+    ///     A MacOS implementation of the HID device listener
     /// </summary>
     internal class MacOSHidDeviceListener : HidDeviceListener
     {
+        private readonly Logger _log = Log.GetLogger();
         private Thread? _listenerThread;
         private IntPtr? _runLoop;
-
-        private readonly Logger _log = Log.GetLogger();
 
         // Start listening as soon as this object is constructed.
         public MacOSHidDeviceListener()
@@ -50,6 +49,7 @@ namespace Yubico.Core.Devices.Hid
             {
                 IsBackground = true
             };
+
             _listenerThread.Start();
         }
 
@@ -70,7 +70,8 @@ namespace Yubico.Core.Devices.Hid
             const int runLoopTimeout = 10; // 10 seconds is arbitrary, pulled from Apple sample code
             using IDisposable? logScope = _log.BeginScope("MacOSHidDeviceListener.StartListening()");
 
-            _log.LogInformation("HID listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
+            _log.LogInformation(
+                "HID listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
 
             IntPtr manager = IntPtr.Zero;
             IntPtr runLoopMode = IntPtr.Zero;
@@ -78,9 +79,9 @@ namespace Yubico.Core.Devices.Hid
             try
             {
                 byte[] cstr = Encoding.UTF8.GetBytes($"default-runloop-{Environment.CurrentManagedThreadId}");
-                runLoopMode = CFStringCreateWithCString(IntPtr.Zero, cstr, 0);
+                runLoopMode = CFStringCreateWithCString(IntPtr.Zero, cstr, encoding: 0);
 
-                manager = IOHIDManagerCreate(IntPtr.Zero, 0);
+                manager = IOHIDManagerCreate(IntPtr.Zero, options: 0);
                 IOHIDManagerSetDeviceMatching(manager, IntPtr.Zero);
 
                 _runLoop = CFRunLoopGetCurrent();
@@ -94,7 +95,7 @@ namespace Yubico.Core.Devices.Hid
 
                 // MacOS returns both present and future device events. We're only interested in the future ones, so let's
                 // clear out the ones that are already present.
-                _ = CFRunLoopRunInMode(runLoopMode, runLoopTimeout, true);
+                _ = CFRunLoopRunInMode(runLoopMode, runLoopTimeout, returnAfterSourceHandled: true);
                 _log.LogInformation("Flushed existing devices.");
 
                 IOHIDManagerRegisterDeviceMatchingCallback(manager, ArrivedCallback, IntPtr.Zero);
@@ -107,8 +108,9 @@ namespace Yubico.Core.Devices.Hid
                 _log.LogInformation("Beginning run loop polling.");
                 while (runLoopResult == kCFRunLoopRunHandledSource || runLoopResult == kCFRunLoopRunTimedOut)
                 {
-                    runLoopResult = CFRunLoopRunInMode(runLoopMode, runLoopTimeout, true);
+                    runLoopResult = CFRunLoopRunInMode(runLoopMode, runLoopTimeout, returnAfterSourceHandled: true);
                 }
+
                 _log.LogInformation("Run loop exited.");
 
                 if (runLoopResult != kCFRunLoopRunStopped)
@@ -138,7 +140,6 @@ namespace Yubico.Core.Devices.Hid
         private void ArrivedCallback(IntPtr context, int result, IntPtr sender, IntPtr device) =>
             OnArrived(new MacOSHidDevice(MacOSHidDevice.GetEntryId(device)));
 
-        private void RemovedCallback(IntPtr context, int result, IntPtr sender, IntPtr device) =>
-            OnRemoved(null);
+        private void RemovedCallback(IntPtr context, int result, IntPtr sender, IntPtr device) => OnRemoved(null);
     }
 }

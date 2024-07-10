@@ -22,12 +22,13 @@ namespace Yubico.YubiKey
         [Fact]
         public void AvailableUsbCapabilities_SetGet_ReturnsSetValue()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
-                AvailableUsbCapabilities = YubiKeyCapabilities.All,
+                AvailableUsbCapabilities = YubiKeyCapabilities.All
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             Assert.Equal(ykDeviceInfo.AvailableUsbCapabilities, ykDevice.AvailableUsbCapabilities);
         }
@@ -35,12 +36,13 @@ namespace Yubico.YubiKey
         [Fact]
         public void EnabledUsbCapabilities_SetGet_ReturnsSetValue()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
-                EnabledUsbCapabilities = YubiKeyCapabilities.All,
+                EnabledUsbCapabilities = YubiKeyCapabilities.All
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             Assert.Equal(ykDeviceInfo.EnabledUsbCapabilities, ykDevice.EnabledUsbCapabilities);
         }
@@ -48,12 +50,13 @@ namespace Yubico.YubiKey
         [Fact]
         public void AvailableNfcCapabilities_SetGet_ReturnsSetValue()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
-                AvailableNfcCapabilities = YubiKeyCapabilities.All,
+                AvailableNfcCapabilities = YubiKeyCapabilities.All
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             Assert.Equal(ykDeviceInfo.AvailableNfcCapabilities, ykDevice.AvailableNfcCapabilities);
         }
@@ -61,12 +64,13 @@ namespace Yubico.YubiKey
         [Fact]
         public void EnabledNfcCapabilities_SetGet_ReturnsSetValue()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
-                EnabledNfcCapabilities = YubiKeyCapabilities.All,
+                EnabledNfcCapabilities = YubiKeyCapabilities.All
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             Assert.Equal(ykDeviceInfo.EnabledNfcCapabilities, ykDevice.EnabledNfcCapabilities);
         }
@@ -74,12 +78,13 @@ namespace Yubico.YubiKey
         [Fact]
         public void SerialNumber_SetGet_ReturnsSetValue()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
-                SerialNumber = 12345678,
+                SerialNumber = 12345678
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             Assert.Equal(ykDeviceInfo.SerialNumber, ykDevice.SerialNumber);
         }
@@ -87,12 +92,13 @@ namespace Yubico.YubiKey
         [Fact]
         public void IsFipsSeries_SetGet_ReturnsSetValue()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
-                IsFipsSeries = true,
+                IsFipsSeries = true
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             Assert.Equal(ykDeviceInfo.IsFipsSeries, ykDevice.IsFipsSeries);
         }
@@ -100,12 +106,13 @@ namespace Yubico.YubiKey
         [Fact]
         public void IsSkySeries_SetGet_ReturnsSetValue()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
-                IsSkySeries = true,
+                IsSkySeries = true
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             Assert.Equal(ykDeviceInfo.IsSkySeries, ykDevice.IsSkySeries);
         }
@@ -113,12 +120,13 @@ namespace Yubico.YubiKey
         [Fact]
         public void FormFactor_SetGet_ReturnsSetValue()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
-                FormFactor = FormFactor.UsbAKeychain,
+                FormFactor = FormFactor.UsbAKeychain
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             Assert.Equal(ykDeviceInfo.FormFactor, ykDevice.FormFactor);
         }
@@ -126,12 +134,13 @@ namespace Yubico.YubiKey
         [Fact]
         public void FirmwareVersion_SetGet_ReturnsSetValue()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
-                FirmwareVersion = new FirmwareVersion(1, 2, 3),
+                FirmwareVersion = new FirmwareVersion(major: 1, minor: 2, patch: 3)
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             Assert.Equal(ykDeviceInfo.FirmwareVersion, ykDevice.FirmwareVersion);
         }
@@ -139,12 +148,13 @@ namespace Yubico.YubiKey
         [Fact]
         public void AutoEjectTimeout_SetGet_ReturnsSetValue()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
-                AutoEjectTimeout = 10,
+                AutoEjectTimeout = 10
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             Assert.Equal(ykDeviceInfo.AutoEjectTimeout, ykDevice.AutoEjectTimeout);
         }
@@ -152,12 +162,13 @@ namespace Yubico.YubiKey
         [Fact]
         public void ChallengeResponseTimeout_SetGet_ReturnsSetValue()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
-                ChallengeResponseTimeout = 10,
+                ChallengeResponseTimeout = 10
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             Assert.Equal(ykDeviceInfo.ChallengeResponseTimeout, ykDevice.ChallengeResponseTimeout);
         }
@@ -165,12 +176,13 @@ namespace Yubico.YubiKey
         [Fact]
         public void DeviceFlags_SetGet_ReturnsSetValue()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
-                DeviceFlags = DeviceFlags.TouchEject,
+                DeviceFlags = DeviceFlags.TouchEject
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             Assert.Equal(ykDeviceInfo.DeviceFlags, ykDevice.DeviceFlags);
         }
@@ -178,12 +190,13 @@ namespace Yubico.YubiKey
         [Fact]
         public void ConfigurationLocked_SetGet_ReturnsSetValue()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
-                ConfigurationLocked = true,
+                ConfigurationLocked = true
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             Assert.Equal(ykDeviceInfo.ConfigurationLocked, ykDevice.ConfigurationLocked);
         }
@@ -191,13 +204,14 @@ namespace Yubico.YubiKey
         [Fact]
         public void SetEnabledNfcCapabilities_NoConnections_ThrowsException()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
                 AvailableUsbCapabilities = YubiKeyCapabilities.All,
-                EnabledUsbCapabilities = YubiKeyCapabilities.All,
+                EnabledUsbCapabilities = YubiKeyCapabilities.All
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             _ = Assert.Throws<NotSupportedException>(
                 () => ykDevice.SetEnabledNfcCapabilities(YubiKeyCapabilities.Piv));
@@ -206,13 +220,14 @@ namespace Yubico.YubiKey
         [Fact]
         public void SetEnabledUsbCapabilities_SetNone_ThrowsException()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
                 AvailableUsbCapabilities = YubiKeyCapabilities.All,
-                EnabledUsbCapabilities = YubiKeyCapabilities.All,
+                EnabledUsbCapabilities = YubiKeyCapabilities.All
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             _ = Assert.Throws<InvalidOperationException>(
                 () => ykDevice.SetEnabledUsbCapabilities(YubiKeyCapabilities.None));
@@ -221,13 +236,14 @@ namespace Yubico.YubiKey
         [Fact]
         public void SetEnabledUsbCapabilities_SetOnlyUnavailableCapability_ThrowsException()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
                 AvailableUsbCapabilities = YubiKeyCapabilities.Piv | YubiKeyCapabilities.Otp,
-                EnabledUsbCapabilities = YubiKeyCapabilities.Piv,
+                EnabledUsbCapabilities = YubiKeyCapabilities.Piv
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             _ = Assert.Throws<InvalidOperationException>(
                 () => ykDevice.SetEnabledUsbCapabilities(YubiKeyCapabilities.OpenPgp));
@@ -236,13 +252,14 @@ namespace Yubico.YubiKey
         [Fact]
         public void SetEnabledUsbCapabilities_NoConnections_ThrowsException()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo()
+            var ykDeviceInfo = new YubiKeyDeviceInfo
             {
                 AvailableUsbCapabilities = YubiKeyCapabilities.All,
-                EnabledUsbCapabilities = YubiKeyCapabilities.All,
+                EnabledUsbCapabilities = YubiKeyCapabilities.All
             };
 
-            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                ykDeviceInfo);
 
             _ = Assert.Throws<NotSupportedException>(
                 () => ykDevice.SetEnabledUsbCapabilities(YubiKeyCapabilities.Piv));
@@ -253,7 +270,8 @@ namespace Yubico.YubiKey
         [InlineData(256)]
         public void SetChallengeResponseTimeout_InvalidSecondsValue_ThrowsException(int seconds)
         {
-            var ykDevice = new YubiKeyDevice(null, null, null, new YubiKeyDeviceInfo());
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                new YubiKeyDeviceInfo());
 
             _ = Assert.Throws<ArgumentOutOfRangeException>(
                 () => ykDevice.SetChallengeResponseTimeout(seconds));
@@ -262,10 +280,11 @@ namespace Yubico.YubiKey
         [Fact]
         public void SetChallengeResponseTimeout_NoConnections_ThrowsException()
         {
-            var ykDevice = new YubiKeyDevice(null, null, null, new YubiKeyDeviceInfo());
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                new YubiKeyDeviceInfo());
 
             _ = Assert.Throws<NotSupportedException>(
-                () => ykDevice.SetChallengeResponseTimeout(15));
+                () => ykDevice.SetChallengeResponseTimeout(seconds: 15));
         }
 
         [Theory]
@@ -273,7 +292,8 @@ namespace Yubico.YubiKey
         [InlineData(ushort.MaxValue + 1)]
         public void SetAutoEjectTimeout_InvalidSecondsValue_ThrowsException(int seconds)
         {
-            var ykDevice = new YubiKeyDevice(null, null, null, new YubiKeyDeviceInfo());
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                new YubiKeyDeviceInfo());
 
             _ = Assert.Throws<ArgumentOutOfRangeException>(
                 () => ykDevice.SetAutoEjectTimeout(seconds));
@@ -282,16 +302,18 @@ namespace Yubico.YubiKey
         [Fact]
         public void SetAutoEjectTimeout_NoConnections_ThrowsException()
         {
-            var ykDevice = new YubiKeyDevice(null, null, null, new YubiKeyDeviceInfo());
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                new YubiKeyDeviceInfo());
 
             _ = Assert.Throws<NotSupportedException>(
-                () => ykDevice.SetAutoEjectTimeout(15));
+                () => ykDevice.SetAutoEjectTimeout(seconds: 15));
         }
 
         [Fact]
         public void SetDeviceFlags_NoConnections_ThrowsException()
         {
-            var ykDevice = new YubiKeyDevice(null, null, null, new YubiKeyDeviceInfo());
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                new YubiKeyDeviceInfo());
 
             _ = Assert.Throws<NotSupportedException>(
                 () => ykDevice.SetDeviceFlags(DeviceFlags.None));
@@ -300,7 +322,8 @@ namespace Yubico.YubiKey
         [Fact]
         public void LockConfiguration_SetEmptySpan_ThrowsArgException()
         {
-            var ykDevice = new YubiKeyDevice(null, null, null, new YubiKeyDeviceInfo());
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                new YubiKeyDeviceInfo());
 
             _ = Assert.Throws<ArgumentException>(
                 () => ykDevice.LockConfiguration(ReadOnlySpan<byte>.Empty));
@@ -309,7 +332,8 @@ namespace Yubico.YubiKey
         [Fact]
         public void LockConfiguration_SetAllZero_ThrowsArgException()
         {
-            var ykDevice = new YubiKeyDevice(null, null, null, new YubiKeyDeviceInfo());
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                new YubiKeyDeviceInfo());
 
             _ = Assert.Throws<ArgumentException>(
                 () => ykDevice.LockConfiguration(new byte[16]));
@@ -318,9 +342,10 @@ namespace Yubico.YubiKey
         [Fact]
         public void LockConfiguration_NoConnections_ThrowsException()
         {
-            var ykDevice = new YubiKeyDevice(null, null, null, new YubiKeyDeviceInfo());
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                new YubiKeyDeviceInfo());
 
-            byte[] lockCode = new byte[16];
+            var lockCode = new byte[16];
             lockCode[0] = 1;
 
             _ = Assert.Throws<NotSupportedException>(
@@ -330,7 +355,8 @@ namespace Yubico.YubiKey
         [Fact]
         public void UnlockConfiguration_SetEmptySpan_ThrowsArgException()
         {
-            var ykDevice = new YubiKeyDevice(null, null, null, new YubiKeyDeviceInfo());
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                new YubiKeyDeviceInfo());
 
             _ = Assert.Throws<ArgumentException>(
                 () => ykDevice.LockConfiguration(ReadOnlySpan<byte>.Empty));
@@ -339,9 +365,10 @@ namespace Yubico.YubiKey
         [Fact]
         public void UnlockConfiguration_NoConnections_ThrowsException()
         {
-            var ykDevice = new YubiKeyDevice(null, null, null, new YubiKeyDeviceInfo());
+            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
+                new YubiKeyDeviceInfo());
 
-            byte[] lockCode = new byte[16];
+            var lockCode = new byte[16];
             lockCode[0] = 1;
 
             _ = Assert.Throws<NotSupportedException>(

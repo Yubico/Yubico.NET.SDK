@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.U2f
 
                 case KeyEntryRequest.ChangeU2fPin:
                     keyEntryData.SubmitValues(CurrentPin.Span, NewPin.Span);
-                    ReadOnlyMemory<byte> temp = CurrentPin;
+                    var temp = CurrentPin;
                     CurrentPin = NewPin;
                     NewPin = temp;
                     break;

@@ -12,27 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// The response partner to the GetBioModalityCommand, containing
-    /// information about the biometric technique of the YubiKey.
+    ///     The response partner to the GetBioModalityCommand, containing
+    ///     information about the biometric technique of the YubiKey.
     /// </summary>
     public class GetBioModalityResponse : Fido2Response, IYubiKeyResponseWithData<int>
     {
         private readonly BioEnrollmentResponse _response;
 
         /// <summary>
-        /// Constructs a new instance of
-        /// <see cref="GetBioModalityResponse"/> based on a response APDU
-        /// provided by the YubiKey.
+        ///     Constructs a new instance of
+        ///     <see cref="GetBioModalityResponse" /> based on a response APDU
+        ///     provided by the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// A response APDU containing the CBOR response data for the
-        /// <c>authenticatorBioEnrollment</c> command.
+        ///     A response APDU containing the CBOR response data for the
+        ///     <c>authenticatorBioEnrollment</c> command.
         /// </param>
         public GetBioModalityResponse(ResponseApdu responseApdu)
             : base(responseApdu)
@@ -40,11 +39,11 @@ namespace Yubico.YubiKey.Fido2.Commands
             _response = new BioEnrollmentResponse(responseApdu);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         /// <returns>
-        /// An int, specifying the modality. The standard defines the meaning of
-        /// each possible integer returned. Currently only one integer is
-        /// defined: the value "1" means fingerprint.
+        ///     An int, specifying the modality. The standard defines the meaning of
+        ///     each possible integer returned. Currently only one integer is
+        ///     defined: the value "1" means fingerprint.
         /// </returns>
         public int GetData()
         {

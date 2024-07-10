@@ -27,12 +27,12 @@ namespace Yubico.YubiKey.Fido2
         public void PinOperations_Succeed()
         {
             // Assumption - the YubiKey returned has a new or reset FIDO2 application with no PIN set.
-            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
+            var yubiKey = YubiKeyDevice.FindAll().First();
 
             using (var fido2 = new Fido2Session(yubiKey))
             {
-                byte[] pin1 = Encoding.UTF8.GetBytes("12345");
-                byte[] pin2 = Encoding.UTF8.GetBytes("abcde");
+                var pin1 = Encoding.UTF8.GetBytes("12345");
+                var pin2 = Encoding.UTF8.GetBytes("abcde");
 
                 fido2.KeyCollector = req =>
                 {
@@ -50,6 +50,7 @@ namespace Yubico.YubiKey.Fido2
                             {
                                 req.SubmitValues(pin2, pin1);
                             }
+
                             break;
                         case KeyEntryRequest.VerifyFido2Pin:
                             if (req.IsRetry)
@@ -60,6 +61,7 @@ namespace Yubico.YubiKey.Fido2
                             {
                                 req.SubmitValue(pin1);
                             }
+
                             break;
                     }
 
@@ -70,14 +72,14 @@ namespace Yubico.YubiKey.Fido2
                 fido2.ChangePin();
                 fido2.VerifyPin();
 
-                bool isValid = fido2.TryChangePin(pin1, pin2);
+                var isValid = fido2.TryChangePin(pin1, pin2);
                 Assert.False(isValid);
                 isValid = fido2.TryChangePin(pin2, pin1);
                 Assert.True(isValid);
 
-                isValid = fido2.TryVerifyPin(pin2, null, null, out _, out _);
+                isValid = fido2.TryVerifyPin(pin2, permissions: null, relyingPartyId: null, out _, out _);
                 Assert.False(isValid);
-                isValid = fido2.TryVerifyPin(pin1, null, null, out _, out _);
+                isValid = fido2.TryVerifyPin(pin1, permissions: null, relyingPartyId: null, out _, out _);
                 Assert.True(isValid);
             }
         }
@@ -89,12 +91,13 @@ namespace Yubico.YubiKey.Fido2
             // Test assumptions: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)
             // Test assumptions: A fingerprint is registered on the key.
 
-            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
+            var yubiKey = YubiKeyDevice.FindAll().First();
 
             using (var fido2 = new Fido2Session(yubiKey))
             {
                 fido2.KeyCollector = KeyCollector;
-                fido2.VerifyUv(PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion, "relyingParty1");
+                fido2.VerifyUv(PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion,
+                    "relyingParty1");
             }
         }
 
@@ -103,14 +106,14 @@ namespace Yubico.YubiKey.Fido2
         public void InvalidPinFollowedByValidPin_Succeeds()
         {
             // Test assumption: PIN is already set to 123456 (UTF-8 chars, not the number `123456`)
-            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
+            var yubiKey = YubiKeyDevice.FindAll().First();
 
-            byte[] invalidPin = Encoding.UTF8.GetBytes("44444");
-            byte[] validPin = Encoding.UTF8.GetBytes("123456");
+            var invalidPin = Encoding.UTF8.GetBytes("44444");
+            var validPin = Encoding.UTF8.GetBytes("123456");
 
             using (var fido2 = new Fido2Session(yubiKey))
             {
-                bool success = fido2.TryVerifyPin(
+                var success = fido2.TryVerifyPin(
                     invalidPin,
                     PinUvAuthTokenPermissions.CredentialManagement,
                     "",

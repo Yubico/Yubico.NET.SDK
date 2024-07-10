@@ -12,15 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Xunit;
-using Yubico.Core.Tlv;
-using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Fido2.Commands;
-using Yubico.YubiKey.Fido2.Cose;
-using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -29,22 +21,23 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Format_Correct()
         {
-            byte[] clientDataHash = new byte[] {
+            byte[] clientDataHash =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
             };
 
-            byte[] encoding = GetSampleEncoding();
+            var encoding = GetSampleEncoding();
 
             var cData = new MakeCredentialData(encoding);
-            bool isValid = cData.VerifyAttestation(clientDataHash);
+            var isValid = cData.VerifyAttestation(clientDataHash);
             Assert.True(isValid);
         }
 
         [Fact]
         public void Decode_AuthenticatorData_Correct()
         {
-            byte[] encoding = GetSampleAuthenticatorData();
+            var encoding = GetSampleAuthenticatorData();
 
             var aData = new AuthenticatorData(encoding);
             Assert.True(aData.UserPresence);
@@ -52,7 +45,8 @@ namespace Yubico.YubiKey.Fido2
 
         private byte[] GetSampleAuthenticatorData()
         {
-            return new byte[] {
+            return new byte[]
+            {
                 0xb1, 0xe7, 0x70, 0xb1, 0xb4, 0x50, 0xcb, 0x14, 0x73, 0x86, 0xc4, 0xd3, 0x4a, 0x04, 0x5d, 0x43,
                 0x57, 0x68, 0xdf, 0xf1, 0x38, 0x34, 0x94, 0xe3, 0x74, 0xb7, 0x86, 0x8d, 0x3c, 0xdb, 0x0c, 0x95,
                 0xc5, 0x00, 0x00, 0x00, 0x01, 0x2f, 0xc0, 0x57, 0x9f, 0x81, 0x13, 0x47, 0xea, 0xb1, 0x16, 0xbb,
@@ -70,7 +64,8 @@ namespace Yubico.YubiKey.Fido2
 
         private byte[] GetSampleEncoding()
         {
-            return new byte[] {
+            return new byte[]
+            {
                 0xa5, 0x01, 0x66, 0x70, 0x61, 0x63, 0x6b, 0x65, 0x64, 0x02, 0x58, 0xb4, 0xb1, 0xe7, 0x70, 0xb1,
                 0xb4, 0x50, 0xcb, 0x14, 0x73, 0x86, 0xc4, 0xd3, 0x4a, 0x04, 0x5d, 0x43, 0x57, 0x68, 0xdf, 0xf1,
                 0x38, 0x34, 0x94, 0xe3, 0x74, 0xb7, 0x86, 0x8d, 0x3c, 0xdb, 0x0c, 0x95, 0x45, 0x00, 0x00, 0x00,

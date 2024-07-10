@@ -33,6 +33,6 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
         ResetOath = 11,
 
-        Exit = 12,
+        Exit = 12
     }
 }

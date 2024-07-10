@@ -15,21 +15,19 @@
 using System;
 using Xunit;
 using Yubico.Core.Devices.Hid;
-using Yubico.YubiKey.Otp.Operations;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Otp
 {
     public class ConfigureStaticTests
     {
-
         [Trait("Category", "Simple")]
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void ConfigureStaticPassword_Succeeds(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var otpSession = new OtpSession(testDevice))
             {
@@ -38,15 +36,15 @@ namespace Yubico.YubiKey.Otp
                     otpSession.DeleteSlot(Slot.LongPress);
                 }
 
-                ConfigureStaticPassword configObj = otpSession.ConfigureStaticPassword(Slot.LongPress);
+                var configObj = otpSession.ConfigureStaticPassword(Slot.LongPress);
                 Assert.NotNull(configObj);
 
                 var generatedPassword = new Memory<char>(new char[16]);
 
                 configObj = configObj.WithKeyboard(KeyboardLayout.en_US);
-                configObj = configObj.AllowManualUpdate(false);
-                configObj = configObj.AppendCarriageReturn(false);
-                configObj = configObj.SendTabFirst(false);
+                configObj = configObj.AllowManualUpdate(setConfig: false);
+                configObj = configObj.AppendCarriageReturn(setConfig: false);
+                configObj = configObj.SendTabFirst(setConfig: false);
                 configObj = configObj.SetAllowUpdate();
                 configObj = configObj.GeneratePassword(generatedPassword);
                 configObj.Execute();

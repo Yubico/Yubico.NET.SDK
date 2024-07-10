@@ -18,7 +18,7 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// The response partner to the BioEnrollNextSampleCommand.
+    ///     The response partner to the BioEnrollNextSampleCommand.
     /// </summary>
     public class BioEnrollNextSampleResponse : Fido2Response, IYubiKeyResponseWithData<BioEnrollSampleResult>
     {
@@ -26,17 +26,17 @@ namespace Yubico.YubiKey.Fido2.Commands
         private readonly ReadOnlyMemory<byte> _templateId;
 
         /// <summary>
-        /// Constructs a new instance of
-        /// <see cref="BioEnrollNextSampleResponse"/> based on a response APDU
-        /// provided by the YubiKey, along with the template ID of the
-        /// fingerprint being enrolled.
+        ///     Constructs a new instance of
+        ///     <see cref="BioEnrollNextSampleResponse" /> based on a response APDU
+        ///     provided by the YubiKey, along with the template ID of the
+        ///     fingerprint being enrolled.
         /// </summary>
         /// <param name="responseApdu">
-        /// A response APDU containing the CBOR response data for the
-        /// <c>authenticatorCredentialManagement</c> command.
+        ///     A response APDU containing the CBOR response data for the
+        ///     <c>authenticatorCredentialManagement</c> command.
         /// </param>
         /// <param name="templateId">
-        /// The template ID returned by the BioEnrollBeginCommand.
+        ///     The template ID returned by the BioEnrollBeginCommand.
         /// </param>
         public BioEnrollNextSampleResponse(ResponseApdu responseApdu, ReadOnlyMemory<byte> templateId)
             : base(responseApdu)
@@ -45,7 +45,16 @@ namespace Yubico.YubiKey.Fido2.Commands
             _templateId = templateId;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
+        protected override ResponseStatusPair StatusCodeMap =>
+            CtapStatus switch
+            {
+                CtapStatus.ErrOther => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.Fido2OperationCanceled),
+                _ => base.StatusCodeMap
+            };
+
+        /// <inheritdoc />
         public BioEnrollSampleResult GetData()
         {
             if (Status != ResponseStatus.Success)
@@ -66,12 +75,5 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
         }
-
-        /// <inheritdoc />
-        protected override ResponseStatusPair StatusCodeMap => CtapStatus switch
-        {
-            CtapStatus.ErrOther => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2OperationCanceled),
-            _ => base.StatusCodeMap,
-        };
     }
 }

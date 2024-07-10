@@ -21,16 +21,15 @@ namespace Yubico.YubiKey
 {
     internal class Scp03Connection : SmartCardConnection, IScp03YubiKeyConnection
     {
-        private bool _disposed;
-
         // If an Scp03ApduTransform is used, keep this copy so it can be disposed.
         private readonly Scp03ApduTransform _scp03ApduTransform;
+        private bool _disposed;
 
         public Scp03Connection(
             ISmartCardDevice smartCardDevice,
             YubiKeyApplication yubiKeyApplication,
             StaticKeys scp03Keys)
-            : base(smartCardDevice, yubiKeyApplication, null)
+            : base(smartCardDevice, yubiKeyApplication, applicationId: null)
         {
             _scp03ApduTransform = SetObject(yubiKeyApplication, scp03Keys);
         }
@@ -50,6 +49,8 @@ namespace Yubico.YubiKey
 
             _scp03ApduTransform = SetObject(setError, scp03Keys);
         }
+
+        public StaticKeys GetScp03Keys() => _scp03ApduTransform.Scp03Keys;
 
         private Scp03ApduTransform SetObject(
             YubiKeyApplication setError,
@@ -75,8 +76,6 @@ namespace Yubico.YubiKey
 
             return scp03ApduTransform;
         }
-
-        public StaticKeys GetScp03Keys() => _scp03ApduTransform.Scp03Keys;
 
         protected override void Dispose(bool disposing)
         {

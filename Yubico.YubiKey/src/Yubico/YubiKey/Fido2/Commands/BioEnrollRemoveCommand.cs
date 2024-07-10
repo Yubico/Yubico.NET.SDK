@@ -20,13 +20,13 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Remove an enrolled fingerprint. This is a subcommand of the CTAP
-    /// command "authenticatorBioEnrollment".
+    ///     Remove an enrolled fingerprint. This is a subcommand of the CTAP
+    ///     command "authenticatorBioEnrollment".
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="Fido2Response"/>. This command
-    /// does not return any data, it only returns "success" or "failure", and has
-    /// some FIDO2-specific error information.
+    ///     The partner Response class is <see cref="Fido2Response" />. This command
+    ///     does not return any data, it only returns "success" or "failure", and has
+    ///     some FIDO2-specific error information.
     /// </remarks>
     public sealed class BioEnrollRemoveCommand : IYubiKeyCommand<Fido2Response>
     {
@@ -34,9 +34,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         private const int KeyTemplateId = 0x01;
 
         private readonly BioEnrollmentCommand _command;
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -46,17 +43,17 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// Constructs an instance of the <see cref="BioEnrollEnumerateCommand"/> class.
+        ///     Constructs an instance of the <see cref="BioEnrollEnumerateCommand" /> class.
         /// </summary>
         /// <param name="templateId">
-        /// The ID of the template to remove.
+        ///     The ID of the template to remove.
         /// </param>
         /// <param name="pinUvAuthToken">
-        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        /// key.
+        ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
+        ///     key.
         /// </param>
         /// <param name="authProtocol">
-        /// The Auth Protocol used to build the Auth Token.
+        ///     The Auth Protocol used to build the Auth Token.
         /// </param>
         public BioEnrollRemoveCommand(
             ReadOnlyMemory<byte> templateId,
@@ -71,22 +68,22 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
+
+        /// <inheritdoc />
         public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
-        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new Fido2Response(responseApdu);
+        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) => new Fido2Response(responseApdu);
 
         // This method encodes the parameters. For RemoveEnrollment, the
         // parameters consist of the template ID.
         // It is encoded as
         //   map
         //     01 byte string
-        private static byte[]? EncodeParams(ReadOnlyMemory<byte> templateId)
-        {
-            return new CborMapWriter<int>()
+        private static byte[]? EncodeParams(ReadOnlyMemory<byte> templateId) =>
+            new CborMapWriter<int>()
                 .Entry(KeyTemplateId, templateId)
                 .Encode();
-        }
     }
 }

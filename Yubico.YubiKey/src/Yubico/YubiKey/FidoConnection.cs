@@ -12,8 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.InterIndustry.Commands;
 using Yubico.YubiKey.Pipelines;
 
 namespace Yubico.YubiKey
@@ -55,7 +57,14 @@ namespace Yubico.YubiKey
             return yubiKeyCommand.CreateResponseForApdu(responseApdu);
         }
 
-        public InterIndustry.Commands.ISelectApplicationData? SelectApplicationData { get; set; }
+        public ISelectApplicationData? SelectApplicationData { get; set; }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
 
         protected virtual void Dispose(bool disposing)
         {
@@ -69,13 +78,6 @@ namespace Yubico.YubiKey
 
                 _disposedValue = true;
             }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            System.GC.SuppressFinalize(this);
         }
     }
 }

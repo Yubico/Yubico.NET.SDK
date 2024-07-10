@@ -21,42 +21,42 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Piv.Objects
 {
     /// <summary>
-    /// Use this class to process a specific set of PIN-protected data stored in
-    /// the PRINTED data object.
+    ///     Use this class to process a specific set of PIN-protected data stored in
+    ///     the PRINTED data object.
     /// </summary>
     /// <remarks>
-    /// Some Data Objects are retrievable only in a session where the PIN has
-    /// been verified. Hence, that data is PIN-protected. This class will be able
-    /// to process data stored in one such Data Object. The data this class can
-    /// process is specified by its properties.
-    /// <para>
-    /// See the User's Manual entry on
-    /// <xref href="UsersManualPivObjects#pinprotecteddata"> PIV data objects</xref>
-    /// for a description of the details of how this class works.
-    /// </para>
-    /// <para>
-    /// This class specifies the <c>DefinedDataTag</c> to be <c>0x005FC109</c>
-    /// which is the data tag for the PRINTED storage area. The reason is that
-    /// the PRINTED area requires the PIN to read. The data is stored in this
-    /// object and when it is needed, simply retrieve it and use it. In order to
-    /// retrieve, though, PIN verification is required, so in this way the data
-    /// is PIN-protected.
-    /// </para>
-    /// <para>
-    /// This class does not allow changing the <c>DataTag</c>. That is, it is
-    /// possible to store the data in this set only in the PRINTED area.
-    /// </para>
-    /// <para>
-    /// This class is different from other <c>PivDataObjects</c>. Most such
-    /// classes store information encoded as the PIV standard defines it.
-    /// However, this class stores the elements specified by
-    /// <c>PinProtectedDataType</c> following a definition that is not the PIV
-    /// standard for PRINTED.
-    /// <para>
-    /// Note that this object can accept or decode only elements for which there
-    /// is a property.
-    /// </para>
-    /// </para>
+    ///     Some Data Objects are retrievable only in a session where the PIN has
+    ///     been verified. Hence, that data is PIN-protected. This class will be able
+    ///     to process data stored in one such Data Object. The data this class can
+    ///     process is specified by its properties.
+    ///     <para>
+    ///         See the User's Manual entry on
+    ///         <xref href="UsersManualPivObjects#pinprotecteddata"> PIV data objects</xref>
+    ///         for a description of the details of how this class works.
+    ///     </para>
+    ///     <para>
+    ///         This class specifies the <c>DefinedDataTag</c> to be <c>0x005FC109</c>
+    ///         which is the data tag for the PRINTED storage area. The reason is that
+    ///         the PRINTED area requires the PIN to read. The data is stored in this
+    ///         object and when it is needed, simply retrieve it and use it. In order to
+    ///         retrieve, though, PIN verification is required, so in this way the data
+    ///         is PIN-protected.
+    ///     </para>
+    ///     <para>
+    ///         This class does not allow changing the <c>DataTag</c>. That is, it is
+    ///         possible to store the data in this set only in the PRINTED area.
+    ///     </para>
+    ///     <para>
+    ///         This class is different from other <c>PivDataObjects</c>. Most such
+    ///         classes store information encoded as the PIV standard defines it.
+    ///         However, this class stores the elements specified by
+    ///         <c>PinProtectedDataType</c> following a definition that is not the PIV
+    ///         standard for PRINTED.
+    ///         <para>
+    ///             Note that this object can accept or decode only elements for which there
+    ///             is a property.
+    ///         </para>
+    ///     </para>
     /// </remarks>
     public sealed class PinProtectedData : PivDataObject
     {
@@ -66,23 +66,17 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int PinProtectedTag = 0x88;
         private const int MgmtKeyTag = 0x89;
 
-        private bool _disposed;
-        private readonly Logger _log = Log.GetLogger();
-
-        /// <summary>
-        /// The management key that will be PIN-protected. If there is no
-        /// management key, this will be null.
-        /// </summary>
-        public ReadOnlyMemory<byte>? ManagementKey { get; private set; }
-
         private readonly byte[] _keyBuffer = new byte[MaxKeyLength];
+        private readonly Logger _log = Log.GetLogger();
         private readonly Memory<byte> _mgmtKey;
 
-        private readonly int[] _validKeyLengths = new int[] { 16, 24, 32 };
+        private readonly int[] _validKeyLengths = { 16, 24, 32 };
+
+        private bool _disposed;
 
         /// <summary>
-        /// Build a new object. This will not get the PIN-protected data from the
-        /// YubiKey, it will only build an "empty" object.
+        ///     Build a new object. This will not get the PIN-protected data from the
+        ///     YubiKey, it will only build an "empty" object.
         /// </summary>
         public PinProtectedData()
         {
@@ -94,45 +88,51 @@ namespace Yubico.YubiKey.Piv.Objects
             IsEmpty = true;
         }
 
+        /// <summary>
+        ///     The management key that will be PIN-protected. If there is no
+        ///     management key, this will be null.
+        /// </summary>
+        public ReadOnlyMemory<byte>? ManagementKey { get; private set; }
+
         /// <inheritdoc />
         public override int GetDefinedDataTag() => PinProtectedDefinedDataTag;
 
         /// <summary>
-        /// Override the base class. This class does not allow alternate DataTags.
-        /// The only allowed tag is the defined.
+        ///     Override the base class. This class does not allow alternate DataTags.
+        ///     The only allowed tag is the defined.
         /// </summary>
         /// <param name="dataTag">
-        /// The data tag the caller wants to use as an alternate.
+        ///     The data tag the caller wants to use as an alternate.
         /// </param>
         /// <returns>
-        /// A boolean, <c>true</c> is the given tag can be used as an alternate,
-        /// <c>false</c> otherwise.
+        ///     A boolean, <c>true</c> is the given tag can be used as an alternate,
+        ///     <c>false</c> otherwise.
         /// </returns>
         protected override bool IsValidAlternateTag(int dataTag) => dataTag == PinProtectedDefinedDataTag;
 
         /// <summary>
-        /// Set the <c>ManagementKey</c> property with the specified value.
+        ///     Set the <c>ManagementKey</c> property with the specified value.
         /// </summary>
         /// <remarks>
-        /// The caller supplies an argument of Length zero, 16, 24, or 32. Any
-        /// other input will cause an exception.
-        /// <para>
-        /// An empty array (Length = zero) means there is no management key
-        /// stored in the PRINTED object on the given YubiKey. A caller can set
-        /// the management key to empty in order to "convert" a YubiKey from
-        /// PIN-protected to normal (the application/user must supply the
-        /// management key for authentication).
-        /// </para>
-        /// <para>
-        /// If there is a management key already in this object, this method will
-        /// overwrite it.
-        /// </para>
-        /// <para>
-        /// This method will copy the data, it will not copy a reference.
-        /// </para>
+        ///     The caller supplies an argument of Length zero, 16, 24, or 32. Any
+        ///     other input will cause an exception.
+        ///     <para>
+        ///         An empty array (Length = zero) means there is no management key
+        ///         stored in the PRINTED object on the given YubiKey. A caller can set
+        ///         the management key to empty in order to "convert" a YubiKey from
+        ///         PIN-protected to normal (the application/user must supply the
+        ///         management key for authentication).
+        ///     </para>
+        ///     <para>
+        ///         If there is a management key already in this object, this method will
+        ///         overwrite it.
+        ///     </para>
+        ///     <para>
+        ///         This method will copy the data, it will not copy a reference.
+        ///     </para>
         /// </remarks>
         /// <exception cref="ArgumentException">
-        /// The data Length is not 0, 16, 24, or 32 bytes.
+        ///     The data Length is not 0, 16, 24, or 32 bytes.
         /// </exception>
         public void SetManagementKey(ReadOnlyMemory<byte> managementKey)
         {
@@ -141,7 +141,7 @@ namespace Yubico.YubiKey.Piv.Objects
             if (IsValidKeyLength(managementKey.Length))
             {
                 managementKey.CopyTo(_mgmtKey);
-                ManagementKey = _mgmtKey.Slice(0, managementKey.Length);
+                ManagementKey = _mgmtKey.Slice(start: 0, managementKey.Length);
                 return;
             }
 
@@ -232,7 +232,7 @@ namespace Yubico.YubiKey.Piv.Objects
                     0 => tlvReader.TryReadNestedTlv(out tlvReader, EncodingTag),
                     1 => tlvReader.TryReadNestedTlv(out tlvReader, PinProtectedTag),
                     2 => tlvReader.TryReadValue(out mgmtKey, MgmtKeyTag),
-                    _ => false,
+                    _ => false
                 };
 
                 count++;
@@ -241,7 +241,7 @@ namespace Yubico.YubiKey.Piv.Objects
             if (IsValidKeyLength(mgmtKey.Length))
             {
                 mgmtKey.CopyTo(_mgmtKey);
-                ManagementKey = _mgmtKey.Slice(0, mgmtKey.Length);
+                ManagementKey = _mgmtKey.Slice(start: 0, mgmtKey.Length);
             }
             else
             {

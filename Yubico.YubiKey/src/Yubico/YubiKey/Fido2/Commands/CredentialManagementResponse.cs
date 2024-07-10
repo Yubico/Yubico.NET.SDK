@@ -18,22 +18,22 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// The response partner to the CredentialManagementCommand.
+    ///     The response partner to the CredentialManagementCommand.
     /// </summary>
     /// <remarks>
-    /// Some subcommands return no data, they simply return a success of failure
-    /// code.
+    ///     Some subcommands return no data, they simply return a success of failure
+    ///     code.
     /// </remarks>
     public class CredentialManagementResponse : Fido2Response, IYubiKeyResponseWithData<CredentialManagementData>
     {
         /// <summary>
-        /// Constructs a new instance of
-        /// <see cref="CredentialManagementResponse"/> based on a response APDU
-        /// provided by the YubiKey.
+        ///     Constructs a new instance of
+        ///     <see cref="CredentialManagementResponse" /> based on a response APDU
+        ///     provided by the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// A response APDU containing the CBOR response data for the
-        /// <c>authenticatorCredentialManagement</c> command.
+        ///     A response APDU containing the CBOR response data for the
+        ///     <c>authenticatorCredentialManagement</c> command.
         /// </param>
         public CredentialManagementResponse(ResponseApdu responseApdu) : base(responseApdu)
         {

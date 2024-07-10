@@ -28,23 +28,24 @@ namespace Yubico.YubiKey.Piv
         public void SingleCertSize_3052(StandardTestDevice testDeviceType)
         {
             byte leafSlotNumber = 0x83;
-            int extensionSize = 2107;
-            using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
-            using X509Certificate2 caCert = GetCACert();
+            var extensionSize = 2107;
+            using var rng = RandomObjectUtility.GetRandomObject(fixedBytes: null);
+            using var caCert = GetCACert();
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out string pubKey, out string priKey);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, validAttest: false, out _, out var pubKey,
+                out var priKey);
             var convertPublic = new KeyConverter(pubKey.ToCharArray());
-            RSA dotNetPublicKey = convertPublic.GetRsaObject();
+            var dotNetPublicKey = convertPublic.GetRsaObject();
             var convertPrivate = new KeyConverter(priKey.ToCharArray());
-            PivPrivateKey pivPrivateKey = convertPrivate.GetPivPrivateKey();
+            var pivPrivateKey = convertPrivate.GetPivPrivateKey();
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             // With an extension of 2107 bytes, the cert should be 3052 bytes.
-            byte[] extensionData = new byte[extensionSize];
-            rng.GetBytes(extensionData, 0, extensionData.Length);
+            var extensionData = new byte[extensionSize];
+            rng.GetBytes(extensionData, offset: 0, extensionData.Length);
 
-            X509Certificate2 newCert = GetCertWithRandomExtension(caCert, dotNetPublicKey, extensionData);
+            var newCert = GetCertWithRandomExtension(caCert, dotNetPublicKey, extensionData);
             //            _output.WriteLine ("cert size: {0} from extension = {1}", newCert.RawData.Length, extensionSize);
 
             // A 3052-byte cert should work.
@@ -60,9 +61,9 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Now use a 2108-byte extension, to get a 3053-byte cert.
-            extensionSize += 3;//extensionSize++;
+            extensionSize += 3; //extensionSize++;
             extensionData = new byte[extensionSize];
-            rng.GetBytes(extensionData, 0, extensionData.Length);
+            rng.GetBytes(extensionData, offset: 0, extensionData.Length);
 
             newCert = GetCertWithRandomExtension(caCert, dotNetPublicKey, extensionData);
             //            _output.WriteLine ("cert size: {0} from extension = {1}", newCert.RawData.Length, extensionSize);
@@ -76,7 +77,8 @@ namespace Yubico.YubiKey.Piv
                 pivSession.ResetApplication();
 
                 pivSession.ImportPrivateKey(leafSlotNumber, pivPrivateKey);
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.ImportCertificate(leafSlotNumber, newCert));
+                _ = Assert.Throws<InvalidOperationException>(
+                    () => pivSession.ImportCertificate(leafSlotNumber, newCert));
             }
         }
 
@@ -84,23 +86,24 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void MultipleCerts_3052(StandardTestDevice testDeviceType)
         {
-            int extensionSize = 2107;
-            using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
-            using X509Certificate2 caCert = GetCACert();
+            var extensionSize = 2107;
+            using var rng = RandomObjectUtility.GetRandomObject(fixedBytes: null);
+            using var caCert = GetCACert();
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out string pubKey, out string priKey);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, validAttest: false, out _, out var pubKey,
+                out var priKey);
             var convertPublic = new KeyConverter(pubKey.ToCharArray());
-            RSA dotNetPublicKey = convertPublic.GetRsaObject();
+            var dotNetPublicKey = convertPublic.GetRsaObject();
             var convertPrivate = new KeyConverter(priKey.ToCharArray());
-            PivPrivateKey pivPrivateKey = convertPrivate.GetPivPrivateKey();
+            var pivPrivateKey = convertPrivate.GetPivPrivateKey();
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             // With an extension of 2107 bytes, the cert should be 3052 bytes.
-            byte[] extensionData = new byte[extensionSize];
-            rng.GetBytes(extensionData, 0, extensionData.Length);
+            var extensionData = new byte[extensionSize];
+            rng.GetBytes(extensionData, offset: 0, extensionData.Length);
 
-            X509Certificate2 newCert = GetCertWithRandomExtension(caCert, dotNetPublicKey, extensionData);
+            var newCert = GetCertWithRandomExtension(caCert, dotNetPublicKey, extensionData);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -120,7 +123,8 @@ namespace Yubico.YubiKey.Piv
 
                 // The next storage should fail.
                 pivSession.ImportPrivateKey(leafSlotNumber, pivPrivateKey);
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.ImportCertificate(leafSlotNumber, newCert));
+                _ = Assert.Throws<InvalidOperationException>(
+                    () => pivSession.ImportCertificate(leafSlotNumber, newCert));
             }
         }
 
@@ -128,23 +132,24 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void AllSlot_2079(StandardTestDevice testDeviceType)
         {
-            int extensionSize = 1134;
-            using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
-            using X509Certificate2 caCert = GetCACert();
+            var extensionSize = 1134;
+            using var rng = RandomObjectUtility.GetRandomObject(fixedBytes: null);
+            using var caCert = GetCACert();
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out string pubKey, out string priKey);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, validAttest: false, out _, out var pubKey,
+                out var priKey);
             var convertPublic = new KeyConverter(pubKey.ToCharArray());
-            RSA dotNetPublicKey = convertPublic.GetRsaObject();
+            var dotNetPublicKey = convertPublic.GetRsaObject();
             var convertPrivate = new KeyConverter(priKey.ToCharArray());
-            PivPrivateKey pivPrivateKey = convertPrivate.GetPivPrivateKey();
+            var pivPrivateKey = convertPrivate.GetPivPrivateKey();
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             // With an extension of 1134 bytes, the cert should be 2079 bytes.
-            byte[] extensionData = new byte[extensionSize];
-            rng.GetBytes(extensionData, 0, extensionData.Length);
+            var extensionData = new byte[extensionSize];
+            rng.GetBytes(extensionData, offset: 0, extensionData.Length);
 
-            X509Certificate2 newCert = GetCertWithRandomExtension(caCert, dotNetPublicKey, extensionData);
+            var newCert = GetCertWithRandomExtension(caCert, dotNetPublicKey, extensionData);
             //            _output.WriteLine ("cert size: {0} from extension = {1}", newCert.RawData.Length, extensionSize);
 
             using (var pivSession = new PivSession(testDevice))
@@ -197,7 +202,7 @@ namespace Yubico.YubiKey.Piv
             nameBuilder.AddNameElement(X500NameElement.Locality, "Palo Alto");
             nameBuilder.AddNameElement(X500NameElement.Organization, "Fake");
             nameBuilder.AddNameElement(X500NameElement.CommonName, "Fake Leaf");
-            X500DistinguishedName sampleCertName = nameBuilder.GetDistinguishedName();
+            var sampleCertName = nameBuilder.GetDistinguishedName();
 
             var certRequest = new CertificateRequest(
                 sampleCertName,
@@ -205,14 +210,14 @@ namespace Yubico.YubiKey.Piv
                 HashAlgorithmName.SHA256,
                 RSASignaturePadding.Pss);
 
-            var extension = new X509SubjectKeyIdentifierExtension(extensionData, false);
+            var extension = new X509SubjectKeyIdentifierExtension(extensionData, critical: false);
             certRequest.CertificateExtensions.Add(extension);
 
-            DateTimeOffset notBefore = DateTimeOffset.Now;
-            DateTimeOffset notAfter = notBefore.AddYears(1);
+            var notBefore = DateTimeOffset.Now;
+            var notAfter = notBefore.AddYears(years: 1);
             byte[] serialNumber = { 0x02, 0x4A };
 
-            X509Certificate2 newCert = certRequest.Create(
+            var newCert = certRequest.Create(
                 caCert,
                 notBefore,
                 notAfter,
@@ -226,13 +231,13 @@ namespace Yubico.YubiKey.Piv
         private static X509Certificate2 GetCACert()
         {
             _ = SampleKeyPairs.GetKeysAndCertPem(
-                PivAlgorithm.Rsa2048, true, out string certPem, out _, out string privateKeyPem);
+                PivAlgorithm.Rsa2048, validAttest: true, out var certPem, out _, out var privateKeyPem);
 
             var cert = new CertConverter(certPem.ToCharArray());
-            X509Certificate2 certObj = cert.GetCertObject();
+            var certObj = cert.GetCertObject();
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
-            RSA dotnetObj = privateKey.GetRsaObject();
-            X509Certificate2 certCopy = certObj.CopyWithPrivateKey(dotnetObj);
+            var dotnetObj = privateKey.GetRsaObject();
+            var certCopy = certObj.CopyWithPrivateKey(dotnetObj);
 
             return certCopy;
         }

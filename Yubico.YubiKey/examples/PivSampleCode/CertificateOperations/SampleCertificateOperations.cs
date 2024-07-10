@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     distinguishedName,
                     (RSA)dotNetPubKey,
                     HashAlgorithmName.SHA256,
-                    RSASignaturePadding.Pss),
+                    RSASignaturePadding.Pss)
             };
 
             // Set more info in the cert request if you want.
@@ -103,14 +103,15 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             GetCertRequest(yubiKey, KeyCollectorDelegate, sampleRootName, slotContents);
 
             // Add the BasicConstraints and KeyUsage extensions.
-            var basicConstraints = new X509BasicConstraintsExtension(true, true, 2, true);
-            var keyUsage = new X509KeyUsageExtension(X509KeyUsageFlags.KeyCertSign, true);
+            var basicConstraints = new X509BasicConstraintsExtension(certificateAuthority: true,
+                hasPathLengthConstraint: true, pathLengthConstraint: 2, critical: true);
+            var keyUsage = new X509KeyUsageExtension(X509KeyUsageFlags.KeyCertSign, critical: true);
             slotContents.CertRequest.CertificateExtensions.Add(basicConstraints);
             slotContents.CertRequest.CertificateExtensions.Add(keyUsage);
 
             DateTimeOffset notBefore = DateTimeOffset.Now;
-            DateTimeOffset notAfter = notBefore.AddDays(3650);
-            byte[] serialNumber = new byte[] { 0x01 };
+            DateTimeOffset notAfter = notBefore.AddDays(days: 3650);
+            byte[] serialNumber = { 0x01 };
 
             using (var pivSession = new PivSession(yubiKey))
             {
@@ -151,6 +152,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 throw new ArgumentNullException(nameof(requestorSlotContents));
             }
+
             if (signerSlotContents is null)
             {
                 throw new ArgumentNullException(nameof(signerSlotContents));
@@ -200,6 +202,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     {
                         return false;
                     }
+
                     count++;
                 }
                 else if (signerCert.Extensions[index] is X509KeyUsageExtension keyUsage)
@@ -208,8 +211,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     {
                         return false;
                     }
+
                     count++;
                 }
+
                 index++;
             }
 
@@ -276,15 +281,16 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             if (isCa)
             {
                 // Add the BasicConstraints and KeyUsage extensions.
-                var basicConstraints = new X509BasicConstraintsExtension(true, true, 1, true);
-                var keyUsage = new X509KeyUsageExtension(X509KeyUsageFlags.KeyCertSign, true);
+                var basicConstraints = new X509BasicConstraintsExtension(certificateAuthority: true,
+                    hasPathLengthConstraint: true, pathLengthConstraint: 1, critical: true);
+                var keyUsage = new X509KeyUsageExtension(X509KeyUsageFlags.KeyCertSign, critical: true);
                 certRequest.CertificateExtensions.Add(basicConstraints);
                 certRequest.CertificateExtensions.Add(keyUsage);
             }
 
             DateTimeOffset notBefore = DateTimeOffset.Now;
             var notAfter = new DateTimeOffset(signerCert.NotAfter);
-            byte[] serialNumber = new byte[] { 0x02 };
+            byte[] serialNumber = { 0x02 };
 
             using (var pivSession = new PivSession(yubiKey))
             {
@@ -379,7 +385,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 256 => PivAlgorithm.EccP256,
                 384 => PivAlgorithm.EccP384,
-                _ => PivAlgorithm.None,
+                _ => PivAlgorithm.None
             };
 
             byte[] nonStandardSignature = DsaSignatureConverter.GetNonStandardDsaFromStandard(signature, algorithm);
@@ -429,10 +435,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             //     signing algID,
             //     signature (BIT STRING)
             var tlvReader = new TlvReader(certDer);
-            TlvReader seqReader = tlvReader.ReadNestedTlv(0x30);
-            ReadOnlyMemory<byte> toBeSigned = seqReader.ReadEncoded(0x30);
-            ReadOnlyMemory<byte> algId = seqReader.ReadEncoded(0x30);
-            ReadOnlyMemory<byte> signature = seqReader.ReadValue(0x03);
+            TlvReader seqReader = tlvReader.ReadNestedTlv(expectedTag: 0x30);
+            ReadOnlyMemory<byte> toBeSigned = seqReader.ReadEncoded(expectedTag: 0x30);
+            ReadOnlyMemory<byte> algId = seqReader.ReadEncoded(expectedTag: 0x30);
+            ReadOnlyMemory<byte> signature = seqReader.ReadValue(expectedTag: 0x03);
 
             var sigAlgId = new SignatureAlgIdConverter(algId.ToArray());
 
@@ -460,7 +466,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 256 => PivAlgorithm.EccP256,
                 384 => PivAlgorithm.EccP384,
-                _ => PivAlgorithm.None,
+                _ => PivAlgorithm.None
             };
 
             // The signature is a BIT FIELD so the first octet is the unused
@@ -502,7 +508,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             var returnValue = RSA.Create();
-            returnValue.ImportSubjectPublicKeyInfo(certificate.PublicKey.GetRSAPublicKey().ExportSubjectPublicKeyInfo(), out int _);
+            returnValue.ImportSubjectPublicKeyInfo(certificate.PublicKey.GetRSAPublicKey().ExportSubjectPublicKeyInfo(),
+                out int _);
 
             return returnValue;
         }
@@ -527,10 +534,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             //     signing algID,
             //     signature (BIT STRING)
             var tlvReader = new TlvReader(requestDer);
-            TlvReader seqReader = tlvReader.ReadNestedTlv(0x30);
-            ReadOnlyMemory<byte> toBeSignedMemory = seqReader.ReadEncoded(0x30);
-            ReadOnlyMemory<byte> algId = seqReader.ReadEncoded(0x30);
-            ReadOnlyMemory<byte> signatureMemory = seqReader.ReadValue(0x03);
+            TlvReader seqReader = tlvReader.ReadNestedTlv(expectedTag: 0x30);
+            ReadOnlyMemory<byte> toBeSignedMemory = seqReader.ReadEncoded(expectedTag: 0x30);
+            ReadOnlyMemory<byte> algId = seqReader.ReadEncoded(expectedTag: 0x30);
+            ReadOnlyMemory<byte> signatureMemory = seqReader.ReadValue(expectedTag: 0x03);
 
             toBeSigned = toBeSignedMemory.ToArray();
             sigAlgId = new SignatureAlgIdConverter(algId.ToArray());
@@ -547,17 +554,17 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             //     SubjectPublicKeyInfo
             //      --ignore the rest-- }
             tlvReader = new TlvReader(toBeSigned);
-            seqReader = tlvReader.ReadNestedTlv(0x30);
-            _ = seqReader.ReadValue(0x02);
-            ReadOnlyMemory<byte> subjectName = seqReader.ReadEncoded(0x30);
-            ReadOnlyMemory<byte> subjectPublicKeyInfo = seqReader.ReadEncoded(0x30);
+            seqReader = tlvReader.ReadNestedTlv(expectedTag: 0x30);
+            _ = seqReader.ReadValue(expectedTag: 0x02);
+            ReadOnlyMemory<byte> subjectName = seqReader.ReadEncoded(expectedTag: 0x30);
+            ReadOnlyMemory<byte> subjectPublicKeyInfo = seqReader.ReadEncoded(expectedTag: 0x30);
 
             // Build an X500DistinguishedName from the encoded name.
             requestName = new X500DistinguishedName(subjectName.ToArray());
 
             // Build a key from the SubjectPublicKeyInfo
             char[] pubKeyPem = PemOperations.BuildPem("PUBLIC KEY", subjectPublicKeyInfo.ToArray());
-            return KeyConverter.GetDotNetFromPem(pubKeyPem, false);
+            return KeyConverter.GetDotNetFromPem(pubKeyPem, isPrivate: false);
         }
     }
 }

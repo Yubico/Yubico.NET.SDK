@@ -13,15 +13,15 @@
 // limitations under the License.
 
 using System;
-using System.Threading;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Log = Yubico.Core.Logging.Log;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
-    class ThreadIdEnricher : ILogEventEnricher
+    internal class ThreadIdEnricher : ILogEventEnricher
     {
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
@@ -32,20 +32,19 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
     internal class EventManagerPlugin : PluginBase
     {
+        public EventManagerPlugin(IOutput output) : base(output) { }
         public override string Name => "EventManager";
         public override string Description => "A place for YubiKeyEventManager test code";
 
-        public EventManagerPlugin(IOutput output) : base(output) { }
-
         public override bool Execute()
         {
-            using Logger? log = new LoggerConfiguration()
+            using var log = new LoggerConfiguration()
                 .Enrich.With(new ThreadIdEnricher())
                 .WriteTo.Console(
                     outputTemplate: "[{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
                 .CreateLogger();
 
-            Core.Logging.Log.LoggerFactory = LoggerFactory.Create(
+            Log.LoggerFactory = LoggerFactory.Create(
                 builder => builder
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));

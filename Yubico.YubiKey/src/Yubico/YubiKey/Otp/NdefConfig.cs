@@ -16,13 +16,12 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
-
 using static Yubico.YubiKey.Otp.NdefConstants;
 
 namespace Yubico.YubiKey.Otp
 {
     /// <summary>
-    /// A static class containing helpers that encode configurations for different types of NDEF data.
+    ///     A static class containing helpers that encode configurations for different types of NDEF data.
     /// </summary>
     public static class NdefConfig
     {
@@ -30,12 +29,12 @@ namespace Yubico.YubiKey.Otp
         private const int NdefConfigSize = 62;
 
         /// <summary>
-        /// Create a configuration buffer for the YubiKey to send a URI when NDEF is triggered.
+        ///     Create a configuration buffer for the YubiKey to send a URI when NDEF is triggered.
         /// </summary>
         /// <param name="uri">The URI to send over NDEF.</param>
         /// <returns>
-        /// An opaque configuration buffer that can be written to the YubiKey using the
-        /// <see cref="Commands.ConfigureNdefCommand"/> command class.
+        ///     An opaque configuration buffer that can be written to the YubiKey using the
+        ///     <see cref="Commands.ConfigureNdefCommand" /> command class.
         /// </returns>
         public static byte[] CreateUriConfig(Uri uri)
         {
@@ -47,7 +46,7 @@ namespace Yubico.YubiKey.Otp
             string uriString = uri.ToString();
             int prefixCode = Array.FindIndex(
                 supportedUriPrefixes,
-                1, // Skip the first element ("") as it will match with everything!
+                startIndex: 1, // Skip the first element ("") as it will match with everything!
                 prefix => uriString.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
 
             // If none of the well-known URI prefixes match, set the prefix code to "N/A" and we'll
@@ -59,7 +58,7 @@ namespace Yubico.YubiKey.Otp
 
             Debug.Assert(prefixCode >= 0 && prefixCode < supportedUriPrefixes.Length);
 
-            uriString = uriString.Remove(0, supportedUriPrefixes[prefixCode].Length);
+            uriString = uriString.Remove(startIndex: 0, supportedUriPrefixes[prefixCode].Length);
 
             int utf8Length = Encoding.UTF8.GetByteCount(uriString);
 
@@ -72,7 +71,7 @@ namespace Yubico.YubiKey.Otp
                         NdefDataSize - 1,
                         utf8Length,
                         prefixCode),
-                        nameof(uri));
+                    nameof(uri));
             }
 
             byte[] buffer = CreateBuffer();
@@ -80,24 +79,24 @@ namespace Yubico.YubiKey.Otp
             buffer[1] = (byte)'U';
             buffer[2] = (byte)prefixCode;
 
-            int bytesWritten = Encoding.UTF8.GetBytes(uriString, 0, uriString.Length, buffer, 3);
+            int bytesWritten = Encoding.UTF8.GetBytes(uriString, charIndex: 0, uriString.Length, buffer, byteIndex: 3);
             Debug.Assert(utf8Length == bytesWritten);
 
             return buffer;
         }
 
         /// <summary>
-        /// Create a configuration buffer for the YubiKey to send text when NDEF is triggered.
+        ///     Create a configuration buffer for the YubiKey to send text when NDEF is triggered.
         /// </summary>
         /// <param name="value">The text value to send.</param>
-        /// <param name="languageCode">The ISO/IANA language code for the language of <paramref name="value"/>.</param>
+        /// <param name="languageCode">The ISO/IANA language code for the language of <paramref name="value" />.</param>
         /// <param name="encodeAsUtf16">
-        /// Indicates whether UTF16 Big Endian encoding is preferred. Default is <see langword="false" />,
-        /// denoting a UTF8 encoding.
+        ///     Indicates whether UTF16 Big Endian encoding is preferred. Default is <see langword="false" />,
+        ///     denoting a UTF8 encoding.
         /// </param>
         /// <returns>
-        /// An opaque configuration buffer that can be written to the YubiKey using the
-        /// <see cref="Commands.ConfigureNdefCommand"/> command class.
+        ///     An opaque configuration buffer that can be written to the YubiKey using the
+        ///     <see cref="Commands.ConfigureNdefCommand" /> command class.
         /// </returns>
         public static byte[] CreateTextConfig(string value, string languageCode, bool encodeAsUtf16 = false)
         {
@@ -111,7 +110,9 @@ namespace Yubico.YubiKey.Otp
                 throw new ArgumentNullException(nameof(languageCode));
             }
 
-            Encoding encoding = encodeAsUtf16 ? Encoding.BigEndianUnicode : Encoding.UTF8;
+            Encoding encoding = encodeAsUtf16
+                ? Encoding.BigEndianUnicode
+                : Encoding.UTF8;
 
             int languageLength = Encoding.ASCII.GetByteCount(languageCode);
             int valueLength = encoding.GetByteCount(value);
@@ -124,7 +125,9 @@ namespace Yubico.YubiKey.Otp
                     nameof(languageCode));
             }
 
-            byte status = (byte)((0x3F & languageLength) | (encodeAsUtf16 ? 0x80 : 0x00));
+            byte status = (byte)(0x3F & languageLength | (encodeAsUtf16
+                ? 0x80
+                : 0x00));
 
             if (totalLength > NdefDataSize)
             {
@@ -136,7 +139,7 @@ namespace Yubico.YubiKey.Otp
                         totalLength,
                         totalLength - languageLength,
                         languageLength),
-                        nameof(value));
+                    nameof(value));
             }
 
             byte[] buffer = CreateBuffer();
@@ -147,13 +150,14 @@ namespace Yubico.YubiKey.Otp
 
             int bytesWritten = Encoding.ASCII.GetBytes(
                 languageCode,
-                0,
+                charIndex: 0,
                 languageCode.Length,
                 buffer,
-                3);
+                byteIndex: 3);
+
             Debug.Assert(languageLength == bytesWritten);
 
-            bytesWritten = encoding.GetBytes(value, 0, value.Length, buffer, 3 + languageLength);
+            bytesWritten = encoding.GetBytes(value, charIndex: 0, value.Length, buffer, 3 + languageLength);
             Debug.Assert(valueLength == bytesWritten);
 
             return buffer;

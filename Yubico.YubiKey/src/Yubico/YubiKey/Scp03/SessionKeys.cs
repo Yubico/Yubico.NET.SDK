@@ -19,8 +19,8 @@ namespace Yubico.YubiKey.Scp03
 {
     internal class SessionKeys : IDisposable
     {
-        private readonly byte[] _sessionMacKey;
         private readonly byte[] _sessionEncryptionKey;
+        private readonly byte[] _sessionMacKey;
         private readonly byte[] _sessionRmacKey;
 
         private bool _disposed;
@@ -37,6 +37,12 @@ namespace Yubico.YubiKey.Scp03
             _disposed = false;
         }
 
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
         // Return a reference to the byte array containing the session Mac Key.
         public byte[] GetSessionMacKey() => _sessionMacKey;
 
@@ -45,12 +51,6 @@ namespace Yubico.YubiKey.Scp03
 
         // Return a reference to the byte array containing the session Rmac Key.
         public byte[] GetSessionRmacKey() => _sessionRmacKey;
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
 
         // Overwrite the memory of the keys
         protected virtual void Dispose(bool disposing)

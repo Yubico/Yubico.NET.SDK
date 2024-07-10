@@ -26,14 +26,14 @@ namespace Yubico.Core.Buffers
         [Fact]
         public void TestEncodeEmpty()
         {
-            string encoded = Base32.EncodeBytes(Array.Empty<byte>());
+            var encoded = Base32.EncodeBytes(Array.Empty<byte>());
             Assert.True(encoded == string.Empty);
         }
 
         [Fact]
         public void TestDecodeEmpty()
         {
-            byte[] decoded = Base32.DecodeText(string.Empty);
+            var decoded = Base32.DecodeText(string.Empty);
             Assert.True(decoded.Length == 0);
         }
 
@@ -46,8 +46,8 @@ namespace Yubico.Core.Buffers
         [InlineData("foobar", "MZXW6YTBOI======")]
         public void TestEncodeData(string source, string expected)
         {
-            byte[] data = source.Select(b => (byte)b).ToArray();
-            string encoded = Base32.EncodeBytes(data);
+            var data = source.Select(b => (byte)b).ToArray();
+            var encoded = Base32.EncodeBytes(data);
             Assert.Equal(expected, encoded);
         }
 
@@ -60,8 +60,8 @@ namespace Yubico.Core.Buffers
         [InlineData("foobar", "MZXW6YTBOI======")]
         public void TestDecodeString(string expectedString, string source)
         {
-            byte[] data = Base32.DecodeText(source);
-            byte[] expected = expectedString.Select(c => (byte)c).ToArray();
+            var data = Base32.DecodeText(source);
+            var expected = expectedString.Select(c => (byte)c).ToArray();
             Assert.Equal(expected, data);
         }
 
@@ -72,7 +72,7 @@ namespace Yubico.Core.Buffers
         [InlineData(new byte[] { 0x00, 0x45 }, "aBCz")]
         public void TestSuccessfulBoundries(byte[] expected, string encoded)
         {
-            byte[] decoded = Base32.DecodeText(encoded);
+            var decoded = Base32.DecodeText(encoded);
             Assert.Equal(expected, decoded);
         }
 

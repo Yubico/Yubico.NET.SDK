@@ -19,15 +19,21 @@ using System.Linq;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
-
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.SmartCard
 {
     internal class DesktopSmartCardDevice : SmartCardDevice
     {
-        private readonly string _readerName;
         private readonly Logger _log = Log.GetLogger();
+        private readonly string _readerName;
+
+        public DesktopSmartCardDevice(string readerName, AnswerToReset? atr) :
+            base(readerName, atr)
+        {
+            _readerName = readerName;
+            _log = Log.GetLogger();
+        }
 
         public static IReadOnlyList<ISmartCardDevice> GetList()
         {
@@ -46,7 +52,7 @@ namespace Yubico.Core.Devices.SmartCard
 
             try
             {
-                result = SCardListReaders(context, null, out string[] readerNames);
+                result = SCardListReaders(context, groups: null, out string[] readerNames);
 
                 if (result != ErrorCode.SCARD_E_NO_READERS_AVAILABLE)
                 {
@@ -75,7 +81,7 @@ namespace Yubico.Core.Devices.SmartCard
 
                 result = SCardGetStatusChange(
                     context,
-                    0,
+                    timeout: 0,
                     readerStates,
                     readerStates.Length);
 
@@ -107,13 +113,6 @@ namespace Yubico.Core.Devices.SmartCard
                 SdkPlatform.Linux => new DesktopSmartCardDevice(readerName, atr),
                 _ => throw new PlatformNotSupportedException()
             };
-
-        public DesktopSmartCardDevice(string readerName, AnswerToReset? atr) :
-            base(readerName, atr)
-        {
-            _readerName = readerName;
-            _log = Log.GetLogger();
-        }
 
         public override ISmartCardConnection Connect()
         {
@@ -196,8 +195,8 @@ namespace Yubico.Core.Devices.SmartCard
         public void LogDeviceAccessTime()
         {
             LastAccessed = DateTime.Now;
-            _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
+            _log.LogInformation(
+                "Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
         }
-
     }
 }

@@ -13,15 +13,17 @@
 // limitations under the License.
 
 using System;
+using Yubico.YubiKey.InterIndustry.Commands;
 
 namespace Yubico.YubiKey
 {
     public interface IYubiKeyConnection : IDisposable
     {
-        TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand) where TResponse : IYubiKeyResponse;
         /// <summary>
-        /// An object representing the response received from the YubiKey after selecting the application.  
+        ///     An object representing the response received from the YubiKey after selecting the application.
         /// </summary>
-        InterIndustry.Commands.ISelectApplicationData? SelectApplicationData { get; set; }
+        ISelectApplicationData? SelectApplicationData { get; set; }
+
+        TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand) where TResponse : IYubiKeyResponse;
     }
 }

@@ -25,12 +25,12 @@ namespace Yubico.PlatformInterop
         public PlatformApiException() :
             this(ExceptionMessages.UnknownPlatformApiError)
         {
-            Debug.Assert(false, "You should always call a more specific constructor for this exception type.");
+            Debug.Assert(
+                condition: false, "You should always call a more specific constructor for this exception type.");
         }
 
         public PlatformApiException(string message) : base(message)
         {
-
         }
 
         public PlatformApiException(string message, Exception innerException) : base(message, innerException)
@@ -44,7 +44,6 @@ namespace Yubico.PlatformInterop
         public PlatformApiException(string source, int errorCode, string message) :
             base($"Encountered a platform API exception. {source} = 0x{errorCode:X8}.\n\n{message}")
         {
-
         }
     }
 }

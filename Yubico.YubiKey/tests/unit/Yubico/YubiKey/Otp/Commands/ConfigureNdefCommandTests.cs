@@ -25,9 +25,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62]);
 
-            byte cla = command.CreateCommandApdu().Cla;
+            var cla = command.CreateCommandApdu().Cla;
 
-            Assert.Equal(0, cla);
+            Assert.Equal(expected: 0, cla);
         }
 
         [Fact]
@@ -35,9 +35,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62]);
 
-            byte ins = command.CreateCommandApdu().Ins;
+            var ins = command.CreateCommandApdu().Ins;
 
-            Assert.Equal(1, ins);
+            Assert.Equal(expected: 1, ins);
         }
 
         [Theory]
@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureNdefCommand(otpSlot, new byte[62]);
 
-            byte p1 = command.CreateCommandApdu().P1;
+            var p1 = command.CreateCommandApdu().P1;
 
             Assert.Equal(expectedSlotValue, p1);
         }
@@ -57,15 +57,18 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62]);
 
-            byte p2 = command.CreateCommandApdu().P2;
+            var p2 = command.CreateCommandApdu().P2;
 
-            Assert.Equal(0, p2);
+            Assert.Equal(expected: 0, p2);
         }
 
         [Fact]
         public void FullConstructor_ConfigurationIncorrectSize_ThrowsArgumentExcetion()
         {
-            static void Action() => _ = new ConfigureNdefCommand(Slot.LongPress, Array.Empty<byte>());
+            static void Action()
+            {
+                _ = new ConfigureNdefCommand(Slot.LongPress, Array.Empty<byte>());
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -73,7 +76,7 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void FullConstructor_WithoutAccessCode_WritesConfigurationAsIs()
         {
-            byte[] expectedConfig = new byte[62]
+            var expectedConfig = new byte[62]
             {
                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,
                 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
@@ -86,7 +89,7 @@ namespace Yubico.YubiKey.Otp.Commands
 
             var command = new ConfigureNdefCommand(Slot.LongPress, expectedConfig, Array.Empty<byte>());
 
-            ReadOnlyMemory<byte> actualConfig = command.CreateCommandApdu().Data;
+            var actualConfig = command.CreateCommandApdu().Data;
 
             Assert.True(actualConfig.Span.SequenceEqual(expectedConfig));
         }
@@ -94,13 +97,13 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void FullConstructor_WithAccessCode_WritesAccessCodeToBuffer()
         {
-            byte[] accessCode = new byte[6] { 1, 2, 3, 4, 5, 6 };
+            var accessCode = new byte[6] { 1, 2, 3, 4, 5, 6 };
             var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62], accessCode);
 
-            byte[] data = command.CreateCommandApdu().Data.ToArray();
+            var data = command.CreateCommandApdu().Data.ToArray();
 
             ReadOnlySpan<byte> expectedAccessCode = accessCode.AsSpan();
-            ReadOnlySpan<byte> actualAccessCode = data.AsSpan(56);
+            ReadOnlySpan<byte> actualAccessCode = data.AsSpan(start: 56);
 
             Assert.True(expectedAccessCode.SequenceEqual(actualAccessCode));
         }
@@ -108,7 +111,10 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void FullConstructor_IncorrectAccessCodeSize_ThrowsArgumentException()
         {
-            static void Action() => _ = new ConfigureNdefCommand(Slot.LongPress, new byte[62], new byte[1]);
+            static void Action()
+            {
+                _ = new ConfigureNdefCommand(Slot.LongPress, new byte[62], new byte[1]);
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -118,9 +124,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ConfigureNdefCommand(Slot.LongPress, new byte[62]);
 
-            int ne = command.CreateCommandApdu().Ne;
+            var ne = command.CreateCommandApdu().Ne;
 
-            Assert.Equal(0, ne);
+            Assert.Equal(expected: 0, ne);
         }
 
         [Fact]

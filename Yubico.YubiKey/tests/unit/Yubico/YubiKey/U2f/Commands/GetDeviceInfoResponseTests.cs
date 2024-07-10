@@ -40,7 +40,10 @@ namespace Yubico.YubiKey.U2f.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void action() => _ = new GetPagedDeviceInfoResponse(null);
+            static void action()
+            {
+                _ = new GetPagedDeviceInfoResponse(responseApdu: null);
+            }
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             _ = Assert.Throws<ArgumentNullException>(action);
@@ -49,8 +52,8 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var deviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
@@ -61,8 +64,8 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var deviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
@@ -73,8 +76,8 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_MalformedResponse_Throw()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var deviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
@@ -84,12 +87,15 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_ResponseApduFailed_ThrowsInvalidOperationException()
         {
-            byte sw1 = unchecked((byte)(SWConstants.ExecutionError >> 8));
-            byte sw2 = unchecked((byte)SWConstants.ExecutionError);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            byte sw1 = SWConstants.ExecutionError >> 8;
+            var sw2 = unchecked((byte)SWConstants.ExecutionError);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
             var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
 
-            void action() => _ = getDeviceInfoResponse.GetData();
+            void action()
+            {
+                _ = getDeviceInfoResponse.GetData();
+            }
 
             _ = Assert.Throws<InvalidOperationException>(action);
         }
@@ -129,7 +135,7 @@ namespace Yubico.YubiKey.U2f.Commands
             var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(getDeviceInfoResponse.GetData());
 
 
-            Assert.Equal(0x01020304, deviceInfo.SerialNumber);
+            Assert.Equal(expected: 0x01020304, deviceInfo.SerialNumber);
         }
 
         [Fact]
@@ -160,7 +166,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_FormFactorTagPresent_SetsPropertyCorrectly()
         {
-            FormFactor expectedFormFactor = FormFactor.UsbCLightning;
+            var expectedFormFactor = FormFactor.UsbCLightning;
             var responseApdu = new ResponseApdu(new byte[]
                 { 0x03, FormFactorTag, 0x01, (byte)expectedFormFactor, 0x90, 0x00 });
             var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
@@ -174,7 +180,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_FirmwareVersionTagPresent_SetsPropertyCorrectly()
         {
-            var expectedVersion = new FirmwareVersion() { Major = 0x01, Minor = 0x02, Patch = 0x03 };
+            var expectedVersion = new FirmwareVersion { Major = 0x01, Minor = 0x02, Patch = 0x03 };
             var responseApdu = new ResponseApdu(new byte[]
             {
                 0x05, FirmwareVersionTag, 0x03, expectedVersion.Major, expectedVersion.Minor, expectedVersion.Patch,
@@ -218,7 +224,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_DeviceFlagsTagPresent_SetsPropertyCorrectly()
         {
-            DeviceFlags deviceFlags = DeviceFlags.RemoteWakeup | DeviceFlags.TouchEject;
+            var deviceFlags = DeviceFlags.RemoteWakeup | DeviceFlags.TouchEject;
             var responseApdu =
                 new ResponseApdu(new byte[] { 0x03, DeviceFlagsTag, 0x01, (byte)deviceFlags, 0x90, 0x00 });
             var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);
@@ -232,7 +238,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_ConfigurationLockPresentTagPresent_SetsPropertyCorrectly()
         {
-            bool expectedValue = true;
+            var expectedValue = true;
             var responseApdu =
                 new ResponseApdu(new byte[] { 0x03, ConfigurationLockPresentTag, 0x01, 0x01, 0x90, 0x00 });
             var getDeviceInfoResponse = new GetPagedDeviceInfoResponse(responseApdu);

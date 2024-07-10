@@ -16,7 +16,7 @@ using System;
 
 namespace Yubico.PlatformInterop
 {
-    interface IHidDDevice : IDisposable
+    internal interface IHidDDevice : IDisposable
     {
         string DevicePath { get; }
         short Usage { get; }

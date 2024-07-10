@@ -12,20 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Buffers;
 
 namespace Yubico.YubiKey.TestApp.Converters
 {
     /// <summary>
-    /// Supports parameter parsing base-32 strings for the sandbox app.
+    ///     Supports parameter parsing base-32 strings for the sandbox app.
     /// </summary>
     public class Base16Bytes : BytesBase
     {
-        public static Base16Bytes Bytes(byte[] d) => new Base16Bytes { Value = d };
+        public static Base16Bytes Bytes(byte[] d)
+        {
+            return new Base16Bytes { Value = d };
+        }
 
-        public static Base16Bytes Encode(string s) => new Base16Bytes { Value = Hex.HexToBytes(s) };
+        public static Base16Bytes Encode(string s)
+        {
+            return new Base16Bytes { Value = Hex.HexToBytes(s) };
+        }
 
-        public override string ToString() => Base32.EncodeBytes(Value);
+        public override string ToString()
+        {
+            return Base32.EncodeBytes(Value);
+        }
     }
 }

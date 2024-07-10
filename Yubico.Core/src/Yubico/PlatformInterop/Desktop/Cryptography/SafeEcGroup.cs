@@ -19,16 +19,17 @@ namespace Yubico.PlatformInterop
 {
     public class SafeEcGroup : SafeHandle
     {
-        public SafeEcGroup() : base(IntPtr.Zero, true)
+        public SafeEcGroup() : base(IntPtr.Zero, ownsHandle: true)
         {
-
         }
 
         /// <inheritdoc />
         public SafeEcGroup(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
         {
-
         }
+
+        /// <inheritdoc />
+        public override bool IsInvalid => handle == IntPtr.Zero;
 
         /// <inheritdoc />
         protected override bool ReleaseHandle()
@@ -40,8 +41,5 @@ namespace Yubico.PlatformInterop
 
             return true;
         }
-
-        /// <inheritdoc />
-        public override bool IsInvalid => handle == IntPtr.Zero;
     }
 }

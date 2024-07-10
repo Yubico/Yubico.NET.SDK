@@ -21,11 +21,12 @@ namespace Yubico.YubiKey.Oath
     [Trait("Category", "Simple")]
     public sealed class OathSessionPasswordTests
     {
-        [Theory, TestPriority(0)]
+        [Theory]
+        [TestPriority(priority: 0)]
         [InlineData(StandardTestDevice.Fw5)]
         public void SetPassword(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -38,27 +39,29 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(1)]
+        [Theory]
+        [TestPriority(priority: 1)]
         [InlineData(StandardTestDevice.Fw5)]
         public void VerifyCorrectPassword(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-                bool isVerified = oathSession.TryVerifyPassword();
+                var isVerified = oathSession.TryVerifyPassword();
                 Assert.True(isVerified);
             }
         }
 
-        [Theory, TestPriority(2)]
+        [Theory]
+        [TestPriority(priority: 2)]
         [InlineData(StandardTestDevice.Fw5)]
         public void VerifyWrongPassword(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -67,16 +70,17 @@ namespace Yubico.YubiKey.Oath
 
                 collectorObj.KeyFlag = 1;
 
-                bool isVerified = oathSession.TryVerifyPassword();
+                var isVerified = oathSession.TryVerifyPassword();
                 Assert.False(isVerified);
             }
         }
 
-        [Theory, TestPriority(3)]
+        [Theory]
+        [TestPriority(priority: 3)]
         [InlineData(StandardTestDevice.Fw5)]
         public void ChangePassword(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -90,11 +94,12 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(4)]
+        [Theory]
+        [TestPriority(priority: 4)]
         [InlineData(StandardTestDevice.Fw5)]
         public void UnsetPassword(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {

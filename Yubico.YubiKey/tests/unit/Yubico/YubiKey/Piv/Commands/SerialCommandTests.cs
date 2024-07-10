@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -33,7 +32,7 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             var command = new GetSerialNumberCommand();
 
-            YubiKeyApplication application = command.Application;
+            var application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
@@ -41,49 +40,49 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
-            CommandApdu cmdApdu = GetSerialCommandApdu();
+            var cmdApdu = GetSerialCommandApdu();
 
-            byte Cla = cmdApdu.Cla;
+            var Cla = cmdApdu.Cla;
 
-            Assert.Equal(0, Cla);
+            Assert.Equal(expected: 0, Cla);
         }
 
         [Fact]
         public void CreateCommandApdu_GetInsProperty_ReturnsHexF8()
         {
-            CommandApdu cmdApdu = GetSerialCommandApdu();
+            var cmdApdu = GetSerialCommandApdu();
 
-            byte Ins = cmdApdu.Ins;
+            var Ins = cmdApdu.Ins;
 
-            Assert.Equal(0xF8, Ins);
+            Assert.Equal(expected: 0xF8, Ins);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP1Property_ReturnsZero()
         {
-            CommandApdu cmdApdu = GetSerialCommandApdu();
+            var cmdApdu = GetSerialCommandApdu();
 
-            byte P1 = cmdApdu.P1;
+            var P1 = cmdApdu.P1;
 
-            Assert.Equal(0, P1);
+            Assert.Equal(expected: 0, P1);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP2Property_ReturnsZero()
         {
-            CommandApdu cmdApdu = GetSerialCommandApdu();
+            var cmdApdu = GetSerialCommandApdu();
 
-            byte P2 = cmdApdu.P2;
+            var P2 = cmdApdu.P2;
 
-            Assert.Equal(0, P2);
+            Assert.Equal(expected: 0, P2);
         }
 
         [Fact]
         public void CreateCommandApdu_GetData_ReturnsEmpty()
         {
-            CommandApdu cmdApdu = GetSerialCommandApdu();
+            var cmdApdu = GetSerialCommandApdu();
 
-            ReadOnlyMemory<byte> data = cmdApdu.Data;
+            var data = cmdApdu.Data;
 
             Assert.True(data.IsEmpty);
         }
@@ -91,21 +90,21 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void CreateCommandApdu_GetNc_ReturnsZero()
         {
-            CommandApdu cmdApdu = GetSerialCommandApdu();
+            var cmdApdu = GetSerialCommandApdu();
 
-            int Nc = cmdApdu.Nc;
+            var Nc = cmdApdu.Nc;
 
-            Assert.Equal(0, Nc);
+            Assert.Equal(expected: 0, Nc);
         }
 
         [Fact]
         public void CreateCommandApdu_GetNe_ReturnsZero()
         {
-            CommandApdu cmdApdu = GetSerialCommandApdu();
+            var cmdApdu = GetSerialCommandApdu();
 
-            int Ne = cmdApdu.Ne;
+            var Ne = cmdApdu.Ne;
 
-            Assert.Equal(0, Ne);
+            Assert.Equal(expected: 0, Ne);
         }
 
         [Fact]
@@ -116,7 +115,7 @@ namespace Yubico.YubiKey.Piv.Commands
             var serialCommand = new GetSerialNumberCommand();
 
             // Act
-            GetSerialNumberResponse serialResponse = serialCommand.CreateResponseForApdu(responseApdu);
+            var serialResponse = serialCommand.CreateResponseForApdu(responseApdu);
 
             // Assert
             Assert.True(serialResponse is GetSerialNumberResponse);

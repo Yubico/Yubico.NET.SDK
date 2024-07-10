@@ -23,46 +23,49 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Constructor_Succeeds()
         {
-            byte[] clientDataHash = new byte[] {
+            byte[] clientDataHash =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
             };
-            byte[] credId = new byte[] {
+            byte[] credId =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
             };
-            byte[] pinUvAuth = new byte[] {
+            byte[] pinUvAuth =
+            {
                 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70,
                 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6A, 0x6B, 0x6C, 0x6D, 0x6E, 0x6F, 0x70
             };
 
-            PinUvAuthProtocol protocol = PinUvAuthProtocol.ProtocolTwo;
+            var protocol = PinUvAuthProtocol.ProtocolTwo;
             var authData = new ReadOnlyMemory<byte>(pinUvAuth);
             if (protocol == PinUvAuthProtocol.ProtocolOne)
             {
-                authData = authData.Slice(0, 16);
+                authData = authData.Slice(start: 0, length: 16);
             }
 
             var rp = new RelyingParty("SomeRpId")
             {
-                Name = "SomeRpName",
+                Name = "SomeRpName"
             };
-            var credentialId = new CredentialId()
+            var credentialId = new CredentialId
             {
-                Id = credId,
+                Id = credId
             };
 
             var assertionParams = new GetAssertionParameters(rp, clientDataHash)
             {
                 Protocol = protocol,
-                PinUvAuthParam = authData,
+                PinUvAuthParam = authData
             };
             assertionParams.AllowCredential(credentialId);
             assertionParams.AddExtension("fakeExtension", new byte[] { 0x04 });
-            assertionParams.AddOption("up", true);
+            assertionParams.AddOption("up", optionValue: true);
 
-            byte[] encodedParams = assertionParams.CborEncode();
-            Assert.Equal(0xA7, encodedParams[0]);
+            var encodedParams = assertionParams.CborEncode();
+            Assert.Equal(expected: 0xA7, encodedParams[0]);
         }
     }
 }

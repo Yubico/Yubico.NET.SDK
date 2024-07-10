@@ -28,7 +28,7 @@ using Log = Yubico.Core.Logging.Log;
 
 namespace Yubico.YubiKey
 {
-    class ThreadIdEnricher : ILogEventEnricher
+    internal class ThreadIdEnricher : ILogEventEnricher
     {
         public void Enrich(LogEvent logEvent, ILogEventPropertyFactory propertyFactory)
         {
@@ -43,12 +43,13 @@ namespace Yubico.YubiKey
         public void SwitchingBetweenTransports_ForcesThreeSecondWait()
         {
             // Force the old behavior even for newer YubiKeys.
-            AppContext.SetSwitch(YubiKeyCompatSwitches.UseOldReclaimTimeoutBehavior, true);
+            AppContext.SetSwitch(YubiKeyCompatSwitches.UseOldReclaimTimeoutBehavior, isEnabled: true);
 
-            using Logger? log = new LoggerConfiguration()
+            using var log = new LoggerConfiguration()
                 .Enrich.With(new ThreadIdEnricher())
                 .WriteTo.Console(
-                    outputTemplate: "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
+                    outputTemplate:
+                    "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
                 .CreateLogger();
 
             Log.LoggerFactory = LoggerFactory.Create(
@@ -57,13 +58,13 @@ namespace Yubico.YubiKey
                     .AddFilter(level => level >= LogLevel.Information));
 
             // TEST ASSUMPTION: This test requires FIDO. On Windows, that means this test case must run elevated (admin).
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5);
 
             // Ensure all interfaces are active
             if (testDevice.EnabledUsbCapabilities != YubiKeyCapabilities.All)
             {
                 testDevice.SetEnabledUsbCapabilities(YubiKeyCapabilities.All);
-                Thread.Sleep(TimeSpan.FromSeconds(2)); // Give the YubiKey time to reboot and be rediscovered.
+                Thread.Sleep(TimeSpan.FromSeconds(value: 2)); // Give the YubiKey time to reboot and be rediscovered.
                 testDevice = TestDeviceSelection.RenewDeviceEnumeration(testDevice.SerialNumber!.Value);
             }
 
@@ -73,6 +74,7 @@ namespace Yubico.YubiKey
             {
                 // Running the OtpSession constructor calls the OTP interface
             }
+
             sw1.Stop();
 
             var sw2 = Stopwatch.StartNew();
@@ -80,6 +82,7 @@ namespace Yubico.YubiKey
             {
                 // Running the PivSession constructor calls the SmartCard interface
             }
+
             sw2.Stop();
 
             var sw3 = Stopwatch.StartNew();
@@ -87,6 +90,7 @@ namespace Yubico.YubiKey
             {
                 // Running the Fido2Session constructor calls the FIDO interface
             }
+
             sw3.Stop();
 
             const long expectedLapse = 3000;

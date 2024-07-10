@@ -15,7 +15,7 @@
 namespace Yubico.Core.Devices.Hid
 {
     /// <summary>
-    /// Represents a HID device.
+    ///     Represents a HID device.
     /// </summary>
     public interface IHidDevice : IDevice
     {
@@ -25,9 +25,10 @@ namespace Yubico.Core.Devices.Hid
         HidUsagePage UsagePage { get; }
 
         /// <summary>
-        /// Establishes an active connection to the HID device for the transmittal of data through feature reports.
+        ///     Establishes an active connection to the HID device for the transmittal of data through feature reports.
         /// </summary>
         IHidConnection ConnectToFeatureReports();
+
         IHidConnection ConnectToIOReports();
     }
 }

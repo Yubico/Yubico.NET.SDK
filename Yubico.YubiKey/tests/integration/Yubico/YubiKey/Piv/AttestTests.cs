@@ -28,9 +28,9 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Attest_EmptySlot_ThrowsException(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            bool isValid = LoadAttestationPair(PivAlgorithm.EccP256, true, testDevice);
+            var isValid = LoadAttestationPair(PivAlgorithm.EccP256, isValidCert: true, testDevice);
             Assert.True(isValid);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
@@ -40,7 +40,8 @@ namespace Yubico.YubiKey.Piv
                 isValid = PivSupport.ResetPiv(pivSession);
                 Assert.True(isValid);
 
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.CreateAttestationStatement(PivSlot.Authentication));
+                _ = Assert.Throws<InvalidOperationException>(() =>
+                    pivSession.CreateAttestationStatement(PivSlot.Authentication));
             }
         }
 
@@ -48,9 +49,9 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Attest_Imported_ThrowsException(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            bool isValid = LoadAttestationPair(PivAlgorithm.EccP384, true, testDevice);
+            var isValid = LoadAttestationPair(PivAlgorithm.EccP384, isValidCert: true, testDevice);
             Assert.True(isValid);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
@@ -68,7 +69,8 @@ namespace Yubico.YubiKey.Piv
                 isValid = PivSupport.ImportKey(pivSession, PivSlot.Authentication);
                 Assert.True(isValid);
 
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.CreateAttestationStatement(PivSlot.Authentication));
+                _ = Assert.Throws<InvalidOperationException>(() =>
+                    pivSession.CreateAttestationStatement(PivSlot.Authentication));
             }
         }
 
@@ -80,15 +82,16 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384, StandardTestDevice.Fw5)]
         public void AttestGenerated(PivAlgorithm algorithm, StandardTestDevice testDeviceType)
         {
-            byte[] slotNumbers = {
+            byte[] slotNumbers =
+            {
                 0x9A, 0x9C, 0x9D, 0x9E,
                 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F,
                 0x90, 0x91, 0x92, 0x93, 0x94, 0x95
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            bool isValid = LoadAttestationPair(algorithm, true, testDevice);
+            var isValid = LoadAttestationPair(algorithm, isValidCert: true, testDevice);
             Assert.True(isValid);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
@@ -103,7 +106,7 @@ namespace Yubico.YubiKey.Piv
                 isValid = PivSupport.ResetPiv(pivSession);
                 Assert.True(isValid);
 
-                for (int index = 0; index < slotNumbers.Length; index++)
+                for (var index = 0; index < slotNumbers.Length; index++)
                 {
                     _ = pivSession.GenerateKeyPair(
                         slotNumbers[index], PivAlgorithm.EccP256, PivPinPolicy.Never, PivTouchPolicy.Never);
@@ -113,7 +116,7 @@ namespace Yubico.YubiKey.Piv
                     try
                     {
                         cert = pivSession.CreateAttestationStatement(slotNumbers[index]);
-                        Assert.NotEqual(1, cert.Version);
+                        Assert.NotEqual(expected: 1, cert.Version);
                     }
                     finally
                     {
@@ -131,18 +134,18 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384, StandardTestDevice.Fw5)]
         public void LoadInvalidCert_Attest_ThrowsException(PivAlgorithm algorithm, StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            _ = Assert.Throws<ArgumentException>(() => LoadAttestationPair(algorithm, false, testDevice));
+            _ = Assert.Throws<ArgumentException>(() => LoadAttestationPair(algorithm, isValidCert: false, testDevice));
         }
 
         [Theory]
         [InlineData(StandardTestDevice.Fw5)]
         public void GetAttestationCert_ReturnsCert(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            bool isValid = LoadAttestationPair(PivAlgorithm.EccP384, true, testDevice);
+            var isValid = LoadAttestationPair(PivAlgorithm.EccP384, isValidCert: true, testDevice);
             Assert.True(isValid);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
@@ -174,18 +177,18 @@ namespace Yubico.YubiKey.Piv
         [InlineData(BadAttestationPairs.KeyRsa2048CertBigName, StandardTestDevice.Fw5)]
         public void UseBadAttestPair_CreateStatement_ThrowsInvalidOp(int whichPair, StandardTestDevice testDeviceType)
         {
-            BadAttestationPairs.GetPair(whichPair, out string privateKeyPem, out string certPem);
+            BadAttestationPairs.GetPair(whichPair, out var privateKeyPem, out var certPem);
 
             var priKey = new KeyConverter(privateKeyPem.ToCharArray());
 
-            char[] certChars = certPem.ToCharArray();
-            byte[] certDer = Convert.FromBase64CharArray(certChars, 27, certChars.Length - 52);
+            var certChars = certPem.ToCharArray();
+            var certDer = Convert.FromBase64CharArray(certChars, offset: 27, certChars.Length - 52);
             var certObj = new X509Certificate2(certDer);
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            PivPrivateKey pivPrivateKey = priKey.GetPivPrivateKey();
-            bool isValid = LoadAttestationPairCommands(pivPrivateKey, certObj, testDevice);
+            var pivPrivateKey = priKey.GetPivPrivateKey();
+            var isValid = LoadAttestationPairCommands(pivPrivateKey, certObj, testDevice);
             Assert.True(isValid);
 
             isValid = AttestationShouldFail(BadAttestationPairs.KeyRsa1024CertValid, testDevice);
@@ -238,7 +241,8 @@ namespace Yubico.YubiKey.Piv
 
         // Load a key and cert, but use the commands, so that the checks aren't
         // made and whatever key/cert pair is given is actually loaded.
-        private static bool LoadAttestationPairCommands(PivPrivateKey privateKey, X509Certificate certObj, IYubiKeyDevice testDevice)
+        private static bool LoadAttestationPairCommands(
+            PivPrivateKey privateKey, X509Certificate certObj, IYubiKeyDevice testDevice)
         {
             if (testDevice is null)
             {
@@ -250,20 +254,21 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.ImportPrivateKey(0xF9, privateKey);
+                pivSession.ImportPrivateKey(slotNumber: 0xF9, privateKey);
 
-                byte[] certDer = certObj.GetRawCertData();
+                var certDer = certObj.GetRawCertData();
                 var tlvWriter = new TlvWriter();
-                using (tlvWriter.WriteNestedTlv(0x53))
+                using (tlvWriter.WriteNestedTlv(tag: 0x53))
                 {
-                    tlvWriter.WriteValue(0x70, certDer);
-                    tlvWriter.WriteByte(0x71, 0);
-                    tlvWriter.WriteValue(0xfe, null);
+                    tlvWriter.WriteValue(tag: 0x70, certDer);
+                    tlvWriter.WriteByte(tag: 0x71, value: 0);
+                    tlvWriter.WriteValue(tag: 0xfe, value: null);
                 }
-                byte[] encodedCert = tlvWriter.Encode();
 
-                var putCommand = new PutDataCommand(0x5FFF01, encodedCert);
-                PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
+                var encodedCert = tlvWriter.Encode();
+
+                var putCommand = new PutDataCommand(dataTag: 0x5FFF01, encodedCert);
+                var putResponse = pivSession.Connection.SendCommand(putCommand);
                 return putResponse.Status == ResponseStatus.Success;
             }
         }
@@ -283,15 +288,16 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                if (SampleKeyPairs.GetKeysAndCertPem(algorithm, isValidCert, out string certPem, out _, out string privateKeyPem) == false)
+                if (SampleKeyPairs.GetKeysAndCertPem(algorithm, isValidCert, out var certPem, out _,
+                        out var privateKeyPem) == false)
                 {
                     return false;
                 }
 
                 var cert = new CertConverter(certPem.ToCharArray());
-                X509Certificate2 certObj = cert.GetCertObject();
+                var certObj = cert.GetCertObject();
                 var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
-                PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
+                var pivPrivateKey = privateKey.GetPivPrivateKey();
 
                 pivSession.ReplaceAttestationKeyAndCertificate(pivPrivateKey, certObj);
             }

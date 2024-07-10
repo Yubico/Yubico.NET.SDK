@@ -23,32 +23,32 @@ using Yubico.YubiKey.Fido2.Cbor;
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
-    /// A FIDO2 <c>RelyingParty</c>, consisting of ID and name. This is used when
-    /// the FIDO2 standard specifies a <c>PublicKeyCredentialRpEntity</c>.
+    ///     A FIDO2 <c>RelyingParty</c>, consisting of ID and name. This is used when
+    ///     the FIDO2 standard specifies a <c>PublicKeyCredentialRpEntity</c>.
     /// </summary>
     /// <remarks>
-    /// A relying party (RP) can specify its ID, but a client can also build an
-    /// RP ID based on the domain of the page its currently communicating with.
-    /// In addition, an authenticator or a platform can specify a
-    /// "human-readable" name of the RP to display to the user.
-    /// <para>
-    /// This class holds the RP ID and name, and can encode and decode them as
-    /// part of CBOR structures.
-    /// </para>
-    /// <para>
-    /// The FIDO2 standard specifies that when communicating with the
-    /// authenticator, the ID is a required element. The W3C standard says the ID
-    /// is optional. This seeming contradiction is because the RP is not required
-    /// to specify an ID. In that case, the client will build an ID from the
-    /// domain it is communicating with. Either way, an ID must be passed to the
-    /// authenticator. Hence, when building am instance of RelyingParty, an ID is
-    /// required.
-    /// </para>
-    /// <para>
-    /// The W3C standard declares the name a required element, and the FIDO2
-    /// standard declares it optional. Because the FIDO2 standard specifically
-    /// prescribes authenticator functionality, this class will allow a null name.
-    /// </para>
+    ///     A relying party (RP) can specify its ID, but a client can also build an
+    ///     RP ID based on the domain of the page its currently communicating with.
+    ///     In addition, an authenticator or a platform can specify a
+    ///     "human-readable" name of the RP to display to the user.
+    ///     <para>
+    ///         This class holds the RP ID and name, and can encode and decode them as
+    ///         part of CBOR structures.
+    ///     </para>
+    ///     <para>
+    ///         The FIDO2 standard specifies that when communicating with the
+    ///         authenticator, the ID is a required element. The W3C standard says the ID
+    ///         is optional. This seeming contradiction is because the RP is not required
+    ///         to specify an ID. In that case, the client will build an ID from the
+    ///         domain it is communicating with. Either way, an ID must be passed to the
+    ///         authenticator. Hence, when building am instance of RelyingParty, an ID is
+    ///         required.
+    ///     </para>
+    ///     <para>
+    ///         The W3C standard declares the name a required element, and the FIDO2
+    ///         standard declares it optional. Because the FIDO2 standard specifically
+    ///         prescribes authenticator functionality, this class will allow a null name.
+    ///     </para>
     /// </remarks>
     public class RelyingParty : ICborEncode
     {
@@ -56,30 +56,10 @@ namespace Yubico.YubiKey.Fido2
         private const string TagName = "name";
 
         /// <summary>
-        /// The <c>id</c> component of the <c>RelyingParty</c>.
-        /// </summary>
-        public string Id { get; set; }
-
-        /// <summary>
-        /// The <c>name</c> component of the <c>RelyingParty</c>.
-        /// </summary>
-        public string? Name { get; set; }
-
-        /// <summary>
-        /// The SHA-256 digest of the <c>RelyingParty.Id</c>.
-        /// </summary>
-        /// <remarks>
-        /// When a <c>RelyingParty</c> object is created, the constructor will
-        /// build the <c>RelyingPartyIdHash</c>. It is the digest of the UTF8
-        /// byte array version of the string that is the <see cref="Id"/>.
-        /// </remarks>
-        public ReadOnlyMemory<byte> RelyingPartyIdHash { get; private set; }
-
-        /// <summary>
-        /// Constructs a new instance of <see cref="RelyingParty"/>.
+        ///     Constructs a new instance of <see cref="RelyingParty" />.
         /// </summary>
         /// <param name="id">
-        /// The relying party ID.
+        ///     The relying party ID.
         /// </param>
         public RelyingParty(string id)
         {
@@ -88,12 +68,12 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Constructs a new instance of <see cref="RelyingParty"/> based on the
-        /// encoded value.
+        ///     Constructs a new instance of <see cref="RelyingParty" /> based on the
+        ///     encoded value.
         /// </summary>
         /// <remarks>
-        /// This constructor expects the encoding to follow this template.
-        /// <code>
+        ///     This constructor expects the encoding to follow this template.
+        ///     <code>
         ///    map {
         ///      "id"          --text string--
         ///      "name"        --text string-- (optional)
@@ -101,10 +81,10 @@ namespace Yubico.YubiKey.Fido2
         /// </code>
         /// </remarks>
         /// <param name="encodedRelyingParty">
-        /// The CBOR-encoded relying party info.
+        ///     The CBOR-encoded relying party info.
         /// </param>
         /// <exception cref="Ctap2DataException">
-        /// The <c>encodedRelyingParty</c> is not a correct encoding.
+        ///     The <c>encodedRelyingParty</c> is not a correct encoding.
         /// </exception>
         public RelyingParty(ReadOnlyMemory<byte> encodedRelyingParty)
         {
@@ -146,7 +126,7 @@ namespace Yubico.YubiKey.Fido2
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.Ctap2CborUnexpectedValue),
-                        cborException);
+                    cborException);
             }
 
             if (Id is null)
@@ -159,34 +139,26 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Determine if the <c>candidateHash</c> the same as the computed
-        /// <see cref="RelyingPartyIdHash"/> of this object. This is likely used
-        /// when searching for a RelyingParty when all you have is the
-        /// RelyingPartyIdHash, or when given a RelyingParty and a
-        /// RelyingPartyIdHash (e.g. enumerating relying parties), and want to
-        /// verify that the given value is correct.
+        ///     The <c>id</c> component of the <c>RelyingParty</c>.
         /// </summary>
-        /// <param name="candidateHash">
-        /// The purported relying party Id hash
-        /// </param>
-        /// <returns>
-        /// A boolean, <c>true</c> if the candidate matches the hash inside the
-        /// object and <c>false</c> otherwise.
-        /// </returns>
-        public bool IsMatchingRelyingPartyId(ReadOnlyMemory<byte> candidateHash) =>
-            MemoryExtensions.SequenceEqual<byte>(candidateHash.Span, RelyingPartyIdHash.Span);
+        public string Id { get; set; }
 
-        // Perform the appropriate digest operation to generate the correct value.
-        private void ComputeRelyingPartyIdHash()
-        {
-            using SHA256 digester = CryptographyProviders.Sha256Creator();
-            digester.Initialize();
-            byte[] utf = Encoding.UTF8.GetBytes(Id);
-            byte[] digest = digester.ComputeHash(utf);
-            RelyingPartyIdHash = new ReadOnlyMemory<byte>(digest);
-        }
+        /// <summary>
+        ///     The <c>name</c> component of the <c>RelyingParty</c>.
+        /// </summary>
+        public string? Name { get; set; }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     The SHA-256 digest of the <c>RelyingParty.Id</c>.
+        /// </summary>
+        /// <remarks>
+        ///     When a <c>RelyingParty</c> object is created, the constructor will
+        ///     build the <c>RelyingPartyIdHash</c>. It is the digest of the UTF8
+        ///     byte array version of the string that is the <see cref="Id" />.
+        /// </remarks>
+        public ReadOnlyMemory<byte> RelyingPartyIdHash { get; private set; }
+
+        /// <inheritdoc />
         public byte[] CborEncode()
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
@@ -202,6 +174,34 @@ namespace Yubico.YubiKey.Fido2
 
             cbor.WriteEndMap();
             return cbor.Encode();
+        }
+
+        /// <summary>
+        ///     Determine if the <c>candidateHash</c> the same as the computed
+        ///     <see cref="RelyingPartyIdHash" /> of this object. This is likely used
+        ///     when searching for a RelyingParty when all you have is the
+        ///     RelyingPartyIdHash, or when given a RelyingParty and a
+        ///     RelyingPartyIdHash (e.g. enumerating relying parties), and want to
+        ///     verify that the given value is correct.
+        /// </summary>
+        /// <param name="candidateHash">
+        ///     The purported relying party Id hash
+        /// </param>
+        /// <returns>
+        ///     A boolean, <c>true</c> if the candidate matches the hash inside the
+        ///     object and <c>false</c> otherwise.
+        /// </returns>
+        public bool IsMatchingRelyingPartyId(ReadOnlyMemory<byte> candidateHash) =>
+            candidateHash.Span.SequenceEqual(RelyingPartyIdHash.Span);
+
+        // Perform the appropriate digest operation to generate the correct value.
+        private void ComputeRelyingPartyIdHash()
+        {
+            using SHA256 digester = CryptographyProviders.Sha256Creator();
+            digester.Initialize();
+            byte[] utf = Encoding.UTF8.GetBytes(Id);
+            byte[] digest = digester.ComputeHash(utf);
+            RelyingPartyIdHash = new ReadOnlyMemory<byte>(digest);
         }
     }
 }

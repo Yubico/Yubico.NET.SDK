@@ -19,12 +19,23 @@ namespace Yubico.PlatformInterop
 {
     internal static partial class NativeMethods
     {
+        #region Delegates
+
+        internal delegate int CM_NOTIFY_CALLBACK(
+            IntPtr hNotify,
+            IntPtr Context,
+            CM_NOTIFY_ACTION Action,
+            IntPtr EventData,
+            int EventDataSize);
+
+        #endregion
+
         #region Enumerations and flags
 
         /// <summary>
-        /// Configuration Manager CONFIGRET return status codes
+        ///     Configuration Manager CONFIGRET return status codes
         /// </summary>
-        internal enum CmErrorCode : int
+        internal enum CmErrorCode
         {
             CR_SUCCESS = 0x00000000,
             CR_DEFAULT = 0x00000001,
@@ -77,11 +88,11 @@ namespace Yubico.PlatformInterop
             CR_NO_DEPENDENT = 0x0000002C,
             CR_SAME_RESOURCES = 0x0000002D,
             CR_NO_SUCH_REGISTRY_KEY = 0x0000002E,
-            CR_INVALID_MACHINENAME = 0x0000002F,   // NT ONLY
-            CR_REMOTE_COMM_FAILURE = 0x00000030,   // NT ONLY
-            CR_MACHINE_UNAVAILABLE = 0x00000031,   // NT ONLY
-            CR_NO_CM_SERVICES = 0x00000032,   // NT ONLY
-            CR_ACCESS_DENIED = 0x00000033,   // NT ONLY
+            CR_INVALID_MACHINENAME = 0x0000002F, // NT ONLY
+            CR_REMOTE_COMM_FAILURE = 0x00000030, // NT ONLY
+            CR_MACHINE_UNAVAILABLE = 0x00000031, // NT ONLY
+            CR_NO_CM_SERVICES = 0x00000032, // NT ONLY
+            CR_ACCESS_DENIED = 0x00000033, // NT ONLY
             CR_CALL_NOT_IMPLEMENTED = 0x00000034,
             CR_INVALID_PROPERTY = 0x00000035,
             CR_DEVICE_INTERFACE_ACTIVE = 0x00000036,
@@ -96,21 +107,21 @@ namespace Yubico.PlatformInterop
         // Flags for CM_Locate_DevNode
         //
         [Flags]
-        internal enum CM_LOCATE_DEVNODE : int
+        internal enum CM_LOCATE_DEVNODE
         {
             NORMAL = 0x0000_0000,
             PHANTOM = 0x0000_0001,
             CANCELREMOVE = 0x0000_0002,
-            NOVALIDATION = 0x0000_0004,
+            NOVALIDATION = 0x0000_0004
         }
 
         [Flags]
-        internal enum CM_LOCATE_DEVINST : int
+        internal enum CM_LOCATE_DEVINST
         {
             NORMAL = CM_LOCATE_DEVNODE.NORMAL,
             PHANTOM = CM_LOCATE_DEVNODE.PHANTOM,
             CANCELREMOVE = CM_LOCATE_DEVNODE.CANCELREMOVE,
-            NOVALIDATION = CM_LOCATE_DEVNODE.NOVALIDATION,
+            NOVALIDATION = CM_LOCATE_DEVNODE.NOVALIDATION
         }
 
         //
@@ -118,10 +129,10 @@ namespace Yubico.PlatformInterop
         //
 
         [Flags]
-        internal enum CM_NOTIFY_FILTER_FLAG : int
+        internal enum CM_NOTIFY_FILTER_FLAG
         {
             ALL_INTERFACE_CLASSES = 0x0000_0001,
-            ALL_DEVICE_INSTANCES = 0x0000_0002,
+            ALL_DEVICE_INSTANCES = 0x0000_0002
         }
 
         //
@@ -132,10 +143,10 @@ namespace Yubico.PlatformInterop
         {
             DEVINTERFACE = 0,
             DEVICEHANDLE = 1,
-            DEVICEINSTANCE = 2,
+            DEVICEINSTANCE = 2
         }
 
-        internal enum CM_NOTIFY_ACTION : int
+        internal enum CM_NOTIFY_ACTION
         {
             // Filter type: CM_NOTIFY_FILTER_TYPE.DEVICEINTERFACE
             DEVICEINTERFACEARRIVAL = 0,
@@ -151,14 +162,14 @@ namespace Yubico.PlatformInterop
             // Filter type: CM_NOTIFY_FILTER_TYPE.DEVICEINSTANCE
             DEVICEINSTANCEENUMERATED = 7,
             DEVICEINSTANCESTARTED = 8,
-            DEVICEINSTANCEREMOVED = 9,
+            DEVICEINSTANCEREMOVED = 9
         }
 
         // Flags for CM_Get_Device_Interface_List, CM_Get_Device_Interface_List_Size
-        internal enum CM_GET_DEVICE_LIST : int
+        internal enum CM_GET_DEVICE_LIST
         {
             PRESENT = 0x0000_0000, // Only currently 'live' device interfaces
-            ALL_DEVICES = 0x0000_0001, // All registered device interfaces, live or not
+            ALL_DEVICES = 0x0000_0001 // All registered device interfaces, live or not
         }
 
         #endregion
@@ -193,15 +204,11 @@ namespace Yubico.PlatformInterop
         {
             internal CM_NOTIFY_FILTER_TYPE FilterType;
             internal int Reserved;
+
             internal Guid ClassGuid;
+
             // String SymbolicLink
         }
-
-        #endregion
-
-        #region Delegates
-
-        internal delegate int CM_NOTIFY_CALLBACK(IntPtr hNotify, IntPtr Context, CM_NOTIFY_ACTION Action, IntPtr EventData, int EventDataSize);
 
         #endregion
 
@@ -217,14 +224,12 @@ namespace Yubico.PlatformInterop
         private static extern CmErrorCode CM_Get_Child(
             out int childInstance,
             int devInstance,
-            int mustBeZero
-            );
+            int mustBeZero);
 
         internal static CmErrorCode CM_Get_Child(
             out int childInstance,
-            int devInstance
-            ) =>
-            CM_Get_Child(out childInstance, devInstance, 0);
+            int devInstance) =>
+            CM_Get_Child(out childInstance, devInstance, mustBeZero: 0);
 
         [DllImport(Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Get_Device_IDW", ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
@@ -232,50 +237,51 @@ namespace Yubico.PlatformInterop
             int dnDevInst,
             char[] buffer,
             int bufferLen,
-            int mustBeZero
-            );
+            int mustBeZero);
 
         internal static CmErrorCode CM_Get_Device_Id(
             int dnDevInst,
             char[] buffer,
-            int bufferLen
-            ) => CM_Get_Device_Id(dnDevInst, buffer, bufferLen, 0);
+            int bufferLen) =>
+            CM_Get_Device_Id(dnDevInst, buffer, bufferLen, mustBeZero: 0);
 
-        [DllImport(Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Get_Device_ID_Size", ExactSpelling = true)]
+        [DllImport(
+            Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Get_Device_ID_Size", ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         private static extern CmErrorCode CM_Get_Device_Id_Size(
             out IntPtr pulLen,
             int dnDevInst,
-            int mustBeZero
-            );
+            int mustBeZero);
 
         internal static CmErrorCode CM_Get_Device_Id_Size(
             out IntPtr pulLen,
-            int dnDevInst
-            ) => CM_Get_Device_Id_Size(out pulLen, dnDevInst, 0);
+            int dnDevInst) =>
+            CM_Get_Device_Id_Size(out pulLen, dnDevInst, mustBeZero: 0);
 
-        [DllImport(Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Get_Device_Interface_ListW", ExactSpelling = true)]
+        [DllImport(
+            Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Get_Device_Interface_ListW",
+            ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern CmErrorCode CM_Get_Device_Interface_List(
-            [MarshalAs(UnmanagedType.LPStruct)]
-            Guid interfaceClassGuid,
+            [MarshalAs(UnmanagedType.LPStruct)] Guid interfaceClassGuid,
             string? deviceId,
             byte[] byteBuffer,
             int bufferLengthCch,
-            CM_GET_DEVICE_LIST flags
-            );
+            CM_GET_DEVICE_LIST flags);
 
-        [DllImport(Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Get_Device_Interface_List_SizeW", ExactSpelling = true)]
+        [DllImport(
+            Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Get_Device_Interface_List_SizeW",
+            ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern CmErrorCode CM_Get_Device_Interface_List_Size(
             out int bufferLengthCch,
-            [MarshalAs(UnmanagedType.LPStruct)]
-            Guid interfaceClassGuid,
+            [MarshalAs(UnmanagedType.LPStruct)] Guid interfaceClassGuid,
             string? deviceId,
-            CM_GET_DEVICE_LIST flags
-            );
+            CM_GET_DEVICE_LIST flags);
 
-        [DllImport(Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Get_Device_Interface_PropertyW", ExactSpelling = true)]
+        [DllImport(
+            Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Get_Device_Interface_PropertyW",
+            ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         private static extern CmErrorCode CM_Get_Device_Interface_Property(
             string deviceInterface,
@@ -283,18 +289,19 @@ namespace Yubico.PlatformInterop
             out DEVPROP_TYPE propertyType,
             byte[]? propertyBuffer,
             ref IntPtr propertyBufferSize,
-            int mustBeZero
-            );
+            int mustBeZero);
 
         internal static CmErrorCode CM_Get_Device_Interface_Property(
             string deviceInterface,
             in DEVPROPKEY propertyKey,
             out DEVPROP_TYPE propertyType,
             byte[]? propertyBuffer,
-            ref IntPtr propertyBufferSize
-            ) => CM_Get_Device_Interface_Property(deviceInterface, propertyKey, out propertyType, propertyBuffer, ref propertyBufferSize, 0);
+            ref IntPtr propertyBufferSize) =>
+            CM_Get_Device_Interface_Property(
+                deviceInterface, propertyKey, out propertyType, propertyBuffer, ref propertyBufferSize, mustBeZero: 0);
 
-        [DllImport(Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Get_DevNode_PropertyW", ExactSpelling = true)]
+        [DllImport(
+            Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Get_DevNode_PropertyW", ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         private static extern CmErrorCode CM_Get_DevNode_Property(
             int devInstance,
@@ -302,65 +309,63 @@ namespace Yubico.PlatformInterop
             out DEVPROP_TYPE propertyType,
             byte[]? propertyBuffer,
             ref IntPtr propertyBufferSize,
-            int mustBeZero
-            );
+            int mustBeZero);
 
         internal static CmErrorCode CM_Get_DevNode_Property(
             int devInstance,
             in DEVPROPKEY propertyKey,
             out DEVPROP_TYPE propertyType,
             byte[]? propertyBuffer,
-            ref IntPtr propertyBufferSize
-            ) => CM_Get_DevNode_Property(devInstance, in propertyKey, out propertyType, propertyBuffer, ref propertyBufferSize, 0);
+            ref IntPtr propertyBufferSize) =>
+            CM_Get_DevNode_Property(
+                devInstance, in propertyKey, out propertyType, propertyBuffer, ref propertyBufferSize, mustBeZero: 0);
 
         [DllImport(Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Get_Parent", ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         private static extern CmErrorCode CM_Get_Parent(
             out int pdnDevInst,
             int dnDevInst,
-            int mustBeZero
-            );
+            int mustBeZero);
 
         internal static CmErrorCode CM_Get_Parent(
             out int pdnDevInst,
-            int dnDevInst
-            ) => CM_Get_Parent(out pdnDevInst, dnDevInst, 0);
+            int dnDevInst) =>
+            CM_Get_Parent(out pdnDevInst, dnDevInst, mustBeZero: 0);
 
-        [DllImport(Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Locate_DevNodeW", ExactSpelling = true)]
+        [DllImport(
+            Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Locate_DevNodeW", ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern CmErrorCode CM_Locate_DevNode(
             out int devInstance,
             string deviceId,
-            CM_LOCATE_DEVNODE flags
-            );
+            CM_LOCATE_DEVNODE flags);
 
-        [DllImport(Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Register_Notification", ExactSpelling = true)]
+        [DllImport(
+            Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Register_Notification", ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern CmErrorCode CM_Register_Notification(
             IntPtr pFilter,
             IntPtr pContext,
             CM_NOTIFY_CALLBACK pCM_NOTIFY_CALLBACK,
-            out IntPtr pNotifyContext
-            );
+            out IntPtr pNotifyContext);
 
         [DllImport(Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Get_Sibling", ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         internal static extern CmErrorCode CM_Get_Sibling(
             out int siblingInstance,
             int devInstance,
-            int mustBeZero
-            );
+            int mustBeZero);
 
         internal static CmErrorCode CM_Get_Sibling(
             out int siblingInstance,
-            int devInstance
-            ) => CM_Get_Sibling(out siblingInstance, devInstance, 0);
+            int devInstance) =>
+            CM_Get_Sibling(out siblingInstance, devInstance, mustBeZero: 0);
 
-        [DllImport(Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Unregister_Notification", ExactSpelling = true)]
+        [DllImport(
+            Libraries.CfgMgr, CharSet = CharSet.Unicode, EntryPoint = "CM_Unregister_Notification",
+            ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        internal static extern CmErrorCode CM_Unregister_Notification(
-            IntPtr NotifyContext
-            );
+        internal static extern CmErrorCode CM_Unregister_Notification(IntPtr NotifyContext);
 
         #endregion
     }

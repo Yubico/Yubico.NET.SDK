@@ -25,17 +25,17 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKey.Cryptography
 {
     /// <summary>
-    /// Extension class to extend random number functionality.
+    ///     Extension class to extend random number functionality.
     /// </summary>
     public static class RandomNumberGeneratorExt
     {
         /// <summary>
-        /// Gets a random 32-bit signed int.
+        ///     Gets a random 32-bit signed int.
         /// </summary>
-        /// <param name="rng">The <see cref="RandomNumberGenerator"/> instance being extended.</param>
+        /// <param name="rng">The <see cref="RandomNumberGenerator" /> instance being extended.</param>
         /// <param name="fromInclusive">The lowest value of the range.</param>
         /// <param name="toExclusive">One above the highest value of the range.</param>
-        /// <returns>Random <see langword="Int32"/>.</returns>
+        /// <returns>Random <see langword="Int32" />.</returns>
         public static int GetInt32(
             this RandomNumberGenerator rng,
             int fromInclusive,
@@ -45,16 +45,19 @@ namespace Yubico.YubiKey.Cryptography
             {
                 throw new ArgumentNullException(nameof(rng));
             }
+
             if (fromInclusive >= toExclusive)
             {
-                throw new ArithmeticException(string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.ValueMustBeBetweenXandY,
-                    int.MinValue,
-                    (long)int.MaxValue + 1));
+                throw new ArithmeticException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.ValueMustBeBetweenXandY,
+                        int.MinValue,
+                        (long)int.MaxValue + 1));
             }
 
             uint range = (uint)toExclusive - (uint)fromInclusive - 1;
+
             // Mask away bits beyond our range.
             uint mask = range;
             mask |= mask >> 1;
@@ -67,30 +70,31 @@ namespace Yubico.YubiKey.Cryptography
             {
                 byte[] data = new byte[sizeof(int)];
                 rng.GetBytes(data);
-                result = mask & BitConverter.ToUInt32(data, 0);
+                result = mask & BitConverter.ToUInt32(data, startIndex: 0);
             }
+
             return (int)result + fromInclusive;
         }
 
         /// <summary>
-        /// Fill a range with random bytes.
+        ///     Fill a range with random bytes.
         /// </summary>
-        /// <param name="rng">The <see cref="RandomNumberGenerator"/> instance being extended.</param>
-        /// <param name="data">A <see cref="Span{T}"/> to fill with random bytes.</param>
+        /// <param name="rng">The <see cref="RandomNumberGenerator" /> instance being extended.</param>
+        /// <param name="data">A <see cref="Span{T}" /> to fill with random bytes.</param>
         public static void Fill(
             this RandomNumberGenerator rng,
             Span<byte> data)
         {
             for (int i = 0; i < data.Length; ++i)
             {
-                data[i] = rng.GetByte(0x00, 0x100);
+                data[i] = rng.GetByte(fromInclusive: 0x00, toExclusive: 0x100);
             }
         }
 
         /// <summary>
-        /// Get a <see langword="byte"/> with a random value.
+        ///     Get a <see langword="byte" /> with a random value.
         /// </summary>
-        /// <param name="rng">The <see cref="RandomNumberGenerator"/> instance being extended.</param>
+        /// <param name="rng">The <see cref="RandomNumberGenerator" /> instance being extended.</param>
         /// <param name="fromInclusive">The lowest value of the range.</param>
         /// <param name="toExclusive">One above the highest value of the range.</param>
         /// <returns></returns>
@@ -103,12 +107,14 @@ namespace Yubico.YubiKey.Cryptography
                 || toExclusive > 0x100
                 || fromInclusive >= toExclusive)
             {
-                throw new ArithmeticException(string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.ValueMustBeBetweenXandY,
-                    byte.MinValue,
-                    byte.MaxValue + 1));
+                throw new ArithmeticException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.ValueMustBeBetweenXandY,
+                        byte.MinValue,
+                        byte.MaxValue + 1));
             }
+
             return (byte)rng.GetInt32(fromInclusive, toExclusive);
         }
     }

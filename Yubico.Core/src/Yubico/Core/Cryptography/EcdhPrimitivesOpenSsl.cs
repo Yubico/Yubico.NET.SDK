@@ -20,7 +20,7 @@ using Yubico.PlatformInterop;
 namespace Yubico.Core.Cryptography
 {
     /// <summary>
-    /// An OpenSSL implementation of the IEcdh interface, exposing ECDH primitives to the SDK.
+    ///     An OpenSSL implementation of the IEcdh interface, exposing ECDH primitives to the SDK.
     /// </summary>
     internal class EcdhPrimitivesOpenSsl : IEcdhPrimitives
     {
@@ -149,34 +149,33 @@ namespace Yubico.Core.Cryptography
         }
 
         /// <summary>
-        /// Return the byte length of a buffer that can hold <c>bitLength</c>
-        /// bits.
+        ///     Return the byte length of a buffer that can hold <c>bitLength</c>
+        ///     bits.
         /// </summary>
         /// <param name="bitLength">
-        /// The length, in bits, of a canonical int for which the byte length is
-        /// requested.
+        ///     The length, in bits, of a canonical int for which the byte length is
+        ///     requested.
         /// </param>
         /// <returns>
-        /// An int, the number of bytes needed to hold a canonical int whose
-        /// length, in bits, is given by <c>bitLength</c>.
+        ///     An int, the number of bytes needed to hold a canonical int whose
+        ///     length, in bits, is given by <c>bitLength</c>.
         /// </returns>
         public static int GetByteLength(int bitLength) => (bitLength + 7) / 8;
 
         /// <summary>
-        /// Return a byte that will mask away unused bits in the most significant
-        /// byte of a canonical integer of length <c>bitLength</c>
+        ///     Return a byte that will mask away unused bits in the most significant
+        ///     byte of a canonical integer of length <c>bitLength</c>
         /// </summary>
         /// <param name="bitLength">
-        /// The length, in bits, of a canonical int for which the leading byte
-        /// mask is requested.
+        ///     The length, in bits, of a canonical int for which the leading byte
+        ///     mask is requested.
         /// </param>
         /// <returns>
-        /// A byte, the mask value, such as <c>0xFF</c> if the <c>bitLength</c>
-        /// is a multiple of 2 (don't mask any bits away) or <c>0x07</c> if the
-        /// <c>bitLength</c> is 35 (mask away the top 5 bits but retain the last
-        /// 3).
+        ///     A byte, the mask value, such as <c>0xFF</c> if the <c>bitLength</c>
+        ///     is a multiple of 2 (don't mask any bits away) or <c>0x07</c> if the
+        ///     <c>bitLength</c> is 35 (mask away the top 5 bits but retain the last
+        ///     3).
         /// </returns>
-        public static byte GetLeadingByteMask(int bitLength) =>
-            (byte)(0x00FF >> ((8 - (bitLength & 7)) & 7));
+        public static byte GetLeadingByteMask(int bitLength) => (byte)(0x00FF >> (8 - (bitLength & 7) & 7));
     }
 }

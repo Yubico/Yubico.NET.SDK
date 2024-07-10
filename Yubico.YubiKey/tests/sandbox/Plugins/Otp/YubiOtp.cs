@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
@@ -30,6 +31,12 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class YubiOtp : OtpPluginBase
     {
+        public YubiOtp(IOutput output) : base(output)
+        {
+            // We're reusing ParameterUse.Generate, so we'll update the description.
+            Parameters["generate"].Description = "Generate a random key. Conflicts with key.";
+        }
+
         public override string Name => "YubiOTP";
 
         public override string Description => "Mimics the 'ykman yubiotp' command";
@@ -45,12 +52,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             | ParameterUse.Generate
             | ParameterUse.Upload
             | ParameterUse.Force;
-
-        public YubiOtp(IOutput output) : base(output)
-        {
-            // We're reusing ParameterUse.Generate, so we'll update the description.
-            Parameters["generate"].Description = "Generate a random key. Conflicts with key.";
-        }
 
         public override void HandleParameters()
         {
@@ -69,7 +70,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 {
                     exceptions.Add(
                         new InvalidOperationException("You must either specify a public ID or choose to " +
-                        "use the YubiKey serial number as the public ID, but not both."));
+                                                      "use the YubiKey serial number as the public ID, but not both."));
                 }
                 // Otherwise, we'll create the buffer to receive it.
                 else
@@ -83,14 +84,14 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 {
                     exceptions.Add(
                         new InvalidOperationException("You must either specify a public ID between" +
-                        "one and 16 bytes or specify that the device serial number should be used " +
-                        "as the public ID."));
+                                                      "one and 16 bytes or specify that the device serial number should be used " +
+                                                      "as the public ID."));
                 }
                 else if (_upload && _publicId[0] != 0xff)
                 {
                     exceptions.Add(
                         new InvalidOperationException("YubiCloud requires the public ID to begin " +
-                        "with \"vv\" (0xff), so that condition must be true to upload."));
+                                                      "with \"vv\" (0xff), so that condition must be true to upload."));
                 }
             }
 
@@ -102,7 +103,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 {
                     exceptions.Add(
                         new InvalidOperationException("You must either specify a private ID or choose " +
-                        "to have a private ID generated, but not both."));
+                                                      "to have a private ID generated, but not both."));
                 }
                 else
                 {
@@ -113,7 +114,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 exceptions.Add(
                     new InvalidOperationException("Must must specify either a private ID or choose " +
-                    "to have one generated."));
+                                                  "to have one generated."));
             }
 
             if (_generate)
@@ -122,7 +123,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 {
                     exceptions.Add(
                         new InvalidOperationException("You must either specify a key or choose to have a " +
-                        "key randomly generated, but not both."));
+                                                      "key randomly generated, but not both."));
                 }
                 else
                 {
@@ -133,7 +134,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 exceptions.Add(
                     new InvalidOperationException("You must either specify a key or choose to have a " +
-                    "key randomly generated."));
+                                                  "key randomly generated."));
             }
 
             try
@@ -148,7 +149,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             if (exceptions.Count > 0)
             {
                 throw exceptions.Count == 1
-                    ? exceptions[0]
+                    ? exceptions[index: 0]
                     : new AggregateException(
                         $"{exceptions.Count} errors encountered.",
                         exceptions);
@@ -174,9 +175,10 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Output.WriteLine("Aborted.", OutputLevel.Error);
                 return false;
             }
+
             try
             {
-                ConfigureYubicoOtp op = GetOperation(otp);
+                var op = GetOperation(otp);
 
                 // Declaring these outside the _upload block so that
                 // we can decide whether or not to use the result later.
@@ -207,7 +209,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
         private ConfigureYubicoOtp GetOperation(OtpSession otp)
         {
-            ConfigureYubicoOtp op = otp.ConfigureYubicoOtp(_slot)
+            var op = otp.ConfigureYubicoOtp(_slot)
                 .UseCurrentAccessCode((SlotAccessCode)_currentAccessCode)
                 .SetNewAccessCode((SlotAccessCode)_newAccessCode)
                 .AppendCarriageReturn(!_noEnter);
@@ -239,10 +241,10 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 {
                     // If it's quiet output, then it will all be on one line.
                     // Otherwise, each property we print gets its own line.
-                    string sep =
+                    var sep =
                         leadWithSeparator
-                        ? Output.OutputLevel >= OutputLevel.Normal ? Eol : " "
-                        : string.Empty;
+                            ? Output.OutputLevel >= OutputLevel.Normal ? Eol : " "
+                            : string.Empty;
                     if (Output.OutputLevel > OutputLevel.Normal
                         || (Output.OutputLevel == OutputLevel.Normal && generated))
                     {
@@ -254,16 +256,17 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                     }
                     else if (generated)
                     {
-                        Output.Write($"{sep}{name.Replace(" ", null)}[", OutputLevel.Quiet);
+                        Output.Write($"{sep}{name.Replace(" ", newValue: null)}[", OutputLevel.Quiet);
                         Output.WriteSensitive(value, OutputLevel.Quiet);
                         Output.Write("]", OutputLevel.Quiet);
                         return true;
                     }
+
                     return leadWithSeparator;
                 }
                 finally
                 {
-                    for (int i = 0; i < value.Length; ++i)
+                    for (var i = 0; i < value.Length; ++i)
                     {
                         value[i] = 'X';
                     }
@@ -272,7 +275,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             Span<char> encoded = new char[_publicId.Length * 2];
             ModHex.EncodeBytes(_publicId, encoded);
-            bool hasOutput = PropOut("Public ID", encoded, _serialAsPublicId, false);
+            var hasOutput = PropOut("Public ID", encoded, _serialAsPublicId, leadWithSeparator: false);
             encoded = new char[_privateId.Length * 2];
             Base16.EncodeBytes(_privateId, encoded);
             hasOutput = PropOut("Private ID", encoded, _generatePrivateId, hasOutput);
@@ -288,7 +291,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         private Uri UploadToYubiCloud()
         {
             // Here are all the things the Yubico OTP service wants.
-            string json = JsonSerializer.Serialize(new
+            var json = JsonSerializer.Serialize(new
             {
                 aes_key = Base16.EncodeBytes(_key),
                 serial = (_serialNumber ?? 0).ToString(),
@@ -314,19 +317,21 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             if (!response.IsSuccessStatusCode)
             {
-                if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                if (response.StatusCode == HttpStatusCode.BadRequest)
                 {
-                    string[] errors = yubiOtp.Errors ?? Array.Empty<string>();
+                    var errors = yubiOtp.Errors ?? Array.Empty<string>();
                     if (errors.Length == 0)
                     {
                         throw new InvalidOperationException(
                             "Upload to Yubico OTP server failed with BAD_REQUEST (no details from server).");
                     }
+
                     if (errors.Length == 1)
                     {
                         throw new InvalidOperationException(
                             $"Upload to Yubico OTP server failed with BAD_REQUEST ({GetYubiOtpErrors(errors).First()}).");
                     }
+
                     IEnumerable<Exception> exceptions = GetYubiOtpErrors(errors)
                         .Select(e => new InvalidOperationException(
                             $"Upload to Yubico OTP server failed with BAD_REQUEST ({e})"));
@@ -356,8 +361,9 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             return client.PostAsync("/prepare", content).Result;
         }
 
-        static IEnumerable<string> GetYubiOtpErrors(IEnumerable<string> errorCodes) =>
-            errorCodes.Select(e => e switch
+        private static IEnumerable<string> GetYubiOtpErrors(IEnumerable<string> errorCodes)
+        {
+            return errorCodes.Select(e => e switch
                 {
                     "PRIVATE_ID_INVALID_LENGTH" => "Private ID must be 12 characters long.",
                     "PRIVATE_ID_NOT_HEX" => "Private ID must consist only of hex characters (0-9A-F).",
@@ -375,6 +381,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                     _ => "Undefined error from server."
                 }
             );
+        }
 
         private static void OpenUrl(string url)
         {
@@ -395,12 +402,11 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
         private class YubiOtpResponse
         {
-            [JsonPropertyName("finish_url")]
-            public Uri? FinishUrl { get; set; }
-            [JsonPropertyName("request_id")]
-            public Guid? RequestId { get; set; }
-            [JsonPropertyName("errors")]
-            public string[]? Errors { get; set; }
+            [JsonPropertyName("finish_url")] public Uri? FinishUrl { get; set; }
+
+            [JsonPropertyName("request_id")] public Guid? RequestId { get; set; }
+
+            [JsonPropertyName("errors")] public string[]? Errors { get; set; }
         }
     }
 }

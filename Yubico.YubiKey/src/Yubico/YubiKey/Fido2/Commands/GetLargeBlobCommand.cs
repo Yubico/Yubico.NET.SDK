@@ -19,16 +19,16 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Gets the large blob out of the YubiKey.
+    ///     Gets the large blob out of the YubiKey.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="GetLargeBlobResponse"/>.
-    /// Specified in CTAP as "authenticatorLargeBlobs".
-    /// <para>
-    /// The standard specifies one command called
-    /// "<c>authenticatorLargeBlobs</c>". It takes input that specifies whether
-    /// to get or set. The SDK breaks this into two commands.
-    /// </para>
+    ///     The partner Response class is <see cref="GetLargeBlobResponse" />.
+    ///     Specified in CTAP as "authenticatorLargeBlobs".
+    ///     <para>
+    ///         The standard specifies one command called
+    ///         "<c>authenticatorLargeBlobs</c>". It takes input that specifies whether
+    ///         to get or set. The SDK breaks this into two commands.
+    ///     </para>
     /// </remarks>
     public sealed class GetLargeBlobCommand : IYubiKeyCommand<GetLargeBlobResponse>
     {
@@ -36,33 +36,33 @@ namespace Yubico.YubiKey.Fido2.Commands
         private const int CborMapCount = 2;
         private const int CborKeyGet = 1;
         private const int CborKeyOffset = 3;
-
-        private readonly int _offset;
         private readonly int _count;
 
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Fido2
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
+        private readonly int _offset;
 
         /// <summary>
-        /// Constructs an instance of the <see cref="GetLargeBlobCommand" /> class.
+        ///     Constructs an instance of the <see cref="GetLargeBlobCommand" /> class.
         /// </summary>
         /// <param name="offset">
-        /// The offset into the stored large blob where the returned data should
-        /// begin.
+        ///     The offset into the stored large blob where the returned data should
+        ///     begin.
         /// </param>
         /// <param name="count">
-        /// The number of bytes to return.
+        ///     The number of bytes to return.
         /// </param>
         public GetLargeBlobCommand(int offset, int count)
         {
             _offset = offset;
             _count = count;
         }
+
+        /// <summary>
+        ///     Gets the YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        ///     YubiKeyApplication.Fido2
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
@@ -78,9 +78,9 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             byte[] payload = new byte[encodedParams.Length + 1];
             payload[0] = CtapGetLargeBlobCmd;
-            Array.Copy(encodedParams, 0, payload, 1, encodedParams.Length);
+            Array.Copy(encodedParams, sourceIndex: 0, payload, destinationIndex: 1, encodedParams.Length);
 
-            return new CommandApdu()
+            return new CommandApdu
             {
                 Ins = CtapConstants.CtapHidCbor,
                 Data = payload

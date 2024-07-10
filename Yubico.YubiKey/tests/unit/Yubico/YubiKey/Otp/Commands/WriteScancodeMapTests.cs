@@ -32,10 +32,13 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void ScancodeMap_SetWithIncorrectLength_ThrowsArgumentException()
         {
-            byte[] scancodeMap = HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes("abc");
+            var scancodeMap = HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes("abc");
             var command = new WriteScancodeMap();
 
-            void Action() => command.ScancodeMap = scancodeMap;
+            void Action()
+            {
+                command.ScancodeMap = scancodeMap;
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -43,7 +46,7 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void ScancodeMap_SetFollowedByGet_ReturnsTheSetScancodeMap()
         {
-            byte[] scancodeMap = HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes(
+            var scancodeMap = HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes(
                 "123456789012345678901234567890123456789012345");
 
             var command = new WriteScancodeMap
@@ -77,7 +80,7 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void FullConstructor_GivenScancodeMap_SetsScanmodeMapProperty()
         {
-            byte[] scancodeMap = HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes(
+            var scancodeMap = HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes(
                 "123456789012345678901234567890123456789012345");
 
             var command = new WriteScancodeMap(scancodeMap);
@@ -90,9 +93,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new WriteScancodeMap();
 
-            byte cla = command.CreateCommandApdu().Cla;
+            var cla = command.CreateCommandApdu().Cla;
 
-            Assert.Equal(0, cla);
+            Assert.Equal(expected: 0, cla);
         }
 
         [Fact]
@@ -100,9 +103,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new WriteScancodeMap();
 
-            byte ins = command.CreateCommandApdu().Ins;
+            var ins = command.CreateCommandApdu().Ins;
 
-            Assert.Equal(1, ins);
+            Assert.Equal(expected: 1, ins);
         }
 
         [Fact]
@@ -110,9 +113,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new WriteScancodeMap();
 
-            byte p1 = command.CreateCommandApdu().P1;
+            var p1 = command.CreateCommandApdu().P1;
 
-            Assert.Equal(0x12, p1);
+            Assert.Equal(expected: 0x12, p1);
         }
 
         [Fact]
@@ -120,9 +123,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new WriteScancodeMap();
 
-            byte p2 = command.CreateCommandApdu().P2;
+            var p2 = command.CreateCommandApdu().P2;
 
-            Assert.Equal(0, p2);
+            Assert.Equal(expected: 0, p2);
         }
 
         [Fact]
@@ -130,9 +133,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new WriteScancodeMap();
 
-            int nc = command.CreateCommandApdu().Nc;
+            var nc = command.CreateCommandApdu().Nc;
 
-            Assert.Equal(45, nc);
+            Assert.Equal(expected: 45, nc);
         }
 
         [Fact]
@@ -140,9 +143,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new WriteScancodeMap();
 
-            int ne = command.CreateCommandApdu().Ne;
+            var ne = command.CreateCommandApdu().Ne;
 
-            Assert.Equal(0, ne);
+            Assert.Equal(expected: 0, ne);
         }
 
         [Fact]

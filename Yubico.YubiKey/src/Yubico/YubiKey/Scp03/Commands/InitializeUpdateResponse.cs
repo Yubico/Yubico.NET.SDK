@@ -21,16 +21,13 @@ namespace Yubico.YubiKey.Scp03.Commands
 {
     internal class InitializeUpdateResponse : Scp03Response
     {
-        public IReadOnlyCollection<byte> DiversificationData { get; protected set; }
-        public IReadOnlyCollection<byte> KeyInfo { get; protected set; }
-        public IReadOnlyCollection<byte> CardChallenge { get; protected set; }
-        public IReadOnlyCollection<byte> CardCryptogram { get; protected set; }
-
         /// <summary>
-        /// Constructs an InitializeUpdateResponse based on a ResponseApdu received from the YubiKey.
+        ///     Constructs an InitializeUpdateResponse based on a ResponseApdu received from the YubiKey.
         /// </summary>
-        /// <param name="responseApdu">The ResponseApdu that corresponds to the issuance of
-        /// this command.</param>
+        /// <param name="responseApdu">
+        ///     The ResponseApdu that corresponds to the issuance of
+        ///     this command.
+        /// </param>
         public InitializeUpdateResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
@@ -41,14 +38,20 @@ namespace Yubico.YubiKey.Scp03.Commands
 
             if (responseApdu.Data.Length != 29)
             {
-                throw new ArgumentException(ExceptionMessages.IncorrectInitializeUpdateResponseData, nameof(responseApdu));
+                throw new ArgumentException(
+                    ExceptionMessages.IncorrectInitializeUpdateResponseData, nameof(responseApdu));
             }
 
             ReadOnlySpan<byte> responseData = responseApdu.Data.Span;
-            DiversificationData = new ReadOnlyCollection<byte>(responseData[0..10].ToArray());
+            DiversificationData = new ReadOnlyCollection<byte>(responseData[..10].ToArray());
             KeyInfo = new ReadOnlyCollection<byte>(responseData[10..13].ToArray());
             CardChallenge = new ReadOnlyCollection<byte>(responseData[13..21].ToArray());
             CardCryptogram = new ReadOnlyCollection<byte>(responseData[21..29].ToArray());
         }
+
+        public IReadOnlyCollection<byte> DiversificationData { get; protected set; }
+        public IReadOnlyCollection<byte> KeyInfo { get; protected set; }
+        public IReadOnlyCollection<byte> CardChallenge { get; protected set; }
+        public IReadOnlyCollection<byte> CardCryptogram { get; protected set; }
     }
 }

@@ -24,16 +24,16 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new PutDataResponse(null));
+            _ = Assert.Throws<ArgumentNullException>(() => new PutDataResponse(responseApdu: null));
 #pragma warning restore CS8625
         }
 
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var response = new PutDataResponse(responseApdu);
 
@@ -43,9 +43,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var response = new PutDataResponse(responseApdu);
 
@@ -55,9 +55,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_ErrorResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
-            byte sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            byte sw1 = SWConstants.FunctionNotSupported >> 8;
+            var sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var response = new PutDataResponse(responseApdu);
 
@@ -67,9 +67,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_AuthFailed_SetsStatusCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.SecurityStatusNotSatisfied >> 8));
-            byte sw2 = unchecked((byte)SWConstants.SecurityStatusNotSatisfied);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            byte sw1 = SWConstants.SecurityStatusNotSatisfied >> 8;
+            var sw2 = unchecked((byte)SWConstants.SecurityStatusNotSatisfied);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var response = new PutDataResponse(responseApdu);
 

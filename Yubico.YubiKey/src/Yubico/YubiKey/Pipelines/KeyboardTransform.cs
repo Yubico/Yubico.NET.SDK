@@ -20,27 +20,20 @@ using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Otp;
+using Yubico.YubiKey.Otp.Commands;
 
 namespace Yubico.YubiKey.Pipelines
 {
     /// <summary>
-    /// Represents an ApduPipeline backed by a direct connection to the
-    /// YubiOTP application.
+    ///     Represents an ApduPipeline backed by a direct connection to the
+    ///     YubiOTP application.
     /// </summary>
     internal class KeyboardTransform : IApduTransform
     {
+        public const byte ConfigInstruction = 0x01;
         private readonly IHidConnection _hidConnection;
 
         private readonly Logger _log = Log.GetLogger();
-
-        /// <summary>
-        /// An event which is fired if the YubiKey indicates it is waiting for touch. Event handlers
-        /// must return as quickly as possible. If there are longer running tasks which are triggered
-        /// as a result of this event, they should be run on a separate thread.
-        /// </summary>
-        public event EventHandler<EventArgs>? TouchPending;
-
-        public const byte ConfigInstruction = 0x01;
 
         public KeyboardTransform(IHidConnection hidConnection)
         {
@@ -48,24 +41,23 @@ namespace Yubico.YubiKey.Pipelines
         }
 
         /// <summary>
-        /// Sets up the pipeline; should be called only once, before any `Invoke` calls.
+        ///     Sets up the pipeline; should be called only once, before any `Invoke` calls.
         /// </summary>
         public void Setup()
         {
-
         }
 
         /// <summary>
-        /// Passes the supplied command into the pipeline, and returns the final response.
+        ///     Passes the supplied command into the pipeline, and returns the final response.
         /// </summary>
         /// <remarks>
-        /// The HID Keyboard interface predates the CCID-style APDU interface. While most commands
-        /// have been built around sending a slot request, the original "status" command remains a
-        /// separate entity. Unfortunately that means there must be some information leakage about
-        /// the command definitions themselves in the implementation of this keyboard connection class.
+        ///     The HID Keyboard interface predates the CCID-style APDU interface. While most commands
+        ///     have been built around sending a slot request, the original "status" command remains a
+        ///     separate entity. Unfortunately that means there must be some information leakage about
+        ///     the command definitions themselves in the implementation of this keyboard connection class.
         /// </remarks>
         /// <exception cref="NotSupportedException">
-        /// A <see cref="CommandApdu"/> with an unexpected <see cref="CommandApdu.Ins"/> member was used.
+        ///     A <see cref="CommandApdu" /> with an unexpected <see cref="CommandApdu.Ins" /> member was used.
         /// </exception>
         public ResponseApdu Invoke(CommandApdu commandApdu, Type commandType, Type responseType)
         {
@@ -73,13 +65,15 @@ namespace Yubico.YubiKey.Pipelines
 
             switch (commandApdu.Ins)
             {
-                case Otp.OtpConstants.ReadStatusInstruction:
+                case OtpConstants.ReadStatusInstruction:
                     _log.LogInformation("Reading the OTP status.");
                     frameReader.AddStatusReport(new KeyboardReport(_hidConnection.GetReport()));
                     break;
-                case Otp.OtpConstants.RequestSlotInstruction:
-                    bool configInstruction = responseType.IsAssignableFrom(typeof(Otp.Commands.ReadStatusResponse));
-                    _log.LogInformation($"Handling an OTP slot request {commandApdu.P1}. Configuring = {configInstruction}");
+                case OtpConstants.RequestSlotInstruction:
+                    bool configInstruction = responseType.IsAssignableFrom(typeof(ReadStatusResponse));
+                    _log.LogInformation(
+                        $"Handling an OTP slot request {commandApdu.P1}. Configuring = {configInstruction}");
+
                     HandleSlotRequestInstruction(commandApdu, frameReader, configInstruction);
                     break;
                 default:
@@ -94,28 +88,37 @@ namespace Yubico.YubiKey.Pipelines
         }
 
         /// <summary>
-        /// Cleans up the pipeline; should be called only once, after all `Invoke` calls.
+        ///     Cleans up the pipeline; should be called only once, after all `Invoke` calls.
         /// </summary>
         public void Cleanup()
         {
-
         }
 
         /// <summary>
-        /// Sends a command request to the YubiKey. This is done by making a request to a certain "slot"
-        /// in the OTP application.
+        ///     An event which is fired if the YubiKey indicates it is waiting for touch. Event handlers
+        ///     must return as quickly as possible. If there are longer running tasks which are triggered
+        ///     as a result of this event, they should be run on a separate thread.
+        /// </summary>
+        public event EventHandler<EventArgs>? TouchPending;
+
+        /// <summary>
+        ///     Sends a command request to the YubiKey. This is done by making a request to a certain "slot"
+        ///     in the OTP application.
         /// </summary>
         /// <param name="apdu">
-        /// The meta-apdu representation of the command we're trying to send.
+        ///     The meta-apdu representation of the command we're trying to send.
         /// </param>
         /// <param name="frameReader">
-        /// A frameReader instance to receive the data read from the YubiKey.
+        ///     A frameReader instance to receive the data read from the YubiKey.
         /// </param>
         /// <param name="configInstruction">
-        /// A boolean flag to indicate whether this is a command that sends configuration data, or
-        /// a command that exercises certain non-NVRAM altering functionality.
+        ///     A boolean flag to indicate whether this is a command that sends configuration data, or
+        ///     a command that exercises certain non-NVRAM altering functionality.
         /// </param>
-        private void HandleSlotRequestInstruction(CommandApdu apdu, KeyboardFrameReader frameReader, bool configInstruction)
+        private void HandleSlotRequestInstruction(
+            CommandApdu apdu,
+            KeyboardFrameReader frameReader,
+            bool configInstruction)
         {
             KeyboardReport? report = null;
             foreach (KeyboardReport featureReport in apdu.GetHidReports())
@@ -156,12 +159,13 @@ namespace Yubico.YubiKey.Pipelines
                                     frameReader.UnexpectedEOR,
                                     frameReader.IsEndOfReadChain));
                         }
+
                         break;
                     }
 
                     report = new KeyboardReport(_hidConnection.GetReport());
-
-                } while (true);
+                }
+                while (true);
             }
             else
             {
@@ -172,11 +176,11 @@ namespace Yubico.YubiKey.Pipelines
         }
 
         /// <summary>
-        /// Polls the keyboard device to wait for the WritePending flag to clear.
+        ///     Polls the keyboard device to wait for the WritePending flag to clear.
         /// </summary>
         /// <returns>
-        /// A report with the WritePending flag cleared. Once in this state, the YubiKey is ready
-        /// to receive more data, or to wait for read operations.
+        ///     A report with the WritePending flag cleared. Once in this state, the YubiKey is ready
+        ///     to receive more data, or to wait for read operations.
         /// </returns>
         private KeyboardReport WaitForWriteResponse() =>
             WaitFor(
@@ -186,9 +190,9 @@ namespace Yubico.YubiKey.Pipelines
                 ExceptionMessages.KeyboardTimeout);
 
         /// <summary>
-        /// Polls the keyboard device to wait for the ReadPending flag to be present.
+        ///     Polls the keyboard device to wait for the ReadPending flag to be present.
         /// </summary>
-        /// <returns><see cref="KeyboardReport"/> from the YubiKey.</returns>
+        /// <returns><see cref="KeyboardReport" /> from the YubiKey.</returns>
         private KeyboardReport WaitForReadPending() =>
             WaitFor(
                 r => r.ReadPending,
@@ -211,10 +215,19 @@ namespace Yubico.YubiKey.Pipelines
             // would start with a 1ms sleep time, and double it each retry for
             // ten retries. This winds up being 1023ms. We will keep the sleep
             // doubling logic, but just timeout after 1023ms.
-            int timeLimitMs = shortTimeout ? 1023 : 14000;
-            int sleepDurationMs = shortTimeout ? 1 : 250;
-            int growthFactor = shortTimeout ? 2 : 1;
-            Stopwatch stopwatch = Stopwatch.StartNew();
+            int timeLimitMs = shortTimeout
+                ? 1023
+                : 14000;
+
+            int sleepDurationMs = shortTimeout
+                ? 1
+                : 250;
+
+            int growthFactor = shortTimeout
+                ? 2
+                : 1;
+
+            var stopwatch = Stopwatch.StartNew();
 
             while (stopwatch.ElapsedMilliseconds < timeLimitMs)
             {
@@ -251,10 +264,10 @@ namespace Yubico.YubiKey.Pipelines
 
         private void ResetReadMode()
         {
-            var resetReport = new KeyboardReport()
+            var resetReport = new KeyboardReport
             {
                 Flags = KeyboardReportFlags.WritePending,
-                SequenceNumber = 0xF,
+                SequenceNumber = 0xF
             };
 
             _log.LogInformation("Reset read mode [{Report}]", resetReport);

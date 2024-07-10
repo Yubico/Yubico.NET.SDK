@@ -24,11 +24,13 @@ namespace Yubico.YubiKey.Fido2
         [Trait("Category", "Simple")]
         public void GetTestDevice_NoSerialNumber_Succeeds()
         {
-            IYubiKeyDevice device = IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5, false);
+            var device =
+                IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5, requireSerialNumber: false);
             Assert.NotNull(device);
             if (device.SerialNumber is null)
             {
-                _ = Assert.Throws<InvalidOperationException>(() => IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5));
+                _ = Assert.Throws<InvalidOperationException>(() =>
+                    IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5));
             }
         }
     }

@@ -17,7 +17,7 @@ using System;
 namespace Yubico.Core.Buffers
 {
     /// <summary>
-    /// Utility class for calculating and verifying the CRC13239 checksum used in YubiKey products.
+    ///     Utility class for calculating and verifying the CRC13239 checksum used in YubiKey products.
     /// </summary>
     public static class Crc13239
     {
@@ -25,7 +25,7 @@ namespace Yubico.Core.Buffers
         private const ushort GeneratorPolynomial = 0x8408;
 
         /// <summary>
-        /// Calculates a CRC13239 checksum over a byte buffer.
+        ///     Calculates a CRC13239 checksum over a byte buffer.
         /// </summary>
         /// <param name="buffer">The buffer to be checksummed.</param>
         /// <returns>A two byte CRC checksum.</returns>

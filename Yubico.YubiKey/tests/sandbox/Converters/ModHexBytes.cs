@@ -12,20 +12,28 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Buffers;
 
 namespace Yubico.YubiKey.TestApp.Converters
 {
     /// <summary>
-    /// Supports parameter parsing ModHex strings for the sandbox app.
+    ///     Supports parameter parsing ModHex strings for the sandbox app.
     /// </summary>
     public class ModHexBytes : BytesBase
     {
-        public static ModHexBytes Bytes(byte[] d) => new ModHexBytes { Value = d };
+        public static ModHexBytes Bytes(byte[] d)
+        {
+            return new ModHexBytes { Value = d };
+        }
 
-        public static ModHexBytes Encode(string s) => new ModHexBytes { Value = ModHex.DecodeText(s) };
+        public static ModHexBytes Encode(string s)
+        {
+            return new ModHexBytes { Value = ModHex.DecodeText(s) };
+        }
 
-        public override string ToString() => ModHex.EncodeBytes(Value);
+        public override string ToString()
+        {
+            return ModHex.EncodeBytes(Value);
+        }
     }
 }

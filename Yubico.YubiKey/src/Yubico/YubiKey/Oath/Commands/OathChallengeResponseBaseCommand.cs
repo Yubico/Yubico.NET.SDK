@@ -14,23 +14,22 @@
 
 using System;
 using System.Buffers.Binary;
-using System.Linq;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    /// Provides helper methods that are used to calculate challenge-response for the commands: 
-    /// SetPassword, Validate, CalculateCredential, CalculateAllCredentials.
+    ///     Provides helper methods that are used to calculate challenge-response for the commands:
+    ///     SetPassword, Validate, CalculateCredential, CalculateAllCredentials.
     /// </summary>
     public abstract class OathChallengeResponseBaseCommand
     {
         /// <summary>
-        /// Generates 8 bytes challenge that can be used for TOTP credential calculation.
+        ///     Generates 8 bytes challenge that can be used for TOTP credential calculation.
         /// </summary>
         /// <returns>
-        /// 8 bytes challenge.
+        ///     8 bytes challenge.
         /// </returns>
         protected static byte[] GenerateTotpChallenge(CredentialPeriod? period)
         {
@@ -47,10 +46,10 @@ namespace Yubico.YubiKey.Oath.Commands
         protected static byte[] GenerateChallenge() => GenerateRandomChallenge();
 
         /// <summary>
-        /// Generates random 8 bytes that can be used as challenge for authentication.
+        ///     Generates random 8 bytes that can be used as challenge for authentication.
         /// </summary>
         /// <returns>
-        /// Random 8 bytes.
+        ///     Random 8 bytes.
         /// </returns>
         protected static byte[] GenerateRandomChallenge()
         {
@@ -63,37 +62,36 @@ namespace Yubico.YubiKey.Oath.Commands
         }
 
         /// <summary>
-        /// Passes a user-supplied UTF-8 encoded password through 1000 rounds of PBKDF2
-        /// with the salt value (the deviceID returned in SelectResponse).
+        ///     Passes a user-supplied UTF-8 encoded password through 1000 rounds of PBKDF2
+        ///     with the salt value (the deviceID returned in SelectResponse).
         /// </summary>
         /// <returns>
-        /// 16 bytes secret for authentication.
+        ///     16 bytes secret for authentication.
         /// </returns>
         protected static byte[] CalculateSecret(ReadOnlyMemory<byte> password, ReadOnlyMemory<byte> salt)
         {
-#pragma warning disable CA5379, CA5387 // Do Not Use Weak Key Derivation Function Algorithm
-            using (var pbkBytes = new Rfc2898DeriveBytes(password.ToArray(), salt.ToArray(), 1000))
+            #pragma warning disable CA5379, CA5387 // Do Not Use Weak Key Derivation Function Algorithm
+            using (var pbkBytes = new Rfc2898DeriveBytes(password.ToArray(), salt.ToArray(), iterations: 1000))
             {
                 return pbkBytes.GetBytes(16);
             }
-#pragma warning restore CA5379, CA5387 // Do Not Use Weak Key Derivation Function Algorithm
+            #pragma warning restore CA5379, CA5387 // Do Not Use Weak Key Derivation Function Algorithm
         }
 
         /// <summary>
-        /// Calculates HMAC using SHA1 as a hash function.
+        ///     Calculates HMAC using SHA1 as a hash function.
         /// </summary>
         /// <returns>
-        /// HMAC result.
+        ///     HMAC result.
         /// </returns>
         protected static byte[] CalculateResponse(ReadOnlyMemory<byte> secret, ReadOnlyMemory<byte> message)
         {
-#pragma warning disable CA5350 // Do Not Use Weak Cryptographic Algorithms
+            #pragma warning disable CA5350 // Do Not Use Weak Cryptographic Algorithms
             using (var hmacSha1 = new HMACSHA1(secret.ToArray()))
-#pragma warning restore CA5350 // Do Not Use Weak Cryptographic Algorithms
+                #pragma warning restore CA5350 // Do Not Use Weak Cryptographic Algorithms
             {
                 return hmacSha1.ComputeHash(message.ToArray());
             }
         }
-
     }
 }

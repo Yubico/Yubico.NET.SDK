@@ -36,10 +36,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // cast the input to RSA.
             if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmRsa, StringComparison.Ordinal))
             {
-                RSAParameters rsaParams = ((RSA)dotNetObject).ExportParameters(false);
+                RSAParameters rsaParams = ((RSA)dotNetObject).ExportParameters(includePrivateParameters: false);
                 // This constructor will validate the modulus and exponent.
                 var rsaPubKey = new PivRsaPublicKey(rsaParams.Modulus, rsaParams.Exponent);
-                return (PivPublicKey)rsaPubKey;
+                return rsaPubKey;
             }
 
             var eccParams = new ECParameters();
@@ -47,11 +47,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // If the SignatureAlgorithm is "ECDsa", we can cast to ECDsa.
             if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmEcdsa, StringComparison.Ordinal))
             {
-                eccParams = ((ECDsa)dotNetObject).ExportParameters(false);
+                eccParams = ((ECDsa)dotNetObject).ExportParameters(includePrivateParameters: false);
             }
             else if (string.Equals(dotNetObject.KeyExchangeAlgorithm, AlgorithmEcdh, StringComparison.Ordinal))
             {
-                eccParams = ((ECDiffieHellman)dotNetObject).ExportParameters(false);
+                eccParams = ((ECDiffieHellman)dotNetObject).ExportParameters(includePrivateParameters: false);
             }
 
             if (ValidateEccParameters(eccParams))
@@ -61,12 +61,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 byte[] point = new byte[(keySize * 2) + 1];
                 point[0] = 4;
                 int offset = 1 + (keySize - eccParams.Q.X.Length);
-                Array.Copy(eccParams.Q.X, 0, point, offset, eccParams.Q.X.Length);
+                Array.Copy(eccParams.Q.X, sourceIndex: 0, point, offset, eccParams.Q.X.Length);
                 offset += keySize + (keySize - eccParams.Q.Y.Length);
-                Array.Copy(eccParams.Q.Y, 0, point, offset, eccParams.Q.Y.Length);
+                Array.Copy(eccParams.Q.Y, sourceIndex: 0, point, offset, eccParams.Q.Y.Length);
 
                 var eccPubKey = new PivEccPublicKey(point);
-                return (PivPublicKey)eccPubKey;
+                return eccPubKey;
             }
 
             throw new InvalidOperationException(
@@ -107,16 +107,18 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                             CultureInfo.CurrentCulture,
                             InvalidKeyDataMessage));
                 }
+
                 eccCurve = ECCurve.CreateFromValue("1.3.132.0.34");
             }
+
             var eccParams = new ECParameters
             {
-                Curve = (ECCurve)eccCurve
+                Curve = eccCurve
             };
 
             var eccPublic = (PivEccPublicKey)pivPublicKey;
             int coordLength = (eccPublic.PublicPoint.Length - 1) / 2;
-            eccParams.Q.X = eccPublic.PublicPoint.Slice(1, coordLength).ToArray();
+            eccParams.Q.X = eccPublic.PublicPoint.Slice(start: 1, coordLength).ToArray();
             eccParams.Q.Y = eccPublic.PublicPoint.Slice(1 + coordLength, coordLength).ToArray();
 
             return ECDsa.Create(eccParams);
@@ -140,24 +142,24 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 // cast the input to RSA.
                 if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmRsa, StringComparison.Ordinal))
                 {
-                    rsaParams = ((RSA)dotNetObject).ExportParameters(true);
+                    rsaParams = ((RSA)dotNetObject).ExportParameters(includePrivateParameters: true);
                     var rsaPriKey = new PivRsaPrivateKey(
                         rsaParams.P,
                         rsaParams.Q,
                         rsaParams.DP,
                         rsaParams.DQ,
                         rsaParams.InverseQ);
-                    return (PivPrivateKey)rsaPriKey;
+                    return rsaPriKey;
                 }
 
                 // If the SignatureAlgorithm is "ECDsa", we can cast to ECDsa.
                 if (string.Equals(dotNetObject.SignatureAlgorithm, AlgorithmEcdsa, StringComparison.Ordinal))
                 {
-                    eccParams = ((ECDsa)dotNetObject).ExportParameters(true);
+                    eccParams = ((ECDsa)dotNetObject).ExportParameters(includePrivateParameters: true);
                 }
                 else if (string.Equals(dotNetObject.KeyExchangeAlgorithm, AlgorithmEcdh, StringComparison.Ordinal))
                 {
-                    eccParams = ((ECDiffieHellman)dotNetObject).ExportParameters(true);
+                    eccParams = ((ECDiffieHellman)dotNetObject).ExportParameters(includePrivateParameters: true);
                 }
 
                 if (ValidateEccParameters(eccParams))
@@ -166,9 +168,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
                     byte[] privateValue = new byte[keySize];
                     int offset = keySize - eccParams.D.Length;
-                    Array.Copy(eccParams.D, 0, privateValue, offset, eccParams.D.Length);
+                    Array.Copy(eccParams.D, sourceIndex: 0, privateValue, offset, eccParams.D.Length);
                     var eccPriKey = new PivEccPrivateKey(privateValue);
-                    return (PivPrivateKey)eccPriKey;
+                    return eccPriKey;
                 }
             }
             finally

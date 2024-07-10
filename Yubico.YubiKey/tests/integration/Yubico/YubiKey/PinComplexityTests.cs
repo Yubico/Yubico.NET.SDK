@@ -1,4 +1,3 @@
-
 // Copyright 2024 Yubico AB
 //
 // Licensed under the Apache License, Version 2.0 (the "License").
@@ -24,19 +23,27 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    /// Tests device that it will not accept PINs or PUKs which violate PIN complexity
-    /// Before running the tests, reset the FIDO2/PIV application on the device
+    ///     Tests device that it will not accept PINs or PUKs which violate PIN complexity
+    ///     Before running the tests, reset the FIDO2/PIV application on the device
     /// </summary>
     public class PinComplexityTests
     {
+        private readonly ReadOnlyMemory<byte> _complexPin =
+            new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("11234567"));
+
+        private readonly ReadOnlyMemory<byte> _complexPuk =
+            new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("11234567"));
 
         private readonly ReadOnlyMemory<byte> _defaultPin = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("123456"));
-        private readonly ReadOnlyMemory<byte> _complexPin = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("11234567"));
-        private readonly ReadOnlyMemory<byte> _invalidPin = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("33333333"));
 
-        private readonly ReadOnlyMemory<byte> _defaultPuk = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("12345678"));
-        private readonly ReadOnlyMemory<byte> _complexPuk = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("11234567"));
-        private readonly ReadOnlyMemory<byte> _invalidPuk = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("33333333"));
+        private readonly ReadOnlyMemory<byte> _defaultPuk =
+            new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("12345678"));
+
+        private readonly ReadOnlyMemory<byte> _invalidPin =
+            new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("33333333"));
+
+        private readonly ReadOnlyMemory<byte> _invalidPuk =
+            new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("33333333"));
 
         [SkippableFact]
         public void ChangePivPinToInvalidValue_ThrowsSecurityException()
@@ -49,7 +56,8 @@ namespace Yubico.YubiKey
 
             Assert.True(pivSession.TryChangePin(_defaultPin, _complexPin, out _));
             int? retriesRemaining = 3;
-            var e = Assert.Throws<SecurityException>(() => pivSession.TryChangePin(_complexPin, _invalidPin, out retriesRemaining));
+            var e = Assert.Throws<SecurityException>(() =>
+                pivSession.TryChangePin(_complexPin, _invalidPin, out retriesRemaining));
             Assert.Equal(ExceptionMessages.PinComplexityViolation, e.Message);
             Assert.Null(retriesRemaining);
         }
@@ -66,7 +74,8 @@ namespace Yubico.YubiKey
             Assert.True(pivSession.TryChangePuk(_defaultPuk, _complexPuk, out _));
             int? retriesRemaining = 3;
 
-            var e = Assert.Throws<SecurityException>(() => pivSession.TryChangePuk(_complexPuk, _invalidPuk, out retriesRemaining));
+            var e = Assert.Throws<SecurityException>(() =>
+                pivSession.TryChangePuk(_complexPuk, _invalidPuk, out retriesRemaining));
             Assert.Equal(ExceptionMessages.PinComplexityViolation, e.Message);
             Assert.Null(retriesRemaining);
         }
@@ -82,7 +91,8 @@ namespace Yubico.YubiKey
 
             Assert.True(pivSession.TryResetPin(_defaultPuk, _complexPin, out _));
             int? retriesRemaining = 3;
-            var e = Assert.Throws<SecurityException>(() => pivSession.TryResetPin(_defaultPuk, _invalidPin, out retriesRemaining));
+            var e = Assert.Throws<SecurityException>(() =>
+                pivSession.TryResetPin(_defaultPuk, _invalidPin, out retriesRemaining));
             Assert.Equal(ExceptionMessages.PinComplexityViolation, e.Message);
             Assert.Null(retriesRemaining);
         }
@@ -137,8 +147,8 @@ namespace Yubico.YubiKey
 
         private class PinComplexityKeyCollector
         {
-            public ReadOnlyMemory<byte> NewPin { get; set; }
             private ReadOnlyMemory<byte> _currentPin;
+            public ReadOnlyMemory<byte> NewPin { get; set; }
 
             public bool KeyCollectorDelegate(KeyEntryData keyEntryData)
             {

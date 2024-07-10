@@ -12,24 +12,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Globalization;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// The response to the <see cref="GetLargeBlobCommand"/> command, returning
-    /// the large blob.
+    ///     The response to the <see cref="GetLargeBlobCommand" /> command, returning
+    ///     the large blob.
     /// </summary>
     public sealed class SetLargeBlobResponse : Fido2Response, IYubiKeyResponse
     {
         /// <summary>
-        /// Constructs a <c>SetLargeBlobResponse</c> instance based on a ResponseApdu
-        /// received from the YubiKey.
+        ///     Constructs a <c>SetLargeBlobResponse</c> instance based on a ResponseApdu
+        ///     received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
+        ///     The ResponseApdu returned by the YubiKey.
         /// </param>
         public SetLargeBlobResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -37,4 +35,3 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
     }
 }
-

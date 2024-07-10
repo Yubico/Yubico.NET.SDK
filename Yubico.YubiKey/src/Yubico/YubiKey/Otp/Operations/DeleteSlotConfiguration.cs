@@ -21,7 +21,9 @@ namespace Yubico.YubiKey.Otp.Operations
     public class DeleteSlotConfiguration : OperationBase<DeleteSlotConfiguration>
     {
         internal DeleteSlotConfiguration(IYubiKeyConnection connection, IOtpSession session, Slot slot)
-            : base(connection, session, slot) { }
+            : base(connection, session, slot)
+        {
+        }
 
         protected override void ExecuteOperation()
         {
@@ -29,15 +31,17 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 OtpSlot = OtpSlot!.Value
             };
+
             cmd.ApplyCurrentAccessCode(CurrentAccessCode);
 
             ReadStatusResponse response = Connection.SendCommand(cmd);
             if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.YubiKeyOperationFailed,
-                    response.StatusMessage));
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.YubiKeyOperationFailed,
+                        response.StatusMessage));
             }
         }
 
@@ -45,8 +49,8 @@ namespace Yubico.YubiKey.Otp.Operations
         {
             if (!(OtpSlot ==
                 Slot.ShortPress
-                ? Session.IsShortPressConfigured
-                : Session.IsLongPressConfigured))
+                    ? Session.IsShortPressConfigured
+                    : Session.IsLongPressConfigured))
             {
                 throw new InvalidOperationException(ExceptionMessages.CantDeleteEmptySlot);
             }

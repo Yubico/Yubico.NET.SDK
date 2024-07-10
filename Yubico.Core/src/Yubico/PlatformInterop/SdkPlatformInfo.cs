@@ -21,25 +21,28 @@ namespace Yubico.PlatformInterop
 {
     public static class SdkPlatformInfo
     {
-        public static Encoding Encoding => OperatingSystem switch
-        {
-            SdkPlatform.Windows => Encoding.Unicode,
-            SdkPlatform.Unknown => throw new PlatformNotSupportedException(),
-            _ => Encoding.UTF8
-        };
+        public static Encoding Encoding =>
+            OperatingSystem switch
+            {
+                SdkPlatform.Windows => Encoding.Unicode,
+                SdkPlatform.Unknown => throw new PlatformNotSupportedException(),
+                _ => Encoding.UTF8
+            };
 
-        public static int CharSize => OperatingSystem switch
-        {
-            SdkPlatform.Windows => 2,
-            SdkPlatform.Unknown => throw new PlatformNotSupportedException(),
-            _ => 1
-        };
+        public static int CharSize =>
+            OperatingSystem switch
+            {
+                SdkPlatform.Windows => 2,
+                SdkPlatform.Unknown => throw new PlatformNotSupportedException(),
+                _ => 1
+            };
 
-        public static int DwordSize => OperatingSystem switch
-        {
-            SdkPlatform.Linux => 8,
-            _ => 4
-        };
+        public static int DwordSize =>
+            OperatingSystem switch
+            {
+                SdkPlatform.Linux => 8,
+                _ => 4
+            };
 
         public static SdkPlatform OperatingSystem
         {
@@ -49,18 +52,18 @@ namespace Yubico.PlatformInterop
                 {
                     return SdkPlatform.Windows;
                 }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
                 {
                     return SdkPlatform.MacOS;
                 }
-                else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+
+                if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
                     return SdkPlatform.Linux;
                 }
-                else
-                {
-                    return SdkPlatform.Unknown;
-                }
+
+                return SdkPlatform.Unknown;
             }
         }
 
@@ -70,7 +73,8 @@ namespace Yubico.PlatformInterop
             {
                 if (OperatingSystem == SdkPlatform.Windows)
                 {
-                    return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+                    return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(
+                        WindowsBuiltInRole.Administrator);
                 }
 
                 return false;

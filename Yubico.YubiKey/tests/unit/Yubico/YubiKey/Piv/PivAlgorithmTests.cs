@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using Xunit;
 
 namespace Yubico.YubiKey.Piv
@@ -33,7 +30,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Pin, false)]
         public void IsValidAlg_ReturnsCorrect(PivAlgorithm algorithm, bool expectedResult)
         {
-            bool result = algorithm.IsValidAlgorithmForGenerate();
+            var result = algorithm.IsValidAlgorithmForGenerate();
 
             Assert.Equal(expectedResult, result);
         }
@@ -50,7 +47,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Pin, false)]
         public void IsRsa_ReturnsCorrect(PivAlgorithm algorithm, bool expectedResult)
         {
-            bool result = algorithm.IsRsa();
+            var result = algorithm.IsRsa();
 
             Assert.Equal(expectedResult, result);
         }
@@ -67,7 +64,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Pin, false)]
         public void IsEcc_ReturnsCorrect(PivAlgorithm algorithm, bool expectedResult)
         {
-            bool result = algorithm.IsEcc();
+            var result = algorithm.IsEcc();
 
             Assert.Equal(expectedResult, result);
         }
@@ -84,7 +81,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Pin, 64)]
         public void KeySizeBits_ReturnsCorrect(PivAlgorithm algorithm, int expectedResult)
         {
-            int result = algorithm.KeySizeBits();
+            var result = algorithm.KeySizeBits();
 
             Assert.Equal(expectedResult, result);
         }

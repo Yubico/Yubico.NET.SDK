@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
         // To run it as a GUI application, run the executable with an argument of g.
         //   $ Fido2Sample g
         // Note that the GUI version is available only on Windows platforms.
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             bool useGui = false;
 
@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 fido2SampleGui.RunSample();
 #else
                 SampleMenu.WriteMessage(
-                    MessageType.Title, 0,
+                    MessageType.Title, numberToWrite: 0,
                     "\n---The GUI version of this sample is not available on this plaform---\n");
 #endif
             }
@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 #if WINDOWS
                 fido2SampleRun.RunSample();
 #else
-                fido2SampleRun.RunSample(false);
+                fido2SampleRun.RunSample(displayGuiMessage: false);
 #endif
             }
         }

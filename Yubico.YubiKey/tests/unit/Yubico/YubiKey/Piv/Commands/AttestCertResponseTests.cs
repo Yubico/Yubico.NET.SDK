@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using Xunit;
@@ -27,14 +26,14 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new CreateAttestationStatementResponse(null));
+            _ = Assert.Throws<ArgumentNullException>(() => new CreateAttestationStatementResponse(responseApdu: null));
 #pragma warning restore CS8625
         }
 
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            byte[] responseData = GetResponseData();
+            var responseData = GetResponseData();
             var responseApdu = new ResponseApdu(responseData);
 
             var response = new CreateAttestationStatementResponse(responseApdu);
@@ -45,7 +44,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            byte[] responseData = GetResponseData();
+            var responseData = GetResponseData();
             var responseApdu = new ResponseApdu(responseData);
 
             var response = new CreateAttestationStatementResponse(responseApdu);
@@ -56,9 +55,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_ErrorResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.ReferenceDataUnusable >> 8));
-            byte sw2 = unchecked((byte)SWConstants.ReferenceDataUnusable);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            byte sw1 = SWConstants.ReferenceDataUnusable >> 8;
+            var sw2 = unchecked((byte)SWConstants.ReferenceDataUnusable);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var response = new CreateAttestationStatementResponse(responseApdu);
 
@@ -68,9 +67,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_ErrorResponseApdu_SetsStatusWordCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.ReferenceDataUnusable >> 8));
-            byte sw2 = unchecked((byte)SWConstants.ReferenceDataUnusable);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            byte sw1 = SWConstants.ReferenceDataUnusable >> 8;
+            var sw2 = unchecked((byte)SWConstants.ReferenceDataUnusable);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var response = new CreateAttestationStatementResponse(responseApdu);
 
@@ -80,17 +79,17 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_GetDataCorrect()
         {
-            byte[] responseData = GetResponseData();
+            var responseData = GetResponseData();
             var responseApdu = new ResponseApdu(responseData);
 
             var response = new CreateAttestationStatementResponse(responseApdu);
 
-            X509Certificate2 theCert = response.GetData();
+            var theCert = response.GetData();
 
-            byte[] certData = theCert.Export(X509ContentType.Cert);
+            var certData = theCert.Export(X509ContentType.Cert);
 
-            IEnumerable<byte> expectedData = responseData.SkipLast<byte>(2);
-            bool compareResult = expectedData.SequenceEqual(certData);
+            var expectedData = responseData.SkipLast(count: 2);
+            var compareResult = expectedData.SequenceEqual(certData);
 
             Assert.True(compareResult);
         }
@@ -98,9 +97,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void GetData_FailResponseApdu_Exception()
         {
-            byte sw1 = unchecked((byte)(SWConstants.InvalidCommandDataParameter >> 8));
-            byte sw2 = unchecked((byte)SWConstants.InvalidCommandDataParameter);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            byte sw1 = SWConstants.InvalidCommandDataParameter >> 8;
+            var sw2 = unchecked((byte)SWConstants.InvalidCommandDataParameter);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var response = new CreateAttestationStatementResponse(responseApdu);
 
@@ -109,7 +108,8 @@ namespace Yubico.YubiKey.Piv.Commands
 
         private static byte[] GetResponseData()
         {
-            return new byte[] {
+            return new byte[]
+            {
                 0x30, 0x82, 0x03, 0x1E, 0x30, 0x82, 0x02, 0x06, 0xA0, 0x03, 0x02, 0x01, 0x02, 0x02, 0x10, 0x01,
                 0xA9, 0x1B, 0x29, 0xDC, 0x21, 0xE7, 0x67, 0xA5, 0xAE, 0xE4, 0xAA, 0x5C, 0x8C, 0x51, 0xE3, 0x30,
                 0x0D, 0x06, 0x09, 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01, 0x0B, 0x05, 0x00, 0x30, 0x21,

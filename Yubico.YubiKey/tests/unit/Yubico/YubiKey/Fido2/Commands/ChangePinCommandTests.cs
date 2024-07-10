@@ -24,9 +24,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void Constructor_Succeeds()
         {
-            byte[] currentPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-            byte[] newPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
-            CoseKey authenticatorPubKey = GetSamplePubKey();
+            byte[] currentPin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            byte[] newPin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
+            var authenticatorPubKey = GetSamplePubKey();
             var protocol = new PinUvAuthProtocolOne();
             protocol.Encapsulate(authenticatorPubKey);
 
@@ -38,20 +38,21 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void NullProtocol_ThrowsException()
         {
-            byte[] currentPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-            byte[] newPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
-            CoseKey authenticatorPubKey = GetSamplePubKey();
+            byte[] currentPin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            byte[] newPin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
+            var authenticatorPubKey = GetSamplePubKey();
 
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new ChangePinCommand(null, currentPin, newPin));
+            _ = Assert.Throws<ArgumentNullException>(() => new ChangePinCommand(pinProtocol: null, currentPin, newPin));
 #pragma warning restore CS8625 // Justification: this tests null input
         }
 
         [Fact]
         public void InvalidKey_ThrowsException()
         {
-            byte[] currentPin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-            byte[] newPin = new byte[] {
+            byte[] currentPin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            byte[] newPin =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
@@ -61,7 +62,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
             };
-            CoseKey authenticatorPubKey = GetSamplePubKey();
+            var authenticatorPubKey = GetSamplePubKey();
             var protocol = new PinUvAuthProtocolOne();
             protocol.Encapsulate(authenticatorPubKey);
 
@@ -70,7 +71,8 @@ namespace Yubico.YubiKey.Fido2.Commands
 
         private CoseKey GetSamplePubKey()
         {
-            byte[] encodedKey = new byte[] {
+            byte[] encodedKey =
+            {
                 0xa5, 0x01, 0x02, 0x03, 0x38, 0x18, 0x20, 0x01, 0x21, 0x58, 0x20, 0xde, 0x01, 0x65, 0x7e, 0x79,
                 0xf9, 0x84, 0x47, 0x4b, 0xa2, 0xee, 0xbd, 0x3a, 0x8c, 0x68, 0xf9, 0xe2, 0x5c, 0x7a, 0x67, 0x6d,
                 0x38, 0x9b, 0xb3, 0x51, 0x95, 0x29, 0xec, 0x4e, 0x0b, 0x88, 0x1d, 0x22, 0x58, 0x20, 0x81, 0x1e,
@@ -78,7 +80,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 0x40, 0x79, 0xbb, 0x2b, 0x2a, 0x28, 0x96, 0x4f, 0x6b, 0x15, 0x41, 0x95, 0xe7, 0x0f
             };
 
-            return CoseKey.Create(encodedKey, out int _);
+            return CoseKey.Create(encodedKey, out var _);
         }
     }
 }

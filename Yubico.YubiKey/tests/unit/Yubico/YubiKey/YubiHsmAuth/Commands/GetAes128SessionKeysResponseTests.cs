@@ -15,7 +15,6 @@
 using System;
 using Xunit;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Scp03;
 
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
@@ -23,17 +22,19 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     {
         private static readonly byte[] _encKey =
             new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+
         private static readonly byte[] _macKey =
             new byte[16] { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30 };
+
         private static readonly byte[] _rmacKey =
             new byte[16] { 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31 };
 
         private byte[] _data()
         {
-            byte[] data = new byte[48];
-            _encKey.CopyTo(data, 0);
-            _macKey.CopyTo(data, 16);
-            _rmacKey.CopyTo(data, 32);
+            var data = new byte[48];
+            _encKey.CopyTo(data, index: 0);
+            _macKey.CopyTo(data, index: 16);
+            _rmacKey.CopyTo(data, index: 32);
 
             return data;
         }
@@ -41,9 +42,9 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void GetData_NotSuccess_ThrowsInvalidOperationException()
         {
-            ResponseApdu apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
+            var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
 
-            GetAes128SessionKeysResponse response = new GetAes128SessionKeysResponse(apdu);
+            var response = new GetAes128SessionKeysResponse(apdu);
 
             Action action = () => response.GetData();
 
@@ -55,9 +56,9 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [InlineData(48 + 1)]
         public void GetData_InvalidDataLength_ThrowsMalformedResponseException(int dataLength)
         {
-            ResponseApdu apdu = new ResponseApdu(new byte[dataLength], SWConstants.Success);
+            var apdu = new ResponseApdu(new byte[dataLength], SWConstants.Success);
 
-            GetAes128SessionKeysResponse response = new GetAes128SessionKeysResponse(apdu);
+            var response = new GetAes128SessionKeysResponse(apdu);
 
             Action action = () => response.GetData();
 
@@ -67,10 +68,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void GetData_Success_ReturnsExpectedEncryptionSessionKey()
         {
-            ResponseApdu apdu = new ResponseApdu(_data(), SWConstants.Success);
+            var apdu = new ResponseApdu(_data(), SWConstants.Success);
 
-            GetAes128SessionKeysResponse response = new GetAes128SessionKeysResponse(apdu);
-            SessionKeys sessionKeys = response.GetData();
+            var response = new GetAes128SessionKeysResponse(apdu);
+            var sessionKeys = response.GetData();
 
             Assert.Equal(_encKey, sessionKeys.EncryptionKey.ToArray());
         }
@@ -78,10 +79,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void GetData_Success_ReturnsExpectedMacSessionKey()
         {
-            ResponseApdu apdu = new ResponseApdu(_data(), SWConstants.Success);
+            var apdu = new ResponseApdu(_data(), SWConstants.Success);
 
-            GetAes128SessionKeysResponse response = new GetAes128SessionKeysResponse(apdu);
-            SessionKeys sessionKeys = response.GetData();
+            var response = new GetAes128SessionKeysResponse(apdu);
+            var sessionKeys = response.GetData();
 
             Assert.Equal(_macKey, sessionKeys.MacKey.ToArray());
         }
@@ -89,10 +90,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void GetData_Success_ReturnsExpectedRmacSessionKey()
         {
-            ResponseApdu apdu = new ResponseApdu(_data(), SWConstants.Success);
+            var apdu = new ResponseApdu(_data(), SWConstants.Success);
 
-            GetAes128SessionKeysResponse response = new GetAes128SessionKeysResponse(apdu);
-            SessionKeys sessionKeys = response.GetData();
+            var response = new GetAes128SessionKeysResponse(apdu);
+            var sessionKeys = response.GetData();
 
             Assert.Equal(_rmacKey, sessionKeys.RmacKey.ToArray());
         }

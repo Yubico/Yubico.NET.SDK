@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void Response_6F30_CorrectStatus()
         {
-            byte[] response = new byte[] { 0x6F, 0x30 };
+            byte[] response = { 0x6F, 0x30 };
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
@@ -33,18 +33,19 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void Response_6F30_CorrectStatusMessage()
         {
-            byte[] response = new byte[] { 0x6F, 0x30 };
+            byte[] response = { 0x6F, 0x30 };
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
-            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2NotAllowed, StringComparison.Ordinal);
+            var isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2NotAllowed,
+                StringComparison.Ordinal);
             Assert.True(isEqual == 0);
         }
 
         [Fact]
         public void Response_6F31_CorrectStatus()
         {
-            byte[] response = new byte[] { 0x6F, 0x31 };
+            byte[] response = { 0x6F, 0x31 };
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
@@ -54,18 +55,19 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void Response_6F31_CorrectStatusMessage()
         {
-            byte[] response = new byte[] { 0x6F, 0x31 };
+            byte[] response = { 0x6F, 0x31 };
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
-            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2PinNotVerified, StringComparison.Ordinal);
+            var isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2PinNotVerified,
+                StringComparison.Ordinal);
             Assert.True(isEqual == 0);
         }
 
         [Fact]
         public void Response_6F32_CorrectStatus()
         {
-            byte[] response = new byte[] { 0x6F, 0x32 };
+            byte[] response = { 0x6F, 0x32 };
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
@@ -75,18 +77,19 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void Response_6F32_CorrectStatusMessage()
         {
-            byte[] response = new byte[] { 0x6F, 0x32 };
+            byte[] response = { 0x6F, 0x32 };
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
-            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2PinBlocked, StringComparison.Ordinal);
+            var isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2PinBlocked,
+                StringComparison.Ordinal);
             Assert.True(isEqual == 0);
         }
 
         [Fact]
         public void Response_6F35_CorrectStatus()
         {
-            byte[] response = new byte[] { 0x6F, 0x35 };
+            byte[] response = { 0x6F, 0x35 };
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
@@ -96,18 +99,19 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void Response_6F35_CorrectStatusMessage()
         {
-            byte[] response = new byte[] { 0x6F, 0x35 };
+            byte[] response = { 0x6F, 0x35 };
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
-            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2PinNotSet, StringComparison.Ordinal);
+            var isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2PinNotSet,
+                StringComparison.Ordinal);
             Assert.True(isEqual == 0);
         }
 
         [Fact]
         public void Response_6F3A_CorrectStatus()
         {
-            byte[] response = new byte[] { 0x6F, 0x3A };
+            byte[] response = { 0x6F, 0x3A };
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
@@ -117,11 +121,12 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void Response_6F3A_CorrectStatusMessage()
         {
-            byte[] response = new byte[] { 0x6F, 0x3A };
+            byte[] response = { 0x6F, 0x3A };
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
-            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2Timeout, StringComparison.Ordinal);
+            var isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2Timeout,
+                StringComparison.Ordinal);
             Assert.True(isEqual == 0);
         }
     }

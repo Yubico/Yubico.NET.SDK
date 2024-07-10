@@ -24,21 +24,23 @@ namespace Yubico.YubiKey.U2f
         [InlineData(StandardTestDevice.Fw5)]
         public void RegisterCredential_BasicTest(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var u2fSession = new U2fSession(testDevice))
             {
                 u2fSession.KeyCollector = k => k.Request switch
                 {
                     KeyEntryRequest.TouchRequest => true,
-                    _ => throw new NotSupportedException("Test requested a key that is not supported by this test case.")
+                    _ => throw new NotSupportedException(
+                        "Test requested a key that is not supported by this test case.")
                 };
 
-                byte[] applicationId = U2fSession.EncodeAndHashString("https://fido.example.com/app");
+                var applicationId = U2fSession.EncodeAndHashString("https://fido.example.com/app");
                 // This is not a well-formed challenge. That's OK - we're not really trying to log in here.
-                byte[] clientDataHash = U2fSession.EncodeAndHashString("FakeChallenge");
+                var clientDataHash = U2fSession.EncodeAndHashString("FakeChallenge");
 
-                RegistrationData registrationData = u2fSession.Register(applicationId, clientDataHash, new TimeSpan(0, 0, 5));
+                var registrationData = u2fSession.Register(applicationId, clientDataHash,
+                    new TimeSpan(hours: 0, minutes: 0, seconds: 5));
 
                 Assert.True(registrationData.VerifySignature(applicationId, clientDataHash));
             }

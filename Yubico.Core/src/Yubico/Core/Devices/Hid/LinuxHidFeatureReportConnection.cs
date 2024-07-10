@@ -23,13 +23,10 @@ namespace Yubico.Core.Devices.Hid
     internal class LinuxHidFeatureReportConnection : IHidConnection
     {
         private const int YubiKeyFeatureReportSize = 8;
+        private readonly LinuxHidDevice _device;
 
         private readonly LinuxFileSafeHandle _handle;
         private bool _isDisposed;
-        private readonly LinuxHidDevice _device;
-
-        public int InputReportSize { get; private set; }
-        public int OutputReportSize { get; private set; }
 
         public LinuxHidFeatureReportConnection(LinuxHidDevice device, string devnode)
         {
@@ -49,6 +46,9 @@ namespace Yubico.Core.Devices.Hid
             }
         }
 
+        public int InputReportSize { get; }
+        public int OutputReportSize { get; }
+
         // Send the given report as a HID feature report.
         // We expect to get a report that is FeatureReportSize bytes long. Then
         // we prepend a 00 byte for the actual data passed into the YubiKey.
@@ -63,14 +63,14 @@ namespace Yubico.Core.Devices.Hid
             }
 
             byte[] reportToSend = new byte[report.Length + 1];
-            Array.Copy(report, 0, reportToSend, 1, report.Length);
+            Array.Copy(report, sourceIndex: 0, reportToSend, destinationIndex: 1, report.Length);
 
-            long ioctlFlag = NativeMethods.HIDIOCSFEATURE | ((long)(report.Length + 1) << 16);
+            long ioctlFlag = NativeMethods.HIDIOCSFEATURE | (long)(report.Length + 1) << 16;
             IntPtr setReportData = Marshal.AllocHGlobal(report.Length + 1);
 
             try
             {
-                Marshal.Copy(reportToSend, 0, setReportData, reportToSend.Length);
+                Marshal.Copy(reportToSend, startIndex: 0, setReportData, reportToSend.Length);
                 int bytesSent = NativeMethods.ioctl(_handle, ioctlFlag, setReportData);
 
                 _device.LogDeviceAccessTime();
@@ -94,7 +94,7 @@ namespace Yubico.Core.Devices.Hid
         // Get the feature report that is waiting on the device.
         public byte[] GetReport()
         {
-            long ioctlFlag = NativeMethods.HIDIOCGFEATURE | ((long)NativeMethods.MaxFeatureBufferSize << 16);
+            long ioctlFlag = NativeMethods.HIDIOCGFEATURE | (long)NativeMethods.MaxFeatureBufferSize << 16;
             IntPtr getReportData = Marshal.AllocHGlobal(NativeMethods.MaxFeatureBufferSize);
 
             try
@@ -111,11 +111,12 @@ namespace Yubico.Core.Devices.Hid
                     // if we receive something longer than 8, just return the
                     // last 8.
                     byte[] outputBuffer = new byte[bytesReturned];
-                    Marshal.Copy(getReportData, outputBuffer, 0, bytesReturned);
+                    Marshal.Copy(getReportData, outputBuffer, startIndex: 0, bytesReturned);
                     if (bytesReturned > YubiKeyFeatureReportSize)
                     {
                         outputBuffer = outputBuffer.Skip(bytesReturned - YubiKeyFeatureReportSize).ToArray();
                     }
+
                     return outputBuffer;
                 }
             }

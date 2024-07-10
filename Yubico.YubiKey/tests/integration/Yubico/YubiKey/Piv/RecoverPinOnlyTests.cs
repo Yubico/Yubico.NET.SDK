@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                PivPinOnlyMode mode = pivSession.TryRecoverPinOnlyMode();
+                var mode = pivSession.TryRecoverPinOnlyMode();
 
                 Assert.Equal(PivPinOnlyMode.None, mode);
             }
@@ -65,14 +65,15 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
 
-                using AdminData adminData = pivSession.ReadObject<AdminData>();
+                using var adminData = pivSession.ReadObject<AdminData>();
 
                 Assert.True(adminData.PinProtected);
             }
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                var nonAdminData = new ReadOnlyMemory<byte>(new byte[] {
+                var nonAdminData = new ReadOnlyMemory<byte>(new byte[]
+                {
                     0x53, 0x0A, 0x04, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88
                 });
 
@@ -80,15 +81,15 @@ namespace Yubico.YubiKey.Piv
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                 pivSession.AuthenticateManagementKey();
-                var putDataCmd = new PutDataCommand(0x005FFF00, nonAdminData);
-                PutDataResponse putDataRsp = pivSession.Connection.SendCommand(putDataCmd);
+                var putDataCmd = new PutDataCommand(dataTag: 0x005FFF00, nonAdminData);
+                var putDataRsp = pivSession.Connection.SendCommand(putDataCmd);
 
                 Assert.Equal(ResponseStatus.Success, putDataRsp.Status);
             }
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                PivPinOnlyMode mode = pivSession.GetPinOnlyMode();
+                var mode = pivSession.GetPinOnlyMode();
                 Assert.True(mode.HasFlag(PivPinOnlyMode.PinProtectedUnavailable));
                 Assert.True(mode.HasFlag(PivPinOnlyMode.PinDerivedUnavailable));
                 Assert.False(mode.HasFlag(PivPinOnlyMode.PinProtected));
@@ -109,10 +110,11 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                PivPinOnlyMode mode = pivSession.TryRecoverPinOnlyMode();
+                var mode = pivSession.TryRecoverPinOnlyMode();
                 Assert.Equal(PivPinOnlyMode.PinProtected, mode);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated, pivSession.ManagementKeyAuthenticationResult);
+                Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated,
+                    pivSession.ManagementKeyAuthenticationResult);
                 mode = pivSession.GetPinOnlyMode();
                 Assert.True(mode.HasFlag(PivPinOnlyMode.PinProtected));
                 Assert.False(mode.HasFlag(PivPinOnlyMode.PinDerived));
@@ -123,7 +125,7 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(0x86, PivAlgorithm.EccP256);
+                var publicKey = pivSession.GenerateKeyPair(slotNumber: 0x86, PivAlgorithm.EccP256);
                 Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
             }
         }
@@ -139,7 +141,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived);
 
-                using AdminData adminData = pivSession.ReadObject<AdminData>();
+                using var adminData = pivSession.ReadObject<AdminData>();
 
                 Assert.True(adminData.PinProtected);
                 _ = Assert.NotNull(adminData.Salt);
@@ -147,7 +149,8 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                var nonPrintedData = new ReadOnlyMemory<byte>(new byte[] {
+                var nonPrintedData = new ReadOnlyMemory<byte>(new byte[]
+                {
                     0x53, 0x0A, 0x04, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88
                 });
 
@@ -156,14 +159,14 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.AuthenticateManagementKey();
                 var putDataCmd = new PutDataCommand((int)PivDataTag.Printed, nonPrintedData);
-                PutDataResponse putDataRsp = pivSession.Connection.SendCommand(putDataCmd);
+                var putDataRsp = pivSession.Connection.SendCommand(putDataCmd);
 
                 Assert.Equal(ResponseStatus.Success, putDataRsp.Status);
             }
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                PivPinOnlyMode mode = pivSession.GetPinOnlyMode();
+                var mode = pivSession.GetPinOnlyMode();
                 Assert.False(mode.HasFlag(PivPinOnlyMode.PinProtectedUnavailable));
                 Assert.False(mode.HasFlag(PivPinOnlyMode.PinDerivedUnavailable));
                 Assert.True(mode.HasFlag(PivPinOnlyMode.PinProtected));
@@ -175,7 +178,7 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(0x87, PivAlgorithm.EccP256);
+                var publicKey = pivSession.GenerateKeyPair(slotNumber: 0x87, PivAlgorithm.EccP256);
                 Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
             }
 
@@ -184,10 +187,11 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                PivPinOnlyMode mode = pivSession.TryRecoverPinOnlyMode();
+                var mode = pivSession.TryRecoverPinOnlyMode();
                 Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated, pivSession.ManagementKeyAuthenticationResult);
+                Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated,
+                    pivSession.ManagementKeyAuthenticationResult);
                 mode = pivSession.GetPinOnlyMode();
                 Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
             }
@@ -197,7 +201,7 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                using PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
+                using var pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.False(pinProtect.IsEmpty);
             }
         }

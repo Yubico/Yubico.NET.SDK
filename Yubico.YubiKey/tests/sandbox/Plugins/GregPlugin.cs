@@ -16,41 +16,38 @@ using System;
 using System.Linq;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Log = Yubico.Core.Logging.Log;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
     internal class GregPlugin : PluginBase
     {
+        public GregPlugin(IOutput output) : base(output) { }
         public override string Name => "Greg";
         public override string Description => "A place for Greg's test code";
 
-        public GregPlugin(IOutput output) : base(output) { }
-
         public override bool Execute()
         {
-            using Serilog.Core.Logger? log = new LoggerConfiguration()
+            using var log = new LoggerConfiguration()
                 .Enrich.With(new ThreadIdEnricher())
                 .WriteTo.Console(
                     outputTemplate: "[{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
                 .CreateLogger();
 
-            Core.Logging.Log.LoggerFactory = LoggerFactory.Create(
+            Log.LoggerFactory = LoggerFactory.Create(
                 builder => builder
                     .AddSerilog(log)
                     .AddFilter(level => level >= LogLevel.Information));
 
 
-
-
-
-            IYubiKeyDevice? yubiKey = YubiKeyDevice.FindByTransport(Transport.All).First();
+            var yubiKey = YubiKeyDevice.FindByTransport().First();
 
             // IYubiKeyDevice? yubiKey = YubiKeyDevice.FindByTransport(Transport.HidFido).First();
 
             Console.Error.WriteLine($"YubiKey Version: {yubiKey.FirmwareVersion}");
             Console.Error.WriteLine("NFC Before Value: " + yubiKey.IsNfcRestricted);
 
-            yubiKey.SetIsNfcRestricted(true);
+            yubiKey.SetIsNfcRestricted(enabled: true);
 
             return true;
         }

@@ -17,37 +17,37 @@ namespace Yubico.YubiKey.TestUtilities
     public enum StandardTestDevice
     {
         /// <summary>
-        /// Major version 3, USB A keychain, not FIPS
+        ///     Major version 3, USB A keychain, not FIPS
         /// </summary>
         Fw3,
 
         /// <summary>
-        /// Major version 4, USB A keychain, FIPS
+        ///     Major version 4, USB A keychain, FIPS
         /// </summary>
         Fw4Fips,
 
         /// <summary>
-        /// Major version 5, USB A keychain, not FIPS
+        ///     Major version 5, USB A keychain, not FIPS
         /// </summary>
         Fw5,
 
         /// <summary>
-        /// Major version 5, USB A keychain, FIPS
+        ///     Major version 5, USB A keychain, FIPS
         /// </summary>
         Fw5Fips,
 
         /// <summary>
-        /// Major version 5, USB C Lightning, not FIPS
+        ///     Major version 5, USB C Lightning, not FIPS
         /// </summary>
         Fw5Ci,
 
         /// <summary>
-        /// Major version 5, USB C Keychain
+        ///     Major version 5, USB C Keychain
         /// </summary>
         Fw5C,
 
         /// <summary>
-        /// Major version 5, USB A biometric keychain, not FIPS
+        ///     Major version 5, USB A biometric keychain, not FIPS
         /// </summary>
         Fw5Bio
     }

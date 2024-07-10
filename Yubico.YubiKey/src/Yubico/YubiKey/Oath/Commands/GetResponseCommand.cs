@@ -18,7 +18,7 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    /// Gets additional response data from the previously issued command.
+    ///     Gets additional response data from the previously issued command.
     /// </summary>
     public class GetResponseCommand : IYubiKeyCommand<YubiKeyResponse>
     {
@@ -28,23 +28,15 @@ namespace Yubico.YubiKey.Oath.Commands
         private readonly int _SW2;
 
         /// <summary>
-        /// Gets the YubiKeyApplication (e.g. PIV, OATH, etc.) that this command applies to.
-        /// </summary>
-        /// <value>
-        /// The value will always be `YubiKeyApplication.Oath` for this command.
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Oath;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GetResponseCommand"/> class.
+        ///     Initializes a new instance of the <see cref="GetResponseCommand" /> class.
         /// </summary>
         /// <param name="originatingCommand">
-        /// The original command APDU that was sent that is now indicating that more data is in the
-        /// response.
+        ///     The original command APDU that was sent that is now indicating that more data is in the
+        ///     response.
         /// </param>
         /// <param name="SW2">
-        /// The SW2 byte of the last response. It indicates the number of bytes left for the next
-        /// GetResponseCommand.
+        ///     The SW2 byte of the last response. It indicates the number of bytes left for the next
+        ///     GetResponseCommand.
         /// </param>
         public GetResponseCommand(CommandApdu originatingCommand, short SW2)
         {
@@ -57,16 +49,26 @@ namespace Yubico.YubiKey.Oath.Commands
             _SW2 = SW2;
         }
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Cla = _Cla,
-            Ins = GetResponseInstruction,
-            Ne = _SW2 == 0 ? 256 : _SW2,
-        };
+        /// <summary>
+        ///     Gets the YubiKeyApplication (e.g. PIV, OATH, etc.) that this command applies to.
+        /// </summary>
+        /// <value>
+        ///     The value will always be `YubiKeyApplication.Oath` for this command.
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Oath;
 
         /// <inheritdoc />
-        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new YubiKeyResponse(responseApdu);
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Cla = _Cla,
+                Ins = GetResponseInstruction,
+                Ne = _SW2 == 0
+                    ? 256
+                    : _SW2
+            };
+
+        /// <inheritdoc />
+        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new YubiKeyResponse(responseApdu);
     }
 }

@@ -59,6 +59,42 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         public const byte TrailerBC = 0xBC;
 
+        // Build a new instance of the SignatureAlgIdConverter class. The input
+        // is the DER encoding of an algId. Check the properties after
+        // instantiation to get information about the algorithm represented.
+        // If the algId was not one of the supported algorithms, the Algorithm
+        // property will be SignatureAlgIdConverter.AlgorithmUnknown (the string
+        // "Unknown").
+        public SignatureAlgIdConverter(byte[] algIdDer)
+        {
+            AlgorithmName = AlgorithmUnknown;
+            HashAlgorithm = HashAlgorithmName.MD5;
+            Padding = RSASignaturePadding.Pkcs1;
+            PssSaltLength = 0;
+            PssTrailerField = 0;
+            var tlvReader = new TlvReader(algIdDer);
+            TlvReader seqReader = tlvReader.ReadNestedTlv(expectedTag: 0x30);
+            ReadOnlyMemory<byte> oid = seqReader.ReadValue(expectedTag: 0x06);
+
+            if (SetFromOid(oid))
+            {
+                var algIdParams = new ReadOnlyMemory<byte>(new byte[] { 0x30, 0x00 });
+
+                // We're expecting parameters. If there is no data left to read,
+                // there are no params. That is generally an error. But we're
+                // going to allow for it because if we reach this point, the
+                // algorithm is RSA with PSS. In that case, it is possible to
+                // have 30 00 for the params, which really means no params, just
+                // use the DEFAULT for everything. The DEFAULT is SHA-1.
+                if (seqReader.HasData)
+                {
+                    algIdParams = seqReader.ReadEncoded(expectedTag: 0x30);
+                }
+
+                ReadPssParams(algIdParams);
+            }
+        }
+
         // This will be the name the .NET Base Class Libraries uses. For RSA, the
         // string is "RSA", for ECDSA, the string is "ECDsa".
         // If the algId is not for a signature algorithm, this will be "Unknown".
@@ -85,42 +121,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // this will be 0 and can be ignored.
         public byte PssTrailerField { get; private set; }
 
-        // Build a new instance of the SignatureAlgIdConverter class. The input
-        // is the DER encoding of an algId. Check the properties after
-        // instantiation to get information about the algorithm represented.
-        // If the algId was not one of the supported algorithms, the Algorithm
-        // property will be SignatureAlgIdConverter.AlgorithmUnknown (the string
-        // "Unknown").
-        public SignatureAlgIdConverter(byte[] algIdDer)
-        {
-            AlgorithmName = AlgorithmUnknown;
-            HashAlgorithm = HashAlgorithmName.MD5;
-            Padding = RSASignaturePadding.Pkcs1;
-            PssSaltLength = 0;
-            PssTrailerField = 0;
-            var tlvReader = new TlvReader(algIdDer);
-            TlvReader seqReader = tlvReader.ReadNestedTlv(0x30);
-            ReadOnlyMemory<byte> oid = seqReader.ReadValue(0x06);
-
-            if (SetFromOid(oid))
-            {
-                var algIdParams = new ReadOnlyMemory<byte>(new byte[] { 0x30, 0x00 });
-
-                // We're expecting parameters. If there is no data left to read,
-                // there are no params. That is generally an error. But we're
-                // going to allow for it because if we reach this point, the
-                // algorithm is RSA with PSS. In that case, it is possible to
-                // have 30 00 for the params, which really means no params, just
-                // use the DEFAULT for everything. The DEFAULT is SHA-1.
-                if (seqReader.HasData)
-                {
-                    algIdParams = seqReader.ReadEncoded(0x30);
-                }
-
-                ReadPssParams(algIdParams);
-            }
-        }
-
         // Based on the OID, set as many properties as possible. Certainly the
         // Algorithm, but possibly the HashAlgorithm as well. If RSA, the
         // Padding, too.
@@ -141,9 +141,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             if (oid.Length == 9)
             {
                 target = new byte[] { 0x2A, 0x86, 0x48, 0x86, 0xF7, 0x0D, 0x01, 0x01 };
-                oidSpan = oid.Span.Slice(0, 8);
+                oidSpan = oid.Span.Slice(start: 0, length: 8);
 
-                if (MemoryExtensions.SequenceEqual(oidSpan, target) == false)
+                if (oidSpan.SequenceEqual(target) == false)
                 {
                     return false;
                 }
@@ -186,7 +186,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 target = new byte[] { 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x04, 0x01 };
 
-                if (MemoryExtensions.SequenceEqual(oid.Span, target))
+                if (oid.Span.SequenceEqual(target))
                 {
                     AlgorithmName = AlgorithmEcdsa;
                     HashAlgorithm = HashAlgorithmName.SHA1;
@@ -206,9 +206,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // This OID is for ECDSA with SHA-256 (2), SHA-384 (3), or
             // SHA-512 (4)
             target = new byte[] { 0x2A, 0x86, 0x48, 0xCE, 0x3D, 0x04, 0x03 };
-            oidSpan = oid.Span.Slice(0, 7);
+            oidSpan = oid.Span.Slice(start: 0, length: 7);
 
-            if (MemoryExtensions.SequenceEqual(oidSpan, target) == false)
+            if (oidSpan.SequenceEqual(target) == false)
             {
                 return false;
             }
@@ -264,21 +264,21 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         {
             if (algIdParams.Length == 2)
             {
-                if (algIdParams.Span[0] == 0x30 && algIdParams.Span[1] == 0)
+                if (algIdParams.Span[index: 0] == 0x30 && algIdParams.Span[index: 1] == 0)
                 {
                     PssSaltLength = 20;
                 }
             }
             else if (algIdParams.Length == 50)
             {
-                if (algIdParams.Span[16] == algIdParams.Span[44])
+                if (algIdParams.Span[index: 16] == algIdParams.Span[index: 44])
                 {
-                    PssSaltLength = algIdParams.Span[16] switch
+                    PssSaltLength = algIdParams.Span[index: 16] switch
                     {
                         1 => 32,
                         2 => 48,
                         3 => 64,
-                        _ => 0,
+                        _ => 0
                     };
                 }
             }

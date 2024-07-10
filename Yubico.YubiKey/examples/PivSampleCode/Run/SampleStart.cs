@@ -12,13 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Yubico.YubiKey.Sample.PivSampleCode
 {
     internal sealed class StartProgram
     {
-        static void Main()
+        private static void Main()
         {
             var pivSampleRun = new PivSampleRun(maxInvalidCount: 2);
             pivSampleRun.RunSample();

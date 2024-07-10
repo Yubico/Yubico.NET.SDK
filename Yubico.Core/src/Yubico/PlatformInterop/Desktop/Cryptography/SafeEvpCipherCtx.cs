@@ -19,7 +19,7 @@ namespace Yubico.PlatformInterop
 {
     public class SafeEvpCipherCtx : SafeHandle
     {
-        public SafeEvpCipherCtx() : base(IntPtr.Zero, true)
+        public SafeEvpCipherCtx() : base(IntPtr.Zero, ownsHandle: true)
         {
         }
 
@@ -27,6 +27,9 @@ namespace Yubico.PlatformInterop
         public SafeEvpCipherCtx(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
         {
         }
+
+        /// <inheritdoc />
+        public override bool IsInvalid => handle == IntPtr.Zero;
 
         /// <inheritdoc />
         protected override bool ReleaseHandle()
@@ -38,8 +41,5 @@ namespace Yubico.PlatformInterop
 
             return true;
         }
-
-        /// <inheritdoc />
-        public override bool IsInvalid => handle == IntPtr.Zero;
     }
 }

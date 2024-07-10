@@ -17,14 +17,23 @@ using Yubico.Core.Buffers;
 namespace Yubico.YubiKey.TestApp.Converters
 {
     /// <summary>
-    /// Supports parameter parsing base-32 strings for the sandbox app.
+    ///     Supports parameter parsing base-32 strings for the sandbox app.
     /// </summary>
     public class Base32Bytes : BytesBase
     {
-        public static Base32Bytes Bytes(byte[] d) => new Base32Bytes { Value = d };
+        public static Base32Bytes Bytes(byte[] d)
+        {
+            return new Base32Bytes { Value = d };
+        }
 
-        public static Base32Bytes Encode(string s) => new Base32Bytes { Value = Base32.DecodeText(s) };
+        public static Base32Bytes Encode(string s)
+        {
+            return new Base32Bytes { Value = Base32.DecodeText(s) };
+        }
 
-        public override string ToString() => Base32.EncodeBytes(Value);
+        public override string ToString()
+        {
+            return Base32.EncodeBytes(Value);
+        }
     }
 }

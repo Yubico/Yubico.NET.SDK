@@ -23,47 +23,17 @@ using Yubico.YubiKey.Otp.Commands;
 namespace Yubico.YubiKey.Otp.Operations
 {
     /// <summary>
-    /// Operation class for sending an HMAC-SHA1, TOTP, or Yubico OTP challenge 
-    /// to an OTP application slot on a YubiKey and receiving its response.
+    ///     Operation class for sending an HMAC-SHA1, TOTP, or Yubico OTP challenge
+    ///     to an OTP application slot on a YubiKey and receiving its response.
     /// </summary>
     public class CalculateChallengeResponse : OperationBase<CalculateChallengeResponse>
     {
         internal CalculateChallengeResponse(IYubiKeyConnection connection, IOtpSession session, Slot slot)
-            : base(connection, session, slot) { }
+            : base(connection, session, slot)
+        {
+        }
 
-        #region Size Constants
-        /// <summary>
-        /// Maximum length in bytes for an HMAC challenge.
-        /// </summary>
-        public const int MaxHmacChallengeSize = 64;
-
-        /// <summary>
-        /// Size in bytes for a Yubico OTP challenge.
-        /// </summary>
-        public const int YubicoOtpChallengeSize = 6;
-
-        /// <summary>
-        /// Minimum digits for an OTP (one-time password).
-        /// </summary>
-        public const int MinOtpDigits = 6;
-
-        /// <summary>
-        /// Maximum digits for an OTP (one-time password).
-        /// </summary>
-        public const int MaxOtpDigits = 10;
-        #endregion
-
-        #region Private Fields
-        private byte[] _challenge = Array.Empty<byte>();
-        private bool? _isTotp;
-        private int _period = 30;
-        private ChallengeResponseAlgorithm _algorithm;
-        private Action _touchNotify = () => Debug.WriteLine("YubiKey SDK: Default Touch Prompt");
-        private ReadOnlyMemory<byte> _dataBytes;
-        private int _dataInt;
-        #endregion
-
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void PreLaunchOperation()
         {
             var exceptions = new List<Exception>();
@@ -96,12 +66,15 @@ namespace Yubico.YubiKey.Otp.Operations
                         {
                             exceptions.Add(new InvalidOperationException(ExceptionMessages.HmacChallengeTooLong));
                         }
+
                         break;
                     case ChallengeResponseAlgorithm.YubicoOtp:
                         if (_challenge.Length != YubicoOtpChallengeSize)
                         {
-                            exceptions.Add(new InvalidOperationException(ExceptionMessages.YubicoOtpChallengeLengthInvalid));
+                            exceptions.Add(
+                                new InvalidOperationException(ExceptionMessages.YubicoOtpChallengeLengthInvalid));
                         }
+
                         break;
                 }
             }
@@ -114,7 +87,7 @@ namespace Yubico.YubiKey.Otp.Operations
             }
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override void ExecuteOperation()
         {
             // This only needs to be called once, so short-circuit if it has
@@ -129,7 +102,10 @@ namespace Yubico.YubiKey.Otp.Operations
                     kb.TouchEvent += OnTouch;
                 }
 
-                void OnTouch(object sender, EventArgs e) => _ = Task.Run(_touchNotify);
+                void OnTouch(object sender, EventArgs e)
+                {
+                    _ = Task.Run(_touchNotify);
+                }
 
                 try
                 {
@@ -139,13 +115,15 @@ namespace Yubico.YubiKey.Otp.Operations
                         OtpSlot!.Value,
                         _algorithm,
                         _challenge);
+
                     ChallengeResponseResponse response = Connection.SendCommand(cmd);
                     if (response.Status != ResponseStatus.Success)
                     {
-                        throw new InvalidOperationException(string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.YubiKeyOperationFailed,
-                            response.StatusMessage));
+                        throw new InvalidOperationException(
+                            string.Format(
+                                CultureInfo.CurrentCulture,
+                                ExceptionMessages.YubiKeyOperationFailed,
+                                response.StatusMessage));
                     }
 
                     _dataBytes = response.GetData();
@@ -153,6 +131,7 @@ namespace Yubico.YubiKey.Otp.Operations
                     if (_algorithm == ChallengeResponseAlgorithm.HmacSha1)
                     {
                         byte offset = (byte)(_dataBytes.Span[^1] & 0x0f);
+
                         // The ykman code reads this as a uint, but masks the top bit. I'll just do the same
                         // thing, but treat it as an int since that's CLS-compliant.
                         _dataInt = (int)BinaryPrimitives.ReadUInt32BigEndian(_dataBytes[offset..].Span) & 0x7fffffff;
@@ -170,9 +149,9 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         /// <summary>
-        /// Get the raw bytes for the OTP (one-time password).
+        ///     Get the raw bytes for the OTP (one-time password).
         /// </summary>
-        /// <returns><see cref="ReadOnlyMemory{T}"/> collection of bytes.</returns>
+        /// <returns><see cref="ReadOnlyMemory{T}" /> collection of bytes.</returns>
         public ReadOnlyMemory<byte> GetDataBytes()
         {
             // We're calling Execute here because the base class orchestrates
@@ -183,7 +162,7 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         /// <summary>
-        /// Get the OTP (one-time password) as an <see langword="int"/>.
+        ///     Get the OTP (one-time password) as an <see langword="int" />.
         /// </summary>
         /// <returns>Single int representing the OTP.</returns>
         public int GetDataInt()
@@ -192,6 +171,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.IntOrCodeOnlyWithHmac);
             }
+
             // We're calling Execute here because the base class orchestrates
             // validation through it.
             Execute();
@@ -200,31 +180,33 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         /// <summary>
-        /// Get the OTP code as a string representation of numeric digits.
+        ///     Get the OTP code as a string representation of numeric digits.
         /// </summary>
         /// <param name="digits">The number of digits in the string (default is 6).</param>
-        /// <returns>A <see cref="string"/> representation of the OTP.</returns>
+        /// <returns>A <see cref="string" /> representation of the OTP.</returns>
         public string GetCode(int digits = 6)
         {
             if (digits < MinOtpDigits || digits > MaxOtpDigits)
             {
                 throw new ArgumentOutOfRangeException(ExceptionMessages.OtpCodeDigitRange, nameof(digits));
             }
-            return (GetDataInt() % (uint)Math.Pow(10, digits))
-                .ToString(CultureInfo.InvariantCulture).PadLeft(digits, '0');
+
+            return (GetDataInt() % (uint)Math.Pow(x: 10, digits))
+                .ToString(CultureInfo.InvariantCulture).PadLeft(digits, paddingChar: '0');
         }
 
         /// <summary>
-        /// Accepts the challenge phrase as a <see langword="byte"/> array.
+        ///     Accepts the challenge phrase as a <see langword="byte" /> array.
         /// </summary>
-        /// <param name="challenge">A <see langword="byte"/> array.</param>
-        /// <returns>The <see cref="CalculateChallengeResponse"/> instance</returns>
+        /// <param name="challenge">A <see langword="byte" /> array.</param>
+        /// <returns>The <see cref="CalculateChallengeResponse" /> instance</returns>
         public CalculateChallengeResponse UseChallenge(byte[] challenge)
         {
             if (_isTotp ?? false)
             {
                 throw new InvalidOperationException(ExceptionMessages.BothTotpAndChallenge);
             }
+
             _isTotp = false;
             _challenge = challenge;
 
@@ -232,20 +214,21 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         /// <summary>
-        /// Instructs the operation to use TOTP instead of a <see langword="byte"/> array
-        /// for the challenge.
+        ///     Instructs the operation to use TOTP instead of a <see langword="byte" /> array
+        ///     for the challenge.
         /// </summary>
         /// <remarks>
-        /// UseYubiOtp(false) must be called along with UseTotp() in order for the YubiKey
-        /// to calculate the response code using the HMAC-SHA1 algorithm.
+        ///     UseYubiOtp(false) must be called along with UseTotp() in order for the YubiKey
+        ///     to calculate the response code using the HMAC-SHA1 algorithm.
         /// </remarks>
-        /// <returns>The <see cref="CalculateChallengeResponse"/> instance</returns>
+        /// <returns>The <see cref="CalculateChallengeResponse" /> instance</returns>
         public CalculateChallengeResponse UseTotp()
         {
             if (!(_isTotp ?? true))
             {
                 throw new InvalidOperationException(ExceptionMessages.BothTotpAndChallenge);
             }
+
             _isTotp = true;
 
             // ToUnixTimeSeconds returns a long, obviously in host order. The
@@ -259,10 +242,10 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         /// <summary>
-        /// Sets the time period in seconds that a TOTP challenge is good for.
+        ///     Sets the time period in seconds that a TOTP challenge is good for.
         /// </summary>
         /// <param name="seconds">Time resolution in seconds for the challenge.</param>
-        /// <returns>The <see cref="CalculateChallengeResponse"/> instance</returns>
+        /// <returns>The <see cref="CalculateChallengeResponse" /> instance</returns>
         public CalculateChallengeResponse WithPeriod(int seconds)
         {
             _period = seconds;
@@ -270,25 +253,25 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         /// <summary>
-        /// Set an <see cref="Action"/> delegate to notify users to touch the YubiKey button.
+        ///     Set an <see cref="Action" /> delegate to notify users to touch the YubiKey button.
         /// </summary>
         /// <remarks>
-        /// <para>
-        /// This delegate will be launched as a <see cref="Task"/>. The SDK will
-        /// not wait or otherwise track the completion of the delegate. It is
-        /// meant as a simple notifier.
-        /// </para>
-        /// <para>
-        /// It is important to take into consideration that it will execute on
-        /// an unknown thread, so if you are using it to do a notification on a
-        /// graphical user interface, then you should be sure that you marshall
-        /// the call to the appropriate thread.
-        /// </para>
+        ///     <para>
+        ///         This delegate will be launched as a <see cref="Task" />. The SDK will
+        ///         not wait or otherwise track the completion of the delegate. It is
+        ///         meant as a simple notifier.
+        ///     </para>
+        ///     <para>
+        ///         It is important to take into consideration that it will execute on
+        ///         an unknown thread, so if you are using it to do a notification on a
+        ///         graphical user interface, then you should be sure that you marshall
+        ///         the call to the appropriate thread.
+        ///     </para>
         /// </remarks>
         /// <example>
-        /// Here is a very simple example of performing a challenge-response
-        /// operation on a YubiKey.
-        /// <code language="csharp">
+        ///     Here is a very simple example of performing a challenge-response
+        ///     operation on a YubiKey.
+        ///     <code language="csharp">
         /// using (var otpSess = new OtpSession(_yubiKey))
         /// {
         ///     string otp = otp.CalculateChallengeResponse(_slot)
@@ -297,10 +280,10 @@ namespace Yubico.YubiKey.Otp.Operations
         ///         .GetCode();
         /// }
         /// </code>
-        /// As mentioned in the remarks section, showing a prompt in a GUI
-        /// application requires a little bit more work. Here is an example of
-        /// calling a notifier method.
-        /// <code language="csharp">
+        ///     As mentioned in the remarks section, showing a prompt in a GUI
+        ///     application requires a little bit more work. Here is an example of
+        ///     calling a notifier method.
+        ///     <code language="csharp">
         /// using (var otpSess = new OtpSession(_yubiKey))
         /// {
         ///     string otp = otpSess.CalculateChallengeResponse(_slot)
@@ -310,9 +293,9 @@ namespace Yubico.YubiKey.Otp.Operations
         ///     _appWindow.SetOtpCode(otp);
         /// }
         /// </code>
-        /// Here is how the notifier would handle making sure the notification
-        /// is handled on the correct thread.
-        /// <code language="csharp">
+        ///     Here is how the notifier would handle making sure the notification
+        ///     is handled on the correct thread.
+        ///     <code language="csharp">
         /// public void AlertUser()
         /// {
         ///     if (!Dispatcher.CheckAccess())
@@ -323,8 +306,8 @@ namespace Yubico.YubiKey.Otp.Operations
         /// }
         /// </code>
         /// </example>
-        /// <param name="notifier"><see cref="Action"/> delegate.</param>
-        /// <returns>The <see cref="CalculateChallengeResponse"/> instance</returns>
+        /// <param name="notifier"><see cref="Action" /> delegate.</param>
+        /// <returns>The <see cref="CalculateChallengeResponse" /> instance</returns>
         public CalculateChallengeResponse UseTouchNotifier(Action notifier)
         {
             _touchNotify = notifier;
@@ -332,26 +315,63 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         /// <summary>
-        /// Sets the operation to use the Yubico OTP or HMAC-SHA1 algorithm to calculate the response.
+        ///     Sets the operation to use the Yubico OTP or HMAC-SHA1 algorithm to calculate the response.
         /// </summary>
         /// <remarks>
-        /// There is no default algorithm. You must either call this method with a 
-        /// <see langword="true"/> parameter, which will configure the YubiKey to use 
-        /// Yubico OTP as the algorithm, or a <see langword="false"/> parameter, which
-        /// will configure the YubiKey to use the HMAC-SHA1 algorithm (for both HMAC-SHA1 
-        /// and TOTP challenges).
+        ///     There is no default algorithm. You must either call this method with a
+        ///     <see langword="true" /> parameter, which will configure the YubiKey to use
+        ///     Yubico OTP as the algorithm, or a <see langword="false" /> parameter, which
+        ///     will configure the YubiKey to use the HMAC-SHA1 algorithm (for both HMAC-SHA1
+        ///     and TOTP challenges).
         /// </remarks>
         /// <param name="setting">
-        /// A <see langword="bool"/> specifying whether to use the Yubico OTP or HMAC-SHA1 algorithm.
+        ///     A <see langword="bool" /> specifying whether to use the Yubico OTP or HMAC-SHA1 algorithm.
         /// </param>
-        /// <returns>The <see cref="CalculateChallengeResponse"/> instance</returns>
+        /// <returns>The <see cref="CalculateChallengeResponse" /> instance</returns>
         public CalculateChallengeResponse UseYubiOtp(bool setting)
         {
             _algorithm =
                 setting
-                ? ChallengeResponseAlgorithm.YubicoOtp
-                : ChallengeResponseAlgorithm.HmacSha1;
+                    ? ChallengeResponseAlgorithm.YubicoOtp
+                    : ChallengeResponseAlgorithm.HmacSha1;
+
             return this;
         }
+
+        #region Size Constants
+
+        /// <summary>
+        ///     Maximum length in bytes for an HMAC challenge.
+        /// </summary>
+        public const int MaxHmacChallengeSize = 64;
+
+        /// <summary>
+        ///     Size in bytes for a Yubico OTP challenge.
+        /// </summary>
+        public const int YubicoOtpChallengeSize = 6;
+
+        /// <summary>
+        ///     Minimum digits for an OTP (one-time password).
+        /// </summary>
+        public const int MinOtpDigits = 6;
+
+        /// <summary>
+        ///     Maximum digits for an OTP (one-time password).
+        /// </summary>
+        public const int MaxOtpDigits = 10;
+
+        #endregion
+
+        #region Private Fields
+
+        private byte[] _challenge = Array.Empty<byte>();
+        private bool? _isTotp;
+        private int _period = 30;
+        private ChallengeResponseAlgorithm _algorithm;
+        private Action _touchNotify = () => Debug.WriteLine("YubiKey SDK: Default Touch Prompt");
+        private ReadOnlyMemory<byte> _dataBytes;
+        private int _dataInt;
+
+        #endregion
     }
 }

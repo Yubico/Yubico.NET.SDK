@@ -380,14 +380,14 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Get information about YubiKey Bio multi-protocol.
+        ///     Get information about YubiKey Bio multi-protocol.
         /// </summary>
         /// <remarks>
-        /// This feature is available only on YubiKeys Bio multi-protocol (FW 5.6 and later). If you call
-        /// this method on an incompatible YubiKey, it will throw a <c>NotSupportedException</c>.
-        /// <code language="csharp">
+        ///     This feature is available only on YubiKeys Bio multi-protocol (FW 5.6 and later). If you call
+        ///     this method on an incompatible YubiKey, it will throw a <c>NotSupportedException</c>.
+        ///     <code language="csharp">
         ///     IEnumerable&lt;IYubiKeyDevice&gt; list = YubiKey.FindByTransport(Transport.UsbSmartCard);
-        ///     IYubiKeyDevice yubiKey = list.First();<br/>
+        ///     IYubiKeyDevice yubiKey = list.First();<br />
         ///     using (var pivSession = new PivSession(yubiKey))
         ///     {
         ///         try
@@ -400,20 +400,20 @@ namespace Yubico.YubiKey.Piv
         ///         }
         ///     }
         /// </code>
-        /// <para>
-        /// See the User's Manual
-        /// <xref href="UsersManualPivCommands#get-bio-metadata"> entry on getting bio metadata</xref>
-        /// for specific information about what information is returned.
-        /// </para>
+        ///     <para>
+        ///         See the User's Manual
+        ///         <xref href="UsersManualPivCommands#get-bio-metadata"> entry on getting bio metadata</xref>
+        ///         for specific information about what information is returned.
+        ///     </para>
         /// </remarks>
         /// <returns>
-        /// A new instance of a <c>PivBioMetadata</c> object.
+        ///     A new instance of a <c>PivBioMetadata</c> object.
         /// </returns>
         /// <exception cref="NotSupportedException">
-        /// The queried YubiKey does not support bio metadata.
+        ///     The queried YubiKey does not support bio metadata.
         /// </exception>
         /// <exception cref="ApduException">
-        /// The operation could not be completed.
+        ///     The operation could not be completed.
         /// </exception>
         public PivBioMetadata GetBioMetadata()
         {

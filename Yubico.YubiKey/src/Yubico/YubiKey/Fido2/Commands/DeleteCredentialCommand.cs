@@ -20,17 +20,17 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Delete a credential.
+    ///     Delete a credential.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="Fido2Response"/>. This command
-    /// does not return any data, it only returns "success" or "failure", and has
-    /// some FIDO2-specific error information.
-    /// <para>
-    /// This deletes a FIDO2 credential from the YubiKey. It is possible there is
-    /// some large blob data associated with that credential. This command will
-    /// not delete that data.
-    /// </para>
+    ///     The partner Response class is <see cref="Fido2Response" />. This command
+    ///     does not return any data, it only returns "success" or "failure", and has
+    ///     some FIDO2-specific error information.
+    ///     <para>
+    ///         This deletes a FIDO2 credential from the YubiKey. It is possible there is
+    ///         some large blob data associated with that credential. This command will
+    ///         not delete that data.
+    ///     </para>
     /// </remarks>
     public class DeleteCredentialCommand : CredentialMgmtSubCommand, IYubiKeyCommand<Fido2Response>
     {
@@ -45,41 +45,39 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// Constructs a new instance of <see cref="DeleteCredentialCommand"/>.
+        ///     Constructs a new instance of <see cref="DeleteCredentialCommand" />.
         /// </summary>
         /// <param name="credentialId">
-        /// The <c>CredentialId</c> of the credential to delete.
+        ///     The <c>CredentialId</c> of the credential to delete.
         /// </param>
         /// <param name="pinUvAuthToken">
-        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        /// key.
+        ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
+        ///     key.
         /// </param>
         /// <param name="authProtocol">
-        /// The Auth Protocol used to build the Auth Token.
+        ///     The Auth Protocol used to build the Auth Token.
         /// </param>
         public DeleteCredentialCommand(
             CredentialId credentialId,
             ReadOnlyMemory<byte> pinUvAuthToken,
             PinUvAuthProtocolBase authProtocol)
-            : base(new CredentialManagementCommand(
-            SubCmdDeleteCredential, EncodeParams(credentialId), pinUvAuthToken, authProtocol))
+            : base(
+                new CredentialManagementCommand(
+                    SubCmdDeleteCredential, EncodeParams(credentialId), pinUvAuthToken, authProtocol))
         {
         }
 
         /// <inheritdoc />
-        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new Fido2Response(responseApdu);
+        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) => new Fido2Response(responseApdu);
 
         // This method encodes the parameters. For
         // DeleteCredentialCommand, the parameters consist of only the
         // credentialId, and it is encoded as
         //   map
         //     02 encoding of credentialID
-        private static byte[] EncodeParams(CredentialId credentialId)
-        {
-            return new CborMapWriter<int>()
+        private static byte[] EncodeParams(CredentialId credentialId) =>
+            new CborMapWriter<int>()
                 .Entry(KeyCredentialId, credentialId)
                 .Encode();
-        }
     }
 }

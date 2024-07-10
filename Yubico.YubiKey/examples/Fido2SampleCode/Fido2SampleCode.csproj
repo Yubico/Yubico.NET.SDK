@@ -15,16 +15,16 @@ limitations under the License. -->
  -->
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT'">net6.0-windows</TargetFrameworks>
-    <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT'">net6.0</TargetFrameworks>
-    <Nullable>disable</Nullable>
-    <IsPackable>false</IsPackable>
-    <UseWindowsForms Condition=" '$(OS)' == 'Windows_NT'">true</UseWindowsForms>
-  </PropertyGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\SharedSampleCode\SharedSampleCode.csproj" />
-  </ItemGroup>
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT'">net6.0-windows</TargetFrameworks>
+        <TargetFrameworks Condition=" '$(OS)' != 'Windows_NT'">net6.0</TargetFrameworks>
+        <Nullable>disable</Nullable>
+        <IsPackable>false</IsPackable>
+        <UseWindowsForms Condition=" '$(OS)' == 'Windows_NT'">true</UseWindowsForms>
+    </PropertyGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\SharedSampleCode\SharedSampleCode.csproj"/>
+    </ItemGroup>
 
 </Project>

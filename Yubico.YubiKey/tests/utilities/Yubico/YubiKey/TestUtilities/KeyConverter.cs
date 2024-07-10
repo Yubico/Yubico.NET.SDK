@@ -127,7 +127,7 @@ namespace Yubico.YubiKey.TestUtilities
                 BuildPivPrivateKey(pemKeyString);
             }
 
-            SetProperties(true);
+            SetProperties(exceptionOnNoData: true);
         }
 
         // This will clone the input key object, so that the KeyConverter object
@@ -139,7 +139,7 @@ namespace Yubico.YubiKey.TestUtilities
                 _pivPublicKey = PivPublicKey.Create(pivPublicKey.PivEncodedPublicKey);
             }
 
-            SetProperties(true);
+            SetProperties(exceptionOnNoData: true);
         }
 
         // This will clone the input key object, so that the KeyConverter object
@@ -157,7 +157,7 @@ namespace Yubico.YubiKey.TestUtilities
                 _pivPrivateKey = PivPrivateKey.Create(pivPrivateKey.EncodedPrivateKey);
             }
 
-            SetProperties(true);
+            SetProperties(exceptionOnNoData: true);
         }
 
         // A System.Security.Cryptography.RSA object can contain a private key, a
@@ -178,7 +178,7 @@ namespace Yubico.YubiKey.TestUtilities
 
             BuildPivPublicKey(rsaObject);
 
-            SetProperties(true);
+            SetProperties(exceptionOnNoData: true);
         }
 
         // A System.Security.Cryptography.ECDsa object can contain a private key,
@@ -199,7 +199,7 @@ namespace Yubico.YubiKey.TestUtilities
 
             BuildPivPublicKey(eccObject);
 
-            SetProperties(true);
+            SetProperties(exceptionOnNoData: true);
         }
 
         public bool IsPrivate { get; private set; }
@@ -228,13 +228,10 @@ namespace Yubico.YubiKey.TestUtilities
         // in a PivPrivateKey.
         public bool IsKeyAvailable(int keyType)
         {
-            bool returnValue = false;
+            var returnValue = false;
 
             switch (keyType)
             {
-                default:
-                    break;
-
                 case KeyTypePemPublic:
                     if (_pivPublicKey.Algorithm != PivAlgorithm.None)
                     {
@@ -336,17 +333,17 @@ namespace Yubico.YubiKey.TestUtilities
 
             if (_pivPrivateKey.Algorithm == PivAlgorithm.Rsa1024 || _pivPrivateKey.Algorithm == PivAlgorithm.Rsa2048)
             {
-                byte[] primeP = Array.Empty<byte>();
-                byte[] primeQ = Array.Empty<byte>();
+                var primeP = Array.Empty<byte>();
+                var primeQ = Array.Empty<byte>();
                 try
                 {
                     var rsaPrivate = (PivRsaPrivateKey)_pivPrivateKey;
                     primeP = rsaPrivate.PrimeP.ToArray();
                     primeQ = rsaPrivate.PrimeQ.ToArray();
-                    byte[] modulus = GetModulusFromPrimes(primeP, primeQ);
-                    byte[] exponent = new byte[] { 0x01, 0x00, 0x01 };
+                    var modulus = GetModulusFromPrimes(primeP, primeQ);
+                    byte[] exponent = { 0x01, 0x00, 0x01 };
                     var rsaPublic = new PivRsaPublicKey(modulus, exponent);
-                    return (PivPublicKey)rsaPublic;
+                    return rsaPublic;
                 }
                 finally
                 {
@@ -463,15 +460,15 @@ namespace Yubico.YubiKey.TestUtilities
 
             var eccParams = new ECParameters
             {
-                Curve = (ECCurve)eccCurve
+                Curve = eccCurve
             };
 
             try
             {
                 var eccPublic = (PivEccPublicKey)_pivPublicKey;
 
-                int coordLength = (eccPublic.PublicPoint.Length - 1) / 2;
-                eccParams.Q.X = eccPublic.PublicPoint.Slice(1, coordLength).ToArray();
+                var coordLength = (eccPublic.PublicPoint.Length - 1) / 2;
+                eccParams.Q.X = eccPublic.PublicPoint.Slice(start: 1, coordLength).ToArray();
                 eccParams.Q.Y = eccPublic.PublicPoint.Slice(1 + coordLength, coordLength).ToArray();
                 if (_pivPrivateKey.Algorithm != PivAlgorithm.None)
                 {
@@ -509,21 +506,21 @@ namespace Yubico.YubiKey.TestUtilities
         // If this method cannot build the PEM, it will throw an exception.
         public char[] GetPemKeyString()
         {
-            byte[] encodedKey = Array.Empty<byte>();
-            char[] temp = Array.Empty<char>();
+            var encodedKey = Array.Empty<byte>();
+            var temp = Array.Empty<char>();
             char[] prefix;
             char[] suffix;
             if (IsPrivate)
             {
-                string keyStart = PrivateKeyStart + "\n";
-                string keyEnd = "\n" + PrivateKeyEnd;
+                var keyStart = PrivateKeyStart + "\n";
+                var keyEnd = "\n" + PrivateKeyEnd;
                 prefix = keyStart.ToCharArray();
                 suffix = keyEnd.ToCharArray();
             }
             else
             {
-                string keyStart = PublicKeyStart + "\n";
-                string keyEnd = "\n" + PublicKeyEnd;
+                var keyStart = PublicKeyStart + "\n";
+                var keyEnd = "\n" + PublicKeyEnd;
                 prefix = keyStart.ToCharArray();
                 suffix = keyEnd.ToCharArray();
             }
@@ -532,7 +529,7 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 if (Algorithm == PivAlgorithm.Rsa1024 || Algorithm == PivAlgorithm.Rsa2048)
                 {
-                    using RSA rsaObject = GetRsaObject();
+                    using var rsaObject = GetRsaObject();
                     if (IsPrivate)
                     {
                         encodedKey = rsaObject.ExportPkcs8PrivateKey();
@@ -544,7 +541,7 @@ namespace Yubico.YubiKey.TestUtilities
                 }
                 else if (Algorithm == PivAlgorithm.EccP256 || Algorithm == PivAlgorithm.EccP384)
                 {
-                    using ECDsa eccObject = GetEccObject();
+                    using var eccObject = GetEccObject();
                     if (IsPrivate)
                     {
                         encodedKey = eccObject.ExportPkcs8PrivateKey();
@@ -560,23 +557,23 @@ namespace Yubico.YubiKey.TestUtilities
                     // The length of the char array will be the lengths of the
                     // prefix and suffix, along with the length of the Base64
                     // data, and new line characters. Create an upper bound.
-                    int blockCount = (encodedKey.Length + 2) / 3;
-                    int totalLength = blockCount * 4;
-                    int lineCount = (totalLength + 75) / 76;
+                    var blockCount = (encodedKey.Length + 2) / 3;
+                    var totalLength = blockCount * 4;
+                    var lineCount = (totalLength + 75) / 76;
                     totalLength += lineCount * 4;
                     totalLength += prefix.Length;
                     totalLength += suffix.Length;
 
                     temp = new char[totalLength];
-                    Array.Copy(prefix, 0, temp, 0, prefix.Length);
-                    int count = Convert.ToBase64CharArray(
-                        encodedKey, 0, encodedKey.Length,
+                    Array.Copy(prefix, sourceIndex: 0, temp, destinationIndex: 0, prefix.Length);
+                    var count = Convert.ToBase64CharArray(
+                        encodedKey, offsetIn: 0, encodedKey.Length,
                         temp, prefix.Length,
                         Base64FormattingOptions.InsertLineBreaks);
-                    Array.Copy(suffix, 0, temp, prefix.Length + count, suffix.Length);
+                    Array.Copy(suffix, sourceIndex: 0, temp, prefix.Length + count, suffix.Length);
                     totalLength = prefix.Length + suffix.Length + count;
-                    char[] returnValue = new char[totalLength];
-                    Array.Copy(temp, 0, returnValue, 0, totalLength);
+                    var returnValue = new char[totalLength];
+                    Array.Copy(temp, sourceIndex: 0, returnValue, destinationIndex: 0, totalLength);
 
                     return returnValue;
                 }
@@ -584,7 +581,7 @@ namespace Yubico.YubiKey.TestUtilities
             finally
             {
                 CryptographicOperations.ZeroMemory(encodedKey);
-                Array.Fill<char>(temp, (char)0);
+                Array.Fill(temp, (char)0);
             }
 
             throw new InvalidOperationException(
@@ -604,7 +601,7 @@ namespace Yubico.YubiKey.TestUtilities
             _pivPrivateKey = new PivPrivateKey();
             _pivPublicKey = new PivPublicKey();
 
-            SetProperties(false);
+            SetProperties(exceptionOnNoData: false);
         }
 
         // Make sure any properties are correctly set.
@@ -641,15 +638,15 @@ namespace Yubico.YubiKey.TestUtilities
         private void BuildPivPrivateKey(char[] pemKeyString)
         {
             // Read everything between the labels.
-            byte[] encodedKey = Convert.FromBase64CharArray(
+            var encodedKey = Convert.FromBase64CharArray(
                 pemKeyString,
                 PrivateStartLength,
                 pemKeyString.Length - (PrivateStartLength + PrivateEndLength));
 
-            int offset = ReadTagLen(encodedKey, 0, false);
-            offset = ReadTagLen(encodedKey, offset, true);
-            offset = ReadTagLen(encodedKey, offset, false);
-            offset = ReadTagLen(encodedKey, offset, false);
+            var offset = ReadTagLen(encodedKey, offset: 0, readValue: false);
+            offset = ReadTagLen(encodedKey, offset, readValue: true);
+            offset = ReadTagLen(encodedKey, offset, readValue: false);
+            offset = ReadTagLen(encodedKey, offset, readValue: false);
             if (offset > 0)
             {
                 if (encodedKey[offset + 3] == 0x86)
@@ -674,14 +671,14 @@ namespace Yubico.YubiKey.TestUtilities
         private void BuildPivPublicKey(char[] pemKeyString)
         {
             // Read everything between the labels.
-            byte[] encodedKey = Convert.FromBase64CharArray(
+            var encodedKey = Convert.FromBase64CharArray(
                 pemKeyString,
                 PublicStartLength,
                 pemKeyString.Length - (PublicStartLength + PublicEndLength));
 
-            int offset = ReadTagLen(encodedKey, 0, false);
-            offset = ReadTagLen(encodedKey, offset, false);
-            offset = ReadTagLen(encodedKey, offset, false);
+            var offset = ReadTagLen(encodedKey, offset: 0, readValue: false);
+            offset = ReadTagLen(encodedKey, offset, readValue: false);
+            offset = ReadTagLen(encodedKey, offset, readValue: false);
             if (offset > 0)
             {
                 if (encodedKey[offset + 3] == 0x86)
@@ -703,7 +700,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         private void BuildPivPrivateKey(RSA rsaObject)
         {
-            RSAParameters rsaParams = rsaObject.ExportParameters(true);
+            var rsaParams = rsaObject.ExportParameters(includePrivateParameters: true);
 
             try
             {
@@ -714,7 +711,7 @@ namespace Yubico.YubiKey.TestUtilities
                     rsaParams.DQ,
                     rsaParams.InverseQ);
 
-                _pivPrivateKey = (PivPrivateKey)rsaPriKey;
+                _pivPrivateKey = rsaPriKey;
             }
             finally
             {
@@ -724,44 +721,44 @@ namespace Yubico.YubiKey.TestUtilities
 
         private void BuildPivPublicKey(RSA rsaObject)
         {
-            RSAParameters rsaParams = rsaObject.ExportParameters(false);
+            var rsaParams = rsaObject.ExportParameters(includePrivateParameters: false);
 
             var rsaPubKey = new PivRsaPublicKey(rsaParams.Modulus, rsaParams.Exponent);
-            _pivPublicKey = (PivPublicKey)rsaPubKey;
+            _pivPublicKey = rsaPubKey;
         }
 
         private void BuildPivPrivateKey(ECDsa eccObject)
         {
             // We need to build the private value and it must be exactly
             // the keySize.
-            int keySize = eccObject.KeySize / 8;
-            ECParameters eccParams = eccObject.ExportParameters(true);
-            byte[] privateValue = new byte[keySize];
-            int offset = keySize - eccParams.D!.Length;
-            Array.Copy(eccParams.D, 0, privateValue, offset, eccParams.D.Length);
+            var keySize = eccObject.KeySize / 8;
+            var eccParams = eccObject.ExportParameters(includePrivateParameters: true);
+            var privateValue = new byte[keySize];
+            var offset = keySize - eccParams.D!.Length;
+            Array.Copy(eccParams.D, sourceIndex: 0, privateValue, offset, eccParams.D.Length);
 
             var eccPriKey = new PivEccPrivateKey(privateValue);
-            _pivPrivateKey = (PivPrivateKey)eccPriKey;
+            _pivPrivateKey = eccPriKey;
         }
 
         private void BuildPivPublicKey(ECDsa eccObject)
         {
-            int keySize = eccObject.KeySize / 8;
+            var keySize = eccObject.KeySize / 8;
 
             // We need to build the public point as
             //  04 || x-coord || y-coord
             // Each coordinate must be the exact length.
             // Prepend 00 bytes if the coordinate is not long enough.
-            ECParameters eccParams = eccObject.ExportParameters(false);
-            byte[] point = new byte[(keySize * 2) + 1];
+            var eccParams = eccObject.ExportParameters(includePrivateParameters: false);
+            var point = new byte[(keySize * 2) + 1];
             point[0] = 4;
-            int offset = 1 + (keySize - eccParams.Q.X!.Length);
-            Array.Copy(eccParams.Q.X, 0, point, offset, eccParams.Q.X.Length);
+            var offset = 1 + (keySize - eccParams.Q.X!.Length);
+            Array.Copy(eccParams.Q.X, sourceIndex: 0, point, offset, eccParams.Q.X.Length);
             offset += keySize + (keySize - eccParams.Q.Y!.Length);
-            Array.Copy(eccParams.Q.Y, 0, point, offset, eccParams.Q.Y.Length);
+            Array.Copy(eccParams.Q.Y, sourceIndex: 0, point, offset, eccParams.Q.Y.Length);
 
             var eccPubKey = new PivEccPublicKey(point);
-            _pivPublicKey = (PivPublicKey)eccPubKey;
+            _pivPublicKey = eccPubKey;
         }
 
         // Multiply p and q to get the modulus
@@ -772,25 +769,25 @@ namespace Yubico.YubiKey.TestUtilities
         // crypto.
         private static byte[] GetModulusFromPrimes(byte[] primeP, byte[] primeQ)
         {
-            byte[] pValue = Array.Empty<byte>();
-            byte[] qValue = Array.Empty<byte>();
-            byte[] modulus = Array.Empty<byte>();
+            var pValue = Array.Empty<byte>();
+            var qValue = Array.Empty<byte>();
+            var modulus = Array.Empty<byte>();
 
             try
             {
                 pValue = new byte[primeP.Length + 1];
-                Array.Copy(primeP, 0, pValue, 1, primeP.Length);
+                Array.Copy(primeP, sourceIndex: 0, pValue, destinationIndex: 1, primeP.Length);
                 Array.Reverse(pValue);
 
                 qValue = new byte[primeQ.Length + 1];
-                Array.Copy(primeQ, 0, qValue, 1, primeQ.Length);
+                Array.Copy(primeQ, sourceIndex: 0, qValue, destinationIndex: 1, primeQ.Length);
                 Array.Reverse(qValue);
 
                 var pInteger = new BigInteger(pValue);
                 var qInteger = new BigInteger(qValue);
                 var result = BigInteger.Multiply(pInteger, qInteger);
 
-                modulus = result.ToByteArray(true, true);
+                modulus = result.ToByteArray(isUnsigned: true, isBigEndian: true);
             }
             finally
             {
@@ -810,27 +807,27 @@ namespace Yubico.YubiKey.TestUtilities
         // crypto.
         private static byte[] GetPrivateExponentFromPrimes(byte[] primeP, byte[] primeQ, byte[] publicExponent)
         {
-            byte[] pValue = new byte[primeP.Length + 1];
-            Array.Copy(primeP, 0, pValue, 1, primeP.Length);
+            var pValue = new byte[primeP.Length + 1];
+            Array.Copy(primeP, sourceIndex: 0, pValue, destinationIndex: 1, primeP.Length);
             Array.Reverse(pValue);
             var pInteger = new BigInteger(pValue);
             var pMinus1 = BigInteger.Subtract(pInteger, BigInteger.One);
 
-            byte[] qValue = new byte[primeQ.Length + 1];
-            Array.Copy(primeQ, 0, qValue, 1, primeQ.Length);
+            var qValue = new byte[primeQ.Length + 1];
+            Array.Copy(primeQ, sourceIndex: 0, qValue, destinationIndex: 1, primeQ.Length);
             Array.Reverse(qValue);
             var qInteger = new BigInteger(qValue);
             var qMinus1 = BigInteger.Subtract(qInteger, BigInteger.One);
 
             var phi = BigInteger.Multiply(pMinus1, qMinus1);
 
-            byte[] eValue = new byte[publicExponent.Length + 1];
-            Array.Copy(publicExponent, 0, eValue, 1, publicExponent.Length);
+            var eValue = new byte[publicExponent.Length + 1];
+            Array.Copy(publicExponent, sourceIndex: 0, eValue, destinationIndex: 1, publicExponent.Length);
             Array.Reverse(eValue);
             var eInteger = new BigInteger(eValue);
 
-            BigInteger dInteger = ModInverse(eInteger, phi);
-            byte[] result = dInteger.ToByteArray(true, true);
+            var dInteger = ModInverse(eInteger, phi);
+            var result = dInteger.ToByteArray(isUnsigned: true, isBigEndian: true);
 
             return result;
         }
@@ -841,7 +838,7 @@ namespace Yubico.YubiKey.TestUtilities
         // crypto.
         public static BigInteger ModInverse(BigInteger value, BigInteger modulo)
         {
-            if (1 != Egcd(value, modulo, out BigInteger x, out _))
+            if (1 != Egcd(value, modulo, out var x, out _))
             {
                 return BigInteger.Zero;
             }
@@ -872,11 +869,11 @@ namespace Yubico.YubiKey.TestUtilities
 
             while (left != 0)
             {
-                BigInteger q = right / left;
-                BigInteger r = right % left;
+                var q = right / left;
+                var r = right % left;
 
-                BigInteger m = leftFactor - (u * q);
-                BigInteger n = rightFactor - (v * q);
+                var m = leftFactor - (u * q);
+                var n = rightFactor - (v * q);
 
                 right = left;
                 left = r;
@@ -912,7 +909,7 @@ namespace Yubico.YubiKey.TestUtilities
             // could be 84 or higher, but this method does not support anything
             // beyond 83). This says the length is the next 1, 2, or 3 octets.
             int length = buffer[offset + 1];
-            int increment = 2;
+            var increment = 2;
             if (length == 0x80 || length > 0x83)
             {
                 return -1;
@@ -920,7 +917,7 @@ namespace Yubico.YubiKey.TestUtilities
 
             if (length > 0x80)
             {
-                int count = length & 0xf;
+                var count = length & 0xf;
                 if (buffer.Length < offset + increment + count)
                 {
                     return -1;
@@ -931,7 +928,7 @@ namespace Yubico.YubiKey.TestUtilities
                 while (count > 0)
                 {
                     length <<= 8;
-                    length += (int)buffer[offset + increment - count] & 0xFF;
+                    length += buffer[offset + increment - count] & 0xFF;
                     count--;
                 }
             }
@@ -953,10 +950,10 @@ namespace Yubico.YubiKey.TestUtilities
         // the targetEnd.
         private static bool VerifyPemHeaderAndFooter(char[] pemKeyString, char[] targetStart, char[] targetEnd)
         {
-            bool returnValue = false;
+            var returnValue = false;
             if (pemKeyString.Length > targetStart.Length + targetEnd.Length)
             {
-                if (CompareToTarget(pemKeyString, 0, targetStart))
+                if (CompareToTarget(pemKeyString, offset: 0, targetStart))
                 {
                     returnValue = CompareToTarget(pemKeyString, pemKeyString.Length - targetEnd.Length, targetEnd);
                 }
@@ -969,7 +966,7 @@ namespace Yubico.YubiKey.TestUtilities
         // target.
         private static bool CompareToTarget(char[] buffer, int offset, char[] target)
         {
-            int index = 0;
+            var index = 0;
             for (; index < target.Length; index++)
             {
                 if (buffer[index + offset] != target[index])

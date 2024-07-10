@@ -28,17 +28,17 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
     //   BuildPublicKey
     //   GetSignatureAlgorithmIdentifier
     //   SignData
-    public sealed partial class YubiKeySignatureGenerator : X509SignatureGenerator
+    public sealed class YubiKeySignatureGenerator : X509SignatureGenerator
     {
         private const string InvalidAlgorithmMessage = "The algorithm was not recognized.";
         private const string InvalidSlotMessage = "The slot number was invalid.";
+        private readonly PivAlgorithm _algorithm;
+        private readonly X509SignatureGenerator _defaultGenerator;
 
         private readonly PivSession _pivSession;
-        private readonly byte _slotNumber;
-        private readonly PivAlgorithm _algorithm;
 
         private readonly RSASignaturePaddingMode _rsaPaddingMode;
-        private readonly X509SignatureGenerator _defaultGenerator;
+        private readonly byte _slotNumber;
 
         // The constructor copies a reference to the PivSession.
         // If the key is RSA, specify the padding scheme. If no padding scheme is
@@ -57,10 +57,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 throw new ArgumentNullException(nameof(pivSession));
             }
+
             if (pivPublicKey is null)
             {
                 throw new ArgumentNullException(nameof(pivPublicKey));
             }
+
             if (!PivSlot.IsValidSlotNumberForSigning(slotNumber))
             {
                 throw new ArgumentException(
@@ -78,13 +80,14 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             if (_algorithm.IsRsa())
             {
-                RSASignaturePadding paddingScheme = rsaPaddingMode == RSASignaturePaddingMode.Pss ?
-                    RSASignaturePadding.Pss : RSASignaturePadding.Pkcs1;
-                _defaultGenerator = X509SignatureGenerator.CreateForRSA((RSA)dotNetPublicKey, paddingScheme);
+                RSASignaturePadding paddingScheme = rsaPaddingMode == RSASignaturePaddingMode.Pss
+                    ? RSASignaturePadding.Pss
+                    : RSASignaturePadding.Pkcs1;
+                _defaultGenerator = CreateForRSA((RSA)dotNetPublicKey, paddingScheme);
             }
             else if (_algorithm.IsEcc())
             {
-                _defaultGenerator = X509SignatureGenerator.CreateForECDsa((ECDsa)dotNetPublicKey);
+                _defaultGenerator = CreateForECDsa((ECDsa)dotNetPublicKey);
             }
             else
             {
@@ -140,9 +143,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 "SHA384" => CryptographyProviders.Sha384Creator(),
                 "SHA512" => CryptographyProviders.Sha512Creator(),
                 _ => throw new ArgumentException(
-                         string.Format(
-                             CultureInfo.CurrentCulture,
-                             InvalidAlgorithmMessage)),
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        InvalidAlgorithmMessage))
             };
 
             // If the algorithm is P-256, then make sure the digest is exactly 32
@@ -152,7 +155,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 PivAlgorithm.EccP256 => 32,
                 PivAlgorithm.EccP384 => 48,
-                _ => digester.HashSize / 8,
+                _ => digester.HashSize / 8
             };
 
             byte[] digest = new byte[bufferSize];
@@ -167,8 +170,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         InvalidAlgorithmMessage));
             }
 
-            _ = digester.TransformFinalBlock(data, 0, data.Length);
-            Array.Copy(digester.Hash, 0, digest, offset, digest.Length);
+            _ = digester.TransformFinalBlock(data, inputOffset: 0, data.Length);
+            Array.Copy(digester.Hash, sourceIndex: 0, digest, offset, digest.Length);
 
             return digest;
         }
@@ -185,7 +188,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 "SHA256" => RsaFormat.Sha256,
                 "SHA384" => RsaFormat.Sha384,
                 "SHA512" => RsaFormat.Sha512,
-                _ => 0,
+                _ => 0
             };
 
             if (_rsaPaddingMode == RSASignaturePaddingMode.Pss)

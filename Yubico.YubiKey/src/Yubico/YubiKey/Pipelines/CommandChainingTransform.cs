@@ -18,19 +18,19 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Pipelines
 {
     /// <summary>
-    /// A pipeline that performs command chaining to allow sending larger
-    /// command APDUs.
+    ///     A pipeline that performs command chaining to allow sending larger
+    ///     command APDUs.
     /// </summary>
     internal class CommandChainingTransform : IApduTransform
     {
-        public int MaxSize { get; internal set; } = 255;
-
-        readonly IApduTransform _pipeline;
+        private readonly IApduTransform _pipeline;
 
         public CommandChainingTransform(IApduTransform pipeline)
         {
             _pipeline = pipeline;
         }
+
+        public int MaxSize { get; internal set; } = 255;
 
         public void Cleanup() => _pipeline.Cleanup();
 
@@ -52,12 +52,14 @@ namespace Yubico.YubiKey.Pipelines
             while (!sourceData.IsEmpty)
             {
                 int length = Math.Min(MaxSize, sourceData.Length);
-                ReadOnlyMemory<byte> data = sourceData.Slice(0, length);
+                ReadOnlyMemory<byte> data = sourceData.Slice(start: 0, length);
                 sourceData = sourceData.Slice(length);
 
                 var partialApdu = new CommandApdu
                 {
-                    Cla = (byte)(command.Cla | (sourceData.IsEmpty ? 0 : 0x10)),
+                    Cla = (byte)(command.Cla | (sourceData.IsEmpty
+                        ? 0
+                        : 0x10)),
                     Ins = command.Ins,
                     P1 = command.P1,
                     P2 = command.P2,

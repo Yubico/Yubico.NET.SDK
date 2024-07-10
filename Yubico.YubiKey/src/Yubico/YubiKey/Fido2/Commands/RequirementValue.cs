@@ -12,43 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Formats.Cbor;
-using System.Globalization;
-using Yubico.YubiKey.Fido2.Cbor;
-using Yubico.YubiKey.Fido2.Cose;
-using Yubico.YubiKey.Fido2.PinProtocols;
-
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
-    /// These are the possible values of an element that has requirement
-    /// conditions.
+    ///     These are the possible values of an element that has requirement
+    ///     conditions.
     /// </summary>
     /// <remarks>
-    /// Some elements might be required in some situations, others are optional,
-    /// and others are ignored. This enum is used to report what the requirement
-    /// level is.
+    ///     Some elements might be required in some situations, others are optional,
+    ///     and others are ignored. This enum is used to report what the requirement
+    ///     level is.
     /// </remarks>
     public enum RequirementValue
     {
         /// <summary>
-        /// The element is ignored. It is not required, but it is not optional
-        /// either. But if the element is provided, it is ignored, as opposed to
-        /// an error.
+        ///     The element is ignored. It is not required, but it is not optional
+        ///     either. But if the element is provided, it is ignored, as opposed to
+        ///     an error.
         /// </summary>
         Ignored = 0,
 
         /// <summary>
-        /// The element is required.
+        ///     The element is required.
         /// </summary>
         Required = 1,
 
         /// <summary>
-        /// The element is optional.
+        ///     The element is optional.
         /// </summary>
-        Optional = 2,
+        Optional = 2
     }
 }
-

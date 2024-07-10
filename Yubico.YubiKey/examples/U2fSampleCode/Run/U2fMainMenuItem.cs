@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-
 namespace Yubico.YubiKey.Sample.U2fSampleCode
 {
     public enum U2fMainMenuItem
@@ -32,6 +30,6 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
 
         Reset = 20,
 
-        Exit = 24,
+        Exit = 24
     }
 }

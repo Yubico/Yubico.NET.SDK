@@ -13,38 +13,16 @@
 // limitations under the License.
 
 using System;
+using Yubico.YubiKey.InterIndustry.Commands;
 
 namespace Yubico.YubiKey.Oath
 {
     /// <summary>
-    /// Represents the information returned when selecting the OATH application. 
-    /// Includes information such the salt and challenge which are needed for setting/validating a password.
+    ///     Represents the information returned when selecting the OATH application.
+    ///     Includes information such the salt and challenge which are needed for setting/validating a password.
     /// </summary>
-    public class OathApplicationData : InterIndustry.Commands.ISelectApplicationData
+    public class OathApplicationData : ISelectApplicationData
     {
-        /// <inheritdoc/>
-        public ReadOnlyMemory<byte> RawData { get; }
-
-        /// <summary>
-        /// The version of the firmware currently running on the YubiKey.
-        /// </summary>
-        public FirmwareVersion Version { get; }
-
-        /// <summary>
-        /// The device identifier.
-        /// </summary>
-        public ReadOnlyMemory<byte> Salt { get; }
-
-        /// <summary>
-        /// The 8 byte challenge if authentication is configured.
-        /// </summary>
-        public ReadOnlyMemory<byte> Challenge { get; }
-
-        /// <summary>
-        /// What hash algorithm to use.
-        /// </summary>
-        public HashAlgorithm Algorithm { get; }
-
         // We explicitly do not want a default constructor for this command.
         private OathApplicationData()
         {
@@ -52,7 +30,7 @@ namespace Yubico.YubiKey.Oath
         }
 
         /// <summary>
-        /// Constructs an instance of the <see cref="OathApplicationData" /> class.
+        ///     Constructs an instance of the <see cref="OathApplicationData" /> class.
         /// </summary>
         public OathApplicationData(
             ReadOnlyMemory<byte> rawData,
@@ -77,5 +55,28 @@ namespace Yubico.YubiKey.Oath
             Challenge = challenge;
             Algorithm = algorithm;
         }
+
+        /// <summary>
+        ///     The version of the firmware currently running on the YubiKey.
+        /// </summary>
+        public FirmwareVersion Version { get; }
+
+        /// <summary>
+        ///     The device identifier.
+        /// </summary>
+        public ReadOnlyMemory<byte> Salt { get; }
+
+        /// <summary>
+        ///     The 8 byte challenge if authentication is configured.
+        /// </summary>
+        public ReadOnlyMemory<byte> Challenge { get; }
+
+        /// <summary>
+        ///     What hash algorithm to use.
+        /// </summary>
+        public HashAlgorithm Algorithm { get; }
+
+        /// <inheritdoc />
+        public ReadOnlyMemory<byte> RawData { get; }
     }
 }

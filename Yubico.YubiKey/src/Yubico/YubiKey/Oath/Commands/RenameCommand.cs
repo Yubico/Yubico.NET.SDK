@@ -20,10 +20,10 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    /// Renames an existing credential by setting new issuer and account names.
-    /// <remarks>
-    /// This command is only available on the YubiKeys with firmware version 5.3.0 and later.
-    /// </remarks>
+    ///     Renames an existing credential by setting new issuer and account names.
+    ///     <remarks>
+    ///         This command is only available on the YubiKeys with firmware version 5.3.0 and later.
+    ///     </remarks>
     /// </summary>
     public class RenameCommand : IYubiKeyCommand<RenameResponse>
     {
@@ -31,50 +31,27 @@ namespace Yubico.YubiKey.Oath.Commands
         private const byte NameTag = 0x71;
 
         /// <summary>
-        /// The credential to edit.
-        /// </summary>
-        public Credential? Credential { get; set; }
-
-        /// <summary>
-        /// The new issuer.
-        /// </summary>
-        public string? NewIssuer { get; set; }
-
-        /// <summary>
-        /// The new account name.
-        /// </summary>
-        public string? NewAccount { get; set; }
-
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Oath
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Oath;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="RenameCommand" /> class.
+        ///     Constructs an instance of the <see cref="RenameCommand" /> class.
         /// </summary>
         public RenameCommand()
         {
         }
 
         /// <summary>
-        /// Constructs an instance of the <see cref="RenameCommand" /> class.
+        ///     Constructs an instance of the <see cref="RenameCommand" /> class.
         /// </summary>
         /// <param name="credential">
-        /// The credential to edit.
+        ///     The credential to edit.
         /// </param>
         /// <param name="newIssuer">
-        /// The new issuer.
+        ///     The new issuer.
         /// </param>
         /// <param name="newAccount">
-        /// The new account name.
+        ///     The new account name.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// The credential to rename is null, or the new account name to set is null, empty or
-        /// consists only of white-space characters.
+        ///     The credential to rename is null, or the new account name to set is null, empty or
+        ///     consists only of white-space characters.
         /// </exception>
         public RenameCommand(Credential credential, string? newIssuer, string newAccount)
         {
@@ -92,6 +69,29 @@ namespace Yubico.YubiKey.Oath.Commands
             NewIssuer = newIssuer;
             NewAccount = newAccount;
         }
+
+        /// <summary>
+        ///     The credential to edit.
+        /// </summary>
+        public Credential? Credential { get; set; }
+
+        /// <summary>
+        ///     The new issuer.
+        /// </summary>
+        public string? NewIssuer { get; set; }
+
+        /// <summary>
+        ///     The new account name.
+        /// </summary>
+        public string? NewAccount { get; set; }
+
+        /// <summary>
+        ///     Gets the YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        ///     YubiKeyApplication.Oath
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Oath;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
@@ -131,7 +131,6 @@ namespace Yubico.YubiKey.Oath.Commands
         }
 
         /// <inheritdoc />
-        public RenameResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new RenameResponse(responseApdu);
+        public RenameResponse CreateResponseForApdu(ResponseApdu responseApdu) => new RenameResponse(responseApdu);
     }
 }

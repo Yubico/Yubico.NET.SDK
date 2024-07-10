@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 using Yubico.YubiKey.Piv.Commands;
 
@@ -58,7 +57,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivDataTag.PairingCodeReferenceData, true)]
         public void IsValidForPut_CorrectResult(PivDataTag tag, bool result)
         {
-            bool isValid = tag.IsValidTagForPut();
+            var isValid = tag.IsValidTagForPut();
 
             Assert.Equal(result, isValid);
         }
@@ -131,9 +130,9 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivDataTag.PairingCodeReferenceData, false)]
         public void IsValidEncoding_CorrectResult(PivDataTag tag, bool result)
         {
-            byte[] encoding = PivCommandResponseTestData.PutDataEncoding(tag, result);
+            var encoding = PivCommandResponseTestData.PutDataEncoding(tag, result);
 
-            bool isValid = tag.IsValidEncodingForPut(encoding);
+            var isValid = tag.IsValidEncodingForPut(encoding);
 
             Assert.Equal(result, isValid);
         }

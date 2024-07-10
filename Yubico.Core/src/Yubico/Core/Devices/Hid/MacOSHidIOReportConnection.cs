@@ -25,48 +25,38 @@ using static Yubico.PlatformInterop.NativeMethods;
 namespace Yubico.Core.Devices.Hid
 {
     /// <summary>
-    /// macOS implementation of the FIDO IO report connection.
+    ///     macOS implementation of the FIDO IO report connection.
     /// </summary>
     internal sealed class MacOSHidIOReportConnection : IHidConnection
     {
-        private readonly long _entryId;
-        private IntPtr _deviceHandle;
-        private bool _isDisposed;
         private readonly MacOSHidDevice _device;
-        private readonly IntPtr _loopId;
+        private readonly long _entryId;
         private readonly Logger _log = Log.GetLogger();
+        private readonly IntPtr _loopId;
 
         private readonly byte[] _readBuffer;
-        private GCHandle _readHandle;
-
-        private readonly ConcurrentQueue<byte[]> _reportsQueue;
-        private GCHandle _pinnedReportsQueue;
+        private readonly IOHIDCallback _removalDelegate = RemovalCallback;
 
         // We need this intermediate step. Passing the managed callbacks to marshalling directly actually lowers to a
         // call to `new NativeMethods.IOHIDCallback((object) null, __methodptr(RemovalCallback))` which will go out of
         // scope and be garbage collected. So we need to make sure the delegate instance has the same lifetime as the
         // entire connect (i.e. this class's scope).
         private readonly IOHIDReportCallback _reportDelegate = ReportCallback;
-        private readonly IOHIDCallback _removalDelegate = RemovalCallback;
+
+        private readonly ConcurrentQueue<byte[]> _reportsQueue;
+        private IntPtr _deviceHandle;
+        private bool _isDisposed;
+        private GCHandle _pinnedReportsQueue;
+        private GCHandle _readHandle;
 
         /// <summary>
-        /// The correct size, in bytes, for the data buffer to be transmitted to the device.
-        /// </summary>
-        public int InputReportSize { get; }
-
-        /// <summary>
-        /// The correct size, in bytes, for the data buffer to be received from the device.
-        /// </summary>
-        public int OutputReportSize { get; }
-
-        /// <summary>
-        /// Constructs an instance of the MacOSHidIOReportConnection class.
+        ///     Constructs an instance of the MacOSHidIOReportConnection class.
         /// </summary>
         /// <param name="device">
-        /// The device object from which this connection originates.
+        ///     The device object from which this connection originates.
         /// </param>
         /// <param name="entryId">
-        /// The IOKit registry entry identifier representing the device we're trying to connect to.
+        ///     The IOKit registry entry identifier representing the device we're trying to connect to.
         /// </param>
         public MacOSHidIOReportConnection(MacOSHidDevice device, long entryId)
         {
@@ -76,7 +66,7 @@ namespace Yubico.Core.Devices.Hid
             _entryId = entryId;
 
             byte[] cstr = Encoding.UTF8.GetBytes($"fido2-loopid-{entryId}");
-            _loopId = CFStringCreateWithCString(IntPtr.Zero, cstr, 0);
+            _loopId = CFStringCreateWithCString(IntPtr.Zero, cstr, encoding: 0);
 
             // The following buffer must be pinned because the native function must retain a pointer (i.e. the address)
             _readBuffer = new byte[64];
@@ -98,13 +88,127 @@ namespace Yubico.Core.Devices.Hid
                 OutputReportSize);
         }
 
+        /// <summary>
+        ///     The correct size, in bytes, for the data buffer to be transmitted to the device.
+        /// </summary>
+        public int InputReportSize { get; }
+
+        /// <summary>
+        ///     The correct size, in bytes, for the data buffer to be received from the device.
+        /// </summary>
+        public int OutputReportSize { get; }
+
+        /// <summary>
+        ///     Reads a report from the FIDO interface.
+        /// </summary>
+        /// <returns>
+        ///     A buffer that contains the data received from the device.
+        /// </returns>
+        /// <exception cref="PlatformApiException">
+        ///     Thrown when the underlying IOKit framework reports an error. See the exception message for details.
+        /// </exception>
+        public byte[] GetReport()
+        {
+            if (_reportsQueue.TryDequeue(out byte[] report))
+            {
+                // If there's already a report in the queue (i.e. the callback beat us to calling GetReport) return
+                // that one immediately.
+                _log.SensitiveLogInformation(
+                    "GetReport returned buffer: {Report}",
+                    Hex.BytesToHex(report));
+
+                return report;
+            }
+
+            // Otherwise start up the IO runloop and see if we find more reports to pick up.
+            IntPtr runLoop = CFRunLoopGetCurrent();
+
+            IOHIDDeviceScheduleWithRunLoop(_deviceHandle, runLoop, _loopId);
+
+            // The YubiKey has a reclaim timeout of 3 seconds. This can cause the SDK some trouble if we just
+            // switched out of a different USB interface (like Keyboard or CCID). We previously used a fairly
+            // tight timeout of 4 seconds, but that seemed to not always work. 6 seconds (double the timeout)
+            // seems like a more reasonable timeout for the operating system.
+            int runLoopResult = CFRunLoopRunInMode(_loopId, seconds: 6, returnAfterSourceHandled: true);
+
+            _device.LogDeviceAccessTime();
+
+            if (runLoopResult != kCFRunLoopRunHandledSource)
+            {
+                throw new PlatformApiException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.WrongIOKitRunLoopMode,
+                        runLoopResult));
+            }
+
+            IOHIDDeviceUnscheduleFromRunLoop(_deviceHandle, runLoop, _loopId);
+
+            // We should be guaranteed to have a report here - otherwise the runloop would have timed out
+            // and the PlatformApiException above would have been thrown.
+            _ = _reportsQueue.TryDequeue(out report);
+
+            _log.SensitiveLogInformation(
+                "GetReport returned buffer: {Report}",
+                Hex.BytesToHex(report));
+
+            return report;
+        }
+
+        /// <summary>
+        ///     Sends a buffer to the device.
+        /// </summary>
+        /// <param name="report">
+        ///     The buffer to send.
+        /// </param>
+        /// <exception cref="PlatformApiException">
+        ///     Thrown when the underlying IOKit framework reports an error. See the exception message for details.
+        /// </exception>
+        public void SetReport(byte[] report)
+        {
+            if (report is null)
+            {
+                throw new ArgumentNullException(nameof(report));
+            }
+
+            _log.SensitiveLogInformation(
+                "Calling SetReport with data: {Report}",
+                Hex.BytesToHex(report));
+
+            int result = IOHIDDeviceSetReport(
+                _deviceHandle,
+                IOKitHidConstants.kIOHidReportTypeOutput,
+                reportID: 0,
+                report,
+                report.Length);
+
+            _device.LogDeviceAccessTime();
+
+            _log.IOKitApiCall(nameof(IOHIDDeviceSetReport), (kern_return_t)result);
+
+            if (result != 0)
+            {
+                throw new PlatformApiException(
+                    nameof(IOHIDDeviceSetReport),
+                    result,
+                    ExceptionMessages.IOKitOperationFailed);
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
         private void SetupConnection()
         {
             int deviceEntry = 0;
             try
             {
                 IntPtr matchingDictionary = IORegistryEntryIDMatching((ulong)_entryId);
-                deviceEntry = IOServiceGetMatchingService(0, matchingDictionary);
+                deviceEntry = IOServiceGetMatchingService(masterPort: 0, matchingDictionary);
 
                 if (deviceEntry == 0)
                 {
@@ -120,7 +224,7 @@ namespace Yubico.Core.Devices.Hid
                     throw new PlatformApiException(ExceptionMessages.IOKitCannotOpenDevice);
                 }
 
-                int result = IOHIDDeviceOpen(_deviceHandle, 0x01);
+                int result = IOHIDDeviceOpen(_deviceHandle, options: 0x01);
                 _log.IOKitApiCall(nameof(IOHIDDeviceOpen), (kern_return_t)result);
 
                 if (result != 0)
@@ -157,85 +261,28 @@ namespace Yubico.Core.Devices.Hid
         }
 
         /// <summary>
-        /// Reads a report from the FIDO interface.
-        /// </summary>
-        /// <returns>
-        /// A buffer that contains the data received from the device.
-        /// </returns>
-        /// <exception cref="PlatformApiException">
-        /// Thrown when the underlying IOKit framework reports an error. See the exception message for details.
-        /// </exception>
-        public byte[] GetReport()
-        {
-            if (_reportsQueue.TryDequeue(out byte[] report))
-            {
-                // If there's already a report in the queue (i.e. the callback beat us to calling GetReport) return
-                // that one immediately.
-                _log.SensitiveLogInformation(
-                    "GetReport returned buffer: {Report}",
-                    Hex.BytesToHex(report));
-
-                return report;
-            }
-
-            // Otherwise start up the IO runloop and see if we find more reports to pick up.
-            IntPtr runLoop = CFRunLoopGetCurrent();
-
-            IOHIDDeviceScheduleWithRunLoop(_deviceHandle, runLoop, _loopId);
-
-            // The YubiKey has a reclaim timeout of 3 seconds. This can cause the SDK some trouble if we just
-            // switched out of a different USB interface (like Keyboard or CCID). We previously used a fairly
-            // tight timeout of 4 seconds, but that seemed to not always work. 6 seconds (double the timeout)
-            // seems like a more reasonable timeout for the operating system.
-            int runLoopResult = CFRunLoopRunInMode(_loopId, 6, true);
-
-            _device.LogDeviceAccessTime();
-
-            if (runLoopResult != kCFRunLoopRunHandledSource)
-            {
-                throw new PlatformApiException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.WrongIOKitRunLoopMode,
-                        runLoopResult));
-            }
-
-            IOHIDDeviceUnscheduleFromRunLoop(_deviceHandle, runLoop, _loopId);
-
-            // We should be guaranteed to have a report here - otherwise the runloop would have timed out
-            // and the PlatformApiException above would have been thrown.
-            _ = _reportsQueue.TryDequeue(out report);
-
-            _log.SensitiveLogInformation(
-                "GetReport returned buffer: {Report}",
-                Hex.BytesToHex(report));
-
-            return report;
-        }
-
-        /// <summary>
-        /// The callback that is invoked when an input report is read.
+        ///     The callback that is invoked when an input report is read.
         /// </summary>
         /// <param name="context">
-        /// Callback context, in this case the buffer in which we wish to deposit the report.
+        ///     Callback context, in this case the buffer in which we wish to deposit the report.
         /// </param>
         /// <param name="result">
-        /// Result of the GetReport operation.
+        ///     Result of the GetReport operation.
         /// </param>
         /// <param name="sender">
-        /// Ignore.
+        ///     Ignore.
         /// </param>
         /// <param name="type">
-        /// The type of the report that was read. Should always be Input Report type.
+        ///     The type of the report that was read. Should always be Input Report type.
         /// </param>
         /// <param name="reportId">
-        /// Report ID of the HID packet. Should always be non-zero.
+        ///     Report ID of the HID packet. Should always be non-zero.
         /// </param>
         /// <param name="report">
-        /// The report buffer as delivered by the IOKit service. We need to copy this buffer.
+        ///     The report buffer as delivered by the IOKit service. We need to copy this buffer.
         /// </param>
         /// <param name="reportLength">
-        /// The length of the report buffer delivered to us by the IOKit service.
+        ///     The length of the report buffer delivered to us by the IOKit service.
         /// </param>
         private static void ReportCallback(
             IntPtr context,
@@ -267,59 +314,18 @@ namespace Yubico.Core.Devices.Hid
         }
 
         /// <summary>
-        /// Called when the device has been removed and the connection class is still alive.
+        ///     Called when the device has been removed and the connection class is still alive.
         /// </summary>
         /// <param name="context">
-        /// The run loop which we need to stop.
+        ///     The run loop which we need to stop.
         /// </param>
         /// <param name="result">
-        /// Ignore.
+        ///     Ignore.
         /// </param>
         /// <param name="sender">
-        /// Ignore.
+        ///     Ignore.
         /// </param>
-        private static void RemovalCallback(IntPtr context, int result, IntPtr sender) =>
-            CFRunLoopStop(context);
-
-        /// <summary>
-        /// Sends a buffer to the device.
-        /// </summary>
-        /// <param name="report">
-        /// The buffer to send.
-        /// </param>
-        /// <exception cref="PlatformApiException">
-        /// Thrown when the underlying IOKit framework reports an error. See the exception message for details.
-        /// </exception>
-        public void SetReport(byte[] report)
-        {
-            if (report is null)
-            {
-                throw new ArgumentNullException(nameof(report));
-            }
-
-            _log.SensitiveLogInformation(
-                "Calling SetReport with data: {Report}",
-                Hex.BytesToHex(report));
-
-            int result = IOHIDDeviceSetReport(
-                _deviceHandle,
-                IOKitHidConstants.kIOHidReportTypeOutput,
-                0,
-                report,
-                report.Length);
-
-            _device.LogDeviceAccessTime();
-
-            _log.IOKitApiCall(nameof(IOHIDDeviceSetReport), (kern_return_t)result);
-
-            if (result != 0)
-            {
-                throw new PlatformApiException(
-                    nameof(IOHIDDeviceSetReport),
-                    result,
-                    ExceptionMessages.IOKitOperationFailed);
-            }
-        }
+        private static void RemovalCallback(IntPtr context, int result, IntPtr sender) => CFRunLoopStop(context);
 
         private void Dispose(bool disposing)
         {
@@ -354,7 +360,7 @@ namespace Yubico.Core.Devices.Hid
 
             if (_deviceHandle != IntPtr.Zero)
             {
-                _ = IOHIDDeviceClose(_deviceHandle, 0);
+                _ = IOHIDDeviceClose(_deviceHandle, options: 0);
                 _deviceHandle = IntPtr.Zero;
             }
 
@@ -365,13 +371,6 @@ namespace Yubico.Core.Devices.Hid
         {
             // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
             Dispose(disposing: false);
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

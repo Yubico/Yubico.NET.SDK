@@ -105,7 +105,7 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 // The SDK comes with a listener that can tell when a YubiKey has
                 // been removed or inserted.
-                YubiKeyDeviceListener yubiKeyDeviceListener = YubiKeyDeviceListener.Instance;
+                var yubiKeyDeviceListener = YubiKeyDeviceListener.Instance;
 
                 yubiKeyDeviceListener.Arrived += YubiKeyInserted;
                 yubiKeyDeviceListener.Removed += YubiKeyRemoved;
@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.TestUtilities
                 // This task simply checks to see if the YubiKey in question has been
                 // reinserted or not. Once it has been reinserted, this method will
                 // return the IYubiKeyDevice that was reinserted.
-                var reinsert = Task<IYubiKeyDevice>.Run(() => CheckReinsert());
+                var reinsert = Task.Run(() => CheckReinsert());
 
                 // Wait for CheckReinsert to complete, or else the task times out.
                 // If it returns false, the YubiKey was not reinserted within the
@@ -188,7 +188,7 @@ namespace Yubico.YubiKey.TestUtilities
                 touchMessageTask.Start();
 
                 var resetCmd = new ResetCommand();
-                ResetResponse resetRsp = fido2Session.Connection.SendCommand(resetCmd);
+                var resetRsp = fido2Session.Connection.SendCommand(resetCmd);
 
                 if (resetRsp.Status == ResponseStatus.Success && _setPin)
                 {
@@ -251,7 +251,7 @@ namespace Yubico.YubiKey.TestUtilities
         {
             while (_yubiKeyDevice is null)
             {
-                Thread.Sleep(100);
+                Thread.Sleep(millisecondsTimeout: 100);
             }
 
             return (IYubiKeyDevice)_yubiKeyDevice;
@@ -259,7 +259,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         private void YubiKeyRemoved(object? sender, YubiKeyDeviceEventArgs eventArgs)
         {
-            int serialNumberRemoved = eventArgs.Device.SerialNumber ?? 0;
+            var serialNumberRemoved = eventArgs.Device.SerialNumber ?? 0;
 
             if (serialNumberRemoved != SerialNumber)
             {
@@ -277,7 +277,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         private void YubiKeyInserted(object? sender, YubiKeyDeviceEventArgs eventArgs)
         {
-            int serialNumberInserted = eventArgs.Device.SerialNumber ?? 0;
+            var serialNumberInserted = eventArgs.Device.SerialNumber ?? 0;
 
             if (serialNumberInserted != SerialNumber)
             {
@@ -301,7 +301,7 @@ namespace Yubico.YubiKey.TestUtilities
 
         public static bool ResetForTestKeyCollectorDelegate(KeyEntryData keyEntryData)
         {
-            return ResetKeyCollector(keyEntryData, null);
+            return ResetKeyCollector(keyEntryData, pin: null);
         }
 
         public static bool ResetKeyCollector(KeyEntryData keyEntryData, ReadOnlyMemory<byte>? pin)
@@ -322,7 +322,7 @@ namespace Yubico.YubiKey.TestUtilities
                     return true;
 
                 case KeyEntryRequest.VerifyFido2Pin:
-                    ReadOnlyMemory<byte> toSubmit =
+                    var toSubmit =
                         pin ?? new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
                     keyEntryData.SubmitValue(toSubmit.Span);
                     return true;
@@ -338,7 +338,7 @@ namespace Yubico.YubiKey.TestUtilities
         public static bool DoReset(int? serialNum)
         {
             var fido2Reset = new Fido2ResetForTest(serialNum);
-            ResponseStatus status = fido2Reset.RunFido2Reset();
+            var status = fido2Reset.RunFido2Reset();
 
             return status == ResponseStatus.Success;
         }

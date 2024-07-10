@@ -17,32 +17,32 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    /// Reads the status information maintained by the OTP application. This is sometimes necessary
-    /// in order to determine whether a configuration update was successful or not.
+    ///     Reads the status information maintained by the OTP application. This is sometimes necessary
+    ///     in order to determine whether a configuration update was successful or not.
     /// </summary>
     public class ReadStatusCommand : IYubiKeyCommand<ReadStatusResponse>
     {
         /// <summary>
-        /// Gets the YubiKey Application to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Otp
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Otp;
-
-        /// <summary>
-        /// Constructs a new instance of the ReadStatusCommand class.
+        ///     Constructs a new instance of the ReadStatusCommand class.
         /// </summary>
         public ReadStatusCommand()
         {
-
         }
 
+        /// <summary>
+        ///     Gets the YubiKey Application to which this command belongs.
+        /// </summary>
+        /// <value>
+        ///     YubiKeyApplication.Otp
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Otp;
+
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = OtpConstants.ReadStatusInstruction
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = OtpConstants.ReadStatusInstruction
+            };
 
         /// <inheritdoc />
         public ReadStatusResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

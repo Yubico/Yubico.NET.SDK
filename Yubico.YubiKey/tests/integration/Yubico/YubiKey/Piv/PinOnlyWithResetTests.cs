@@ -14,7 +14,6 @@
 
 using System;
 using System.Security;
-using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Piv.Objects;
 using Yubico.YubiKey.TestUtilities;
@@ -32,9 +31,9 @@ namespace Yubico.YubiKey.Piv
     {
         private const int SpecifiedStart = 72;
         private const int RandomTrailingCount = 2048;
+        private readonly RandomObjectUtility replacement;
+        private readonly byte[] specifiedBytes;
         private readonly IYubiKeyDevice yubiKey;
-        readonly RandomObjectUtility replacement;
-        readonly private byte[] specifiedBytes;
 
         public PinOnlyWithResetTests()
         {
@@ -45,7 +44,8 @@ namespace Yubico.YubiKey.Piv
             // The third 24 bytes is the 3DES key that is derived using a PIN of
             // "123456" and a salt of the first 16 bytes.
             // Then there will be 2048 random bytes.
-            specifiedBytes = new byte[SpecifiedStart] {
+            specifiedBytes = new byte[SpecifiedStart]
+            {
                 0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
                 0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
                 0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
@@ -54,16 +54,16 @@ namespace Yubico.YubiKey.Piv
                 0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
                 0xc9, 0xf4, 0x20, 0x5a, 0x29, 0x38, 0x1b, 0xb8,
                 0x60, 0x6b, 0xd4, 0xde, 0x18, 0xef, 0xf4, 0x3d,
-                0x43, 0x24, 0x87, 0x3e, 0x5e, 0xd2, 0xc1, 0xed,
+                0x43, 0x24, 0x87, 0x3e, 0x5e, 0xd2, 0xc1, 0xed
             };
 
-            byte[] randomBytes = new byte[SpecifiedStart + RandomTrailingCount];
-            using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
+            var randomBytes = new byte[SpecifiedStart + RandomTrailingCount];
+            using var random = RandomObjectUtility.GetRandomObject(fixedBytes: null);
             {
                 random.GetBytes(randomBytes);
             }
 
-            Array.Copy(specifiedBytes, 0, randomBytes, 0, specifiedBytes.Length);
+            Array.Copy(specifiedBytes, sourceIndex: 0, randomBytes, destinationIndex: 0, specifiedBytes.Length);
 
             replacement = RandomObjectUtility.SetRandomProviderFixedBytes(randomBytes);
 
@@ -82,7 +82,7 @@ namespace Yubico.YubiKey.Piv
         {
             using (var pivSession = new PivSession(yubiKey))
             {
-                PivPinOnlyMode mode = pivSession.GetPinOnlyMode();
+                var mode = pivSession.GetPinOnlyMode();
 
                 Assert.Equal(PivPinOnlyMode.None, mode);
             }
@@ -104,17 +104,17 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(pivSession.PinVerified);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
 
-                PivPinOnlyMode mode = pivSession.GetPinOnlyMode();
+                var mode = pivSession.GetPinOnlyMode();
 
                 Assert.Equal(PivPinOnlyMode.PinDerived, mode);
 
-                AdminData adminData = pivSession.ReadObject<AdminData>();
+                var adminData = pivSession.ReadObject<AdminData>();
                 Assert.Null(adminData.PinLastUpdated);
                 Assert.False(adminData.PinProtected);
                 Assert.True(adminData.PukBlocked);
                 _ = Assert.NotNull(adminData.Salt);
 
-                PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
+                var pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.True(pinProtect.IsEmpty);
                 Assert.Null(pinProtect.ManagementKey);
             }
@@ -133,14 +133,14 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(pivSession.ManagementKeyAuthenticated);
             }
 
-            bool isBlocked = IsPukBlocked();
+            var isBlocked = IsPukBlocked();
             Assert.True(isBlocked);
         }
 
         [Fact]
         public void Run_SetPinDerived_UsesSalt()
         {
-            Span<byte> expected = GetSpecifiedSpan(0, 16);
+            var expected = GetSpecifiedSpan(offset: 0, length: 16);
             using (var pivSession = new PivSession(yubiKey))
             {
                 var collectorObj = new Simple39KeyCollector();
@@ -148,12 +148,12 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
 
-                AdminData adminData = pivSession.ReadObject<AdminData>();
+                var adminData = pivSession.ReadObject<AdminData>();
                 _ = Assert.NotNull(adminData.Salt);
                 if (!(adminData.Salt is null))
                 {
                     var result = (ReadOnlyMemory<byte>)adminData.Salt;
-                    bool isValid = expected.SequenceEqual(result.Span);
+                    var isValid = expected.SequenceEqual(result.Span);
                     Assert.True(isValid);
                 }
             }
@@ -175,17 +175,17 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(pivSession.PinVerified);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
 
-                PivPinOnlyMode mode = pivSession.GetPinOnlyMode();
+                var mode = pivSession.GetPinOnlyMode();
 
                 Assert.Equal(PivPinOnlyMode.PinProtected, mode);
 
-                AdminData adminData = pivSession.ReadObject<AdminData>();
+                var adminData = pivSession.ReadObject<AdminData>();
                 Assert.Null(adminData.PinLastUpdated);
                 Assert.True(adminData.PinProtected);
                 Assert.True(adminData.PukBlocked);
                 Assert.Null(adminData.Salt);
 
-                PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
+                var pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.False(pinProtect.IsEmpty);
                 _ = Assert.NotNull(pinProtect.ManagementKey);
             }
@@ -204,7 +204,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(pivSession.ManagementKeyAuthenticated);
             }
 
-            bool isBlocked = IsPukBlocked();
+            var isBlocked = IsPukBlocked();
             Assert.True(isBlocked);
         }
 
@@ -224,12 +224,12 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(pivSession.PinVerified);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
 
-                PivPinOnlyMode mode = pivSession.GetPinOnlyMode();
+                var mode = pivSession.GetPinOnlyMode();
 
                 Assert.Equal(PivPinOnlyMode.PinDerived | PivPinOnlyMode.PinProtected, mode);
             }
 
-            bool isBlocked = IsPukBlocked();
+            var isBlocked = IsPukBlocked();
             Assert.True(isBlocked);
         }
 
@@ -251,19 +251,19 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
 
-                PivPinOnlyMode mode = pivSession.GetPinOnlyMode();
+                var mode = pivSession.GetPinOnlyMode();
                 Assert.Equal(PivPinOnlyMode.PinDerived | PivPinOnlyMode.PinProtected, mode);
             }
 
-            bool isBlocked = IsPukBlocked();
+            var isBlocked = IsPukBlocked();
             Assert.True(isBlocked);
         }
 
         [Fact]
         public void SetProtectThenDerive_CorrectMgmtKey()
         {
-            Span<byte> expected1 = GetSpecifiedSpan(24, 24);
-            Span<byte> expected2 = GetSpecifiedSpan(48, 24);
+            var expected1 = GetSpecifiedSpan(offset: 24, length: 24);
+            var expected2 = GetSpecifiedSpan(offset: 48, length: 24);
             using (var pivSession = new PivSession(yubiKey))
             {
                 var collectorObj = new Simple39KeyCollector();
@@ -271,13 +271,13 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
 
-                PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
+                var pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.False(pinProtect.IsEmpty);
                 _ = Assert.NotNull(pinProtect.ManagementKey);
                 if (!(pinProtect.ManagementKey is null))
                 {
                     var result = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
-                    bool isValid = expected1.SequenceEqual(result.Span);
+                    var isValid = expected1.SequenceEqual(result.Span);
                     Assert.True(isValid);
                 }
             }
@@ -289,16 +289,16 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.SetPinOnlyMode(PivPinOnlyMode.PinDerived);
 
-                PivPinOnlyMode mode = pivSession.GetPinOnlyMode();
+                var mode = pivSession.GetPinOnlyMode();
                 Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
 
-                PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
+                var pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.False(pinProtect.IsEmpty);
                 _ = Assert.NotNull(pinProtect.ManagementKey);
                 if (!(pinProtect.ManagementKey is null))
                 {
                     var result = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
-                    bool isValid = expected2.SequenceEqual(result.Span);
+                    var isValid = expected2.SequenceEqual(result.Span);
                     Assert.True(isValid);
                 }
             }
@@ -307,7 +307,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void SetProtect_RejectsWeakKey()
         {
-            Span<byte> expected = GetSpecifiedSpan(24, 24);
+            var expected = GetSpecifiedSpan(offset: 24, length: 24);
             using (var pivSession = new PivSession(yubiKey))
             {
                 var collectorObj = new Simple39KeyCollector();
@@ -315,14 +315,14 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
 
-                PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
+                var pinProtect = pivSession.ReadObject<PinProtectedData>();
 
                 Assert.False(pinProtect.IsEmpty);
                 _ = Assert.NotNull(pinProtect.ManagementKey);
                 if (!(pinProtect.ManagementKey is null))
                 {
                     var result = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
-                    bool isValid = expected.SequenceEqual(result.Span);
+                    var isValid = expected.SequenceEqual(result.Span);
                     Assert.True(isValid);
                 }
             }
@@ -331,7 +331,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void SetProtect_ThenNone_CorrectMode()
         {
-            Span<byte> mgmtKey = GetSpecifiedSpan(24, 24);
+            var mgmtKey = GetSpecifiedSpan(offset: 24, length: 24);
             var specifiedCollector = new SpecifiedKeyCollector(
                 new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 },
                 new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 },
@@ -344,19 +344,19 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.SetPinOnlyMode(PivPinOnlyMode.PinProtected);
 
-                PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
+                var pinProtect = pivSession.ReadObject<PinProtectedData>();
 
                 Assert.False(pinProtect.IsEmpty);
                 _ = Assert.NotNull(pinProtect.ManagementKey);
                 if (!(pinProtect.ManagementKey is null))
                 {
                     var result = (ReadOnlyMemory<byte>)pinProtect.ManagementKey;
-                    bool isValid = mgmtKey.SequenceEqual(result.Span);
+                    var isValid = mgmtKey.SequenceEqual(result.Span);
                     Assert.True(isValid);
                 }
             }
 
-            bool isBlocked = IsPukBlocked();
+            var isBlocked = IsPukBlocked();
             Assert.True(isBlocked);
 
             using (var pivSession = new PivSession(yubiKey))
@@ -384,13 +384,13 @@ namespace Yubico.YubiKey.Piv
                 // provide a mgmt key that will return the wrong value.
                 pivSession.KeyCollector = specifiedCollector.SpecifiedKeyCollectorDelegate;
 
-                PivPinOnlyMode mode = pivSession.GetPinOnlyMode();
+                var mode = pivSession.GetPinOnlyMode();
                 Assert.Equal(PivPinOnlyMode.None, mode);
 
-                AdminData adminData = pivSession.ReadObject<AdminData>();
+                var adminData = pivSession.ReadObject<AdminData>();
                 Assert.True(adminData.IsEmpty);
 
-                PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
+                var pinProtect = pivSession.ReadObject<PinProtectedData>();
                 Assert.True(pinProtect.IsEmpty);
             }
 
@@ -404,7 +404,7 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.ChangePinAndPukRetryCounts(5, 6);
+                pivSession.ChangePinAndPukRetryCounts(newRetryCountPin: 5, newRetryCountPuk: 6);
             }
 
             isBlocked = IsPukBlocked();
@@ -418,7 +418,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.VerifyPin();
                 pivSession.AuthenticateManagementKey();
-                pivSession.ChangePinAndPukRetryCounts(7, 8);
+                pivSession.ChangePinAndPukRetryCounts(newRetryCountPin: 7, newRetryCountPuk: 8);
             }
         }
 
@@ -456,7 +456,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+                var currentMode = pivSession.GetPinOnlyMode();
 
                 Assert.Equal(mode, currentMode);
             }
@@ -481,7 +481,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.PinVerified);
                 Assert.False(pivSession.ManagementKeyAuthenticated);
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(
+                var publicKey = pivSession.GenerateKeyPair(
                     slotNumber, PivAlgorithm.EccP256);
 
                 Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
@@ -499,8 +499,7 @@ namespace Yubico.YubiKey.Piv
                 new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
             );
 
-            PivPinOnlyMode newMode = mode == PivPinOnlyMode.PinProtected ?
-                PivPinOnlyMode.PinDerived : PivPinOnlyMode.PinProtected;
+            var newMode = mode == PivPinOnlyMode.PinProtected ? PivPinOnlyMode.PinDerived : PivPinOnlyMode.PinProtected;
 
             using (var pivSession = new PivSession(yubiKey))
             {
@@ -517,7 +516,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+                var currentMode = pivSession.GetPinOnlyMode();
 
                 Assert.Equal(mode, currentMode);
                 Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
@@ -536,7 +535,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+                var currentMode = pivSession.GetPinOnlyMode();
 
                 Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, currentMode);
             }
@@ -548,7 +547,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.PinVerified);
                 Assert.False(pivSession.ManagementKeyAuthenticated);
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(
+                var publicKey = pivSession.GenerateKeyPair(
                     slotNumber, PivAlgorithm.EccP256);
 
                 Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
@@ -568,12 +567,12 @@ namespace Yubico.YubiKey.Piv
                 new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
             );
 
-            PivAlgorithm newAlg = algorithm switch
+            var newAlg = algorithm switch
             {
                 PivAlgorithm.Aes128 => PivAlgorithm.Aes192,
                 PivAlgorithm.Aes192 => PivAlgorithm.Aes256,
                 PivAlgorithm.Aes256 => PivAlgorithm.TripleDes,
-                _ => PivAlgorithm.Aes128,
+                _ => PivAlgorithm.Aes128
             };
 
             using (var pivSession = new PivSession(yubiKey))
@@ -591,7 +590,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+                var currentMode = pivSession.GetPinOnlyMode();
 
                 Assert.Equal(mode, currentMode);
                 Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
@@ -610,7 +609,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+                var currentMode = pivSession.GetPinOnlyMode();
 
                 Assert.Equal(mode, currentMode);
             }
@@ -622,7 +621,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.PinVerified);
                 Assert.False(pivSession.ManagementKeyAuthenticated);
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(
+                var publicKey = pivSession.GenerateKeyPair(
                     slotNumber, PivAlgorithm.EccP256);
 
                 Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
@@ -656,7 +655,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+                var currentMode = pivSession.GetPinOnlyMode();
 
                 Assert.Equal(mode, currentMode);
             }
@@ -668,7 +667,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.PinVerified);
                 Assert.False(pivSession.ManagementKeyAuthenticated);
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(
+                var publicKey = pivSession.GenerateKeyPair(
                     slotNumber, PivAlgorithm.EccP256);
 
                 Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
@@ -688,21 +687,24 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+                var currentMode = pivSession.GetPinOnlyMode();
 
                 Assert.Equal(PivPinOnlyMode.None, currentMode);
 
-                var mgmtKey = new ReadOnlyMemory<byte>(new byte[] {
+                var mgmtKey = new ReadOnlyMemory<byte>(new byte[]
+                {
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
                 });
-                bool isValid = pivSession.TryAuthenticateManagementKey(mgmtKey);
+                var isValid = pivSession.TryAuthenticateManagementKey(mgmtKey);
             }
         }
 
-        private Span<byte> GetSpecifiedSpan(int offset, int length) =>
-            new Span<byte>(specifiedBytes, offset, length);
+        private Span<byte> GetSpecifiedSpan(int offset, int length)
+        {
+            return new Span<byte>(specifiedBytes, offset, length);
+        }
 
         // If the PUK is blocked, return true.
         // If the PUK is not blocked, return false.

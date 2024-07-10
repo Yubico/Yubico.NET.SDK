@@ -22,60 +22,88 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.Piv.Objects
 {
     /// <summary>
-    /// Use this class to process the CCC (Card Capability Container) data.
+    ///     Use this class to process the CCC (Card Capability Container) data.
     /// </summary>
     /// <remarks>
-    /// The PIV standard declares,
-    /// <para>
-    /// <i>"The Card Capability Container (CCC) is a mandatory data object whose
-    /// purpose is to facilitate compatibility of Government Smart Card
-    /// Interoperability Specification (GSC-IS) applications with PIV Cards."</i>
-    /// </para>
-    /// <para>
-    /// In other words, it's a holdover from the older smart card specification.
-    /// In order to remain compatible with that older spec and with older
-    /// applications, it might be necessary to read and write this data object.
-    /// </para>
-    /// <para>
-    /// There are many elements that make up the CCC, but most of them are
-    /// ignored by PIV and the YubiKey. Other elements are fixed. Note that the
-    /// PIV standard says,
-    /// </para>
-    /// <para>
-    /// <i>"The data model of the PIV Card Application shall be identified by
-    /// data model number 0x10. ... The content of the CCC data elements, other
-    /// than the data model number, are out of scope for this specification."</i>
-    /// </para>
-    /// <para>
-    /// There is only one element that can be set in this class, namely, the Card
-    /// Identifier portion of the Unique Card Identifier. This is a 14-byte
-    /// value. With the YubiKey, the caller sets it, or allows the SDK to set it
-    /// to random bytes.
-    /// </para>
-    /// <para>
-    /// Upon manufacture, the CCC is "empty", so the
-    /// <see cref="PivDataObject.IsEmpty"/> property is <c>true</c>. This object will
-    /// be considered empty until the Card Identifier is set. See
-    /// <see cref="SetCardId"/> and <see cref="SetRandomCardId"/>.
-    /// </para>
-    /// <para>
-    /// The following list indicates the elements of the CCC that can be found on
-    /// a YubiKey.
-    /// <list type="bullet">
-    /// <item><description>Unique Card Identifier</description></item>
-    /// <item><description>Application Identifier (part of the Unique Card ID</description></item>
-    /// <item><description>GSC-RID (Registered Application Provider Identifier,
-    /// part of the AID)</description></item>
-    /// <item><description>Card Identifier (part of the Unique Card ID)</description></item>
-    /// <item><description>Manufacturer ID</description></item>
-    /// <item><description>Card Type</description></item>
-    /// <item><description>Container Version Number</description></item>
-    /// <item><description>Grammar Version Number</description></item>
-    /// <item><description>PKCS #15 Version Number (for the YubiKey, this is 0x00
-    /// indicating PKCS #15 is not supported</description></item>
-    /// <item><description>Data Model Number</description></item>
-    /// </list>
-    /// </para>
+    ///     The PIV standard declares,
+    ///     <para>
+    ///         <i>
+    ///             "The Card Capability Container (CCC) is a mandatory data object whose
+    ///             purpose is to facilitate compatibility of Government Smart Card
+    ///             Interoperability Specification (GSC-IS) applications with PIV Cards."
+    ///         </i>
+    ///     </para>
+    ///     <para>
+    ///         In other words, it's a holdover from the older smart card specification.
+    ///         In order to remain compatible with that older spec and with older
+    ///         applications, it might be necessary to read and write this data object.
+    ///     </para>
+    ///     <para>
+    ///         There are many elements that make up the CCC, but most of them are
+    ///         ignored by PIV and the YubiKey. Other elements are fixed. Note that the
+    ///         PIV standard says,
+    ///     </para>
+    ///     <para>
+    ///         <i>
+    ///             "The data model of the PIV Card Application shall be identified by
+    ///             data model number 0x10. ... The content of the CCC data elements, other
+    ///             than the data model number, are out of scope for this specification."
+    ///         </i>
+    ///     </para>
+    ///     <para>
+    ///         There is only one element that can be set in this class, namely, the Card
+    ///         Identifier portion of the Unique Card Identifier. This is a 14-byte
+    ///         value. With the YubiKey, the caller sets it, or allows the SDK to set it
+    ///         to random bytes.
+    ///     </para>
+    ///     <para>
+    ///         Upon manufacture, the CCC is "empty", so the
+    ///         <see cref="PivDataObject.IsEmpty" /> property is <c>true</c>. This object will
+    ///         be considered empty until the Card Identifier is set. See
+    ///         <see cref="SetCardId" /> and <see cref="SetRandomCardId" />.
+    ///     </para>
+    ///     <para>
+    ///         The following list indicates the elements of the CCC that can be found on
+    ///         a YubiKey.
+    ///         <list type="bullet">
+    ///             <item>
+    ///                 <description>Unique Card Identifier</description>
+    ///             </item>
+    ///             <item>
+    ///                 <description>Application Identifier (part of the Unique Card ID</description>
+    ///             </item>
+    ///             <item>
+    ///                 <description>
+    ///                     GSC-RID (Registered Application Provider Identifier,
+    ///                     part of the AID)
+    ///                 </description>
+    ///             </item>
+    ///             <item>
+    ///                 <description>Card Identifier (part of the Unique Card ID)</description>
+    ///             </item>
+    ///             <item>
+    ///                 <description>Manufacturer ID</description>
+    ///             </item>
+    ///             <item>
+    ///                 <description>Card Type</description>
+    ///             </item>
+    ///             <item>
+    ///                 <description>Container Version Number</description>
+    ///             </item>
+    ///             <item>
+    ///                 <description>Grammar Version Number</description>
+    ///             </item>
+    ///             <item>
+    ///                 <description>
+    ///                     PKCS #15 Version Number (for the YubiKey, this is 0x00
+    ///                     indicating PKCS #15 is not supported
+    ///                 </description>
+    ///             </item>
+    ///             <item>
+    ///                 <description>Data Model Number</description>
+    ///             </item>
+    ///         </list>
+    ///     </para>
     /// </remarks>
     public sealed class CardCapabilityContainer : PivDataObject
     {
@@ -107,77 +135,23 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int UnusedTag6 = 0xFC;
         private const int UnusedTag7 = 0xFD;
         private const int UnusedTag8 = 0xFE;
-
-        private bool _disposed;
         private readonly Logger _log = Log.GetLogger();
 
-        /// <summary>
-        /// The full Unique Card Identifier which consists of the AID || CardID.
-        /// </summary>
-        public ReadOnlyMemory<byte> UniqueCardIdentifier { get; private set; }
-
-        private readonly byte[] _uniqueCardIdentifier = new byte[] {
+        private readonly byte[] _uniqueCardIdentifier =
+        {
             0xA0, 0x00, 0x00, 0x01, 0x16, 0xFF, 0x02,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
 
-        /// <summary>
-        /// The "AID" (Capabilities Application Identifier), which consists of
-        /// the GSC-RID || ManufacturerID || CardType.
-        /// </summary>
-        public ReadOnlyMemory<byte> ApplicationIdentifier { get; private set; }
+        private bool _disposed;
 
         /// <summary>
-        /// The "Government Smart Card - Registered Application Provider
-        /// Identifier".
-        /// </summary>
-        public ReadOnlyMemory<byte> GscRid { get; private set; }
-
-        /// <summary>
-        /// The actual Card Identifier portion of the Unique Card Identifier.
-        /// </summary>
-        public ReadOnlyMemory<byte> CardIdentifier { get; private set; }
-
-        /// <summary>
-        /// The manufacturer ID is fixed at 0xFF
-        /// </summary>
-        public int ManufacturerId => FixedManufacturerId;
-
-        /// <summary>
-        /// The card type is fixed at JavaCard.
-        /// </summary>
-        public int CardType => CardTypeJavaCard;
-
-        /// <summary>
-        /// The version number of the CCC itself, it is fixed at version 2.1.
-        /// </summary>
-        public byte ContainerVersionNumber => FixedContainerVersionNumber;
-
-        /// <summary>
-        /// The version number of the CCC grammar, it is fixed at version 2.1.
-        /// </summary>
-        public byte GrammarVersionNumber => FixedGrammarVersionNumber;
-
-        /// <summary>
-        /// The version of PKCS #15 the card supports. If the card does not
-        /// support PKCS #15, this number is 0x00. For the YubiKey it is fixed at
-        /// 0x00.
-        /// </summary>
-        public byte Pkcs15Version => FixedPkcs15VersionNumber;
-
-        /// <summary>
-        /// The number representing the Data Model used by the smart card. For
-        /// the YubiKey it is fixed at 0x10 (a PIV requirement).
-        /// </summary>
-        public byte DataModelNumber => FixedDataModelNumber;
-
-        /// <summary>
-        /// Build a new object. This will not get the CCC from from any YubiKey,
-        /// it will only build an "empty" object.
+        ///     Build a new object. This will not get the CCC from from any YubiKey,
+        ///     it will only build an "empty" object.
         /// </summary>
         /// <remarks>
-        /// To read the CCC data out of a YubiKey, call a
-        /// <see cref="PivSession.ReadObject{PivObject}(int)"/> method.
+        ///     To read the CCC data out of a YubiKey, call a
+        ///     <see cref="PivSession.ReadObject{PivObject}(int)" /> method.
         /// </remarks>
         public CardCapabilityContainer()
         {
@@ -192,20 +166,75 @@ namespace Yubico.YubiKey.Piv.Objects
             CardIdentifier = UniqueCardIdentifier.Slice(CardIdOffset, CardIdLength);
         }
 
+        /// <summary>
+        ///     The full Unique Card Identifier which consists of the AID || CardID.
+        /// </summary>
+        public ReadOnlyMemory<byte> UniqueCardIdentifier { get; }
+
+        /// <summary>
+        ///     The "AID" (Capabilities Application Identifier), which consists of
+        ///     the GSC-RID || ManufacturerID || CardType.
+        /// </summary>
+        public ReadOnlyMemory<byte> ApplicationIdentifier { get; }
+
+        /// <summary>
+        ///     The "Government Smart Card - Registered Application Provider
+        ///     Identifier".
+        /// </summary>
+        public ReadOnlyMemory<byte> GscRid { get; private set; }
+
+        /// <summary>
+        ///     The actual Card Identifier portion of the Unique Card Identifier.
+        /// </summary>
+        public ReadOnlyMemory<byte> CardIdentifier { get; private set; }
+
+        /// <summary>
+        ///     The manufacturer ID is fixed at 0xFF
+        /// </summary>
+        public int ManufacturerId => FixedManufacturerId;
+
+        /// <summary>
+        ///     The card type is fixed at JavaCard.
+        /// </summary>
+        public int CardType => CardTypeJavaCard;
+
+        /// <summary>
+        ///     The version number of the CCC itself, it is fixed at version 2.1.
+        /// </summary>
+        public byte ContainerVersionNumber => FixedContainerVersionNumber;
+
+        /// <summary>
+        ///     The version number of the CCC grammar, it is fixed at version 2.1.
+        /// </summary>
+        public byte GrammarVersionNumber => FixedGrammarVersionNumber;
+
+        /// <summary>
+        ///     The version of PKCS #15 the card supports. If the card does not
+        ///     support PKCS #15, this number is 0x00. For the YubiKey it is fixed at
+        ///     0x00.
+        /// </summary>
+        public byte Pkcs15Version => FixedPkcs15VersionNumber;
+
+        /// <summary>
+        ///     The number representing the Data Model used by the smart card. For
+        ///     the YubiKey it is fixed at 0x10 (a PIV requirement).
+        /// </summary>
+        public byte DataModelNumber => FixedDataModelNumber;
+
         /// <inheritdoc />
         public override int GetDefinedDataTag() => CccDefinedDataTag;
 
         /// <summary>
-        /// Set the CardId with a random, 14-byte value.
+        ///     Set the CardId with a random, 14-byte value.
         /// </summary>
         /// <remarks>
-        /// This method will use the random number generator built by
-        /// <see cref="CryptographyProviders"/> to generate 14 random bytes as
-        /// the new CardId.
-        /// <para>
-        /// If there is a CardId value already in this object, this method will
-        /// overwrite it.
-        /// </para>
+        ///     This method will use the random number generator built by
+        ///     <see cref="CryptographyProviders" /> to generate 14 random bytes as
+        ///     the new CardId.
+        ///     <para>
+        ///         If there is a CardId value already in this object, this method will
+        ///         overwrite it.
+        ///     </para>
         /// </remarks>
         public void SetRandomCardId()
         {
@@ -221,18 +250,18 @@ namespace Yubico.YubiKey.Piv.Objects
         }
 
         /// <summary>
-        /// Set the <c>CardIdentifier</c> with the given value. If the array is
-        /// not exactly 14 bytes, this method will throw an exception.
+        ///     Set the <c>CardIdentifier</c> with the given value. If the array is
+        ///     not exactly 14 bytes, this method will throw an exception.
         /// </summary>
         /// <remarks>
-        /// If there is a CardId value already in this object, this method will
-        /// overwrite it.
+        ///     If there is a CardId value already in this object, this method will
+        ///     overwrite it.
         /// </remarks>
         /// <param name="cardIdValue">
-        /// The CardId to use.
+        ///     The CardId to use.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// The data is not exactly 14 bytes.
+        ///     The data is not exactly 14 bytes.
         /// </exception>
         public void SetCardId(ReadOnlySpan<byte> cardIdValue)
         {
@@ -250,7 +279,6 @@ namespace Yubico.YubiKey.Piv.Objects
             var dest = new Span<byte>(_uniqueCardIdentifier);
             cardIdValue.CopyTo(dest.Slice(CardIdOffset, CardIdLength));
             IsEmpty = false;
-            return;
         }
 
         /// <inheritdoc />
@@ -305,7 +333,6 @@ namespace Yubico.YubiKey.Piv.Objects
                 return true;
             }
 
-
             // We're looking for a CCC that is encoded as
             //   53 33
             //      F0 15
@@ -353,7 +380,7 @@ namespace Yubico.YubiKey.Piv.Objects
                 if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> encodedUniqueId, UniqueCardIdTag))
                 {
                     if (encodedUniqueId.Length == UniqueCardIdLength &&
-                        MemoryExtensions.SequenceEqual<byte>(encodedUniqueId.Slice(AidOffset, AidLength).Span, ApplicationIdentifier.Span))
+                        encodedUniqueId.Slice(AidOffset, AidLength).Span.SequenceEqual(ApplicationIdentifier.Span))
                     {
                         var dest = new Memory<byte>(_uniqueCardIdentifier);
                         encodedUniqueId.CopyTo(dest);
@@ -388,8 +415,9 @@ namespace Yubico.YubiKey.Piv.Objects
             {
                 if (elementList[index].Item2 == 0)
                 {
-                    returnValue = tlvReader.TryReadValue(out ReadOnlyMemory<byte> currentValue, elementList[index].Item1) &&
-                              currentValue.Length == elementList[index].Item2;
+                    returnValue = tlvReader.TryReadValue(
+                            out ReadOnlyMemory<byte> currentValue, elementList[index].Item1) &&
+                        currentValue.Length == elementList[index].Item2;
                 }
                 else
                 {
@@ -421,7 +449,8 @@ namespace Yubico.YubiKey.Piv.Objects
                 }
 
                 index++;
-            } while (index < elementList.Length);
+            }
+            while (index < elementList.Length);
         }
 
         // This array of tuples represents what we'll be encoding or decoding.
@@ -429,19 +458,20 @@ namespace Yubico.YubiKey.Piv.Objects
         // Item 2 is the length, it must be either 0 or 1.
         // Item 3 is the value, if the length is 0, this is ignored.
         private Tuple<int, int, byte>[] GetFixedTupleArray() =>
-            new Tuple<int, int, byte>[] {
-                new Tuple<int, int, byte>(ContainerVersionTag, 1, ContainerVersionNumber),
-                new Tuple<int, int, byte>(GrammarVersionTag, 1, GrammarVersionNumber),
-                new Tuple<int, int, byte>(UnusedTag1, 0, 0),
-                new Tuple<int, int, byte>(Pkcs15Tag, 1, Pkcs15Version),
-                new Tuple<int, int, byte>(DataModelTag, 1, DataModelNumber),
-                new Tuple<int, int, byte>(UnusedTag2, 0, 0),
-                new Tuple<int, int, byte>(UnusedTag3, 0, 0),
-                new Tuple<int, int, byte>(UnusedTag4, 0, 0),
-                new Tuple<int, int, byte>(UnusedTag5, 0, 0),
-                new Tuple<int, int, byte>(UnusedTag6, 0, 0),
-                new Tuple<int, int, byte>(UnusedTag7, 0, 0),
-                new Tuple<int, int, byte>(UnusedTag8, 0, 0)
+            new[]
+            {
+                new Tuple<int, int, byte>(ContainerVersionTag, item2: 1, ContainerVersionNumber),
+                new Tuple<int, int, byte>(GrammarVersionTag, item2: 1, GrammarVersionNumber),
+                new Tuple<int, int, byte>(UnusedTag1, item2: 0, item3: 0),
+                new Tuple<int, int, byte>(Pkcs15Tag, item2: 1, Pkcs15Version),
+                new Tuple<int, int, byte>(DataModelTag, item2: 1, DataModelNumber),
+                new Tuple<int, int, byte>(UnusedTag2, item2: 0, item3: 0),
+                new Tuple<int, int, byte>(UnusedTag3, item2: 0, item3: 0),
+                new Tuple<int, int, byte>(UnusedTag4, item2: 0, item3: 0),
+                new Tuple<int, int, byte>(UnusedTag5, item2: 0, item3: 0),
+                new Tuple<int, int, byte>(UnusedTag6, item2: 0, item3: 0),
+                new Tuple<int, int, byte>(UnusedTag7, item2: 0, item3: 0),
+                new Tuple<int, int, byte>(UnusedTag8, item2: 0, item3: 0)
             };
 
         private void Clear()

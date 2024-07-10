@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void SetKey_ValidAes_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
+            if (yubiKey.FirmwareVersion < new FirmwareVersion(major: 5, minor: 4, patch: 2))
             {
                 return;
             }
@@ -48,19 +48,20 @@ namespace Yubico.YubiKey.Piv.Commands
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                byte[] keyData = {
+                byte[] keyData =
+                {
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
                 };
                 var setCmd = new SetManagementKeyCommand(keyData)
                 {
-                    Algorithm = PivAlgorithm.Aes128,
+                    Algorithm = PivAlgorithm.Aes128
                 };
 
-                SetManagementKeyResponse setRsp = pivSession.Connection.SendCommand(setCmd);
+                var setRsp = pivSession.Connection.SendCommand(setCmd);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, setRsp.Status);
 
-                bool isValid = pivSession.TryAuthenticateManagementKey();
+                var isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
                 setRsp = pivSession.Connection.SendCommand(setCmd);
@@ -71,7 +72,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void SetKey_Aes256_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
+            if (yubiKey.FirmwareVersion < new FirmwareVersion(major: 5, minor: 4, patch: 2))
             {
                 return;
             }
@@ -81,10 +82,11 @@ namespace Yubico.YubiKey.Piv.Commands
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                bool isValid = pivSession.TryAuthenticateManagementKey();
+                var isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
-                byte[] keyData = {
+                byte[] keyData =
+                {
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
@@ -92,7 +94,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 };
                 var setCmd = new SetManagementKeyCommand(keyData, PivTouchPolicy.Never, PivAlgorithm.Aes256);
 
-                SetManagementKeyResponse setRsp = pivSession.Connection.SendCommand(setCmd);
+                var setRsp = pivSession.Connection.SendCommand(setCmd);
                 Assert.Equal(ResponseStatus.Success, setRsp.Status);
             }
         }
@@ -100,7 +102,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void SetKey_TDes_Succeeds()
         {
-            if (yubiKey.FirmwareVersion < new FirmwareVersion(5, 4, 2))
+            if (yubiKey.FirmwareVersion < new FirmwareVersion(major: 5, minor: 4, patch: 2))
             {
                 return;
             }
@@ -110,17 +112,18 @@ namespace Yubico.YubiKey.Piv.Commands
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                bool isValid = pivSession.TryAuthenticateManagementKey();
+                var isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
-                byte[] keyData = {
+                byte[] keyData =
+                {
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                     0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
                 };
                 var setCmd = new SetManagementKeyCommand(keyData);
 
-                SetManagementKeyResponse setRsp = pivSession.Connection.SendCommand(setCmd);
+                var setRsp = pivSession.Connection.SendCommand(setCmd);
                 Assert.Equal(ResponseStatus.Success, setRsp.Status);
             }
         }

@@ -13,40 +13,29 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 
 namespace Yubico.YubiKey.YubiHsmAuth
 {
     /// <summary>
-    /// This class represents a <see cref="YubiHsmAuth.Credential"/> stored in the YubiKey's
-    /// YubiHSM Auth application, and the number of retries remaining.
+    ///     This class represents a <see cref="YubiHsmAuth.Credential" /> stored in the YubiKey's
+    ///     YubiHSM Auth application, and the number of retries remaining.
     /// </summary>
     /// <remarks>
-    /// This class is used in <see cref="Commands.ListCredentialsResponse"/>.
+    ///     This class is used in <see cref="Commands.ListCredentialsResponse" />.
     /// </remarks>
     public class CredentialRetryPair
     {
         /// <summary>
-        /// The Credential stored in the YubiHSM Auth application.
-        /// </summary>
-        public Credential Credential { get; }
-
-        /// <summary>
-        /// The number of retries remaining to access the Credential.
-        /// </summary>
-        public int Retries { get; }
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="CredentialRetryPair"/> class.
+        ///     Constructs an instance of the <see cref="CredentialRetryPair" /> class.
         /// </summary>
         /// <param name="credential">
-        /// <inheritdoc cref="Credential" path="/summary"/>
+        ///     <inheritdoc cref="Credential" path="/summary" />
         /// </param>
         /// <param name="retries">
-        /// <inheritdoc cref="Retries" path="/summary"/> Must be a non-negative value.
+        ///     <inheritdoc cref="Retries" path="/summary" /> Must be a non-negative value.
         /// </param>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when <paramref name="retries"/> is negative.
+        ///     Thrown when <paramref name="retries" /> is negative.
         /// </exception>
         public CredentialRetryPair(Credential credential, int retries)
         {
@@ -56,10 +45,18 @@ namespace Yubico.YubiKey.YubiHsmAuth
             {
                 throw new ArgumentOutOfRangeException(nameof(retries), ExceptionMessages.RetryCountNegative);
             }
-            else
-            {
-                Retries = retries;
-            }
+
+            Retries = retries;
         }
+
+        /// <summary>
+        ///     The Credential stored in the YubiHSM Auth application.
+        /// </summary>
+        public Credential Credential { get; }
+
+        /// <summary>
+        ///     The number of retries remaining to access the Credential.
+        /// </summary>
+        public int Retries { get; }
     }
 }

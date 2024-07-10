@@ -33,7 +33,7 @@ namespace Yubico.Core.Iso7816.UnitTests
             const byte SW1 = 0x12;
             const byte SW2 = 0x34;
 
-            var responseApdu = new ResponseApdu(new byte[] { SW1, SW2 });
+            var responseApdu = new ResponseApdu(new[] { SW1, SW2 });
 
             Assert.Equal(SW1, responseApdu.SW1);
         }
@@ -44,7 +44,7 @@ namespace Yubico.Core.Iso7816.UnitTests
             const byte SW1 = 0x12;
             const byte SW2 = 0x34;
 
-            var responseApdu = new ResponseApdu(new byte[] { SW1, SW2 });
+            var responseApdu = new ResponseApdu(new[] { SW1, SW2 });
 
             Assert.Equal(SW1, responseApdu.SW >> 8);
         }
@@ -55,7 +55,7 @@ namespace Yubico.Core.Iso7816.UnitTests
             const byte SW1 = 0x12;
             const byte SW2 = 0x34;
 
-            var responseApdu = new ResponseApdu(new byte[] { SW1, SW2 });
+            var responseApdu = new ResponseApdu(new[] { SW1, SW2 });
 
             Assert.Equal(SW2, responseApdu.SW2);
         }
@@ -66,7 +66,7 @@ namespace Yubico.Core.Iso7816.UnitTests
             const byte SW1 = 0x12;
             const byte SW2 = 0x34;
 
-            var responseApdu = new ResponseApdu(new byte[] { SW1, SW2 });
+            var responseApdu = new ResponseApdu(new[] { SW1, SW2 });
 
             Assert.Equal(SW2, responseApdu.SW & 0xFF);
         }
@@ -76,7 +76,7 @@ namespace Yubico.Core.Iso7816.UnitTests
         {
             // Suppressing nullable warning as we want to explicitly test this case.
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new ResponseApdu(null));
+            _ = Assert.Throws<ArgumentNullException>(() => new ResponseApdu(data: null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -90,14 +90,14 @@ namespace Yubico.Core.Iso7816.UnitTests
         public void DataSWConstructor_GivenNullResponseData_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new ResponseApdu(null, 0x0000));
+            _ = Assert.Throws<ArgumentNullException>(() => new ResponseApdu(dataWithoutSW: null, sw: 0x0000));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
         [Fact]
         public void DataSWConstructor_GivenZeroLengthData_Succeeds()
         {
-            var responseApdu = new ResponseApdu(Array.Empty<byte>(), 0);
+            var responseApdu = new ResponseApdu(Array.Empty<byte>(), sw: 0);
 
             Assert.NotNull(responseApdu);
         }
@@ -105,8 +105,8 @@ namespace Yubico.Core.Iso7816.UnitTests
         [Fact]
         public void DataSWConstructor_GivenData_ReflectedInDataProperty()
         {
-            byte[] expectedData = new byte[] { 1, 2, 3, 4 };
-            var responseApdu = new ResponseApdu(expectedData, 0);
+            byte[] expectedData = { 1, 2, 3, 4 };
+            var responseApdu = new ResponseApdu(expectedData, sw: 0);
 
             Assert.Equal(expectedData, responseApdu.Data.ToArray());
         }

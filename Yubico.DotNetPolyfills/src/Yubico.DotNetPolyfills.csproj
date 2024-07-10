@@ -14,58 +14,58 @@ limitations under the License. -->
 
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
+    <PropertyGroup>
 
-    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <PackageId>Yubico.DotNetPolyfills</PackageId>
-    <VersionPrefix>$(YubicoDotNetPolyfillsVersion)</VersionPrefix>
+        <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+        <PackageId>Yubico.DotNetPolyfills</PackageId>
+        <VersionPrefix>$(YubicoDotNetPolyfillsVersion)</VersionPrefix>
 
-    <!-- TODO: Adjust in .editorconfig -->
-    <EnableNETAnalyzers>false</EnableNETAnalyzers>
-    <AnalysisLevel>5.0</AnalysisLevel>
-    <AnalysisMode>AllDisabledByDefault</AnalysisMode>
-    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
-    <NoWarn>CA1805</NoWarn>
-    <Configurations>Debug;Release;ReleaseWithDocs</Configurations>
+        <!-- TODO: Adjust in .editorconfig -->
+        <EnableNETAnalyzers>false</EnableNETAnalyzers>
+        <AnalysisLevel>5.0</AnalysisLevel>
+        <AnalysisMode>AllDisabledByDefault</AnalysisMode>
+        <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+        <NoWarn>CA1805</NoWarn>
+        <Configurations>Debug;Release;ReleaseWithDocs</Configurations>
 
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
-    <!-- DocFX will throw a warning (which we set as an error) if it doesn't find a reference assembly. -->
-    <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+        <!-- DocFX will throw a warning (which we set as an error) if it doesn't find a reference assembly. -->
+        <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
 
-    <!-- StrongName signing -->
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+        <!-- StrongName signing -->
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
 
-  <ItemGroup Label="Resource file definitions">
-    <None Include="..\..\Yubico.NET.SDK.snk">
-      <Link>Yubico.NET.SDK.snk</Link>
-    </None>
-  </ItemGroup>
+    <ItemGroup Label="Resource file definitions">
+        <None Include="..\..\Yubico.NET.SDK.snk">
+            <Link>Yubico.NET.SDK.snk</Link>
+        </None>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
+    </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
 
-    <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
-    <PackageReference Include="System.Memory" Version="4.5.5" />
+        <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1"/>
+        <PackageReference Include="System.Memory" Version="4.5.5"/>
 
-  </ItemGroup>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Include="..\..\LICENSE.txt" Pack="true" PackagePath="" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Include="..\..\LICENSE.txt" Pack="true" PackagePath=""/>
+    </ItemGroup>
 
 </Project>

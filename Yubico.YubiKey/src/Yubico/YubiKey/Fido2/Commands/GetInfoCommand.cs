@@ -17,36 +17,36 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Gets detailed information about the authenticator.
+    ///     Gets detailed information about the authenticator.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="GetInfoResponse"/>.
-    /// Specified in CTAP as "authenticatorGetInfo".
+    ///     The partner Response class is <see cref="GetInfoResponse" />.
+    ///     Specified in CTAP as "authenticatorGetInfo".
     /// </remarks>
     public sealed class GetInfoCommand : IYubiKeyCommand<GetInfoResponse>
     {
         private const byte CtapGetInfoCmd = 0x04;
 
         /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Fido2
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="GetInfoCommand" /> class.
+        ///     Constructs an instance of the <see cref="GetInfoCommand" /> class.
         /// </summary>
         public GetInfoCommand()
         {
         }
 
+        /// <summary>
+        ///     Gets the YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        ///     YubiKeyApplication.Fido2
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
+
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
         {
-            byte[] payload = new byte[] { CtapGetInfoCmd };
-            return new CommandApdu()
+            byte[] payload = { CtapGetInfoCmd };
+            return new CommandApdu
             {
                 Ins = CtapConstants.CtapHidCbor,
                 Data = payload
@@ -54,7 +54,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public GetInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetInfoResponse(responseApdu);
+        public GetInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) => new GetInfoResponse(responseApdu);
     }
 }

@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    /// Reset the YubiHSM Auth application, which will delete all credentials,
-    /// reset the management key to its default value (all zeros), and reset
-    /// the management key retry counter to 8.
+    ///     Reset the YubiHSM Auth application, which will delete all credentials,
+    ///     reset the management key to its default value (all zeros), and reset
+    ///     the management key retry counter to 8.
     /// </summary>
     /// <remarks>
-    /// The associated response class is <see cref="ResetApplicationResponse"/>.
+    ///     The associated response class is <see cref="ResetApplicationResponse" />.
     /// </remarks>
     public sealed class ResetApplicationCommand : IYubiKeyCommand<ResetApplicationResponse>
     {
@@ -32,27 +31,28 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         private const byte ResetAppP2 = 0xad;
 
         /// <summary>
-        /// Gets the <see cref="YubiKeyApplication"/> to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// <see cref="YubiKeyApplication.YubiHsmAuth"/>
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="ResetApplicationCommand"/> class.
+        ///     Constructs an instance of the <see cref="ResetApplicationCommand" /> class.
         /// </summary>
         public ResetApplicationCommand()
         {
         }
 
+        /// <summary>
+        ///     Gets the <see cref="YubiKeyApplication" /> to which this command belongs.
+        /// </summary>
+        /// <value>
+        ///     <see cref="YubiKeyApplication.YubiHsmAuth" />
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
+
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = ResetAppInstruction,
-            P1 = ResetAppP1,
-            P2 = ResetAppP2
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = ResetAppInstruction,
+                P1 = ResetAppP1,
+                P2 = ResetAppP2
+            };
 
         /// <inheritdoc />
         public ResetApplicationResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

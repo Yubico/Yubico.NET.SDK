@@ -21,65 +21,57 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    /// Remove a credential from the YubiHSM Auth application.
+    ///     Remove a credential from the YubiHSM Auth application.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// The associated response class is
-    /// <see cref="DeleteCredentialResponse"/>.
-    /// </para>
-    /// <para>
-    /// There is a limit of 8 attempts to authenticate with the management key
-    /// before the management key is blocked. Once the management key is
-    /// blocked, the application must be reset before performing operations
-    /// which require authentication with the management key (such as adding
-    /// credentials, deleting credentials, and changing the management key).
-    /// To reset the application, see <see cref="ResetApplicationCommand"/>.
-    /// Supplying the correct management key before the management key is
-    /// blocked will reset the retry counter to 8.
-    /// </para>
+    ///     <para>
+    ///         The associated response class is
+    ///         <see cref="DeleteCredentialResponse" />.
+    ///     </para>
+    ///     <para>
+    ///         There is a limit of 8 attempts to authenticate with the management key
+    ///         before the management key is blocked. Once the management key is
+    ///         blocked, the application must be reset before performing operations
+    ///         which require authentication with the management key (such as adding
+    ///         credentials, deleting credentials, and changing the management key).
+    ///         To reset the application, see <see cref="ResetApplicationCommand" />.
+    ///         Supplying the correct management key before the management key is
+    ///         blocked will reset the retry counter to 8.
+    ///     </para>
     /// </remarks>
     public class DeleteCredentialCommand : IYubiKeyCommand<DeleteCredentialResponse>
     {
         private const byte DeleteCredentialInstruction = 0x02;
 
-        private readonly ReadOnlyMemory<byte> _managementKey;
-        private readonly Credential _credential = new Credential();
-
-        /// <inheritdoc cref="Credential.Label"/>
-        public string Label
-        {
-            get => _credential.Label;
-            set => _credential.Label = value;
-        }
-
         /// <summary>
-        /// The management key must be exactly 16 bytes.
+        ///     The management key must be exactly 16 bytes.
         /// </summary>
         /// <remarks>
-        /// The management key is supplied as an argument to the constructor.
+        ///     The management key is supplied as an argument to the constructor.
         /// </remarks>
         public static readonly int ValidManagementKeyLength = 16;
 
-        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
+        private readonly Credential _credential = new Credential();
+
+        private readonly ReadOnlyMemory<byte> _managementKey;
 
         /// <summary>
-        /// Constructs an instance of the <see cref="DeleteCredentialCommand"/>
-        /// class.
+        ///     Constructs an instance of the <see cref="DeleteCredentialCommand" />
+        ///     class.
         /// </summary>
         /// <remarks>
-        /// The <see cref="Label"/> will need to be set before calling
-        /// <see cref="CreateCommandApdu"/>.
+        ///     The <see cref="Label" /> will need to be set before calling
+        ///     <see cref="CreateCommandApdu" />.
         /// </remarks>
         /// <param name="managementKey">
-        /// The secret used to authenticate to the application prior to adding
-        /// or removing credentials. See <see cref="ValidManagementKeyLength"/>
-        /// for its required length. The application has a default management
-        /// key of all zeros.
+        ///     The secret used to authenticate to the application prior to adding
+        ///     or removing credentials. See <see cref="ValidManagementKeyLength" />
+        ///     for its required length. The application has a default management
+        ///     key of all zeros.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// <paramref name="managementKey"/> does not meet the length
-        /// requirements.
+        ///     <paramref name="managementKey" /> does not meet the length
+        ///     requirements.
         /// </exception>
         public DeleteCredentialCommand(ReadOnlyMemory<byte> managementKey)
         {
@@ -93,22 +85,22 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         }
 
         /// <summary>
-        /// Constructs an instance of the <see cref="DeleteCredentialCommand"/>
-        /// class.
+        ///     Constructs an instance of the <see cref="DeleteCredentialCommand" />
+        ///     class.
         /// </summary>
         /// <param name="managementKey">
-        /// The secret used to authenticate to the application prior to adding
-        /// or removing credentials. See <see cref="ValidManagementKeyLength"/>
-        /// for its required length. The application has a default management
-        /// key of all zeros.
+        ///     The secret used to authenticate to the application prior to adding
+        ///     or removing credentials. See <see cref="ValidManagementKeyLength" />
+        ///     for its required length. The application has a default management
+        ///     key of all zeros.
         /// </param>
         /// <param name="label">
-        /// The label of the credential to be deleted. The string must meet the
-        /// same requirements as <see cref="Credential.Label"/>.
+        ///     The label of the credential to be deleted. The string must meet the
+        ///     same requirements as <see cref="Credential.Label" />.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// <paramref name="managementKey"/> does not meet the length
-        /// requirements.
+        ///     <paramref name="managementKey" /> does not meet the length
+        ///     requirements.
         /// </exception>
         public DeleteCredentialCommand(ReadOnlyMemory<byte> managementKey, string label)
             : this(managementKey)
@@ -116,20 +108,31 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             Label = label;
         }
 
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
+        /// <inheritdoc cref="Credential.Label" />
+        public string Label
         {
-            Ins = DeleteCredentialInstruction,
-            Data = BuildDataField()
-        };
+            get => _credential.Label;
+            set => _credential.Label = value;
+        }
+
+        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
+
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = DeleteCredentialInstruction,
+                Data = BuildDataField()
+            };
 
         public DeleteCredentialResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new DeleteCredentialResponse(responseApdu);
 
         private byte[] BuildDataField()
         {
-            TlvWriter tlvWriter = new TlvWriter();
+            var tlvWriter = new TlvWriter();
             tlvWriter.WriteValue(DataTagConstants.ManagementKey, _managementKey.Span);
-            tlvWriter.WriteString(DataTagConstants.Label,
+            tlvWriter.WriteString(
+                DataTagConstants.Label,
                 Label, Encoding.UTF8);
 
             byte[] returnValue = tlvWriter.Encode();

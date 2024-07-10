@@ -20,30 +20,47 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    /// Updates the scancode mapping used for Yubico OTP and the Yubico OTP based password generator.
+    ///     Updates the scancode mapping used for Yubico OTP and the Yubico OTP based password generator.
     /// </summary>
     public class WriteScancodeMap : IYubiKeyCommand<ReadStatusResponse>
     {
         private const byte RequestSlotInstruction = 0x01;
         private const byte WriteScancodeMapSlot = 0x12;
-        // Note that this is not ModHex, but it's what yubico_personalization
-        // uses to write the map.
-        private static string _defaultScancodeMap => "cbdefghijklnrtuvCBDEFGHIJKLNRTUV0123456789!\t\n";
         private static readonly int _scancodeMapLength = _defaultScancodeMap.Length;
 
         private ReadOnlyMemory<byte> _scancodeMap = Array.Empty<byte>();
 
         /// <summary>
-        /// The default HID usage map.
+        ///     Initializes a new instance of the <see cref="WriteScancodeMap" /> class. The scancode map
+        ///     will be initialized to the default, until it is overridden by the caller.
+        /// </summary>
+        public WriteScancodeMap() :
+            this(DefaultScancodeMap)
+        {
+        }
+
+        /// <summary>
+        ///     Initializing a new instance of the <see cref="WriteScancodeMap" /> class with a custom
+        ///     scancode map.
+        /// </summary>
+        /// <param name="scancodeMap">The scancode map to program on the YubiKey.</param>
+        public WriteScancodeMap(ReadOnlyMemory<byte> scancodeMap)
+        {
+            ScancodeMap = scancodeMap;
+        }
+
+        // Note that this is not ModHex, but it's what yubico_personalization
+        // uses to write the map.
+        private static string _defaultScancodeMap => "cbdefghijklnrtuvCBDEFGHIJKLNRTUV0123456789!\t\n";
+
+        /// <summary>
+        ///     The default HID usage map.
         /// </summary>
         public static ReadOnlyMemory<byte> DefaultScancodeMap =>
             HidCodeTranslator.GetInstance(KeyboardLayout.en_US).GetHidCodes(_defaultScancodeMap);
 
-        /// <inheritdoc />
-        public YubiKeyApplication Application => YubiKeyApplication.Otp;
-
         /// <summary>
-        /// The scancode map to be written when the command is sent to the YubiKey.
+        ///     The scancode map to be written when the command is sent to the YubiKey.
         /// </summary>
         public ReadOnlyMemory<byte> ScancodeMap
         {
@@ -58,36 +75,19 @@ namespace Yubico.YubiKey.Otp.Commands
                             ExceptionMessages.WrongHidCodeMapLength,
                             _scancodeMapLength,
                             value.Length),
-                            nameof(value));
+                        nameof(value));
                 }
 
                 _scancodeMap = value;
             }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="WriteScancodeMap"/> class. The scancode map
-        /// will be initialized to the default, until it is overridden by the caller.
-        /// </summary>
-        public WriteScancodeMap() :
-            this(DefaultScancodeMap)
-        {
-
-        }
-
-        /// <summary>
-        /// Initializing a new instance of the <see cref="WriteScancodeMap"/> class with a custom
-        /// scancode map.
-        /// </summary>
-        /// <param name="scancodeMap">The scancode map to program on the YubiKey.</param>
-        public WriteScancodeMap(ReadOnlyMemory<byte> scancodeMap)
-        {
-            ScancodeMap = scancodeMap;
-        }
+        /// <inheritdoc />
+        public YubiKeyApplication Application => YubiKeyApplication.Otp;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() =>
-            new CommandApdu()
+            new CommandApdu
             {
                 Ins = RequestSlotInstruction,
                 P1 = WriteScancodeMapSlot,

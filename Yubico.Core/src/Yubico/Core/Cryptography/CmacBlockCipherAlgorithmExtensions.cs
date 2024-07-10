@@ -17,46 +17,48 @@ using System;
 namespace Yubico.Core.Cryptography
 {
     /// <summary>
-    /// Extension methods to operate on the CmacBlockCipherAlgorithm enum.
+    ///     Extension methods to operate on the CmacBlockCipherAlgorithm enum.
     /// </summary>
     public static class CmacBlockCipherAlgorithmExtensions
     {
         /// <summary>
-        /// Returns the length, in bytes, of the key to be used in the operations
-        /// given the specified underlying block cipher algorithm.
+        ///     Returns the length, in bytes, of the key to be used in the operations
+        ///     given the specified underlying block cipher algorithm.
         /// </summary>
         /// <param name="algorithm">
-        /// The algorithm name to check.
+        ///     The algorithm name to check.
         /// </param>
         /// <returns>
-        /// An int, the length, in bytes, of the key for the specified block
-        /// cipher algorithm.
+        ///     An int, the length, in bytes, of the key for the specified block
+        ///     cipher algorithm.
         /// </returns>
-        public static int KeyLength(this CmacBlockCipherAlgorithm algorithm) => algorithm switch
-        {
-            CmacBlockCipherAlgorithm.Aes128 => 16,
-            CmacBlockCipherAlgorithm.Aes192 => 24,
-            CmacBlockCipherAlgorithm.Aes256 => 32,
-            _ => throw new ArgumentOutOfRangeException(ExceptionMessages.InvalidCmacInput),
-        };
+        public static int KeyLength(this CmacBlockCipherAlgorithm algorithm) =>
+            algorithm switch
+            {
+                CmacBlockCipherAlgorithm.Aes128 => 16,
+                CmacBlockCipherAlgorithm.Aes192 => 24,
+                CmacBlockCipherAlgorithm.Aes256 => 32,
+                _ => throw new ArgumentOutOfRangeException(ExceptionMessages.InvalidCmacInput)
+            };
 
         /// <summary>
-        /// Returns the size, in bytes, of the resulting CMAC given the specified
-        /// underlying block cipher algorithm.
+        ///     Returns the size, in bytes, of the resulting CMAC given the specified
+        ///     underlying block cipher algorithm.
         /// </summary>
         /// <param name="algorithm">
-        /// The algorithm name to check.
+        ///     The algorithm name to check.
         /// </param>
         /// <returns>
-        /// An int, the size, in bytes, of the CMAC result for the specified
-        /// block cipher algorithm.
+        ///     An int, the size, in bytes, of the CMAC result for the specified
+        ///     block cipher algorithm.
         /// </returns>
-        public static int MacLength(this CmacBlockCipherAlgorithm algorithm) => algorithm switch
-        {
-            CmacBlockCipherAlgorithm.Aes128 => 16,
-            CmacBlockCipherAlgorithm.Aes192 => 16,
-            CmacBlockCipherAlgorithm.Aes256 => 16,
-            _ => throw new ArgumentOutOfRangeException(ExceptionMessages.InvalidCmacInput),
-        };
+        public static int MacLength(this CmacBlockCipherAlgorithm algorithm) =>
+            algorithm switch
+            {
+                CmacBlockCipherAlgorithm.Aes128 => 16,
+                CmacBlockCipherAlgorithm.Aes192 => 16,
+                CmacBlockCipherAlgorithm.Aes256 => 16,
+                _ => throw new ArgumentOutOfRangeException(ExceptionMessages.InvalidCmacInput)
+            };
     }
 }

@@ -18,13 +18,13 @@ namespace Yubico.YubiKey
 {
     internal class Scp03YubiKeyDevice : YubiKeyDevice
     {
-        public StaticKeys StaticKeys { get; private set; }
-
         public Scp03YubiKeyDevice(YubiKeyDevice device, StaticKeys staticKeys)
-            : base(device.GetSmartCardDevice(), null, null, device)
+            : base(device.GetSmartCardDevice(), hidKeyboardDevice: null, hidFidoDevice: null, device)
         {
             StaticKeys = staticKeys.GetCopy();
         }
+
+        public StaticKeys StaticKeys { get; }
 
         internal override IYubiKeyConnection? Connect(
             YubiKeyApplication? application,

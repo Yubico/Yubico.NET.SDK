@@ -15,7 +15,6 @@
 using System;
 using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
 
 namespace Yubico.YubiKey
 {
@@ -26,13 +25,22 @@ namespace Yubico.YubiKey
 
         private readonly Memory<byte> _reportBuffer;
 
+        public KeyboardReport()
+        {
+            _reportBuffer = new byte[8];
+        }
+
+        public KeyboardReport(Memory<byte> reportBuffer)
+        {
+            Debug.Assert(reportBuffer.Length == 8);
+            _reportBuffer = reportBuffer;
+        }
+
         public Span<byte> Payload
         {
             get => PayloadSpan();
             set => value.CopyTo(PayloadSpan());
         }
-
-        public bool IsAllZeros() => Payload.SequenceEqual(new byte[] { 0, 0, 0, 0, 0, 0, 0 });
 
         public KeyboardReportFlags Flags
         {
@@ -80,29 +88,17 @@ namespace Yubico.YubiKey
             }
         }
 
-        public KeyboardReport()
-        {
-            _reportBuffer = new byte[8];
-        }
-
-        public KeyboardReport(Memory<byte> reportBuffer)
-        {
-            Debug.Assert(reportBuffer.Length == 8);
-            _reportBuffer = reportBuffer;
-        }
+        public bool IsAllZeros() => Payload.SequenceEqual(new byte[] { 0, 0, 0, 0, 0, 0, 0 });
 
         public byte[] ToArray() => _reportBuffer.ToArray();
 
-        private Span<byte> PayloadSpan() => _reportBuffer.Slice(0, 7).Span;
+        private Span<byte> PayloadSpan() => _reportBuffer.Slice(start: 0, length: 7).Span;
 
-        public override string ToString()
-        {
-            return
-                $"TouchPending: {TouchPending}, " +
-                $"ReadPending: {ReadPending}, " +
-                $"WritePending: {WritePending}, " +
-                $"SequenceNumber: {SequenceNumber}, " +
-                $"Payload: {BitConverter.ToString(PayloadSpan().ToArray())}";
-        }
+        public override string ToString() =>
+            $"TouchPending: {TouchPending}, " +
+            $"ReadPending: {ReadPending}, " +
+            $"WritePending: {WritePending}, " +
+            $"SequenceNumber: {SequenceNumber}, " +
+            $"Payload: {BitConverter.ToString(PayloadSpan().ToArray())}";
     }
 }

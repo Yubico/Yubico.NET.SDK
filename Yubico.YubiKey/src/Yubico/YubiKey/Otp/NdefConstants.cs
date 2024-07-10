@@ -16,51 +16,58 @@ namespace Yubico.YubiKey.Otp
 {
     internal static class NdefConstants
     {
-        public static string[] supportedUriPrefixes = new string[]
+        public static string[] supportedUriPrefixes =
         {
             "",
             "http://www.",
             "https://www.",
             "http://",
             "https://",
+
             // 5
             "tel:",
             "mailto:",
             "ftp://anonymous:anonymous@",
             "ftp://ftp.",
             "ftps://",
+
             // 10
             "sftp://",
             "smb://",
             "nfs://",
             "ftp://",
             "dav://",
+
             // 15
             "news:",
             "telnet://",
             "imap:",
             "rtsp://",
             "urn:",
+
             // 20
             "pop:",
             "sip:",
             "sips:",
             "tftp:",
             "btspp://",
-                // 25
+
+            // 25
             "btl2cap://",
             "btgoep://",
             "tcpobex://",
             "irdaobex://",
             "file://",
+
             // 30
             "urn:epc:id:",
             "urn:epc:tag:",
             "urn:epc:pat:",
             "urn:epc:raw:",
             "urn:epc:",
+
             // 35
-            "urn:nfc:",
+            "urn:nfc:"
         };
     }
 }

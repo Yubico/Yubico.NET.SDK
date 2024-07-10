@@ -21,77 +21,75 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    /// The command class for adding a credential to the YubiHSM Auth
-    /// application.
+    ///     The command class for adding a credential to the YubiHSM Auth
+    ///     application.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// The partner class is <see cref="AddCredentialResponse"/>. See
-    /// <see cref="CredentialWithSecrets"/> for further information on the
-    /// requirements of the new credential.
-    /// </para>
-    /// <para>
-    /// There is a limit of 8 attempts to authenticate with the management key
-    /// before the management key is blocked. Once the management key is
-    /// blocked, the application must be reset before performing operations
-    /// which require authentication with the management key (such as adding
-    /// credentials, deleting credentials, and changing the management key).
-    /// To reset the application, see <see cref="ResetApplicationCommand"/>.
-    /// Supplying the correct management key before the management key is
-    /// blocked will reset the retry counter to 8.
-    /// </para>
+    ///     <para>
+    ///         The partner class is <see cref="AddCredentialResponse" />. See
+    ///         <see cref="CredentialWithSecrets" /> for further information on the
+    ///         requirements of the new credential.
+    ///     </para>
+    ///     <para>
+    ///         There is a limit of 8 attempts to authenticate with the management key
+    ///         before the management key is blocked. Once the management key is
+    ///         blocked, the application must be reset before performing operations
+    ///         which require authentication with the management key (such as adding
+    ///         credentials, deleting credentials, and changing the management key).
+    ///         To reset the application, see <see cref="ResetApplicationCommand" />.
+    ///         Supplying the correct management key before the management key is
+    ///         blocked will reset the retry counter to 8.
+    ///     </para>
     /// </remarks>
     public sealed class AddCredentialCommand : IYubiKeyCommand<AddCredentialResponse>
     {
         private const byte AddCredentialInstruction = 0x01;
 
-        private readonly ReadOnlyMemory<byte> _managementKey;
-        private readonly CredentialWithSecrets _credentialWithSecrets;
-
         /// <summary>
-        /// The management key must be exactly 16 bytes.
+        ///     The management key must be exactly 16 bytes.
         /// </summary>
         /// <remarks>
-        /// The management key is supplied as an argument to the constructor
-        /// <see cref="AddCredentialCommand(ReadOnlyMemory{byte}, CredentialWithSecrets)"/>.
+        ///     The management key is supplied as an argument to the constructor
+        ///     <see cref="AddCredentialCommand(ReadOnlyMemory{byte}, CredentialWithSecrets)" />.
         /// </remarks>
         public const int ValidManagementKeyLength = 16;
 
-        /// <inheritdoc/>
-        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
+        private readonly CredentialWithSecrets _credentialWithSecrets;
+
+        private readonly ReadOnlyMemory<byte> _managementKey;
 
         /// <summary>
-        /// Add a credential to the YubiHSM Auth application.
+        ///     Add a credential to the YubiHSM Auth application.
         /// </summary>
         /// <remarks>
-        /// <para>
-        /// The application can store up to 32 credentials, and each credential
-        /// must have a unique label. See <see cref="Credential.Label"/> for
-        /// more information on encodings and requirements.
-        /// </para>
-        /// <para>
-        /// To list the credentials currently stored in the application, use
-        /// <see cref="ListCredentialsCommand"/>.
-        /// </para>
-        /// <para>
-        /// The caller is responsible for controlling the buffer which holds
-        /// the management key, and should overwrite the data after the command
-        /// is sent. The user's manual entry
-        /// <xref href="UsersManualSensitive">"Sensitive Data"</xref> has further
-        /// details and recommendations for handling this kind of data.
-        /// </para>
+        ///     <para>
+        ///         The application can store up to 32 credentials, and each credential
+        ///         must have a unique label. See <see cref="Credential.Label" /> for
+        ///         more information on encodings and requirements.
+        ///     </para>
+        ///     <para>
+        ///         To list the credentials currently stored in the application, use
+        ///         <see cref="ListCredentialsCommand" />.
+        ///     </para>
+        ///     <para>
+        ///         The caller is responsible for controlling the buffer which holds
+        ///         the management key, and should overwrite the data after the command
+        ///         is sent. The user's manual entry
+        ///         <xref href="UsersManualSensitive">"Sensitive Data"</xref> has further
+        ///         details and recommendations for handling this kind of data.
+        ///     </para>
         /// </remarks>
         /// <param name="managementKey">
-        /// The secret used to authenticate to the application prior to adding
-        /// or removing credentials. See <see cref="ValidManagementKeyLength"/>
-        /// for its required length. The application has a default management
-        /// key of all zeros.
+        ///     The secret used to authenticate to the application prior to adding
+        ///     or removing credentials. See <see cref="ValidManagementKeyLength" />
+        ///     for its required length. The application has a default management
+        ///     key of all zeros.
         /// </param>
         /// <param name="credentialWithSecrets">
-        /// The credential to be added.
+        ///     The credential to be added.
         /// </param>
         /// <exception cref="ArgumentOutOfRangeException">
-        /// Thrown when <paramref name="managementKey"/> has an invalid length.
+        ///     Thrown when <paramref name="managementKey" /> has an invalid length.
         /// </exception>
         public AddCredentialCommand(
             ReadOnlyMemory<byte> managementKey,
@@ -108,36 +106,44 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             _credentialWithSecrets = credentialWithSecrets;
         }
 
-        /// <inheritdoc/>
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = AddCredentialInstruction,
-            Data = BuildDataField(),
-        };
+        /// <inheritdoc />
+        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = AddCredentialInstruction,
+                Data = BuildDataField()
+            };
+
+        /// <inheritdoc />
         public AddCredentialResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new AddCredentialResponse(responseApdu);
 
         /// <summary>
-        /// Build the <see cref="CommandApdu.Data"/> field from the given data.
+        ///     Build the <see cref="CommandApdu.Data" /> field from the given data.
         /// </summary>
         /// <returns>
-        /// Data formatted as a TLV.
+        ///     Data formatted as a TLV.
         /// </returns>
         private byte[] BuildDataField()
         {
-            TlvWriter tlvWriter = new TlvWriter();
+            var tlvWriter = new TlvWriter();
             tlvWriter.WriteValue(DataTagConstants.ManagementKey, _managementKey.Span);
-            tlvWriter.WriteString(DataTagConstants.Label,
+            tlvWriter.WriteString(
+                DataTagConstants.Label,
                 _credentialWithSecrets.Label, Encoding.UTF8);
 
             WriteCryptographicKeyType(tlvWriter);
             WriteKeys(tlvWriter);
             WriteCredentialPassword(tlvWriter);
 
-            tlvWriter.WriteByte(DataTagConstants.Touch,
-                _credentialWithSecrets.TouchRequired ? (byte)1 : (byte)0);
+            tlvWriter.WriteByte(
+                DataTagConstants.Touch,
+                _credentialWithSecrets.TouchRequired
+                    ? (byte)1
+                    : (byte)0);
 
             byte[] returnValue = tlvWriter.Encode();
             tlvWriter.Clear();
@@ -146,48 +152,44 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         }
 
         /// <summary>
-        /// Write credential password as a TLV.
+        ///     Write credential password as a TLV.
         /// </summary>
         /// <remarks>
-        /// Commands sent to the YubiHSM Auth application must send their data
-        /// formatted as a TLV.
+        ///     Commands sent to the YubiHSM Auth application must send their data
+        ///     formatted as a TLV.
         /// </remarks>
         /// <param name="tlvWriter">
-        /// The writer to use to build the TLV.
+        ///     The writer to use to build the TLV.
         /// </param>
-        private void WriteCredentialPassword(TlvWriter tlvWriter)
-        {
+        private void WriteCredentialPassword(TlvWriter tlvWriter) =>
             tlvWriter.WriteValue(
                 DataTagConstants.Password,
                 _credentialWithSecrets.CredentialPassword.Span);
-        }
 
         /// <summary>
-        /// Write key type as a TLV.
+        ///     Write key type as a TLV.
         /// </summary>
         /// <remarks>
-        /// Commands sent to the YubiHSM Auth application must send their data
-        /// formatted as a TLV.
+        ///     Commands sent to the YubiHSM Auth application must send their data
+        ///     formatted as a TLV.
         /// </remarks>
         /// <param name="tlvWriter">
-        /// The writer to use to build the TLV.
+        ///     The writer to use to build the TLV.
         /// </param>
-        private void WriteCryptographicKeyType(TlvWriter tlvWriter)
-        {
+        private void WriteCryptographicKeyType(TlvWriter tlvWriter) =>
             tlvWriter.WriteByte(
                 DataTagConstants.CryptographicKeyType,
                 (byte)_credentialWithSecrets.KeyType);
-        }
 
         /// <summary>
-        /// Write the key(s) as a TLV.
+        ///     Write the key(s) as a TLV.
         /// </summary>
         /// <remarks>
-        /// This method will cast the <see cref="_credentialWithSecrets"/>
-        /// to the matching subclass, and then retrieve the appropriate keys.
+        ///     This method will cast the <see cref="_credentialWithSecrets" />
+        ///     to the matching subclass, and then retrieve the appropriate keys.
         /// </remarks>
         /// <param name="tlvWriter">
-        /// The writer to use to build the TLV.
+        ///     The writer to use to build the TLV.
         /// </param>
         private void WriteKeys(TlvWriter tlvWriter)
         {
@@ -208,6 +210,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             tlvWriter.WriteValue(
                 DataTagConstants.EncryptionKey,
                 credentialWithSecrets.EncryptionKey.Span);
+
             tlvWriter.WriteValue(
                 DataTagConstants.MacKey,
                 credentialWithSecrets.MacKey.Span);

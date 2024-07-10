@@ -21,25 +21,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
     // on the classes that perform each of the sample operations.
     public partial class PivSampleRun
     {
+        private readonly SampleKeyCollector _keyCollector;
         private readonly SampleMenu _menuObject;
+        private readonly List<SamplePivSlotContents> _slotContentsList;
         private bool _chosenByUser;
         private IYubiKeyDevice _yubiKeyChosen;
-        private readonly SampleKeyCollector _keyCollector;
-        private readonly List<SamplePivSlotContents> _slotContentsList;
-
-        // This is a list of the slot contents.
-        // This only keeps track of the contents for the instance of a sample run.
-        // Each time you run the sample, a new List is created. Any information
-        // about existing contents are not represented. When you exit the sample,
-        // this information disappears.
-        // The point of this is to simply keep track of the contents to make it
-        // possible to demonstrate how to create a cert request.
-        // In addition, in a real-world application, you would likely want to
-        // keep track of this information, just persistently.
-        public IReadOnlyCollection<SamplePivSlotContents> SlotContentsList
-        {
-            get { return _slotContentsList; }
-        }
 
         // Provide the max invalid count, this is the number of times in a row
         // the a user can type an invalid response to a menu request before
@@ -59,6 +45,17 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             _keyCollector = new SampleKeyCollector(_menuObject);
             _slotContentsList = new List<SamplePivSlotContents>();
         }
+
+        // This is a list of the slot contents.
+        // This only keeps track of the contents for the instance of a sample run.
+        // Each time you run the sample, a new List is created. Any information
+        // about existing contents are not represented. When you exit the sample,
+        // this information disappears.
+        // The point of this is to simply keep track of the contents to make it
+        // possible to demonstrate how to create a cert request.
+        // In addition, in a real-world application, you would likely want to
+        // keep track of this information, just persistently.
+        public IReadOnlyCollection<SamplePivSlotContents> SlotContentsList => _slotContentsList;
 
         // Run the sample.
         // Run the main menu, then based on the item chosen, run the appropriate
@@ -89,7 +86,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         menuItem = PivMainMenuItem.Exit;
                     }
                 }
-
             } while (menuItem != PivMainMenuItem.Exit);
         }
 
@@ -114,7 +110,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     }
 
                     return ChooseYubiKey.RunChooseYubiKey(
-                        false,
+                        alwaysAsk: false,
                         _menuObject,
                         Transport.SmartCard,
                         ref _yubiKeyChosen);
@@ -125,7 +121,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         private bool RunChooseYubiKey()
         {
             _chosenByUser = ChooseYubiKey.RunChooseYubiKey(
-                true,
+                alwaysAsk: true,
                 _menuObject,
                 Transport.SmartCard,
                 ref _yubiKeyChosen);

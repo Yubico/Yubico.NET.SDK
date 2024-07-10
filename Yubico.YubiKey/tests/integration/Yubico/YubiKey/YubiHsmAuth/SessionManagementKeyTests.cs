@@ -21,11 +21,12 @@ namespace Yubico.YubiKey.YubiHsmAuth
     public class SessionManagementKeyTests
     {
         #region GetRetries
+
         [Fact]
         public void GetMgmtKeyRetries_NoFailedAttempts_Returns8()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
             int retriesRemaining;
 
@@ -36,28 +37,28 @@ namespace Yubico.YubiKey.YubiHsmAuth
             }
 
             // Postconditions
-            Assert.Equal(8, retriesRemaining);
+            Assert.Equal(expected: 8, retriesRemaining);
         }
 
         [Fact]
         public void GetMgmtKeyRetries_FailAllAttempts_Returns0()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
             int retriesRemaining;
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
                 // Exhaust all retries
-                int availableRetries = yubiHsmAuthSession.GetManagementKeyRetries();
+                var availableRetries = yubiHsmAuthSession.GetManagementKeyRetries();
 
-                for (int i = 0; i < availableRetries; i++)
+                for (var i = 0; i < availableRetries; i++)
                 {
                     _ = yubiHsmAuthSession.TryChangeManagementKey(
                         YhaTestUtilities.AlternateMgmtKey,
                         YhaTestUtilities.DefaultMgmtKey,
-                        out int? _);
+                        out var _);
                 }
 
                 // Test
@@ -65,18 +66,20 @@ namespace Yubico.YubiKey.YubiHsmAuth
             }
 
             // Postconditions
-            Assert.Equal(0, retriesRemaining);
+            Assert.Equal(expected: 0, retriesRemaining);
         }
+
         #endregion
 
         #region TryChangeMgmtKey
+
         [Fact]
         public void TryChangeManagementKey_ValidKeys_ReturnsTrue()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
-            bool mgmtKeyChanged = false;
+            var mgmtKeyChanged = false;
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
@@ -84,7 +87,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 mgmtKeyChanged = yubiHsmAuthSession.TryChangeManagementKey(
                     YhaTestUtilities.DefaultMgmtKey,
                     YhaTestUtilities.AlternateMgmtKey,
-                    out int? _);
+                    out var _);
             }
 
             // Postcondition
@@ -95,7 +98,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryChangeManagementKey_ValidKeys_ReturnsNullRetries()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
             int? retriesRemaining;
 
@@ -116,9 +119,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryChangeMgmtKey_WrongCurrentKey_ReturnsFalse()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
-            bool mgmtKeyChanged = false;
+            var mgmtKeyChanged = false;
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
@@ -126,7 +129,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 mgmtKeyChanged = yubiHsmAuthSession.TryChangeManagementKey(
                     YhaTestUtilities.AlternateMgmtKey,
                     YhaTestUtilities.DefaultMgmtKey,
-                    out int? _);
+                    out var _);
             }
 
             // Postcondition
@@ -137,7 +140,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryChangeMgmtKey_WrongCurrentKey_Returns1FewerRetries()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
             int expectedRetriesRemaining;
             int? actualRetriesRemaining;
@@ -156,14 +159,16 @@ namespace Yubico.YubiKey.YubiHsmAuth
             // Postcondition
             Assert.Equal(expectedRetriesRemaining, actualRetriesRemaining);
         }
+
         #endregion
 
         #region ChangeMgmtKey
+
         [Fact]
         public void ChangeManagementKey_ValidKeys_MgmtKeyChanged()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
@@ -182,14 +187,17 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void ChangeMgmtKey_WrongCurrentKey_ThrowsSecurityEx()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
                 // Test & postcondition
-                void changeMgmtKey() => yubiHsmAuthSession.ChangeManagementKey(
-                    YhaTestUtilities.AlternateMgmtKey,
-                    YhaTestUtilities.DefaultMgmtKey);
+                void changeMgmtKey()
+                {
+                    yubiHsmAuthSession.ChangeManagementKey(
+                        YhaTestUtilities.AlternateMgmtKey,
+                        YhaTestUtilities.DefaultMgmtKey);
+                }
 
                 _ = Assert.Throws<SecurityException>(changeMgmtKey);
             }
@@ -199,44 +207,52 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void ChangeMgmtKey_NoRetries_ThrowsSecurityEx()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
                 // Exhaust all retries
-                int availableRetries = yubiHsmAuthSession.GetManagementKeyRetries();
+                var availableRetries = yubiHsmAuthSession.GetManagementKeyRetries();
 
-                for (int i = 0; i < availableRetries; i++)
+                for (var i = 0; i < availableRetries; i++)
                 {
                     _ = yubiHsmAuthSession.TryChangeManagementKey(
                         YhaTestUtilities.AlternateMgmtKey,
                         YhaTestUtilities.DefaultMgmtKey,
-                        out int? _);
+                        out var _);
                 }
 
                 // Test
-                void changeMgmtKey() => yubiHsmAuthSession.ChangeManagementKey(
-                    YhaTestUtilities.DefaultMgmtKey,
-                    YhaTestUtilities.AlternateMgmtKey);
+                void changeMgmtKey()
+                {
+                    yubiHsmAuthSession.ChangeManagementKey(
+                        YhaTestUtilities.DefaultMgmtKey,
+                        YhaTestUtilities.AlternateMgmtKey);
+                }
 
                 _ = Assert.Throws<SecurityException>(changeMgmtKey);
             }
         }
+
         #endregion
 
         #region KeyCollector
+
         [Fact]
         public void TryChangeMgmtKeyKeyCollector_NoKeyCollector_ThrowsInvalidOpEx()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
                 // Leave yubiHsmAuthSession.KeyCollector set to its default value of `null`
 
                 // Test & postcondition
-                void tryChangeMgmtKey() => yubiHsmAuthSession.TryChangeManagementKey();
+                void tryChangeMgmtKey()
+                {
+                    yubiHsmAuthSession.TryChangeManagementKey();
+                }
 
                 _ = Assert.Throws<InvalidOperationException>(tryChangeMgmtKey);
             }
@@ -246,14 +262,14 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryChangeMgmtKeyKeyCollector_KeyCollectorReturnsFalse_ReturnsFalse()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
                 yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.ReturnsFalseCollectorDelegate;
 
                 // Test
-                bool managmentKeyChanged = yubiHsmAuthSession.TryChangeManagementKey();
+                var managmentKeyChanged = yubiHsmAuthSession.TryChangeManagementKey();
 
                 // Postconditions
                 Assert.False(managmentKeyChanged);
@@ -264,15 +280,15 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryChangeManagementKeyKeyCollector_ValidKeys_ManagementKeyChanged()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-            SimpleKeyCollector keyCollector = new SimpleKeyCollector();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
+            var keyCollector = new SimpleKeyCollector();
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
                 yubiHsmAuthSession.KeyCollector = keyCollector.FlipFlopCollectorDelegate;
 
                 // Test by changing from current to new, and then back
-                bool managmentKeyChanged = yubiHsmAuthSession.TryChangeManagementKey();
+                var managmentKeyChanged = yubiHsmAuthSession.TryChangeManagementKey();
                 Assert.True(managmentKeyChanged);
 
                 managmentKeyChanged = yubiHsmAuthSession.TryChangeManagementKey();
@@ -284,10 +300,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryChangeMgmtKeyKeyCollector_WrongCurrentKey_RetrySuccess()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
-            SimpleKeyCollector keyCollector = new SimpleKeyCollector
+            var testDevice = YhaTestUtilities.GetCleanDevice();
+            var keyCollector = new SimpleKeyCollector
             {
-                UseDefaultValue = false,
+                UseDefaultValue = false
             };
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
@@ -295,7 +311,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 yubiHsmAuthSession.KeyCollector = keyCollector.FlipFlopCollectorDelegate;
 
                 // Test
-                bool managmentKeyChanged = yubiHsmAuthSession.TryChangeManagementKey();
+                var managmentKeyChanged = yubiHsmAuthSession.TryChangeManagementKey();
 
                 // Postconditions
                 Assert.True(managmentKeyChanged);
@@ -306,17 +322,22 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryChangeMgmtKeyKeyCollector_FailedAuthenticationWithNoRetries_ThrowsSecurityEx()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
                 yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.AlternateValueCollectorDelegate;
 
                 // Test & postcondition
-                void tryChangeMgmtKey() => yubiHsmAuthSession.TryChangeManagementKey();
+                void tryChangeMgmtKey()
+                {
+                    yubiHsmAuthSession.TryChangeManagementKey();
+                }
+
                 _ = Assert.Throws<SecurityException>(tryChangeMgmtKey);
             }
         }
+
         #endregion KeyCollector
     }
 }

@@ -25,27 +25,28 @@ namespace Yubico.YubiKey
 {
     internal class TestSmartCardDevice : ISmartCardDevice
     {
-        public readonly static ISmartCardDevice AnyInstance = new TestSmartCardDevice()
-        { Kind = SmartCardConnectionKind.Any };
+        public static readonly ISmartCardDevice AnyInstance = new TestSmartCardDevice
+            { Kind = SmartCardConnectionKind.Any };
 
-        public readonly static ISmartCardDevice NfcInstance = new TestSmartCardDevice()
-        { Kind = SmartCardConnectionKind.Nfc };
+        public static readonly ISmartCardDevice NfcInstance = new TestSmartCardDevice
+            { Kind = SmartCardConnectionKind.Nfc };
 
         public DateTime LastAccessed { get; } = DateTime.Now;
         public string Path { get; } = string.Empty;
         public string? ParentDeviceId { get; } = null;
         public AnswerToReset? Atr { get; }
         public SmartCardConnectionKind Kind { get; private set; }
+
         public ISmartCardConnection Connect()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 
     internal class TestHidDevice : IHidDevice
     {
-        public readonly static IHidDevice FidoInstance = new TestHidDevice() { UsagePage = HidUsagePage.Fido };
-        public readonly static IHidDevice KeyboardInstance = new TestHidDevice() { UsagePage = HidUsagePage.Keyboard };
+        public static readonly IHidDevice FidoInstance = new TestHidDevice { UsagePage = HidUsagePage.Fido };
+        public static readonly IHidDevice KeyboardInstance = new TestHidDevice { UsagePage = HidUsagePage.Keyboard };
 
         public DateTime LastAccessed { get; } = DateTime.Now;
         public string Path { get; } = string.Empty;
@@ -54,25 +55,26 @@ namespace Yubico.YubiKey
         public short ProductId { get; }
         public short Usage { get; }
         public HidUsagePage UsagePage { get; private set; }
+
         public IHidConnection ConnectToFeatureReports()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public IHidConnection ConnectToIOReports()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 
     public class ConnectionManagerTests
     {
-        private readonly Mock<IYubiKeyDevice> _yubiKeyDeviceMock = new Mock<IYubiKeyDevice>();
-        private readonly Mock<ISmartCardDevice> _smartCardDeviceMock = new Mock<ISmartCardDevice>();
         private readonly Mock<ISmartCardConnection> _smartCardConnectionMock = new Mock<ISmartCardConnection>();
+        private readonly Mock<ISmartCardDevice> _smartCardDeviceMock = new Mock<ISmartCardDevice>();
+        private readonly Mock<IYubiKeyDevice> _yubiKeyDeviceMock = new Mock<IYubiKeyDevice>();
 
         public static IEnumerable<object[]> SupportedApplicationTuples =>
-            new List<object[]>()
+            new List<object[]>
             {
                 new object[] { TestHidDevice.FidoInstance, YubiKeyApplication.FidoU2f },
                 new object[] { TestHidDevice.FidoInstance, YubiKeyApplication.Fido2 },
@@ -88,15 +90,8 @@ namespace Yubico.YubiKey
                 new object[] { TestSmartCardDevice.NfcInstance, YubiKeyApplication.OtpNdef }
             };
 
-        [Theory]
-        [MemberData(nameof(SupportedApplicationTuples))]
-        public void DeviceSupportsApplication_GivenSupportedTuple_ReturnsTrue(IDevice device, YubiKeyApplication application)
-        {
-            Assert.True(ConnectionManager.DeviceSupportsApplication(device, application));
-        }
-
         public static IEnumerable<object[]> UnsupportedApplicationTuples =>
-            new List<object[]>()
+            new List<object[]>
             {
                 new object[] { TestHidDevice.FidoInstance, YubiKeyApplication.Otp },
                 new object[] { TestHidDevice.FidoInstance, YubiKeyApplication.OtpNdef },
@@ -110,12 +105,21 @@ namespace Yubico.YubiKey
                 new object[] { TestHidDevice.KeyboardInstance, YubiKeyApplication.Piv },
                 new object[] { TestHidDevice.KeyboardInstance, YubiKeyApplication.OpenPgp },
                 new object[] { TestHidDevice.KeyboardInstance, YubiKeyApplication.Management },
-                new object[] { TestHidDevice.KeyboardInstance, YubiKeyApplication.YubiHsmAuth },
+                new object[] { TestHidDevice.KeyboardInstance, YubiKeyApplication.YubiHsmAuth }
             };
 
         [Theory]
+        [MemberData(nameof(SupportedApplicationTuples))]
+        public void DeviceSupportsApplication_GivenSupportedTuple_ReturnsTrue(
+            IDevice device, YubiKeyApplication application)
+        {
+            Assert.True(ConnectionManager.DeviceSupportsApplication(device, application));
+        }
+
+        [Theory]
         [MemberData(nameof(UnsupportedApplicationTuples))]
-        public void DeviceSupportsApplication_GivenUnsupportedTuple_ReturnsFalse(IDevice device, YubiKeyApplication application)
+        public void DeviceSupportsApplication_GivenUnsupportedTuple_ReturnsFalse(
+            IDevice device, YubiKeyApplication application)
         {
             Assert.False(ConnectionManager.DeviceSupportsApplication(device, application));
         }
@@ -123,10 +127,10 @@ namespace Yubico.YubiKey
         [Fact]
         public void Instance_ReturnsSameInstanceOfConnectionManager()
         {
-            ConnectionManager? connectionManager1 = ConnectionManager.Instance;
+            var connectionManager1 = ConnectionManager.Instance;
             Assert.NotNull(connectionManager1);
 
-            ConnectionManager? connectionManager2 = ConnectionManager.Instance;
+            var connectionManager2 = ConnectionManager.Instance;
             Assert.Same(connectionManager1, connectionManager2);
         }
 
@@ -141,11 +145,11 @@ namespace Yubico.YubiKey
                 .Setup(x => x.Transmit(It.IsAny<CommandApdu>()))
                 .Returns(new ResponseApdu(Array.Empty<byte>(), SWConstants.Success));
 
-            bool result = cm.TryCreateConnection(
+            var result = cm.TryCreateConnection(
                 _yubiKeyDeviceMock.Object,
                 _smartCardDeviceMock.Object,
                 YubiKeyApplication.Piv,
-                out IYubiKeyConnection? connection);
+                out var connection);
 
             Assert.True(result);
             Assert.NotNull(connection);
@@ -158,7 +162,7 @@ namespace Yubico.YubiKey
 
             _ = _yubiKeyDeviceMock
                 .Setup(x => x.Equals(It.IsAny<IYubiKeyDevice>()))
-                .Returns(true);
+                .Returns(value: true);
             _ = _smartCardDeviceMock
                 .Setup(x => x.Connect()).Returns(_smartCardConnectionMock.Object);
             _ = _smartCardConnectionMock
@@ -171,11 +175,11 @@ namespace Yubico.YubiKey
                 YubiKeyApplication.Piv,
                 out _);
 
-            bool result = cm.TryCreateConnection(
+            var result = cm.TryCreateConnection(
                 _yubiKeyDeviceMock.Object,
                 _smartCardDeviceMock.Object,
                 YubiKeyApplication.Piv,
-                out IYubiKeyConnection? connection);
+                out var connection);
 
             Assert.False(result);
             Assert.Null(connection);
@@ -188,18 +192,18 @@ namespace Yubico.YubiKey
 
             _ = _yubiKeyDeviceMock
                 .Setup(x => x.Equals(It.IsAny<IYubiKeyDevice>()))
-                .Returns(false);
+                .Returns(value: false);
             _ = _smartCardDeviceMock
                 .Setup(x => x.Connect()).Returns(_smartCardConnectionMock.Object);
             _ = _smartCardConnectionMock
                 .Setup(x => x.Transmit(It.IsAny<CommandApdu>()))
                 .Returns(new ResponseApdu(Array.Empty<byte>(), SWConstants.Success));
 
-            bool result = cm.TryCreateConnection(
+            var result = cm.TryCreateConnection(
                 _yubiKeyDeviceMock.Object,
                 _smartCardDeviceMock.Object,
                 YubiKeyApplication.Piv,
-                out IYubiKeyConnection? connection1);
+                out var connection1);
 
             Assert.True(result);
             Assert.NotNull(connection1);
@@ -208,7 +212,7 @@ namespace Yubico.YubiKey
                 _yubiKeyDeviceMock.Object,
                 _smartCardDeviceMock.Object,
                 YubiKeyApplication.Piv,
-                out IYubiKeyConnection? connection2);
+                out var connection2);
 
             Assert.True(result);
             Assert.NotNull(connection2);
@@ -225,11 +229,11 @@ namespace Yubico.YubiKey
                 .Setup(x => x.Transmit(It.IsAny<CommandApdu>()))
                 .Returns(new ResponseApdu(Array.Empty<byte>(), SWConstants.Success));
 
-            bool result = cm.TryCreateConnection(
+            var result = cm.TryCreateConnection(
                 _yubiKeyDeviceMock.Object,
                 _smartCardDeviceMock.Object,
                 new byte[] { 1, 2, 3, 4 },
-                out IYubiKeyConnection? connection);
+                out var connection);
 
             Assert.True(result);
             Assert.NotNull(connection);
@@ -242,7 +246,7 @@ namespace Yubico.YubiKey
 
             _ = _yubiKeyDeviceMock
                 .Setup(x => x.Equals(It.IsAny<IYubiKeyDevice>()))
-                .Returns(true);
+                .Returns(value: true);
             _ = _smartCardDeviceMock
                 .Setup(x => x.Connect()).Returns(_smartCardConnectionMock.Object);
             _ = _smartCardConnectionMock
@@ -255,11 +259,11 @@ namespace Yubico.YubiKey
                 new byte[] { 1, 2, 3, 4 },
                 out _);
 
-            bool result = cm.TryCreateConnection(
+            var result = cm.TryCreateConnection(
                 _yubiKeyDeviceMock.Object,
                 _smartCardDeviceMock.Object,
                 new byte[] { 1, 2, 3, 4 },
-                out IYubiKeyConnection? connection);
+                out var connection);
 
             Assert.False(result);
             Assert.Null(connection);
@@ -272,18 +276,18 @@ namespace Yubico.YubiKey
 
             _ = _yubiKeyDeviceMock
                 .Setup(x => x.Equals(It.IsAny<IYubiKeyDevice>()))
-                .Returns(false);
+                .Returns(value: false);
             _ = _smartCardDeviceMock
                 .Setup(x => x.Connect()).Returns(_smartCardConnectionMock.Object);
             _ = _smartCardConnectionMock
                 .Setup(x => x.Transmit(It.IsAny<CommandApdu>()))
                 .Returns(new ResponseApdu(Array.Empty<byte>(), SWConstants.Success));
 
-            bool result = cm.TryCreateConnection(
+            var result = cm.TryCreateConnection(
                 _yubiKeyDeviceMock.Object,
                 _smartCardDeviceMock.Object,
                 new byte[] { 1, 2, 3, 4 },
-                out IYubiKeyConnection? connection1);
+                out var connection1);
 
             Assert.True(result);
             Assert.NotNull(connection1);
@@ -292,7 +296,7 @@ namespace Yubico.YubiKey
                 _yubiKeyDeviceMock.Object,
                 _smartCardDeviceMock.Object,
                 new byte[] { 1, 2, 3, 4 },
-                out IYubiKeyConnection? connection2);
+                out var connection2);
 
             Assert.True(result);
             Assert.NotNull(connection2);
@@ -303,7 +307,10 @@ namespace Yubico.YubiKey
         {
             var cm = new ConnectionManager();
 
-            void Action() => cm.EndConnection(_yubiKeyDeviceMock.Object);
+            void Action()
+            {
+                cm.EndConnection(_yubiKeyDeviceMock.Object);
+            }
 
             _ = Assert.Throws<KeyNotFoundException>(Action);
         }
@@ -315,7 +322,7 @@ namespace Yubico.YubiKey
 
             _ = _yubiKeyDeviceMock
                 .Setup(x => x.Equals(It.IsAny<IYubiKeyDevice>()))
-                .Returns(true);
+                .Returns(value: true);
             _ = _smartCardDeviceMock
                 .Setup(x => x.Connect()).Returns(_smartCardConnectionMock.Object);
             _ = _smartCardConnectionMock
@@ -330,11 +337,11 @@ namespace Yubico.YubiKey
 
             cm.EndConnection(_yubiKeyDeviceMock.Object);
 
-            bool result = cm.TryCreateConnection(
+            var result = cm.TryCreateConnection(
                 _yubiKeyDeviceMock.Object,
                 _smartCardDeviceMock.Object,
                 YubiKeyApplication.Piv,
-                out IYubiKeyConnection? connection);
+                out var connection);
 
             Assert.True(result);
             Assert.NotNull(connection);

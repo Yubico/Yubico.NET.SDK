@@ -19,16 +19,17 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    /// The response to the <see cref="GetDeviceInfoCommand"/> command, containing the YubiKey's
-    /// device configuration details.
+    ///     The response to the <see cref="GetDeviceInfoCommand" /> command, containing the YubiKey's
+    ///     device configuration details.
     /// </summary>
-    public class GetPagedDeviceInfoResponse : OtpResponse, IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>
+    public class GetPagedDeviceInfoResponse : OtpResponse,
+                                              IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>
     {
         /// <summary>
-        /// Constructs a GetPagedDeviceInfoResponse instance based on a ResponseApdu received from the YubiKey.
+        ///     Constructs a GetPagedDeviceInfoResponse instance based on a ResponseApdu received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
+        ///     The ResponseApdu returned by the YubiKey.
         /// </param>
         public GetPagedDeviceInfoResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -36,12 +37,17 @@ namespace Yubico.YubiKey.Otp.Commands
         }
 
         /// <summary>
-        /// Retrieves and converts the response data from an APDU response into a dictionary of TLV tags and their corresponding values.
+        ///     Retrieves and converts the response data from an APDU response into a dictionary of TLV tags and their
+        ///     corresponding values.
         /// </summary>
         /// <returns>A dictionary mapping integer tags to their corresponding values as byte arrays.</returns>
         /// <exception cref="InvalidOperationException">Thrown when the response status is not successful.</exception>
-        /// <exception cref="MalformedYubiKeyResponseException">Thrown when the APDU data length exceeds expected bounds or if the data conversion fails.</exception>
-        public Dictionary<int, ReadOnlyMemory<byte>> GetData() => GetDeviceInfoResponseHelper.ParseResponse(ResponseApdu, Status, StatusMessage, nameof(GetPagedDeviceInfoResponse));
-
+        /// <exception cref="MalformedYubiKeyResponseException">
+        ///     Thrown when the APDU data length exceeds expected bounds or if the
+        ///     data conversion fails.
+        /// </exception>
+        public Dictionary<int, ReadOnlyMemory<byte>> GetData() =>
+            GetDeviceInfoResponseHelper.ParseResponse(
+                ResponseApdu, Status, StatusMessage, nameof(GetPagedDeviceInfoResponse));
     }
 }

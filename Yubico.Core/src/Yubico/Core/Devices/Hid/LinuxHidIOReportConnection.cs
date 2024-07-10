@@ -24,15 +24,12 @@ namespace Yubico.Core.Devices.Hid
     internal class LinuxHidIOReportConnection : IHidConnection
     {
         private const int YubiKeyIOReportSize = 64;
-
-        private readonly LinuxFileSafeHandle _handle;
-        private bool _isDisposed;
-
-        private readonly Logger _log = Log.GetLogger();
         private readonly LinuxHidDevice _device;
 
-        public int InputReportSize { get; private set; }
-        public int OutputReportSize { get; private set; }
+        private readonly LinuxFileSafeHandle _handle;
+
+        private readonly Logger _log = Log.GetLogger();
+        private bool _isDisposed;
 
         public LinuxHidIOReportConnection(LinuxHidDevice device, string devnode)
         {
@@ -55,11 +52,16 @@ namespace Yubico.Core.Devices.Hid
             }
         }
 
+        public int InputReportSize { get; }
+        public int OutputReportSize { get; }
+
         // Send the given report to the FIDO device. All FIDO messages are
         // exactly 64 bytes long.
         public void SetReport(byte[] report)
         {
-            _log.SensitiveLogInformation("Sending IO report> {report}, Length = {length}", Hex.BytesToHex(report), report.Length);
+            _log.SensitiveLogInformation(
+                "Sending IO report> {report}, Length = {length}", Hex.BytesToHex(report), report.Length);
+
             if (report.Length != YubiKeyIOReportSize)
             {
                 throw new InvalidOperationException(
@@ -73,7 +75,8 @@ namespace Yubico.Core.Devices.Hid
             byte[] paddedBuffer = new byte[YubiKeyIOReportSize + 1];
             report.CopyTo(paddedBuffer.AsSpan(1)); // Leave the first byte as 00
 
-            int bytesWritten = NativeMethods.write(_handle.DangerousGetHandle().ToInt32(), paddedBuffer, paddedBuffer.Length);
+            int bytesWritten = NativeMethods.write(
+                _handle.DangerousGetHandle().ToInt32(), paddedBuffer, paddedBuffer.Length);
 
             _device.LogDeviceAccessTime();
 

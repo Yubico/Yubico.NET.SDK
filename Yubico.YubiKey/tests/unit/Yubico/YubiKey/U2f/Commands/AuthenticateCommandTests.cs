@@ -14,8 +14,6 @@
 
 using System;
 using Xunit;
-using Yubico.Core.Buffers;
-using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f.Commands
 {
@@ -26,9 +24,9 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var cmd = new AuthenticateCommand(
                 U2fAuthenticationType.EnforceUserPresence,
-                RegistrationDataTests.GetAppIdArray(true),
-                RegistrationDataTests.GetClientDataHashArray(true),
-                RegistrationDataTests.GetKeyHandleArray(true, out byte _));
+                RegistrationDataTests.GetAppIdArray(isValid: true),
+                RegistrationDataTests.GetClientDataHashArray(isValid: true),
+                RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _));
             Assert.Equal(YubiKeyApplication.FidoU2f, cmd.Application);
         }
 
@@ -40,9 +38,9 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var cmd = new AuthenticateCommand(
                 controlByte,
-                RegistrationDataTests.GetAppIdArray(true),
-                RegistrationDataTests.GetClientDataHashArray(true),
-                RegistrationDataTests.GetKeyHandleArray(true, out byte _));
+                RegistrationDataTests.GetAppIdArray(isValid: true),
+                RegistrationDataTests.GetClientDataHashArray(isValid: true),
+                RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _));
             Assert.Equal(controlByte, cmd.ControlByte);
         }
 
@@ -52,20 +50,20 @@ namespace Yubico.YubiKey.U2f.Commands
         [InlineData(U2fAuthenticationType.DontEnforceUserPresence)]
         public void Constructor_ChangeControlByte_Correct(U2fAuthenticationType controlByte)
         {
-            U2fAuthenticationType newByte = controlByte switch
+            var newByte = controlByte switch
             {
                 U2fAuthenticationType.CheckOnly => U2fAuthenticationType.EnforceUserPresence,
                 U2fAuthenticationType.EnforceUserPresence => U2fAuthenticationType.DontEnforceUserPresence,
                 U2fAuthenticationType.DontEnforceUserPresence => U2fAuthenticationType.CheckOnly,
-                _ => U2fAuthenticationType.Unknown,
+                _ => U2fAuthenticationType.Unknown
             };
 
 #pragma warning disable IDE0017 // Testing specific behavior
             var cmd = new AuthenticateCommand(
                 controlByte,
-                RegistrationDataTests.GetAppIdArray(true),
-                RegistrationDataTests.GetClientDataHashArray(true),
-                RegistrationDataTests.GetKeyHandleArray(true, out byte _));
+                RegistrationDataTests.GetAppIdArray(isValid: true),
+                RegistrationDataTests.GetClientDataHashArray(isValid: true),
+                RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _));
             cmd.ControlByte = newByte;
 #pragma warning restore IDE0017
             Assert.Equal(newByte, cmd.ControlByte);
@@ -76,9 +74,9 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             _ = Assert.Throws<ArgumentException>(() => new AuthenticateCommand(
                 U2fAuthenticationType.EnforceUserPresence,
-                RegistrationDataTests.GetKeyHandleArray(true, out byte _),
-                RegistrationDataTests.GetAppIdArray(true),
-                RegistrationDataTests.GetKeyHandleArray(true, out byte _)));
+                RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _),
+                RegistrationDataTests.GetAppIdArray(isValid: true),
+                RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _)));
         }
 
         [Fact]
@@ -86,12 +84,12 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var cmd = new AuthenticateCommand(
                 U2fAuthenticationType.EnforceUserPresence,
-                RegistrationDataTests.GetAppIdArray(true),
-                RegistrationDataTests.GetClientDataHashArray(true),
-                RegistrationDataTests.GetKeyHandleArray(true, out byte _));
+                RegistrationDataTests.GetAppIdArray(isValid: true),
+                RegistrationDataTests.GetClientDataHashArray(isValid: true),
+                RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _));
 
             _ = Assert.Throws<ArgumentException>(() =>
-                cmd.ClientDataHash = RegistrationDataTests.GetKeyHandleArray(true, out byte _));
+                cmd.ClientDataHash = RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _));
         }
 
         [Fact]
@@ -99,9 +97,9 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             _ = Assert.Throws<ArgumentException>(() => new AuthenticateCommand(
                 U2fAuthenticationType.EnforceUserPresence,
-                RegistrationDataTests.GetClientDataHashArray(true),
-                RegistrationDataTests.GetKeyHandleArray(true, out byte _),
-                RegistrationDataTests.GetKeyHandleArray(true, out byte _)));
+                RegistrationDataTests.GetClientDataHashArray(isValid: true),
+                RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _),
+                RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _)));
         }
 
         [Fact]
@@ -109,12 +107,12 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var cmd = new AuthenticateCommand(
                 U2fAuthenticationType.EnforceUserPresence,
-                RegistrationDataTests.GetAppIdArray(true),
-                RegistrationDataTests.GetClientDataHashArray(true),
-                RegistrationDataTests.GetKeyHandleArray(true, out byte _));
+                RegistrationDataTests.GetAppIdArray(isValid: true),
+                RegistrationDataTests.GetClientDataHashArray(isValid: true),
+                RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _));
 
             _ = Assert.Throws<ArgumentException>(() =>
-                cmd.ApplicationId = RegistrationDataTests.GetKeyHandleArray(true, out byte _));
+                cmd.ApplicationId = RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _));
         }
 
         [Fact]
@@ -122,9 +120,9 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             _ = Assert.Throws<ArgumentException>(() => new AuthenticateCommand(
                 U2fAuthenticationType.EnforceUserPresence,
-                RegistrationDataTests.GetAppIdArray(true),
-                RegistrationDataTests.GetClientDataHashArray(true),
-                RegistrationDataTests.GetAppIdArray(true)));
+                RegistrationDataTests.GetAppIdArray(isValid: true),
+                RegistrationDataTests.GetClientDataHashArray(isValid: true),
+                RegistrationDataTests.GetAppIdArray(isValid: true)));
         }
 
         [Fact]
@@ -132,12 +130,12 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var cmd = new AuthenticateCommand(
                 U2fAuthenticationType.EnforceUserPresence,
-                RegistrationDataTests.GetAppIdArray(true),
-                RegistrationDataTests.GetClientDataHashArray(true),
-                RegistrationDataTests.GetKeyHandleArray(true, out byte _));
+                RegistrationDataTests.GetAppIdArray(isValid: true),
+                RegistrationDataTests.GetClientDataHashArray(isValid: true),
+                RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _));
 
             _ = Assert.Throws<ArgumentException>(() =>
-                cmd.KeyHandle = RegistrationDataTests.GetClientDataHashArray(true));
+                cmd.KeyHandle = RegistrationDataTests.GetClientDataHashArray(isValid: true));
         }
 
         [Fact]
@@ -145,12 +143,12 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var cmd = new AuthenticateCommand(
                 U2fAuthenticationType.EnforceUserPresence,
-                RegistrationDataTests.GetAppIdArray(true),
-                RegistrationDataTests.GetClientDataHashArray(true),
-                RegistrationDataTests.GetKeyHandleArray(true, out byte _));
-            CommandApdu cmdApdu = cmd.CreateCommandApdu();
+                RegistrationDataTests.GetAppIdArray(isValid: true),
+                RegistrationDataTests.GetClientDataHashArray(isValid: true),
+                RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _));
+            var cmdApdu = cmd.CreateCommandApdu();
 
-            Assert.Equal(0, cmdApdu.Cla);
+            Assert.Equal(expected: 0, cmdApdu.Cla);
         }
 
         [Fact]
@@ -158,12 +156,12 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var cmd = new AuthenticateCommand(
                 U2fAuthenticationType.EnforceUserPresence,
-                RegistrationDataTests.GetAppIdArray(true),
-                RegistrationDataTests.GetClientDataHashArray(true),
-                RegistrationDataTests.GetKeyHandleArray(true, out byte _));
-            CommandApdu cmdApdu = cmd.CreateCommandApdu();
+                RegistrationDataTests.GetAppIdArray(isValid: true),
+                RegistrationDataTests.GetClientDataHashArray(isValid: true),
+                RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _));
+            var cmdApdu = cmd.CreateCommandApdu();
 
-            Assert.Equal(3, cmdApdu.Ins);
+            Assert.Equal(expected: 3, cmdApdu.Ins);
         }
     }
 }

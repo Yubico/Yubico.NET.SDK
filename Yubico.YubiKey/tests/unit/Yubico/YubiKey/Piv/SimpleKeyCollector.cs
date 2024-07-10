@@ -124,10 +124,19 @@ namespace Yubico.YubiKey.Piv
             return true;
         }
 
-        public static byte[] CollectPin() => _pin;
+        public static byte[] CollectPin()
+        {
+            return _pin;
+        }
 
-        public static byte[] CollectPuk() => _puk;
+        public static byte[] CollectPuk()
+        {
+            return _puk;
+        }
 
-        public static byte[] CollectMgmtKey() => _mgmtKey;
+        public static byte[] CollectMgmtKey()
+        {
+            return _mgmtKey;
+        }
     }
 }

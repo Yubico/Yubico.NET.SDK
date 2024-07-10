@@ -25,133 +25,133 @@ namespace Yubico.YubiKey.Piv
     public sealed partial class PivSession : IDisposable
     {
         /// <summary>
-        /// Create a digital signature using the key in the given slot.
+        ///     Create a digital signature using the key in the given slot.
         /// </summary>
         /// <remarks>
-        /// The caller supplies the data to sign in the form of a formatted
-        /// message digest.
-        /// <para>
-        /// This method returns the digital signature created, if it can build
-        /// one. Otherwise it will throw an exception.
-        /// </para>
-        /// <para>
-        /// If the slot specified is not one that can sign, or it does not
-        /// contain a key, this method will throw an exception. If the input data
-        /// is not the correct length, the method will throw an exception.
-        /// </para>
-        /// <para>
-        /// If the key is ECC P-256, then the formatted digest is simply the
-        /// message digest itself, but it must be exactly 32 bytes. If the input
-        /// is not exactly 32 bytes, the method will throw an exception. If the
-        /// input data is shorter than 32 bytes, prepend pad bytes of 00 until
-        /// the length is exactly 32 bytes. You will almost certainly want to use
-        /// SHA-256 as the digest algorithm. The signature will be the BER
-        /// encoding of
-        /// <code>
+        ///     The caller supplies the data to sign in the form of a formatted
+        ///     message digest.
+        ///     <para>
+        ///         This method returns the digital signature created, if it can build
+        ///         one. Otherwise it will throw an exception.
+        ///     </para>
+        ///     <para>
+        ///         If the slot specified is not one that can sign, or it does not
+        ///         contain a key, this method will throw an exception. If the input data
+        ///         is not the correct length, the method will throw an exception.
+        ///     </para>
+        ///     <para>
+        ///         If the key is ECC P-256, then the formatted digest is simply the
+        ///         message digest itself, but it must be exactly 32 bytes. If the input
+        ///         is not exactly 32 bytes, the method will throw an exception. If the
+        ///         input data is shorter than 32 bytes, prepend pad bytes of 00 until
+        ///         the length is exactly 32 bytes. You will almost certainly want to use
+        ///         SHA-256 as the digest algorithm. The signature will be the BER
+        ///         encoding of
+        ///         <code>
         ///   SEQUENCE {
         ///     r   INTEGER,
         ///     s   INTEGER }
         /// </code>
-        /// </para>
-        /// <para>
-        /// If the key is ECC P-384, then the formatted digest is simply the
-        /// message digest itself, but it must be exactly 48 bytes. If the input
-        /// is not exactly 48 bytes, the method will throw an exception. If the
-        /// input data is shorter than 48 bytes, prepend pad bytes of 00 until
-        /// the length is exactly 48 bytes. You will almost certainly want to use
-        /// SHA-384 as the digest algorithm. The signature will be the BER
-        /// encoding of
-        /// <code>
+        ///     </para>
+        ///     <para>
+        ///         If the key is ECC P-384, then the formatted digest is simply the
+        ///         message digest itself, but it must be exactly 48 bytes. If the input
+        ///         is not exactly 48 bytes, the method will throw an exception. If the
+        ///         input data is shorter than 48 bytes, prepend pad bytes of 00 until
+        ///         the length is exactly 48 bytes. You will almost certainly want to use
+        ///         SHA-384 as the digest algorithm. The signature will be the BER
+        ///         encoding of
+        ///         <code>
         ///   SEQUENCE {
         ///     r   INTEGER,
         ///     s   INTEGER }
         /// </code>
-        /// </para>
-        /// <para>
-        /// If the key is RSA 1024, then the input must be exactly 128 bytes,
-        /// otherwise the method will throw an exception. You can use the
-        /// <see cref="Cryptography.RsaFormat"/> class to format the data. That
-        /// class will be able to format the digest into either PKCS #1 v1.5 or a
-        /// subset of PKCS #1 PSS. However, if that class does not support the
-        /// exact format you want, you will have to write your own formatting
-        /// code and guarantee the input to this method is exactly 128 bytes
-        /// (prepend pad bytes of 00 until the length is exactly 128 if needed).
-        /// The signature will be a 128-byte block.
-        /// </para>
-        /// <para>
-        /// If the key is RSA 2048, then the input must be exactly 256 bytes,
-        /// otherwise the method will throw an exception. You can use the
-        /// <see cref="Cryptography.RsaFormat"/> class to format the data. That
-        /// class will be able to format the digest into either PKCS #1 v1.5 or a
-        /// subset of PKCS #1 PSS. However, if that class does not support the
-        /// exact format you want, you will have to write your own formatting
-        /// code and guarantee the input to this method is exactly 256 bytes
-        /// (prepend pad bytes of 00 until the length is exactly 256 if needed).
-        /// The signature will be a 256-byte block.
-        /// </para>
-        /// <para>
-        /// Signing might require the PIN and/or touch, depending on the PIN and
-        /// touch policies specified at the time the key was generated or
-        /// imported.
-        /// </para>
-        /// <para>
-        /// If a PIN is required, this method will call the necessary
-        /// routines to verify the PIN. See <see cref="VerifyPin()"/> for more
-        /// information on PIN verification. If the user cancels, this method
-        /// will throw an exception.
-        /// </para>
-        /// <para>
-        /// If touch is required, the YubiKey itself will flash its touch signal
-        /// and wait. If the YubiKey is not touched before the touch timeout, the
-        /// YubiKey will return with an error, and this method will throw an
-        /// exception (<c>OperationCanceledException</c>). Note that this method
-        /// will not make another effort to sign if the YubiKey is not touched,
-        /// it will simply throw the exception.
-        /// </para>
-        /// <para>
-        /// Note that on YubiKeys prior to version 5.3, it is not possible to know
-        /// programmatically what the PIN or touch policies are without actually
-        /// trying to sign. Also, it is not possible to know programmatically if
-        /// an authentication failure is due to PIN or touch. This means that on
-        /// older YubiKeys, this method will try to sign without the PIN, and if
-        /// it does not work because of authentication failure, it will not know
-        /// if the failure was due to PIN or touch. Hence, it will try to verify
-        /// the PIN then try to sign again. This all means that on older
-        /// YubiKeys, it is possible a YubiKey slot was originally configured
-        /// with a PIN policy of "never" and a touch policy of "always", and this
-        /// method will call for the PIN anyway. This happens if the user does
-        /// not touch the YubiKey before the timeout. See the User's Manual entry
-        /// on <xref href="UsersManualPivKeepingTrack">keeping track</xref> of
-        /// slot contents.
-        /// </para>
+        ///     </para>
+        ///     <para>
+        ///         If the key is RSA 1024, then the input must be exactly 128 bytes,
+        ///         otherwise the method will throw an exception. You can use the
+        ///         <see cref="Cryptography.RsaFormat" /> class to format the data. That
+        ///         class will be able to format the digest into either PKCS #1 v1.5 or a
+        ///         subset of PKCS #1 PSS. However, if that class does not support the
+        ///         exact format you want, you will have to write your own formatting
+        ///         code and guarantee the input to this method is exactly 128 bytes
+        ///         (prepend pad bytes of 00 until the length is exactly 128 if needed).
+        ///         The signature will be a 128-byte block.
+        ///     </para>
+        ///     <para>
+        ///         If the key is RSA 2048, then the input must be exactly 256 bytes,
+        ///         otherwise the method will throw an exception. You can use the
+        ///         <see cref="Cryptography.RsaFormat" /> class to format the data. That
+        ///         class will be able to format the digest into either PKCS #1 v1.5 or a
+        ///         subset of PKCS #1 PSS. However, if that class does not support the
+        ///         exact format you want, you will have to write your own formatting
+        ///         code and guarantee the input to this method is exactly 256 bytes
+        ///         (prepend pad bytes of 00 until the length is exactly 256 if needed).
+        ///         The signature will be a 256-byte block.
+        ///     </para>
+        ///     <para>
+        ///         Signing might require the PIN and/or touch, depending on the PIN and
+        ///         touch policies specified at the time the key was generated or
+        ///         imported.
+        ///     </para>
+        ///     <para>
+        ///         If a PIN is required, this method will call the necessary
+        ///         routines to verify the PIN. See <see cref="VerifyPin()" /> for more
+        ///         information on PIN verification. If the user cancels, this method
+        ///         will throw an exception.
+        ///     </para>
+        ///     <para>
+        ///         If touch is required, the YubiKey itself will flash its touch signal
+        ///         and wait. If the YubiKey is not touched before the touch timeout, the
+        ///         YubiKey will return with an error, and this method will throw an
+        ///         exception (<c>OperationCanceledException</c>). Note that this method
+        ///         will not make another effort to sign if the YubiKey is not touched,
+        ///         it will simply throw the exception.
+        ///     </para>
+        ///     <para>
+        ///         Note that on YubiKeys prior to version 5.3, it is not possible to know
+        ///         programmatically what the PIN or touch policies are without actually
+        ///         trying to sign. Also, it is not possible to know programmatically if
+        ///         an authentication failure is due to PIN or touch. This means that on
+        ///         older YubiKeys, this method will try to sign without the PIN, and if
+        ///         it does not work because of authentication failure, it will not know
+        ///         if the failure was due to PIN or touch. Hence, it will try to verify
+        ///         the PIN then try to sign again. This all means that on older
+        ///         YubiKeys, it is possible a YubiKey slot was originally configured
+        ///         with a PIN policy of "never" and a touch policy of "always", and this
+        ///         method will call for the PIN anyway. This happens if the user does
+        ///         not touch the YubiKey before the timeout. See the User's Manual entry
+        ///         on <xref href="UsersManualPivKeepingTrack">keeping track</xref> of
+        ///         slot contents.
+        ///     </para>
         /// </remarks>
         /// <param name="slotNumber">
-        /// The slot containing the key to use.
+        ///     The slot containing the key to use.
         /// </param>
         /// <param name="dataToSign">
-        /// The formatted message digest.
+        ///     The formatted message digest.
         /// </param>
         /// <returns>
-        /// The resulting signature.
+        ///     The resulting signature.
         /// </returns>
         /// <exception cref="ArgumentException">
-        /// The slot number given was not valid, or the data to sign was an
-        /// invalid length.
+        ///     The slot number given was not valid, or the data to sign was an
+        ///     invalid length.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// There was no key in the slot specified or the data did not match the
-        /// key (e.g. the data to sign was 32 bytes long but the key was ECC
-        /// P-384).
+        ///     There was no key in the slot specified or the data did not match the
+        ///     key (e.g. the data to sign was 32 bytes long but the key was ECC
+        ///     P-384).
         /// </exception>
         /// <exception cref="OperationCanceledException">
-        /// Either the PIN was required and the user canceled collection or touch
-        /// was required and the user did not touch within the timeout period.
+        ///     Either the PIN was required and the user canceled collection or touch
+        ///     was required and the user did not touch within the timeout period.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// The remaining retries count indicates the PIN is blocked.
+        ///     The remaining retries count indicates the PIN is blocked.
         /// </exception>
         /// <exception cref="NotSupportedException">
-        /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
+        ///     If the specified <see cref="PivAlgorithm" /> is not supported by the provided <see cref="IYubiKeyDevice" />.
         /// </exception>
         public byte[] Sign(byte slotNumber, ReadOnlyMemory<byte> dataToSign)
         {
@@ -170,96 +170,96 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Decrypt the given data using the key in the given slot.
+        ///     Decrypt the given data using the key in the given slot.
         /// </summary>
         /// <remarks>
-        /// The YubiKey supports decryption only with RSA keys.
-        /// <para>
-        /// This method returns the raw decrypted data, if it can decrypt. It
-        /// will not parse the formatted data. If it cannot decrypt for some
-        /// reason, it will throw an exception.
-        /// </para>
-        /// <para>
-        /// If the slot specified is not one that can decrypt, or it does not
-        /// contain a key, or it contains an ECC key (instead of RSA), this
-        /// method will throw an exception. If the input data is not the correct
-        /// length, the method will throw an exception.
-        /// </para>
-        /// <para>
-        /// If the key is RSA 1024, then the input must be exactly 128 bytes. If
-        /// the key is RSA 2048, then the input must be exactly 256 bytes. If the
-        /// input data is not the correct length, the method will throw an
-        /// exception.
-        /// </para>
-        /// <para>
-        /// The return will be the raw decrypted data. You can use the
-        /// <see cref="Cryptography.RsaFormat"/> class to parse the data and
-        /// extract the actual unpadded plaintext. That class will be able to
-        /// parse from either PKCS #1 v1.5 or a subset of PKCS #1 OAEP. However,
-        /// if that class does not support the exact format you want, you will
-        /// have to write your own parsing code.
-        /// </para>
-        /// <para>
-        /// Decrypting might require the PIN and/or touch, depending on the PIN
-        /// and touch policies specified at the time the key was generated or
-        /// imported.
-        /// </para>
-        /// <para>
-        /// If a PIN is required, this method will call the necessary
-        /// routines to verify the PIN. See <see cref="VerifyPin()"/> for more
-        /// information on PIN verification. If the user cancels, this method
-        /// will throw an exception.
-        /// </para>
-        /// <para>
-        /// If touch is required, the YubiKey itself will flash its touch signal
-        /// and wait. If the YubiKey is not touched before the touch timeout, the
-        /// YubiKey will return with an error, and this method will throw an
-        /// exception (<c>OperationCanceledException</c>). Note that this method
-        /// will not make another effort to decrypt if the YubiKey is not
-        /// touched, it will simply throw the exception.
-        /// </para>
-        /// <para>
-        /// Note that on YubiKeys prior to version 5.3, it is not possible to know
-        /// programmatically what the PIN or touch policies are without actually
-        /// trying to decrypt. Also, it is not possible to know programmatically
-        /// if an authentication failure is due to PIN or touch. This means that
-        /// on older YubiKeys, this method will try to decrypt without the PIN,
-        /// and if it does not work because of authentication failure, it will
-        /// not know if the failure was due to PIN or touch. Hence, it will try
-        /// to verify the PIN then try to sign again. This all means that on
-        /// older YubiKeys, it is possible a YubiKey slot was originally
-        /// configured with a PIN policy of "never" and a touch policy of
-        /// "always", and this method will call for the PIN anyway. This happens
-        /// if the user does not touch the YubiKey before the timeout. See the
-        /// User's Manual entry on
-        /// <xref href="UsersManualPivKeepingTrack">keeping track</xref> of slot
-        /// contents.
-        /// </para>
+        ///     The YubiKey supports decryption only with RSA keys.
+        ///     <para>
+        ///         This method returns the raw decrypted data, if it can decrypt. It
+        ///         will not parse the formatted data. If it cannot decrypt for some
+        ///         reason, it will throw an exception.
+        ///     </para>
+        ///     <para>
+        ///         If the slot specified is not one that can decrypt, or it does not
+        ///         contain a key, or it contains an ECC key (instead of RSA), this
+        ///         method will throw an exception. If the input data is not the correct
+        ///         length, the method will throw an exception.
+        ///     </para>
+        ///     <para>
+        ///         If the key is RSA 1024, then the input must be exactly 128 bytes. If
+        ///         the key is RSA 2048, then the input must be exactly 256 bytes. If the
+        ///         input data is not the correct length, the method will throw an
+        ///         exception.
+        ///     </para>
+        ///     <para>
+        ///         The return will be the raw decrypted data. You can use the
+        ///         <see cref="Cryptography.RsaFormat" /> class to parse the data and
+        ///         extract the actual unpadded plaintext. That class will be able to
+        ///         parse from either PKCS #1 v1.5 or a subset of PKCS #1 OAEP. However,
+        ///         if that class does not support the exact format you want, you will
+        ///         have to write your own parsing code.
+        ///     </para>
+        ///     <para>
+        ///         Decrypting might require the PIN and/or touch, depending on the PIN
+        ///         and touch policies specified at the time the key was generated or
+        ///         imported.
+        ///     </para>
+        ///     <para>
+        ///         If a PIN is required, this method will call the necessary
+        ///         routines to verify the PIN. See <see cref="VerifyPin()" /> for more
+        ///         information on PIN verification. If the user cancels, this method
+        ///         will throw an exception.
+        ///     </para>
+        ///     <para>
+        ///         If touch is required, the YubiKey itself will flash its touch signal
+        ///         and wait. If the YubiKey is not touched before the touch timeout, the
+        ///         YubiKey will return with an error, and this method will throw an
+        ///         exception (<c>OperationCanceledException</c>). Note that this method
+        ///         will not make another effort to decrypt if the YubiKey is not
+        ///         touched, it will simply throw the exception.
+        ///     </para>
+        ///     <para>
+        ///         Note that on YubiKeys prior to version 5.3, it is not possible to know
+        ///         programmatically what the PIN or touch policies are without actually
+        ///         trying to decrypt. Also, it is not possible to know programmatically
+        ///         if an authentication failure is due to PIN or touch. This means that
+        ///         on older YubiKeys, this method will try to decrypt without the PIN,
+        ///         and if it does not work because of authentication failure, it will
+        ///         not know if the failure was due to PIN or touch. Hence, it will try
+        ///         to verify the PIN then try to sign again. This all means that on
+        ///         older YubiKeys, it is possible a YubiKey slot was originally
+        ///         configured with a PIN policy of "never" and a touch policy of
+        ///         "always", and this method will call for the PIN anyway. This happens
+        ///         if the user does not touch the YubiKey before the timeout. See the
+        ///         User's Manual entry on
+        ///         <xref href="UsersManualPivKeepingTrack">keeping track</xref> of slot
+        ///         contents.
+        ///     </para>
         /// </remarks>
         /// <param name="slotNumber">
-        /// The slot containing the key to use.
+        ///     The slot containing the key to use.
         /// </param>
         /// <param name="dataToDecrypt">
-        /// The ciphertext.
+        ///     The ciphertext.
         /// </param>
         /// <returns>
-        /// The resulting decrypted block.
+        ///     The resulting decrypted block.
         /// </returns>
         /// <exception cref="ArgumentException">
-        /// The slot number given was not valid, or the data to decrypt was an
-        /// invalid length.
+        ///     The slot number given was not valid, or the data to decrypt was an
+        ///     invalid length.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// There was no key in the slot specified or the data did not match the
-        /// key (e.g. the data to decrypt was 128 bytes long but the key was RSA
-        /// 2048).
+        ///     There was no key in the slot specified or the data did not match the
+        ///     key (e.g. the data to decrypt was 128 bytes long but the key was RSA
+        ///     2048).
         /// </exception>
         /// <exception cref="OperationCanceledException">
-        /// Either the PIN was required and the user canceled collection or touch
-        /// was required and the user did not touch within the timeout period.
+        ///     Either the PIN was required and the user canceled collection or touch
+        ///     was required and the user did not touch within the timeout period.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// The remaining retries count indicates the PIN is blocked.
+        ///     The remaining retries count indicates the PIN is blocked.
         /// </exception>
         public byte[] Decrypt(byte slotNumber, ReadOnlyMemory<byte> dataToDecrypt)
         {
@@ -277,88 +277,88 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Perform Phase 2 of EC Diffie-Hellman Key Agreement using the private
-        /// key in the given slot, and the corresponding party's public key.
+        ///     Perform Phase 2 of EC Diffie-Hellman Key Agreement using the private
+        ///     key in the given slot, and the corresponding party's public key.
         /// </summary>
         /// <remarks>
-        /// The YubiKey supports key agreement only with ECC keys.
-        /// <para>
-        /// This method returns the raw shared secret data, if it can perform the
-        /// key agreement operation. It will not perform any derivation
-        /// operations. The result will be the same size as the key. That is, for
-        /// a 256-bit ECC key, the shared secret is 32 bytes, and for a 384-bit
-        /// key, the shared secret is 48 bytes.
-        /// </para>
-        /// <para>
-        /// The data returned is not formatted, nor encoded, it is simply a byte
-        /// array. It happens to be the x coordinate of an ECC point that is the
-        /// result of an EC scalar multiplication operation.
-        /// </para>
-        /// <para>
-        /// Key Agreement might require the PIN and/or touch, depending on the
-        /// PIN and touch policies specified at the time the key was generated or
-        /// imported.
-        /// </para>
-        /// <para>
-        /// If a PIN is required, this method will call the necessary
-        /// routines to verify the PIN. See <see cref="VerifyPin()"/> for more
-        /// information on PIN verification. If the user cancels, this method
-        /// will throw an exception.
-        /// </para>
-        /// <para>
-        /// If touch is required, the YubiKey itself will flash its touch signal
-        /// and wait. If the YubiKey is not touched before the touch timeout, the
-        /// YubiKey will return with an error, and this method will throw an
-        /// exception (<c>OperationCanceledException</c>). Note that this method
-        /// will not make another effort to perform key agreement if the YubiKey
-        /// is not touched, it will simply throw the exception.
-        /// </para>
-        /// <para>
-        /// Note that on YubiKeys prior to version 5.3, it is not possible to know
-        /// programmatically what the PIN or touch policies are without actually
-        /// trying to perform key agreement. Also, it is not possible to know
-        /// programmatically if an authentication failure is due to PIN or touch.
-        /// This means that on older YubiKeys, this method will try to perform
-        /// the key agreement operation without the PIN, and if it does not work
-        /// because of authentication failure, it will not know if the failure
-        /// was due to PIN or touch. Hence, it will try to verify the PIN then
-        /// try to perform the key agreement operation again. This all means that
-        /// on older YubiKeys, it is possible a YubiKey slot was originally
-        /// configured with a PIN policy of "never" and a touch policy of
-        /// "always", and this method will call for the PIN anyway. This happens
-        /// if the user does not touch the YubiKey before the timeout. See the
-        /// User's Manual entry on
-        /// <xref href="UsersManualPivKeepingTrack">keeping track</xref> of slot
-        /// contents.
-        /// </para>
+        ///     The YubiKey supports key agreement only with ECC keys.
+        ///     <para>
+        ///         This method returns the raw shared secret data, if it can perform the
+        ///         key agreement operation. It will not perform any derivation
+        ///         operations. The result will be the same size as the key. That is, for
+        ///         a 256-bit ECC key, the shared secret is 32 bytes, and for a 384-bit
+        ///         key, the shared secret is 48 bytes.
+        ///     </para>
+        ///     <para>
+        ///         The data returned is not formatted, nor encoded, it is simply a byte
+        ///         array. It happens to be the x coordinate of an ECC point that is the
+        ///         result of an EC scalar multiplication operation.
+        ///     </para>
+        ///     <para>
+        ///         Key Agreement might require the PIN and/or touch, depending on the
+        ///         PIN and touch policies specified at the time the key was generated or
+        ///         imported.
+        ///     </para>
+        ///     <para>
+        ///         If a PIN is required, this method will call the necessary
+        ///         routines to verify the PIN. See <see cref="VerifyPin()" /> for more
+        ///         information on PIN verification. If the user cancels, this method
+        ///         will throw an exception.
+        ///     </para>
+        ///     <para>
+        ///         If touch is required, the YubiKey itself will flash its touch signal
+        ///         and wait. If the YubiKey is not touched before the touch timeout, the
+        ///         YubiKey will return with an error, and this method will throw an
+        ///         exception (<c>OperationCanceledException</c>). Note that this method
+        ///         will not make another effort to perform key agreement if the YubiKey
+        ///         is not touched, it will simply throw the exception.
+        ///     </para>
+        ///     <para>
+        ///         Note that on YubiKeys prior to version 5.3, it is not possible to know
+        ///         programmatically what the PIN or touch policies are without actually
+        ///         trying to perform key agreement. Also, it is not possible to know
+        ///         programmatically if an authentication failure is due to PIN or touch.
+        ///         This means that on older YubiKeys, this method will try to perform
+        ///         the key agreement operation without the PIN, and if it does not work
+        ///         because of authentication failure, it will not know if the failure
+        ///         was due to PIN or touch. Hence, it will try to verify the PIN then
+        ///         try to perform the key agreement operation again. This all means that
+        ///         on older YubiKeys, it is possible a YubiKey slot was originally
+        ///         configured with a PIN policy of "never" and a touch policy of
+        ///         "always", and this method will call for the PIN anyway. This happens
+        ///         if the user does not touch the YubiKey before the timeout. See the
+        ///         User's Manual entry on
+        ///         <xref href="UsersManualPivKeepingTrack">keeping track</xref> of slot
+        ///         contents.
+        ///     </para>
         /// </remarks>
         /// <param name="slotNumber">
-        /// The slot containing the key to use.
+        ///     The slot containing the key to use.
         /// </param>
         /// <param name="correspondentPublicKey">
-        /// The correspondent's public key.
+        ///     The correspondent's public key.
         /// </param>
         /// <returns>
-        /// The resulting shared secret data.
+        ///     The resulting shared secret data.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// The <c>correspondentPublicKey</c> argument is null.
+        ///     The <c>correspondentPublicKey</c> argument is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// The slot number given was not valid, or the public key was invalid
-        /// (e.g. empty, wrong algorithm).
+        ///     The slot number given was not valid, or the public key was invalid
+        ///     (e.g. empty, wrong algorithm).
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// There was no key in the slot specified or the public key did not
-        /// match the private key (e.g. the public key was for ECC P256 but the
-        /// private key in the given slot was ECC P384).
+        ///     There was no key in the slot specified or the public key did not
+        ///     match the private key (e.g. the public key was for ECC P256 but the
+        ///     private key in the given slot was ECC P384).
         /// </exception>
         /// <exception cref="OperationCanceledException">
-        /// Either the PIN was required and the user canceled collection or touch
-        /// was required and the user did not touch within the timeout period.
+        ///     Either the PIN was required and the user canceled collection or touch
+        ///     was required and the user did not touch within the timeout period.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// The remaining retries count indicates the PIN is blocked.
+        ///     The remaining retries count indicates the PIN is blocked.
         /// </exception>
         public byte[] KeyAgree(byte slotNumber, PivPublicKey correspondentPublicKey)
         {
@@ -393,10 +393,11 @@ namespace Yubico.YubiKey.Piv
         // Common code, this performs either Signing, Decryption, or Key
         // Agreement. Just pass in the actual command to run, along with some
         // other information.
-        private byte[] PerformPrivateKeyOperation(byte slotNumber,
-                                                  IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> command,
-                                                  PivAlgorithm algorithm,
-                                                  string algorithmExceptionMessage)
+        private byte[] PerformPrivateKeyOperation(
+            byte slotNumber,
+            IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> command,
+            PivAlgorithm algorithm,
+            string algorithmExceptionMessage)
         {
             bool pinRequired = true;
 
@@ -432,7 +433,7 @@ namespace Yubico.YubiKey.Piv
                 // The only other case is Always which means we set the
                 // pinRequired to true, but we init that variable to true.
                 if (metadata.PinPolicy == PivPinPolicy.Never ||
-                    (metadata.PinPolicy == PivPinPolicy.Once && PinVerified))
+                    metadata.PinPolicy == PivPinPolicy.Once && PinVerified)
                 {
                     pinRequired = false;
                 }

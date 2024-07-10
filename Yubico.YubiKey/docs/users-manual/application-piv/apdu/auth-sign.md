@@ -12,14 +12,13 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Authenticate: sign
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
-:---: | :---: | :---: | :---: | :---: | :---:
-00 | 87 | *algorithm* | *slot number* | *data len* | *encoded digest of data to sign* | (absent)
+| CLA | INS | P1 | P2 | Lc | Data | Le |
+|:---: | :---: | :---: | :---: | :---: | :---:|
+| 00 | 87 | *algorithm* | *slot number* | *data len* | *encoded digest of data to sign* | (absent)|
 
 The *algorithm* is either `06` (RSA-1048), `07` (RSA-2048), `11` (ECC-P256), or `14`
 (ECC-P384).
@@ -83,9 +82,9 @@ For ECC, there is one format:
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-7C *len1* 82 *len2 \<signature\>* | 90 | 00
+|               Data                | SW1 | SW2 |
+|:---------------------------------:|:---:|:---:|
+| 7C *len1* 82 *len2 \<signature\>* | 90  | 00  |
 
 Note that the signature might be returned over multiple commands. Each return command
 will be able to return up to 256 bytes. To get more bytes of a return, call the GET
@@ -122,9 +121,9 @@ The signature is returned encoded as follows,
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 69 | 82
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 82  |  
 
 If the key was generated or imported with a PIN policy other than "Never", and the command
 was sent without first verifying the PIN or the wrong PIN was entered, then the following
@@ -133,6 +132,7 @@ after sumbitting the command the YubiKey was not touched within the time limit, 
 response will be returned.
 
 ### Examples
+
 ```C
 $ opensc-tool -c default -s 00:a4:04:00:09:a0:00:00:03:08:00:00:10:00
   -s 00:20:00:80:08:31:32:33:34:35:36:ff:ff

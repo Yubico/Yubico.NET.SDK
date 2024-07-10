@@ -12,12 +12,11 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Authenticate: key agreement
 
 ### Command APDU Info
 
-CLA | INS | P1 | P2 | Lc | Data | Le
+| CLA | INS | P1 | P2 | Lc | Data | Le
 :---: | :---: | :---: | :---: | :---: | :---:
 00 | 87 | *algorithm* | *slot number* | *data len* | *other party's public key* | (absent)
 
@@ -53,9 +52,9 @@ ECDSA.
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-7C *len1* 82 *len2 \<shared secret\>* | 90 | 00
+|                 Data                  | SW1 | SW2 |
+|:-------------------------------------:|:---:|:---:|
+| 7C *len1* 82 *len2 \<shared secret\>* | 90  | 00  |
 
 The shared secret will be the same size as the key, and will be the raw data, no further
 formatting.
@@ -69,9 +68,9 @@ RESPONSE APDU.
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 69 | 82
+|   Data    | SW1 | SW2 | 
+|:---------:|:---:|:---:|
+| (no data) | 69  | 82  |  
 
 If the key was generated or imported with a PIN policy other than "Never", and the command
 was sent without first verifying the PIN or the wrong PIN was entered, then this response

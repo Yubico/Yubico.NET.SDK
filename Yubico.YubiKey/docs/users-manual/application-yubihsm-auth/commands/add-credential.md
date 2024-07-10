@@ -30,7 +30,11 @@ All YubiKeys with the YubiHSM Auth application (included in firmware version 5.4
 
 ## Input
 
-This operation requires authenticating with the management key. There is a limit of 8 attempts to authenticate with the management key before the management key is blocked. Once the management key is blocked, the application itself must be reset before authentication can be attempted again. To reset the application, see [ResetApplicationCommand](xref:YubiHsmAuthCmdResetApplication). Supplying the correct management key before the management key is blocked will reset the retry counter to 8.
+This operation requires authenticating with the management key. There is a limit of 8 attempts to authenticate with the
+management key before the management key is blocked. Once the management key is blocked, the application itself must be
+reset before authentication can be attempted again. To reset the application,
+see [ResetApplicationCommand](xref:YubiHsmAuthCmdResetApplication). Supplying the correct management key before the
+management key is blocked will reset the retry counter to 8.
 
 The rest of the input data is related to the new credential:
 
@@ -43,31 +47,37 @@ The rest of the input data is related to the new credential:
 Further information is found in the [Data](#data) section.
 
 > [!NOTE]
-> The label may only contain characters that can be encoded with UTF-8, and its UTF-8 byte count must be between 1 and 64. Non-printing characters are allowed, as long as they can be encoded with UTF-8. For example, null (UTF-8: 0x00) and Right-To-Left Mark U+200F (UTF-8: 0xE2 0x80 0x8F) would be accepted. Since the label is used for display purposes, it is recommended to prefer printable characters.
+> The label may only contain characters that can be encoded with UTF-8, and its UTF-8 byte count must be between 1 and
+
+64. Non-printing characters are allowed, as long as they can be encoded with UTF-8. For example, null (UTF-8: 0x00) and
+    Right-To-Left Mark U+200F (UTF-8: 0xE2 0x80 0x8F) would be accepted. Since the label is used for display purposes,
+    it is
+    recommended to prefer printable characters.
 
 ## Output
 
-None, though some information may be included in the status word when the command fails (see [Response APDU](#response-apdu)).
+None, though some information may be included in the status word when the command fails (
+see [Response APDU](#response-apdu)).
 
 ## Command APDU
 
-| CLA | INS | P1 | P2 | Lc | Data | Le |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 00 | 01 | 00 | 00 | *variable* | (TLV, see below) | (absent) |
+| CLA | INS | P1 | P2 |     Lc     |       Data       |    Le    |
+|:---:|:---:|:--:|:--:|:----------:|:----------------:|:--------:|
+| 00  | 01  | 00 | 00 | *variable* | (TLV, see below) | (absent) |
 
 ### Data
 
 The data is sent as concatenated TLV-formatted elements, as follows:
 
-| Tag (hexadecimal) | Length (decimal) | Value | Notes |
-| :---: | :---: | :---: | :--- |
-| 0x7b | 16 | managment key | used to authenticate to the YubiHSM Auth application |
-| 0x71 | 1-64 | label | UTF-8 encoded string |
-| 0x74 | 1 | cryptographic key type | See [CryptographicKeyType](xref:Yubico.YubiKey.YubiHsmAuth.CryptographicKeyType) |
-| 0x75 | 16 | ENC key | |
-| 0x76 | 16 | MAC key | |
-| 0x73 | 16 | password | byte array |
-| 0x7a | 1 | touch required | boolean: 0-not required, 1-required |
+| Tag (hexadecimal) | Length (decimal) |         Value          | Notes                                                                            |
+|:-----------------:|:----------------:|:----------------------:|:---------------------------------------------------------------------------------|
+|       0x7b        |        16        |     managment key      | used to authenticate to the YubiHSM Auth application                             |
+|       0x71        |       1-64       |         label          | UTF-8 encoded string                                                             |
+|       0x74        |        1         | cryptographic key type | See [CryptographicKeyType](xref:Yubico.YubiKey.YubiHsmAuth.CryptographicKeyType) |
+|       0x75        |        16        |        ENC key         |                                                                                  |
+|       0x76        |        16        |        MAC key         |                                                                                  |
+|       0x73        |        16        |        password        | byte array                                                                       |
+|       0x7a        |        1         |     touch required     | boolean: 0-not required, 1-required                                              |
 
 ### Example
 
@@ -97,19 +107,20 @@ Notated:
 
 ## Response APDU
 
-The data field is always empty. On success, the status word will be 0x90 0x00. If there was a failure, further information may be communicated in the status word.
+The data field is always empty. On success, the status word will be 0x90 0x00. If there was a failure, further
+information may be communicated in the status word.
 
 Total Length: 2\
 
-| Data | SW1 | SW2 |
-| :---: | :---: | :---: |
-| (no data) | 90 | 00 |
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 90  | 00  |
 
 ### Common non-success status words
 
-| Value | Meaning |
-| :---: | :--- |
-| 0x6983 | A credential with that label already exists |
-| 0x6a84 | No space (30 credentials maximum) |
+| Value  | Meaning                                                           |
+|:------:|:------------------------------------------------------------------|
+| 0x6983 | A credential with that label already exists                       |
+| 0x6a84 | No space (30 credentials maximum)                                 |
 | 0x63c# | Wrong management key, where # is the number of attempts remaining |
-| 0x6a80 | Wrong syntax |
+| 0x6a80 | Wrong syntax                                                      |

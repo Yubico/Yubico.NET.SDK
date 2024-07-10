@@ -40,19 +40,21 @@ There are up to seven elements in a command APDU. All command APDUs must have th
 four, but it is legal to have the first four, five, six, or seven elements.
 
 #### Table 1.1: Possible command APDU elements
-| Class | Instruction | Param 1 | Param 2 | Length of Data | Data | Max Length of Response Data |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| CLA | INS | P1 | P2 | Lc | Data | Le |
-| CLA | INS | P1 | P2 | Lc | Data | (absent) |
-| CLA | INS | P1 | P2 | Lc | (absent) | (absent) |
-| CLA | INS | P1 | P2 | (absent) | (absent) | (absent) |
+
+| Class | Instruction | Param 1 | Param 2 | Length of Data |   Data   | Max Length of Response Data |
+|:-----:|:-----------:|:-------:|:-------:|:--------------:|:--------:|:---------------------------:|
+|  CLA  |     INS     |   P1    |   P2    |       Lc       |   Data   |             Le              |
+|  CLA  |     INS     |   P1    |   P2    |       Lc       |   Data   |          (absent)           |
+|  CLA  |     INS     |   P1    |   P2    |       Lc       | (absent) |          (absent)           |
+|  CLA  |     INS     |   P1    |   P2    |    (absent)    | (absent) |          (absent)           |
 
 For example, with the command APDU `00 87 03 9B 04 7C 02 80 00`, these are the elements.
 
 #### Table 1.2: Example command APDU elements
-| CLA | INS | P1 | P2 | Lc | Data | Le |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 00 | 87 | 03 | 9B | 04 | 7C 02 80 00 | (absent) |
+
+| CLA | INS | P1 | P2 | Lc |    Data     |    Le    |
+|:---:|:---:|:--:|:--:|:--:|:-----------:|:--------:|
+| 00  | 87  | 03 | 9B | 04 | 7C 02 80 00 | (absent) |
 
 When building command APDUs in the SDK, the `Le` value will always be absent. The `Le`
 value is the maximum number of bytes in the data response. However, we will not specify
@@ -74,10 +76,11 @@ error message.
 A response APDU consists of up to three elements.
 
 #### Table 2.1: Possible response APDU elements
-| Data | Status Word 1 | Status Word 2 |
-| :---: | :---: | :---: |
-| Return Data | SW1 | SW2 |
-| (absent) | SW1 | SW2 |
+
+|    Data     | Status Word 1 | Status Word 2 |
+|:-----------:|:-------------:|:-------------:|
+| Return Data |      SW1      |      SW2      |
+|  (absent)   |      SW1      |      SW2      |
 
 The last two bytes make up the status word, which is the error or success code. A
 response might contain data and the status word, or just the status word.
@@ -86,18 +89,20 @@ For example, with the response APDU `7C 0A 80 08 3D 12 D6 71 F7 32 75 0D 90 00`,
 are the elements.
 
 #### Table 2.2: Example response APDU elements
-| Data | SW1 | SW2 |
-| :---: | :---: | :---: |
-| 7C 0A 80 08 3D 12 D6 71 F7 32 75 0D | 90 | 00 |
+
+|                Data                 | SW1 | SW2 |
+|:-----------------------------------:|:---:|:---:|
+| 7C 0A 80 08 3D 12 D6 71 F7 32 75 0D | 90  | 00  |
 
 Note that if there is an error, the response APDU will be two bytes only: SW1 and SW2.
 For example, the two-byte response of `6A 81` means "Card is blocked or command not
 supported".
 
 #### Table 2.3: Response APDU indicating error
-| Data | SW1 | SW2 |
-| :---: | :---: | :---: |
-| (absent) | 6A | 81 |
+
+|   Data   | SW1 | SW2 |
+|:--------:|:---:|:---:|
+| (absent) | 6A  | 81  |
 
 It is also possible to have a successful response APDU of only two bytes (no data). For
 example, suppose a command APDU requests the YubiKey set the number of PIN retries to
@@ -105,9 +110,10 @@ five (instead of the default three). If the YubiKey successfully sets the retry 
 there is no data to be returned, simply the status word, `90 00`, indicating success.
 
 #### Table 2.4: Response APDU indicating success with no data
-| Data | SW1 | SW2 |
-| :---: | :---: | :---: |
-| (absent) | 90 | 00 |
+
+|   Data   | SW1 | SW2 |
+|:--------:|:---:|:---:|
+| (absent) | 90  | 00  |
 
 ## Chaining
 
@@ -127,38 +133,40 @@ last of the data), set the CLA to be the regular value (no `0x10` bit).
 For example, suppose you were sending the PIV command "Sign" for a 2048-bit RSA key.
 Here's what the command APDU would be.
 
-| CLA | INS | P1 | P2 | Lc | Data | Le |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 00 | 87 | 07 | 9c | *data len* | 7c *L1* 82 *L2* 81 *L3* *\<encoded data to sign\>* | absent |
+| CLA | INS | P1 | P2 |     Lc     |                        Data                        |   Le   |
+|:---:|:---:|:--:|:--:|:----------:|:--------------------------------------------------:|:------:|
+| 00  | 87  | 07 | 9c | *data len* | 7c *L1* 82 *L2* 81 *L3* *\<encoded data to sign\>* | absent |
 
 The Data is made up of these elements.
 
-| 7C | L1 | 82 | L2 | 81 | L3 | Encoded Data |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| tag (auth template) | length (DER) | tag (response) | length (DER) | tag (challenge) | length (DER) | PKCS 1 v1.5 or PSS  |
+|         7C          |      L1      |       82       |      L2      |       81        |      L3      |    Encoded Data    |
+|:-------------------:|:------------:|:--------------:|:------------:|:---------------:|:------------:|:------------------:|
+| tag (auth template) | length (DER) | tag (response) | length (DER) | tag (challenge) | length (DER) | PKCS 1 v1.5 or PSS |
 
 The actual data we will send will be the following.
 
-| 7C | L1 | 82 | L2 | 81 | L3 | Encoded Data |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| | decimal 262 | | 00 (this is not a response) | | decimal 256 | PKCS 1 v1.5 |
-| 7c | 82 01 06 | 82 | 00 |81 | 82 01 00 | 00 01 FF FF ... FF 00 *\<DigestInfo\>* |
-| 1 byte | 3 | 1 | 1 | 1  | 3 | 256 |
+|   7C   |     L1      | 82 |             L2              | 81 |     L3      |              Encoded Data              |
+|:------:|:-----------:|:--:|:---------------------------:|:--:|:-----------:|:--------------------------------------:|
+|        | decimal 262 |    | 00 (this is not a response) |    | decimal 256 |              PKCS 1 v1.5               |
+|   7c   |  82 01 06   | 82 |             00              | 81 |  82 01 00   | 00 01 FF FF ... FF 00 *\<DigestInfo\>* |
+| 1 byte |      3      | 1  |              1              | 1  |      3      |                  256                   |
 
 There will be 268 bytes of data to send. The APDU's field *Lc* is one byte only, so the
 maximum value it can represent is 255. So break the data into two commands.
 
 #### First command APDU
-| CLA | INS | P1 | P2 | Lc | Data | Le |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 10 | 87 | 07 | 9c | d6 | 7c 82 01 06 82 00 81 82 01 00 00 01 ff ff ... ff | absent |
-| 0x10 set, more data in following APDU | | | | Lc is 214, number of bytes in APDU's data | 214 bytes | |
+
+|                  CLA                  | INS | P1 | P2 |                    Lc                     |                       Data                       |   Le   |
+|:-------------------------------------:|:---:|:--:|:--:|:-----------------------------------------:|:------------------------------------------------:|:------:|
+|                  10                   | 87  | 07 | 9c |                    d6                     | 7c 82 01 06 82 00 81 82 01 00 00 01 ff ff ... ff | absent |
+| 0x10 set, more data in following APDU |     |    |    | Lc is 214, number of bytes in APDU's data |                    214 bytes                     |        |
 
 #### Second command APDU
-| CLA | INS | P1 | P2 | Lc | Data | Le |
-| :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| 00 | 87 | 07 | 9c | 34 | ff ff ff 00 30 2f ... 1F | absent |
-| 0x10 NOT set, last of the data in this APDU | | | | Lc is 52, number of bytes in APDU's data | 52 bytes, the rest of the data | |
+
+|                     CLA                     | INS | P1 | P2 |                    Lc                    |              Data              |   Le   |
+|:-------------------------------------------:|:---:|:--:|:--:|:----------------------------------------:|:------------------------------:|:------:|
+|                     00                      | 87  | 07 | 9c |                    34                    |    ff ff ff 00 30 2f ... 1F    | absent |
+| 0x10 NOT set, last of the data in this APDU |     |    |    | Lc is 52, number of bytes in APDU's data | 52 bytes, the rest of the data |        |
 
 For both calls, the CLA, INS, P1, and P2 values are the same (except for the `0x10` bit
 in the CLA of the first call). The data is simply broken up.

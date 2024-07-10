@@ -39,36 +39,36 @@ If there is no current PIN, then the data will be encoded as
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 90 | 00
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 90  | 00  
 
 #### Response APDU for current PIN incorrect
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 63 | C0
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 63  | C0  
 
 #### Response APDU for blocked PIN
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 69 | 83
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 69  | 83  
 
 #### Response APDU for new PIN invalid length
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 67 | 00
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 67  | 00  
 
 #### Response APDU for PIN not supported
 
@@ -79,6 +79,6 @@ response.
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 6D | 00
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 6D  | 00  

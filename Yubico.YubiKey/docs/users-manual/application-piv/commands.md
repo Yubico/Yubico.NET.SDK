@@ -48,7 +48,9 @@ is the one calling the YubiKey. The keys, data, and firmware running on the Yubi
 * [Get data](#get-data)
 * [Put data](#put-data)
 * [Reset](#reset-the-piv-application)
+
 ___
+
 ## Get the serial number
 
 This gets the YubiKey's serial number.
@@ -86,6 +88,7 @@ To see the serial number as a decimal string, use `ToString()`. For example,
 
 [Technical APDU Details](apdu/serial.md)
 ___
+
 ## Get the firmware version number
 
 This gets the YubiKey firmware version number.
@@ -112,6 +115,7 @@ None.
 
 [Technical APDU Details](apdu/version.md)
 ___
+
 ## Get metadata
 
 This gets information about the key in a particular slot.
@@ -145,21 +149,23 @@ PIV slots.
 ### Output
 
 #### Table 1: List of Metadata Elements
-|   Name    |                  Meaning                   |                                    Data                                                                     | Slots                           |
-| :-------: | :----------------------------------------: | :---------------------------------------------------------------------------------------------------------: | :-----------------------------: |
-| Algorithm |            Algorithm of the key            |       PIN, PUK, Triple DES, AES-128, AES-192, AES-256, <br/>RSA-1024, RSA-2048, ECC-P256, or ECC-P384       | all slots                       |
-|  Policy   |            PIN and touch policy            | PIN: Default, Never, Once, Always<br/>Touch: Default, Never, Always, Cached                                 | 9A, 9B, 9C, 9D, 9E, F9, 82 - 95 |
-|  Origin   |           Imported or generated            |                             imported/generated                                                              | 9A, 9C, 9D, 9E, F9, 82 - 95     |
-|  Public   |       Pub key partner to the pri key       |                         DER encoding of public key                                                          | 9A, 9C, 9D, 9E, F9, 82 - 95     |
-|  Default  | Whether PIN/PUK/Mgmt Key has default value |                           Default or Not Default                                                            | 80, 81, 9B                      |
-|  Retries  |    Retry count and retries remaining       |                               two numbers                                                                   | 80, 81                          |
+
+|   Name    |                  Meaning                   |                                              Data                                               |              Slots              |
+|:---------:|:------------------------------------------:|:-----------------------------------------------------------------------------------------------:|:-------------------------------:|
+| Algorithm |            Algorithm of the key            | PIN, PUK, Triple DES, AES-128, AES-192, AES-256, <br/>RSA-1024, RSA-2048, ECC-P256, or ECC-P384 |            all slots            |
+|  Policy   |            PIN and touch policy            |           PIN: Default, Never, Once, Always<br/>Touch: Default, Never, Always, Cached           | 9A, 9B, 9C, 9D, 9E, F9, 82 - 95 |
+|  Origin   |           Imported or generated            |                                       imported/generated                                        |   9A, 9C, 9D, 9E, F9, 82 - 95   |
+|  Public   |       Pub key partner to the pri key       |                                   DER encoding of public key                                    |   9A, 9C, 9D, 9E, F9, 82 - 95   |
+|  Default  | Whether PIN/PUK/Mgmt Key has default value |                                     Default or Not Default                                      |           80, 81, 9B            |
+|  Retries  |     Retry count and retries remaining      |                                           two numbers                                           |             80, 81              |
 
 Another way to look at what is returned is the following table that lists which data
 elements are returned for each slot.
 
 #### Table 2: List of PIV slots and the metadata elements returned
+
 |     Slot Number (hex)      |         Key         |           Data returned           |
-| :------------------------: | :-----------------: | :-------------------------------: |
+|:--------------------------:|:-------------------:|:---------------------------------:|
 |             80             |         PIN         |    Algorithm, Default, Retries    |
 |             81             |         PUK         |    Algorithm, Default, Retries    |
 |             9B             |     Management      |    Algorithm, Policy, Default     |
@@ -174,9 +180,10 @@ elements are returned for each slot.
 
 [Technical APDU Details](apdu/metadata.md)
 ___
+
 ## Get Bio metadata
 
-This gets YubiKey's biometric metadata. 
+This gets YubiKey's biometric metadata.
 
 ### Available
 
@@ -191,17 +198,18 @@ YubiKey Bio Multi-protocol 5.6 and later.
 ### Output
 
 #### Table 1: List of Metadata Elements
-|   Name            |                  Meaning                                 |                              Data                                 |
-| :---------------: | :------------------------------------------------------: | :---------------------------------------------------------------: |
-|  IsConfigured     |  Is this device configured for biometric verification    |  bool                                                             |
-|  RetriesRemaining |  Number of remaining retries for biometric verification  |  integer, zero value means the biometric verification is blocked  |
-|  HasTemporaryPin  |  Whether a temporary PIN is generated                    |  bool                                                             |
 
+|       Name       |                        Meaning                         |                              Data                               |
+|:----------------:|:------------------------------------------------------:|:---------------------------------------------------------------:|
+|   IsConfigured   |  Is this device configured for biometric verification  |                              bool                               |
+| RetriesRemaining | Number of remaining retries for biometric verification | integer, zero value means the biometric verification is blocked |
+| HasTemporaryPin  |          Whether a temporary PIN is generated          |                              bool                               |
 
 ### APDU
 
 [Technical APDU Details](apdu/bio-metadata.md)
 ___
+
 ## Verify
 
 Verify a PIN.
@@ -289,13 +297,23 @@ value and `GetData` will throw an exception.
 
 [Technical APDU Details](apdu/verify.md)
 ___
+
 ## Biometric verification
 
-With biometric verification, the users can authenticate the PIV session with a successful match of a fingerprint. To be able to execute the biometric verification, the YubiKey has to have biometrics configured and must not be blocked for using biometrics. Clients can verify the conditions by reading the properties of biometric metadata (see [Get Bio metadata](#get-bio-metadata)).
+With biometric verification, the users can authenticate the PIV session with a successful match of a fingerprint. To be
+able to execute the biometric verification, the YubiKey has to have biometrics configured and must not be blocked for
+using biometrics. Clients can verify the conditions by reading the properties of biometric metadata (
+see [Get Bio metadata](#get-bio-metadata)).
 
-The YubiKey keeps track of failed biometric matches and will block the biometric authentication if there are more than three such failures. In that case the client should use the PIN verification as soon as possible. The number of remaining biometric matches is returned in the command response's `AttemptsRemaining` property. The value is present only after a failed match.
+The YubiKey keeps track of failed biometric matches and will block the biometric authentication if there are more than
+three such failures. In that case the client should use the PIN verification as soon as possible. The number of
+remaining biometric matches is returned in the command response's `AttemptsRemaining` property. The value is present
+only after a failed match.
 
-Clients can also request to generate a temporary PIN which can be used with the `VerifyTemporaryPinCommand` for authentication without the need of a biometric match. The temporary PIN is stored in YubiKey's RAM and is invalidated after the PIV session is closed or an attempt of using a wrong temporary PIN. For `PIN_OR_MATCH_ALWAYS` slot policy, the temporary PIN can be used only once.
+Clients can also request to generate a temporary PIN which can be used with the `VerifyTemporaryPinCommand` for
+authentication without the need of a biometric match. The temporary PIN is stored in YubiKey's RAM and is invalidated
+after the PIV session is closed or an attempt of using a wrong temporary PIN. For `PIN_OR_MATCH_ALWAYS` slot policy, the
+temporary PIN can be used only once.
 
 ### Available
 
@@ -316,23 +334,31 @@ YubiKey Bio Multi-Protocol keys.
 #### VerifyUvCommand
 
 Two boolean values:
-- request temporary PIN\
-if true, the YubiKey will wait for the user to perform a biometric verification (match an enrolled fingerprint) and, on success, generate a temporary PIN.
-- check only\
-when true, the YubiKey verifies internally that the biometric state is valid. No biometric verification is performed on the YubiKey. 
 
-A client application would typically call the command with `false`, `false` parameters - this will make the YubiKey request the biometric verification from the users.
+- request temporary PIN\
+  if true, the YubiKey will wait for the user to perform a biometric verification (match an enrolled fingerprint) and,
+  on success, generate a temporary PIN.
+- check only\
+  when true, the YubiKey verifies internally that the biometric state is valid. No biometric verification is performed
+  on the YubiKey.
+
+A client application would typically call the command with `false`, `false` parameters - this will make the YubiKey
+request the biometric verification from the users.
 
 #### VerifyTemporaryPinCommand
+
 The temporary PIN is the only parameter.
 
 ### Output
 
 #### VerifyUvResponse
+
 If temporary PIN was requested and the status is Success, the returned value is the temporary PIN.
-In case of failure (for example the fingerprint did not match), the clients should read the `AttemptsRemaining` property which contains number of remaining biometric attempts.
+In case of failure (for example the fingerprint did not match), the clients should read the `AttemptsRemaining` property
+which contains number of remaining biometric attempts.
 
 #### VerifyTemporaryPinResponse
+
 No output. The Status will be Success if the temporary PIN was verified.
 
 ### APDU
@@ -341,6 +367,7 @@ No output. The Status will be Success if the temporary PIN was verified.
 
 [Technical APDU Details for VerifyTemporaryPinCommand](apdu/verify-temporary-pin.md)
 ___
+
 ## Authenticate: management key
 
 The Authenticate command can be used to perform several cryptographic operations:
@@ -377,14 +404,14 @@ we will use in this section.
 
 * Response APDU
 * Response Class or Response Object (e.g. InitializeAuthenticateManagementKeyResponse is a
-Response Class and an instantiation of that class is a Response Object)
+  Response Class and an instantiation of that class is a Response Object)
 * Client Authentication Challenge/Response (the Challenge-Response pair associated with Client Authentication)
 * YubiKey Authentication Challenge/Response (the Challenge-Response pair associated with YubiKey Authenticaiton)
 
 The process is the following:
 
 |                                Single Authentication                                |                                                                                              |
-| :---------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------: |
+|:-----------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------:|
 |                          **Client (Off-Card) Application**                          |                                         **YubiKey**                                          |
 |                                      *Step 1*                                       |                                                                                              |
 |                         Initiate the process (single auth)                          |                                                                                              |
@@ -439,7 +466,7 @@ authentication, and step 1 or step 2.
 * Single Auth, Step 2: output is the result of verifying the Client Authentication Response
 * Mutual Auth, Step 1: output is Client Authentication Challenge
 * Mutual Auth, Step 2: output is YubiKey Authentication Response (to be verified by the client
-(off-card) application) and the result of Client Authentication
+  (off-card) application) and the result of Client Authentication
 
 The output of the Response classes is the following.
 
@@ -447,7 +474,7 @@ The output of the Response classes is the following.
 * Single Auth, Step 2: output is the result of verifying the Client Authentication Response
 * Mutual Auth, Step 1: output is Client Authentication Challenge
 * Mutual Auth, Step 2: output is the result of Client Authentication,
-and, if Client Authentication was successful, YubiKey Authentication Response
+  and, if Client Authentication was successful, YubiKey Authentication Response
 
 The process is explained in the documentation for
 [CompleteAuthenticateManagementKeyCommand](xref:Yubico.YubiKey.Piv.Commands.CompleteAuthenticateManagementKeyCommand)
@@ -456,6 +483,7 @@ The process is explained in the documentation for
 
 [Technical APDU Details](apdu/auth-mgmt.md)
 ___
+
 ## Set PIN retries
 
 Set the number of PIN retries allowed before the PIN and PUK are blocked. The default is
@@ -515,6 +543,7 @@ authenticated the management key and verified the PIN.
 
 [Technical APDU Details](apdu/set-pin-retries.md)
 ___
+
 ## Change Reference Data
 
 Change a PIN or PUK (PIN Unblocking Key). The term "reference data" in this case refers
@@ -608,6 +637,7 @@ operation could not be performed. The `Status` property in the Response object w
 
 [Technical APDU Details](apdu/change-ref.md)
 ___
+
 ## Set management key
 
 Set the management key to a new value.
@@ -665,6 +695,7 @@ successfully authenticated the management key.
 
 [Technical APDU Details](apdu/set-mgmt-key.md)
 ___
+
 ## Reset Retry (Recover the PIN)
 
 Reset the PIN.
@@ -743,6 +774,7 @@ operation could not be performed. The `Status` property in the Response object w
 
 [Technical APDU Details](apdu/reset-retry.md)
 ___
+
 ## Generate Asymmetric
 
 Generate a new asymmetric key pair and store it in one of the asymmetric key slots.
@@ -785,6 +817,7 @@ The public key partner to the private key now residing in the given slot.
 
 [Technical APDU Details](apdu/generate-pair.md)
 ___
+
 ## Import Asymmetric
 
 Import an asymmetric key, that was generated outside the YubiKey, into one of the
@@ -825,6 +858,7 @@ The management key, the slot number, PIN policy, touch policy, and the new key.
 
 [Technical APDU Details](apdu/import-asym.md)
 ___
+
 ## Authenticate: sign
 
 The Authenticate command can be used to perform several cryptographic operations:
@@ -925,6 +959,7 @@ The signature.
 
 [Technical APDU Details](apdu/auth-sign.md)
 ___
+
 ## Authenticate: decrypt
 
 The Authenticate command can be used to perform several cryptographic operations:
@@ -984,6 +1019,7 @@ result.
 
 [Technical APDU Details](apdu/auth-decrypt.md)
 ___
+
 ## Authenticate: key agreement
 
 The Authenticate command can be used to perform several cryptographic operations:
@@ -1054,6 +1090,7 @@ shared secret itself, no tag or length octets.
 
 [Technical APDU Details](apdu/auth-key-agree.md)
 ___
+
 ## Create attestation statement
 
 Create an attestation statement for a key that had been generated by the YubiKey. See the
@@ -1136,6 +1173,7 @@ the specific YubiKey.
 
 [Technical APDU Details](apdu/attest.md)
 ___
+
 ## Get Data
 
 Get a data element from the YubiKey.
@@ -1186,29 +1224,31 @@ Requesting these elements using GET DATA will return "NoData". If you want these
 to contain data, you will have to load them using PUT DATA.
 
 #### Table 4A: PIV GET DATA elements available upon manufacture
-|    Name    |   Tag    |                  Meaning                  |   Authentication<br/>Required  |              Data Returned              |
-| :--------: | :------: | :---------------------------------------: | :----------------------------: | :-------------------------------------: |
-| DISCOVERY  |    7E    |     PIV AID plus<br/>PIN usage policy     | PUT: not allowed<br/>GET: none | [Encoded discovery](#encoded-discovery) |
+
+|   Name    | Tag |              Meaning              |  Authentication<br/>Required   |              Data Returned              |
+|:---------:|:---:|:---------------------------------:|:------------------------------:|:---------------------------------------:|
+| DISCOVERY | 7E  | PIV AID plus<br/>PIN usage policy | PUT: not allowed<br/>GET: none | [Encoded discovery](#encoded-discovery) |
 
 #### Table 4B: PIV GET DATA elements empty upon manufacture
-|           Name            |                Tag                |                 Meaning                  | Authentication<br/>Required |                   Data Returned                   |
-| :-----------------------: | :-------------------------------: | :--------------------------------------: | :-------------------------: | :-----------------------------------------------: |
-|      AUTHENTICATION       |             5F C1 05              |         Cert for key in slot 9A          | PUT: mgmt key<br/>GET: none |    [Encoded certificate](#encoded-certificate)    |
-|         SIGNATURE         |             5F C1 0A              |         Cert for key in slot 9C          | PUT: mgmt key<br/>GET: none |    [Encoded certificate](#encoded-certificate)    |
-|      KEY MANAGEMENT       |             5F C1 0B              |         Cert for key in slot 9D          | PUT: mgmt key<br/>GET: none |    [Encoded certificate](#encoded-certificate)    |
-|         CARD AUTH         |             5F C1 01              |         Cert for key in slot 9E          | PUT: mgmt key<br/>GET: none |    [Encoded certificate](#encoded-certificate)    |
-| RETIRED1 to<br/>RETIRED20 | 5F C1 0D<br/>through<br/>5F C1 20 |              Retired certs               | PUT: mgmt key<br/>GET: none |    [Encoded certificate](#encoded-certificate)    |
-|           CHUID           |             5F C1 02              |    Cardholder Unique<br/>Identifier      | PUT: mgmt key<br/>GET: none |     [Encoded CHUID](#encoded-chuid)               |
-|         CAPABILITY        |             5F C1 07              |    Card Capability<br/>Container (CCC)   | PUT: mgmt key<br/>GET: none |       [Encoded CCC](#encoded-ccc)       |
-|          PRINTED          |             5F C1 09              |   Information printed<br/>on the card    | PUT: mgmt key<br/>GET: PIN  |        [Encoded printed](#encoded-printed)        |
-|         SECURITY          |             5F C1 06              |             Security object              | PUT: mgmt key<br/>GET: none |   [Encoded security](#encoded-security-object)    |
-|        KEY HISTORY        |             5F C1 0C              |         Info about retired keys          | PUT: mgmt key<br/>GET: none |    [Encoded key history](#encoded-key-history)    |
-|           IRIS            |             5F C1 21              |          Cardholder iris images          | PUT: mgmt key<br/>GET: PIN  |    [Encoded iris images](#encoded-iris-images)    |
-|       FACIAL IMAGE        |             5F C1 08              |         Cardholder facial image          | PUT: mgmt key<br/>GET: PIN  |   [Encoded facial image](#encoded-facial-image)   |
-|       FINGERPRINTS        |             5F C1 03              |         Cardholder fingerprints          | PUT: mgmt key<br/>GET: PIN  |   [Encoded fingerprints](#encoded-fingerprints)   |
+
+|           Name            |                Tag                |                 Meaning                  |   Authentication<br/>Required    |                   Data Returned                   |
+|:-------------------------:|:---------------------------------:|:----------------------------------------:|:--------------------------------:|:-------------------------------------------------:|
+|      AUTHENTICATION       |             5F C1 05              |         Cert for key in slot 9A          |   PUT: mgmt key<br/>GET: none    |    [Encoded certificate](#encoded-certificate)    |
+|         SIGNATURE         |             5F C1 0A              |         Cert for key in slot 9C          |   PUT: mgmt key<br/>GET: none    |    [Encoded certificate](#encoded-certificate)    |
+|      KEY MANAGEMENT       |             5F C1 0B              |         Cert for key in slot 9D          |   PUT: mgmt key<br/>GET: none    |    [Encoded certificate](#encoded-certificate)    |
+|         CARD AUTH         |             5F C1 01              |         Cert for key in slot 9E          |   PUT: mgmt key<br/>GET: none    |    [Encoded certificate](#encoded-certificate)    |
+| RETIRED1 to<br/>RETIRED20 | 5F C1 0D<br/>through<br/>5F C1 20 |              Retired certs               |   PUT: mgmt key<br/>GET: none    |    [Encoded certificate](#encoded-certificate)    |
+|           CHUID           |             5F C1 02              |     Cardholder Unique<br/>Identifier     |   PUT: mgmt key<br/>GET: none    |          [Encoded CHUID](#encoded-chuid)          |
+|        CAPABILITY         |             5F C1 07              |   Card Capability<br/>Container (CCC)    |   PUT: mgmt key<br/>GET: none    |            [Encoded CCC](#encoded-ccc)            |
+|          PRINTED          |             5F C1 09              |   Information printed<br/>on the card    |    PUT: mgmt key<br/>GET: PIN    |        [Encoded printed](#encoded-printed)        |
+|         SECURITY          |             5F C1 06              |             Security object              |   PUT: mgmt key<br/>GET: none    |   [Encoded security](#encoded-security-object)    |
+|        KEY HISTORY        |             5F C1 0C              |         Info about retired keys          |   PUT: mgmt key<br/>GET: none    |    [Encoded key history](#encoded-key-history)    |
+|           IRIS            |             5F C1 21              |          Cardholder iris images          |    PUT: mgmt key<br/>GET: PIN    |    [Encoded iris images](#encoded-iris-images)    |
+|       FACIAL IMAGE        |             5F C1 08              |         Cardholder facial image          |    PUT: mgmt key<br/>GET: PIN    |   [Encoded facial image](#encoded-facial-image)   |
+|       FINGERPRINTS        |             5F C1 03              |         Cardholder fingerprints          |    PUT: mgmt key<br/>GET: PIN    |   [Encoded fingerprints](#encoded-fingerprints)   |
 |           BITGT           |               7F 61               | Biometric Information<br/>Group Template | PUT: not supported<br/>GET: none |          [Encoded BITGT](#encoded-bitgt)          |
-|         SM SIGNER         |             5F C1 22              | Secure Messaging<br/>Certificate Signer  | PUT: mgmt key<br/>GET: none | [Encoded SM cert signer](#encoded-sm-cert-signer) |
-|        PC REF DATA        |             5F C1 23              |     Pairing Code<br/>Reference Data      | PUT: mgmt key<br/>GET: none |         [Encoded PC Ref](#encoded-pc-ref)         |
+|         SM SIGNER         |             5F C1 22              | Secure Messaging<br/>Certificate Signer  |   PUT: mgmt key<br/>GET: none    | [Encoded SM cert signer](#encoded-sm-cert-signer) |
+|        PC REF DATA        |             5F C1 23              |     Pairing Code<br/>Reference Data      |   PUT: mgmt key<br/>GET: none    |         [Encoded PC Ref](#encoded-pc-ref)         |
 
 All the tags supported are one, two, or three bytes long. The APDU data contains the tag,
 each constructed as a TLV itself. That is, there is a DER TLV with a T of `5C`, and a V of
@@ -1496,6 +1536,7 @@ length is zero.
 
 [Technical APDU Details](apdu/get-data.md)
 ___
+
 ## Put data
 
 Put the given data into a data element on the card.
@@ -1542,6 +1583,7 @@ your YubiKey unusable.
 
 [Technical APDU Details](apdu/put-data.md)
 ___
+
 ## Get and Put Vendor Data
 
 The SDK also contains the ability to get and put data into tags not defined by the PIV
@@ -1560,16 +1602,18 @@ Requesting these elements using GET DATA will return "NoData". If you want these
 to contain data, you will have to load them using PUT DATA.
 
 #### Table 5A: Yubico-defined GET DATA elements available upon manufacture
-|    Name     |   Tag    |    Meaning       | Authentication<br/>Required |                Data Returned                |
-| :---------: | :------: | :--------------: | :-------------------------: | :-----------------------------------------: |
+
+|    Name     |   Tag    |     Meaning      | Authentication<br/>Required |                Data Returned                |
+|:-----------:|:--------:|:----------------:|:---------------------------:|:-------------------------------------------:|
 | ATTESTATION | 5F FF 01 | Attestation cert | PUT: mgmt key<br/>GET: none | [Encoded certificate](#encoded-certificate) |
 
 #### Table 5B: Yubico-defined GET DATA elements empty upon manufacture
-|           Name           |                Tag                |                     Meaning                     | Authentication<br/>Required  |               Data Returned               |
-| :----------------------: | :-------------------------------: | :---------------------------------------------: | :--------------------------: | :---------------------------------------: |
-|        ADMIN DATA        |             5F FF 00              | PIV manager application<br/>administrative data |  PUT: mgmt key</br>GET: none | [Encoded admin data](#encoded-admin-data) |
-|          MSCMAP          |             5F FF 10              |             Microsoft container map             |  PUT: mgmt key</br>GET: none |             [MSCMAP](#mscmap)             |
-| MSROOTS1 to<br/>MSROOTS5 | 5F FF 11<br/>through<br/>5F FF 15 |              Microsoft root certs               |  PUT: mgmt key</br>GET: none |            [MSROOTS](#msroots)            |
+
+|           Name           |                Tag                |                     Meaning                     | Authentication<br/>Required |               Data Returned               |
+|:------------------------:|:---------------------------------:|:-----------------------------------------------:|:---------------------------:|:-----------------------------------------:|
+|        ADMIN DATA        |             5F FF 00              | PIV manager application<br/>administrative data | PUT: mgmt key</br>GET: none | [Encoded admin data](#encoded-admin-data) |
+|          MSCMAP          |             5F FF 10              |             Microsoft container map             | PUT: mgmt key</br>GET: none |             [MSCMAP](#mscmap)             |
+| MSROOTS1 to<br/>MSROOTS5 | 5F FF 11<br/>through<br/>5F FF 15 |              Microsoft root certs               | PUT: mgmt key</br>GET: none |            [MSROOTS](#msroots)            |
 
 #### Encoded Admin Data
 
@@ -1620,6 +1664,7 @@ scenario where an application will need to use the data the SDK will PUT into an
 these objects. If your application uses the Base CSP, and you use a YubiKey, any necessary
 operations with the MSCMAP will be handled by the SDK.
 ___
+
 ## Reset the PIV Application
 
 Delete all the credentials and keys, and set the PIN, PUK, and management key to the

@@ -16,7 +16,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Get metadata
 
 ### Command APDU Info
@@ -30,8 +29,9 @@ CLA | INS | P1 | P2 | Lc | Data | Le
 Total Length: *variable + 2*\
 Data Length: *variable*
 
-Data | SW1 | SW2
-:---: | :---: | :---:
+           Data           | SW1 | SW2
+
+:------------------------:| :---: | :---:
 *metadata as set of TLV* | 90 | 00
 
 The data consists of a set of TLVs. The possible valid tags (T of TLV) are listed in the
@@ -39,12 +39,15 @@ table below. The length (L of TLV) is one, two, or three bytes, using the DER en
 rules. The values (V of TLV) are dependent on the tags, described in the table below.
 
 #### Table 1: List of Metadata Elements
+
 Tag | Name | Meaning | Data | Slots
 :---: | :---: | :---: | :---:
-01 | Algorithm| Algorithm/Type of the key | ff (PIN or PUK), 03 (Triple DES), 08 (AES-128),<br/>0A (AES-192), 0C (AES-256),<br/>06 (RSA-1024), 07 (RSA-2048),<br/>11 (ECC-P256), or 14 (ECC-P384) | all slots
-02 | Policy| PIN and touch policy | PIN: 0 (Default), 1 (Never),<br/>2 (Once), 3 (Always)<br/>Touch: 0 (Default), 1 (Never),<br/>2 (Always), 3 (Cached) | 9a, 9b, 9c, 9d, 9e, f9, 82 - 95
+01 | Algorithm| Algorithm/Type of the key | ff (PIN or PUK), 03 (Triple DES), 08 (AES-128),<br/>0A (AES-192), 0C (
+AES-256),<br/>06 (RSA-1024), 07 (RSA-2048),<br/>11 (ECC-P256), or 14 (ECC-P384) | all slots
+02 | Policy| PIN and touch policy | PIN: 0 (Default), 1 (Never),<br/>2 (Once), 3 (Always)<br/>Touch: 0 (Default), 1 (
+Never),<br/>2 (Always), 3 (Cached) | 9a, 9b, 9c, 9d, 9e, f9, 82 - 95
 03 | Origin| Imported or generated | 1 (generated), 2 (imported) | 9a, 9c, 9d, 9e, f9, 82 - 95
-04 | Public| Pub key partner to the pri key | DER encoding of public key  | 9a, 9c, 9d, 9e, f9, 82 - 95
+04 | Public| Pub key partner to the pri key | DER encoding of public key | 9a, 9c, 9d, 9e, f9, 82 - 95
 05 | Default| Whether PIN/PUK/Mgmt Key has default value | 01 (default) 00 (not default) | 80, 81, 9b
 06 | Retries| Number of Retries left | Two bytes, the retry count and remaining count | 80, 81
 
@@ -52,17 +55,18 @@ Another way to look at what is returned is the following table that lists which 
 elements are returned for each slot.
 
 #### Table 2: List of PIV Slots and the Metadata Elements Returned
-| Slot Number (hex) | Key | Data Returned (tags) |
-| :---: | :---: | :---: |
-| 80 | PIN | 01, 05, 06 |
-| 81 | PUK | 01, 05, 06 |
-| 9B | Management | 01, 02, 05 |
-| 82, 83, ..., 95 (20 slots)  | Retired Keys | 01, 02, 03, 04 |
-| 9A | Authentication | 01, 02, 03, 04 |
-| 9C | Signing | 01, 02, 03, 04 |
-| 9D | Key Management | 01, 02, 03, 04 |
-| 9E | Card Authentication | 01, 02, 03, 04 |
-| F9 | Attestation | 01, 02, 03, 04 |
+
+|     Slot Number (hex)      |         Key         | Data Returned (tags) |
+|:--------------------------:|:-------------------:|:--------------------:|
+|             80             |         PIN         |      01, 05, 06      |
+|             81             |         PUK         |      01, 05, 06      |
+|             9B             |     Management      |      01, 02, 05      |
+| 82, 83, ..., 95 (20 slots) |    Retired Keys     |    01, 02, 03, 04    |
+|             9A             |   Authentication    |    01, 02, 03, 04    |
+|             9C             |       Signing       |    01, 02, 03, 04    |
+|             9D             |   Key Management    |    01, 02, 03, 04    |
+|             9E             | Card Authentication |    01, 02, 03, 04    |
+|             F9             |     Attestation     |    01, 02, 03, 04    |
 
 The length of a TLV follows the DER encoding rules (values in hex).
 
@@ -113,6 +117,7 @@ TL
    A8 A3 30 D1 59 DE 66 01 0E 3F 21 13 29 C5 98 56
    07 B5 26
 ```
+
 ```C
 Get Metadata on a public/private key pair, in this case, the Digital Signature key in
 slot 9C. It's RSA.
@@ -173,6 +178,7 @@ E7 E9 82 03 01 00 01
    6A E5 AD FA EC 48 CC E7 BA 8B F7 56 6B DD 7B 56
    2A 3B E7 E9 82 03 01 00 01
 ```
+
 ```C
 Get Metadata on the Management Key.
 
@@ -194,6 +200,7 @@ Received (SW1=0x90, SW2=0x00):
 05 01
    00
 ```
+
 ```C
 Get Metadata on the PIN.
 
@@ -215,6 +222,7 @@ Received (SW1=0x90, SW2=0x00):
 06 02
    05 05
 ```
+
 ```C
 Get Metadata on the PUK.
 
@@ -236,6 +244,7 @@ Received (SW1=0x90, SW2=0x00):
 06 02
    05 05
 ```
+
 ```C
 Get Metadata on the Attestation Key.
 

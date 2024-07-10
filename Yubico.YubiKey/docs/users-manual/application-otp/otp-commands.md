@@ -39,7 +39,7 @@ the initial read of the status structure and the issuance of the command.
 The response data is in the following form:
 
 | Size (Bytes) |     Name      | Description                                                           |
-| :----------: | :-----------: | :-------------------------------------------------------------------- |
+|:------------:|:-------------:|:----------------------------------------------------------------------|
 |      1       | Major Version | Typically denotes the line of YubiKey (3 for NEO, 4, 5, etc.)         |
 |      1       | Minor Version | Can represent substantial revisions within a YubiKey line.            |
 |      1       | Patch Version | The minor and/or bug-fix revision of the firmware.                    |

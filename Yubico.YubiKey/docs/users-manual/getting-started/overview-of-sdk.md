@@ -40,11 +40,11 @@ Additionally, while .NET Framework 4.6.x is listed as implementing Standard 2.0,
 entirely true. The SDK relies on certain cryptographic functionality that is defined
 in the standard but not actually implemented in Framework 4.6.x.
 
-| Platform | Architecture | Version |
-| ---- | ---- | ---- |
-| macOS | x64, arm64 | Catalina, Big Sur |
-| Windows | x86, x64, arm64 | Windows 10, Windows 11 |
-| Linux | x64, arm64 | Debian, Ubuntu, RHEL, CentOS |
+| Platform | Architecture    | Version                      |
+|----------|-----------------|------------------------------|
+| macOS    | x64, arm64      | Catalina, Big Sur            |
+| Windows  | x86, x64, arm64 | Windows 10, Windows 11       |
+| Linux    | x64, arm64      | Debian, Ubuntu, RHEL, CentOS |
 
 ## Supported YubiKey applications
 
@@ -128,9 +128,10 @@ The YubiKey SDK is comprised of three managed assemblies:
   the .NET implementation that contains those features directly.
 - **Yubico.NativeShims** is an internal unmanaged library that provides a stable Application
   Binary Interface (ABI) to the P/Invoke Foreign Function Interface (FFI) in Yubico.Core.
-  
+
 All components of the SDK are built to the .NET Standard 2.0 specification. This means that either
-.NET Framework, .NET Core, or Mono can be used as the underlying runtime, so long as the runtime version implements .NET Standard 2.0 or higher.
+.NET Framework, .NET Core, or Mono can be used as the underlying runtime, so long as the runtime version implements .NET
+Standard 2.0 or higher.
 
 ![Layer diagram of SDK](../../images/sdk_layers_diagram.png "Layers of the SDK")
 

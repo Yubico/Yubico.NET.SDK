@@ -103,9 +103,9 @@ longer needed), set the new lock code to all `00` bytes.
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 90 | 00
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 90  | 00  
 
 #### Response APDU for incorrect lock code provided
 
@@ -116,15 +116,15 @@ is the return.
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 6F | 00
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 6F  | 00  
 
 #### Response APDU when sent to YubiKeys before version 5
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 69 | 00
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 69  | 00  

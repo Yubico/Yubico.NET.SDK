@@ -36,17 +36,20 @@ The PIN and touch policies answer those questions.
 ## What are the possible policies?
 
 #### PIN policies
+
 * Never: the PIN is never needed
 * Always: the PIN needed for every use
 * Once: the PIN is needed once per session
 
 #### Touch policies
+
 * Never: a touch is never needed
 * Always: a touch is needed for every use
 
 For YubiKeys 4.3 and later, there is one more possible policy
+
 * Cached: a touch is not needed if the YubiKey had been touched in the last 15 seconds,
-otherwise a touch is needed
+  otherwise a touch is needed
 
 > [!WARNING]
 > It is important to point out that setting the PIN policy to "never" reduces security

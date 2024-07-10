@@ -25,9 +25,9 @@ CLA | INS | P1 | P2 | Lc | Data | Le
 Total Length: 49\
 Data Length: 47
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-*data* | 90 | 00
+  Data  | SW1 | SW2 
+:------:|:---:|:---:
+ *data* | 90  | 00  
 
 The data is a byte array with the first byte the length and the
 following bytes a series of TLVs. See

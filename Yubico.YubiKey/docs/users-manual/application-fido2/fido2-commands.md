@@ -41,7 +41,9 @@ what information is needed from the caller for that command.
 * [Get Large Blob](#get-large-blob)
 * [Set Large Blob](#set-large-blob)
 * [Reset](#reset)
+
 ___
+
 ## Get version
 
 Get the YubiKey's version number.
@@ -68,6 +70,7 @@ None.
 
 [Technical APDU Details](apdu/version.md)
 ___
+
 ## Get info
 
 Get information about the YubiKey's FIDO2 application.
@@ -104,6 +107,7 @@ The YubiKey can return up to 20 of the defined elements. It will not return
 
 [Technical APDU Details](apdu/get-info.md)
 ___
+
 ## Get key agreement
 
 Get the YubiKey's public key that will be used to perform key agreement. The shared secret
@@ -131,6 +135,7 @@ All YubiKeys with the FIDO2 application.
 
 [Technical APDU Details](apdu/get-key-agree.md)
 ___
+
 ## Set PIN
 
 Set the YubiKey's FIDO application to be PIN-protected.
@@ -158,6 +163,7 @@ None
 
 [Technical APDU Details](apdu/set-pin.md)
 ___
+
 ## Change PIN
 
 Change the YubiKey's FIDO application's PIN.
@@ -185,6 +191,7 @@ None
 
 [Technical APDU Details](apdu/change-pin.md)
 ___
+
 ## Get PIN token
 
 Get a PIN token, which can be used in later operations such as Make Credential.
@@ -225,6 +232,7 @@ The encrypted token as a byte array.
 [Technical APDU Details](apdu/get-pin-token.md)
 ___
 <a name="pin-uv-auth-using-pin"></a>
+
 ## Get PIN/UV Auth token using PIN
 
 Get A PIN/UV Auth token, to be used in later operations such as Make Credential.
@@ -267,6 +275,7 @@ The encrypted token as a byte array.
 [Technical APDU Details](apdu/get-auth-token-using-pin.md)
 ___
 <a name="pin-uv-auth-using-uv"></a>
+
 ## Get PIN/UV Auth token using user verification (UV)
 
 Get A PIN/UV Auth token, to be used in later operations such as Make Credential.
@@ -307,6 +316,7 @@ The encrypted token as a byte array.
 
 [Technical APDU Details](apdu/get-auth-token-using-uv.md)
 ___
+
 ## Make credential
 
 Make a credential for a relying party.
@@ -336,6 +346,7 @@ The credential (public key) and other information.
 
 [Technical APDU Details](apdu/make-credential.md)
 ___
+
 ## Get assertion
 
 Get an assertion (credential) that will be verified by a relying party.
@@ -367,6 +378,7 @@ The credential, along with other information.
 
 [Technical APDU Details](apdu/get-assertion.md)
 ___
+
 ## Get next assertion
 
 Get the next assertion (credential) associated with the relying party specified
@@ -399,6 +411,7 @@ The credential, along with other information.
 
 [Technical APDU Details](apdu/get-next-assertion.md)
 ___
+
 ## Get credential metadata
 
 Get information about the credentials on the YubiKey. This is one of the subcommands of
@@ -420,7 +433,7 @@ All YubiKeys with the FIDO2 application.
 ### Input
 
 A PIN/UV auth token (built using the "cm" permission), and the protocol used to build the
-token. 
+token.
 
 ### Output
 
@@ -433,6 +446,7 @@ The data is returned in the form of a Tuple of two integers.
 
 [Technical APDU Details](apdu/get-cred-metadata.md)
 ___
+
 ## Enumerate RPs begin
 
 Get the total number of RPs that can be found along with information about the first
@@ -455,7 +469,7 @@ All YubiKeys with the FIDO2 application.
 ### Input
 
 A PIN/UV auth token (built using the "cm" permission), and the protocol used to build the
-token. 
+token.
 
 ### Output
 
@@ -468,6 +482,7 @@ object.
 
 [Technical APDU Details](apdu/enum-rps-begin.md)
 ___
+
 ## Enumerate RPs get next RP
 
 Get information about the next relying party (RP) represented by the credentials on the
@@ -504,6 +519,7 @@ The data is returned in the form of a
 
 [Technical APDU Details](apdu/enum-rps-next.md)
 ___
+
 ## Get large blob
 
 Get the large blob data out of the YubiKey. This command gets the raw data, it does not
@@ -548,6 +564,7 @@ and the caller should send another command.
 
 [Technical APDU Details](apdu/get-large-blob.md)
 ___
+
 ## Set large blob
 
 Store large blob data on the YubiKey. This command stores the data given, it does not
@@ -595,6 +612,7 @@ None
 
 [Technical APDU Details](apdu/set-large-blob.md)
 ___
+
 ## Reset
 
 Reset the FIDO2 application on a YubiKey. This will delete all existing FIDO2 keys and

@@ -38,7 +38,7 @@ Nonetheless, if you decide to reset, here's what needs to be done:
 
 1. "Reboot" the YubiKey by removing and re-inserting. Obtain a connection to the YubiKey
    once it has been reinserted. This will likely be done using a listener class (see
-   [YubiKeyDeviceListener](xref:Yubico.YubiKey.YubiKeyDeviceListener)). 
+   [YubiKeyDeviceListener](xref:Yubico.YubiKey.YubiKeyDeviceListener)).
 2. Within a time limit from the reboot (about 5 seconds), complete the reset command:
 
     1. Send the [ResetCommand](xref:Yubico.YubiKey.Fido2.Commands.ResetCommand). The

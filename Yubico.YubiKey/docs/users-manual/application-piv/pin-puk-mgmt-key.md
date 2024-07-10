@@ -51,14 +51,17 @@ The YubiKey is manufactured with the standard default PIN, PUK, and managment ke
 
 * PIN: "123456"
 * PUK: "12345678"
-* Management Key: (Firmware Version 5.6 and below: Triple-DES / 5.7 and above: AES-192), 0x010203040506070801020304050607080102030405060708\
-0102030405060708 three times
+* Management Key: (Firmware Version 5.6 and below: Triple-DES / 5.7 and above: AES-192),
+  0x010203040506070801020304050607080102030405060708\
+  0102030405060708 three times
 
-Note that the PIV standard specifies these default/initial values. For firmware 5.4 YubiKeys that allow AES, the default management key is Triple-DES. For firmware 5.7 and above 
+Note that the PIV standard specifies these default/initial values. For firmware 5.4 YubiKeys that allow AES, the default
+management key is Triple-DES. For firmware 5.7 and above
 YubiKeys, the default management key is AES-192.
 
 Upon receipt of the YubiKey, it is a good idea to change the PIN, PUK, and management key from the default values. See
-[PivSession.TryChangePin](xref:Yubico.YubiKey.Piv.PivSession.TryChangePin%2a), [PivSession.TryChangePuk](xref:Yubico.YubiKey.Piv.PivSession.TryChangePuk), and
+[PivSession.TryChangePin](xref:Yubico.YubiKey.Piv.PivSession.TryChangePin%2a), [PivSession.TryChangePuk](xref:Yubico.YubiKey.Piv.PivSession.TryChangePuk),
+and
 [PivSession.TryChangeManagementKey](xref:Yubico.YubiKey.Piv.PivSession.TryChangeManagementKey%2a).
 
 ### Entering binary data
@@ -158,7 +161,7 @@ never offer the option of changing the retry count again.
 * [Import a private key](xref:Yubico.YubiKey.Piv.PivSession.ImportPrivateKey%2a)
 * [Import a certificate](xref:Yubico.YubiKey.Piv.PivSession.ImportCertificate%2a)
 * [Change the retry counts](xref:Yubico.YubiKey.Piv.PivSession.ChangePinAndPukRetryCounts%2a)\
-also requires the PIN
+  also requires the PIN
 * [Change the management key](xref:Yubico.YubiKey.Piv.PivSession.ChangeManagementKey%2a)
 
 ## Operations that require the PIN
@@ -166,7 +169,7 @@ also requires the PIN
 * [Verify the PIN](xref:Yubico.YubiKey.Piv.PivSession.TryVerifyPin%2a)
 * [Change the PIN](xref:Yubico.YubiKey.Piv.PivSession.TryChangePin%2a)
 * [Change the retry counts](xref:Yubico.YubiKey.Piv.PivSession.ChangePinAndPukRetryCounts%2a)\
-also requires the management key
+  also requires the management key
 * [Sign](xref:Yubico.YubiKey.Piv.PivSession.Sign%2a)
 * [Decrypt](xref:Yubico.YubiKey.Piv.PivSession.Decrypt%2a)
 * [Key Agreement](xref:Yubico.YubiKey.Piv.PivSession.KeyAgree%2a)

@@ -18,7 +18,8 @@ limitations under the License. -->
 
 The .NET framework team has published their best practices for .NET-style framework (API) design. A subset of the
 guidelines are [posted online](https://docs.microsoft.com/en-us/dotnet/standard/design-guidelines/). The best
-resource, however, is the [“Framework Design Guidelines” book by Cwalina, et. al.](https://www.amazon.com/Framework-Design-Guidelines-Conventions-Addison-Wesley/dp/0135896460/ref=sr_1_1?crid=B6MTRR8KZCD1&dchild=1&keywords=framework+design+guidelines&qid=1599875133&sprefix=framework+design+%2Caps%2C210&sr=8-1)
+resource, however, is
+the [“Framework Design Guidelines” book by Cwalina, et. al.](https://www.amazon.com/Framework-Design-Guidelines-Conventions-Addison-Wesley/dp/0135896460/ref=sr_1_1?crid=B6MTRR8KZCD1&dchild=1&keywords=framework+design+guidelines&qid=1599875133&sprefix=framework+design+%2Caps%2C210&sr=8-1)
 It is currently in its third edition. This book contains the complete set of rules, along with commentary from the
 .NET designers themselves.
 
@@ -98,7 +99,8 @@ ICollection, over IList.
 
 ### Byte buffer guidance
 
-✅ **CONSIDER** using [Memory- and Span-related types](https://docs.microsoft.com/en-us/dotnet/standard/memory-and-spans/)
+✅ **CONSIDER**
+using [Memory- and Span-related types](https://docs.microsoft.com/en-us/dotnet/standard/memory-and-spans/)
 on the public interface for shared references to an array.
 
 Due to the low level nature of this project, it is common for data to be represented as a sequence of bytes. This
@@ -128,7 +130,8 @@ public IReadOnlyList<byte>? Data { get; set; }
 public ReadOnlyMemory<byte> Data { get; set; } = ReadOnlyMemory<byte>.Empty;
 ```
 
-✅ **DO** adhere to the [Memory<T> and Span<T> usage guidelines](https://docs.microsoft.com/en-us/dotnet/standard/memory-and-spans/memory-t-usage-guidelines).
+✅ **DO** adhere to
+the [Memory<T> and Span<T> usage guidelines](https://docs.microsoft.com/en-us/dotnet/standard/memory-and-spans/memory-t-usage-guidelines).
 This document contains information on ownership, lifetime management, consumption, and member design. They are
 copied here, and augmented with additional findings, for easy reference:
 
@@ -191,7 +194,7 @@ There are three main ways an object can be constructed with input data:
 
 1. Calling a constructor with arguments:
 
-    `var obj = new Foo(param1, param2, param3);`
+   `var obj = new Foo(param1, param2, param3);`
 
 2. Calling a parameter-less default constructor followed by setting properties:
 
@@ -205,7 +208,7 @@ There are three main ways an object can be constructed with input data:
 3. Using object-initialization syntax. This leverages settable properties, but constructs the object in a
    thread-safe manner:
 
-    `var obj = new Foo { Param1 = param1, Param2 = param2, Param3 = param3 };`
+   `var obj = new Foo { Param1 = param1, Param2 = param2, Param3 = param3 };`
 
 There is, of course, a fourth style of construction which is a combination of the above, but for the purposes
 of this section we can set that aside.

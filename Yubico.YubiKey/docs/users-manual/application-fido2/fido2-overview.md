@@ -70,9 +70,9 @@ other.
 - FIDO: Fast IDentiy Online, the standards body that developed U2F and FIDO2
 - CTAP: Client To Authenticator Protocol
 - U2F: Universal Second Factor, the first generation of the standard
-  - Includes CTAP, later called CTAP1
-  - Includes Relying Party to Client communication
+    - Includes CTAP, later called CTAP1
+    - Includes Relying Party to Client communication
 - FIDO2: The second generation of the standard
-  - Developed as a partnership between the FIDO Alliance and W3C
-  - Relying Party to Client communication defined in WebAuthn
-  - Includes CTAP2, defined in FIDO2 and W3C documents
+    - Developed as a partnership between the FIDO Alliance and W3C
+    - Relying Party to Client communication defined in WebAuthn
+    - Includes CTAP2, defined in FIDO2 and W3C documents

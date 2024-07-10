@@ -40,9 +40,9 @@ handle length is one byte.
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-*encoded response* | 90 | 00
+|        Data        | SW1 | SW2 |
+|:------------------:|:---:|:---:|
+| *encoded response* | 90  | 00  |
 
 where the encoded response is
 
@@ -55,24 +55,24 @@ user presence || counter || signature
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 69 | 85
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 69  | 85  |
 
 #### Response APDU for invalid key handle
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 6A | 80
+|   Data    | SW1 | SW2 |
+|:---------:|:---:|:---:|
+| (no data) | 6A  | 80  |
 
 #### Response APDU for incorrect data length.
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 67 | 00
+|   Data    | SW1 | SW2 | 
+|:---------:|:---:|:---:|
+| (no data) | 67  | 00  |

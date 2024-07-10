@@ -51,15 +51,15 @@ it is little endian
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 90 | 00
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 90  | 00  
 
 #### Response APDU when sent to YubiKeys version 5 and later
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 69 | 00
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 69  | 00  

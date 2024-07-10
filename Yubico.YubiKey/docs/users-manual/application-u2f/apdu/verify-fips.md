@@ -12,7 +12,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 ## Verify FIPS mode
 
 ### Inner command APDU info
@@ -28,24 +27,24 @@ CLA | INS | P1 | P2 | Lc | Data | Le
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 90 | 00
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 90  | 00  
 
 #### Response APDU for not FIPS mode (false)
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 6A | 81
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 6A  | 81  
 
 #### Response APDU for a device that cannot be set to FIPS mode
 
 Total Length: 2\
 Data Length: 0
 
-Data | SW1 | SW2
-:---: | :---: | :---:
-(no data) | 6D | 00
+   Data    | SW1 | SW2 
+:---------:|:---:|:---:
+ (no data) | 6D  | 00  

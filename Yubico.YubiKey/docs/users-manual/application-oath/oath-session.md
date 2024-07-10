@@ -18,7 +18,9 @@ limitations under the License. -->
 
 # OATH session APIs
 
-The high level OATH session APIs provide a simpler way to work with the OATH application on the YubiKey. The OATH session API is a layer built on the lower level command API. Session APIs will help perform OATH scenarios in a shorter amount of development time and without getting involved with each command's details.
+The high level OATH session APIs provide a simpler way to work with the OATH application on the YubiKey. The OATH
+session API is a layer built on the lower level command API. Session APIs will help perform OATH scenarios in a shorter
+amount of development time and without getting involved with each command's details.
 
 ## General Definitions
 
@@ -37,7 +39,8 @@ var yubiKeyToUse = YubiKeyDevice.FindAll().First();
 
 ### Credential
 
-The `Credential` class represents a single OATH credential. The credential can be a TOTP (Time-based One-time Password) or a HOTP (HMAC-based One-time Password). 
+The `Credential` class represents a single OATH credential. The credential can be a TOTP (Time-based One-time Password)
+or a HOTP (HMAC-based One-time Password).
 
 ```csharp
 var credentialTotp = new Credential 
@@ -67,7 +70,9 @@ var credentialHotp = new Credential
 
 ### Code
 
-The `Code` class represents the credential’s OTP code generated on the YubiKey. The YubiKey supports Open Authentication (OATH) standards for generating one-time password (OTP) codes. The YubiKey-generated passcode can be used as one of the authentication options in two-factor or multi-factor authentication. 
+The `Code` class represents the credential’s OTP code generated on the YubiKey. The YubiKey supports Open
+Authentication (OATH) standards for generating one-time password (OTP) codes. The YubiKey-generated passcode can be used
+as one of the authentication options in two-factor or multi-factor authentication.
 
 ```csharp
 var credentialTotp = new Credential 
@@ -92,26 +97,34 @@ Read more about [credentials](./oath-credentials.md).
 
 ## OathSession
 
-The `OathSession` class contains methods to perform high-level operations and scenarios. 
+The `OathSession` class contains methods to perform high-level operations and scenarios.
 
-Once you have chosen the YubiKey, you have an object: an instance of the IYubiKeyDevice interface representing the actual hardware. 
+Once you have chosen the YubiKey, you have an object: an instance of the IYubiKeyDevice interface representing the
+actual hardware.
 
-To perform OATH operations, create an instance of an OathSession class and pass the YubiKey object. This will connect to the OATH application on the chosen YubiKey: 
+To perform OATH operations, create an instance of an OathSession class and pass the YubiKey object. This will connect to
+the OATH application on the chosen YubiKey:
 
 ```csharp
 var oathSession = new OathSession(yubiKeyToUse);
 ```
 
-This class implements [IDisposable](https://docs.microsoft.com/en-us/dotnet/api/system.idisposable) so that we can close out a session. If the OATH application on the chosen YubiKey is protected with a password, the user will need to verify the password first to unlock the application in order to perform any OATH operations except resetting the application.
+This class implements [IDisposable](https://docs.microsoft.com/en-us/dotnet/api/system.idisposable) so that we can close
+out a session. If the OATH application on the chosen YubiKey is protected with a password, the user will need to verify
+the password first to unlock the application in order to perform any OATH operations except resetting the application.
 
-Each method except ResetApplication() will call the KeyCollector delegate to manage authentication if the ResponseStatus returns AuthenticationRequired. So, the delegate will be called every time when a password is needed in order to unlock the OATH application.
+Each method except ResetApplication() will call the KeyCollector delegate to manage authentication if the ResponseStatus
+returns AuthenticationRequired. So, the delegate will be called every time when a password is needed in order to unlock
+the OATH application.
 
 ## KeyCollector delegate
 
 This delegate will be called every time when a password is needed in order to unlock the OATH application.
 
-The delegate provided will read the KeyEntryData which contains the information needed to determine what to collect and methods to submit what was collected. The delegate will return true for success or false for "cancel." A cancel will usually happen when the user has clicked a "Cancel" button.
-        
+The delegate provided will read the KeyEntryData which contains the information needed to determine what to collect and
+methods to submit what was collected. The delegate will return true for success or false for "cancel." A cancel will
+usually happen when the user has clicked a "Cancel" button.
+
 The SDK will call the KeyCollector with a Request of Release when the process completes.
 
 ## Methods
@@ -129,15 +142,19 @@ List<Credential> filteredCredentials = oathSession.GetCredentials().Where(creden
 
 ### Get OTPs
 
-The CalculateAllCredentials() method calculates OTP (one-time passwords) values for all configured credentials on the YubiKey except HOTP credentials and TOTP credentials requiring touch.
+The CalculateAllCredentials() method calculates OTP (one-time passwords) values for all configured credentials on the
+YubiKey except HOTP credentials and TOTP credentials requiring touch.
 
-The OTPs need to be calculated because the YubiKey doesn't have an internal clock. The system time is used and passed to the YubiKey.
+The OTPs need to be calculated because the YubiKey doesn't have an internal clock. The system time is used and passed to
+the YubiKey.
 
 ```csharp
 IDictionary<Credential, Code> credentialCodes = oathSession.CalculateAllCredentials(); 
 ```
 
-Also, there is the CalculateCredential() method which gets a single OTP value for a specific credential on the YubiKey. This can be used for HOTP credentials and when the RequireTouch property is set for a credential, so you just need to request to recalculate one credential.
+Also, there is the CalculateCredential() method which gets a single OTP value for a specific credential on the YubiKey.
+This can be used for HOTP credentials and when the RequireTouch property is set for a credential, so you just need to
+request to recalculate one credential.
 
 ```csharp
 var credentialTotp = new Credential 
@@ -165,11 +182,21 @@ Code otpCode = oathSession.CalculateCredential(
 
 The AddCredential() method adds a new credential or overwrites the existing one on the YubiKey.
 
-The existing credential will be overwritten if the same Issuer and Account Name is used when adding a new credential. It applies to TOTP with a default period (30sec) and HOTP credentials. For example, suppose you have a HOTP credential stored on the YubiKey, and you try to add a TOTP credential with a default period and the same Issuer and Account name. In that case, the credential will be overwritten. The behavior would also be the same if the TOTP credential was added first, and the HOTP credential was second. However, this won't apply to TOTP credentials with non-default periods 15sec or 60sec; they will be added separately.
+The existing credential will be overwritten if the same Issuer and Account Name is used when adding a new credential. It
+applies to TOTP with a default period (30sec) and HOTP credentials. For example, suppose you have a HOTP credential
+stored on the YubiKey, and you try to add a TOTP credential with a default period and the same Issuer and Account name.
+In that case, the credential will be overwritten. The behavior would also be the same if the TOTP credential was added
+first, and the HOTP credential was second. However, this won't apply to TOTP credentials with non-default periods 15sec
+or 60sec; they will be added separately.
 
-A YubiKey is an embedded device, and storage is a scarce resource. Due to this constraint, the maximum number of credentials that can be added to a YubiKey is 32. Also, the same reason applies to the 64 character restriction for the credential's name (issuer + account name).
+A YubiKey is an embedded device, and storage is a scarce resource. Due to this constraint, the maximum number of
+credentials that can be added to a YubiKey is 32. Also, the same reason applies to the 64 character restriction for the
+credential's name (issuer + account name).
 
-Note that credentials on the YubiKeys with a firmware version 5.3.0 or older cannot be renamed once they have been added; they can only be viewed or deleted. If you want to change anything about the credential, including the name of the credential, you must delete the existing credential, and create a new credential with the settings and the name that you want. 
+Note that credentials on the YubiKeys with a firmware version 5.3.0 or older cannot be renamed once they have been
+added; they can only be viewed or deleted. If you want to change anything about the credential, including the name of
+the credential, you must delete the existing credential, and create a new credential with the settings and the name that
+you want.
 
 ```csharp
 var credentialTotp = new Credential 
@@ -280,13 +307,16 @@ oathSession.ResetApplication();
 
 The SetPassword() method sets or changes the password for the OATH application.
 
-Suppose the password was previously configured on the YubiKey. In that case, this method will prompt for the current password to verify, as well as a new password to change to using the KeyCollector callback.
+Suppose the password was previously configured on the YubiKey. In that case, this method will prompt for the current
+password to verify, as well as a new password to change to using the KeyCollector callback.
 
 If a password is not configured, this method will collect only a new password to set.
-        
-The password can be any string of bytes. However, most applications will choose to encode a user supplied string using UTF-8. 
 
-The password is passed through 1,000 rounds of PBKDF2 with a salt value supplied by the YubiKey, ensuring an extra level of security against brute force attacks.
+The password can be any string of bytes. However, most applications will choose to encode a user supplied string using
+UTF-8.
+
+The password is passed through 1,000 rounds of PBKDF2 with a salt value supplied by the YubiKey, ensuring an extra level
+of security against brute force attacks.
 
 ```csharp
 oathSession.SetPassword();
@@ -294,7 +324,10 @@ oathSession.SetPassword();
 
 ## Verify password
 
-The VerifyPassword() method attempts to proactively verify the current password. Note that the the SDK will automatically call the KeyCollector delegate when the password is required. Sometimes an application may want to choose when the password is gathered. This may help with implementing a specific user experience that may otherwise be impossible if you relied on the default KeyCollector behavior.
+The VerifyPassword() method attempts to proactively verify the current password. Note that the the SDK will
+automatically call the KeyCollector delegate when the password is required. Sometimes an application may want to choose
+when the password is gathered. This may help with implementing a specific user experience that may otherwise be
+impossible if you relied on the default KeyCollector behavior.
 
 The method performs mutual authentication with the YubiKey using the password collected by the key collector.
 
@@ -304,7 +337,8 @@ oathSession.VerifyPassword();
 
 ## Unset password
 
-The UnsetPassword() method attempts to remove the current password. This method prompts for the current password to verify first and then removes the authentication.
+The UnsetPassword() method attempts to remove the current password. This method prompts for the current password to
+verify first and then removes the authentication.
 
 ```csharp
 oathSession.UnsetPassword();

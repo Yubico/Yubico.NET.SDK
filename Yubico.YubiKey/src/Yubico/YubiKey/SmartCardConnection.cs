@@ -20,21 +20,20 @@ using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.InterIndustry.Commands;
+using Yubico.YubiKey.Oath.Commands;
 using Yubico.YubiKey.Pipelines;
 
 namespace Yubico.YubiKey
 {
     internal class SmartCardConnection : IYubiKeyConnection
     {
+        private readonly byte[]? _applicationId;
         private readonly Logger _log = Log.GetLogger();
+        private readonly ISmartCardConnection _smartCardConnection;
 
         private readonly YubiKeyApplication _yubiKeyApplication;
-        private readonly byte[]? _applicationId;
-        private readonly ISmartCardConnection _smartCardConnection;
         private IApduTransform _apduPipeline;
         private bool _disposedValue;
-
-        public ISelectApplicationData? SelectApplicationData { get; set; }
 
         protected SmartCardConnection(
             ISmartCardDevice smartCardDevice,
@@ -88,6 +87,39 @@ namespace Yubico.YubiKey
             SelectApplication();
         }
 
+        private bool IsOath =>
+            _yubiKeyApplication == YubiKeyApplication.Oath
+            || _applicationId != null && _applicationId.SequenceEqual(
+                YubiKeyApplication.Oath.GetIso7816ApplicationId());
+
+        public ISelectApplicationData? SelectApplicationData { get; set; }
+
+        public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
+            where TResponse : IYubiKeyResponse
+        {
+            using (IDisposable _ = _smartCardConnection.BeginTransaction(out bool cardWasReset))
+            {
+                if (cardWasReset)
+                {
+                    SelectApplication();
+                }
+
+                ResponseApdu responseApdu = _apduPipeline.Invoke(
+                    yubiKeyCommand.CreateCommandApdu(),
+                    yubiKeyCommand.GetType(),
+                    typeof(TResponse));
+
+                return yubiKeyCommand.CreateResponseForApdu(responseApdu);
+            }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
+
         // Allow subclasses to build a different pipeline, which means they need
         // to get the current one.
         protected IApduTransform GetPipeline() => _apduPipeline;
@@ -101,11 +133,6 @@ namespace Yubico.YubiKey
             SelectApplication();
         }
 
-        private bool IsOath =>
-            _yubiKeyApplication == YubiKeyApplication.Oath
-            || _applicationId != null && _applicationId.SequenceEqual(
-                YubiKeyApplicationExtensions.GetIso7816ApplicationId(YubiKeyApplication.Oath));
-
         private IApduTransform AddResponseChainingTransform(IApduTransform pipeline) =>
             IsOath
                 ? new OathResponseChainingTransform(pipeline)
@@ -116,7 +143,7 @@ namespace Yubico.YubiKey
             IYubiKeyCommand<ISelectApplicationResponse<ISelectApplicationData>> selectApplicationCommand =
                 _yubiKeyApplication switch
                 {
-                    YubiKeyApplication.Oath => new Oath.Commands.SelectOathCommand(),
+                    YubiKeyApplication.Oath => new SelectOathCommand(),
                     YubiKeyApplication.Unknown => new SelectApplicationCommand(_applicationId!),
                     _ => new SelectApplicationCommand(_yubiKeyApplication)
                 };
@@ -145,25 +172,6 @@ namespace Yubico.YubiKey
             SelectApplicationData = response.GetData();
         }
 
-        public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
-            where TResponse : IYubiKeyResponse
-        {
-            using (IDisposable _ = _smartCardConnection.BeginTransaction(out bool cardWasReset))
-            {
-                if (cardWasReset)
-                {
-                    SelectApplication();
-                }
-
-                ResponseApdu responseApdu = _apduPipeline.Invoke(
-                    yubiKeyCommand.CreateCommandApdu(),
-                    yubiKeyCommand.GetType(),
-                    typeof(TResponse));
-
-                return yubiKeyCommand.CreateResponseForApdu(responseApdu);
-            }
-        }
-
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)
@@ -176,13 +184,6 @@ namespace Yubico.YubiKey
 
                 _disposedValue = true;
             }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

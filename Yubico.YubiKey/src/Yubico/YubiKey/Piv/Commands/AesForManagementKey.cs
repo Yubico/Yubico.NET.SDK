@@ -20,16 +20,16 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// Perform AES operations.
-    /// &gt; [!WARNING]
-    /// &gt; This is not a general purpose class and is specifically tailored for
-    /// &gt; PIV management key operations. Do not use this class anywhere else.
+    ///     Perform AES operations.
+    ///     &gt; [!WARNING]
+    ///     &gt; This is not a general purpose class and is specifically tailored for
+    ///     &gt; PIV management key operations. Do not use this class anywhere else.
     /// </summary>
     /// <remarks>
-    /// The reason this class exists is because we need a special Triple-DES for
-    /// the PIV management key. Rather than using if clauses everywhere, we have
-    /// an interface to define the symmetric algorithm and implement one for 3DES
-    /// and another for AES.
+    ///     The reason this class exists is because we need a special Triple-DES for
+    ///     the PIV management key. Rather than using if clauses everywhere, we have
+    ///     an interface to define the symmetric algorithm and implement one for 3DES
+    ///     and another for AES.
     /// </remarks>
     [Obsolete("This should only be used for PIV management key operations and nowhere else.")]
     internal sealed class AesForManagementKey : ISymmetricForManagementKey
@@ -39,31 +39,25 @@ namespace Yubico.YubiKey.Piv.Commands
         private readonly ICryptoTransform _cryptoTransform;
         private bool _disposed;
 
-        /// <inheritdoc/>
-        public bool IsEncrypting { get; }
-
-        /// <inheritdoc/>
-        public int BlockSize { get; }
-
         /// <summary>
-        /// Create a new instance of <c>AesForManagementKey</c> using the given
-        /// management key. Make sure the key is the same length as
-        /// <c>expectedKeyLength</c>.
+        ///     Create a new instance of <c>AesForManagementKey</c> using the given
+        ///     management key. Make sure the key is the same length as
+        ///     <c>expectedKeyLength</c>.
         /// </summary>
         /// <param name="managementKey">
-        /// The bytes of the management key. This key must be
-        /// <c>expectedKeyLength</c> bytes long.
+        ///     The bytes of the management key. This key must be
+        ///     <c>expectedKeyLength</c> bytes long.
         /// </param>
         /// <param name="expectedKeyLength">
-        /// How long the key should be, in bytes.
+        ///     How long the key should be, in bytes.
         /// </param>
         /// <param name="isEncrypting">
-        /// Indicates whether the object should be built to encrypt (if it is
-        /// <c>true</c>), or to decrypt (if it is <c>false</c>).
+        ///     Indicates whether the object should be built to encrypt (if it is
+        ///     <c>true</c>), or to decrypt (if it is <c>false</c>).
         /// </param>
         /// <exception cref="ArgumentException">
-        /// The <c>managementKey</c> argument is not <c>expectedKeyLength</c>
-        /// bytes long.
+        ///     The <c>managementKey</c> argument is not <c>expectedKeyLength</c>
+        ///     bytes long.
         /// </exception>
         public AesForManagementKey(ReadOnlySpan<byte> managementKey, int expectedKeyLength, bool isEncrypting)
         {
@@ -102,7 +96,13 @@ namespace Yubico.YubiKey.Piv.Commands
             }
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
+        public bool IsEncrypting { get; }
+
+        /// <inheritdoc />
+        public int BlockSize { get; }
+
+        /// <inheritdoc />
         public int TransformBlock(
             byte[] inputBuffer,
             int inputOffset,
@@ -145,8 +145,8 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        /// When the object goes out of scope, this method is called. It will
-        /// dispose local objects.
+        ///     When the object goes out of scope, this method is called. It will
+        ///     dispose local objects.
         /// </summary>
 
         // Note that .NET recommends a Dispose method call Dispose(true) and

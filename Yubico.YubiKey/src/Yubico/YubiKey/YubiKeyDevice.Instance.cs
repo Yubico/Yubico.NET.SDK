@@ -21,6 +21,7 @@ using Yubico.Core.Devices.Hid;
 using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.DeviceExtensions;
+using Yubico.YubiKey.Otp.Commands;
 using Yubico.YubiKey.Scp03;
 using MgmtCmd = Yubico.YubiKey.Management.Commands;
 
@@ -28,122 +29,20 @@ namespace Yubico.YubiKey
 {
     public partial class YubiKeyDevice : IYubiKeyDevice
     {
-        #region IYubiKeyDeviceInfo
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities AvailableUsbCapabilities => _yubiKeyInfo.AvailableUsbCapabilities;
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities EnabledUsbCapabilities => _yubiKeyInfo.EnabledUsbCapabilities;
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities AvailableNfcCapabilities => _yubiKeyInfo.AvailableNfcCapabilities;
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities EnabledNfcCapabilities => _yubiKeyInfo.EnabledNfcCapabilities;
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities FipsApproved => _yubiKeyInfo.FipsApproved;
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities FipsCapable => _yubiKeyInfo.FipsCapable;
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities ResetBlocked => _yubiKeyInfo.ResetBlocked;
-
-        /// <inheritdoc />
-        public bool IsNfcRestricted => _yubiKeyInfo.IsNfcRestricted;
-
-        /// <inheritdoc />
-        public string? PartNumber => _yubiKeyInfo.PartNumber;
-
-        /// <inheritdoc />
-        public bool IsPinComplexityEnabled => _yubiKeyInfo.IsPinComplexityEnabled;
-
-        /// <inheritdoc />
-        public int? SerialNumber => _yubiKeyInfo.SerialNumber;
-
-        /// <inheritdoc />
-        public bool IsFipsSeries => _yubiKeyInfo.IsFipsSeries;
-
-        /// <inheritdoc />
-        public bool IsSkySeries => _yubiKeyInfo.IsSkySeries;
-
-        /// <inheritdoc />
-        public FormFactor FormFactor => _yubiKeyInfo.FormFactor;
-
-        /// <inheritdoc />
-        public FirmwareVersion FirmwareVersion => _yubiKeyInfo.FirmwareVersion;
-
-        /// <inheritdoc />
-        public TemplateStorageVersion? TemplateStorageVersion => _yubiKeyInfo.TemplateStorageVersion;
-
-        /// <inheritdoc />
-        public ImageProcessorVersion? ImageProcessorVersion => _yubiKeyInfo.ImageProcessorVersion;
-
-        /// <inheritdoc />
-        public int AutoEjectTimeout => _yubiKeyInfo.AutoEjectTimeout;
-
-        /// <inheritdoc />
-        public byte ChallengeResponseTimeout => _yubiKeyInfo.ChallengeResponseTimeout;
-
-        /// <inheritdoc />
-        public DeviceFlags DeviceFlags => _yubiKeyInfo.DeviceFlags;
-
-        /// <inheritdoc />
-        public bool ConfigurationLocked => _yubiKeyInfo.ConfigurationLocked;
-
-        #endregion
-
         private const int _lockCodeLength = MgmtCmd.SetDeviceInfoBaseCommand.LockCodeLength;
 
         private static readonly ReadOnlyMemory<byte> _lockCodeAllZeros = new byte[_lockCodeLength];
 
-        internal bool HasSmartCard => !(_smartCardDevice is null);
-        internal bool HasHidFido => !(_hidFidoDevice is null);
-        internal bool HasHidKeyboard => !(_hidKeyboardDevice is null);
-        internal bool IsNfcDevice { get; private set; }
-
-        private ISmartCardDevice? _smartCardDevice;
+        private readonly Logger _log = Log.GetLogger();
         private IHidDevice? _hidFidoDevice;
         private IHidDevice? _hidKeyboardDevice;
-        private IYubiKeyDeviceInfo _yubiKeyInfo;
         private Transport _lastActiveTransport;
 
-        private readonly Logger _log = Log.GetLogger();
-
-        internal ISmartCardDevice GetSmartCardDevice() => _smartCardDevice!;
-
-        /// <inheritdoc />
-        public Transport AvailableTransports
-        {
-            get
-            {
-                Transport transports = Transport.None;
-
-                if (HasHidKeyboard)
-                {
-                    transports |= Transport.HidKeyboard;
-                }
-
-                if (HasHidFido)
-                {
-                    transports |= Transport.HidFido;
-                }
-
-                if (HasSmartCard)
-                {
-                    transports |= IsNfcDevice
-                        ? Transport.NfcSmartCard
-                        : Transport.UsbSmartCard;
-                }
-
-                return transports;
-            }
-        }
+        private ISmartCardDevice? _smartCardDevice;
+        private IYubiKeyDeviceInfo _yubiKeyInfo;
 
         /// <summary>
-        /// Constructs a <see cref="YubiKeyDevice"/> instance.
+        ///     Constructs a <see cref="YubiKeyDevice" /> instance.
         /// </summary>
         /// <param name="device">A valid device; either a smart card, keyboard, or FIDO device.</param>
         /// <param name="info">The YubiKey device information that describes the device.</param>
@@ -173,12 +72,12 @@ namespace Yubico.YubiKey
         }
 
         /// <summary>
-        /// Construct a <see cref="YubiKeyDevice"/> instance.
+        ///     Construct a <see cref="YubiKeyDevice" /> instance.
         /// </summary>
-        /// <param name="smartCardDevice"><see cref="ISmartCardDevice"/> for the YubiKey.</param>
-        /// <param name="hidKeyboardDevice"><see cref="IHidDevice"/> for normal HID interaction with the YubiKey.</param>
-        /// <param name="hidFidoDevice"><see cref="IHidDevice"/> for FIDO interaction with the YubiKey.</param>
-        /// <param name="yubiKeyDeviceInfo"><see cref="IYubiKeyDeviceInfo"/> with remaining properties of the YubiKey.</param>
+        /// <param name="smartCardDevice"><see cref="ISmartCardDevice" /> for the YubiKey.</param>
+        /// <param name="hidKeyboardDevice"><see cref="IHidDevice" /> for normal HID interaction with the YubiKey.</param>
+        /// <param name="hidFidoDevice"><see cref="IHidDevice" /> for FIDO interaction with the YubiKey.</param>
+        /// <param name="yubiKeyDeviceInfo"><see cref="IYubiKeyDeviceInfo" /> with remaining properties of the YubiKey.</param>
         public YubiKeyDevice(
             ISmartCardDevice? smartCardDevice,
             IHidDevice? hidKeyboardDevice,
@@ -193,87 +92,40 @@ namespace Yubico.YubiKey
             _lastActiveTransport = GetTransportIfOnlyDevice(); // Must be after setting the three device fields.
         }
 
-        /// <summary>
-        /// Updates current <see cref="YubiKeyDevice" /> with a newly found device.
-        /// </summary>
-        /// <param name="device">
-        /// A new operating system device that is known to belong to this YubiKey.
-        /// </param>
-        /// <exception cref="ArgumentException">
-        /// The device does not have the same ParentDeviceId, or
-        /// The device is not of a recognizable type.
-        /// </exception>
-        public void Merge(IDevice device)
+        internal bool HasSmartCard => !(_smartCardDevice is null);
+        internal bool HasHidFido => !(_hidFidoDevice is null);
+        internal bool HasHidKeyboard => !(_hidKeyboardDevice is null);
+        internal bool IsNfcDevice { get; private set; }
+
+        /// <inheritdoc />
+        public Transport AvailableTransports
         {
-            if (!((IYubiKeyDevice)this).HasSameParentDevice(device))
+            get
             {
-                throw new ArgumentException(ExceptionMessages.CannotMergeDifferentParents);
+                Transport transports = Transport.None;
+
+                if (HasHidKeyboard)
+                {
+                    transports |= Transport.HidKeyboard;
+                }
+
+                if (HasHidFido)
+                {
+                    transports |= Transport.HidFido;
+                }
+
+                if (HasSmartCard)
+                {
+                    transports |= IsNfcDevice
+                        ? Transport.NfcSmartCard
+                        : Transport.UsbSmartCard;
+                }
+
+                return transports;
             }
-
-            MergeDevice(device);
-        }
-
-        /// <summary>
-        /// Updates current <see cref="YubiKeyDevice"/> with new info from SmartCard device or HID device.
-        /// </summary>
-        /// <param name="device"></param>
-        /// <param name="info"></param>
-        public void Merge(IDevice device, IYubiKeyDeviceInfo info)
-        {
-            // First merge the devices
-            MergeDevice(device);
-
-            // Then merge the YubiKey device information / metadata
-            if (_yubiKeyInfo is YubiKeyDeviceInfo first && info is YubiKeyDeviceInfo second)
-            {
-                _yubiKeyInfo = first.Merge(second);
-            }
-            else
-            {
-                _yubiKeyInfo = info;
-            }
-        }
-
-        private void MergeDevice(IDevice device)
-        {
-            switch (device)
-            {
-                case ISmartCardDevice scardDevice:
-                    _smartCardDevice = scardDevice;
-                    IsNfcDevice = scardDevice.IsNfcTransport();
-                    break;
-                case IHidDevice hidDevice when hidDevice.IsKeyboard():
-                    _hidKeyboardDevice = hidDevice;
-                    break;
-                case IHidDevice hidDevice when hidDevice.IsFido():
-                    _hidFidoDevice = hidDevice;
-                    break;
-                default:
-                    throw new ArgumentException(ExceptionMessages.DeviceTypeNotRecognized, nameof(device));
-            }
-
-            _lastActiveTransport = GetTransportIfOnlyDevice();
         }
 
         bool IYubiKeyDevice.HasSameParentDevice(IDevice device) => HasSameParentDevice(device);
-
-        protected internal bool HasSameParentDevice(IDevice device)
-        {
-            if (device is null)
-            {
-                throw new ArgumentNullException(nameof(device));
-            }
-
-            // Never match on a missing parent ID
-            if (device.ParentDeviceId is null)
-            {
-                return false;
-            }
-
-            return _smartCardDevice?.ParentDeviceId == device.ParentDeviceId
-                || _hidFidoDevice?.ParentDeviceId == device.ParentDeviceId
-                || _hidKeyboardDevice?.ParentDeviceId == device.ParentDeviceId;
-        }
 
         /// <inheritdoc />
         public IYubiKeyConnection Connect(YubiKeyApplication yubikeyApplication)
@@ -336,6 +188,423 @@ namespace Yubico.YubiKey
             StaticKeys scp03Keys,
             [MaybeNullWhen(returnValue: false)] out IScp03YubiKeyConnection connection) =>
             TryConnectScp03(application: null, applicationId, scp03Keys, throwOnFail: false, out connection);
+
+        /// <inheritdoc />
+        public void SetEnabledNfcCapabilities(YubiKeyCapabilities yubiKeyCapabilities)
+        {
+            var command = new MgmtCmd.SetDeviceInfoCommand
+            {
+                EnabledNfcCapabilities = yubiKeyCapabilities,
+                ResetAfterConfig = true
+            };
+
+            IYubiKeyResponse response = SendConfiguration(command);
+
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+        }
+
+        /// <inheritdoc />
+        public void SetEnabledUsbCapabilities(YubiKeyCapabilities yubiKeyCapabilities)
+        {
+            if ((AvailableUsbCapabilities & yubiKeyCapabilities) == YubiKeyCapabilities.None)
+            {
+                throw new InvalidOperationException(ExceptionMessages.MustEnableOneAvailableUsbCapability);
+            }
+
+            var command = new MgmtCmd.SetDeviceInfoCommand
+            {
+                EnabledUsbCapabilities = yubiKeyCapabilities,
+                ResetAfterConfig = true
+            };
+
+            IYubiKeyResponse response = SendConfiguration(command);
+
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+        }
+
+        /// <inheritdoc />
+        public void SetChallengeResponseTimeout(int seconds)
+        {
+            if (seconds < 0 || seconds > byte.MaxValue)
+            {
+                throw new ArgumentOutOfRangeException(nameof(seconds));
+            }
+
+            var command = new MgmtCmd.SetDeviceInfoCommand
+            {
+                ChallengeResponseTimeout = (byte)seconds
+            };
+
+            IYubiKeyResponse response = SendConfiguration(command);
+
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+        }
+
+        /// <inheritdoc />
+        public void SetAutoEjectTimeout(int seconds)
+        {
+            if (seconds < ushort.MinValue || seconds > ushort.MaxValue)
+            {
+                throw new ArgumentOutOfRangeException(nameof(seconds));
+            }
+
+            var command = new MgmtCmd.SetDeviceInfoCommand
+            {
+                AutoEjectTimeout = seconds
+            };
+
+            IYubiKeyResponse response = SendConfiguration(command);
+
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+        }
+
+        /// <inheritdoc />
+        public void SetIsNfcRestricted(bool enabled)
+        {
+            this.ThrowOnMissingFeature(YubiKeyFeature.ManagementNfcRestricted);
+
+            var command = new MgmtCmd.SetDeviceInfoCommand
+            {
+                RestrictNfc = enabled
+            };
+
+            IYubiKeyResponse response = SendConfiguration(command);
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+        }
+
+        /// <inheritdoc />
+        public void SetDeviceFlags(DeviceFlags deviceFlags)
+        {
+            var command = new MgmtCmd.SetDeviceInfoCommand
+            {
+                DeviceFlags = deviceFlags
+            };
+
+            IYubiKeyResponse response = SendConfiguration(command);
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+        }
+
+        /// <inheritdoc />
+        public void LockConfiguration(ReadOnlySpan<byte> lockCode)
+        {
+            if (lockCode.Length != _lockCodeLength)
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.LockCodeWrongLength,
+                        _lockCodeLength,
+                        lockCode.Length),
+                    nameof(lockCode));
+            }
+
+            if (lockCode.SequenceEqual(_lockCodeAllZeros.Span))
+            {
+                throw new ArgumentException(
+                    ExceptionMessages.LockCodeAllZeroNotAllowed,
+                    nameof(lockCode));
+            }
+
+            var command = new MgmtCmd.SetDeviceInfoCommand();
+            command.SetLockCode(lockCode);
+
+            IYubiKeyResponse response = SendConfiguration(command);
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+        }
+
+        /// <inheritdoc />
+        public void UnlockConfiguration(ReadOnlySpan<byte> lockCode)
+        {
+            if (lockCode.Length != _lockCodeLength)
+            {
+                throw new ArgumentException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.LockCodeWrongLength,
+                        _lockCodeLength,
+                        lockCode.Length),
+                    nameof(lockCode));
+            }
+
+            var command = new MgmtCmd.SetDeviceInfoCommand();
+            command.ApplyLockCode(lockCode);
+            command.SetLockCode(_lockCodeAllZeros.Span);
+
+            IYubiKeyResponse response = SendConfiguration(command);
+
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+        }
+
+        /// <inheritdoc />
+        public void SetLegacyDeviceConfiguration(
+            YubiKeyCapabilities yubiKeyInterfaces,
+            byte challengeResponseTimeout,
+            bool touchEjectEnabled,
+            int autoEjectTimeout)
+        {
+            #region argument checks
+
+            // Keep only flags related to interfaces. This makes the operation easier for users
+            // who may be doing bitwise operations on [Available/Enabled]UsbCapabilities.
+            yubiKeyInterfaces &=
+                YubiKeyCapabilities.Ccid
+                | YubiKeyCapabilities.FidoU2f
+                | YubiKeyCapabilities.Otp;
+
+            // Check if at least one interface is enabled.
+            if (yubiKeyInterfaces == YubiKeyCapabilities.None
+                || AvailableUsbCapabilities != YubiKeyCapabilities.None
+                && (AvailableUsbCapabilities & yubiKeyInterfaces) == YubiKeyCapabilities.None)
+            {
+                throw new InvalidOperationException(ExceptionMessages.MustEnableOneAvailableUsbInterface);
+            }
+
+            if (touchEjectEnabled)
+            {
+                if (yubiKeyInterfaces != YubiKeyCapabilities.Ccid)
+                {
+                    throw new ArgumentException(
+                        ExceptionMessages.TouchEjectTimeoutRequiresCcidOnly,
+                        nameof(touchEjectEnabled));
+                }
+
+                if (autoEjectTimeout < ushort.MinValue || autoEjectTimeout > ushort.MaxValue)
+                {
+                    throw new ArgumentOutOfRangeException(nameof(autoEjectTimeout));
+                }
+            }
+            else
+            {
+                if (autoEjectTimeout != 0)
+                {
+                    throw new ArgumentException(
+                        ExceptionMessages.AutoEjectTimeoutRequiresTouchEjectEnabled,
+                        nameof(autoEjectTimeout));
+                }
+            }
+
+            #endregion
+
+            IYubiKeyResponse response;
+
+            // Newer YubiKeys should use SetDeviceInfo
+            if (FirmwareVersion.Major >= 5)
+            {
+                DeviceFlags deviceFlags =
+                    touchEjectEnabled
+                        ? DeviceFlags | DeviceFlags.TouchEject
+                        : DeviceFlags & ~DeviceFlags.TouchEject;
+
+                var setDeviceInfoCommand = new MgmtCmd.SetDeviceInfoCommand
+                {
+                    EnabledUsbCapabilities = yubiKeyInterfaces.ToDeviceInfoCapabilities(),
+                    ChallengeResponseTimeout = challengeResponseTimeout,
+                    AutoEjectTimeout = autoEjectTimeout,
+                    DeviceFlags = deviceFlags,
+                    ResetAfterConfig = true
+                };
+
+                response = SendConfiguration(setDeviceInfoCommand);
+            }
+            else
+            {
+                var setLegacyDeviceConfigCommand = new MgmtCmd.SetLegacyDeviceConfigCommand(
+                    yubiKeyInterfaces,
+                    challengeResponseTimeout,
+                    touchEjectEnabled,
+                    autoEjectTimeout);
+
+                response = SendConfiguration(setLegacyDeviceConfigCommand);
+            }
+
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+        }
+
+        /// <inheritdoc />
+        /// <exception cref="NotSupportedException">
+        ///     The YubiKey does not support this feature.
+        /// </exception>
+        /// <exception cref="ArgumentOutOfRangeException">
+        ///     The value is less than `6` or greater than `255`.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        ///     The YubiKey encountered an error and could not set the setting.
+        /// </exception>
+        public void SetTemporaryTouchThreshold(int value)
+        {
+            if (!this.HasFeature(YubiKeyFeature.TemporaryTouchThreshold))
+            {
+                throw new NotSupportedException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.NotSupportedByYubiKeyVersion));
+            }
+
+            if (value < 6 || value > 255)
+            {
+                throw new ArgumentOutOfRangeException(nameof(value));
+            }
+
+            var command = new MgmtCmd.SetDeviceInfoCommand
+            {
+                TemporaryTouchThreshold = value
+            };
+
+            IYubiKeyResponse response = SendConfiguration(command);
+            if (response.Status != ResponseStatus.Success)
+            {
+                throw new InvalidOperationException(response.StatusMessage);
+            }
+        }
+
+        /// <inheritdoc />
+        /// <exception cref="NotSupportedException">
+        ///     The YubiKey does not support this feature.
+        /// </exception>
+        /// <exception cref="InvalidOperationException">
+        ///     The YubiKey encountered an error and could not set the setting.
+        /// </exception>
+        public void DeviceReset()
+        {
+            if (!this.HasFeature(YubiKeyFeature.DeviceReset))
+            {
+                throw new NotSupportedException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.NotSupportedByYubiKeyVersion));
+            }
+
+            IYubiKeyConnection? connection = null;
+            try
+            {
+                if (TryConnect(YubiKeyApplication.Management, out connection))
+                {
+                    var command = new MgmtCmd.DeviceResetCommand();
+                    IYubiKeyResponse response = connection.SendCommand(command);
+                    if (response.Status != ResponseStatus.Success)
+                    {
+                        throw new InvalidOperationException(response.StatusMessage);
+                    }
+                }
+                else
+                {
+                    throw new NotSupportedException(ExceptionMessages.NoInterfaceAvailable);
+                }
+            }
+            finally
+            {
+                connection?.Dispose();
+            }
+        }
+
+        internal ISmartCardDevice GetSmartCardDevice() => _smartCardDevice!;
+
+        /// <summary>
+        ///     Updates current <see cref="YubiKeyDevice" /> with a newly found device.
+        /// </summary>
+        /// <param name="device">
+        ///     A new operating system device that is known to belong to this YubiKey.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        ///     The device does not have the same ParentDeviceId, or
+        ///     The device is not of a recognizable type.
+        /// </exception>
+        public void Merge(IDevice device)
+        {
+            if (!((IYubiKeyDevice)this).HasSameParentDevice(device))
+            {
+                throw new ArgumentException(ExceptionMessages.CannotMergeDifferentParents);
+            }
+
+            MergeDevice(device);
+        }
+
+        /// <summary>
+        ///     Updates current <see cref="YubiKeyDevice" /> with new info from SmartCard device or HID device.
+        /// </summary>
+        /// <param name="device"></param>
+        /// <param name="info"></param>
+        public void Merge(IDevice device, IYubiKeyDeviceInfo info)
+        {
+            // First merge the devices
+            MergeDevice(device);
+
+            // Then merge the YubiKey device information / metadata
+            if (_yubiKeyInfo is YubiKeyDeviceInfo first && info is YubiKeyDeviceInfo second)
+            {
+                _yubiKeyInfo = first.Merge(second);
+            }
+            else
+            {
+                _yubiKeyInfo = info;
+            }
+        }
+
+        private void MergeDevice(IDevice device)
+        {
+            switch (device)
+            {
+                case ISmartCardDevice scardDevice:
+                    _smartCardDevice = scardDevice;
+                    IsNfcDevice = scardDevice.IsNfcTransport();
+                    break;
+                case IHidDevice hidDevice when hidDevice.IsKeyboard():
+                    _hidKeyboardDevice = hidDevice;
+                    break;
+                case IHidDevice hidDevice when hidDevice.IsFido():
+                    _hidFidoDevice = hidDevice;
+                    break;
+                default:
+                    throw new ArgumentException(ExceptionMessages.DeviceTypeNotRecognized, nameof(device));
+            }
+
+            _lastActiveTransport = GetTransportIfOnlyDevice();
+        }
+
+        protected internal bool HasSameParentDevice(IDevice device)
+        {
+            if (device is null)
+            {
+                throw new ArgumentNullException(nameof(device));
+            }
+
+            // Never match on a missing parent ID
+            if (device.ParentDeviceId is null)
+            {
+                return false;
+            }
+
+            return _smartCardDevice?.ParentDeviceId == device.ParentDeviceId
+                || _hidFidoDevice?.ParentDeviceId == device.ParentDeviceId
+                || _hidKeyboardDevice?.ParentDeviceId == device.ParentDeviceId;
+        }
 
         // Calls the common code and throws an exception if there is a problem
         // and throwOnFail is true.
@@ -461,341 +730,6 @@ namespace Yubico.YubiKey
             return null;
         }
 
-        /// <inheritdoc/>
-        public void SetEnabledNfcCapabilities(YubiKeyCapabilities yubiKeyCapabilities)
-        {
-            var command = new MgmtCmd.SetDeviceInfoCommand
-            {
-                EnabledNfcCapabilities = yubiKeyCapabilities,
-                ResetAfterConfig = true
-            };
-
-            IYubiKeyResponse response = SendConfiguration(command);
-
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-        }
-
-        /// <inheritdoc/>
-        public void SetEnabledUsbCapabilities(YubiKeyCapabilities yubiKeyCapabilities)
-        {
-            if ((AvailableUsbCapabilities & yubiKeyCapabilities) == YubiKeyCapabilities.None)
-            {
-                throw new InvalidOperationException(ExceptionMessages.MustEnableOneAvailableUsbCapability);
-            }
-
-            var command = new MgmtCmd.SetDeviceInfoCommand
-            {
-                EnabledUsbCapabilities = yubiKeyCapabilities,
-                ResetAfterConfig = true
-            };
-
-            IYubiKeyResponse response = SendConfiguration(command);
-
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-        }
-
-        /// <inheritdoc/>
-        public void SetChallengeResponseTimeout(int seconds)
-        {
-            if (seconds < 0 || seconds > byte.MaxValue)
-            {
-                throw new ArgumentOutOfRangeException(nameof(seconds));
-            }
-
-            var command = new MgmtCmd.SetDeviceInfoCommand
-            {
-                ChallengeResponseTimeout = (byte)seconds
-            };
-
-            IYubiKeyResponse response = SendConfiguration(command);
-
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-        }
-
-        /// <inheritdoc/>
-        public void SetAutoEjectTimeout(int seconds)
-        {
-            if (seconds < ushort.MinValue || seconds > ushort.MaxValue)
-            {
-                throw new ArgumentOutOfRangeException(nameof(seconds));
-            }
-
-            var command = new MgmtCmd.SetDeviceInfoCommand
-            {
-                AutoEjectTimeout = seconds
-            };
-
-            IYubiKeyResponse response = SendConfiguration(command);
-
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-        }
-
-        /// <inheritdoc/>
-        public void SetIsNfcRestricted(bool enabled)
-        {
-            this.ThrowOnMissingFeature(YubiKeyFeature.ManagementNfcRestricted);
-
-            var command = new MgmtCmd.SetDeviceInfoCommand
-            {
-                RestrictNfc = enabled
-            };
-
-            IYubiKeyResponse response = SendConfiguration(command);
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-        }
-
-        /// <inheritdoc/>
-        public void SetDeviceFlags(DeviceFlags deviceFlags)
-        {
-            var command = new MgmtCmd.SetDeviceInfoCommand
-            {
-                DeviceFlags = deviceFlags
-            };
-
-            IYubiKeyResponse response = SendConfiguration(command);
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-        }
-
-        /// <inheritdoc/>
-        public void LockConfiguration(ReadOnlySpan<byte> lockCode)
-        {
-            if (lockCode.Length != _lockCodeLength)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.LockCodeWrongLength,
-                        _lockCodeLength,
-                        lockCode.Length),
-                    nameof(lockCode));
-            }
-
-            if (lockCode.SequenceEqual(_lockCodeAllZeros.Span))
-            {
-                throw new ArgumentException(
-                    ExceptionMessages.LockCodeAllZeroNotAllowed,
-                    nameof(lockCode));
-            }
-
-            var command = new MgmtCmd.SetDeviceInfoCommand();
-            command.SetLockCode(lockCode);
-
-            IYubiKeyResponse response = SendConfiguration(command);
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-        }
-
-        /// <inheritdoc/>
-        public void UnlockConfiguration(ReadOnlySpan<byte> lockCode)
-        {
-            if (lockCode.Length != _lockCodeLength)
-            {
-                throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.LockCodeWrongLength,
-                        _lockCodeLength,
-                        lockCode.Length),
-                    nameof(lockCode));
-            }
-
-            var command = new MgmtCmd.SetDeviceInfoCommand();
-            command.ApplyLockCode(lockCode);
-            command.SetLockCode(_lockCodeAllZeros.Span);
-
-            IYubiKeyResponse response = SendConfiguration(command);
-
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-        }
-
-        /// <inheritdoc/>
-        public void SetLegacyDeviceConfiguration(
-            YubiKeyCapabilities yubiKeyInterfaces,
-            byte challengeResponseTimeout,
-            bool touchEjectEnabled,
-            int autoEjectTimeout)
-        {
-            #region argument checks
-
-            // Keep only flags related to interfaces. This makes the operation easier for users
-            // who may be doing bitwise operations on [Available/Enabled]UsbCapabilities.
-            yubiKeyInterfaces &=
-                YubiKeyCapabilities.Ccid
-                | YubiKeyCapabilities.FidoU2f
-                | YubiKeyCapabilities.Otp;
-
-            // Check if at least one interface is enabled.
-            if (yubiKeyInterfaces == YubiKeyCapabilities.None
-                || AvailableUsbCapabilities != YubiKeyCapabilities.None
-                && (AvailableUsbCapabilities & yubiKeyInterfaces) == YubiKeyCapabilities.None)
-            {
-                throw new InvalidOperationException(ExceptionMessages.MustEnableOneAvailableUsbInterface);
-            }
-
-            if (touchEjectEnabled)
-            {
-                if (yubiKeyInterfaces != YubiKeyCapabilities.Ccid)
-                {
-                    throw new ArgumentException(
-                        ExceptionMessages.TouchEjectTimeoutRequiresCcidOnly,
-                        nameof(touchEjectEnabled));
-                }
-
-                if (autoEjectTimeout < ushort.MinValue || autoEjectTimeout > ushort.MaxValue)
-                {
-                    throw new ArgumentOutOfRangeException(nameof(autoEjectTimeout));
-                }
-            }
-            else
-            {
-                if (autoEjectTimeout != 0)
-                {
-                    throw new ArgumentException(
-                        ExceptionMessages.AutoEjectTimeoutRequiresTouchEjectEnabled,
-                        nameof(autoEjectTimeout));
-                }
-            }
-
-            #endregion
-
-            IYubiKeyResponse response;
-
-            // Newer YubiKeys should use SetDeviceInfo
-            if (FirmwareVersion.Major >= 5)
-            {
-                DeviceFlags deviceFlags =
-                    touchEjectEnabled
-                        ? DeviceFlags | DeviceFlags.TouchEject
-                        : DeviceFlags & ~DeviceFlags.TouchEject;
-
-                var setDeviceInfoCommand = new MgmtCmd.SetDeviceInfoCommand
-                {
-                    EnabledUsbCapabilities = yubiKeyInterfaces.ToDeviceInfoCapabilities(),
-                    ChallengeResponseTimeout = challengeResponseTimeout,
-                    AutoEjectTimeout = autoEjectTimeout,
-                    DeviceFlags = deviceFlags,
-                    ResetAfterConfig = true
-                };
-
-                response = SendConfiguration(setDeviceInfoCommand);
-            }
-            else
-            {
-                var setLegacyDeviceConfigCommand = new MgmtCmd.SetLegacyDeviceConfigCommand(
-                    yubiKeyInterfaces,
-                    challengeResponseTimeout,
-                    touchEjectEnabled,
-                    autoEjectTimeout);
-
-                response = SendConfiguration(setLegacyDeviceConfigCommand);
-            }
-
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-        }
-
-        /// <inheritdoc />
-        /// <exception cref="NotSupportedException">
-        /// The YubiKey does not support this feature.
-        /// </exception>
-        /// <exception cref="ArgumentOutOfRangeException">
-        /// The value is less than `6` or greater than `255`.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// The YubiKey encountered an error and could not set the setting.
-        /// </exception>
-        public void SetTemporaryTouchThreshold(int value)
-        {
-            if (!this.HasFeature(YubiKeyFeature.TemporaryTouchThreshold))
-            {
-                throw new NotSupportedException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.NotSupportedByYubiKeyVersion));
-            }
-
-            if (value < 6 || value > 255)
-            {
-                throw new ArgumentOutOfRangeException(nameof(value));
-            }
-
-            var command = new MgmtCmd.SetDeviceInfoCommand
-            {
-                TemporaryTouchThreshold = value
-            };
-
-            IYubiKeyResponse response = SendConfiguration(command);
-            if (response.Status != ResponseStatus.Success)
-            {
-                throw new InvalidOperationException(response.StatusMessage);
-            }
-        }
-
-        /// <inheritdoc />
-        /// <exception cref="NotSupportedException">
-        /// The YubiKey does not support this feature.
-        /// </exception>
-        /// <exception cref="InvalidOperationException">
-        /// The YubiKey encountered an error and could not set the setting.
-        /// </exception>
-        public void DeviceReset()
-        {
-            if (!this.HasFeature(YubiKeyFeature.DeviceReset))
-            {
-                throw new NotSupportedException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.NotSupportedByYubiKeyVersion));
-            }
-
-            IYubiKeyConnection? connection = null;
-            try
-            {
-                if (TryConnect(YubiKeyApplication.Management, out connection))
-                {
-                    var command = new MgmtCmd.DeviceResetCommand();
-                    IYubiKeyResponse response = connection.SendCommand(command);
-                    if (response.Status != ResponseStatus.Success)
-                    {
-                        throw new InvalidOperationException(response.StatusMessage);
-                    }
-                }
-                else
-                {
-                    throw new NotSupportedException(ExceptionMessages.NoInterfaceAvailable);
-                }
-            }
-            finally
-            {
-                connection?.Dispose();
-            }
-        }
-
         private IYubiKeyResponse SendConfiguration(MgmtCmd.SetDeviceInfoBaseCommand baseCommand)
         {
             IYubiKeyConnection? connection = null;
@@ -809,7 +743,7 @@ namespace Yubico.YubiKey
                 }
                 else if (TryConnect(YubiKeyApplication.Otp, out connection))
                 {
-                    command = new Otp.Commands.SetDeviceInfoCommand(baseCommand);
+                    command = new SetDeviceInfoCommand(baseCommand);
                 }
                 else if (TryConnect(YubiKeyApplication.FidoU2f, out connection))
                 {
@@ -841,7 +775,7 @@ namespace Yubico.YubiKey
                 }
                 else if (TryConnect(YubiKeyApplication.Otp, out connection))
                 {
-                    command = new Otp.Commands.SetLegacyDeviceConfigCommand(baseCommand);
+                    command = new SetLegacyDeviceConfigCommand(baseCommand);
                 }
                 else
                 {
@@ -855,223 +789,6 @@ namespace Yubico.YubiKey
                 connection?.Dispose();
             }
         }
-
-        #region IEquatable<T> and IComparable<T>
-
-        /// <inheritdoc/>
-        public override bool Equals(object obj)
-        {
-            if (!(obj is IYubiKeyDevice other))
-            {
-                return false;
-            }
-            else
-            {
-                return Equals(other);
-            }
-        }
-
-        /// <inheritdoc/>
-        public bool Equals(IYubiKeyDevice other)
-        {
-            if (this is null && other is null)
-            {
-                return true;
-            }
-
-            if (this is null || other is null)
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, other))
-            {
-                return true;
-            }
-
-            if (SerialNumber == null && other.SerialNumber == null)
-            {
-                // fingerprint match
-                if (!Equals(FirmwareVersion, other.FirmwareVersion))
-                {
-                    return false;
-                }
-
-                return CompareTo(other) == 0;
-            }
-            else if (SerialNumber == null || other.SerialNumber == null)
-            {
-                return false;
-            }
-            else
-            {
-                return SerialNumber.Equals(other.SerialNumber);
-            }
-        }
-
-        /// <inheritdoc/>
-        bool IYubiKeyDevice.Contains(IDevice other) => Contains(other);
-
-        /// <inheritdoc/>
-        protected internal bool Contains(IDevice other) =>
-            other switch
-            {
-                ISmartCardDevice scDevice => scDevice.Path == _smartCardDevice?.Path,
-                IHidDevice hidDevice => hidDevice.Path == _hidKeyboardDevice?.Path ||
-                    hidDevice.Path == _hidFidoDevice?.Path,
-                _ => false
-            };
-
-        /// <inheritdoc/>
-        public int CompareTo(IYubiKeyDevice other)
-        {
-            if (other is null)
-            {
-                throw new ArgumentNullException(nameof(other));
-            }
-
-            if (ReferenceEquals(this, other))
-            {
-                return 0;
-            }
-
-            if (SerialNumber == null && other.SerialNumber == null)
-            {
-                if (!(other is YubiKeyDevice concreteKey))
-                {
-                    return 1;
-                }
-
-                if (HasSmartCard)
-                {
-                    int delta = string.Compare(
-                        _smartCardDevice!.Path, concreteKey._smartCardDevice!.Path, StringComparison.Ordinal);
-
-                    if (delta != 0)
-                    {
-                        return delta;
-                    }
-                }
-                else if (concreteKey.HasSmartCard)
-                {
-                    return -1;
-                }
-
-                if (HasHidFido)
-                {
-                    int delta = string.Compare(
-                        _hidFidoDevice!.Path, concreteKey._hidFidoDevice!.Path, StringComparison.Ordinal);
-
-                    if (delta != 0)
-                    {
-                        return delta;
-                    }
-                }
-                else if (concreteKey.HasHidFido)
-                {
-                    return -1;
-                }
-
-                if (HasHidKeyboard)
-                {
-                    int delta = string.Compare(
-                        _hidKeyboardDevice!.Path, concreteKey._hidKeyboardDevice!.Path, StringComparison.Ordinal);
-
-                    if (delta != 0)
-                    {
-                        return delta;
-                    }
-                }
-                else if (concreteKey.HasHidFido)
-                {
-                    return -1;
-                }
-
-                return 0;
-            }
-            else if (SerialNumber == null)
-            {
-                return -1;
-            }
-            else if (other.SerialNumber == null)
-            {
-                return 1;
-            }
-            else
-            {
-                return SerialNumber.Value.CompareTo(other.SerialNumber.Value);
-            }
-        }
-
-        /// <inheritdoc/>
-        public static bool operator ==(YubiKeyDevice left, YubiKeyDevice right)
-        {
-            if (left is null)
-            {
-                return right is null;
-            }
-
-            return left.Equals(right);
-        }
-
-        /// <inheritdoc/>
-        public static bool operator !=(YubiKeyDevice left, YubiKeyDevice right) => !(left == right);
-
-        /// <inheritdoc/>
-        public static bool operator <(YubiKeyDevice left, YubiKeyDevice right) =>
-            left is null
-                ? right is object
-                : left.CompareTo(right) < 0;
-
-        /// <inheritdoc/>
-        public static bool operator <=(YubiKeyDevice left, YubiKeyDevice right) =>
-            left is null || left.CompareTo(right) <= 0;
-
-        /// <inheritdoc/>
-        public static bool operator >(YubiKeyDevice left, YubiKeyDevice right) =>
-            left is object && left.CompareTo(right) > 0;
-
-        /// <inheritdoc/>
-        public static bool operator >=(YubiKeyDevice left, YubiKeyDevice right) =>
-            left is null
-                ? right is null
-                : left.CompareTo(right) >= 0;
-
-        #endregion
-
-        #region System.Object overrides
-
-        /// <inheritdoc/>
-        public override int GetHashCode() =>
-            !(SerialNumber is null)
-                ? SerialNumber!.GetHashCode()
-                : HashCode.Combine(
-                    _smartCardDevice?.Path,
-                    _hidFidoDevice?.Path,
-                    _hidKeyboardDevice?.Path);
-
-        private static readonly string EOL = Environment.NewLine;
-
-        /// <inheritdoc/>
-        public override string ToString()
-        {
-            string res = "- Firmware Version: " + FirmwareVersion + EOL
-                + "- Serial Number: " + SerialNumber + EOL
-                + "- Form Factor: " + FormFactor + EOL
-                + "- FIPS: " + IsFipsSeries + EOL
-                + "- SKY: " + IsSkySeries + EOL
-                + "- Has SmartCard: " + HasSmartCard + EOL
-                + "- Has HID FIDO: " + HasHidFido + EOL
-                + "- Has HID Keyboard: " + HasHidKeyboard + EOL
-                + "- Available USB Capabilities: " + AvailableUsbCapabilities + EOL
-                + "- Available NFC Capabilities: " + AvailableNfcCapabilities + EOL
-                + "- Enabled USB Capabilities: " + EnabledUsbCapabilities + EOL
-                + "- Enabled NFC Capabilities: " + EnabledNfcCapabilities + EOL;
-
-            return res;
-        }
-
-        #endregion
 
         private DateTime GetLastActiveTime() =>
             _lastActiveTransport switch
@@ -1167,5 +884,286 @@ namespace Yubico.YubiKey
 
             return this.HasFeature(YubiKeyFeature.FastUsbReclaim);
         }
+
+        #region IYubiKeyDeviceInfo
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities AvailableUsbCapabilities => _yubiKeyInfo.AvailableUsbCapabilities;
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities EnabledUsbCapabilities => _yubiKeyInfo.EnabledUsbCapabilities;
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities AvailableNfcCapabilities => _yubiKeyInfo.AvailableNfcCapabilities;
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities EnabledNfcCapabilities => _yubiKeyInfo.EnabledNfcCapabilities;
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities FipsApproved => _yubiKeyInfo.FipsApproved;
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities FipsCapable => _yubiKeyInfo.FipsCapable;
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities ResetBlocked => _yubiKeyInfo.ResetBlocked;
+
+        /// <inheritdoc />
+        public bool IsNfcRestricted => _yubiKeyInfo.IsNfcRestricted;
+
+        /// <inheritdoc />
+        public string? PartNumber => _yubiKeyInfo.PartNumber;
+
+        /// <inheritdoc />
+        public bool IsPinComplexityEnabled => _yubiKeyInfo.IsPinComplexityEnabled;
+
+        /// <inheritdoc />
+        public int? SerialNumber => _yubiKeyInfo.SerialNumber;
+
+        /// <inheritdoc />
+        public bool IsFipsSeries => _yubiKeyInfo.IsFipsSeries;
+
+        /// <inheritdoc />
+        public bool IsSkySeries => _yubiKeyInfo.IsSkySeries;
+
+        /// <inheritdoc />
+        public FormFactor FormFactor => _yubiKeyInfo.FormFactor;
+
+        /// <inheritdoc />
+        public FirmwareVersion FirmwareVersion => _yubiKeyInfo.FirmwareVersion;
+
+        /// <inheritdoc />
+        public TemplateStorageVersion? TemplateStorageVersion => _yubiKeyInfo.TemplateStorageVersion;
+
+        /// <inheritdoc />
+        public ImageProcessorVersion? ImageProcessorVersion => _yubiKeyInfo.ImageProcessorVersion;
+
+        /// <inheritdoc />
+        public int AutoEjectTimeout => _yubiKeyInfo.AutoEjectTimeout;
+
+        /// <inheritdoc />
+        public byte ChallengeResponseTimeout => _yubiKeyInfo.ChallengeResponseTimeout;
+
+        /// <inheritdoc />
+        public DeviceFlags DeviceFlags => _yubiKeyInfo.DeviceFlags;
+
+        /// <inheritdoc />
+        public bool ConfigurationLocked => _yubiKeyInfo.ConfigurationLocked;
+
+        #endregion
+
+        #region IEquatable<T> and IComparable<T>
+
+        /// <inheritdoc />
+        public override bool Equals(object obj)
+        {
+            if (!(obj is IYubiKeyDevice other))
+            {
+                return false;
+            }
+
+            return Equals(other);
+        }
+
+        /// <inheritdoc />
+        public bool Equals(IYubiKeyDevice other)
+        {
+            if (this is null && other is null)
+            {
+                return true;
+            }
+
+            if (this is null || other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            if (SerialNumber == null && other.SerialNumber == null)
+            {
+                // fingerprint match
+                if (!Equals(FirmwareVersion, other.FirmwareVersion))
+                {
+                    return false;
+                }
+
+                return CompareTo(other) == 0;
+            }
+
+            if (SerialNumber == null || other.SerialNumber == null)
+            {
+                return false;
+            }
+
+            return SerialNumber.Equals(other.SerialNumber);
+        }
+
+        /// <inheritdoc />
+        bool IYubiKeyDevice.Contains(IDevice other) => Contains(other);
+
+        /// <inheritdoc />
+        protected internal bool Contains(IDevice other) =>
+            other switch
+            {
+                ISmartCardDevice scDevice => scDevice.Path == _smartCardDevice?.Path,
+                IHidDevice hidDevice => hidDevice.Path == _hidKeyboardDevice?.Path ||
+                    hidDevice.Path == _hidFidoDevice?.Path,
+                _ => false
+            };
+
+        /// <inheritdoc />
+        public int CompareTo(IYubiKeyDevice other)
+        {
+            if (other is null)
+            {
+                throw new ArgumentNullException(nameof(other));
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return 0;
+            }
+
+            if (SerialNumber == null && other.SerialNumber == null)
+            {
+                if (!(other is YubiKeyDevice concreteKey))
+                {
+                    return 1;
+                }
+
+                if (HasSmartCard)
+                {
+                    int delta = string.Compare(
+                        _smartCardDevice!.Path, concreteKey._smartCardDevice!.Path, StringComparison.Ordinal);
+
+                    if (delta != 0)
+                    {
+                        return delta;
+                    }
+                }
+                else if (concreteKey.HasSmartCard)
+                {
+                    return -1;
+                }
+
+                if (HasHidFido)
+                {
+                    int delta = string.Compare(
+                        _hidFidoDevice!.Path, concreteKey._hidFidoDevice!.Path, StringComparison.Ordinal);
+
+                    if (delta != 0)
+                    {
+                        return delta;
+                    }
+                }
+                else if (concreteKey.HasHidFido)
+                {
+                    return -1;
+                }
+
+                if (HasHidKeyboard)
+                {
+                    int delta = string.Compare(
+                        _hidKeyboardDevice!.Path, concreteKey._hidKeyboardDevice!.Path, StringComparison.Ordinal);
+
+                    if (delta != 0)
+                    {
+                        return delta;
+                    }
+                }
+                else if (concreteKey.HasHidFido)
+                {
+                    return -1;
+                }
+
+                return 0;
+            }
+
+            if (SerialNumber == null)
+            {
+                return -1;
+            }
+
+            if (other.SerialNumber == null)
+            {
+                return 1;
+            }
+
+            return SerialNumber.Value.CompareTo(other.SerialNumber.Value);
+        }
+
+        /// <inheritdoc />
+        public static bool operator ==(YubiKeyDevice left, YubiKeyDevice right)
+        {
+            if (left is null)
+            {
+                return right is null;
+            }
+
+            return left.Equals(right);
+        }
+
+        /// <inheritdoc />
+        public static bool operator !=(YubiKeyDevice left, YubiKeyDevice right) => !(left == right);
+
+        /// <inheritdoc />
+        public static bool operator <(YubiKeyDevice left, YubiKeyDevice right) =>
+            left is null
+                ? right is object
+                : left.CompareTo(right) < 0;
+
+        /// <inheritdoc />
+        public static bool operator <=(YubiKeyDevice left, YubiKeyDevice right) =>
+            left is null || left.CompareTo(right) <= 0;
+
+        /// <inheritdoc />
+        public static bool operator >(YubiKeyDevice left, YubiKeyDevice right) =>
+            left is object && left.CompareTo(right) > 0;
+
+        /// <inheritdoc />
+        public static bool operator >=(YubiKeyDevice left, YubiKeyDevice right) =>
+            left is null
+                ? right is null
+                : left.CompareTo(right) >= 0;
+
+        #endregion
+
+        #region System.Object overrides
+
+        /// <inheritdoc />
+        public override int GetHashCode() =>
+            !(SerialNumber is null)
+                ? SerialNumber!.GetHashCode()
+                : HashCode.Combine(
+                    _smartCardDevice?.Path,
+                    _hidFidoDevice?.Path,
+                    _hidKeyboardDevice?.Path);
+
+        private static readonly string EOL = Environment.NewLine;
+
+        /// <inheritdoc />
+        public override string ToString()
+        {
+            string res = "- Firmware Version: " + FirmwareVersion + EOL
+                + "- Serial Number: " + SerialNumber + EOL
+                + "- Form Factor: " + FormFactor + EOL
+                + "- FIPS: " + IsFipsSeries + EOL
+                + "- SKY: " + IsSkySeries + EOL
+                + "- Has SmartCard: " + HasSmartCard + EOL
+                + "- Has HID FIDO: " + HasHidFido + EOL
+                + "- Has HID Keyboard: " + HasHidKeyboard + EOL
+                + "- Available USB Capabilities: " + AvailableUsbCapabilities + EOL
+                + "- Available NFC Capabilities: " + AvailableNfcCapabilities + EOL
+                + "- Enabled USB Capabilities: " + EnabledUsbCapabilities + EOL
+                + "- Enabled NFC Capabilities: " + EnabledNfcCapabilities + EOL;
+
+            return res;
+        }
+
+        #endregion
     }
 }

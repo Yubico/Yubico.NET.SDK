@@ -46,7 +46,8 @@ namespace Yubico.YubiKey.Scp03
                 {
                     return paddedPayload.Take(i).ToArray();
                 }
-                else if (paddedPayload[i] != 0x00)
+
+                if (paddedPayload[i] != 0x00)
                 {
                     throw new SecureChannelException(ExceptionMessages.InvalidPadding);
                 }

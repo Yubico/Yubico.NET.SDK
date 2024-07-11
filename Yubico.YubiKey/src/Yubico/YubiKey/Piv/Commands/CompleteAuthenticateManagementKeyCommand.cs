@@ -22,42 +22,42 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// Complete the process to authenticate the PIV management key.
+    ///     Complete the process to authenticate the PIV management key.
     /// </summary>
     /// <remarks>
-    /// In the PIV standard, there is a command called GENERAL AUTHENTICATE.
-    /// Although it is one command, it can do four things: authenticate a
-    /// management key (challenge-response), sign arbitrary data, RSA decryption,
-    /// and EC Diffie-Hellman. The SDK breaks these four operations into separate
-    /// classes. This class is how you complete the process of performing
-    /// "GENERAL AUTHENTICATE: management key".
-    /// <para>
-    /// The partner Response class is <see cref="CompleteAuthenticateManagementKeyResponse"/>.
-    /// </para>
-    /// <para>
-    /// See the comments for the class
-    /// <see cref="InitializeAuthenticateManagementKeyCommand"/>, there is a
-    /// lengthy discussion of the process of authenticating the management key,
-    /// including descriptions of the challenges and responses.
-    /// </para>
-    /// <para>
-    /// When you pass a management key to this class (the management key to
-    /// authenticate), the class will copy it, use it immediately, and overwrite
-    /// the local buffer. The class will not keep a reference to your key data.
-    /// Because of this, you can overwrite the management key data immediately
-    /// upon return from the constructor if you want. See the User's Manual
-    /// <xref href="UsersManualSensitive"> entry on sensitive data</xref>
-    /// for more information on this topic.
-    /// </para>
-    /// <para>
-    /// This class will need a random number generator and either a triple-DES or
-    /// AES object. It will get them from the
-    /// <see cref="Yubico.YubiKey.Cryptography.CryptographyProviders"/>
-    /// class. That class will build default implementations. It is possible to
-    /// change that class to build alternate versions. See the user's manual
-    /// entry on <xref href="UsersManualAlternateCrypto"> alternate crypto </xref>
-    /// for information on how to do so.
-    /// </para>
+    ///     In the PIV standard, there is a command called GENERAL AUTHENTICATE.
+    ///     Although it is one command, it can do four things: authenticate a
+    ///     management key (challenge-response), sign arbitrary data, RSA decryption,
+    ///     and EC Diffie-Hellman. The SDK breaks these four operations into separate
+    ///     classes. This class is how you complete the process of performing
+    ///     "GENERAL AUTHENTICATE: management key".
+    ///     <para>
+    ///         The partner Response class is <see cref="CompleteAuthenticateManagementKeyResponse" />.
+    ///     </para>
+    ///     <para>
+    ///         See the comments for the class
+    ///         <see cref="InitializeAuthenticateManagementKeyCommand" />, there is a
+    ///         lengthy discussion of the process of authenticating the management key,
+    ///         including descriptions of the challenges and responses.
+    ///     </para>
+    ///     <para>
+    ///         When you pass a management key to this class (the management key to
+    ///         authenticate), the class will copy it, use it immediately, and overwrite
+    ///         the local buffer. The class will not keep a reference to your key data.
+    ///         Because of this, you can overwrite the management key data immediately
+    ///         upon return from the constructor if you want. See the User's Manual
+    ///         <xref href="UsersManualSensitive"> entry on sensitive data</xref>
+    ///         for more information on this topic.
+    ///     </para>
+    ///     <para>
+    ///         This class will need a random number generator and either a triple-DES or
+    ///         AES object. It will get them from the
+    ///         <see cref="Yubico.YubiKey.Cryptography.CryptographyProviders" />
+    ///         class. That class will build default implementations. It is possible to
+    ///         change that class to build alternate versions. See the user's manual
+    ///         entry on <xref href="UsersManualAlternateCrypto"> alternate crypto </xref>
+    ///         for information on how to do so.
+    ///     </para>
     /// </remarks>
     public sealed class CompleteAuthenticateManagementKeyCommand
         : IYubiKeyCommand<CompleteAuthenticateManagementKeyResponse>
@@ -74,32 +74,18 @@ namespace Yubico.YubiKey.Piv.Commands
         private const int ClientResponseTag = 0x80;
         private const int YubiKeyChallengeTag = 0x81;
         private const int EmptyTag = 0x82;
-
-        private readonly bool _isMutual;
-        private readonly int _blockSize;
-
-        private readonly byte[] _buffer;
-        private readonly Memory<byte> _dataMemory;
-        private readonly ReadOnlyMemory<byte> _expectedResponse;
         private const int BlockCount = 4;
         private const int ClientResponseOffset = 0;
         private const int YubiKeyChallengeOffset = 1;
         private const int ExpectedResponseOffset = 2;
         private const int ClientChallengeOffset = 3;
+        private readonly int _blockSize;
 
-        /// <summary>
-        /// Which algorithm is the management key.
-        /// </summary>
-        public PivAlgorithm Algorithm { get; private set; }
+        private readonly byte[] _buffer;
+        private readonly Memory<byte> _dataMemory;
+        private readonly ReadOnlyMemory<byte> _expectedResponse;
 
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs. For this
-        /// command it's PIV.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Piv
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Piv;
+        private readonly bool _isMutual;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -111,45 +97,45 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        /// Build a new instance of the
-        /// <c>CompleteAuthenticateManagementKeyCommand</c> class for the
-        /// algorithm specified in <c>initializeAuthenticationResponse</c>.
+        ///     Build a new instance of the
+        ///     <c>CompleteAuthenticateManagementKeyCommand</c> class for the
+        ///     algorithm specified in <c>initializeAuthenticationResponse</c>.
         /// </summary>
         /// <remarks>
-        /// The input Response Object is the successful Response from step 1. The
-        /// response has information on whether the process was initiated for
-        /// single or mutual authentication, along with the management key's
-        /// algorithm. The object created using this constructor will therefore
-        /// be able to perform the appropriate operations and build the
-        /// appropriate APDU based on how the process was initiated.
-        /// <para>
-        /// This class will use the random number generator and Triple-DES or AES
-        /// classes from <see cref="CryptographyProviders"/>. If you want this
-        /// class to use classes other than the defaults, change them. See also
-        /// the user's manual entry on
-        /// <xref href="UsersManualAlternateCrypto"> alternate crypto </xref> for
-        /// information on how to do so.
-        /// </para>
+        ///     The input Response Object is the successful Response from step 1. The
+        ///     response has information on whether the process was initiated for
+        ///     single or mutual authentication, along with the management key's
+        ///     algorithm. The object created using this constructor will therefore
+        ///     be able to perform the appropriate operations and build the
+        ///     appropriate APDU based on how the process was initiated.
+        ///     <para>
+        ///         This class will use the random number generator and Triple-DES or AES
+        ///         classes from <see cref="CryptographyProviders" />. If you want this
+        ///         class to use classes other than the defaults, change them. See also
+        ///         the user's manual entry on
+        ///         <xref href="UsersManualAlternateCrypto"> alternate crypto </xref> for
+        ///         information on how to do so.
+        ///     </para>
         /// </remarks>
         /// <param name="initializeAuthenticationResponse">
-        /// The Response Object from Step 1.
+        ///     The Response Object from Step 1.
         /// </param>
         /// <param name="managementKey">
-        /// The bytes of the management key.
+        ///     The bytes of the management key.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// The <c>initializeAuthenticationResponse</c> argument is null
+        ///     The <c>initializeAuthenticationResponse</c> argument is null
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// The <c>initializeAuthenticationResponse</c> argument does not
-        /// represent a complete response.
+        ///     The <c>initializeAuthenticationResponse</c> argument does not
+        ///     represent a complete response.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// The <c>managementKey</c> argument is not a valid key, or the
-        /// <c>algorithm</c> is not valid or does not match the data.
+        ///     The <c>managementKey</c> argument is not a valid key, or the
+        ///     <c>algorithm</c> is not valid or does not match the data.
         /// </exception>
         /// <exception cref="CryptographicException">
-        /// The Triple-DES or AES operation failed.
+        ///     The Triple-DES or AES operation failed.
         /// </exception>
         public CompleteAuthenticateManagementKeyCommand(
             InitializeAuthenticateManagementKeyResponse initializeAuthenticationResponse,
@@ -264,6 +250,20 @@ namespace Yubico.YubiKey.Piv.Commands
                         ExceptionMessages.TripleDesFailed));
             }
         }
+
+        /// <summary>
+        ///     Which algorithm is the management key.
+        /// </summary>
+        public PivAlgorithm Algorithm { get; }
+
+        /// <summary>
+        ///     Gets the YubiKeyApplication to which this command belongs. For this
+        ///     command it's PIV.
+        /// </summary>
+        /// <value>
+        ///     YubiKeyApplication.Piv
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Piv;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()

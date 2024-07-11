@@ -18,9 +18,9 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    /// The response to the <see cref="GetApplicationVersionCommand"/> command,
-    /// containing the version of the YubiHSM Auth application as a major,
-    /// minor, and patch value.
+    ///     The response to the <see cref="GetApplicationVersionCommand" /> command,
+    ///     containing the version of the YubiHSM Auth application as a major,
+    ///     minor, and patch value.
     /// </summary>
     public class GetApplicationVersionResponse : BaseYubiHsmAuthResponse, IYubiKeyResponseWithData<ApplicationVersion>
     {
@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
 
             ReadOnlySpan<byte> versionData = ResponseApdu.Data.Span;
 
-            var version = new ApplicationVersion()
+            var version = new ApplicationVersion
             {
                 Major = versionData[0],
                 Minor = versionData[1],

@@ -19,18 +19,18 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    /// The response to the <see cref="GetSerialNumberCommand"/> command, containing the YubiKey's
-    /// serial number.
+    ///     The response to the <see cref="GetSerialNumberCommand" /> command, containing the YubiKey's
+    ///     serial number.
     /// </summary>
     public class GetSerialNumberResponse : OtpResponse, IYubiKeyResponseWithData<int>
     {
         private const int SerialNumberLength = 4;
 
         /// <summary>
-        /// Constructs a GetSerialNumberResponse based on a ResponseApdu received from the YubiKey.
+        ///     Constructs a GetSerialNumberResponse based on a ResponseApdu received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// The object containing the response APDU returned by the YubiKey.
+        ///     The object containing the response APDU returned by the YubiKey.
         /// </param>
         public GetSerialNumberResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -38,17 +38,17 @@ namespace Yubico.YubiKey.Otp.Commands
         }
 
         /// <summary>
-        /// Gets the serial number.
+        ///     Gets the serial number.
         /// </summary>
         /// <returns>
-        /// The data in the ResponseAPDU, presented as an int.
+        ///     The data in the ResponseAPDU, presented as an int.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
+        ///     Thrown when <see cref="YubiKeyResponse.Status" /> is not <see cref="ResponseStatus.Success" />.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
-        /// Thrown when the data received from the YubiKey does not
-        /// match the expectations of the parser.
+        ///     Thrown when the data received from the YubiKey does not
+        ///     match the expectations of the parser.
         /// </exception>
         public int GetData()
         {
@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Otp.Commands
 
             if (ResponseApdu.Data.Length < SerialNumberLength)
             {
-                throw new MalformedYubiKeyResponseException()
+                throw new MalformedYubiKeyResponseException
                 {
                     ResponseClass = nameof(GetSerialNumberResponse),
                     ExpectedDataLength = SerialNumberLength,

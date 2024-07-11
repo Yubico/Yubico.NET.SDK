@@ -17,11 +17,10 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Scp03.Commands
 {
     /// <summary>
-    /// Represents the second command in the SCP03 authentication handshake, 'EXTERNAL_AUTHENTICATE'
+    ///     Represents the second command in the SCP03 authentication handshake, 'EXTERNAL_AUTHENTICATE'
     /// </summary>
     internal class ExternalAuthenticateCommand : IYubiKeyCommand<ExternalAuthenticateResponse>
     {
-        public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
         private const byte GpExternalAuthenticateCla = 0b1000_0100;
         private const byte GpExternalAuthenticateIns = 0x82;
         private const byte GpHighestSecurityLevel = 0b0011_0011;
@@ -29,10 +28,10 @@ namespace Yubico.YubiKey.Scp03.Commands
         private readonly byte[] _data;
 
         /// <summary>
-        /// Constructs an EXTERNAL_AUTHENTICATE command, containing the provided data.
+        ///     Constructs an EXTERNAL_AUTHENTICATE command, containing the provided data.
         /// </summary>
         /// <remarks>
-        /// Clients should not generally build this manually. See <see cref="Pipelines.Scp03ApduTransform"/> for more.
+        ///     Clients should not generally build this manually. See <see cref="Pipelines.Scp03ApduTransform" /> for more.
         /// </remarks>
         /// <param name="data">Data for the command</param>
         public ExternalAuthenticateCommand(byte[] data)
@@ -40,8 +39,10 @@ namespace Yubico.YubiKey.Scp03.Commands
             _data = data;
         }
 
+        public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
+
         public CommandApdu CreateCommandApdu() =>
-            new CommandApdu()
+            new CommandApdu
             {
                 Cla = GpExternalAuthenticateCla,
                 Ins = GpExternalAuthenticateIns,

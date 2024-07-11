@@ -46,7 +46,7 @@ namespace Yubico.YubiKey
         public const short SecurityKey = 0x0120;
 
         public static IList<short> AllYubiKeys =>
-            new List<short>()
+            new List<short>
             {
                 YubiKeyV1V2,
                 YubiKeyPlus,

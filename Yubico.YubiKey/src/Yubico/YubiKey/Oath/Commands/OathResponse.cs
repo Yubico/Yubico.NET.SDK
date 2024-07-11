@@ -17,8 +17,8 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    /// Base class for all OATH responses. Use this class to represent the status of an OATH command,
-    /// or one of its derived classes to retrieve the full response.
+    ///     Base class for all OATH responses. Use this class to represent the status of an OATH command,
+    ///     or one of its derived classes to retrieve the full response.
     /// </summary>
     /// <seealso cref="Yubico.YubiKey.IYubiKeyResponse" />
     public class OathResponse : YubiKeyResponse
@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override ResponseStatusPair StatusCodeMap =>
             StatusWord switch
             {

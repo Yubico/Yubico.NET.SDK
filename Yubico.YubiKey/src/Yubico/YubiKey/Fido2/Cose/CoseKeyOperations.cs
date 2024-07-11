@@ -15,62 +15,62 @@
 namespace Yubico.YubiKey.Fido2.Cose
 {
     /// <summary>
-    /// An enumeration of the operations that one can potentially perform with a COSE key.
+    ///     An enumeration of the operations that one can potentially perform with a COSE key.
     /// </summary>
     public enum CoseKeyOperations
     {
         /// <summary>
-        /// The operation could not be determined.
+        ///     The operation could not be determined.
         /// </summary>
         None = 0,
 
         /// <summary>
-        /// The key is used to create signatures. Requires private key fields.
+        ///     The key is used to create signatures. Requires private key fields.
         /// </summary>
         Sign = 1,
 
         /// <summary>
-        /// The key is used for verification of signatures.
+        ///     The key is used for verification of signatures.
         /// </summary>
         Verify = 2,
 
         /// <summary>
-        /// The key is used for key transport encryption.
+        ///     The key is used for key transport encryption.
         /// </summary>
         Encrypt = 3,
 
         /// <summary>
-        /// The key is used for key transport decryption. Requires private key fields.
+        ///     The key is used for key transport decryption. Requires private key fields.
         /// </summary>
         Decrypt = 4,
 
         /// <summary>
-        /// The key is used for key wrap encryption.
+        ///     The key is used for key wrap encryption.
         /// </summary>
         WrapKey = 5,
 
         /// <summary>
-        /// The key is used for key wrap decryption.
+        ///     The key is used for key wrap decryption.
         /// </summary>
         UnwrapKey = 6,
 
         /// <summary>
-        /// The key is used for deriving keys. Requires private key fields.
+        ///     The key is used for deriving keys. Requires private key fields.
         /// </summary>
         DeriveKey = 7,
 
         /// <summary>
-        /// The key is used for deriving bits not to be used as a key. Requires private key fields.
+        ///     The key is used for deriving bits not to be used as a key. Requires private key fields.
         /// </summary>
         DeriveBits = 8,
 
         /// <summary>
-        /// The key is used for creating MACs.
+        ///     The key is used for creating MACs.
         /// </summary>
         MacCreate = 9,
 
         /// <summary>
-        /// The key is used for validating MACs.
+        ///     The key is used for validating MACs.
         /// </summary>
         MacVerify = 10
     }

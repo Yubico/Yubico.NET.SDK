@@ -12,18 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.InterIndustry.Commands
 {
     /// <summary>
-    /// Selects a smart card application.
+    ///     Selects a smart card application.
     /// </summary>
     public class SelectApplicationCommand : BaseSelectApplicationCommand<GenericSelectResponse>
     {
         /// <summary>
-        /// Select Application using its raw application Id.  This is for advanced scenarios only.
+        ///     Select Application using its raw application Id.  This is for advanced scenarios only.
         /// </summary>
         /// <param name="applicationId">ID of the Application</param>
         public SelectApplicationCommand(byte[] applicationId) : base(applicationId)
@@ -31,7 +30,7 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         }
 
         /// <summary>
-        /// Constructs an instance of the <see cref="SelectApplicationCommand" /> class.
+        ///     Constructs an instance of the <see cref="SelectApplicationCommand" /> class.
         /// </summary>
         /// <param name="yubiKeyApplication">Application</param>
         public SelectApplicationCommand(YubiKeyApplication yubiKeyApplication) : base(yubiKeyApplication)
@@ -39,7 +38,7 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         }
 
         /// <summary>
-        /// <inheritdoc/>
+        ///     <inheritdoc />
         /// </summary>
         /// <param name="responseApdu"></param>
         /// <returns></returns>

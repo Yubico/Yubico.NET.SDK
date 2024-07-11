@@ -20,7 +20,7 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    /// Deletes an existing credential.
+    ///     Deletes an existing credential.
     /// </summary>
     public class DeleteCommand : IYubiKeyCommand<DeleteResponse>
     {
@@ -28,33 +28,20 @@ namespace Yubico.YubiKey.Oath.Commands
         private const byte NameTag = 0x71;
 
         /// <summary>
-        /// The credential to delete.
-        /// </summary>
-        public Credential? Credential { get; set; }
-
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Oath
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Oath;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="DeleteCommand" /> class.
+        ///     Constructs an instance of the <see cref="DeleteCommand" /> class.
         /// </summary>
         public DeleteCommand()
         {
         }
 
         /// <summary>
-        /// Constructs an instance of the <see cref="DeleteCommand" /> class.
+        ///     Constructs an instance of the <see cref="DeleteCommand" /> class.
         /// </summary>
         /// <param name="credential">
-        /// The credential to delete.
+        ///     The credential to delete.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// The credential is null.
+        ///     The credential is null.
         /// </exception>
         public DeleteCommand(Credential credential)
         {
@@ -65,6 +52,19 @@ namespace Yubico.YubiKey.Oath.Commands
 
             Credential = credential;
         }
+
+        /// <summary>
+        ///     The credential to delete.
+        /// </summary>
+        public Credential? Credential { get; set; }
+
+        /// <summary>
+        ///     Gets the YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        ///     YubiKeyApplication.Oath
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Oath;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()

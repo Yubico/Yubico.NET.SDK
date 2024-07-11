@@ -19,22 +19,25 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    /// Base class for all YubiKey responses.
+    ///     Base class for all YubiKey responses.
     /// </summary>
     /// <seealso cref="IYubiKeyResponse" />
     /// <remarks>
-    /// <para>This base class is primarily responsible for mapping YubiKey specific status words to more
-    /// generic constructs like ResponseStatus and exceptions.</para>
-    /// <para>This class can also be overridden to customize error handling if a certain application
-    /// or command requires special casing.</para>
-    ///
-    /// <para>
-    /// If the subtype needs to change the mappings associated with an
-    /// existing status code, it should override <see cref="StatusCodeMap"/>.
-    /// For example:
-    /// </para>
-    /// <para>
-    /// <code language="csharp">
+    ///     <para>
+    ///         This base class is primarily responsible for mapping YubiKey specific status words to more
+    ///         generic constructs like ResponseStatus and exceptions.
+    ///     </para>
+    ///     <para>
+    ///         This class can also be overridden to customize error handling if a certain application
+    ///         or command requires special casing.
+    ///     </para>
+    ///     <para>
+    ///         If the subtype needs to change the mappings associated with an
+    ///         existing status code, it should override <see cref="StatusCodeMap" />.
+    ///         For example:
+    ///     </para>
+    ///     <para>
+    ///         <code language="csharp">
     /// public class MyResponse : YubiKeyResponse
     /// {
     ///     // MyResponse has custom definitions for what certain StatusWord
@@ -48,35 +51,50 @@ namespace Yubico.YubiKey
     ///             // Add new maps or override existing ones here
     ///             _ => base.StatusCodeMap,
     ///         };
-    ///
+    /// 
     ///     public MyResponse(ResponseApdu responseApdu) : base(responseApdu)
     ///     {
     ///     }
     /// }
     /// </code>
-    /// </para>
-    /// <para>
-    /// <see cref="StatusCodeMap"/> can also be overridden if the subtype introduces
-    /// a new status code. This typically happens when the
-    /// <c>ResponseApdu.Data</c> is actually an encoded message which
-    /// contains its own status code.
-    /// </para>
+    ///     </para>
+    ///     <para>
+    ///         <see cref="StatusCodeMap" /> can also be overridden if the subtype introduces
+    ///         a new status code. This typically happens when the
+    ///         <c>ResponseApdu.Data</c> is actually an encoded message which
+    ///         contains its own status code.
+    ///     </para>
     /// </remarks>
     public class YubiKeyResponse : IYubiKeyResponse
     {
         /// <summary>
-        /// The APDU returned by the YubiKey.
+        ///     Initializes a new instance of the <see cref="YubiKeyResponse" /> class.
+        /// </summary>
+        /// <param name="responseApdu">The ResponseApdu from the YubiKey.</param>
+        /// <exception cref="ArgumentNullException">responseApdu</exception>
+        public YubiKeyResponse(ResponseApdu responseApdu)
+        {
+            if (responseApdu is null)
+            {
+                throw new ArgumentNullException(nameof(responseApdu));
+            }
+
+            ResponseApdu = responseApdu;
+        }
+
+        /// <summary>
+        ///     The APDU returned by the YubiKey.
         /// </summary>
         protected ResponseApdu ResponseApdu { get; set; }
 
         /// <summary>
-        /// Retrieves the details describing the processing state.
+        ///     Retrieves the details describing the processing state.
         /// </summary>
         /// <remarks>
-        /// Implementers of subtypes can override this member to change or add mappings.
+        ///     Implementers of subtypes can override this member to change or add mappings.
         /// </remarks>
         /// <returns>
-        /// The ResponseStatus and a descriptive message, as a <see cref="ResponseStatusPair"/>.
+        ///     The ResponseStatus and a descriptive message, as a <see cref="ResponseStatusPair" />.
         /// </returns>
         protected virtual ResponseStatusPair StatusCodeMap =>
             StatusWord switch
@@ -187,21 +205,6 @@ namespace Yubico.YubiKey
                 _ => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseFailed)
             };
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="YubiKeyResponse"/> class.
-        /// </summary>
-        /// <param name="responseApdu">The ResponseApdu from the YubiKey.</param>
-        /// <exception cref="ArgumentNullException">responseApdu</exception>
-        public YubiKeyResponse(ResponseApdu responseApdu)
-        {
-            if (responseApdu is null)
-            {
-                throw new ArgumentNullException(nameof(responseApdu));
-            }
-
-            ResponseApdu = responseApdu;
-        }
-
         /// <inheritdoc />
         public ResponseStatus Status => StatusCodeMap.Status;
 
@@ -213,27 +216,22 @@ namespace Yubico.YubiKey
 
         public override string ToString() =>
             string.Join(
-                ", ",
-                new[]
-                {
-                    $"Status: [{StatusMessage}]",
-                    $"Code[Status.{Status}]",
-                    $"APDU SW[0x{ResponseApdu.SW.ToString("x4", CultureInfo.InvariantCulture)}]"
-                });
+                ", ", $"Status: [{StatusMessage}]", $"Code[Status.{Status}]",
+                $"APDU SW[0x{ResponseApdu.SW.ToString("x4", CultureInfo.InvariantCulture)}]");
 
         /// <summary>
-        /// Represents a ResponseStatus and StatusMessage pair returned by <see cref="StatusCodeMap"/>.
+        ///     Represents a ResponseStatus and StatusMessage pair returned by <see cref="StatusCodeMap" />.
         /// </summary>
         protected sealed class ResponseStatusPair
         {
-            public ResponseStatus Status { get; }
-            public string StatusMessage { get; }
-
             public ResponseStatusPair(ResponseStatus status, string statusMessage)
             {
                 Status = status;
                 StatusMessage = statusMessage;
             }
+
+            public ResponseStatus Status { get; }
+            public string StatusMessage { get; }
         }
     }
 }

@@ -18,8 +18,8 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    /// A shared response for many OTP commands, containing the YubiKey's current OTP application
-    /// status. This is often used to verify whether a configuration was successfully applied or not.
+    ///     A shared response for many OTP commands, containing the YubiKey's current OTP application
+    ///     status. This is often used to verify whether a configuration was successfully applied or not.
     /// </summary>
     public class ReadStatusResponse : OtpResponse, IYubiKeyResponseWithData<OtpStatus>
     {
@@ -37,15 +37,15 @@ namespace Yubico.YubiKey.Otp.Commands
         }
 
         /// <summary>
-        /// Gets the OTP application status.
+        ///     Gets the OTP application status.
         /// </summary>
         /// <returns>The data in the ResponseAPDU, presented as an OtpStatus class.</returns>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
+        ///     Thrown when <see cref="YubiKeyResponse.Status" /> is not <see cref="ResponseStatus.Success" />.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
-        /// Thrown when the data received from the YubiKey does not
-        /// match the expectations of the parser.
+        ///     Thrown when the data received from the YubiKey does not
+        ///     match the expectations of the parser.
         /// </exception>
         public OtpStatus GetData()
         {
@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.Otp.Commands
 
             if (ResponseApdu.Data.Length != OtpStatusLength)
             {
-                throw new MalformedYubiKeyResponseException()
+                throw new MalformedYubiKeyResponseException
                 {
                     ResponseClass = nameof(ReadStatusResponse),
                     ExpectedDataLength = OtpStatusLength,

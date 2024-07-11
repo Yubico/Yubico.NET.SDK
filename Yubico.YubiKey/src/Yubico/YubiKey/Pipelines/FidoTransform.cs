@@ -18,14 +18,13 @@ using System.Linq;
 using System.Security.Cryptography;
 using Yubico.Core.Devices.Hid;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Fido2.Commands;
 
 namespace Yubico.YubiKey.Pipelines
 {
     /// <summary>
-    /// Represents an ApduPipeline backed by a direct connection
-    /// to the U2F/FIDO2 application.
+    ///     Represents an ApduPipeline backed by a direct connection
+    ///     to the U2F/FIDO2 application.
     /// </summary>
     internal class FidoTransform : IApduTransform, ICancelApduTransform
     {
@@ -50,10 +49,6 @@ namespace Yubico.YubiKey.Pipelines
 
         private uint? _channelId;
 
-        public QueryCancel? QueryCancel { get; set; }
-
-        public bool IsChannelIdAcquired => _channelId.HasValue;
-
         public FidoTransform(IHidConnection hidConnection)
         {
             if (hidConnection is null)
@@ -63,6 +58,8 @@ namespace Yubico.YubiKey.Pipelines
 
             _hidConnection = hidConnection;
         }
+
+        public bool IsChannelIdAcquired => _channelId.HasValue;
 
         public void Setup() => AcquireCtapHidChannel();
 
@@ -100,6 +97,8 @@ namespace Yubico.YubiKey.Pipelines
         }
 
         public void Cleanup() => _channelId = null;
+
+        public QueryCancel? QueryCancel { get; set; }
 
         private static byte[] ConstructInitPacket(uint cid, byte cmd, ReadOnlySpan<byte> data, int totalDataLength)
         {
@@ -180,33 +179,33 @@ namespace Yubico.YubiKey.Pipelines
         }
 
         /// <summary>
-        /// Receives the FIDO U2F HID response message.
+        ///     Receives the FIDO U2F HID response message.
         /// </summary>
         /// <remarks>
-        /// The important information in a U2F HID response message are the
-        /// command identifier (1 byte), and the payload data (0-7609 bytes),
-        /// and this method will return both items. The command identifier
-        /// describes what the message is about. Most of the time it will match
-        /// the command identifier sent in the request. However, it's also
-        /// possible for a U2FHID_ERROR to be returned when certain failure
-        /// modes are encountered. This behavior is described in the
-        /// specification document FIDO U2F HID Protocol.
+        ///     The important information in a U2F HID response message are the
+        ///     command identifier (1 byte), and the payload data (0-7609 bytes),
+        ///     and this method will return both items. The command identifier
+        ///     describes what the message is about. Most of the time it will match
+        ///     the command identifier sent in the request. However, it's also
+        ///     possible for a U2FHID_ERROR to be returned when certain failure
+        ///     modes are encountered. This behavior is described in the
+        ///     specification document FIDO U2F HID Protocol.
         /// </remarks>
         /// <param name="channelId">
-        /// The id number for the operation.
+        ///     The id number for the operation.
         /// </param>
         /// <param name="commandByte">
-        /// The byte describing the command currently operating.
+        ///     The byte describing the command currently operating.
         /// </param>
         /// <param name="responseCommand">
-        /// An output parameter containing the command identifier returned by
-        /// the CTAP response.
+        ///     An output parameter containing the command identifier returned by
+        ///     the CTAP response.
         /// </param>
         /// <returns>
-        /// A byte array containing the response data.
+        ///     A byte array containing the response data.
         /// </returns>
         /// <exception cref="MalformedYubiKeyResponseException">
-        /// Thrown when the response payload size is larger than expected.
+        ///     Thrown when the response payload size is larger than expected.
         /// </exception>
         private byte[] ReceiveResponse(uint channelId, byte commandByte, out byte responseCommand)
         {
@@ -258,7 +257,7 @@ namespace Yubico.YubiKey.Pipelines
         }
 
         /// <summary>
-        /// Acquires a CTAPHID channel by sending CTAPHID_INIT to the broadcast channel.
+        ///     Acquires a CTAPHID channel by sending CTAPHID_INIT to the broadcast channel.
         /// </summary>
         /// <returns>A fresh CTAPHID channel</returns>
         private void AcquireCtapHidChannel()

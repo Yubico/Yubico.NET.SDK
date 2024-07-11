@@ -12,27 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// The response partner to the EnumerateRpsGetNextCommand, containing the
-    /// next relying party represented in the YubiKey.
+    ///     The response partner to the EnumerateRpsGetNextCommand, containing the
+    ///     next relying party represented in the YubiKey.
     /// </summary>
     public class EnumerateRpsGetNextResponse : Fido2Response, IYubiKeyResponseWithData<RelyingParty>
     {
         private readonly CredentialManagementResponse _response;
 
         /// <summary>
-        /// Constructs a new instance of
-        /// <see cref="EnumerateRpsGetNextResponse"/> based on a response APDU
-        /// provided by the YubiKey.
+        ///     Constructs a new instance of
+        ///     <see cref="EnumerateRpsGetNextResponse" /> based on a response APDU
+        ///     provided by the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// A response APDU containing the CBOR response data for the
-        /// <c>authenticatorCredentialManagement</c> command.
+        ///     A response APDU containing the CBOR response data for the
+        ///     <c>authenticatorCredentialManagement</c> command.
         /// </param>
         public EnumerateRpsGetNextResponse(ResponseApdu responseApdu)
             : base(responseApdu)
@@ -40,7 +39,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             _response = new CredentialManagementResponse(responseApdu);
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public RelyingParty GetData()
         {
             CredentialManagementData mgmtData = _response.GetData();

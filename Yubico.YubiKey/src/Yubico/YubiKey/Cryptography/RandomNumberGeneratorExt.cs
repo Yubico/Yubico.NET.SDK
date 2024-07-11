@@ -25,17 +25,17 @@ using System.Security.Cryptography;
 namespace Yubico.YubiKey.Cryptography
 {
     /// <summary>
-    /// Extension class to extend random number functionality.
+    ///     Extension class to extend random number functionality.
     /// </summary>
     public static class RandomNumberGeneratorExt
     {
         /// <summary>
-        /// Gets a random 32-bit signed int.
+        ///     Gets a random 32-bit signed int.
         /// </summary>
-        /// <param name="rng">The <see cref="RandomNumberGenerator"/> instance being extended.</param>
+        /// <param name="rng">The <see cref="RandomNumberGenerator" /> instance being extended.</param>
         /// <param name="fromInclusive">The lowest value of the range.</param>
         /// <param name="toExclusive">One above the highest value of the range.</param>
-        /// <returns>Random <see langword="Int32"/>.</returns>
+        /// <returns>Random <see langword="Int32" />.</returns>
         public static int GetInt32(
             this RandomNumberGenerator rng,
             int fromInclusive,
@@ -77,10 +77,10 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         /// <summary>
-        /// Fill a range with random bytes.
+        ///     Fill a range with random bytes.
         /// </summary>
-        /// <param name="rng">The <see cref="RandomNumberGenerator"/> instance being extended.</param>
-        /// <param name="data">A <see cref="Span{T}"/> to fill with random bytes.</param>
+        /// <param name="rng">The <see cref="RandomNumberGenerator" /> instance being extended.</param>
+        /// <param name="data">A <see cref="Span{T}" /> to fill with random bytes.</param>
         public static void Fill(
             this RandomNumberGenerator rng,
             Span<byte> data)
@@ -92,9 +92,9 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         /// <summary>
-        /// Get a <see langword="byte"/> with a random value.
+        ///     Get a <see langword="byte" /> with a random value.
         /// </summary>
-        /// <param name="rng">The <see cref="RandomNumberGenerator"/> instance being extended.</param>
+        /// <param name="rng">The <see cref="RandomNumberGenerator" /> instance being extended.</param>
         /// <param name="fromInclusive">The lowest value of the range.</param>
         /// <param name="toExclusive">One above the highest value of the range.</param>
         /// <returns></returns>

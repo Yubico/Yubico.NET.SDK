@@ -18,25 +18,20 @@ using System.Runtime.Serialization;
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
-    /// Exception that represents invalid or missing data passed to a CTAP2 command.
+    ///     Exception that represents invalid or missing data passed to a CTAP2 command.
     /// </summary>
     [Serializable]
     public class Ctap2DataException : Fido2Exception
     {
         /// <summary>
-        /// The name of the property that contained invalid data.
-        /// </summary>
-        public string? PropertyName { get; set; }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Ctap2DataException"/> class.
+        ///     Initializes a new instance of the <see cref="Ctap2DataException" /> class.
         /// </summary>
         public Ctap2DataException()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Ctap2DataException"/> class.
+        ///     Initializes a new instance of the <see cref="Ctap2DataException" /> class.
         /// </summary>
         /// <param name="message">The message that describes the error.</param>
         public Ctap2DataException(string message) : base(message)
@@ -44,7 +39,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Ctap2DataException"/> class.
+        ///     Initializes a new instance of the <see cref="Ctap2DataException" /> class.
         /// </summary>
         /// <param name="message">The error message that explains the reason for the exception.</param>
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
@@ -56,5 +51,10 @@ namespace Yubico.YubiKey.Fido2
             base(serializationInfo, streamingContext)
         {
         }
+
+        /// <summary>
+        ///     The name of the property that contained invalid data.
+        /// </summary>
+        public string? PropertyName { get; set; }
     }
 }

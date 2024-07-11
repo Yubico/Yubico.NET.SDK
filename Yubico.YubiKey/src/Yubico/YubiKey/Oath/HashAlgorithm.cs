@@ -15,7 +15,7 @@
 namespace Yubico.YubiKey.Oath
 {
     /// <summary>
-    /// The types of hash algorithms that are used by OATH credentials.
+    ///     The types of hash algorithms that are used by OATH credentials.
     /// </summary>
     public enum HashAlgorithm
     {

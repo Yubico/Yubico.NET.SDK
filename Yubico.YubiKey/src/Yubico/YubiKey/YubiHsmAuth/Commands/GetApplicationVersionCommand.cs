@@ -12,40 +12,39 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    /// Get the version of the YubiHSM Auth application as a major, minor, and
-    /// patch value.
+    ///     Get the version of the YubiHSM Auth application as a major, minor, and
+    ///     patch value.
     /// </summary>
     /// <remarks>
-    /// The associated response class is <see cref="GetApplicationVersionResponse"/>.
+    ///     The associated response class is <see cref="GetApplicationVersionResponse" />.
     /// </remarks>
     public sealed class GetApplicationVersionCommand : IYubiKeyCommand<GetApplicationVersionResponse>
     {
         private const byte GetApplicationVersionInstruction = 0x07;
 
         /// <summary>
-        /// Gets the <see cref="YubiKeyApplication"/> to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// <see cref="YubiKeyApplication.YubiHsmAuth"/>
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="GetApplicationVersionCommand"/> class.
+        ///     Constructs an instance of the <see cref="GetApplicationVersionCommand" /> class.
         /// </summary>
         public GetApplicationVersionCommand()
         {
         }
 
+        /// <summary>
+        ///     Gets the <see cref="YubiKeyApplication" /> to which this command belongs.
+        /// </summary>
+        /// <value>
+        ///     <see cref="YubiKeyApplication.YubiHsmAuth" />
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
+
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() =>
-            new CommandApdu()
+            new CommandApdu
             {
                 Ins = GetApplicationVersionInstruction
             };

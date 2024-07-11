@@ -21,65 +21,73 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Piv.Objects
 {
     /// <summary>
-    /// Use this class to process the Key History data.
+    ///     Use this class to process the Key History data.
     /// </summary>
     /// <remarks>
-    /// A Key History consists of three values:
-    /// <list type="bullet">
-    /// <item><description>Number of keys with on-card certificates</description></item>
-    /// <item><description>Number of keys with off-card certificates</description></item>
-    /// <item><description>Off-card certificate URL (if off-card or on-card certs
-    /// value is greater than zero)</description></item>
-    /// </list>
-    /// <para>
-    /// The YubiKey will not automatically set the number of on-card certs value.
-    /// For example, suppose you call the method
-    /// <see cref="PivSession.ImportCertificate"/> for a slot that has no cert.
-    /// There is now one more key with an on-card cert. However, the YubiKey will
-    /// not increment the value in the Key History storage area. If you want the
-    /// Key History to reflect the number of keys with certs on the card, you
-    /// must set this data object yourself.
-    /// </para>
-    /// <para>
-    /// The Off-card certificate URL is where the off-card certs can be found.
-    /// This should be set if the number of off-card certs is greater than zero.
-    /// If there are no off-card certs, this is generally null. However, the PIV
-    /// standard allows for a non-null URL if either or both the number of
-    /// on-card and off-card certs is not zero. That is, if the number of
-    /// off-card certs is zero, but the number of on-card certs is not zero, then
-    /// it is permissible to have an off-card cert URL.
-    /// </para>
-    /// <para>
-    /// This class will not check to make sure the values you set for the numbers
-    /// of certificates matches the YubiKey contents. For example, suppose you
-    /// have a YubiKey with only four private keys. Hence, the maximum
-    /// <c>OnCardCertificates</c> is four. But there is nothing stopping you from
-    /// creating a <c>KeyHistory</c> object and setting <c>OnCardCertificates</c>
-    /// to 20, 30, or even 255.
-    /// </para>
-    /// <para>
-    /// If you create an instance of <c>KeyHistory</c>, it will be empty
-    /// (<c>IsEmpty</c> will be <c>true</c>). Once you set one of the properties
-    /// (<c>OnCardCertificates</c> or <c>OffCardCertificates</c>), the object
-    /// will no longer be empty, even if you set those values to zero. If a
-    /// <c>PivDataObject</c> is empty, the <c>PivSession.WriteObject</c> method
-    /// will not write anything to the YubiKey. If the Data Object is not empty,
-    /// the <c>WriteObject</c> method will write to the YubiKey. So if you want
-    /// to write a Key History to the YubiKey that contains the information that
-    /// there are no certs and no URL, then create a new <c>KeyHistory</c> object,
-    /// set one of the properties to zero, and call the <c>Write</c> method.
-    /// </para>
-    /// <para>
-    /// If you create a new <c>KeyHistory</c> object by calling the constructor
-    /// directly, then set the properties and call <c>PivSession.WriteObject</c>,
-    /// that will, of course, overwrite the Key History on the YubiKey, if there
-    /// is one. Because that might not be something you want to do, this is the
-    /// most dangerous option.
-    /// </para>
-    /// <para>
-    /// See also the user's manual entry on
-    /// <xref href="UsersManualPivObjects"> PIV data objects</xref>.
-    /// </para>
+    ///     A Key History consists of three values:
+    ///     <list type="bullet">
+    ///         <item>
+    ///             <description>Number of keys with on-card certificates</description>
+    ///         </item>
+    ///         <item>
+    ///             <description>Number of keys with off-card certificates</description>
+    ///         </item>
+    ///         <item>
+    ///             <description>
+    ///                 Off-card certificate URL (if off-card or on-card certs
+    ///                 value is greater than zero)
+    ///             </description>
+    ///         </item>
+    ///     </list>
+    ///     <para>
+    ///         The YubiKey will not automatically set the number of on-card certs value.
+    ///         For example, suppose you call the method
+    ///         <see cref="PivSession.ImportCertificate" /> for a slot that has no cert.
+    ///         There is now one more key with an on-card cert. However, the YubiKey will
+    ///         not increment the value in the Key History storage area. If you want the
+    ///         Key History to reflect the number of keys with certs on the card, you
+    ///         must set this data object yourself.
+    ///     </para>
+    ///     <para>
+    ///         The Off-card certificate URL is where the off-card certs can be found.
+    ///         This should be set if the number of off-card certs is greater than zero.
+    ///         If there are no off-card certs, this is generally null. However, the PIV
+    ///         standard allows for a non-null URL if either or both the number of
+    ///         on-card and off-card certs is not zero. That is, if the number of
+    ///         off-card certs is zero, but the number of on-card certs is not zero, then
+    ///         it is permissible to have an off-card cert URL.
+    ///     </para>
+    ///     <para>
+    ///         This class will not check to make sure the values you set for the numbers
+    ///         of certificates matches the YubiKey contents. For example, suppose you
+    ///         have a YubiKey with only four private keys. Hence, the maximum
+    ///         <c>OnCardCertificates</c> is four. But there is nothing stopping you from
+    ///         creating a <c>KeyHistory</c> object and setting <c>OnCardCertificates</c>
+    ///         to 20, 30, or even 255.
+    ///     </para>
+    ///     <para>
+    ///         If you create an instance of <c>KeyHistory</c>, it will be empty
+    ///         (<c>IsEmpty</c> will be <c>true</c>). Once you set one of the properties
+    ///         (<c>OnCardCertificates</c> or <c>OffCardCertificates</c>), the object
+    ///         will no longer be empty, even if you set those values to zero. If a
+    ///         <c>PivDataObject</c> is empty, the <c>PivSession.WriteObject</c> method
+    ///         will not write anything to the YubiKey. If the Data Object is not empty,
+    ///         the <c>WriteObject</c> method will write to the YubiKey. So if you want
+    ///         to write a Key History to the YubiKey that contains the information that
+    ///         there are no certs and no URL, then create a new <c>KeyHistory</c> object,
+    ///         set one of the properties to zero, and call the <c>Write</c> method.
+    ///     </para>
+    ///     <para>
+    ///         If you create a new <c>KeyHistory</c> object by calling the constructor
+    ///         directly, then set the properties and call <c>PivSession.WriteObject</c>,
+    ///         that will, of course, overwrite the Key History on the YubiKey, if there
+    ///         is one. Because that might not be something you want to do, this is the
+    ///         most dangerous option.
+    ///     </para>
+    ///     <para>
+    ///         See also the user's manual entry on
+    ///         <xref href="UsersManualPivObjects"> PIV data objects</xref>.
+    ///     </para>
     /// </remarks>
     public sealed class KeyHistory : PivDataObject
     {
@@ -90,15 +98,38 @@ namespace Yubico.YubiKey.Piv.Objects
         private const int OffCardTag = 0xC2;
         private const int UrlTag = 0xF3;
         private const int UnusedTag = 0xFE;
-
-        private bool _disposed;
         private readonly Logger _log = Log.GetLogger();
 
+        private bool _disposed;
+
+        private byte _offCardCerts;
+
+        private Uri? _offCardCertUrl;
+
+        private byte _onCardCerts;
+        private byte[]? _urlBytes;
+
         /// <summary>
-        /// Number of Keys with On-Card Certificates. If you set this to zero,
-        /// and the <c>OffCardCertificates</c> property is also zero, the
-        /// <c>OffCardCertificateUrl</c> property will automatically be set to
-        /// null.
+        ///     Build a new object. This will not get the Key History from any
+        ///     YubiKey, it will only build an "empty" object.
+        /// </summary>
+        /// <remarks>
+        ///     To read the Key History data out of a YubiKey, call the
+        ///     <see cref="PivSession.ReadObject{PivObject}()" /> method.
+        /// </remarks>
+        public KeyHistory()
+        {
+            _log.LogInformation("Create a new instance of KeyHistory.");
+            _disposed = false;
+            DataTag = KeyHistoryDefinedDataTag;
+            IsEmpty = true;
+        }
+
+        /// <summary>
+        ///     Number of Keys with On-Card Certificates. If you set this to zero,
+        ///     and the <c>OffCardCertificates</c> property is also zero, the
+        ///     <c>OffCardCertificateUrl</c> property will automatically be set to
+        ///     null.
         /// </summary>
         public byte OnCardCertificates
         {
@@ -111,13 +142,11 @@ namespace Yubico.YubiKey.Piv.Objects
             }
         }
 
-        private byte _onCardCerts;
-
         /// <summary>
-        /// Number of Keys with Off-Card Certificates. If you set this to zero,
-        /// and the <c>OnCardCertificates</c> property is also zero, the
-        /// <c>OffCardCertificateUrl</c> property will automatically be set to
-        /// null.
+        ///     Number of Keys with Off-Card Certificates. If you set this to zero,
+        ///     and the <c>OnCardCertificates</c> property is also zero, the
+        ///     <c>OffCardCertificateUrl</c> property will automatically be set to
+        ///     null.
         /// </summary>
         public byte OffCardCertificates
         {
@@ -130,51 +159,30 @@ namespace Yubico.YubiKey.Piv.Objects
             }
         }
 
-        private byte _offCardCerts;
-
         /// <summary>
-        /// The URL where the Off-Card Certificates can be found. If there are no
-        /// On-Card or Off-Card Certs, it can only be set to null.
+        ///     The URL where the Off-Card Certificates can be found. If there are no
+        ///     On-Card or Off-Card Certs, it can only be set to null.
         /// </summary>
         /// <remarks>
-        /// This class will use the <c>AbsoluteUri</c> property of the <c>Uri</c>
-        /// class. Furthermore, it will "convert" it to bytes by using the UTF8
-        /// encoding. That is, you will build the <c>Uri</c> object, and when this
-        /// class builds the encoded <c>KeyHistory</c>, it will extract the
-        /// <c>AbsoluteUri</c> property and convert it into a byte array made up
-        /// of the UTF8 encoding for the off-card cert URL portion.
-        /// <para>
-        /// The PIV standard specifies that this value be made up of 118 bytes or
-        /// fewer. If the UTF8 encoding of the <c>AbsoluteUri</c> is greater than
-        /// 118, this class will throw an exception.
-        /// </para>
-        /// If this property is set to something other than null, and the
-        /// <c>OnCardCertificates</c> and <c>OffCardCertificates</c> properties
-        /// are both zero, a call to <c>Encode</c> will throw an exception.
+        ///     This class will use the <c>AbsoluteUri</c> property of the <c>Uri</c>
+        ///     class. Furthermore, it will "convert" it to bytes by using the UTF8
+        ///     encoding. That is, you will build the <c>Uri</c> object, and when this
+        ///     class builds the encoded <c>KeyHistory</c>, it will extract the
+        ///     <c>AbsoluteUri</c> property and convert it into a byte array made up
+        ///     of the UTF8 encoding for the off-card cert URL portion.
+        ///     <para>
+        ///         The PIV standard specifies that this value be made up of 118 bytes or
+        ///         fewer. If the UTF8 encoding of the <c>AbsoluteUri</c> is greater than
+        ///         118, this class will throw an exception.
+        ///     </para>
+        ///     If this property is set to something other than null, and the
+        ///     <c>OnCardCertificates</c> and <c>OffCardCertificates</c> properties
+        ///     are both zero, a call to <c>Encode</c> will throw an exception.
         /// </remarks>
         public Uri? OffCardCertificateUrl
         {
             get => _offCardCertUrl;
             set => SetOffCardCertUrl(value);
-        }
-
-        private Uri? _offCardCertUrl;
-        private byte[]? _urlBytes;
-
-        /// <summary>
-        /// Build a new object. This will not get the Key History from any
-        /// YubiKey, it will only build an "empty" object.
-        /// </summary>
-        /// <remarks>
-        /// To read the Key History data out of a YubiKey, call the
-        /// <see cref="PivSession.ReadObject{PivObject}()"/> method.
-        /// </remarks>
-        public KeyHistory()
-        {
-            _log.LogInformation("Create a new instance of KeyHistory.");
-            _disposed = false;
-            DataTag = KeyHistoryDefinedDataTag;
-            IsEmpty = true;
         }
 
         /// <inheritdoc />

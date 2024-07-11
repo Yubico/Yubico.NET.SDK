@@ -26,49 +26,53 @@ using Yubico.YubiKey.DeviceExtensions;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    /// Provides device and enumeration capabilities.
+    ///     Provides device and enumeration capabilities.
     /// </summary>
     public partial class YubiKeyDevice
     {
         /// <summary>
-        /// Enumerate all YubiKeys on the system over all available transports.
-        /// </summary>
-        /// <remarks><inheritdoc cref="FindByTransport(Transport)"/></remarks>
-        /// <returns><inheritdoc cref="FindByTransport(Transport)"/></returns>
-        public static IEnumerable<IYubiKeyDevice> FindAll() => FindByTransport(Transport.All);
-
-        /// <summary>
-        /// Enumerate YubiKeys over the given transports.
+        ///     Enumerate all YubiKeys on the system over all available transports.
         /// </summary>
         /// <remarks>
-        /// <para>
-        /// This method will exclude any connection (SmartCard, HidFido, HidKeyboard) that did
-        /// not successfully respond to a request for its Firmware Version.
-        /// This means that there may be fewer IYubiKeys returned than expected,
-        /// or that some IYubiKeys are missing an expected connection.
-        /// </para>
-        /// <para>
-        /// To the host device, a single YubiKey can appear as multiple devices. This method
-        /// will attempt to match these devices back together into a single
-        /// <see cref="IYubiKeyDevice"/> using their serial number. If they cannot be matched,
-        /// each connection will be returned as a separate <see cref="IYubiKeyDevice"/>.
-        /// </para>
+        ///     <inheritdoc cref="FindByTransport(Transport)" />
+        /// </remarks>
+        /// <returns>
+        ///     <inheritdoc cref="FindByTransport(Transport)" />
+        /// </returns>
+        public static IEnumerable<IYubiKeyDevice> FindAll() => FindByTransport();
+
+        /// <summary>
+        ///     Enumerate YubiKeys over the given transports.
+        /// </summary>
+        /// <remarks>
+        ///     <para>
+        ///         This method will exclude any connection (SmartCard, HidFido, HidKeyboard) that did
+        ///         not successfully respond to a request for its Firmware Version.
+        ///         This means that there may be fewer IYubiKeys returned than expected,
+        ///         or that some IYubiKeys are missing an expected connection.
+        ///     </para>
+        ///     <para>
+        ///         To the host device, a single YubiKey can appear as multiple devices. This method
+        ///         will attempt to match these devices back together into a single
+        ///         <see cref="IYubiKeyDevice" /> using their serial number. If they cannot be matched,
+        ///         each connection will be returned as a separate <see cref="IYubiKeyDevice" />.
+        ///     </para>
         /// </remarks>
         /// <param name="transport">
-        /// Argument controls which devices are searched for. Values <see cref="Transport.None"/>
-        /// will result in exceptions being thrown. <see cref="FindAll"/> is a
-        /// convenience function to find <see cref="Transport.All"/>.
+        ///     Argument controls which devices are searched for. Values <see cref="Transport.None" />
+        ///     will result in exceptions being thrown. <see cref="FindAll" /> is a
+        ///     convenience function to find <see cref="Transport.All" />.
         /// </param>
         /// <returns>
-        /// A collection of YubiKeys that were found, as <see cref="IYubiKeyDevice"/>s.
+        ///     A collection of YubiKeys that were found, as <see cref="IYubiKeyDevice" />s.
         /// </returns>
         /// <exception cref="ArgumentException">
-        /// Thrown when <paramref name="transport"/> is <see cref="Transport.None"/>.
+        ///     Thrown when <paramref name="transport" /> is <see cref="Transport.None" />.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
-        /// Thrown when attempting to find YubiKeys for the transport
-        /// <c>HidFido</c> on Windows, and the application is not running in an
-        /// elevated state (e.g. "Run as administrator").
+        ///     Thrown when attempting to find YubiKeys for the transport
+        ///     <c>HidFido</c> on Windows, and the application is not running in an
+        ///     elevated state (e.g. "Run as administrator").
         /// </exception>
         public static IEnumerable<IYubiKeyDevice> FindByTransport(Transport transport = Transport.All)
         {
@@ -102,14 +106,14 @@ namespace Yubico.YubiKey
         }
 
         /// <summary>
-        /// Get info on a specific YubiKey by serial number.
+        ///     Get info on a specific YubiKey by serial number.
         /// </summary>
         /// <remarks>
-        /// This method will only be successful if the YubiKey was programmed with the flag
-        /// <c>SerialNumberUsbVisible</c>.
+        ///     This method will only be successful if the YubiKey was programmed with the flag
+        ///     <c>SerialNumberUsbVisible</c>.
         /// </remarks>
         /// <param name="serialNumber">Integer representation of the YubiKey serial number.</param>
-        /// <param name="yubiKey">Out parameter that returns an <see cref="IYubiKeyDevice"/> instance.</param>
+        /// <param name="yubiKey">Out parameter that returns an <see cref="IYubiKeyDevice" /> instance.</param>
         /// <returns>A bool indicating whether the YubiKey was found.</returns>
         public static bool TryGetYubiKey(int serialNumber, out IYubiKeyDevice yubiKey)
         {
@@ -119,19 +123,19 @@ namespace Yubico.YubiKey
 
         internal class YubicoDeviceWithInfo
         {
-            /// <summary>
-            /// Device information synthesized from various commands.
-            /// </summary>
-            public YubiKeyDeviceInfo Info { get; }
-
-            public IDevice Device { get; }
-
             // Assumes that `device` is a YubiKey
             public YubicoDeviceWithInfo(IDevice device)
             {
                 Device = device;
                 Info = GetDeviceInfo();
             }
+
+            /// <summary>
+            ///     Device information synthesized from various commands.
+            /// </summary>
+            public YubiKeyDeviceInfo Info { get; }
+
+            public IDevice Device { get; }
 
             public override bool Equals(object? obj)
             {

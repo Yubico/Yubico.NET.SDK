@@ -20,73 +20,70 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    /// The command class for changing the management key.
+    ///     The command class for changing the management key.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// The management key is required when performing operations that add or
-    /// delete credentials (<see cref="AddCredentialCommand"/> and
-    /// <see cref="DeleteCredentialCommand"/>, respectively).
-    /// </para>
-    /// <para>
-    /// There is a limit of 8 attempts to authenticate with the management key
-    /// before the management key is blocked. Once the management key is
-    /// blocked, the application must be reset before performing operations
-    /// which require authentication with the management key (such as adding
-    /// credentials, deleting credentials, and changing the management key).
-    /// To reset the application, see <see cref="ResetApplicationCommand"/>.
-    /// Supplying the correct management key before the management key is
-    /// blocked will reset the retry counter to 8.
-    /// </para>
-    /// <para>
-    /// The partner response class is <see cref="ChangeManagementKeyResponse"/>.
-    /// </para>
+    ///     <para>
+    ///         The management key is required when performing operations that add or
+    ///         delete credentials (<see cref="AddCredentialCommand" /> and
+    ///         <see cref="DeleteCredentialCommand" />, respectively).
+    ///     </para>
+    ///     <para>
+    ///         There is a limit of 8 attempts to authenticate with the management key
+    ///         before the management key is blocked. Once the management key is
+    ///         blocked, the application must be reset before performing operations
+    ///         which require authentication with the management key (such as adding
+    ///         credentials, deleting credentials, and changing the management key).
+    ///         To reset the application, see <see cref="ResetApplicationCommand" />.
+    ///         Supplying the correct management key before the management key is
+    ///         blocked will reset the retry counter to 8.
+    ///     </para>
+    ///     <para>
+    ///         The partner response class is <see cref="ChangeManagementKeyResponse" />.
+    ///     </para>
     /// </remarks>
     public sealed class ChangeManagementKeyCommand : IYubiKeyCommand<ChangeManagementKeyResponse>
     {
         private const byte SetManagementKeyInstruction = 0x08;
 
+        /// <summary>
+        ///     The management key must be exactly 16 bytes.
+        /// </summary>
+        /// <remarks>
+        ///     The management key is supplied as an argument to the constructor
+        ///     <see cref="ChangeManagementKeyCommand(ReadOnlyMemory{byte}, ReadOnlyMemory{byte})" />.
+        /// </remarks>
+        public const int ValidManagementKeyLength = 16;
+
         private readonly ReadOnlyMemory<byte> _currentManagementKey;
         private readonly ReadOnlyMemory<byte> _newManagementKey;
 
         /// <summary>
-        /// The management key must be exactly 16 bytes.
+        ///     Change the management key.
         /// </summary>
         /// <remarks>
-        /// The management key is supplied as an argument to the constructor
-        /// <see cref="ChangeManagementKeyCommand(ReadOnlyMemory{byte}, ReadOnlyMemory{byte})"/>.
-        /// </remarks>
-        public const int ValidManagementKeyLength = 16;
-
-        /// <inheritdoc/>
-        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
-
-        /// <summary>
-        /// Change the management key.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// The management key is required when performing operations that add or
-        /// delete credentials (<see cref="AddCredentialCommand"/> and
-        /// <see cref="DeleteCredentialCommand"/>, respectively).
-        /// </para>
-        /// <para>
-        /// The caller is responsible for controlling the buffers which hold
-        /// the management keys and should overwrite the data after the command
-        /// is sent. The user's manual entry
-        /// <xref href="UsersManualSensitive">"Sensitive Data"</xref> has further
-        /// details and recommendations for handling this kind of data.
-        /// </para>
+        ///     <para>
+        ///         The management key is required when performing operations that add or
+        ///         delete credentials (<see cref="AddCredentialCommand" /> and
+        ///         <see cref="DeleteCredentialCommand" />, respectively).
+        ///     </para>
+        ///     <para>
+        ///         The caller is responsible for controlling the buffers which hold
+        ///         the management keys and should overwrite the data after the command
+        ///         is sent. The user's manual entry
+        ///         <xref href="UsersManualSensitive">"Sensitive Data"</xref> has further
+        ///         details and recommendations for handling this kind of data.
+        ///     </para>
         /// </remarks>
         /// <param name="currentManagementKey">
-        /// The current value of the management key. The default value is all
-        /// zeros.
+        ///     The current value of the management key. The default value is all
+        ///     zeros.
         /// </param>
         /// <param name="newManagementKey">
-        /// The new value of the management key.
+        ///     The new value of the management key.
         /// </param>
         /// <exception cref="ArgumentException">
-        /// Thrown when a management key has an invalid length.
+        ///     Thrown when a management key has an invalid length.
         /// </exception>
         public ChangeManagementKeyCommand(
             ReadOnlyMemory<byte> currentManagementKey,
@@ -109,23 +106,26 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                         newManagementKey.Length));
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
+        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
+
+        /// <inheritdoc />
         public CommandApdu CreateCommandApdu() =>
-            new CommandApdu()
+            new CommandApdu
             {
                 Ins = SetManagementKeyInstruction,
                 Data = BuildDataField()
             };
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public ChangeManagementKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new ChangeManagementKeyResponse(responseApdu);
 
         /// <summary>
-        /// Build the <see cref="CommandApdu.Data"/> field from the given data.
+        ///     Build the <see cref="CommandApdu.Data" /> field from the given data.
         /// </summary>
         /// <returns>
-        /// Data formatted as a TLV.
+        ///     Data formatted as a TLV.
         /// </returns>
         private byte[] BuildDataField()
         {

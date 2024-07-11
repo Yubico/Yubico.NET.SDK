@@ -18,22 +18,22 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
-    /// The response to the <see cref="VerifyFipsModeCommand"/> command, containing the response from the YubiKey.
+    ///     The response to the <see cref="VerifyFipsModeCommand" /> command, containing the response from the YubiKey.
     /// </summary>
     public sealed class VerifyFipsModeResponse : U2fResponse, IYubiKeyResponseWithData<bool>
     {
         /// <summary>
-        /// Constructs a VerifyFipsModeResponse based on a ResponseApdu received from the YubiKey.
+        ///     Constructs a VerifyFipsModeResponse based on a ResponseApdu received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// The object containing the response APDU returned by the YubiKey.
+        ///     The object containing the response APDU returned by the YubiKey.
         /// </param>
         public VerifyFipsModeResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override ResponseStatusPair StatusCodeMap =>
             StatusWord switch
             {
@@ -43,10 +43,10 @@ namespace Yubico.YubiKey.U2f.Commands
             };
 
         /// <summary>
-        /// Gets the response data, presented as a boolean value.
+        ///     Gets the response data, presented as a boolean value.
         /// </summary>
         /// <returns>
-        /// Returns true if (and only if) the YubiKey U2F application is currently in "FIPS Approved mode".
+        ///     Returns true if (and only if) the YubiKey U2F application is currently in "FIPS Approved mode".
         /// </returns>
         public bool GetData() =>
             StatusWord switch

@@ -18,19 +18,19 @@ using System.Globalization;
 namespace Yubico.YubiKey.Piv
 {
     /// <summary>
-    /// This class provides extension methods for the <see cref="PivSession"/> class.
+    ///     This class provides extension methods for the <see cref="PivSession" /> class.
     /// </summary>
     public static class PivSessionExtensions
     {
         /// <summary>
-        /// Throws a <see cref="NotSupportedException"/> if the specified <see cref="PivAlgorithm"/>
-        /// is not supported by the provided <see cref="IYubiKeyDevice"/>.
+        ///     Throws a <see cref="NotSupportedException" /> if the specified <see cref="PivAlgorithm" />
+        ///     is not supported by the provided <see cref="IYubiKeyDevice" />.
         /// </summary>
         /// <param name="device">The YubiKey device to check for algorithm support.</param>
         /// <param name="algorithm">The PIV algorithm to check.</param>
         /// <exception cref="NotSupportedException">
-        /// Thrown if the specified <paramref name="algorithm"/> is not supported by the
-        /// <paramref name="device"/>.
+        ///     Thrown if the specified <paramref name="algorithm" /> is not supported by the
+        ///     <paramref name="device" />.
         /// </exception>
         public static void ThrowIfUnsupportedAlgorithm(
             this IYubiKeyDevice device,

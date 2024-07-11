@@ -14,7 +14,6 @@
 
 using System;
 using System.Globalization;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKey.Cryptography;
@@ -22,8 +21,8 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.Fido2.PinProtocols
 {
     /// <summary>
-    /// This class contains methods that perform the platform operations of
-    /// FIDO2's PIN/UV auth protocol two.
+    ///     This class contains methods that perform the platform operations of
+    ///     FIDO2's PIN/UV auth protocol two.
     /// </summary>
     public class PinUvAuthProtocolTwo : PinUvAuthProtocolBase
     {
@@ -35,13 +34,13 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         private const string InfoAes = "CTAP2 AES key";
         private const string InfoHmac = "CTAP2 HMAC key";
 
-        private bool _disposed;
-
         private readonly byte[] _aesKey = new byte[KeyLength];
         private readonly byte[] _hmacKey = new byte[KeyLength];
 
+        private bool _disposed;
+
         /// <summary>
-        /// Constructs a new instance of <see cref="PinUvAuthProtocolTwo"/>.
+        ///     Constructs a new instance of <see cref="PinUvAuthProtocolTwo" />.
         /// </summary>
         public PinUvAuthProtocolTwo()
         {
@@ -233,7 +232,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         }
 
         /// <summary>
-        /// Release resources, overwrite sensitive data.
+        ///     Release resources, overwrite sensitive data.
         /// </summary>
         protected override void Dispose(bool disposing)
         {

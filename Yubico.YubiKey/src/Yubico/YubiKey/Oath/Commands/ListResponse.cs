@@ -22,18 +22,18 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    /// The response to the <see cref="ListCommand"/> command, containing the YubiKey's
-    /// configured credentials list.
+    ///     The response to the <see cref="ListCommand" /> command, containing the YubiKey's
+    ///     configured credentials list.
     /// </summary>
     public class ListResponse : OathResponse, IYubiKeyResponseWithData<List<Credential>>
     {
         private const byte NameListTag = 0x72;
 
         /// <summary>
-        /// Constructs a ListResponse instance based on a ResponseApdu received from the YubiKey.
+        ///     Constructs a ListResponse instance based on a ResponseApdu received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
+        ///     The ResponseApdu returned by the YubiKey.
         /// </param>
         public ListResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -41,16 +41,16 @@ namespace Yubico.YubiKey.Oath.Commands
         }
 
         /// <summary>
-        /// Gets the list of <see cref="Credential"/> objects.
+        ///     Gets the list of <see cref="Credential" /> objects.
         /// </summary>
         /// <returns>
-        /// The list of credentials.
+        ///     The list of credentials.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="IYubiKeyResponse.Status"/> is not equal to <see cref="ResponseStatus.Success"/>.
+        ///     Thrown when <see cref="IYubiKeyResponse.Status" /> is not equal to <see cref="ResponseStatus.Success" />.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
-        /// Thrown when the data provided does not meet the expectations, and cannot be parsed.
+        ///     Thrown when the data provided does not meet the expectations, and cannot be parsed.
         /// </exception>
         public List<Credential> GetData()
         {
@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Oath.Commands
                         credentialList.Add(_GetCredential(tlvReader.ReadValue(NameListTag)));
                         break;
                     default:
-                        throw new MalformedYubiKeyResponseException()
+                        throw new MalformedYubiKeyResponseException
                         {
                             ResponseClass = nameof(ListResponse),
                             ActualDataLength = ResponseApdu.Data.Length
@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Oath.Commands
         }
 
         /// <returns>
-        /// Credential presented as a type, algorithm and name as "issuer:account".
+        ///     Credential presented as a type, algorithm and name as "issuer:account".
         /// </returns>
         private static Credential _GetCredential(ReadOnlyMemory<byte> value)
         {

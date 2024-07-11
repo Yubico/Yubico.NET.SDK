@@ -13,94 +13,93 @@
 // limitations under the License.
 
 using System;
-using System.Formats.Cbor;
 using System.Globalization;
 using Yubico.YubiKey.Fido2.Cbor;
 
 namespace Yubico.YubiKey.Fido2.Cose
 {
     /// <summary>
-    /// A base class for all COSE key representations.
+    ///     A base class for all COSE key representations.
     /// </summary>
     public abstract class CoseKey : ICborEncode
     {
         /// <summary>
-        /// The CBOR tag (key of key/value pair) for the COSE key type.
+        ///     The CBOR tag (key of key/value pair) for the COSE key type.
         /// </summary>
         protected const int TagKeyType = 1;
 
         /// <summary>
-        /// The CBOR tag (key of key/value pair) for the COSE key algorithm.
+        ///     The CBOR tag (key of key/value pair) for the COSE key algorithm.
         /// </summary>
         protected const int TagAlgorithm = 3;
 
         /// <summary>
-        /// The key's type (or family). E.g. "EC2" for elliptic curve with an X,Y point.
-        /// </summary>
-        public CoseKeyType Type { get; set; }
-
-        /// <summary>
-        /// The key's algorithm.
-        /// </summary>
-        public CoseAlgorithmIdentifier Algorithm { get; set; }
-
-        /// <summary>
-        /// Constructs a <see cref="CoseKey"/> instance.
+        ///     Constructs a <see cref="CoseKey" /> instance.
         /// </summary>
         protected CoseKey()
         {
         }
 
         /// <summary>
-        /// Return a new byte array that is the key data encoded following the
-        /// FIDO2/CBOR standard.
+        ///     The key's type (or family). E.g. "EC2" for elliptic curve with an X,Y point.
+        /// </summary>
+        public CoseKeyType Type { get; set; }
+
+        /// <summary>
+        ///     The key's algorithm.
+        /// </summary>
+        public CoseAlgorithmIdentifier Algorithm { get; set; }
+
+        /// <summary>
+        ///     Return a new byte array that is the key data encoded following the
+        ///     FIDO2/CBOR standard.
         /// </summary>
         /// <returns>
-        /// The encoded key.
+        ///     The encoded key.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// The object contains no key data.
+        ///     The object contains no key data.
         /// </exception>
         byte[] ICborEncode.CborEncode() => Encode();
 
         /// <summary>
-        /// Return a new byte array that is the key data encoded following the
-        /// FIDO2/CBOR standard.
+        ///     Return a new byte array that is the key data encoded following the
+        ///     FIDO2/CBOR standard.
         /// </summary>
         /// <returns>
-        /// The encoded key.
+        ///     The encoded key.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// The object contains no key data.
+        ///     The object contains no key data.
         /// </exception>
         public abstract byte[] Encode();
 
         /// <summary>
-        /// Creates the correct COSE key representation based on the CBOR data provided.
+        ///     Creates the correct COSE key representation based on the CBOR data provided.
         /// </summary>
         /// <param name="coseEncodedKey">
-        /// A valid COSE key representation.
+        ///     A valid COSE key representation.
         /// </param>
         /// <param name="bytesRead">
-        /// The method will return the number of bytes read in this argument.
+        ///     The method will return the number of bytes read in this argument.
         /// </param>
         /// <returns>
-        /// A COSE key instance corresponding to the type described by the CBOR data.
+        ///     A COSE key instance corresponding to the type described by the CBOR data.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        /// The <paramref name="coseEncodedKey"/> parameter was null.
+        ///     The <paramref name="coseEncodedKey" /> parameter was null.
         /// </exception>
         /// <exception cref="Ctap2DataException">
-        /// <para>
-        /// The CBOR reader is not in the correct position.
-        /// </para>
-        /// --- or ---
-        /// <para>
-        /// The <see cref="CoseAlgorithmIdentifier"/> could not be determined from the data provided.
-        /// </para>
+        ///     <para>
+        ///         The CBOR reader is not in the correct position.
+        ///     </para>
+        ///     --- or ---
+        ///     <para>
+        ///         The <see cref="CoseAlgorithmIdentifier" /> could not be determined from the data provided.
+        ///     </para>
         /// </exception>
         /// <exception cref="NotSupportedException">
-        /// The <see cref="CoseAlgorithmIdentifier"/> is not supported by this object representation.
+        ///     The <see cref="CoseAlgorithmIdentifier" /> is not supported by this object representation.
         /// </exception>
         public static CoseKey Create(ReadOnlyMemory<byte> coseEncodedKey, out int bytesRead)
         {

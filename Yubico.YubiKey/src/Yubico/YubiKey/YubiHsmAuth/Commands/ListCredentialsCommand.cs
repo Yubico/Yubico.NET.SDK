@@ -12,41 +12,40 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    /// Get the public properties of all <see cref="Credential"/>s in the
-    /// YubiHSM Auth application, along with the number of retries remaining
-    /// for each.
+    ///     Get the public properties of all <see cref="Credential" />s in the
+    ///     YubiHSM Auth application, along with the number of retries remaining
+    ///     for each.
     /// </summary>
     /// <remarks>
-    /// The associated response class is <see cref="ListCredentialsResponse"/>.
+    ///     The associated response class is <see cref="ListCredentialsResponse" />.
     /// </remarks>
     public sealed class ListCredentialsCommand : IYubiKeyCommand<ListCredentialsResponse>
     {
         private const byte ListCredentialsInstruction = 0x05;
 
         /// <summary>
-        /// Gets the <see cref="YubiKeyApplication"/> to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// <see cref="YubiKeyApplication.YubiHsmAuth"/>
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="ListCredentialsCommand"/> class.
+        ///     Constructs an instance of the <see cref="ListCredentialsCommand" /> class.
         /// </summary>
         public ListCredentialsCommand()
         {
         }
 
+        /// <summary>
+        ///     Gets the <see cref="YubiKeyApplication" /> to which this command belongs.
+        /// </summary>
+        /// <value>
+        ///     <see cref="YubiKeyApplication.YubiHsmAuth" />
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.YubiHsmAuth;
+
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() =>
-            new CommandApdu()
+            new CommandApdu
             {
                 Ins = ListCredentialsInstruction
             };

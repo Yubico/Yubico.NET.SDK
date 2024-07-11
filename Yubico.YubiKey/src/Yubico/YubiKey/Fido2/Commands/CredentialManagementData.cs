@@ -19,32 +19,32 @@ using Yubico.YubiKey.Fido2.Cose;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Parses the data returned by the YubiKey after calling one of the
-    /// <c>authenticatorCredentialManagement</c> subcommands. This class is
-    /// relevant only to the <see cred="CredentialManagementResponse"/> class in
-    /// order to extract data from a response.
+    ///     Parses the data returned by the YubiKey after calling one of the
+    ///     <c>authenticatorCredentialManagement</c> subcommands. This class is
+    ///     relevant only to the <see cred="CredentialManagementResponse" /> class in
+    ///     order to extract data from a response.
     /// </summary>
     /// <remarks>
-    /// When a credential management subcommand is sent to the YubiKey, it
-    /// returns data encoded following the definition of the
-    /// <c>authenticatorCredentialManagement</c> response. The FIDO2 standard
-    /// defines this encoded response as a map of a set of elements. The standard
-    /// also specifies which subset of the total data is returned by each
-    /// subcommand.
-    /// <para>
-    /// After calling one of the subcommands, get the data out of the response.
-    /// It will be an instance of this class. Only those elements the particular
-    /// subcommand returns will be represented in the object, the rest will be
-    /// null.
-    /// </para>
-    /// <para>
-    /// For example, if you call the get credential metadata subcommand, the
-    /// YubiKey will return the number of discoverable credentials and the
-    /// maximum number of credentials the YubiKey can yet hold (i.e. the number
-    /// of remaining slots). Hence, the only two properties with values will be
-    /// <c>NumberOfDiscoverableCredentials</c> and
-    /// <c>RemainingCredentialCount</c>. All other properties will be null.
-    /// </para>
+    ///     When a credential management subcommand is sent to the YubiKey, it
+    ///     returns data encoded following the definition of the
+    ///     <c>authenticatorCredentialManagement</c> response. The FIDO2 standard
+    ///     defines this encoded response as a map of a set of elements. The standard
+    ///     also specifies which subset of the total data is returned by each
+    ///     subcommand.
+    ///     <para>
+    ///         After calling one of the subcommands, get the data out of the response.
+    ///         It will be an instance of this class. Only those elements the particular
+    ///         subcommand returns will be represented in the object, the rest will be
+    ///         null.
+    ///     </para>
+    ///     <para>
+    ///         For example, if you call the get credential metadata subcommand, the
+    ///         YubiKey will return the number of discoverable credentials and the
+    ///         maximum number of credentials the YubiKey can yet hold (i.e. the number
+    ///         of remaining slots). Hence, the only two properties with values will be
+    ///         <c>NumberOfDiscoverableCredentials</c> and
+    ///         <c>RemainingCredentialCount</c>. All other properties will be null.
+    ///     </para>
     /// </remarks>
     public class CredentialManagementData
     {
@@ -60,112 +60,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         private const int KeyCredProtectPolicy = 10;
         private const int KeyLargeBlobKey = 11;
 
-        /// <summary>
-        /// The number of discoverable credentials on the YubiKey. This is not
-        /// the total number of credentials, because there could be
-        /// non-discoverable credentials as well.
-        /// </summary>
-        /// <remarks>
-        /// Not all calls to get credential management data will return this
-        /// element, hence, it can be null.
-        /// </remarks>
-        public int? NumberOfDiscoverableCredentials { get; private set; }
-
-        /// <summary>
-        /// The number of credentials the YubiKey can still hold.
-        /// </summary>
-        /// <remarks>
-        /// Not all calls to get credential management data will return this
-        /// element, hence, it can be null.
-        /// </remarks>
-        public int? RemainingCredentialCount { get; private set; }
-
-        /// <summary>
-        /// The total number of relying parties present on the YubiKey, when the
-        /// request for data is one related to specific relying parties.
-        /// </summary>
-        /// <remarks>
-        /// Not all calls to get credential management data will return this
-        /// element, hence, it can be null.
-        /// </remarks>
-        public int? TotalRelyingPartyCount { get; private set; }
-
-        /// <summary>
-        /// The relying party information when the request for data is one
-        /// related to specific relying parties.
-        /// </summary>
-        /// <remarks>
-        /// Not all calls to get credential management data will return this
-        /// element, hence, it can be null.
-        /// </remarks>
-        public RelyingParty? RelyingParty { get; private set; }
-
-        /// <summary>
-        /// The SHA-256 digest of the relying party ID when the request for data
-        /// is one related to specific relying parties.
-        /// </summary>
-        /// <remarks>
-        /// Not all calls to get credential management data will return this
-        /// element, hence, it can be null.
-        /// </remarks>
-        public ReadOnlyMemory<byte>? RelyingPartyIdHash { get; private set; }
-
-        /// <summary>
-        /// The total number of credentials present on the YubiKey for a
-        /// specified relying party.
-        /// </summary>
-        /// <remarks>
-        /// Not all calls to get credential management data will return this
-        /// element, hence, it can be null.
-        /// </remarks>
-        public int? TotalCredentialsForRelyingParty { get; private set; }
-
-        /// <summary>
-        /// The user entity for a credential returned.
-        /// </summary>
-        /// <remarks>
-        /// Not all calls to get credential management data will return this
-        /// element, hence, it can be null.
-        /// </remarks>
-        public UserEntity? User { get; private set; }
-
-        /// <summary>
-        /// The credential ID for a credential returned.
-        /// </summary>
-        /// <remarks>
-        /// Not all calls to get credential management data will return this
-        /// element, hence, it can be null.
-        /// </remarks>
-        public CredentialId? CredentialId { get; private set; }
-
-        /// <summary>
-        /// The public key for a credential returned.
-        /// </summary>
-        /// <remarks>
-        /// Not all calls to get credential management data will return this
-        /// element, hence, it can be null.
-        /// </remarks>
-        public CoseKey? CredentialPublicKey { get; private set; }
-
-        /// <summary>
-        /// The credential protection policy. See section 12.1.1 of the FIDO2
-        /// standard for a description of the meanings of the number returned.
-        /// </summary>
-        /// <remarks>
-        /// Not all calls to get credential management data will return this
-        /// element, hence, it can be null.
-        /// </remarks>
-        public int? CredProtectPolicy { get; private set; }
-
-        /// <summary>
-        /// The large blob key for a credential.
-        /// </summary>
-        /// <remarks>
-        /// Not all calls to get credential management data will return this
-        /// element, hence, it can be null.
-        /// </remarks>
-        public ReadOnlyMemory<byte>? LargeBlobKey { get; private set; }
-
         // The default constructor explicitly defined. We don't want it to be
         // used.
         private CredentialManagementData()
@@ -174,21 +68,21 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// Build a new instance of <see cref="CredentialManagementData"/> based on the
-        /// given CBOR encoding.
+        ///     Build a new instance of <see cref="CredentialManagementData" /> based on the
+        ///     given CBOR encoding.
         /// </summary>
         /// <remarks>
-        /// The encoding must follow the definition of the
-        /// <c>authenticatorCredentialManagement response structure</c> in section
-        /// 6.8 of the CTAP 2.1 standard.
+        ///     The encoding must follow the definition of the
+        ///     <c>authenticatorCredentialManagement response structure</c> in section
+        ///     6.8 of the CTAP 2.1 standard.
         /// </remarks>
         /// <param name="cborEncoding">
-        /// The credential data, encoded following the CTAP 2.1 and CBOR (RFC
-        /// 8949) standards.
+        ///     The credential data, encoded following the CTAP 2.1 and CBOR (RFC
+        ///     8949) standards.
         /// </param>
         /// <exception cref="Ctap2DataException">
-        /// The <c>cborEncoding</c> is not a valid CBOR encoding, or it is not a
-        /// correct encoding for FIDO2 credential management data.
+        ///     The <c>cborEncoding</c> is not a valid CBOR encoding, or it is not a
+        ///     correct encoding for FIDO2 credential management data.
         /// </exception>
         public CredentialManagementData(ReadOnlyMemory<byte> cborEncoding)
         {
@@ -254,5 +148,111 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             cborReader.ReadEndMap();
         }
+
+        /// <summary>
+        ///     The number of discoverable credentials on the YubiKey. This is not
+        ///     the total number of credentials, because there could be
+        ///     non-discoverable credentials as well.
+        /// </summary>
+        /// <remarks>
+        ///     Not all calls to get credential management data will return this
+        ///     element, hence, it can be null.
+        /// </remarks>
+        public int? NumberOfDiscoverableCredentials { get; private set; }
+
+        /// <summary>
+        ///     The number of credentials the YubiKey can still hold.
+        /// </summary>
+        /// <remarks>
+        ///     Not all calls to get credential management data will return this
+        ///     element, hence, it can be null.
+        /// </remarks>
+        public int? RemainingCredentialCount { get; private set; }
+
+        /// <summary>
+        ///     The total number of relying parties present on the YubiKey, when the
+        ///     request for data is one related to specific relying parties.
+        /// </summary>
+        /// <remarks>
+        ///     Not all calls to get credential management data will return this
+        ///     element, hence, it can be null.
+        /// </remarks>
+        public int? TotalRelyingPartyCount { get; private set; }
+
+        /// <summary>
+        ///     The relying party information when the request for data is one
+        ///     related to specific relying parties.
+        /// </summary>
+        /// <remarks>
+        ///     Not all calls to get credential management data will return this
+        ///     element, hence, it can be null.
+        /// </remarks>
+        public RelyingParty? RelyingParty { get; private set; }
+
+        /// <summary>
+        ///     The SHA-256 digest of the relying party ID when the request for data
+        ///     is one related to specific relying parties.
+        /// </summary>
+        /// <remarks>
+        ///     Not all calls to get credential management data will return this
+        ///     element, hence, it can be null.
+        /// </remarks>
+        public ReadOnlyMemory<byte>? RelyingPartyIdHash { get; private set; }
+
+        /// <summary>
+        ///     The total number of credentials present on the YubiKey for a
+        ///     specified relying party.
+        /// </summary>
+        /// <remarks>
+        ///     Not all calls to get credential management data will return this
+        ///     element, hence, it can be null.
+        /// </remarks>
+        public int? TotalCredentialsForRelyingParty { get; private set; }
+
+        /// <summary>
+        ///     The user entity for a credential returned.
+        /// </summary>
+        /// <remarks>
+        ///     Not all calls to get credential management data will return this
+        ///     element, hence, it can be null.
+        /// </remarks>
+        public UserEntity? User { get; private set; }
+
+        /// <summary>
+        ///     The credential ID for a credential returned.
+        /// </summary>
+        /// <remarks>
+        ///     Not all calls to get credential management data will return this
+        ///     element, hence, it can be null.
+        /// </remarks>
+        public CredentialId? CredentialId { get; private set; }
+
+        /// <summary>
+        ///     The public key for a credential returned.
+        /// </summary>
+        /// <remarks>
+        ///     Not all calls to get credential management data will return this
+        ///     element, hence, it can be null.
+        /// </remarks>
+        public CoseKey? CredentialPublicKey { get; private set; }
+
+        /// <summary>
+        ///     The credential protection policy. See section 12.1.1 of the FIDO2
+        ///     standard for a description of the meanings of the number returned.
+        /// </summary>
+        /// <remarks>
+        ///     Not all calls to get credential management data will return this
+        ///     element, hence, it can be null.
+        /// </remarks>
+        public int? CredProtectPolicy { get; private set; }
+
+        /// <summary>
+        ///     The large blob key for a credential.
+        /// </summary>
+        /// <remarks>
+        ///     Not all calls to get credential management data will return this
+        ///     element, hence, it can be null.
+        /// </remarks>
+        public ReadOnlyMemory<byte>? LargeBlobKey { get; private set; }
     }
 }

@@ -17,31 +17,31 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Management.Commands
 {
     /// <summary>
-    /// Configures device-wide settings on the YubiKey.
+    ///     Configures device-wide settings on the YubiKey.
     /// </summary>
     public class SetDeviceInfoCommand : SetDeviceInfoBaseCommand, IYubiKeyCommand<YubiKeyResponse>
     {
         private const byte SetDeviceInfoInstruction = 0x1C;
 
-        /// <inheritdoc />
-        public YubiKeyApplication Application => YubiKeyApplication.Management;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="SetDeviceInfoCommand"/> class.
+        ///     Initializes a new instance of the <see cref="SetDeviceInfoCommand" /> class.
         /// </summary>
         public SetDeviceInfoCommand()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SetDeviceInfoCommand"/> class.
+        ///     Initializes a new instance of the <see cref="SetDeviceInfoCommand" /> class.
         /// </summary>
         /// <param name="baseCommand">
-        /// An instance of the base class to use for initialization.
+        ///     An instance of the base class to use for initialization.
         /// </param>
         public SetDeviceInfoCommand(SetDeviceInfoBaseCommand baseCommand) : base(baseCommand)
         {
         }
+
+        /// <inheritdoc />
+        public YubiKeyApplication Application => YubiKeyApplication.Management;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() =>

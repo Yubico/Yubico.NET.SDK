@@ -15,17 +15,17 @@
 namespace Yubico.YubiKey.Otp
 {
     /// <summary>
-    /// Character encodings supported by NDEF text records.
+    ///     Character encodings supported by NDEF text records.
     /// </summary>
     public enum NdefTextEncoding
     {
         /// <summary>
-        /// UTF-8 encoding.
+        ///     UTF-8 encoding.
         /// </summary>
         Utf8,
 
         /// <summary>
-        /// UTF-16 encoding.
+        ///     UTF-16 encoding.
         /// </summary>
         Utf16
     }

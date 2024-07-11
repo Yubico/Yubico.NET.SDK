@@ -91,7 +91,7 @@ namespace Yubico.YubiKey.Scp03
         private static byte[] ApduToBytes(CommandApdu apdu)
         {
             byte[] data = apdu.Data.ToArray();
-            byte[] header = new byte[] { apdu.Cla, apdu.Ins, apdu.P1, apdu.P2 };
+            byte[] header = { apdu.Cla, apdu.Ins, apdu.P1, apdu.P2 };
             byte[] encodedLen = EncodeLen(data.Length);
             using var s = new MemoryStream();
             s.Write(header, offset: 0, header.Length);
@@ -102,7 +102,7 @@ namespace Yubico.YubiKey.Scp03
 
         private static CommandApdu AddDataToApdu(CommandApdu apdu, byte[] data)
         {
-            var newApdu = new CommandApdu()
+            var newApdu = new CommandApdu
             {
                 Cla = apdu.Cla,
                 Ins = apdu.Ins,
@@ -127,14 +127,12 @@ namespace Yubico.YubiKey.Scp03
         {
             if (len <= 0xFF)
             {
-                return new byte[] { (byte)len };
+                return new[] { (byte)len };
             }
-            else
-            {
-                byte lenUpper = (byte)(len >> 8);
-                byte lenLower = (byte)(len & 0xFF);
-                return new byte[] { 0x00, lenUpper, lenLower };
-            }
+
+            byte lenUpper = (byte)(len >> 8);
+            byte lenLower = (byte)(len & 0xFF);
+            return new byte[] { 0x00, lenUpper, lenLower };
         }
     }
 }

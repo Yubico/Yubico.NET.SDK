@@ -17,32 +17,32 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Management.Commands
 {
     /// <summary>
-    /// Gets detailed information about the YubiKey and its current configuration.
+    ///     Gets detailed information about the YubiKey and its current configuration.
     /// </summary>
     /// <remarks>
-    /// This class has a corresponding partner class <see cref="GetDeviceInfoResponse"/>
+    ///     This class has a corresponding partner class <see cref="GetDeviceInfoResponse" />
     /// </remarks>
     public sealed class GetPagedDeviceInfoCommand : IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse>
     {
         private const byte GetDeviceInfoInstruction = 0x1D;
 
-        /// <inheritdoc />
-        public byte Page { get; set; }
-
         /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// <see cref="YubiKeyApplication.Management"/>
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Management;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="GetDeviceInfoCommand"/> class.
+        ///     Initializes a new instance of the <see cref="GetDeviceInfoCommand" /> class.
         /// </summary>
         public GetPagedDeviceInfoCommand()
         {
         }
+
+        /// <inheritdoc />
+        public byte Page { get; set; }
+
+        /// <summary>
+        ///     Gets the YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        ///     <see cref="YubiKeyApplication.Management" />
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Management;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() =>

@@ -24,10 +24,10 @@ namespace Yubico.YubiKey.Cryptography
         public const int BlockSizeBits = 128;
 
         /// <summary>
-        /// Computes the raw AES128 encryption of the input block using the specified key.
+        ///     Computes the raw AES128 encryption of the input block using the specified key.
         /// </summary>
         /// <remarks>
-        /// This is not a secure authenticated encryption scheme.
+        ///     This is not a secure authenticated encryption scheme.
         /// </remarks>
         /// <param name="key">16-byte AES128 key</param>
         /// <param name="plaintext">16-byte input block</param>
@@ -80,10 +80,10 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         /// <summary>
-        /// Computes the AES-CBC encryption of the input blocks using the specified key.
+        ///     Computes the AES-CBC encryption of the input blocks using the specified key.
         /// </summary>
         /// <remarks>
-        /// This is not a secure authenticated encryption scheme. No padding occurs.
+        ///     This is not a secure authenticated encryption scheme. No padding occurs.
         /// </remarks>
         /// <param name="key">16-byte AES128 key</param>
         /// <param name="iv">16-byte initialization vector (IV)</param>
@@ -145,10 +145,10 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         /// <summary>
-        /// Computes the AES-CBC decryption of the input blocks using the specified key.
+        ///     Computes the AES-CBC decryption of the input blocks using the specified key.
         /// </summary>
         /// <remarks>
-        /// This is not a secure authenticated encryption scheme. No padding occurs.
+        ///     This is not a secure authenticated encryption scheme. No padding occurs.
         /// </remarks>
         /// <param name="key">16-byte AES128 key</param>
         /// <param name="iv">16-byte initialization vector (IV)</param>

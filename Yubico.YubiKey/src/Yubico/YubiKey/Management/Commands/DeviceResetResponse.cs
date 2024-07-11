@@ -12,22 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Management.Commands
 {
     /// <summary>
-    /// The response to the <see cref="DeviceResetCommand"/> command, containing the YubiKey's
-    /// device configuration details.
+    ///     The response to the <see cref="DeviceResetCommand" /> command, containing the YubiKey's
+    ///     device configuration details.
     /// </summary>
     public class DeviceResetResponse : YubiKeyResponse
     {
         /// <summary>
-        /// Constructs a DeviceResetResponse instance based on a ResponseApdu received from the YubiKey.
+        ///     Constructs a DeviceResetResponse instance based on a ResponseApdu received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
+        ///     The ResponseApdu returned by the YubiKey.
         /// </param>
         public DeviceResetResponse(ResponseApdu responseApdu) :
             base(responseApdu)

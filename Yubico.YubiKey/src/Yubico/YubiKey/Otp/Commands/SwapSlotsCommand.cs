@@ -17,24 +17,24 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    /// Swaps the configurations in the short and long press slots.
+    ///     Swaps the configurations in the short and long press slots.
     /// </summary>
     public class SwapSlotsCommand : IYubiKeyCommand<ReadStatusResponse>
     {
         /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Otp
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Otp;
-
-        /// <summary>
-        /// Constructs a new instance of the SwapSlotsCommand class.
+        ///     Constructs a new instance of the SwapSlotsCommand class.
         /// </summary>
         public SwapSlotsCommand()
         {
         }
+
+        /// <summary>
+        ///     Gets the YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        ///     YubiKeyApplication.Otp
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Otp;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() =>

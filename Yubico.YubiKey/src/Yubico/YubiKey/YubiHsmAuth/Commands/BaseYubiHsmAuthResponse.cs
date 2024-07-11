@@ -12,23 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Globalization;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    /// The base class of YubiHSM Auth response types.
+    ///     The base class of YubiHSM Auth response types.
     /// </summary>
     /// <remarks>
-    /// This base class adds mappings for status words which have new meanings
-    /// in the YubiHSM Auth application.
+    ///     This base class adds mappings for status words which have new meanings
+    ///     in the YubiHSM Auth application.
     /// </remarks>
     public abstract class BaseYubiHsmAuthResponse : YubiKeyResponse
     {
-        /// <inheritdoc/>
+        protected BaseYubiHsmAuthResponse(ResponseApdu responseApdu) : base(responseApdu)
+        {
+        }
+
+        /// <inheritdoc />
         protected override ResponseStatusPair StatusCodeMap =>
             StatusWord switch
             {
@@ -42,9 +43,5 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
 
                 _ => base.StatusCodeMap
             };
-
-        protected BaseYubiHsmAuthResponse(ResponseApdu responseApdu) : base(responseApdu)
-        {
-        }
     }
 }

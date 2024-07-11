@@ -18,28 +18,28 @@ using Yubico.YubiKey.Management.Commands;
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
-    /// Configures device-wide settings on the YubiKey.
+    ///     Configures device-wide settings on the YubiKey.
     /// </summary>
     public sealed class SetDeviceInfoCommand : SetDeviceInfoBaseCommand, IYubiKeyCommand<SetDeviceInfoResponse>
     {
         private const byte SetDeviceInfoInstruction = 0xC3;
 
-        /// <inheritdoc />
-        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
-
         /// <summary>
-        /// Initializes a new instance of the <see cref="SetDeviceInfoCommand"/> class.
+        ///     Initializes a new instance of the <see cref="SetDeviceInfoCommand" /> class.
         /// </summary>
         public SetDeviceInfoCommand()
         {
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="SetDeviceInfoCommand"/> class.
+        ///     Initializes a new instance of the <see cref="SetDeviceInfoCommand" /> class.
         /// </summary>
         public SetDeviceInfoCommand(SetDeviceInfoBaseCommand baseCommand) : base(baseCommand)
         {
         }
+
+        /// <inheritdoc />
+        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() =>

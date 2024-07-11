@@ -15,16 +15,16 @@
 namespace Yubico.YubiKey.YubiHsmAuth
 {
     /// <summary>
-    /// Tag values for TLV-formatted data associated with the YubiHSM Auth
-    /// application.
+    ///     Tag values for TLV-formatted data associated with the YubiHSM Auth
+    ///     application.
     /// </summary>
     internal static class DataTagConstants
     {
         public const byte Label = 0x71;
 
         /// <summary>
-        /// The data contains a Credential and the number of remaining
-        /// retries.
+        ///     The data contains a Credential and the number of remaining
+        ///     retries.
         /// </summary>
         public const byte LabelList = 0x72;
 

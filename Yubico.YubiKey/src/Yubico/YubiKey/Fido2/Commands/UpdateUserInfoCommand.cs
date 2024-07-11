@@ -20,25 +20,25 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Update the user information for a credential stored on the YubiKey.
+    ///     Update the user information for a credential stored on the YubiKey.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="Fido2Response"/>. This command
-    /// does not return any data, it only returns "success" or "failure".
-    /// <para>
-    /// This replaces the user information currently on the YubiKey. That is, you
-    /// don't "edit" an entry. You generally will get the current user info, then
-    /// create an entirely new <see cref="Yubico.YubiKey.Fido2.UserEntity"/>,
-    /// copying any information from the previous object you want to retain, and
-    /// setting any new information. Then call this command with the new object.
-    /// </para>
-    /// <para>
-    /// Note that this feature is available only to YubiKeys that support
-    /// "credMgmt". It is not available to those that support only
-    /// "CredentialMgmtPreview". It is not a subclass of
-    /// <c>CredentialMgmtSubCommand</c> and hence does not possess the property
-    /// <c>IsPreview</c>.
-    /// </para>
+    ///     The partner Response class is <see cref="Fido2Response" />. This command
+    ///     does not return any data, it only returns "success" or "failure".
+    ///     <para>
+    ///         This replaces the user information currently on the YubiKey. That is, you
+    ///         don't "edit" an entry. You generally will get the current user info, then
+    ///         create an entirely new <see cref="Yubico.YubiKey.Fido2.UserEntity" />,
+    ///         copying any information from the previous object you want to retain, and
+    ///         setting any new information. Then call this command with the new object.
+    ///     </para>
+    ///     <para>
+    ///         Note that this feature is available only to YubiKeys that support
+    ///         "credMgmt". It is not available to those that support only
+    ///         "CredentialMgmtPreview". It is not a subclass of
+    ///         <c>CredentialMgmtSubCommand</c> and hence does not possess the property
+    ///         <c>IsPreview</c>.
+    ///     </para>
     /// </remarks>
     public class UpdateUserInfoCommand : IYubiKeyCommand<Fido2Response>
     {
@@ -48,9 +48,6 @@ namespace Yubico.YubiKey.Fido2.Commands
 
         private readonly CredentialManagementCommand _command;
 
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
-
         // The default constructor explicitly defined. We don't want it to be
         // used.
         private UpdateUserInfoCommand()
@@ -59,22 +56,22 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// Constructs a new instance of <see cref="UpdateUserInfoCommand"/>.
+        ///     Constructs a new instance of <see cref="UpdateUserInfoCommand" />.
         /// </summary>
         /// <param name="credentialId">
-        /// The <c>CredentialId</c> of the credential with the user info to
-        /// update.
+        ///     The <c>CredentialId</c> of the credential with the user info to
+        ///     update.
         /// </param>
         /// <param name="userEntity">
-        /// The <c>UserEntity</c> containing the new user info to be stored on
-        /// the YubiKey.
+        ///     The <c>UserEntity</c> containing the new user info to be stored on
+        ///     the YubiKey.
         /// </param>
         /// <param name="pinUvAuthToken">
-        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        /// key.
+        ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
+        ///     key.
         /// </param>
         /// <param name="authProtocol">
-        /// The Auth Protocol used to build the Auth Token.
+        ///     The Auth Protocol used to build the Auth Token.
         /// </param>
         public UpdateUserInfoCommand(
             CredentialId credentialId,
@@ -85,6 +82,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             _command = new CredentialManagementCommand(
                 SubCmdUpdateUserInfo, EncodeParams(credentialId, userEntity), pinUvAuthToken, authProtocol);
         }
+
+        /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();

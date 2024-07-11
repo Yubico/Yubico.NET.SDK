@@ -30,102 +30,102 @@ namespace Yubico.YubiKey.Piv
         private const int PivLrcTag = 0xFE;
 
         /// <summary>
-        /// Generate a new key pair in the given slot.
+        ///     Generate a new key pair in the given slot.
         /// </summary>
         /// <remarks>
-        /// When you generate a key pair, you specify which slot will hold this
-        /// new key. If there is a key in that slot already, this method will
-        /// replace it. That old key will be gone and there will be nothing you
-        /// can do to recover it. Hence, use this method with caution.
-        /// <para>
-        /// You also have the opportunity to specify the PIN and touch policies
-        /// of the private key generated. These policies describe what will be
-        /// required when using the key. For example, if the PIN policy is
-        /// <c>Always</c>, then every time the key is used (to sign, decrypt, or
-        /// perform key agreement), it will be necessary to verify the PIV PIN.
-        /// With the touch policy, for instance, setting it to <c>Always</c> will
-        /// require touch every time the key is used. This method has the
-        /// policies as optional arguments. If you do not specify these
-        /// arguments, the key pair will be generated with the policies set to
-        /// <c>Default</c>. Currently for all YubiKeys, the default PIN
-        /// policy is <c>Once</c>, and the default touch policy is <c>Never</c>.
-        /// </para>
-        /// <para>
-        /// This method will return the public key partner to the private key
-        /// generated in the slot. For YubiKeys before version 5.3, it is the
-        /// only time you will have the opportunity to obtain the public key, so
-        /// make sure your application manages it right from the start. Beginning
-        /// with version 5.3, it is possible to get a public key out of a slot at
-        /// any time.
-        /// </para>
-        /// <para>
-        /// Note that while this method will return the public key, you will
-        /// still need to obtain a certificate for the private key outside of
-        /// this SDK. Once you have the certificate, you can load it into the
-        /// YubiKey using the <see cref="ImportCertificate"/> method.
-        /// </para>
-        /// <para>
-        /// In order to perform this operation, the management key must be
-        /// authenticated during this session. If it has not been authenticated,
-        /// this method will call <see cref="AuthenticateManagementKey"/>. That
-        /// is, your application does not need to authenticate the management key
-        /// separately (i.e., call <c>TryAuthenticateManagementKey</c> or
-        /// <c>AuthenticateManagementKey</c>), this method will determine if the
-        /// management key has been authenticated or not, and if not, it will
-        /// make the call to perform mutual authentication.
-        /// </para>
-        /// <para>
-        /// The authentication method will collect the management key using the
-        /// <c>KeyCollector</c> delegate. If no such delegate has been set, it
-        /// will throw an exception.
-        /// </para>
-        /// <para>
-        /// The <c>KeyCollector</c> has an option to cancel the operation. That
-        /// is, the <c>AuthenticateManagementKey</c> method will call the
-        /// <c>KeyCollector</c> requesting the management key, and it is possible
-        /// that during the collection operations, the user cancels. The
-        /// <c>KeyCollector</c> will return to the authentication method noting
-        /// the cancellation. In that case, it will throw an exception. If you
-        /// want the authentication to return <c>false</c> on user cancellation,
-        /// you must call <see cref="TryAuthenticateManagementKey(bool)"/> directly
-        /// before calling this method.
-        /// </para>
+        ///     When you generate a key pair, you specify which slot will hold this
+        ///     new key. If there is a key in that slot already, this method will
+        ///     replace it. That old key will be gone and there will be nothing you
+        ///     can do to recover it. Hence, use this method with caution.
+        ///     <para>
+        ///         You also have the opportunity to specify the PIN and touch policies
+        ///         of the private key generated. These policies describe what will be
+        ///         required when using the key. For example, if the PIN policy is
+        ///         <c>Always</c>, then every time the key is used (to sign, decrypt, or
+        ///         perform key agreement), it will be necessary to verify the PIV PIN.
+        ///         With the touch policy, for instance, setting it to <c>Always</c> will
+        ///         require touch every time the key is used. This method has the
+        ///         policies as optional arguments. If you do not specify these
+        ///         arguments, the key pair will be generated with the policies set to
+        ///         <c>Default</c>. Currently for all YubiKeys, the default PIN
+        ///         policy is <c>Once</c>, and the default touch policy is <c>Never</c>.
+        ///     </para>
+        ///     <para>
+        ///         This method will return the public key partner to the private key
+        ///         generated in the slot. For YubiKeys before version 5.3, it is the
+        ///         only time you will have the opportunity to obtain the public key, so
+        ///         make sure your application manages it right from the start. Beginning
+        ///         with version 5.3, it is possible to get a public key out of a slot at
+        ///         any time.
+        ///     </para>
+        ///     <para>
+        ///         Note that while this method will return the public key, you will
+        ///         still need to obtain a certificate for the private key outside of
+        ///         this SDK. Once you have the certificate, you can load it into the
+        ///         YubiKey using the <see cref="ImportCertificate" /> method.
+        ///     </para>
+        ///     <para>
+        ///         In order to perform this operation, the management key must be
+        ///         authenticated during this session. If it has not been authenticated,
+        ///         this method will call <see cref="AuthenticateManagementKey" />. That
+        ///         is, your application does not need to authenticate the management key
+        ///         separately (i.e., call <c>TryAuthenticateManagementKey</c> or
+        ///         <c>AuthenticateManagementKey</c>), this method will determine if the
+        ///         management key has been authenticated or not, and if not, it will
+        ///         make the call to perform mutual authentication.
+        ///     </para>
+        ///     <para>
+        ///         The authentication method will collect the management key using the
+        ///         <c>KeyCollector</c> delegate. If no such delegate has been set, it
+        ///         will throw an exception.
+        ///     </para>
+        ///     <para>
+        ///         The <c>KeyCollector</c> has an option to cancel the operation. That
+        ///         is, the <c>AuthenticateManagementKey</c> method will call the
+        ///         <c>KeyCollector</c> requesting the management key, and it is possible
+        ///         that during the collection operations, the user cancels. The
+        ///         <c>KeyCollector</c> will return to the authentication method noting
+        ///         the cancellation. In that case, it will throw an exception. If you
+        ///         want the authentication to return <c>false</c> on user cancellation,
+        ///         you must call <see cref="TryAuthenticateManagementKey(bool)" /> directly
+        ///         before calling this method.
+        ///     </para>
         /// </remarks>
         /// <param name="slotNumber">
-        /// The slot into which the key pair will be generated.
+        ///     The slot into which the key pair will be generated.
         /// </param>
         /// <param name="algorithm">
-        /// The algorithm of the key to generate.
+        ///     The algorithm of the key to generate.
         /// </param>
         /// <param name="pinPolicy">
-        /// The PIN policy the key will have. If no argument is given, the policy
-        /// will be <c>Default</c>.
+        ///     The PIN policy the key will have. If no argument is given, the policy
+        ///     will be <c>Default</c>.
         /// </param>
         /// <param name="touchPolicy">
-        /// The touch policy the key will have. If no argument is given, the policy
-        /// will be <c>Default</c>.
+        ///     The touch policy the key will have. If no argument is given, the policy
+        ///     will be <c>Default</c>.
         /// </param>
         /// <returns>
-        /// The public key partner to the private key generated on the YubiKey.
+        ///     The public key partner to the private key generated on the YubiKey.
         /// </returns>
         /// <exception cref="ArgumentException">
-        /// The slot or algorithm specified is not valid for generating a key
-        /// pair.
+        ///     The slot or algorithm specified is not valid for generating a key
+        ///     pair.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded, the key provided was not a
-        /// valid Triple-DES key, or the YubiKey had some other error, such as
-        /// unreliable connection.
+        ///     There is no <c>KeyCollector</c> loaded, the key provided was not a
+        ///     valid Triple-DES key, or the YubiKey had some other error, such as
+        ///     unreliable connection.
         /// </exception>
         /// <exception cref="OperationCanceledException">
-        /// The user canceled management key collection.
+        ///     The user canceled management key collection.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Mutual authentication was performed and the YubiKey was not
-        /// authenticated.
+        ///     Mutual authentication was performed and the YubiKey was not
+        ///     authenticated.
         /// </exception>
         /// <exception cref="NotSupportedException">
-        /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
+        ///     If the specified <see cref="PivAlgorithm" /> is not supported by the provided <see cref="IYubiKeyDevice" />.
         /// </exception>
         public PivPublicKey GenerateKeyPair(
             byte slotNumber,
@@ -147,96 +147,96 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Import a private key into the given slot.
+        ///     Import a private key into the given slot.
         /// </summary>
         /// <remarks>
-        /// When you import a key, you specify which slot will hold this key. If
-        /// there is a key in that slot already, this method will replace it.
-        /// That old key will be gone and there will be nothing you can do to
-        /// recover it. Hence, use this method with caution.
-        /// <para>
-        /// This method will not return to you the public key partner to the
-        /// private key imported into the slot. For YubiKeys before version 5.3,
-        /// you will not have the opportunity to obtain the public key, so make
-        /// sure your application manages it right from the start. Beginning with
-        /// version 5.3, it is possible to get a public key out of a slot at any
-        /// time.
-        /// </para>
-        /// <para>
-        /// You also have the opportunity to specify the PIN and touch policies
-        /// of the private key generated. These policies describe what will be
-        /// required when using the key. For example, if the PIN policy is
-        /// <c>Always</c>, then every time the key is used (to sign, decrypt, or
-        /// perform key agreement), it will be necessary to verify the PIV PIN.
-        /// With the touch policy, for instance, setting it to <c>Always</c> will
-        /// require touch every time the key is used. This method has the
-        /// policies as optional arguments. If you do not specify these
-        /// arguments, the key pair will be generated with the policies set to
-        /// <c>Default</c>. Currently for all YubiKeys, the default PIN
-        /// policy is <c>Once</c>, and the default touch policy is <c>Never</c>.
-        /// </para>
-        /// <para>
-        /// In order to perform this operation, the management key must be
-        /// authenticated during this session. If it has not been authenticated,
-        /// this method will call <see cref="AuthenticateManagementKey"/>. That
-        /// is, your application does not need to authenticate the management key
-        /// separately (i.e., call <c>TryAuthenticateManagementKey</c> or
-        /// <c>AuthenticateManagementKey</c>), this method will determine if the
-        /// management key has been authenticated or not, and if not, it will
-        /// make the call to perform mutual authentication.
-        /// </para>
-        /// <para>
-        /// The authentication method will collect the management key using the
-        /// <c>KeyCollector</c> delegate. If no such delegate has been set, it
-        /// will throw an exception.
-        /// </para>
-        /// <para>
-        /// The <c>KeyCollector</c> has an option to cancel the operation. That
-        /// is, the <c>AuthenticateManagementKey</c> method will call the
-        /// <c>KeyCollector</c> requesting the management key, and it is possible
-        /// that during the collection operations, the user cancels. The
-        /// <c>KeyCollector</c> will return to the authentication method noting
-        /// the cancellation. In that case, it will throw an exception. If you
-        /// want the authentication to return <c>false</c> on user cancellation,
-        /// you must call <see cref="TryAuthenticateManagementKey(bool)"/> directly
-        /// before calling this method.
-        /// </para>
+        ///     When you import a key, you specify which slot will hold this key. If
+        ///     there is a key in that slot already, this method will replace it.
+        ///     That old key will be gone and there will be nothing you can do to
+        ///     recover it. Hence, use this method with caution.
+        ///     <para>
+        ///         This method will not return to you the public key partner to the
+        ///         private key imported into the slot. For YubiKeys before version 5.3,
+        ///         you will not have the opportunity to obtain the public key, so make
+        ///         sure your application manages it right from the start. Beginning with
+        ///         version 5.3, it is possible to get a public key out of a slot at any
+        ///         time.
+        ///     </para>
+        ///     <para>
+        ///         You also have the opportunity to specify the PIN and touch policies
+        ///         of the private key generated. These policies describe what will be
+        ///         required when using the key. For example, if the PIN policy is
+        ///         <c>Always</c>, then every time the key is used (to sign, decrypt, or
+        ///         perform key agreement), it will be necessary to verify the PIV PIN.
+        ///         With the touch policy, for instance, setting it to <c>Always</c> will
+        ///         require touch every time the key is used. This method has the
+        ///         policies as optional arguments. If you do not specify these
+        ///         arguments, the key pair will be generated with the policies set to
+        ///         <c>Default</c>. Currently for all YubiKeys, the default PIN
+        ///         policy is <c>Once</c>, and the default touch policy is <c>Never</c>.
+        ///     </para>
+        ///     <para>
+        ///         In order to perform this operation, the management key must be
+        ///         authenticated during this session. If it has not been authenticated,
+        ///         this method will call <see cref="AuthenticateManagementKey" />. That
+        ///         is, your application does not need to authenticate the management key
+        ///         separately (i.e., call <c>TryAuthenticateManagementKey</c> or
+        ///         <c>AuthenticateManagementKey</c>), this method will determine if the
+        ///         management key has been authenticated or not, and if not, it will
+        ///         make the call to perform mutual authentication.
+        ///     </para>
+        ///     <para>
+        ///         The authentication method will collect the management key using the
+        ///         <c>KeyCollector</c> delegate. If no such delegate has been set, it
+        ///         will throw an exception.
+        ///     </para>
+        ///     <para>
+        ///         The <c>KeyCollector</c> has an option to cancel the operation. That
+        ///         is, the <c>AuthenticateManagementKey</c> method will call the
+        ///         <c>KeyCollector</c> requesting the management key, and it is possible
+        ///         that during the collection operations, the user cancels. The
+        ///         <c>KeyCollector</c> will return to the authentication method noting
+        ///         the cancellation. In that case, it will throw an exception. If you
+        ///         want the authentication to return <c>false</c> on user cancellation,
+        ///         you must call <see cref="TryAuthenticateManagementKey(bool)" /> directly
+        ///         before calling this method.
+        ///     </para>
         /// </remarks>
         /// <param name="privateKey">
-        /// The private key to import into the YubiKey.
+        ///     The private key to import into the YubiKey.
         /// </param>
         /// <param name="slotNumber">
-        /// The slot into which the key will be imported.
+        ///     The slot into which the key will be imported.
         /// </param>
         /// <param name="pinPolicy">
-        /// The PIN policy the key will have. If no argument is given, the policy
-        /// will be <c>Default</c>.
+        ///     The PIN policy the key will have. If no argument is given, the policy
+        ///     will be <c>Default</c>.
         /// </param>
         /// <param name="touchPolicy">
-        /// The touch policy the key will have. If no argument is given, the policy
-        /// will be <c>Default</c>.
+        ///     The touch policy the key will have. If no argument is given, the policy
+        ///     will be <c>Default</c>.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// The <c>privateKey</c> argument is <c>null</c>.
+        ///     The <c>privateKey</c> argument is <c>null</c>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// The slot specified is not valid for generating a key pair, or the
-        /// <c>privateKey</c> object is empty.
+        ///     The slot specified is not valid for generating a key pair, or the
+        ///     <c>privateKey</c> object is empty.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded, the key provided was not a
-        /// valid Triple-DES key, or the YubiKey had some other error, such as
-        /// unreliable connection.
+        ///     There is no <c>KeyCollector</c> loaded, the key provided was not a
+        ///     valid Triple-DES key, or the YubiKey had some other error, such as
+        ///     unreliable connection.
         /// </exception>
         /// <exception cref="OperationCanceledException">
-        /// The user canceled management key collection.
+        ///     The user canceled management key collection.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Mutual authentication was performed and the YubiKey was not
-        /// authenticated.
+        ///     Mutual authentication was performed and the YubiKey was not
+        ///     authenticated.
         /// </exception>
         /// <exception cref="NotSupportedException">
-        /// If the specified <see cref="PivAlgorithm"/> is not supported by the provided <see cref="IYubiKeyDevice"/>.
+        ///     If the specified <see cref="PivAlgorithm" /> is not supported by the provided <see cref="IYubiKeyDevice" />.
         /// </exception>
         public void ImportPrivateKey(
             byte slotNumber,
@@ -266,72 +266,72 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Import a certificate into the given slot.
+        ///     Import a certificate into the given slot.
         /// </summary>
         /// <remarks>
-        /// When you import a certificate, you specify which slot will hold this
-        /// cert. If there is a cert in that slot already, this method will
-        /// replace it.
-        /// <para>
-        /// The PIV standard specifies that the maximum length of a cert is 1,856
-        /// bytes. The YubiKey allows for certs up to 3,052 bytes. However, if
-        /// you want your application to be PIV-compliant, then use certs no
-        /// longer than 1,856 bytes.
-        /// </para>
-        /// <para>
-        /// This method will not verify that the cert matches the private key in
-        /// the slot. It will simply store the cert given in the slot specified.
-        /// </para>
-        /// <para>
-        /// In order to perform this operation, the management key must be
-        /// authenticated during this session. If it has not been authenticated,
-        /// this method will call <see cref="AuthenticateManagementKey"/>. That
-        /// is, your application does not need to authenticate the management key
-        /// separately (i.e., call <c>TryAuthenticateManagementKey</c> or
-        /// <c>AuthenticateManagementKey</c>), this method will determine if the
-        /// management key has been authenticated or not, and if not, it will
-        /// make the call to perform mutual authentication.
-        /// </para>
-        /// <para>
-        /// The authentication method will collect the management key using the
-        /// <c>KeyCollector</c> delegate. If no such delegate has been set, it
-        /// will throw an exception.
-        /// </para>
-        /// <para>
-        /// The <c>KeyCollector</c> has an option to cancel the operation. That
-        /// is, the <c>AuthenticateManagementKey</c> method will call the
-        /// <c>KeyCollector</c> requesting the management key, and it is possible
-        /// that during the collection operations, the user cancels. The
-        /// <c>KeyCollector</c> will return to the authentication method noting
-        /// the cancellation. In that case, it will throw an exception. If you
-        /// want the authentication to return <c>false</c> on user cancellation,
-        /// you must call <see cref="TryAuthenticateManagementKey(bool)"/> directly
-        /// before calling this method.
-        /// </para>
+        ///     When you import a certificate, you specify which slot will hold this
+        ///     cert. If there is a cert in that slot already, this method will
+        ///     replace it.
+        ///     <para>
+        ///         The PIV standard specifies that the maximum length of a cert is 1,856
+        ///         bytes. The YubiKey allows for certs up to 3,052 bytes. However, if
+        ///         you want your application to be PIV-compliant, then use certs no
+        ///         longer than 1,856 bytes.
+        ///     </para>
+        ///     <para>
+        ///         This method will not verify that the cert matches the private key in
+        ///         the slot. It will simply store the cert given in the slot specified.
+        ///     </para>
+        ///     <para>
+        ///         In order to perform this operation, the management key must be
+        ///         authenticated during this session. If it has not been authenticated,
+        ///         this method will call <see cref="AuthenticateManagementKey" />. That
+        ///         is, your application does not need to authenticate the management key
+        ///         separately (i.e., call <c>TryAuthenticateManagementKey</c> or
+        ///         <c>AuthenticateManagementKey</c>), this method will determine if the
+        ///         management key has been authenticated or not, and if not, it will
+        ///         make the call to perform mutual authentication.
+        ///     </para>
+        ///     <para>
+        ///         The authentication method will collect the management key using the
+        ///         <c>KeyCollector</c> delegate. If no such delegate has been set, it
+        ///         will throw an exception.
+        ///     </para>
+        ///     <para>
+        ///         The <c>KeyCollector</c> has an option to cancel the operation. That
+        ///         is, the <c>AuthenticateManagementKey</c> method will call the
+        ///         <c>KeyCollector</c> requesting the management key, and it is possible
+        ///         that during the collection operations, the user cancels. The
+        ///         <c>KeyCollector</c> will return to the authentication method noting
+        ///         the cancellation. In that case, it will throw an exception. If you
+        ///         want the authentication to return <c>false</c> on user cancellation,
+        ///         you must call <see cref="TryAuthenticateManagementKey(bool)" /> directly
+        ///         before calling this method.
+        ///     </para>
         /// </remarks>
         /// <param name="slotNumber">
-        /// The slot into which the key will be imported.
+        ///     The slot into which the key will be imported.
         /// </param>
         /// <param name="certificate">
-        /// The certificate to import into the YubiKey.
+        ///     The certificate to import into the YubiKey.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// The <c>certificate</c> argument is <c>null</c>.
+        ///     The <c>certificate</c> argument is <c>null</c>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        /// The slot specified is not valid for importing a certificate.
+        ///     The slot specified is not valid for importing a certificate.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// There is no <c>KeyCollector</c> loaded, the key provided was not a
-        /// valid Triple-DES key, or the YubiKey had some other error, such as
-        /// unreliable connection.
+        ///     There is no <c>KeyCollector</c> loaded, the key provided was not a
+        ///     valid Triple-DES key, or the YubiKey had some other error, such as
+        ///     unreliable connection.
         /// </exception>
         /// <exception cref="OperationCanceledException">
-        /// The user canceled management key collection.
+        ///     The user canceled management key collection.
         /// </exception>
         /// <exception cref="SecurityException">
-        /// Mutual authentication was performed and the YubiKey was not
-        /// authenticated.
+        ///     Mutual authentication was performed and the YubiKey was not
+        ///     authenticated.
         /// </exception>
         public void ImportCertificate(byte slotNumber, X509Certificate2 certificate)
         {
@@ -369,41 +369,41 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        /// Get the certificate in the given slot.
+        ///     Get the certificate in the given slot.
         /// </summary>
         /// <remarks>
-        /// After obtaining a cert, you can install it into the slot containing
-        /// the associated private key (<see cref="ImportCertificate"/>). Later
-        /// on, when you need the cert (e.g. to send it along with a signed
-        /// message), call this method to retrieve it.
-        /// <para>
-        /// It is not necessary to authenticate the management key nor verify the
-        /// PIN in order to obtain a certificate.
-        /// </para>
-        /// <para>
-        /// If the <c>slotNumber</c> given is for a slot that does not hold
-        /// asymmetric keys, or if there is no cert in the slot, this method will
-        /// throw an exception.
-        /// </para>
-        /// <para>
-        /// If you want to get the attestation cert, do not use this method, call
-        /// <see cref="GetAttestationCertificate"/>. If you call this method with
-        /// slot number <c>0xF9</c> (<c>PivSlot.Attestation</c>) it will throw an
-        /// exception.
-        /// </para>
+        ///     After obtaining a cert, you can install it into the slot containing
+        ///     the associated private key (<see cref="ImportCertificate" />). Later
+        ///     on, when you need the cert (e.g. to send it along with a signed
+        ///     message), call this method to retrieve it.
+        ///     <para>
+        ///         It is not necessary to authenticate the management key nor verify the
+        ///         PIN in order to obtain a certificate.
+        ///     </para>
+        ///     <para>
+        ///         If the <c>slotNumber</c> given is for a slot that does not hold
+        ///         asymmetric keys, or if there is no cert in the slot, this method will
+        ///         throw an exception.
+        ///     </para>
+        ///     <para>
+        ///         If you want to get the attestation cert, do not use this method, call
+        ///         <see cref="GetAttestationCertificate" />. If you call this method with
+        ///         slot number <c>0xF9</c> (<c>PivSlot.Attestation</c>) it will throw an
+        ///         exception.
+        ///     </para>
         /// </remarks>
         /// <param name="slotNumber">
-        /// The slot containing the requested cert.
+        ///     The slot containing the requested cert.
         /// </param>
         /// <returns>
-        /// The cert residing in the slot specified.
+        ///     The cert residing in the slot specified.
         /// </returns>
         /// <exception cref="ArgumentException">
-        /// The slot specified is not valid for getting a certificate.
+        ///     The slot specified is not valid for getting a certificate.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// The slot did not contain a cert, or the YubiKey had some other error,
-        /// such as unreliable connection.
+        ///     The slot did not contain a cert, or the YubiKey had some other error,
+        ///     such as unreliable connection.
         /// </exception>
         public X509Certificate2 GetCertificate(byte slotNumber)
         {

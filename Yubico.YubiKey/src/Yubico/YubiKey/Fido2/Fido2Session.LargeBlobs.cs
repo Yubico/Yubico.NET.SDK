@@ -33,17 +33,17 @@ namespace Yubico.YubiKey.Fido2
         private const int DataToAuthPrefixLength = DataToAuthFfByteCount + 6;
 
         /// <summary>
-        /// Get the current <c>Serialized Large Blob Array</c> out of the
-        /// YubiKey. See also the
-        /// <xref href="Fido2LargeBlobs">User's Manual entry</xref> on large
-        /// blobs.
+        ///     Get the current <c>Serialized Large Blob Array</c> out of the
+        ///     YubiKey. See also the
+        ///     <xref href="Fido2LargeBlobs">User's Manual entry</xref> on large
+        ///     blobs.
         /// </summary>
         /// <remarks>
-        /// Note that this feature is not available on all YubiKeys. To determine
-        /// if large blobs are supported on a YubiKey, check the
-        /// <see cref="AuthenticatorInfo.Options"/> in the
-        /// <see cref="AuthenticatorInfo"/> property of this class. For example,
-        /// <code language="csharp">
+        ///     Note that this feature is not available on all YubiKeys. To determine
+        ///     if large blobs are supported on a YubiKey, check the
+        ///     <see cref="AuthenticatorInfo.Options" /> in the
+        ///     <see cref="AuthenticatorInfo" /> property of this class. For example,
+        ///     <code language="csharp">
         ///     OptionValue optionValue =
         ///         fido2Session.AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.largeBlobs);
         ///     if (optionValue != OptionValue.True)
@@ -52,57 +52,57 @@ namespace Yubico.YubiKey.Fido2
         ///     }
         ///     int maxLargeBlobsLength = authInfo.MaximumSerializedLargeBlobArray ?? 0;
         /// </code>
-        /// <para>
-        /// A serialized large blob array is the large blob array concatenated
-        /// with the digest of the array. The digest is the first 16 bytes (left
-        /// 16 bytes) of the SHA-256 of the CBOR-encoded array.
-        /// </para>
-        /// <para>
-        /// Once you have the object containing the data, it is possible to read
-        /// each entry by decrypting, using the appropriate <c>LargeBlobKey</c>.
-        /// Each entry is encrypted using the large blob key of one of the
-        /// credentials (each credential has a different large blob key). The
-        /// standard specifies obtaining a large blob key (likely from a
-        /// <c>GetAssertion</c> call), and trying to decrypt each entry in the
-        /// array using that key. If it succeeds, that entry is associated with
-        /// the credential and the decrypted data will be returned. See also
-        /// <see cref="LargeBlobEntry.TryDecrypt"/>
-        /// </para>
-        /// <para>
-        /// A YubiKey is manufactured with the initial large blob data, which is
-        /// an array of zero elements plus the digest of the CBOR-encoding of a
-        /// zero-element array. An array with zero elements is simply the single
-        /// byte <c>0x80</c>. Hence, there will always be a current large blob
-        /// array to retrieve.
-        /// </para>
-        /// <para>
-        /// The standard specifies that when reading a serialized large blob
-        /// array, a client must verify the digest. If the digest does not
-        /// verify, the standard specifically says, "the configuration is corrupt
-        /// and the platform MUST discard it and act as if the initial serialized
-        /// large-blob array was received." This method will verify the digest
-        /// value. If the digest does not verify, this method will return a new
-        /// <c>SerializedLargeBlobArray</c> containing the initial value. It
-        /// will not overwrite the data on the YubiKey, so you can still use the
-        /// <see cref="GetLargeBlobCommand"/> to get the raw data.
-        /// </para>
-        /// <para>
-        /// Because writing to the large blob area in a YubiKey means overwriting
-        /// the existing data, it is recommended that to add to, remove from, or
-        /// "edit" the large blob data, the caller should get the current large
-        /// blob array, operate on the resulting <c>SerializedLargeBlobArray</c>,
-        /// and then call <see cref="SetSerializedLargeBlobArray"/> with the
-        /// updated data. Even if your application has not updated the large blob
-        /// array, it is possible another application has stored data and you
-        /// likely do not want to overwrite that data.
-        /// </para>
+        ///     <para>
+        ///         A serialized large blob array is the large blob array concatenated
+        ///         with the digest of the array. The digest is the first 16 bytes (left
+        ///         16 bytes) of the SHA-256 of the CBOR-encoded array.
+        ///     </para>
+        ///     <para>
+        ///         Once you have the object containing the data, it is possible to read
+        ///         each entry by decrypting, using the appropriate <c>LargeBlobKey</c>.
+        ///         Each entry is encrypted using the large blob key of one of the
+        ///         credentials (each credential has a different large blob key). The
+        ///         standard specifies obtaining a large blob key (likely from a
+        ///         <c>GetAssertion</c> call), and trying to decrypt each entry in the
+        ///         array using that key. If it succeeds, that entry is associated with
+        ///         the credential and the decrypted data will be returned. See also
+        ///         <see cref="LargeBlobEntry.TryDecrypt" />
+        ///     </para>
+        ///     <para>
+        ///         A YubiKey is manufactured with the initial large blob data, which is
+        ///         an array of zero elements plus the digest of the CBOR-encoding of a
+        ///         zero-element array. An array with zero elements is simply the single
+        ///         byte <c>0x80</c>. Hence, there will always be a current large blob
+        ///         array to retrieve.
+        ///     </para>
+        ///     <para>
+        ///         The standard specifies that when reading a serialized large blob
+        ///         array, a client must verify the digest. If the digest does not
+        ///         verify, the standard specifically says, "the configuration is corrupt
+        ///         and the platform MUST discard it and act as if the initial serialized
+        ///         large-blob array was received." This method will verify the digest
+        ///         value. If the digest does not verify, this method will return a new
+        ///         <c>SerializedLargeBlobArray</c> containing the initial value. It
+        ///         will not overwrite the data on the YubiKey, so you can still use the
+        ///         <see cref="GetLargeBlobCommand" /> to get the raw data.
+        ///     </para>
+        ///     <para>
+        ///         Because writing to the large blob area in a YubiKey means overwriting
+        ///         the existing data, it is recommended that to add to, remove from, or
+        ///         "edit" the large blob data, the caller should get the current large
+        ///         blob array, operate on the resulting <c>SerializedLargeBlobArray</c>,
+        ///         and then call <see cref="SetSerializedLargeBlobArray" /> with the
+        ///         updated data. Even if your application has not updated the large blob
+        ///         array, it is possible another application has stored data and you
+        ///         likely do not want to overwrite that data.
+        ///     </para>
         /// </remarks>
         /// <returns>
-        /// A new instance of the <see cref="SerializedLargeBlobArray"/> class
-        /// containing the currently stored large blob data.
+        ///     A new instance of the <see cref="SerializedLargeBlobArray" /> class
+        ///     containing the currently stored large blob data.
         /// </returns>
         /// <exception cref="NotSupportedException">
-        /// The YubiKey selected does not support large blobs.
+        ///     The YubiKey selected does not support large blobs.
         /// </exception>
         public SerializedLargeBlobArray GetSerializedLargeBlobArray()
         {
@@ -142,7 +142,7 @@ namespace Yubico.YubiKey.Fido2
             //   A1
             //      01 byte string
             var cborMap = new CborMap<int>(
-                fullEncoding.GetBuffer().AsMemory<byte>(start: 0, (int)fullEncoding.Length));
+                fullEncoding.GetBuffer().AsMemory(start: 0, (int)fullEncoding.Length));
 
             ReadOnlyMemory<byte> encodedArray = cborMap.ReadByteString(KeyEncodedArray);
 
@@ -156,7 +156,7 @@ namespace Yubico.YubiKey.Fido2
 
             // The standard says if the digest does not verify, the Large Blob is
             // the initial large blob.
-            byte[] initialLargeBlobArray = new byte[]
+            byte[] initialLargeBlobArray =
             {
                 0x80, 0x76, 0xbe, 0x8b, 0x52, 0x8d, 0x00, 0x75, 0xf7, 0xaa, 0xe9, 0x8d, 0x6f, 0xa5, 0x7a, 0x6d, 0x3c
             };
@@ -165,17 +165,17 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Set the <c>Serialized Large Blob Array</c> in the YubiKey to contain the
-        /// data in the input <c>serializedLargeBlobArray</c>. See also the
-        /// <xref href="Fido2LargeBlobs">User's Manual entry</xref> on large
-        /// blobs.
+        ///     Set the <c>Serialized Large Blob Array</c> in the YubiKey to contain the
+        ///     data in the input <c>serializedLargeBlobArray</c>. See also the
+        ///     <xref href="Fido2LargeBlobs">User's Manual entry</xref> on large
+        ///     blobs.
         /// </summary>
         /// <remarks>
-        /// Note that this feature is not available on all YubiKeys. To determine
-        /// if large blobs are supported on a YubiKey, check the
-        /// <see cref="AuthenticatorInfo.Options"/> in the
-        /// <see cref="AuthenticatorInfo"/> property of this class. For example,
-        /// <code language="csharp">
+        ///     Note that this feature is not available on all YubiKeys. To determine
+        ///     if large blobs are supported on a YubiKey, check the
+        ///     <see cref="AuthenticatorInfo.Options" /> in the
+        ///     <see cref="AuthenticatorInfo" /> property of this class. For example,
+        ///     <code language="csharp">
         ///     OptionValue optionValue =
         ///         fido2Session.AuthenticatorInfo.GetOptionValue(AuthenticatorOptions.largeBlobs);
         ///     if (optionValue != OptionValue.True)
@@ -184,26 +184,26 @@ namespace Yubico.YubiKey.Fido2
         ///     }
         ///     int maxLargeBlobsLength = authInfo.MaximumSerializedLargeBlobArray ?? 0;
         /// </code>
-        /// <para>
-        /// This method will overwrite the current contents of the large blob
-        /// data on the YubiKey. Hence, an application should get the current
-        /// contents (<see cref="GetSerializedLargeBlobArray"/>) and add to, remove
-        /// from, or "edit" the contents. Then use this method to store the
-        /// updated large blob.
-        /// </para>
-        /// <para>
-        /// This method will need the PIN to have been verified with the
-        /// <see cref="PinUvAuthTokenPermissions.LargeBlobWrite"/>. If that
-        /// permission is not set, this method will verify the PIN (even if it
-        /// had already been verified during this session) with the permission,
-        /// and use the <see cref="KeyCollector"/> in order to obtain the PIN. If
-        /// you do not want this method to call the <c>KeyCollector</c> you must
-        /// verify the PIN explicitly (see <c>TryVerifyPin</c>)
-        /// with the <c>permissions</c> argument set with <c>LargeBlobWrite</c>. You will
-        /// likely want to get the current permissions
-        /// (<see cref="AuthTokenPermissions"/>) and add <c>LargeBlobWrite</c>.
-        /// For example,
-        /// <code language="csharp">
+        ///     <para>
+        ///         This method will overwrite the current contents of the large blob
+        ///         data on the YubiKey. Hence, an application should get the current
+        ///         contents (<see cref="GetSerializedLargeBlobArray" />) and add to, remove
+        ///         from, or "edit" the contents. Then use this method to store the
+        ///         updated large blob.
+        ///     </para>
+        ///     <para>
+        ///         This method will need the PIN to have been verified with the
+        ///         <see cref="PinUvAuthTokenPermissions.LargeBlobWrite" />. If that
+        ///         permission is not set, this method will verify the PIN (even if it
+        ///         had already been verified during this session) with the permission,
+        ///         and use the <see cref="KeyCollector" /> in order to obtain the PIN. If
+        ///         you do not want this method to call the <c>KeyCollector</c> you must
+        ///         verify the PIN explicitly (see <c>TryVerifyPin</c>)
+        ///         with the <c>permissions</c> argument set with <c>LargeBlobWrite</c>. You will
+        ///         likely want to get the current permissions
+        ///         (<see cref="AuthTokenPermissions" />) and add <c>LargeBlobWrite</c>.
+        ///         For example,
+        ///         <code language="csharp">
         ///     PinUvAuthTokenPermissions permissions = AuthTokenPermissions ?? PinUvAuthTokenPermissions.None;
         ///     if (!permissions.HasFlag(PinUvAuthTokenPermissions.LargeBlobWrite))
         ///     {
@@ -212,14 +212,14 @@ namespace Yubico.YubiKey.Fido2
         ///            currentPin, permissions, null, out int retriesRemaining, out bool rebootRequired);
         ///     }
         /// </code>
-        /// </para>
+        ///     </para>
         /// </remarks>
         /// <param name="serializedLargeBlobArray">
-        /// The object containing the data to store.
+        ///     The object containing the data to store.
         /// </param>
         /// <exception cref="Fido2Exception">
-        /// The YubiKey could not complete the operation, likely because of a
-        /// wrong PIN or fingerprint.
+        ///     The YubiKey could not complete the operation, likely because of a
+        ///     wrong PIN or fingerprint.
         /// </exception>
         public void SetSerializedLargeBlobArray(SerializedLargeBlobArray serializedLargeBlobArray)
         {

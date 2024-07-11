@@ -25,7 +25,7 @@ namespace Yubico.YubiKey
         private static readonly Logger Logger = Log.GetLogger();
 
         /// <summary>
-        /// Attempts to create a dictionary from a TLV-encoded byte array by parsing and extracting tag-value pairs.
+        ///     Attempts to create a dictionary from a TLV-encoded byte array by parsing and extracting tag-value pairs.
         /// </summary>
         /// <param name="tlvData">The byte array containing TLV-encoded data.</param>
         /// <returns>A dictionary mapping integer tags to their corresponding values as byte arrays.</returns>

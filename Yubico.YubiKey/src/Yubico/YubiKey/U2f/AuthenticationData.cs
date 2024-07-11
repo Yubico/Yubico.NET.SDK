@@ -21,11 +21,11 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.U2f
 {
     /// <summary>
-    /// Represents a single U2F authentication response.
+    ///     Represents a single U2F authentication response.
     /// </summary>
     /// <remarks>
-    /// This class is used to see what the was returned by the YubiKey in an
-    /// authentication operation, as well as a method to verify the signature.
+    ///     This class is used to see what the was returned by the YubiKey in an
+    ///     authentication operation, as well as a method to verify the signature.
     /// </remarks>
     public class AuthenticationData : U2fSignedData
     {
@@ -60,20 +60,9 @@ namespace Yubico.YubiKey.U2f
         private readonly Logger _log = Log.GetLogger();
 
         /// <summary>
-        /// If the user's presence was verified in the authentication operation,
-        /// this will be <c>true</c>. Otherwise it will be <c>false</c>.
-        /// </summary>
-        public bool UserPresenceVerified { get; private set; }
-
-        /// <summary>
-        /// The counter used in computing the signature.
-        /// </summary>
-        public int Counter { get; private set; }
-
-        /// <summary>
-        /// Build a new <c>AuthenticationData</c> object from the encoded
-        /// response, which is the data portion of the value returned by the
-        /// YubiKey.
+        ///     Build a new <c>AuthenticationData</c> object from the encoded
+        ///     response, which is the data portion of the value returned by the
+        ///     YubiKey.
         /// </summary>
         public AuthenticationData(ReadOnlyMemory<byte> encodedResponse)
             : base(PayloadLength, AppIdOffset, ClientDataOffset, SignatureOffset)
@@ -96,37 +85,48 @@ namespace Yubico.YubiKey.U2f
         }
 
         /// <summary>
-        /// Use the given public key to verify the signature. Use the given
-        /// Application ID (hash of origin data) and Client Data Hash (includes
-        /// the challenge) to build the data to verify.
+        ///     If the user's presence was verified in the authentication operation,
+        ///     this will be <c>true</c>. Otherwise it will be <c>false</c>.
+        /// </summary>
+        public bool UserPresenceVerified { get; private set; }
+
+        /// <summary>
+        ///     The counter used in computing the signature.
+        /// </summary>
+        public int Counter { get; private set; }
+
+        /// <summary>
+        ///     Use the given public key to verify the signature. Use the given
+        ///     Application ID (hash of origin data) and Client Data Hash (includes
+        ///     the challenge) to build the data to verify.
         /// </summary>
         /// <remarks>
-        /// This will build the data to verify from the input
-        /// <c>applicationId</c>, <c>clientDataHash</c>, along with the user
-        /// presence and counter data inside this object. The user presence and
-        /// counter were part of the authentication response, the encodedResponse
-        /// of the constructor. It will then verify the signature inside this
-        /// object (from the encoded response) using the public key.
-        /// <para>
-        /// The public key is returned by the YubiKey during registration. See
-        /// the <see cref="RegistrationData"/> class.
-        /// </para>
+        ///     This will build the data to verify from the input
+        ///     <c>applicationId</c>, <c>clientDataHash</c>, along with the user
+        ///     presence and counter data inside this object. The user presence and
+        ///     counter were part of the authentication response, the encodedResponse
+        ///     of the constructor. It will then verify the signature inside this
+        ///     object (from the encoded response) using the public key.
+        ///     <para>
+        ///         The public key is returned by the YubiKey during registration. See
+        ///         the <see cref="RegistrationData" /> class.
+        ///     </para>
         /// </remarks>
         /// <param name="userPublicKey">
-        /// The public key partner to the private key used to authenticate this
-        /// credential, as an encoded EC Point.
+        ///     The public key partner to the private key used to authenticate this
+        ///     credential, as an encoded EC Point.
         /// </param>
         /// <param name="applicationId">
-        /// The original <c>applicationId</c> that was provided to the
-        /// <c>AuthenticateCommand</c>. This is the hash of the origin data.
+        ///     The original <c>applicationId</c> that was provided to the
+        ///     <c>AuthenticateCommand</c>. This is the hash of the origin data.
         /// </param>
         /// <param name="clientDataHash">
-        /// The original <c>clientDataHash</c> that was provided to the
-        /// <c>AuthenticateCommand</c>. This contains the challenge.
+        ///     The original <c>clientDataHash</c> that was provided to the
+        ///     <c>AuthenticateCommand</c>. This contains the challenge.
         /// </param>
         /// <returns>
-        /// A <c>bool</c>, <c>true</c> if the signature verifies, <c>false</c>
-        /// otherwise.
+        ///     A <c>bool</c>, <c>true</c> if the signature verifies, <c>false</c>
+        ///     otherwise.
         /// </returns>
         public bool VerifySignature(
             ReadOnlyMemory<byte> userPublicKey,

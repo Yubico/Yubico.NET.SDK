@@ -14,27 +14,26 @@
 
 using System;
 using System.Globalization;
-using System.IO;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Fido2.PinProtocols
 {
     /// <summary>
-    /// This class contains methods that perform the platform operations of
-    /// FIDO2's PIN/UV auth protocol one.
+    ///     This class contains methods that perform the platform operations of
+    ///     FIDO2's PIN/UV auth protocol one.
     /// </summary>
     public class PinUvAuthProtocolOne : PinUvAuthProtocolBase
     {
         private const int KeyLength = 32;
         private const int BlockSize = 16;
 
-        private bool _disposed;
-
         private readonly byte[] _keyData = new byte[KeyLength];
 
+        private bool _disposed;
+
         /// <summary>
-        /// Constructs a new instance of <see cref="PinUvAuthProtocolOne"/>.
+        ///     Constructs a new instance of <see cref="PinUvAuthProtocolOne" />.
         /// </summary>
         public PinUvAuthProtocolOne()
         {
@@ -166,7 +165,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         }
 
         /// <summary>
-        /// Release resources, overwrite sensitive data.
+        ///     Release resources, overwrite sensitive data.
         /// </summary>
         protected override void Dispose(bool disposing)
         {

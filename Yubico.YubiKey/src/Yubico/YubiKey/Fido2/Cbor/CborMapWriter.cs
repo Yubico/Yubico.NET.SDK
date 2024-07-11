@@ -18,11 +18,11 @@ using System.Formats.Cbor;
 namespace Yubico.YubiKey.Fido2.Cbor
 {
     /// <summary>
-    /// Some helpers to make writing CBOR maps a little easier.
+    ///     Some helpers to make writing CBOR maps a little easier.
     /// </summary>
     /// <remarks>
-    /// Note that the only types supported for <c>TKey</c> are <c>int</c> and
-    /// <c>string</c>.
+    ///     Note that the only types supported for <c>TKey</c> are <c>int</c> and
+    ///     <c>string</c>.
     /// </remarks>
     internal class CborMapWriter<TKey>
     {

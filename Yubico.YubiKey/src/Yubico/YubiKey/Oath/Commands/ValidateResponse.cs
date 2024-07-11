@@ -19,13 +19,28 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    /// The response to the <see cref="ValidateCommand"/> command, containing the response from the oath application.
+    ///     The response to the <see cref="ValidateCommand" /> command, containing the response from the oath application.
     /// </summary>
     public class ValidateResponse : OathResponse, IYubiKeyResponseWithData<bool>
     {
         private const byte ResponseTag = 0x75;
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Constructs a ValidateResponse instance based on a ResponseApdu received from the YubiKey.
+        /// </summary>
+        /// <param name="responseApdu">
+        ///     The ResponseApdu returned by the YubiKey.
+        /// </param>
+        /// <param name="calculatedResponse">
+        ///     The response that was calculated with a new generated challenge in ValidateComand.
+        /// </param>
+        public ValidateResponse(ResponseApdu responseApdu, ReadOnlyMemory<byte> calculatedResponse) :
+            base(responseApdu)
+        {
+            Response = calculatedResponse;
+        }
+
+        /// <inheritdoc />
         protected override ResponseStatusPair StatusCodeMap =>
             StatusWord switch
             {
@@ -35,36 +50,21 @@ namespace Yubico.YubiKey.Oath.Commands
             };
 
         /// <summary>
-        /// Gets the response.
+        ///     Gets the response.
         /// </summary>
         /// <value>
-        /// The response that was calculated with a new generated challenge.
+        ///     The response that was calculated with a new generated challenge.
         /// </value>
         public ReadOnlyMemory<byte> Response { get; }
 
         /// <summary>
-        /// Constructs a ValidateResponse instance based on a ResponseApdu received from the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
-        /// </param>
-        /// <param name="calculatedResponse">
-        /// The response that was calculated with a new generated challenge in ValidateComand.
-        /// </param>
-        public ValidateResponse(ResponseApdu responseApdu, ReadOnlyMemory<byte> calculatedResponse) :
-            base(responseApdu)
-        {
-            Response = calculatedResponse;
-        }
-
-        /// <summary>
-        /// Gets the response data.
+        ///     Gets the response data.
         /// </summary>
         /// <returns>
-        /// True if validation succeeded.
+        ///     True if validation succeeded.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="IYubiKeyResponse.Status"/> is not equal to <see cref="ResponseStatus.Success"/>.
+        ///     Thrown when <see cref="IYubiKeyResponse.Status" /> is not equal to <see cref="ResponseStatus.Success" />.
         /// </exception>
         public bool GetData()
         {

@@ -17,7 +17,7 @@ using System;
 namespace Yubico.YubiKey.Scp03
 {
     /// <summary>
-    /// Represents errors that occur during encoding or decoding data for SCP03.
+    ///     Represents errors that occur during encoding or decoding data for SCP03.
     /// </summary>
     #pragma warning disable CA1064 // Exceptions should be public
     internal class SecureChannelException : Exception

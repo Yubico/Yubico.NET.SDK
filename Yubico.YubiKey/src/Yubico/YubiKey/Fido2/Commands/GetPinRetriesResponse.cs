@@ -17,7 +17,7 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// This is the partner response class to the <see cref="GetPinRetriesCommand" /> command class.
+    ///     This is the partner response class to the <see cref="GetPinRetriesCommand" /> command class.
     /// </summary>
     public class GetPinRetriesResponse : Fido2Response,
                                          IYubiKeyResponseWithData<(int retriesRemaining, bool? powerCycleRequired)>
@@ -25,12 +25,12 @@ namespace Yubico.YubiKey.Fido2.Commands
         private readonly ClientPinResponse _response;
 
         /// <summary>
-        /// Constructs a new instance of the <see cref="GetPinRetriesResponse"/> class based on a response APDU provided
-        /// by the YubiKey.
+        ///     Constructs a new instance of the <see cref="GetPinRetriesResponse" /> class based on a response APDU provided
+        ///     by the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// A response APDU containing the CBOR response for the `getPINRetries` subcommand of the `authenticatorClientPIN`
-        /// CTAP2 command.
+        ///     A response APDU containing the CBOR response for the `getPINRetries` subcommand of the `authenticatorClientPIN`
+        ///     CTAP2 command.
         /// </param>
         public GetPinRetriesResponse(ResponseApdu responseApdu) : base(responseApdu)
         {
@@ -38,19 +38,19 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// Returns the number of PIN retries remaining for this YubiKey's FIDO application, and if a reboot of the
-        /// YubiKey is required.
+        ///     Returns the number of PIN retries remaining for this YubiKey's FIDO application, and if a reboot of the
+        ///     YubiKey is required.
         /// </summary>
         /// <remarks>
-        /// The `powerCycleRequired` value returned can have three states: `true` if the YubiKey needs to be power-
-        /// cycled (rebooted), `false` if it does not, and `null` if this information could not be determined.
+        ///     The `powerCycleRequired` value returned can have three states: `true` if the YubiKey needs to be power-
+        ///     cycled (rebooted), `false` if it does not, and `null` if this information could not be determined.
         /// </remarks>
         /// <returns>
-        /// An int/boolean pair. The int is the number of retries remaining, and
-        /// the boolean (if not null), indicates whether the YubiKey needs to be
-        /// power-cycled (removed and reinserted) in order to try verifying the
-        /// PIN again. If the boolean is null, then that is equivalent to
-        /// <c>false</c> (power-cycle not required).
+        ///     An int/boolean pair. The int is the number of retries remaining, and
+        ///     the boolean (if not null), indicates whether the YubiKey needs to be
+        ///     power-cycled (removed and reinserted) in order to try verifying the
+        ///     PIN again. If the boolean is null, then that is equivalent to
+        ///     <c>false</c> (power-cycle not required).
         /// </returns>
         public (int retriesRemaining, bool? powerCycleRequired) GetData()
         {

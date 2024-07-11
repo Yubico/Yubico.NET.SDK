@@ -16,7 +16,7 @@ namespace Yubico.YubiKey.Otp
 {
     internal static class NdefConstants
     {
-        public static string[] supportedUriPrefixes = new string[]
+        public static string[] supportedUriPrefixes =
         {
             "",
             "http://www.",

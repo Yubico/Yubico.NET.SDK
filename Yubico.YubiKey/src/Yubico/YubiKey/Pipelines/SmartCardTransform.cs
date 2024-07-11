@@ -19,8 +19,8 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Pipelines
 {
     /// <summary>
-    /// Represents an ApduPipeline backed by a direct connection
-    /// to a specific application on a smartcard.
+    ///     Represents an ApduPipeline backed by a direct connection
+    ///     to a specific application on a smartcard.
     /// </summary>
     internal class SmartCardTransform : IApduTransform
     {

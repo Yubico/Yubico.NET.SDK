@@ -20,11 +20,11 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Continue the process of enrolling a fingerprint. This is a subcommand of
-    /// the CTAP command "authenticatorBioEnrollment".
+    ///     Continue the process of enrolling a fingerprint. This is a subcommand of
+    ///     the CTAP command "authenticatorBioEnrollment".
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="BioEnrollNextSampleResponse"/>.
+    ///     The partner Response class is <see cref="BioEnrollNextSampleResponse" />.
     /// </remarks>
     public sealed class BioEnrollNextSampleCommand : IYubiKeyCommand<BioEnrollNextSampleResponse>
     {
@@ -35,9 +35,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         private readonly BioEnrollmentCommand _command;
         private readonly ReadOnlyMemory<byte> _templateId;
 
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
-
         // The default constructor explicitly defined. We don't want it to be
         // used.
         private BioEnrollNextSampleCommand()
@@ -46,22 +43,22 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// Constructs a new instance of <see cref="BioEnrollNextSampleCommand"/>.
+        ///     Constructs a new instance of <see cref="BioEnrollNextSampleCommand" />.
         /// </summary>
         /// <param name="templateId">
-        /// The templateID returned by the YubiKey upon completion of the
-        /// <see cref="BioEnrollBeginCommand"/>.
+        ///     The templateID returned by the YubiKey upon completion of the
+        ///     <see cref="BioEnrollBeginCommand" />.
         /// </param>
         /// <param name="timeoutMilliseconds">
-        /// The timeout the caller would like the YubiKey to enforce. This is
-        /// optional and can be null.
+        ///     The timeout the caller would like the YubiKey to enforce. This is
+        ///     optional and can be null.
         /// </param>
         /// <param name="pinUvAuthToken">
-        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        /// key.
+        ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
+        ///     key.
         /// </param>
         /// <param name="authProtocol">
-        /// The Auth Protocol used to build the Auth Token.
+        ///     The Auth Protocol used to build the Auth Token.
         /// </param>
         public BioEnrollNextSampleCommand(
             ReadOnlyMemory<byte> templateId,
@@ -76,6 +73,9 @@ namespace Yubico.YubiKey.Fido2.Commands
                 pinUvAuthToken,
                 authProtocol);
         }
+
+        /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();

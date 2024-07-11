@@ -17,10 +17,10 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
-    /// Get the U2F protocol version implemented by the application.
+    ///     Get the U2F protocol version implemented by the application.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="GetProtocolVersionResponse"/>.
+    ///     The partner Response class is <see cref="GetProtocolVersionResponse" />.
     /// </remarks>
     public sealed class GetProtocolVersionCommand : IYubiKeyCommand<GetProtocolVersionResponse>
     {
@@ -28,36 +28,36 @@ namespace Yubico.YubiKey.U2f.Commands
         private const byte AppVersionInstruction = 0x03;
 
         /// <summary>
-        /// The YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// <see cref="YubiKeyApplication.FidoU2f"/>
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="GetProtocolVersionCommand"/> class.
+        ///     Constructs an instance of the <see cref="GetProtocolVersionCommand" /> class.
         /// </summary>
         public GetProtocolVersionCommand()
         {
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     The YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        ///     <see cref="YubiKeyApplication.FidoU2f" />
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
+
+        /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
         {
-            var innerCommand = new CommandApdu()
+            var innerCommand = new CommandApdu
             {
                 Ins = AppVersionInstruction
             };
 
-            return new CommandApdu()
+            return new CommandApdu
             {
                 Ins = Ctap1MessageInstruction,
                 Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength)
             };
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public GetProtocolVersionResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new GetProtocolVersionResponse(responseApdu);
     }

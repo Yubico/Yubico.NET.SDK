@@ -22,17 +22,17 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.U2f
 {
     /// <summary>
-    /// Represents a single U2F registration.
+    ///     Represents a single U2F registration.
     /// </summary>
     /// <remarks>
-    /// This represents the registration data returned by the YubiKey when
-    /// registering a new U2F credential. The information stored in this
-    /// structure can be sent back to the relying party to store for future
-    /// validation (authentication) attempts.
-    /// <para>
-    /// This class is useful for storing registration data, in scenarios like U2F
-    /// preregistration.
-    /// </para>
+    ///     This represents the registration data returned by the YubiKey when
+    ///     registering a new U2F credential. The information stored in this
+    ///     structure can be sent back to the relying party to store for future
+    ///     validation (authentication) attempts.
+    ///     <para>
+    ///         This class is useful for storing registration data, in scenarios like U2F
+    ///         preregistration.
+    ///     </para>
     /// </remarks>
     public class RegistrationData : U2fSignedData
     {
@@ -72,64 +72,9 @@ namespace Yubico.YubiKey.U2f
         private readonly Logger _log = Log.GetLogger();
 
         /// <summary>
-        /// The ECDSA public key for this user credential. Each coordinate must
-        /// be 32 bytes and the point must be on the P256 curve.
-        /// </summary>
-        /// <remarks>
-        /// This is the public key that will be used to verify an authentication.
-        /// Save this key and pass it into the <see cref="VerifySignature"/> method
-        /// when verifying for authentication.
-        /// <para>
-        /// This is a public key for ECDSA using the NIST P256 curve and SHA256,
-        /// per the FIDO specifications.
-        /// </para>
-        /// <para>
-        /// If you want to get the public key as an instance of <c>ECPoint</c>,
-        /// do this.
-        /// <code language="csharp">
-        ///   var pubKeyPoint = new ECPoint
-        ///   {
-        ///       X = UserPublicKey.Slice(1, 32).ToArray(),
-        ///       Y = UserPublicKey.Slice(33, 32).ToArray(),
-        ///   };
-        /// </code>
-        /// </para>
-        /// </remarks>
-        public ReadOnlyMemory<byte> UserPublicKey
-        {
-            get => _bufferMemory.Slice(PublicKeyOffset, PublicKeyLength);
-            set => SetBufferData(value, PublicKeyLength, PublicKeyOffset, nameof(UserPublicKey));
-        }
-
-        /// <summary>
-        /// The private key handle created by the YubiKey. Save this value and
-        /// use it when authenticating.
-        /// </summary>
-        public ReadOnlyMemory<byte> KeyHandle
-        {
-            get => _bufferMemory.Slice(KeyHandleOffset, KeyHandleLength);
-            set => SetBufferData(value, KeyHandleLength, KeyHandleOffset, nameof(KeyHandle));
-        }
-
-        /// <summary>
-        /// The Attestation cert used to verify a newly-registered credential.
-        /// </summary>
-        /// <remarks>
-        /// There is a <see cref="VerifySignature"/> method that will use the public key
-        /// inside the <c>AttestationCert</c> to verify the signature on the
-        /// registration response. That verifies that the newly-generated public
-        /// key was indeed generated on the device. However, the SDK has no
-        /// classes or methods to verify the <c>AttestationCert</c> itself. The
-        /// relying party app that performs verification must obtain any root and
-        /// CA certs necessary and perform certificate verification using some
-        /// other means.
-        /// </remarks>
-        public X509Certificate2 AttestationCert { get; private set; }
-
-        /// <summary>
-        /// Build a new <c>RegistrationData</c> object from the encoded
-        /// response, which is the data portion of the value returned by the
-        /// YubiKey.
+        ///     Build a new <c>RegistrationData</c> object from the encoded
+        ///     response, which is the data portion of the value returned by the
+        ///     YubiKey.
         /// </summary>
         public RegistrationData(ReadOnlyMemory<byte> encodedResponse)
             : base(PayloadLength, AppIdOffset, ClientDataOffset, SignatureOffset)
@@ -171,21 +116,76 @@ namespace Yubico.YubiKey.U2f
         }
 
         /// <summary>
-        /// Verify the signature using the public key in the attestation
-        /// cert returned by the YubiKey in the registration command/response.
-        /// Use the given Client Data Hash and Application ID to build the data
-        /// to verify.
+        ///     The ECDSA public key for this user credential. Each coordinate must
+        ///     be 32 bytes and the point must be on the P256 curve.
+        /// </summary>
+        /// <remarks>
+        ///     This is the public key that will be used to verify an authentication.
+        ///     Save this key and pass it into the <see cref="VerifySignature" /> method
+        ///     when verifying for authentication.
+        ///     <para>
+        ///         This is a public key for ECDSA using the NIST P256 curve and SHA256,
+        ///         per the FIDO specifications.
+        ///     </para>
+        ///     <para>
+        ///         If you want to get the public key as an instance of <c>ECPoint</c>,
+        ///         do this.
+        ///         <code language="csharp">
+        ///   var pubKeyPoint = new ECPoint
+        ///   {
+        ///       X = UserPublicKey.Slice(1, 32).ToArray(),
+        ///       Y = UserPublicKey.Slice(33, 32).ToArray(),
+        ///   };
+        /// </code>
+        ///     </para>
+        /// </remarks>
+        public ReadOnlyMemory<byte> UserPublicKey
+        {
+            get => _bufferMemory.Slice(PublicKeyOffset, PublicKeyLength);
+            set => SetBufferData(value, PublicKeyLength, PublicKeyOffset, nameof(UserPublicKey));
+        }
+
+        /// <summary>
+        ///     The private key handle created by the YubiKey. Save this value and
+        ///     use it when authenticating.
+        /// </summary>
+        public ReadOnlyMemory<byte> KeyHandle
+        {
+            get => _bufferMemory.Slice(KeyHandleOffset, KeyHandleLength);
+            set => SetBufferData(value, KeyHandleLength, KeyHandleOffset, nameof(KeyHandle));
+        }
+
+        /// <summary>
+        ///     The Attestation cert used to verify a newly-registered credential.
+        /// </summary>
+        /// <remarks>
+        ///     There is a <see cref="VerifySignature" /> method that will use the public key
+        ///     inside the <c>AttestationCert</c> to verify the signature on the
+        ///     registration response. That verifies that the newly-generated public
+        ///     key was indeed generated on the device. However, the SDK has no
+        ///     classes or methods to verify the <c>AttestationCert</c> itself. The
+        ///     relying party app that performs verification must obtain any root and
+        ///     CA certs necessary and perform certificate verification using some
+        ///     other means.
+        /// </remarks>
+        public X509Certificate2 AttestationCert { get; }
+
+        /// <summary>
+        ///     Verify the signature using the public key in the attestation
+        ///     cert returned by the YubiKey in the registration command/response.
+        ///     Use the given Client Data Hash and Application ID to build the data
+        ///     to verify.
         /// </summary>
         /// <param name="applicationId">
-        /// The appId (origin data or hash of origin) that was provided to create
-        /// this registration.
+        ///     The appId (origin data or hash of origin) that was provided to create
+        ///     this registration.
         /// </param>
         /// <param name="clientDataHash">
-        /// The `clientDataHash` (challenge data) that was provided to create
-        /// this registration.
+        ///     The `clientDataHash` (challenge data) that was provided to create
+        ///     this registration.
         /// </param>
         /// <returns>
-        /// A `bool`, `true` if the signature verifies, `false` otherwise.
+        ///     A `bool`, `true` if the signature verifies, `false` otherwise.
         /// </returns>
         public bool VerifySignature(ReadOnlyMemory<byte> applicationId, ReadOnlyMemory<byte> clientDataHash)
         {

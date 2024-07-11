@@ -13,28 +13,26 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.InterIndustry.Commands
 {
     /// <summary>
-    /// Response from SelectApplication command.
+    ///     Response from SelectApplication command.
     /// </summary>
     public class GenericSelectResponse : YubiKeyResponse, ISelectApplicationResponse<GenericSelectApplicationData>
     {
         private readonly ReadOnlyMemory<byte> _rawData;
 
         /// <summary>
-        /// Constructs an instance of the <see cref="GenericSelectResponse" /> class.
+        ///     Constructs an instance of the <see cref="GenericSelectResponse" /> class.
         /// </summary>
         public GenericSelectResponse(ResponseApdu responseApdu) : base(responseApdu)
         {
             _rawData = responseApdu.Data;
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         public GenericSelectApplicationData GetData() => new GenericSelectApplicationData(_rawData);
     }
 }

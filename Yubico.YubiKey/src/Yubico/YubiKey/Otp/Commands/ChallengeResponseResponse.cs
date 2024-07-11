@@ -18,8 +18,8 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    /// The response to the <see cref="ChallengeResponseCommand"/> command, containing the YubiKey's
-    /// response to the issued challenge.
+    ///     The response to the <see cref="ChallengeResponseCommand" /> command, containing the YubiKey's
+    ///     response to the issued challenge.
     /// </summary>
     public class ChallengeResponseResponse : OtpResponse, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
     {
@@ -29,12 +29,12 @@ namespace Yubico.YubiKey.Otp.Commands
         private readonly ChallengeResponseAlgorithm _algorithm;
 
         /// <summary>
-        /// Constructs a <see cref="ChallengeResponseResponse"/> instance based on a <see cref="ResponseApdu"/>
-        /// received from the YubiKey, and the algorithm requested for generating the response.
+        ///     Constructs a <see cref="ChallengeResponseResponse" /> instance based on a <see cref="ResponseApdu" />
+        ///     received from the YubiKey, and the algorithm requested for generating the response.
         /// </summary>
-        /// <param name="responseApdu">The <see cref="ResponseApdu"/> returned by the YubiKey.</param>
+        /// <param name="responseApdu">The <see cref="ResponseApdu" /> returned by the YubiKey.</param>
         /// <param name="algorithm">
-        /// The algorithm used when the <see cref="ChallengeResponseCommand"/> was sent.
+        ///     The algorithm used when the <see cref="ChallengeResponseCommand" /> was sent.
         /// </param>
         public ChallengeResponseResponse(ResponseApdu responseApdu, ChallengeResponseAlgorithm algorithm) :
             base(responseApdu)
@@ -43,18 +43,18 @@ namespace Yubico.YubiKey.Otp.Commands
         }
 
         /// <summary>
-        /// Gets the response to the issued challenge.
+        ///     Gets the response to the issued challenge.
         /// </summary>
         /// <returns>
-        /// The response to the challenge. The size of the response will be 16 bytes if the YubicoOtp
-        /// algorithm was used, or 20 bytes if the HMAC-SHA1 algorithm was used.
+        ///     The response to the challenge. The size of the response will be 16 bytes if the YubicoOtp
+        ///     algorithm was used, or 20 bytes if the HMAC-SHA1 algorithm was used.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
+        ///     Thrown when <see cref="YubiKeyResponse.Status" /> is not <see cref="ResponseStatus.Success" />.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
-        /// Thrown when the data received from the YubiKey does not
-        /// match the expectations of the parser.
+        ///     Thrown when the data received from the YubiKey does not
+        ///     match the expectations of the parser.
         /// </exception>
         public ReadOnlyMemory<byte> GetData()
         {
@@ -72,7 +72,7 @@ namespace Yubico.YubiKey.Otp.Commands
 
             if (ResponseApdu.Data.Length < expectedLength)
             {
-                throw new MalformedYubiKeyResponseException()
+                throw new MalformedYubiKeyResponseException
                 {
                     ResponseClass = nameof(ChallengeResponseResponse),
                     ActualDataLength = ResponseApdu.Data.Length

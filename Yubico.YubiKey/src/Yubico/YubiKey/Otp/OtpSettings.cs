@@ -21,41 +21,25 @@ using Yubico.YubiKey.Otp.Operations;
 namespace Yubico.YubiKey.Otp
 {
     /// <summary>
-    /// Helper class to manage the flags used by the YubiKey OTP configuration.
+    ///     Helper class to manage the flags used by the YubiKey OTP configuration.
     /// </summary>
-    /// <typeparam name="T">The <see cref="Type"/> of the operation class.</typeparam>
+    /// <typeparam name="T">The <see cref="Type" /> of the operation class.</typeparam>
     public partial class OtpSettings<T> where T : OperationBase<T>
     {
-        private Flag _flags;
         private readonly T _op;
-
-        private IEnumerable<Flag> FlagsSet =>
-            ((Flag[])Enum.GetValues(typeof(Flag)))
-            .Where(f => _flags.HasFlag(f));
-
-        private T ApplyFlag(Flag flag, bool setIt)
-        {
-            if (_op.Version < _flagDefinitions[flag].RequiredVersion)
-            {
-                throw new InvalidOperationException(ExceptionMessages.NotSupportedByYubiKeyVersion);
-            }
-
-            _flags = setIt
-                ? _flags | flag
-                : _flags & ~flag;
-
-            return _op;
-        }
-
-        internal bool IsFlagSet(Flag flag) => (_flags & flag) != 0;
+        private Flag _flags;
 
         internal OtpSettings(T op)
         {
             _op = op;
         }
 
+        private IEnumerable<Flag> FlagsSet =>
+            ((Flag[])Enum.GetValues(typeof(Flag)))
+            .Where(f => _flags.HasFlag(f));
+
         /// <summary>
-        /// The YubiKey OTP flags collected in one data-structure.
+        ///     The YubiKey OTP flags collected in one data-structure.
         /// </summary>
         public YubiKeyFlags YubiKeyFlags
         {
@@ -145,12 +129,28 @@ namespace Yubico.YubiKey.Otp
             }
         }
 
+        private T ApplyFlag(Flag flag, bool setIt)
+        {
+            if (_op.Version < _flagDefinitions[flag].RequiredVersion)
+            {
+                throw new InvalidOperationException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+            }
+
+            _flags = setIt
+                ? _flags | flag
+                : _flags & ~flag;
+
+            return _op;
+        }
+
+        internal bool IsFlagSet(Flag flag) => (_flags & flag) != 0;
+
         /// <summary>
-        /// Sets the configuration for OATH HOTP.
+        ///     Sets the configuration for OATH HOTP.
         /// </summary>
         /// <remarks>
-        /// In order to use OATH HOTP in a slot, neither <see cref="Flag.YubicoOtpChallengeResponse"/>
-        /// nor <see cref="Flag.HmacSha1ChallengeResponse"/> can be set.
+        ///     In order to use OATH HOTP in a slot, neither <see cref="Flag.YubicoOtpChallengeResponse" />
+        ///     nor <see cref="Flag.HmacSha1ChallengeResponse" /> can be set.
         /// </remarks>
         public T SetOathHotp(bool setting = true) => ApplyFlag(Flag.OathHotP, setting);
 

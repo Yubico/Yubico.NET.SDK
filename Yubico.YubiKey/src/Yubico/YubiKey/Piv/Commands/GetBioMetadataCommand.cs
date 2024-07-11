@@ -12,32 +12,30 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Globalization;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// Get information about Bio multi-protocol key.
+    ///     Get information about Bio multi-protocol key.
     /// </summary>
     /// <remarks>
-    /// The Get Bio Metadata command is available on YubiKey Bio multi-protocol.
-    /// <para>
-    /// The partner Response class is <see cref="GetBioMetadataResponse"/>.
-    /// </para>
-    /// <para>
-    /// See the User's Manual
-    /// <xref href="UsersManualPivCommands#get-bio-metadata"> entry on getting bio metadata</xref>
-    /// for specific information about what information is returned. 
-    /// </para>
-    /// <para>
-    /// Example:
-    /// </para>
-    /// <code language="csharp">
-    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
+    ///     The Get Bio Metadata command is available on YubiKey Bio multi-protocol.
+    ///     <para>
+    ///         The partner Response class is <see cref="GetBioMetadataResponse" />.
+    ///     </para>
+    ///     <para>
+    ///         See the User's Manual
+    ///         <xref href="UsersManualPivCommands#get-bio-metadata"> entry on getting bio metadata</xref>
+    ///         for specific information about what information is returned.
+    ///     </para>
+    ///     <para>
+    ///         Example:
+    ///     </para>
+    ///     <code language="csharp">
+    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br />
     ///   GetBioMetadataCommand command = new GetBioMetadataCommand();
-    ///   GetBioMetadataResponse response = connection.SendCommand(command);<br/>
+    ///   GetBioMetadataResponse response = connection.SendCommand(command);<br />
     ///   if (response.Status == ResponseStatus.Success)
     ///   {
     ///       PivBioMetadata data = response.GetData();
@@ -51,20 +49,20 @@ namespace Yubico.YubiKey.Piv.Commands
         private const byte OnCardComparisonAuthenticationSlot = 0x96;
 
         /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs. For this
-        /// command it's PIV.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Piv
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Piv;
-
-        /// <summary>
-        /// Initializes a new instance of the GetBioMetadataCommand class.
+        ///     Initializes a new instance of the GetBioMetadataCommand class.
         /// </summary>
         public GetBioMetadataCommand()
         {
         }
+
+        /// <summary>
+        ///     Gets the YubiKeyApplication to which this command belongs. For this
+        ///     command it's PIV.
+        /// </summary>
+        /// <value>
+        ///     YubiKeyApplication.Piv
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Piv;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() =>

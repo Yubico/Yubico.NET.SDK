@@ -20,34 +20,19 @@ using System.Globalization;
 namespace Yubico.YubiKey.Fido2.Cbor
 {
     /// <summary>
-    /// Represents a CBOR map as a random-access dictionary. This is used to read
-    /// a map in a CBOR-encoded construction.
+    ///     Represents a CBOR map as a random-access dictionary. This is used to read
+    ///     a map in a CBOR-encoded construction.
     /// </summary>
     internal class CborMap<TKey>
     {
         private readonly IDictionary<TKey, object?> _dict;
 
         /// <summary>
-        /// The number of key/value pairs in this map.
-        /// </summary>
-        public int Count => _dict.Count;
-
-        /// <summary>
-        /// The number of bytes in the encoding that were read.
-        /// </summary>
-        public int BytesRead { get; private set; }
-
-        /// <summary>
-        /// The CBOR encoded map, if available.
-        /// </summary>
-        public ReadOnlyMemory<byte> Encoded { get; private set; }
-
-        /// <summary>
-        /// Creates a new instance of <see cref="CborMap{TKey}"/> based on the
-        /// encoding.
+        ///     Creates a new instance of <see cref="CborMap{TKey}" /> based on the
+        ///     encoding.
         /// </summary>
         /// <param name="encoding">
-        /// A byte array containing a CBOR encoding that is a map.
+        ///     A byte array containing a CBOR encoding that is a map.
         /// </param>
         public CborMap(ReadOnlyMemory<byte> encoding)
         {
@@ -80,25 +65,40 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Checks to see whether a given key is present in the map, without throwing an exception.
+        ///     The number of key/value pairs in this map.
+        /// </summary>
+        public int Count => _dict.Count;
+
+        /// <summary>
+        ///     The number of bytes in the encoding that were read.
+        /// </summary>
+        public int BytesRead { get; private set; }
+
+        /// <summary>
+        ///     The CBOR encoded map, if available.
+        /// </summary>
+        public ReadOnlyMemory<byte> Encoded { get; private set; }
+
+        /// <summary>
+        ///     Checks to see whether a given key is present in the map, without throwing an exception.
         /// </summary>
         public bool Contains(TKey key) => _dict.ContainsKey(key);
 
         /// <summary>
-        /// Returns this map as an IDictionary of key/value pairs where the keys
-        /// are all of type TKey and the values are all of the type TValue. If
-        /// one or more of the map's values is not of the specified type, this
-        /// will throw an exception.
+        ///     Returns this map as an IDictionary of key/value pairs where the keys
+        ///     are all of type TKey and the values are all of the type TValue. If
+        ///     one or more of the map's values is not of the specified type, this
+        ///     will throw an exception.
         /// </summary>
         /// <remarks>
-        /// This is generally used to get a sub-map out. For example, one element
-        /// of the main map is a map itself, a map of key/value pairs where each
-        /// key is a string and each value is a boolean (or a string). So get the
-        /// sub-map out (e.g. subMap = mainMap.ReadMap(4)), then get that
-        /// map as a dictionary (e.g. subMap.AsDictionary()).
+        ///     This is generally used to get a sub-map out. For example, one element
+        ///     of the main map is a map itself, a map of key/value pairs where each
+        ///     key is a string and each value is a boolean (or a string). So get the
+        ///     sub-map out (e.g. subMap = mainMap.ReadMap(4)), then get that
+        ///     map as a dictionary (e.g. subMap.AsDictionary()).
         /// </remarks>
         /// <returns>
-        /// A new IDictionary representing this map.
+        ///     A new IDictionary representing this map.
         /// </returns>
         public IReadOnlyDictionary<TKey, TValue> AsDictionary<TValue>()
         {
@@ -118,8 +118,8 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Read the value for the given key as a nested map, a map where each
-        /// element is a key/value pair and each key is of type TNestedKey.
+        ///     Read the value for the given key as a nested map, a map where each
+        ///     element is a key/value pair and each key is of type TNestedKey.
         /// </summary>
         public CborMap<TNestedKey> ReadMap<TNestedKey>(TKey key)
         {
@@ -134,7 +134,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Read the value for the given key as an array of TValue.
+        ///     Read the value for the given key as an array of TValue.
         /// </summary>
         public IReadOnlyList<TValue> ReadArray<TValue>(TKey key)
         {
@@ -168,8 +168,8 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// If the map does not contain the given key, return null, otherwise
-        /// read the value as a "T".
+        ///     If the map does not contain the given key, return null, otherwise
+        ///     read the value as a "T".
         /// </summary>
         public object? ReadOptional<T>(TKey key)
         {
@@ -212,7 +212,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Read the value for the given key as a signed 32-bit integer.
+        ///     Read the value for the given key as a signed 32-bit integer.
         /// </summary>
         public int ReadInt32(TKey key) => ReadInt32(_dict[key]);
 
@@ -229,11 +229,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Read the value for the given key as an unsigned 32-bit integer.
+        ///     Read the value for the given key as an unsigned 32-bit integer.
         /// </summary>
         /// <remarks>
-        /// WARNING! If the value is a negative int, this method will throw an
-        /// exception.
+        ///     WARNING! If the value is a negative int, this method will throw an
+        ///     exception.
         /// </remarks>
         public uint ReadUInt32(TKey key) => ReadUInt32(_dict[key]);
 
@@ -250,7 +250,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Read the value for the given key as a signed integer.
+        ///     Read the value for the given key as a signed integer.
         /// </summary>
         public long ReadInt64(TKey key) => ReadInt64(_dict[key]);
 
@@ -267,11 +267,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Read the value for the given key as an unsigned integer.
+        ///     Read the value for the given key as an unsigned integer.
         /// </summary>
         /// <remarks>
-        /// WARNING! If the value is a negative int, this method will throw an
-        /// exception.
+        ///     WARNING! If the value is a negative int, this method will throw an
+        ///     exception.
         /// </remarks>
         public ulong ReadUInt64(TKey key) => ReadUInt64(_dict[key]);
 
@@ -288,7 +288,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Read the value for the given key as a byte array.
+        ///     Read the value for the given key as a byte array.
         /// </summary>
         public ReadOnlyMemory<byte> ReadByteString(TKey key)
         {
@@ -303,7 +303,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Read the value for the given key as a string.
+        ///     Read the value for the given key as a string.
         /// </summary>
         public string ReadTextString(TKey key)
         {
@@ -318,7 +318,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Read the value for the given key as a single-width floating point number.
+        ///     Read the value for the given key as a single-width floating point number.
         /// </summary>
         public float ReadSingle(TKey key)
         {
@@ -333,7 +333,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Read the value for the given key as a double-width floating point number.
+        ///     Read the value for the given key as a double-width floating point number.
         /// </summary>
         public double ReadDouble(TKey key)
         {
@@ -348,7 +348,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Read the given key as a "null" value - throw if there is a value.
+        ///     Read the given key as a "null" value - throw if there is a value.
         /// </summary>
         public void ReadNull(TKey key)
         {
@@ -363,7 +363,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        /// Read the value for the given key as a boolean.
+        ///     Read the value for the given key as a boolean.
         /// </summary>
         public bool ReadBoolean(TKey key)
         {

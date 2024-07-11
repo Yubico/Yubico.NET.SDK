@@ -20,7 +20,7 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    /// Performs CALCULATE of OTP (One-Time Password) values for one named credential.
+    ///     Performs CALCULATE of OTP (One-Time Password) values for one named credential.
     /// </summary>
     public class CalculateCredentialCommand : OathChallengeResponseBaseCommand,
                                               IYubiKeyCommand<CalculateCredentialResponse>
@@ -30,45 +30,24 @@ namespace Yubico.YubiKey.Oath.Commands
         private const byte ChallengeTag = 0x74;
 
         /// <summary>
-        /// The credential to calculate.
-        /// </summary>
-        public Credential? Credential { get; set; }
-
-        /// <summary>
-        /// Full or truncated response to receive back.
-        /// </summary>
-        /// <value>
-        /// The default value for the response is truncated.
-        /// </value>
-        public ResponseFormat ResponseFormat { get; set; } = ResponseFormat.Truncated;
-
-        /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Oath
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Oath;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="CalculateCredentialCommand" /> class.
-        /// The ResponseFormat will be set to its default value which is truncated.
+        ///     Constructs an instance of the <see cref="CalculateCredentialCommand" /> class.
+        ///     The ResponseFormat will be set to its default value which is truncated.
         /// </summary>
         public CalculateCredentialCommand()
         {
         }
 
         /// <summary>
-        /// Constructs an instance of the <see cref="CalculateCredentialCommand" /> class.
+        ///     Constructs an instance of the <see cref="CalculateCredentialCommand" /> class.
         /// </summary>
         /// <param name="credential">
-        ///  The credential to calculate.
+        ///     The credential to calculate.
         /// </param>
         /// <param name="responseFormat">
-        /// Full or truncated response to receive back.
+        ///     Full or truncated response to receive back.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// The credential is null.
+        ///     The credential is null.
         /// </exception>
         public CalculateCredentialCommand(Credential credential, ResponseFormat responseFormat)
         {
@@ -80,6 +59,27 @@ namespace Yubico.YubiKey.Oath.Commands
             Credential = credential;
             ResponseFormat = responseFormat;
         }
+
+        /// <summary>
+        ///     The credential to calculate.
+        /// </summary>
+        public Credential? Credential { get; set; }
+
+        /// <summary>
+        ///     Full or truncated response to receive back.
+        /// </summary>
+        /// <value>
+        ///     The default value for the response is truncated.
+        /// </value>
+        public ResponseFormat ResponseFormat { get; set; } = ResponseFormat.Truncated;
+
+        /// <summary>
+        ///     Gets the YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        ///     YubiKeyApplication.Oath
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Oath;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()

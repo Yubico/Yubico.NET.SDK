@@ -14,18 +14,14 @@
 
 using System;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Instruct the YubiKey to make a credential based on the input parameters.
+    ///     Instruct the YubiKey to make a credential based on the input parameters.
     /// </summary>
     public class MakeCredentialCommand : IYubiKeyCommand<MakeCredentialResponse>
     {
-        /// <inheritdoc />
-        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
-
         private readonly MakeCredentialParameters _params;
 
         // The default constructor explicitly defined. We don't want it to be
@@ -38,21 +34,24 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// Constructs an instance of the <see cref="MakeCredentialCommand" />
-        /// class using the given parameters.
+        ///     Constructs an instance of the <see cref="MakeCredentialCommand" />
+        ///     class using the given parameters.
         /// </summary>
         /// <remarks>
-        /// This class will copy a reference to the input parameters object. It
-        /// will no longer need it after the call to <c>SendCommand</c>.
+        ///     This class will copy a reference to the input parameters object. It
+        ///     will no longer need it after the call to <c>SendCommand</c>.
         /// </remarks>
         /// <param name="makeCredentialParameters">
-        /// An object containing all the parameters the YubiKey will use to make
-        /// a new credential.
+        ///     An object containing all the parameters the YubiKey will use to make
+        ///     a new credential.
         /// </param>
         public MakeCredentialCommand(MakeCredentialParameters makeCredentialParameters)
         {
             _params = makeCredentialParameters;
         }
+
+        /// <inheritdoc />
+        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
@@ -61,7 +60,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             byte[] payload = new byte[encodedParams.Length + 1];
             payload[0] = CtapConstants.CtapMakeCredentialCmd;
             Array.Copy(encodedParams, sourceIndex: 0, payload, destinationIndex: 1, encodedParams.Length);
-            return new CommandApdu()
+            return new CommandApdu
             {
                 Ins = CtapConstants.CtapHidCbor,
                 Data = payload

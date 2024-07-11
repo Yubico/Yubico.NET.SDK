@@ -21,14 +21,31 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    /// The response to the <see cref="CalculateCredentialCommand"/> command, containing the response from the oath application.
+    ///     The response to the <see cref="CalculateCredentialCommand" /> command, containing the response from the oath
+    ///     application.
     /// </summary>
     public class CalculateCredentialResponse : OathResponse, IYubiKeyResponseWithData<Code>
     {
         private const byte FullResponseTag = 0x75;
         private const byte TruncatedResponseTag = 0x76;
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Constructs an instance of the <see cref="CalculateCredentialResponse" /> class based on a ResponseApdu received
+        ///     from the YubiKey.
+        /// </summary>
+        /// <param name="responseApdu">
+        ///     The ResponseApdu returned by the YubiKey.
+        /// </param>
+        /// <param name="credential">
+        ///     The credential that was sent to calculate in CalculateCredentialCommand.
+        /// </param>
+        public CalculateCredentialResponse(ResponseApdu responseApdu, Credential credential) :
+            base(responseApdu)
+        {
+            Credential = credential;
+        }
+
+        /// <inheritdoc />
         protected override ResponseStatusPair StatusCodeMap =>
             StatusWord switch
             {
@@ -38,36 +55,21 @@ namespace Yubico.YubiKey.Oath.Commands
             };
 
         /// <summary>
-        /// The credential that was sent to calculate in CalculateCredentialCommand.
+        ///     The credential that was sent to calculate in CalculateCredentialCommand.
         /// </summary>
         public Credential Credential { get; }
 
-        /// <summary> 
-        /// Constructs an instance of the <see cref="CalculateCredentialResponse" /> class based on a ResponseApdu received from the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
-        /// </param>
-        /// <param name="credential">
-        /// The credential that was sent to calculate in CalculateCredentialCommand.
-        /// </param>
-        public CalculateCredentialResponse(ResponseApdu responseApdu, Credential credential) :
-            base(responseApdu)
-        {
-            Credential = credential;
-        }
-
         /// <summary>
-        /// Gets the instance <see cref="Code"/> class.
+        ///     Gets the instance <see cref="Code" /> class.
         /// </summary>
         /// <returns>
-        /// The data in the response APDU, presented as one-time password.
+        ///     The data in the response APDU, presented as one-time password.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="IYubiKeyResponse.Status"/> is not equal to <see cref="ResponseStatus.Success"/>.
+        ///     Thrown when <see cref="IYubiKeyResponse.Status" /> is not equal to <see cref="ResponseStatus.Success" />.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
-        /// Thrown when the data provided does not meet the expectations, and cannot be parsed.
+        ///     Thrown when the data provided does not meet the expectations, and cannot be parsed.
         /// </exception>
         public Code GetData()
         {
@@ -82,7 +84,7 @@ namespace Yubico.YubiKey.Oath.Commands
             {
                 FullResponseTag => tlvReader.ReadValue(FullResponseTag),
                 TruncatedResponseTag => tlvReader.ReadValue(TruncatedResponseTag),
-                _ => throw new MalformedYubiKeyResponseException()
+                _ => throw new MalformedYubiKeyResponseException
                 {
                     ResponseClass = nameof(CalculateCredentialResponse),
                     ActualDataLength = ResponseApdu.Data.Length
@@ -91,7 +93,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             if (bytes.Length < 5)
             {
-                throw new MalformedYubiKeyResponseException()
+                throw new MalformedYubiKeyResponseException
                 {
                     ResponseClass = nameof(CalculateCredentialResponse),
                     ActualDataLength = ResponseApdu.Data.Length

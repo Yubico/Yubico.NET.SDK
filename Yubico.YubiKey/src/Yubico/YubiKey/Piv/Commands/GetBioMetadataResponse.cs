@@ -19,24 +19,24 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// The response to <see cref="GetBioMetadataCommand"/>, containing Bio Metadata about a
-    /// particular key.
+    ///     The response to <see cref="GetBioMetadataCommand" />, containing Bio Metadata about a
+    ///     particular key.
     /// </summary>
     /// <remarks>
-    /// The Get Bio Metadata command is available on Bio multi-protocol keys.
-    /// <para>
-    /// This is the partner Response class to <see cref="GetBioMetadataCommand"/>.
-    /// </para>
-    /// <para>
-    /// The data returned is a <see cref="PivBioMetadata"/>.
-    /// </para>
-    /// <para>
-    /// Example:
-    /// </para>
-    /// <code language="csharp">
-    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
+    ///     The Get Bio Metadata command is available on Bio multi-protocol keys.
+    ///     <para>
+    ///         This is the partner Response class to <see cref="GetBioMetadataCommand" />.
+    ///     </para>
+    ///     <para>
+    ///         The data returned is a <see cref="PivBioMetadata" />.
+    ///     </para>
+    ///     <para>
+    ///         Example:
+    ///     </para>
+    ///     <code language="csharp">
+    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br />
     ///   GetBioMetadataCommand command = new GetBioMetadataCommand();
-    ///   GetBioMetadataResponse response = connection.SendCommand(command);<br/>
+    ///   GetBioMetadataResponse response = connection.SendCommand(command);<br />
     ///   if (response.Status == ResponseStatus.Success)
     ///   {
     ///       PivBioMetadata data = response.GetData();
@@ -46,11 +46,11 @@ namespace Yubico.YubiKey.Piv.Commands
     public sealed class GetBioMetadataResponse : PivResponse, IYubiKeyResponseWithData<PivBioMetadata>
     {
         /// <summary>
-        /// Constructs a GetBioMetadataResponse based on a ResponseApdu received from
-        /// the YubiKey.
+        ///     Constructs a GetBioMetadataResponse based on a ResponseApdu received from
+        ///     the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// The object containing the response APDU<br/>returned by the YubiKey.
+        ///     The object containing the response APDU<br />returned by the YubiKey.
         /// </param>
         public GetBioMetadataResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -58,16 +58,16 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        /// Gets the bio metadata from the YubiKey response.
+        ///     Gets the bio metadata from the YubiKey response.
         /// </summary>
         /// <returns>
-        /// The data in the response APDU, presented as a PivBioMetadata object.
+        ///     The data in the response APDU, presented as a PivBioMetadata object.
         /// </returns>
         /// <exception cref="NotSupportedException">
-        /// Thrown when the device does not support Bio Metadata.
+        ///     Thrown when the device does not support Bio Metadata.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
+        ///     Thrown when <see cref="YubiKeyResponse.Status" /> is not <see cref="ResponseStatus.Success" />.
         /// </exception>
         public PivBioMetadata GetData() =>
             Status switch

@@ -18,7 +18,7 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Scp03.Commands
 {
     /// <summary>
-    /// The response to putting or replacing SCP03 keys on the YubiKey.
+    ///     The response to putting or replacing SCP03 keys on the YubiKey.
     /// </summary>
     internal class PutKeyResponse : Scp03Response, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
     {

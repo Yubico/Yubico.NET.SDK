@@ -15,14 +15,15 @@
 using System;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
+using Yubico.YubiKey.InterIndustry.Commands;
 
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    /// The response to the <see cref="SelectOathCommand"/> command, containing the YubiKey's OATH application info.
+    ///     The response to the <see cref="SelectOathCommand" /> command, containing the YubiKey's OATH application info.
     /// </summary>
     public class SelectOathResponse : OathResponse,
-                                      InterIndustry.Commands.ISelectApplicationResponse<OathApplicationData>
+                                      ISelectApplicationResponse<OathApplicationData>
     {
         private const byte VersionTag = 0x79;
         private const byte NameTag = 0x71;
@@ -30,10 +31,10 @@ namespace Yubico.YubiKey.Oath.Commands
         private const byte AlgorithmTag = 0x7B;
 
         /// <summary>
-        /// Constructs a SelectResponse instance based on a ResponseApdu received from the YubiKey.
+        ///     Constructs a SelectResponse instance based on a ResponseApdu received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
+        ///     The ResponseApdu returned by the YubiKey.
         /// </param>
         public SelectOathResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -41,16 +42,16 @@ namespace Yubico.YubiKey.Oath.Commands
         }
 
         /// <summary>
-        /// Gets the instance of the <see cref="OathApplicationData"/> class.
+        ///     Gets the instance of the <see cref="OathApplicationData" /> class.
         /// </summary>
         /// <returns>
-        /// The data in the response APDU, presented as a OATH application info.
+        ///     The data in the response APDU, presented as a OATH application info.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="IYubiKeyResponse.Status"/> is not equal to <see cref="ResponseStatus.Success"/>.
+        ///     Thrown when <see cref="IYubiKeyResponse.Status" /> is not equal to <see cref="ResponseStatus.Success" />.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
-        /// Thrown when the data provided does not meet the expectations, and cannot be parsed.
+        ///     Thrown when the data provided does not meet the expectations, and cannot be parsed.
         /// </exception>
         public OathApplicationData GetData()
         {
@@ -93,7 +94,7 @@ namespace Yubico.YubiKey.Oath.Commands
                         break;
 
                     default:
-                        throw new MalformedYubiKeyResponseException()
+                        throw new MalformedYubiKeyResponseException
                         {
                             ResponseClass = nameof(SelectOathResponse),
                             ActualDataLength = ResponseApdu.Data.Length

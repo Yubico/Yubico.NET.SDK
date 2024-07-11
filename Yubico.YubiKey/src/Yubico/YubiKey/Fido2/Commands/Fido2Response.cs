@@ -20,20 +20,20 @@ namespace Yubico.YubiKey.Fido2.Commands
     {
         private const short CtapStatusMask = 0xFF;
 
-        /// <summary>
-        /// The CTAP status code.
-        /// </summary>
-        public CtapStatus CtapStatus { get; private set; }
-
         public Fido2Response(ResponseApdu responseApdu) : base(responseApdu)
         {
             CtapStatus = (CtapStatus)(StatusWord & CtapStatusMask);
         }
 
         /// <summary>
-        /// Overridden to modify the messages associated with certain
-        /// status words. The messages match the status words' meanings
-        /// as described in the FIDO2 specifications.
+        ///     The CTAP status code.
+        /// </summary>
+        public CtapStatus CtapStatus { get; }
+
+        /// <summary>
+        ///     Overridden to modify the messages associated with certain
+        ///     status words. The messages match the status words' meanings
+        ///     as described in the FIDO2 specifications.
         /// </summary>
         protected override ResponseStatusPair StatusCodeMap =>
             CtapStatus switch

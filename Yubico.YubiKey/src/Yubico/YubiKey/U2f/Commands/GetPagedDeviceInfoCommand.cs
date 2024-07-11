@@ -17,29 +17,29 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
-    /// Gets detailed information about the YubiKey and its current configuration.
+    ///     Gets detailed information about the YubiKey and its current configuration.
     /// </summary>
     public sealed class GetPagedDeviceInfoCommand : IGetPagedDeviceInfoCommand<GetPagedDeviceInfoResponse>
     {
         private const byte GetDeviceInfoInstruction = 0xC2;
 
-        /// <inheritdoc />
-        public byte Page { get; set; }
-
         /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.FidoU2f
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
-
-        /// <summary>
-        /// Constructs an instance of the <see cref="GetPagedDeviceInfoCommand" /> class.
+        ///     Constructs an instance of the <see cref="GetPagedDeviceInfoCommand" /> class.
         /// </summary>
         public GetPagedDeviceInfoCommand()
         {
         }
+
+        /// <inheritdoc />
+        public byte Page { get; set; }
+
+        /// <summary>
+        ///     Gets the YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        ///     YubiKeyApplication.FidoU2f
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() =>

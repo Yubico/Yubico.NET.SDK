@@ -22,29 +22,28 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    /// The response to the <see cref="ListCredentialsCommand"/> command, containing
-    /// the credentials present in the YubiHSM Auth application, and the number
-    /// of retries remaining for each.
+    ///     The response to the <see cref="ListCredentialsCommand" /> command, containing
+    ///     the credentials present in the YubiHSM Auth application, and the number
+    ///     of retries remaining for each.
     /// </summary>
     public sealed class ListCredentialsResponse :
         BaseYubiHsmAuthResponse,
         IYubiKeyResponseWithData<List<CredentialRetryPair>>
     {
-        private readonly Index CryptoKeyTypeIndex = 0;
-        private readonly Index TouchIndex = 1;
-        private readonly Range LabelRange = 2..^1;
-        private readonly Index RetryIndex = ^1;
-
         // CryptoKeyType (1) + Touch (1) + Retry (1) + Label (min/max)
         private const int MinElementSize = 3 + Credential.MinLabelByteCount;
         private const int MaxElementSize = 3 + Credential.MaxLabelByteCount;
+        private readonly Index CryptoKeyTypeIndex = 0;
+        private readonly Range LabelRange = 2..^1;
+        private readonly Index RetryIndex = ^1;
+        private readonly Index TouchIndex = 1;
 
         /// <summary>
-        /// Constructs a ListCredentialsResponse instance based on a ResponseApdu
-        /// received from the YubiKey.
+        ///     Constructs a ListCredentialsResponse instance based on a ResponseApdu
+        ///     received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
+        ///     The ResponseApdu returned by the YubiKey.
         /// </param>
         public ListCredentialsResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -52,15 +51,15 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         }
 
         /// <summary>
-        /// Gets the list of <see cref="Credential"/>s present in the YubiHSM Auth
-        /// application, and the number of retries remaining.
+        ///     Gets the list of <see cref="Credential" />s present in the YubiHSM Auth
+        ///     application, and the number of retries remaining.
         /// </summary>
         /// <returns>
-        /// The data in the response APDU, as a list of credentials and retry count.
+        ///     The data in the response APDU, as a list of credentials and retry count.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when the <see cref="IYubiKeyResponse.Status"/> is not equal to
-        /// <see cref="ResponseStatus.Success"/>.
+        ///     Thrown when the <see cref="IYubiKeyResponse.Status" /> is not equal to
+        ///     <see cref="ResponseStatus.Success" />.
         /// </exception>
         public List<CredentialRetryPair> GetData()
         {
@@ -69,7 +68,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                 throw new InvalidOperationException(StatusMessage);
             }
 
-            List<CredentialRetryPair> credentialRetryPairs = new List<CredentialRetryPair>();
+            var credentialRetryPairs = new List<CredentialRetryPair>();
 
             var tlvReader = new TlvReader(ResponseApdu.Data);
 

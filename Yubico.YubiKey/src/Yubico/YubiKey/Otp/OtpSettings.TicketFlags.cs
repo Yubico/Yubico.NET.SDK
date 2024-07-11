@@ -19,37 +19,37 @@ namespace Yubico.YubiKey.Otp
     public partial class OtpSettings<T> where T : OperationBase<T>
     {
         /// <summary>
-        /// Sends a tab character before the fixed string.
+        ///     Sends a tab character before the fixed string.
         /// </summary>
         public T SendTabFirst(bool setting = true) => ApplyFlag(Flag.SendTabFirst, setting);
 
         /// <summary>
-        /// Sends a tab character after the fixed string.
+        ///     Sends a tab character after the fixed string.
         /// </summary>
         public T AppendTabToFixed(bool setting = true) => ApplyFlag(Flag.AppendTabToFixed, setting);
 
         /// <summary>
-        /// Sends a tab character after the OTP string.
+        ///     Sends a tab character after the OTP string.
         /// </summary>
         public T SetAppendTabToOtp(bool setting = true) => ApplyFlag(Flag.AppendTabToOtp, setting);
 
         /// <summary>
-        /// Adds a 500ms delay after sending the fixed string.
+        ///     Adds a 500ms delay after sending the fixed string.
         /// </summary>
         public T AppendDelayToFixed(bool setting = true) => ApplyFlag(Flag.AppendDelayToFixed, setting);
 
         /// <summary>
-        /// Adds a 500ms delay after sending the OTP string.
+        ///     Adds a 500ms delay after sending the OTP string.
         /// </summary>
         public T AppendDelayToOtp(bool setting = true) => ApplyFlag(Flag.AppendDelayToOtp, setting);
 
         /// <summary>
-        /// Sends a carriage return [Enter Key] after all characters have been sent.
+        ///     Sends a carriage return [Enter Key] after all characters have been sent.
         /// </summary>
         public T AppendCarriageReturn(bool setting = true) => ApplyFlag(Flag.AppendCarriageReturn, setting);
 
         /// <summary>
-        /// Locks and/or protects the long press configuration slot of the YubiKey.
+        ///     Locks and/or protects the long press configuration slot of the YubiKey.
         /// </summary>
         public T ProtectLongPressSlot(bool setting = true) => ApplyFlag(Flag.ProtectLongPressSlot, setting);
     }

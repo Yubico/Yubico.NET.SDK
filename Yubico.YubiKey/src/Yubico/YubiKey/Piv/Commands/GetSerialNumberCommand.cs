@@ -17,17 +17,17 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// Get the YubiKey's serial number.
+    ///     Get the YubiKey's serial number.
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="GetSerialNumberResponse"/>.
-    /// <para>
-    /// Example:
-    /// </para>
-    /// <code language="csharp">
+    ///     The partner Response class is <see cref="GetSerialNumberResponse" />.
+    ///     <para>
+    ///         Example:
+    ///     </para>
+    ///     <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);
     ///   SerialCommand serialCommand = new GetSerialNumberCommand();
-    ///   GetSerialNumberResponse serialResponse = connection.SendCommand(serialCommand);<br/>
+    ///   GetSerialNumberResponse serialResponse = connection.SendCommand(serialCommand);<br />
     ///   if (serialResponse.Status == ResponseStatus.Success)
     ///   {
     ///       int serialNum = serialResponse.GetData();
@@ -39,21 +39,21 @@ namespace Yubico.YubiKey.Piv.Commands
         private const byte PivGetSerialNumberInstruction = 0xF8;
 
         /// <summary>
-        /// Gets the YubiKeyApplication to which this command belongs. For this
-        /// command it's PIV.
-        /// </summary>
-        /// <value>
-        /// YubiKeyApplication.Piv
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Piv;
-
-        /// <summary>
-        /// Initializes a new instance of the GetSerialNumberCommand class. This
-        /// command has no input.
+        ///     Initializes a new instance of the GetSerialNumberCommand class. This
+        ///     command has no input.
         /// </summary>
         public GetSerialNumberCommand()
         {
         }
+
+        /// <summary>
+        ///     Gets the YubiKeyApplication to which this command belongs. For this
+        ///     command it's PIV.
+        /// </summary>
+        /// <value>
+        ///     YubiKeyApplication.Piv
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Piv;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() =>

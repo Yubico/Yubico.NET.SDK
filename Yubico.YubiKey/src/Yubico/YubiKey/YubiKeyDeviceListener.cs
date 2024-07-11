@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using Yubico.Core.Devices;
@@ -27,37 +26,22 @@ using Yubico.YubiKey.DeviceExtensions;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    /// This class provides events for YubiKeyDevice arrival and removal.
+    ///     This class provides events for YubiKeyDevice arrival and removal.
     /// </summary>
     public class YubiKeyDeviceListener : IDisposable
     {
-        /// <summary>
-        /// Subscribe to receive an event whenever a YubiKey is added to the computer.
-        /// </summary>
-        public event EventHandler<YubiKeyDeviceEventArgs>? Arrived;
-
-        /// <summary>
-        /// Subscribe to receive an event whenever a YubiKey is removed from the computer.
-        /// </summary>
-        public event EventHandler<YubiKeyDeviceEventArgs>? Removed;
-
-        /// <summary>
-        /// An instance of a <see cref="YubiKeyDeviceListener"/>.
-        /// </summary>
-        public static YubiKeyDeviceListener Instance => _lazyInstance.Value;
-
         private static readonly Lazy<YubiKeyDeviceListener> _lazyInstance =
             new Lazy<YubiKeyDeviceListener>(() => new YubiKeyDeviceListener());
 
         private static readonly ReaderWriterLockSlim RwLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
-
-        private readonly Logger _log = Log.GetLogger();
-        private readonly Dictionary<IYubiKeyDevice, bool> _internalCache = new Dictionary<IYubiKeyDevice, bool>();
         private readonly HidDeviceListener _hidListener = HidDeviceListener.Create();
-        private readonly SmartCardDeviceListener _smartCardListener = SmartCardDeviceListener.Create();
+        private readonly Dictionary<IYubiKeyDevice, bool> _internalCache = new Dictionary<IYubiKeyDevice, bool>();
+        private readonly bool _isListening;
 
         private readonly Thread? _listenerThread;
-        private readonly bool _isListening;
+
+        private readonly Logger _log = Log.GetLogger();
+        private readonly SmartCardDeviceListener _smartCardListener = SmartCardDeviceListener.Create();
 
         private YubiKeyDeviceListener()
         {
@@ -71,6 +55,21 @@ namespace Yubico.YubiKey
 
             _listenerThread.Start();
         }
+
+        /// <summary>
+        ///     An instance of a <see cref="YubiKeyDeviceListener" />.
+        /// </summary>
+        public static YubiKeyDeviceListener Instance => _lazyInstance.Value;
+
+        /// <summary>
+        ///     Subscribe to receive an event whenever a YubiKey is added to the computer.
+        /// </summary>
+        public event EventHandler<YubiKeyDeviceEventArgs>? Arrived;
+
+        /// <summary>
+        ///     Subscribe to receive an event whenever a YubiKey is removed from the computer.
+        /// </summary>
+        public event EventHandler<YubiKeyDeviceEventArgs>? Removed;
 
         internal List<IYubiKeyDevice> GetAll() => _internalCache.Keys.ToList();
 
@@ -305,12 +304,12 @@ namespace Yubico.YubiKey
         }
 
         /// <summary>
-        /// Raises event on device arrival.
+        ///     Raises event on device arrival.
         /// </summary>
         private void OnDeviceArrived(YubiKeyDeviceEventArgs e) => Arrived?.Invoke(typeof(YubiKeyDevice), e);
 
         /// <summary>
-        /// Raises event on device removal.
+        ///     Raises event on device removal.
         /// </summary>
         private void OnDeviceRemoved(YubiKeyDeviceEventArgs e) => Removed?.Invoke(typeof(YubiKeyDevice), e);
 
@@ -361,7 +360,7 @@ namespace Yubico.YubiKey
         private bool _disposedValue;
 
         /// <summary>
-        /// Disposes the objects.
+        ///     Disposes the objects.
         /// </summary>
         /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
@@ -385,7 +384,7 @@ namespace Yubico.YubiKey
 
         // This code added to correctly implement the disposable pattern.
         /// <summary>
-        /// Calls Dispose(true).
+        ///     Calls Dispose(true).
         /// </summary>
         public void Dispose()
         {

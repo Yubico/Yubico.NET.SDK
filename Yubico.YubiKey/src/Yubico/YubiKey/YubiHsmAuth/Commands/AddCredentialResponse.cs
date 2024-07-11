@@ -17,23 +17,35 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    /// The response class for adding a credential to the YubiHSM Auth
-    /// application.
+    ///     The response class for adding a credential to the YubiHSM Auth
+    ///     application.
     /// </summary>
     /// <remarks>
-    /// <para>
-    /// If authentication failed, the <see cref="YubiKeyResponse.Status"/>
-    /// will be set to
-    /// <see cref="ResponseStatus.AuthenticationRequired"/> and
-    /// <see cref="BaseYubiHsmAuthResponseWithRetries.RetriesRemaining"/>
-    /// will contain the number of retries remaining for the management key.
-    /// </para>
-    /// <para>
-    /// The associated command class is <see cref="AddCredentialCommand"/>.
-    /// </para>
+    ///     <para>
+    ///         If authentication failed, the <see cref="YubiKeyResponse.Status" />
+    ///         will be set to
+    ///         <see cref="ResponseStatus.AuthenticationRequired" /> and
+    ///         <see cref="BaseYubiHsmAuthResponseWithRetries.RetriesRemaining" />
+    ///         will contain the number of retries remaining for the management key.
+    ///     </para>
+    ///     <para>
+    ///         The associated command class is <see cref="AddCredentialCommand" />.
+    ///     </para>
     /// </remarks>
     public class AddCredentialResponse : BaseYubiHsmAuthResponseWithRetries
     {
+        /// <summary>
+        ///     Constructs an AddCredentialResponse based on a ResponseApdu
+        ///     received from the YubiKey.
+        /// </summary>
+        /// <param name="responseApdu">
+        ///     The ResponseApdu returned by the YubiKey.
+        /// </param>
+        public AddCredentialResponse(ResponseApdu responseApdu) :
+            base(responseApdu)
+        {
+        }
+
         protected override ResponseStatusPair StatusCodeMap =>
             StatusWord switch
             {
@@ -43,17 +55,5 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
 
                 _ => base.StatusCodeMap
             };
-
-        /// <summary>
-        /// Constructs an AddCredentialResponse based on a ResponseApdu
-        /// received from the YubiKey.
-        /// </summary>
-        /// <param name="responseApdu">
-        /// The ResponseApdu returned by the YubiKey.
-        /// </param>
-        public AddCredentialResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
-        {
-        }
     }
 }

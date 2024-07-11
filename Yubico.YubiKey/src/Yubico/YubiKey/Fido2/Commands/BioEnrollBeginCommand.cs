@@ -20,11 +20,11 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// Begins the process of enrolling a fingerprint. This is a subcommand of
-    /// the CTAP command "authenticatorBioEnrollment".
+    ///     Begins the process of enrolling a fingerprint. This is a subcommand of
+    ///     the CTAP command "authenticatorBioEnrollment".
     /// </summary>
     /// <remarks>
-    /// The partner Response class is <see cref="BioEnrollBeginResponse"/>.
+    ///     The partner Response class is <see cref="BioEnrollBeginResponse" />.
     /// </remarks>
     public sealed class BioEnrollBeginCommand : IYubiKeyCommand<BioEnrollBeginResponse>
     {
@@ -32,9 +32,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         private const int KeyTimeout = 0x03;
 
         private readonly BioEnrollmentCommand _command;
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -44,18 +41,18 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        /// Constructs a new instance of <see cref="BioEnrollBeginCommand"/>.
+        ///     Constructs a new instance of <see cref="BioEnrollBeginCommand" />.
         /// </summary>
         /// <param name="timeoutMilliseconds">
-        /// The timeout the caller would like the YubiKey to enforce. This is
-        /// optional and can be null.
+        ///     The timeout the caller would like the YubiKey to enforce. This is
+        ///     optional and can be null.
         /// </param>
         /// <param name="pinUvAuthToken">
-        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        /// key.
+        ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
+        ///     key.
         /// </param>
         /// <param name="authProtocol">
-        /// The Auth Protocol used to build the Auth Token.
+        ///     The Auth Protocol used to build the Auth Token.
         /// </param>
         public BioEnrollBeginCommand(
             int? timeoutMilliseconds,
@@ -68,6 +65,9 @@ namespace Yubico.YubiKey.Fido2.Commands
                 pinUvAuthToken,
                 authProtocol);
         }
+
+        /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();

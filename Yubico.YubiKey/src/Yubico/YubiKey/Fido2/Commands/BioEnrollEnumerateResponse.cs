@@ -18,20 +18,20 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    /// The response partner to the BioEnrollEnumerateCommand.
+    ///     The response partner to the BioEnrollEnumerateCommand.
     /// </summary>
     public class BioEnrollEnumerateResponse : Fido2Response, IYubiKeyResponseWithData<IReadOnlyList<TemplateInfo>>
     {
         private readonly BioEnrollmentResponse _response;
 
         /// <summary>
-        /// Constructs a new instance of
-        /// <see cref="BioEnrollEnumerateResponse"/> based on a response APDU
-        /// provided by the YubiKey.
+        ///     Constructs a new instance of
+        ///     <see cref="BioEnrollEnumerateResponse" /> based on a response APDU
+        ///     provided by the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        /// A response APDU containing the CBOR response data for the
-        /// <c>authenticatorCredentialManagement</c> command.
+        ///     A response APDU containing the CBOR response data for the
+        ///     <c>authenticatorCredentialManagement</c> command.
         /// </param>
         public BioEnrollEnumerateResponse(ResponseApdu responseApdu)
             : base(responseApdu)
@@ -39,12 +39,21 @@ namespace Yubico.YubiKey.Fido2.Commands
             _response = new BioEnrollmentResponse(responseApdu);
         }
 
+        /// <inheritdoc />
+        protected override ResponseStatusPair StatusCodeMap =>
+            CtapStatus switch
+            {
+                CtapStatus.InvalidOption => new ResponseStatusPair(
+                    ResponseStatus.Success, ResponseStatusMessages.BaseSuccess),
+                _ => base.StatusCodeMap
+            };
+
         /// <summary>
-        /// Return the data returned by the YubiKey as a <c>List</c>.
+        ///     Return the data returned by the YubiKey as a <c>List</c>.
         /// </summary>
         /// <remarks>
-        /// If there are no fingerprints enrolled, this will return a <c>List</c>
-        /// with zero elements.
+        ///     If there are no fingerprints enrolled, this will return a <c>List</c>
+        ///     with zero elements.
         /// </remarks>
         public IReadOnlyList<TemplateInfo> GetData()
         {
@@ -64,14 +73,5 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
         }
-
-        /// <inheritdoc />
-        protected override ResponseStatusPair StatusCodeMap =>
-            CtapStatus switch
-            {
-                CtapStatus.InvalidOption => new ResponseStatusPair(
-                    ResponseStatus.Success, ResponseStatusMessages.BaseSuccess),
-                _ => base.StatusCodeMap
-            };
     }
 }

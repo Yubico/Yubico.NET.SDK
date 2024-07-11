@@ -15,15 +15,15 @@
 namespace Yubico.YubiKey.YubiHsmAuth
 {
     /// <summary>
-    /// Cryptographic algorithm used to describe the key(s) associated
-    /// with a <see cref="Credential"/> in the YubiHSM Auth application.
+    ///     Cryptographic algorithm used to describe the key(s) associated
+    ///     with a <see cref="Credential" /> in the YubiHSM Auth application.
     /// </summary>
     public enum CryptographicKeyType
     {
         None = 0,
 
         /// <summary>
-        /// AES-128
+        ///     AES-128
         /// </summary>
         Aes128 = 38
     }

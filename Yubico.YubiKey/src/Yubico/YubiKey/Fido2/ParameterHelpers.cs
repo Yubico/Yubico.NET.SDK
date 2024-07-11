@@ -15,14 +15,13 @@
 using System;
 using System.Collections.Generic;
 using System.Formats.Cbor;
-using System.Globalization;
 using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
-    /// Some helpers to make working with MakeCredential and GetAssertion
-    /// parameters a little easier.
+    ///     Some helpers to make working with MakeCredential and GetAssertion
+    ///     parameters a little easier.
     /// </summary>
     internal static class ParameterHelpers
     {
@@ -33,9 +32,9 @@ namespace Yubico.YubiKey.Fido2
         public const CoseAlgorithmIdentifier DefaultAlg = CoseAlgorithmIdentifier.ES256;
 
         /// <summary>
-        /// Add the <c>credentialId</c> to the <c>currentList</c> if it is not
-        /// null, and return the <c>currentList</c>. If the <c>currentList</c> is
-        /// null, create a new list, add the credentialId and return the new list.
+        ///     Add the <c>credentialId</c> to the <c>currentList</c> if it is not
+        ///     null, and return the <c>currentList</c>. If the <c>currentList</c> is
+        ///     null, create a new list, add the credentialId and return the new list.
         /// </summary>
         public static List<T> AddToList<T>(T itemToAdd, List<T>? currentList)
         {
@@ -54,10 +53,10 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Add the key/value to the <c>currentDictionary</c> if it is not null,
-        /// and return the <c>currentDictionary</c>. If the
-        /// <c>currentDictionary</c> is  null, create a new Dictionary, add the
-        /// key/value and return the new Dictionary.
+        ///     Add the key/value to the <c>currentDictionary</c> if it is not null,
+        ///     and return the <c>currentDictionary</c>. If the
+        ///     <c>currentDictionary</c> is  null, create a new Dictionary, add the
+        ///     key/value and return the new Dictionary.
         /// </summary>
         public static Dictionary<string, TValue> AddKeyValue<TValue>(
             string theKey,
@@ -89,25 +88,25 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        /// Encode a dictionary as a map. This implements the
-        /// <c>CborEncodeDelegate</c>.
+        ///     Encode a dictionary as a map. This implements the
+        ///     <c>CborEncodeDelegate</c>.
         /// </summary>
         /// <remarks>
-        /// If the input <c>localData</c> is null, or the its count is zero,
-        /// this method will return an empty byte array. So if you want "no
-        /// entries" to mean "don't write anything", don't call this method.
-        /// <para>
-        /// Currently this method supports <c>byte[]</c> and <c>bool</c> as the
-        /// <c>TValue</c>.
-        /// </para>
+        ///     If the input <c>localData</c> is null, or the its count is zero,
+        ///     this method will return an empty byte array. So if you want "no
+        ///     entries" to mean "don't write anything", don't call this method.
+        ///     <para>
+        ///         Currently this method supports <c>byte[]</c> and <c>bool</c> as the
+        ///         <c>TValue</c>.
+        ///     </para>
         /// </remarks>
         /// <param name="localData">
-        /// The set of key/value pairs to encode.
+        ///     The set of key/value pairs to encode.
         /// </param>
         /// <returns>
-        /// A byte array containing the encoded map. If there is no list
-        /// (<c>localData</c> is null or a the <c>Count</c> is zero), the
-        /// return will be an empty byte array.
+        ///     A byte array containing the encoded map. If there is no list
+        ///     (<c>localData</c> is null or a the <c>Count</c> is zero), the
+        ///     return will be an empty byte array.
         /// </returns>
         public static byte[] EncodeKeyValues<TValue>(IReadOnlyDictionary<string, TValue>? localData)
         {

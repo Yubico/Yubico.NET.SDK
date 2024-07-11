@@ -22,12 +22,12 @@ using static Yubico.YubiKey.Otp.NdefConstants;
 namespace Yubico.YubiKey.Otp
 {
     /// <summary>
-    /// Reads NDEF Record data types supported by the YubiKey.
+    ///     Reads NDEF Record data types supported by the YubiKey.
     /// </summary>
     /// <remarks>
-    /// This class is used to interpret the byte array returned by the <see cref="Commands.ReadNdefDataResponse"/>
-    /// class. Note that this class does not interpret the Configuration Container data that can also
-    /// be returned through the same API. That data is not technically an NDEF message or record.
+    ///     This class is used to interpret the byte array returned by the <see cref="Commands.ReadNdefDataResponse" />
+    ///     class. Note that this class does not interpret the Configuration Container data that can also
+    ///     be returned through the same API. That data is not technically an NDEF message or record.
     /// </remarks>
     public class NdefDataReader
     {
@@ -43,22 +43,7 @@ namespace Yubico.YubiKey.Otp
         private readonly byte[] _data;
 
         /// <summary>
-        /// Indicates the type of NDEF record that was read.
-        /// </summary>
-        /// <remarks>
-        /// The YubiKey supports the following NDEF record types:
-        /// - 'T' Text
-        /// - 'U' URI
-        /// </remarks>
-        public NdefDataType Type { get; private set; }
-
-        /// <summary>
-        /// Returns the uninterpreted data inside of the NDEF record.
-        /// </summary>
-        public IReadOnlyList<byte> Data => _data;
-
-        /// <summary>
-        /// Constructs a new instance of the NdefDataReader class.
+        ///     Constructs a new instance of the NdefDataReader class.
         /// </summary>
         /// <param name="responseData">The NDEF message data returned by the YubiKey.</param>
         public NdefDataReader(ReadOnlySpan<byte> responseData)
@@ -103,11 +88,26 @@ namespace Yubico.YubiKey.Otp
         }
 
         /// <summary>
-        /// Interprets the NDEF data as a text record.
+        ///     Indicates the type of NDEF record that was read.
+        /// </summary>
+        /// <remarks>
+        ///     The YubiKey supports the following NDEF record types:
+        ///     - 'T' Text
+        ///     - 'U' URI
+        /// </remarks>
+        public NdefDataType Type { get; }
+
+        /// <summary>
+        ///     Returns the uninterpreted data inside of the NDEF record.
+        /// </summary>
+        public IReadOnlyList<byte> Data => _data;
+
+        /// <summary>
+        ///     Interprets the NDEF data as a text record.
         /// </summary>
         /// <returns>The text of the message, and the language information specified in the record.</returns>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if <see cref="Type"/> is not <see cref="NdefDataType.Text"/>.
+        ///     Thrown if <see cref="Type" /> is not <see cref="NdefDataType.Text" />.
         /// </exception>
         public NdefText ToText()
         {
@@ -144,7 +144,7 @@ namespace Yubico.YubiKey.Otp
             string languageCode = encoding.GetString(_data, index: 1, languageCodeLength);
             string text = encoding.GetString(_data, textOffset, _data.Length - textOffset);
 
-            return new NdefText()
+            return new NdefText
             {
                 Encoding = isUtf16
                     ? NdefTextEncoding.Utf16
@@ -155,11 +155,11 @@ namespace Yubico.YubiKey.Otp
         }
 
         /// <summary>
-        /// Interprets the NDEF data as a URI record.
+        ///     Interprets the NDEF data as a URI record.
         /// </summary>
         /// <returns>The message as a Uniform Resource Identifier (URI).</returns>
         /// <exception cref="InvalidOperationException">
-        /// Throw if <see cref="Type"/> is not <see cref="NdefDataType.Uri"/>.
+        ///     Throw if <see cref="Type" /> is not <see cref="NdefDataType.Uri" />.
         /// </exception>
         public Uri ToUri()
         {
@@ -200,34 +200,33 @@ namespace Yubico.YubiKey.Otp
             {
                 return (Encoding.Unicode, true);
             }
-            else if (stringData.StartsWith(bePreamble))
+
+            if (stringData.StartsWith(bePreamble))
             {
                 return (Encoding.BigEndianUnicode, true);
             }
-            else
-            {
-                // No byte-order-mark present. NDEF spec says to assume big-endian... but since so many
-                // UTF-16 clients (i.e. Windows) use little-endian, I don't think it's good to assume
-                // one way or the other. If we assume the most commonly used characters will fall on a
-                // single byte boundary, then we should be able to reliably determine which encoding it
-                // is by detecting which side we find the 0-byte on. Even == Big-Endian, Odd = Little-Endian.
-                int[] score = new int[2] { 0, 0 }; // BigEndian, LittleEndian
-                int index = 0;
-                foreach (byte b in stringData)
-                {
-                    if (b == 0)
-                    {
-                        score[index % 2]++;
-                    }
 
-                    index++;
+            // No byte-order-mark present. NDEF spec says to assume big-endian... but since so many
+            // UTF-16 clients (i.e. Windows) use little-endian, I don't think it's good to assume
+            // one way or the other. If we assume the most commonly used characters will fall on a
+            // single byte boundary, then we should be able to reliably determine which encoding it
+            // is by detecting which side we find the 0-byte on. Even == Big-Endian, Odd = Little-Endian.
+            int[] score = new int[2] { 0, 0 }; // BigEndian, LittleEndian
+            int index = 0;
+            foreach (byte b in stringData)
+            {
+                if (b == 0)
+                {
+                    score[index % 2]++;
                 }
 
-                // RFC 2781 does say to give preference to big endian, so I guess that'll be the tie-breaker.
-                return score[0] >= score[1]
-                    ? (Encoding.BigEndianUnicode, false)
-                    : (Encoding.Unicode, false);
+                index++;
             }
+
+            // RFC 2781 does say to give preference to big endian, so I guess that'll be the tie-breaker.
+            return score[0] >= score[1]
+                ? (Encoding.BigEndianUnicode, false)
+                : (Encoding.Unicode, false);
         }
     }
 }

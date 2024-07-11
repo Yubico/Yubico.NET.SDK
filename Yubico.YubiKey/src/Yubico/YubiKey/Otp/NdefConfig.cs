@@ -21,7 +21,7 @@ using static Yubico.YubiKey.Otp.NdefConstants;
 namespace Yubico.YubiKey.Otp
 {
     /// <summary>
-    /// A static class containing helpers that encode configurations for different types of NDEF data.
+    ///     A static class containing helpers that encode configurations for different types of NDEF data.
     /// </summary>
     public static class NdefConfig
     {
@@ -29,12 +29,12 @@ namespace Yubico.YubiKey.Otp
         private const int NdefConfigSize = 62;
 
         /// <summary>
-        /// Create a configuration buffer for the YubiKey to send a URI when NDEF is triggered.
+        ///     Create a configuration buffer for the YubiKey to send a URI when NDEF is triggered.
         /// </summary>
         /// <param name="uri">The URI to send over NDEF.</param>
         /// <returns>
-        /// An opaque configuration buffer that can be written to the YubiKey using the
-        /// <see cref="Commands.ConfigureNdefCommand"/> command class.
+        ///     An opaque configuration buffer that can be written to the YubiKey using the
+        ///     <see cref="Commands.ConfigureNdefCommand" /> command class.
         /// </returns>
         public static byte[] CreateUriConfig(Uri uri)
         {
@@ -86,17 +86,17 @@ namespace Yubico.YubiKey.Otp
         }
 
         /// <summary>
-        /// Create a configuration buffer for the YubiKey to send text when NDEF is triggered.
+        ///     Create a configuration buffer for the YubiKey to send text when NDEF is triggered.
         /// </summary>
         /// <param name="value">The text value to send.</param>
-        /// <param name="languageCode">The ISO/IANA language code for the language of <paramref name="value"/>.</param>
+        /// <param name="languageCode">The ISO/IANA language code for the language of <paramref name="value" />.</param>
         /// <param name="encodeAsUtf16">
-        /// Indicates whether UTF16 Big Endian encoding is preferred. Default is <see langword="false" />,
-        /// denoting a UTF8 encoding.
+        ///     Indicates whether UTF16 Big Endian encoding is preferred. Default is <see langword="false" />,
+        ///     denoting a UTF8 encoding.
         /// </param>
         /// <returns>
-        /// An opaque configuration buffer that can be written to the YubiKey using the
-        /// <see cref="Commands.ConfigureNdefCommand"/> command class.
+        ///     An opaque configuration buffer that can be written to the YubiKey using the
+        ///     <see cref="Commands.ConfigureNdefCommand" /> command class.
         /// </returns>
         public static byte[] CreateTextConfig(string value, string languageCode, bool encodeAsUtf16 = false)
         {

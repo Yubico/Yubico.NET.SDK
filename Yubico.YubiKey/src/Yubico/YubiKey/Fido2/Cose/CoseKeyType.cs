@@ -15,27 +15,27 @@
 namespace Yubico.YubiKey.Fido2.Cose
 {
     /// <summary>
-    /// An enumeration of the key families supported by COSE.
+    ///     An enumeration of the key families supported by COSE.
     /// </summary>
     public enum CoseKeyType
     {
         /// <summary>
-        /// The type could not be determined.
+        ///     The type could not be determined.
         /// </summary>
         Unknown = 0,
 
         /// <summary>
-        /// Octet Key Pair
+        ///     Octet Key Pair
         /// </summary>
         Okp = 1,
 
         /// <summary>
-        /// Elliptic Curve keys with x- and y-coordinates
+        ///     Elliptic Curve keys with x- and y-coordinates
         /// </summary>
         Ec2 = 2,
 
         /// <summary>
-        /// Symmetric keys
+        ///     Symmetric keys
         /// </summary>
         Symmetric = 4
     }

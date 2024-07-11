@@ -14,19 +14,18 @@
 
 using System;
 using System.Globalization;
-using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f
 {
     /// <summary>
-    /// This is a base class for those classes that need to collect and encode
-    /// data into a single buffer, either as data in a command or data to verify.
-    /// This will hold the buffer along with the Application ID Hash and Client
-    /// Data Hash. Subclasses can add more data to be placed into the buffer.
+    ///     This is a base class for those classes that need to collect and encode
+    ///     data into a single buffer, either as data in a command or data to verify.
+    ///     This will hold the buffer along with the Application ID Hash and Client
+    ///     Data Hash. Subclasses can add more data to be placed into the buffer.
     /// </summary>
     /// <remarks>
-    /// Only the SDK will ever need to create subclasses, there is no reason for
-    /// any other application to do so.
+    ///     Only the SDK will ever need to create subclasses, there is no reason for
+    ///     any other application to do so.
     /// </remarks>
     public abstract class U2fBuffer
     {
@@ -37,32 +36,14 @@ namespace Yubico.YubiKey.U2f
         protected const byte PublicKeyTag = 0x04;
         protected const int CoordinateLength = 32;
         protected const int CounterLength = 4;
+        private readonly int _appIdOffset;
 
         private protected readonly byte[] _buffer;
         private protected readonly Memory<byte> _bufferMemory;
         private readonly int _clientDataOffset;
-        private readonly int _appIdOffset;
 
         /// <summary>
-        /// Set the <c>ApplicationIdHash</c>. It must be 32 bytes long.
-        /// </summary>
-        public ReadOnlyMemory<byte> ApplicationId
-        {
-            get => _bufferMemory.Slice(_appIdOffset, AppIdHashLength);
-            set => SetBufferData(value, AppIdHashLength, _appIdOffset, nameof(ApplicationId));
-        }
-
-        /// <summary>
-        /// Set and get the <c>ClientDataHash</c> or "challenge". It must be 32 bytes long.
-        /// </summary>
-        public ReadOnlyMemory<byte> ClientDataHash
-        {
-            get => _bufferMemory.Slice(_clientDataOffset, ClientDataHashLength);
-            set => SetBufferData(value, ClientDataHashLength, _clientDataOffset, nameof(ClientDataHash));
-        }
-
-        /// <summary>
-        /// Initialize the object to the given values.
+        ///     Initialize the object to the given values.
         /// </summary>
         protected U2fBuffer(int bufferLength, int appIdOffset, int clientDataOffset)
         {
@@ -73,8 +54,26 @@ namespace Yubico.YubiKey.U2f
         }
 
         /// <summary>
-        /// Copy the buffer data into the _buffer beginning at the given offset.
-        /// Throw an exception if the input length is not correct.
+        ///     Set the <c>ApplicationIdHash</c>. It must be 32 bytes long.
+        /// </summary>
+        public ReadOnlyMemory<byte> ApplicationId
+        {
+            get => _bufferMemory.Slice(_appIdOffset, AppIdHashLength);
+            set => SetBufferData(value, AppIdHashLength, _appIdOffset, nameof(ApplicationId));
+        }
+
+        /// <summary>
+        ///     Set and get the <c>ClientDataHash</c> or "challenge". It must be 32 bytes long.
+        /// </summary>
+        public ReadOnlyMemory<byte> ClientDataHash
+        {
+            get => _bufferMemory.Slice(_clientDataOffset, ClientDataHashLength);
+            set => SetBufferData(value, ClientDataHashLength, _clientDataOffset, nameof(ClientDataHash));
+        }
+
+        /// <summary>
+        ///     Copy the buffer data into the _buffer beginning at the given offset.
+        ///     Throw an exception if the input length is not correct.
         /// </summary>
         protected void SetBufferData(
             ReadOnlyMemory<byte> bufferData,

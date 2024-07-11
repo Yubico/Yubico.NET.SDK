@@ -17,24 +17,25 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
-    /// The response to the U2F Set Legacy Device Config command.
+    ///     The response to the U2F Set Legacy Device Config command.
     /// </summary>
     /// <remarks>
-    /// This is the partner response class to <see cref="SetLegacyDeviceConfigCommand"/>.
-    /// <para>
-    /// After executing the <c>SetLegacyDeviceConfigCommand</c>, the result is an
-    /// instance of this class. There is no data to return. Simply check the
-    /// <c>Status</c> property. If it is <c>ResponseStatus.Success</c> the
-    /// command succeeded.
-    /// </para>
+    ///     This is the partner response class to <see cref="SetLegacyDeviceConfigCommand" />.
+    ///     <para>
+    ///         After executing the <c>SetLegacyDeviceConfigCommand</c>, the result is an
+    ///         instance of this class. There is no data to return. Simply check the
+    ///         <c>Status</c> property. If it is <c>ResponseStatus.Success</c> the
+    ///         command succeeded.
+    ///     </para>
     /// </remarks>
     public sealed class SetLegacyDeviceConfigResponse : YubiKeyResponse, IYubiKeyResponse
     {
         /// <summary>
-        /// Constructs a SetLegacyDeviceConfigResponse from the given ResponseApdu.
+        ///     Constructs a SetLegacyDeviceConfigResponse from the given ResponseApdu.
         /// </summary>
-        /// <param name="responseApdu">The response to a
-        /// <see cref="SetLegacyDeviceConfigCommand"/>.
+        /// <param name="responseApdu">
+        ///     The response to a
+        ///     <see cref="SetLegacyDeviceConfigCommand" />.
         /// </param>
         public SetLegacyDeviceConfigResponse(ResponseApdu responseApdu) :
             base(responseApdu)

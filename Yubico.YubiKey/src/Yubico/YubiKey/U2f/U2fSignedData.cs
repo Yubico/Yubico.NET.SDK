@@ -13,17 +13,16 @@
 // limitations under the License.
 
 using System;
-using Yubico.Core.Tlv;
 using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.U2f
 {
     /// <summary>
-    /// This is a base class for those classes that need to verify.
+    ///     This is a base class for those classes that need to verify.
     /// </summary>
     /// <remarks>
-    /// Only the SDK will ever need to create subclasses, there is no reason for
-    /// any other application to do so.
+    ///     Only the SDK will ever need to create subclasses, there is no reason for
+    ///     any other application to do so.
     /// </remarks>
     public abstract class U2fSignedData : U2fBuffer
     {
@@ -39,8 +38,17 @@ namespace Yubico.YubiKey.U2f
         private protected int _berSignatureLength;
 
         /// <summary>
-        /// The signature created by the YubiKey. This is the BER encoding
-        /// version of the signature.
+        ///     Create an instance of <c>U2fSignedData</c>.
+        /// </summary>
+        protected U2fSignedData(int bufferLength, int appIdOffset, int clientDataOffset, int signatureOffset)
+            : base(bufferLength, appIdOffset, clientDataOffset)
+        {
+            _signatureOffset = signatureOffset;
+        }
+
+        /// <summary>
+        ///     The signature created by the YubiKey. This is the BER encoding
+        ///     version of the signature.
         /// </summary>
         public ReadOnlyMemory<byte> Signature
         {
@@ -50,15 +58,6 @@ namespace Yubico.YubiKey.U2f
                 SetBufferData(value, value.Length, _signatureOffset, nameof(Signature));
                 _berSignatureLength = value.Length;
             }
-        }
-
-        /// <summary>
-        /// Create an instance of <c>U2fSignedData</c>.
-        /// </summary>
-        protected U2fSignedData(int bufferLength, int appIdOffset, int clientDataOffset, int signatureOffset)
-            : base(bufferLength, appIdOffset, clientDataOffset)
-        {
-            _signatureOffset = signatureOffset;
         }
 
         // The subclass will build the EcdsaVerify object based on the format of

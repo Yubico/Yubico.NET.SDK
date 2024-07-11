@@ -20,81 +20,81 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    /// Perform Triple-DES and DES operations, even if the key is weak.
-    /// &gt; [!WARNING]
-    /// &gt; This is not a general purpose class and is specifically tailored for
-    /// &gt; PIV management key operations. Do not use this class anywhere else.
+    ///     Perform Triple-DES and DES operations, even if the key is weak.
+    ///     &gt; [!WARNING]
+    ///     &gt; This is not a general purpose class and is specifically tailored for
+    ///     &gt; PIV management key operations. Do not use this class anywhere else.
     /// </summary>
     /// <remarks>
-    /// A Triple-DES key is simply three DES keys. There is a concept of a "weak
-    /// key". These are keys for which the first two or the last two DES keys are
-    /// the same value. Because Triple-DES performs EDE
-    /// (Encryption-Decryption-Encryption, encrypt with the first key, decrypt
-    /// with the second and encrypt with the third), encryption or decryption
-    /// with a weak key is equivalent to single DES. The default TripleDES
-    /// implementation in the .NET BCL will throw an exception if it is called
-    /// upon to encrypt or decrypt using a weak key.
-    /// <para>
-    /// This causes a problem with the SDK because the default management key for
-    /// PIV (as required by the standard) is weak. Therefore, it seems we cannot
-    /// use the default TripleDES implementation to perform authentication.
-    /// </para>
-    /// <para>
-    /// The solution is to simply determine if a key is weak and if so, perform
-    /// single DES.
-    /// </para>
-    /// <para>
-    /// The next problem is that the default implementation of DES will throw an
-    /// exception if it is called upon to encrypt or decrypt with a DES weak key.
-    /// These are not the same as TripleDES weak keys. There is a small set of
-    /// keys that reduce the effectiveness of DES. Encrypting a block with a weak
-    /// key produces the same result as decrypting that block.
-    /// </para>
-    /// <para>
-    /// Because it is possible someone can change a management key using a tool
-    /// other than the SDK, it is possible to set the management key to something
-    /// that is a TripleDES weak key, and the key data is a single DES weak key.
-    /// We want to be able to authenticate a management key, even if it is weak,
-    /// and even if it is equivalent to a single DES weak key.
-    /// </para>
-    /// <para>
-    /// To perform single DES with a weak key, K1, we will perform TripleDES,
-    /// because the default implementation of TripleDES does not check for DES
-    /// weak keys. In order to obtain the correct result, we will perform
-    /// <code>
+    ///     A Triple-DES key is simply three DES keys. There is a concept of a "weak
+    ///     key". These are keys for which the first two or the last two DES keys are
+    ///     the same value. Because Triple-DES performs EDE
+    ///     (Encryption-Decryption-Encryption, encrypt with the first key, decrypt
+    ///     with the second and encrypt with the third), encryption or decryption
+    ///     with a weak key is equivalent to single DES. The default TripleDES
+    ///     implementation in the .NET BCL will throw an exception if it is called
+    ///     upon to encrypt or decrypt using a weak key.
+    ///     <para>
+    ///         This causes a problem with the SDK because the default management key for
+    ///         PIV (as required by the standard) is weak. Therefore, it seems we cannot
+    ///         use the default TripleDES implementation to perform authentication.
+    ///     </para>
+    ///     <para>
+    ///         The solution is to simply determine if a key is weak and if so, perform
+    ///         single DES.
+    ///     </para>
+    ///     <para>
+    ///         The next problem is that the default implementation of DES will throw an
+    ///         exception if it is called upon to encrypt or decrypt with a DES weak key.
+    ///         These are not the same as TripleDES weak keys. There is a small set of
+    ///         keys that reduce the effectiveness of DES. Encrypting a block with a weak
+    ///         key produces the same result as decrypting that block.
+    ///     </para>
+    ///     <para>
+    ///         Because it is possible someone can change a management key using a tool
+    ///         other than the SDK, it is possible to set the management key to something
+    ///         that is a TripleDES weak key, and the key data is a single DES weak key.
+    ///         We want to be able to authenticate a management key, even if it is weak,
+    ///         and even if it is equivalent to a single DES weak key.
+    ///     </para>
+    ///     <para>
+    ///         To perform single DES with a weak key, K1, we will perform TripleDES,
+    ///         because the default implementation of TripleDES does not check for DES
+    ///         weak keys. In order to obtain the correct result, we will perform
+    ///         <code>
     ///    TripleDES-with-K1-KA-KB(block)  -->  Result-1
     ///    DES-Decrypt-with-KB(Result-1)   -->  Result-2
     ///    DES-Encrypt-with-KA(Result-2)   -->  ActualResult
     /// </code>
-    /// This works because TripleDES is simply
-    /// <code>
+    ///         This works because TripleDES is simply
+    ///         <code>
     ///    DES-Encrypt-with-K1 (block)   -->  Block1
     ///    DES-Decrypt-with-K2 (Block1)  -->  Block2
     ///    DES-Encrypt-with-K3 (Block2)  -->  Result
     /// </code>
-    /// This means that the process we'll be performing is
-    /// <code>
+    ///         This means that the process we'll be performing is
+    ///         <code>
     ///    DES-Encrypt-with-K1 (block)    -->  Block1
     ///    DES-Decrypt-with-KA (Block1)   -->  Block2
     ///    DES-Encrypt-with-KB (Block2)   -->  Result1
     ///    DES-Decrypt-with-KB (Result1)  -->  Block2
     ///    DES-Encrypt-with-KA (Result2)  -->  Block1
-    /// <br/>Block1 is the result we want.
+    /// <br />Block1 is the result we want.
     /// </code>
-    /// Note that TripleDES decryption is Decrypt-Encrypt-Decrypt, but in the
-    /// order of third key, then second, then first.
-    /// </para>
-    /// <para>
-    /// To use this class, create an instance, then call the
-    /// <c>TransformBlock</c> method.
-    /// <code language="csharp">
+    ///         Note that TripleDES decryption is Decrypt-Encrypt-Decrypt, but in the
+    ///         order of third key, then second, then first.
+    ///     </para>
+    ///     <para>
+    ///         To use this class, create an instance, then call the
+    ///         <c>TransformBlock</c> method.
+    ///         <code language="csharp">
     ///    var tdes = new TripleDesForManagementKey(mgmtKey, true);
     ///    int bytesWritten = tdes.TransformBlock(
     ///      plaintext, offsetP, 8, encryptedData, offsetE);
     /// </code>
-    /// The <c>TransformBlock</c> method is used because that is the method (and
-    /// argument list) used in the .NET <c>TripleDES</c> classes.
-    /// </para>
+    ///         The <c>TransformBlock</c> method is used because that is the method (and
+    ///         argument list) used in the .NET <c>TripleDES</c> classes.
+    ///     </para>
     /// </remarks>
     [Obsolete("This should only be used for PIV management key operations and nowhere else.")]
     internal sealed class TripleDesForManagementKey : ISymmetricForManagementKey
@@ -113,7 +113,7 @@ namespace Yubico.YubiKey.Piv.Commands
         private const int EqualKeyOneAndTwo = 12;
         private const int EqualKeyTwoAndThree = 23;
 
-        private static readonly byte[] parityBytes = new byte[]
+        private static readonly byte[] parityBytes =
         {
             0x01, 0x01, 0x02, 0x02, 0x04, 0x04, 0x07, 0x07, 0x08, 0x08, 0x0b, 0x0b, 0x0d, 0x0d, 0x0e, 0x0e,
             0x10, 0x10, 0x13, 0x13, 0x15, 0x15, 0x16, 0x16, 0x19, 0x19, 0x1a, 0x1a, 0x1c, 0x1c, 0x1f, 0x1f,
@@ -138,31 +138,25 @@ namespace Yubico.YubiKey.Piv.Commands
         private ICryptoTransform? _cryptoTransformB;
         private bool _disposed;
 
-        /// <inheritdoc/>
-        public bool IsEncrypting { get; }
-
-        /// <inheritdoc/>
-        public int BlockSize { get; }
-
         /// <summary>
-        /// Create a new instance of <c>TripleDesForManagementKey</c> using the
-        /// given management key.
+        ///     Create a new instance of <c>TripleDesForManagementKey</c> using the
+        ///     given management key.
         /// </summary>
         /// <remarks>
-        /// Each instance of this class will be able to encrypt or decrypt, but
-        /// not both. Specify whether it should encrypt or decrypt with the
-        /// <c>isEncrypting</c> argument.
+        ///     Each instance of this class will be able to encrypt or decrypt, but
+        ///     not both. Specify whether it should encrypt or decrypt with the
+        ///     <c>isEncrypting</c> argument.
         /// </remarks>
         /// <param name="managementKey">
-        /// The bytes of the management key. This key must be exactly 24 bytes
-        /// long.
+        ///     The bytes of the management key. This key must be exactly 24 bytes
+        ///     long.
         /// </param>
         /// <param name="isEncrypting">
-        /// Indicates whether the object should be built to encrypt (if it is
-        /// <c>true</c>), or to decrypt (if it is <c>false</c>).
+        ///     Indicates whether the object should be built to encrypt (if it is
+        ///     <c>true</c>), or to decrypt (if it is <c>false</c>).
         /// </param>
         /// <exception cref="ArgumentException">
-        /// The <c>managementKey</c> argument is not a valid Triple-DES key.
+        ///     The <c>managementKey</c> argument is not a valid Triple-DES key.
         /// </exception>
         public TripleDesForManagementKey(ReadOnlySpan<byte> managementKey, bool isEncrypting)
         {
@@ -196,7 +190,13 @@ namespace Yubico.YubiKey.Piv.Commands
             }
         }
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
+        public bool IsEncrypting { get; }
+
+        /// <inheritdoc />
+        public int BlockSize { get; }
+
+        /// <inheritdoc />
         public int TransformBlock(
             byte[] inputBuffer,
             int inputOffset,
@@ -245,6 +245,100 @@ namespace Yubico.YubiKey.Piv.Commands
             }
 
             return inputCount;
+        }
+
+        /// <summary>
+        ///     When the object goes out of scope, this method is called. It will
+        ///     dispose local objects.
+        /// </summary>
+
+        // Note that .NET recommends a Dispose method call Dispose(true) and
+        // GC.SuppressFinalize(this). The actual disposal is in the
+        // Dispose(bool) method.
+        //
+        // However, that does not apply to sealed classes.
+        // So the Dispose method will simply perform the
+        // "closing" process, no call to Dispose(bool) or GC.
+        public void Dispose()
+        {
+            if (_disposed)
+            {
+                return;
+            }
+
+            _cryptoTransform.Dispose();
+            if (!(_cryptoTransformA is null))
+            {
+                _cryptoTransformA.Dispose();
+            }
+
+            if (!(_cryptoTransformB is null))
+            {
+                _cryptoTransformB.Dispose();
+            }
+
+            _disposed = true;
+        }
+
+        /// <summary>
+        ///     Create a new byte array containing the key data, but with the DES
+        ///     parity bits set correctly.
+        /// </summary>
+        /// <param name="keyDataSpan">
+        ///     A <c>ReadOnlySpan</c> containing the key data to set.
+        /// </param>
+        /// <returns>
+        ///     A new byte array containing the key data with the DES parity bits
+        ///     correctly set.
+        /// </returns>
+        public static byte[] SetParity(ReadOnlySpan<byte> keyDataSpan)
+        {
+            byte[] returnValue = new byte[keyDataSpan.Length];
+
+            for (int index = 0; index < keyDataSpan.Length; index++)
+            {
+                returnValue[index] = parityBytes[keyDataSpan[index]];
+            }
+
+            return returnValue;
+        }
+
+        // Check to see if either the first key and second key are the same, or
+        // the second key and third key are the same.
+        // This is checking for a tripleDES weak key. But instead of returning an
+        // answer yes or no (it is or is not a weak key), this returns a value to
+        // indicate whether the weakness is because the first and second are the
+        // same, or the second and third are the same.
+        // If the first and second are equal, don't bother checking the second
+        // and third.
+        // If this is not a weak key, return NoEqualKey.
+        // If this is a weak key because the first and second keys are the same,
+        // return EqualKeyOneAndTwo.
+        // If this is a weak key because the second and third keys are the same,
+        // return EqualKeyTwoAndThree.
+        private static int CheckForEqualKeys(ReadOnlySpan<byte> keyData)
+        {
+            if (keyData.Slice(start: 0, ValidDesKeyLength)
+                .SequenceEqual(keyData.Slice(KeyOffsetSecond, ValidDesKeyLength)))
+            {
+                return EqualKeyOneAndTwo;
+            }
+
+            if (keyData.Slice(KeyOffsetSecond, ValidDesKeyLength)
+                .SequenceEqual(keyData.Slice(KeyOffsetThird, ValidDesKeyLength)))
+            {
+                return EqualKeyTwoAndThree;
+            }
+
+            return NoEqualKey;
+        }
+
+        private void EnsureNotDisposed()
+        {
+            if (_disposed)
+            {
+                throw new ObjectDisposedException(nameof(TripleDesForManagementKey));
+            }
         }
         #pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
 
@@ -322,19 +416,19 @@ namespace Yubico.YubiKey.Piv.Commands
         // can.
         private ICryptoTransform BuildDesWithWeakKey(byte[] keyData)
         {
-            byte[] threeKeyData = new byte[]
+            byte[] threeKeyData =
             {
                 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
                 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28
             };
 
-            byte[] keyDataA = new byte[]
+            byte[] keyDataA =
             {
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18
             };
 
-            byte[] keyDataB = new byte[]
+            byte[] keyDataB =
             {
                 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28
             };
@@ -377,101 +471,5 @@ namespace Yubico.YubiKey.Piv.Commands
             }
         }
         #pragma warning restore CA5401
-
-        /// <summary>
-        /// Create a new byte array containing the key data, but with the DES
-        /// parity bits set correctly.
-        /// </summary>
-        /// <param name="keyDataSpan">
-        /// A <c>ReadOnlySpan</c> containing the key data to set.
-        /// </param>
-        /// <returns>
-        /// A new byte array containing the key data with the DES parity bits
-        /// correctly set.
-        /// </returns>
-        public static byte[] SetParity(ReadOnlySpan<byte> keyDataSpan)
-        {
-            byte[] returnValue = new byte[keyDataSpan.Length];
-
-            for (int index = 0; index < keyDataSpan.Length; index++)
-            {
-                returnValue[index] = parityBytes[keyDataSpan[index]];
-            }
-
-            return returnValue;
-        }
-
-        // Check to see if either the first key and second key are the same, or
-        // the second key and third key are the same.
-        // This is checking for a tripleDES weak key. But instead of returning an
-        // answer yes or no (it is or is not a weak key), this returns a value to
-        // indicate whether the weakness is because the first and second are the
-        // same, or the second and third are the same.
-        // If the first and second are equal, don't bother checking the second
-        // and third.
-        // If this is not a weak key, return NoEqualKey.
-        // If this is a weak key because the first and second keys are the same,
-        // return EqualKeyOneAndTwo.
-        // If this is a weak key because the second and third keys are the same,
-        // return EqualKeyTwoAndThree.
-        private static int CheckForEqualKeys(ReadOnlySpan<byte> keyData)
-        {
-            if (MemoryExtensions.SequenceEqual(
-                    keyData.Slice(start: 0, ValidDesKeyLength),
-                    keyData.Slice(KeyOffsetSecond, ValidDesKeyLength)))
-            {
-                return EqualKeyOneAndTwo;
-            }
-
-            if (MemoryExtensions.SequenceEqual(
-                    keyData.Slice(KeyOffsetSecond, ValidDesKeyLength),
-                    keyData.Slice(KeyOffsetThird, ValidDesKeyLength)))
-            {
-                return EqualKeyTwoAndThree;
-            }
-
-            return NoEqualKey;
-        }
-
-        /// <summary>
-        /// When the object goes out of scope, this method is called. It will
-        /// dispose local objects.
-        /// </summary>
-
-        // Note that .NET recommends a Dispose method call Dispose(true) and
-        // GC.SuppressFinalize(this). The actual disposal is in the
-        // Dispose(bool) method.
-        //
-        // However, that does not apply to sealed classes.
-        // So the Dispose method will simply perform the
-        // "closing" process, no call to Dispose(bool) or GC.
-        public void Dispose()
-        {
-            if (_disposed)
-            {
-                return;
-            }
-
-            _cryptoTransform.Dispose();
-            if (!(_cryptoTransformA is null))
-            {
-                _cryptoTransformA.Dispose();
-            }
-
-            if (!(_cryptoTransformB is null))
-            {
-                _cryptoTransformB.Dispose();
-            }
-
-            _disposed = true;
-        }
-
-        private void EnsureNotDisposed()
-        {
-            if (_disposed)
-            {
-                throw new ObjectDisposedException(nameof(TripleDesForManagementKey));
-            }
-        }
     }
 }

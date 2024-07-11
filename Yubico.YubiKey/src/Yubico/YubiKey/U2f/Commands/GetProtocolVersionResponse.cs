@@ -19,23 +19,23 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
-    /// The response containing the U2F protocol version implemented by the application.
+    ///     The response containing the U2F protocol version implemented by the application.
     /// </summary>
     /// <remarks>
-    /// This is the partner Response class to <see cref="GetProtocolVersionCommand"/>. The
-    /// data is returned as a string, describing the protocol version of the U2F application.
+    ///     This is the partner Response class to <see cref="GetProtocolVersionCommand" />. The
+    ///     data is returned as a string, describing the protocol version of the U2F application.
     /// </remarks>
     public class GetProtocolVersionResponse : U2fResponse, IYubiKeyResponseWithData<string>
     {
         /// <summary>
-        /// Constructs a GetProtocolVersionResponse object from the given
-        /// <see cref="ResponseApdu"/>.
+        ///     Constructs a GetProtocolVersionResponse object from the given
+        ///     <see cref="ResponseApdu" />.
         /// </summary>
         /// <param name="responseApdu">
-        /// The object containing the response APDU returned by the YubiKey.
+        ///     The object containing the response APDU returned by the YubiKey.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        /// Thrown when <paramref name="responseApdu"/> is `null`.
+        ///     Thrown when <paramref name="responseApdu" /> is `null`.
         /// </exception>
         public GetProtocolVersionResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -43,18 +43,18 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <summary>
-        /// Gets the U2F protocol version string from the response.
+        ///     Gets the U2F protocol version string from the response.
         /// </summary>
         /// <remarks>
-        /// If the status of the response is not <see cref="ResponseStatus.Success"/>,
-        /// this method will throw an exception.
+        ///     If the status of the response is not <see cref="ResponseStatus.Success" />,
+        ///     this method will throw an exception.
         /// </remarks>
         /// <returns>
-        /// The data in the response APDU, which is encoded as an ASCII string. This data describes the
-        /// U2F protocol version.
+        ///     The data in the response APDU, which is encoded as an ASCII string. This data describes the
+        ///     U2F protocol version.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
+        ///     Thrown when <see cref="YubiKeyResponse.Status" /> is not <see cref="ResponseStatus.Success" />.
         /// </exception>
         public string GetData()
         {

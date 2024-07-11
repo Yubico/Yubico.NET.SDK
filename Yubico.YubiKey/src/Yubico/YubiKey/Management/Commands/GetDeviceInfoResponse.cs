@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.Management.Commands
             {
                 throw new MalformedYubiKeyResponseException
                 {
-                    ResponseClass = nameof(GetDeviceInfoResponse),
+                    ResponseClass = nameof(GetDeviceInfoResponse)
                 };
             }
 

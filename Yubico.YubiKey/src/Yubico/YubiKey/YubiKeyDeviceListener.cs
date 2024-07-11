@@ -322,7 +322,7 @@ namespace Yubico.YubiKey
                     .GetHidDevices()
                     .Where(d => d.IsYubicoDevice() && d.IsFido());
             }
-            catch (PlatformInterop.PlatformApiException e) { ErrorHandler(e); }
+            catch (PlatformApiException e) { ErrorHandler(e); }
 
             return Enumerable.Empty<IDevice>();
         }
@@ -335,7 +335,7 @@ namespace Yubico.YubiKey
                     .GetHidDevices()
                     .Where(d => d.IsYubicoDevice() && d.IsKeyboard());
             }
-            catch (PlatformInterop.PlatformApiException e) { ErrorHandler(e); }
+            catch (PlatformApiException e) { ErrorHandler(e); }
 
             return Enumerable.Empty<IDevice>();
         }
@@ -348,7 +348,7 @@ namespace Yubico.YubiKey
                     .GetSmartCardDevices()
                     .Where(d => d.IsYubicoDevice());
             }
-            catch (PlatformInterop.SCardException e) { ErrorHandler(e); }
+            catch (SCardException e) { ErrorHandler(e); }
 
             return Enumerable.Empty<IDevice>();
         }

@@ -76,13 +76,13 @@ namespace Yubico.YubiKey.U2f.Commands
             var innerEchoCommand = new CommandApdu()
             {
                 Ins = EchoInstruction,
-                Data = Data.ToArray(),
+                Data = Data.ToArray()
             };
 
             return new CommandApdu()
             {
                 Ins = Ctap1MessageInstruction,
-                Data = innerEchoCommand.AsByteArray(ApduEncoding.ExtendedLength),
+                Data = innerEchoCommand.AsByteArray(ApduEncoding.ExtendedLength)
             };
         }
 

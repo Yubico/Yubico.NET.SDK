@@ -27,6 +27,6 @@ namespace Yubico.YubiKey.Otp
         /// <summary>
         /// An NFC Uniform Resource Identifier (URI) record. Type "U" / "urn:nfc:wkt:U".
         /// </summary>
-        Uri,
+        Uri
     }
 }

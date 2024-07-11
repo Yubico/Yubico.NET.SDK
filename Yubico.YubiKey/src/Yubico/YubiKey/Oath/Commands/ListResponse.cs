@@ -79,7 +79,7 @@ namespace Yubico.YubiKey.Oath.Commands
                         throw new MalformedYubiKeyResponseException()
                         {
                             ResponseClass = nameof(ListResponse),
-                            ActualDataLength = ResponseApdu.Data.Length,
+                            ActualDataLength = ResponseApdu.Data.Length
                         };
                 }
             }
@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.Oath.Commands
         /// </returns>
         private static Credential _GetCredential(ReadOnlyMemory<byte> value)
         {
-            _ThrowIfNotLength(value, 2);
+            _ThrowIfNotLength(value, minLength: 2);
 
             byte algorithmType = value.Span[0];
             var algorithm = (HashAlgorithm)(algorithmType & 0x0F);

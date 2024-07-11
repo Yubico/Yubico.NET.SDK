@@ -92,12 +92,10 @@ namespace Yubico.YubiKey.Fido2.Commands
         //   map
         //     01 byte string
         //     03 int
-        private static byte[]? EncodeParams(ReadOnlyMemory<byte> templateId, int? timeoutMilliseconds)
-        {
-            return new CborMapWriter<int>()
+        private static byte[]? EncodeParams(ReadOnlyMemory<byte> templateId, int? timeoutMilliseconds) =>
+            new CborMapWriter<int>()
                 .Entry(KeyTemplateId, templateId)
                 .OptionalEntry(KeyTimeout, timeoutMilliseconds)
                 .Encode();
-        }
     }
 }

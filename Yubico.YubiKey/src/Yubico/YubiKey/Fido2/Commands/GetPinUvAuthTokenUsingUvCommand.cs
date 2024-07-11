@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 PinUvAuthProtocol = pinProtocol.Protocol,
                 KeyAgreement = pinProtocol.PlatformPublicKey,
                 Permissions = permissions,
-                RpId = rpId,
+                RpId = rpId
             };
         }
 

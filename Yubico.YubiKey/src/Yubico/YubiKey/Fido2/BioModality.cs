@@ -33,6 +33,6 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// Indicates that a YubiKey supports the fingerprint biometric method.
         /// </summary>
-        Fingerprint = 1,
+        Fingerprint = 1
     }
 }

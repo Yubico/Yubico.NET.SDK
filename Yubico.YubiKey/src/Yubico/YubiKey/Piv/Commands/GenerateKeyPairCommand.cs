@@ -263,7 +263,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 Ins = PivGenerateKeyPairInstruction,
                 P2 = SlotNumber,
-                Data = BuildGenerateKeyPairApduData(),
+                Data = BuildGenerateKeyPairApduData()
             };
 
         // Build a byte array that contains the data portion of the APDU.
@@ -313,7 +313,7 @@ namespace Yubico.YubiKey.Piv.Commands
             }
 
             data[IndexValueLength] = (byte)valueLength;
-            Span<byte> returnValue = data.AsSpan(0, length);
+            Span<byte> returnValue = data.AsSpan(start: 0, length);
             return returnValue.ToArray();
         }
 

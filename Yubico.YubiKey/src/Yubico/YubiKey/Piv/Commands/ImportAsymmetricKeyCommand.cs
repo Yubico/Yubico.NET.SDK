@@ -303,7 +303,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 Ins = PivImportAsymmetricInstruction,
                 P1 = (byte)Algorithm,
                 P2 = SlotNumber,
-                Data = BuildImportAsymmetricApduData(),
+                Data = BuildImportAsymmetricApduData()
             };
 
         // Build a new byte array containing the key data and policy data.
@@ -328,7 +328,7 @@ namespace Yubico.YubiKey.Piv.Commands
             try
             {
                 _privateKey.EncodedPrivateKey.CopyTo(apduData);
-                Array.Copy(_policy, 0, apduData, offset, maximumPolicyLength);
+                Array.Copy(_policy, sourceIndex: 0, apduData, offset, maximumPolicyLength);
 
                 if (PinPolicy == PivPinPolicy.Default || PinPolicy == PivPinPolicy.None)
                 {
@@ -341,7 +341,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     length -= touchPolicyCount;
                 }
 
-                var returnValue = new Memory<byte>(apduData, 0, length);
+                var returnValue = new Memory<byte>(apduData, start: 0, length);
                 return returnValue.ToArray();
             }
             finally

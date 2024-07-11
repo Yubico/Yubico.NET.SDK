@@ -23,28 +23,28 @@ namespace Yubico.YubiKey
 
         // Note that these are for internal use. It's expected that SDK users should call `.HasFeature` on the
         // YubiKey device to check for features instead of FW versions.
-        internal static readonly FirmwareVersion All = new FirmwareVersion(1, 0, 0);
-        internal static readonly FirmwareVersion V2_0_0 = new FirmwareVersion(2, 0, 0);
-        internal static readonly FirmwareVersion V2_1_0 = new FirmwareVersion(2, 1, 0);
-        internal static readonly FirmwareVersion V2_2_0 = new FirmwareVersion(2, 2, 0);
-        internal static readonly FirmwareVersion V2_3_0 = new FirmwareVersion(2, 3, 0);
-        internal static readonly FirmwareVersion V2_3_2 = new FirmwareVersion(2, 3, 2);
-        internal static readonly FirmwareVersion V2_4_0 = new FirmwareVersion(2, 4, 0);
-        internal static readonly FirmwareVersion V3_1_0 = new FirmwareVersion(3, 1, 0);
-        internal static readonly FirmwareVersion V4_0_0 = new FirmwareVersion(4, 0, 0);
-        internal static readonly FirmwareVersion V4_2_4 = new FirmwareVersion(4, 2, 4);
-        internal static readonly FirmwareVersion V4_3_0 = new FirmwareVersion(4, 3, 0);
-        internal static readonly FirmwareVersion V4_3_1 = new FirmwareVersion(4, 3, 1);
-        internal static readonly FirmwareVersion V4_3_4 = new FirmwareVersion(4, 3, 4);
-        internal static readonly FirmwareVersion V4_4_0 = new FirmwareVersion(4, 4, 0);
-        internal static readonly FirmwareVersion V4_5_0 = new FirmwareVersion(4, 5, 0);
-        internal static readonly FirmwareVersion V5_0_0 = new FirmwareVersion(5, 0, 0);
-        internal static readonly FirmwareVersion V5_3_0 = new FirmwareVersion(5, 3, 0);
-        internal static readonly FirmwareVersion V5_3_1 = new FirmwareVersion(5, 3, 1);
-        internal static readonly FirmwareVersion V5_4_2 = new FirmwareVersion(5, 4, 2);
-        internal static readonly FirmwareVersion V5_4_3 = new FirmwareVersion(5, 4, 3);
-        internal static readonly FirmwareVersion V5_6_0 = new FirmwareVersion(5, 6, 0);
-        internal static readonly FirmwareVersion V5_7_0 = new FirmwareVersion(5, 7, 0);
+        internal static readonly FirmwareVersion All = new FirmwareVersion(major: 1, minor: 0, patch: 0);
+        internal static readonly FirmwareVersion V2_0_0 = new FirmwareVersion(major: 2, minor: 0, patch: 0);
+        internal static readonly FirmwareVersion V2_1_0 = new FirmwareVersion(major: 2, minor: 1, patch: 0);
+        internal static readonly FirmwareVersion V2_2_0 = new FirmwareVersion(major: 2, minor: 2, patch: 0);
+        internal static readonly FirmwareVersion V2_3_0 = new FirmwareVersion(major: 2, minor: 3, patch: 0);
+        internal static readonly FirmwareVersion V2_3_2 = new FirmwareVersion(major: 2, minor: 3, patch: 2);
+        internal static readonly FirmwareVersion V2_4_0 = new FirmwareVersion(major: 2, minor: 4, patch: 0);
+        internal static readonly FirmwareVersion V3_1_0 = new FirmwareVersion(major: 3, minor: 1, patch: 0);
+        internal static readonly FirmwareVersion V4_0_0 = new FirmwareVersion(major: 4, minor: 0, patch: 0);
+        internal static readonly FirmwareVersion V4_2_4 = new FirmwareVersion(major: 4, minor: 2, patch: 4);
+        internal static readonly FirmwareVersion V4_3_0 = new FirmwareVersion(major: 4, minor: 3, patch: 0);
+        internal static readonly FirmwareVersion V4_3_1 = new FirmwareVersion(major: 4, minor: 3, patch: 1);
+        internal static readonly FirmwareVersion V4_3_4 = new FirmwareVersion(major: 4, minor: 3, patch: 4);
+        internal static readonly FirmwareVersion V4_4_0 = new FirmwareVersion(major: 4, minor: 4, patch: 0);
+        internal static readonly FirmwareVersion V4_5_0 = new FirmwareVersion(major: 4, minor: 5, patch: 0);
+        internal static readonly FirmwareVersion V5_0_0 = new FirmwareVersion(major: 5, minor: 0, patch: 0);
+        internal static readonly FirmwareVersion V5_3_0 = new FirmwareVersion(major: 5, minor: 3, patch: 0);
+        internal static readonly FirmwareVersion V5_3_1 = new FirmwareVersion(major: 5, minor: 3, patch: 1);
+        internal static readonly FirmwareVersion V5_4_2 = new FirmwareVersion(major: 5, minor: 4, patch: 2);
+        internal static readonly FirmwareVersion V5_4_3 = new FirmwareVersion(major: 5, minor: 4, patch: 3);
+        internal static readonly FirmwareVersion V5_6_0 = new FirmwareVersion(major: 5, minor: 6, patch: 0);
+        internal static readonly FirmwareVersion V5_7_0 = new FirmwareVersion(major: 5, minor: 7, patch: 0);
 
         #endregion
 

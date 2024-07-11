@@ -217,7 +217,7 @@ namespace Yubico.YubiKey.Cryptography
                 CoseAlgorithmIdentifier.ES256 => OidP256,
                 CoseAlgorithmIdentifier.ECDHwHKDF256 => OidP256,
                 CoseAlgorithmIdentifier.ES384 => OidP384,
-                _ => "",
+                _ => ""
             };
 
             byte[] xCoordinate = Array.Empty<byte>();
@@ -317,7 +317,7 @@ namespace Yubico.YubiKey.Cryptography
             {
                 P256KeySize => CryptographyProviders.Sha256Creator(),
                 P384KeySize => CryptographyProviders.Sha384Creator(),
-                _ => throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm),
+                _ => throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm)
             };
 
             return VerifyDigestedData(digester.ComputeHash(dataToVerify), signature, isStandardSignature);
@@ -370,14 +370,14 @@ namespace Yubico.YubiKey.Cryptography
             if (encodedEccPoint.Length >= MinEncodedPointLength && encodedEccPoint.Span[0] == EncodedPointTag)
             {
                 int coordLength = (encodedEccPoint.Length - 1) / 2;
-                xCoordinate = encodedEccPoint.Slice(1, coordLength).ToArray();
+                xCoordinate = encodedEccPoint.Slice(start: 1, coordLength).ToArray();
                 yCoordinate = encodedEccPoint.Slice(1 + coordLength, coordLength).ToArray();
 
                 oid = encodedEccPoint.Length switch
                 {
                     P256EncodedPointLength => OidP256,
                     P384EncodedPointLength => OidP384,
-                    _ => "",
+                    _ => ""
                 };
             }
 
@@ -411,7 +411,7 @@ namespace Yubico.YubiKey.Cryptography
             {
                 OidP256 => (P256EncodedPointLength - 1) / 2,
                 OidP384 => (P384EncodedPointLength - 1) / 2,
-                _ => -1,
+                _ => -1
             };
 
             if (eccParams.Q.X.Length > 0 && eccParams.Q.X.Length <= coordinateLength)

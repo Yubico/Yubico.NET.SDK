@@ -49,13 +49,13 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var innerCommand = new CommandApdu()
             {
-                Ins = VerifyFipsModeInstruction,
+                Ins = VerifyFipsModeInstruction
             };
 
             return new CommandApdu()
             {
                 Ins = Ctap1MessageInstruction,
-                Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength),
+                Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength)
             };
         }
 

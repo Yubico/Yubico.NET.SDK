@@ -59,6 +59,6 @@ namespace Yubico.YubiKey
         /// <see cref="Piv.Commands.GetDataResponse"/>.
         /// </p>
         /// </remarks>
-        NoData = 5,
+        NoData = 5
     }
 }

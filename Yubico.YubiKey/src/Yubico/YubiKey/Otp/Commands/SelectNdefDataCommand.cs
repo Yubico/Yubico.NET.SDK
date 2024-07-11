@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.Otp.Commands
                 P2 = SelectNdefParameter2,
                 Data = new byte[]
                 {
-                    (byte)(((short)FileID >> 8) & 0xFF),
+                    (byte)((short)FileID >> 8 & 0xFF),
                     (byte)((short)FileID & 0xFF)
                 }
             };

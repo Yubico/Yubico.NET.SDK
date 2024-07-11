@@ -161,7 +161,7 @@ namespace Yubico.YubiKey.Fido2
         {
             EncodedAuthenticatorData = new ReadOnlyMemory<byte>(encodedData.ToArray());
 
-            RelyingPartyIdHash = EncodedAuthenticatorData.Slice(0, RelyingPartyIdHashLength);
+            RelyingPartyIdHash = EncodedAuthenticatorData.Slice(start: 0, RelyingPartyIdHashLength);
             int offset = RelyingPartyIdHashLength;
             byte flags = EncodedAuthenticatorData.Span[offset];
             UserPresence = (flags & UserPresenceBit) != 0;
@@ -338,7 +338,7 @@ namespace Yubico.YubiKey.Fido2
                     var cborReader = new CborReader(encodedValue, CborConformanceMode.Ctap2Canonical);
                     byte[] encryptedData = cborReader.ReadByteString();
 
-                    return authProtocol.Decrypt(encryptedData, 0, encryptedData.Length);
+                    return authProtocol.Decrypt(encryptedData, offset: 0, encryptedData.Length);
                 }
             }
 

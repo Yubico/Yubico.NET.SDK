@@ -40,6 +40,6 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// This policy specifies that UV is required to get an assertion.
         /// </summary>
-        UserVerificationRequired = 3,
+        UserVerificationRequired = 3
     }
 }

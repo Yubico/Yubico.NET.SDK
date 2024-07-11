@@ -34,18 +34,15 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// </remarks>
     public class AddCredentialResponse : BaseYubiHsmAuthResponseWithRetries
     {
-        protected override ResponseStatusPair StatusCodeMap
-        {
-            get =>
-                StatusWord switch
-                {
-                    // A credential with that label already exists
-                    SWConstants.AuthenticationMethodBlocked =>
-                        new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.YubiHsmAuthLabelConflict),
+        protected override ResponseStatusPair StatusCodeMap =>
+            StatusWord switch
+            {
+                // A credential with that label already exists
+                SWConstants.AuthenticationMethodBlocked =>
+                    new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.YubiHsmAuthLabelConflict),
 
-                    _ => base.StatusCodeMap,
-                };
-        }
+                _ => base.StatusCodeMap
+            };
 
         /// <summary>
         /// Constructs an AddCredentialResponse based on a ResponseApdu

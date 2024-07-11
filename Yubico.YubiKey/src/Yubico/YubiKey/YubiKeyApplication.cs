@@ -29,7 +29,7 @@ namespace Yubico.YubiKey
         InterIndustry = 8,
         OtpNdef = 9,
         YubiHsmAuth = 10,
-        Scp03 = 11,
+        Scp03 = 11
     }
 
     internal static class YubiKeyApplicationExtensions
@@ -58,7 +58,7 @@ namespace Yubico.YubiKey
                 YubiKeyApplication.OtpNdef => OtpNdef,
                 YubiKeyApplication.YubiHsmAuth => YubiHsmAuthId,
                 YubiKeyApplication.Scp03 => Scp03AuthId,
-                _ => throw new NotSupportedException(ExceptionMessages.ApplicationIdNotFound),
+                _ => throw new NotSupportedException(ExceptionMessages.ApplicationIdNotFound)
             };
     }
 }

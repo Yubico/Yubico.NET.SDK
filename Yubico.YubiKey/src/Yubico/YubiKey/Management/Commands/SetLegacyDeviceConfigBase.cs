@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Management.Commands
                 [YubiKeyCapabilities.Otp | YubiKeyCapabilities.FidoU2f] = 0x04,
                 [YubiKeyCapabilities.Ccid | YubiKeyCapabilities.FidoU2f] = 0x05,
                 [YubiKeyCapabilities.Otp | YubiKeyCapabilities.Ccid | YubiKeyCapabilities.FidoU2f] = 0x06,
-                [YubiKeyCapabilities.All] = 0x06, // Convenience value, auto convert to interfaces
+                [YubiKeyCapabilities.All] = 0x06 // Convenience value, auto convert to interfaces
             };
 
         public static bool ContainsOnlyValidInterfaceFlags(YubiKeyCapabilities yubiKeyInterfaces) =>

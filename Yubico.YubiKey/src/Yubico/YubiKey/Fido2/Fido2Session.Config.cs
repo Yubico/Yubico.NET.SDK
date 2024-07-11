@@ -86,15 +86,17 @@ namespace Yubico.YubiKey.Fido2
             }
 
             ReadOnlyMemory<byte> currentToken = GetAuthToken(
-                false,
+                forceNewToken: false,
                 PinUvAuthTokenPermissions.AuthenticatorConfiguration,
-                null);
+                relyingPartyId: null);
 
             var enableCmd = new EnableEnterpriseAttestationCommand(currentToken, AuthProtocol);
             Fido2Response enableRsp = Connection.SendCommand(enableCmd);
             if (enableRsp.CtapStatus == CtapStatus.PinAuthInvalid)
             {
-                currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
+                currentToken = GetAuthToken(
+                    forceNewToken: true, PinUvAuthTokenPermissions.AuthenticatorConfiguration, relyingPartyId: null);
+
                 enableCmd = new EnableEnterpriseAttestationCommand(currentToken, AuthProtocol);
                 enableRsp = Connection.SendCommand(enableCmd);
             }
@@ -172,15 +174,17 @@ namespace Yubico.YubiKey.Fido2
             }
 
             ReadOnlyMemory<byte> currentToken = GetAuthToken(
-                false,
+                forceNewToken: false,
                 PinUvAuthTokenPermissions.AuthenticatorConfiguration,
-                null);
+                relyingPartyId: null);
 
             var toggleCmd = new ToggleAlwaysUvCommand(currentToken, AuthProtocol);
             Fido2Response toggleRsp = Connection.SendCommand(toggleCmd);
             if (toggleRsp.CtapStatus == CtapStatus.PinAuthInvalid)
             {
-                currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
+                currentToken = GetAuthToken(
+                    forceNewToken: true, PinUvAuthTokenPermissions.AuthenticatorConfiguration, relyingPartyId: null);
+
                 toggleCmd = new ToggleAlwaysUvCommand(currentToken, AuthProtocol);
                 toggleRsp = Connection.SendCommand(toggleCmd);
             }
@@ -333,9 +337,9 @@ namespace Yubico.YubiKey.Fido2
             }
 
             ReadOnlyMemory<byte> currentToken = GetAuthToken(
-                false,
+                forceNewToken: false,
                 PinUvAuthTokenPermissions.AuthenticatorConfiguration,
-                null);
+                relyingPartyId: null);
 
             var setCmd = new SetMinPinLengthCommand(
                 newMinPinLength,
@@ -347,7 +351,9 @@ namespace Yubico.YubiKey.Fido2
             Fido2Response setRsp = Connection.SendCommand(setCmd);
             if (setRsp.CtapStatus == CtapStatus.PinAuthInvalid)
             {
-                currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.AuthenticatorConfiguration, null);
+                currentToken = GetAuthToken(
+                    forceNewToken: true, PinUvAuthTokenPermissions.AuthenticatorConfiguration, relyingPartyId: null);
+
                 setCmd = new SetMinPinLengthCommand(
                     newMinPinLength,
                     relyingPartyIds,

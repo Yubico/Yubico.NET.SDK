@@ -184,7 +184,7 @@ namespace Yubico.YubiKey
                     ResponseStatus.Failed, ResponseStatusMessages.BaseClaNotSupported),
 
                 // Default
-                _ => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseFailed),
+                _ => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseFailed)
             };
 
         /// <summary>

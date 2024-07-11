@@ -49,7 +49,7 @@ namespace Yubico.YubiKey.U2f.Commands
                     ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidLength),
                 SWConstants.NoPreciseDiagnosis => GetU2fHidErrorStatusPair(),
 
-                _ => base.StatusCodeMap,
+                _ => base.StatusCodeMap
             };
 
         /// <summary>
@@ -127,7 +127,7 @@ namespace Yubico.YubiKey.U2f.Commands
                     _ => string.Format(
                         System.Globalization.CultureInfo.CurrentCulture,
                         ResponseStatusMessages.U2fHidErrorUnknown,
-                        errorCode),
+                        errorCode)
                 };
 
             return new ResponseStatusPair(ResponseStatus.Failed, responseMessage);

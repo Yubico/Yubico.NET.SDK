@@ -119,8 +119,8 @@ namespace Yubico.YubiKey
                 log.LogInformation("Attempting to read serial number through the keybaord interface.");
                 using var keyboardConnection = new KeyboardConnection(device);
 
-                Otp.Commands.GetSerialNumberResponse response =
-                    keyboardConnection.SendCommand(new Otp.Commands.GetSerialNumberCommand());
+                GetSerialNumberResponse response =
+                    keyboardConnection.SendCommand(new GetSerialNumberCommand());
 
                 if (response.Status == ResponseStatus.Success)
                 {
@@ -163,8 +163,8 @@ namespace Yubico.YubiKey
                 log.LogInformation("Attempting to read firmware version through the keyboard interface.");
                 using var keyboardConnection = new KeyboardConnection(device);
 
-                Otp.Commands.ReadStatusResponse response =
-                    keyboardConnection.SendCommand(new Otp.Commands.ReadStatusCommand());
+                ReadStatusResponse response =
+                    keyboardConnection.SendCommand(new ReadStatusCommand());
 
                 if (response.Status == ResponseStatus.Success)
                 {

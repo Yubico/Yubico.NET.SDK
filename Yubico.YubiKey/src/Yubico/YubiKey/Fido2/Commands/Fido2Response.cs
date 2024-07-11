@@ -73,7 +73,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 CtapStatus.CredentialExcluded => new ResponseStatusPair(
                     ResponseStatus.Failed, ResponseStatusMessages.Fido2CredentialExcluded),
 
-                _ => base.StatusCodeMap,
+                _ => base.StatusCodeMap
             };
     }
 }

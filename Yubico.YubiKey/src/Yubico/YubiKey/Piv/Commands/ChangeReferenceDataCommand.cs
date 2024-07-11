@@ -193,7 +193,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 Ins = PivChangeReferenceInstruction,
                 P2 = SlotNumber,
-                Data = PivPinUtilities.CopyTwoPinsWithPadding(_currentValue, _newValue),
+                Data = PivPinUtilities.CopyTwoPinsWithPadding(_currentValue, _newValue)
             };
 
         /// <inheritdoc />

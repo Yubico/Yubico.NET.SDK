@@ -72,6 +72,6 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <summary>
         /// The key is used for validating MACs.
         /// </summary>
-        MacVerify = 10,
+        MacVerify = 10
     }
 }

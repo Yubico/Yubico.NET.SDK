@@ -80,7 +80,7 @@ namespace Yubico.YubiKey.Otp.Commands
                 ShortPressRequiresTouch = (responseApduData[4] & ShortPressTouchMask) != 0,
                 LongPressRequiresTouch = (responseApduData[4] & LongPressTouchMask) != 0,
                 LedBehaviorInverted = (responseApduData[4] & LedInvertedMask) != 0,
-                TouchLevel = responseApduData[5],
+                TouchLevel = responseApduData[5]
             };
         }
     }

@@ -112,7 +112,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             managementKeyRetries = null;
 
-            AddCredentialCommand addCredCmd =
+            var addCredCmd =
                 new AddCredentialCommand(managementKey, credentialWithSecrets);
 
             AddCredentialResponse addCredRsp = Connection.SendCommand(addCredCmd);
@@ -205,7 +205,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.AuthenticateYubiHsmAuthManagementKey,
+                Request = KeyEntryRequest.AuthenticateYubiHsmAuthManagementKey
             };
 
             try
@@ -327,7 +327,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.AuthenticateYubiHsmAuthManagementKey,
+                Request = KeyEntryRequest.AuthenticateYubiHsmAuthManagementKey
             };
 
             try
@@ -452,7 +452,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             managementKeyRetries = null;
 
-            DeleteCredentialCommand deleteCredCmd =
+            var deleteCredCmd =
                 new DeleteCredentialCommand(managementKey, label);
 
             DeleteCredentialResponse deleteCredRsp =

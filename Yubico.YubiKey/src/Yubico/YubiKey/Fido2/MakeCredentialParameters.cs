@@ -487,7 +487,7 @@ namespace Yubico.YubiKey.Fido2
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidDataLength,
-                        0, authenticatorInfo.MaximumCredentialBlobLength, credBlobValue.Length));
+                        arg0: 0, authenticatorInfo.MaximumCredentialBlobLength, credBlobValue.Length));
             }
 
             var cborWriter = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
@@ -696,9 +696,8 @@ namespace Yubico.YubiKey.Fido2
                 ParameterHelpers.AddKeyValue<bool>(optionKey, optionValue, _options);
 
         /// <inheritdoc/>
-        public byte[] CborEncode()
-        {
-            return new CborMapWriter<int>()
+        public byte[] CborEncode() =>
+            new CborMapWriter<int>()
                 .Entry(TagClientDataHash, ClientDataHash)
                 .Entry(TagRp, RelyingParty)
                 .Entry(TagUserEntity, UserEntity)
@@ -712,7 +711,6 @@ namespace Yubico.YubiKey.Fido2
                 .OptionalEntry(TagProtocol, (int?)Protocol)
                 .OptionalEntry(TagEnterpriseAttestation, (int?)EnterpriseAttestation)
                 .Encode();
-        }
 
         private byte[] EncodeAlgorithms(MakeCredentialParameters? localData)
         {

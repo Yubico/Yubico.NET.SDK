@@ -30,7 +30,7 @@ namespace Yubico.YubiKey
             ISmartCardDevice smartCardDevice,
             YubiKeyApplication yubiKeyApplication,
             StaticKeys scp03Keys)
-            : base(smartCardDevice, yubiKeyApplication, null)
+            : base(smartCardDevice, yubiKeyApplication, applicationId: null)
         {
             _scp03ApduTransform = SetObject(yubiKeyApplication, scp03Keys);
         }

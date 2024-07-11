@@ -46,7 +46,7 @@ namespace Yubico.YubiKey.Otp
             string uriString = uri.ToString();
             int prefixCode = Array.FindIndex(
                 supportedUriPrefixes,
-                1, // Skip the first element ("") as it will match with everything!
+                startIndex: 1, // Skip the first element ("") as it will match with everything!
                 prefix => uriString.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
 
             // If none of the well-known URI prefixes match, set the prefix code to "N/A" and we'll
@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.Otp
 
             Debug.Assert(prefixCode >= 0 && prefixCode < supportedUriPrefixes.Length);
 
-            uriString = uriString.Remove(0, supportedUriPrefixes[prefixCode].Length);
+            uriString = uriString.Remove(startIndex: 0, supportedUriPrefixes[prefixCode].Length);
 
             int utf8Length = Encoding.UTF8.GetByteCount(uriString);
 
@@ -79,7 +79,7 @@ namespace Yubico.YubiKey.Otp
             buffer[1] = (byte)'U';
             buffer[2] = (byte)prefixCode;
 
-            int bytesWritten = Encoding.UTF8.GetBytes(uriString, 0, uriString.Length, buffer, 3);
+            int bytesWritten = Encoding.UTF8.GetBytes(uriString, charIndex: 0, uriString.Length, buffer, byteIndex: 3);
             Debug.Assert(utf8Length == bytesWritten);
 
             return buffer;
@@ -125,7 +125,7 @@ namespace Yubico.YubiKey.Otp
                     nameof(languageCode));
             }
 
-            byte status = (byte)((0x3F & languageLength) | (encodeAsUtf16
+            byte status = (byte)(0x3F & languageLength | (encodeAsUtf16
                 ? 0x80
                 : 0x00));
 
@@ -150,14 +150,14 @@ namespace Yubico.YubiKey.Otp
 
             int bytesWritten = Encoding.ASCII.GetBytes(
                 languageCode,
-                0,
+                charIndex: 0,
                 languageCode.Length,
                 buffer,
-                3);
+                byteIndex: 3);
 
             Debug.Assert(languageLength == bytesWritten);
 
-            bytesWritten = encoding.GetBytes(value, 0, value.Length, buffer, 3 + languageLength);
+            bytesWritten = encoding.GetBytes(value, charIndex: 0, value.Length, buffer, 3 + languageLength);
             Debug.Assert(valueLength == bytesWritten);
 
             return buffer;

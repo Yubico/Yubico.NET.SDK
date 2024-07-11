@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.Oath.Commands
                         throw new MalformedYubiKeyResponseException()
                         {
                             ResponseClass = nameof(SelectOathResponse),
-                            ActualDataLength = ResponseApdu.Data.Length,
+                            ActualDataLength = ResponseApdu.Data.Length
                         };
                 }
             }

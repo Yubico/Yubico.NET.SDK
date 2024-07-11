@@ -149,7 +149,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 Ins = PivVerifyInstruction,
                 P2 = (byte)PivSlot.Pin,
-                Data = PivPinUtilities.CopySinglePinWithPadding(_pin),
+                Data = PivPinUtilities.CopySinglePinWithPadding(_pin)
             };
 
         /// <inheritdoc />

@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         // identifier).
         private const byte P1_SELECT_BY_DF_NAME = 0b0100;
 
-        readonly private byte[] _applicationId;
+        private readonly byte[] _applicationId;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="SelectApplicationCommand"/> class.

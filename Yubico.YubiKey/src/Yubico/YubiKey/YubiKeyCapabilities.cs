@@ -82,6 +82,6 @@ namespace Yubico.YubiKey
         /// <summary>
         /// A convenience member for representing the state where all applications should be enabled.
         /// </summary>
-        All = 0b0011_0011_1111,
+        All = 0b0011_0011_1111
     }
 }

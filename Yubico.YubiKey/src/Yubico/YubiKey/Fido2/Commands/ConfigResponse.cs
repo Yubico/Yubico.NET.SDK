@@ -54,7 +54,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             {
                 CtapStatus.InvalidParameter => new ResponseStatusPair(
                     ResponseStatus.Failed, ResponseStatusMessages.BaseFunctionNotSupported),
-                _ => base.StatusCodeMap,
+                _ => base.StatusCodeMap
             };
     }
 }

@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.U2f
             ClientDataHash = clientDataHash;
 
             return verifier.VerifyData(
-                _bufferMemory.Slice(0, _signatureOffset).ToArray(),
+                _bufferMemory.Slice(start: 0, _signatureOffset).ToArray(),
                 _bufferMemory.Slice(_signatureOffset, _berSignatureLength).ToArray());
         }
     }

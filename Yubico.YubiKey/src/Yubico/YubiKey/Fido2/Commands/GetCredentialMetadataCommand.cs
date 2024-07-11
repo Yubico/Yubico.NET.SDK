@@ -52,7 +52,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// The Auth Protocol used to build the Auth Token.
         /// </param>
         public GetCredentialMetadataCommand(ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
-            : base(new CredentialManagementCommand(SubCmdGetMetadata, null, pinUvAuthToken, authProtocol))
+            : base(
+                new CredentialManagementCommand(
+                    SubCmdGetMetadata, subCommandParams: null, pinUvAuthToken, authProtocol))
         {
         }
 

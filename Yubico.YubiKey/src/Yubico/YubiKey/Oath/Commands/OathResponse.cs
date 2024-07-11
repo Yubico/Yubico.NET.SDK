@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Oath.Commands
                     ResponseStatus.Failed, ResponseStatusMessages.OathWrongSyntax),
                 SWConstants.SecurityStatusNotSatisfied => new ResponseStatusPair(
                     ResponseStatus.AuthenticationRequired, ResponseStatusMessages.OathSecurityStatusNotSatisfied),
-                _ => base.StatusCodeMap,
+                _ => base.StatusCodeMap
             };
     }
 }

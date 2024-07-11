@@ -128,7 +128,7 @@ namespace Yubico.YubiKey.Fido2
                 GetLargeBlobResponse response = Connection.SendCommand(command);
                 currentData = response.GetData();
 
-                fullEncoding.Write(currentData.ToArray(), 0, currentData.Length);
+                fullEncoding.Write(currentData.ToArray(), offset: 0, currentData.Length);
 
                 // For the next call, get the data starting where this call left
                 // off.
@@ -142,7 +142,7 @@ namespace Yubico.YubiKey.Fido2
             //   A1
             //      01 byte string
             var cborMap = new CborMap<int>(
-                fullEncoding.GetBuffer().AsMemory<byte>(0, (int)fullEncoding.Length));
+                fullEncoding.GetBuffer().AsMemory<byte>(start: 0, (int)fullEncoding.Length));
 
             ReadOnlyMemory<byte> encodedArray = cborMap.ReadByteString(KeyEncodedArray);
 
@@ -249,7 +249,7 @@ namespace Yubico.YubiKey.Fido2
                 do
                 {
                     ReadOnlyMemory<byte> currentToken = GetAuthToken(
-                        forceToken, PinUvAuthTokenPermissions.LargeBlobWrite, null);
+                        forceToken, PinUvAuthTokenPermissions.LargeBlobWrite, relyingPartyId: null);
 
                     currentToken.CopyTo(token.AsMemory());
 
@@ -259,7 +259,7 @@ namespace Yubico.YubiKey.Fido2
 
                     byte[] dataToAuth = BuildDataToAuth(encodedArray, offset, currentLength, digester);
                     byte[] pinUvAuthParam = AuthProtocol.AuthenticateUsingPinToken(
-                        token, 0, currentToken.Length, dataToAuth);
+                        token, offset: 0, currentToken.Length, dataToAuth);
 
                     var command = new SetLargeBlobCommand(
                         new ReadOnlyMemory<byte>(encodedArray, offset, currentLength),

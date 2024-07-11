@@ -77,14 +77,14 @@ namespace Yubico.YubiKey
             {
                 YubiKeyNeoUsb,
                 YubiKey4Usb,
-                YubiKey5Usb,
+                YubiKey5Usb
             };
 
         public static IList<AnswerToReset> NfcYubiKeys =>
             new List<AnswerToReset>()
             {
                 YubiKeyNeoNfc,
-                YubiKey5Nfc,
+                YubiKey5Nfc
             };
 
         public static IList<AnswerToReset> AllYubiKeys =>
@@ -94,7 +94,7 @@ namespace Yubico.YubiKey
                 YubiKeyNeoUsb,
                 YubiKey4Usb,
                 YubiKey5Nfc,
-                YubiKey5Usb,
+                YubiKey5Usb
             };
     }
 }

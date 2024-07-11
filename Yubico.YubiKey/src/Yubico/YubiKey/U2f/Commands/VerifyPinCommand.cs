@@ -88,13 +88,13 @@ namespace Yubico.YubiKey.U2f.Commands
             var innerCommand = new CommandApdu()
             {
                 Ins = VerifyPinInstruction,
-                Data = Pin,
+                Data = Pin
             };
 
             return new CommandApdu()
             {
                 Ins = Ctap1MessageInstruction,
-                Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength),
+                Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength)
             };
         }
 

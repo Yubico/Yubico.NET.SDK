@@ -263,7 +263,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The data tag specified is not valid for putting data.
         /// </exception>
-        [ObsoleteAttribute("This property is obsolete. Use DataTag instead", false)]
+        [ObsoleteAttribute("This property is obsolete. Use DataTag instead", error: false)]
         public PivDataTag Tag
         {
             get => (PivDataTag)_tag;
@@ -291,7 +291,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The data supplied is not valid for the specified data tag.
         /// </exception>
-        [ObsoleteAttribute("This property is obsolete. Use Data instead", false)]
+        [ObsoleteAttribute("This property is obsolete. Use Data instead", error: false)]
         public ReadOnlyMemory<byte> EncodedData
         {
             get => _encodedData;
@@ -363,7 +363,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// The encodedData is not as specified for the given <c>tag</c>.
         /// </exception>
         [ObsoleteAttribute(
-            "This constructor is obsolete. Use PutDataCommand(int, ReadOnlyMemory<byte>) instead", false)]
+            "This constructor is obsolete. Use PutDataCommand(int, ReadOnlyMemory<byte>) instead", error: false)]
         public PutDataCommand(PivDataTag tag, ReadOnlyMemory<byte> encodedData)
         {
             Tag = tag;
@@ -409,7 +409,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 Ins = PivPutDataInstruction,
                 P1 = PivPutDataParameter1,
                 P2 = PivPutDataParameter2,
-                Data = BuildPutDataApduData(),
+                Data = BuildPutDataApduData()
             };
 
         // Build the data that is the Data portion of the APDU.

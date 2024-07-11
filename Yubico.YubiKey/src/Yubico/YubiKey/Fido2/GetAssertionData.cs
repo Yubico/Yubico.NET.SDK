@@ -135,7 +135,7 @@ namespace Yubico.YubiKey.Fido2
                 CredentialId = new CredentialId()
                 {
                     Type = stringMap.ReadTextString(KeyCredentialType),
-                    Id = stringMap.ReadByteString(KeyCredentialId),
+                    Id = stringMap.ReadByteString(KeyCredentialId)
                 };
 
                 if (stringMap.Contains(KeyCredentialTransports))
@@ -202,10 +202,10 @@ namespace Yubico.YubiKey.Fido2
         {
             using SHA256 digester = CryptographyProviders.Sha256Creator();
             _ = digester.TransformBlock(
-                AuthenticatorData.EncodedAuthenticatorData.ToArray(), 0,
-                AuthenticatorData.EncodedAuthenticatorData.Length, null, 0);
+                AuthenticatorData.EncodedAuthenticatorData.ToArray(), inputOffset: 0,
+                AuthenticatorData.EncodedAuthenticatorData.Length, outputBuffer: null, outputOffset: 0);
 
-            _ = digester.TransformFinalBlock(clientDataHash.ToArray(), 0, clientDataHash.Length);
+            _ = digester.TransformFinalBlock(clientDataHash.ToArray(), inputOffset: 0, clientDataHash.Length);
 
             using var ecdsaVfy = new EcdsaVerify(publicKey);
             return ecdsaVfy.VerifyDigestedData(digester.Hash, Signature.ToArray());

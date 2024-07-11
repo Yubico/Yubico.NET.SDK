@@ -196,7 +196,7 @@ namespace Yubico.YubiKey.Fido2
                 throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
             }
 
-            EncodedArray = cborEncoding.Slice(0, cborEncoding.Length - DigestLength);
+            EncodedArray = cborEncoding.Slice(start: 0, cborEncoding.Length - DigestLength);
             Digest = cborEncoding.Slice(cborEncoding.Length - DigestLength, DigestLength);
 
             try
@@ -369,7 +369,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 using SHA256 digester = CryptographyProviders.Sha256Creator();
                 byte[] computedDigest = digester.ComputeHash(EncodedArray.Value.ToArray());
-                var digestSpan = new Span<byte>(computedDigest, 0, DigestLength);
+                var digestSpan = new Span<byte>(computedDigest, start: 0, DigestLength);
                 returnValue = MemoryExtensions.SequenceEqual<byte>(digestSpan, Digest.Value.Span);
             }
 
@@ -384,7 +384,7 @@ namespace Yubico.YubiKey.Fido2
             if (Digest is null)
             {
                 using SHA256 digester = CryptographyProviders.Sha256Creator();
-                Digest = new ReadOnlyMemory<byte>(digester.ComputeHash(encoding.ToArray()), 0, DigestLength);
+                Digest = new ReadOnlyMemory<byte>(digester.ComputeHash(encoding.ToArray()), start: 0, DigestLength);
             }
 
             return Digest.Value;

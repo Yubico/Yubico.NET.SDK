@@ -183,13 +183,11 @@ namespace Yubico.YubiKey.Scp03
         }
 
         // Get a copy (deep clone) of this object.
-        internal StaticKeys GetCopy()
-        {
-            return new StaticKeys(ChannelMacKey, ChannelEncryptionKey, DataEncryptionKey)
+        internal StaticKeys GetCopy() =>
+            new StaticKeys(ChannelMacKey, ChannelEncryptionKey, DataEncryptionKey)
             {
                 KeyVersionNumber = KeyVersionNumber
             };
-        }
 
         /// <summary>
         /// Determine if the contents of each key is the same for both objects.

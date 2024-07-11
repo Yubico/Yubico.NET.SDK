@@ -33,6 +33,6 @@ namespace Yubico.YubiKey.Oath
         /// <summary>
         /// A truncated response only contains the generated four-byte one-time password (OTP).
         /// </summary>
-        Truncated = 0x01,
+        Truncated = 0x01
     }
 }

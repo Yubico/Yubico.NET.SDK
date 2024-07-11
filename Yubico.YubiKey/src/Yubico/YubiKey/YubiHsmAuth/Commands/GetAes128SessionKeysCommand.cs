@@ -165,7 +165,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             new CommandApdu()
             {
                 Ins = GetSessionKeysInstruction,
-                Data = BuildDataField(),
+                Data = BuildDataField()
             };
 
         /// <inheritdoc/>
@@ -180,7 +180,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// </returns>
         private byte[] BuildDataField()
         {
-            TlvWriter tlvWriter = new TlvWriter();
+            var tlvWriter = new TlvWriter();
 
             tlvWriter.WriteString(DataTagConstants.Label, CredentialLabel, Encoding.UTF8);
 

@@ -94,7 +94,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             fullKey[0] = (byte)(algorithm | type);
             fullKey[1] = (byte)(Credential.Digits ?? DefaultDigits);
-            Array.Copy(secretDecoded, 0, fullKey, 2, secretDecoded.Length);
+            Array.Copy(secretDecoded, sourceIndex: 0, fullKey, destinationIndex: 2, secretDecoded.Length);
 
             var tlvWriter = new TlvWriter();
             tlvWriter.WriteValue(NameTag, nameBytes);
@@ -109,7 +109,7 @@ namespace Yubico.YubiKey.Oath.Commands
             {
                 byte[] buffer = new byte[ImfDataLength];
                 var span = new Span<byte>(buffer);
-                BinaryPrimitives.WriteInt32LittleEndian(span.Slice(0, ImfDataLength), Credential.Counter.Value);
+                BinaryPrimitives.WriteInt32LittleEndian(span.Slice(start: 0, ImfDataLength), Credential.Counter.Value);
                 tlvWriter.WriteValue(ImfTag, buffer);
             }
 

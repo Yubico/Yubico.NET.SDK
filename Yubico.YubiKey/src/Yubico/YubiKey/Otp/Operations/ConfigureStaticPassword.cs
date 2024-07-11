@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.Otp.Operations
                     OtpSlot = OtpSlot!.Value
                 };
 
-                cmd.SetFixedData(_passwordHidCodes.AsSpan(0, SlotConfigureBase.FixedDataLength));
+                cmd.SetFixedData(_passwordHidCodes.AsSpan(start: 0, SlotConfigureBase.FixedDataLength));
                 cmd.SetUid(_passwordHidCodes.AsSpan(SlotConfigureBase.FixedDataLength, SlotConfigureBase.UidLength));
                 cmd.SetAesKey(
                     _passwordHidCodes.AsSpan(SlotConfigureBase.FixedDataLength + SlotConfigureBase.UidLength));
@@ -397,7 +397,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 // Generate the random characters.
                 for (int i = 0; i < password.Length; ++i)
                 {
-                    byte hidCode = hidTable[rng.GetByte(0, (byte)hidTable.Length)];
+                    byte hidCode = hidTable[rng.GetByte(fromInclusive: 0, (byte)hidTable.Length)];
                     password[i] = translator[hidCode];
                 }
             }

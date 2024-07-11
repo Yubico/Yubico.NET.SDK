@@ -250,7 +250,7 @@ namespace Yubico.YubiKey.Scp03
             }
 
             byte[] fullDecryptedResponse = new byte[decryptedData.Length + 2];
-            decryptedData.CopyTo(fullDecryptedResponse, 0);
+            decryptedData.CopyTo(fullDecryptedResponse, index: 0);
             fullDecryptedResponse[decryptedData.Length] = response.SW1;
             fullDecryptedResponse[decryptedData.Length + 1] = response.SW2;
             return new ResponseApdu(fullDecryptedResponse);

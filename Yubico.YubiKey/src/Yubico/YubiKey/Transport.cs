@@ -56,6 +56,6 @@ namespace Yubico.YubiKey
         /// <summary>
         /// A convenience member that combines all flags.
         /// </summary>
-        All = SmartCard | HidKeyboard | HidFido,
+        All = SmartCard | HidKeyboard | HidFido
     }
 }

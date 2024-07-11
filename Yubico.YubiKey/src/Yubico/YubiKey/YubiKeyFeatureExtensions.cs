@@ -181,8 +181,8 @@ namespace Yubico.YubiKey
 
                 YubiKeyFeature.PivAesManagementKey =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_4_2 ||
-                    (yubiKeyDevice.FirmwareVersion == new FirmwareVersion(0, 8, 8)
-                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv)),
+                    yubiKeyDevice.FirmwareVersion == new FirmwareVersion(major: 0, minor: 8, patch: 8)
+                    && HasApplication(yubiKeyDevice, YubiKeyCapabilities.Piv),
 
                 YubiKeyFeature.PivMetadata =>
                     yubiKeyDevice.FirmwareVersion >= FirmwareVersion.V5_3_0

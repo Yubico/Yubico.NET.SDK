@@ -57,6 +57,6 @@ namespace Yubico.YubiKey
         /// <summary>
         /// The YubiKey is a USB-C key-chain device with a biometric (fingerprint) sensor.
         /// </summary>
-        UsbCBiometricKeychain = 7,
+        UsbCBiometricKeychain = 7
     }
 }

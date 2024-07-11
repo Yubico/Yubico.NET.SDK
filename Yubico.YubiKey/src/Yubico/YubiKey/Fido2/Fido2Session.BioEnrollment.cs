@@ -54,7 +54,7 @@ namespace Yubico.YubiKey.Fido2
             return modality switch
             {
                 1 => BioModality.Fingerprint,
-                _ => BioModality.None,
+                _ => BioModality.None
             };
         }
 
@@ -103,12 +103,16 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public IReadOnlyList<TemplateInfo> EnumerateBioEnrollments()
         {
-            ReadOnlyMemory<byte> currentToken = GetAuthToken(false, PinUvAuthTokenPermissions.BioEnrollment, null);
+            ReadOnlyMemory<byte> currentToken = GetAuthToken(
+                forceNewToken: false, PinUvAuthTokenPermissions.BioEnrollment, relyingPartyId: null);
+
             var enumCmd = new BioEnrollEnumerateCommand(currentToken, AuthProtocol);
             BioEnrollEnumerateResponse enumRsp = Connection.SendCommand(enumCmd);
             if (enumRsp.CtapStatus == CtapStatus.PinAuthInvalid)
             {
-                currentToken = GetAuthToken(false, PinUvAuthTokenPermissions.BioEnrollment, null);
+                currentToken = GetAuthToken(
+                    forceNewToken: false, PinUvAuthTokenPermissions.BioEnrollment, relyingPartyId: null);
+
                 enumCmd = new BioEnrollEnumerateCommand(currentToken, AuthProtocol);
                 enumRsp = Connection.SendCommand(enumCmd);
             }
@@ -250,12 +254,16 @@ namespace Yubico.YubiKey.Fido2
             // Incidentally, enumerating will add some time to this method, but
             // the process of enrolling a fingerprint is so time consuming
             // already, a few milliseconds won't matter.
-            ReadOnlyMemory<byte> currentToken = GetAuthToken(false, PinUvAuthTokenPermissions.BioEnrollment, null);
+            ReadOnlyMemory<byte> currentToken = GetAuthToken(
+                forceNewToken: false, PinUvAuthTokenPermissions.BioEnrollment, relyingPartyId: null);
+
             var enumCmd = new BioEnrollEnumerateCommand(currentToken, AuthProtocol);
             BioEnrollEnumerateResponse enumRsp = Connection.SendCommand(enumCmd);
             if (enumRsp.CtapStatus == CtapStatus.PinAuthInvalid)
             {
-                currentToken = GetAuthToken(false, PinUvAuthTokenPermissions.BioEnrollment, null);
+                currentToken = GetAuthToken(
+                    forceNewToken: false, PinUvAuthTokenPermissions.BioEnrollment, relyingPartyId: null);
+
                 enumCmd = new BioEnrollEnumerateCommand(currentToken, AuthProtocol);
                 enumRsp = Connection.SendCommand(enumCmd);
             }
@@ -284,7 +292,7 @@ namespace Yubico.YubiKey.Fido2
 
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.EnrollFingerprint,
+                Request = KeyEntryRequest.EnrollFingerprint
             };
 
             using var fingerprintTask = new TouchFingerprintTask(
@@ -405,12 +413,16 @@ namespace Yubico.YubiKey.Fido2
         /// </exception>
         public void SetBioTemplateFriendlyName(ReadOnlyMemory<byte> templateId, string friendlyName)
         {
-            ReadOnlyMemory<byte> currentToken = GetAuthToken(false, PinUvAuthTokenPermissions.BioEnrollment, null);
+            ReadOnlyMemory<byte> currentToken = GetAuthToken(
+                forceNewToken: false, PinUvAuthTokenPermissions.BioEnrollment, relyingPartyId: null);
+
             var nameCmd = new BioEnrollSetFriendlyNameCommand(templateId, friendlyName, currentToken, AuthProtocol);
             Fido2Response nameRsp = Connection.SendCommand(nameCmd);
             if (nameRsp.CtapStatus == CtapStatus.PinAuthInvalid)
             {
-                currentToken = GetAuthToken(false, PinUvAuthTokenPermissions.BioEnrollment, null);
+                currentToken = GetAuthToken(
+                    forceNewToken: false, PinUvAuthTokenPermissions.BioEnrollment, relyingPartyId: null);
+
                 nameCmd = new BioEnrollSetFriendlyNameCommand(templateId, friendlyName, currentToken, AuthProtocol);
                 nameRsp = Connection.SendCommand(nameCmd);
             }
@@ -435,12 +447,16 @@ namespace Yubico.YubiKey.Fido2
         /// </returns>
         public bool TryRemoveBioTemplate(ReadOnlyMemory<byte> templateId)
         {
-            ReadOnlyMemory<byte> currentToken = GetAuthToken(false, PinUvAuthTokenPermissions.BioEnrollment, null);
+            ReadOnlyMemory<byte> currentToken = GetAuthToken(
+                forceNewToken: false, PinUvAuthTokenPermissions.BioEnrollment, relyingPartyId: null);
+
             var removeCmd = new BioEnrollRemoveCommand(templateId, currentToken, AuthProtocol);
             Fido2Response removeRsp = Connection.SendCommand(removeCmd);
             if (removeRsp.CtapStatus == CtapStatus.PinAuthInvalid)
             {
-                currentToken = GetAuthToken(false, PinUvAuthTokenPermissions.BioEnrollment, null);
+                currentToken = GetAuthToken(
+                    forceNewToken: false, PinUvAuthTokenPermissions.BioEnrollment, relyingPartyId: null);
+
                 removeCmd = new BioEnrollRemoveCommand(templateId, currentToken, AuthProtocol);
                 removeRsp = Connection.SendCommand(removeCmd);
             }

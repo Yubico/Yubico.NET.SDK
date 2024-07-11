@@ -67,14 +67,12 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu()
-        {
-            return new CommandApdu
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
             {
                 Ins = PivMetadataInstruction,
-                P2 = OnCardComparisonAuthenticationSlot,
+                P2 = OnCardComparisonAuthenticationSlot
             };
-        }
 
         /// <inheritdoc />
         public GetBioMetadataResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

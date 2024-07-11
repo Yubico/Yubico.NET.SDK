@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             _command = new ClientPinCommand()
             {
-                SubCommand = SubCmdGetKeyAgreement,
+                SubCommand = SubCmdGetKeyAgreement
             };
         }
 

@@ -100,6 +100,6 @@ namespace Yubico.YubiKey.Piv
         /// &gt; You should not set a YubiKey for PIN-derived, this feature is
         /// &gt; provided only for backwards compatibility.
         /// </summary>
-        PinDerived = 8,
+        PinDerived = 8
     }
 }

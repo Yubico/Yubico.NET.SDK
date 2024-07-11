@@ -45,7 +45,7 @@ namespace Yubico.YubiKey.Oath.Commands
         public CommandApdu CreateCommandApdu() =>
             new CommandApdu()
             {
-                Ins = ListInstruction,
+                Ins = ListInstruction
             };
 
         /// <inheritdoc />

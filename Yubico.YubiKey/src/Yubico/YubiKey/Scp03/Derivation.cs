@@ -56,8 +56,8 @@ namespace Yubico.YubiKey.Scp03
             // This is the output length.
             macInp[14] = outputLenBits;
             macInp[15] = 1;
-            hostChallenge.CopyTo(macInp, 16);
-            cardChallenge.CopyTo(macInp, 24);
+            hostChallenge.CopyTo(macInp, index: 16);
+            cardChallenge.CopyTo(macInp, index: 24);
 
             byte[] cmac = new byte[16];
             using ICmacPrimitives cmacObj =
@@ -73,7 +73,7 @@ namespace Yubico.YubiKey.Scp03
             }
 
             byte[] smallerResult = new byte[8];
-            Array.Copy(cmac, 0, smallerResult, 0, 8);
+            Array.Copy(cmac, sourceIndex: 0, smallerResult, destinationIndex: 0, length: 8);
             CryptographicOperations.ZeroMemory(cmac.AsSpan());
             return smallerResult;
         }
@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.Scp03
             byte[] key,
             byte[] hostChallenge,
             byte[] cardChallenge) =>
-            Derive(dataDerivationConstant, 0x40, key, hostChallenge, cardChallenge);
+            Derive(dataDerivationConstant, outputLenBits: 0x40, key, hostChallenge, cardChallenge);
 
         public static SessionKeys DeriveSessionKeysFromStaticKeys(
             StaticKeys staticKeys,
@@ -105,9 +105,9 @@ namespace Yubico.YubiKey.Scp03
                 // is not exactly 8 bytes. In that case, the first call would
                 // fail before generating a result, so there will be no data to
                 // overwrite.
-                byte[] SMAC = Derive(DDC_SMAC, 0x80, macKey, hostChallenge, cardChallenge);
-                byte[] SENC = Derive(DDC_SENC, 0x80, encKey, hostChallenge, cardChallenge);
-                byte[] SRMAC = Derive(DDC_SRMAC, 0x80, macKey, hostChallenge, cardChallenge);
+                byte[] SMAC = Derive(DDC_SMAC, outputLenBits: 0x80, macKey, hostChallenge, cardChallenge);
+                byte[] SENC = Derive(DDC_SENC, outputLenBits: 0x80, encKey, hostChallenge, cardChallenge);
+                byte[] SRMAC = Derive(DDC_SRMAC, outputLenBits: 0x80, macKey, hostChallenge, cardChallenge);
 
                 return new SessionKeys(SMAC, SENC, SRMAC);
             }

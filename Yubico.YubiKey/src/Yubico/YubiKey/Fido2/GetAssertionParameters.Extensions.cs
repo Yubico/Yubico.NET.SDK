@@ -310,7 +310,7 @@ namespace Yubico.YubiKey.Fido2
                 dataToEncryptLength += HmacSecretSaltLength;
             }
 
-            byte[] encryptedSalt = authProtocol.Encrypt(dataToEncrypt, 0, dataToEncryptLength);
+            byte[] encryptedSalt = authProtocol.Encrypt(dataToEncrypt, offset: 0, dataToEncryptLength);
 
             byte[] authenticatedSalt = authProtocol.Authenticate(encryptedSalt);
 

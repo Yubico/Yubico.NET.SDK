@@ -48,6 +48,6 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// The element is optional.
         /// </summary>
-        Optional = 2,
+        Optional = 2
     }
 }

@@ -145,7 +145,7 @@ namespace Yubico.YubiKey.Piv
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPrivateKeyData)),
+                        ExceptionMessages.InvalidPrivateKeyData))
             };
 
             if (primeQ.Length != primeP.Length || exponentP.Length != primeP.Length

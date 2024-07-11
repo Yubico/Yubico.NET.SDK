@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Piv
                 PivAlgorithm.Rsa4096 => true,
                 PivAlgorithm.EccP256 => true,
                 PivAlgorithm.EccP384 => true,
-                _ => false,
+                _ => false
             };
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.Piv
                 PivAlgorithm.EccP384 => 384,
                 PivAlgorithm.TripleDes => 192,
                 PivAlgorithm.Pin => 64,
-                _ => 0,
+                _ => 0
             };
 
         /// <summary>
@@ -149,7 +149,7 @@ namespace Yubico.YubiKey.Piv
                 PivAlgorithm.Rsa2048 => true,
                 PivAlgorithm.Rsa3072 => true,
                 PivAlgorithm.Rsa4096 => true,
-                _ => false,
+                _ => false
             };
 
         /// <summary>
@@ -180,7 +180,7 @@ namespace Yubico.YubiKey.Piv
             {
                 PivAlgorithm.EccP256 => true,
                 PivAlgorithm.EccP384 => true,
-                _ => false,
+                _ => false
             };
     }
 }

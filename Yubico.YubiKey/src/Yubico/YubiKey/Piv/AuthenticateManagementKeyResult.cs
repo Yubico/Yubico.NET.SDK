@@ -86,6 +86,6 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication, Off-Card app authenticated, the YubiKey
         /// authenticated.
         /// </summary>
-        MutualFullyAuthenticated = 5,
+        MutualFullyAuthenticated = 5
     }
 }

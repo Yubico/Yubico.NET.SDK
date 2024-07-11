@@ -189,7 +189,7 @@ namespace Yubico.YubiKey.Piv.Commands
             Status switch
             {
                 ResponseStatus.Success => PivPublicKey.Create(ResponseApdu.Data),
-                _ => throw new InvalidOperationException(StatusMessage),
+                _ => throw new InvalidOperationException(StatusMessage)
             };
     }
 }

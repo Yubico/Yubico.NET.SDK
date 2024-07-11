@@ -141,7 +141,7 @@ namespace Yubico.YubiKey.Piv.Objects
             if (IsValidKeyLength(managementKey.Length))
             {
                 managementKey.CopyTo(_mgmtKey);
-                ManagementKey = _mgmtKey.Slice(0, managementKey.Length);
+                ManagementKey = _mgmtKey.Slice(start: 0, managementKey.Length);
                 return;
             }
 
@@ -232,7 +232,7 @@ namespace Yubico.YubiKey.Piv.Objects
                     0 => tlvReader.TryReadNestedTlv(out tlvReader, EncodingTag),
                     1 => tlvReader.TryReadNestedTlv(out tlvReader, PinProtectedTag),
                     2 => tlvReader.TryReadValue(out mgmtKey, MgmtKeyTag),
-                    _ => false,
+                    _ => false
                 };
 
                 count++;
@@ -241,7 +241,7 @@ namespace Yubico.YubiKey.Piv.Objects
             if (IsValidKeyLength(mgmtKey.Length))
             {
                 mgmtKey.CopyTo(_mgmtKey);
-                ManagementKey = _mgmtKey.Slice(0, mgmtKey.Length);
+                ManagementKey = _mgmtKey.Slice(start: 0, mgmtKey.Length);
             }
             else
             {

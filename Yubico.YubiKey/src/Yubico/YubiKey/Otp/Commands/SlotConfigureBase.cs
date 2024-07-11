@@ -264,8 +264,8 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             if (CalculateCrc)
             {
-                short crc = (short)~Crc13239.Calculate(ConfigurationBuffer.Slice(0, CrcOffset));
-                BinaryPrimitives.WriteInt16LittleEndian(ConfigurationBuffer.Slice(CrcOffset, 2), crc);
+                short crc = (short)~Crc13239.Calculate(ConfigurationBuffer.Slice(start: 0, CrcOffset));
+                BinaryPrimitives.WriteInt16LittleEndian(ConfigurationBuffer.Slice(CrcOffset, length: 2), crc);
             }
 
             return new CommandApdu()

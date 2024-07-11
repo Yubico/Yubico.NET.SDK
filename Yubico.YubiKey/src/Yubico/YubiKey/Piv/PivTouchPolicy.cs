@@ -46,6 +46,6 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// The touch policy is the default for the YubiKey.
         /// </summary>
-        Default = 32,
+        Default = 32
     }
 }

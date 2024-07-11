@@ -61,6 +61,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// Allow the auth token to be used with the Config command. The relying party ID parameter is ignored for this
         /// permission.
         /// </summary>
-        AuthenticatorConfiguration = 0x20,
+        AuthenticatorConfiguration = 0x20
     }
 }

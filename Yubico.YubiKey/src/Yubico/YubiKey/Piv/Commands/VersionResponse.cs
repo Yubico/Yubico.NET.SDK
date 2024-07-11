@@ -89,7 +89,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 {
                     ResponseClass = nameof(VersionResponse),
                     ExpectedDataLength = VersionLength,
-                    ActualDataLength = ResponseApdu.Data.Length,
+                    ActualDataLength = ResponseApdu.Data.Length
                 };
             }
 

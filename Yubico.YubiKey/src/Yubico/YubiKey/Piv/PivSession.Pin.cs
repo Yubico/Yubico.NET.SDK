@@ -133,7 +133,7 @@ namespace Yubico.YubiKey.Piv
 
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.VerifyPivPin,
+                Request = KeyEntryRequest.VerifyPivPin
             };
 
             try
@@ -544,7 +544,8 @@ namespace Yubico.YubiKey.Piv
             // verified/authenticated.
             if (TryGetChangePinMode(pin, out PivPinOnlyMode mode, out retriesRemaining))
             {
-                if (ManagementKeyAuthenticated || TryAuthenticateManagementKey(managementKey, true))
+                if (ManagementKeyAuthenticated ||
+                    TryAuthenticateManagementKey(managementKey, mutualAuthentication: true))
                 {
                     if (PinVerified || TryVerifyPin(pin, out retriesRemaining))
                     {
@@ -1285,7 +1286,7 @@ namespace Yubico.YubiKey.Piv
 
             var keyEntryData = new KeyEntryData()
             {
-                Request = request,
+                Request = request
             };
 
             try

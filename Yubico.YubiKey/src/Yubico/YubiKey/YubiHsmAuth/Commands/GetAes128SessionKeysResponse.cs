@@ -98,7 +98,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                 throw new MalformedYubiKeyResponseException();
             }
 
-            SessionKeys keys = new SessionKeys(
+            var keys = new SessionKeys(
                 ResponseApdu.Data.Slice(encStart, keyLength),
                 ResponseApdu.Data.Slice(macStart, keyLength),
                 ResponseApdu.Data.Slice(rmacStart, keyLength));

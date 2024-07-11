@@ -44,6 +44,6 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// Identifier for PIN/UV auth protocol 2. This protocol contains certain provisions that make it more applicable
         /// to FIPS certified YubiKeys.
         /// </summary>
-        ProtocolTwo = 2,
+        ProtocolTwo = 2
     }
 }

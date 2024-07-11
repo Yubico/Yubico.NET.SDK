@@ -187,7 +187,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 {
                     EqualKeyOneAndTwo => BuildDes(keyData, KeyOffsetThird),
                     EqualKeyTwoAndThree => BuildDes(keyData, KeyOffsetFirst),
-                    _ => BuildTripleDes(keyData),
+                    _ => BuildTripleDes(keyData)
                 };
             }
             finally
@@ -261,17 +261,17 @@ namespace Yubico.YubiKey.Piv.Commands
 
             if (IsEncrypting)
             {
-                return tripleDesObject.CreateEncryptor(keyData, null);
+                return tripleDesObject.CreateEncryptor(keyData, rgbIV: null);
             }
 
-            return tripleDesObject.CreateDecryptor(keyData, null);
+            return tripleDesObject.CreateDecryptor(keyData, rgbIV: null);
         }
 
         // Build this object to use DES with the given key.
         private ICryptoTransform BuildDes(byte[] threeKeyData, int offset)
         {
             byte[] keyData = new byte[ValidDesKeyLength];
-            Array.Copy(threeKeyData, offset, keyData, 0, ValidDesKeyLength);
+            Array.Copy(threeKeyData, offset, keyData, destinationIndex: 0, ValidDesKeyLength);
 
             try
             {
@@ -291,10 +291,10 @@ namespace Yubico.YubiKey.Piv.Commands
 
                 if (IsEncrypting)
                 {
-                    return desObject.CreateEncryptor(keyData, null);
+                    return desObject.CreateEncryptor(keyData, rgbIV: null);
                 }
 
-                return desObject.CreateDecryptor(keyData, null);
+                return desObject.CreateDecryptor(keyData, rgbIV: null);
             }
             finally
             {
@@ -354,21 +354,21 @@ namespace Yubico.YubiKey.Piv.Commands
                 #pragma warning disable CA5390 // Justification: In this case, allow to use the hard-code keys
                 if (IsEncrypting)
                 {
-                    Array.Copy(keyData, 0, threeKeyData, 0, ValidDesKeyLength);
+                    Array.Copy(keyData, sourceIndex: 0, threeKeyData, destinationIndex: 0, ValidDesKeyLength);
 
-                    _cryptoTransformA = desObject.CreateEncryptor(keyDataA, null);
-                    _cryptoTransformB = desObject.CreateDecryptor(keyDataB, null);
-                    return tripleDesObject.CreateEncryptor(threeKeyData, null);
+                    _cryptoTransformA = desObject.CreateEncryptor(keyDataA, rgbIV: null);
+                    _cryptoTransformB = desObject.CreateDecryptor(keyDataB, rgbIV: null);
+                    return tripleDesObject.CreateEncryptor(threeKeyData, rgbIV: null);
                 }
 
                 // Because decryption operates "in reverse", the third key will
                 // be used in the first use of DES. So copy the target key to the
                 // third position.
-                Array.Copy(keyData, 0, threeKeyData, KeyOffsetThird, ValidDesKeyLength);
+                Array.Copy(keyData, sourceIndex: 0, threeKeyData, KeyOffsetThird, ValidDesKeyLength);
 
-                _cryptoTransformA = desObject.CreateDecryptor(keyDataA, null);
-                _cryptoTransformB = desObject.CreateEncryptor(keyDataB, null);
-                return tripleDesObject.CreateDecryptor(threeKeyData, null);
+                _cryptoTransformA = desObject.CreateDecryptor(keyDataA, rgbIV: null);
+                _cryptoTransformB = desObject.CreateEncryptor(keyDataB, rgbIV: null);
+                return tripleDesObject.CreateDecryptor(threeKeyData, rgbIV: null);
                 #pragma warning restore CA5390
             }
             finally
@@ -417,7 +417,7 @@ namespace Yubico.YubiKey.Piv.Commands
         private static int CheckForEqualKeys(ReadOnlySpan<byte> keyData)
         {
             if (MemoryExtensions.SequenceEqual(
-                    keyData.Slice(0, ValidDesKeyLength),
+                    keyData.Slice(start: 0, ValidDesKeyLength),
                     keyData.Slice(KeyOffsetSecond, ValidDesKeyLength)))
             {
                 return EqualKeyOneAndTwo;

@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Pipelines
                     Ctap1Message => new ResponseApdu(responseData),
                     CtapHidCbor => CtapToApduResponse.ToCtap2ResponseApdu(responseData),
                     CtapError => CtapToApduResponse.ToCtap1ResponseApdu(responseData),
-                    _ => new ResponseApdu(responseData, SWConstants.Success),
+                    _ => new ResponseApdu(responseData, SWConstants.Success)
                 };
 
             return responseApdu;
@@ -135,7 +135,7 @@ namespace Yubico.YubiKey.Pipelines
         // This function applies a mask to remove the initial frame identifier (0x80)
         private static byte GetPacketCmd(byte[] packet) => (byte)(packet[4] & ~0x80);
 
-        private static int GetPacketBcnt(byte[] packet) => (packet[5] << 8) | packet[6];
+        private static int GetPacketBcnt(byte[] packet) => packet[5] << 8 | packet[6];
 
         private byte[] TransmitCommand(uint channelId, byte commandByte, byte[] data, out byte responseByte)
         {
@@ -158,7 +158,7 @@ namespace Yubico.YubiKey.Pipelines
             bool requestFitsInInit = data.Length <= InitDataSize;
             ReadOnlySpan<byte> dataInInitPacket = requestFitsInInit
                 ? data
-                : data.Slice(0, InitDataSize);
+                : data.Slice(start: 0, InitDataSize);
 
             _hidConnection.SetReport(ConstructInitPacket(channelId, commandByte, dataInInitPacket, data.Length));
 
@@ -217,7 +217,7 @@ namespace Yubico.YubiKey.Pipelines
                 if (!(QueryCancel is null) && QueryCancel(commandByte))
                 {
                     _hidConnection.SetReport(
-                        ConstructInitPacket(channelId, CtapHidCancelCmd, ReadOnlySpan<byte>.Empty, 0));
+                        ConstructInitPacket(channelId, CtapHidCancelCmd, ReadOnlySpan<byte>.Empty, totalDataLength: 0));
 
                     QueryCancel = null;
                 }
@@ -269,14 +269,14 @@ namespace Yubico.YubiKey.Pipelines
             rng.GetBytes(nonce);
             byte[] response = TransmitCommand(CtapHidBroadcastChannelId, CtapHidInitCmd, nonce, out _);
 
-            Span<byte> receivedNonce = response.AsSpan(0, 8);
+            Span<byte> receivedNonce = response.AsSpan(start: 0, length: 8);
 
             if (!nonce.AsSpan().SequenceEqual(receivedNonce))
             {
                 throw new MalformedYubiKeyResponseException(ExceptionMessages.Ctap2MalformedResponse);
             }
 
-            uint cid = BinaryPrimitives.ReadUInt32BigEndian(response.AsSpan(8, 4));
+            uint cid = BinaryPrimitives.ReadUInt32BigEndian(response.AsSpan(start: 8, length: 4));
 
             _channelId = cid;
         }

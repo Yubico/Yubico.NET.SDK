@@ -67,7 +67,7 @@ namespace Yubico.YubiKey.Otp.Commands
                 };
             }
 
-            return BinaryPrimitives.ReadInt32BigEndian(ResponseApdu.Data.Slice(0, SerialNumberLength).Span);
+            return BinaryPrimitives.ReadInt32BigEndian(ResponseApdu.Data.Slice(start: 0, SerialNumberLength).Span);
         }
     }
 }

@@ -72,11 +72,11 @@ namespace Yubico.YubiKey.Pipelines
 
             switch (commandApdu.Ins)
             {
-                case Otp.OtpConstants.ReadStatusInstruction:
+                case OtpConstants.ReadStatusInstruction:
                     _log.LogInformation("Reading the OTP status.");
                     frameReader.AddStatusReport(new KeyboardReport(_hidConnection.GetReport()));
                     break;
-                case Otp.OtpConstants.RequestSlotInstruction:
+                case OtpConstants.RequestSlotInstruction:
                     bool configInstruction = responseType.IsAssignableFrom(typeof(Otp.Commands.ReadStatusResponse));
                     _log.LogInformation(
                         $"Handling an OTP slot request {commandApdu.P1}. Configuring = {configInstruction}");
@@ -227,7 +227,7 @@ namespace Yubico.YubiKey.Pipelines
                 ? 2
                 : 1;
 
-            Stopwatch stopwatch = Stopwatch.StartNew();
+            var stopwatch = Stopwatch.StartNew();
 
             while (stopwatch.ElapsedMilliseconds < timeLimitMs)
             {
@@ -267,7 +267,7 @@ namespace Yubico.YubiKey.Pipelines
             var resetReport = new KeyboardReport()
             {
                 Flags = KeyboardReportFlags.WritePending,
-                SequenceNumber = 0xF,
+                SequenceNumber = 0xF
             };
 
             _log.LogInformation("Reset read mode [{Report}]", resetReport);

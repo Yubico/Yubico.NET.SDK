@@ -362,7 +362,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                 throw new ArgumentNullException(nameof(pinToken));
             }
 
-            return AuthenticateUsingPinToken(pinToken, 0, pinToken.Length, message);
+            return AuthenticateUsingPinToken(pinToken, offset: 0, pinToken.Length, message);
         }
 
         /// <summary>

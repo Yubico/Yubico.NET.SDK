@@ -93,16 +93,13 @@ namespace Yubico.YubiKey
 
         public byte[] ToArray() => _reportBuffer.ToArray();
 
-        private Span<byte> PayloadSpan() => _reportBuffer.Slice(0, 7).Span;
+        private Span<byte> PayloadSpan() => _reportBuffer.Slice(start: 0, length: 7).Span;
 
-        public override string ToString()
-        {
-            return
-                $"TouchPending: {TouchPending}, " +
-                $"ReadPending: {ReadPending}, " +
-                $"WritePending: {WritePending}, " +
-                $"SequenceNumber: {SequenceNumber}, " +
-                $"Payload: {BitConverter.ToString(PayloadSpan().ToArray())}";
-        }
+        public override string ToString() =>
+            $"TouchPending: {TouchPending}, " +
+            $"ReadPending: {ReadPending}, " +
+            $"WritePending: {WritePending}, " +
+            $"SequenceNumber: {SequenceNumber}, " +
+            $"Payload: {BitConverter.ToString(PayloadSpan().ToArray())}";
     }
 }

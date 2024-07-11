@@ -138,7 +138,10 @@ namespace Yubico.YubiKey.Otp.Operations
                     kb.TouchEvent += OnTouch;
                 }
 
-                void OnTouch(object sender, EventArgs e) => _ = Task.Run(_touchNotify);
+                void OnTouch(object sender, EventArgs e)
+                {
+                    _ = Task.Run(_touchNotify);
+                }
 
                 try
                 {
@@ -224,8 +227,8 @@ namespace Yubico.YubiKey.Otp.Operations
                 throw new ArgumentOutOfRangeException(ExceptionMessages.OtpCodeDigitRange, nameof(digits));
             }
 
-            return (GetDataInt() % (uint)Math.Pow(10, digits))
-                .ToString(CultureInfo.InvariantCulture).PadLeft(digits, '0');
+            return (GetDataInt() % (uint)Math.Pow(x: 10, digits))
+                .ToString(CultureInfo.InvariantCulture).PadLeft(digits, paddingChar: '0');
         }
 
         /// <summary>

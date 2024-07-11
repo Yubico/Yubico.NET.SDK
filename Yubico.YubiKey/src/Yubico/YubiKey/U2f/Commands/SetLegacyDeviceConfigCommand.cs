@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.U2f.Commands
             new CommandApdu
             {
                 Ins = DeviceConfigurationInstruction,
-                Data = GetDataForApdu(),
+                Data = GetDataForApdu()
             };
 
         /// <inheritdoc/>

@@ -395,7 +395,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 Ins = AuthMgmtKeyInstruction,
                 P1 = (byte)Algorithm,
                 P2 = AuthMgmtKeyParameter2,
-                Data = _data,
+                Data = _data
             };
 
         /// <inheritdoc />

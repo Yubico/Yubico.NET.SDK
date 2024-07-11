@@ -168,7 +168,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 Ins = PivResetRetryInstruction,
                 P2 = PivSlot.Pin,
-                Data = PivPinUtilities.CopyTwoPinsWithPadding(_puk, _newPin),
+                Data = PivPinUtilities.CopyTwoPinsWithPadding(_puk, _newPin)
             };
 
         /// <inheritdoc />

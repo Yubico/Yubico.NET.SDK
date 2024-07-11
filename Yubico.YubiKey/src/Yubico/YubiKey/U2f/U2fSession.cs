@@ -315,7 +315,7 @@ namespace Yubico.YubiKey.U2f
             TimeSpan timeout)
         {
             _log.LogInformation("Register a new U2F credential.");
-            RegisterResponse response = CommonRegister(applicationId, clientDataHash, timeout, true);
+            RegisterResponse response = CommonRegister(applicationId, clientDataHash, timeout, throwOnCancel: true);
 
             // If everything worked, this will return the correct result. If
             // there was an error, this will throw an exception.
@@ -424,7 +424,7 @@ namespace Yubico.YubiKey.U2f
             [MaybeNullWhen(returnValue: false)] out RegistrationData registrationData)
         {
             _log.LogInformation("Try to register a new U2F credential.");
-            RegisterResponse response = CommonRegister(applicationId, clientDataHash, timeout, false);
+            RegisterResponse response = CommonRegister(applicationId, clientDataHash, timeout, throwOnCancel: false);
 
             if (response.Status == ResponseStatus.Success)
             {

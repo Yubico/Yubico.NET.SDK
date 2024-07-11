@@ -33,6 +33,6 @@ namespace Yubico.YubiKey.Otp
         /// Identifier for the Capability Container file. 
         /// This file is described in the NFC Forum Tag Type 4 specification.
         /// </summary>
-        CapabilityContainer = unchecked((short)0xE103),
+        CapabilityContainer = unchecked((short)0xE103)
     }
 }

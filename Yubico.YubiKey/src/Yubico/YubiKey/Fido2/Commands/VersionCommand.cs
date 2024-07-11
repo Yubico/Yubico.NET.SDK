@@ -64,7 +64,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             byte[] payload = new byte[8];
 
-            _rng.GetBytes(payload, 0, 8);
+            _rng.GetBytes(payload, offset: 0, count: 8);
 
             return new CommandApdu()
             {

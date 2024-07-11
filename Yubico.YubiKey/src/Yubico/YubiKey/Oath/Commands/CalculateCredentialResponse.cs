@@ -34,7 +34,7 @@ namespace Yubico.YubiKey.Oath.Commands
             {
                 OathSWConstants.NoSuchObject => new ResponseStatusPair(
                     ResponseStatus.NoData, ResponseStatusMessages.OathNoSuchObject),
-                _ => base.StatusCodeMap,
+                _ => base.StatusCodeMap
             };
 
         /// <summary>
@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 _ => throw new MalformedYubiKeyResponseException()
                 {
                     ResponseClass = nameof(CalculateCredentialResponse),
-                    ActualDataLength = ResponseApdu.Data.Length,
+                    ActualDataLength = ResponseApdu.Data.Length
                 }
             };
 
@@ -94,7 +94,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 throw new MalformedYubiKeyResponseException()
                 {
                     ResponseClass = nameof(CalculateCredentialResponse),
-                    ActualDataLength = ResponseApdu.Data.Length,
+                    ActualDataLength = ResponseApdu.Data.Length
                 };
             }
 
@@ -102,8 +102,8 @@ namespace Yubico.YubiKey.Oath.Commands
             Credential.Digits = digits;
 
             uint otpValue = BinaryPrimitives.ReadUInt32BigEndian(bytes.Slice(1).Span);
-            otpValue %= (uint)Math.Pow(10, digits);
-            string response = otpValue.ToString(CultureInfo.InvariantCulture).PadLeft(digits, '0');
+            otpValue %= (uint)Math.Pow(x: 10, digits);
+            string response = otpValue.ToString(CultureInfo.InvariantCulture).PadLeft(digits, paddingChar: '0');
 
             if (Credential.Period is null)
             {

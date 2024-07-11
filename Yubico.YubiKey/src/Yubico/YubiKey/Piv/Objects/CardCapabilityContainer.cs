@@ -434,18 +434,18 @@ namespace Yubico.YubiKey.Piv.Objects
         private Tuple<int, int, byte>[] GetFixedTupleArray() =>
             new Tuple<int, int, byte>[]
             {
-                new Tuple<int, int, byte>(ContainerVersionTag, 1, ContainerVersionNumber),
-                new Tuple<int, int, byte>(GrammarVersionTag, 1, GrammarVersionNumber),
-                new Tuple<int, int, byte>(UnusedTag1, 0, 0),
-                new Tuple<int, int, byte>(Pkcs15Tag, 1, Pkcs15Version),
-                new Tuple<int, int, byte>(DataModelTag, 1, DataModelNumber),
-                new Tuple<int, int, byte>(UnusedTag2, 0, 0),
-                new Tuple<int, int, byte>(UnusedTag3, 0, 0),
-                new Tuple<int, int, byte>(UnusedTag4, 0, 0),
-                new Tuple<int, int, byte>(UnusedTag5, 0, 0),
-                new Tuple<int, int, byte>(UnusedTag6, 0, 0),
-                new Tuple<int, int, byte>(UnusedTag7, 0, 0),
-                new Tuple<int, int, byte>(UnusedTag8, 0, 0)
+                new Tuple<int, int, byte>(ContainerVersionTag, item2: 1, ContainerVersionNumber),
+                new Tuple<int, int, byte>(GrammarVersionTag, item2: 1, GrammarVersionNumber),
+                new Tuple<int, int, byte>(UnusedTag1, item2: 0, item3: 0),
+                new Tuple<int, int, byte>(Pkcs15Tag, item2: 1, Pkcs15Version),
+                new Tuple<int, int, byte>(DataModelTag, item2: 1, DataModelNumber),
+                new Tuple<int, int, byte>(UnusedTag2, item2: 0, item3: 0),
+                new Tuple<int, int, byte>(UnusedTag3, item2: 0, item3: 0),
+                new Tuple<int, int, byte>(UnusedTag4, item2: 0, item3: 0),
+                new Tuple<int, int, byte>(UnusedTag5, item2: 0, item3: 0),
+                new Tuple<int, int, byte>(UnusedTag6, item2: 0, item3: 0),
+                new Tuple<int, int, byte>(UnusedTag7, item2: 0, item3: 0),
+                new Tuple<int, int, byte>(UnusedTag8, item2: 0, item3: 0)
             };
 
         private void Clear()

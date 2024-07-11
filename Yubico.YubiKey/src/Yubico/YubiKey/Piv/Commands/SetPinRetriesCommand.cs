@@ -192,7 +192,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 Ins = PivSetPinRetriesInstruction,
                 P1 = _pinRetryCount,
-                P2 = _pukRetryCount,
+                P2 = _pukRetryCount
             };
 
         /// <inheritdoc />

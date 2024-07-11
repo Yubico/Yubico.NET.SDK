@@ -392,7 +392,7 @@ namespace Yubico.YubiKey.Piv
                             ExceptionMessages.InvalidDataEncoding));
                 }
 
-                var putCommand = new PutDataCommand(MsrootsTag + index, encoding.Slice(0, bytesWritten));
+                var putCommand = new PutDataCommand(MsrootsTag + index, encoding.Slice(start: 0, bytesWritten));
                 PutDataResponse putResponse = Connection.SendCommand(putCommand);
                 if (putResponse.Status != ResponseStatus.Success)
                 {

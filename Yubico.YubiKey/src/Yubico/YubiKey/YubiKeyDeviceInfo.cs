@@ -252,7 +252,7 @@ namespace Yubico.YubiKey
                         // Ignore these tags for now
                         break;
                     default:
-                        Debug.Assert(false, "Encountered an unrecognized tag in DeviceInfo. Ignoring.");
+                        Debug.Assert(condition: false, "Encountered an unrecognized tag in DeviceInfo. Ignoring.");
                         break;
                 }
             }
@@ -329,7 +329,7 @@ namespace Yubico.YubiKey
 
                 IsNfcRestricted = IsNfcRestricted || second.IsNfcRestricted,
                 PartNumber = PartNumber ?? second.PartNumber,
-                IsPinComplexityEnabled = IsPinComplexityEnabled || second.IsPinComplexityEnabled,
+                IsPinComplexityEnabled = IsPinComplexityEnabled || second.IsPinComplexityEnabled
             };
         }
 

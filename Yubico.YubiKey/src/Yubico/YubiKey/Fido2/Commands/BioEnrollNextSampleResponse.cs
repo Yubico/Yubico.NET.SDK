@@ -73,7 +73,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             {
                 CtapStatus.ErrOther => new ResponseStatusPair(
                     ResponseStatus.Failed, ResponseStatusMessages.Fido2OperationCanceled),
-                _ => base.StatusCodeMap,
+                _ => base.StatusCodeMap
             };
     }
 }

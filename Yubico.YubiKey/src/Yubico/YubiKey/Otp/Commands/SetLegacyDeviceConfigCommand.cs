@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.Otp.Commands
             {
                 Ins = OtpConstants.RequestSlotInstruction,
                 P1 = OtpConstants.WriteDeviceConfig,
-                Data = GetDataForApdu(),
+                Data = GetDataForApdu()
             };
 
         /// <inheritdoc />

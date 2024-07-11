@@ -433,7 +433,7 @@ namespace Yubico.YubiKey.Piv
                 // The only other case is Always which means we set the
                 // pinRequired to true, but we init that variable to true.
                 if (metadata.PinPolicy == PivPinPolicy.Never ||
-                    (metadata.PinPolicy == PivPinPolicy.Once && PinVerified))
+                    metadata.PinPolicy == PivPinPolicy.Once && PinVerified)
                 {
                     pinRequired = false;
                 }

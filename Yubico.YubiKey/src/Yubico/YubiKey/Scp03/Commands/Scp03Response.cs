@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Scp03.Commands
         {
         }
 
-        public virtual new ResponseStatus Status =>
+        public new virtual ResponseStatus Status =>
             StatusWord switch
             {
                 SWConstants.Success => ResponseStatus.Success,

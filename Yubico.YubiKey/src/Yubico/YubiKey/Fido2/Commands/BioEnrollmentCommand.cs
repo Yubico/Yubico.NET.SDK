@@ -185,12 +185,12 @@ namespace Yubico.YubiKey.Fido2.Commands
             byte[] message = new byte[length + 2];
             message[0] = FingerprintValue;
             message[1] = (byte)subCommand;
-            subCommandParams?.CopyTo(message, 2);
+            subCommandParams?.CopyTo(message, index: 2);
 
             // The pinUvAuthToken is an encrypted value, so there's no need to
             // overwrite the array.
             byte[] authParam = authProtocol.AuthenticateUsingPinToken(pinUvAuthToken.ToArray(), message);
-            PinUvAuthParam = new ReadOnlyMemory<byte>(authParam, 0, 16);
+            PinUvAuthParam = new ReadOnlyMemory<byte>(authParam, start: 0, length: 16);
             PinUvAuthProtocol = authProtocol.Protocol;
         }
 

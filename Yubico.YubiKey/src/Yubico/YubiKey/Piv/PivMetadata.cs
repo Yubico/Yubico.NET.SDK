@@ -188,7 +188,7 @@ namespace Yubico.YubiKey.Piv
                     case AlgorithmTag:
                         // Algorithm
                         // One byte, no more, no less.
-                        ThrowIfNotLength(value, 1);
+                        ThrowIfNotLength(value, length: 1);
                         bool isKnownAlgorithm = Enum.IsDefined(typeof(PivAlgorithm), (PivAlgorithm)value.Span[0]);
                         Debug.Assert(isKnownAlgorithm);
                         Algorithm = (PivAlgorithm)value.Span[0];
@@ -198,7 +198,7 @@ namespace Yubico.YubiKey.Piv
                     case PolicyTag:
                         // Policy: PIN and touch policy
                         // Two bytes, no more, no less.
-                        ThrowIfNotLength(value, 2);
+                        ThrowIfNotLength(value, length: 2);
                         Debug.Assert(value.Span[0] >= 0 && value.Span[0] <= 3);
                         Debug.Assert(value.Span[1] >= 0 && value.Span[1] <= 3);
 
@@ -226,7 +226,7 @@ namespace Yubico.YubiKey.Piv
                         // Origin: imported or generated
                         // One byte, no more, no less.
                         // 1 means generated, 2 means imported.
-                        ThrowIfNotLength(value, 1);
+                        ThrowIfNotLength(value, length: 1);
                         Debug.Assert(value.Span[0] == 1 || value.Span[0] == 2);
                         KeyStatus = (PivKeyStatus)value.Span[0];
 
@@ -243,7 +243,7 @@ namespace Yubico.YubiKey.Piv
                         // Default: whether the PIN/PUK/Mgmt key is default or not
                         // One byte, no more, no less.
                         // 0 is not default, 1 is default.
-                        ThrowIfNotLength(value, 1);
+                        ThrowIfNotLength(value, length: 1);
 
                         KeyStatus = PivKeyStatus.Default;
 
@@ -258,7 +258,7 @@ namespace Yubico.YubiKey.Piv
                         // Retries: number of PIN or PUK retries, total and
                         // remaining.
                         // Two bytes, no more, no less.
-                        ThrowIfNotLength(value, 2);
+                        ThrowIfNotLength(value, length: 2);
 
                         RetryCount = (int)value.Span[0];
                         RetriesRemaining = (int)value.Span[1];

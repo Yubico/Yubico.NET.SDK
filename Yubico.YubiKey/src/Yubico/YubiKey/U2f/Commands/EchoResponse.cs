@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.U2f.Commands
             Status switch
             {
                 ResponseStatus.Success => ResponseApdu.Data,
-                _ => throw new InvalidOperationException(StatusMessage),
+                _ => throw new InvalidOperationException(StatusMessage)
             };
     }
 }

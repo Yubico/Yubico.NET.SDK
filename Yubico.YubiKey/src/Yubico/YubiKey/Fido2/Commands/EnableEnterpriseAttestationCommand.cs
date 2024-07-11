@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             PinUvAuthProtocolBase authProtocol)
         {
             _command = new ConfigCommand(
-                SubCmdEnableEnterpriseAttestation, null, pinUvAuthToken, authProtocol);
+                SubCmdEnableEnterpriseAttestation, subCommandParams: null, pinUvAuthToken, authProtocol);
         }
 
         /// <inheritdoc />

@@ -353,8 +353,8 @@ namespace Yubico.YubiKey.Piv
             using (tlvWriter.WriteNestedTlv(PivEncodingTag))
             {
                 tlvWriter.WriteValue(PivCertTag, certDer);
-                tlvWriter.WriteByte(PivCompressionTag, 0);
-                tlvWriter.WriteValue(PivLrcTag, null);
+                tlvWriter.WriteByte(PivCompressionTag, value: 0);
+                tlvWriter.WriteValue(PivLrcTag, value: null);
             }
 
             byte[] encodedCert = tlvWriter.Encode();
@@ -452,7 +452,7 @@ namespace Yubico.YubiKey.Piv
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidSlot,
-                        slotNumber)),
+                        slotNumber))
             };
         }
     }

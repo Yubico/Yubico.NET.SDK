@@ -210,6 +210,6 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// Tag for the pairing code reference data.
         /// </summary>
-        PairingCodeReferenceData = 0x005FC123,
+        PairingCodeReferenceData = 0x005FC123
     }
 }

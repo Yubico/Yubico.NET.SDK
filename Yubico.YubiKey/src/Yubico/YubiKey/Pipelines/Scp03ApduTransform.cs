@@ -140,10 +140,7 @@ namespace Yubico.YubiKey.Pipelines
 
         // There is a call to cleanup and a call to Dispose. The cleanup only
         // needs to call the cleanup on the local APDU Pipeline object.
-        public void Cleanup()
-        {
-            _pipeline.Cleanup();
-        }
+        public void Cleanup() => _pipeline.Cleanup();
 
         public void Dispose()
         {

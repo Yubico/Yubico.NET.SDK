@@ -26,9 +26,9 @@ namespace Yubico.YubiKey.Scp03
                 throw new ArgumentNullException(nameof(payload));
             }
 
-            int paddedLen = ((payload.Length / 16) + 1) * 16;
+            int paddedLen = (payload.Length / 16 + 1) * 16;
             byte[] padded = new byte[paddedLen];
-            payload.CopyTo(padded, 0);
+            payload.CopyTo(padded, index: 0);
             padded[payload.Length] = 0x80;
             return padded;
         }

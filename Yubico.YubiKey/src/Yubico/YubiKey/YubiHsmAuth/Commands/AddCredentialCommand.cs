@@ -113,7 +113,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             new CommandApdu()
             {
                 Ins = AddCredentialInstruction,
-                Data = BuildDataField(),
+                Data = BuildDataField()
             };
 
         /// <inheritdoc/>
@@ -128,7 +128,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// </returns>
         private byte[] BuildDataField()
         {
-            TlvWriter tlvWriter = new TlvWriter();
+            var tlvWriter = new TlvWriter();
             tlvWriter.WriteValue(DataTagConstants.ManagementKey, _managementKey.Span);
             tlvWriter.WriteString(
                 DataTagConstants.Label,
@@ -160,12 +160,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// <param name="tlvWriter">
         /// The writer to use to build the TLV.
         /// </param>
-        private void WriteCredentialPassword(TlvWriter tlvWriter)
-        {
+        private void WriteCredentialPassword(TlvWriter tlvWriter) =>
             tlvWriter.WriteValue(
                 DataTagConstants.Password,
                 _credentialWithSecrets.CredentialPassword.Span);
-        }
 
         /// <summary>
         /// Write key type as a TLV.
@@ -177,12 +175,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// <param name="tlvWriter">
         /// The writer to use to build the TLV.
         /// </param>
-        private void WriteCryptographicKeyType(TlvWriter tlvWriter)
-        {
+        private void WriteCryptographicKeyType(TlvWriter tlvWriter) =>
             tlvWriter.WriteByte(
                 DataTagConstants.CryptographicKeyType,
                 (byte)_credentialWithSecrets.KeyType);
-        }
 
         /// <summary>
         /// Write the key(s) as a TLV.

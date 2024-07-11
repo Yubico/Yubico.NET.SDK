@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             byte[] encodedParams = _params.CborEncode();
             byte[] payload = new byte[encodedParams.Length + 1];
             payload[0] = CtapConstants.CtapGetAssertionCmd;
-            Array.Copy(encodedParams, 0, payload, 1, encodedParams.Length);
+            Array.Copy(encodedParams, sourceIndex: 0, payload, destinationIndex: 1, encodedParams.Length);
             return new CommandApdu()
             {
                 Ins = CtapConstants.CtapHidCbor,

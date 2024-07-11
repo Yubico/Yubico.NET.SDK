@@ -102,7 +102,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
             ReadOnlyMemory<byte> hostChallenge,
             ReadOnlyMemory<byte> hsmDeviceChallenge)
         {
-            GetAes128SessionKeysCommand getKeysCmd =
+            var getKeysCmd =
                 new GetAes128SessionKeysCommand(
                     credentialLabel,
                     credentialPassword,
@@ -241,7 +241,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.AuthenticateYubiHsmAuthCredentialPassword,
+                Request = KeyEntryRequest.AuthenticateYubiHsmAuthCredentialPassword
             };
 
             try

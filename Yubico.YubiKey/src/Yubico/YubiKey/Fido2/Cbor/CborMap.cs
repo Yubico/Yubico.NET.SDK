@@ -220,11 +220,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
         {
             try
             {
-                return Convert.ToInt32(value, null);
+                return Convert.ToInt32(value, provider: null);
             }
             catch (OverflowException overflowException)
             {
-                throw new InvalidCastException(null, overflowException);
+                throw new InvalidCastException(message: null, overflowException);
             }
         }
 
@@ -241,11 +241,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
         {
             try
             {
-                return Convert.ToUInt32(value, null);
+                return Convert.ToUInt32(value, provider: null);
             }
             catch (OverflowException overflowException)
             {
-                throw new InvalidCastException(null, overflowException);
+                throw new InvalidCastException(message: null, overflowException);
             }
         }
 
@@ -258,11 +258,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
         {
             try
             {
-                return Convert.ToInt64(value, null);
+                return Convert.ToInt64(value, provider: null);
             }
             catch (OverflowException overflowException)
             {
-                throw new InvalidCastException(null, overflowException);
+                throw new InvalidCastException(message: null, overflowException);
             }
         }
 
@@ -279,11 +279,11 @@ namespace Yubico.YubiKey.Fido2.Cbor
         {
             try
             {
-                return Convert.ToUInt64(value, null);
+                return Convert.ToUInt64(value, provider: null);
             }
             catch (OverflowException overflowException)
             {
-                throw new InvalidCastException(null, overflowException);
+                throw new InvalidCastException(message: null, overflowException);
             }
         }
 

@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Pipelines
     {
         public int MaxSize { get; internal set; } = 255;
 
-        readonly IApduTransform _pipeline;
+        private readonly IApduTransform _pipeline;
 
         public CommandChainingTransform(IApduTransform pipeline)
         {
@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.Pipelines
             while (!sourceData.IsEmpty)
             {
                 int length = Math.Min(MaxSize, sourceData.Length);
-                ReadOnlyMemory<byte> data = sourceData.Slice(0, length);
+                ReadOnlyMemory<byte> data = sourceData.Slice(start: 0, length);
                 sourceData = sourceData.Slice(length);
 
                 var partialApdu = new CommandApdu

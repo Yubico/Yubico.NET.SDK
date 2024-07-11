@@ -26,7 +26,8 @@ namespace Yubico.YubiKey.YubiHsmAuth
     /// </summary>
     public class Credential
     {
-        private static readonly Encoding _utf8ThrowOnInvalidBytes = new UTF8Encoding(false, true);
+        private static readonly Encoding _utf8ThrowOnInvalidBytes = new UTF8Encoding(
+            encoderShouldEmitUTF8Identifier: false, throwOnInvalidBytes: true);
 
         private CryptographicKeyType _keyType = CryptographicKeyType.None;
         private string _label = string.Empty;

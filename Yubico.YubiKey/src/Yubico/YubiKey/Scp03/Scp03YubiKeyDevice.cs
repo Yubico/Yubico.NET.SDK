@@ -21,7 +21,7 @@ namespace Yubico.YubiKey
         public StaticKeys StaticKeys { get; private set; }
 
         public Scp03YubiKeyDevice(YubiKeyDevice device, StaticKeys staticKeys)
-            : base(device.GetSmartCardDevice(), null, null, device)
+            : base(device.GetSmartCardDevice(), hidKeyboardDevice: null, hidFidoDevice: null, device)
         {
             StaticKeys = staticKeys.GetCopy();
         }

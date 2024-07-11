@@ -243,7 +243,7 @@ namespace Yubico.YubiKey.Fido2
             if (!Format.Equals(PackedString, StringComparison.Ordinal)
                 || !attest.Contains(AlgString) || !attest.Contains(SigString)
                 || attest.Count > MaxAttestationMapCount
-                || (attest.Count == MaxAttestationMapCount && !attest.Contains(X5cString)))
+                || attest.Count == MaxAttestationMapCount && !attest.Contains(X5cString))
             {
                 return false;
             }
@@ -297,10 +297,10 @@ namespace Yubico.YubiKey.Fido2
 
             using SHA256 digester = CryptographyProviders.Sha256Creator();
             _ = digester.TransformBlock(
-                AuthenticatorData.EncodedAuthenticatorData.ToArray(), 0,
-                AuthenticatorData.EncodedAuthenticatorData.Length, null, 0);
+                AuthenticatorData.EncodedAuthenticatorData.ToArray(), inputOffset: 0,
+                AuthenticatorData.EncodedAuthenticatorData.Length, outputBuffer: null, outputOffset: 0);
 
-            _ = digester.TransformFinalBlock(clientDataHash.ToArray(), 0, clientDataHash.Length);
+            _ = digester.TransformFinalBlock(clientDataHash.ToArray(), inputOffset: 0, clientDataHash.Length);
 
             using var ecdsaVfy = new EcdsaVerify(AttestationCertificates[0]);
             return ecdsaVfy.VerifyDigestedData(digester.Hash, AttestationStatement.ToArray());

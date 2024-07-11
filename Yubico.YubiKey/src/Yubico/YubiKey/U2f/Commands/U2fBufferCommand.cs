@@ -61,13 +61,13 @@ namespace Yubico.YubiKey.U2f.Commands
             {
                 Ins = _instruction,
                 P1 = Parameter1,
-                Data = _buffer,
+                Data = _buffer
             };
 
             return new CommandApdu()
             {
                 Ins = Ctap1MessageInstruction,
-                Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength),
+                Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength)
             };
         }
     }

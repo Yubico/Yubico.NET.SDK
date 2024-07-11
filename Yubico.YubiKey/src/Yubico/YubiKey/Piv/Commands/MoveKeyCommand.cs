@@ -79,7 +79,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 Ins = MoveOrDeleteInstruction,
                 P1 = DestinationSlot,
-                P2 = SourceSlot,
+                P2 = SourceSlot
             };
         }
 

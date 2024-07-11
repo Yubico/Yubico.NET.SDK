@@ -63,7 +63,7 @@ namespace Yubico.YubiKey.Otp
         /// <summary>
         /// Reserved for compatibility with the YubiKey 1. (Deprecated).
         /// </summary>
-        [Obsolete(message: "This value is here for compatibility with YubiKey 1.", error: false)]
+        [Obsolete("This value is here for compatibility with YubiKey 1.", error: false)]
         public const byte TicketFirst = 0x02;
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace Yubico.YubiKey.Otp
         /// <summary>
         /// Reserved for compatibility with the YubiKey 1. (Deprecated).
         /// </summary>
-        [Obsolete(message: "This value is here for compatibility with YubiKey 1.", error: false)]
+        [Obsolete("This value is here for compatibility with YubiKey 1.", error: false)]
         public const byte AllowHidTrigger = 0x10;
 
         /// <summary>

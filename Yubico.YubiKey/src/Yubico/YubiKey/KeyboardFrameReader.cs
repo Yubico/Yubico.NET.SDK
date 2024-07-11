@@ -37,7 +37,7 @@ namespace Yubico.YubiKey
         {
             WaitingForTouch = report.TouchPending;
 
-            if ((report.SequenceNumber == 0 && _previousReportNumber != -1) || !report.ReadPending)
+            if (report.SequenceNumber == 0 && _previousReportNumber != -1 || !report.ReadPending)
             {
                 // If this is the second time we're seeing zero as the report number, we are at the
                 // end of a read chain and should not process this record.

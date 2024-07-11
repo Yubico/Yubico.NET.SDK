@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public CommandApdu CreateCommandApdu() =>
             new CommandApdu
             {
-                Ins = PivVersionInstruction,
+                Ins = PivVersionInstruction
             };
 
         /// <inheritdoc />

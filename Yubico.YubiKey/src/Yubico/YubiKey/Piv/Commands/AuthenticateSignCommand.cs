@@ -181,7 +181,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.IncorrectDigestLength)),
+                        ExceptionMessages.IncorrectDigestLength))
             };
         }
 

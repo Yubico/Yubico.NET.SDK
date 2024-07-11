@@ -63,7 +63,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             {
                 CtapStatus.FpDatabaseFull => new ResponseStatusPair(
                     ResponseStatus.Failed, ResponseStatusMessages.BaseNoMoreSpaceInFile),
-                _ => base.StatusCodeMap,
+                _ => base.StatusCodeMap
             };
     }
 }

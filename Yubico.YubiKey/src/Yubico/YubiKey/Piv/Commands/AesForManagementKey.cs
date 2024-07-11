@@ -92,8 +92,8 @@ namespace Yubico.YubiKey.Piv.Commands
                 keyData = managementKey.ToArray();
                 #pragma warning disable CA5401 // Allow null IV because we're in ECB
                 _cryptoTransform = isEncrypting
-                    ? aesObject.CreateEncryptor(keyData, null)
-                    : aesObject.CreateDecryptor(keyData, null);
+                    ? aesObject.CreateEncryptor(keyData, rgbIV: null)
+                    : aesObject.CreateDecryptor(keyData, rgbIV: null);
                 #pragma warning restore CA5401
             }
             finally

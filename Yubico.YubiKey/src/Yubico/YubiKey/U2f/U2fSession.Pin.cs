@@ -111,7 +111,7 @@ namespace Yubico.YubiKey.U2f
 
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.SetU2fPin,
+                Request = KeyEntryRequest.SetU2fPin
             };
 
             try
@@ -182,7 +182,7 @@ namespace Yubico.YubiKey.U2f
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.YubiKeyNotFips)),
-                _ => false,
+                _ => false
             };
         }
 
@@ -289,7 +289,7 @@ namespace Yubico.YubiKey.U2f
 
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.ChangeU2fPin,
+                Request = KeyEntryRequest.ChangeU2fPin
             };
 
             try
@@ -351,7 +351,7 @@ namespace Yubico.YubiKey.U2f
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.YubiKeyNotFips)),
-                _ => false,
+                _ => false
             };
         }
 
@@ -438,7 +438,7 @@ namespace Yubico.YubiKey.U2f
 
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.VerifyU2fPin,
+                Request = KeyEntryRequest.VerifyU2fPin
             };
 
             try
@@ -508,7 +508,7 @@ namespace Yubico.YubiKey.U2f
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.YubiKeyNotFips)),
-                _ => false,
+                _ => false
             };
         }
     }

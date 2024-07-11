@@ -205,10 +205,7 @@ namespace Yubico.YubiKey.Fido2
         /// An <see cref="AuthenticatorInfo"/> instance containing information provided by the YubiKey.
         /// </returns>
         [Obsolete("The GetAuthenticatorInfo method is deprecated, please use the AuthenticatorInfo property instead.")]
-        public AuthenticatorInfo GetAuthenticatorInfo()
-        {
-            return AuthenticatorInfo;
-        }
+        public AuthenticatorInfo GetAuthenticatorInfo() => AuthenticatorInfo;
 
         // Get the AuthenticatorInfo and return it. In addition, set the
         // _authenticatorInfo field with the info so that is is no longer

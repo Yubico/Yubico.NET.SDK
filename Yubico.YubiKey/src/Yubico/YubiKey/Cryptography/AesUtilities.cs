@@ -70,7 +70,7 @@ namespace Yubico.YubiKey.Cryptography
                 {
                     using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
                     {
-                        csEncrypt.Write(plaintext.ToArray(), 0, plaintext.Length);
+                        csEncrypt.Write(plaintext.ToArray(), offset: 0, plaintext.Length);
                         ciphertext = msEncrypt.ToArray();
                     }
                 }
@@ -135,7 +135,7 @@ namespace Yubico.YubiKey.Cryptography
                 {
                     using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
                     {
-                        csEncrypt.Write(plaintext.ToArray(), 0, plaintext.Length);
+                        csEncrypt.Write(plaintext.ToArray(), offset: 0, plaintext.Length);
                         ciphertext = msEncrypt.ToArray();
                     }
                 }
@@ -198,7 +198,7 @@ namespace Yubico.YubiKey.Cryptography
                 {
                     using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Write))
                     {
-                        csDecrypt.Write(ciphertext.ToArray(), 0, ciphertext.Length);
+                        csDecrypt.Write(ciphertext.ToArray(), offset: 0, ciphertext.Length);
                         plaintext = msDecrypt.ToArray();
                     }
                 }

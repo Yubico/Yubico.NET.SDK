@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.U2f.Commands
             {
                 SWConstants.NoPreciseDiagnosis => new ResponseStatusPair(
                     ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.BaseConditionsNotSatisfied),
-                _ => base.StatusCodeMap,
+                _ => base.StatusCodeMap
             };
     }
 }

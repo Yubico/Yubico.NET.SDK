@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Oath.Commands
             {
                 OathSWConstants.NoSuchObject => new ResponseStatusPair(
                     ResponseStatus.Failed, ResponseStatusMessages.OathResponseDoesNotMatch),
-                _ => base.StatusCodeMap,
+                _ => base.StatusCodeMap
             };
 
         /// <summary>

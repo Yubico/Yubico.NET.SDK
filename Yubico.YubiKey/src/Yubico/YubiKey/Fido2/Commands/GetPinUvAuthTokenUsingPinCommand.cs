@@ -143,7 +143,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             byte[] pin = currentPin.ToArray();
             byte[] digest = sha256Object.ComputeHash(pin);
             CryptographicOperations.ZeroMemory(pin);
-            byte[] encryptedPinHash = pinProtocol.Encrypt(digest, 0, PinHashLength);
+            byte[] encryptedPinHash = pinProtocol.Encrypt(digest, offset: 0, PinHashLength);
 
             _command = new ClientPinCommand()
             {
@@ -152,7 +152,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 KeyAgreement = pinProtocol.PlatformPublicKey,
                 PinHashEnc = encryptedPinHash,
                 Permissions = permissions,
-                RpId = rpId,
+                RpId = rpId
             };
         }
 

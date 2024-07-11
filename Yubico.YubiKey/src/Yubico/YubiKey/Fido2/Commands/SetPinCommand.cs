@@ -154,7 +154,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             byte[] dataToEncrypt = new byte[PinBlockLength];
             newPin.CopyTo(dataToEncrypt.AsMemory());
 
-            byte[] encryptedPin = pinProtocol.Encrypt(dataToEncrypt, 0, dataToEncrypt.Length);
+            byte[] encryptedPin = pinProtocol.Encrypt(dataToEncrypt, offset: 0, dataToEncrypt.Length);
             CryptographicOperations.ZeroMemory(dataToEncrypt);
             byte[] pinAuthentication = pinProtocol.Authenticate(encryptedPin);
 
@@ -164,7 +164,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 PinUvAuthProtocol = pinProtocol.Protocol,
                 KeyAgreement = pinProtocol.PlatformPublicKey,
                 NewPinEnc = encryptedPin,
-                PinUvAuthParam = pinAuthentication,
+                PinUvAuthParam = pinAuthentication
             };
         }
 

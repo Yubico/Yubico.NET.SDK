@@ -86,11 +86,11 @@ namespace Yubico.YubiKey.Piv.Commands
                 {
                     ResponseClass = nameof(GetSerialNumberResponse),
                     ExpectedDataLength = SerialNumberLength,
-                    ActualDataLength = ResponseApdu.Data.Length,
+                    ActualDataLength = ResponseApdu.Data.Length
                 };
             }
 
-            return BinaryPrimitives.ReadInt32BigEndian(ResponseApdu.Data.Span.Slice(0, 4));
+            return BinaryPrimitives.ReadInt32BigEndian(ResponseApdu.Data.Span.Slice(start: 0, length: 4));
         }
     }
 }

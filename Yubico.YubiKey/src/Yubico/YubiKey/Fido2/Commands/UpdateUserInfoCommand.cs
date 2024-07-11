@@ -99,12 +99,10 @@ namespace Yubico.YubiKey.Fido2.Commands
         //   map
         //     02 encoding of credentialID
         //     03 encoding of userEntity
-        private static byte[] EncodeParams(CredentialId credentialId, UserEntity userEntity)
-        {
-            return new CborMapWriter<int>()
+        private static byte[] EncodeParams(CredentialId credentialId, UserEntity userEntity) =>
+            new CborMapWriter<int>()
                 .Entry(KeyCredentialId, credentialId)
                 .Entry(KeyUserEntity, userEntity)
                 .Encode();
-        }
     }
 }

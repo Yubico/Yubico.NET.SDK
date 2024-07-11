@@ -333,9 +333,9 @@ namespace Yubico.YubiKey.Piv
             var tlvWriter = new TlvWriter();
             using (tlvWriter.WriteNestedTlv(0x53))
             {
-                tlvWriter.WriteValue(0x70, certDer);
-                tlvWriter.WriteByte(0x71, 0);
-                tlvWriter.WriteValue(0xfe, null);
+                tlvWriter.WriteValue(tag: 0x70, certDer);
+                tlvWriter.WriteByte(tag: 0x71, value: 0);
+                tlvWriter.WriteValue(tag: 0xfe, value: null);
             }
 
             byte[] encodedCert = tlvWriter.Encode();
@@ -472,10 +472,10 @@ namespace Yubico.YubiKey.Piv
                 {
                     returnValue = keySize switch
                     {
-                        256 => certificate.PublicKey.EncodedKeyValue.RawData.Length == (keySize / 4) + 1,
-                        384 => certificate.PublicKey.EncodedKeyValue.RawData.Length == (keySize / 4) + 1,
+                        256 => certificate.PublicKey.EncodedKeyValue.RawData.Length == keySize / 4 + 1,
+                        384 => certificate.PublicKey.EncodedKeyValue.RawData.Length == keySize / 4 + 1,
                         2048 => certificate.PublicKey.Key.KeySize == keySize,
-                        _ => false,
+                        _ => false
                     };
                 }
             }
@@ -507,9 +507,9 @@ namespace Yubico.YubiKey.Piv
                 // so "decode" them as full elements (don't decode the contents
                 // of the IssuerName and Validity SEQUENCEs).
                 var reader = new TlvReader(certDer);
-                if (reader.TryReadNestedTlv(out reader, 0x30))
+                if (reader.TryReadNestedTlv(out reader, expectedTag: 0x30))
                 {
-                    if (reader.TryReadNestedTlv(out reader, 0x30))
+                    if (reader.TryReadNestedTlv(out reader, expectedTag: 0x30))
                     {
                         byte[] tags = new byte[] { 0xA0, 0x02, 0x30, 0x30, 0x30, 0x30 };
                         var value = new ReadOnlyMemory<byte>[tags.Length];

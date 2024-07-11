@@ -118,7 +118,7 @@ namespace Yubico.YubiKey.Scp03.Commands
         private const byte AesBlockSize = 16;
         private const byte KeyCheckSize = 3;
 
-        private const int ChecksumLength = (3 * KeyCheckSize) + 1;
+        private const int ChecksumLength = 3 * KeyCheckSize + 1;
         private const int ChecksumOffsetEnc = 1;
         private const int ChecksumOffsetMac = ChecksumOffsetEnc + KeyCheckSize;
         private const int ChecksumOffsetDek = ChecksumOffsetMac + KeyCheckSize;
@@ -240,8 +240,8 @@ namespace Yubico.YubiKey.Scp03.Commands
                 binaryWriter.Write(AesBlockSize);
                 binaryWriter.Write(encryptedKey);
                 binaryWriter.Write(KeyCheckSize);
-                binaryWriter.Write(checkBlock, 0, KeyCheckSize);
-                Array.Copy(checkBlock, 0, _checksum, checksumOffset, KeyCheckSize);
+                binaryWriter.Write(checkBlock, index: 0, KeyCheckSize);
+                Array.Copy(checkBlock, sourceIndex: 0, _checksum, checksumOffset, KeyCheckSize);
             }
             finally
             {

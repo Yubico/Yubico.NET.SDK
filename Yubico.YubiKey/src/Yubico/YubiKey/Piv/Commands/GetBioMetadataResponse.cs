@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.BioMetadataNotSupported)),
-                _ => throw new InvalidOperationException(StatusMessage),
+                _ => throw new InvalidOperationException(StatusMessage)
             };
     }
 }

@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             {
                 CtapStatus.InvalidOption => new ResponseStatusPair(
                     ResponseStatus.Success, ResponseStatusMessages.BaseSuccess),
-                _ => base.StatusCodeMap,
+                _ => base.StatusCodeMap
             };
     }
 }

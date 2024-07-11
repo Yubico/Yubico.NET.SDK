@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.Otp.Commands
             {
                 throw new MalformedYubiKeyResponseException
                 {
-                    ResponseClass = nameof(GetDeviceInfoResponse),
+                    ResponseClass = nameof(GetDeviceInfoResponse)
                 };
             }
 

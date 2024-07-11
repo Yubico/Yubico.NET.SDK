@@ -375,7 +375,7 @@ namespace Yubico.YubiKey.Piv.Objects
                     BitFieldTag => ReadBitField(tlvReader, ref elementsRead),
                     SaltTag => ReadSalt(tlvReader, ref elementsRead),
                     DateTag => ReadDate(tlvReader, ref elementsRead),
-                    _ => false,
+                    _ => false
                 };
 
                 if (!isValid)

@@ -58,6 +58,6 @@ namespace Yubico.YubiKey
         // CTAP2_ENROLL_FEEDBACK_NO_USER_PRESENCE_TRANSITION
         NoUserPresenceTransition = 0x0E,
 
-        Unknown = -1,
+        Unknown = -1
     }
 }

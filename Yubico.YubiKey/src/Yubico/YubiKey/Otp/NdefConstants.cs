@@ -67,7 +67,7 @@ namespace Yubico.YubiKey.Otp
             "urn:epc:",
 
             // 35
-            "urn:nfc:",
+            "urn:nfc:"
         };
     }
 }

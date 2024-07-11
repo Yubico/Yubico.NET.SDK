@@ -170,7 +170,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The data tag specified is not valid for getting data.
         /// </exception>
-        [ObsoleteAttribute("This property is obsolete. Use DataTag instead", false)]
+        [ObsoleteAttribute("This property is obsolete. Use DataTag instead", error: false)]
         public PivDataTag Tag
         {
             get => (PivDataTag)_tag;
@@ -234,7 +234,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <param name="tag">
         /// The tag indicating which data to get.
         /// </param>
-        [ObsoleteAttribute("This constructor is obsolete. Use GetDataCommand(int) instead", false)]
+        [ObsoleteAttribute("This constructor is obsolete. Use GetDataCommand(int) instead", error: false)]
         public GetDataCommand(PivDataTag tag)
         {
             Tag = tag;
@@ -268,14 +268,13 @@ namespace Yubico.YubiKey.Piv.Commands
                 Ins = PivGetDataInstruction,
                 P1 = PivGetDataParameter1,
                 P2 = PivGetDataParameter2,
-                Data = BuildGetDataApduData(),
+                Data = BuildGetDataApduData()
             };
 
         // Build the data that is the Data portion of the APDU.
         // This will be TLV 5C length Tag
-        private byte[] BuildGetDataApduData()
-        {
-            return _tag switch
+        private byte[] BuildGetDataApduData() =>
+            _tag switch
             {
                 0 => throw new InvalidOperationException(
                     string.Format(
@@ -284,9 +283,8 @@ namespace Yubico.YubiKey.Piv.Commands
                         _tag)),
                 DiscoveryTag => new byte[] { PivGetDataTlvTag, 0x01, (byte)_tag },
                 BiometricGroupTemplateTag => new byte[] { PivGetDataTlvTag, 0x02, (byte)(_tag >> 8), (byte)_tag },
-                _ => new byte[] { PivGetDataTlvTag, 0x03, (byte)(_tag >> 16), (byte)(_tag >> 8), (byte)_tag },
+                _ => new byte[] { PivGetDataTlvTag, 0x03, (byte)(_tag >> 16), (byte)(_tag >> 8), (byte)_tag }
             };
-        }
 
         /// <inheritdoc />
         public GetDataResponse CreateResponseForApdu(ResponseApdu responseApdu) => new GetDataResponse(responseApdu);

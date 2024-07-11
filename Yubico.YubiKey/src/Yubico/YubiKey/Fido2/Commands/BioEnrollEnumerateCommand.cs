@@ -53,7 +53,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </param>
         public BioEnrollEnumerateCommand(ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
         {
-            _command = new BioEnrollmentCommand(SubCmdEnumerateEnroll, null, pinUvAuthToken, authProtocol);
+            _command = new BioEnrollmentCommand(
+                SubCmdEnumerateEnroll, subCommandParams: null, pinUvAuthToken, authProtocol);
         }
 
         /// <inheritdoc />

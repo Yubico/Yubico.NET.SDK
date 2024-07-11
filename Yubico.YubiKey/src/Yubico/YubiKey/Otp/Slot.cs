@@ -36,6 +36,6 @@ namespace Yubico.YubiKey.Otp
         /// Refers to the configuration slot that is activated by a longer duration touch of the YubiKey.
         /// This is also sometimes referred to as "Slot 2".
         /// </summary>
-        LongPress = 2,
+        LongPress = 2
     }
 }

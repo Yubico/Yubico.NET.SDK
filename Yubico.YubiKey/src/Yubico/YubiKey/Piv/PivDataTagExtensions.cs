@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Piv
                 PivDataTag.Printed => false,
                 PivDataTag.Discovery => false,
                 PivDataTag.BiometricGroupTemplate => false,
-                _ => true,
+                _ => true
             };
 
         /// <summary>

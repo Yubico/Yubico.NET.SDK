@@ -75,7 +75,7 @@ namespace Yubico.YubiKey.Piv
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidPrivateKeyData)),
+                        ExceptionMessages.InvalidPrivateKeyData))
             };
 
             var tlvWriter = new TlvWriter();

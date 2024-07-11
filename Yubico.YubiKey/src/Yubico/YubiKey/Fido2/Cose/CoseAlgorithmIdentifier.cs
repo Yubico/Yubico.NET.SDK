@@ -53,6 +53,6 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <summary>
         /// RSASSA-PKCS1-v1_5 with SHA-256
         /// </summary>
-        RS256 = -257,
+        RS256 = -257
     }
 }

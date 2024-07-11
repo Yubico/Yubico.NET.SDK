@@ -160,7 +160,7 @@ namespace Yubico.YubiKey
                         KeyboardDeviceInfoFactory.GetDeviceInfo(keyboardDevice),
                     IHidDevice fidoDevice when fidoDevice.IsFido() =>
                         FidoDeviceInfoFactory.GetDeviceInfo(fidoDevice),
-                    _ => new YubiKeyDeviceInfo(),
+                    _ => new YubiKeyDeviceInfo()
                 };
         }
     }

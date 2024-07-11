@@ -87,7 +87,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             using ICryptoTransform aesTransform = aes.CreateEncryptor();
 
             byte[] encryptedData = new byte[BlockSize + length];
-            Array.Copy(initVector, 0, encryptedData, 0, BlockSize);
+            Array.Copy(initVector, sourceIndex: 0, encryptedData, destinationIndex: 0, BlockSize);
             _ = aesTransform.TransformBlock(plaintext, offset, length, encryptedData, BlockSize);
 
             return encryptedData;
@@ -121,7 +121,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
 
             // The first BlockSize bytes are the IV, decrypt the rest.
             byte[] initVector = new byte[BlockSize];
-            Array.Copy(ciphertext, offset, initVector, 0, BlockSize);
+            Array.Copy(ciphertext, offset, initVector, destinationIndex: 0, BlockSize);
 
             using Aes aes = CryptographyProviders.AesCreator();
             aes.Mode = CipherMode.CBC;
@@ -131,7 +131,8 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             using ICryptoTransform aesTransform = aes.CreateDecryptor();
 
             byte[] decryptedData = new byte[length - BlockSize];
-            _ = aesTransform.TransformBlock(ciphertext, BlockSize + offset, length - BlockSize, decryptedData, 0);
+            _ = aesTransform.TransformBlock(
+                ciphertext, BlockSize + offset, length - BlockSize, decryptedData, outputOffset: 0);
 
             return decryptedData;
         }
@@ -204,17 +205,21 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                 // Expand (Aes key)
                 hmacSha256.Key = prk;
                 byte[] infoAes = Encoding.ASCII.GetBytes(InfoAes);
-                _ = hmacSha256.TransformBlock(infoAes, 0, infoAes.Length, null, 0);
+                _ = hmacSha256.TransformBlock(
+                    infoAes, inputOffset: 0, infoAes.Length, outputBuffer: null, outputOffset: 0);
+
                 infoAes[0] = TrailingByte;
-                _ = hmacSha256.TransformFinalBlock(infoAes, 0, TrailingByteCount);
+                _ = hmacSha256.TransformFinalBlock(infoAes, inputOffset: 0, TrailingByteCount);
 
                 Array.Copy(hmacSha256.Hash, _aesKey, KeyLength);
 
                 // Expand (HMAC key)
                 byte[] infoHmac = Encoding.ASCII.GetBytes(InfoHmac);
-                _ = hmacSha256.TransformBlock(infoHmac, 0, infoHmac.Length, null, 0);
+                _ = hmacSha256.TransformBlock(
+                    infoHmac, inputOffset: 0, infoHmac.Length, outputBuffer: null, outputOffset: 0);
+
                 infoHmac[0] = TrailingByte;
-                _ = hmacSha256.TransformFinalBlock(infoHmac, 0, TrailingByteCount);
+                _ = hmacSha256.TransformFinalBlock(infoHmac, inputOffset: 0, TrailingByteCount);
 
                 Array.Copy(hmacSha256.Hash, _hmacKey, KeyLength);
             }

@@ -67,7 +67,7 @@ namespace Yubico.YubiKey.Otp.Commands
             {
                 ChallengeResponseAlgorithm.YubicoOtp => YubicoOtpResponseLength,
                 ChallengeResponseAlgorithm.HmacSha1 => HmacResponseLength,
-                _ => throw new InvalidOperationException(ExceptionMessages.InvalidOtpChallengeResponseAlgorithm),
+                _ => throw new InvalidOperationException(ExceptionMessages.InvalidOtpChallengeResponseAlgorithm)
             };
 
             if (ResponseApdu.Data.Length < expectedLength)
@@ -75,11 +75,11 @@ namespace Yubico.YubiKey.Otp.Commands
                 throw new MalformedYubiKeyResponseException()
                 {
                     ResponseClass = nameof(ChallengeResponseResponse),
-                    ActualDataLength = ResponseApdu.Data.Length,
+                    ActualDataLength = ResponseApdu.Data.Length
                 };
             }
 
-            return ResponseApdu.Data.Slice(0, expectedLength);
+            return ResponseApdu.Data.Slice(start: 0, expectedLength);
         }
     }
 }

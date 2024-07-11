@@ -608,7 +608,8 @@ namespace Yubico.YubiKey.Oath
             }
 
             return new Credential(
-                issuer, Uri.UnescapeDataString(account), type, algorithm, secret, period, digits, counter, false);
+                issuer, Uri.UnescapeDataString(account), type, algorithm, secret, period, digits, counter,
+                requireTouch: false);
         }
 
         /// <summary>
@@ -619,13 +620,13 @@ namespace Yubico.YubiKey.Oath
         /// </returns>
         private static (string? issuer, string account) ParseUriPath(string path, string? defaultIssuer)
         {
-            string tempPath = path.StartsWith("/", true, CultureInfo.InvariantCulture)
+            string tempPath = path.StartsWith("/", ignoreCase: true, CultureInfo.InvariantCulture)
                 ? path.Substring(1)
                 : path;
 
             if (tempPath.Length > MaximumUrlLength)
             {
-                tempPath = tempPath.Substring(0, MaximumUrlLength);
+                tempPath = tempPath.Substring(startIndex: 0, MaximumUrlLength);
             }
 
             string[]? parsedPath = tempPath.Split(':');
@@ -645,14 +646,14 @@ namespace Yubico.YubiKey.Oath
         {
             int hash = base.GetHashCode();
 
-            hash = (hash * 7) + _issuer?.GetHashCode() ?? "".GetHashCode();
-            hash = (hash * 7) + _accountName?.GetHashCode() ?? "".GetHashCode();
-            hash = (hash * 7) + _secret?.GetHashCode() ?? "".GetHashCode();
-            hash = (hash * 7) + _digits.GetHashCode();
-            hash = (hash * 7) + _counter.GetHashCode();
-            hash = (hash * 7) + _type.GetHashCode();
-            hash = (hash * 7) + _period.GetHashCode();
-            hash = (hash * 7) + _algorithm.GetHashCode();
+            hash = hash * 7 + _issuer?.GetHashCode() ?? "".GetHashCode();
+            hash = hash * 7 + _accountName?.GetHashCode() ?? "".GetHashCode();
+            hash = hash * 7 + _secret?.GetHashCode() ?? "".GetHashCode();
+            hash = hash * 7 + _digits.GetHashCode();
+            hash = hash * 7 + _counter.GetHashCode();
+            hash = hash * 7 + _type.GetHashCode();
+            hash = hash * 7 + _period.GetHashCode();
+            hash = hash * 7 + _algorithm.GetHashCode();
 
             return hash;
         }
@@ -666,7 +667,7 @@ namespace Yubico.YubiKey.Oath
                 return false;
             }
 
-            if (Object.ReferenceEquals(this, credential))
+            if (ReferenceEquals(this, credential))
             {
                 return true;
             }

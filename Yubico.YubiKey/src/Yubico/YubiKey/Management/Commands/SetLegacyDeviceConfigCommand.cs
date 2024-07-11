@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Management.Commands
             {
                 Ins = SetLegacyDeviceConfigInstruction,
                 P1 = P1DeviceConfiguration,
-                Data = GetDataForApdu(),
+                Data = GetDataForApdu()
             };
 
         /// <inheritdoc/>

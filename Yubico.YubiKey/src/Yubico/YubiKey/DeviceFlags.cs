@@ -53,6 +53,6 @@ namespace Yubico.YubiKey
         /// <see cref="IYubiKeyDeviceInfo.AutoEjectTimeout"/>.
         /// </para>
         /// </remarks>
-        TouchEject = 0x80,
+        TouchEject = 0x80
     }
 }

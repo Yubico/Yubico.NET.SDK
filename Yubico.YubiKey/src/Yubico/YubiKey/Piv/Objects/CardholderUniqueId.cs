@@ -157,7 +157,7 @@ namespace Yubico.YubiKey.Piv.Objects
 
             using (RandomNumberGenerator randomObject = CryptographyProviders.RngCreator())
             {
-                randomObject.GetBytes(_guidValue, 0, GuidLength);
+                randomObject.GetBytes(_guidValue, offset: 0, GuidLength);
             }
 
             IsEmpty = false;

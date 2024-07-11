@@ -260,7 +260,7 @@ namespace Yubico.YubiKey.Piv
         {
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.AuthenticatePivManagementKey,
+                Request = KeyEntryRequest.AuthenticatePivManagementKey
             };
 
             try
@@ -654,16 +654,16 @@ namespace Yubico.YubiKey.Piv
                 "Try to change the management key, touch policy = {0}, algorithm = {1}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
-            CheckManagementKeyAlgorithm(newKeyAlgorithm, true);
+            CheckManagementKeyAlgorithm(newKeyAlgorithm, checkMode: true);
 
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.ChangePivManagementKey,
+                Request = KeyEntryRequest.ChangePivManagementKey
             };
 
             try
             {
-                if (TryAuthenticateWithKeyCollector(true, keyEntryData) == false)
+                if (TryAuthenticateWithKeyCollector(mutualAuthentication: true, keyEntryData) == false)
                 {
                     return false;
                 }
@@ -895,7 +895,7 @@ namespace Yubico.YubiKey.Piv
             PivTouchPolicy touchPolicy,
             PivAlgorithm newKeyAlgorithm)
         {
-            CheckManagementKeyAlgorithm(newKeyAlgorithm, true);
+            CheckManagementKeyAlgorithm(newKeyAlgorithm, checkMode: true);
 
             return TryForcedChangeManagementKey(currentKey, newKey, touchPolicy, newKeyAlgorithm);
         }
@@ -908,7 +908,7 @@ namespace Yubico.YubiKey.Piv
             PivTouchPolicy touchPolicy,
             PivAlgorithm newKeyAlgorithm)
         {
-            if (TryAuthenticateManagementKey(currentKey, true))
+            if (TryAuthenticateManagementKey(currentKey, mutualAuthentication: true))
             {
                 var setCommand = new SetManagementKeyCommand(newKey, touchPolicy, newKeyAlgorithm);
                 SetManagementKeyResponse setResponse = Connection.SendCommand(setCommand);

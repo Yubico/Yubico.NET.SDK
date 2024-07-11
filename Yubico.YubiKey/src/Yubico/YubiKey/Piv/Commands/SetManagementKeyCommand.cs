@@ -269,9 +269,9 @@ namespace Yubico.YubiKey.Piv.Commands
                 {
                     PivTouchPolicy.Always => TouchPolicyP2Always,
                     PivTouchPolicy.Cached => TouchPolicyP2Cached,
-                    _ => TouchPolicyP2Never,
+                    _ => TouchPolicyP2Never
                 },
-                Data = BuildSetManagementKeyApduData(),
+                Data = BuildSetManagementKeyApduData()
             };
 
         // Build a byte array that contains the data portion of the APDU.

@@ -390,7 +390,7 @@ namespace Yubico.YubiKey.Fido2
             }
             else
             {
-                AddPermissions(PinUvAuthTokenPermissions.None, null);
+                AddPermissions(PinUvAuthTokenPermissions.None, relyingPartyId: null);
             }
 
             return AuthToken ?? ReadOnlyMemory<byte>.Empty;
@@ -518,7 +518,7 @@ namespace Yubico.YubiKey.Fido2
 
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.SetFido2Pin,
+                Request = KeyEntryRequest.SetFido2Pin
             };
 
             try

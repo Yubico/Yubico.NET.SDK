@@ -124,7 +124,7 @@ namespace Yubico.YubiKey.Fido2
 
             using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
             byte[] nonce = new byte[NonceSize];
-            randomObject.GetBytes(nonce, 0, NonceSize);
+            randomObject.GetBytes(nonce, offset: 0, NonceSize);
             Nonce = new ReadOnlyMemory<byte>(nonce);
 
             Ciphertext = EncryptBlobData(blobData, largeBlobKey);
@@ -250,7 +250,7 @@ namespace Yubico.YubiKey.Fido2
                 IAesGcmPrimitives decryptor = CryptographyProviders.AesGcmPrimitivesCreator();
                 bool returnValue = decryptor.DecryptAndVerify(
                     largeBlobKey.Span, Nonce.Span,
-                    Ciphertext.Slice(0, dataToDecryptLength).Span,
+                    Ciphertext.Slice(start: 0, dataToDecryptLength).Span,
                     Ciphertext.Slice(dataToDecryptLength, GcmTagSize).Span, decryptedData, associatedData);
 
                 if (returnValue)
@@ -310,8 +310,8 @@ namespace Yubico.YubiKey.Fido2
                 encryptor.EncryptAndAuthenticate(
                     largeBlobKey.Span, Nonce.Span, dataToEncrypt, encryptedData, gcmTag, associatedData);
 
-                Array.Copy(encryptedData, 0, ciphertext, 0, encryptedData.Length);
-                Array.Copy(gcmTag, 0, ciphertext, encryptedData.Length, gcmTag.Length);
+                Array.Copy(encryptedData, sourceIndex: 0, ciphertext, destinationIndex: 0, encryptedData.Length);
+                Array.Copy(gcmTag, sourceIndex: 0, ciphertext, encryptedData.Length, gcmTag.Length);
 
                 return new ReadOnlyMemory<byte>(ciphertext);
             }
@@ -323,18 +323,17 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <inheritdoc/>
-        internal byte[] CborEncode()
-        {
+        internal byte[] CborEncode() =>
+
             // An encoded LargeBlobEntry is
             //   map
             //     01  byte string: ciphertext
             //     02  byte string: nonce
             //     03  unsigned int : originalplaintext length
-            return new CborMapWriter<int>()
+            new CborMapWriter<int>()
                 .Entry(KeyCiphertext, Ciphertext)
                 .Entry(KeyNonce, Nonce)
                 .Entry(KeyOrigSize, OriginalDataLength)
                 .Encode();
-        }
     }
 }

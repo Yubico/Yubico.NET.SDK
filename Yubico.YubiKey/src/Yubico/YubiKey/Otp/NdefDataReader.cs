@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.Otp
             {
                 (byte)NdefTextRecordType => NdefDataType.Text,
                 (byte)NdefUriRecordType => NdefDataType.Uri,
-                _ => throw new NotSupportedException(ExceptionMessages.BadNdefRecordType),
+                _ => throw new NotSupportedException(ExceptionMessages.BadNdefRecordType)
             };
 
             _data = responseData.Slice(TypeOffset + typeLength, dataLength).ToArray();
@@ -141,7 +141,7 @@ namespace Yubico.YubiKey.Otp
             }
 
             // Empty string specifies the invariant culture, which seems like the correct thing to do anyways.
-            string languageCode = encoding.GetString(_data, 1, languageCodeLength);
+            string languageCode = encoding.GetString(_data, index: 1, languageCodeLength);
             string text = encoding.GetString(_data, textOffset, _data.Length - textOffset);
 
             return new NdefText()
@@ -180,7 +180,9 @@ namespace Yubico.YubiKey.Otp
                 throw new InvalidOperationException(ExceptionMessages.OutOfRangeUriPrefixCode);
             }
 
-            string uriString = supportedUriPrefixes[prefixCode] + Encoding.ASCII.GetString(_data, 1, _data.Length - 1);
+            string uriString = supportedUriPrefixes[prefixCode] +
+                Encoding.ASCII.GetString(_data, index: 1, _data.Length - 1);
+
             bool isAbsolute = Uri.IsWellFormedUriString(uriString, UriKind.Absolute);
 
             return new Uri(

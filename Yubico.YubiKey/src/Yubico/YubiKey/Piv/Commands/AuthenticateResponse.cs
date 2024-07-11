@@ -102,7 +102,7 @@ namespace Yubico.YubiKey.Piv.Commands
             Status switch
             {
                 ResponseStatus.Success => ExtractGeneralAuthenticateResponseData(),
-                _ => throw new InvalidOperationException(StatusMessage),
+                _ => throw new InvalidOperationException(StatusMessage)
             };
 
         /// <summary>

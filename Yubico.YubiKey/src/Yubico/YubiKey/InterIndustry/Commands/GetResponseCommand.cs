@@ -73,7 +73,7 @@ namespace Yubico.YubiKey.InterIndustry.Commands
                 Ins = GetResponseInstruction,
                 Ne = _SW2 == 0
                     ? 256
-                    : _SW2,
+                    : _SW2
             };
 
         /// <inheritdoc />

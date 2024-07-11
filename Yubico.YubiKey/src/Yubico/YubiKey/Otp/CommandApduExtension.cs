@@ -72,7 +72,7 @@ namespace Yubico.YubiKey.Otp
         // YubiKey frame.
         private static void AddCrc(byte[] frame)
         {
-            short crc = Crc13239.Calculate(frame.AsSpan(0, _framePayloadSize));
+            short crc = Crc13239.Calculate(frame.AsSpan(start: 0, _framePayloadSize));
             BinaryPrimitives.WriteInt16LittleEndian(frame.AsSpan(_framePayloadCrcOffset, sizeof(ushort)), crc);
         }
 

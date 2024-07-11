@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Oath.Commands
                     _ => throw new MalformedYubiKeyResponseException()
                     {
                         ResponseClass = nameof(CalculateAllCredentialsResponse),
-                        ActualDataLength = ResponseApdu.Data.Length,
+                        ActualDataLength = ResponseApdu.Data.Length
                     }
                 };
 
@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.Oath.Commands
                         throw new MalformedYubiKeyResponseException()
                         {
                             ResponseClass = nameof(CalculateAllCredentialsResponse),
-                            ActualDataLength = ResponseApdu.Data.Length,
+                            ActualDataLength = ResponseApdu.Data.Length
                         };
                 }
 
@@ -143,14 +143,14 @@ namespace Yubico.YubiKey.Oath.Commands
                 throw new MalformedYubiKeyResponseException()
                 {
                     ResponseClass = nameof(CalculateCredentialResponse),
-                    ActualDataLength = value.Length,
+                    ActualDataLength = value.Length
                 };
             }
 
             int digits = value.Span[0];
             uint otpValue = BinaryPrimitives.ReadUInt32BigEndian(value.Slice(1).Span);
-            otpValue %= (uint)Math.Pow(10, digits);
-            string otpString = otpValue.ToString(CultureInfo.InvariantCulture).PadLeft(digits, '0');
+            otpValue %= (uint)Math.Pow(x: 10, digits);
+            string otpString = otpValue.ToString(CultureInfo.InvariantCulture).PadLeft(digits, paddingChar: '0');
 
             return (otpString, digits);
         }

@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.Management.Commands
             new CommandApdu
             {
                 Ins = SetDeviceInfoInstruction,
-                Data = GetDataForApdu(),
+                Data = GetDataForApdu()
             };
 
         /// <inheritdoc />

@@ -165,7 +165,7 @@ namespace Yubico.YubiKey.Piv.Commands
             return new CommandApdu()
             {
                 Ins = AttestInstruction,
-                P1 = SlotNumber,
+                P1 = SlotNumber
             };
         }
 

@@ -73,7 +73,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             using ICryptoTransform aesTransform = aes.CreateEncryptor();
 
             byte[] encryptedData = new byte[length];
-            _ = aesTransform.TransformBlock(plaintext, offset, length, encryptedData, 0);
+            _ = aesTransform.TransformBlock(plaintext, offset, length, encryptedData, outputOffset: 0);
 
             return encryptedData;
         }
@@ -110,7 +110,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             using ICryptoTransform aesTransform = aes.CreateDecryptor();
 
             byte[] decryptedData = new byte[length];
-            _ = aesTransform.TransformBlock(ciphertext, offset, length, decryptedData, 0);
+            _ = aesTransform.TransformBlock(ciphertext, offset, length, decryptedData, outputOffset: 0);
 
             return decryptedData;
         }
@@ -139,7 +139,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         {
             using HMAC hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
             hmacSha256.Key = keyData;
-            return hmacSha256.ComputeHash(message).AsMemory(0, 16).ToArray();
+            return hmacSha256.ComputeHash(message).AsMemory(start: 0, length: 16).ToArray();
         }
 
         /// <inheritdoc />
@@ -151,7 +151,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             }
 
             using SHA256 sha256 = CryptographyProviders.Sha256Creator();
-            _ = sha256.TransformFinalBlock(buffer, 0, buffer.Length);
+            _ = sha256.TransformFinalBlock(buffer, inputOffset: 0, buffer.Length);
             if (sha256.Hash.Length != KeyLength)
             {
                 throw new InvalidOperationException(

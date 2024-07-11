@@ -90,7 +90,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 Ins = PivAuthenticateInstruction,
                 P1 = (byte)Algorithm,
                 P2 = SlotNumber,
-                Data = BuildGeneralAuthenticateApduData(),
+                Data = BuildGeneralAuthenticateApduData()
             };
 
         /// <summary>
@@ -121,7 +121,7 @@ namespace Yubico.YubiKey.Piv.Commands
             var tlvWriter = new TlvWriter();
             using (tlvWriter.WriteNestedTlv(NestedTag))
             {
-                tlvWriter.WriteValue(ResponseTag, null);
+                tlvWriter.WriteValue(ResponseTag, value: null);
                 tlvWriter.WriteValue(DataTag, Data.Span);
             }
 

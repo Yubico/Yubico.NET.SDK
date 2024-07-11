@@ -100,7 +100,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 return new CommandApdu
                 {
                     Ins = PivVerifyInstruction,
-                    P2 = OnCardComparisonAuthenticationSlot,
+                    P2 = OnCardComparisonAuthenticationSlot
                 };
             }
 
@@ -108,12 +108,12 @@ namespace Yubico.YubiKey.Piv.Commands
             const byte GetTemporaryPinTag = 0x02;
             if (RequestTemporaryPin)
             {
-                tlvWriter.WriteValue(GetTemporaryPinTag, null);
+                tlvWriter.WriteValue(GetTemporaryPinTag, value: null);
             }
             else
             {
                 const byte VerifyUvTag = 0x03;
-                tlvWriter.WriteValue(VerifyUvTag, null);
+                tlvWriter.WriteValue(VerifyUvTag, value: null);
             }
 
             ReadOnlyMemory<byte> data = tlvWriter.Encode();

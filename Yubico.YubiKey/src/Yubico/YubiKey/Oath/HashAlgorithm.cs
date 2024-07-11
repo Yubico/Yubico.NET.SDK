@@ -22,6 +22,6 @@ namespace Yubico.YubiKey.Oath
         None = 0,
         Sha1 = 0x01,
         Sha256 = 0x02,
-        Sha512 = 0x03,
+        Sha512 = 0x03
     }
 }

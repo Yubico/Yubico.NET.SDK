@@ -207,8 +207,8 @@ namespace Yubico.YubiKey.Cryptography
             // check those inputs here.
             int digestInfoLength = BuildDigestInfo(digest, digestAlgorithm, bufferAsSpan);
 
-            int paddingLength = (keySizeBits / 8) - (digestInfoLength + 3);
-            bufferAsSpan.Slice(2, paddingLength).Fill(Pkcs1SignPadByte);
+            int paddingLength = keySizeBits / 8 - (digestInfoLength + 3);
+            bufferAsSpan.Slice(start: 2, paddingLength).Fill(Pkcs1SignPadByte);
 
             buffer[0] = Pkcs1LeadByte;
             buffer[1] = Pkcs1SignByte;
@@ -328,7 +328,7 @@ namespace Yubico.YubiKey.Cryptography
                 var tlvReader = new TlvReader(digestInfo);
 
                 isValid = TryReadDer(
-                    true, ReadNestedNoMoreData, SequenceTag, tlvReader, out TlvReader infoReader,
+                    isValid: true, ReadNestedNoMoreData, SequenceTag, tlvReader, out TlvReader infoReader,
                     out _);
 
                 isValid = TryReadDer(isValid, ReadNested, SequenceTag, infoReader, out TlvReader oidReader, out _);
@@ -443,7 +443,7 @@ namespace Yubico.YubiKey.Cryptography
             // The  PS || 01 || salt  make up DB.
             // The salt is the same length as the digest.
             // The first bufferLen - (saltLen + hashLen + 2) bytes are PS.
-            int psLength = buffer.Length - ((2 * digest.Length) + 2);
+            int psLength = buffer.Length - (2 * digest.Length + 2);
             int offsetSalt = psLength + 1;
             int offsetHash = offsetSalt + digest.Length;
 
@@ -458,12 +458,12 @@ namespace Yubico.YubiKey.Cryptography
 
             // Create H which is the digest of M' = 00 ... 00 || digest || salt.
             // that's 8 00 octets, the digest, and 20 bytes of random salt.
-            _ = digester.TransformBlock(buffer, 0, 8, null, 0);
+            _ = digester.TransformBlock(buffer, inputOffset: 0, inputCount: 8, outputBuffer: null, outputOffset: 0);
 
             // Now copy the digest into the buffer, just so we can operate on it
             // (we need it in a byte array, not a Span).
             digest.CopyTo(bufferAsSpan[offsetHash..]);
-            _ = digester.TransformBlock(buffer, offsetHash, digest.Length, null, 0);
+            _ = digester.TransformBlock(buffer, offsetHash, digest.Length, outputBuffer: null, outputOffset: 0);
 
             // Generate the random salt and digest it.
             using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
@@ -472,12 +472,13 @@ namespace Yubico.YubiKey.Cryptography
 
             // Place H into its location in the buffer.
             // Also, place the 01 (that comes after PS) and the trailer field.
-            Array.Copy(digester.Hash, 0, buffer, offsetHash, digester.Hash.Length);
+            Array.Copy(digester.Hash, sourceIndex: 0, buffer, offsetHash, digester.Hash.Length);
             buffer[psLength] = 1;
             buffer[^1] = TrailerField;
 
             // Now compute the mask for DB using MGF1.
-            PerformMgf1(buffer, offsetHash, digest.Length, buffer, 0, psLength + digest.Length + 1, digester);
+            PerformMgf1(
+                buffer, offsetHash, digest.Length, buffer, offsetTarget: 0, psLength + digest.Length + 1, digester);
 
             // Note that at this point, the algorithm calls for making sure the
             // appropriate leading bits are all 0. Because we support only 1024-
@@ -719,7 +720,7 @@ namespace Yubico.YubiKey.Cryptography
             {
                 // the salt is the same length as the digest.
                 // PS || 01 || salt || H || BC
-                int psLength = buffer.Length - ((2 * digest.Length) + 2);
+                int psLength = buffer.Length - (2 * digest.Length + 2);
                 int offsetHash = buffer.Length - (digest.Length + 1);
 
                 if (psLength < 0)
@@ -728,7 +729,8 @@ namespace Yubico.YubiKey.Cryptography
                 }
 
                 // Run MGF1 to unmask the PS and salt.
-                PerformMgf1(buffer, offsetHash, digest.Length, buffer, 0, psLength + digest.Length + 1, digester);
+                PerformMgf1(
+                    buffer, offsetHash, digest.Length, buffer, offsetTarget: 0, psLength + digest.Length + 1, digester);
 
                 // It's possible the most significant bit is set if it had been
                 // "manually" removed when signing. So remove it here.
@@ -746,7 +748,7 @@ namespace Yubico.YubiKey.Cryptography
                 //  PS || 01 || salt || H || BC
                 // Build the mPrimeAndH buffer:
                 //  00 00 00 00 00 00 00 00 || digest || salt || H
-                int mPrimeLength = (2 * digest.Length) + 8;
+                int mPrimeLength = 2 * digest.Length + 8;
                 mPrimeAndH = new byte[mPrimeLength + digest.Length];
                 var mPrimeAsSpan = new Span<byte>(mPrimeAndH);
 
@@ -765,7 +767,7 @@ namespace Yubico.YubiKey.Cryptography
 
                 // Compute Digest of M-prime and compare it to H.
                 digester.Initialize();
-                _ = digester.TransformFinalBlock(mPrimeAndH, 0, mPrimeLength);
+                _ = digester.TransformFinalBlock(mPrimeAndH, inputOffset: 0, mPrimeLength);
                 var digestAsSpan = new Span<byte>(digester.Hash);
 
                 isVerified = digestAsSpan.SequenceEqual(mPrimeAsSpan[mPrimeLength..]);
@@ -875,12 +877,12 @@ namespace Yubico.YubiKey.Cryptography
             // Generate non-00 random pad bytes.
             int paddingLength = buffer.Length - (inputData.Length + 3);
             using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
-            randomObject.GetBytes(buffer, 2, paddingLength);
+            randomObject.GetBytes(buffer, offset: 2, paddingLength);
             int index;
 
-            while ((index = Array.FindIndex<byte>(buffer, 2, paddingLength, p => p == 0)) > 0)
+            while ((index = Array.FindIndex<byte>(buffer, startIndex: 2, paddingLength, p => p == 0)) > 0)
             {
-                randomObject.GetBytes(buffer, index, 1);
+                randomObject.GetBytes(buffer, index, count: 1);
             }
 
             buffer[0] = Pkcs1LeadByte;
@@ -1116,7 +1118,7 @@ namespace Yubico.YubiKey.Cryptography
 
             int digestLength = digester.HashSize / 8;
 
-            if (inputData.Length == 0 || inputData.Length > buffer.Length - ((2 * digestLength) + 2))
+            if (inputData.Length == 0 || inputData.Length > buffer.Length - (2 * digestLength + 2))
             {
                 throw new ArgumentException(
                     string.Format(
@@ -1131,11 +1133,11 @@ namespace Yubico.YubiKey.Cryptography
             using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
 
             // seed
-            randomObject.GetBytes(buffer, 1, digestLength);
+            randomObject.GetBytes(buffer, offset: 1, digestLength);
 
             // lHash = digest of empty string.
-            _ = digester.TransformFinalBlock(buffer, 0, 0);
-            Array.Copy(digester.Hash, 0, buffer, digestLength + 1, digestLength);
+            _ = digester.TransformFinalBlock(buffer, inputOffset: 0, inputCount: 0);
+            Array.Copy(digester.Hash, sourceIndex: 0, buffer, digestLength + 1, digestLength);
 
             // 01
             buffer[^(inputData.Length + 1)] = 1;
@@ -1143,12 +1145,12 @@ namespace Yubico.YubiKey.Cryptography
 
             // Use the seed to mask the DB.
             PerformMgf1(
-                buffer, 1, digestLength, buffer, digestLength + 1, buffer.Length - (digestLength + 1),
+                buffer, offsetSeed: 1, digestLength, buffer, digestLength + 1, buffer.Length - (digestLength + 1),
                 digester);
 
             // Use the masked DB to mask the seed.
             PerformMgf1(
-                buffer, digestLength + 1, buffer.Length - (digestLength + 1), buffer, 1, digestLength,
+                buffer, digestLength + 1, buffer.Length - (digestLength + 1), buffer, offsetTarget: 1, digestLength,
                 digester);
 
             return buffer;
@@ -1270,12 +1272,12 @@ namespace Yubico.YubiKey.Cryptography
             {
                 // Use the masked DB to unmask the seed.
                 PerformMgf1(
-                    buffer, digestLength + 1, buffer.Length - (digestLength + 1), buffer, 1, digestLength,
+                    buffer, digestLength + 1, buffer.Length - (digestLength + 1), buffer, offsetTarget: 1, digestLength,
                     digester);
 
                 // Use the seed to unmask the DB.
                 PerformMgf1(
-                    buffer, 1, digestLength, buffer, digestLength + 1, buffer.Length - (digestLength + 1),
+                    buffer, offsetSeed: 1, digestLength, buffer, digestLength + 1, buffer.Length - (digestLength + 1),
                     digester);
 
                 // Verify the DB
@@ -1284,7 +1286,7 @@ namespace Yubico.YubiKey.Cryptography
 
                 // lHash = digest of empty string.
                 digester.Initialize();
-                _ = digester.TransformFinalBlock(buffer, 0, 0);
+                _ = digester.TransformFinalBlock(buffer, inputOffset: 0, inputCount: 0);
                 int index = 0;
 
                 for (; index < digestLength; index++)
@@ -1293,7 +1295,7 @@ namespace Yubico.YubiKey.Cryptography
                 }
 
                 // Find the first byte after the PS, make sure it is 01.
-                index = (2 * digestLength) + 1;
+                index = 2 * digestLength + 1;
                 index = Array.FindIndex<byte>(buffer, index, buffer.Length - index, p => p != 0);
 
                 // If there is no non-zero byte, or it is the last byte, this is
@@ -1311,7 +1313,7 @@ namespace Yubico.YubiKey.Cryptography
                 if (errorCount == 0)
                 {
                     outputData = new byte[buffer.Length - (index + 1)];
-                    Array.Copy(buffer, index + 1, outputData, 0, buffer.Length - (index + 1));
+                    Array.Copy(buffer, index + 1, outputData, destinationIndex: 0, buffer.Length - (index + 1));
 
                     return true;
                 }
@@ -1583,8 +1585,8 @@ namespace Yubico.YubiKey.Cryptography
                 }
 
                 digester.Initialize();
-                _ = digester.TransformBlock(seed, offsetSeed, seedLength, null, 0);
-                _ = digester.TransformFinalBlock(counter, 0, 4);
+                _ = digester.TransformBlock(seed, offsetSeed, seedLength, outputBuffer: null, outputOffset: 0);
+                _ = digester.TransformFinalBlock(counter, inputOffset: 0, inputCount: 4);
 
                 for (int index = 0; index < xorCount; index++)
                 {
@@ -1624,7 +1626,7 @@ namespace Yubico.YubiKey.Cryptography
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.UnsupportedAlgorithm)),
+                        ExceptionMessages.UnsupportedAlgorithm))
             };
     }
 }

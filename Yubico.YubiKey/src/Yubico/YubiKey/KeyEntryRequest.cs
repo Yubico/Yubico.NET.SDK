@@ -403,6 +403,6 @@ namespace Yubico.YubiKey
         /// is null, this is the first call, and if it is not null, this is a
         /// subsequent call.
         /// </remarks>
-        EnrollFingerprint = 20,
+        EnrollFingerprint = 20
     }
 }

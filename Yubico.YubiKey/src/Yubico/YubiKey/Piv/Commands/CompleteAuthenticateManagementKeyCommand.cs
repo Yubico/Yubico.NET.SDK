@@ -193,7 +193,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        ExceptionMessages.InvalidAlgorithm)),
+                        ExceptionMessages.InvalidAlgorithm))
             };
             #pragma warning restore 618
 
@@ -251,7 +251,7 @@ namespace Yubico.YubiKey.Piv.Commands
             // Client Authentication Response.
             bytesWritten += symObject.TransformBlock(
                 _dataMemory.Slice(ClientChallengeOffset * _blockSize, _blockSize).ToArray(),
-                0,
+                inputOffset: 0,
                 _blockSize,
                 _buffer,
                 ClientResponseOffset * _blockSize);
@@ -295,7 +295,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 Ins = AuthMgmtKeyInstruction,
                 P1 = (byte)Algorithm,
                 P2 = AuthMgmtKeyParameter2,
-                Data = encoding,
+                Data = encoding
             };
         }
 

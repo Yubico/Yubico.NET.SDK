@@ -23,8 +23,8 @@ namespace Yubico.YubiKey.Scp03.Commands
     internal class InitializeUpdateCommand : IYubiKeyCommand<InitializeUpdateResponse>
     {
         public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
-        const byte GpInitializeUpdateCla = 0b1000_0000;
-        const byte GpInitializeUpdateIns = 0x50;
+        private const byte GpInitializeUpdateCla = 0b1000_0000;
+        private const byte GpInitializeUpdateIns = 0x50;
         private readonly byte[] _challenge;
         private readonly int _keyVersionNumber;
 

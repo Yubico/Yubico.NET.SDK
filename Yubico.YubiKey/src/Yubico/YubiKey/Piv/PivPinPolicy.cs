@@ -59,6 +59,6 @@ namespace Yubico.YubiKey.Piv
         /// <summary>
         /// The PIN policy is the default for the YubiKey.
         /// </summary>
-        Default = 32,
+        Default = 32
     }
 }

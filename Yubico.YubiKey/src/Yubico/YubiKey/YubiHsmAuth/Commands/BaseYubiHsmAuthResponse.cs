@@ -29,22 +29,19 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     public abstract class BaseYubiHsmAuthResponse : YubiKeyResponse
     {
         /// <inheritdoc/>
-        protected override ResponseStatusPair StatusCodeMap
-        {
-            get =>
-                StatusWord switch
-                {
-                    // Overriding these SW for meanings specific to the YubiHSM Auth application
-                    SWConstants.SecurityStatusNotSatisfied => new ResponseStatusPair(
-                        ResponseStatus.RetryWithTouch, ResponseStatusMessages.YubiHsmAuthTouchRequired),
-                    SWConstants.AuthenticationMethodBlocked => new ResponseStatusPair(
-                        ResponseStatus.Failed, ResponseStatusMessages.YubiHsmAuthInvalidEntry),
-                    SWConstants.ReferenceDataUnusable => new ResponseStatusPair(
-                        ResponseStatus.Failed, ResponseStatusMessages.YubiHsmAuthInvalidAuthData),
+        protected override ResponseStatusPair StatusCodeMap =>
+            StatusWord switch
+            {
+                // Overriding these SW for meanings specific to the YubiHSM Auth application
+                SWConstants.SecurityStatusNotSatisfied => new ResponseStatusPair(
+                    ResponseStatus.RetryWithTouch, ResponseStatusMessages.YubiHsmAuthTouchRequired),
+                SWConstants.AuthenticationMethodBlocked => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.YubiHsmAuthInvalidEntry),
+                SWConstants.ReferenceDataUnusable => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.YubiHsmAuthInvalidAuthData),
 
-                    _ => base.StatusCodeMap,
-                };
-        }
+                _ => base.StatusCodeMap
+            };
 
         protected BaseYubiHsmAuthResponse(ResponseApdu responseApdu) : base(responseApdu)
         {

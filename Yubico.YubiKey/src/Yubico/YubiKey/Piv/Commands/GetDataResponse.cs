@@ -70,7 +70,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 SWConstants.AuthenticationMethodBlocked => new ResponseStatusPair(
                     ResponseStatus.AuthenticationRequired, ResponseStatusMessages.BaseAuthenticationMethodBlocked),
-                _ => base.StatusCodeMap,
+                _ => base.StatusCodeMap
             };
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace Yubico.YubiKey.Piv.Commands
             StatusWord switch
             {
                 SWConstants.Success => ResponseApdu.Data,
-                _ => throw new InvalidOperationException(StatusMessage),
+                _ => throw new InvalidOperationException(StatusMessage)
             };
     }
 }

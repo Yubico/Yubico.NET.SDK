@@ -81,11 +81,9 @@ namespace Yubico.YubiKey.Fido2.Commands
         // It is encoded as
         //   map
         //     01 byte string
-        private static byte[]? EncodeParams(ReadOnlyMemory<byte> templateId)
-        {
-            return new CborMapWriter<int>()
+        private static byte[]? EncodeParams(ReadOnlyMemory<byte> templateId) =>
+            new CborMapWriter<int>()
                 .Entry(KeyTemplateId, templateId)
                 .Encode();
-        }
     }
 }

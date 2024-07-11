@@ -57,7 +57,7 @@ namespace Yubico.YubiKey
         }
 
         public SmartCardConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication yubiKeyApplication)
-            : this(smartCardDevice, yubiKeyApplication, null)
+            : this(smartCardDevice, yubiKeyApplication, applicationId: null)
         {
             if (yubiKeyApplication == YubiKeyApplication.Fido2)
             {
@@ -103,8 +103,8 @@ namespace Yubico.YubiKey
 
         private bool IsOath =>
             _yubiKeyApplication == YubiKeyApplication.Oath
-            || (_applicationId != null && _applicationId.SequenceEqual(
-                YubiKeyApplicationExtensions.GetIso7816ApplicationId(YubiKeyApplication.Oath)));
+            || _applicationId != null && _applicationId.SequenceEqual(
+                YubiKeyApplicationExtensions.GetIso7816ApplicationId(YubiKeyApplication.Oath));
 
         private IApduTransform AddResponseChainingTransform(IApduTransform pipeline) =>
             IsOath
@@ -118,7 +118,7 @@ namespace Yubico.YubiKey
                 {
                     YubiKeyApplication.Oath => new Oath.Commands.SelectOathCommand(),
                     YubiKeyApplication.Unknown => new SelectApplicationCommand(_applicationId!),
-                    _ => new SelectApplicationCommand(_yubiKeyApplication),
+                    _ => new SelectApplicationCommand(_yubiKeyApplication)
                 };
 
             _log.LogInformation(

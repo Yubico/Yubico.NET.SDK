@@ -52,6 +52,6 @@ namespace Yubico.YubiKey.U2f
         /// user has not proved presence. Completion includes computing a
         /// signature.
         /// </summary>
-        DontEnforceUserPresence = 0x08,
+        DontEnforceUserPresence = 0x08
     }
 }

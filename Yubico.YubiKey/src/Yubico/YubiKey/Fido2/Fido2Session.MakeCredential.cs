@@ -112,7 +112,7 @@ namespace Yubico.YubiKey.Fido2
                     currentToken.CopyTo(token.AsMemory());
                     parameters.Protocol = AuthProtocol.Protocol;
                     parameters.PinUvAuthParam = AuthProtocol.AuthenticateUsingPinToken(
-                        token, 0, currentToken.Length, clientDataHash);
+                        token, offset: 0, currentToken.Length, clientDataHash);
                 }
                 finally
                 {
@@ -170,7 +170,7 @@ namespace Yubico.YubiKey.Fido2
         {
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.TouchRequest,
+                Request = KeyEntryRequest.TouchRequest
             };
 
             using var touchTask = new TouchFingerprintTask(

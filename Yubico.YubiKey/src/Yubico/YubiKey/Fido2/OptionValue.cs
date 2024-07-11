@@ -60,6 +60,6 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// The option is not listed and the default is "Not Supported".
         /// </summary>
-        NotSupported = 3,
+        NotSupported = 3
     }
 }

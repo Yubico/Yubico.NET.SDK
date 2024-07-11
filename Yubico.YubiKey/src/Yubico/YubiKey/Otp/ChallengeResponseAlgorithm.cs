@@ -39,6 +39,6 @@ namespace Yubico.YubiKey.Otp
         /// deterministic in this mode. That is, if the same challenge is
         /// issued repeatedly, the response will be identical each time.
         /// </summary>
-        HmacSha1 = 2,
+        HmacSha1 = 2
     }
 }

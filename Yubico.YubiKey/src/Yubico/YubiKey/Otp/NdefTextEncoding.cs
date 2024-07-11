@@ -27,6 +27,6 @@ namespace Yubico.YubiKey.Otp
         /// <summary>
         /// UTF-16 encoding.
         /// </summary>
-        Utf16,
+        Utf16
     }
 }

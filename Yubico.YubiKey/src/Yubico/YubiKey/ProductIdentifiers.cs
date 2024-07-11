@@ -63,7 +63,7 @@ namespace Yubico.YubiKey
                 YubiKeyOtpCcid,
                 YubiKeyFidoCcid,
                 YubiKeyOtpFidoCcid,
-                SecurityKey,
+                SecurityKey
             };
     }
 }

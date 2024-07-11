@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Pipelines
     /// </summary>
     internal class SmartCardTransform : IApduTransform
     {
-        readonly ISmartCardConnection _smartCardConnection;
+        private readonly ISmartCardConnection _smartCardConnection;
 
         public SmartCardTransform(ISmartCardConnection smartCardConnection)
         {

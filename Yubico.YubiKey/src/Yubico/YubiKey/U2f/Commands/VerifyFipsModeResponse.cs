@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.U2f.Commands
             {
                 SWConstants.FunctionNotSupported => new ResponseStatusPair(
                     ResponseStatus.Success, ResponseStatusMessages.BaseSuccess),
-                _ => base.StatusCodeMap,
+                _ => base.StatusCodeMap
             };
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.U2f.Commands
             {
                 SWConstants.Success => true,
                 SWConstants.FunctionNotSupported => false,
-                _ => throw new InvalidOperationException(StatusMessage),
+                _ => throw new InvalidOperationException(StatusMessage)
             };
     }
 }

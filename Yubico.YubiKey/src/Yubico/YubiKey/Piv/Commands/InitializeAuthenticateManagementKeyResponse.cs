@@ -120,11 +120,11 @@ namespace Yubico.YubiKey.Piv.Commands
             int authTag = authReader.PeekTag();
             ReadOnlyMemory<byte> value = authReader.ReadValue(authTag);
 
-            if (nestedTag != NestedTag || (authTag != MutualAuthTag && authTag != SingleAuthTag))
+            if (nestedTag != NestedTag || authTag != MutualAuthTag && authTag != SingleAuthTag)
             {
                 throw new MalformedYubiKeyResponseException()
                 {
-                    ResponseClass = nameof(InitializeAuthenticateManagementKeyResponse),
+                    ResponseClass = nameof(InitializeAuthenticateManagementKeyResponse)
                 };
             }
 
@@ -134,7 +134,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 {
                     ResponseClass = nameof(InitializeAuthenticateManagementKeyResponse),
                     ExpectedDataLength = TDesDataLength,
-                    ActualDataLength = value.Length,
+                    ActualDataLength = value.Length
                 };
             }
 
@@ -146,7 +146,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
             // Get the 8 or 16 bytes of V in the TLV for tag1. This ignores any
             // extraneous trailing bytes.
-            _clientAuthenticationChallenge = value.Slice(0, dataLength).ToArray();
+            _clientAuthenticationChallenge = value.Slice(start: 0, dataLength).ToArray();
         }
 
         /// <summary>
@@ -164,7 +164,7 @@ namespace Yubico.YubiKey.Piv.Commands
             _clientAuthenticationChallenge switch
             {
                 null => throw new InvalidOperationException(StatusMessage),
-                _ => (_tag1 == MutualAuthTag, _clientAuthenticationChallenge),
+                _ => (_tag1 == MutualAuthTag, _clientAuthenticationChallenge)
             };
     }
 }

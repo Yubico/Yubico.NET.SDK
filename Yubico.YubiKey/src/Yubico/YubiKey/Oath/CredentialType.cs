@@ -41,6 +41,6 @@ namespace Yubico.YubiKey.Oath
         /// It expires after 15, 30 or 60 seconds.
         /// The algorithm is specified in RFC 6238.
         /// </remarks>
-        Totp = 0x20,
+        Totp = 0x20
     }
 }

@@ -159,7 +159,7 @@ namespace Yubico.YubiKey.Piv.Commands
             return new CommandApdu
             {
                 Ins = PivMetadataInstruction,
-                P2 = SlotNumber,
+                P2 = SlotNumber
             };
         }
 

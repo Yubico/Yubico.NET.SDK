@@ -37,11 +37,11 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
 
             ReadOnlySpan<byte> versionData = ResponseApdu.Data.Span;
 
-            ApplicationVersion version = new ApplicationVersion()
+            var version = new ApplicationVersion()
             {
                 Major = versionData[0],
                 Minor = versionData[1],
-                Patch = versionData[2],
+                Patch = versionData[2]
             };
 
             return version;

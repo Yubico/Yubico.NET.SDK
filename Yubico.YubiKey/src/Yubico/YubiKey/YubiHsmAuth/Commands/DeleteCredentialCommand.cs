@@ -128,7 +128,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
 
         private byte[] BuildDataField()
         {
-            TlvWriter tlvWriter = new TlvWriter();
+            var tlvWriter = new TlvWriter();
             tlvWriter.WriteValue(DataTagConstants.ManagementKey, _managementKey.Span);
             tlvWriter.WriteString(
                 DataTagConstants.Label,

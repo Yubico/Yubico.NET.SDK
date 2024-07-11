@@ -31,7 +31,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 SWConstants.SecurityStatusNotSatisfied => new ResponseStatusPair(
                     ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivSecurityStatusNotSatisfied),
-                _ => base.StatusCodeMap,
+                _ => base.StatusCodeMap
             };
 
         /// <summary>

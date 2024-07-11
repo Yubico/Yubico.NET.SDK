@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             PinUvAuthProtocolBase authProtocol)
         {
             _command = new ConfigCommand(
-                SubCmdToggleAlwaysUv, null, pinUvAuthToken, authProtocol);
+                SubCmdToggleAlwaysUv, subCommandParams: null, pinUvAuthToken, authProtocol);
         }
 
         /// <inheritdoc />

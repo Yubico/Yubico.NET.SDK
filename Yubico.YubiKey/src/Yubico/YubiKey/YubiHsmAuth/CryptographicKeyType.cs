@@ -25,6 +25,6 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// <summary>
         /// AES-128
         /// </summary>
-        Aes128 = 38,
+        Aes128 = 38
     }
 }

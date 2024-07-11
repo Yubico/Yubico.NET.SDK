@@ -99,7 +99,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                         ExceptionMessages.InvalidCredentialRetryDataLength);
                 }
 
-                Credential credential = new Credential(
+                var credential = new Credential(
                     (CryptographicKeyType)credentialRetryElement[CryptoKeyTypeIndex],
                     Encoding.UTF8.GetString(credentialRetryElement[LabelRange].ToArray()),
                     credentialRetryElement[TouchIndex] != 0);

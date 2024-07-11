@@ -66,6 +66,6 @@ namespace Yubico.YubiKey.Fido2
         /// <summary>
         /// Identifier for Platform-Managed Enterprise Attestation.
         /// </summary>
-        PlatformManaged = 2,
+        PlatformManaged = 2
     }
 }

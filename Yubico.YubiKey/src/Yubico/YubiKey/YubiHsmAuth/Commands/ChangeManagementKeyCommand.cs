@@ -114,7 +114,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             new CommandApdu()
             {
                 Ins = SetManagementKeyInstruction,
-                Data = BuildDataField(),
+                Data = BuildDataField()
             };
 
         /// <inheritdoc/>
@@ -129,7 +129,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// </returns>
         private byte[] BuildDataField()
         {
-            TlvWriter tlvWriter = new TlvWriter();
+            var tlvWriter = new TlvWriter();
             tlvWriter.WriteValue(DataTagConstants.ManagementKey, _currentManagementKey.Span);
             tlvWriter.WriteValue(DataTagConstants.ManagementKey, _newManagementKey.Span);
 

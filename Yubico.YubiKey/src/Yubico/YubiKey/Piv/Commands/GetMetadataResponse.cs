@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Piv.Commands
             Status switch
             {
                 ResponseStatus.Success => new PivMetadata(ResponseApdu.Data.ToArray(), SlotNumber),
-                _ => throw new InvalidOperationException(StatusMessage),
+                _ => throw new InvalidOperationException(StatusMessage)
             };
     }
 }

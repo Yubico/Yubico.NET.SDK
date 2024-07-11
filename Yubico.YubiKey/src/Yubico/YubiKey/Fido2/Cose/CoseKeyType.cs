@@ -37,6 +37,6 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// <summary>
         /// Symmetric keys
         /// </summary>
-        Symmetric = 4,
+        Symmetric = 4
     }
 }

@@ -61,7 +61,7 @@ namespace Yubico.YubiKey.Pipelines
                     (byte)U2f.U2fHidStatus.Ctap1ErrInvalidCommand => SWConstants.CommandNotAllowed,
                     (byte)U2f.U2fHidStatus.Ctap1ErrInvalidParameter => SWConstants.InvalidParameter,
                     (byte)U2f.U2fHidStatus.Ctap1ErrInvalidLength => SWConstants.WrongLength,
-                    _ => SWConstants.NoPreciseDiagnosis,
+                    _ => SWConstants.NoPreciseDiagnosis
                 };
 
             return new ResponseApdu(responseData.ToArray(), statusWord);
@@ -94,7 +94,7 @@ namespace Yubico.YubiKey.Pipelines
             ctapStatus switch
             {
                 CtapStatus.Ok => SWConstants.Success,
-                _ => unchecked((short)((SW1Constants.NoPreciseDiagnosis << 8) | (byte)ctapStatus))
+                _ => unchecked((short)(SW1Constants.NoPreciseDiagnosis << 8 | (byte)ctapStatus))
             };
     }
 }

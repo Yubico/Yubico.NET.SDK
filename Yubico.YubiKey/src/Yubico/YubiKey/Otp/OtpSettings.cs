@@ -138,7 +138,10 @@ namespace Yubico.YubiKey.Otp
                 // We would never use this for performance sensitive code,
                 // but if we're throwing this exception, that's not a concern
                 // here.
-                static int GetBitCount(Flag b) => Convert.ToString((byte)b, 2).ToCharArray().Count(c => c == '1');
+                static int GetBitCount(Flag b)
+                {
+                    return Convert.ToString((byte)b, toBase: 2).ToCharArray().Count(c => c == '1');
+                }
             }
         }
 
@@ -248,105 +251,105 @@ namespace Yubico.YubiKey.Otp
             new Dictionary<Flag, OtpFlagItem>
             {
                 [Flag.OathHotP] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_1_0,
-                    ticket: 0b1 << 6,
+                    FirmwareVersion.V2_1_0,
+                    0b1 << 6,
                     invalidFlags: Flag.ChallengeResponseMode),
                 [Flag.SendTabFirst] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.All,
-                    ticket: 0b1 << 0),
+                    FirmwareVersion.All,
+                    0b1 << 0),
                 [Flag.AppendTabToFixed] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.All,
-                    ticket: 0b1 << 1),
+                    FirmwareVersion.All,
+                    0b1 << 1),
                 [Flag.AppendTabToOtp] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.All,
-                    ticket: 0b1 << 2),
+                    FirmwareVersion.All,
+                    0b1 << 2),
                 [Flag.AppendDelayToFixed] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.All,
-                    ticket: 0b1 << 3),
+                    FirmwareVersion.All,
+                    0b1 << 3),
                 [Flag.AppendDelayToOtp] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.All,
-                    ticket: 0b1 << 4),
+                    FirmwareVersion.All,
+                    0b1 << 4),
                 [Flag.AppendCarriageReturn] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.All,
-                    ticket: 0b1 << 5),
+                    FirmwareVersion.All,
+                    0b1 << 5),
                 [Flag.ProtectLongPressSlot] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_0_0,
-                    ticket: 0b1 << 7),
+                    FirmwareVersion.V2_0_0,
+                    0b1 << 7),
                 [Flag.SerialNumberButtonVisible] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_2_0,
+                    FirmwareVersion.V2_2_0,
                     extended: 0b1 << 0),
                 [Flag.SerialNumberUsbVisible] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_2_0,
+                    FirmwareVersion.V2_2_0,
                     extended: 0b1 << 1),
                 [Flag.SerialNumberApiVisible] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_2_0,
+                    FirmwareVersion.V2_2_0,
                     extended: 0b1 << 2),
                 [Flag.UseNumericKeypad] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_3_0,
+                    FirmwareVersion.V2_3_0,
                     extended: 0b1 << 3),
                 [Flag.FastTrigger] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_3_0,
+                    FirmwareVersion.V2_3_0,
                     extended: 0b1 << 4),
                 [Flag.AllowUpdate] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_3_0,
+                    FirmwareVersion.V2_3_0,
                     extended: 0b1 << 5),
                 [Flag.Dormant] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_3_0,
+                    FirmwareVersion.V2_3_0,
                     extended: 0b1 << 6),
                 [Flag.InvertLed] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_4_0,
+                    FirmwareVersion.V2_4_0,
                     extended: 0b1 << 7),
                 [Flag.SendReferenceString] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.All,
+                    FirmwareVersion.All,
                     config: 0b1 << 0),
                 [Flag.TicketFirst] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.All,
+                    FirmwareVersion.All,
                     config: 0b1 << 1),
                 [Flag.ShortTicket] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_0_0,
+                    FirmwareVersion.V2_0_0,
                     config: 0b1 << 1,
                     requiredOrFlags: Flag.StaticTicket),
                 [Flag.StaticPasswordMode] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_0_0,
+                    FirmwareVersion.V2_0_0,
                     config: 0b1 << 1,
                     invalidFlags: Flag.StaticTicket),
                 [Flag.Use8DigitHotp] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_1_0,
+                    FirmwareVersion.V2_1_0,
                     config: 0b1 << 1,
                     requiredOrFlags: Flag.OathHotP),
                 [Flag.Use10msPacing] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.All,
+                    FirmwareVersion.All,
                     config: 0b1 << 2,
                     invalidFlags: Flag.ChallengeResponseMode),
                 [Flag.HmacLessThan64Bytes] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_2_0,
+                    FirmwareVersion.V2_2_0,
                     config: 0b1 << 2,
                     requiredOrFlags: Flag.HmacSha1ChallengeResponse),
                 [Flag.Use20msPacing] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.All,
+                    FirmwareVersion.All,
                     config: 0b1 << 3,
                     invalidFlags: Flag.ChallengeResponseMode),
                 [Flag.UseButtonTrigger] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_2_0,
+                    FirmwareVersion.V2_2_0,
                     config: 0b1 << 3,
                     requiredOrFlags: Flag.ChallengeResponseMode | Flag.StaticTicket),
                 [Flag.AllowHidTrigger] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.All,
+                    FirmwareVersion.All,
                     config: 0b1 << 4),
                 [Flag.UseMixedCasePassword] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_0_0,
+                    FirmwareVersion.V2_0_0,
                     config: 0b1 << 4,
                     requiredOrFlags: Flag.StaticTicket),
                 [Flag.OathFixedModhex1] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_1_0,
+                    FirmwareVersion.V2_1_0,
                     config: 0b1 << 4,
                     requiredOrFlags: Flag.OathHotP),
                 [Flag.StaticTicket] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.All,
+                    FirmwareVersion.All,
                     config: 0b1 << 5,
                     invalidFlags: Flag.ChallengeResponseMode),
                 [Flag.YubicoOtpChallengeResponse] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_2_0,
+                    FirmwareVersion.V2_2_0,
                     config: 0b1 << 5,
                     ticket: 0b1 << 6,
                     invalidFlags:
@@ -354,29 +357,29 @@ namespace Yubico.YubiKey.Otp
                     | Flag.OutputMode
                     | Flag.StaticTicketMode),
                 [Flag.HmacSha1ChallengeResponse] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_2_0,
-                    config: (0b1 << 5) | (0b1 << 1),
+                    FirmwareVersion.V2_2_0,
+                    config: 0b1 << 5 | 0b1 << 1,
                     ticket: 0b1 << 6,
                     invalidFlags:
                     Flag.YubicoOtpChallengeResponse
                     | Flag.OutputMode
                     | Flag.StaticTicketMode),
                 [Flag.UseAlphaNumericPassword] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_0_0,
+                    FirmwareVersion.V2_0_0,
                     config: 0b1 << 6,
                     requiredOrFlags: Flag.StaticTicket),
                 [Flag.OathFixedModhex2] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_1_0,
+                    FirmwareVersion.V2_1_0,
                     config: 0b1 << 6,
                     requiredOrFlags: Flag.OathHotP),
                 [Flag.OathFixedModhex] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_1_0,
-                    config: (0b1 << 4) | (0b1 << 6),
+                    FirmwareVersion.V2_1_0,
+                    config: 0b1 << 4 | 0b1 << 6,
                     requiredOrFlags: Flag.OathHotP),
                 [Flag.AllowManualUpdate] = new OtpFlagItem(
-                    requiredVersion: FirmwareVersion.V2_0_0,
+                    FirmwareVersion.V2_0_0,
                     config: 0b1 << 7,
-                    requiredOrFlags: Flag.StaticTicket),
+                    requiredOrFlags: Flag.StaticTicket)
             };
 
         private class OtpFlagItem
@@ -391,7 +394,7 @@ namespace Yubico.YubiKey.Otp
                 Flag requiredAndFlags = Flag.None)
             {
                 RequiredVersion = requiredVersion;
-                BitMask = ticket | (extended << 8) | (config << 16);
+                BitMask = ticket | extended << 8 | config << 16;
                 InvalidFlags = invalidFlags;
                 RequiredOrFlags = requiredOrFlags;
                 RequiredAndFlags = requiredAndFlags;

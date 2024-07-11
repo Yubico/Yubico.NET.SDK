@@ -320,8 +320,8 @@ namespace Yubico.YubiKey.Piv
         /// <returns>
         /// True if <c>slotNumber</c> is a valid PIV slot, or False otherwise.
         /// </returns>
-        public static bool IsValidSlotNumber(byte slotNumber)
-        {
+        public static bool IsValidSlotNumber(byte slotNumber) =>
+
             // The slots are 80, 81, 82, 83, ..., 95 --- 9A, ..., 9E --- F9
             //              PIN PUK  |<- retired ->|   |<- primary ->|  Attestation
             // Ideally we would like to have a system of checking for valid slot
@@ -329,10 +329,9 @@ namespace Yubico.YubiKey.Piv
             // something that is only dependent on some private const values, but
             // the slots are almost certainly never going to change. If they do
             // change, this code will need to be revisited.
-            return (slotNumber >= Pin && slotNumber <= Retired20)
-                || (slotNumber >= Authentication && slotNumber <= CardAuthentication)
-                || slotNumber == Attestation;
-        }
+            slotNumber >= Pin && slotNumber <= Retired20
+            || slotNumber >= Authentication && slotNumber <= CardAuthentication
+            || slotNumber == Attestation;
 
         /// <summary>
         /// Is the given number a valid slot number for generating asymmetric
@@ -368,13 +367,11 @@ namespace Yubico.YubiKey.Piv
         /// True if <c>slotNumber</c> is a valid PIV asymmetric key slot that can
         /// generate a new key pair, or False otherwise.
         /// </returns>
-        public static bool IsValidSlotNumberForGenerate(byte slotNumber)
-        {
-            return slotNumber != Management
-                && ((slotNumber >= Retired1 && slotNumber <= Retired20)
-                || (slotNumber >= Authentication && slotNumber <= CardAuthentication)
-                || slotNumber == Attestation);
-        }
+        public static bool IsValidSlotNumberForGenerate(byte slotNumber) =>
+            slotNumber != Management
+            && (slotNumber >= Retired1 && slotNumber <= Retired20
+            || slotNumber >= Authentication && slotNumber <= CardAuthentication
+            || slotNumber == Attestation);
 
         /// <summary>
         /// Is the given number a valid slot number for signing arbitrary data.
@@ -406,8 +403,8 @@ namespace Yubico.YubiKey.Piv
         /// True if <c>slotNumber</c> is a valid PIV asymmetric key slot that can
         /// sign, or False otherwise.
         /// </returns>
-        public static bool IsValidSlotNumberForSigning(byte slotNumber)
-        {
+        public static bool IsValidSlotNumberForSigning(byte slotNumber) =>
+
             // Only slots that hold a private asymmetric key, other than F9 can
             // sign. That is, slots 9A, 9C, 9D, 9E, and 82 - 95.
             // Ideally we would like to have a system of checking for valid slot
@@ -415,9 +412,8 @@ namespace Yubico.YubiKey.Piv
             // something that is only dependent on some private const values, but
             // the slots are almost certainly never going to change. If they do
             // change, this code will need to be revisited.
-            return slotNumber != Management
-                && ((slotNumber >= Retired1 && slotNumber <= Retired20)
-                || (slotNumber >= Authentication && slotNumber <= CardAuthentication));
-        }
+            slotNumber != Management
+            && (slotNumber >= Retired1 && slotNumber <= Retired20
+            || slotNumber >= Authentication && slotNumber <= CardAuthentication);
     }
 }

@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             if (Password.Length == 0)
             {
-                tlvWriter.WriteValue(SecretTag, null);
+                tlvWriter.WriteValue(SecretTag, value: null);
             }
             else
             {
@@ -95,7 +95,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
                 byte[] fullKey = new byte[1 + secret.Length];
                 fullKey[0] = (byte)HashAlgorithm.Sha1;
-                Array.Copy(secret, 0, fullKey, 1, secret.Length);
+                Array.Copy(secret, sourceIndex: 0, fullKey, destinationIndex: 1, secret.Length);
 
                 tlvWriter.WriteValue(SecretTag, fullKey);
                 tlvWriter.WriteValue(ChallengeTag, challenge);

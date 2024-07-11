@@ -43,7 +43,7 @@ namespace Yubico.YubiKey.Oath
 
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.VerifyOathPassword,
+                Request = KeyEntryRequest.VerifyOathPassword
             };
 
             try
@@ -179,7 +179,7 @@ namespace Yubico.YubiKey.Oath
 
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.SetOathPassword,
+                Request = KeyEntryRequest.SetOathPassword
             };
 
             try
@@ -374,7 +374,7 @@ namespace Yubico.YubiKey.Oath
 
             var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.VerifyOathPassword,
+                Request = KeyEntryRequest.VerifyOathPassword
             };
 
             try

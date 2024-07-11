@@ -70,7 +70,7 @@ namespace Yubico.YubiKey.Cryptography
             {
                 byte[] data = new byte[sizeof(int)];
                 rng.GetBytes(data);
-                result = mask & BitConverter.ToUInt32(data, 0);
+                result = mask & BitConverter.ToUInt32(data, startIndex: 0);
             }
 
             return (int)result + fromInclusive;
@@ -87,7 +87,7 @@ namespace Yubico.YubiKey.Cryptography
         {
             for (int i = 0; i < data.Length; ++i)
             {
-                data[i] = rng.GetByte(0x00, 0x100);
+                data[i] = rng.GetByte(fromInclusive: 0x00, toExclusive: 0x100);
             }
         }
 

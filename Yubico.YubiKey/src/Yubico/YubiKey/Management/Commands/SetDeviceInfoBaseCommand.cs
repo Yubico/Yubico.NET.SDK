@@ -209,7 +209,7 @@ namespace Yubico.YubiKey.Management.Commands
 
             byte[] dataField = new byte[tlvDataLength + 1];
             dataField[0] = tlvDataLength;
-            tlvData.CopyTo(dataField, 1);
+            tlvData.CopyTo(dataField, index: 1);
 
             // tlvData may contain lock/unlock codes
             CryptographicOperations.ZeroMemory(tlvData);
@@ -263,7 +263,7 @@ namespace Yubico.YubiKey.Management.Commands
 
             if (RestrictNfc)
             {
-                buffer.WriteByte(YubikeyDeviceManagementTags.NfcRestrictedTag, 1);
+                buffer.WriteByte(YubikeyDeviceManagementTags.NfcRestrictedTag, value: 1);
             }
 
             if (TemporaryTouchThreshold.HasValue)

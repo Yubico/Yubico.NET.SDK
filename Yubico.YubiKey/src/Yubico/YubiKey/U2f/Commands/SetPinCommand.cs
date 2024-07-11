@@ -122,19 +122,19 @@ namespace Yubico.YubiKey.U2f.Commands
             byte[] payload = new byte[1 + CurrentPin.Length + NewPin.Length];
 
             payload[0] = (byte)NewPin.Length;
-            Array.Copy(CurrentPin.ToArray(), 0, payload, 1, CurrentPin.Length);
-            Array.Copy(NewPin.ToArray(), 0, payload, CurrentPin.Length + 1, NewPin.Length);
+            Array.Copy(CurrentPin.ToArray(), sourceIndex: 0, payload, destinationIndex: 1, CurrentPin.Length);
+            Array.Copy(NewPin.ToArray(), sourceIndex: 0, payload, CurrentPin.Length + 1, NewPin.Length);
 
             var innerCommand = new CommandApdu()
             {
                 Ins = SetPinInstruction,
-                Data = payload,
+                Data = payload
             };
 
             return new CommandApdu()
             {
                 Ins = Ctap1MessageInstruction,
-                Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength),
+                Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength)
             };
         }
 

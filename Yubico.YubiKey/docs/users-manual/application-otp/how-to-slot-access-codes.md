@@ -43,8 +43,10 @@ Access codes can only be set, reset, or removed during another slot configuratio
 
 > [!NOTE]
 > If a slot is configured with an access code,
-> calling [ConfigureNdef()](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureNdef%28Yubico.YubiKey.Otp.Slot%29) will fail, even
-> if the correct access code is provided during the operation. Similarly, if a slot is not configured with an access code,
+> calling [ConfigureNdef()](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureNdef%28Yubico.YubiKey.Otp.Slot%29) will fail,
+> even
+> if the correct access code is provided during the operation. Similarly, if a slot is not configured with an access
+> code,
 > you cannot set one when calling ``ConfigureNdef()``.
 
 ## Slot access code properties

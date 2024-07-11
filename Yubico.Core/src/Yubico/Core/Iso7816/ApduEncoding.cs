@@ -15,22 +15,22 @@
 namespace Yubico.Core.Iso7816
 {
     /// <summary>
-    ///     Represents encoding options for an APDU's length fields.
+    /// Represents encoding options for an APDU's length fields.
     /// </summary>
     public enum ApduEncoding
     {
         /// <summary>
-        ///     Automatically determine the encoding length.
+        /// Automatically determine the encoding length.
         /// </summary>
         Automatic = 0,
 
         /// <summary>
-        ///     Use short encoding.
+        /// Use short encoding.
         /// </summary>
         ShortLength = 1,
 
         /// <summary>
-        ///     Use extended encoding.
+        /// Use extended encoding.
         /// </summary>
         ExtendedLength = 2
     }

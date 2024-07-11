@@ -22,6 +22,12 @@ namespace Yubico.Core.Devices.Hid
         // The SDK device instance that created this connection instance.
         private readonly WindowsHidDevice _device;
 
+        // The underlying Windows HID device used for communication.
+        private IHidDDevice HidDDevice { get; set; }
+
+        public int InputReportSize { get; private set; }
+        public int OutputReportSize { get; private set; }
+
         internal WindowsHidFeatureReportConnection(WindowsHidDevice device, string path)
         {
             _device = device;
@@ -29,11 +35,12 @@ namespace Yubico.Core.Devices.Hid
             SetupConnection();
         }
 
-        // The underlying Windows HID device used for communication.
-        private IHidDDevice HidDDevice { get; }
-
-        public int InputReportSize { get; private set; }
-        public int OutputReportSize { get; private set; }
+        private void SetupConnection()
+        {
+            HidDDevice.OpenFeatureConnection();
+            InputReportSize = HidDDevice.FeatureReportByteLength;
+            OutputReportSize = HidDDevice.FeatureReportByteLength;
+        }
 
         public byte[] GetReport()
         {
@@ -48,13 +55,6 @@ namespace Yubico.Core.Devices.Hid
         {
             HidDDevice.SetFeatureReport(report);
             _device.LogDeviceAccessTime();
-        }
-
-        private void SetupConnection()
-        {
-            HidDDevice.OpenFeatureConnection();
-            InputReportSize = HidDDevice.FeatureReportByteLength;
-            OutputReportSize = HidDDevice.FeatureReportByteLength;
         }
 
         #region IDisposable Support

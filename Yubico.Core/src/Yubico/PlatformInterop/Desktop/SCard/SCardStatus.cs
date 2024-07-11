@@ -19,34 +19,34 @@ namespace Yubico.PlatformInterop
         UNKNOWN = 0,
 
         /// <summary>
-        ///     There is no card in the reader.
+        /// There is no card in the reader.
         /// </summary>
         ABSENT = 1,
 
         /// <summary>
-        ///     There is a card in the reader, but it has not been moved into position for use.
+        /// There is a card in the reader, but it has not been moved into position for use.
         /// </summary>
         PRESENT = 2,
 
         /// <summary>
-        ///     There is a card in the reader in position for use. The card is not powered.
+        /// There is a card in the reader in position for use. The card is not powered.
         /// </summary>
         SWALLOWED = 3,
 
         /// <summary>
-        ///     Power is being provided to the card, but the reader driver is unaware of the mode of
-        ///     the card.
+        /// Power is being provided to the card, but the reader driver is unaware of the mode of
+        /// the card.
         /// </summary>
         POWERED = 4,
 
         /// <summary>
-        ///     The card has been reset and is awaiting PTS negotiation.
+        /// The card has been reset and is awaiting PTS negotiation.
         /// </summary>
         NEGOTIABLE = 5,
 
         /// <summary>
-        ///     The card has been reset and specific communication protocols have been established.
+        /// The card has been reset and specific communication protocols have been established.
         /// </summary>
-        SPECIFIC = 6
+        SPECIFIC = 6,
     }
 }

@@ -19,30 +19,6 @@ namespace Yubico.PlatformInterop
 {
     internal static partial class NativeMethods
     {
-        public delegate void IOHIDCallback(IntPtr context, int result, IntPtr sender);
-
-        public delegate void IOHIDDeviceCallback(IntPtr context, int result, IntPtr sender, IntPtr device);
-
-        /*! @typedef IOHIDReportCallback
-            @discussion Type and arguments of callout C function that is used when a HID report completion routine is called.
-            @param context void * pointer to your data, often a pointer to an object.
-            @param result Completion result of desired operation.
-            @param sender Interface instance sending the completion routine.
-            @param type The type of the report that was completed.
-            @param reportID The ID of the report that was completed.
-            @param report Pointer to the buffer containing the contents of the report.
-            @param reportLength Size of the buffer received upon completion.
-        */
-        public delegate void IOHIDReportCallback(
-            IntPtr context,
-            int result,
-            IntPtr sender,
-            int type,
-            int reportId,
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 6)]
-            byte[] report,
-            long reportLength);
-
         /*!
             @function   IOHIDManagerCreate
             @abstract   Creates an IOHIDManager object.
@@ -88,6 +64,8 @@ namespace Yubico.PlatformInterop
         [DllImport(Libraries.IOKitFramework)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         internal static extern IntPtr IOHIDManagerCopyDevices(IntPtr manager); /* OS >= 10.5 */
+
+        public delegate void IOHIDDeviceCallback(IntPtr context, int result, IntPtr sender, IntPtr device);
 
         /*! @function   IOHIDManagerRegisterDeviceMatchingCallback
             @abstract   Registers a callback to be used a device is enumerated.
@@ -280,6 +258,26 @@ namespace Yubico.PlatformInterop
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         internal static extern int IOHIDDeviceGetService(IntPtr device);
 
+        /*! @typedef IOHIDReportCallback
+            @discussion Type and arguments of callout C function that is used when a HID report completion routine is called.
+            @param context void * pointer to your data, often a pointer to an object.
+            @param result Completion result of desired operation.
+            @param sender Interface instance sending the completion routine.
+            @param type The type of the report that was completed.
+            @param reportID The ID of the report that was completed.
+            @param report Pointer to the buffer containing the contents of the report.
+            @param reportLength Size of the buffer received upon completion.
+        */
+        public delegate void IOHIDReportCallback(
+            IntPtr context,
+            int result,
+            IntPtr sender,
+            int type,
+            int reportId,
+            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 6)]
+            byte[] report,
+            long reportLength);
+
         /*! @function   IOHIDDeviceRegisterInputReportCallback
             @abstract   Registers a callback to be used when an input report is issued
                         by the device.
@@ -337,6 +335,8 @@ namespace Yubico.PlatformInterop
             IntPtr device,
             IntPtr runLoop,
             IntPtr runLoopMode);
+
+        public delegate void IOHIDCallback(IntPtr context, int result, IntPtr sender);
 
         /*! @function   IOHIDDeviceRegisterRemovalCallback
             @abstract   Registers a callback to be used when a IOHIDDevice is removed.

@@ -23,7 +23,7 @@ using static Yubico.PlatformInterop.NativeMethods;
 namespace Yubico.Core.Devices.Hid
 {
     /// <summary>
-    ///     macOS implementation of a Human Interface Device (HID)
+    /// macOS implementation of a Human Interface Device (HID)
     /// </summary>
     internal class MacOSHidDevice : HidDevice
     {
@@ -41,10 +41,10 @@ namespace Yubico.Core.Devices.Hid
         }
 
         /// <summary>
-        ///     Return a list of all HID devices on the system. No filtering is done here.
+        /// Return a list of all HID devices on the system. No filtering is done here.
         /// </summary>
         /// <returns>
-        ///     An enumerable list of all the HID devices present on the system.
+        /// An enumerable list of all the HID devices present on the system.
         /// </returns>
         public static IEnumerable<HidDevice> GetList()
         {
@@ -56,7 +56,7 @@ namespace Yubico.Core.Devices.Hid
 
             try
             {
-                manager = IOHIDManagerCreate(IntPtr.Zero, options: 0);
+                manager = IOHIDManagerCreate(IntPtr.Zero, 0);
                 IOHIDManagerSetDeviceMatching(manager, IntPtr.Zero);
 
                 deviceSet = IOHIDManagerCopyDevices(manager);
@@ -103,18 +103,18 @@ namespace Yubico.Core.Devices.Hid
         }
 
         /// <summary>
-        ///     Establishes a connection capable of transmitting feature reports to a keyboard device.
+        /// Establishes a connection capable of transmitting feature reports to a keyboard device.
         /// </summary>
         /// <returns>
-        ///     An active connection object.
+        /// An active connection object.
         /// </returns>
         public override IHidConnection ConnectToFeatureReports() => new MacOSHidFeatureReportConnection(this, _entryId);
 
         /// <summary>
-        ///     Establishes a connection capable of transmitting IO reports to a FIDO device.
+        /// Establishes a connection capable of transmitting IO reports to a FIDO device.
         /// </summary>
         /// <returns>
-        ///     An active connection object.
+        /// An active connection object.
         /// </returns>
         public override IHidConnection ConnectToIOReports() => new MacOSHidIOReportConnection(this, _entryId);
 

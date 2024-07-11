@@ -19,12 +19,36 @@ using System.Linq;
 namespace Yubico.Core.Iso7816
 {
     /// <summary>
-    ///     Represents an ISO 7816 application response.
+    /// Represents an ISO 7816 application response.
     /// </summary>
     public class ResponseApdu
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ResponseApdu" /> class.
+        /// The status word (two byte) code which represents the overall result of a CCID interaction.
+        /// The most common value is 0x9000 which represents a successful result.
+        /// </summary>
+        public short SW => (short)((SW1 << 8) | SW2);
+
+        /// <summary>
+        /// A convenience property accessor for the high byte of SW
+        /// </summary>
+        public byte SW1 { get; private set; }
+
+        /// <summary>
+        /// A convenience property accessor for the low byte of SW
+        /// </summary>
+        public byte SW2 { get; private set; }
+
+        /// <summary>
+        /// Gets the data part of the response.
+        /// </summary>
+        /// <value>
+        /// The raw bytes not including the ending status word.
+        /// </value>
+        public ReadOnlyMemory<byte> Data { get; private set; }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ResponseApdu"/> class.
         /// </summary>
         /// <param name="data">The raw data returned by the ISO 7816 smart card.</param>
         public ResponseApdu(byte[] data)
@@ -47,12 +71,10 @@ namespace Yubico.Core.Iso7816
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="ResponseApdu" /> class.
+        /// Initializes a new instance of the <see cref="ResponseApdu"/> class.
         /// </summary>
-        /// <param name="dataWithoutSW">
-        ///     The raw data returned by the ISO 7816 smart card without the
-        ///     trailing status bytes.
-        /// </param>
+        /// <param name="dataWithoutSW">The raw data returned by the ISO 7816 smart card without the
+        /// trailing status bytes.</param>
         /// <param name="sw">The status word, 'SW', for the APDU response.</param>
         public ResponseApdu(byte[] dataWithoutSW, short sw)
         {
@@ -65,29 +87,5 @@ namespace Yubico.Core.Iso7816
             SW2 = (byte)(sw & 0xFF);
             Data = dataWithoutSW.ToArray();
         }
-
-        /// <summary>
-        ///     The status word (two byte) code which represents the overall result of a CCID interaction.
-        ///     The most common value is 0x9000 which represents a successful result.
-        /// </summary>
-        public short SW => (short)(SW1 << 8 | SW2);
-
-        /// <summary>
-        ///     A convenience property accessor for the high byte of SW
-        /// </summary>
-        public byte SW1 { get; }
-
-        /// <summary>
-        ///     A convenience property accessor for the low byte of SW
-        /// </summary>
-        public byte SW2 { get; }
-
-        /// <summary>
-        ///     Gets the data part of the response.
-        /// </summary>
-        /// <value>
-        ///     The raw bytes not including the ending status word.
-        /// </value>
-        public ReadOnlyMemory<byte> Data { get; private set; }
     }
 }

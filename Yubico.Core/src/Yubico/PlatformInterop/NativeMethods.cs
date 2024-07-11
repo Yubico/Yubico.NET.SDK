@@ -20,19 +20,6 @@ namespace Yubico.PlatformInterop
 {
     internal static partial class NativeMethods
     {
-        [Flags]
-        public enum DlOpenFlags
-        {
-            Lazy = 0x1,
-            Now = 0x2,
-            BindingMask = Lazy | Now,
-            NoLoad = 0x4,
-            DeepBind = 0x8,
-            Global = 0x100,
-            Local = 0x0,
-            NoDelete = 0x1000
-        }
-
         private const string Kernel32Dll = "kernel32.dll";
         private const string MacDlLib = "libdl.dylib";
         private const string LinuxDlLib = "libdl.so";
@@ -54,6 +41,19 @@ namespace Yubico.PlatformInterop
             Kernel32Dll, CharSet = CharSet.Ansi, BestFitMapping = false, SetLastError = true, ExactSpelling = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
         public static extern IntPtr GetProcAddress(SafeLibraryHandle hModule, string methodName);
+
+        [Flags]
+        public enum DlOpenFlags
+        {
+            Lazy = 0x1,
+            Now = 0x2,
+            BindingMask = Lazy | Now,
+            NoLoad = 0x4,
+            DeepBind = 0x8,
+            Global = 0x100,
+            Local = 0x0,
+            NoDelete = 0x1000,
+        }
 
         [SuppressMessage(
             "Globalization", "CA2101:Specify marshaling for P/Invoke string arguments",

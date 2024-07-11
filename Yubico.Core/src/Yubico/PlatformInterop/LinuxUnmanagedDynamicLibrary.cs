@@ -50,9 +50,11 @@ namespace Yubico.PlatformInterop
                 d = Marshal.GetDelegateForFunctionPointer<TDelegate>(p);
                 return true;
             }
-
-            d = null;
-            return false;
+            else
+            {
+                d = null;
+                return false;
+            }
         }
     }
 }

@@ -29,6 +29,7 @@ namespace Yubico.PlatformInterop
     [SuppressMessage("Style", "IDE0044:Add readonly modifier")]
     internal struct SCARD_READER_STATE
     {
+        [MarshalAs(UnmanagedType.LPStr)] private string _readerName;
         private IntPtr _userData;
         private uint _currentState;
         private uint _eventState;
@@ -40,14 +41,17 @@ namespace Yubico.PlatformInterop
         private const uint SequenceMask = 0xFFFF_0000;
         private const uint StateMask = 0x0000_FFFF;
 
-        [field: MarshalAs(UnmanagedType.LPStr)]
-        public string ReaderName { get; set; }
+        public string ReaderName
+        {
+            get => _readerName;
+            set => _readerName = value;
+        }
 
         public SCARD_STATE CurrentState => (SCARD_STATE)(_currentState & StateMask);
         public SCARD_STATE EventState => (SCARD_STATE)(_eventState & StateMask);
         public int CurrentSequence => (int)(_currentState & SequenceMask) >> 16;
         public int EventSequence => (int)(_eventState & SequenceMask) >> 16;
-        public AnswerToReset Atr => new AnswerToReset(_answerToReset.AsSpan(start: 0, (int)_atrLength));
+        public AnswerToReset Atr => new AnswerToReset(_answerToReset.AsSpan(0, (int)_atrLength));
 
         public static SCARD_READER_STATE[] CreateFromReaderNames(IEnumerable<string> readerNames) =>
             readerNames.Select(r => new SCARD_READER_STATE { ReaderName = r }).ToArray();

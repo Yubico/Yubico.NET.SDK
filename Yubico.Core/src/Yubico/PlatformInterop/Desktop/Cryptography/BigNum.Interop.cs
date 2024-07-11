@@ -26,14 +26,14 @@ namespace Yubico.PlatformInterop
         private static extern IntPtr BnBinaryToBigNum(byte[] buffer, int length, IntPtr ret);
 
         public static SafeBigNum BnBinaryToBigNum(byte[] buffer) =>
-            new SafeBigNum(BnBinaryToBigNum(buffer, buffer.Length, IntPtr.Zero), ownsHandle: true);
+            new SafeBigNum(BnBinaryToBigNum(buffer, buffer.Length, IntPtr.Zero), true);
 
         // BIGNUM* BN_new();
         [DllImport(Libraries.NativeShims, EntryPoint = "Native_BN_new", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern IntPtr BnNewIntPtr();
 
-        public static SafeBigNum BnNew() => new SafeBigNum(BnNewIntPtr(), ownsHandle: true);
+        public static SafeBigNum BnNew() => new SafeBigNum(BnNewIntPtr(), true);
 
         // void BN_clear_free(BIGNUM* a);
         [DllImport(

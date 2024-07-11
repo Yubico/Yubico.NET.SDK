@@ -40,8 +40,7 @@ namespace Yubico.PlatformInterop
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern IntPtr CmacEvpMacCtxNewIntPtr();
 
-        public static SafeEvpCmacCtx CmacEvpMacCtxNew() =>
-            new SafeEvpCmacCtx(CmacEvpMacCtxNewIntPtr(), ownsHandle: true);
+        public static SafeEvpCmacCtx CmacEvpMacCtxNew() => new SafeEvpCmacCtx(CmacEvpMacCtxNewIntPtr(), true);
 
         // void EVP_MAC_CTX_free(EVP_MAC_CTX* c);
         [DllImport(

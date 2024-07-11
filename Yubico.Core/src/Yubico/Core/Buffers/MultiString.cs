@@ -20,13 +20,13 @@ using System.Text;
 namespace Yubico.Core.Buffers
 {
     /// <summary>
-    ///     Utilities for working with multi null-terminated strings.
+    /// Utilities for working with multi null-terminated strings.
     /// </summary>
     public static class MultiString
     {
         /// <summary>
-        ///     Converts the byte array representing a multi-null-terminated string and return them as
-        ///     .NET strings.
+        /// Converts the byte array representing a multi-null-terminated string and return them as
+        /// .NET strings.
         /// </summary>
         /// <param name="value">Multi-string to convert.</param>
         /// <param name="encoding">Encoding to use for interpreting the strings.</param>
@@ -40,11 +40,11 @@ namespace Yubico.Core.Buffers
 
             return encoding
                 .GetString(value)
-                .Split(new[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
+                .Split(new char[] { '\0' }, StringSplitOptions.RemoveEmptyEntries);
         }
 
         /// <summary>
-        ///     Converts an array of strings to a multi-null-terminated string.
+        /// Converts an array of strings to a multi-null-terminated string.
         /// </summary>
         /// <param name="value">Array of strings.</param>
         /// <param name="encoding">Encoding to apply to the multi-string.</param>

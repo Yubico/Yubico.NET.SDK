@@ -23,6 +23,13 @@ namespace Yubico.PlatformInterop
 {
     internal class CmPropertyAccessHelper
     {
+        internal delegate CmErrorCode GetObjectProperty<T>(
+            T ObjectId,
+            in DEVPROPKEY propertyKey,
+            out DEVPROP_TYPE propertyType,
+            byte[]? propertyBuffer,
+            ref IntPtr propertyBufferSize);
+
         internal static object? TryGetProperty<T>(
             GetObjectProperty<T> getObjectProperty,
             T objectId,
@@ -35,7 +42,7 @@ namespace Yubico.PlatformInterop
                 objectId,
                 propertyKey,
                 out DEVPROP_TYPE propertyType,
-                propertyBuffer: null,
+                null,
                 ref propertyBufferSize
                 );
 
@@ -43,8 +50,7 @@ namespace Yubico.PlatformInterop
             {
                 return default;
             }
-
-            if (errorCode != CmErrorCode.CR_BUFFER_SMALL)
+            else if (errorCode != CmErrorCode.CR_BUFFER_SMALL)
             {
                 throw new PlatformApiException(
                     "CONFIG_RET",
@@ -98,12 +104,5 @@ namespace Yubico.PlatformInterop
                     throw new NotSupportedException($"GetProperty does not support properties of type {propertyType}");
             }
         }
-
-        internal delegate CmErrorCode GetObjectProperty<T>(
-            T ObjectId,
-            in DEVPROPKEY propertyKey,
-            out DEVPROP_TYPE propertyType,
-            byte[]? propertyBuffer,
-            ref IntPtr propertyBufferSize);
     }
 }

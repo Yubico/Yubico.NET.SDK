@@ -14,13 +14,15 @@
 
 using System;
 using System.Buffers.Binary;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 
 namespace Yubico.Core.Iso7816
 {
     /// <summary>
-    ///     Represents an ISO 7816 application command
+    /// Represents an ISO 7816 application command
     /// </summary>
     public class CommandApdu
     {
@@ -31,66 +33,57 @@ namespace Yubico.Core.Iso7816
         private int _ne;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="CommandApdu" /> class.
-        /// </summary>
-        public CommandApdu()
-        {
-        }
-
-        /// <summary>
-        ///     Indicates the class of the instruction.
+        /// Indicates the class of the instruction.
         /// </summary>
         public byte Cla { get; set; }
 
         /// <summary>
-        ///     Indicates the command or instruction to process.
+        /// Indicates the command or instruction to process.
         /// </summary>
         public byte Ins { get; set; }
 
         /// <summary>
-        ///     First parameter byte.
+        /// First parameter byte.
         /// </summary>
         public byte P1 { get; set; }
 
         /// <summary>
-        ///     Second parameter byte.
+        /// Second parameter byte.
         /// </summary>
         public byte P2 { get; set; }
 
         /// <summary>
-        ///     Gets or sets the optional command data payload.
+        /// Gets or sets the optional command data payload.
         /// </summary>
         public ReadOnlyMemory<byte> Data { get; set; } = ReadOnlyMemory<byte>.Empty;
 
         /// <summary>
-        ///     The number of bytes in <see cref="Data" />.
+        /// The number of bytes in <see cref="Data"/>.
         /// </summary>
         /// <remarks>
-        ///     If <see cref="Data" /> is <c>null</c>, returns 0.
+        /// If <see cref="Data"/> is <c>null</c>, returns 0.
         /// </remarks>
         public int Nc => Data.Length;
 
         /// <summary>
-        ///     The maximum number of bytes expected in the response data.
-        ///     Must be a non-negative number.
+        /// The maximum number of bytes expected in the response data.
+        /// Must be a non-negative number.
         /// </summary>
         /// <remarks>
-        ///     Values of note:
-        ///     <list type="bullet">
-        ///         <item>
-        ///             <term>0</term>
-        ///             <description>No data is expected to be returned.</description>
-        ///         </item>
-        ///         <item>
-        ///             <term>
-        ///                 <see cref="int.MaxValue" />
-        ///             </term>
-        ///             <description>
-        ///                 Maximum value according to the encoding used. See <see cref="AsByteArray()" />
-        ///                 and <see cref="AsByteArray(ApduEncoding)" />.
-        ///             </description>
-        ///         </item>
-        ///     </list>
+        /// Values of note:
+        /// <list type="bullet">
+        /// <item>
+        /// <term>0</term>
+        /// <description>No data is expected to be returned.</description>
+        /// </item>
+        /// <item>
+        /// <term><see cref="int.MaxValue"/></term>
+        /// <description>
+        /// Maximum value according to the encoding used. See <see cref="AsByteArray()"/>
+        /// and <see cref="AsByteArray(ApduEncoding)"/>.
+        /// </description>
+        /// </item>
+        /// </list>
         /// </remarks>
         public int Ne
         {
@@ -102,42 +95,51 @@ namespace Yubico.Core.Iso7816
                 {
                     throw new ArgumentOutOfRangeException(nameof(Ne), ExceptionMessages.CommandApduNeRangeError);
                 }
-
-                _ne = value;
+                else
+                {
+                    _ne = value;
+                }
             }
         }
 
         /// <summary>
-        ///     Transforms the CommandApdu into an array of bytes.
+        /// Initializes a new instance of the <see cref="CommandApdu"/> class.
+        /// </summary>
+        public CommandApdu()
+        {
+        }
+
+        /// <summary>
+        /// Transforms the CommandApdu into an array of bytes.
         /// </summary>
         /// <remarks>
-        ///     Automatically determines the appropriate encoding to use.
-        ///     See also <seealso cref="AsByteArray(ApduEncoding)" />.
+        /// Automatically determines the appropriate encoding to use.
+        /// See also <seealso cref="AsByteArray(ApduEncoding)"/>.
         /// </remarks>
         /// <returns>An array of bytes representing an ISO 7816 CommandApdu.</returns>
         /// <exception cref="InvalidOperationException">
-        ///     Thrown when no valid <see cref="ApduEncoding" /> scheme is found for the
-        ///     current state of <see cref="CommandApdu" />.
+        /// Thrown when no valid <see cref="ApduEncoding"/> scheme is found for the
+        /// current state of <see cref="CommandApdu"/>.
         /// </exception>
         public byte[] AsByteArray() => AsByteArray(ApduEncoding.Automatic);
 
         /// <summary>
-        ///     Transforms the CommandApdu into an array of bytes.
+        /// Transforms the CommandApdu into an array of bytes.
         /// </summary>
         /// <remarks>
-        ///     All <see cref="CommandApdu" /> fields must be valid for the given
-        ///     <paramref name="apduEncoding" />.
+        /// All <see cref="CommandApdu"/> fields must be valid for the given
+        /// <paramref name="apduEncoding"/>.
         /// </remarks>
         /// <param name="apduEncoding">
-        ///     The <see cref="ApduEncoding" /> in which the output is written.
+        /// The <see cref="ApduEncoding"/> in which the output is written.
         /// </param>
         /// <returns>An array of bytes representing an ISO 7816 CommandApdu.</returns>
         /// <exception cref="InvalidOperationException">
-        ///     Thrown when no valid <see cref="ApduEncoding" /> scheme is found for the
-        ///     current state of <see cref="CommandApdu" />.
+        /// Thrown when no valid <see cref="ApduEncoding"/> scheme is found for the
+        /// current state of <see cref="CommandApdu"/>.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        ///     Thrown when <paramref name="apduEncoding" /> is invalid.
+        /// Thrown when <paramref name="apduEncoding"/> is invalid.
         /// </exception>
         public byte[] AsByteArray(ApduEncoding apduEncoding)
         {
@@ -175,13 +177,14 @@ namespace Yubico.Core.Iso7816
             {
                 return ApduEncoding.ShortLength;
             }
-
-            if (ValidNc(ApduEncoding.ExtendedLength) && ValidNe(ApduEncoding.ExtendedLength))
+            else if (ValidNc(ApduEncoding.ExtendedLength) && ValidNe(ApduEncoding.ExtendedLength))
             {
                 return ApduEncoding.ExtendedLength;
             }
-
-            throw new InvalidOperationException(ExceptionMessages.CommandApduNoValidEncoding);
+            else
+            {
+                throw new InvalidOperationException(ExceptionMessages.CommandApduNoValidEncoding);
+            }
         }
 
         // Returns the inclusive upper bound for a data length value.
@@ -194,7 +197,7 @@ namespace Yubico.Core.Iso7816
                 ApduEncoding.Automatic => maximumSizeExtendedEncoding,
                 ApduEncoding.ShortLength => maximumSizeShortEncoding,
                 ApduEncoding.ExtendedLength => maximumSizeExtendedEncoding,
-                _ => throw new ArgumentOutOfRangeException(nameof(apduEncoding))
+                _ => throw new ArgumentOutOfRangeException(nameof(apduEncoding)),
             };
 
         // Checks that Nc is valid, given the encoding.
@@ -210,7 +213,7 @@ namespace Yubico.Core.Iso7816
         {
             int inclusiveUpperBound = GetInclusiveUpperBound(apduEncoding);
 
-            return Ne == int.MaxValue || Ne >= 0 && Ne <= inclusiveUpperBound;
+            return Ne == int.MaxValue || (Ne >= 0 && Ne <= inclusiveUpperBound);
         }
 
         // Validates Nc, then returns the Lc field as a byte array in the given encoding.
@@ -221,15 +224,17 @@ namespace Yubico.Core.Iso7816
             {
                 throw new ArgumentOutOfRangeException(nameof(apduEncoding));
             }
-
-            if (!ValidNc(apduEncoding))
+            else
             {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.CommandApduFieldOutOfRangeEncoding,
-                        nameof(Nc),
-                        Enum.GetName(typeof(ApduEncoding), apduEncoding)));
+                if (!ValidNc(apduEncoding))
+                {
+                    throw new InvalidOperationException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.CommandApduFieldOutOfRangeEncoding,
+                            nameof(Nc),
+                            Enum.GetName(typeof(ApduEncoding), apduEncoding)));
+                }
             }
 
             byte[] lcField = Array.Empty<byte>();
@@ -256,7 +261,7 @@ namespace Yubico.Core.Iso7816
                         lcValue = 0;
                     }
 
-                    lcField = new[] { (byte)lcValue };
+                    lcField = new byte[] { (byte)lcValue };
                 }
             }
 
@@ -271,15 +276,17 @@ namespace Yubico.Core.Iso7816
             {
                 throw new ArgumentOutOfRangeException(nameof(apduEncoding));
             }
-
-            if (!ValidNe(apduEncoding))
+            else
             {
-                throw new InvalidOperationException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.CommandApduFieldOutOfRangeEncoding,
-                        nameof(Ne),
-                        Enum.GetName(typeof(ApduEncoding), apduEncoding)));
+                if (!ValidNe(apduEncoding))
+                {
+                    throw new InvalidOperationException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.CommandApduFieldOutOfRangeEncoding,
+                            nameof(Ne),
+                            Enum.GetName(typeof(ApduEncoding), apduEncoding)));
+                }
             }
 
             byte[] leField = Array.Empty<byte>();
@@ -316,7 +323,7 @@ namespace Yubico.Core.Iso7816
                         leValue = 0;
                     }
 
-                    leField = new[] { (byte)leValue };
+                    leField = new byte[] { (byte)leValue };
                 }
             }
 

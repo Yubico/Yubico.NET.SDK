@@ -14,7 +14,6 @@
 
 using System;
 using System.Runtime.InteropServices;
-using System.Text;
 using Yubico.Core;
 using Yubico.Core.Buffers;
 
@@ -74,7 +73,7 @@ namespace Yubico.PlatformInterop
         public static extern uint SCardGetStatusChange(
             SCardContext context,
             int timeout,
-            [In] [Out] SCARD_READER_STATE[] readerStates,
+            [In, Out] SCARD_READER_STATE[] readerStates,
             int readerStatesCount);
 
         [DllImport(
@@ -98,7 +97,7 @@ namespace Yubico.PlatformInterop
 
             if (!(groups is null))
             {
-                rawGroups = MultiString.GetBytes(groups, Encoding.ASCII);
+                rawGroups = MultiString.GetBytes(groups, System.Text.Encoding.ASCII);
             }
 
             int readerNamesLength = 0;
@@ -106,7 +105,7 @@ namespace Yubico.PlatformInterop
             uint result = SCardListReaders(
                 context,
                 rawGroups,
-                readerNames: null,
+                null,
                 ref readerNamesLength);
 
             if (result == ErrorCode.SCARD_S_SUCCESS)
@@ -124,7 +123,7 @@ namespace Yubico.PlatformInterop
                     rawReaderNames,
                     ref readerNamesLength);
 
-                readerNames = MultiString.GetStrings(rawReaderNames, Encoding.ASCII);
+                readerNames = MultiString.GetStrings(rawReaderNames, System.Text.Encoding.ASCII);
             }
 
             return result;

@@ -22,6 +22,13 @@ namespace Yubico.PlatformInterop
 {
     internal class HidDDevice : IHidDDevice
     {
+        public string DevicePath { get; private set; }
+        public short Usage { get; private set; }
+        public short UsagePage { get; private set; }
+        public short InputReportByteLength { get; private set; }
+        public short OutputReportByteLength { get; private set; }
+        public short FeatureReportByteLength { get; private set; }
+
         private SafeFileHandle _handle;
 
         public HidDDevice(string devicePath)
@@ -37,13 +44,6 @@ namespace Yubico.PlatformInterop
             OutputReportByteLength = capabilities.OutputReportByteLength;
             FeatureReportByteLength = capabilities.FeatureReportByteLength;
         }
-
-        public string DevicePath { get; }
-        public short Usage { get; }
-        public short UsagePage { get; }
-        public short InputReportByteLength { get; }
-        public short OutputReportByteLength { get; }
-        public short FeatureReportByteLength { get; }
 
         public void OpenIOConnection()
         {
@@ -72,7 +72,7 @@ namespace Yubico.PlatformInterop
             }
 
             byte[] returnBuf = new byte[FeatureReportByteLength - 1];
-            Array.Copy(buffer, sourceIndex: 1, returnBuf, destinationIndex: 0, returnBuf.Length);
+            Array.Copy(buffer, 1, returnBuf, 0, returnBuf.Length);
 
             return returnBuf;
         }
@@ -90,7 +90,7 @@ namespace Yubico.PlatformInterop
             }
 
             byte[] sendBuf = new byte[buffer.Length + 1];
-            Array.Copy(buffer, sourceIndex: 0, sendBuf, destinationIndex: 1, buffer.Length);
+            Array.Copy(buffer, 0, sendBuf, 1, buffer.Length);
 
             if (!HidD_SetFeature(_handle, sendBuf, sendBuf.Length))
             {
@@ -114,7 +114,7 @@ namespace Yubico.PlatformInterop
             }
 
             byte[] returnBuf = new byte[InputReportByteLength - 1];
-            Array.Copy(buffer, sourceIndex: 1, returnBuf, destinationIndex: 0, returnBuf.Length);
+            Array.Copy(buffer, 1, returnBuf, 0, returnBuf.Length);
 
             return returnBuf;
         }
@@ -132,7 +132,7 @@ namespace Yubico.PlatformInterop
             }
 
             byte[] sendBuf = new byte[buffer.Length + 1];
-            Array.Copy(buffer, sourceIndex: 0, sendBuf, destinationIndex: 1, buffer.Length);
+            Array.Copy(buffer, 0, sendBuf, 1, buffer.Length);
 
             if (!WriteFile(_handle, sendBuf, sendBuf.Length, out int bytesWritten, IntPtr.Zero)
                 || bytesWritten != sendBuf.Length)

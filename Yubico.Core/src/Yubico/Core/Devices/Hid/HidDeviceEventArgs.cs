@@ -17,29 +17,29 @@ using System;
 namespace Yubico.Core.Devices.Hid
 {
     /// <summary>
-    ///     Event arguments given whenever a HID device is added or removed from the system.
+    /// Event arguments given whenever a HID device is added or removed from the system.
     /// </summary>
     public class HidDeviceEventArgs : EventArgs
     {
         /// <summary>
-        ///     Constructs a new instance of the <see cref="HidDeviceEventArgs" /> class.
+        /// The HID device that originated the event.
+        /// </summary>
+        /// <remarks>
+        /// This property will always be populated, regardless of whether this is an arrival event or a removal event.
+        /// If the device was removed, not all members will be available on the object. An exception will be thrown if
+        /// you try to use the device in a way that requires it to be present.
+        /// </remarks>
+        public IHidDevice? Device { get; set; }
+
+        /// <summary>
+        /// Constructs a new instance of the <see cref="HidDeviceEventArgs"/> class.
         /// </summary>
         /// <param name="device">
-        ///     The HID device that is originating this event.
+        /// The HID device that is originating this event.
         /// </param>
         public HidDeviceEventArgs(IHidDevice? device)
         {
             Device = device;
         }
-
-        /// <summary>
-        ///     The HID device that originated the event.
-        /// </summary>
-        /// <remarks>
-        ///     This property will always be populated, regardless of whether this is an arrival event or a removal event.
-        ///     If the device was removed, not all members will be available on the object. An exception will be thrown if
-        ///     you try to use the device in a way that requires it to be present.
-        /// </remarks>
-        public IHidDevice? Device { get; set; }
     }
 }

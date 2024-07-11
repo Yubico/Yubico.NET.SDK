@@ -27,7 +27,7 @@ namespace Yubico.PlatformInterop
         private static extern IntPtr EcGroupNewByCurveNameIntPtr(int curveId);
 
         public static SafeEcGroup EcGroupNewByCurveName(int curveId) =>
-            new SafeEcGroup(EcGroupNewByCurveNameIntPtr(curveId), ownsHandle: true);
+            new SafeEcGroup(EcGroupNewByCurveNameIntPtr(curveId), true);
 
         // void EC_GROUP_free(EC_GROUP* group);
         [DllImport(

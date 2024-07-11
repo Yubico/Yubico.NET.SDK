@@ -27,7 +27,7 @@ namespace Yubico.PlatformInterop
             O_RDONLY = 0,
             O_WRONLY = 1,
             O_RDWR = 2,
-            O_NONBLOCK = 0x800
+            O_NONBLOCK = 0x800,
         }
 
         public const long HIDIOCGRAWINFO = 0x0000000080084803;

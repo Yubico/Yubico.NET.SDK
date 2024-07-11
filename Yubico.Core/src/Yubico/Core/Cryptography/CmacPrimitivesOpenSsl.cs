@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Runtime.InteropServices;
 using System.Security;
 using System.Security.Cryptography;
 using Yubico.PlatformInterop;
@@ -20,17 +21,17 @@ using Yubico.PlatformInterop;
 namespace Yubico.Core.Cryptography
 {
     /// <summary>
-    ///     An OpenSSL implementation of the ICmacPrimitives interface, exposing CMAC
-    ///     primitives to the SDK.
+    /// An OpenSSL implementation of the ICmacPrimitives interface, exposing CMAC
+    /// primitives to the SDK.
     /// </summary>
     internal sealed class CmacPrimitivesOpenSsl : ICmacPrimitives
     {
-        private readonly SafeEvpCmacCtx _cmacCtx;
         private bool _disposed;
+        private readonly SafeEvpCmacCtx _cmacCtx;
 
         /// <summary>
-        ///     Build a new OpenSSL CMAC Primitives object setting the algorithm to
-        ///     the default: AES-128.
+        /// Build a new OpenSSL CMAC Primitives object setting the algorithm to
+        /// the default: AES-128.
         /// </summary>
         public CmacPrimitivesOpenSsl()
             : this(CmacBlockCipherAlgorithm.Aes128)
@@ -38,8 +39,8 @@ namespace Yubico.Core.Cryptography
         }
 
         /// <summary>
-        ///     Build a new OpenSSL CMAC Primitives object that uses the specified
-        ///     algorithm.
+        /// Build a new OpenSSL CMAC Primitives object that uses the specified
+        /// algorithm.
         /// </summary>
         public CmacPrimitivesOpenSsl(CmacBlockCipherAlgorithm algorithm)
         {

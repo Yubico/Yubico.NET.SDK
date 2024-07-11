@@ -66,7 +66,7 @@ jobs:
       - uses: actions/setup-dotnet@v4
         with:
           global-json-file: global.json
-          
+
       - name: Add local NuGet repository
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
@@ -99,7 +99,7 @@ jobs:
             Yubico.DotNetPolyfills/src/bin/ReleaseWithDocs/*.nupkg
             Yubico.Core/src/bin/ReleaseWithDocs/*.nupkg
             Yubico.YubiKey/src/bin/ReleaseWithDocs/*.nupkg
-      
+
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -135,7 +135,7 @@ jobs:
           path: |
             Yubico.YubiKey/examples/PivSampleCode
             Yubico.YubiKey/examples/SharedSampleCode
-      
+  
   upload-docs:
     name: Upload docs
     if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'

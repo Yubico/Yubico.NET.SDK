@@ -25,8 +25,11 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 {
 #pragma warning disable CA1303
     public delegate void VoidVoidDel();
+
     public delegate void VoidStringDel(string message);
+
     public delegate void VoidStringKedDel(string message, KeyEntryData keyEntryData);
+
     public delegate bool BoolKedDel(KeyEntryData keyEntryData);
 
     public sealed class Fido2SampleGui : IDisposable
@@ -76,6 +79,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             {
                 Thread.Sleep(500);
             }
+
             return _parentForm.Answer;
         }
 
@@ -197,6 +201,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 _ = Invoke(new VoidStringDel(WriteMenuBox), message);
                 return;
             }
+
             _menuBox.ReadOnly = false;
             _menuBox.Text += message + "\r\n";
             _menuBox.ReadOnly = true;
@@ -213,6 +218,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 _ = Invoke(new VoidVoidDel(InitAnswerBox));
                 return;
             }
+
             _answerBox.Clear();
             Answered = false;
             _answerBox.ReadOnly = false;
@@ -229,6 +235,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 {
                     return returnValue;
                 }
+
                 return false;
             }
 
@@ -266,6 +273,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 _ = Invoke(new VoidVoidDel(CloseFpTouchPopup));
                 return;
             }
+
             _fpTouchPopupForm.Hide();
         }
 
@@ -276,6 +284,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 _ = Invoke(new VoidVoidDel(CallClose));
                 return;
             }
+
             Close();
         }
 
@@ -620,6 +629,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                         "\nNumber of good samples still needed: " +
                         keyEntryData.LastBioEnrollSampleResult.RemainingSampleCount + "\n\n";
                 }
+
                 if (!(keyEntryData.SignalUserCancel is null))
                 {
                     _cancelCallback = keyEntryData.SignalUserCancel;

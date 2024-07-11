@@ -46,7 +46,7 @@ jobs:
           else
           echo "OpenSSL already installed"
           fi
-                
+
       - name: Test Yubico.YubiKey
         run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
 

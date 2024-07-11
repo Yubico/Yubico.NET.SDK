@@ -27,20 +27,20 @@ on:
       - '**.csproj'
       - '**.sln'
       - '.github/workflows/build-pull-requests.yml'
-      
+
 permissions:
   pull-requests: write
   checks: write
   contents: read
   packages: read
-  
+
 jobs:
   run-tests:
     name: Run tests
     uses: ./.github/workflows/test.yml
     with:
       build-coverage-report: true
-    
+  
   build-artifacts:
     name: Build artifacts
     runs-on: windows-2019
@@ -57,7 +57,7 @@ jobs:
 
       - name: Build Yubico.NET.SDK.sln
         run: dotnet build --configuration ReleaseWithDocs --nologo --verbosity normal Yubico.NET.SDK.sln
-        
+
       - name: Save build artifacts
         uses: actions/upload-artifact@v4
         with:

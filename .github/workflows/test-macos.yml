@@ -35,13 +35,18 @@ jobs:
       - name: Add local NuGet repository
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
 
-#      - name: Install OpenSSL and link
-#        run: |
-#          brew install openssl
-#          sudo mkdir /usr/local/lib
-#          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
-#          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
-
+      - name: Install OpenSSL and link
+        run: |
+          if ! command -v openssl &> /dev/null; then
+          echo "OpenSSL not found, installing..."
+          brew install openssl
+          sudo mkdir -p /usr/local/lib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libcrypto.3.dylib /usr/local/lib/libcrypto.3.dylib
+          sudo ln -s $(brew --prefix)/opt/openssl@3/lib/libssl.3.dylib /usr/local/lib/libssl.3.dylib
+          else
+          echo "OpenSSL already installed"
+          fi
+                
       - name: Test Yubico.YubiKey
         run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
 

@@ -55,7 +55,7 @@ is discussed below in the section [Failures and recovery](#failures-and-recovery
 ## Management key authentication
 
 When we say the management key must be authenticated in order to execute some operations,
-we mean that the management key must be authenticated in the same session. 
+we mean that the management key must be authenticated in the same session.
 
 For example, suppose you want to import two certificates.
 
@@ -173,7 +173,7 @@ This is the tradeoff for improving usability with respect to the management key.
 
 ## Configure a YubiKey for PIN-only
 
-A YubiKey must first be configured for PIN-only. With the SDK, call 
+A YubiKey must first be configured for PIN-only. With the SDK, call
 [PivSession.SetPinOnlyMode](xref:Yubico.YubiKey.Piv.PivSession.SetPinOnlyMode%2a).
 That call requires you to specify the mode, `PinProtected`, `PinDerived`, or both.
 
@@ -408,25 +408,25 @@ To know the result of the recovery process, check the return value.
 
 * `None`: One possibility is that no data was found in ADMIN DATA and PRINTED.
 * `None`: Another possibility is that invalid data was found in ADMIN DATA and/or PRINTED,
-the management key was authenticated using the default key or the `KeyCollector`, and the
-storage locations were cleared of any data.
+  the management key was authenticated using the default key or the `KeyCollector`, and the
+  storage locations were cleared of any data.
 * `PinProtected`: The method was able to find the management key in PRINTED and
-authenticate. ADMIN DATA is now set with the correct information (there will be no salt).
+  authenticate. ADMIN DATA is now set with the correct information (there will be no salt).
 * `PinDerived`: it was able to authenticate the management key using a value derived
-from the PIN and salt. PRINTED is now empty, ADMIN DATA indicates the YubiKey is
-PIN-derived (with the correct sale) but not PIN-protected.
+  from the PIN and salt. PRINTED is now empty, ADMIN DATA indicates the YubiKey is
+  PIN-derived (with the correct sale) but not PIN-protected.
 * `PinProtected | PinDerived`: The method was able to find the management key in PRINTED
-and authenticate. The ADMIN DATA contained a salt and the key derived was the same one
-found in PRINTED. Both are set with the correct information.
+  and authenticate. The ADMIN DATA contained a salt and the key derived was the same one
+  found in PRINTED. Both are set with the correct information.
 * `PinProtectedUnavailable`: ADMIN DATA had indicated the YubiKey was PIN-protected but
-not PIN-derived. The data in PRINTED was incorrect, the management key is not
-authenticated. The data in ADMIN DATA and PRINTED was not changed.
+  not PIN-derived. The data in PRINTED was incorrect, the management key is not
+  authenticated. The data in ADMIN DATA and PRINTED was not changed.
 * `PinDerivedUnavailable`: ADMIN DATA had indicated the YubiKey was PIN-derived, but the
-key derived from the PIN and salt did not authenticate. There was no data in PRINTED. The
-method could not authenticate using the default key or the `KeyCollector`. The contents
-were not changed.
+  key derived from the PIN and salt did not authenticate. There was no data in PRINTED. The
+  method could not authenticate using the default key or the `KeyCollector`. The contents
+  were not changed.
 * `PinProtectedUnavailable | PinDerivedUnavailable`: The information in both was
-incorrect, the management key was not authenticated, the contents were not changed.
+  incorrect, the management key was not authenticated, the contents were not changed.
 
 ## PIN-protected vs. PIN-derived
 
@@ -439,7 +439,7 @@ the reasons you will want to use PIN-protected.
 There is only one reason to use PIN-derived.
 
 1. The application calling on the SDK must be compatible with another existing application
-that can recognize only PIN-derived
+   that can recognize only PIN-derived
 
 The SDK will be able to determine if an existing YubiKey is set to PIN-derived and
 automatically use it. That is, there is no need to set new YubiKeys to PIN-derived just

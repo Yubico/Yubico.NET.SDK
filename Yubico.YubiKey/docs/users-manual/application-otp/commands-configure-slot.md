@@ -16,7 +16,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. -->
 
-
 # Configure slot
 
 Commits a configuration to one of two programmable slots. Slot 1 corresponds to the "short press"
@@ -31,16 +30,16 @@ Note: Access over USB (CCID) disabled after YubiKey firmware 5.x
 
 ## Command APDU info
 
-|  CLA  |  INS  |     P1      |  P2   |  Lc   |    Data     |
-| :---: | :---: | :---------: | :---: | :---: | :---------: |
-| 0x00  | 0x01  | (See below) | 0x00  |  52   | (see below) |
+| CLA  | INS  |     P1      |  P2  | Lc |    Data     |
+|:----:|:----:|:-----------:|:----:|:--:|:-----------:|
+| 0x00 | 0x01 | (See below) | 0x00 | 52 | (see below) |
 
 ### P1: Slot
 
 P1 determines which slot to program. It can have one of the following values:
 
 | Option               | Value |
-| :------------------- | :---: |
+|:---------------------|:-----:|
 | Short press (Slot 1) | 0x01  |
 | Long press (Slot 2)  | 0x03  |
 
@@ -48,26 +47,26 @@ P1 determines which slot to program. It can have one of the following values:
 
 The data field contains a standard configuration structure.
 
-| Field       | Size  | Description                        |
-| :---------- | :---: | :--------------------------------- |
-| Fixed Data  |  16   | Fixed data in binary form.         |
-| UID         |   6   | Fixed UID part of the ticket.      |
-| AES Key     |  16   | AES key                            |
-| Access Code |   6   | Access code to re-program the slot |
-| EXT Flags   |   1   | Extended flags                     |
-| TKT Flags   |   1   | Ticket configuration flags         |
-| CFG Flags   |   1   | General configuration flags        |
-| Reserved    |   2   | Must be zero                       |
-| CRC         |   2   | CRC16 value of all the fields      |
+| Field       | Size | Description                        |
+|:------------|:----:|:-----------------------------------|
+| Fixed Data  |  16  | Fixed data in binary form.         |
+| UID         |  6   | Fixed UID part of the ticket.      |
+| AES Key     |  16  | AES key                            |
+| Access Code |  6   | Access code to re-program the slot |
+| EXT Flags   |  1   | Extended flags                     |
+| TKT Flags   |  1   | Ticket configuration flags         |
+| CFG Flags   |  1   | General configuration flags        |
+| Reserved    |  2   | Must be zero                       |
+| CRC         |  2   | CRC16 value of all the fields      |
 
 <!-- TODO -->
 TBD page will go into more detail on how to construct a valid configuration.
 
 ## Response APDU info
 
-|  Lr   |                 Data                  |  SW1  |  SW1  |
-| :---: | :-----------------------------------: | :---: | :---: |
-| 0x06  | [Status structure](xref:OtpCommands#status-structure) | 0x90  | 0x00  |
+|  Lr  |                         Data                          | SW1  | SW1  |
+|:----:|:-----------------------------------------------------:|:----:|:----:|
+| 0x06 | [Status structure](xref:OtpCommands#status-structure) | 0x90 | 0x00 |
 
 ## Examples
 

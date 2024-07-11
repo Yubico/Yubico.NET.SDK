@@ -27,17 +27,17 @@ YubiKey firmware 4.4.x.
 
 ## Command APDU info
 
-|  CLA  |  INS  |  P1   |  P2   |    Lc    |   Data   |
-| :---: | :---: | :---: | :---: | :------: | :------: |
-| 0x00  | 0x01  | 0x14  | 0x00  | (absent) | (absent) |
+| CLA  | INS  |  P1  |  P2  |    Lc    |   Data   |
+|:----:|:----:|:----:|:----:|:--------:|:--------:|
+| 0x00 | 0x01 | 0x14 | 0x00 | (absent) | (absent) |
 
 ## Response APDU info
 
 If a FIPS key:
 
-|  Lr   |                    Data                    |  SW1  |  SW2  |
-| :---: | :----------------------------------------: | :---: | :---: |
-| 0x01  | 0 = not FIPS compliant, 1 = FIPS compliant | 0x90  | 0x00  |
+|  Lr  |                    Data                    | SW1  | SW2  |
+|:----:|:------------------------------------------:|:----:|:----:|
+| 0x01 | 0 = not FIPS compliant, 1 = FIPS compliant | 0x90 | 0x00 |
 
 Just because a key may be branded FIPS or have FIPS capable firmware loaded, does not mean that the
 YubiKey is FIPS compliant. Configurations on the key need to be locked or otherwise protected in
@@ -45,9 +45,9 @@ order to claim compliant behavior.
 
 If not a FIPS key:
 
-|    Lr    |   Data   |  SW1  |  SW2  |
-| :------: | :------: | :---: | :---: |
-| (absent) | (absent) | 0x6B  | 0x00  |
+|    Lr    |   Data   | SW1  | SW2  |
+|:--------:|:--------:|:----:|:----:|
+| (absent) | (absent) | 0x6B | 0x00 |
 
 0x6B00 is "SW_WRONG_P1P2", which in this context simply means that the query command is not present.
 This behavior can be assumed to mean that the key does not support FIPS mode, and that it does not

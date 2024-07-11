@@ -105,7 +105,7 @@ policy that specifies PINs be updated periodically), then call `TrySetPinConfig`
 `forceChangePin` arg of `true`.
 
 This forces a PIN change, even if the current PIN is of a length that is at least the
-minimum PIN length. 
+minimum PIN length.
 
 ```csharp
         // Force the PIN change while setting the minimum PIN length,
@@ -208,7 +208,7 @@ remove entries from that list, not even resetting the FIDO2 application.
 Because your application will almost certainly not be the only application with access to
 the YubiKey, and you can't see what RPIDs are on either list, you can't really know for
 sure whether any particular RPID is on the caller-defined list or not.
- 
+
 What this means is that if your application is making a credential, and you want the RP to
 see the minimum PIN length (and you know this RP is not on the pre-configured list), a
 good strategy is to simply always set the caller-defined list before making the

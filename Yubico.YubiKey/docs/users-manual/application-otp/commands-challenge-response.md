@@ -27,16 +27,16 @@ YubiKey firmware 2.2 and later.
 
 ## Command APDU info
 
-|  CLA  |  INS  |     P1      |  P2   |    Lc    |      Data      |
-| :---: | :---: | :---------: | :---: | :------: | :------------: |
-| 0x00  | 0x01  | (See below) | 0x00  | (varies) | Challenge data |
+| CLA  | INS  |     P1      |  P2  |    Lc    |      Data      |
+|:----:|:----:|:-----------:|:----:|:--------:|:--------------:|
+| 0x00 | 0x01 | (See below) | 0x00 | (varies) | Challenge data |
 
 ### P1: Slot
 
 P1 indicates both the type of challenge-response algorithm and the slot in which to use.
 
 | Option            | Value |
-| :---------------- | :---: |
+|:------------------|:-----:|
 | YubicoOTP (Short) | 0x20  |
 | YubicoOTP (Long)  | 0x28  |
 | HMAC-SHA1 (Short) | 0x30  |
@@ -48,9 +48,9 @@ A string of bytes no greater than 64-bytes in length.
 
 ## Response APDU info
 
-|      Lr      |     Data      |  SW1  |  SW1  |
-| :----------: | :-----------: | :---: | :---: |
-| 0x10 or 0x14 | Response data | 0x90  | 0x00  |
+|      Lr      |     Data      | SW1  | SW1  |
+|:------------:|:-------------:|:----:|:----:|
+| 0x10 or 0x14 | Response data | 0x90 | 0x00 |
 
 If the YubicoOTP algorithm was used, a 16-byte response will be given. HMAC-SHA1 will return a 20-byte
 response.

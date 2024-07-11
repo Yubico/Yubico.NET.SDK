@@ -17,10 +17,10 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    ///     The <see cref="MoveKeyResponse" /> for the corresponding <see cref="MoveKeyCommand" />
-    ///     <seealso cref="PivResponse" />
-    ///     <seealso cref="YubiKeyResponse" />
+    ///     The <see cref="MoveKeyResponse" /> for the corresponding <see cref="MoveKeyCommand" />.
     /// </summary>
+    /// <seealso cref="PivResponse" />
+    /// <seealso cref="YubiKeyResponse" />
     public class MoveKeyResponse : PivResponse
     {
         /// <summary>

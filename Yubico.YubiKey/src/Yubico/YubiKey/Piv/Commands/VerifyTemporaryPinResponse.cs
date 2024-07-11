@@ -32,14 +32,14 @@ namespace Yubico.YubiKey.Piv.Commands
     ///             <term>
     ///                 <see cref="ResponseStatus.Success" />
     ///             </term>
-    ///             <description>The temporary PIN verified. GetData returns <c>null</c>.</description>
+    ///             <description>The temporary PIN was valid and verified successfully. GetData returns <c>null</c>.</description>
     ///         </item>
     ///         <item>
     ///             <term>
     ///                 <see cref="ResponseStatus.AuthenticationRequired" />
     ///             </term>
     ///             <description>
-    ///                 The temporary PIN did not verify. The temporary PIN is cleared from the YubiKey,
+    ///                 The temporary PIN was not valid. The temporary PIN is cleared from the YubiKey, and
     ///                 the session is not authenticated.
     ///             </description>
     ///         </item>

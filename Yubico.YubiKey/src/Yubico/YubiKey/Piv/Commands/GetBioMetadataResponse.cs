@@ -19,16 +19,16 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    ///     The response to <see cref="GetBioMetadataCommand" />, containing Bio Metadata about a
+    ///     The response to <see cref="GetBioMetadataCommand" /> containing YubiKey Bio Metadata about a
     ///     particular key.
     /// </summary>
     /// <remarks>
-    ///     The Get Bio Metadata command is available on Bio multi-protocol keys.
+    ///     The GetBioMetadataCommand is available on YubiKey Bio multi-protocol keys.
     ///     <para>
     ///         This is the partner Response class to <see cref="GetBioMetadataCommand" />.
     ///     </para>
     ///     <para>
-    ///         The data returned is a <see cref="PivBioMetadata" />.
+    ///         The data returned is a <see cref="PivBioMetadata" /> object.
     ///     </para>
     ///     <para>
     ///         Example:

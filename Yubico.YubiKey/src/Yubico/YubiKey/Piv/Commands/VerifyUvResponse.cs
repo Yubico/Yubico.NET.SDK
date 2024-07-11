@@ -42,7 +42,7 @@ namespace Yubico.YubiKey.Piv.Commands
     ///                 <see cref="ResponseStatus.Success" />
     ///             </term>
     ///             <description>
-    ///                 The biometric authentication succeeded. GetData returns temporary pin if requested.
+    ///                 The biometric authentication succeeded. GetData returns the temporary pin if requested.
     ///             </description>
     ///         </item>
     ///         <item>
@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.Piv.Commands
     ///             <description>
     ///                 The biometric authentication failed. GetData returns null. <see cref="AttemptsRemaining" />
     ///                 returns the number of retries remaining. If the number of retries is 0, the biometric authentication is
-    ///                 blocked and the client should use PIN authentication <see cref="VerifyPinCommand" />.
+    ///                 blocked and the client should authenticate with the PIV PIN via <see cref="VerifyPinCommand" />.
     ///             </description>
     ///         </item>
     ///     </list>

@@ -56,4 +56,4 @@ Data | SW1 | SW2
 (no data) | 63 | C0 - C2
 
 If the biometric match failed, the error is `63 CX` where *X* is the number of
-retries remaining. In the case of `C0`, the biometric verification becomes blocked.
+retries remaining. In the case of `C0`, the biometric verification becomes blocked, and [PIV PIN verification](xref:PivApduVerifyPIN) must be used.

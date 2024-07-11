@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var oathResponse = new OathResponse(responseApdu);
 
@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var oathResponse = new OathResponse(responseApdu);
 
@@ -48,10 +48,10 @@ namespace Yubico.YubiKey.Oath.Commands
         [Fact]
         public void Status_GenericErrorResponseApdu_ReturnsFailed()
         {
-            const byte sw1 = OathSWConstants.GenericError >> 8;
+            const byte sw1 = unchecked((byte)(OathSWConstants.GenericError >> 8));
             const byte sw2 = unchecked((byte)OathSWConstants.GenericError);
 
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var oathResponse = new OathResponse(responseApdu);
 
@@ -61,10 +61,10 @@ namespace Yubico.YubiKey.Oath.Commands
         [Fact]
         public void Status_WrongSyntaxResponseApdu_ReturnsFailed()
         {
-            const byte sw1 = OathSWConstants.WrongSyntax >> 8;
+            const byte sw1 = unchecked((byte)(OathSWConstants.WrongSyntax >> 8));
             const byte sw2 = unchecked((byte)OathSWConstants.WrongSyntax);
 
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var oathResponse = new OathResponse(responseApdu);
 

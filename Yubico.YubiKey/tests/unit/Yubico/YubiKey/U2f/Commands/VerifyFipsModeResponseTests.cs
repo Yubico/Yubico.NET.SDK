@@ -23,9 +23,9 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new VerifyFipsModeResponse(responseApdu);
 
@@ -35,9 +35,9 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_FunctionNotSupportedResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = SWConstants.FunctionNotSupported >> 8;
-            var sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
+            byte sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new VerifyFipsModeResponse(responseApdu);
 
@@ -47,45 +47,37 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_NoThrowIfFailed()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new VerifyFipsModeResponse(responseApdu);
+            void action() => response.GetData();
 
-            void action()
-            {
-                response.GetData();
-            }
-
-            var ex = Record.Exception(action);
+            Exception? ex = Record.Exception(action);
             Assert.Null(ex);
         }
 
         [Fact]
         public void Constructor_FunctionNotSupportedResponseApdu_NoThrowIfFailed()
         {
-            byte sw1 = SWConstants.FunctionNotSupported >> 8;
-            var sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
+            byte sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new VerifyFipsModeResponse(responseApdu);
+            void action() => response.GetData();
 
-            void action()
-            {
-                response.GetData();
-            }
-
-            var ex = Record.Exception(action);
+            Exception? ex = Record.Exception(action);
             Assert.Null(ex);
         }
 
         [Fact]
         public void ResponseApduFailed_ThrowsException()
         {
-            byte sw1 = SWConstants.FunctionError >> 8;
-            var sw2 = unchecked((byte)SWConstants.FunctionError);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.FunctionError >> 8));
+            byte sw2 = unchecked((byte)SWConstants.FunctionError);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new VerifyFipsModeResponse(responseApdu);
 
@@ -95,9 +87,9 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_FunctionNotSupportedResponseApdu_GetCorrectData()
         {
-            byte sw1 = SWConstants.FunctionNotSupported >> 8;
-            var sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
+            byte sw2 = unchecked((byte)SWConstants.FunctionNotSupported);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new VerifyFipsModeResponse(responseApdu);
 
@@ -107,9 +99,9 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_GetCorrectData()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new VerifyFipsModeResponse(responseApdu);
 

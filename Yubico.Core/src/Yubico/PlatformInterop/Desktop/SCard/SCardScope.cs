@@ -15,21 +15,21 @@
 namespace Yubico.PlatformInterop
 {
     /// <summary>
-    ///     The scope or domain in which database operations are to be performed.
+    /// The scope or domain in which database operations are to be performed.
     /// </summary>
     internal enum SCARD_SCOPE
     {
         /// <summary>
-        ///     Database operations are performed within the domain of the user.
+        /// Database operations are performed within the domain of the user.
         /// </summary>
         USER,
 
         TERMINAL,
 
         /// <summary>
-        ///     Database operations are performed within the domain of the system. The calling
-        ///     application must have appropriate access permissions for any database actions.
+        /// Database operations are performed within the domain of the system. The calling
+        /// application must have appropriate access permissions for any database actions.
         /// </summary>
-        SYSTEM
+        SYSTEM,
     }
 }

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -35,7 +36,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new ResetCommand();
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().Cla);
+            Assert.Equal(0, command.CreateCommandApdu().Cla);
         }
 
         [Fact]
@@ -43,7 +44,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new ResetCommand();
 
-            Assert.Equal(expected: 0x03, command.CreateCommandApdu().Ins);
+            Assert.Equal(0x03, command.CreateCommandApdu().Ins);
         }
 
         [Fact]
@@ -51,7 +52,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new ResetCommand();
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().P1);
+            Assert.Equal(0, command.CreateCommandApdu().P1);
         }
 
         [Fact]
@@ -59,14 +60,14 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new ResetCommand();
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().P2);
+            Assert.Equal(0, command.CreateCommandApdu().P2);
         }
 
         [Fact]
         public void CreateCommandApdu_GetNcProperty_ReturnsCorrectLength()
         {
             var command = new ResetCommand();
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
             Assert.Equal(lengthHeader, commandApdu.Nc);
         }
@@ -75,57 +76,56 @@ namespace Yubico.YubiKey.U2f.Commands
         public void CreateCommandApdu_InnerCommandGetClaProperty_ReturnsZero()
         {
             var command = new ResetCommand();
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandCla = actualInnerCommandApdu.Span[offsetCla];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandCla = actualInnerCommandApdu.Span[offsetCla];
 
-            Assert.Equal(expected: 0, actualInnerCommandCla);
+            Assert.Equal(0, actualInnerCommandCla);
         }
 
         [Fact]
         public void CreateCommandApdu_InnerCommandGetInsProperty_Returns0x45()
         {
             var command = new ResetCommand();
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandIns = actualInnerCommandApdu.Span[offsetIns];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandIns = actualInnerCommandApdu.Span[offsetIns];
 
-            Assert.Equal(expected: 0x45, actualInnerCommandIns);
+            Assert.Equal(0x45, actualInnerCommandIns);
         }
-
         [Fact]
         public void CreateCommandApdu_InnerCommandGetP1Property_ReturnsZero()
         {
             var command = new ResetCommand();
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandP1 = actualInnerCommandApdu.Span[offsetP1];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandP1 = actualInnerCommandApdu.Span[offsetP1];
 
-            Assert.Equal(expected: 0, actualInnerCommandP1);
+            Assert.Equal(0, actualInnerCommandP1);
         }
 
         [Fact]
         public void CreateCommandApdu_InnerCommandGetP2Property_ReturnsZero()
         {
             var command = new ResetCommand();
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandP2 = actualInnerCommandApdu.Span[offsetP2];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandP2 = actualInnerCommandApdu.Span[offsetP2];
 
-            Assert.Equal(expected: 0, actualInnerCommandP2);
+            Assert.Equal(0, actualInnerCommandP2);
         }
 
         [Fact]
         public void CreateCommandApdu_InnerCommandGetNcProperty_ReturnsNoLength()
         {
             var command = new ResetCommand();
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandLc = commandApdu.Data.Slice(offsetLc, length: 0);
+            ReadOnlyMemory<byte> actualInnerCommandLc = commandApdu.Data.Slice(offsetLc, 0);
 
             Assert.True(actualInnerCommandLc.IsEmpty);
         }
@@ -134,9 +134,9 @@ namespace Yubico.YubiKey.U2f.Commands
         public void CreateCommandApdu_InnerCommandGetData_ReturnsNoData()
         {
             var command = new ResetCommand();
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandData = commandApdu.Data.Slice(offsetData, length: 0);
+            ReadOnlyMemory<byte> actualInnerCommandData = commandApdu.Data.Slice(offsetData, 0);
 
             Assert.True(actualInnerCommandData.IsEmpty);
         }

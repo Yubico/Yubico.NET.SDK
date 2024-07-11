@@ -21,6 +21,11 @@ namespace Yubico.Core.Devices.Hid
     {
         // The SDK device instance that created this connection instance.
         private readonly WindowsHidDevice _device;
+        // The underlying Windows HID device used for communication.
+        private IHidDDevice HidDDevice { get; set; }
+
+        public int InputReportSize { get; private set; }
+        public int OutputReportSize { get; private set; }
 
         internal WindowsHidIOReportConnection(WindowsHidDevice device, string path)
         {
@@ -29,11 +34,12 @@ namespace Yubico.Core.Devices.Hid
             SetupConnection();
         }
 
-        // The underlying Windows HID device used for communication.
-        private IHidDDevice HidDDevice { get; }
-
-        public int InputReportSize { get; private set; }
-        public int OutputReportSize { get; private set; }
+        private void SetupConnection()
+        {
+            HidDDevice.OpenIOConnection();
+            InputReportSize = HidDDevice.InputReportByteLength;
+            OutputReportSize = HidDDevice.OutputReportByteLength;
+        }
 
         public byte[] GetReport()
         {
@@ -50,15 +56,7 @@ namespace Yubico.Core.Devices.Hid
             _device.LogDeviceAccessTime();
         }
 
-        private void SetupConnection()
-        {
-            HidDDevice.OpenIOConnection();
-            InputReportSize = HidDDevice.InputReportByteLength;
-            OutputReportSize = HidDDevice.OutputReportByteLength;
-        }
-
         #region IDisposable Support
-
         private bool disposedValue; // To detect redundant calls
 
         protected virtual void Dispose(bool disposing)
@@ -87,7 +85,6 @@ namespace Yubico.Core.Devices.Hid
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-
         #endregion
     }
 }

@@ -29,7 +29,7 @@ namespace Yubico.YubiKey.Scp03.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new ExternalAuthenticateResponse(responseApdu: null));
+            _ = Assert.Throws<ArgumentNullException>(() => new ExternalAuthenticateResponse(null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -37,7 +37,7 @@ namespace Yubico.YubiKey.Scp03.Commands
         public void Constructor_GivenResponseApdu_SetsStatusWordCorrectly()
         {
             // Arrange
-            var responseApdu = GetResponseApdu();
+            ResponseApdu responseApdu = GetResponseApdu();
 
             // Act
             var externalAuthenticateResponse = new ExternalAuthenticateResponse(responseApdu);

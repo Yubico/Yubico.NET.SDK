@@ -32,14 +32,14 @@ namespace Yubico.YubiKey.Otp
         private const int _hidReportPayloadSize = 7;
 
         /// <summary>
-        ///     Formats an APDU as a YubiKey Frame
+        /// Formats an APDU as a YubiKey Frame
         /// </summary>
-        /// <param name="apdu">A <see cref="CommandApdu" />.</param>
+        /// <param name="apdu">A <see cref="CommandApdu"/>.</param>
         /// <returns>A byte array formatted as a YubiKey frame.</returns>
         /// <remarks>
-        ///     Normal guidance is to use span type objects for collections of bytes.
-        ///     However, since the main use for this is to break up the frame to send
-        ///     as HID usage reports, we will use a byte array.
+        /// Normal guidance is to use span type objects for collections of bytes.
+        /// However, since the main use for this is to break up the frame to send
+        /// as HID usage reports, we will use a byte array.
         /// </remarks>
         public static byte[] GetYubiKeyFrame(this CommandApdu apdu)
         {
@@ -61,7 +61,6 @@ namespace Yubico.YubiKey.Otp
             byte[] frame = apdu.Data.ToArray()
                 .Concat(new byte[_yubiKeyFrameSize - apdu.Nc])
                 .ToArray();
-
             frame[_slotNumberOffset] = apdu.P1;
             AddCrc(frame);
 
@@ -72,19 +71,19 @@ namespace Yubico.YubiKey.Otp
         // YubiKey frame.
         private static void AddCrc(byte[] frame)
         {
-            short crc = Crc13239.Calculate(frame.AsSpan(start: 0, _framePayloadSize));
+            short crc = Crc13239.Calculate(frame.AsSpan(0, _framePayloadSize));
             BinaryPrimitives.WriteInt16LittleEndian(frame.AsSpan(_framePayloadCrcOffset, sizeof(ushort)), crc);
         }
 
         /// <summary>
-        ///     Returns an <see cref="IEnumerable{T}" /> collection of <see cref="KeyboardReport" />
-        ///     objects to send through an HID interface.
+        /// Returns an <see cref="IEnumerable{T}"/> collection of <see cref="KeyboardReport"/>
+        /// objects to send through an HID interface.
         /// </summary>
-        /// <param name="apdu">A <see cref="CommandApdu" /> instance.</param>
-        /// <returns>A collection of <see cref="KeyboardReport" />.</returns>
+        /// <param name="apdu">A <see cref="CommandApdu"/> instance.</param>
+        /// <returns>A collection of <see cref="KeyboardReport"/>.</returns>
         /// <remarks>
-        ///     This method adheres to the YubiKey protocol, which includes skipping frames
-        ///     that are not the start or end frame and have all zeros for payload.
+        /// This method adheres to the YubiKey protocol, which includes skipping frames
+        /// that are not the start or end frame and have all zeros for payload.
         /// </remarks>
         public static IEnumerable<KeyboardReport> GetHidReports(this CommandApdu apdu)
         {

@@ -42,7 +42,7 @@ namespace Yubico.YubiKey.Piv
 
             var importCommand = new ImportAsymmetricKeyCommand(
                 priKey, slotNumber, PivPinPolicy.Never, PivTouchPolicy.Never);
-            var importResponse = pivSession.Connection.SendCommand(importCommand);
+            ImportAsymmetricKeyResponse importResponse = pivSession.Connection.SendCommand(importCommand);
 
             return importResponse.Status == ResponseStatus.Success;
         }
@@ -64,7 +64,7 @@ namespace Yubico.YubiKey.Piv
 
             var genPairCommand = new GenerateKeyPairCommand(
                 slotNumber, PivAlgorithm.EccP256, PivPinPolicy.Never, PivTouchPolicy.Never);
-            var genPairResponse =
+            GenerateKeyPairResponse genPairResponse =
                 pivSession.Connection.SendCommand(genPairCommand);
 
             return genPairResponse.Status == ResponseStatus.Success;
@@ -82,7 +82,7 @@ namespace Yubico.YubiKey.Piv
                 if (BlockPinOrPuk(pivSession, PivSlot.Puk))
                 {
                     var resetCommand = new ResetPivCommand();
-                    var resetResponse = pivSession.Connection.SendCommand(resetCommand);
+                    ResetPivResponse resetResponse = pivSession.Connection.SendCommand(resetCommand);
                     return resetResponse.Status == ResponseStatus.Success;
                 }
             }
@@ -95,16 +95,14 @@ namespace Yubico.YubiKey.Piv
             int retriesRemaining;
             do
             {
-                byte[] currentValue =
-                {
+                byte[] currentValue = {
                     0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
                 };
-                byte[] newValue =
-                {
+                byte[] newValue = {
                     0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22, 0x22
                 };
                 var changeCommand = new ChangeReferenceDataCommand(slotNumber, currentValue, newValue);
-                var changeResponse = pivSession.Connection.SendCommand(changeCommand);
+                ChangeReferenceDataResponse changeResponse = pivSession.Connection.SendCommand(changeCommand);
 
                 if (changeResponse.Status == ResponseStatus.Failed)
                 {

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
@@ -41,7 +42,7 @@ namespace Yubico.YubiKey.Piv
             };
             _newKeyBytes = new byte[32];
 
-            using var random = RandomObjectUtility.GetRandomObject(fixedBytes: null);
+            using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
             {
                 random.GetBytes(_newKeyBytes);
             }
@@ -84,11 +85,11 @@ namespace Yubico.YubiKey.Piv
                 return;
             }
 
-            var expectedResult = mutualAuth
+            AuthenticateManagementKeyResult expectedResult = mutualAuth
                 ? AuthenticateManagementKeyResult.MutualFullyAuthenticated
                 : AuthenticateManagementKeyResult.SingleAuthenticated;
 
-            SetKeyLengths(currentKeyLength: 24, keySize);
+            SetKeyLengths(24, keySize);
             using (var pivSession = new PivSession(_yubiKey))
             {
                 pivSession.KeyCollector = AesMgmtKeyTestsKeyCollectorDelegate;
@@ -159,18 +160,18 @@ namespace Yubico.YubiKey.Piv
                 return;
             }
 
-            var expectedResult = mutualAuth
+            AuthenticateManagementKeyResult expectedResult = mutualAuth
                 ? AuthenticateManagementKeyResult.MutualFullyAuthenticated
                 : AuthenticateManagementKeyResult.SingleAuthenticated;
 
-            SetKeyLengths(currentKeyLength: 24, keySize);
+            SetKeyLengths(24, keySize);
             using (var pivSession = new PivSession(_yubiKey))
             {
                 pivSession.KeyCollector = AesMgmtKeyTestsKeyCollectorDelegate;
                 Assert.False(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
 
-                var isValid = pivSession.TryAuthenticateManagementKey(mutualAuth);
+                bool isValid = pivSession.TryAuthenticateManagementKey(mutualAuth);
                 Assert.True(isValid);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
@@ -183,7 +184,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
 
-                var isValid = pivSession.TryChangeManagementKey(PivTouchPolicy.None, algorithm);
+                bool isValid = pivSession.TryChangeManagementKey(PivTouchPolicy.None, algorithm);
                 Assert.True(isValid);
 
                 // The Change call will always use mutual auth.
@@ -201,7 +202,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
 
-                var isValid = pivSession.TryAuthenticateManagementKey(mutualAuth);
+                bool isValid = pivSession.TryAuthenticateManagementKey(mutualAuth);
                 Assert.True(isValid);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
@@ -225,18 +226,18 @@ namespace Yubico.YubiKey.Piv
                 return;
             }
 
-            var expectedResult = mutualAuth
+            AuthenticateManagementKeyResult expectedResult = mutualAuth
                 ? AuthenticateManagementKeyResult.MutualFullyAuthenticated
                 : AuthenticateManagementKeyResult.SingleAuthenticated;
 
-            SetKeyLengths(currentKeyLength: 24, keySize);
+            SetKeyLengths(24, keySize);
             using (var pivSession = new PivSession(_yubiKey))
             {
                 Assert.False(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
 
-                var isValid =
-                    pivSession.TryAuthenticateManagementKey(_currentKey.Slice(start: 0, _currentKeyLength), mutualAuth);
+                bool isValid =
+                    pivSession.TryAuthenticateManagementKey(_currentKey.Slice(0, _currentKeyLength), mutualAuth);
                 Assert.True(isValid);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
@@ -248,9 +249,9 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
 
-                var isValid = pivSession.TryChangeManagementKey(
-                    _currentKey.Slice(start: 0, _currentKeyLength),
-                    _newKey.Slice(start: 0, _newKeyLength),
+                bool isValid = pivSession.TryChangeManagementKey(
+                    _currentKey.Slice(0, _currentKeyLength),
+                    _newKey.Slice(0, _newKeyLength),
                     PivTouchPolicy.None,
                     algorithm);
                 Assert.True(isValid);
@@ -270,8 +271,8 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(algorithm, pivSession.ManagementKeyAlgorithm);
 
-                var isValid =
-                    pivSession.TryAuthenticateManagementKey(_currentKey.Slice(start: 0, _currentKeyLength), mutualAuth);
+                bool isValid =
+                    pivSession.TryAuthenticateManagementKey(_currentKey.Slice(0, _currentKeyLength), mutualAuth);
                 Assert.True(isValid);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(expectedResult, pivSession.ManagementKeyAuthenticationResult);
@@ -300,13 +301,13 @@ namespace Yubico.YubiKey.Piv
                     break;
 
                 case KeyEntryRequest.AuthenticatePivManagementKey:
-                    keyEntryData.SubmitValue(_currentKey.Slice(start: 0, _currentKeyLength).Span);
+                    keyEntryData.SubmitValue(_currentKey.Slice(0, _currentKeyLength).Span);
                     break;
 
                 case KeyEntryRequest.ChangePivManagementKey:
                     keyEntryData.SubmitValues(
-                        _currentKey.Slice(start: 0, _currentKeyLength).Span,
-                        _newKey.Slice(start: 0, _newKeyLength).Span);
+                        _currentKey.Slice(0, _currentKeyLength).Span,
+                        _newKey.Slice(0, _newKeyLength).Span);
                     break;
             }
 
@@ -317,12 +318,12 @@ namespace Yubico.YubiKey.Piv
         // swap the lengths.
         private void SwapKeys()
         {
-            var swapBuffer = new byte[32];
-            Array.Copy(_currentKeyBytes, swapBuffer, length: 32);
-            Array.Copy(_newKeyBytes, _currentKeyBytes, length: 32);
-            Array.Copy(swapBuffer, _newKeyBytes, length: 32);
+            byte[] swapBuffer = new byte[32];
+            Array.Copy(_currentKeyBytes, swapBuffer, 32);
+            Array.Copy(_newKeyBytes, _currentKeyBytes, 32);
+            Array.Copy(swapBuffer, _newKeyBytes, 32);
 
-            var swapLength = _currentKeyLength;
+            int swapLength = _currentKeyLength;
             _currentKeyLength = _newKeyLength;
             _newKeyLength = swapLength;
         }

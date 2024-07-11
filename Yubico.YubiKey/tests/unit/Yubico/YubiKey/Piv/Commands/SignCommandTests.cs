@@ -24,8 +24,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void ClassType_DerivedFromPivCommand_IsTrue()
         {
-            var digest = PivCommandResponseTestData.GetDigestData(PivAlgorithm.Rsa1024);
-            var signCommand = new AuthenticateSignCommand(digest, slotNumber: 0x9A);
+            byte[] digest = PivCommandResponseTestData.GetDigestData(PivAlgorithm.Rsa1024);
+            var signCommand = new AuthenticateSignCommand(digest, 0x9A);
 
             Assert.True(signCommand is IYubiKeyCommand<AuthenticateSignResponse>);
         }
@@ -33,8 +33,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void FullConstructor_NullDigestData_ThrowsException()
         {
-            _ = Assert.Throws<ArgumentException>(() =>
-                _ = new AuthenticateSignCommand(digestData: null, slotNumber: 0x87));
+            _ = Assert.Throws<ArgumentException>(() => _ = new AuthenticateSignCommand(null, 0x87));
         }
 
         [Theory]
@@ -60,17 +59,17 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(8)]
         public void Constructor_BadDigestData_ThrowsException(int badKeyNum)
         {
-            var digest = GetBadDigestData(badKeyNum);
-            _ = Assert.Throws<ArgumentException>(() => new AuthenticateSignCommand(digest, slotNumber: 0x9A));
+            byte[] digest = GetBadDigestData(badKeyNum);
+            _ = Assert.Throws<ArgumentException>(() => new AuthenticateSignCommand(digest, 0x9A));
         }
 
         [Fact]
         public void Constructor_Application_Piv()
         {
-            var digest = PivCommandResponseTestData.GetDigestData(PivAlgorithm.Rsa2048);
-            var command = new AuthenticateSignCommand(digest, slotNumber: 0x95);
+            byte[] digest = PivCommandResponseTestData.GetDigestData(PivAlgorithm.Rsa2048);
+            var command = new AuthenticateSignCommand(digest, 0x95);
 
-            var application = command.Application;
+            YubiKeyApplication application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
@@ -82,9 +81,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(0x83, PivAlgorithm.Rsa2048)]
         public void Constructor_Property_SlotNum(byte slotNumber, PivAlgorithm algorithm)
         {
-            var command = GetCommandObject(slotNumber, algorithm);
+            AuthenticateSignCommand command = GetCommandObject(slotNumber, algorithm);
 
-            var getSlotNum = command.SlotNumber;
+            byte getSlotNum = command.SlotNumber;
 
             Assert.Equal(slotNumber, getSlotNum);
         }
@@ -96,11 +95,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa2048)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(PivAlgorithm algorithm)
         {
-            var cmdApdu = GetSignCommandApdu(slotNumber: 0x8F, algorithm);
+            CommandApdu cmdApdu = GetSignCommandApdu(0x8F, algorithm);
 
-            var Cla = cmdApdu.Cla;
+            byte Cla = cmdApdu.Cla;
 
-            Assert.Equal(expected: 0, Cla);
+            Assert.Equal(0, Cla);
         }
 
         [Theory]
@@ -112,11 +111,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHex87(PivAlgorithm algorithm)
         {
-            var cmdApdu = GetSignCommandApdu(slotNumber: 0x90, algorithm);
+            CommandApdu cmdApdu = GetSignCommandApdu(0x90, algorithm);
 
-            var Ins = cmdApdu.Ins;
+            byte Ins = cmdApdu.Ins;
 
-            Assert.Equal(expected: 0x87, Ins);
+            Assert.Equal(0x87, Ins);
         }
 
         [Theory]
@@ -128,9 +127,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetP1Property_ReturnsAlgorithm(PivAlgorithm algorithm)
         {
-            var cmdApdu = GetSignCommandApdu(slotNumber: 0x91, algorithm);
+            CommandApdu cmdApdu = GetSignCommandApdu(0x91, algorithm);
 
-            var P1 = cmdApdu.P1;
+            byte P1 = cmdApdu.P1;
 
             Assert.Equal((byte)algorithm, P1);
         }
@@ -142,9 +141,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(0x93, PivAlgorithm.Rsa2048)]
         public void CreateCommandApdu_GetP2Property_ReturnsSlotNum(byte slotNumber, PivAlgorithm algorithm)
         {
-            var cmdApdu = GetSignCommandApdu(slotNumber, algorithm);
+            CommandApdu cmdApdu = GetSignCommandApdu(slotNumber, algorithm);
 
-            var P2 = cmdApdu.P2;
+            byte P2 = cmdApdu.P2;
 
             Assert.Equal(slotNumber, P2);
         }
@@ -156,9 +155,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa2048, 266)]
         public void CreateCommandApdu_GetNcProperty_ReturnsCorrect(PivAlgorithm algorithm, int expected)
         {
-            var cmdApdu = GetSignCommandApdu(slotNumber: 0x94, algorithm);
+            CommandApdu cmdApdu = GetSignCommandApdu(0x94, algorithm);
 
-            var Nc = cmdApdu.Nc;
+            int Nc = cmdApdu.Nc;
 
             Assert.Equal(expected, Nc);
         }
@@ -169,11 +168,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa1024)]
         public void CreateCommandApdu_GetNeProperty_ReturnsZero(PivAlgorithm algorithm)
         {
-            var cmdApdu = GetSignCommandApdu(slotNumber: 0x95, algorithm);
+            CommandApdu cmdApdu = GetSignCommandApdu(0x95, algorithm);
 
-            var Ne = cmdApdu.Ne;
+            int Ne = cmdApdu.Ne;
 
-            Assert.Equal(expected: 0, Ne);
+            Assert.Equal(0, Ne);
         }
 
         [Theory]
@@ -183,14 +182,14 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa2048)]
         public void CreateCommandApdu_GetData_ReturnsCorrect(PivAlgorithm algorithm)
         {
-            var prefix = GetDigestDataPrefix(algorithm);
-            var digest = PivCommandResponseTestData.GetDigestData(algorithm);
+            byte[] prefix = GetDigestDataPrefix(algorithm);
+            byte[] digest = PivCommandResponseTestData.GetDigestData(algorithm);
             var expected = new List<byte>(prefix);
             expected.AddRange(digest);
 
-            var cmdApdu = GetSignCommandApdu(slotNumber: 0x85, algorithm);
+            CommandApdu cmdApdu = GetSignCommandApdu(0x85, algorithm);
 
-            var data = cmdApdu.Data;
+            ReadOnlyMemory<byte> data = cmdApdu.Data;
 
             Assert.False(data.IsEmpty);
             if (data.IsEmpty)
@@ -198,7 +197,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 return;
             }
 
-            var compareResult = data.Span.SequenceEqual(expected.ToArray());
+            bool compareResult = data.Span.SequenceEqual(expected.ToArray());
 
             Assert.True(compareResult);
         }
@@ -208,23 +207,23 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
 
-            var command = GetCommandObject(slotNumber: 0x86, PivAlgorithm.EccP256);
+            AuthenticateSignCommand command = GetCommandObject(0x86, PivAlgorithm.EccP256);
 
-            var response = command.CreateResponseForApdu(responseApdu);
+            AuthenticateSignResponse response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is AuthenticateSignResponse);
         }
 
         private static CommandApdu GetSignCommandApdu(byte slotNumber, PivAlgorithm algorithm)
         {
-            var cmd = GetCommandObject(slotNumber, algorithm);
+            AuthenticateSignCommand cmd = GetCommandObject(slotNumber, algorithm);
 
             return cmd.CreateCommandApdu();
         }
 
         private static AuthenticateSignCommand GetCommandObject(byte slotNumber, PivAlgorithm algorithm)
         {
-            var digest = PivCommandResponseTestData.GetDigestData(algorithm);
+            byte[] digest = PivCommandResponseTestData.GetDigestData(algorithm);
             var cmd = new AuthenticateSignCommand(digest, slotNumber);
 
             return cmd;
@@ -270,27 +269,25 @@ namespace Yubico.YubiKey.Piv.Commands
 
             if ((badDataNum & 1) != 0)
             {
-                Array.Resize(ref digest, digest.Length + 1);
+                Array.Resize<byte>(ref digest, digest.Length + 1);
                 digest[^1] = 0x44;
             }
             else
             {
-                Array.Resize(ref digest, digest.Length - 1);
+                Array.Resize<byte>(ref digest, digest.Length - 1);
             }
 
             return digest;
         }
 
         // Get the TL TL TL prefix for each algorithm.
-        private static byte[] GetDigestDataPrefix(PivAlgorithm algorithm)
+        private static byte[] GetDigestDataPrefix(PivAlgorithm algorithm) => algorithm switch
         {
-            return algorithm switch
-            {
-                PivAlgorithm.Rsa2048 => new byte[] { 0x7C, 0x82, 0x01, 0x06, 0x82, 0x00, 0x81, 0x82, 0x01, 0x00 },
-                PivAlgorithm.EccP256 => new byte[] { 0x7C, 0x24, 0x82, 0x00, 0x81, 0x20 },
-                PivAlgorithm.EccP384 => new byte[] { 0x7C, 0x34, 0x82, 0x00, 0x81, 0x30 },
-                _ => new byte[] { 0x7C, 0x81, 0x85, 0x82, 0x00, 0x81, 0x81, 0x80 }
-            };
-        }
+            PivAlgorithm.Rsa2048 => new byte[] { 0x7C, 0x82, 0x01, 0x06, 0x82, 0x00, 0x81, 0x82, 0x01, 0x00 },
+            PivAlgorithm.EccP256 => new byte[] { 0x7C, 0x24, 0x82, 0x00, 0x81, 0x20 },
+            PivAlgorithm.EccP384 => new byte[] { 0x7C, 0x34, 0x82, 0x00, 0x81, 0x30 },
+            _ => new byte[] { 0x7C, 0x81, 0x85, 0x82, 0x00, 0x81, 0x81, 0x80 },
+        };
     }
 }
+

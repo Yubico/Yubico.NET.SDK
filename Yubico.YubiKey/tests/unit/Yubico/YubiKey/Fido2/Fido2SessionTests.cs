@@ -23,12 +23,12 @@ namespace Yubico.YubiKey.Fido2
     public class Fido2SessionTests
     {
         [Fact]
-        private void Constructor_NullYubiKeyDevice_ThrowsArgumentNullException()
+        void Constructor_NullYubiKeyDevice_ThrowsArgumentNullException()
         {
             static void Action()
             {
 #pragma warning disable CS8625
-                _ = new Fido2Session(yubiKeyDevice: null);
+                _ = new Fido2Session(null);
 #pragma warning restore CS8625
             }
 
@@ -36,12 +36,11 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        private void Constructor_ValidYubiKeyDevice_Succeeds()
+        void Constructor_ValidYubiKeyDevice_Succeeds()
         {
             var mockYubiKey = new Mock<IYubiKeyDevice>();
             var mockConnection = new Mock<IYubiKeyConnection>();
-            var mockResponse =
-                new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
+            var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
             _ = mockConnection
                 .Setup(c => c.SendCommand(It.IsAny<IYubiKeyCommand<IYubiKeyResponse>>()))
@@ -57,12 +56,11 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        private void Constructor_GivenValidYubiKeyDevice_ConnectsToFido2Application()
+        void Constructor_GivenValidYubiKeyDevice_ConnectsToFido2Application()
         {
             var mockYubiKey = new Mock<IYubiKeyDevice>();
             var mockConnection = new Mock<IYubiKeyConnection>();
-            var mockResponse =
-                new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
+            var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
             _ = mockConnection
                 .Setup(c => c.SendCommand(It.IsAny<IYubiKeyCommand<IYubiKeyResponse>>()))
@@ -78,12 +76,11 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        private void GetAuthenticatorInfo_SendsGetInfoCommand()
+        void GetAuthenticatorInfo_SendsGetInfoCommand()
         {
             var mockYubiKey = new Mock<IYubiKeyDevice>();
             var mockConnection = new Mock<IYubiKeyConnection>();
-            var mockResponse =
-                new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
+            var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
             _ = mockConnection
                 .Setup(c => c.SendCommand(It.IsAny<IYubiKeyCommand<IYubiKeyResponse>>()))

@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ReadCcc_IsEmpty_Correct(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ResetApplication();
 
-                var ccc = pivSession.ReadObject<CardCapabilityContainer>();
+                CardCapabilityContainer ccc = pivSession.ReadObject<CardCapabilityContainer>();
 
                 Assert.True(ccc.IsEmpty);
             }
@@ -45,12 +45,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteThenReadCcc_Data_Correct(StandardTestDevice testDeviceType)
         {
-            var expected = new ReadOnlySpan<byte>(new byte[]
-            {
+            var expected = new ReadOnlySpan<byte>(new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03
             });
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             try
             {
@@ -61,7 +60,7 @@ namespace Yubico.YubiKey.Piv
 
                     pivSession.ResetApplication();
 
-                    var ccc = pivSession.ReadObject<CardCapabilityContainer>();
+                    CardCapabilityContainer ccc = pivSession.ReadObject<CardCapabilityContainer>();
                     Assert.True(ccc.IsEmpty);
 
                     ccc.SetCardId(expected);
@@ -71,7 +70,7 @@ namespace Yubico.YubiKey.Piv
                     ccc = pivSession.ReadObject<CardCapabilityContainer>();
                     Assert.False(ccc.IsEmpty);
 
-                    var isValid = expected.SequenceEqual(ccc.CardIdentifier.Span);
+                    bool isValid = expected.SequenceEqual(ccc.CardIdentifier.Span);
                     Assert.True(isValid);
                 }
             }
@@ -88,12 +87,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void AltTag_WriteThenReadCcc_Data_Correct(StandardTestDevice testDeviceType)
         {
-            var expected = new ReadOnlySpan<byte>(new byte[]
-            {
+            var expected = new ReadOnlySpan<byte>(new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03
             });
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             try
             {
@@ -104,7 +102,7 @@ namespace Yubico.YubiKey.Piv
 
                     pivSession.ResetApplication();
 
-                    var ccc = pivSession.ReadObject<CardCapabilityContainer>();
+                    CardCapabilityContainer ccc = pivSession.ReadObject<CardCapabilityContainer>();
                     Assert.True(ccc.IsEmpty);
 
                     ccc.SetCardId(expected);
@@ -112,10 +110,10 @@ namespace Yubico.YubiKey.Piv
 
                     pivSession.WriteObject(ccc);
 
-                    ccc = pivSession.ReadObject<CardCapabilityContainer>(dataTag: 0x5F1110);
+                    ccc = pivSession.ReadObject<CardCapabilityContainer>(0x5F1110);
                     Assert.False(ccc.IsEmpty);
 
-                    var isValid = expected.SequenceEqual(ccc.CardIdentifier.Span);
+                    bool isValid = expected.SequenceEqual(ccc.CardIdentifier.Span);
                     Assert.True(isValid);
                 }
             }
@@ -132,12 +130,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteEmpty_Correct(StandardTestDevice testDeviceType)
         {
-            var expected = new ReadOnlySpan<byte>(new byte[]
-            {
+            var expected = new ReadOnlySpan<byte>(new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03
             });
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             try
             {
@@ -148,14 +145,14 @@ namespace Yubico.YubiKey.Piv
 
                     pivSession.ResetApplication();
 
-                    var emptyCcc = pivSession.ReadObject<CardCapabilityContainer>();
+                    CardCapabilityContainer emptyCcc = pivSession.ReadObject<CardCapabilityContainer>();
                     Assert.True(emptyCcc.IsEmpty);
 
                     // Write an empty object.
                     pivSession.WriteObject(emptyCcc);
 
                     // Make sure the contents are still empty.
-                    var ccc = pivSession.ReadObject<CardCapabilityContainer>();
+                    CardCapabilityContainer ccc = pivSession.ReadObject<CardCapabilityContainer>();
                     Assert.True(ccc.IsEmpty);
 
                     // Now write a CCC with data.
@@ -165,7 +162,7 @@ namespace Yubico.YubiKey.Piv
                     // Make sure that worked.
                     ccc = pivSession.ReadObject<CardCapabilityContainer>();
                     Assert.False(ccc.IsEmpty);
-                    var isValid = expected.SequenceEqual(ccc.CardIdentifier.Span);
+                    bool isValid = expected.SequenceEqual(ccc.CardIdentifier.Span);
                     Assert.True(isValid);
 
                     // Now write an empty object.
@@ -199,7 +196,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(0x005FFF01, StandardTestDevice.Fw5)]
         public void Read_InvalidTag_Throws(int newTag, StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {

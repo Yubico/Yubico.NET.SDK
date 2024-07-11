@@ -22,84 +22,84 @@ using Yubico.YubiKey.Piv;
 namespace Yubico.YubiKey.Cryptography
 {
     /// <summary>
-    ///     This class can verify the ECDSA signature using different types of public
-    ///     keys.
+    /// This class can verify the ECDSA signature using different types of public
+    /// keys.
     /// </summary>
     /// <remarks>
-    ///     This class will use the default <c>System.Security.Cryptography.ECDsa</c>
-    ///     implementation to verify a signature. In order to do so, it must be able
-    ///     to "convert" the public key and the signature into the formats required
-    ///     by that class.
-    ///     <para>
-    ///         The <c>ECDsa</c> class is disposable, which is why this class is as well.
-    ///     </para>
-    ///     <para>
-    ///         Converting the key into the appropriate format is done by the
-    ///         constructor. The public key you will use to verify the signature will
-    ///         likely be in one of these formats:
-    ///         <code>
+    /// This class will use the default <c>System.Security.Cryptography.ECDsa</c>
+    /// implementation to verify a signature. In order to do so, it must be able
+    /// to "convert" the public key and the signature into the formats required
+    /// by that class.
+    /// <para>
+    /// The <c>ECDsa</c> class is disposable, which is why this class is as well.
+    /// </para>
+    /// <para>
+    /// Converting the key into the appropriate format is done by the
+    /// constructor. The public key you will use to verify the signature will
+    /// likely be in one of these formats:
+    /// <code>
     ///    PivPublicKey
     ///    CoseKey
     ///    X509Certificate2
     ///    ECDsa
     ///    encoded point (0x04 || x-coordinate || y-coordinate)
     /// </code>
-    ///         Create an instance of this class with the key you have. Then examine the
-    ///         <see cref="ECDsa" /> property. You will see your key is now loaded in the
-    ///         format needed. For example, suppose you have an object that contains
-    ///         information about a PIV slot, and the <c>PublicKey</c> property is a
-    ///         <see cref="PivPublicKey" /> containing the public key partner to the
-    ///         private key in that slot.
-    ///         <code>
+    /// Create an instance of this class with the key you have. Then examine the
+    /// <see cref="ECDsa"/> property. You will see your key is now loaded in the
+    /// format needed. For example, suppose you have an object that contains
+    /// information about a PIV slot, and the <c>PublicKey</c> property is a
+    /// <see cref="PivPublicKey"/> containing the public key partner to the
+    /// private key in that slot.
+    /// <code>
     ///   using var ecdsaVerifier = new EcdsaVerify(slotContents[index].PublicKey);
     /// </code>
-    ///     </para>
-    ///     <para>
-    ///         The <c>ECDsa</c> class also requires the signature to be in a specific
-    ///         format that is not standard. Most standards specify that an ECDSA
-    ///         signature is formatted following the BER encoding of the following ASN.1
-    ///         definition:
-    ///         <code>
+    /// </para>
+    /// <para>
+    /// The <c>ECDsa</c> class also requires the signature to be in a specific
+    /// format that is not standard. Most standards specify that an ECDSA
+    /// signature is formatted following the BER encoding of the following ASN.1
+    /// definition:
+    /// <code>
     ///    Ecdsa-Sig-Value  ::=  SEQUENCE  {
     ///      r     INTEGER,
     ///      s     INTEGER  }
     /// </code>
-    ///         However, the <c>ECDsa</c> class expects the signature to be represented
-    ///         as the concatenation of <c>r</c> and <c>s</c> where each value is exactly
-    ///         the curve size. For example, the size of the NIST curve P-256 is 256
-    ///         bits, which is 32 bytes. Hence, the signature <c>r||s</c> must be 64
-    ///         bytes, both <c>r</c> and <c>s</c> must be exactly 32 bytes. If a value is
-    ///         shorter than 32 bytes, it is prepended with <c>00</c> bytes.
-    ///     </para>
-    ///     <para>
-    ///         The verification methods will convert a standard signature into the
-    ///         format the <c>ECDsa</c> class needs. They can also verify signatures that
-    ///         are formatted as <c>r||s</c>.
-    ///     </para>
-    ///     <para>
-    ///         The YubiKey returns an ECDSA signature following the standard, namely the
-    ///         BER encoding.
-    ///     </para>
-    ///     <para>
-    ///         This class can verify signatures for P-256 and P-384 only.
-    ///     </para>
-    ///     <para>
-    ///         Each of the verify methods will return a boolean, indicating whether the
-    ///         signature verifies or not. If a signature does not verify, that is not an
-    ///         error. The methods will throw exceptions if they encounter bad data, such
-    ///         as x- or y-coordinates that do not fit the specified curve.
-    ///     </para>
-    ///     <para>
-    ///         For example,
-    ///         <code>
+    /// However, the <c>ECDsa</c> class expects the signature to be represented
+    /// as the concatenation of <c>r</c> and <c>s</c> where each value is exactly
+    /// the curve size. For example, the size of the NIST curve P-256 is 256
+    /// bits, which is 32 bytes. Hence, the signature <c>r||s</c> must be 64
+    /// bytes, both <c>r</c> and <c>s</c> must be exactly 32 bytes. If a value is
+    /// shorter than 32 bytes, it is prepended with <c>00</c> bytes.
+    /// </para>
+    /// <para>
+    /// The verification methods will convert a standard signature into the
+    /// format the <c>ECDsa</c> class needs. They can also verify signatures that
+    /// are formatted as <c>r||s</c>.
+    /// </para>
+    /// <para>
+    /// The YubiKey returns an ECDSA signature following the standard, namely the
+    /// BER encoding.
+    /// </para>
+    /// <para>
+    /// This class can verify signatures for P-256 and P-384 only.
+    /// </para>
+    /// <para>
+    /// Each of the verify methods will return a boolean, indicating whether the
+    /// signature verifies or not. If a signature does not verify, that is not an
+    /// error. The methods will throw exceptions if they encounter bad data, such
+    /// as x- or y-coordinates that do not fit the specified curve.
+    /// </para>
+    /// <para>
+    /// For example,
+    /// <code>
     ///    using var ecdsaVfy = new EcdsaVerify(authData.CredentialPublicKey);
     ///    bool isVerified = ecdsaVerify.VerifyDigest(digest, signature);
     /// </code>
-    ///         <code>
+    /// <code>
     ///    using var ecdsaVfy = new EcdsaVerify(AttestationCert);
     ///    bool isVerified = ecdsaVerify.VerifyData(dataToVerify, signature, false);
     /// </code>
-    ///     </para>
+    /// </para>
     /// </remarks>
     public class EcdsaVerify : IDisposable
     {
@@ -117,6 +117,14 @@ namespace Yubico.YubiKey.Cryptography
 
         private bool _disposed;
 
+        /// <summary>
+        /// The object built that will perform the verification operation.
+        /// </summary>
+        /// <remarks>
+        /// This must be P-256 or P-384, and contain valid coordinates.
+        /// </remarks>
+        public ECDsa ECDsa { get; private set; }
+
         // The default constructor explicitly defined. We don't want it to be
         // used.
         private EcdsaVerify()
@@ -125,21 +133,21 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         /// <summary>
-        ///     Create an instance of the <see cref="EcdsaVerify" /> class using the
-        ///     ECDsa object that contains the public key.
+        /// Create an instance of the <see cref="EcdsaVerify"/> class using the
+        /// ECDsa object that contains the public key.
         /// </summary>
         /// <remarks>
-        ///     This supports only NIST P-256 and P-384 curves.
+        /// This supports only NIST P-256 and P-384 curves.
         /// </remarks>
         /// <param name="ecdsa">
-        ///     The public key to use to verify. This constructor will copy a
-        ///     reference to this object.
+        /// The public key to use to verify. This constructor will copy a
+        /// reference to this object.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     The ecdsa argument is null.
+        /// The ecdsa argument is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     The key is not for a supported algorithm or curve, or is malformed.
+        /// The key is not for a supported algorithm or curve, or is malformed.
         /// </exception>
         public EcdsaVerify(ECDsa ecdsa)
         {
@@ -152,20 +160,20 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         /// <summary>
-        ///     Create an instance of the <see cref="EcdsaVerify" /> class using the
-        ///     PIV ECC public key.
+        /// Create an instance of the <see cref="EcdsaVerify"/> class using the
+        /// PIV ECC public key.
         /// </summary>
         /// <remarks>
-        ///     This supports only NIST P-256 and P-384 curves.
+        /// This supports only NIST P-256 and P-384 curves.
         /// </remarks>
         /// <param name="pivPublicKey">
-        ///     The public key to use to verify.
+        /// The public key to use to verify.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     The pivPublicKey argument is null.
+        /// The pivPublicKey argument is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     The key is not for a supported algorithm or curve, or is malformed.
+        /// The key is not for a supported algorithm or curve, or is malformed.
         /// </exception>
         public EcdsaVerify(PivPublicKey pivPublicKey)
         {
@@ -175,27 +183,26 @@ namespace Yubico.YubiKey.Cryptography
             }
 
             ReadOnlySpan<byte> pubPoint = pivPublicKey is PivEccPublicKey eccKey
-                ? eccKey.PublicPoint
-                : ReadOnlySpan<byte>.Empty;
+                ? eccKey.PublicPoint : ReadOnlySpan<byte>.Empty;
 
             ECDsa = ConvertPublicKey(pubPoint.ToArray());
         }
 
         /// <summary>
-        ///     Create an instance of the <see cref="EcdsaVerify" /> class using the
-        ///     COSE EC public key.
+        /// Create an instance of the <see cref="EcdsaVerify"/> class using the
+        /// COSE EC public key.
         /// </summary>
         /// <remarks>
-        ///     This supports only NIST P-256 and P-384 curves.
+        /// This supports only NIST P-256 and P-384 curves.
         /// </remarks>
         /// <param name="coseKey">
-        ///     The public key to use to verify.
+        /// The public key to use to verify.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     The coseKey is null.
+        /// The coseKey is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     The key is not for a supported algorithm or curve, or is malformed.
+        /// The key is not for a supported algorithm or curve, or is malformed.
         /// </exception>
         public EcdsaVerify(CoseKey coseKey)
         {
@@ -209,7 +216,7 @@ namespace Yubico.YubiKey.Cryptography
                 CoseAlgorithmIdentifier.ES256 => OidP256,
                 CoseAlgorithmIdentifier.ECDHwHKDF256 => OidP256,
                 CoseAlgorithmIdentifier.ES384 => OidP384,
-                _ => ""
+                _ => "",
             };
 
             byte[] xCoordinate = Array.Empty<byte>();
@@ -224,24 +231,24 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         /// <summary>
-        ///     Create an instance of the <see cref="EcdsaVerify" /> class using the
-        ///     encoded point.
+        /// Create an instance of the <see cref="EcdsaVerify"/> class using the
+        /// encoded point.
         /// </summary>
         /// <remarks>
-        ///     This supports only NIST P-256 and P-384 curves and only supports the
-        ///     uncompressed encoded point: <c>04||x-coordinate||y-coordinate</c>
-        ///     where both coordinates are the curve size (each coordinate is 32 bytes
-        ///     for P-256 and 48 bytes for P-384), prepended with 00 bytes if
-        ///     necessary.
+        /// This supports only NIST P-256 and P-384 curves and only supports the
+        /// uncompressed encoded point: <c>04||x-coordinate||y-coordinate</c>
+        /// where both coordinates are the curve size (each coordinate is 32 bytes
+        /// for P-256 and 48 bytes for P-384), prepended with 00 bytes if
+        /// necessary.
         /// </remarks>
         /// <param name="encodedEccPoint">
-        ///     The public key to use to verify.
+        /// The public key to use to verify.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     The coseKey is null.
+        /// The coseKey is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     The key is not for a supported algorithm or curve, or is malformed.
+        /// The key is not for a supported algorithm or curve, or is malformed.
         /// </exception>
         public EcdsaVerify(ReadOnlyMemory<byte> encodedEccPoint)
         {
@@ -249,20 +256,20 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         /// <summary>
-        ///     Create an instance of the <see cref="EcdsaVerify" /> class using the
-        ///     given certificate.
+        /// Create an instance of the <see cref="EcdsaVerify"/> class using the
+        /// given certificate.
         /// </summary>
         /// <remarks>
-        ///     This supports only NIST P-256 and P-384 curves.
+        /// This supports only NIST P-256 and P-384 curves.
         /// </remarks>
         /// <param name="certificate">
-        ///     The certificate containing the public key to use to verify.
+        /// The certificate containing the public key to use to verify.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     The certificate argument is null.
+        /// The certificate argument is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     The key is not for a supported algorithm or curve, or is malformed.
+        /// The key is not for a supported algorithm or curve, or is malformed.
         /// </exception>
         public EcdsaVerify(X509Certificate2 certificate)
         {
@@ -270,52 +277,35 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         /// <summary>
-        ///     The object built that will perform the verification operation.
+        /// Verify the <c>signature</c> using the  <c>dataToVerify</c>. This
+        /// method will digest the <c>dataToVerify</c> using SHA-256 if the
+        /// public key is P-256 and SHA-384 if the public key is P-384, and then
+        /// verify the signature using the digest.
         /// </summary>
         /// <remarks>
-        ///     This must be P-256 or P-384, and contain valid coordinates.
-        /// </remarks>
-        public ECDsa ECDsa { get; }
-
-        /// <summary>
-        ///     Clean up.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        ///     Verify the <c>signature</c> using the  <c>dataToVerify</c>. This
-        ///     method will digest the <c>dataToVerify</c> using SHA-256 if the
-        ///     public key is P-256 and SHA-384 if the public key is P-384, and then
-        ///     verify the signature using the digest.
-        /// </summary>
-        /// <remarks>
-        ///     If the signature is the standard BER encoding, then pass <c>true</c>
-        ///     for <c>isStandardSignature</c>. That argument defaults to <c>true</c>
-        ///     so if the signature is formatted in the standard way, you can call
-        ///     this method with that argument missing. If the signature is the
-        ///     concatenation of <c>r</c> and <c>s</c>, pass <c>false</c> for
-        ///     <c>isStandardSignature</c>.
+        /// If the signature is the standard BER encoding, then pass <c>true</c>
+        /// for <c>isStandardSignature</c>. That argument defaults to <c>true</c>
+        /// so if the signature is formatted in the standard way, you can call
+        /// this method with that argument missing. If the signature is the
+        /// concatenation of <c>r</c> and <c>s</c>, pass <c>false</c> for
+        /// <c>isStandardSignature</c>.
         /// </remarks>
         /// <param name="dataToVerify">
-        ///     The data data to verify. To verify an ECDSA signature, this method
-        ///     will digest the data using SHA-256 or SHA-384, depending on the
-        ///     public key's curve.
+        /// The data data to verify. To verify an ECDSA signature, this method
+        /// will digest the data using SHA-256 or SHA-384, depending on the
+        /// public key's curve.
         /// </param>
         /// <param name="signature">
-        ///     The signature to verify.
+        /// The signature to verify.
         /// </param>
         /// <param name="isStandardSignature">
-        ///     <c>true</c> if the signature is formatted as the BER encoding
-        ///     specified by most standards, or <c>false</c> if the signature is
-        ///     formatted as the concatenation of <c>r</c> and <c>s</c>.
+        /// <c>true</c> if the signature is formatted as the BER encoding
+        /// specified by most standards, or <c>false</c> if the signature is
+        /// formatted as the concatenation of <c>r</c> and <c>s</c>.
         /// </param>
         /// <returns>
-        ///     A boolean, <c>true</c> if the signature verifies, <c>false</c> if it
-        ///     does not.
+        /// A boolean, <c>true</c> if the signature verifies, <c>false</c> if it
+        /// does not.
         /// </returns>
         public bool VerifyData(
             byte[] dataToVerify,
@@ -326,47 +316,44 @@ namespace Yubico.YubiKey.Cryptography
             {
                 P256KeySize => CryptographyProviders.Sha256Creator(),
                 P384KeySize => CryptographyProviders.Sha384Creator(),
-                _ => throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm)
+                _ => throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm),
             };
 
             return VerifyDigestedData(digester.ComputeHash(dataToVerify), signature, isStandardSignature);
         }
 
         /// <summary>
-        ///     Verify the <c>signature</c> using the <c>digestToVerify</c>.
+        /// Verify the <c>signature</c> using the <c>digestToVerify</c>.
         /// </summary>
         /// <remarks>
-        ///     If the signature is the standard BER encoding, then pass <c>true</c>
-        ///     for <c>isStandardSignature</c>. That argument defaults to <c>true</c>
-        ///     so if the signature is formatted in the standard way, you can call
-        ///     this method with that argument missing. If the signature is the
-        ///     concatenation of <c>r</c> and <c>s</c>, pass <c>false</c> for
-        ///     <c>isStandardSignature</c>.
+        /// If the signature is the standard BER encoding, then pass <c>true</c>
+        /// for <c>isStandardSignature</c>. That argument defaults to <c>true</c>
+        /// so if the signature is formatted in the standard way, you can call
+        /// this method with that argument missing. If the signature is the
+        /// concatenation of <c>r</c> and <c>s</c>, pass <c>false</c> for
+        /// <c>isStandardSignature</c>.
         /// </remarks>
         /// <param name="digestToVerify">
-        ///     The digest of the data to verify.
+        /// The digest of the data to verify.
         /// </param>
         /// <param name="signature">
-        ///     The signature to verify.
+        /// The signature to verify.
         /// </param>
         /// <param name="isStandardSignature">
-        ///     <c>true</c> if the signature is formatted as the BER encoding
-        ///     specified by most standards, or <c>false</c> if the signature is
-        ///     formatted as the concatenation of <c>r</c> and <c>s</c>.
+        /// <c>true</c> if the signature is formatted as the BER encoding
+        /// specified by most standards, or <c>false</c> if the signature is
+        /// formatted as the concatenation of <c>r</c> and <c>s</c>.
         /// </param>
         /// <returns>
-        ///     A boolean, <c>true</c> if the signature verifies, <c>false</c> if it
-        ///     does not.
+        /// A boolean, <c>true</c> if the signature verifies, <c>false</c> if it
+        /// does not.
         /// </returns>
         public bool VerifyDigestedData(
             byte[] digestToVerify,
             byte[] signature,
             bool isStandardSignature = true)
         {
-            byte[] sig = isStandardSignature
-                ? ConvertSignature(signature, ECDsa.KeySize)
-                : signature;
-
+            byte[] sig = isStandardSignature ? ConvertSignature(signature, ECDsa.KeySize) : signature;
             return ECDsa.VerifyHash(digestToVerify, sig);
         }
 
@@ -379,14 +366,14 @@ namespace Yubico.YubiKey.Cryptography
             if (encodedEccPoint.Length >= MinEncodedPointLength && encodedEccPoint.Span[0] == EncodedPointTag)
             {
                 int coordLength = (encodedEccPoint.Length - 1) / 2;
-                xCoordinate = encodedEccPoint.Slice(start: 1, coordLength).ToArray();
+                xCoordinate = encodedEccPoint.Slice(1, coordLength).ToArray();
                 yCoordinate = encodedEccPoint.Slice(1 + coordLength, coordLength).ToArray();
 
                 oid = encodedEccPoint.Length switch
                 {
                     P256EncodedPointLength => OidP256,
                     P384EncodedPointLength => OidP384,
-                    _ => ""
+                    _ => "",
                 };
             }
 
@@ -400,7 +387,7 @@ namespace Yubico.YubiKey.Cryptography
                 var eccCurve = ECCurve.CreateFromValue(oid);
                 var eccParams = new ECParameters
                 {
-                    Curve = eccCurve
+                    Curve = (ECCurve)eccCurve
                 };
 
                 eccParams.Q.X = xCoordinate;
@@ -420,7 +407,7 @@ namespace Yubico.YubiKey.Cryptography
             {
                 OidP256 => (P256EncodedPointLength - 1) / 2,
                 OidP384 => (P384EncodedPointLength - 1) / 2,
-                _ => -1
+                _ => -1,
             };
 
             if (eccParams.Q.X.Length > 0 && eccParams.Q.X.Length <= coordinateLength)
@@ -433,6 +420,7 @@ namespace Yubico.YubiKey.Cryptography
 
             throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
         }
+
 
         // Convert the signature from standard to the concatenation of r and s.
         private static byte[] ConvertSignature(byte[] signature, int publicKeyBitSize)
@@ -495,10 +483,10 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         /// <summary>
-        ///     Clean up
+        /// Clean up
         /// </summary>
         /// <param name="disposing">
-        ///     Disposing or called from elsewhere.
+        /// Disposing or called from elsewhere.
         /// </param>
         protected virtual void Dispose(bool disposing)
         {
@@ -511,6 +499,15 @@ namespace Yubico.YubiKey.Cryptography
 
                 _disposed = true;
             }
+        }
+
+        /// <summary>
+        /// Clean up.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

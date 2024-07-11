@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -24,7 +25,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new ResetCommand();
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().Cla);
+            Assert.Equal(0, command.CreateCommandApdu().Cla);
         }
 
         [Fact]
@@ -32,7 +33,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new ResetCommand();
 
-            Assert.Equal(expected: 0x04, command.CreateCommandApdu().Ins);
+            Assert.Equal(0x04, command.CreateCommandApdu().Ins);
         }
 
         [Fact]
@@ -40,7 +41,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new ResetCommand();
 
-            Assert.Equal(expected: 0xDE, command.CreateCommandApdu().P1);
+            Assert.Equal(0xDE, command.CreateCommandApdu().P1);
         }
 
         [Fact]
@@ -48,7 +49,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new ResetCommand();
 
-            Assert.Equal(expected: 0xAD, command.CreateCommandApdu().P2);
+            Assert.Equal(0xAD, command.CreateCommandApdu().P2);
         }
 
         [Fact]
@@ -56,7 +57,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new ResetCommand();
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().Nc);
+            Assert.Equal(0, command.CreateCommandApdu().Nc);
         }
 
         [Fact]
@@ -64,7 +65,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new ResetCommand();
 
-            var data = command.CreateCommandApdu().Data;
+            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
             Assert.True(data.IsEmpty);
         }
@@ -74,7 +75,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new ResetCommand();
-            var response = command.CreateResponseForApdu(responseApdu);
+            OathResponse? response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is OathResponse);
         }

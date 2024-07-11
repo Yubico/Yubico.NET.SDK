@@ -49,13 +49,13 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 // Are there any?
                 if (credentials.Count == 0)
                 {
-                    SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "No credentials found");
+                    SampleMenu.WriteMessage(MessageType.Special, 0, "No credentials found");
                     return false;
                 }
 
                 if (credentials.Count == 1 && alwaysAsk == false)
                 {
-                    chosenCredential = credentials[index: 0];
+                    chosenCredential = credentials[0];
                     return true;
                 }
 
@@ -75,7 +75,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 }
             }
 
-            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "Invalid response");
+            SampleMenu.WriteMessage(MessageType.Special, 0, "Invalid response");
             return false;
         }
 
@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             string[] choices =
             {
                 "Create credential yourself",
-                "Add an already configured credential"
+                "Add an already configured credential",
             };
 
             int indexChosen = menuObject.RunMenu("How would you want to add it?", choices);
@@ -104,7 +104,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 return true;
             }
 
-            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "Invalid response");
+            SampleMenu.WriteMessage(MessageType.Special, 0, "Invalid response");
             return false;
         }
 
@@ -136,7 +136,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 return true;
             }
 
-            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "Invalid response");
+            SampleMenu.WriteMessage(MessageType.Special, 0, "Invalid response");
             return false;
         }
 
@@ -154,7 +154,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             string[] choices =
             {
                 "Create existing credential yourself",
-                "Pick from credentials"
+                "Pick from credentials",
             };
 
             int indexChosen = menuObject.RunMenu("How would you want to " + name + " it?", choices);
@@ -165,7 +165,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 return true;
             }
 
-            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "Invalid response");
+            SampleMenu.WriteMessage(MessageType.Special, 0, "Invalid response");
             return false;
         }
     }

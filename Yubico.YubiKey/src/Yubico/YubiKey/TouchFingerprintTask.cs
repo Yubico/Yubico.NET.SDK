@@ -38,7 +38,6 @@ namespace Yubico.YubiKey
 
         private readonly ICancelConnection? _connection;
         private readonly Task _notifyTask;
-        private readonly object _updateLock = new object();
         private bool _disposed;
 
         // This field holds a boolean that indicates whether the sub-thread
@@ -51,6 +50,7 @@ namespace Yubico.YubiKey
         // KeyCollector will read and write.
         // Hence, there is a lock.
         private bool _isSdkUpdate = true;
+        private readonly object _updateLock = new object();
 
         // The SDK will call SdkUpdate, which will create a new KeyEntryData and
         // copy the old into the new.
@@ -58,6 +58,18 @@ namespace Yubico.YubiKey
         // We're using different KeyEntryData objects, one for each call to the
         // KeyCollector, to avoid collisions.
         private KeyEntryData _keyEntryData;
+
+        // If there is no SignalCancel call, this is how we report cancellation.
+        // That is, set this to true so that we have a second way to notify the
+        // caller that the operation is canceled.
+        // Note that we won't set this property if there is a SignalCancel, even
+        // if the caller requests cancellation.
+        // Note that two threads will have access to this property. However, the
+        // main thread (the one on which the SDK is performing the operation)
+        // will read only. The "sub-thread" that contacts the KeyCollector will
+        // write to this property if there's an exception.
+        // So while there is a "race condition", it is not dangerous.
+        public bool IsUserCanceled { get; private set; }
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -96,9 +108,8 @@ namespace Yubico.YubiKey
             {
                 Request = keyEntryData.Request
             };
-
             _notifyTask = new Task(() => RunKeyCollectorTask(keyCollector));
-            _ = _notifyTask.ContinueWith(t => HandleTaskException(t), TaskScheduler.Current);
+            _ = _notifyTask.ContinueWith((t) => HandleTaskException(t), TaskScheduler.Current);
 
             if (connection is ICancelConnection cancelConnection)
             {
@@ -114,31 +125,8 @@ namespace Yubico.YubiKey
             }
         }
 
-        // If there is no SignalCancel call, this is how we report cancellation.
-        // That is, set this to true so that we have a second way to notify the
-        // caller that the operation is canceled.
-        // Note that we won't set this property if there is a SignalCancel, even
-        // if the caller requests cancellation.
-        // Note that two threads will have access to this property. However, the
-        // main thread (the one on which the SDK is performing the operation)
-        // will read only. The "sub-thread" that contacts the KeyCollector will
-        // write to this property if there's an exception.
-        // So while there is a "race condition", it is not dangerous.
-        public bool IsUserCanceled { get; private set; }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
         private void HandleTaskException(Task task) =>
-            task.Exception?.Handle(
-                e =>
-                {
-                    UserCancel();
-                    return true;
-                });
+            task.Exception?.Handle((e) => { UserCancel(); return true; });
 
         // If the caller is performing the same command this TouchFingerprintTask
         // object is concerned with, then return the IsUserCanceled.
@@ -167,8 +155,7 @@ namespace Yubico.YubiKey
         public void SdkUpdate(KeyEntryData keyEntryData)
         {
             KeyEntryRequest request = keyEntryData.Request == KeyEntryRequest.EnrollFingerprint
-                ? KeyEntryRequest.EnrollFingerprint
-                : KeyEntryRequest.Release;
+                ? KeyEntryRequest.EnrollFingerprint : KeyEntryRequest.Release;
 
             lock (_updateLock)
             {
@@ -213,8 +200,13 @@ namespace Yubico.YubiKey
                 {
                     Thread.Sleep(250);
                 }
-            }
-            while (!isRelease);
+            } while (!isRelease);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)
@@ -232,6 +224,9 @@ namespace Yubico.YubiKey
                 // it unless the state is RanToCompletion, Faulted, or Canceled.
                 switch (_notifyTask.Status)
                 {
+                    default:
+                        break;
+
                     case TaskStatus.RanToCompletion:
                     case TaskStatus.Faulted:
                     case TaskStatus.Canceled:

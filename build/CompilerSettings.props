@@ -21,113 +21,113 @@ on things like conditions in this file.
 -->
 <Project>
 
-    <!--
-    Settings that affect ALL projects, including test and reference assemblies.
-    -->
-    <PropertyGroup Label="Global C# language and build settings">
-
-        <!--
-        Use C# 8.0 features. This is likely the maximum language version that we can use while generating
-        .NETStandard 2.0 libraries. C# 9.0 requires the .NET 5 runtime. More research can be done at the time
-        of .NET 5 release to re-evaluate this statement.
-        -->
-        <LangVersion>8.0</LangVersion>
-
-        <!--
-        Enable nullable reference types. This is a C# 8.0 feature that is off by default, due to backward
-        compatability reasons. Since this is a brand new project starting, we do not have this concern and should
-        use the new behavior.
-    
-        Nullable reference types allow us to have nearly identical behavior to nullable value types. This allows
-        code maintainers to reason about null behavior in a much more consistent way.
-        -->
-        <Nullable>enable</Nullable>
-
-        <!--
-        We want to treat all warnings as errors. While most of this behavior is now controlled by .editorconfig
-        files, we still set this globally in case any error groups were missed.
-    
-        Warnings contribute to technical debt of the project. Forcing us to deal with warnings in the here and
-        now helps prevent any future build-up. Likewise, updating to new compilers or analyzers should be done
-        deliberately. If any new errors or warnings are introduced as part of the upgrade, they should be
-        addressed as part of that commit.
-        -->
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-        <WarningsAsErrors/>
-
-        <!--
-        NU5105 is a warning about older clients not being able to understand SemVer 2.0. This warning is no longer
-        relevant as everyone should be using the newer Nuget clients by now.
-        -->
-        <NoWarn>@(NoWarn);NU5105</NoWarn>
-
-        <!--
-        Create byte-for-byte identical build artifacts given the same build input. Normally, the compiler will
-        add certain things to the binary header like timestamp, compiler version, and even more seemingly
-        unnecessary administrivia. There doesn't really seem to be any benefit to this, and arguable deterministic
-        builds should be the default; but they aren't. Setting this can potentially open the door to build caching,
-        better build auditing, and faster testing.
-        -->
-        <Deterministic>true</Deterministic>
-        <EnableNETAnalyzers>true</EnableNETAnalyzers>
-        <AnalysisLevel>latest</AnalysisLevel>
-        <AnalysisMode>AllEnabledByDefault</AnalysisMode>
-        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-    </PropertyGroup>
-
-    <PropertyGroup Label="Production assembly project settings" Condition="'$(IsProdProject)' == 'true'">
-
-        <NeutralLanguage>en-US</NeutralLanguage>
-
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-
-    </PropertyGroup>
+  <!--
+  Settings that affect ALL projects, including test and reference assemblies.
+  -->
+  <PropertyGroup Label="Global C# language and build settings">
 
     <!--
-    Settings that affect reference assemblies.
+    Use C# 8.0 features. This is likely the maximum language version that we can use while generating
+    .NETStandard 2.0 libraries. C# 9.0 requires the .NET 5 runtime. More research can be done at the time
+    of .NET 5 release to re-evaluate this statement.
     -->
-    <PropertyGroup Label="Reference assembly project settings" Condition="'$(IsRefProject)'=='true'">
-
-        <!--
-        Add a compiler define for REFERENCE_ASSEMBLY that implementers can use to guard code blocks using #if
-        pre-processor directives. Note that for platform specific code (of which reference assemblies should
-        be considered a "special" platform), we prefer to use convention based files that end in the suffix
-        *.Ref.cs or placed in a folder called Ref. Use the #if style only as a last resort.
-        -->
-        <DefineConstants>$(DefineConstants);REFERENCE_ASSEMBLY</DefineConstants>
-
-        <!--
-        Instructs MSBuild / CSC.exe that we want to produce a metadata only (reference) assembly. This allows
-        use to create a project that pulls the metadata from the source code itself, but strips out all
-        implementation, leaving only the public signature behind. Reference assemblies are used by Visual
-        Studio and IntelliSense for resolving references while not depending on any platform-dependent code.
-        -->
-        <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
-
-        <!--
-        Do not pack this assembly automatically. Yes, references assemblies need to be packed in our final
-        NuGet package, however we take care of this step manually. This is because the ref assembly is not
-        being packed as part of its project build, but because of the main project's build pass.
-        -->
-        <IsPackable>false</IsPackable>
-
-        <!--
-        If no other language or locale is specified, assume that we're all speaking United States English.
-        -->
-        <NeutralLanguage>en-US</NeutralLanguage>
-
-    </PropertyGroup>
+    <LangVersion>8.0</LangVersion>
 
     <!--
-    Settings that affect test projects.
+    Enable nullable reference types. This is a C# 8.0 feature that is off by default, due to backward
+    compatability reasons. Since this is a brand new project starting, we do not have this concern and should
+    use the new behavior.
+
+    Nullable reference types allow us to have nearly identical behavior to nullable value types. This allows
+    code maintainers to reason about null behavior in a much more consistent way.
     -->
-    <PropertyGroup Label="Test project settings" Condition="'$(IsTestProject)'=='true'">
+    <Nullable>enable</Nullable>
 
-        <!--
-        Do not pack test projects in any of the NuGet packages.
-        -->
-        <IsPackable>false</IsPackable>
+    <!--
+    We want to treat all warnings as errors. While most of this behavior is now controlled by .editorconfig
+    files, we still set this globally in case any error groups were missed.
 
-    </PropertyGroup>
+    Warnings contribute to technical debt of the project. Forcing us to deal with warnings in the here and
+    now helps prevent any future build-up. Likewise, updating to new compilers or analyzers should be done
+    deliberately. If any new errors or warnings are introduced as part of the upgrade, they should be
+    addressed as part of that commit.
+    -->
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <WarningsAsErrors />
+
+    <!--
+    NU5105 is a warning about older clients not being able to understand SemVer 2.0. This warning is no longer
+    relevant as everyone should be using the newer Nuget clients by now.
+    -->
+    <NoWarn>@(NoWarn);NU5105</NoWarn>
+
+    <!--
+    Create byte-for-byte identical build artifacts given the same build input. Normally, the compiler will
+    add certain things to the binary header like timestamp, compiler version, and even more seemingly
+    unnecessary administrivia. There doesn't really seem to be any benefit to this, and arguable deterministic
+    builds should be the default; but they aren't. Setting this can potentially open the door to build caching,
+    better build auditing, and faster testing.
+    -->
+    <Deterministic>true</Deterministic>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisLevel>latest</AnalysisLevel>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Production assembly project settings" Condition="'$(IsProdProject)' == 'true'">
+
+    <NeutralLanguage>en-US</NeutralLanguage>
+
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+  </PropertyGroup>
+
+  <!--
+  Settings that affect reference assemblies.
+  -->
+  <PropertyGroup Label="Reference assembly project settings" Condition="'$(IsRefProject)'=='true'">
+
+    <!--
+    Add a compiler define for REFERENCE_ASSEMBLY that implementers can use to guard code blocks using #if
+    pre-processor directives. Note that for platform specific code (of which reference assemblies should
+    be considered a "special" platform), we prefer to use convention based files that end in the suffix
+    *.Ref.cs or placed in a folder called Ref. Use the #if style only as a last resort.
+    -->
+    <DefineConstants>$(DefineConstants);REFERENCE_ASSEMBLY</DefineConstants>
+
+    <!--
+    Instructs MSBuild / CSC.exe that we want to produce a metadata only (reference) assembly. This allows
+    use to create a project that pulls the metadata from the source code itself, but strips out all
+    implementation, leaving only the public signature behind. Reference assemblies are used by Visual
+    Studio and IntelliSense for resolving references while not depending on any platform-dependent code.
+    -->
+    <ProduceReferenceAssembly>true</ProduceReferenceAssembly>
+
+    <!--
+    Do not pack this assembly automatically. Yes, references assemblies need to be packed in our final
+    NuGet package, however we take care of this step manually. This is because the ref assembly is not
+    being packed as part of its project build, but because of the main project's build pass.
+    -->
+    <IsPackable>false</IsPackable>
+
+    <!--
+    If no other language or locale is specified, assume that we're all speaking United States English.
+    -->
+    <NeutralLanguage>en-US</NeutralLanguage>
+
+  </PropertyGroup>
+
+  <!--
+  Settings that affect test projects.
+  -->
+  <PropertyGroup Label="Test project settings" Condition="'$(IsTestProject)'=='true'">
+
+    <!--
+    Do not pack test projects in any of the NuGet packages.
+    -->
+    <IsPackable>false</IsPackable>
+
+  </PropertyGroup>
 
 </Project>

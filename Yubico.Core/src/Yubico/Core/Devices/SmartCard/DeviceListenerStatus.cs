@@ -15,22 +15,22 @@
 namespace Yubico.Core.Devices.SmartCard
 {
     /// <summary>
-    ///     An enumeration that represents the status of a device listener.
+    /// An enumeration that represents the status of a device listener.
     /// </summary>
     public enum DeviceListenerStatus
     {
         /// <summary>
-        ///     The listener has not been started, and is not currently listening for devices. No events will be raised.
+        /// The listener has not been started, and is not currently listening for devices. No events will be raised.
         /// </summary>
         Stopped,
 
         /// <summary>
-        ///     The listener has been successfully started.
+        /// The listener has been successfully started.
         /// </summary>
         Started,
 
         /// <summary>
-        ///     The listener encountered an error and could not start. No events will be raised.
+        /// The listener encountered an error and could not start. No events will be raised.
         /// </summary>
         Error
     }

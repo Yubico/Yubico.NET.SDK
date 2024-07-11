@@ -13,23 +13,21 @@
 // limitations under the License.
 
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.Oath.Commands;
 
 namespace Yubico.YubiKey.Pipelines
 {
     /// <summary>
-    ///     An OATH-specific transform that automatically detects large responses
-    ///     and issues GET_RESPONSE APDUs until all data has been returned.
+    /// An OATH-specific transform that automatically detects large responses
+    /// and issues GET_RESPONSE APDUs until all data has been returned.
     /// </summary>
     internal class OathResponseChainingTransform : ResponseChainingTransform
     {
         public OathResponseChainingTransform(IApduTransform pipeline) : base(pipeline)
         {
+
         }
 
-        protected override IYubiKeyCommand<YubiKeyResponse> CreateGetResponseCommand(
-            CommandApdu originatingCommand,
-            short SW2) =>
-            new GetResponseCommand(originatingCommand, SW2);
+        protected override IYubiKeyCommand<YubiKeyResponse> CreateGetResponseCommand(CommandApdu originatingCommand, short SW2) =>
+            new Oath.Commands.GetResponseCommand(originatingCommand, SW2);
     }
 }

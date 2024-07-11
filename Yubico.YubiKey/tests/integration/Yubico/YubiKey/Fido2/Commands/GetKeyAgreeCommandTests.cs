@@ -30,11 +30,11 @@ namespace Yubico.YubiKey.Fido2.Commands
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void GetKeyAgreeCommand_Succeeds()
         {
-            var cmd = new GetKeyAgreementCommand { PinUvAuthProtocol = PinUvAuthProtocol.ProtocolTwo };
-            var rsp = Connection.SendCommand(cmd);
+            var cmd = new GetKeyAgreementCommand { PinUvAuthProtocol = PinUvAuthProtocol.ProtocolTwo, };
+            GetKeyAgreementResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            var pubKey = rsp.GetData();
+            CoseEcPublicKey pubKey = rsp.GetData();
             Assert.Equal(CoseEcCurve.P256, pubKey.Curve);
         }
     }

@@ -17,28 +17,28 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    ///     The response to the <see cref="DeleteCredentialCommand" /> class.
+    /// The response to the <see cref="DeleteCredentialCommand"/> class.
     /// </summary>
     /// <remarks>
-    ///     <para>
-    ///         If authentication failed, the <see cref="YubiKeyResponse.Status" />
-    ///         will be set to
-    ///         <see cref="ResponseStatus.AuthenticationRequired" /> and
-    ///         <see cref="BaseYubiHsmAuthResponseWithRetries.RetriesRemaining" />
-    ///         will contain the number of retries remaining for the management key.
-    ///     </para>
-    ///     <para>
-    ///         The associated command class is <see cref="DeleteCredentialCommand" />.
-    ///     </para>
+    /// <para>
+    /// If authentication failed, the <see cref="YubiKeyResponse.Status"/>
+    /// will be set to
+    /// <see cref="ResponseStatus.AuthenticationRequired"/> and
+    /// <see cref="BaseYubiHsmAuthResponseWithRetries.RetriesRemaining"/>
+    /// will contain the number of retries remaining for the management key.
+    /// </para>
+    /// <para>
+    /// The associated command class is <see cref="DeleteCredentialCommand"/>.
+    /// </para>
     /// </remarks>
     public class DeleteCredentialResponse : BaseYubiHsmAuthResponseWithRetries
     {
         /// <summary>
-        ///     Constructs a DeleteCredential instance based on a ResponseApdu
-        ///     received from the YubiKey.
+        /// Constructs a DeleteCredential instance based on a ResponseApdu
+        /// received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     The ResponseApdu returned by the YubiKey.
+        /// The ResponseApdu returned by the YubiKey.
         /// </param>
         public DeleteCredentialResponse(ResponseApdu responseApdu) : base(responseApdu)
         {

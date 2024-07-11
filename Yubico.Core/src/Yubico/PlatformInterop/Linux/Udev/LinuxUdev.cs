@@ -27,8 +27,8 @@ namespace Yubico.PlatformInterop
     // subclasses.
     internal class LinuxUdev : IDisposable
     {
-        private bool _isDisposed;
         protected LinuxUdevSafeHandle _udevObject;
+        private bool _isDisposed;
 
         // Create a new instance of LinuxUdev. This is essentially equivalent in
         // C to calling udev_new to get the initial object.
@@ -37,12 +37,6 @@ namespace Yubico.PlatformInterop
         public LinuxUdev()
         {
             _udevObject = (LinuxUdevSafeHandle)ThrowIfFailedNull(NativeMethods.udev_new());
-        }
-
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
 
         // Throw the PlatformApiException(LinuxUdevError) if the value is NULL.
@@ -73,6 +67,12 @@ namespace Yubico.PlatformInterop
                 string.Format(
                     CultureInfo.CurrentCulture,
                     ExceptionMessages.LinuxUdevError));
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)

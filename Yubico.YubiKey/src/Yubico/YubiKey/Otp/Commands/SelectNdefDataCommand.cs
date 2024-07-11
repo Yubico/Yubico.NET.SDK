@@ -17,8 +17,8 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    ///     Selects the file containing the YubiKey's NDEF data. This must be sent prior to sending the
-    ///     <see cref="ReadNdefDataCommand" /> command. Note that this command only works over NFC.
+    /// Selects the file containing the YubiKey's NDEF data. This must be sent prior to sending the
+    /// <see cref="ReadNdefDataCommand"/> command. Note that this command only works over NFC.
     /// </summary>
     public class SelectNdefDataCommand : IYubiKeyCommand<OtpResponse>
     {
@@ -26,39 +26,40 @@ namespace Yubico.YubiKey.Otp.Commands
         private const byte SelectNdefParameter2 = 0x0C;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="SelectNdefDataCommand" /> class.
-        /// </summary>
-        public SelectNdefDataCommand()
-        {
-        }
-
-        /// <summary>
-        ///     Indicates which file should be selected when this command is issued. Defaults to Ndef.
+        /// Indicates which file should be selected when this command is issued. Defaults to Ndef.
         /// </summary>
         public NdefFileId FileID { get; set; } = NdefFileId.Ndef;
 
         /// <summary>
-        ///     Gets the YubiKeyApplication to which this command belongs.
+        /// Gets the YubiKeyApplication to which this command belongs.
         /// </summary>
         /// <value>
-        ///     YubiKeyApplication.OtpNdef
+        /// YubiKeyApplication.OtpNdef
         /// </value>
         public YubiKeyApplication Application => YubiKeyApplication.OtpNdef;
 
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Ins = SelectNdefDataInstruction,
-                P2 = SelectNdefParameter2,
-                Data = new[]
-                {
-                    (byte)((short)FileID >> 8 & 0xFF),
-                    (byte)((short)FileID & 0xFF)
-                }
-            };
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SelectNdefDataCommand"/> class.
+        /// </summary>
+        public SelectNdefDataCommand()
+        {
+
+        }
 
         /// <inheritdoc />
-        public OtpResponse CreateResponseForApdu(ResponseApdu responseApdu) => new OtpResponse(responseApdu);
+        public CommandApdu CreateCommandApdu() => new CommandApdu()
+        {
+            Ins = SelectNdefDataInstruction,
+            P2 = SelectNdefParameter2,
+            Data = new byte[]
+            {
+                (byte)(((short)FileID >> 8) & 0xFF),
+                (byte)((short)FileID & 0xFF)
+            }
+        };
+
+        /// <inheritdoc />
+        public OtpResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new OtpResponse(responseApdu);
     }
 }

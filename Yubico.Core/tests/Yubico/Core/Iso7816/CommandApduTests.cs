@@ -14,7 +14,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Security.Cryptography;
 using Xunit;
 
 namespace Yubico.Core.Iso7816.UnitTests
@@ -24,7 +23,7 @@ namespace Yubico.Core.Iso7816.UnitTests
         private const int _MaximumSizeShortEncoding = 256;
         private const int _MaximumSizeExtendedEncoding = 65536;
 
-        private static readonly byte[] _header = { 0xBA, 0xDF, 0x00, 0xD };
+        private static readonly byte[] _header = new byte[] { 0xBA, 0xDF, 0x00, 0xD };
         private static byte _cla => _header[0];
         private static byte _ins => _header[1];
         private static byte _p1 => _header[2];
@@ -35,8 +34,8 @@ namespace Yubico.Core.Iso7816.UnitTests
         //
         private static byte[] GenerateRandBytes(int length)
         {
-            var randBytes = new byte[length];
-            RandomNumberGenerator.Fill(randBytes);
+            byte[] randBytes = new byte[length];
+            System.Security.Cryptography.RandomNumberGenerator.Fill(randBytes);
             return randBytes;
         }
 
@@ -48,7 +47,7 @@ namespace Yubico.Core.Iso7816.UnitTests
         {
             var commandApdu = new CommandApdu();
 
-            Assert.Equal(expected: 0, commandApdu.Cla);
+            Assert.Equal(0, commandApdu.Cla);
         }
 
         [Fact]
@@ -69,7 +68,7 @@ namespace Yubico.Core.Iso7816.UnitTests
         {
             var commandApdu = new CommandApdu();
 
-            Assert.Equal(expected: 0, commandApdu.Ins);
+            Assert.Equal(0, commandApdu.Ins);
         }
 
         [Fact]
@@ -90,7 +89,7 @@ namespace Yubico.Core.Iso7816.UnitTests
         {
             var commandApdu = new CommandApdu();
 
-            Assert.Equal(expected: 0, commandApdu.P1);
+            Assert.Equal(0, commandApdu.P1);
         }
 
         [Fact]
@@ -111,7 +110,7 @@ namespace Yubico.Core.Iso7816.UnitTests
         {
             var commandApdu = new CommandApdu();
 
-            Assert.Equal(expected: 0, commandApdu.P2);
+            Assert.Equal(0, commandApdu.P2);
         }
 
         [Fact]
@@ -138,9 +137,9 @@ namespace Yubico.Core.Iso7816.UnitTests
         [Fact]
         public void Data_GetAfterEmptySet_ReturnsSameListValues()
         {
-            var data = Array.Empty<byte>();
+            byte[] data = Array.Empty<byte>();
 
-            var commandApdu = new CommandApdu
+            var commandApdu = new CommandApdu()
             {
                 Data = data
             };
@@ -151,9 +150,9 @@ namespace Yubico.Core.Iso7816.UnitTests
         [Fact]
         public void Data_GetAfterSet_ReturnsSameListValues()
         {
-            var data = GenerateRandBytes(length: 4);
+            byte[] data = GenerateRandBytes(4);
 
-            var commandApdu = new CommandApdu
+            var commandApdu = new CommandApdu()
             {
                 Data = data
             };
@@ -166,7 +165,7 @@ namespace Yubico.Core.Iso7816.UnitTests
         {
             var commandApdu = new CommandApdu();
 
-            Assert.Equal(expected: 0, commandApdu.Nc);
+            Assert.Equal(0, commandApdu.Nc);
         }
 
         [Fact]
@@ -174,19 +173,19 @@ namespace Yubico.Core.Iso7816.UnitTests
         {
             var commandApdu = new CommandApdu
             {
-                Data = Array.Empty<byte>()
+                Data = Array.Empty<byte>(),
             };
 
-            Assert.Equal(expected: 0, commandApdu.Nc);
+            Assert.Equal(0, commandApdu.Nc);
         }
 
         [Fact]
         public void Nc_ApduWithNonZeroData_ReturnsLengthOfData()
         {
-            var expectedNc = 3;
-            var data = GenerateRandBytes(expectedNc);
+            int expectedNc = 3;
+            byte[] data = GenerateRandBytes(expectedNc);
 
-            var commandApdu = new CommandApdu
+            var commandApdu = new CommandApdu()
             {
                 Data = data
             };
@@ -199,7 +198,7 @@ namespace Yubico.Core.Iso7816.UnitTests
         {
             var commandApdu = new CommandApdu();
 
-            Assert.Equal(expected: 0, commandApdu.Ne);
+            Assert.Equal(0, commandApdu.Ne);
         }
 
         [Theory]
@@ -221,13 +220,10 @@ namespace Yubico.Core.Iso7816.UnitTests
         {
             const int ne = -1;
 
-            static CommandApdu actual()
+            static CommandApdu actual() => new CommandApdu
             {
-                return new CommandApdu
-                {
-                    Ne = ne
-                };
-            }
+                Ne = ne
+            };
 
             _ = Assert.Throws<ArgumentOutOfRangeException>(actual);
         }
@@ -242,24 +238,24 @@ namespace Yubico.Core.Iso7816.UnitTests
         {
             var commandApdu = new CommandApdu();
 
-            var byteArray = commandApdu.AsByteArray();
+            byte[] byteArray = commandApdu.AsByteArray();
 
-            Assert.Equal(expected: 4, byteArray.Length);
+            Assert.Equal(4, byteArray.Length);
         }
 
         [Fact]
         public void AsByteArray_Data0Length_EmitsFourByteHeader()
         {
-            var data = Array.Empty<byte>();
+            byte[] data = Array.Empty<byte>();
 
             var commandApdu = new CommandApdu
             {
-                Data = data
+                Data = data,
             };
 
-            var byteArray = commandApdu.AsByteArray();
+            byte[] byteArray = commandApdu.AsByteArray();
 
-            Assert.Equal(expected: 4, byteArray.Length);
+            Assert.Equal(4, byteArray.Length);
         }
 
         [Fact]
@@ -270,10 +266,10 @@ namespace Yubico.Core.Iso7816.UnitTests
                 Cla = _cla,
                 Ins = _ins,
                 P1 = _p1,
-                P2 = _p2
+                P2 = _p2,
             };
 
-            var actualByteArray = commandApdu.AsByteArray();
+            byte[] actualByteArray = commandApdu.AsByteArray();
 
             Assert.Equal(_header, actualByteArray);
         }
@@ -295,10 +291,10 @@ namespace Yubico.Core.Iso7816.UnitTests
                 Ins = _ins,
                 P1 = _p1,
                 P2 = _p2,
-                Ne = ne
+                Ne = ne,
             };
 
-            var actualByteArray = commandApdu.AsByteArray();
+            byte[] actualByteArray = commandApdu.AsByteArray();
 
             Assert.Equal(expectedByteArray, actualByteArray);
         }
@@ -320,10 +316,10 @@ namespace Yubico.Core.Iso7816.UnitTests
                 Ins = _ins,
                 P1 = _p1,
                 P2 = _p2,
-                Ne = ne
+                Ne = ne,
             };
 
-            var actualByteArray = commandApdu.AsByteArray();
+            byte[] actualByteArray = commandApdu.AsByteArray();
 
             Assert.Equal(expectedByteArray, actualByteArray);
         }
@@ -335,7 +331,7 @@ namespace Yubico.Core.Iso7816.UnitTests
         [InlineData(_MaximumSizeShortEncoding, new byte[] { 0x00 })]
         public void AsByteArray_HeaderSetDataSet_EmitsCorrectApduShort(int nc, byte[] expectedLc)
         {
-            var data = GenerateRandBytes(nc);
+            byte[] data = GenerateRandBytes(nc);
 
             var expectedByteArray = new List<byte>();
             expectedByteArray.AddRange(_header);
@@ -348,10 +344,10 @@ namespace Yubico.Core.Iso7816.UnitTests
                 Ins = _ins,
                 P1 = _p1,
                 P2 = _p2,
-                Data = data
+                Data = data,
             };
 
-            var actualByteArray = commandApdu.AsByteArray();
+            byte[] actualByteArray = commandApdu.AsByteArray();
 
             Assert.Equal(expectedByteArray, actualByteArray);
         }
@@ -363,7 +359,7 @@ namespace Yubico.Core.Iso7816.UnitTests
         [InlineData(_MaximumSizeExtendedEncoding, new byte[] { 0x00, 0x00, 0x00 })]
         public void AsByteArray_HeaderSetDataSet_EmitsCorrectApduExtended(int nc, byte[] expectedLc)
         {
-            var data = GenerateRandBytes(nc);
+            byte[] data = GenerateRandBytes(nc);
 
             var expectedByteArray = new List<byte>();
             expectedByteArray.AddRange(_header);
@@ -376,10 +372,10 @@ namespace Yubico.Core.Iso7816.UnitTests
                 Ins = _ins,
                 P1 = _p1,
                 P2 = _p2,
-                Data = data
+                Data = data,
             };
 
-            var actualByteArray = commandApdu.AsByteArray();
+            byte[] actualByteArray = commandApdu.AsByteArray();
 
             Assert.Equal(expectedByteArray, actualByteArray);
         }
@@ -389,10 +385,9 @@ namespace Yubico.Core.Iso7816.UnitTests
         [InlineData(1, new byte[] { 0x01 }, 1, new byte[] { 0x01 })]
         [InlineData(0x12, new byte[] { 0x12 }, 0x12, new byte[] { 0x12 })]
         [InlineData(_MaximumSizeShortEncoding, new byte[] { 0x00 }, _MaximumSizeShortEncoding, new byte[] { 0x00 })]
-        public void AsByteArray_HeaderSetDataSetNeSet_EmitsCorrectApduShort(
-            int nc, byte[] expectedLc, int ne, byte[] expectedLe)
+        public void AsByteArray_HeaderSetDataSetNeSet_EmitsCorrectApduShort(int nc, byte[] expectedLc, int ne, byte[] expectedLe)
         {
-            var data = GenerateRandBytes(nc);
+            byte[] data = GenerateRandBytes(nc);
 
             var expectedByteArray = new List<byte>();
             expectedByteArray.AddRange(_header);
@@ -407,10 +402,10 @@ namespace Yubico.Core.Iso7816.UnitTests
                 P1 = _p1,
                 P2 = _p2,
                 Data = data,
-                Ne = ne
+                Ne = ne,
             };
 
-            var actualByteArray = commandApdu.AsByteArray();
+            byte[] actualByteArray = commandApdu.AsByteArray();
 
             Assert.Equal(expectedByteArray, actualByteArray);
         }
@@ -418,17 +413,14 @@ namespace Yubico.Core.Iso7816.UnitTests
         // Case 4E - matching, APDU = [Header][extended Lc][Data][extended (2 byte) Le]
         // Case 4E - mixed, APDU = [Header][extended Lc][Data][extended (2 byte) Le]
         [Theory]
-        [InlineData(_MaximumSizeShortEncoding + 1, new byte[] { 0x00, 0x01, 0x01 }, _MaximumSizeShortEncoding + 1,
-            new byte[] { 0x01, 0x01 })]
+        [InlineData(_MaximumSizeShortEncoding + 1, new byte[] { 0x00, 0x01, 0x01 }, _MaximumSizeShortEncoding + 1, new byte[] { 0x01, 0x01 })]
         [InlineData(0x1234, new byte[] { 0x00, 0x12, 0x34 }, 0x1234, new byte[] { 0x12, 0x34 })]
-        [InlineData(_MaximumSizeExtendedEncoding, new byte[] { 0x00, 0x00, 0x00 }, _MaximumSizeExtendedEncoding,
-            new byte[] { 0x00, 0x00 })]
+        [InlineData(_MaximumSizeExtendedEncoding, new byte[] { 0x00, 0x00, 0x00 }, _MaximumSizeExtendedEncoding, new byte[] { 0x00, 0x00 })]
         [InlineData(1, new byte[] { 0x00, 0x00, 0x01 }, _MaximumSizeShortEncoding + 1, new byte[] { 0x01, 0x01 })]
         [InlineData(_MaximumSizeShortEncoding + 1, new byte[] { 0x00, 0x01, 0x01 }, 1, new byte[] { 0x00, 0x01 })]
-        public void AsByteArray_HeaderSetDataSetNeSet_EmitsCorrectApduExtended(
-            int nc, byte[] expectedLc, int ne, byte[] expectedLe)
+        public void AsByteArray_HeaderSetDataSetNeSet_EmitsCorrectApduExtended(int nc, byte[] expectedLc, int ne, byte[] expectedLe)
         {
-            var data = GenerateRandBytes(nc);
+            byte[] data = GenerateRandBytes(nc);
 
             var expectedByteArray = new List<byte>();
             expectedByteArray.AddRange(_header);
@@ -443,10 +435,10 @@ namespace Yubico.Core.Iso7816.UnitTests
                 P1 = _p1,
                 P2 = _p2,
                 Data = data,
-                Ne = ne
+                Ne = ne,
             };
 
-            var actualByteArray = commandApdu.AsByteArray();
+            byte[] actualByteArray = commandApdu.AsByteArray();
 
             Assert.Equal(expectedByteArray, actualByteArray);
         }
@@ -455,18 +447,14 @@ namespace Yubico.Core.Iso7816.UnitTests
         [Fact]
         public void AsByteArray_NcLargerThanExtendedMax_ThrowsInvalidOperationException()
         {
-            var data = GenerateRandBytes(_MaximumSizeExtendedEncoding + 1);
+            byte[] data = GenerateRandBytes(_MaximumSizeExtendedEncoding + 1);
 
-            var commandApdu = new CommandApdu
+            var commandApdu = new CommandApdu()
             {
-                Data = data
+                Data = data,
             };
 
-            void encodeCommand()
-            {
-                commandApdu.AsByteArray();
-            }
-
+            void encodeCommand() => commandApdu.AsByteArray();
             _ = Assert.Throws<InvalidOperationException>(encodeCommand);
         }
 
@@ -474,18 +462,14 @@ namespace Yubico.Core.Iso7816.UnitTests
         [Fact]
         public void AsByteArray_NeLargerThanExtendedMax_ThrowsInvalidOperationException()
         {
-            var ne = _MaximumSizeExtendedEncoding + 1;
+            int ne = _MaximumSizeExtendedEncoding + 1;
 
-            var commandApdu = new CommandApdu
+            var commandApdu = new CommandApdu()
             {
-                Ne = ne
+                Ne = ne,
             };
 
-            void encodeCommand()
-            {
-                commandApdu.AsByteArray();
-            }
-
+            void encodeCommand() => commandApdu.AsByteArray();
             _ = Assert.Throws<InvalidOperationException>(encodeCommand);
         }
 
@@ -501,19 +485,15 @@ namespace Yubico.Core.Iso7816.UnitTests
         [InlineData(_MaximumSizeExtendedEncoding, _MaximumSizeExtendedEncoding)]
         public void AsShortByteArray_NcAndOrNeInvalidSize_ThrowsInvalidOperationException(int nc, int ne)
         {
-            var data = new byte[nc];
+            byte[] data = new byte[nc];
 
             var commandApdu = new CommandApdu
             {
                 Data = data,
-                Ne = ne
+                Ne = ne,
             };
 
-            void encodeCommand()
-            {
-                commandApdu.AsByteArray(ApduEncoding.ShortLength);
-            }
-
+            void encodeCommand() => commandApdu.AsByteArray(ApduEncoding.ShortLength);
             _ = Assert.Throws<InvalidOperationException>(encodeCommand);
         }
 
@@ -526,11 +506,11 @@ namespace Yubico.Core.Iso7816.UnitTests
         [Fact]
         public void AsExtendedByteArray_DataAndNeShortSize_EmitsCorrectApduExtended()
         {
-            var nc = 1;
-            byte[] expectedLc = { 0x00, 0x00, 0x01 };
-            var ne = 1;
-            byte[] expectedLe = { 0x00, 0x01 };
-            var data = GenerateRandBytes(nc);
+            int nc = 1;
+            byte[] expectedLc = new byte[] { 0x00, 0x00, 0x01 };
+            int ne = 1;
+            byte[] expectedLe = new byte[] { 0x00, 0x01 };
+            byte[] data = GenerateRandBytes(nc);
 
             var expectedByteArray = new List<byte>();
             expectedByteArray.AddRange(_header);
@@ -545,10 +525,10 @@ namespace Yubico.Core.Iso7816.UnitTests
                 P1 = _p1,
                 P2 = _p2,
                 Data = data,
-                Ne = ne
+                Ne = ne,
             };
 
-            var actualByteArray = commandApdu.AsByteArray(ApduEncoding.ExtendedLength);
+            byte[] actualByteArray = commandApdu.AsByteArray(ApduEncoding.ExtendedLength);
 
             Assert.Equal(expectedByteArray, actualByteArray);
         }
@@ -561,19 +541,15 @@ namespace Yubico.Core.Iso7816.UnitTests
         [InlineData(_MaximumSizeExtendedEncoding + 1, _MaximumSizeExtendedEncoding + 1)]
         public void AsExtendedByteArray_NcAndOrNeInvalidSize_ThrowsInvalidOperationException(int nc, int ne)
         {
-            var data = new byte[nc];
+            byte[] data = new byte[nc];
 
             var commandApdu = new CommandApdu
             {
                 Data = data,
-                Ne = ne
+                Ne = ne,
             };
 
-            void encodeCommand()
-            {
-                commandApdu.AsByteArray(ApduEncoding.ExtendedLength);
-            }
-
+            void encodeCommand() => commandApdu.AsByteArray(ApduEncoding.ExtendedLength);
             _ = Assert.Throws<InvalidOperationException>(encodeCommand);
         }
 
@@ -586,11 +562,7 @@ namespace Yubico.Core.Iso7816.UnitTests
         {
             var commandApdu = new CommandApdu();
 
-            void encodedCommand()
-            {
-                commandApdu.AsByteArray((ApduEncoding)(-1));
-            }
-
+            void encodedCommand() => commandApdu.AsByteArray((ApduEncoding)(-1));
             _ = Assert.Throws<ArgumentOutOfRangeException>(encodedCommand);
         }
 
@@ -603,28 +575,28 @@ namespace Yubico.Core.Iso7816.UnitTests
         [InlineData(ApduEncoding.ExtendedLength)]
         public void AsEncodingByteArray_NeSetIntMaxValue_EmitsCorrectApduMaxNe(ApduEncoding apduEncoding)
         {
-            var ne = int.MaxValue;
-            var expectedLe = apduEncoding switch
+            int ne = int.MaxValue;
+            byte[] expectedLe = apduEncoding switch
             {
                 ApduEncoding.ShortLength => new byte[] { 0x00 },
                 ApduEncoding.ExtendedLength => new byte[] { 0x00, 0x00, 0x00 },
-                _ => Array.Empty<byte>() // Shouldn't be reached
+                _ => Array.Empty<byte>(),   // Shouldn't be reached
             };
 
             var expectedByteArray = new List<byte>();
             expectedByteArray.AddRange(_header);
             expectedByteArray.AddRange(expectedLe);
 
-            var commandApdu = new CommandApdu
+            var commandApdu = new CommandApdu()
             {
                 Cla = _cla,
                 Ins = _ins,
                 P1 = _p1,
                 P2 = _p2,
-                Ne = ne
+                Ne = ne,
             };
 
-            var actualByteArray = commandApdu.AsByteArray(apduEncoding);
+            byte[] actualByteArray = commandApdu.AsByteArray(apduEncoding);
 
             Assert.Equal(expectedByteArray, actualByteArray);
         }

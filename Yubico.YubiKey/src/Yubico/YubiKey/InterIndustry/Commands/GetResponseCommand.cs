@@ -18,11 +18,11 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.InterIndustry.Commands
 {
     /// <summary>
-    ///     Gets additional response data from the previously issued command.
+    /// Gets additional response data from the previously issued command.
     /// </summary>
     /// <remarks>
-    ///     The OATH application uses a different version of this command. See
-    ///     <see cref="Oath.Commands.GetResponseCommand" />.
+    /// The OATH application uses a different version of this command. See
+    /// <see cref="Oath.Commands.GetResponseCommand"/>.
     /// </remarks>
     public class GetResponseCommand : IYubiKeyCommand<YubiKeyResponse>
     {
@@ -32,15 +32,27 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         private readonly int _SW2;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="GetResponseCommand" /> class.
+        /// Gets the YubiKeyApplication (e.g. PIV, OATH, etc.) that this command applies to.
+        /// </summary>
+        /// <remarks>
+        /// This command does not apply to the OATH application. The OATH application uses
+        /// <see cref="Oath.Commands.GetResponseCommand"/>.
+        /// </remarks>
+        /// <value>
+        /// The value will always be `YubiKeyApplication.InterIndustry` for this command.
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetResponseCommand"/> class.
         /// </summary>
         /// <param name="originatingCommand">
-        ///     The original command APDU that was sent that is now indicating that more data is in the
-        ///     response.
+        /// The original command APDU that was sent that is now indicating that more data is in the
+        /// response.
         /// </param>
         /// <param name="SW2">
-        ///     The SW2 byte of the last response. It indicates the number of bytes left for the next
-        ///     GetResponseCommand.
+        /// The SW2 byte of the last response. It indicates the number of bytes left for the next
+        /// GetResponseCommand.
         /// </param>
         public GetResponseCommand(CommandApdu originatingCommand, short SW2)
         {
@@ -53,30 +65,16 @@ namespace Yubico.YubiKey.InterIndustry.Commands
             _SW2 = SW2;
         }
 
-        /// <summary>
-        ///     Gets the YubiKeyApplication (e.g. PIV, OATH, etc.) that this command applies to.
-        /// </summary>
-        /// <remarks>
-        ///     This command does not apply to the OATH application. The OATH application uses
-        ///     <see cref="Oath.Commands.GetResponseCommand" />.
-        /// </remarks>
-        /// <value>
-        ///     The value will always be `YubiKeyApplication.InterIndustry` for this command.
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
+        /// <inheritdoc />
+        public CommandApdu CreateCommandApdu() => new CommandApdu
+        {
+            Cla = _Cla,
+            Ins = GetResponseInstruction,
+            Ne = _SW2 == 0 ? 256 : _SW2,
+        };
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Cla = _Cla,
-                Ins = GetResponseInstruction,
-                Ne = _SW2 == 0
-                    ? 256
-                    : _SW2
-            };
-
-        /// <inheritdoc />
-        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new YubiKeyResponse(responseApdu);
+        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new YubiKeyResponse(responseApdu);
     }
 }

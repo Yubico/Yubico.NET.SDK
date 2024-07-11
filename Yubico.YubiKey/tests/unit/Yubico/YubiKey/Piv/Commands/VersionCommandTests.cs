@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             var versionCommand = new VersionCommand();
 
-            var application = versionCommand.Application;
+            YubiKeyApplication application = versionCommand.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
@@ -40,25 +40,25 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
-            Assert.Equal(expected: 0, GetVersionCommandApdu().Cla);
+            Assert.Equal(0, GetVersionCommandApdu().Cla);
         }
 
         [Fact]
         public void CreateCommandApdu_GetInsProperty_ReturnsHexFD()
         {
-            Assert.Equal(expected: 0xFD, GetVersionCommandApdu().Ins);
+            Assert.Equal(0xFD, GetVersionCommandApdu().Ins);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP1Property_ReturnsZero()
         {
-            Assert.Equal(expected: 0, GetVersionCommandApdu().P1);
+            Assert.Equal(0, GetVersionCommandApdu().P1);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP2Property_ReturnsZero()
         {
-            Assert.Equal(expected: 0, GetVersionCommandApdu().P2);
+            Assert.Equal(0, GetVersionCommandApdu().P2);
         }
 
         [Fact]
@@ -70,13 +70,13 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void CreateCommandApdu_GetNc_ReturnsZero()
         {
-            Assert.Equal(expected: 0, GetVersionCommandApdu().Nc);
+            Assert.Equal(0, GetVersionCommandApdu().Nc);
         }
 
         [Fact]
         public void CreateCommandApdu_GetNe_ReturnsZero()
         {
-            Assert.Equal(expected: 0, GetVersionCommandApdu().Ne);
+            Assert.Equal(0, GetVersionCommandApdu().Ne);
         }
 
         [Fact]
@@ -87,7 +87,7 @@ namespace Yubico.YubiKey.Piv.Commands
             var versionCommand = new VersionCommand();
 
             // Act
-            var versionResponse = versionCommand.CreateResponseForApdu(responseApdu);
+            VersionResponse? versionResponse = versionCommand.CreateResponseForApdu(responseApdu);
 
             // Assert
             Assert.True(versionResponse is VersionResponse);

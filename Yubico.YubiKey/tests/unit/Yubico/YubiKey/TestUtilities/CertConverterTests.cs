@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Xunit;
 using Yubico.YubiKey.Piv;
 
@@ -28,33 +30,33 @@ namespace Yubico.YubiKey.TestUtilities
         [InlineData(PivAlgorithm.EccP384)]
         public void CertConverter_AllOperations_Succeed(PivAlgorithm algorithm)
         {
-            var isValid = SampleKeyPairs.GetKeysAndCertPem(algorithm, validAttest: true, out var certPem, out _, out _);
+            bool isValid = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out string certPem, out _, out _);
             Assert.True(isValid);
 
             var certConverter = new CertConverter(certPem.ToCharArray());
 
             Assert.Equal(certConverter.Algorithm, algorithm);
 
-            var getCert = certConverter.GetCertObject();
+            X509Certificate2 getCert = certConverter.GetCertObject();
             Assert.False(getCert.HasPrivateKey);
 
-            var getDer = certConverter.GetCertDer();
-            Assert.Equal(expected: 0x30, getDer[0]);
+            byte[] getDer = certConverter.GetCertDer();
+            Assert.Equal(0x30, getDer[0]);
 
-            var getPem = certConverter.GetCertPem();
-            Assert.Equal(expected: '-', getPem[0]);
+            char[] getPem = certConverter.GetCertPem();
+            Assert.Equal('-', getPem[0]);
 
-            var pubKey = certConverter.GetPivPublicKey();
+            PivPublicKey pubKey = certConverter.GetPivPublicKey();
             Assert.Equal(algorithm, pubKey.Algorithm);
 
             if (certConverter.KeySize > 384)
             {
-                using var rsaObject = certConverter.GetRsaObject();
+                using RSA rsaObject = certConverter.GetRsaObject();
                 Assert.Equal(certConverter.KeySize, rsaObject.KeySize);
             }
             else
             {
-                using var eccObject = certConverter.GetEccObject();
+                using ECDsa eccObject = certConverter.GetEccObject();
                 Assert.Equal(certConverter.KeySize, eccObject.KeySize);
             }
         }

@@ -17,7 +17,7 @@ using Xunit;
 
 namespace Yubico.Core.Devices.Hid.UnitTests
 {
-    internal class FakeHidDevice : IHidDevice
+    class FakeHidDevice : IHidDevice
     {
         public DateTime LastAccessed { get; } = DateTime.Now;
         public string Path { get; } = string.Empty;
@@ -26,34 +26,15 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         public short ProductId { get; }
         public short Usage { get; }
         public HidUsagePage UsagePage { get; }
-
-        public IHidConnection ConnectToFeatureReports()
-        {
-            throw new NotImplementedException();
-        }
-
-        public IHidConnection ConnectToIOReports()
-        {
-            throw new NotImplementedException();
-        }
+        public IHidConnection ConnectToFeatureReports() => throw new NotImplementedException();
+        public IHidConnection ConnectToIOReports() => throw new NotImplementedException();
     }
 
-    internal class FakeHidListener : HidDeviceListener
+    class FakeHidListener : HidDeviceListener
     {
-        public void FireArrival()
-        {
-            OnArrived(new FakeHidDevice());
-        }
-
-        public void FireRemoval()
-        {
-            OnRemoved(new FakeHidDevice());
-        }
-
-        public void Clear()
-        {
-            ClearEventHandlers();
-        }
+        public void FireArrival() => OnArrived(new FakeHidDevice());
+        public void FireRemoval() => OnRemoved(new FakeHidDevice());
+        public void Clear() => ClearEventHandlers();
     }
 
     public class HidDeviceListenerTests
@@ -111,8 +92,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         {
             var listener = new FakeHidListener();
 
-            listener.Arrived += (sender, args) => Assert.False(condition: true);
-            listener.Removed += (sender, args) => Assert.False(condition: true);
+            listener.Arrived += (sender, args) => Assert.False(true);
+            listener.Removed += (sender, args) => Assert.False(true);
 
             listener.Clear();
 

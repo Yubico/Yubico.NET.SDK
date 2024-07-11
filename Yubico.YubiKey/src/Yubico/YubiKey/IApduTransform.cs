@@ -18,25 +18,25 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    ///     Represents an arbitrary pipeline that accepts command APDUs and returns response APDUs.
+    /// Represents an arbitrary pipeline that accepts command APDUs and returns response APDUs.
     /// </summary>
     /// <remarks>
-    ///     Can often be composed, using the constructor of an implementing type.
+    /// Can often be composed, using the constructor of an implementing type.
     /// </remarks>
     public interface IApduTransform
     {
         /// <summary>
-        ///     Passes the supplied command into the pipeline, and returns the final response.
+        /// Passes the supplied command into the pipeline, and returns the final response.
         /// </summary>
         ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType);
 
         /// <summary>
-        ///     Sets up the pipeline; should be called only once, before any `Invoke` calls.
+        /// Sets up the pipeline; should be called only once, before any `Invoke` calls.
         /// </summary>
         void Setup();
 
         /// <summary>
-        ///     Cleans up the pipeline; should be called only once, after all `Invoke` calls.
+        /// Cleans up the pipeline; should be called only once, after all `Invoke` calls.
         /// </summary>
         void Cleanup();
     }

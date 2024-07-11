@@ -18,31 +18,31 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    ///     The response to the get version command, containing the YubiKey's
-    ///     firmware version.
+    /// The response to the get version command, containing the YubiKey's
+    /// firmware version.
     /// </summary>
     /// <remarks>
-    ///     <para>
-    ///         This is the partner Response class to <see cref="VersionCommand" />.
-    ///     </para>
-    ///     <para>
-    ///         The data returned is <see cref="FirmwareVersion" />.
-    ///     </para>
-    ///     <para>
-    ///         Example:
-    ///     </para>
-    ///     <code language="csharp">
+    /// <para>
+    /// This is the partner Response class to <see cref="VersionCommand"/>.
+    /// </para>
+    /// <para>
+    /// The data returned is <see cref="FirmwareVersion"/>.
+    /// </para>
+    /// <para>
+    /// Example:
+    /// </para>
+    /// <code language="csharp">
     ///   IList&lt;IYubiKeyDevice&gt; keys = YubiKey.GetList();
     ///   foreach (IYubiKeyDevice key in keys)
     ///   {
     ///       IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);
     ///       VersionCommand versionCmd = new VersionCommand();
-    ///       VersionResponse versionRsp = connection.SendCommand(versionCmd);<br />
+    ///       VersionResponse versionRsp = connection.SendCommand(versionCmd);<br/>
     ///       if (versionNum.Status != ResponseStatus.Success)
     ///       {
     ///         // Handle error
     ///       }
-    /// 
+    ///
     ///       FirmwareVersion versionNum = versionRsp.GetData();
     ///   }
     /// </code>
@@ -52,11 +52,11 @@ namespace Yubico.YubiKey.Piv.Commands
         private const int VersionLength = 3;
 
         /// <summary>
-        ///     Constructs a VersionResponse based on a ResponseApdu received from
-        ///     the YubiKey.
+        /// Constructs a VersionResponse based on a ResponseApdu received from
+        /// the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     The object containing the response APDU<br />returned by the YubiKey.
+        /// The object containing the response APDU<br/>returned by the YubiKey.
         /// </param>
         public VersionResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -64,17 +64,17 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        ///     Gets the version from the YubiKey response.
+        /// Gets the version from the YubiKey response.
         /// </summary>
         /// <returns>
-        ///     The data in the response APDU, presented as a FirmwareVersion object.
+        /// The data in the response APDU, presented as a FirmwareVersion object.
         /// </returns>
         /// <exception cref="MalformedYubiKeyResponseException">
-        ///     Thrown when the <c>ResponseApdu.Data</c> does not meet the expectations
-        ///     of the parser.
+        /// Thrown when the <c>ResponseApdu.Data</c> does not meet the expectations
+        /// of the parser.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        ///     Thrown when <see cref="YubiKeyResponse.Status" /> is not <see cref="ResponseStatus.Success" />.
+        /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
         public FirmwareVersion GetData()
         {
@@ -85,11 +85,11 @@ namespace Yubico.YubiKey.Piv.Commands
 
             if (ResponseApdu.Data.Length < VersionLength)
             {
-                throw new MalformedYubiKeyResponseException
+                throw new MalformedYubiKeyResponseException()
                 {
                     ResponseClass = nameof(VersionResponse),
                     ExpectedDataLength = VersionLength,
-                    ActualDataLength = ResponseApdu.Data.Length
+                    ActualDataLength = ResponseApdu.Data.Length,
                 };
             }
 

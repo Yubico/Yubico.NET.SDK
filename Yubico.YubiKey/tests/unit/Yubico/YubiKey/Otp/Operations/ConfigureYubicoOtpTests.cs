@@ -20,9 +20,9 @@ namespace Yubico.YubiKey.Otp.Operations
 {
     public class ConfigureYubicoOtpTests : IDisposable
     {
-        private static readonly byte[] _validKey = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-        private readonly ConfigureYubicoOtp _op;
         private readonly HollowOtpSession _session;
+        private readonly ConfigureYubicoOtp _op;
+        private readonly static byte[] _validKey = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
         private bool _disposedValue;
 
         public ConfigureYubicoOtpTests()
@@ -31,18 +31,11 @@ namespace Yubico.YubiKey.Otp.Operations
             _op = _session.ConfigureYubicoOtp(Slot.ShortPress);
         }
 
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
         [Fact]
         public void TestNoSlot()
         {
-            var op = _session.ConfigureYubicoOtp(Slot.None);
-            var ex =
+            ConfigureYubicoOtp op = _session.ConfigureYubicoOtp(Slot.None);
+            InvalidOperationException ex =
                 Assert.Throws<InvalidOperationException>(() => op.Execute());
             Assert.Equal(ExceptionMessages.SlotNotSet, ex.Message);
         }
@@ -51,7 +44,7 @@ namespace Yubico.YubiKey.Otp.Operations
         public void TestGeneratedAndSpecifiedKey()
         {
             _ = _op.GenerateKey(new byte[ConfigureYubicoOtp.KeySize]);
-            var ex =
+            InvalidOperationException ex =
                 Assert.Throws<InvalidOperationException>(() => _op.UseKey(_validKey));
             Assert.Equal(ExceptionMessages.CantSpecifyKeyAndGenerate, ex.Message);
         }
@@ -60,7 +53,7 @@ namespace Yubico.YubiKey.Otp.Operations
         public void TestSpecifiedAndGeneratedKey()
         {
             _ = _op.UseKey(_validKey);
-            var ex =
+            InvalidOperationException ex =
                 Assert.Throws<InvalidOperationException>(
                     () => _op.GenerateKey(new byte[ConfigureYubicoOtp.KeySize]));
             Assert.Equal(ExceptionMessages.CantSpecifyKeyAndGenerate, ex.Message);
@@ -74,9 +67,15 @@ namespace Yubico.YubiKey.Otp.Operations
                 {
                     _session.Dispose();
                 }
-
                 _disposedValue = true;
             }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

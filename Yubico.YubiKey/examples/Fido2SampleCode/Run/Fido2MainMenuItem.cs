@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
 {
     public enum Fido2MainMenuItem
@@ -45,6 +47,6 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
         Reset = 26,
 
-        Exit = 27
+        Exit = 27,
     }
 }

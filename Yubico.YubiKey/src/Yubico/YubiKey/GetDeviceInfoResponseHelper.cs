@@ -25,7 +25,7 @@ namespace Yubico.YubiKey
         private static readonly Logger Logger = Log.GetLogger();
 
         /// <summary>
-        ///     Attempts to create a dictionary from a TLV-encoded byte array by parsing and extracting tag-value pairs.
+        /// Attempts to create a dictionary from a TLV-encoded byte array by parsing and extracting tag-value pairs.
         /// </summary>
         /// <param name="tlvData">The byte array containing TLV-encoded data.</param>
         /// <returns>A dictionary mapping integer tags to their corresponding values as byte arrays.</returns>
@@ -49,7 +49,7 @@ namespace Yubico.YubiKey
             }
 
             var result = new Dictionary<int, ReadOnlyMemory<byte>>();
-            var tlvReader = new TlvReader(tlvData.Slice(start: 1, tlvDataLength));
+            var tlvReader = new TlvReader(tlvData.Slice(1, tlvDataLength));
             while (tlvReader.HasData)
             {
                 int tag = tlvReader.PeekTag();
@@ -83,7 +83,7 @@ namespace Yubico.YubiKey
             Dictionary<int, ReadOnlyMemory<byte>>? result = CreateApduDictionaryFromResponseData(responseApdu.Data);
             return result ?? throw new MalformedYubiKeyResponseException
             {
-                ResponseClass = responseClass
+                ResponseClass = responseClass,
             };
         }
     }

@@ -14,14 +14,15 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Otp.Commands;
+using Yubico.YubiKey.Otp.Operations;
 
 namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class Static : OtpPluginBase
     {
-        public Static(IOutput output) : base(output) { }
         public override string Name => "Static";
 
         public override string Description => "Configures a static password in a YubiKey OTP slot.";
@@ -37,6 +38,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             | ParameterUse.Force
             | ParameterUse.NoEnter;
 
+        public Static(IOutput output) : base(output) { }
+
         public override void HandleParameters()
         {
             // We'll let the base class handle populating all of the fields.
@@ -50,28 +53,25 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 exceptions.Add(
                     new ArgumentException("You can only generate a password " +
-                                          "or specify one, but not both."));
+                    "or specify one, but not both."));
             }
-
             if (_password.Length > 0 && _passwordLength > 0)
             {
                 exceptions.Add(
                     new ArgumentException("You can't specify a password length " +
-                                          "if you are specifying a password."));
+                    "if you are specifying a password."));
             }
-
             if (_password.Length == 0 && !_generate)
             {
                 exceptions.Add(
                     new ArgumentException("You must select to generate a password " +
-                                          "or specify a password to use."));
+                    "or specify a password to use."));
             }
-
             if (!_generate && _passwordLength > 0)
             {
                 exceptions.Add(
                     new ArgumentException("It is not relevant to select a password " +
-                                          "length if you have not selected to generate a password."));
+                    "length if you have not selected to generate a password."));
             }
 
             try
@@ -88,10 +88,9 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 throw new AggregateException($"{exceptions.Count} errors encountered.",
                     exceptions);
             }
-
-            if (exceptions.Count == 1)
+            else if (exceptions.Count == 1)
             {
-                throw exceptions[index: 0];
+                throw exceptions[0];
             }
 
             // I was going to check the access codes here, but I think it's a
@@ -108,26 +107,24 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Output.WriteLine("Aborted.", OutputLevel.Error);
                 return false;
             }
-
             try
             {
-                var password = Array.Empty<char>();
+                char[] password = Array.Empty<char>();
                 if (_generate)
                 {
-                    var len =
+                    int len =
                         _passwordLength > 0
-                            ? _passwordLength
-                            : SlotConfigureBase.MaxPasswordLength;
+                        ? _passwordLength
+                        : SlotConfigureBase.MaxPasswordLength;
                     password = new char[len];
                 }
                 else
                 {
                     password = _password.ToCharArray();
                 }
-
                 try
                 {
-                    var op = otp.ConfigureStaticPassword(_slot)
+                    ConfigureStaticPassword op = otp.ConfigureStaticPassword(_slot)
                         .WithKeyboard(_keyboard)
                         .UseCurrentAccessCode((SlotAccessCode)_currentAccessCode)
                         .SetNewAccessCode((SlotAccessCode)_newAccessCode)
@@ -140,13 +137,12 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                     {
                         op = op.SetPassword(password);
                     }
-
                     op.Execute();
 
                     // If OutputLevel is None or Error, then no output here.
                     if (Output.OutputLevel > OutputLevel.Error)
                     {
-                        var output = string.Empty;
+                        string output = string.Empty;
                         // If it's generated, or set to verbose, output the password.
                         if (_generate || Output.OutputLevel > OutputLevel.Normal)
                         {
@@ -167,7 +163,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                             // If it's not quiet, just output that it's done.
                             Output.WriteLine("Password set.");
                         }
-
                         if (!string.IsNullOrWhiteSpace(output))
                         {
                             Output.WriteLine(output, OutputLevel.Quiet);
@@ -176,7 +171,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 }
                 finally
                 {
-                    for (var i = 0; i < password.Length; ++i)
+                    for (int i = 0; i < password.Length; ++i)
                     {
                         password[i] = (char)0xfe;
                     }

@@ -26,34 +26,23 @@ namespace Yubico.YubiKey.Otp
 
         // ConfigureSlotCommand
         public const byte ConfigureShortPressSlot = 0x01;
-
         public const byte ConfigureLongPressSlot = 0x03;
-
         // UpdateSlotCommand
         public const byte UpdateShortPressSlot = 0x04;
-
         public const byte UpdateLongPressSlot = 0x05;
-
         // ConfigureNdefCommand
         public const byte ProgramNDEFShortPress = 0x08;
-
         public const byte ProgramNDEFLongPress = 0x09;
-
         // GetDeviceInfoCommand
         public const byte GetDeviceInfoSlot = 0x13;
-
         // GetSerialNumberCommand
         public const byte SerialNumberSlot = 0x10;
-
         // QueryFipsModeCommand
         public const byte QueryFipsSlot = 0x14;
-
         // SetLegacyDeviceConfigCommand
         public const byte WriteDeviceConfig = 0x11;
-
         // SwapSlotsCommand
         public const byte SwapSlotsSlot = 0x06;
-
         // SetDeviceInfoSlot
         public const byte SetDeviceInfoSlot = 0x15;
     }

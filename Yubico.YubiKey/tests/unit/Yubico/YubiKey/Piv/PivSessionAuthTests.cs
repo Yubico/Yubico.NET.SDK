@@ -14,6 +14,7 @@
 
 using System;
 using Xunit;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
@@ -24,7 +25,7 @@ namespace Yubico.YubiKey.Piv
         public void PivSession_NullYubiKey_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new PivSession(yubiKey: null));
+            _ = Assert.Throws<ArgumentNullException>(() => new PivSession(null));
 #pragma warning restore CS8625 // Specifically testing null input.
         }
 
@@ -58,7 +59,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                var isValid = pivSession.TryAuthenticateManagementKey();
+                bool isValid = pivSession.TryAuthenticateManagementKey();
 
                 Assert.False(isValid);
             }
@@ -106,7 +107,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                var isValid = pivSession.TryChangeManagementKey();
+                bool isValid = pivSession.TryChangeManagementKey();
 
                 Assert.False(isValid);
             }
@@ -154,7 +155,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                var isValid = pivSession.TryVerifyPin();
+                bool isValid = pivSession.TryVerifyPin();
 
                 Assert.False(isValid);
             }
@@ -202,7 +203,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                var isValid = pivSession.TryChangePin();
+                bool isValid = pivSession.TryChangePin();
 
                 Assert.False(isValid);
             }
@@ -250,7 +251,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                var isValid = pivSession.TryResetPin();
+                bool isValid = pivSession.TryResetPin();
 
                 Assert.False(isValid);
             }
@@ -298,7 +299,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                var isValid = pivSession.TryChangePuk();
+                bool isValid = pivSession.TryChangePuk();
 
                 Assert.False(isValid);
             }

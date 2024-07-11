@@ -22,8 +22,7 @@ namespace Yubico.YubiKey.Oath.Commands
     {
         private const short StatusWordNoSuchObject = 0x6984;
 
-        private readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp,
-            CredentialPeriod.Period30);
+        readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp, CredentialPeriod.Period30);
 
         [Fact]
         public void SuccessResponseApdu_NoCredential_ListCredentialsCorrectly()
@@ -31,7 +30,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var calculateCredentialResponse = new CalculateCredentialResponse(responseApdu, credential);
 
@@ -44,7 +43,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var calculateCredentialResponse = new CalculateCredentialResponse(responseApdu, credential);
 
@@ -54,10 +53,10 @@ namespace Yubico.YubiKey.Oath.Commands
         [Fact]
         public void Status_NoSuchObjectResponseApdu_ReturnsNoData()
         {
-            const byte sw1 = StatusWordNoSuchObject >> 8;
+            const byte sw1 = unchecked((byte)(StatusWordNoSuchObject >> 8));
             const byte sw2 = unchecked((byte)StatusWordNoSuchObject);
 
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var calculateCredentialResponse = new CalculateCredentialResponse(responseApdu, credential);
 
@@ -70,8 +69,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new byte[]
-            {
+            var responseApdu = new ResponseApdu(new byte[] {
                 0x75, 0x15, 0x06, 0x8A, 0x9B, 0x0D, 0xF3, 0xD7, 0x18, 0x43,
                 0x96, 0x40, 0xA6, 0x58, 0x6F, 0x89, 0xD4, 0x03, 0x1D, 0xC4,
                 0xC4, 0x9F, 0x6C, sw1, sw2
@@ -79,7 +77,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var calculateCredentialResponse = new CalculateCredentialResponse(responseApdu, credential);
 
-            var data = calculateCredentialResponse.GetData();
+            Code? data = calculateCredentialResponse.GetData();
 
             Assert.Equal(SWConstants.Success, calculateCredentialResponse.StatusWord);
             Assert.NotNull(data.Value);
@@ -92,14 +90,13 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new byte[]
-            {
+            var responseApdu = new ResponseApdu(new byte[] {
                 0x76, 0x05, 0x06, 0x8A, 0x9B, 0x0D, 0xF3, sw1, sw2
             });
 
             var calculateCredentialResponse = new CalculateCredentialResponse(responseApdu, credential);
 
-            var data = calculateCredentialResponse.GetData();
+            Code? data = calculateCredentialResponse.GetData();
 
             Assert.Equal(SWConstants.Success, calculateCredentialResponse.StatusWord);
             Assert.NotNull(data.Value);

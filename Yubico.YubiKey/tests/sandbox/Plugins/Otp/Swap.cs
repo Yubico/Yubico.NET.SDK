@@ -19,12 +19,13 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class Swap : OtpPluginBase
     {
-        public Swap(IOutput output) : base(output) { }
         public override string Name => "Swap";
 
         public override string Description => "Swaps the two slot configurations.";
 
         protected override ParameterUse ParametersUsed => ParameterUse.Force;
+
+        public Swap(IOutput output) : base(output) { }
 
         public override void HandleParameters()
         {
@@ -35,7 +36,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         public override bool Execute()
         {
             using var otpSession = new OtpSession(_yubiKey!);
-            var isConfigured = otpSession.IsShortPressConfigured || otpSession.IsLongPressConfigured;
+            bool isConfigured = otpSession.IsShortPressConfigured || otpSession.IsLongPressConfigured;
 
             if (!isConfigured)
             {

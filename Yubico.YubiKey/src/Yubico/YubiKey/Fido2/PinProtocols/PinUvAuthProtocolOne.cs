@@ -14,26 +14,27 @@
 
 using System;
 using System.Globalization;
+using System.IO;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Cryptography;
 
 namespace Yubico.YubiKey.Fido2.PinProtocols
 {
     /// <summary>
-    ///     This class contains methods that perform the platform operations of
-    ///     FIDO2's PIN/UV auth protocol one.
+    /// This class contains methods that perform the platform operations of
+    /// FIDO2's PIN/UV auth protocol one.
     /// </summary>
     public class PinUvAuthProtocolOne : PinUvAuthProtocolBase
     {
         private const int KeyLength = 32;
         private const int BlockSize = 16;
 
-        private readonly byte[] _keyData = new byte[KeyLength];
-
         private bool _disposed;
 
+        private readonly byte[] _keyData = new byte[KeyLength];
+
         /// <summary>
-        ///     Constructs a new instance of <see cref="PinUvAuthProtocolOne" />.
+        /// Constructs a new instance of <see cref="PinUvAuthProtocolOne"/>.
         /// </summary>
         public PinUvAuthProtocolOne()
         {
@@ -55,7 +56,6 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 throw new ArgumentNullException(nameof(plaintext));
             }
-
             if (length < BlockSize || length % BlockSize != 0 || offset + length > plaintext.Length)
             {
                 throw new ArgumentException(
@@ -72,7 +72,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             using ICryptoTransform aesTransform = aes.CreateEncryptor();
 
             byte[] encryptedData = new byte[length];
-            _ = aesTransform.TransformBlock(plaintext, offset, length, encryptedData, outputOffset: 0);
+            _ = aesTransform.TransformBlock(plaintext, offset, length, encryptedData, 0);
 
             return encryptedData;
         }
@@ -92,7 +92,6 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 throw new ArgumentNullException(nameof(ciphertext));
             }
-
             if (length == 0 || length % BlockSize != 0 || offset + length > ciphertext.Length)
             {
                 throw new ArgumentException(
@@ -109,7 +108,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             using ICryptoTransform aesTransform = aes.CreateDecryptor();
 
             byte[] decryptedData = new byte[length];
-            _ = aesTransform.TransformBlock(ciphertext, offset, length, decryptedData, outputOffset: 0);
+            _ = aesTransform.TransformBlock(ciphertext, offset, length, decryptedData, 0);
 
             return decryptedData;
         }
@@ -138,7 +137,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         {
             using HMAC hmacSha256 = CryptographyProviders.HmacCreator("HMACSHA256");
             hmacSha256.Key = keyData;
-            return hmacSha256.ComputeHash(message).AsMemory(start: 0, length: 16).ToArray();
+            return hmacSha256.ComputeHash(message).AsMemory(0, 16).ToArray();
         }
 
         /// <inheritdoc />
@@ -150,7 +149,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             }
 
             using SHA256 sha256 = CryptographyProviders.Sha256Creator();
-            _ = sha256.TransformFinalBlock(buffer, inputOffset: 0, buffer.Length);
+            _ = sha256.TransformFinalBlock(buffer, 0, buffer.Length);
             if (sha256.Hash.Length != KeyLength)
             {
                 throw new InvalidOperationException(
@@ -165,7 +164,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         }
 
         /// <summary>
-        ///     Release resources, overwrite sensitive data.
+        /// Release resources, overwrite sensitive data.
         /// </summary>
         protected override void Dispose(bool disposing)
         {

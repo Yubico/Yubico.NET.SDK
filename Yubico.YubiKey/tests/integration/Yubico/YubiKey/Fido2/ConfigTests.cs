@@ -35,11 +35,10 @@ namespace Yubico.YubiKey.Fido2
             {
                 fido2Session.KeyCollector = LocalKeyCollector;
 
-                var optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("ep");
-                var isSet = fido2Session.TryEnableEnterpriseAttestation();
+                OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("ep");
+                bool isSet = fido2Session.TryEnableEnterpriseAttestation();
 
-                var shouldSupportEnterpriseAttestation =
-                    optionValue == OptionValue.True || optionValue == OptionValue.False;
+                bool shouldSupportEnterpriseAttestation = optionValue == OptionValue.True || optionValue == OptionValue.False;
                 if (shouldSupportEnterpriseAttestation)
                 {
                     Assert.True(isSet);
@@ -48,6 +47,7 @@ namespace Yubico.YubiKey.Fido2
                 {
                     Assert.False(isSet);
                 }
+
             }
         }
 
@@ -58,14 +58,14 @@ namespace Yubico.YubiKey.Fido2
             {
                 fido2Session.KeyCollector = LocalKeyCollector;
 
-                var optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("alwaysUv");
+                OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("alwaysUv");
 
-                var expectedResult = false;
-                var expectedValue = optionValue switch
+                bool expectedResult = false;
+                OptionValue expectedValue = optionValue switch
                 {
                     OptionValue.True => OptionValue.False,
                     OptionValue.False => OptionValue.True,
-                    _ => OptionValue.NotSupported
+                    _ => OptionValue.NotSupported,
                 };
 
                 if (expectedValue != OptionValue.NotSupported)
@@ -73,7 +73,7 @@ namespace Yubico.YubiKey.Fido2
                     expectedResult = true;
                 }
 
-                var isSet = fido2Session.TryToggleAlwaysUv();
+                bool isSet = fido2Session.TryToggleAlwaysUv();
 
                 optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("alwaysUv");
                 Assert.Equal(expectedResult, isSet);
@@ -88,11 +88,11 @@ namespace Yubico.YubiKey.Fido2
             {
                 fido2Session.KeyCollector = LocalKeyCollector;
 
-                var optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
+                OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
 
-                var expectedResult = optionValue == OptionValue.True;
+                bool expectedResult = optionValue == OptionValue.True;
 
-                var isSet = fido2Session.TrySetPinConfig(newMinPinLength: 6);
+                bool isSet = fido2Session.TrySetPinConfig(6);
                 Assert.Equal(expectedResult, isSet);
                 if (isSet)
                 {
@@ -109,16 +109,14 @@ namespace Yubico.YubiKey.Fido2
             {
                 fido2Session.KeyCollector = LocalKeyCollector;
 
-                _ = Assert.NotNull(fido2Session.AuthenticatorInfo
-                    .ForcePinChange); // Does not work on my USBAKeychain 5.4.3 (Assert.NotNull() Failure: Value of type 'Nullable<bool>' does not have a value)
+                _ = Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange); // Does not work on my USBAKeychain 5.4.3 (Assert.NotNull() Failure: Value of type 'Nullable<bool>' does not have a value)
                 Assert.False(fido2Session.AuthenticatorInfo.ForcePinChange!);
 
-                var optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
+                OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
 
-                var expectedResult = optionValue == OptionValue.True;
+                bool expectedResult = optionValue == OptionValue.True;
 
-                var isSet = fido2Session.TrySetPinConfig(newMinPinLength: null, relyingPartyIds: null,
-                    forceChangePin: true);
+                bool isSet = fido2Session.TrySetPinConfig(null, null, true);
                 Assert.Equal(expectedResult, isSet);
                 if (isSet)
                 {
@@ -135,16 +133,16 @@ namespace Yubico.YubiKey.Fido2
             {
                 fido2Session.KeyCollector = LocalKeyCollector;
 
-                var optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
-                var isSupported = fido2Session.AuthenticatorInfo.IsExtensionSupported("minPinLength");
+                OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
+                bool isSupported = fido2Session.AuthenticatorInfo.IsExtensionSupported("minPinLength");
 
-                var expectedResult = optionValue == OptionValue.True && isSupported;
+                bool expectedResult = optionValue == OptionValue.True && isSupported;
 
-                var rpList = new List<string>(capacity: 1)
+                var rpList = new List<string>(1)
                 {
                     "rpidOne"
                 };
-                var isSet = fido2Session.TrySetPinConfig(newMinPinLength: null, rpList);
+                bool isSet = fido2Session.TrySetPinConfig(null, rpList);
                 Assert.Equal(expectedResult, isSet);
 
                 if (isSet)
@@ -157,8 +155,7 @@ namespace Yubico.YubiKey.Fido2
 
         private bool VerifyExtension(Fido2Session fido2Session)
         {
-            byte[] clientDataHash =
-            {
+            byte[] clientDataHash = {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
             };
@@ -173,17 +170,17 @@ namespace Yubico.YubiKey.Fido2
             {
                 ClientDataHash = clientDataHash
             };
-            mcParams.AddOption(AuthenticatorOptions.rk, optionValue: true);
+            mcParams.AddOption(AuthenticatorOptions.rk, true);
             mcParams.AddExtension("minPinLength", new byte[] { 0xF5 });
 
-            var mcData = fido2Session.MakeCredential(mcParams);
+            MakeCredentialData mcData = fido2Session.MakeCredential(mcParams);
 
             if (mcData.AuthenticatorData.Extensions is null)
             {
                 return false;
             }
 
-            var isValid = mcData.AuthenticatorData.Extensions!.TryGetValue("minPinLength", out var eValue);
+            bool isValid = mcData.AuthenticatorData.Extensions!.TryGetValue("minPinLength", out byte[]? eValue);
             if (isValid)
             {
                 isValid = eValue![0] == 4;

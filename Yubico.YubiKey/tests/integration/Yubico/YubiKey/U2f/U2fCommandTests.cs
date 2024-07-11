@@ -37,10 +37,10 @@ namespace Yubico.YubiKey.U2f
                 }
             }
 
-            var devices = HidDevice.GetHidDevices();
+            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
             Assert.NotNull(devices);
 
-            var deviceToUse = GetFidoHid(devices);
+            HidDevice? deviceToUse = GetFidoHid(devices);
             Assert.NotNull(deviceToUse);
 
             if (deviceToUse is null)
@@ -57,34 +57,32 @@ namespace Yubico.YubiKey.U2f
         {
             byte[] pin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
             var vfyPinCmd = new VerifyPinCommand(pin);
-            var vfyPinRsp = _fidoConnection.SendCommand(vfyPinCmd);
+            VerifyPinResponse vfyPinRsp = _fidoConnection.SendCommand(vfyPinCmd);
             Assert.Equal(ResponseStatus.Success, vfyPinRsp.Status);
 
-            var appId = RegistrationDataTests.GetAppIdArray(isValid: true);
-            var clientDataHash = RegistrationDataTests.GetClientDataHashArray(isValid: true);
+            byte[] appId = RegistrationDataTests.GetAppIdArray(true);
+            byte[] clientDataHash = RegistrationDataTests.GetClientDataHashArray(true);
             var registerCmd = new RegisterCommand(appId, clientDataHash);
-            var registerRsp = _fidoConnection.SendCommand(registerCmd);
+            RegisterResponse registerRsp = _fidoConnection.SendCommand(registerCmd);
             if (registerRsp.Status == ResponseStatus.ConditionsNotSatisfied)
             {
                 registerRsp = _fidoConnection.SendCommand(registerCmd);
             }
-
             Assert.Equal(ResponseStatus.Success, registerRsp.Status);
 
-            var regData = registerRsp.GetData();
-            var isVerified = regData.VerifySignature(appId, clientDataHash);
+            RegistrationData regData = registerRsp.GetData();
+            bool isVerified = regData.VerifySignature(appId, clientDataHash);
             Assert.True(isVerified);
 
             var authCmd = new AuthenticateCommand(
                 U2fAuthenticationType.DontEnforceUserPresence, appId, clientDataHash, regData.KeyHandle);
-            var authRsp = _fidoConnection.SendCommand(authCmd);
+            AuthenticateResponse authRsp = _fidoConnection.SendCommand(authCmd);
             if (authRsp.Status == ResponseStatus.ConditionsNotSatisfied)
             {
                 authRsp = _fidoConnection.SendCommand(authCmd);
             }
-
             Assert.Equal(ResponseStatus.Success, authRsp.Status);
-            var authData = authRsp.GetData();
+            AuthenticationData authData = authRsp.GetData();
             Assert.False(authData.UserPresenceVerified);
 
             isVerified = authData.VerifySignature(regData.UserPublicKey, appId, clientDataHash);
@@ -99,30 +97,29 @@ namespace Yubico.YubiKey.U2f
                 return;
             }
 
-            var appId = RegistrationDataTests.GetAppIdArray(isValid: true);
-            var clientDataHash = RegistrationDataTests.GetClientDataHashArray(isValid: true);
-            var keyHandle = RegistrationDataTests.GetKeyHandleArray(isValid: true, out var _);
-            var pubKey = RegistrationDataTests.GetPubKeyArray(isValid: true);
+            byte[] appId = RegistrationDataTests.GetAppIdArray(true);
+            byte[] clientDataHash = RegistrationDataTests.GetClientDataHashArray(true);
+            byte[] keyHandle = RegistrationDataTests.GetKeyHandleArray(true, out byte _);
+            byte[] pubKey = RegistrationDataTests.GetPubKeyArray(true);
 
             var authCmd = new AuthenticateCommand(
                 U2fAuthenticationType.DontEnforceUserPresence, appId, clientDataHash, keyHandle);
-            var authRsp = _fidoConnection.SendCommand(authCmd);
+            AuthenticateResponse authRsp = _fidoConnection.SendCommand(authCmd);
             if (authRsp.Status == ResponseStatus.ConditionsNotSatisfied)
             {
                 authRsp = _fidoConnection.SendCommand(authCmd);
             }
-
             Assert.Equal(ResponseStatus.Success, authRsp.Status);
-            var authData = authRsp.GetData();
+            AuthenticationData authData = authRsp.GetData();
             Assert.False(authData.UserPresenceVerified);
 
-            var isVerified = authData.VerifySignature(pubKey, appId, clientDataHash);
+            bool isVerified = authData.VerifySignature(pubKey, appId, clientDataHash);
             Assert.True(isVerified);
         }
 
         private static HidDevice? GetFidoHid(IEnumerable<HidDevice> devices)
         {
-            foreach (var currentDevice in devices)
+            foreach (HidDevice currentDevice in devices)
             {
                 if (currentDevice.VendorId == 0x1050 &&
                     currentDevice.UsagePage == HidUsagePage.Fido)

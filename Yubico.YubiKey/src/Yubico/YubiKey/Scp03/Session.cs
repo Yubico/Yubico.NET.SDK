@@ -22,15 +22,16 @@ namespace Yubico.YubiKey.Scp03
 {
     internal class Session : IDisposable
     {
-        private bool _disposed;
-        private int _encryptionCounter;
+        private SessionKeys? _sessionKeys;
         private byte[]? _hostChallenge;
         private byte[]? _hostCryptogram;
         private byte[] _macChainingValue;
-        private SessionKeys? _sessionKeys;
+        private int _encryptionCounter;
+
+        private bool _disposed;
 
         /// <summary>
-        ///     Initializes the host-side state for an SCP03 session.
+        /// Initializes the host-side state for an SCP03 session.
         /// </summary>
         public Session()
         {
@@ -43,14 +44,8 @@ namespace Yubico.YubiKey.Scp03
             _disposed = false;
         }
 
-        public void Dispose()
-        {
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
         /// <summary>
-        ///     Builds the INITIALIZE_UPDATE APDU, using the supplied host challenge.
+        /// Builds the INITIALIZE_UPDATE APDU, using the supplied host challenge.
         /// </summary>
         /// <param name="keyVersionNumber">Which key set is to be used.</param>
         /// <param name="hostChallenge">Randomly chosen 8-byte challenge.</param>
@@ -72,14 +67,12 @@ namespace Yubico.YubiKey.Scp03
         }
 
         /// <summary>
-        ///     Processes the card's response to the INITIALIZE_UPDATE APDU. Loads
-        ///     data into state. Must be called after <c>BuildInitializeUpdate</c>.
+        /// Processes the card's response to the INITIALIZE_UPDATE APDU. Loads
+        /// data into state. Must be called after <c>BuildInitializeUpdate</c>.
         /// </summary>
         /// <param name="initializeUpdateResponse">Response to the previous INITIALIZE_UPDATE</param>
         /// <param name="staticKeys">The secret static SCP03 keys shared by the host and card</param>
-        public void LoadInitializeUpdateResponse(
-            InitializeUpdateResponse initializeUpdateResponse,
-            StaticKeys staticKeys)
+        public void LoadInitializeUpdateResponse(InitializeUpdateResponse initializeUpdateResponse, StaticKeys staticKeys)
         {
             if (_hostChallenge is null)
             {
@@ -127,43 +120,38 @@ namespace Yubico.YubiKey.Scp03
         }
 
         /// <summary>
-        ///     Builds the EXTERNAL_AUTHENTICATE APDU. Must be called after
-        ///     <c>LoadInitializeUpdateResponse</c>.
+        /// Builds the EXTERNAL_AUTHENTICATE APDU. Must be called after
+        /// <c>LoadInitializeUpdateResponse</c>.
         /// </summary>
         /// <returns>EXTERNAL_AUTHENTICATE APDU</returns>
         public ExternalAuthenticateCommand BuildExternalAuthenticate()
         {
             if (_sessionKeys == null)
             {
-                throw new InvalidOperationException(
-                    ExceptionMessages.BuildExternalAuthenticatePriorToLoadInitializeUpdateResponse);
+                throw new InvalidOperationException(ExceptionMessages.BuildExternalAuthenticatePriorToLoadInitializeUpdateResponse);
             }
 
             if (_hostCryptogram is null)
             {
-                throw new InvalidOperationException(
-                    ExceptionMessages.BuildExternalAuthenticatePriorToLoadInitializeUpdateResponse);
+                throw new InvalidOperationException(ExceptionMessages.BuildExternalAuthenticatePriorToLoadInitializeUpdateResponse);
             }
 
             var eaCommandInitial = new ExternalAuthenticateCommand(_hostCryptogram);
             CommandApdu macdApdu;
-            (macdApdu, _macChainingValue) = ChannelMac.MacApdu(
-                eaCommandInitial.CreateCommandApdu(), _sessionKeys.GetSessionMacKey(), _macChainingValue);
-
+            (macdApdu, _macChainingValue) = ChannelMac.MacApdu(eaCommandInitial.CreateCommandApdu(), _sessionKeys.GetSessionMacKey(), _macChainingValue);
             var eaCommand = new ExternalAuthenticateCommand(macdApdu.Data.ToArray());
             return eaCommand;
         }
 
         /// <summary>
-        ///     Verifies that the EXTERNAL_AUTHENTICATE command was successful.
+        /// Verifies that the EXTERNAL_AUTHENTICATE command was successful.
         /// </summary>
         /// <param name="externalAuthenticateResponse">Response to the previous EXTERNAL_AUTHENTICATE</param>
         public void LoadExternalAuthenticateResponse(ExternalAuthenticateResponse externalAuthenticateResponse)
         {
             if (_sessionKeys == null)
             {
-                throw new InvalidOperationException(
-                    ExceptionMessages.LoadExternalAuthenticateResponsePriorToLoadInitializUpdateResponse);
+                throw new InvalidOperationException(ExceptionMessages.LoadExternalAuthenticateResponsePriorToLoadInitializUpdateResponse);
             }
 
             if (externalAuthenticateResponse is null)
@@ -175,8 +163,8 @@ namespace Yubico.YubiKey.Scp03
         }
 
         /// <summary>
-        ///     Encodes (encrypt then MAC) a command using SCP03. Modifies state,
-        ///     and must be sent in-order. Must be called after LoadInitializeUpdate.
+        /// Encodes (encrypt then MAC) a command using SCP03. Modifies state,
+        /// and must be sent in-order. Must be called after LoadInitializeUpdate.
         /// </summary>
         /// <returns></returns>
         public CommandApdu EncodeCommand(CommandApdu command)
@@ -191,7 +179,7 @@ namespace Yubico.YubiKey.Scp03
                 throw new ArgumentNullException(nameof(command));
             }
 
-            var encodedCommand = new CommandApdu
+            var encodedCommand = new CommandApdu()
             {
                 Cla = (byte)(command.Cla | 0x84),
                 Ins = command.Ins,
@@ -200,21 +188,17 @@ namespace Yubico.YubiKey.Scp03
             };
 
             byte[] commandData = command.Data.ToArray();
-            byte[] encryptedData = ChannelEncryption.EncryptData(
-                commandData, _sessionKeys.GetSessionEncKey(), _encryptionCounter);
-
+            byte[] encryptedData = ChannelEncryption.EncryptData(commandData, _sessionKeys.GetSessionEncKey(), _encryptionCounter);
             _encryptionCounter += 1;
             encodedCommand.Data = encryptedData;
 
             CommandApdu encodedApdu;
-            (encodedApdu, _macChainingValue) = ChannelMac.MacApdu(
-                encodedCommand, _sessionKeys.GetSessionMacKey(), _macChainingValue);
-
+            (encodedApdu, _macChainingValue) = ChannelMac.MacApdu(encodedCommand, _sessionKeys.GetSessionMacKey(), _macChainingValue);
             return encodedApdu;
         }
 
         /// <summary>
-        ///     Decodes (verify RMAC then decrypt) a raw response from the device.
+        /// Decodes (verify RMAC then decrypt) a raw response from the device.
         /// </summary>
         /// <param name="response"></param>
         /// <returns></returns>
@@ -251,14 +235,20 @@ namespace Yubico.YubiKey.Scp03
                     responseData.Take(responseData.Length - 8).ToArray(),
                     _sessionKeys.GetSessionEncKey(),
                     _encryptionCounter - 1
-                    );
+                );
             }
 
             byte[] fullDecryptedResponse = new byte[decryptedData.Length + 2];
-            decryptedData.CopyTo(fullDecryptedResponse, index: 0);
+            decryptedData.CopyTo(fullDecryptedResponse, 0);
             fullDecryptedResponse[decryptedData.Length] = response.SW1;
             fullDecryptedResponse[decryptedData.Length + 1] = response.SW2;
             return new ResponseApdu(fullDecryptedResponse);
+        }
+
+        public void Dispose()
+        {
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
 
         protected virtual void Dispose(bool disposing)

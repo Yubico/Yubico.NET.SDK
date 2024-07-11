@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using Yubico.Core.Devices.Hid;
@@ -24,14 +25,14 @@ namespace Yubico.YubiKey.TestApp.Plugins
 {
     internal class JamiePlugin : PluginBase
     {
+        public override string Name => "Jamie";
+
+        public override string Description => "A place for Jamie's test code";
+
         public JamiePlugin(IOutput output) : base(output)
         {
             Parameters["command"].Required = true;
         }
-
-        public override string Name => "Jamie";
-
-        public override string Description => "A place for Jamie's test code";
 
         public override bool Execute()
         {
@@ -47,9 +48,9 @@ namespace Yubico.YubiKey.TestApp.Plugins
         private bool PrintRandomBytes()
         {
             using var rng = RandomNumberGenerator.Create();
-            var bytes = Enumerable
-                .Range(start: 0, count: 40)
-                .Select(x => rng.GetByte(fromInclusive: 0, toExclusive: 0x100))
+            byte[] bytes = Enumerable
+                .Range(0, 40)
+                .Select(x => rng.GetByte(0, 0x100))
                 .ToArray();
             Output.WriteLine(BitConverter.ToString(bytes));
             return true;
@@ -57,42 +58,41 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         private bool SwapSlots()
         {
-            var result = false;
-            var keys = YubiKeyDevice.FindByTransport();
+            bool result = false;
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
 
             if (keys.Any())
             {
-                var key = keys.First();
-                var connection = key.Connect(YubiKeyApplication.Otp);
+                IYubiKeyDevice key = keys.First();
+                IYubiKeyConnection? connection = key.Connect(YubiKeyApplication.Otp);
 
                 // Try getting status.
                 var statusCmd = new ReadStatusCommand();
-                var statusx = connection.SendCommand(statusCmd);
-                var data = statusx.GetData();
+                ReadStatusResponse? statusx = connection.SendCommand(statusCmd);
+                OtpStatus? data = statusx.GetData();
                 Output.WriteLine($"Data is {data}");
 
                 var cmd = new SwapSlotsCommand();
-                var response = connection.SendCommand(cmd);
-                var status = response.GetData();
+                ReadStatusResponse response = connection.SendCommand(cmd);
+                OtpStatus status = response.GetData();
                 Output.WriteLine(status.ToString()!);
                 result = response.Status == ResponseStatus.Success;
             }
-
             return result;
         }
 
         private bool SetStaticPassword()
         {
-            var result = false;
-            var keys = YubiKeyDevice.FindByTransport();
+            bool result = false;
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(Transport.All);
 
             if (keys.Any())
             {
-                var key = keys.First();
+                IYubiKeyDevice key = keys.First();
                 var otpSession = new OtpSession(key);
                 try
                 {
-                    var password = new char[12];
+                    char[] password = new char[12];
                     otpSession.ConfigureStaticPassword(Slot.ShortPress)
                         .WithKeyboard(KeyboardLayout.en_US)
                         //.SetPassword("JackiKennedy")

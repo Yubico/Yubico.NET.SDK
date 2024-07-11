@@ -22,17 +22,17 @@ namespace Yubico.PlatformInterop
         public WindowsUnmanagedDynamicLibrary(string fileName) :
             base(OpenLibrary(fileName))
         {
+
         }
 
         private static SafeLibraryHandle OpenLibrary(string fileName)
         {
-            SafeWindowsLibraryHandle handle = NativeMethods.LoadLibraryEx(fileName, IntPtr.Zero, flags: 0);
+            SafeWindowsLibraryHandle handle = NativeMethods.LoadLibraryEx(fileName, IntPtr.Zero, 0);
             if (handle.IsInvalid)
             {
                 int hr = Marshal.GetHRForLastWin32Error();
                 Marshal.ThrowExceptionForHR(hr);
             }
-
             return handle;
         }
 
@@ -42,7 +42,6 @@ namespace Yubico.PlatformInterop
             {
                 return TryGetFunctionInternal(functionName + "W", out d);
             }
-
             return true;
         }
 
@@ -55,9 +54,11 @@ namespace Yubico.PlatformInterop
                 d = Marshal.GetDelegateForFunctionPointer<TDelegate>(p);
                 return true;
             }
-
-            d = null;
-            return false;
+            else
+            {
+                d = null;
+                return false;
+            }
         }
     }
 }

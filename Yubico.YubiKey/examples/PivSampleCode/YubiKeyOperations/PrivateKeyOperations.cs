@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 if (digest.Length < bufferSize)
                 {
                     byte[] newBuffer = new byte[bufferSize];
-                    Array.Copy(digest, sourceIndex: 0, newBuffer, bufferSize - digest.Length, digest.Length);
+                    Array.Copy(digest, 0, newBuffer, bufferSize - digest.Length, digest.Length);
                     digest = newBuffer;
                 }
             }
@@ -74,7 +74,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     "SHA256" => RsaFormat.Sha256,
                     "SHA384" => RsaFormat.Sha384,
                     "SHA512" => RsaFormat.Sha512,
-                    _ => -1
+                    _ => -1,
                 };
 
                 // If digestAlgorithm is < 0, then the caller wanted to use an
@@ -142,7 +142,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     "SHA256" => RsaFormat.Sha256,
                     "SHA384" => RsaFormat.Sha384,
                     "SHA512" => RsaFormat.Sha512,
-                    _ => -1
+                    _ => -1,
                 };
 
                 // If the digest algorithm is -1, we're not using a supported

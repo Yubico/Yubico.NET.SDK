@@ -15,7 +15,7 @@
 namespace Yubico.YubiKey
 {
     /// <summary>
-    ///     Device info tags that can be accessed in the device
+    /// Device info tags that can be accessed in the device
     /// </summary>
     internal static class YubikeyDeviceManagementTags
     {

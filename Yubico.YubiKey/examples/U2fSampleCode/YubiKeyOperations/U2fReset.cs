@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using System.Threading.Tasks;
@@ -31,6 +32,14 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
         private int? _serialNumber;
         private IYubiKeyDevice? _yubiKeyDevice;
 
+        // Set the serial number using this property. If there is no serial
+        // number (the actual YubiKey's serial number is null), this will be 0.
+        public int SerialNumber
+        {
+            get => _serialNumber ?? 0;
+            set => _serialNumber = value;
+        }
+
         public U2fReset()
         {
         }
@@ -40,14 +49,6 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
         public U2fReset(int? serialNumber)
         {
             _serialNumber = serialNumber;
-        }
-
-        // Set the serial number using this property. If there is no serial
-        // number (the actual YubiKey's serial number is null), this will be 0.
-        public int SerialNumber
-        {
-            get => _serialNumber ?? 0;
-            set => _serialNumber = value;
         }
 
         // This implementation requires a valid KeyCollector. Although the SDK
@@ -69,13 +70,12 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             yubiKeyDeviceListener.Arrived += YubiKeyInserted;
             yubiKeyDeviceListener.Removed += YubiKeyRemoved;
 
-            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
-                "Remove and re-insert the YubiKey (" + ReinsertTimeoutString + " second timeout).\n");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Remove and re-insert the YubiKey (" + ReinsertTimeoutString + " second timeout).\n");
 
             // This task simply checks to see if the YubiKey in question has been
             // reinserted or not. Once it has been reinserted, this method will
             // return the IYubiKeyDevice that was reinserted.
-            var reinsert = Task.Run(() => CheckReinsert());
+            var reinsert = Task<IYubiKeyDevice>.Run(() => CheckReinsert());
 
             // Wait for CheckReinsert to complete, or else the task times out.
             // If it returns false, the YubiKey was not reinserted within the
@@ -108,7 +108,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                         keyEntryRequest = KeyEntryRequest.Release;
                     }
 
-                    Thread.Sleep(millisecondsTimeout: 100);
+                    Thread.Sleep(100);
                     resetRsp = connection.SendCommand(resetCmd);
                 }
 
@@ -134,7 +134,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
         {
             while (_yubiKeyDevice is null)
             {
-                Thread.Sleep(millisecondsTimeout: 100);
+                Thread.Sleep(100);
             }
 
             return (IYubiKeyDevice)_yubiKeyDevice;
@@ -146,17 +146,13 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
 
             if (serialNumberRemoved != SerialNumber)
             {
-                SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0,
-                    "The YubiKey removed is not the expected YubiKey.");
-                SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
-                    "expected serial number = " + SerialNumber.ToString(NumberFormatInfo.InvariantInfo));
-                SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
-                    " removed serial number = " + serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
+                SampleMenu.WriteMessage(MessageType.Special, 0, "The YubiKey removed is not the expected YubiKey.");
+                SampleMenu.WriteMessage(MessageType.Title, 0, "expected serial number = " + SerialNumber.ToString(NumberFormatInfo.InvariantInfo));
+                SampleMenu.WriteMessage(MessageType.Title, 0, " removed serial number = " + serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
             }
             else
             {
-                SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
-                    " removed serial number = " + serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
+                SampleMenu.WriteMessage(MessageType.Title, 0, " removed serial number = " + serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
             }
         }
 
@@ -166,19 +162,16 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
 
             if (serialNumberInserted != SerialNumber)
             {
-                SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0,
-                    "The YubiKey inserted is not the expected YubiKey.");
-                SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
-                    "expected serial number = " + SerialNumber.ToString(NumberFormatInfo.InvariantInfo));
-                SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
-                    "inserted serial number = " + serialNumberInserted.ToString(NumberFormatInfo.InvariantInfo));
+                SampleMenu.WriteMessage(MessageType.Special, 0, "The YubiKey inserted is not the expected YubiKey.");
+                SampleMenu.WriteMessage(MessageType.Title, 0, "expected serial number = " + SerialNumber.ToString(NumberFormatInfo.InvariantInfo));
+                SampleMenu.WriteMessage(MessageType.Title, 0, "inserted serial number = " + serialNumberInserted.ToString(NumberFormatInfo.InvariantInfo));
             }
             else
             {
-                SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
-                    "inserted serial number = " + serialNumberInserted.ToString(NumberFormatInfo.InvariantInfo));
+                SampleMenu.WriteMessage(MessageType.Title, 0, "inserted serial number = " + serialNumberInserted.ToString(NumberFormatInfo.InvariantInfo));
                 _yubiKeyDevice = eventArgs.Device;
             }
         }
     }
+#nullable restore
 }

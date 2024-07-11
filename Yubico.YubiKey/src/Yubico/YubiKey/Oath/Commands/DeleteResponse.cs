@@ -17,29 +17,29 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    ///     The response to the <see cref="DeleteCommand" /> command.
+    /// The response to the <see cref="DeleteCommand"/> command.
     /// </summary>
     public class DeleteResponse : OathResponse
     {
+        /// <inheritdoc/>
+        protected override ResponseStatusPair StatusCodeMap =>
+           StatusWord switch
+           {
+               OathSWConstants.NoSuchObject => new ResponseStatusPair(ResponseStatus.NoData, ResponseStatusMessages.OathNoSuchObject),
+               _ => base.StatusCodeMap,
+           };
+
         /// <summary>
-        ///     Constructs a DeleteResponse instance based on a
-        ///     ResponseApdu received from the YubiKey.
+        /// Constructs a DeleteResponse instance based on a
+        /// ResponseApdu received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     The ResponseApdu returned by the YubiKey.
+        /// The ResponseApdu returned by the YubiKey.
         /// </param>
         public DeleteResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
+               base(responseApdu)
         {
-        }
 
-        /// <inheritdoc />
-        protected override ResponseStatusPair StatusCodeMap =>
-            StatusWord switch
-            {
-                OathSWConstants.NoSuchObject => new ResponseStatusPair(
-                    ResponseStatus.NoData, ResponseStatusMessages.OathNoSuchObject),
-                _ => base.StatusCodeMap
-            };
+        }
     }
 }

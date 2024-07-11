@@ -25,27 +25,27 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ChangeRetry_Succeeds(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            var isOld = testDevice.FirmwareVersion < FirmwareVersion.V5_3_0;
+            bool isOld = testDevice.FirmwareVersion < FirmwareVersion.V5_3_0;
 
             using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.ChangePinAndPukRetryCounts(newRetryCountPin: 7, newRetryCountPuk: 8);
+                pivSession.ChangePinAndPukRetryCounts(7, 8);
 
                 if (isOld)
                 {
                     return;
                 }
 
-                var metadata = pivSession.GetMetadata(PivSlot.Pin);
-                Assert.Equal(expected: 7, metadata.RetryCount);
+                PivMetadata metadata = pivSession.GetMetadata(PivSlot.Pin);
+                Assert.Equal(7, metadata.RetryCount);
 
                 metadata = pivSession.GetMetadata(PivSlot.Puk);
-                Assert.Equal(expected: 8, metadata.RetryCount);
+                Assert.Equal(8, metadata.RetryCount);
             }
         }
 
@@ -53,9 +53,9 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ChangeRetry_SetsToDefault(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            var isOld = testDevice.FirmwareVersion < FirmwareVersion.V5_3_0;
+            bool isOld = testDevice.FirmwareVersion < FirmwareVersion.V5_3_0;
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.Piv
                     pivSession.ChangeManagementKey();
 
                     collectorObj.KeyFlag = 1;
-                    pivSession.ChangePinAndPukRetryCounts(newRetryCountPin: 9, newRetryCountPuk: 10);
+                    pivSession.ChangePinAndPukRetryCounts(9, 10);
 
                     collectorObj.KeyFlag = 0;
                     pivSession.VerifyPin();
@@ -79,12 +79,12 @@ namespace Yubico.YubiKey.Piv
                         return;
                     }
 
-                    var metadata = pivSession.GetMetadata(PivSlot.Pin);
-                    Assert.Equal(expected: 9, metadata.RetryCount);
+                    PivMetadata metadata = pivSession.GetMetadata(PivSlot.Pin);
+                    Assert.Equal(9, metadata.RetryCount);
                     Assert.Equal(PivKeyStatus.Default, metadata.KeyStatus);
 
                     metadata = pivSession.GetMetadata(PivSlot.Puk);
-                    Assert.Equal(expected: 10, metadata.RetryCount);
+                    Assert.Equal(10, metadata.RetryCount);
                     Assert.Equal(PivKeyStatus.Default, metadata.KeyStatus);
                 }
                 finally
@@ -98,7 +98,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Metadata_OldYubiKey_ThrowsException(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             // If the YubiKey is 5.3 or later, don't bother with this test.
             if (testDevice.HasFeature(YubiKeyFeature.PivMetadata))

@@ -20,59 +20,59 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    ///     Import an existing private key into one of the asymmetric key slots (9a,
-    ///     9c, 9d, 9e, 82 - 95).
+    /// Import an existing private key into one of the asymmetric key slots (9a,
+    /// 9c, 9d, 9e, 82 - 95).
     /// </summary>
     /// <remarks>
-    ///     The partner Response class is <see cref="ImportAsymmetricKeyResponse" />.
-    ///     <para>
-    ///         In order to import a key, you must authenticate the management key. The
-    ///         management key is not part of this command. For information on how to
-    ///         authenticate a management key in order to perform operations, see the
-    ///         User's Manual entry on
-    ///         <xref href="UsersManualPivAccessControl"> PIV commands access control</xref>.
-    ///     </para>
-    ///     <para>
-    ///         When you import a private key, you specify which slot will hold this key.
-    ///         If there is a key in that slot already, this command will replace it.
-    ///         That old key will be gone and there will be nothing you can do to recover
-    ///         it. Hence, use this command with caution.
-    ///     </para>
-    ///     <para>
-    ///         If you have a certificate to accompany the private key you are importing
-    ///         using this command, you can load it using the Put Data command.
-    ///     </para>
-    ///     <para>
-    ///         The PIN policy determines whether using the private key to sign or
-    ///         decrypt will require authenticating with the PIN or not. By default, the
-    ///         PIN policy is always require a PIN in order to use the key in that slot.
-    ///         See the User's Manual entry on
-    ///         <xref href="UsersManualPivPinTouchPolicy"> PIN and touch policies </xref>
-    ///         for more information.
-    ///     </para>
-    ///     <para>
-    ///         Similarly, the touch policy determines whether using the private key will
-    ///         require touch or not. The default is never.
-    ///     </para>
-    ///     <para>
-    ///         When you pass the private key to this class, it will copy a reference to
-    ///         the object passed in, it will not copy the value. Because of this, you
-    ///         cannot call its <c>Clear</c> method until this object is done with it. It
-    ///         will be safe to clear the private key after calling
-    ///         <c>connection.SendCommand</c>. See the User's Manual
-    ///         <xref href="UsersManualSensitive"> entry on sensitive data</xref> for
-    ///         more information on this topic.
-    ///     </para>
-    ///     <para>
-    ///         Example:
-    ///     </para>
-    ///     <code language="csharp">
+    /// The partner Response class is <see cref="ImportAsymmetricKeyResponse"/>.
+    /// <para>
+    /// In order to import a key, you must authenticate the management key. The
+    /// management key is not part of this command. For information on how to
+    /// authenticate a management key in order to perform operations, see the
+    /// User's Manual entry on
+    /// <xref href="UsersManualPivAccessControl"> PIV commands access control</xref>.
+    /// </para>
+    /// <para>
+    /// When you import a private key, you specify which slot will hold this key.
+    /// If there is a key in that slot already, this command will replace it.
+    /// That old key will be gone and there will be nothing you can do to recover
+    /// it. Hence, use this command with caution.
+    /// </para>
+    /// <para>
+    /// If you have a certificate to accompany the private key you are importing
+    /// using this command, you can load it using the Put Data command.
+    /// </para>
+    /// <para>
+    /// The PIN policy determines whether using the private key to sign or
+    /// decrypt will require authenticating with the PIN or not. By default, the
+    /// PIN policy is always require a PIN in order to use the key in that slot.
+    /// See the User's Manual entry on
+    /// <xref href="UsersManualPivPinTouchPolicy"> PIN and touch policies </xref>
+    /// for more information.
+    /// </para>
+    /// <para>
+    /// Similarly, the touch policy determines whether using the private key will
+    /// require touch or not. The default is never.
+    /// </para>
+    /// <para>
+    /// When you pass the private key to this class, it will copy a reference to
+    /// the object passed in, it will not copy the value. Because of this, you
+    /// cannot call its <c>Clear</c> method until this object is done with it. It
+    /// will be safe to clear the private key after calling
+    /// <c>connection.SendCommand</c>. See the User's Manual
+    /// <xref href="UsersManualSensitive"> entry on sensitive data</xref> for
+    /// more information on this topic.
+    /// </para>
+    /// <para>
+    /// Example:
+    /// </para>
+    /// <code language="csharp">
     ///   var privateKey = new PivEccPrivateKey(privateValue);
-    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br />
+    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   var importKeyCommand = new ImportAsymmetricKeyCommand(
     ///       privateKey, PivSlot.Signing, PivPinPolicy.Default, PivTouchPolicy.Default);
     ///   ImportAsymmetricKeyResponse importAsymmetricKeyResponse =
-    ///       connection.SendCommand(importAsymmetricKeyCommand);<br />
+    ///       connection.SendCommand(importAsymmetricKeyCommand);<br/>
     ///   if (importAsymmetricKeyResponse.Status != ResponseStatus.Success)
     ///   {
     ///       // Handle error
@@ -98,14 +98,71 @@ namespace Yubico.YubiKey.Piv.Commands
         private const int touchPolicyIndex = 5;
         private const int touchPolicyCount = 3;
 
-        private readonly byte[] _policy = new byte[maximumPolicyLength]
-        {
-            0xAA, 0x01, 0x00, 0xAB, 0x01, 0x00
-        };
+        /// <summary>
+        /// Gets the YubiKeyApplication to which this command belongs. For this
+        /// command it's PIV.
+        /// </summary>
+        /// <value>
+        /// YubiKeyApplication.Piv
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Piv;
+
+        private byte _slotNumber;
 
         private readonly PivPrivateKey _privateKey;
 
-        private byte _slotNumber;
+        /// <summary>
+        /// The slot into which the key will be imported.
+        /// </summary>
+        /// <value>
+        /// The slot number, see <see cref="PivSlot"/>
+        /// </value>
+        /// <exception cref="ArgumentException">
+        /// The slot specified is not valid for public key operations.
+        /// </exception>
+        public byte SlotNumber
+        {
+            get => _slotNumber;
+            set
+            {
+                if (PivSlot.IsValidSlotNumberForGenerate(value) == false)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidSlot,
+                            value));
+                }
+                _slotNumber = value;
+            }
+        }
+
+        /// <summary>
+        /// The algorithm (and size) of the key being imported.
+        /// </summary>
+        /// <value>
+        /// The algorithm.
+        /// </value>
+        public PivAlgorithm Algorithm { get; private set; }
+
+        /// <summary>
+        /// The PIN policy the key will have. None is equivalent to Default.
+        /// </summary>
+        /// <value>
+        /// The PIN policy flag.
+        /// </value>
+        public PivPinPolicy PinPolicy { get; set; }
+
+        /// <summary>
+        /// The touch policy the key will have. None is equivalent to Default.
+        /// </summary>
+        /// <value>
+        /// The touch policy flag.
+        /// </value>
+        public PivTouchPolicy TouchPolicy { get; set; }
+
+        private readonly byte[] _policy = new byte[maximumPolicyLength] {
+            0xAA, 0x01, 0x00, 0xAB, 0x01, 0x00 };
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -115,46 +172,46 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <c>ImportAsymmetricKeyCommand</c> class.
-        ///     This command takes the slot number, PIN and touch policies, and the
-        ///     private key as input.
+        /// Initializes a new instance of the <c>ImportAsymmetricKeyCommand</c> class.
+        /// This command takes the slot number, PIN and touch policies, and the
+        /// private key as input.
         /// </summary>
         /// <remarks>
-        ///     The only possible private keys this command will accept are RSA-1024,
-        ///     RSA-2048, ECC-P256, and ECC-P384. If you supply any other private
-        ///     key, the constructor will throw an exception.
-        ///     <para>
-        ///         The slot number must be for a slot that holds an asymmetric key. See
-        ///         the User's Manual
-        ///         <xref href="UsersManualPivSlots"> entry on PIV slots </xref> and
-        ///         <see cref="PivSlot" />.
-        ///     </para>
-        ///     <para>
-        ///         Both the touch policy and pin policy <c>enum</c> arguments have
-        ///         <c>None</c> as a possible value. This command will treat a policy of
-        ///         <c>None</c> the same as <c>Default</c>.
-        ///     </para>
-        ///     <para>
-        ///         The key data must be supplied as an instance of <see cref="PivPrivateKey" />
-        ///     </para>
+        /// The only possible private keys this command will accept are RSA-1024,
+        /// RSA-2048, ECC-P256, and ECC-P384. If you supply any other private
+        /// key, the constructor will throw an exception.
+        /// <para>
+        /// The slot number must be for a slot that holds an asymmetric key. See
+        /// the User's Manual
+        /// <xref href="UsersManualPivSlots"> entry on PIV slots </xref> and
+        /// <see cref="PivSlot"/>.
+        /// </para>
+        /// <para>
+        /// Both the touch policy and pin policy <c>enum</c> arguments have
+        /// <c>None</c> as a possible value. This command will treat a policy of
+        /// <c>None</c> the same as <c>Default</c>.
+        /// </para>
+        /// <para>
+        /// The key data must be supplied as an instance of <see cref="PivPrivateKey"/>
+        /// </para>
         /// </remarks>
         /// <param name="privateKey">
-        ///     The private key to import.
+        /// The private key to import.
         /// </param>
         /// <param name="slotNumber">
-        ///     The slot which will hold the private key.
+        /// The slot which will hold the private key.
         /// </param>
         /// <param name="pinPolicy">
-        ///     The PIN policy the key will have.
+        /// The PIN policy the key will have.
         /// </param>
         /// <param name="touchPolicy">
-        ///     The touch policy the key will have.
+        /// The touch policy the key will have.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     The <c>privateKey</c> argument is null.
+        /// The <c>privateKey</c> argument is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     The <c>privateKey</c> argument does not contain a key.
+        /// The <c>privateKey</c> argument does not contain a key.
         /// </exception>
         public ImportAsymmetricKeyCommand(
             PivPrivateKey privateKey,
@@ -166,7 +223,6 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 throw new ArgumentNullException(nameof(privateKey));
             }
-
             if (privateKey.EncodedPrivateKey.IsEmpty)
             {
                 throw new ArgumentException(
@@ -183,36 +239,36 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <c>ImportAsymmetricKeyCommand</c> class.
-        ///     This command takes the private key as input, it will set the
-        ///     <c>PinPolicy</c> and <c>TouchPolicy</c> to the defaults.
+        /// Initializes a new instance of the <c>ImportAsymmetricKeyCommand</c> class.
+        /// This command takes the private key as input, it will set the
+        /// <c>PinPolicy</c> and <c>TouchPolicy</c> to the defaults.
         /// </summary>
         /// <remarks>
-        ///     This constructor is provided for those developers who want to use the
-        ///     object initializer pattern. For example:
-        ///     <code language="csharp">
+        /// This constructor is provided for those developers who want to use the
+        /// object initializer pattern. For example:
+        /// <code language="csharp">
         ///   var command = new ImportAsymmetricKeyCommand(privateKey)
         ///   {
         ///       SlotNumber = PivSlots.Authentication,
         ///       PinPolicy = PivPinPolicy.Once,
         ///   };
         /// </code>
-        ///     <para>
-        ///         There is no default slot number, hence, for this command to be valid,
-        ///         the slot number must be specified. So if you create an object using
-        ///         this constructor, you must set the SlotNumber property at some time
-        ///         before using it. Otherwise you will get an exception when you do use
-        ///         it.
-        ///     </para>
+        /// <para>
+        /// There is no default slot number, hence, for this command to be valid,
+        /// the slot number must be specified. So if you create an object using
+        /// this constructor, you must set the SlotNumber property at some time
+        /// before using it. Otherwise you will get an exception when you do use
+        /// it.
+        /// </para>
         /// </remarks>
         /// <param name="privateKey">
-        ///     The private key to import.
+        /// The private key to import.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     The <c>privateKey</c> argument is null.
+        /// The <c>privateKey</c> argument is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     The <c>privateKey</c> argument does not contain a key.
+        /// The <c>privateKey</c> argument does not contain a key.
         /// </exception>
         public ImportAsymmetricKeyCommand(PivPrivateKey privateKey)
         {
@@ -220,7 +276,6 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 throw new ArgumentNullException(nameof(privateKey));
             }
-
             if (privateKey.EncodedPrivateKey.IsEmpty)
             {
                 throw new ArgumentException(
@@ -236,79 +291,14 @@ namespace Yubico.YubiKey.Piv.Commands
             _privateKey = privateKey;
         }
 
-        /// <summary>
-        ///     The slot into which the key will be imported.
-        /// </summary>
-        /// <value>
-        ///     The slot number, see <see cref="PivSlot" />
-        /// </value>
-        /// <exception cref="ArgumentException">
-        ///     The slot specified is not valid for public key operations.
-        /// </exception>
-        public byte SlotNumber
+        /// <inheritdoc />
+        public CommandApdu CreateCommandApdu() => new CommandApdu
         {
-            get => _slotNumber;
-            set
-            {
-                if (PivSlot.IsValidSlotNumberForGenerate(value) == false)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidSlot,
-                            value));
-                }
-
-                _slotNumber = value;
-            }
-        }
-
-        /// <summary>
-        ///     The algorithm (and size) of the key being imported.
-        /// </summary>
-        /// <value>
-        ///     The algorithm.
-        /// </value>
-        public PivAlgorithm Algorithm { get; }
-
-        /// <summary>
-        ///     The PIN policy the key will have. None is equivalent to Default.
-        /// </summary>
-        /// <value>
-        ///     The PIN policy flag.
-        /// </value>
-        public PivPinPolicy PinPolicy { get; set; }
-
-        /// <summary>
-        ///     The touch policy the key will have. None is equivalent to Default.
-        /// </summary>
-        /// <value>
-        ///     The touch policy flag.
-        /// </value>
-        public PivTouchPolicy TouchPolicy { get; set; }
-
-        /// <summary>
-        ///     Gets the YubiKeyApplication to which this command belongs. For this
-        ///     command it's PIV.
-        /// </summary>
-        /// <value>
-        ///     YubiKeyApplication.Piv
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Piv;
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Ins = PivImportAsymmetricInstruction,
-                P1 = (byte)Algorithm,
-                P2 = SlotNumber,
-                Data = BuildImportAsymmetricApduData()
-            };
-
-        /// <inheritdoc />
-        public ImportAsymmetricKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ImportAsymmetricKeyResponse(responseApdu);
+            Ins = PivImportAsymmetricInstruction,
+            P1 = (byte)Algorithm,
+            P2 = SlotNumber,
+            Data = BuildImportAsymmetricApduData(),
+        };
 
         // Build a new byte array containing the key data and policy data.
         // Build it in such a way that there will be no "reallocation".
@@ -332,20 +322,19 @@ namespace Yubico.YubiKey.Piv.Commands
             try
             {
                 _privateKey.EncodedPrivateKey.CopyTo(apduData);
-                Array.Copy(_policy, sourceIndex: 0, apduData, offset, maximumPolicyLength);
+                Array.Copy(_policy, 0, apduData, offset, maximumPolicyLength);
 
                 if (PinPolicy == PivPinPolicy.Default || PinPolicy == PivPinPolicy.None)
                 {
                     Array.Copy(_policy, pinPolicyCount, apduData, offset, touchPolicyCount);
                     length -= pinPolicyCount;
                 }
-
                 if (TouchPolicy == PivTouchPolicy.Default || TouchPolicy == PivTouchPolicy.None)
                 {
                     length -= touchPolicyCount;
                 }
 
-                var returnValue = new Memory<byte>(apduData, start: 0, length);
+                var returnValue = new Memory<byte>(apduData, 0, length);
                 return returnValue.ToArray();
             }
             finally
@@ -353,5 +342,9 @@ namespace Yubico.YubiKey.Piv.Commands
                 CryptographicOperations.ZeroMemory(apduData);
             }
         }
+
+        /// <inheritdoc />
+        public ImportAsymmetricKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new ImportAsymmetricKeyResponse(responseApdu);
     }
 }

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Linq;
 using Xunit;
 
@@ -48,9 +49,9 @@ namespace Yubico.YubiKey.Cryptography
         {
             var entryData = new KeyEntryData();
             entryData.Clear();
-            var value = entryData.GetCurrentValue();
+            ReadOnlyMemory<byte> value = entryData.GetCurrentValue();
 
-            Assert.Equal(expected: 0, value.Length);
+            Assert.Equal(0, value.Length);
         }
 
         [Fact]
@@ -58,16 +59,15 @@ namespace Yubico.YubiKey.Cryptography
         {
             var entryData = new KeyEntryData();
 
-            byte[] dataToSubmit =
-            {
+            byte[] dataToSubmit = new byte[] {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
             };
             entryData.SubmitValue(dataToSubmit);
 
-            var value = entryData.GetCurrentValue();
-            var getValue = value.ToArray();
+            ReadOnlyMemory<byte> value = entryData.GetCurrentValue();
+            byte[] getValue = value.ToArray();
 
-            var compareResult = getValue.SequenceEqual(dataToSubmit);
+            bool compareResult = getValue.SequenceEqual(dataToSubmit);
 
             Assert.True(compareResult);
         }
@@ -77,21 +77,19 @@ namespace Yubico.YubiKey.Cryptography
         {
             var entryData = new KeyEntryData();
 
-            byte[] dataToSubmit =
-            {
+            byte[] dataToSubmit = new byte[] {
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47
             };
             entryData.SubmitValue(dataToSubmit);
             entryData.Clear();
 
-            var value = entryData.GetCurrentValue();
-            var getValue = value.ToArray();
+            ReadOnlyMemory<byte> value = entryData.GetCurrentValue();
+            byte[] getValue = value.ToArray();
 
-            byte[] expected =
-            {
+            byte[] expected = new byte[] {
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
             };
-            var compareResult = getValue.SequenceEqual(expected);
+            bool compareResult = getValue.SequenceEqual(expected);
 
             Assert.True(compareResult);
         }
@@ -101,19 +99,17 @@ namespace Yubico.YubiKey.Cryptography
         {
             var entryData = new KeyEntryData();
 
-            byte[] currentValue =
-            {
+            byte[] currentValue = new byte[] {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
             };
-            byte[] newValue =
-            {
+            byte[] newValue = new byte[] {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
             };
             entryData.SubmitValues(currentValue, newValue);
 
-            var value = entryData.GetCurrentValue();
-            var getValue = value.ToArray();
-            var compareResult = getValue.SequenceEqual(currentValue);
+            ReadOnlyMemory<byte> value = entryData.GetCurrentValue();
+            byte[] getValue = value.ToArray();
+            bool compareResult = getValue.SequenceEqual(currentValue);
 
             Assert.True(compareResult);
 

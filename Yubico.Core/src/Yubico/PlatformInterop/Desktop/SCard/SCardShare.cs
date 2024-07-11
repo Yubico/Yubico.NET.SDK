@@ -15,25 +15,25 @@
 namespace Yubico.PlatformInterop
 {
     /// <summary>
-    ///     A value that indicates whether other applications may form connections to the card once
-    ///     a connection has been established.
+    /// A value that indicates whether other applications may form connections to the card once
+    /// a connection has been established.
     /// </summary>
     internal enum SCARD_SHARE
     {
         /// <summary>
-        ///     This application is not willing to share the card with other applications.
+        /// This application is not willing to share the card with other applications.
         /// </summary>
         EXCLUSIVE = 1,
 
         /// <summary>
-        ///     This application is willing to share the card with other applications.
+        /// This application is willing to share the card with other applications.
         /// </summary>
         SHARED = 2,
 
         /// <summary>
-        ///     This application is allocating the reader for its private use, and will be controlling
-        ///     it directly. No other applications are allowed access to it.
+        /// This application is allocating the reader for its private use, and will be controlling
+        /// it directly. No other applications are allowed access to it.
         /// </summary>
-        DIRECT = 3
+        DIRECT = 3,
     }
 }

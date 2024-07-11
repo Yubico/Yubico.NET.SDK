@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void CreateCommandApdu_SubcommandSet_CorrectlySerializesApdu()
         {
-            var command = new ClientPinCommand
+            var command = new ClientPinCommand()
             {
                 SubCommand = 0xFF
             };
@@ -58,19 +58,19 @@ namespace Yubico.YubiKey.Fido2.Commands
             //    18 FF #   unsigned(255)
             byte[] expectedData = { 0x06, 0xA1, 0x02, 0x18, 0xFF };
 
-            var apdu = command.CreateCommandApdu();
+            CommandApdu apdu = command.CreateCommandApdu();
 
-            Assert.Equal(expected: 0, apdu.Cla);
-            Assert.Equal(expected: 0x10, apdu.Ins);
-            Assert.Equal(expected: 0, apdu.P1);
-            Assert.Equal(expected: 0, apdu.P2);
+            Assert.Equal(0, apdu.Cla);
+            Assert.Equal(0x10, apdu.Ins);
+            Assert.Equal(0, apdu.P1);
+            Assert.Equal(0, apdu.P2);
             Assert.True(expectedData.SequenceEqual(apdu.Data.ToArray()));
         }
 
         [Fact]
         public void CreateCommandApdu_AllPropertiesSet_CorrectlySerializesApdu()
         {
-            var command = new ClientPinCommand
+            var command = new ClientPinCommand()
             {
                 PinUvAuthProtocol = PinUvAuthProtocol.ProtocolOne,
                 SubCommand = 0xFF,
@@ -94,7 +94,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 0x0A, 0x64, 0x74, 0x65, 0x73, 0x74 // RpId = "test"
             };
 
-            var apdu = command.CreateCommandApdu();
+            CommandApdu apdu = command.CreateCommandApdu();
 
             Assert.True(expectedData.SequenceEqual(apdu.Data.ToArray()));
         }
@@ -104,7 +104,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             var command = new ClientPinCommand();
 
-            var response = command.CreateResponseForApdu(new ResponseApdu(new byte[] { 0x90, 0x00 }));
+            IYubiKeyResponse response = command.CreateResponseForApdu(new ResponseApdu(new byte[] { 0x90, 0x00 }));
 
             _ = Assert.IsType<ClientPinResponse>(response);
         }
@@ -112,20 +112,19 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void NullKeyAgreement_CorrectApdu()
         {
-            byte[] expectedValue =
-            {
+            byte[] expectedValue = new byte[] {
                 0x06, 0xA2, 0x01, 0x01, 0x02, 0x10
             };
 
-            var command = new ClientPinCommand
+            var command = new ClientPinCommand()
             {
                 PinUvAuthProtocol = PinUvAuthProtocol.ProtocolOne,
-                SubCommand = 16
+                SubCommand = 16,
             };
 
-            var cmdApdu = command.CreateCommandApdu();
+            CommandApdu cmdApdu = command.CreateCommandApdu();
 
-            var isValid = new Span<byte>(expectedValue).SequenceEqual(cmdApdu.Data.Span);
+            bool isValid = MemoryExtensions.SequenceEqual(new Span<byte>(expectedValue), cmdApdu.Data.Span);
             Assert.True(isValid);
         }
     }

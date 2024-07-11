@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 _ => throw new ArgumentException(
                     string.Format(
                         CultureInfo.CurrentCulture,
-                        InvalidAlgorithmMessage))
+                        InvalidAlgorithmMessage)),
             };
 
             var tlvReader = new TlvReader(signature);
@@ -90,11 +90,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             int offsetR = 0;
             int offsetS = 0;
             bool isValid = false;
-            if (tlvReader.TryReadNestedTlv(out TlvReader seqReader, expectedTag: 0x30))
+            if (tlvReader.TryReadNestedTlv(out TlvReader seqReader, 0x30))
             {
-                if (seqReader.TryReadValue(out rValue, expectedTag: 0x02))
+                if (seqReader.TryReadValue(out rValue, 0x02))
                 {
-                    if (seqReader.TryReadValue(out sValue, expectedTag: 0x02))
+                    if (seqReader.TryReadValue(out sValue, 0x02))
                     {
                         // Skip any leading 00 bytes.
                         while (rValue.Span[offsetR] == 0)
@@ -105,7 +105,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                                 break;
                             }
                         }
-
                         while (sValue.Span[offsetS] == 0)
                         {
                             offsetS++;
@@ -177,7 +176,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     break;
                 }
             }
-
             while (signature[offsetS] == 0)
             {
                 offsetS++;
@@ -207,10 +205,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             sigBuffer.Slice(offsetS, sLength).CopyTo(valueS[startS..]);
 
             var tlvWriter = new TlvWriter();
-            using (tlvWriter.WriteNestedTlv(tag: 0x30))
+            using (tlvWriter.WriteNestedTlv(0x30))
             {
-                tlvWriter.WriteValue(tag: 0x02, valueR.Slice(start: 0, rLength + startR));
-                tlvWriter.WriteValue(tag: 0x02, valueS.Slice(start: 0, sLength + startS));
+                tlvWriter.WriteValue(0x02, valueR.Slice(0, rLength + startR));
+                tlvWriter.WriteValue(0x02, valueS.Slice(0, sLength + startS));
             }
 
             return tlvWriter.Encode();

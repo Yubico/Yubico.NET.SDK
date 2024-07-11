@@ -20,15 +20,14 @@ namespace Yubico.YubiKey.Oath.Commands
 {
     public class DeleteCredentialCommandTests
     {
-        private readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp,
-            HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, digits: 6, counter: 0, requireTouch: false);
+        readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp, HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
 
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
             var command = new DeleteCommand { Credential = credential };
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().Cla);
+            Assert.Equal(0, command.CreateCommandApdu().Cla);
         }
 
         [Fact]
@@ -36,7 +35,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new DeleteCommand { Credential = credential };
 
-            Assert.Equal(expected: 0x02, command.CreateCommandApdu().Ins);
+            Assert.Equal(0x02, command.CreateCommandApdu().Ins);
         }
 
         [Fact]
@@ -44,7 +43,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new DeleteCommand { Credential = credential };
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().P1);
+            Assert.Equal(0, command.CreateCommandApdu().P1);
         }
 
         [Fact]
@@ -52,7 +51,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new DeleteCommand { Credential = credential };
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().P2);
+            Assert.Equal(0, command.CreateCommandApdu().P2);
         }
 
         [Fact]
@@ -66,7 +65,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D
             };
 
-            var data = command.CreateCommandApdu().Data;
+            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
             Assert.Equal(dataList.Length, command.CreateCommandApdu().Nc);
             Assert.True(data.Span.SequenceEqual(dataList));
@@ -77,7 +76,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new DeleteCommand { Credential = credential };
-            var response = command.CreateResponseForApdu(responseApdu);
+            DeleteResponse? response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is DeleteResponse);
         }

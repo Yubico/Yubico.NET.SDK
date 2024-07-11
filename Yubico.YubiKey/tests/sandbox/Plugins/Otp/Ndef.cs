@@ -22,11 +22,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class Ndef : OtpPluginBase
     {
-        public Ndef(IOutput output) : base(output)
-        {
-            Parameters["slot"].Required = false;
-        }
-
         public override string Name => "NDEF";
 
         public override string Description => "Configure or read a slot to be used over NDEF (NFC).";
@@ -38,6 +33,11 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             | ParameterUse.Uri
             | ParameterUse.Utf16
             | ParameterUse.Read;
+
+        public Ndef(IOutput output) : base(output)
+        {
+            Parameters["slot"].Required = false;
+        }
 
         public override void HandleParameters()
         {
@@ -55,7 +55,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                     exceptions.Add(new InvalidOperationException(
                         "You cannot read and program an NDEF tag in the same operation."));
                 }
-
                 if (_slot != Slot.None)
                 {
                     exceptions.Add(new InvalidOperationException(
@@ -74,7 +73,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 // Only continue if the error is that there are no keys found.
                 if (!ex.Data.Contains("NoYubiKeys")) { throw; }
-
                 noKeysException = ex;
             }
 
@@ -89,7 +87,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
                 while (_yubiKey is null && timer.Elapsed.TotalSeconds < 10)
                 {
-                    Thread.Sleep(millisecondsTimeout: 500);
+                    Thread.Sleep(500);
                     try
                     {
                         _yubiKey = GetYubiKey(_serialNumber, Transport.NfcSmartCard);
@@ -101,7 +99,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                         // Otherwise, we'll wait and see.
                     }
                 }
-
                 if (_yubiKey is null)
                 {
                     exceptions.Add(noKeysException ?? new InvalidOperationException(
@@ -112,7 +109,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             if (exceptions.Count > 0)
             {
                 throw exceptions.Count == 1
-                    ? exceptions[index: 0]
+                    ? exceptions[0]
                     : new AggregateException(
                         $"{exceptions.Count} errors encountered.",
                         exceptions);
@@ -127,40 +124,27 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             if (_read)
             {
-                var reader = otp.ReadNdefTag();
+                NdefDataReader reader = otp.ReadNdefTag();
 
-                Uri uri()
-                {
-                    return reader.ToUri();
-                }
+                Uri uri() => reader.ToUri();
+                NdefText text() => reader.ToText();
 
-                NdefText text()
-                {
-                    return reader.ToText();
-                }
+                string raw() =>
+                    reader.Type == NdefDataType.Uri
+                    ? uri().ToString()
+                    : text().ToString();
 
-                string raw()
-                {
-                    return reader.Type == NdefDataType.Uri
-                        ? uri().ToString()
-                        : text().ToString();
-                }
+                string labeled() =>
+                    reader.Type == NdefDataType.Uri
+                    ? $"URI Read: {raw()}"
+                    : $"Text Read: {raw()}";
 
-                string labeled()
-                {
-                    return reader.Type == NdefDataType.Uri
-                        ? $"URI Read: {raw()}"
-                        : $"Text Read: {raw()}";
-                }
+                string detailed() =>
+                    reader.Type == NdefDataType.Uri
+                    ? uriDetails(uri())
+                    : textDetails(raw(), text().Language.Name, text().Encoding);
 
-                string detailed()
-                {
-                    return reader.Type == NdefDataType.Uri
-                        ? uriDetails(uri())
-                        : textDetails(raw(), text().Language.Name, text().Encoding);
-                }
-
-                var output = Output.OutputLevel switch
+                string output = Output.OutputLevel switch
                 {
                     OutputLevel.Quiet => raw(),
                     OutputLevel.Normal => labeled(),
@@ -190,28 +174,27 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 {
                     Output.WriteLine("NDEF tag set.");
                 }
-
                 if (Output.OutputLevel >= OutputLevel.Verbose)
                 {
                     Output.WriteLine(
                         _uri != null
-                            ? uriDetails(_uri)
-                            : textDetails(_text, _lcid, _encoding));
+                        ? uriDetails(_uri)
+                        : textDetails(_text, _lcid, _encoding));
                 }
             }
-
             return true;
 
-            string uriDetails(Uri uri)
-            {
-                return string.Join(Eol, $"URL: {uri}", $"Scheme: {uri.Scheme}", $"Host: {uri.Host}",
-                    $"Port: {uri.Port}", $"Path: {uri.AbsolutePath}");
-            }
-
-            string textDetails(string text, string lcid, NdefTextEncoding encoding)
-            {
-                return $"Text: {text + Eol}LCID: {lcid + Eol}Encoding: {encoding}";
-            }
+            string uriDetails(Uri uri) =>
+                string.Join(Eol, new[]
+                {
+                    $"URL: { uri }",
+                    $"Scheme: { uri.Scheme }",
+                    $"Host: { uri.Host }",
+                    $"Port: { uri.Port }",
+                    $"Path: { uri.AbsolutePath }"
+                });
+            string textDetails(string text, string lcid, NdefTextEncoding encoding) =>
+                $"Text: {text + Eol}LCID: {lcid + Eol}Encoding: {encoding}";
         }
     }
 }

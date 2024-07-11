@@ -17,22 +17,25 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    ///     Gets the modality of the BioEnrollment. This is a subcommand of the CTAP
-    ///     command "authenticatorBioEnrollment".
+    /// Gets the modality of the BioEnrollment. This is a subcommand of the CTAP
+    /// command "authenticatorBioEnrollment".
     /// </summary>
     /// <remarks>
-    ///     The partner Response class is <see cref="GetBioModalityResponse" />.
-    ///     <para>
-    ///         The modality describes what the Bio authentication (biometric) is.
-    ///         Currently, the only modality listed in the FIDO2 standard is fingerprint.
-    ///     </para>
+    /// The partner Response class is <see cref="GetBioModalityResponse"/>.
+    /// <para>
+    /// The modality describes what the Bio authentication (biometric) is.
+    /// Currently, the only modality listed in the FIDO2 standard is fingerprint.
+    /// </para>
     /// </remarks>
     public sealed class GetBioModalityCommand : IYubiKeyCommand<GetBioModalityResponse>
     {
         private readonly BioEnrollmentCommand _command;
 
+        /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
+
         /// <summary>
-        ///     Constructs an instance of the <see cref="GetBioModalityCommand" /> class.
+        /// Constructs an instance of the <see cref="GetBioModalityCommand" /> class.
         /// </summary>
         public GetBioModalityCommand()
         {
@@ -40,9 +43,6 @@ namespace Yubico.YubiKey.Fido2.Commands
             // subcommand. The base class knows how to handle this case.
             _command = new BioEnrollmentCommand(0);
         }
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();

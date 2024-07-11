@@ -17,16 +17,16 @@ using System;
 namespace Yubico.Core.Buffers
 {
     /// <summary>
-    ///     Class for encoding and decoding byte collections into MODHEX.
+    /// Class for encoding and decoding byte collections into MODHEX.
     /// </summary>
     public class ModHex : Base16
     {
         private readonly Memory<char> _characterSet = "cbdefghijklnrtuv".ToCharArray();
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override Span<char> CharacterSet => _characterSet.Span;
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override bool DefaultLowerCase => true;
 
         #region Static Version

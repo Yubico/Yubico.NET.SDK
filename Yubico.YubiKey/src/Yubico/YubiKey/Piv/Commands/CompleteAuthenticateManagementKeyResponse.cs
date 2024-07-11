@@ -20,23 +20,21 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    ///     The response to the complete authenticate management key command.
+    /// The response to the complete authenticate management key command.
     /// </summary>
     /// <remarks>
-    ///     This is the partner Response class to
-    ///     <see
-    ///         cref="CompleteAuthenticateManagementKeyCommand" />
-    ///     .
-    ///     <para>
-    ///         The data returned is an <see cref="AuthenticateManagementKeyResult" />
-    ///         enum.
-    ///     </para>
-    ///     <para>
-    ///         See the comments for the class
-    ///         <see cref="InitializeAuthenticateManagementKeyCommand" />, there is a
-    ///         lengthy discussion of the process of authenticating the management key,
-    ///         including descriptions of the challenges and responses.
-    ///     </para>
+    /// This is the partner Response class to <see
+    /// cref="CompleteAuthenticateManagementKeyCommand"/>.
+    /// <para>
+    /// The data returned is an <see cref="AuthenticateManagementKeyResult"/>
+    /// enum.
+    /// </para>
+    /// <para>
+    /// See the comments for the class
+    /// <see cref="InitializeAuthenticateManagementKeyCommand"/>, there is a
+    /// lengthy discussion of the process of authenticating the management key,
+    /// including descriptions of the challenges and responses.
+    /// </para>
     /// </remarks>
     public sealed class CompleteAuthenticateManagementKeyResponse
         : PivResponse, IYubiKeyResponseWithData<AuthenticateManagementKeyResult>
@@ -44,29 +42,39 @@ namespace Yubico.YubiKey.Piv.Commands
         private const int EncodingTag = 0x7C;
         private const int ResponseTag = 0x82;
 
+        private ReadOnlyMemory<byte> YubiKeyAuthenticationExpectedResponse { get; }
+
+        /// <inheritdoc />
+        protected override ResponseStatusPair StatusCodeMap =>
+            StatusWord switch
+            {
+                SWConstants.ConditionsNotSatisfied => new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivSecurityStatusNotSatisfied),
+                _ => base.StatusCodeMap,
+            };
+
         /// <summary>
-        ///     Constructs a CompleteAuthenticateManagementKeyResponse based on a ResponseApdu
-        ///     received from the YubiKey.
+        /// Constructs a CompleteAuthenticateManagementKeyResponse based on a ResponseApdu
+        /// received from the YubiKey.
         /// </summary>
         /// <remarks>
-        ///     The caller must also pass in the YubiKey Authentication Expected Response.
-        ///     These arguments must all be non-null. However, in the case of single
-        ///     authentication, there will be no YubiKey Authentication Expected Response, so that
-        ///     argument will be "empty", with a Length of zero.
-        ///     <para>
-        ///         If there is data in the <paramref name="yubiKeyAuthenticationExpectedResponse" />, it must be 8 bytes,
-        ///         no more, no less.
-        ///     </para>
-        ///     <para>
-        ///         If this is mutual authentication, the response APDU will contain the
-        ///         response to YubiKey Authentication Challenge.
-        ///     </para>
+        /// The caller must also pass in the YubiKey Authentication Expected Response.
+        /// These arguments must all be non-null. However, in the case of single
+        /// authentication, there will be no YubiKey Authentication Expected Response, so that
+        /// argument will be "empty", with a Length of zero.
+        /// <para>
+        /// If there is data in the <paramref name="yubiKeyAuthenticationExpectedResponse"/>, it must be 8 bytes,
+        /// no more, no less.
+        /// </para>
+        /// <para>
+        /// If this is mutual authentication, the response APDU will contain the
+        /// response to YubiKey Authentication Challenge.
+        /// </para>
         /// </remarks>
         /// <param name="responseApdu">
-        ///     The object containing the Response APDU returned by the YubiKey.
+        /// The object containing the Response APDU returned by the YubiKey.
         /// </param>
-        /// <param name="yubiKeyAuthenticationExpectedResponse">
-        ///     The bytes the off-card app expects the YubiKey Authentication Response to be.
+        /// <param name = "yubiKeyAuthenticationExpectedResponse">
+        /// The bytes the off-card app expects the YubiKey Authentication Response to be.
         /// </param>
         public CompleteAuthenticateManagementKeyResponse(
             ResponseApdu responseApdu,
@@ -76,39 +84,28 @@ namespace Yubico.YubiKey.Piv.Commands
             YubiKeyAuthenticationExpectedResponse = yubiKeyAuthenticationExpectedResponse;
         }
 
-        private ReadOnlyMemory<byte> YubiKeyAuthenticationExpectedResponse { get; }
-
-        /// <inheritdoc />
-        protected override ResponseStatusPair StatusCodeMap =>
-            StatusWord switch
-            {
-                SWConstants.ConditionsNotSatisfied => new ResponseStatusPair(
-                    ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivSecurityStatusNotSatisfied),
-                _ => base.StatusCodeMap
-            };
-
         /// <summary>
-        ///     Determines the result of the management key authentication.
+        /// Determines the result of the management key authentication.
         /// </summary>
         /// <remarks>
-        ///     If this is mutual authentication, this method will compare the value from
-        ///     the response APDU to the <c>YubiKey Authentication Challenge</c>. If they are the
-        ///     same, the YubiKey will have authenticated itself to the Off-Card app.
-        ///     <para>
-        ///         It is suggested to check the value of <see cref="YubiKeyResponse.Status" /> before calling
-        ///         this method. If the value is neither <see cref="ResponseStatus.Success" /> nor
-        ///         <see cref="ResponseStatus.AuthenticationRequired" />, this method will throw an exception.
-        ///     </para>
+        /// If this is mutual authentication, this method will compare the value from
+        /// the response APDU to the <c>YubiKey Authentication Challenge</c>. If they are the
+        /// same, the YubiKey will have authenticated itself to the Off-Card app.
+        /// <para>
+        /// It is suggested to check the value of <see cref="YubiKeyResponse.Status"/> before calling
+        /// this method. If the value is neither <see cref="ResponseStatus.Success"/> nor
+        /// <see cref="ResponseStatus.AuthenticationRequired"/>, this method will throw an exception.
+        /// </para>
         /// </remarks>
         /// <returns>
-        ///     An <c>AuthenticateManagementKeyResult</c> enum.
+        /// An <c>AuthenticateManagementKeyResult</c> enum.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///     Thrown if <see cref="YubiKeyResponse.Status" /> is neither
-        ///     <see cref="ResponseStatus.Success" /> nor <see cref="ResponseStatus.AuthenticationRequired" />.
+        /// Thrown if <see cref="YubiKeyResponse.Status"/> is neither
+        /// <see cref="ResponseStatus.Success"/> nor <see cref="ResponseStatus.AuthenticationRequired"/>.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
-        ///     Thrown when the data provided does not meet the expectations, and cannot be parsed.
+        /// Thrown when the data provided does not meet the expectations, and cannot be parsed.
         /// </exception>
         public AuthenticateManagementKeyResult GetData()
         {
@@ -157,7 +154,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     {
                         if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> responseValue, ResponseTag))
                         {
-                            return responseValue.Span.SequenceEqual(YubiKeyAuthenticationExpectedResponse.Span)
+                            return MemoryExtensions.SequenceEqual(responseValue.Span, YubiKeyAuthenticationExpectedResponse.Span)
                                 ? AuthenticateManagementKeyResult.MutualFullyAuthenticated
                                 : AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed;
                         }

@@ -15,17 +15,16 @@
 using System;
 using System.Collections.Generic;
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.InterIndustry.Commands;
 
 namespace Yubico.YubiKey.Pipelines
 {
     /// <summary>
-    ///     A transform that automatically detects large responses and issues GET_RESPONSE APDUs until
-    ///     all data has been returned.
+    /// A transform that automatically detects large responses and issues GET_RESPONSE APDUs until
+    /// all data has been returned.
     /// </summary>
     /// <remarks>
-    ///     This transform will work for all YubiKey applications except
-    ///     OATH. For OATH, use <see cref="OathResponseChainingTransform" />.
+    /// This transform will work for all YubiKey applications except
+    /// OATH. For OATH, use <see cref="OathResponseChainingTransform"/>.
     /// </remarks>
     internal class ResponseChainingTransform : IApduTransform
     {
@@ -79,11 +78,9 @@ namespace Yubico.YubiKey.Pipelines
             return new ResponseApdu(tempBuffer.ToArray(), response.SW);
         }
 
-        public void Setup() => _pipeline.Setup();
+        protected virtual IYubiKeyCommand<YubiKeyResponse> CreateGetResponseCommand(CommandApdu originatingCommand, short SW2) =>
+            new InterIndustry.Commands.GetResponseCommand(originatingCommand, SW2);
 
-        protected virtual IYubiKeyCommand<YubiKeyResponse> CreateGetResponseCommand(
-            CommandApdu originatingCommand,
-            short SW2) =>
-            new GetResponseCommand(originatingCommand, SW2);
+        public void Setup() => _pipeline.Setup();
     }
 }

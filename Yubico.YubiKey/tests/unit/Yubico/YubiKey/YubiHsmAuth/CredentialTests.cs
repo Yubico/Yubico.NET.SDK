@@ -19,37 +19,16 @@ namespace Yubico.YubiKey.YubiHsmAuth
 {
     public class CredentialTests
     {
-        #region touch property
-
-        [Fact]
-        public void TouchRequired_SetGetTrue_ReturnsTrue()
-        {
-            var expectedTouch = true;
-
-            var cred = new Credential(
-                CryptographicKeyType.Aes128,
-                "test key",
-                touchRequired: false)
-            {
-                TouchRequired = expectedTouch
-            };
-
-            Assert.Equal(expectedTouch, cred.TouchRequired);
-        }
-
-        #endregion
-
         #region constructor
-
         [Fact]
         public void Constructor_KeyTypeAes128_ObjectKeyTypeAes128()
         {
-            var expectedKeyType = CryptographicKeyType.Aes128;
+            CryptographicKeyType expectedKeyType = CryptographicKeyType.Aes128;
 
-            var cred = new Credential(
+            Credential cred = new Credential(
                 expectedKeyType,
                 "test key",
-                touchRequired: false);
+                false);
 
             Assert.Equal(expectedKeyType, cred.KeyType);
         }
@@ -61,7 +40,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 () => new Credential(
                     CryptographicKeyType.None,
                     "test key",
-                    touchRequired: false));
+                    false));
         }
 
         [Fact]
@@ -71,18 +50,18 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 () => new Credential(
                     (CryptographicKeyType)(-1),
                     "test key",
-                    touchRequired: false));
+                    false));
         }
 
         [Fact]
         public void Constructor_LabelTestKey_ObjectLabelTestKey()
         {
-            var expectedLabel = "test key";
+            string expectedLabel = "test key";
 
-            var cred = new Credential(
+            Credential cred = new Credential(
                 CryptographicKeyType.Aes128,
                 expectedLabel,
-                touchRequired: false);
+                false);
 
             Assert.Equal(expectedLabel, cred.Label);
         }
@@ -92,40 +71,38 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [InlineData(Credential.MaxLabelByteCount + 1)]
         public void Constructor_LabelInvalidLength_ThrowsArgException(int strLength)
         {
-            var expectedLabel = new string(c: 'a', strLength);
+            string expectedLabel = new string('a', strLength);
 
             _ = Assert.Throws<ArgumentOutOfRangeException>(() => new Credential(
-                CryptographicKeyType.Aes128,
-                expectedLabel,
-                touchRequired: false));
+                    CryptographicKeyType.Aes128,
+                    expectedLabel,
+                    false));
         }
 
         [Fact]
         public void Constructor_TouchRequiredTrue_ObjectTouchRequiredTrue()
         {
-            var expectedTouchRequired = true;
+            bool expectedTouchRequired = true;
 
-            var cred = new Credential(
-                CryptographicKeyType.Aes128,
-                "test key",
-                expectedTouchRequired);
+            Credential cred = new Credential(
+                    CryptographicKeyType.Aes128,
+                    "test key",
+                    expectedTouchRequired);
 
             Assert.Equal(expectedTouchRequired, cred.TouchRequired);
         }
-
         #endregion
 
         #region KeyType Property
-
         [Fact]
         public void KeyType_GetSetAes128_KeyTypeIsAes128()
         {
-            var expectedKeyType = CryptographicKeyType.Aes128;
+            CryptographicKeyType expectedKeyType = CryptographicKeyType.Aes128;
 
-            var cred = new Credential(
+            Credential cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "test key",
-                touchRequired: false)
+                false)
             {
                 KeyType = expectedKeyType
             };
@@ -136,12 +113,12 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [Fact]
         public void KeyType_SetNegative1_ThrowsArgOutOfRange()
         {
-            var invalidKeyType = (CryptographicKeyType)(-1);
+            CryptographicKeyType invalidKeyType = (CryptographicKeyType)(-1);
 
-            var cred = new Credential(
+            Credential cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "test key",
-                touchRequired: false);
+                false);
 
             _ = Assert.Throws<ArgumentOutOfRangeException>(
                 () => cred.KeyType = invalidKeyType);
@@ -150,31 +127,29 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [Fact]
         public void KeyType_SetNone_ThrowsArgOutOfRange()
         {
-            var invalidKeyType = CryptographicKeyType.None;
+            CryptographicKeyType invalidKeyType = CryptographicKeyType.None;
 
-            var cred = new Credential(
+            Credential cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "test key",
-                touchRequired: false);
+                false);
 
             _ = Assert.Throws<ArgumentOutOfRangeException>(
                 () => cred.KeyType = invalidKeyType);
         }
-
         #endregion
 
         #region label property
-
         [Fact]
         public void MinLabelLength_Get_Returns1()
         {
-            Assert.Equal(expected: 1, Credential.MinLabelByteCount);
+            Assert.Equal(1, Credential.MinLabelByteCount);
         }
 
         [Fact]
         public void MaxLabelLength_Get_Returns64()
         {
-            Assert.Equal(expected: 64, Credential.MaxLabelByteCount);
+            Assert.Equal(64, Credential.MaxLabelByteCount);
         }
 
         [Theory]
@@ -182,12 +157,12 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [InlineData(Credential.MaxLabelByteCount)]
         public void Label_SetGetLabel_ReturnsMatchingString(int labelLength)
         {
-            var expectedLabel = new string(c: 'a', labelLength);
+            string expectedLabel = new string('a', labelLength);
 
-            var cred = new Credential(
+            Credential cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "old label",
-                touchRequired: false)
+                false)
             {
                 Label = expectedLabel
             };
@@ -198,12 +173,12 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [Fact]
         public void Label_SetNonUtf8Character_ThrowsArgException()
         {
-            var expectedLabel = "abc\uD801\uD802d";
+            string expectedLabel = "abc\uD801\uD802d";
 
-            var cred = new Credential(
+            Credential cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "old label",
-                touchRequired: false);
+                false);
 
             _ = Assert.ThrowsAny<ArgumentException>(
                 () => cred.Label = expectedLabel);
@@ -214,17 +189,34 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [InlineData(Credential.MaxLabelByteCount + 1)]
         public void Label_SetInvalidLabelLength_ThrowsArgOutOfRangeException(int labelLength)
         {
-            var expectedLabel = new string(c: 'a', labelLength);
+            string expectedLabel = new string('a', labelLength);
 
-            var cred = new Credential(
+            Credential cred = new Credential(
                 CryptographicKeyType.Aes128,
                 "old label",
-                touchRequired: false);
+                false);
 
             _ = Assert.Throws<ArgumentOutOfRangeException>(
                 () => cred.Label = expectedLabel);
         }
+        #endregion
 
+        #region touch property
+        [Fact]
+        public void TouchRequired_SetGetTrue_ReturnsTrue()
+        {
+            bool expectedTouch = true;
+
+            Credential cred = new Credential(
+                CryptographicKeyType.Aes128,
+                "test key",
+                false)
+            {
+                TouchRequired = expectedTouch
+            };
+
+            Assert.Equal(expectedTouch, cred.TouchRequired);
+        }
         #endregion
     }
 }

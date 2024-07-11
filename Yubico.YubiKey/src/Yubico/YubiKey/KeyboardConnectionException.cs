@@ -22,6 +22,7 @@ namespace Yubico.YubiKey
     {
         public KeyboardConnectionException()
         {
+
         }
 
         public KeyboardConnectionException(string message) : base(message)
@@ -35,6 +36,7 @@ namespace Yubico.YubiKey
         protected KeyboardConnectionException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
             base(serializationInfo, streamingContext)
         {
+
         }
     }
 }

@@ -31,27 +31,26 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384, PivPinPolicy.Never, StandardTestDevice.Fw5)]
         public void KeyAgree_Succeeds(PivAlgorithm algorithm, PivPinPolicy pinPolicy, StandardTestDevice testDeviceType)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, validAttest: false, out _, out var publicKeyPem, out _);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out string publicKeyPem, out _);
             var keyConverter = new KeyConverter(publicKeyPem.ToCharArray());
             var pivPublicKey = keyConverter.GetPivPublicKey();
             var eccPublicKey = (PivEccPublicKey)pivPublicKey;
             var expectedSecretLength = (eccPublicKey.PublicPoint.Length - 1) / 2;
 
-            var isValid =
-                SampleKeyPairs.GetKeysAndCertPem(algorithm, validAttest: true, out _, out _, out var privateKeyPem);
+            var isValid = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out _, out _, out string privateKeyPem);
             Assert.True(isValid);
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
-            var pivPrivateKey = privateKey.GetPivPrivateKey();
+            PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.ImportPrivateKey(slotNumber: 0x85, pivPrivateKey, pinPolicy, PivTouchPolicy.Never);
+                pivSession.ImportPrivateKey(0x85, pivPrivateKey, pinPolicy, PivTouchPolicy.Never);
 
-                var sharedSecret = pivSession.KeyAgree(slotNumber: 0x85, eccPublicKey);
+                byte[] sharedSecret = pivSession.KeyAgree(0x85, eccPublicKey);
                 Assert.Equal(expectedSecretLength, sharedSecret.Length);
             }
         }
@@ -65,45 +64,43 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha256, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha384, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha512, StandardTestDevice.Fw5)]
-        public void KeyAgree_MatchesCSharp(
-            PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm, StandardTestDevice testDeviceType)
+        public void KeyAgree_MatchesCSharp(PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm, StandardTestDevice testDeviceType)
         {
             // Build the correspondent objects.
-            var isValid =
-                SampleKeyPairs.GetKeysAndCertPem(algorithm, validAttest: true, out _, out _, out var privateKeyPem);
+            bool isValid = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out _, out _, out string privateKeyPem);
             Assert.True(isValid);
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
 
-            var correspondentPub = privateKey.GetPivPublicKey();
+            PivPublicKey correspondentPub = privateKey.GetPivPublicKey();
             var correspondentEcc = (PivEccPublicKey)correspondentPub;
 
-            var ecDsaObject = privateKey.GetEccObject();
-            var ecParams = ecDsaObject.ExportParameters(includePrivateParameters: true);
+            ECDsa ecDsaObject = privateKey.GetEccObject();
+            ECParameters ecParams = ecDsaObject.ExportParameters(true);
             var correspondentObject = ECDiffieHellman.Create(ecParams);
             privateKey.Clear();
 
             // Build the YubiKey objects.
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, validAttest: false, out _, out _, out privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out _, out privateKeyPem);
             privateKey = new KeyConverter(privateKeyPem.ToCharArray());
-            var pivPrivateKey = privateKey.GetPivPrivateKey();
+            PivPrivateKey pivPrivateKey = privateKey.GetPivPrivateKey();
 
             ecDsaObject = privateKey.GetEccObject();
-            ecParams = ecDsaObject.ExportParameters(includePrivateParameters: false);
+            ecParams = ecDsaObject.ExportParameters(false);
             var eccObject = ECDiffieHellman.Create(ecParams);
             privateKey.Clear();
 
-            var hashAlgorithm = digestAlgorithm switch
+            HashAlgorithmName hashAlgorithm = digestAlgorithm switch
             {
                 RsaFormat.Sha256 => HashAlgorithmName.SHA256,
                 RsaFormat.Sha384 => HashAlgorithmName.SHA384,
                 RsaFormat.Sha512 => HashAlgorithmName.SHA512,
-                _ => HashAlgorithmName.SHA1
+                _ => HashAlgorithmName.SHA1,
             };
 
             // The correspondent computes the digest of the shared secret.
-            var correspondentSecret = correspondentObject.DeriveKeyFromHash(eccObject.PublicKey, hashAlgorithm);
+            byte[] correspondentSecret = correspondentObject.DeriveKeyFromHash(eccObject.PublicKey, hashAlgorithm);
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             // The YubiKey computes the shared secret.
             using (var pivSession = new PivSession(testDevice))
@@ -113,11 +110,11 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ImportPrivateKey(slotNumber, pivPrivateKey, PivPinPolicy.Always, PivTouchPolicy.Never);
 
-                var sharedSecret = pivSession.KeyAgree(slotNumber, correspondentEcc);
+                byte[] sharedSecret = pivSession.KeyAgree(slotNumber, correspondentEcc);
 
-                using var digester = GetHashAlgorithm(digestAlgorithm);
+                using HashAlgorithm digester = GetHashAlgorithm(digestAlgorithm);
                 digester.Initialize();
-                _ = digester.TransformFinalBlock(sharedSecret, inputOffset: 0, sharedSecret.Length);
+                _ = digester.TransformFinalBlock(sharedSecret, 0, sharedSecret.Length);
 
                 isValid = correspondentSecret.SequenceEqual(digester.Hash!);
                 Assert.True(isValid);
@@ -128,12 +125,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void NoKeyInSlot_KeyAgree_Exception(StandardTestDevice testDeviceType)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.EccP384, validAttest: false, out _, out var publicKeyPem,
-                out _);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.EccP384, false, out _, out string publicKeyPem, out _);
             var publicKey = new KeyConverter(publicKeyPem.ToCharArray());
-            var pivPublicKey = publicKey.GetPivPublicKey();
+            PivPublicKey pivPublicKey = publicKey.GetPivPublicKey();
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -142,19 +138,16 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ResetApplication();
 
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.KeyAgree(slotNumber: 0x9a, pivPublicKey));
+                _ = Assert.Throws<InvalidOperationException>(() => pivSession.KeyAgree(0x9a, pivPublicKey));
             }
         }
 
-        private static HashAlgorithm GetHashAlgorithm(int digestAlgorithm)
+        private static HashAlgorithm GetHashAlgorithm(int digestAlgorithm) => digestAlgorithm switch
         {
-            return digestAlgorithm switch
-            {
-                RsaFormat.Sha256 => CryptographyProviders.Sha256Creator(),
-                RsaFormat.Sha384 => CryptographyProviders.Sha384Creator(),
-                RsaFormat.Sha512 => CryptographyProviders.Sha512Creator(),
-                _ => CryptographyProviders.Sha1Creator()
-            };
-        }
+            RsaFormat.Sha256 => CryptographyProviders.Sha256Creator(),
+            RsaFormat.Sha384 => CryptographyProviders.Sha384Creator(),
+            RsaFormat.Sha512 => CryptographyProviders.Sha512Creator(),
+            _ => CryptographyProviders.Sha1Creator(),
+        };
     }
 }

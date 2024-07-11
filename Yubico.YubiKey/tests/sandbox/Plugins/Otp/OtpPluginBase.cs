@@ -29,9 +29,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         public OtpPluginBase(IOutput output) : base(output)
         {
             // First, add any converters that are not in the base class.
-            Converters[typeof(KeyboardLayout)] = s =>
-                StaticConverters.ParseEnum<KeyboardLayout>(s.Replace(oldChar: '-', newChar: '_'));
-            Converters[typeof(Slot)] = s => StaticConverters.ParseEnum<Slot>(s);
+            Converters[typeof(KeyboardLayout)] = (s) => StaticConverters.ParseEnum<KeyboardLayout>(s.Replace('-', '_'));
+            Converters[typeof(Slot)] = (s) => StaticConverters.ParseEnum<Slot>(s);
 
             // Next, we'll build the parameter collection by enumerating
             // the child class' ParametersUsed bitfield.
@@ -77,7 +76,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "Password",
                                 Shortcut = "p",
                                 Description = "The static password to set. " +
-                                              "Note: This option is mutually exclusive to 'generate'.",
+                                    "Note: This option is mutually exclusive to 'generate'.",
                                 Type = typeof(string)
                             }),
                         ParameterUse.Length => new KeyValuePair<string, Parameter>(
@@ -96,7 +95,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "Keyboard",
                                 Shortcut = "kb",
                                 Description = "Keyboard layout to use for the static password. " +
-                                              $@"Choices are {string.Join(separator: ',', Enum.GetNames(typeof(KeyboardLayout)))} [default: ModHex]",
+                                    $@"Choices are {string.Join(',', Enum.GetNames(typeof(KeyboardLayout)))} [default: ModHex]",
                                 Type = typeof(KeyboardLayout)
                             }),
                         ParameterUse.CurrentAccessCode => new KeyValuePair<string, Parameter>(
@@ -106,11 +105,11 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "Current-Access-Code",
                                 Shortcut = "ca",
                                 Description = "Current access code protecting this OTP slot. This is " +
-                                              "specified as a Base16 (hex) string. The access code is six bytes. " +
-                                              "If you specify less than six bytes, it will be padded with zeros. " +
-                                              "If you specify more than six bytes, an error will be shown. Note that " +
-                                              "if you specify a current access code, but not a new access code, the " +
-                                              "protection will be removed from the slot",
+                                    "specified as a Base16 (hex) string. The access code is six bytes. " +
+                                    "If you specify less than six bytes, it will be padded with zeros. " +
+                                    "If you specify more than six bytes, an error will be shown. Note that " +
+                                    "if you specify a current access code, but not a new access code, the " +
+                                    "protection will be removed from the slot",
                                 Type = typeof(Base16Bytes)
                             }),
                         ParameterUse.NewAccessCode => new KeyValuePair<string, Parameter>(
@@ -120,8 +119,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "New-Access-Code",
                                 Shortcut = "na",
                                 Description = "New access-code to protect this slot. If there is currently " +
-                                              "an access code, it must also be specified. Default is six zero bytes, " +
-                                              "which equates to no access-code.",
+                                    "an access code, it must also be specified. Default is six zero bytes, " +
+                                    "which equates to no access-code.",
                                 Type = typeof(Base16Bytes)
                             }),
                         ParameterUse.NoEnter => new KeyValuePair<string, Parameter>(
@@ -149,8 +148,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "PrivateId",
                                 Shortcut = "pri",
                                 Description = "Private identifier. This is specified as a Base16 (hex) " +
-                                              "string. If you specify less than six bytes, it will be padded at " +
-                                              "the end with zeros.",
+                                    "string. If you specify less than six bytes, it will be padded at " +
+                                    "the end with zeros.",
                                 Type = typeof(Base16Bytes)
                             }),
                         ParameterUse.Key => new KeyValuePair<string, Parameter>(
@@ -160,11 +159,11 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "Key",
                                 Shortcut = "k",
                                 Description = "Decryption key. This is specified as a Base16 (hex) " +
-                                              "string. The length depends on the algorithm type used. For HMAC, " +
-                                              "it's twenty bytes. For Yubico OTP, it's sixteen bytes. If you " +
-                                              "specify a key that is shorter than what is required, it will be " +
-                                              "padded at the end with zeros. If you specify too long of a key, " +
-                                              "an error will be shown.",
+                                    "string. The length depends on the algorithm type used. For HMAC, " +
+                                    "it's twenty bytes. For Yubico OTP, it's sixteen bytes. If you " +
+                                    "specify a key that is shorter than what is required, it will be " +
+                                    "padded at the end with zeros. If you specify too long of a key, " +
+                                    "an error will be shown.",
                                 Type = typeof(Base16Bytes)
                             }),
                         ParameterUse.TotpKey => new KeyValuePair<string, Parameter>(
@@ -174,11 +173,11 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "TOTP-Key",
                                 Shortcut = "tk",
                                 Description = "Key, encoded in Base32. The result of setting this " +
-                                              "parameter is the same as setting the non TOTP key parameter. " +
-                                              "The only difference is that this parameter accepts Base32 " +
-                                              "instead of Base16 (hex). If you specify both this parameter " +
-                                              "and \"key\", an error will occur. By itself, this does not put " +
-                                              "anything in TOTP mode. It simply specifies a Base32 key.",
+                                    "parameter is the same as setting the non TOTP key parameter. " +
+                                    "The only difference is that this parameter accepts Base32 " +
+                                    "instead of Base16 (hex). If you specify both this parameter " +
+                                    "and \"key\", an error will occur. By itself, this does not put " +
+                                    "anything in TOTP mode. It simply specifies a Base32 key.",
                                 Type = typeof(Base32Bytes)
                             }),
                         ParameterUse.SerialAsPublicId => new KeyValuePair<string, Parameter>(
@@ -206,7 +205,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "Upload",
                                 Shortcut = "u",
                                 Description = "Upload credential to YubiCloud (opens in browser). " +
-                                              "Conflicts with force.",
+                                    "Conflicts with force.",
                                 Type = typeof(bool)
                             }),
                         ParameterUse.Totp => new KeyValuePair<string, Parameter>(
@@ -216,7 +215,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "TOTP",
                                 Shortcut = "t",
                                 Description = "Generate a TOTP code, use the current time if " +
-                                              "challenge is omitted.",
+                                    "challenge is omitted.",
                                 Type = typeof(bool)
                             }),
                         ParameterUse.Digits => new KeyValuePair<string, Parameter>(
@@ -244,7 +243,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "Button",
                                 Shortcut = "b",
                                 Description = "Require the user to touch the YubiKey button to " +
-                                              "perform a challenge-response calculation.",
+                                    "perform a challenge-response calculation.",
                                 Type = typeof(bool)
                             }),
                         ParameterUse.IMF => new KeyValuePair<string, Parameter>(
@@ -254,8 +253,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "InitialMovingFactor",
                                 Shortcut = "imf",
                                 Description = "Initial moving factor. This is the initial counter " +
-                                              "value for the YubiKey. This should be a value between 0 and " +
-                                              "1048560, evenly dividable by 16.",
+                                    "value for the YubiKey. This should be a value between 0 and " +
+                                    "1048560, evenly dividable by 16.",
                                 Type = typeof(int)
                             }),
                         ParameterUse.Prefix => new KeyValuePair<string, Parameter>(
@@ -292,7 +291,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "Text",
                                 Shortcut = "txt",
                                 Description = "Text string to program the NDEF device to emit. This " +
-                                              "parameter is not compatible with NDEF-URI.",
+                                "parameter is not compatible with NDEF-URI.",
                                 Type = typeof(string)
                             }),
                         ParameterUse.Uri => new KeyValuePair<string, Parameter>(
@@ -301,7 +300,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                             {
                                 Name = "URI",
                                 Description = "URI to program the NDEF device to emit. This parameter" +
-                                              "is not compatible with NDEF-Text or NDEF-UTF16.",
+                                "is not compatible with NDEF-Text or NDEF-UTF16.",
                                 Type = typeof(Uri)
                             }),
                         ParameterUse.Utf16 => new KeyValuePair<string, Parameter>(
@@ -311,8 +310,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "UTF16",
                                 Shortcut = "u16",
                                 Description = "Program text for NDEF tag encoded as UTF-16. Note that " +
-                                              "this is not a common setting to use, and is only recommended if you're " +
-                                              "certain that your application calls for it.",
+                                "this is not a common setting to use, and is only recommended if you're " +
+                                "certain that your application calls for it.",
                                 Type = typeof(bool)
                             }),
                         ParameterUse.Read => new KeyValuePair<string, Parameter>(
@@ -322,10 +321,10 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "Read",
                                 Shortcut = "r",
                                 Description = "Read the data stored in the NDEF device. If this " +
-                                              "parameter is specified, no other NDEF-specific ones can be. You can " +
-                                              "either program an NDEF device or read from it, but not both. Also, " +
-                                              "you cannot specify a slot when you're reading. Slot is only used to " +
-                                              "program the NDEF configuration.",
+                                "parameter is specified, no other NDEF-specific ones can be. You can " +
+                                "either program an NDEF device or read from it, but not both. Also, " +
+                                "you cannot specify a slot when you're reading. Slot is only used to " +
+                                "program the NDEF configuration.",
                                 Type = typeof(bool)
                             }),
                         ParameterUse.LanguageId => new KeyValuePair<string, Parameter>(
@@ -335,8 +334,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "LanguageID",
                                 Shortcut = "lcid",
                                 Description = "Language Code Identifier (LCID) for the string to be " +
-                                              "used to program the NDEF device. This setting is not compatible with " +
-                                              "the URI parameter, since URIs are language neutral.",
+                                "used to program the NDEF device. This setting is not compatible with " +
+                                "the URI parameter, since URIs are language neutral.",
                                 Type = typeof(string)
                             }),
                         _ => throw new InvalidOperationException(
@@ -350,8 +349,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                             Name = "Serial-Number",
                             Shortcut = "sn",
                             Description = "Serial number of the YubiKey to program. You can omit this if " +
-                                          "there is only one plugged-in. However, if you have multiple, then you " +
-                                          "must either specify one or remove others.",
+                            "there is only one plugged-in. However, if you have multiple, then you " +
+                            "must either specify one or remove others.",
                             Type = typeof(int)
                         }))
                     .ToDictionary(p => p.Key, p => p.Value);
@@ -368,11 +367,11 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         public override Dictionary<string, Parameter> Parameters { get; }
 
         /// <summary>
-        ///     Specify this in your class to determine which parameters you need.
+        /// Specify this in your class to determine which parameters you need.
         /// </summary>
         /// <remarks>
-        ///     The constructor will enumerate all of the parameters you specified
-        ///     and populate the <see cref="Parameters" /> collection.
+        /// The constructor will enumerate all of the parameters you specified
+        /// and populate the <see cref="Parameters"/> collection.
         /// </remarks>
         protected abstract ParameterUse ParametersUsed { get; }
 
@@ -420,27 +419,26 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             object? GetParameter(string name)
             {
-                if (Parameters.TryGetValue(name, out var param))
+                if (Parameters.TryGetValue(name, out Parameter? param))
                 {
                     return param.Value;
                 }
-
                 return null;
             }
         }
 
         internal static byte[] SafeArrayResize(byte[] array)
         {
-            var replacement = new byte[array.Length];
-            array.CopyTo(replacement, index: 0);
+            byte[] replacement = new byte[array.Length];
+            array.CopyTo(replacement, 0);
             CryptographicOperations.ZeroMemory(array);
             return replacement;
         }
 
         internal static IYubiKeyDevice GetYubiKey(int? serialNumber, Transport transport = Transport.HidKeyboard)
         {
-            var keys = YubiKeyDevice.FindByTransport(transport);
-            var key = keys.FirstOrDefault() ?? throw new InvalidOperationException();
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(transport);
+            IYubiKeyDevice key = keys.FirstOrDefault() ?? throw new InvalidOperationException();
             if (serialNumber.HasValue)
             {
                 key = keys
@@ -448,13 +446,13 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                     .FirstOrDefault() ?? throw new InvalidOperationException();
                 if (key is null)
                 {
-                    var message = "YubiKey with serial number {0} was not found.{1}";
-                    var subMessage = string.Empty;
+                    string message = "YubiKey with serial number {0} was not found.{1}";
+                    string subMessage = string.Empty;
                     if (keys.Any())
                     {
-                        if (keys.Skip(count: 1).Any())
+                        if (keys.Skip(1).Any())
                         {
-                            var keystr = string.Join(", ", keys.Select(k => k.SerialNumber));
+                            string keystr = string.Join(", ", keys.Select(k => k.SerialNumber));
                             subMessage = $" Keys found: [{keystr}].";
                         }
                         else
@@ -462,12 +460,11 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                             subMessage = $" Key found: [{keys.First().SerialNumber}].";
                         }
                     }
-
-                    var exText = string.Format(message, serialNumber, subMessage);
+                    string exText = string.Format(message, serialNumber, subMessage);
                     throw new InvalidOperationException(exText);
                 }
             }
-            else if (keys.Skip(count: 1).Any())
+            else if (keys.Skip(1).Any())
             {
                 throw new InvalidOperationException(
                     "More than one YubiKey was found. You must remove extra keys " +
@@ -485,10 +482,10 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
         protected bool Verify(OtpSession otp, string? message = null)
         {
-            var verify =
+            bool verify =
                 _slot == Slot.ShortPress
-                    ? otp.IsShortPressConfigured
-                    : otp.IsLongPressConfigured;
+                ? otp.IsShortPressConfigured
+                : otp.IsLongPressConfigured;
             if (verify && !_force)
             {
                 // For now, we're going to assume that "quiet" means that the
@@ -496,7 +493,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 if (Output.OutputLevel >= OutputLevel.Normal)
                 {
                     message ??= $"Slot[{_slot}] is already programmed. {Eol}" +
-                                "Type \"Yes\" and press [Enter] to overwrite";
+                        "Type \"Yes\" and press [Enter] to overwrite";
                     // This is an exception to the "Always use Output" rule.
                     // Outputing a prompt to type "yes" to a file would be worse
                     // than useless.
@@ -518,6 +515,40 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             return true;
         }
+
+        #region Common Protected Fields
+        protected Slot _slot;
+        protected bool _generate;
+        protected int _passwordLength;
+        protected IYubiKeyDevice? _yubiKey;
+        protected int? _serialNumber;
+        protected bool _force;
+        protected byte[] _currentAccessCode = new byte[SlotConfigureBase.AccessCodeLength];
+        protected byte[] _newAccessCode = new byte[SlotConfigureBase.AccessCodeLength];
+        protected bool _noEnter;
+        protected KeyboardLayout _keyboard;
+        protected string _password = string.Empty;
+        protected byte[] _publicId = Array.Empty<byte>();
+        protected byte[] _privateId = Array.Empty<byte>();
+        protected byte[] _key = Array.Empty<byte>();
+        protected byte[] _totpkey = Array.Empty<byte>();
+        protected byte[] _challenge = Array.Empty<byte>();
+        protected bool _serialAsPublicId;
+        protected bool _generatePrivateId;
+        protected bool _generateTotp;
+        protected bool _upload;
+        protected bool _useShortChallenge;
+        protected int? _digits;
+        protected string _prefix = string.Empty;
+        protected bool _yubiOtp;
+        protected bool _button;
+        protected int _imf;
+        protected string _text = string.Empty;
+        protected Uri? _uri;
+        protected NdefTextEncoding _encoding;
+        protected bool _read;
+        protected string _lcid = string.Empty;
+        #endregion
 
         [Flags]
         protected enum ParameterUse
@@ -554,41 +585,5 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             Read = 0b1 << 28,
             LanguageId = 0b1 << 29
         }
-
-        #region Common Protected Fields
-
-        protected Slot _slot;
-        protected bool _generate;
-        protected int _passwordLength;
-        protected IYubiKeyDevice? _yubiKey;
-        protected int? _serialNumber;
-        protected bool _force;
-        protected byte[] _currentAccessCode = new byte[SlotConfigureBase.AccessCodeLength];
-        protected byte[] _newAccessCode = new byte[SlotConfigureBase.AccessCodeLength];
-        protected bool _noEnter;
-        protected KeyboardLayout _keyboard;
-        protected string _password = string.Empty;
-        protected byte[] _publicId = Array.Empty<byte>();
-        protected byte[] _privateId = Array.Empty<byte>();
-        protected byte[] _key = Array.Empty<byte>();
-        protected byte[] _totpkey = Array.Empty<byte>();
-        protected byte[] _challenge = Array.Empty<byte>();
-        protected bool _serialAsPublicId;
-        protected bool _generatePrivateId;
-        protected bool _generateTotp;
-        protected bool _upload;
-        protected bool _useShortChallenge;
-        protected int? _digits;
-        protected string _prefix = string.Empty;
-        protected bool _yubiOtp;
-        protected bool _button;
-        protected int _imf;
-        protected string _text = string.Empty;
-        protected Uri? _uri;
-        protected NdefTextEncoding _encoding;
-        protected bool _read;
-        protected string _lcid = string.Empty;
-
-        #endregion
     }
 }

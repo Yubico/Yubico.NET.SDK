@@ -86,8 +86,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // This changes the management key. It is possible to set the touch
         // policy for the management key as well, but this sample only leaves the
         // touch policy as the default (no touch needed).
-        public static bool RunChangePivManagementKey(
-            IYubiKeyDevice yubiKey, Func<KeyEntryData, bool> KeyCollectorDelegate)
+        public static bool RunChangePivManagementKey(IYubiKeyDevice yubiKey, Func<KeyEntryData, bool> KeyCollectorDelegate)
         {
             using (var pivSession = new PivSession(yubiKey))
             {
@@ -116,9 +115,11 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         private static void ReportChangeResult(bool changeResult, string valueToChange)
         {
-            string resultMessage = changeResult ? "Successfully changed " : "Was not able to change ";
+            string resultMessage = changeResult ?
+                "Successfully changed " :
+                "Was not able to change ";
 
-            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, resultMessage + valueToChange);
+            SampleMenu.WriteMessage(MessageType.Special, 0, resultMessage + valueToChange);
         }
     }
 }

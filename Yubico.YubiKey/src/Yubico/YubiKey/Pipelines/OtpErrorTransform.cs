@@ -46,10 +46,10 @@ namespace Yubico.YubiKey.Pipelines
             // In order to detect failures, we grab the status structure before applying said command so that we have a
             // sequence number to compare to.
             int beforeSequence = new ReadStatusResponse(
-                    _nextTransform.Invoke(
-                        new ReadStatusCommand().CreateCommandApdu(),
-                        typeof(ReadStatusCommand),
-                        typeof(ReadStatusResponse)))
+                _nextTransform.Invoke(
+                    new ReadStatusCommand().CreateCommandApdu(),
+                    typeof(ReadStatusCommand),
+                    typeof(ReadStatusResponse)))
                 .GetData()
                 .SequenceNumber;
 

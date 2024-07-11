@@ -21,15 +21,15 @@ namespace Yubico.PlatformInterop
     // This class represents the C libudev "struct udev_enumerate *" class.
     internal class LinuxUdevEnumerateSafeHandle : SafeHandle
     {
+        public override bool IsInvalid => handle == IntPtr.Zero;
+
         public LinuxUdevEnumerateSafeHandle()
-            : base(IntPtr.Zero, ownsHandle: true)
+            : base(IntPtr.Zero, true)
         {
         }
 
-        public override bool IsInvalid => handle == IntPtr.Zero;
-
         [ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
-        protected override bool ReleaseHandle()
+        override protected bool ReleaseHandle()
         {
             _ = NativeMethods.udev_enumerate_unref(handle);
             return true;

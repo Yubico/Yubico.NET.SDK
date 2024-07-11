@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
@@ -34,7 +35,7 @@ namespace Yubico.YubiKey.TestUtilities
             var yubiKeyList = YubiKeyDevice.FindByTransport(transport).ToList();
             if (yubiKeyList.Count != 0)
             {
-                return yubiKeyList[index: 0];
+                return yubiKeyList[0];
             }
 
             throw new InvalidOperationException(
@@ -52,7 +53,7 @@ namespace Yubico.YubiKey.TestUtilities
             var yubiKeyList = YubiKeyDevice.FindByTransport(Transport.UsbSmartCard).ToList();
             if (yubiKeyList.Count != 0)
             {
-                yubiKey = yubiKeyList[index: 0];
+                yubiKey = yubiKeyList[0];
                 return true;
             }
 

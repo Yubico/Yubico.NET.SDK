@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
@@ -52,10 +52,10 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
-            var data = calculateAllCredentialsResponse.GetData();
+            System.Collections.Generic.IDictionary<Credential, Code>? data = calculateAllCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, calculateAllCredentialsResponse.StatusWord);
             Assert.Empty(data);
@@ -67,8 +67,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new byte[]
-            {
+            var responseApdu = new ResponseApdu(new byte[] {
                 0x71, 0x1A, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F, 0x66, 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74,
                 0x40, 0x6F, 0x75, 0x74, 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D, 0x75, 0x15, 0x06, 0x8A,
                 0x9B, 0x0D, 0xF3, 0xD7, 0x18, 0x43, 0x96, 0x40, 0xA6, 0x58, 0x6F, 0x89, 0xD4, 0x03, 0x1D, 0xC4,
@@ -78,9 +77,8 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
-            var data = calculateAllCredentialsResponse.GetData();
-            var credentialHotp =
-                new Credential("Apple", "test@icloud.com", CredentialType.Hotp, CredentialPeriod.Undefined);
+            System.Collections.Generic.IDictionary<Credential, Code>? data = calculateAllCredentialsResponse.GetData();
+            var credentialHotp = new Credential("Apple", "test@icloud.com", CredentialType.Hotp, CredentialPeriod.Undefined);
             var credentialTotp = new Credential
             {
                 Issuer = "Microsoft",
@@ -91,7 +89,7 @@ namespace Yubico.YubiKey.Oath.Commands
             };
 
             Assert.Equal(SWConstants.Success, calculateAllCredentialsResponse.StatusWord);
-            Assert.Equal(expected: 2, data.Count);
+            Assert.Equal(2, data.Count);
             Assert.Contains(credentialTotp, data.Keys);
             Assert.Contains(credentialHotp, data.Keys);
         }
@@ -101,8 +99,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[]
-            {
+            var responseApdu = new ResponseApdu(new byte[] {
                 0x71, 0x15, 0x41, 0x70, 0x70, 0x6C, 0x65, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40,
                 0x69, 0x63, 0x6C, 0x6F, 0x75, 0x64, 0x2E, 0x63, 0x6F, 0x6D, 0x78, 0x01, 0x06, sw1, sw2
             });
@@ -117,8 +114,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[]
-            {
+            var responseApdu = new ResponseApdu(new byte[] {
                 0x1A, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F, sw1, sw2
             });
 

@@ -22,21 +22,25 @@ namespace Yubico.Core.Tlv
     {
         public TlvException()
         {
+
         }
 
         public TlvException(string message) :
             base(message)
         {
+
         }
 
         public TlvException(string message, Exception innerException) :
             base(message, innerException)
         {
+
         }
 
         protected TlvException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
             base(serializationInfo, streamingContext)
         {
+
         }
     }
 }

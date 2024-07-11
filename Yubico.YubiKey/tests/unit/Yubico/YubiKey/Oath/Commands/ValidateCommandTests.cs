@@ -13,22 +13,23 @@
 // limitations under the License.
 
 using System;
+using System.Security.Cryptography;
 using System.Text;
 using Xunit;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath.Commands
 {
     public class ValidateCommandTests
     {
-        private const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-        private const byte sw2 = unchecked((byte)SWConstants.Success);
-        private readonly byte[] _fixedBytes = new byte[8] { 0xF1, 0x03, 0xDA, 0x89, 0x01, 0x02, 0x03, 0x04 };
+        readonly byte[] _fixedBytes = new byte[8] { 0xF1, 0x03, 0xDA, 0x89, 0x01, 0x02, 0x03, 0x04 };
         private readonly byte[] _password = Encoding.UTF8.GetBytes("test");
+        const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte sw2 = unchecked((byte)SWConstants.Success);
 
-        private readonly ResponseApdu selectResponseApdu = new ResponseApdu(new byte[]
-        {
+        private readonly ResponseApdu selectResponseApdu = new ResponseApdu(new byte[] {
             0x79, 0x03, 0x05, 0x02, 0x04, 0x71, 0x08, 0xC0, 0xE3, 0xAF,
             0x27, 0xCC, 0x7A, 0x20, 0xEE, 0x74, 0x08, 0xF1, 0x03, 0xDA,
             0x89, 0x58, 0xE4, 0x40, 0x85, 0x7B, 0x01, 0x01, sw1, sw2
@@ -38,52 +39,52 @@ namespace Yubico.YubiKey.Oath.Commands
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
             var selectOathResponse = new SelectOathResponse(selectResponseApdu);
-            var oathData = selectOathResponse.GetData();
+            OathApplicationData oathData = selectOathResponse.GetData();
 
             var command = new ValidateCommand(_password, oathData);
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().Cla);
+            Assert.Equal(0, command.CreateCommandApdu().Cla);
         }
 
         [Fact]
         public void CreateCommandApdu_GetInsProperty_Returns0xA3()
         {
             var selectOathResponse = new SelectOathResponse(selectResponseApdu);
-            var oathData = selectOathResponse.GetData();
+            OathApplicationData oathData = selectOathResponse.GetData();
 
             var command = new ValidateCommand(_password, oathData);
 
-            Assert.Equal(expected: 0xA3, command.CreateCommandApdu().Ins);
+            Assert.Equal(0xA3, command.CreateCommandApdu().Ins);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP1Property_ReturnsZero()
         {
             var selectOathResponse = new SelectOathResponse(selectResponseApdu);
-            var oathData = selectOathResponse.GetData();
+            OathApplicationData oathData = selectOathResponse.GetData();
 
             var command = new ValidateCommand(_password, oathData);
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().P1);
+            Assert.Equal(0, command.CreateCommandApdu().P1);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP2Property_ReturnsZero()
         {
             var selectOathResponse = new SelectOathResponse(selectResponseApdu);
-            var oathData = selectOathResponse.GetData();
+            OathApplicationData oathData = selectOathResponse.GetData();
 
             var command = new ValidateCommand(_password, oathData);
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().P2);
+            Assert.Equal(0, command.CreateCommandApdu().P2);
         }
 
         [Fact]
         public void CreateCommandApdu_GetNcProperty_ReturnsCorrectLength()
         {
             var selectOathResponse = new SelectOathResponse(selectResponseApdu);
-            var oathData = selectOathResponse.GetData();
-            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+            OathApplicationData oathData = selectOathResponse.GetData();
+            RandomObjectUtility utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
 
             try
             {
@@ -109,8 +110,8 @@ namespace Yubico.YubiKey.Oath.Commands
         public void CreateCommandApdu_GetDataProperty_ReturnsCorrectData()
         {
             var selectOathResponse = new SelectOathResponse(selectResponseApdu);
-            var oathData = selectOathResponse.GetData();
-            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+            OathApplicationData oathData = selectOathResponse.GetData();
+            RandomObjectUtility utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
 
             try
             {
@@ -124,7 +125,7 @@ namespace Yubico.YubiKey.Oath.Commands
                     0x03, 0x04
                 };
 
-                var data = command.CreateCommandApdu().Data;
+                ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
                 Assert.True(data.Span.SequenceEqual(dataList));
             }
@@ -139,10 +140,10 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var selectOathResponse = new SelectOathResponse(selectResponseApdu);
-            var oathData = selectOathResponse.GetData();
+            OathApplicationData oathData = selectOathResponse.GetData();
 
             var command = new ValidateCommand(_password, oathData);
-            var response = command.CreateResponseForApdu(responseApdu);
+            ValidateResponse response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is ValidateResponse);
         }

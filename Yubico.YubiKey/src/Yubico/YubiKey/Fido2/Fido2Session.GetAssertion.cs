@@ -25,70 +25,70 @@ namespace Yubico.YubiKey.Fido2
     public sealed partial class Fido2Session
     {
         /// <summary>
-        ///     Gets one or more assertions for a particular relying party.
-        ///     &gt; [!NOTE]
-        ///     &gt; You must supply a <see cref="GetAssertionParameters" /> object to
-        ///     &gt; this method, however, you do not need to set the
-        ///     &gt; <see cref="GetAssertionParameters.PinUvAuthParam" /> property,
-        ///     &gt; the SDK will do so.
+        /// Gets one or more assertions for a particular relying party.
+        /// &gt; [!NOTE]
+        /// &gt; You must supply a <see cref="GetAssertionParameters"/> object to
+        /// &gt; this method, however, you do not need to set the
+        /// &gt; <see cref="GetAssertionParameters.PinUvAuthParam"/> property,
+        /// &gt; the SDK will do so.
         /// </summary>
         /// <remarks>
-        ///     <para>
-        ///         Detailed information about the parameters structure and its expected values can be found on the
-        ///         <see cref="GetAssertionParameters" /> page.
-        ///     </para>
-        ///     <para>
-        ///         To get an assertion requires "user presence", which for a YubiKey is
-        ///         touch. This method will call the KeyCollector when touch is required
-        ///         (<c>KeyEntryRequest.TouchRequest</c>).
-        ///     </para>
-        ///     <para>
-        ///         The SDK will automatically perform PIN or user verification using the
-        ///         KeyCollector if needed. That is, if this method determines that
-        ///         authentication has been successfully completed, it will not need the
-        ///         PIN or fingerprint, so will not call the KeyCollector. However, if it
-        ///         needs to perform authentication, it will request user verification
-        ///         and/or a PIN using the KeyCollector.
-        ///     </para>
-        ///     <para>
-        ///         Note that because the SDK will make the appropriate authentication
-        ///         calls, it will build the <c>PinUvAuthParam</c> in the
-        ///         <c>GetAssertionParameters</c> input arg, so you do not need to do so.
-        ///     </para>
-        ///     <para>
-        ///         It is still possible to call this method with a KeyCollector that
-        ///         does not collect a PIN (you will need to have one that supports at
-        ///         least <c>KeyEntryRequest.TouchRequest</c>). You must simply make sure
-        ///         the appropriate Verify method has been called. See the User's Manual
-        ///         entries on <xref href="Fido2AuthTokens">AuthTokens</xref> and
-        ///         <xref href="SdkAuthTokenLogic">the SDK AuthToken logic</xref> for
-        ///         more information on when to verify. If you do not provide a
-        ///         KeyCollector that can collect the PIN, and the method is not able to
-        ///         perform because of an authentication failure, it will throw an
-        ///         exception.
-        ///     </para>
-        ///     <para>
-        ///         If there are no credentials associated with the relying party, this
-        ///         method will return a List with no entries (Count = 0).
-        ///     </para>
+        /// <para>
+        /// Detailed information about the parameters structure and its expected values can be found on the
+        /// <see cref="GetAssertionParameters"/> page.
+        /// </para>
+        /// <para>
+        /// To get an assertion requires "user presence", which for a YubiKey is
+        /// touch. This method will call the KeyCollector when touch is required
+        /// (<c>KeyEntryRequest.TouchRequest</c>).
+        /// </para>
+        /// <para>
+        /// The SDK will automatically perform PIN or user verification using the
+        /// KeyCollector if needed. That is, if this method determines that
+        /// authentication has been successfully completed, it will not need the
+        /// PIN or fingerprint, so will not call the KeyCollector. However, if it
+        /// needs to perform authentication, it will request user verification
+        /// and/or a PIN using the KeyCollector.
+        /// </para>
+        /// <para>
+        /// Note that because the SDK will make the appropriate authentication
+        /// calls, it will build the <c>PinUvAuthParam</c> in the
+        /// <c>GetAssertionParameters</c> input arg, so you do not need to do so.
+        /// </para>
+        /// <para>
+        /// It is still possible to call this method with a KeyCollector that
+        /// does not collect a PIN (you will need to have one that supports at
+        /// least <c>KeyEntryRequest.TouchRequest</c>). You must simply make sure
+        /// the appropriate Verify method has been called. See the User's Manual
+        /// entries on <xref href="Fido2AuthTokens">AuthTokens</xref> and
+        /// <xref href="SdkAuthTokenLogic">the SDK AuthToken logic</xref> for
+        /// more information on when to verify. If you do not provide a
+        /// KeyCollector that can collect the PIN, and the method is not able to
+        /// perform because of an authentication failure, it will throw an
+        /// exception.
+        /// </para>
+        /// <para>
+        /// If there are no credentials associated with the relying party, this
+        /// method will return a List with no entries (Count = 0).
+        /// </para>
         /// </remarks>
         /// <param name="parameters">
-        ///     An appropriately populated <see cref="GetAssertionParameters" /> structure that
-        ///     follows all of the rules set forth by that object.
+        /// An appropriately populated <see cref="GetAssertionParameters"/> structure that
+        /// follows all of the rules set forth by that object.
         /// </param>
         /// <returns>
-        ///     A collection of objects that contain the credential assertion and supporting data.
+        /// A collection of objects that contain the credential assertion and supporting data.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     The <paramref name="parameters" /> argument was null.
+        /// The <paramref name="parameters"/> argument was null.
         /// </exception>
         /// <exception cref="Fido2Exception">
-        ///     The YubiKey could not complete the operation, likely because of a
-        ///     wrong PIN or fingerprint.
+        /// The YubiKey could not complete the operation, likely because of a
+        /// wrong PIN or fingerprint.
         /// </exception>
         /// <exception cref="TimeoutException">
-        ///     The YubiKey either required touch for a user presence check or a biometric touch for user authentication.
-        ///     The YubiKey timed out waiting for this action to be performed.
+        /// The YubiKey either required touch for a user presence check or a biometric touch for user authentication.
+        /// The YubiKey timed out waiting for this action to be performed.
         /// </exception>
         public IReadOnlyList<GetAssertionData> GetAssertions(GetAssertionParameters parameters)
         {
@@ -98,7 +98,6 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
-
             Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
 
             byte[] token = new byte[MaximumAuthTokenLength];
@@ -118,7 +117,7 @@ namespace Yubico.YubiKey.Fido2
                     currentToken.CopyTo(token.AsMemory());
                     parameters.Protocol = AuthProtocol.Protocol;
                     parameters.PinUvAuthParam = AuthProtocol.AuthenticateUsingPinToken(
-                        token, offset: 0, currentToken.Length, clientDataHash);
+                        token, 0, currentToken.Length, clientDataHash);
                 }
                 finally
                 {
@@ -165,8 +164,7 @@ namespace Yubico.YubiKey.Fido2
                 }
 
                 message = rsp.StatusMessage;
-            }
-            while (forceToken);
+            } while (forceToken);
 
             throw new Fido2Exception(message);
         }
@@ -176,11 +174,10 @@ namespace Yubico.YubiKey.Fido2
             Func<KeyEntryData, bool> keyCollector,
             out CtapStatus ctapStatus)
         {
-            var keyEntryData = new KeyEntryData
+            var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.TouchRequest
+                Request = KeyEntryRequest.TouchRequest,
             };
-
             using var touchTask = new TouchFingerprintTask(
                 keyCollector,
                 keyEntryData,
@@ -190,10 +187,7 @@ namespace Yubico.YubiKey.Fido2
             try
             {
                 GetAssertionResponse rsp = Connection.SendCommand(new GetAssertionCommand(parameters));
-                ctapStatus = touchTask.IsUserCanceled
-                    ? CtapStatus.KeepAliveCancel
-                    : rsp.CtapStatus;
-
+                ctapStatus = touchTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : rsp.CtapStatus;
                 return rsp;
             }
             finally

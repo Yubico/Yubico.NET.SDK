@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Yubico.YubiKey.Sample.PivSampleCode
 {
     public enum PivMainMenuItem
@@ -46,6 +48,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         GetAttestationCertificate = 22,
 
         ResetPiv = 23,
-        Exit = 24
+        Exit = 24,
     }
 }

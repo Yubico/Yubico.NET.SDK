@@ -19,56 +19,56 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    ///     Reset the PIN, using the PUK (PIN Unblocking Key).
+    /// Reset the PIN, using the PUK (PIN Unblocking Key).
     /// </summary>
     /// <remarks>
-    ///     The partner Response class is <see cref="ResetRetryResponse" />.
-    ///     <para>
-    ///         This command is what the PUK is for. You can change the PUK, or reset the
-    ///         retry count on a PUK, but the only really useful operation you can do
-    ///         with the PUK is to reset a PIN.
-    ///     </para>
-    ///     <para>
-    ///         The PIN starts out as a default value: "123456", which in ASCII is the
-    ///         6-byte sequence <c>0x31 32 33 34 35 36</c>. The PUK (PIN Unblocking Key)
-    ///         starts out as a default value as well: "12345678", which in ASCII is the
-    ///         8-byte sequence <c>0x31 32 33 34 35 36 37 38</c>. Generally, the first
-    ///         thing done when a YubiKey is initialized for PIV is to change the PIN and
-    ///         PUK (along with the management key). The PIN and PUK must each be 6 to 8
-    ///         bytes. Ultimately the bytes that make up the PIN or PUK can be any binary
-    ///         value, but are generally input from a keyboard, so are usually made up of
-    ///         ASCII characters.
-    ///     </para>
-    ///     <para>
-    ///         If the user forgets the PIN, or if an incorrect PIN value has been
-    ///         entered too many times in a row (exhausted the retry count), it is
-    ///         possible to reset the PIN if the PUK is known.
-    ///     </para>
-    ///     <para>
-    ///         When you pass the PIN and PUK to this class, it will copy a reference to
-    ///         the object passed in, it will not copy the value. Because of this, you
-    ///         cannot overwrite the PIN and PUK until this object is done with it. It
-    ///         will be safe to overwrite the PIN and PUK after calling
-    ///         <c>connection.SendCommand</c>. See the User's Manual
-    ///         <xref href="UsersManualSensitive"> entry on sensitive data</xref> for
-    ///         more information on this topic.
-    ///     </para>
-    ///     <para>
-    ///         Example:
-    ///     </para>
-    ///     <code language="csharp">
-    ///   using System.Security.Cryptography;<br />
+    /// The partner Response class is <see cref="ResetRetryResponse"/>.
+    /// <para>
+    /// This command is what the PUK is for. You can change the PUK, or reset the
+    /// retry count on a PUK, but the only really useful operation you can do
+    /// with the PUK is to reset a PIN.
+    /// </para>
+    /// <para>
+    /// The PIN starts out as a default value: "123456", which in ASCII is the
+    /// 6-byte sequence <c>0x31 32 33 34 35 36</c>. The PUK (PIN Unblocking Key)
+    /// starts out as a default value as well: "12345678", which in ASCII is the
+    /// 8-byte sequence <c>0x31 32 33 34 35 36 37 38</c>. Generally, the first
+    /// thing done when a YubiKey is initialized for PIV is to change the PIN and
+    /// PUK (along with the management key). The PIN and PUK must each be 6 to 8
+    /// bytes. Ultimately the bytes that make up the PIN or PUK can be any binary
+    /// value, but are generally input from a keyboard, so are usually made up of
+    /// ASCII characters.
+    /// </para>
+    /// <para>
+    /// If the user forgets the PIN, or if an incorrect PIN value has been
+    /// entered too many times in a row (exhausted the retry count), it is
+    /// possible to reset the PIN if the PUK is known.
+    /// </para>
+    /// <para>
+    /// When you pass the PIN and PUK to this class, it will copy a reference to
+    /// the object passed in, it will not copy the value. Because of this, you
+    /// cannot overwrite the PIN and PUK until this object is done with it. It
+    /// will be safe to overwrite the PIN and PUK after calling
+    /// <c>connection.SendCommand</c>. See the User's Manual
+    /// <xref href="UsersManualSensitive"> entry on sensitive data</xref> for
+    /// more information on this topic.
+    /// </para>
+    /// <para>
+    /// Example:
+    /// </para>
+    /// <code language="csharp">
+    ///   using System.Security.Cryptography;<br/>
     ///   /* This example assumes the application has a method to collect a
     ///    * PIN/PUK.
     ///    */
     ///   byte[] puk;
-    ///   byte[] newPin;<br />
-    /// 
-    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br />
+    ///   byte[] newPin;<br/>
+    ///
+    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   puk = CollectPuk();
     ///   newPin = CollectNewPin();
     ///   var resetRetryCommand = new ResetRetryCommand(puk, newPin);
-    ///   ResetRetryResponse resetRetryResponse = connection.SendCommand(resetRetryCommand);<br />
+    ///   ResetRetryResponse resetRetryResponse = connection.SendCommand(resetRetryCommand);<br/>
     ///   if (resetRetryResponse.Status != ResponseStatus.Success)
     ///   {
     ///     if (resetRetryResponse.Status == ResponseStatus.AuthenticationRequired)
@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Piv.Commands
     ///         // Handle error
     ///     }
     ///   }
-    /// 
+    ///
     ///   CryptographicOperations.ZeroMemory(puk);
     ///   CryptographicOperations.ZeroMemory(newPin);
     /// </code>
@@ -105,38 +105,38 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        ///     Build a new Command object to reset the PIN using the PUK (PIN
-        ///     Unblocking Key).
+        /// Build a new Command object to reset the PIN using the PUK (PIN
+        /// Unblocking Key).
         /// </summary>
         /// <remarks>
-        ///     To reset the PIN is to set the PIN to a new value, even if you don't
-        ///     know what the old value is. This is possible if you know what the PUK
-        ///     is. This command is similar to <see cref="ChangeReferenceDataCommand" />.
-        ///     That command changes the PIN if you know the current PIN.
-        ///     <para>
-        ///         In order to reset the PIN, the caller must supply the PUK and the new
-        ///         PIN. In this class, the PINs and PUKs are supplied as
-        ///         <c>ReadOnlyMemory&lt;byte&gt;</c>. It is possible to pass a
-        ///         <c>byte[]</c>, because it will be automatically cast.
-        ///     </para>
-        ///     <para>
-        ///         This class will copy references to the PIN and PUK (not the values).
-        ///         This means that you can overwrite the PIN and PUK in your
-        ///         byte arrays only after this class is done with it. It will no longer
-        ///         need the PIN or PUK after calling <c>connection.SendCommand</c>.
-        ///     </para>
-        ///     <para>
-        ///         Both the PIN and PUK are 6 to 8 bytes long.
-        ///     </para>
+        /// To reset the PIN is to set the PIN to a new value, even if you don't
+        /// know what the old value is. This is possible if you know what the PUK
+        /// is. This command is similar to <see cref="ChangeReferenceDataCommand"/>.
+        /// That command changes the PIN if you know the current PIN.
+        /// <para>
+        /// In order to reset the PIN, the caller must supply the PUK and the new
+        /// PIN. In this class, the PINs and PUKs are supplied as
+        /// <c>ReadOnlyMemory&lt;byte&gt;</c>. It is possible to pass a
+        /// <c>byte[]</c>, because it will be automatically cast.
+        /// </para>
+        /// <para>
+        /// This class will copy references to the PIN and PUK (not the values).
+        /// This means that you can overwrite the PIN and PUK in your
+        /// byte arrays only after this class is done with it. It will no longer
+        /// need the PIN or PUK after calling <c>connection.SendCommand</c>.
+        /// </para>
+        /// <para>
+        /// Both the PIN and PUK are 6 to 8 bytes long.
+        /// </para>
         /// </remarks>
         /// <param name="puk">
-        ///     The current PUK.
+        /// The current PUK.
         /// </param>
         /// <param name="newPin">
-        ///     The new PIN.
+        /// The new PIN.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     The PIN or PUK is an invalid length.
+        /// The PIN or PUK is an invalid length.
         /// </exception>
         public ResetRetryCommand(ReadOnlyMemory<byte> puk, ReadOnlyMemory<byte> newPin)
         {
@@ -154,11 +154,11 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        ///     Gets the YubiKeyApplication to which this command belongs. For this
-        ///     command it's PIV.
+        /// Gets the YubiKeyApplication to which this command belongs. For this
+        /// command it's PIV.
         /// </summary>
         /// <value>
-        ///     YubiKeyApplication.Piv
+        /// YubiKeyApplication.Piv
         /// </value>
         public YubiKeyApplication Application => YubiKeyApplication.Piv;
 
@@ -168,7 +168,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 Ins = PivResetRetryInstruction,
                 P2 = PivSlot.Pin,
-                Data = PivPinUtilities.CopyTwoPinsWithPadding(_puk, _newPin)
+                Data = PivPinUtilities.CopyTwoPinsWithPadding(_puk, _newPin),
             };
 
         /// <inheritdoc />

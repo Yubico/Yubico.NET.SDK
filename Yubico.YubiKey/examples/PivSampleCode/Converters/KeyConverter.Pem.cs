@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         //    -----END PRIVATE KEY-----
         public static PivPublicKey GetPivPublicKeyFromPem(char[] pemKeyString)
         {
-            using AsymmetricAlgorithm dotNetObject = GetDotNetFromPem(pemKeyString, isPrivate: false);
+            using AsymmetricAlgorithm dotNetObject = GetDotNetFromPem(pemKeyString, false);
             return GetPivPublicKeyFromDotNet(dotNetObject);
         }
 
@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         public static char[] GetPemFromPivPublicKey(PivPublicKey pivPublicKey)
         {
             using AsymmetricAlgorithm dotNetObject = GetDotNetFromPivPublicKey(pivPublicKey);
-            return GetPemFromDotNet(dotNetObject, isPrivate: false);
+            return GetPemFromDotNet(dotNetObject, false);
         }
 
         // Build a new PivPrivateKey object from a PEM key string.
@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         //    -----END PRIVATE KEY-----
         public static PivPrivateKey GetPivPrivateKeyFromPem(char[] pemKeyString)
         {
-            using AsymmetricAlgorithm dotNetObject = GetDotNetFromPem(pemKeyString, isPrivate: true);
+            using AsymmetricAlgorithm dotNetObject = GetDotNetFromPem(pemKeyString, true);
             return GetPivPrivateKeyFromDotNet(dotNetObject);
         }
 
@@ -108,16 +108,15 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                             rsaPrivateObject.ImportPkcs8PrivateKey(encodedKey, out _);
                             if (isPrivate)
                             {
-                                rsaParams = rsaPrivateObject.ExportParameters(includePrivateParameters: true);
+                                rsaParams = rsaPrivateObject.ExportParameters(true);
                             }
                             else
                             {
                                 // We have a private DotNet object, but the caller wanted
                                 // a public. Get the public params out and build a new
                                 // object.
-                                rsaParams = rsaPrivateObject.ExportParameters(includePrivateParameters: false);
+                                rsaParams = rsaPrivateObject.ExportParameters(false);
                             }
-
                             return RSA.Create(rsaParams);
                         }
 
@@ -132,16 +131,15 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                             eccPrivateObject.ImportPkcs8PrivateKey(encodedKey, out _);
                             if (isPrivate)
                             {
-                                eccParams = eccPrivateObject.ExportParameters(includePrivateParameters: true);
+                                eccParams = eccPrivateObject.ExportParameters(true);
                             }
                             else
                             {
                                 // We have a private DotNet object, but the caller wanted
                                 // a public. Get the public params out and build a new
                                 // object.
-                                eccParams = eccPrivateObject.ExportParameters(includePrivateParameters: false);
+                                eccParams = eccPrivateObject.ExportParameters(false);
                             }
-
                             return ECDsa.Create(eccParams);
                         }
                 }
@@ -327,7 +325,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 return -1;
             }
-
             if (length > 0x80)
             {
                 int count = length & 0xf;
@@ -335,13 +332,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 {
                     return -1;
                 }
-
                 increment += count;
                 length = 0;
                 while (count > 0)
                 {
                     length <<= 8;
-                    length += buffer[offset + increment - count] & 0xFF;
+                    length += (int)buffer[offset + increment - count] & 0xFF;
                     count--;
                 }
             }

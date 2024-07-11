@@ -34,19 +34,15 @@ namespace Yubico.PlatformInterop
         //   EVP_MAC_update(evpMacCtx, dataToMac, dataToMacLen);
         //   EVP_MAC_final(evpMacCtx, result, &outputLen, 16);
 
-        [DllImport(
-            Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_CTX_new", ExactSpelling = true,
-            CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_CTX_new", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern IntPtr CmacEvpMacCtxNewIntPtr();
 
         public static SafeEvpCmacCtx CmacEvpMacCtxNew() =>
-            new SafeEvpCmacCtx(CmacEvpMacCtxNewIntPtr(), ownsHandle: true);
+            new SafeEvpCmacCtx(CmacEvpMacCtxNewIntPtr(), true);
 
         // void EVP_MAC_CTX_free(EVP_MAC_CTX* c);
-        [DllImport(
-            Libraries.NativeShims, EntryPoint = "Native_EVP_MAC_CTX_free", ExactSpelling = true,
-            CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_EVP_MAC_CTX_free", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern void EvpMacCtxFree(IntPtr ctx);
 
@@ -57,9 +53,7 @@ namespace Yubico.PlatformInterop
         //   1 - AES-128-CBC
         //   2 - AES-192-CBC
         //   3 - AES-256-CBC
-        [DllImport(
-            Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_init", ExactSpelling = true,
-            CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_init", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern int CmacEvpMacInit(IntPtr ctx, int algorithm, byte[] key, int keyLength);
 
@@ -69,9 +63,7 @@ namespace Yubico.PlatformInterop
         // int EVP_MAC_update(
         //     EVP_MAC_CTX* c, const void *data, size_t dataLen);
         // This returns 1 for success, or 0 for an error.
-        [DllImport(
-            Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_update", ExactSpelling = true,
-            CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_update", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern int CmacEvpMacUpdate(IntPtr ctx, byte[] input, int inLen);
 
@@ -83,9 +75,7 @@ namespace Yubico.PlatformInterop
         // int EVP_MAC_final(
         //     EVP_MAC_CTX *c, unsigned char *out, size_t *outLen);
         // This returns 1 for success, or 0 for an error.
-        [DllImport(
-            Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_final", ExactSpelling = true,
-            CharSet = CharSet.Ansi)]
+        [DllImport(Libraries.NativeShims, EntryPoint = "Native_CMAC_EVP_MAC_final", ExactSpelling = true, CharSet = CharSet.Ansi)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern int CmacEvpMacFinal(IntPtr ctx, byte[] output, int outputSize, out int outLen);
 

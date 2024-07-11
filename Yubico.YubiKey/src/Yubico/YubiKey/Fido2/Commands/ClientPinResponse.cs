@@ -20,13 +20,13 @@ using Yubico.YubiKey.Fido2.Cose;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    ///     The response partner to <see cref="ClientPinCommand" />.
+    /// The response partner to <see cref="ClientPinCommand"/>.
     /// </summary>
     /// <remarks>
-    ///     Like <see cref="ClientPinCommand" />, this response represents all of the possible outputs of all subcommands
-    ///     supported by `authenticatorClientPin`. It is recommended that you use the command class that corresponds with
-    ///     the particular subcommand you care about. Doing so will return a more specific response partner class that will
-    ///     only contain the information relevant to that subcommand.
+    /// Like <see cref="ClientPinCommand"/>, this response represents all of the possible outputs of all subcommands
+    /// supported by `authenticatorClientPin`. It is recommended that you use the command class that corresponds with
+    /// the particular subcommand you care about. Doing so will return a more specific response partner class that will
+    /// only contain the information relevant to that subcommand.
     /// </remarks>
     public class ClientPinResponse : Fido2Response, IYubiKeyResponseWithData<ClientPinData>
     {
@@ -38,13 +38,14 @@ namespace Yubico.YubiKey.Fido2.Commands
         private const int TagUvRetries = 0x05;
 
         /// <summary>
-        ///     Constructs a new instance of <see cref="ClientPinResponse" /> based on a response APDU provided by the YubiKey.
+        /// Constructs a new instance of <see cref="ClientPinResponse"/> based on a response APDU provided by the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     A response APDU containing the CBOR response data for the `authenticatorClientPin` command.
+        /// A response APDU containing the CBOR response data for the `authenticatorClientPin` command.
         /// </param>
         public ClientPinResponse(ResponseApdu responseApdu) : base(responseApdu)
         {
+
         }
 
         /// <inheritdoc />

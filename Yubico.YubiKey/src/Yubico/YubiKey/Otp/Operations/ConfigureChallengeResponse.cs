@@ -22,23 +22,22 @@ using Yubico.YubiKey.Otp.Commands;
 namespace Yubico.YubiKey.Otp.Operations
 {
     /// <summary>
-    ///     Configures a YubiKey's OTP slot to perform challenge-response using either
-    ///     the Yubico OTP or the HMAC-SHA1 algorithm.
+    /// Configures a YubiKey's OTP slot to perform challenge-response using either
+    /// the Yubico OTP or the HMAC-SHA1 algorithm.
     /// </summary>
     /// <remarks>
-    ///     <para>
-    ///         This class is not to be instantiated by non-SDK code. Instead, you will get a reference to an
-    ///         instance of this class by calling <see cref="OtpSession.ConfigureChallengeResponse(Slot)" />.
-    ///     </para>
-    ///     <para>
-    ///         Once you have a reference to an instance, the member methods of this class can be used to chain
-    ///         together configurations using a builder pattern.
-    ///     </para>
-    ///     <para>
-    ///         Challenge-response mode needs to either have the
-    ///         <see cref="OtpSettings{T}.UseHmacSha1ChallengeResponseMode(bool)" />
-    ///         or the <see cref="OtpSettings{T}.UseYubicoOtpChallengeResponseMode(bool)" /> setting selected.
-    ///     </para>
+    /// <para>
+    /// This class is not to be instantiated by non-SDK code. Instead, you will get a reference to an
+    /// instance of this class by calling <see cref="OtpSession.ConfigureChallengeResponse(Slot)"/>.
+    /// </para>
+    /// <para>
+    /// Once you have a reference to an instance, the member methods of this class can be used to chain
+    /// together configurations using a builder pattern.
+    /// </para>
+    /// <para>
+    /// Challenge-response mode needs to either have the <see cref="OtpSettings{T}.UseHmacSha1ChallengeResponseMode(bool)"/>
+    /// or the <see cref="OtpSettings{T}.UseYubicoOtpChallengeResponseMode(bool)"/> setting selected.
+    /// </para>
     /// </remarks>
     public class ConfigureChallengeResponse : OperationBase<ConfigureChallengeResponse>
     {
@@ -47,11 +46,29 @@ namespace Yubico.YubiKey.Otp.Operations
         // plus any options the user selects. That means this operation has an empty
         // constructor.
         internal ConfigureChallengeResponse(IYubiKeyConnection connection, IOtpSession session, Slot slot)
-            : base(connection, session, slot)
-        {
-        }
+            : base(connection, session, slot) { }
 
-        /// <inheritdoc />
+        #region Private Fields
+        // Key. 20 bytes for HMAC-SHA1, 16 bytes for Yubico OTP.
+        private ReadOnlyMemory<byte> _key = Memory<byte>.Empty;
+        private Memory<byte> _randomKey = Memory<byte>.Empty;
+        private bool? _generateKey;
+        private bool _validated;
+        private bool? _useYubicoOtp;
+        #endregion
+
+        #region Size Constants
+        /// <summary>
+        /// The key for a Yubico OTP operation is 16 bytes.
+        /// </summary>
+        public const int YubiOtpKeySize = 16;
+        /// <summary>
+        /// The key for an HMAC-SHA1 operation is 20 bytes.
+        /// </summary>
+        public const int HmacSha1KeySize = 20;
+        #endregion
+
+        /// <inheritdoc/>
         protected override void ExecuteOperation()
         {
             YubiKeyFlags ykFlags = Settings.YubiKeyFlags;
@@ -71,9 +88,8 @@ namespace Yubico.YubiKey.Otp.Operations
             // algorithms so that code paths stay as converged as possible.
             int keyBufferSize =
                 _useYubicoOtp!.Value
-                    ? YubiOtpKeySize
-                    : HmacSha1KeySize + 2;
-
+                ? YubiOtpKeySize
+                : HmacSha1KeySize + 2;
             Span<byte> keyBuffer = stackalloc byte[keyBufferSize];
             try
             {
@@ -104,7 +120,7 @@ namespace Yubico.YubiKey.Otp.Operations
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override void PreLaunchOperation()
         {
             // It's better to go ahead and find all of the problems rather than
@@ -135,47 +151,20 @@ namespace Yubico.YubiKey.Otp.Operations
             }
         }
 
-        #region Private Fields
-
-        // Key. 20 bytes for HMAC-SHA1, 16 bytes for Yubico OTP.
-        private ReadOnlyMemory<byte> _key = Memory<byte>.Empty;
-        private Memory<byte> _randomKey = Memory<byte>.Empty;
-        private bool? _generateKey;
-        private bool _validated;
-        private bool? _useYubicoOtp;
-
-        #endregion
-
-        #region Size Constants
-
-        /// <summary>
-        ///     The key for a Yubico OTP operation is 16 bytes.
-        /// </summary>
-        public const int YubiOtpKeySize = 16;
-
-        /// <summary>
-        ///     The key for an HMAC-SHA1 operation is 20 bytes.
-        /// </summary>
-        public const int HmacSha1KeySize = 20;
-
-        #endregion
-
         #region Properties for Builder Pattern
-
         /// <summary>
-        ///     Configures the challenge-response to use the HMAC-SHA1 algorithm.
+        /// Configures the challenge-response to use the HMAC-SHA1 algorithm.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        ///     You must choose either Yubico OTP or HMAC-SHA1, but not both.
+        /// You must choose either Yubico OTP or HMAC-SHA1, but not both.
         /// </exception>
-        /// <returns>The current <see cref="ConfigureChallengeResponse" /> instance.</returns>
+        /// <returns>The current <see cref="ConfigureChallengeResponse"/> instance.</returns>
         public ConfigureChallengeResponse UseHmacSha1()
         {
             if (_useYubicoOtp ?? false)
             {
                 throw new InvalidOperationException(ExceptionMessages.OnlyOneAlgorithm);
             }
-
             _useYubicoOtp = false;
             ProcessKey();
 
@@ -183,19 +172,18 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         /// <summary>
-        ///     Configures the challenge-response to use the Yubico OTP algorithm.
+        /// Configures the challenge-response to use the Yubico OTP algorithm.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        ///     You must choose either Yubico OTP or HMAC-SHA1, but not both.
+        /// You must choose either Yubico OTP or HMAC-SHA1, but not both.
         /// </exception>
-        /// <returns>The current <see cref="ConfigureChallengeResponse" /> instance.</returns>
+        /// <returns>The current <see cref="ConfigureChallengeResponse"/> instance.</returns>
         public ConfigureChallengeResponse UseYubiOtp()
         {
             if (!(_useYubicoOtp ?? true))
             {
                 throw new InvalidOperationException(ExceptionMessages.OnlyOneAlgorithm);
             }
-
             _useYubicoOtp = true;
             ProcessKey();
 
@@ -203,24 +191,23 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         /// <summary>
-        ///     Explicitly sets the key of the credential.
+        /// Explicitly sets the key of the credential.
         /// </summary>
         /// <remarks>
-        ///     Setting an explicit key is not compatible with generating a key. Specifying both will
-        ///     result in an exception.
+        /// Setting an explicit key is not compatible with generating a key. Specifying both will
+        /// result in an exception.
         /// </remarks>
         /// <param name="bytes">A collection of bytes to use for the key.</param>
         /// <exception cref="InvalidOperationException">
-        ///     This is thrown when <see cref="GenerateKey" /> has been called before this.
+        /// This is thrown when <see cref="GenerateKey"/> has been called before this.
         /// </exception>
-        /// <returns>The current <see cref="ConfigureChallengeResponse" /> instance.</returns>
+        /// <returns>The current <see cref="ConfigureChallengeResponse"/> instance.</returns>
         public ConfigureChallengeResponse UseKey(ReadOnlyMemory<byte> bytes)
         {
             if (_generateKey ?? false)
             {
                 throw new InvalidOperationException(ExceptionMessages.CantSpecifyKeyAndGenerate);
             }
-
             _generateKey = false;
             _key = bytes;
             ProcessKey();
@@ -229,26 +216,25 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         /// <summary>
-        ///     Generates a cryptographically random series of bytes as the key for the credential.
+        /// Generates a cryptographically random series of bytes as the key for the credential.
         /// </summary>
         /// <remarks>
-        ///     <para>
-        ///         Generating a key is not compatible with setting an explicit byte collection as the key.
-        ///         Specifying both will result in an exception.
-        ///     </para>
+        /// <para>
+        /// Generating a key is not compatible with setting an explicit byte collection as the key.
+        /// Specifying both will result in an exception.
+        /// </para>
         /// </remarks>
         /// <exception cref="InvalidOperationException">
-        ///     This will be thrown if the caller called <see cref="UseKey(ReadOnlyMemory{byte})" />
-        ///     before calling this method.
+        /// This will be thrown if the caller called <see cref="UseKey(ReadOnlyMemory{byte})"/>
+        /// before calling this method.
         /// </exception>
-        /// <returns>The current <see cref="ConfigureChallengeResponse" /> instance.</returns>
+        /// <returns>The current <see cref="ConfigureChallengeResponse"/> instance.</returns>
         public ConfigureChallengeResponse GenerateKey(Memory<byte> key)
         {
             if (!(_generateKey ?? true))
             {
                 throw new InvalidOperationException(ExceptionMessages.CantSpecifyKeyAndGenerate);
             }
-
             _generateKey = true;
             _randomKey = key;
             ProcessKey();
@@ -269,20 +255,14 @@ namespace Yubico.YubiKey.Otp.Operations
                 && !_validated)
             {
                 // Validate key size.
-                int keySize = _generateKey.Value
-                    ? _randomKey.Length
-                    : _key.Length;
-
-                int expectedKeySize = _useYubicoOtp.Value
-                    ? YubiOtpKeySize
-                    : HmacSha1KeySize;
-
+                int keySize = _generateKey.Value ? _randomKey.Length : _key.Length;
+                int expectedKeySize = _useYubicoOtp.Value ? YubiOtpKeySize : HmacSha1KeySize;
                 if (keySize != expectedKeySize)
                 {
                     throw new InvalidOperationException(
                         _useYubicoOtp.Value
-                            ? ExceptionMessages.YubicoKeyWrongSize
-                            : ExceptionMessages.HmacKeyWrongSize);
+                        ? ExceptionMessages.YubicoKeyWrongSize
+                        : ExceptionMessages.HmacKeyWrongSize);
                 }
 
                 // Handle generating.
@@ -291,7 +271,6 @@ namespace Yubico.YubiKey.Otp.Operations
                     using RandomNumberGenerator rng = CryptographyProviders.RngCreator();
                     rng.Fill(_randomKey.Span);
                     _key = _randomKey;
-
                     // From here forward, we use _key, so we'll release this
                     // reference.
                     _randomKey = Memory<byte>.Empty;
@@ -302,40 +281,39 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         #region Flags to Relay
-
         /// <summary>
-        ///     Set when the HMAC challenge will be less than 64-bytes.
+        /// Set when the HMAC challenge will be less than 64-bytes.
         /// </summary>
         /// <remarks>
-        ///     <para>
-        ///         The traditional HMAC challenge is exactly 64-bytes. The YubiKey has a setting that
-        ///         indicates a key of less than 64 bytes.
-        ///     </para>
-        ///     <para>
-        ///         <b>Warning:</b> It's important to choose this setting correctly.
-        ///         If you set this setting and submit a full 64-byte challenge to the YubiKey, then the
-        ///         last byte will be truncated, resulting in a different response.
-        ///     </para>
-        ///     <para>
-        ///         This setting is only valid if configuring for an HMAC challenge. If you set this for
-        ///         a Yubico OTP challenge, an <see cref="InvalidOperationException" /> will be thrown when
-        ///         you call <see cref="OperationBase{T}.Execute" />.
-        ///     </para>
+        /// <para>
+        /// The traditional HMAC challenge is exactly 64-bytes. The YubiKey has a setting that
+        /// indicates a key of less than 64 bytes.
+        /// </para>
+        /// <para>
+        /// <b>Warning:</b> It's important to choose this setting correctly.
+        /// If you set this setting and submit a full 64-byte challenge to the YubiKey, then the
+        /// last byte will be truncated, resulting in a different response.
+        /// </para>
+        /// <para>
+        /// This setting is only valid if configuring for an HMAC challenge. If you set this for
+        /// a Yubico OTP challenge, an <see cref="InvalidOperationException"/> will be thrown when
+        /// you call <see cref="OperationBase{T}.Execute"/>.
+        /// </para>
         /// </remarks>
-        /// <returns>The current <see cref="ConfigureChallengeResponse" /> instance.</returns>
+        /// <returns>The current <see cref="ConfigureChallengeResponse"/> instance.</returns>
         public ConfigureChallengeResponse UseSmallChallenge(bool setConfig = true) =>
             Settings.HmacLessThan64Bytes(setConfig);
 
-        /// <inheritdoc cref="OtpSettings{T}.AllowUpdate(bool)" />
-        /// <returns>The current <see cref="ConfigureChallengeResponse" /> instance.</returns>
-        public ConfigureChallengeResponse SetAllowUpdate(bool setConfig = true) => Settings.AllowUpdate(setConfig);
+        /// <inheritdoc cref="OtpSettings{T}.AllowUpdate(bool)"/>
+        /// <returns>The current <see cref="ConfigureChallengeResponse"/> instance.</returns>
+        public ConfigureChallengeResponse SetAllowUpdate(bool setConfig = true) =>
+            Settings.AllowUpdate(setConfig);
 
-        /// <inheritdoc cref="OtpSettings{T}.UseButtonTrigger(bool)" />
-        /// <returns>The current <see cref="ConfigureChallengeResponse" /> instance.</returns>
-        public ConfigureChallengeResponse UseButton(bool setConfig = true) => Settings.UseButtonTrigger(setConfig);
-
+        /// <inheritdoc cref="OtpSettings{T}.UseButtonTrigger(bool)"/>
+        /// <returns>The current <see cref="ConfigureChallengeResponse"/> instance.</returns>
+        public ConfigureChallengeResponse UseButton(bool setConfig = true) =>
+            Settings.UseButtonTrigger(setConfig);
         #endregion
-
         #endregion
     }
 }

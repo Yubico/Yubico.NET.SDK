@@ -19,12 +19,6 @@ namespace Yubico.PlatformInterop
 {
     internal static partial class NativeMethods
     {
-        public const int kCFRunLoopRunFinished = 1;
-        public const int kCFRunLoopRunStopped = 2;
-        public const int kCFRunLoopRunTimedOut = 3;
-
-        public const int kCFRunLoopRunHandledSource = 4;
-
         // Note that the DefaultDllImportSearchPaths attribute is a security best
         // practice on the Windows platform (and required by our analyzer
         // settings). It does not currently have any effect on platforms other
@@ -79,6 +73,11 @@ namespace Yubico.PlatformInterop
         [DllImport(Libraries.CoreFoundation)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern IntPtr CFRunLoopGetCurrent();
+
+        public const int kCFRunLoopRunFinished = 1;
+        public const int kCFRunLoopRunStopped = 2;
+        public const int kCFRunLoopRunTimedOut = 3;
+        public const int kCFRunLoopRunHandledSource = 4;
 
         [DllImport(Libraries.CoreFoundation)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]

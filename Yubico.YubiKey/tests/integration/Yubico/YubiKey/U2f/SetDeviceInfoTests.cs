@@ -35,10 +35,10 @@ namespace Yubico.YubiKey.U2f
                 }
             }
 
-            var devices = HidDevice.GetHidDevices();
+            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
             Assert.NotNull(devices);
 
-            var deviceToUse = GetFidoHid(devices);
+            HidDevice? deviceToUse = GetFidoHid(devices);
             Assert.NotNull(deviceToUse);
 
             if (deviceToUse is null)
@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.U2f
 
         private static HidDevice? GetFidoHid(IEnumerable<HidDevice> devices)
         {
-            foreach (var currentDevice in devices)
+            foreach (HidDevice currentDevice in devices)
             {
                 if (currentDevice.VendorId == 0x1050 &&
                     currentDevice.UsagePage == HidUsagePage.Fido)
@@ -76,12 +76,12 @@ namespace Yubico.YubiKey.U2f
             {
                 ChallengeResponseTimeout = 0x20
             };
-            var rsp = _fidoConnection.SendCommand(cmd);
+            SetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
 
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
             var getCmd = new GetPagedDeviceInfoCommand();
-            var getRsp = _fidoConnection.SendCommand(getCmd);
+            GetPagedDeviceInfoResponse getRsp = _fidoConnection.SendCommand(getCmd);
             Assert.Equal(ResponseStatus.Success, getRsp.Status);
 
             var getData = YubiKeyDeviceInfo.CreateFromResponseData(getRsp.GetData());
@@ -91,18 +91,15 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void SetLockCode_Succeeds()
         {
-            byte[] newCode =
-            {
+            byte[] newCode = {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48
             };
-            byte[] wrongCode =
-            {
+            byte[] wrongCode = {
                 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
                 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
             };
-            byte[] clearCode =
-            {
+            byte[] clearCode = {
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
             };
@@ -111,7 +108,7 @@ namespace Yubico.YubiKey.U2f
             {
                 ChallengeResponseTimeout = 0x21
             };
-            var rsp = _fidoConnection.SendCommand(cmd);
+            SetDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
             cmd = new SetDeviceInfoCommand();
@@ -145,19 +142,18 @@ namespace Yubico.YubiKey.U2f
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
             var getCmd = new GetPagedDeviceInfoCommand();
-            var getRsp = _fidoConnection.SendCommand(getCmd);
+            GetPagedDeviceInfoResponse getRsp = _fidoConnection.SendCommand(getCmd);
             Assert.Equal(ResponseStatus.Success, getRsp.Status);
 
             var getData = YubiKeyDeviceInfo.CreateFromResponseData(getRsp.GetData());
-            Assert.Equal(expected: 0x24, getData.ChallengeResponseTimeout);
+            Assert.Equal(0x24, getData.ChallengeResponseTimeout);
         }
 
         [Fact]
         public void SetLegacyCRTimeout_Succeeds()
         {
             var cmd = new SetLegacyDeviceConfigCommand(
-                YubiKeyCapabilities.Ccid, challengeResponseTimeout: 0x21, touchEjectEnabled: true,
-                autoEjectTimeout: 255)
+                YubiKeyCapabilities.Ccid, 0x21, true, 255)
             {
                 YubiKeyInterfaces = YubiKeyCapabilities.All
             };
@@ -165,7 +161,7 @@ namespace Yubico.YubiKey.U2f
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
             var getCmd = new GetPagedDeviceInfoCommand();
-            var getRsp = _fidoConnection.SendCommand(getCmd);
+            GetPagedDeviceInfoResponse getRsp = _fidoConnection.SendCommand(getCmd);
             Assert.Equal(ResponseStatus.Success, getRsp.Status);
 
             var getData = YubiKeyDeviceInfo.CreateFromResponseData(getRsp.GetData());

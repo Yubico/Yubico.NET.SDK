@@ -43,8 +43,7 @@ namespace Yubico.YubiKey.Piv
 
             var generatedKeyPair = pivSession.GenerateKeyPair(sourceSlot, expectedAlgorithm, PivPinPolicy.None);
             var metadataForKeyPair = pivSession.GetMetadata(sourceSlot);
-            Assert.Equal(generatedKeyPair.YubiKeyEncodedPublicKey,
-                metadataForKeyPair.PublicKey.YubiKeyEncodedPublicKey);
+            Assert.Equal(generatedKeyPair.YubiKeyEncodedPublicKey, metadataForKeyPair.PublicKey.YubiKeyEncodedPublicKey);
 
             // Act
             pivSession.MoveKey(sourceSlot, destinationSlot);
@@ -122,7 +121,7 @@ namespace Yubico.YubiKey.Piv
 
         private static byte[] GetRandomDataBuffer(PivAlgorithm expectedAlgorithm)
         {
-            var dataToSign = expectedAlgorithm switch
+            byte[] dataToSign = expectedAlgorithm switch
             {
                 PivAlgorithm.Rsa1024 => new byte[128],
                 PivAlgorithm.Rsa2048 => new byte[256],

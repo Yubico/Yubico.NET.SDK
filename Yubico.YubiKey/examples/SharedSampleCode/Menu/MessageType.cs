@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Yubico.YubiKey.Sample.SharedCode
 {
     // When calling SampleMenu.WriteMessage, pass in one of these enum values as
@@ -30,6 +32,6 @@ namespace Yubico.YubiKey.Sample.SharedCode
 
         // Use this value to write out
         //   8 - Message here
-        MenuLine = 2
+        MenuLine = 2,
     }
 }

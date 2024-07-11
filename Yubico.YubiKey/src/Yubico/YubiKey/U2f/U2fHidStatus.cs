@@ -25,6 +25,6 @@ namespace Yubico.YubiKey.U2f
         Ctap1ErrChannelBusy = 0x06,
         Ctap1ErrLockRequired = 0x0a,
         Ctap1ErrInvalidChannel = 0x0b,
-        Ctap1ErrOther = 0x7f
+        Ctap1ErrOther = 0x7f,
     }
 }

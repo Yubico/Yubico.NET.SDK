@@ -15,50 +15,50 @@
 namespace Yubico.YubiKey
 {
     /// <summary>
-    ///     An application independent way of reporting the status in a command's response.
+    /// An application independent way of reporting the status in a command's response.
     /// </summary>
     public enum ResponseStatus
     {
         /// <summary>
-        ///     The command succeeded.
+        /// The command succeeded.
         /// </summary>
         Success = 0,
 
         /// <summary>
-        ///     The command failed to complete.
+        /// The command failed to complete.
         /// </summary>
         Failed = 1,
 
         /// <summary>
-        ///     The command needs to be retried after the user touches the YubiKey.
+        /// The command needs to be retried after the user touches the YubiKey.
         /// </summary>
         RetryWithTouch = 2,
 
         /// <summary>
-        ///     The command needed authentication, which had not been properly
-        ///     provided.
+        /// The command needed authentication, which had not been properly
+        /// provided.
         /// </summary>
         AuthenticationRequired = 3,
 
         /// <summary>
-        ///     The command could not complete because some conditions were not
-        ///     satisfied.
+        /// The command could not complete because some conditions were not
+        /// satisfied.
         /// </summary>
         ConditionsNotSatisfied = 4,
 
         /// <summary>
-        ///     The command requested information of a YubiKey, but the data did not
-        ///     exist.
+        /// The command requested information of a YubiKey, but the data did not
+        /// exist.
         /// </summary>
         /// <remarks>
-        ///     This response simply means that the requested data is not on the
-        ///     YubiKey. It does not even necessarily mean that the YubiKey will
-        ///     never have such data or does not support that data element.
-        ///     <p>
-        ///         For an example of how this value is used, see
-        ///         <see cref="Piv.Commands.GetDataResponse" />.
-        ///     </p>
+        /// This response simply means that the requested data is not on the
+        /// YubiKey. It does not even necessarily mean that the YubiKey will
+        /// never have such data or does not support that data element.
+        /// <p>
+        /// For an example of how this value is used, see
+        /// <see cref="Piv.Commands.GetDataResponse"/>.
+        /// </p>
         /// </remarks>
-        NoData = 5
+        NoData = 5,
     }
 }

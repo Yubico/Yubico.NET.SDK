@@ -17,22 +17,22 @@ using System;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    ///     This class contains properties that are specific to the event being raised.
+    /// This class contains properties that are specific to the event being raised.
     /// </summary>
     public class YubiKeyDeviceEventArgs : EventArgs
     {
         /// <summary>
-        ///     Constructs an event arguments.
+        /// A YubiKey arrived or removed.
+        /// </summary>
+        public IYubiKeyDevice Device { get; }
+
+        /// <summary>
+        /// Constructs an event arguments.
         /// </summary>
         /// <param name="device">A YubiKey device</param>
         public YubiKeyDeviceEventArgs(IYubiKeyDevice device)
         {
             Device = device;
         }
-
-        /// <summary>
-        ///     A YubiKey arrived or removed.
-        /// </summary>
-        public IYubiKeyDevice Device { get; }
     }
 }

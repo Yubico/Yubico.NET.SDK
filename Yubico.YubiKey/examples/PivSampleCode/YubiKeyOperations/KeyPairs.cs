@@ -38,13 +38,13 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 // At this point you will likely want to save the public key and
                 // other information. For this sample, we're simply going to
                 // build a SlotContents object.
-                slotContents = new SamplePivSlotContents
+                slotContents = new SamplePivSlotContents()
                 {
                     SlotNumber = slotNumber,
                     Algorithm = algorithm,
                     PinPolicy = pinPolicy,
                     TouchPolicy = touchPolicy,
-                    PublicKey = pivPublicKey
+                    PublicKey = pivPublicKey,
                 };
             }
 
@@ -65,7 +65,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 throw new ArgumentNullException(nameof(privateKey));
             }
-
             if (publicKey is null)
             {
                 throw new ArgumentNullException(nameof(publicKey));
@@ -83,13 +82,13 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 // The Import method does not need the public key, so we're
                 // building it with no public key. If you want, you can add the
                 // public key.
-                slotContents = new SamplePivSlotContents
+                slotContents = new SamplePivSlotContents()
                 {
                     SlotNumber = slotNumber,
                     Algorithm = privateKey.Algorithm,
                     PinPolicy = pinPolicy,
                     TouchPolicy = touchPolicy,
-                    PublicKey = PivPublicKey.Create(publicKey.YubiKeyEncodedPublicKey)
+                    PublicKey = PivPublicKey.Create(publicKey.YubiKeyEncodedPublicKey),
                 };
             }
 

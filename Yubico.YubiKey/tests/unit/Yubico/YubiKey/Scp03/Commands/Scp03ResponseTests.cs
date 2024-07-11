@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Scp03.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new Scp03Response(responseApdu: null));
+            _ = Assert.Throws<ArgumentNullException>(() => new Scp03Response(null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 

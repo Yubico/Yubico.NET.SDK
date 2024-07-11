@@ -16,32 +16,33 @@ using System;
 using System.Globalization;
 using System.Text;
 using Yubico.PlatformInterop;
+
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.Hid
 {
     /// <summary>
-    ///     Utility methods for interacting with macOS IOKit framework.
+    /// Utility methods for interacting with macOS IOKit framework.
     /// </summary>
     internal static class IOKitHelpers
     {
         /// <summary>
-        ///     Gets an integer-typed property value from a device.
+        /// Gets an integer-typed property value from a device.
         /// </summary>
         /// <param name="device">
-        ///     The previously opened device against which the property should be queried.
+        /// The previously opened device against which the property should be queried.
         /// </param>
         /// <param name="propertyName">
-        ///     The name of the property to query for.
+        /// The name of the property to query for.
         /// </param>
         /// <returns>
-        ///     The value of the property.
+        /// The value of the property.
         /// </returns>
         /// <exception cref="PlatformApiException">
-        ///     The type requested and the type returned by IOKit do not match.
+        /// The type requested and the type returned by IOKit do not match.
         /// </exception>
         /// <exception cref="NullReferenceException">
-        ///     An attempt was made to dereference the property, even though it was null.
+        /// An attempt was made to dereference the property, even though it was null.
         /// </exception>
         public static int GetIntPropertyValue(IntPtr device, string propertyName)
         {
@@ -50,25 +51,25 @@ namespace Yubico.Core.Devices.Hid
             // We want to rely on Nullable<T>'s null checking and subsequent exception.
             // Rather than duplicate the messaging and exception ourselves, let's just
             // use theirs.
-            #pragma warning disable CS8629
+#pragma warning disable CS8629
             return propertyValue.Value;
-            #pragma warning restore CS8629
+#pragma warning restore CS8629
         }
 
         /// <summary>
-        ///     Gets an nullable integer-typed property value from a device.
+        /// Gets an nullable integer-typed property value from a device.
         /// </summary>
         /// <param name="device">
-        ///     The previously opened device against which the property should be queried.
+        /// The previously opened device against which the property should be queried.
         /// </param>
         /// <param name="propertyName">
-        ///     The name of the property to query for.
+        /// The name of the property to query for.
         /// </param>
         /// <returns>
-        ///     The value of the property.
+        /// The value of the property.
         /// </returns>
         /// <exception cref="PlatformApiException">
-        ///     The type requested and the type returned by IOKit do not match.
+        /// The type requested and the type returned by IOKit do not match.
         /// </exception>
         public static int? GetNullableIntPropertyValue(IntPtr device, string propertyName)
         {
@@ -79,7 +80,7 @@ namespace Yubico.Core.Devices.Hid
             try
             {
                 byte[] cstr = Encoding.UTF8.GetBytes(propertyName);
-                stringRef = CFStringCreateWithCString(IntPtr.Zero, cstr, encoding: 0);
+                stringRef = CFStringCreateWithCString(IntPtr.Zero, cstr, 0);
 
                 IntPtr propertyRef = IOHIDDeviceGetProperty(device, stringRef);
 
@@ -106,7 +107,7 @@ namespace Yubico.Core.Devices.Hid
                     return 0;
                 }
 
-                return BitConverter.ToInt32(numberBytes, startIndex: 0);
+                return BitConverter.ToInt32(numberBytes, 0);
             }
             finally
             {

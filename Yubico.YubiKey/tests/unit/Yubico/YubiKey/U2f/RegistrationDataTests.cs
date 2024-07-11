@@ -13,10 +13,13 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using Xunit;
 using Yubico.Core.Buffers;
+using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -25,26 +28,24 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void Constructor_GivenIncorrectUserPublicKey_ThrowsArgumentException()
         {
-            _ = Assert.Throws<ArgumentException>(() =>
-                new RegistrationData(GetEncodedRegistration(validPubKey: false, validKeyHandle: true)));
+            _ = Assert.Throws<ArgumentException>(() => new RegistrationData(GetEncodedRegistration(false, true)));
         }
 
         [Fact]
         public void Constructor_IncorrectKeyHandle_ThrowsArgumentException()
         {
-            _ = Assert.Throws<ArgumentException>(() =>
-                new RegistrationData(GetEncodedRegistration(validPubKey: true, validKeyHandle: false)));
+            _ = Assert.Throws<ArgumentException>(() => new RegistrationData(GetEncodedRegistration(true, false)));
         }
 
         [Fact]
         public void Constructor_GivenGoodData_SetsUserPublicKeyCorrectly()
         {
-            var registrationData = GetGoodRegistrationData();
+            RegistrationData registrationData = GetGoodRegistrationData();
 
             var pubKeyPoint = new ECPoint
             {
-                X = registrationData.UserPublicKey.Slice(start: 1, length: 32).ToArray(),
-                Y = registrationData.UserPublicKey.Slice(start: 33, length: 32).ToArray()
+                X = registrationData.UserPublicKey.Slice(1, 32).ToArray(),
+                Y = registrationData.UserPublicKey.Slice(33, 32).ToArray(),
             };
             Assert.Equal(GetPubKeyX(), Hex.BytesToHex(pubKeyPoint.X));
             Assert.Equal(GetPubKeyY(), Hex.BytesToHex(pubKeyPoint.Y));
@@ -53,9 +54,9 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void Constructor_GivenGoodData_SetsKeyHandle()
         {
-            var registrationData = GetGoodRegistrationData();
+            RegistrationData registrationData = GetGoodRegistrationData();
 
-            var expected = GetKeyHandle(isValid: true, out var _);
+            string expected = GetKeyHandle(true, out string _);
 
             Assert.Equal(expected, Hex.BytesToHex(registrationData.KeyHandle.ToArray()));
         }
@@ -63,7 +64,7 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void Constructor_GivenGoodData_SetsCertificate()
         {
-            var registrationData = GetGoodRegistrationData();
+            RegistrationData registrationData = GetGoodRegistrationData();
 
             Assert.Equal(GetAttestationCert(), Hex.BytesToHex(registrationData.AttestationCert.RawData));
         }
@@ -71,7 +72,7 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void Constructor_GivenGoodData_SetsSignature()
         {
-            var registrationData = GetGoodRegistrationData();
+            RegistrationData registrationData = GetGoodRegistrationData();
 
             Assert.Equal(GetRegSignature(), Hex.BytesToHex(registrationData.Signature.ToArray()));
         }
@@ -79,7 +80,7 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void IsSignatureValid_GivenBadClientDataHash_ThrowsArgumentException()
         {
-            var registrationData = GetGoodRegistrationData();
+            RegistrationData registrationData = GetGoodRegistrationData();
 
             _ = Assert.Throws<ArgumentException>(() => registrationData.VerifySignature(new byte[10], new byte[32]));
         }
@@ -87,7 +88,7 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void IsSignatureValid_GivenBadAppId_ThrowsArgumentException()
         {
-            var registrationData = GetGoodRegistrationData();
+            RegistrationData registrationData = GetGoodRegistrationData();
 
             _ = Assert.Throws<ArgumentException>(() => registrationData.VerifySignature(new byte[32], new byte[10]));
         }
@@ -95,10 +96,10 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void VerifySignature_GivenCorrectData_ReturnsTrue()
         {
-            var appId = Hex.HexToBytes(GetAppId(isValid: true));
-            var clientDataHash = Hex.HexToBytes(GetClientDataHash(isValid: true));
+            byte[] appId = Hex.HexToBytes(GetAppId(true));
+            byte[] clientDataHash = Hex.HexToBytes(GetClientDataHash(true));
 
-            var registrationData = GetGoodRegistrationData();
+            RegistrationData registrationData = GetGoodRegistrationData();
 
             Assert.True(registrationData.VerifySignature(appId, clientDataHash));
         }
@@ -106,17 +107,17 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void IsSignatureValid_GivenIncorrectData_ReturnsFalse()
         {
-            var appId = Hex.HexToBytes(GetAppId(isValid: false));
-            var clientDataHash = Hex.HexToBytes(GetClientDataHash(isValid: true));
+            byte[] appId = Hex.HexToBytes(GetAppId(false));
+            byte[] clientDataHash = Hex.HexToBytes(GetClientDataHash(true));
 
-            var registrationData = GetGoodRegistrationData();
+            RegistrationData registrationData = GetGoodRegistrationData();
 
             Assert.False(registrationData.VerifySignature(appId, clientDataHash));
         }
 
         public static RegistrationData GetGoodRegistrationData()
         {
-            return new RegistrationData(GetEncodedRegistration(validPubKey: true, validKeyHandle: true));
+            return new RegistrationData(GetEncodedRegistration(true, true));
         }
 
         // Return a byte array containing an encoded RegistrationData.
@@ -125,9 +126,8 @@ namespace Yubico.YubiKey.U2f
         // Same for the other valids.
         public static byte[] GetEncodedRegistration(bool validPubKey, bool validKeyHandle)
         {
-            var keyHandle = GetKeyHandle(validKeyHandle, out var handleLength);
-            var regData = "05" + GetPubKey(validPubKey) + handleLength + keyHandle + GetAttestationCert() +
-                          GetRegSignature();
+            string keyHandle = GetKeyHandle(validKeyHandle, out string handleLength);
+            string regData = "05" + GetPubKey(validPubKey) + handleLength + keyHandle + GetAttestationCert() + GetRegSignature();
 
             return Hex.HexToBytes(regData);
         }
@@ -137,7 +137,7 @@ namespace Yubico.YubiKey.U2f
         // value with incorrect data
         public static string GetPubKey(bool isValid)
         {
-            var prefix = "03";
+            string prefix = "03";
             if (isValid)
             {
                 prefix = "04";
@@ -166,8 +166,7 @@ namespace Yubico.YubiKey.U2f
             controlByte = U2fAuthenticationType.DontEnforceUserPresence;
             counter = 17;
 
-            return
-                "304502206190bee2c2ed0dd524c88f0848ae0e779b1167f0524da2329d1e0c80117a608f022100a9e86d105f3d937469a0188be886aaad633e4c8a221ba01873d712cce97778bb";
+            return "304502206190bee2c2ed0dd524c88f0848ae0e779b1167f0524da2329d1e0c80117a608f022100a9e86d105f3d937469a0188be886aaad633e4c8a221ba01873d712cce97778bb";
         }
 
         public static byte[] GetAuthSignatureArray(out U2fAuthenticationType controlByte, out int counter)
@@ -177,18 +176,18 @@ namespace Yubico.YubiKey.U2f
 
         public static byte[] GetGoodAuthDataArray()
         {
-            var signature = GetAuthSignatureArray(
-                out var controlByte, out var counter);
+            byte[] signature = RegistrationDataTests.GetAuthSignatureArray(
+                out U2fAuthenticationType controlByte, out int counter);
 
-            var authData = new byte[signature.Length + 5];
-            var userPresence = controlByte == U2fAuthenticationType.EnforceUserPresence ? 1 : 0;
+            byte[] authData = new byte[signature.Length + 5];
+            int userPresence = controlByte == U2fAuthenticationType.EnforceUserPresence ? 1 : 0;
             authData[0] = (byte)userPresence;
             authData[1] = (byte)(counter >> 24);
             authData[2] = (byte)(counter >> 16);
             authData[3] = (byte)(counter >> 8);
             authData[4] = (byte)counter;
 
-            Array.Copy(signature, sourceIndex: 0, authData, destinationIndex: 5, signature.Length);
+            Array.Copy(signature, 0, authData, 5, signature.Length);
 
             return authData;
         }
@@ -199,9 +198,8 @@ namespace Yubico.YubiKey.U2f
             if (isValid)
             {
                 handleLength = "40";
-                return
-                    "6c61ddbf52b4d1597926c467bf279a96fc1bce0f6044c1482c88dea1097e06ef6bc491cfc82e74b33d2fbc115f5c60046d9dbc1935d78bce98d22af92465e443"
-                        .ToUpper();
+                return "6c61ddbf52b4d1597926c467bf279a96fc1bce0f6044c1482c88dea1097e06ef6bc491cfc82e74b33d2fbc115f5c60046d9dbc1935d78bce98d22af92465e443".ToUpper();
+
             }
 
             return "0102030405060708";
@@ -209,24 +207,20 @@ namespace Yubico.YubiKey.U2f
 
         public static byte[] GetKeyHandleArray(bool isValid, out byte handleLength)
         {
-            var returnValue = Hex.HexToBytes(GetKeyHandle(isValid, out var hLength));
-            var numValue = int.Parse(hLength, NumberStyles.HexNumber);
+            byte[] returnValue = Hex.HexToBytes(GetKeyHandle(isValid, out string hLength));
+            int numValue = int.Parse(hLength, System.Globalization.NumberStyles.HexNumber);
             handleLength = (byte)numValue;
             return returnValue;
         }
 
         public static string GetAttestationCert()
         {
-            return
-                "308202ac30820194a00302010202042403b72b300d06092a864886f70d01010b0500302e312c302a0603550403132359756269636f2055324620526f6f742043412053657269616c203435373230303633313020170d3134303830313030303030305a180f32303530303930343030303030305a306e310b300906035504061302534531123010060355040a0c0959756269636f20414231223020060355040b0c1941757468656e74696361746f72204174746573746174696f6e3127302506035504030c1e59756269636f205532462045452053657269616c203630343232333237353059301306072a8648ce3d020106082a8648ce3d030107034200043f3d6bb53f02d5ef9aa271549ee8e4a6662c86215f0c252779d35c83388c4740ba8f2d004e5d6f14902e5c0b69f346c54163782e12a0fc05f7999749f4bf2c1ca35b3059302206092b0601040182c40a020415312e332e362e312e342e312e34313438322e312e353013060b2b0601040182e51c020101040403020520301006092b0601040182c40a0c0403020103300c0603551d130101ff04023000300d06092a864886f70d01010b050003820101007dc61eae9e8299f09aaac4c090132e5688d1a0d1799581d940716ef9e14c093f31c2a21a557e4227e29e66aaa2a3253b5ac017f47b305079338bbb7060e3997fc9355444722e0ba0d9eb94e55605aa9f1c3003c96128f993ee3d1d5c8206e8ca722ee875220c71255617c34ece5ff00f9bbdb9090863c4850350701e816d3bf52f1b477e031974b080bbe37e05c6f2fcbfc1f8d9739726b41dac1c471854aab55fb840fb496ac3fef8920d97acc901179226be49a08164635ca22cd0cbcab019b64c316a49478c6f72a4da938d5f353b9b10c5bac90869bc5e17e021f60f84b498d0d6d5e850edec6f2316871716af190deff6340a89d07ab824925fc91a8831"
-                    .ToUpper();
+            return "308202ac30820194a00302010202042403b72b300d06092a864886f70d01010b0500302e312c302a0603550403132359756269636f2055324620526f6f742043412053657269616c203435373230303633313020170d3134303830313030303030305a180f32303530303930343030303030305a306e310b300906035504061302534531123010060355040a0c0959756269636f20414231223020060355040b0c1941757468656e74696361746f72204174746573746174696f6e3127302506035504030c1e59756269636f205532462045452053657269616c203630343232333237353059301306072a8648ce3d020106082a8648ce3d030107034200043f3d6bb53f02d5ef9aa271549ee8e4a6662c86215f0c252779d35c83388c4740ba8f2d004e5d6f14902e5c0b69f346c54163782e12a0fc05f7999749f4bf2c1ca35b3059302206092b0601040182c40a020415312e332e362e312e342e312e34313438322e312e353013060b2b0601040182e51c020101040403020520301006092b0601040182c40a0c0403020103300c0603551d130101ff04023000300d06092a864886f70d01010b050003820101007dc61eae9e8299f09aaac4c090132e5688d1a0d1799581d940716ef9e14c093f31c2a21a557e4227e29e66aaa2a3253b5ac017f47b305079338bbb7060e3997fc9355444722e0ba0d9eb94e55605aa9f1c3003c96128f993ee3d1d5c8206e8ca722ee875220c71255617c34ece5ff00f9bbdb9090863c4850350701e816d3bf52f1b477e031974b080bbe37e05c6f2fcbfc1f8d9739726b41dac1c471854aab55fb840fb496ac3fef8920d97acc901179226be49a08164635ca22cd0cbcab019b64c316a49478c6f72a4da938d5f353b9b10c5bac90869bc5e17e021f60f84b498d0d6d5e850edec6f2316871716af190deff6340a89d07ab824925fc91a8831".ToUpper();
         }
 
         public static string GetRegSignature()
         {
-            return
-                "3046022100d778d422916e47baf8935d8a4ac9e5a48cfc45a125ee12538d226be7e5ba73c4022100efd29f8b3b81d5f56d9f8f54586197f300b6211668ea4e53a36120e8cc0c2d11"
-                    .ToUpper();
+            return "3046022100d778d422916e47baf8935d8a4ac9e5a48cfc45a125ee12538d226be7e5ba73c4022100efd29f8b3b81d5f56d9f8f54586197f300b6211668ea4e53a36120e8cc0c2d11".ToUpper();
         }
 
         public static string GetClientDataHash(bool isValid)

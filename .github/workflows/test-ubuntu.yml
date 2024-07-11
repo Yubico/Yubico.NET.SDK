@@ -25,7 +25,7 @@ jobs:
     permissions:
       contents: read
       packages: read
-    
+      
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -34,17 +34,17 @@ jobs:
 
       - name: Add local NuGet repository
         run: dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Yubico/index.json"
-
+    
       - name: Install PCSC and link libUdev
         run: |
           sudo apt-get update && sudo apt-get install pcscd -yq
           sudo ln -s /usr/lib/x86_64-linux-gnu/libudev.so.1 /usr/lib/libudev.so
 
       - name: Test Yubico.YubiKey
-        run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
-
+        run: dotnet test Yubico.YubiKey/tests/unit/Yubico.YubiKey.UnitTests.csproj --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
+  
       - name: Test Yubico.Core
-        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj            --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage"
+        run: dotnet test Yubico.Core/tests/Yubico.Core.UnitTests.csproj            --logger trx --settings coverlet.runsettings.xml --collect:"XPlat Code Coverage" 
 
       - name: Upload Test Result Files
         uses: actions/upload-artifact@v4

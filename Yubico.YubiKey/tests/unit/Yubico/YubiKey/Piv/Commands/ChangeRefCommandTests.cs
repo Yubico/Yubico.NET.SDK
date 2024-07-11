@@ -23,8 +23,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void ClassType_DerivedFromPivCommand_IsTrue()
         {
-            var currentPin = GetPinArray(pinLength: 6, startingPoint: 0);
-            var newPin = GetPinArray(pinLength: 7, startingPoint: 1);
+            byte[] currentPin = GetPinArray(6, 0);
+            byte[] newPin = GetPinArray(7, 1);
             var changeRefDataCommand = new ChangeReferenceDataCommand(PivSlot.Pin, currentPin, newPin);
 
             Assert.True(changeRefDataCommand is IYubiKeyCommand<ChangeReferenceDataResponse>);
@@ -33,11 +33,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Application_Piv()
         {
-            var currentPin = GetPinArray(pinLength: 6, startingPoint: 0);
-            var newPin = GetPinArray(pinLength: 7, startingPoint: 1);
+            byte[] currentPin = GetPinArray(6, 0);
+            byte[] newPin = GetPinArray(7, 1);
             var command = new ChangeReferenceDataCommand(PivSlot.Pin, currentPin, newPin);
 
-            var application = command.Application;
+            YubiKeyApplication application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
@@ -47,11 +47,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivSlot.Puk)]
         public void Constructor_Property_SlotNum(byte slotNumber)
         {
-            var currentPin = GetPinArray(pinLength: 6, startingPoint: 0);
-            var newPin = GetPinArray(pinLength: 7, startingPoint: 1);
+            byte[] currentPin = GetPinArray(6, 0);
+            byte[] newPin = GetPinArray(7, 1);
             var command = new ChangeReferenceDataCommand(slotNumber, currentPin, newPin);
 
-            var getSlotNum = command.SlotNumber;
+            byte getSlotNum = command.SlotNumber;
 
             Assert.Equal(slotNumber, getSlotNum);
         }
@@ -61,11 +61,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivSlot.Puk)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(byte slotNum)
         {
-            var cmdApdu = GetChangeRefCommandApdu(slotNum);
+            CommandApdu cmdApdu = GetChangeRefCommandApdu(slotNum);
 
-            var Cla = cmdApdu.Cla;
+            byte Cla = cmdApdu.Cla;
 
-            Assert.Equal(expected: 0, Cla);
+            Assert.Equal(0, Cla);
         }
 
         [Theory]
@@ -73,11 +73,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivSlot.Puk)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHex24(byte slotNum)
         {
-            var cmdApdu = GetChangeRefCommandApdu(slotNum);
+            CommandApdu cmdApdu = GetChangeRefCommandApdu(slotNum);
 
-            var Ins = cmdApdu.Ins;
+            byte Ins = cmdApdu.Ins;
 
-            Assert.Equal(expected: 0x24, Ins);
+            Assert.Equal(0x24, Ins);
         }
 
         [Theory]
@@ -85,11 +85,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivSlot.Puk)]
         public void CreateCommandApdu_GetP1Property_ReturnsZero(byte slotNum)
         {
-            var cmdApdu = GetChangeRefCommandApdu(slotNum);
+            CommandApdu cmdApdu = GetChangeRefCommandApdu(slotNum);
 
-            var P1 = cmdApdu.P1;
+            byte P1 = cmdApdu.P1;
 
-            Assert.Equal(expected: 0, P1);
+            Assert.Equal(0, P1);
         }
 
         [Theory]
@@ -97,9 +97,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivSlot.Puk)]
         public void CreateCommandApdu_GetP2Property_ReturnsSlotNum(byte slotNum)
         {
-            var cmdApdu = GetChangeRefCommandApdu(slotNum);
+            CommandApdu cmdApdu = GetChangeRefCommandApdu(slotNum);
 
-            var P2 = cmdApdu.P2;
+            byte P2 = cmdApdu.P2;
 
             Assert.Equal(slotNum, P2);
         }
@@ -109,11 +109,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivSlot.Puk)]
         public void CreateCommandApdu_GetNc_Returns16(byte slotNum)
         {
-            var cmdApdu = GetChangeRefCommandApdu(slotNum);
+            CommandApdu cmdApdu = GetChangeRefCommandApdu(slotNum);
 
-            var Nc = cmdApdu.Nc;
+            int Nc = cmdApdu.Nc;
 
-            Assert.Equal(expected: 16, Nc);
+            Assert.Equal(16, Nc);
         }
 
         [Theory]
@@ -125,13 +125,13 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(8, PivSlot.Puk)]
         public void CreateCommandApdu_GetDataProperty_ReturnsPin(int pinLength, byte slotNum)
         {
-            var currentPin = GetPinArray(pinLength: 6, startingPoint: 0);
-            var newPin = GetPinArray(pinLength, startingPoint: 1);
+            byte[] currentPin = GetPinArray(6, 0);
+            byte[] newPin = GetPinArray(pinLength, 1);
 
             var changeRefDataCommand = new ChangeReferenceDataCommand(slotNum, currentPin, newPin);
-            var cmdApdu = changeRefDataCommand.CreateCommandApdu();
+            CommandApdu cmdApdu = changeRefDataCommand.CreateCommandApdu();
 
-            var data = cmdApdu.Data;
+            ReadOnlyMemory<byte> data = cmdApdu.Data;
 
             Assert.False(data.IsEmpty);
             if (data.IsEmpty)
@@ -139,11 +139,11 @@ namespace Yubico.YubiKey.Piv.Commands
                 return;
             }
 
-            Assert.Equal(expected: 16, data.Length);
+            Assert.Equal(16, data.Length);
 
             // Verify the first 8 bytes in the Data are the currentPIN + pad.
-            var compareResult = true;
-            var index = 0;
+            bool compareResult = true;
+            int index = 0;
             for (; index < currentPin.Length; index++)
             {
                 if (data.Span[index] != currentPin[index])
@@ -184,11 +184,11 @@ namespace Yubico.YubiKey.Piv.Commands
         public void CreateResponseForApdu_ReturnsCorrectType()
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var currentPin = GetPinArray(pinLength: 6, startingPoint: 0);
-            var newPin = GetPinArray(pinLength: 7, startingPoint: 1);
-            var changeRefDataCommand = new ChangeReferenceDataCommand(slotNumber: 0x80, currentPin, newPin);
+            byte[] currentPin = GetPinArray(6, 0);
+            byte[] newPin = GetPinArray(7, 1);
+            var changeRefDataCommand = new ChangeReferenceDataCommand(0x80, currentPin, newPin);
 
-            var changeRefDataResponse = changeRefDataCommand.CreateResponseForApdu(responseApdu);
+            ChangeReferenceDataResponse changeRefDataResponse = changeRefDataCommand.CreateResponseForApdu(responseApdu);
 
             Assert.True(changeRefDataResponse is ChangeReferenceDataResponse);
         }
@@ -208,41 +208,39 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(9, PivSlot.Puk)]
         public void Constructor_BadPin_CorrectException(int pinLength, byte slotNum)
         {
-            var currentPin = GetPinArray(pinLength: 6, startingPoint: 0);
-            var newPin = GetPinArray(pinLength, startingPoint: 1);
+            byte[] currentPin = GetPinArray(6, 0);
+            byte[] newPin = GetPinArray(pinLength, 1);
             _ = Assert.Throws<ArgumentException>(() => new ChangeReferenceDataCommand(slotNum, currentPin, newPin));
         }
 
         [Fact]
         public void Constructor_NullCurrentPin_CorrectException()
         {
-            var pin = GetPinArray(pinLength: 6, startingPoint: 0);
-            _ = Assert.Throws<ArgumentException>(() =>
-                new ChangeReferenceDataCommand(slotNumber: 0x80, currentValue: null, pin));
+            byte[] pin = GetPinArray(6, 0);
+            _ = Assert.Throws<ArgumentException>(() => new ChangeReferenceDataCommand(0x80, null, pin));
         }
 
         [Fact]
         public void Constructor_NullNewPin_CorrectException()
         {
-            var pin = GetPinArray(pinLength: 6, startingPoint: 0);
-            _ = Assert.Throws<ArgumentException>(() =>
-                new ChangeReferenceDataCommand(slotNumber: 0x81, pin, newValue: null));
+            byte[] pin = GetPinArray(6, 0);
+            _ = Assert.Throws<ArgumentException>(() => new ChangeReferenceDataCommand(0x81, pin, null));
         }
 
         [Fact]
         public void Constructor_BadSlotNum_CorrectException()
         {
-            var pin = GetPinArray(pinLength: 6, startingPoint: 0);
-            var newPin = GetPinArray(pinLength: 8, startingPoint: 1);
-            _ = Assert.Throws<ArgumentException>(() => new ChangeReferenceDataCommand(slotNumber: 0x82, pin, newPin));
+            byte[] pin = GetPinArray(6, 0);
+            byte[] newPin = GetPinArray(8, 1);
+            _ = Assert.Throws<ArgumentException>(() => new ChangeReferenceDataCommand(0x82, pin, newPin));
         }
 
         private static CommandApdu GetChangeRefCommandApdu(byte slotNum)
         {
-            var currentPin = GetPinArray(pinLength: 6, startingPoint: 0);
-            var newPin = GetPinArray(pinLength: 7, startingPoint: 1);
+            byte[] currentPin = GetPinArray(6, 0);
+            byte[] newPin = GetPinArray(7, 1);
             var changeRefDataCommand = new ChangeReferenceDataCommand(slotNum, currentPin, newPin);
-            var returnValue = changeRefDataCommand.CreateCommandApdu();
+            CommandApdu returnValue = changeRefDataCommand.CreateCommandApdu();
 
             return returnValue;
         }
@@ -251,16 +249,16 @@ namespace Yubico.YubiKey.Piv.Commands
         // Otherwise, start with 32
         private static byte[] GetPinArray(int pinLength, int startingPoint)
         {
-            var returnValue = new byte[pinLength];
+            byte[] returnValue = new byte[pinLength];
             byte increment = 0x32;
             if (startingPoint != 0)
             {
                 increment = 0x30;
             }
 
-            for (var index = 0; index < pinLength; index++)
+            for (int index = 0; index < pinLength; index++)
             {
-                var value = (byte)(index & 15);
+                byte value = (byte)(index & 15);
                 value += increment;
                 returnValue[index] = value;
             }

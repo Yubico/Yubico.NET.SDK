@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Data_DefaultConstructorDefaultValue_ReturnsEmptyArray()
         {
-            var expectedData = ReadOnlyMemory<byte>.Empty;
+            ReadOnlyMemory<byte> expectedData = ReadOnlyMemory<byte>.Empty;
 
             var command = new EchoCommand();
 
@@ -71,7 +71,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Application_DefaultValue_ReturnsFidoU2F()
         {
-            var expectedApplication = YubiKeyApplication.FidoU2f;
+            YubiKeyApplication expectedApplication = YubiKeyApplication.FidoU2f;
 
             var command = new EchoCommand();
 
@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.U2f.Commands
             byte expectedCla = 0;
 
             var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
             Assert.Equal(commandApdu.Cla, expectedCla);
         }
@@ -101,7 +101,7 @@ namespace Yubico.YubiKey.U2f.Commands
             byte expectedIns = 0x03;
 
             var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
             Assert.Equal(commandApdu.Ins, expectedIns);
         }
@@ -114,7 +114,7 @@ namespace Yubico.YubiKey.U2f.Commands
             byte expectedP1 = 0;
 
             var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
             Assert.Equal(commandApdu.P1, expectedP1);
         }
@@ -127,7 +127,7 @@ namespace Yubico.YubiKey.U2f.Commands
             byte expectedP2 = 0;
 
             var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
             Assert.Equal(commandApdu.P2, expectedP2);
         }
@@ -135,13 +135,13 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void CreateCommandApdu_SetEmptyData_OuterCommandNcCorrect()
         {
-            var expectedInnerData = Array.Empty<byte>();
-            var expectedInnerLc = Array.Empty<byte>();
+            byte[] expectedInnerData = Array.Empty<byte>();
+            byte[] expectedInnerLc = Array.Empty<byte>();
 
-            var expectedInnerCommandLength = lengthHeader + expectedInnerLc.Length + expectedInnerData.Length;
+            int expectedInnerCommandLength = lengthHeader + expectedInnerLc.Length + expectedInnerData.Length;
 
             var command = new EchoCommand(expectedInnerData);
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
             Assert.Equal(commandApdu.Nc, expectedInnerCommandLength);
         }
@@ -149,13 +149,13 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void CreateCommandApdu_SetNonEmptyData_OuterCommandLcCorrect()
         {
-            byte[] expectedInnerData = { 0x01, 0x02, 0x03 };
-            byte[] expectedInnerLc = { 0x00, 0x00, (byte)expectedInnerData.Length }; // Assumes 0 < len < 256
+            byte[] expectedInnerData = new byte[] { 0x01, 0x02, 0x03 };
+            byte[] expectedInnerLc = new byte[] { 0x00, 0x00, (byte)expectedInnerData.Length };  // Assumes 0 < len < 256
 
-            var expectedInnerCommandLength = lengthHeader + expectedInnerLc.Length + expectedInnerData.Length;
+            int expectedInnerCommandLength = lengthHeader + expectedInnerLc.Length + expectedInnerData.Length;
 
             var command = new EchoCommand(expectedInnerData);
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
             Assert.Equal(commandApdu.Nc, expectedInnerCommandLength);
         }
@@ -170,10 +170,10 @@ namespace Yubico.YubiKey.U2f.Commands
             byte expectedInnerCla = 0;
 
             var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandCla = actualInnerCommandApdu.Span[offsetCla];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandCla = actualInnerCommandApdu.Span[offsetCla];
 
             Assert.Equal(actualInnerCommandCla, expectedInnerCla);
         }
@@ -186,10 +186,10 @@ namespace Yubico.YubiKey.U2f.Commands
             byte expectedInnerIns = 0x40;
 
             var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandIns = actualInnerCommandApdu.Span[offsetIns];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandIns = actualInnerCommandApdu.Span[offsetIns];
 
             Assert.Equal(actualInnerCommandIns, expectedInnerIns);
         }
@@ -202,10 +202,10 @@ namespace Yubico.YubiKey.U2f.Commands
             byte expectedInnerP1 = 0;
 
             var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandP1 = actualInnerCommandApdu.Span[offsetP1];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandP1 = actualInnerCommandApdu.Span[offsetP1];
 
             Assert.Equal(actualInnerCommandP1, expectedInnerP1);
         }
@@ -218,10 +218,10 @@ namespace Yubico.YubiKey.U2f.Commands
             byte expectedInnerP2 = 0;
 
             var command = new EchoCommand(Hex.HexToBytes(expectedData));
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandP2 = actualInnerCommandApdu.Span[offsetP2];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandP2 = actualInnerCommandApdu.Span[offsetP2];
 
             Assert.Equal(actualInnerCommandP2, expectedInnerP2);
         }
@@ -229,14 +229,14 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void CreateCommandApdu_SetNonEmptyData_InnerCommandLcCorrect()
         {
-            byte[] expectedInnerData = { 0x01, 0x02, 0x03 };
-            byte[] expectedInnerLc = { 0x00, 0x00, (byte)expectedInnerData.Length }; // Assumes 0 < len < 256
+            byte[] expectedInnerData = new byte[] { 0x01, 0x02, 0x03 };
+            byte[] expectedInnerLc = new byte[] { 0x00, 0x00, (byte)expectedInnerData.Length };  // Assumes 0 < len < 256
 
             var command = new EchoCommand(expectedInnerData);
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
             ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data.ToArray();
-            var actualInnerCommandLc = actualInnerCommandApdu.Slice(offsetLc, lengthLc).Span;
+            ReadOnlySpan<byte> actualInnerCommandLc = actualInnerCommandApdu.Slice(offsetLc, lengthLc).Span;
 
             Assert.True(actualInnerCommandLc.SequenceEqual(expectedInnerLc));
         }
@@ -244,13 +244,13 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void CreateCommandApdu_SetNonEmptyData_InnerCommandDataCorrect()
         {
-            byte[] expectedInnerData = { 0x01, 0x02, 0x03 };
+            byte[] expectedInnerData = new byte[] { 0x01, 0x02, 0x03 };
 
             var command = new EchoCommand(expectedInnerData);
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandData = actualInnerCommandApdu.Slice(offsetData, expectedInnerData.Length).Span;
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            ReadOnlySpan<byte> actualInnerCommandData = actualInnerCommandApdu.Slice(offsetData, expectedInnerData.Length).Span;
 
             Assert.True(actualInnerCommandData.SequenceEqual(expectedInnerData));
         }
@@ -261,14 +261,14 @@ namespace Yubico.YubiKey.U2f.Commands
         [InlineData("0102030405")]
         public void CreateResponseForApdu_SetDataSuccessSW_ReturnsCorrectEchoResponse(string expectedResponseDataString)
         {
-            var expectedResponseDataBytes = Hex.HexToBytes(expectedResponseDataString);
-            var sw = SWConstants.Success;
+            byte[] expectedResponseDataBytes = Hex.HexToBytes(expectedResponseDataString);
+            short sw = SWConstants.Success;
 
             var responseApdu = new ResponseApdu(expectedResponseDataBytes, sw);
 
             var command = new EchoCommand();
-            var echoResponse = command.CreateResponseForApdu(responseApdu);
-            var actualResponseDataBytes = echoResponse.GetData();
+            EchoResponse echoResponse = command.CreateResponseForApdu(responseApdu);
+            ReadOnlyMemory<byte> actualResponseDataBytes = echoResponse.GetData();
 
             Assert.True(actualResponseDataBytes.Span.SequenceEqual(expectedResponseDataBytes));
         }
@@ -278,14 +278,14 @@ namespace Yubico.YubiKey.U2f.Commands
         [InlineData("0102030405")]
         public void CreateResponseForApdu_SetDataFailedSW_ReturnsCorrectEchoResponse(string expectedResponseDataString)
         {
-            var expectedResponseDataBytes = Hex.HexToBytes(expectedResponseDataString);
-            var expectedSW = SWConstants.FunctionError;
+            byte[] expectedResponseDataBytes = Hex.HexToBytes(expectedResponseDataString);
+            short expectedSW = SWConstants.FunctionError;
 
             var responseApdu = new ResponseApdu(expectedResponseDataBytes, expectedSW);
 
             var command = new EchoCommand();
-            var echoResponse = command.CreateResponseForApdu(responseApdu);
-            var actualSW = echoResponse.StatusWord;
+            EchoResponse echoResponse = command.CreateResponseForApdu(responseApdu);
+            short actualSW = echoResponse.StatusWord;
 
             Assert.Equal(actualSW, expectedSW);
         }

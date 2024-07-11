@@ -35,6 +35,6 @@ namespace Yubico.PlatformInterop
         Children,
         Siblings,
         Model,
-        ContainerId
+        ContainerId,
     }
 }

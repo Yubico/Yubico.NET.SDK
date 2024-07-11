@@ -26,64 +26,62 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Parse_FromRsaClass(StandardTestDevice testDeviceType)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, validAttest: false, out _, out var publicKeyPem,
-                out var privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out string publicKeyPem, out string privateKeyPem);
 
             var publicKey = new KeyConverter(publicKeyPem.ToCharArray());
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
 
-            byte[] dataToEncrypt =
-            {
+            byte[] dataToEncrypt = {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
-                0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20
+                0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
             };
 
-            using var rsaPublic = publicKey.GetRsaObject();
-            var encryptedData = rsaPublic.Encrypt(dataToEncrypt, RSAEncryptionPadding.OaepSHA1);
+            using RSA rsaPublic = publicKey.GetRsaObject();
+            byte[] encryptedData = rsaPublic.Encrypt(dataToEncrypt, RSAEncryptionPadding.OaepSHA1);
 
-            Assert.Equal(expected: 128, encryptedData.Length);
+            Assert.Equal(128, encryptedData.Length);
 
-            var isValid = CryptoSupport.CSharpRawRsaPrivate(privateKeyPem, encryptedData, out var formattedData);
+            bool isValid = CryptoSupport.CSharpRawRsaPrivate(privateKeyPem, encryptedData, out byte[] formattedData);
             Assert.True(isValid);
-            Assert.Equal(expected: 128, formattedData.Length);
+            Assert.Equal(128, formattedData.Length);
 
             isValid = RsaFormat.TryParsePkcs1Oaep(
                 formattedData,
                 RsaFormat.Sha1,
-                out var decryptedData);
+                out byte[] decryptedData);
 
             Assert.True(isValid);
-            Assert.Equal(expected: 32, decryptedData.Length);
+            Assert.Equal(32, decryptedData.Length);
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-                isValid = pivSession.TryAuthenticateManagementKey(mutualAuthentication: false);
+                isValid = pivSession.TryAuthenticateManagementKey(false);
                 Assert.True(isValid);
                 isValid = pivSession.TryVerifyPin();
                 Assert.True(isValid);
 
-                var pivPrivate = privateKey.GetPivPrivateKey();
+                PivPrivateKey pivPrivate = privateKey.GetPivPrivateKey();
 
-                pivSession.ImportPrivateKey(slotNumber: 0x86, pivPrivate);
+                pivSession.ImportPrivateKey(0x86, pivPrivate);
 
-                var decryptCommand = new AuthenticateDecryptCommand(encryptedData, slotNumber: 0x86);
-                var decryptResponse = pivSession.Connection.SendCommand(decryptCommand);
+                var decryptCommand = new AuthenticateDecryptCommand(encryptedData, 0x86);
+                AuthenticateDecryptResponse decryptResponse = pivSession.Connection.SendCommand(decryptCommand);
 
                 Assert.Equal(ResponseStatus.Success, decryptResponse.Status);
 
-                var yFormattedData = decryptResponse.GetData();
+                byte[] yFormattedData = decryptResponse.GetData();
 
                 isValid = RsaFormat.TryParsePkcs1Oaep(
                     yFormattedData,
                     RsaFormat.Sha1,
-                    out var yDecryptedData);
+                    out byte[] yDecryptedData);
 
                 Assert.True(isValid);
-                Assert.Equal(expected: 32, decryptedData.Length);
+                Assert.Equal(32, decryptedData.Length);
             }
         }
     }

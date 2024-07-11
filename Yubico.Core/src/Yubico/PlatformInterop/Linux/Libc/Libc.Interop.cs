@@ -27,7 +27,7 @@ namespace Yubico.PlatformInterop
             O_RDONLY = 0,
             O_WRONLY = 1,
             O_RDWR = 2,
-            O_NONBLOCK = 0x800
+            O_NONBLOCK = 0x800,
         }
 
         public const long HIDIOCGRAWINFO = 0x0000000080084803;
@@ -67,8 +67,7 @@ namespace Yubico.PlatformInterop
         // settings). It does not currently have any effect on platforms other
         // than Windows, but is included because of the analyzer and in the hope
         // that it will be supported by these platforms in the future.
-        [DllImport(
-            Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "open",
+        [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, BestFitMapping = false, EntryPoint = "open",
             SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         public static extern LinuxFileSafeHandle open(string filename, OpenFlags flag);
@@ -96,19 +95,17 @@ namespace Yubico.PlatformInterop
         // Read count bytes. Place them into outputBuffer.
         [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "read", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern int read(
-            LinuxFileSafeHandle handle,
-            [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
-            byte[] outputBuffer,
-            int count);
+        public static extern int read(LinuxFileSafeHandle handle,
+                                      [MarshalAs(UnmanagedType.LPArray, SizeParamIndex = 2)]
+                                      byte[] outputBuffer,
+                                      int count);
 
         // Write the count bytes in inputBuffer.
         [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "write", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
-        public static extern int write(
-            int handle,
-            [MarshalAs(UnmanagedType.LPArray)] byte[] inputBuffer,
-            int count);
+        public static extern int write(int handle,
+                                       [MarshalAs(UnmanagedType.LPArray)] byte[] inputBuffer,
+                                       int count);
 
         [DllImport(Libraries.LinuxKernelLib, CharSet = CharSet.Ansi, EntryPoint = "fcntl", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]

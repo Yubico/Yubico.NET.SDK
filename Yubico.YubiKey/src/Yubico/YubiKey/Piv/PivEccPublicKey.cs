@@ -19,32 +19,31 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Piv
 {
     /// <summary>
-    ///     This class holds an ECC public key.
+    /// This class holds an ECC public key.
     /// </summary>
     /// <remarks>
-    ///     An ECC public key consists of a public point. To build an ECC key object
-    ///     from the public point, use this class's constructor.
-    ///     <para>
-    ///         Once you have the object built, you can get the encoded public key from
-    ///         either the <c>PivEncodedPublicKey</c> or <c>YubiKeyEncodedPublicKey</c>
-    ///         property.
-    ///     </para>
-    ///     <para>
-    ///         If you have an encoded public key, and want to build an object, use
-    ///         the static factory <c>Create</c> method in the base class
-    ///         <see cref="PivPublicKey" />.
-    ///     </para>
-    ///     <para>
-    ///         The YubiKey supports only P256 and P384 ECC keys, which means that the
-    ///         point must be exactly 65 or 97 bytes long (the point must be of the form
-    ///         <c>04 || x-coordinate || y-coordinate</c>).
-    ///     </para>
-    ///     <para>
-    ///         You can build an object from either the encoded public key (using the
-    ///         <c>PivPublicKey.Create</c> static factory method), and then examine the
-    ///         public point, or you can build an object from the public point, then
-    ///         examine the encoding.
-    ///     </para>
+    /// An ECC public key consists of a public point. To build an ECC key object
+    /// from the public point, use this class's constructor.
+    /// <para>
+    /// Once you have the object built, you can get the encoded public key from
+    /// either the <c>PivEncodedPublicKey</c> or <c>YubiKeyEncodedPublicKey</c>
+    /// property.
+    /// </para>
+    /// <para>If you have an encoded public key, and want to build an object, use
+    /// the static factory <c>Create</c> method in the base class
+    /// <see cref="PivPublicKey"/>.
+    /// </para>
+    /// <para>
+    /// The YubiKey supports only P256 and P384 ECC keys, which means that the
+    /// point must be exactly 65 or 97 bytes long (the point must be of the form
+    /// <c>04 || x-coordinate || y-coordinate</c>).
+    /// </para>
+    /// <para>
+    /// You can build an object from either the encoded public key (using the
+    /// <c>PivPublicKey.Create</c> static factory method), and then examine the
+    /// public point, or you can build an object from the public point, then
+    /// examine the encoding.
+    /// </para>
     /// </remarks>
     public sealed class PivEccPublicKey : PivPublicKey
     {
@@ -64,25 +63,25 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        ///     Create a new instance of an ECC public key object based on the
-        ///     given point.
+        /// Create a new instance of an ECC public key object based on the
+        /// given point.
         /// </summary>
         /// <remarks>
-        ///     The point must be provided in the following form
-        ///     <code>
+        /// The point must be provided in the following form
+        /// <code>
         ///   04 || x-coordinate || y-coordinate
         ///   each coordinate must be the same size, either 32 bytes (256 bits)
         ///   or 48 bytes (384 bits).
         ///   Prepend 00 bytes if necessary.
         /// </code>
-        ///     The class will determine the algorithm (<c>PivAlgorithm.EccP256</c>
-        ///     or <c>PivAlgorithm.EccP384</c>) based on the size of the point.
+        /// The class will determine the algorithm (<c>PivAlgorithm.EccP256</c>
+        /// or <c>PivAlgorithm.EccP384</c>) based on the size of the point.
         /// </remarks>
         /// <param name="publicPoint">
-        ///     The public point to use to build the object.
+        /// The public point to use to build the object.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     The format of the public point is not supported.
+        /// The format of the public point is not supported.
         /// </exception>
         public PivEccPublicKey(ReadOnlySpan<byte> publicPoint)
         {
@@ -96,33 +95,32 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        ///     Contains the public point: <c>04 || x-coordinate || y-coordinate</c>.
+        /// Contains the public point: <c>04 || x-coordinate || y-coordinate</c>.
         /// </summary>
         public ReadOnlySpan<byte> PublicPoint => _publicPoint.Span;
 
         /// <summary>
-        ///     Try to create a new instance of an ECC public key object based on the
-        ///     encoding.
+        /// Try to create a new instance of an ECC public key object based on the
+        /// encoding.
         /// </summary>
         /// <remarks>
-        ///     This static method will build a <c>PivEccPublicKey</c> object and set
-        ///     the output parameter <c>publicKeyObject</c> to the resulting key. If
-        ///     the encoding is not of a supported ECC public key, it will return
-        ///     false.
+        /// This static method will build a <c>PivEccPublicKey</c> object and set
+        /// the output parameter <c>publicKeyObject</c> to the resulting key. If
+        /// the encoding is not of a supported ECC public key, it will return
+        /// false.
         /// </remarks>
         /// <param name="publicKeyObject">
-        ///     Where the resulting public key object will be deposited.
+        /// Where the resulting public key object will be deposited.
         /// </param>
         /// <param name="encodedPublicKey">
-        ///     The PIV TLV encoding.
+        /// The PIV TLV encoding.
         /// </param>
         /// <returns>
-        ///     True if the method was able to create a new RSA public key object,
-        ///     false otherwise.
+        /// True if the method was able to create a new RSA public key object,
+        /// false otherwise.
         /// </returns>
-        internal static bool TryCreate(
-            out PivPublicKey publicKeyObject,
-            ReadOnlyMemory<byte> encodedPublicKey)
+        internal static bool TryCreate(out PivPublicKey publicKeyObject,
+                                       ReadOnlyMemory<byte> encodedPublicKey)
         {
             var returnValue = new PivEccPublicKey();
             publicKeyObject = returnValue;

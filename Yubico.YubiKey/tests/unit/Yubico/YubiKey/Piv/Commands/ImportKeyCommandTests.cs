@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4, PivAlgorithm.Rsa2048)]
         public void ClassType_DerivedFromPivCommand_IsTrue(int cStyle, PivAlgorithm algorithm)
         {
-            var cmd = GetCommandObject(
+            ImportAsymmetricKeyCommand cmd = GetCommandObject(
                 cStyle,
                 PivSlot.Retired5,
                 algorithm,
@@ -43,8 +43,8 @@ namespace Yubico.YubiKey.Piv.Commands
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
             _ = Assert.Throws<ArgumentNullException>(() => new ImportAsymmetricKeyCommand(
-                privateKey: null,
-                slotNumber: 0x87,
+                null,
+                0x87,
                 PivPinPolicy.Always,
                 PivTouchPolicy.Never));
 #pragma warning restore CS8625
@@ -54,11 +54,11 @@ namespace Yubico.YubiKey.Piv.Commands
         public void InitConstructor_NullKeyData_ThrowsException()
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new ImportAsymmetricKeyCommand(privateKey: null)
+            _ = Assert.Throws<ArgumentNullException>(() => new ImportAsymmetricKeyCommand(null)
             {
                 SlotNumber = 0x87,
                 PinPolicy = PivPinPolicy.Always,
-                TouchPolicy = PivTouchPolicy.Never
+                TouchPolicy = PivTouchPolicy.Never,
             });
 #pragma warning restore CS8625
         }
@@ -86,11 +86,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_NoSlotNumber_ThrowsException()
         {
-            var keyData = GetKeyData(PivAlgorithm.EccP256);
+            PivPrivateKey keyData = GetKeyData(PivAlgorithm.EccP256);
             var cmd = new ImportAsymmetricKeyCommand(keyData)
             {
                 PinPolicy = PivPinPolicy.Always,
-                TouchPolicy = PivTouchPolicy.Never
+                TouchPolicy = PivTouchPolicy.Never,
             };
             _ = Assert.Throws<InvalidOperationException>(() => cmd.CreateCommandApdu());
         }
@@ -98,14 +98,14 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Application_Piv()
         {
-            var keyData = GetKeyData(PivAlgorithm.EccP256);
+            PivPrivateKey keyData = GetKeyData(PivAlgorithm.EccP256);
             var importKeyCommand = new ImportAsymmetricKeyCommand(
                 keyData,
                 PivSlot.Retired19,
                 PivPinPolicy.Never,
                 PivTouchPolicy.Never);
 
-            var application = importKeyCommand.Application;
+            YubiKeyApplication application = importKeyCommand.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
 
@@ -115,17 +115,17 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Property_SlotNum()
         {
-            var keyData = GetKeyData(PivAlgorithm.EccP256);
-            var slotNumber = PivSlot.Retired20;
-            var pinPolicy = PivPinPolicy.Always;
-            var touchPolicy = PivTouchPolicy.Cached;
+            PivPrivateKey keyData = GetKeyData(PivAlgorithm.EccP256);
+            byte slotNumber = PivSlot.Retired20;
+            PivPinPolicy pinPolicy = PivPinPolicy.Always;
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Cached;
             var importKeyCommand = new ImportAsymmetricKeyCommand(
                 keyData,
                 slotNumber,
                 pinPolicy,
                 touchPolicy);
 
-            var getSlotNum = importKeyCommand.SlotNumber;
+            byte getSlotNum = importKeyCommand.SlotNumber;
 
             Assert.Equal(slotNumber, getSlotNum);
 
@@ -135,17 +135,17 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Property_PinPolicy()
         {
-            var keyData = GetKeyData(PivAlgorithm.EccP256);
-            var slotNumber = PivSlot.Retired20;
-            var pinPolicy = PivPinPolicy.Always;
-            var touchPolicy = PivTouchPolicy.Cached;
+            PivPrivateKey keyData = GetKeyData(PivAlgorithm.EccP256);
+            byte slotNumber = PivSlot.Retired20;
+            PivPinPolicy pinPolicy = PivPinPolicy.Always;
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Cached;
             var importKeyCommand = new ImportAsymmetricKeyCommand(
                 keyData,
                 slotNumber,
                 pinPolicy,
                 touchPolicy);
 
-            var getPolicy = importKeyCommand.PinPolicy;
+            PivPinPolicy getPolicy = importKeyCommand.PinPolicy;
 
             Assert.Equal(pinPolicy, getPolicy);
 
@@ -155,17 +155,17 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Property_TouchPolicy()
         {
-            var keyData = GetKeyData(PivAlgorithm.EccP256);
-            var slotNumber = PivSlot.Retired20;
-            var pinPolicy = PivPinPolicy.Always;
-            var touchPolicy = PivTouchPolicy.Cached;
+            PivPrivateKey keyData = GetKeyData(PivAlgorithm.EccP256);
+            byte slotNumber = PivSlot.Retired20;
+            PivPinPolicy pinPolicy = PivPinPolicy.Always;
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Cached;
             var importKeyCommand = new ImportAsymmetricKeyCommand(
                 keyData,
                 slotNumber,
                 pinPolicy,
                 touchPolicy);
 
-            var getPolicy = importKeyCommand.TouchPolicy;
+            PivTouchPolicy getPolicy = importKeyCommand.TouchPolicy;
 
             Assert.Equal(touchPolicy, getPolicy);
 
@@ -178,12 +178,12 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(int cStyle)
         {
-            var cmdApdu = GetImportKeyCommandApdu(
-                cStyle, slotNumber: 0x94, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
+            CommandApdu cmdApdu = GetImportKeyCommandApdu(
+                cStyle, 0x94, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
 
-            var Cla = cmdApdu.Cla;
+            byte Cla = cmdApdu.Cla;
 
-            Assert.Equal(expected: 0, Cla);
+            Assert.Equal(0, Cla);
         }
 
         [Theory]
@@ -192,16 +192,16 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHexFE(int cStyle)
         {
-            var cmdApdu = GetImportKeyCommandApdu(
+            CommandApdu cmdApdu = GetImportKeyCommandApdu(
                 cStyle,
-                slotNumber: 0x92,
+                0x92,
                 PivAlgorithm.Rsa1024,
                 PivPinPolicy.Once,
                 PivTouchPolicy.None);
 
-            var Ins = cmdApdu.Ins;
+            byte Ins = cmdApdu.Ins;
 
-            Assert.Equal(expected: 0xFE, Ins);
+            Assert.Equal(0xFE, Ins);
         }
 
         [Theory]
@@ -211,14 +211,14 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4, PivAlgorithm.Rsa2048)]
         public void CreateCommandApdu_GetP1Property_ReturnsAlgorithm(int cStyle, PivAlgorithm algorithm)
         {
-            var cmdApdu = GetImportKeyCommandApdu(
+            CommandApdu cmdApdu = GetImportKeyCommandApdu(
                 cStyle,
-                slotNumber: 0x9E,
+                0x9E,
                 algorithm,
                 PivPinPolicy.None,
                 PivTouchPolicy.Cached);
 
-            var P1 = cmdApdu.P1;
+            byte P1 = cmdApdu.P1;
 
             Assert.Equal((byte)algorithm, P1);
         }
@@ -235,14 +235,14 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(9, 0x89)]
         public void CreateCommandApdu_GetP2Property_ReturnsSlotNum(int cStyle, byte slotNumber)
         {
-            var cmdApdu = GetImportKeyCommandApdu(
+            CommandApdu cmdApdu = GetImportKeyCommandApdu(
                 cStyle,
                 slotNumber,
                 PivAlgorithm.Rsa2048,
                 PivPinPolicy.None,
                 PivTouchPolicy.Cached);
 
-            var P2 = cmdApdu.P2;
+            byte P2 = cmdApdu.P2;
 
             Assert.Equal(slotNumber, P2);
         }
@@ -280,17 +280,17 @@ namespace Yubico.YubiKey.Piv.Commands
             PivTouchPolicy touchPolicy,
             int expectedPolicyLength)
         {
-            var keyData = GetKeyData(algorithm);
-            var cmdApdu = GetImportKeyCommandApdu(
+            PivPrivateKey keyData = GetKeyData(algorithm);
+            CommandApdu cmdApdu = GetImportKeyCommandApdu(
                 cStyle,
-                slotNumber: 0x8E,
+                0x8E,
                 algorithm,
                 pinPolicy,
                 touchPolicy);
 
-            var Nc = cmdApdu.Nc;
+            int Nc = cmdApdu.Nc;
 
-            var expectedLength = keyData.EncodedPrivateKey.Length + expectedPolicyLength;
+            int expectedLength = keyData.EncodedPrivateKey.Length + expectedPolicyLength;
             Assert.Equal(expectedLength, Nc);
 
             keyData.Clear();
@@ -302,16 +302,16 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3)]
         public void CreateCommandApdu_GetNeProperty_ReturnsZero(int cStyle)
         {
-            var cmdApdu = GetImportKeyCommandApdu(
+            CommandApdu cmdApdu = GetImportKeyCommandApdu(
                 cStyle,
-                slotNumber: 0x8F,
+                0x8F,
                 PivAlgorithm.EccP256,
                 PivPinPolicy.Always,
                 PivTouchPolicy.Never);
 
-            var Ne = cmdApdu.Ne;
+            int Ne = cmdApdu.Ne;
 
-            Assert.Equal(expected: 0, Ne);
+            Assert.Equal(0, Ne);
         }
 
         [Theory]
@@ -321,16 +321,16 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4, PivAlgorithm.EccP384)]
         public void CreateCommandApdu_GetData_ReturnsKeyData(int cStyle, PivAlgorithm algorithm)
         {
-            var keyData = GetKeyData(algorithm);
+            PivPrivateKey keyData = GetKeyData(algorithm);
             // Use Default policies so the only data will be the key data.
-            var cmdApdu = GetImportKeyCommandApdu(
+            CommandApdu cmdApdu = GetImportKeyCommandApdu(
                 cStyle,
-                slotNumber: 0x8F,
+                0x8F,
                 algorithm,
                 PivPinPolicy.Default,
                 PivTouchPolicy.Default);
 
-            var data = cmdApdu.Data;
+            ReadOnlyMemory<byte> data = cmdApdu.Data;
 
             Assert.False(data.IsEmpty);
             if (data.IsEmpty)
@@ -338,7 +338,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 return;
             }
 
-            var compareResult = data.Span.SequenceEqual(keyData.EncodedPrivateKey.Span);
+            bool compareResult = data.Span.SequenceEqual(keyData.EncodedPrivateKey.Span);
 
             Assert.True(compareResult);
 
@@ -382,28 +382,26 @@ namespace Yubico.YubiKey.Piv.Commands
             PivPinPolicy pinPolicy,
             PivTouchPolicy touchPolicy)
         {
-            var keyData = GetKeyData(PivAlgorithm.EccP256);
-            byte[] pinData = { 0xAA, 0x01, (byte)pinPolicy };
-            byte[] touchData = { 0xAB, 0x01, (byte)touchPolicy };
+            PivPrivateKey keyData = GetKeyData(PivAlgorithm.EccP256);
+            byte[] pinData = new byte[] { 0xAA, 0x01, (byte)pinPolicy };
+            byte[] touchData = new byte[] { 0xAB, 0x01, (byte)touchPolicy };
             var expected = new List<byte>(keyData.EncodedPrivateKey.ToArray());
             if (pinPolicy != PivPinPolicy.None && pinPolicy != PivPinPolicy.Default)
             {
                 expected.AddRange(pinData);
             }
-
             if (touchPolicy != PivTouchPolicy.None && touchPolicy != PivTouchPolicy.Default)
             {
                 expected.AddRange(touchData);
             }
-
-            var cmdApdu = GetImportKeyCommandApdu(
+            CommandApdu cmdApdu = GetImportKeyCommandApdu(
                 cStyle,
-                slotNumber: 0x8F,
+                0x8F,
                 PivAlgorithm.EccP256,
                 pinPolicy,
                 touchPolicy);
 
-            var data = cmdApdu.Data;
+            ReadOnlyMemory<byte> data = cmdApdu.Data;
 
             Assert.False(data.IsEmpty);
             if (data.IsEmpty)
@@ -411,7 +409,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 return;
             }
 
-            var compareResult = data.Span.SequenceEqual(expected.ToArray());
+            bool compareResult = data.Span.SequenceEqual(expected.ToArray());
 
             Assert.True(compareResult);
 
@@ -421,18 +419,18 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void CreateResponseForApdu_ReturnsCorrectType()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
-            var keyData = GetKeyData(PivAlgorithm.EccP384);
+            PivPrivateKey keyData = GetKeyData(PivAlgorithm.EccP384);
             var importKeyCommand = new ImportAsymmetricKeyCommand(
                 keyData,
                 PivSlot.Retired18,
                 PivPinPolicy.Default,
                 PivTouchPolicy.Default);
 
-            var response = importKeyCommand.CreateResponseForApdu(responseApdu);
+            ImportAsymmetricKeyResponse response = importKeyCommand.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is ImportAsymmetricKeyResponse);
 
@@ -449,7 +447,7 @@ namespace Yubico.YubiKey.Piv.Commands
             PivPinPolicy pinPolicy,
             PivTouchPolicy touchPolicy)
         {
-            var importKeyCommand = GetCommandObject(
+            ImportAsymmetricKeyCommand importKeyCommand = GetCommandObject(
                 cStyle,
                 slotNumber,
                 algorithm,
@@ -485,7 +483,7 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             ImportAsymmetricKeyCommand cmd;
 
-            var keyData = GetKeyData(algorithm);
+            PivPrivateKey keyData = GetKeyData(algorithm);
 #pragma warning disable IDE0017 // Testing this specific construction
             switch (cStyle)
             {
@@ -498,7 +496,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     {
                         SlotNumber = slotNumber,
                         PinPolicy = pinPolicy,
-                        TouchPolicy = touchPolicy
+                        TouchPolicy = touchPolicy,
                     };
                     break;
 
@@ -514,7 +512,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     cmd = new ImportAsymmetricKeyCommand(keyData)
                     {
                         SlotNumber = slotNumber,
-                        TouchPolicy = touchPolicy
+                        TouchPolicy = touchPolicy,
                     };
                     break;
 
@@ -528,7 +526,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     cmd = new ImportAsymmetricKeyCommand(keyData)
                     {
                         SlotNumber = slotNumber,
-                        PinPolicy = pinPolicy
+                        PinPolicy = pinPolicy,
                     };
                     break;
 
@@ -541,7 +539,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 case 8:
                     cmd = new ImportAsymmetricKeyCommand(keyData)
                     {
-                        SlotNumber = slotNumber
+                        SlotNumber = slotNumber,
                     };
                     break;
 
@@ -554,13 +552,10 @@ namespace Yubico.YubiKey.Piv.Commands
             return cmd;
         }
 
-        private static PivPrivateKey GetKeyData(PivAlgorithm algorithm)
+        private static PivPrivateKey GetKeyData(PivAlgorithm algorithm) => algorithm switch
         {
-            return algorithm switch
-            {
-                PivAlgorithm.Rsa1024 =>
-                    PivPrivateKey.Create(new byte[]
-                    {
+            PivAlgorithm.Rsa1024 =>
+                     PivPrivateKey.Create(new byte[] {
                         0x01, 0x40,
                         0xdf, 0x2c, 0x15, 0xe7, 0x9f, 0xf7, 0xf0, 0xe4, 0x36, 0xfd, 0x93, 0x1f, 0xd7, 0x36, 0x20, 0x2e,
                         0x70, 0xd2, 0x51, 0xe4, 0x4a, 0x5d, 0xf8, 0xbb, 0xfd, 0x2d, 0x66, 0xd1, 0xe5, 0x1d, 0x5e, 0x92,
@@ -588,9 +583,8 @@ namespace Yubico.YubiKey.Piv.Commands
                         0xfd, 0xda, 0x5b, 0xbb, 0xc1, 0x0a, 0x77, 0x73, 0x0a, 0xaa, 0x1e, 0xc5, 0x66, 0x42, 0x96, 0xcf
                     }),
 
-                PivAlgorithm.Rsa2048 =>
-                    PivPrivateKey.Create(new byte[]
-                    {
+            PivAlgorithm.Rsa2048 =>
+                PivPrivateKey.Create(new byte[] {
                         0x02, 0x81, 0x80,
                         0xd0, 0xc0, 0x5a, 0xba, 0xec, 0x01, 0x46, 0x1b, 0x48, 0x98, 0xd2, 0x53, 0x97, 0x68, 0x47, 0xca,
                         0xb1, 0x8e, 0xbe, 0xf2, 0x92, 0x6b, 0x62, 0x0f, 0xa7, 0x1b, 0x8c, 0x50, 0x38, 0x23, 0x2d, 0x1a,
@@ -636,25 +630,22 @@ namespace Yubico.YubiKey.Piv.Commands
                         0x6c, 0xdc, 0x44, 0x6e, 0xb5, 0xdd, 0x52, 0x46, 0x24, 0x26, 0x9d, 0x07, 0x55, 0xe4, 0x12, 0xc0,
                         0x4e, 0x3f, 0xba, 0x5a, 0x39, 0xd6, 0x7e, 0xc0, 0xb8, 0x32, 0x92, 0x72, 0x10, 0xe4, 0xa2, 0x76,
                         0x29, 0x22, 0xe3, 0xe3, 0x53, 0xd9, 0xbd, 0xe2, 0xe9, 0x55, 0xb8, 0xd2, 0x07, 0x3a, 0x21, 0x29
-                    }),
+                }),
 
-                PivAlgorithm.EccP256 =>
-                    PivPrivateKey.Create(new byte[]
-                    {
+            PivAlgorithm.EccP256 =>
+                PivPrivateKey.Create(new byte[] {
                         0x06, 0x20,
                         0xba, 0x29, 0x7a, 0xc6, 0x64, 0x62, 0xef, 0x6c, 0xd0, 0x89, 0x76, 0x5c, 0xbd, 0x46, 0x52, 0x2b,
                         0xb0, 0x48, 0x0e, 0x85, 0x49, 0x15, 0x85, 0xe7, 0x7a, 0x74, 0x3c, 0x8e, 0x03, 0x59, 0x8d, 0x3a
-                    }),
+                }),
 
-                _ =>
-                    PivPrivateKey.Create(new byte[]
-                    {
+            _ =>
+                PivPrivateKey.Create(new byte[] {
                         0x06, 0x30,
                         0x47, 0x85, 0xde, 0x3a, 0xff, 0x10, 0x0d, 0x67, 0xa7, 0x26, 0x30, 0x62, 0x73, 0x45, 0xfd, 0xce,
                         0xeb, 0xb9, 0xbe, 0x4c, 0x93, 0x42, 0xcd, 0x6a, 0x84, 0xd6, 0x8e, 0x00, 0x70, 0x70, 0x4c, 0x66,
                         0x63, 0x53, 0xa0, 0x2c, 0xb9, 0xa7, 0x61, 0xcf, 0x56, 0xf0, 0x45, 0x07, 0xa6, 0xfb, 0x9f, 0x5a
-                    })
-            };
-        }
+                }),
+        };
     }
 }

@@ -17,12 +17,27 @@ using System.Globalization;
 namespace Yubico.YubiKey.Otp
 {
     /// <summary>
-    ///     A class that represents the various fields of an NDEF text record.
+    /// A class that represents the various fields of an NDEF text record.
     /// </summary>
     public class NdefText
     {
         /// <summary>
-        ///     Constructs a new instance of the <see cref="NdefText" /> class.
+        /// Represents the underlying character encoding used by the record's text.
+        /// </summary>
+        public NdefTextEncoding Encoding { get; set; }
+
+        /// <summary>
+        /// Represents the language that the text is written.
+        /// </summary>
+        public CultureInfo Language { get; set; }
+
+        /// <summary>
+        /// The message text of the NDEF text record.
+        /// </summary>
+        public string Text { get; set; }
+
+        /// <summary>
+        /// Constructs a new instance of the <see cref="NdefText"/> class.
         /// </summary>
         public NdefText()
         {
@@ -30,25 +45,7 @@ namespace Yubico.YubiKey.Otp
             Text = string.Empty;
         }
 
-        /// <summary>
-        ///     Represents the underlying character encoding used by the record's text.
-        /// </summary>
-        public NdefTextEncoding Encoding { get; set; }
-
-        /// <summary>
-        ///     Represents the language that the text is written.
-        /// </summary>
-        public CultureInfo Language { get; set; }
-
-        /// <summary>
-        ///     The message text of the NDEF text record.
-        /// </summary>
-        public string Text { get; set; }
-
-        /// <inheritdoc />
-        public override string ToString() =>
-            string.IsNullOrEmpty(Text)
-                ? "(null or empty)"
-                : Text;
+        /// <inheritdoc/>
+        public override string ToString() => string.IsNullOrEmpty(Text) ? "(null or empty)" : Text;
     }
 }

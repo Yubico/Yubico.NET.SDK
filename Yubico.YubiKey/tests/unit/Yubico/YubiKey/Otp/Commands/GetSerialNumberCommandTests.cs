@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Xunit;
 
 namespace Yubico.YubiKey.Otp.Commands
@@ -23,9 +24,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new GetSerialNumberCommand();
 
-            var cla = command.CreateCommandApdu().Cla;
+            byte cla = command.CreateCommandApdu().Cla;
 
-            Assert.Equal(expected: 0, cla);
+            Assert.Equal(0, cla);
         }
 
         [Fact]
@@ -33,9 +34,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new GetSerialNumberCommand();
 
-            var ins = command.CreateCommandApdu().Ins;
+            byte ins = command.CreateCommandApdu().Ins;
 
-            Assert.Equal(expected: 1, ins);
+            Assert.Equal(1, ins);
         }
 
         [Fact]
@@ -43,9 +44,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new GetSerialNumberCommand();
 
-            var p1 = command.CreateCommandApdu().P1;
+            byte p1 = command.CreateCommandApdu().P1;
 
-            Assert.Equal(expected: 0x10, p1);
+            Assert.Equal(0x10, p1);
         }
 
         [Fact]
@@ -53,9 +54,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new GetSerialNumberCommand();
 
-            var p2 = command.CreateCommandApdu().P2;
+            byte p2 = command.CreateCommandApdu().P2;
 
-            Assert.Equal(expected: 0, p2);
+            Assert.Equal(0, p2);
         }
 
         [Fact]
@@ -63,7 +64,7 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new GetSerialNumberCommand();
 
-            var data = command.CreateCommandApdu().Data;
+            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
             Assert.True(data.IsEmpty);
         }
@@ -73,9 +74,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new GetSerialNumberCommand();
 
-            var nc = command.CreateCommandApdu().Nc;
+            int nc = command.CreateCommandApdu().Nc;
 
-            Assert.Equal(expected: 0, nc);
+            Assert.Equal(0, nc);
         }
 
         [Fact]
@@ -83,9 +84,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new GetSerialNumberCommand();
 
-            var ne = command.CreateCommandApdu().Ne;
+            int ne = command.CreateCommandApdu().Ne;
 
-            Assert.Equal(expected: 0, ne);
+            Assert.Equal(0, ne);
         }
     }
 }

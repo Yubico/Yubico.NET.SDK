@@ -23,8 +23,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
     public static class CalculateCredentials
     {
         // Get OTP (One-Time Password) values for all configured credentials on the YubiKey.
-        public static bool RunCalculateCredentials(
-            IYubiKeyDevice yubiKey, Func<KeyEntryData, bool> KeyCollectorDelegate)
+        public static bool RunCalculateCredentials(IYubiKeyDevice yubiKey, Func<KeyEntryData, bool> KeyCollectorDelegate)
         {
             using var oathSession = new OathSession(yubiKey);
             {
@@ -85,7 +84,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 _ = outputList.AppendLine("No credentials on this YubiKey");
             }
 
-            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, outputList.ToString());
+            SampleMenu.WriteMessage(MessageType.Special, 0, outputList.ToString());
         }
 
         private static void ReportOneResult(Credential credential, Code code)
@@ -103,7 +102,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             _ = outputList.AppendLine($"Name      : {credential.Name}");
             _ = outputList.AppendLine();
 
-            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, outputList.ToString());
+            SampleMenu.WriteMessage(MessageType.Special, 0, outputList.ToString());
         }
     }
 }

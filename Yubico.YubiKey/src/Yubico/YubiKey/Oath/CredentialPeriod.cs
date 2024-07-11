@@ -15,7 +15,7 @@
 namespace Yubico.YubiKey.Oath
 {
     /// <summary>
-    ///     The credential period.
+    /// The credential period.
     /// </summary>
     public enum CredentialPeriod
     {

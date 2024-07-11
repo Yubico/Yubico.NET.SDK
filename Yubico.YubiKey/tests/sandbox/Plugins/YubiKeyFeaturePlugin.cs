@@ -20,10 +20,11 @@ namespace Yubico.YubiKey.TestApp.Plugins
 {
     internal class YubiKeyFeaturePlugin : PluginBase
     {
-        public YubiKeyFeaturePlugin(IOutput output) : base(output) { }
         public override string Name => "Feature query";
 
         public override string Description => "This plugin displays different features of YubiKeys.";
+
+        public YubiKeyFeaturePlugin(IOutput output) : base(output) { }
 
         public override bool Execute()
         {
@@ -35,19 +36,19 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 Output.WriteLine("2. OTP Application");
                 Output.WriteLine("3. PIV Application");
                 Output.WriteLine("4. OATH Application");
-                Output.WriteLine();
+                Output.WriteLine("");
                 Output.Write("Select an option, or any other key to exit: ");
 
                 inputChar = Console.ReadKey().KeyChar;
                 Output.WriteLine();
 
-                var feature = inputChar switch
+                YubiKeyFeature feature = inputChar switch
                 {
                     '1' => GetGeneralFeature(),
                     '2' => GetOtpFeature(),
                     '3' => GetPivFeature(),
                     '4' => GetOathFeature(),
-                    _ => throw new NotImplementedException()
+                    _ => throw new NotImplementedException(),
                 };
 
                 Output.WriteLine(Eol + "");
@@ -59,8 +60,8 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         private void OutputResult(YubiKeyFeature feature)
         {
-            var yubiKey = YubiKeyDevice.FindAll().First();
-            var result = yubiKey.HasFeature(feature);
+            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
+            bool result = yubiKey.HasFeature(feature);
 
             if (result)
             {
@@ -84,10 +85,10 @@ namespace Yubico.YubiKey.TestApp.Plugins
             Output.WriteLine("3. OATH application");
             Output.WriteLine("4. Management application");
             Output.WriteLine("5. Serial Number visibility controls");
-            Output.WriteLine();
+            Output.WriteLine("");
             Output.Write("Select an option, or any other key to exit: ");
 
-            var inputChar = Console.ReadKey().KeyChar;
+            char inputChar = Console.ReadKey().KeyChar;
             Output.WriteLine();
 
             feature = inputChar switch
@@ -97,7 +98,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 '3' => YubiKeyFeature.OathApplication,
                 '4' => YubiKeyFeature.ManagementApplication,
                 '5' => YubiKeyFeature.SerialNumberVisibilityControls,
-                _ => throw new NotImplementedException()
+                _ => throw new NotImplementedException(),
             };
 
             return feature;
@@ -117,10 +118,10 @@ namespace Yubico.YubiKey.TestApp.Plugins
             Output.WriteLine("7. Touch Policy for management key");
             Output.WriteLine("8. Touch Policy - Cached");
             Output.WriteLine("9. Touch Policy - Cached, for private key");
-            Output.WriteLine();
+            Output.WriteLine("");
             Output.Write("Select an option, or any other key to exit: ");
 
-            var inputChar = Console.ReadKey().KeyChar;
+            char inputChar = Console.ReadKey().KeyChar;
             Output.WriteLine();
 
             feature = inputChar switch
@@ -134,7 +135,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 '7' => YubiKeyFeature.PivManagementKeyTouchPolicy,
                 '8' => YubiKeyFeature.PivTouchPolicyCached,
                 '9' => YubiKeyFeature.PivPrivateKeyTouchPolicyCached,
-                _ => throw new NotImplementedException()
+                _ => throw new NotImplementedException(),
             };
 
             return feature;
@@ -161,16 +162,16 @@ namespace Yubico.YubiKey.TestApp.Plugins
             Output.WriteLine("14. Challenge-Response mode");
             Output.WriteLine("15. Alpha numeric passwords");
             Output.WriteLine("16. Password manual updates");
-            Output.WriteLine();
+            Output.WriteLine("");
             Output.Write("Select an option and press ENTER. Press any other key to exit: ");
 
-            var inputKey = Console.ReadKey(intercept: true);
-            var inputStr = new StringBuilder(inputKey.KeyChar.ToString());
+            ConsoleKeyInfo inputKey = Console.ReadKey(true);
+            StringBuilder inputStr = new StringBuilder(inputKey.KeyChar.ToString());
             Console.Write(inputStr);
 
             while (inputKey.Key != ConsoleKey.Enter)
             {
-                inputKey = Console.ReadKey(intercept: true);
+                inputKey = Console.ReadKey(true);
                 if (inputKey.Key != ConsoleKey.Enter)
                 {
                     _ = inputStr.Append(inputKey.KeyChar);
@@ -196,7 +197,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 "14" => YubiKeyFeature.OtpChallengeResponseMode,
                 "15" => YubiKeyFeature.OtpAlphaNumericPasswords,
                 "16" => YubiKeyFeature.OtpPasswordManualUpdates,
-                _ => throw new NotImplementedException()
+                _ => throw new NotImplementedException(),
             };
 
             return feature;
@@ -210,10 +211,10 @@ namespace Yubico.YubiKey.TestApp.Plugins
             Output.WriteLine("1. Rename credential");
             Output.WriteLine("2. Touch credential");
             Output.WriteLine("3. SHA-512 algorithm");
-            Output.WriteLine();
+            Output.WriteLine("");
             Output.Write("Select an option, or any other key to exit: ");
 
-            var inputChar = Console.ReadKey().KeyChar;
+            char inputChar = Console.ReadKey().KeyChar;
             Output.WriteLine();
 
             feature = inputChar switch
@@ -221,7 +222,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 '1' => YubiKeyFeature.OathRenameCredential,
                 '2' => YubiKeyFeature.OathTouchCredential,
                 '3' => YubiKeyFeature.OathSha512,
-                _ => throw new NotImplementedException()
+                _ => throw new NotImplementedException(),
             };
 
             return feature;

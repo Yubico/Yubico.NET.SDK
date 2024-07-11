@@ -18,36 +18,36 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    ///     Gets detailed information about the YubiKey and its current configuration.
+    /// Gets detailed information about the YubiKey and its current configuration.
     /// </summary>
     /// <remarks>
-    ///     This class has a corresponding partner class <see cref="GetDeviceInfoResponse" />
+    /// This class has a corresponding partner class <see cref="GetDeviceInfoResponse"/>
     /// </remarks>
     [Obsolete("This class has been replaced by GetPagedDeviceInfoCommand")]
     public class GetDeviceInfoCommand : IYubiKeyCommand<GetDeviceInfoResponse>
     {
         /// <summary>
-        ///     Initializes a new instance of the <see cref="GetDeviceInfoCommand" /> class.
-        /// </summary>
-        public GetDeviceInfoCommand()
-        {
-        }
-
-        /// <summary>
-        ///     Gets the YubiKeyApplication to which this command belongs.
+        /// Gets the YubiKeyApplication to which this command belongs.
         /// </summary>
         /// <value>
-        ///     YubiKeyApplication.Otp
+        /// YubiKeyApplication.Otp
         /// </value>
         public YubiKeyApplication Application => YubiKeyApplication.Otp;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="GetDeviceInfoCommand"/> class.
+        /// </summary>
+        public GetDeviceInfoCommand()
+        {
+
+        }
+
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Ins = OtpConstants.RequestSlotInstruction,
-                P1 = OtpConstants.GetDeviceInfoSlot
-            };
+        public CommandApdu CreateCommandApdu() => new CommandApdu()
+        {
+            Ins = OtpConstants.RequestSlotInstruction,
+            P1 = OtpConstants.GetDeviceInfoSlot
+        };
 
         /// <inheritdoc />
         public GetDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

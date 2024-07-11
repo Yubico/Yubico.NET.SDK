@@ -21,8 +21,8 @@ namespace Yubico.PlatformInterop
     [Trait("Category", "Simple")]
     public class ListenSmartCardTests
     {
-        private readonly ITestOutputHelper _output;
         private int _counter;
+        private readonly ITestOutputHelper _output;
 
         public ListenSmartCardTests(ITestOutputHelper output)
         {

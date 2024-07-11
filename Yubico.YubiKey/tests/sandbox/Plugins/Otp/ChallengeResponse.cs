@@ -22,15 +22,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class ChallengeResponse : OtpPluginBase
     {
-        public ChallengeResponse(IOutput output) : base(output)
-        {
-            // We're reusing ParameterUse.Generate, so we'll update the description.
-            Parameters["generate"].Description = "Generate a random key. Conflicts with key, " +
-                                                 "TOTP, and generate.";
-            // We're reusing ParameterUse.Totp...
-            Parameters["totp"].Description = "Output key as base32 (generally used in TOTP applications).";
-        }
-
         public override string Name => "ChalResp";
 
         public override string Description => "Program a challenge-response credential.";
@@ -45,6 +36,15 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             | ParameterUse.Totp
             | ParameterUse.YubiOtp
             | ParameterUse.ShortHMAC;
+
+        public ChallengeResponse(IOutput output) : base(output)
+        {
+            // We're reusing ParameterUse.Generate, so we'll update the description.
+            Parameters["generate"].Description = "Generate a random key. Conflicts with key, " +
+                "TOTP, and generate.";
+            // We're reusing ParameterUse.Totp...
+            Parameters["totp"].Description = "Output key as base32 (generally used in TOTP applications).";
+        }
 
         public override void HandleParameters()
         {
@@ -83,10 +83,10 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 }
             }
 
-            var expectedKeyLength =
+            int expectedKeyLength =
                 _yubiOtp
-                    ? ConfigureChallengeResponse.YubiOtpKeySize
-                    : ConfigureChallengeResponse.HmacSha1KeySize;
+                ? ConfigureChallengeResponse.YubiOtpKeySize
+                : ConfigureChallengeResponse.HmacSha1KeySize;
             if (!_generate)
             {
                 if (_key.Length == 0)
@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             if (exceptions.Count > 0)
             {
                 throw exceptions.Count == 1
-                    ? exceptions[index: 0]
+                    ? exceptions[0]
                     : new AggregateException(
                         $"{exceptions.Count} errors encountered.",
                         exceptions);
@@ -126,7 +126,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         {
             using var otp = new OtpSession(_yubiKey!);
 
-            var op = otp.ConfigureChallengeResponse(_slot)
+            ConfigureChallengeResponse op = otp.ConfigureChallengeResponse(_slot)
                 .UseCurrentAccessCode((SlotAccessCode)_currentAccessCode)
                 .SetNewAccessCode((SlotAccessCode)_newAccessCode)
                 .UseSmallChallenge(_useShortChallenge)
@@ -137,7 +137,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Output.WriteLine("Aborted.", OutputLevel.Error);
                 return false;
             }
-
             op = _yubiOtp
                 ? op.UseYubiOtp()
                 : op.UseHmacSha1();
@@ -161,20 +160,20 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             if (_generate || _generateTotp || Output.OutputLevel > OutputLevel.Normal)
             {
-                var encodedKeySize =
+                int encodedKeySize =
                     _generateTotp
-                        ? Base32.GetEncodedSize(_key.Length)
-                        : _key.Length * 2;
+                    ? Base32.GetEncodedSize(_key.Length)
+                    : _key.Length * 2;
 
                 Span<char> encodedKey = stackalloc char[encodedKeySize];
                 try
                 {
-                    var encoding =
+                    ITextEncoding encoding =
                         _generateTotp
-                            ? (ITextEncoding)new Base32()
-                            : _yubiOtp
-                                ? new ModHex()
-                                : new Base16();
+                        ? (ITextEncoding)new Base32()
+                        : _yubiOtp
+                            ? new ModHex()
+                            : new Base16();
                     encoding.Encode(_key, encodedKey);
                     Output.Write((_generate ? "Generated " : string.Empty) + $"Key ({encoding.GetType()}): ");
                     Output.WriteSensitive(encodedKey, OutputLevel.Quiet);
@@ -184,7 +183,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 {
                     encodedKey.Clear();
                 }
-
                 Output.WriteLine("Mode: " + (_yubiOtp ? "Yubico OTP" : "HMAC-SHA1"), OutputLevel.Verbose);
                 Output.WriteLine($"Button press: {(_button ? string.Empty : "Not ")} required");
             }

@@ -21,7 +21,7 @@ using Yubico.PlatformInterop;
 namespace Yubico.Core.Devices.Hid
 {
     /// <summary>
-    ///     This class represents Linux HID device.
+    /// This class represents Linux HID device.
     /// </summary>
     internal class LinuxHidDevice : HidDevice
     {
@@ -35,6 +35,20 @@ namespace Yubico.Core.Devices.Hid
         private readonly string _devnode;
 
         private readonly Logger _log = Log.GetLogger();
+
+        /// <summary>
+        /// Gets a list of all the HIDs on the system (not just YubiKeys).
+        /// </summary>
+        /// <returns>A list of <see cref="HidDevice"/> objects.</returns>
+        public static IEnumerable<HidDevice> GetList()
+        {
+            // Build an object to search for "hidraw" devices.
+            using var scanObject = new LinuxUdevScan();
+            scanObject.EnumerateAddMatchSubsystem(NativeMethods.UdevSubsystemName);
+            scanObject.EnumerateScanDevices();
+
+            return scanObject.GetLinuxHidDeviceList();
+        }
 
         // Build a new LinuxHidDevice from a device handle.
         internal LinuxHidDevice(LinuxUdevDeviceSafeHandle deviceHandle)
@@ -70,20 +84,6 @@ namespace Yubico.Core.Devices.Hid
 
             GetVendorProductIds(handle);
             GetUsageProperties(handle);
-        }
-
-        /// <summary>
-        ///     Gets a list of all the HIDs on the system (not just YubiKeys).
-        /// </summary>
-        /// <returns>A list of <see cref="HidDevice" /> objects.</returns>
-        public static IEnumerable<HidDevice> GetList()
-        {
-            // Build an object to search for "hidraw" devices.
-            using var scanObject = new LinuxUdevScan();
-            scanObject.EnumerateAddMatchSubsystem(NativeMethods.UdevSubsystemName);
-            scanObject.EnumerateScanDevices();
-
-            return scanObject.GetLinuxHidDeviceList();
         }
 
         private static string DeviceGetPath(IntPtr udevDevice)
@@ -156,14 +156,13 @@ namespace Yubico.Core.Devices.Hid
             if (status >= 0)
             {
                 byte[] descriptor = new byte[NativeMethods.DescriptorSize];
-                Marshal.Copy(descriptorStructData, descriptor, startIndex: 0, NativeMethods.DescriptorSize);
+                Marshal.Copy(descriptorStructData, descriptor, 0, NativeMethods.DescriptorSize);
                 ParseUsageProperties(descriptor, NativeMethods.OffsetDescValue, descriptorLength);
             }
             else
             {
                 _log.LogWarning("IOCTL failed. {error}", LibcHelpers.GetErrnoString());
             }
-
             Marshal.FreeHGlobal(descriptorStructData);
         }
 
@@ -206,9 +205,7 @@ namespace Yubico.Core.Devices.Hid
 
             while (currentOffset < descriptorLength)
             {
-                currentOffset = ReadTagAndLength(
-                    descriptor, currentOffset, descriptorLength, out int tag, out int length);
-
+                currentOffset = ReadTagAndLength(descriptor, currentOffset, descriptorLength, out int tag, out int length);
                 currentOffset = ReadValue(descriptor, currentOffset, descriptorLength, length, out int value);
 
                 // If the tag is 4, the value is the USAGE PAGE. If we already
@@ -218,7 +215,6 @@ namespace Yubico.Core.Devices.Hid
                     usagePageValue = value;
                     usagePageFound = true;
                 }
-
                 // If the tag is 8, the value is the USAGE. Go ahead and set the
                 // Usage property in this object. If we already have a USAGE,
                 // ignore this one.
@@ -258,19 +254,14 @@ namespace Yubico.Core.Devices.Hid
         // If this is long form, the method will read the next two bytes (the
         // actual tag and length), but will verify there are two bytes to read.
         // If not, it will return an offset beyond the tag and length octets.
-        private static int ReadTagAndLength(
-            byte[] descriptor,
-            int offset,
-            int descriptorLength,
-            out int tag,
-            out int length)
+        private static int ReadTagAndLength(byte[] descriptor, int offset, int descriptorLength, out int tag, out int length)
         {
             int newOffset = offset + 1;
 
             // The length is the least significant 2 bits. In addition, the only
             // valid lengths are 0, 1, 2, and 4. So if the length is 3, it's
             // really 4.
-            tag = descriptor[offset];
+            tag = (int)descriptor[offset];
             length = tag & 3;
             if (length == 3)
             {
@@ -285,8 +276,8 @@ namespace Yubico.Core.Devices.Hid
                 newOffset += 2;
                 if (newOffset < descriptorLength)
                 {
-                    tag = descriptor[offset + 2] & 0xFF;
-                    length = descriptor[offset + 1] & 0xFF;
+                    tag = (int)descriptor[offset + 2] & 0xFF;
+                    length = (int)descriptor[offset + 1] & 0xFF;
                 }
             }
 
@@ -309,31 +300,37 @@ namespace Yubico.Core.Devices.Hid
             {
                 for (int index = 0; index < length; index++)
                 {
-                    value += descriptor[offset + index] << 8 * index;
+                    value += (int)descriptor[offset + index] << (8 * index);
                 }
             }
 
             return newOffset;
         }
 
-        /// <summary>
-        ///     Return an implementation of IHidConnection that will already have a
-        ///     connection to the Linux HID device, and will be able to Get and Set Feature Reports.
-        /// </summary>
-        /// <returns>An open <see cref="IHidConnection" />.</returns>
-        public override IHidConnection ConnectToFeatureReports() => new LinuxHidFeatureReportConnection(this, _devnode);
 
         /// <summary>
-        ///     Opens an active connection to the Linux HID device.
+        /// Return an implementation of IHidConnection that will already have a
+        /// connection to the Linux HID device, and will be able to Get and Set Feature Reports.
         /// </summary>
-        /// <returns>An open <see cref="IHidConnection" />.</returns>
-        public override IHidConnection ConnectToIOReports() => new LinuxHidIOReportConnection(this, _devnode);
+        /// <returns>An open <see cref="IHidConnection"/>.</returns>
+        public override IHidConnection ConnectToFeatureReports()
+        {
+            return new LinuxHidFeatureReportConnection(this, _devnode);
+        }
+
+        /// <summary>
+        /// Opens an active connection to the Linux HID device.
+        /// </summary>
+        /// <returns>An open <see cref="IHidConnection"/>.</returns>
+        public override IHidConnection ConnectToIOReports()
+        {
+            return new LinuxHidIOReportConnection(this, _devnode);
+        }
 
         public void LogDeviceAccessTime()
         {
             LastAccessed = DateTime.Now;
-            _log.LogInformation(
-                "Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
+            _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
         }
     }
 }

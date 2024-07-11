@@ -33,14 +33,13 @@ namespace Yubico.YubiKey
         [Fact]
         public void WithScp03_WhenDeviceDoesNotHaveSmartCard_ThrowsException()
         {
-            var ykDeviceInfo = new YubiKeyDeviceInfo
+            var ykDeviceInfo = new YubiKeyDeviceInfo()
             {
                 AvailableUsbCapabilities = YubiKeyCapabilities.All,
-                EnabledUsbCapabilities = YubiKeyCapabilities.All
+                EnabledUsbCapabilities = YubiKeyCapabilities.All,
             };
 
-            var ykDevice = new YubiKeyDevice(smartCardDevice: null, hidKeyboardDevice: null, hidFidoDevice: null,
-                ykDeviceInfo);
+            var ykDevice = new YubiKeyDevice(null, null, null, ykDeviceInfo);
             _ = Assert.Throws<NotSupportedException>(() => ykDevice.WithScp03(new StaticKeys()));
         }
 
@@ -48,15 +47,14 @@ namespace Yubico.YubiKey
         public void WithScp03_WhenDeviceCorrect_Succeeds()
         {
             var mockSmartCard = new Mock<ISmartCardDevice>();
-            var ykDeviceInfo = new YubiKeyDeviceInfo
+            var ykDeviceInfo = new YubiKeyDeviceInfo()
             {
                 AvailableUsbCapabilities = YubiKeyCapabilities.All,
-                EnabledUsbCapabilities = YubiKeyCapabilities.All
+                EnabledUsbCapabilities = YubiKeyCapabilities.All,
             };
 
-            var ykDevice = new YubiKeyDevice(mockSmartCard.Object, hidKeyboardDevice: null, hidFidoDevice: null,
-                ykDeviceInfo);
-            var scp03Device = ykDevice.WithScp03(new StaticKeys());
+            var ykDevice = new YubiKeyDevice(mockSmartCard.Object, null, null, ykDeviceInfo);
+            IYubiKeyDevice scp03Device = ykDevice.WithScp03(new StaticKeys());
             _ = Assert.IsAssignableFrom<Scp03YubiKeyDevice>(scp03Device);
         }
     }

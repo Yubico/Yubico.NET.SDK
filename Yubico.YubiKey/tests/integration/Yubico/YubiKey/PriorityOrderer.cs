@@ -48,7 +48,7 @@ namespace Yubico.YubiKey
                 .Enqueue(testCase.TestMethod.Method.Name);
 
             // Order the test based on the attribute.
-            var attr = testCase.TestMethod.Method
+            TestPriorityAttribute? attr = testCase.TestMethod.Method
                 .ToRuntimeMethod()
                 .GetCustomAttribute<TestPriorityAttribute>();
             return attr?.Priority ?? 0;

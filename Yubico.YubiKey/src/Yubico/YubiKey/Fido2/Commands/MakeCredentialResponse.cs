@@ -18,19 +18,19 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    ///     This is the partner response class to the
-    ///     <see cref="MakeCredentialCommand" /> command class.
+    /// This is the partner response class to the
+    /// <see cref="MakeCredentialCommand"/> command class.
     /// </summary>
     public class MakeCredentialResponse : Fido2Response, IYubiKeyResponseWithData<MakeCredentialData>
     {
         /// <summary>
-        ///     Constructs a new instance of the
-        ///     <see cref="MakeCredentialResponse" /> class based on a response APDU
-        ///     provided by the YubiKey.
+        /// Constructs a new instance of the
+        /// <see cref="MakeCredentialResponse"/> class based on a response APDU
+        /// provided by the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     A response APDU containing the CBOR response for the
-        ///     <c>authenticatorMakeCredential</c> command.
+        /// A response APDU containing the CBOR response for the
+        /// <c>authenticatorMakeCredential</c> command.
         /// </param>
         public MakeCredentialResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -38,15 +38,15 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        ///     Returns a new instance of <see cref="MakeCredentialData" /> containing
-        ///     the credential (a public key) and other information.
+        /// Returns a new instance of <see cref="MakeCredentialData"/> containing
+        /// the credential (a public key) and other information.
         /// </summary>
         /// <returns>
-        ///     A new instance of <c>MakeCredentialData</c>.
+        /// A new instance of <c>MakeCredentialData</c>.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///     The response indicates there was an error, so there is no data to
-        ///     return.
+        /// The response indicates there was an error, so there is no data to
+        /// return.
         /// </exception>
         public MakeCredentialData GetData()
         {

@@ -19,12 +19,10 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    ///     Configures Authentication. If length 0 is sent, authentication is removed.
-    ///     The key to be set is expected to be a user-supplied UTF-8 encoded password passed through 1000 rounds of PBKDF2
-    ///     with the ID from SelectOathResponse used as salt.
-    ///     16 bytes of that are used. When configuring authentication you are required to send an 8 byte challenge and one
-    ///     authentication-response with that key,
-    ///     in order to confirm that the application and the host software can calculate the same response for that key.
+    /// Configures Authentication. If length 0 is sent, authentication is removed.
+    /// The key to be set is expected to be a user-supplied UTF-8 encoded password passed through 1000 rounds of PBKDF2 with the ID from SelectOathResponse used as salt.
+    /// 16 bytes of that are used. When configuring authentication you are required to send an 8 byte challenge and one authentication-response with that key,
+    /// in order to confirm that the application and the host software can calculate the same response for that key.
     /// </summary>
     public class SetPasswordCommand : OathChallengeResponseBaseCommand, IYubiKeyCommand<SetPasswordResponse>
     {
@@ -33,6 +31,27 @@ namespace Yubico.YubiKey.Oath.Commands
         private const byte ChallengeTag = 0x74;
         private const byte ResponseTag = 0x75;
 
+        /// <summary>
+        /// Gets the OATH application information.
+        /// </summary>
+        public OathApplicationData OathData { get; }
+
+        /// <summary>
+        /// Gets the password.
+        /// </summary>
+        /// <value>
+        /// A user-supplied password to validate.
+        /// </value>
+        public ReadOnlyMemory<byte> Password { get; }
+
+        /// <summary>
+        /// Gets the YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        /// YubiKeyApplication.Oath
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Oath;
+
         // We explicitly do not want a default constructor for this command.
         private SetPasswordCommand()
         {
@@ -40,13 +59,13 @@ namespace Yubico.YubiKey.Oath.Commands
         }
 
         /// <summary>
-        ///     Constructs an instance of the <see cref="SetPasswordCommand" /> class.
+        /// Constructs an instance of the <see cref="SetPasswordCommand" /> class.
         /// </summary>
         /// <param name="password">
-        ///     The user-supplied password to validate.
+        /// The user-supplied password to validate.
         /// </param>
         /// <param name="oathData">
-        ///     An implementation of <c>OathApplicationData</c>.
+        ///  An implementation of <c>OathApplicationData</c>.
         /// </param>
         public SetPasswordCommand(ReadOnlyMemory<byte> password, OathApplicationData oathData)
         {
@@ -59,27 +78,6 @@ namespace Yubico.YubiKey.Oath.Commands
             OathData = oathData;
         }
 
-        /// <summary>
-        ///     Gets the OATH application information.
-        /// </summary>
-        public OathApplicationData OathData { get; }
-
-        /// <summary>
-        ///     Gets the password.
-        /// </summary>
-        /// <value>
-        ///     A user-supplied password to validate.
-        /// </value>
-        public ReadOnlyMemory<byte> Password { get; }
-
-        /// <summary>
-        ///     Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        ///     YubiKeyApplication.Oath
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Oath;
-
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
         {
@@ -87,7 +85,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             if (Password.Length == 0)
             {
-                tlvWriter.WriteValue(SecretTag, value: null);
+                tlvWriter.WriteValue(SecretTag, null);
             }
             else
             {
@@ -97,7 +95,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
                 byte[] fullKey = new byte[1 + secret.Length];
                 fullKey[0] = (byte)HashAlgorithm.Sha1;
-                Array.Copy(secret, sourceIndex: 0, fullKey, destinationIndex: 1, secret.Length);
+                Array.Copy(secret, 0, fullKey, 1, secret.Length);
 
                 tlvWriter.WriteValue(SecretTag, fullKey);
                 tlvWriter.WriteValue(ChallengeTag, challenge);

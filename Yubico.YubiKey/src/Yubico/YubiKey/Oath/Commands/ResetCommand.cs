@@ -17,37 +17,37 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    ///     Resets the YubiKey's OATH application back to a factory default state.
+    /// Resets the YubiKey's OATH application back to a factory default state.
     /// </summary>
     public class ResetCommand : IYubiKeyCommand<OathResponse>
     {
         private const byte ResetInstruction = 0x04;
 
         /// <summary>
-        ///     Constructs an instance of the <see cref="ResetCommand" /> class.
+        /// Gets the YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        /// YubiKeyApplication.Oath
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Oath;
+
+        /// <summary>
+        /// Constructs an instance of the <see cref="ResetCommand" /> class.
         /// </summary>
         public ResetCommand()
         {
         }
 
-        /// <summary>
-        ///     Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        ///     YubiKeyApplication.Oath
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Oath;
+        /// <inheritdoc />
+        public CommandApdu CreateCommandApdu() => new CommandApdu()
+        {
+            Ins = ResetInstruction,
+            P1 = 0xDE,
+            P2 = 0xAD
+        };
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Ins = ResetInstruction,
-                P1 = 0xDE,
-                P2 = 0xAD
-            };
-
-        /// <inheritdoc />
-        public OathResponse CreateResponseForApdu(ResponseApdu responseApdu) => new OathResponse(responseApdu);
+        public OathResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new OathResponse(responseApdu);
     }
 }

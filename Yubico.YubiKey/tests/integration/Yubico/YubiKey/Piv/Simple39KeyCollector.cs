@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.Piv
                 }
             }
 
-            var isChange = false;
+            bool isChange = false;
             byte[] currentValue;
             byte[]? newValue = null;
 
@@ -164,24 +164,18 @@ namespace Yubico.YubiKey.Piv
             return true;
         }
 
-        public static byte[] CollectPin()
-        {
-            return new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-        }
+        public static byte[] CollectPin() =>
+            new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
-        public static byte[] CollectPuk()
-        {
-            return new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
-        }
+        public static byte[] CollectPuk() =>
+            new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 };
 
-        public static byte[] CollectMgmtKey()
-        {
-            return new byte[]
+        public static byte[] CollectMgmtKey() =>
+            new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             };
-        }
     }
 }

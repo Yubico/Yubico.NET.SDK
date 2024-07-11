@@ -19,7 +19,7 @@ using System.Formats.Cbor;
 namespace Yubico.YubiKey.Fido2.Cbor
 {
     /// <summary>
-    ///     Some helpers to make working with CBOR a little easier.
+    /// Some helpers to make working with CBOR a little easier.
     /// </summary>
     internal static class CborHelpers
     {
@@ -30,16 +30,16 @@ namespace Yubico.YubiKey.Fido2.Cbor
         public delegate byte[] CborEncodeDelegate<T>(T? localData) where T : class;
 
         /// <summary>
-        ///     Use this method to write CBOR maps (which is mostly what CTAP2 uses). This uses a builder-like pattern
-        ///     where you can chain calls to add additional entries.
+        /// Use this method to write CBOR maps (which is mostly what CTAP2 uses). This uses a builder-like pattern
+        /// where you can chain calls to add additional entries.
         /// </summary>
         /// <param name="cbor">
-        ///     An instance of a CborWriter. It must have the `ConvertIndefiniteLengthEncodings` option enabled.
+        /// An instance of a CborWriter. It must have the `ConvertIndefiniteLengthEncodings` option enabled.
         /// </param>
         /// <returns>
-        ///     An instance of the `CborMapWriter` builder class. You should not need to store this value anywhere. The intended
-        ///     use is to chain calls to its method like the following:
-        ///     <code language="C#">
+        /// An instance of the `CborMapWriter` builder class. You should not need to store this value anywhere. The intended
+        /// use is to chain calls to its method like the following:
+        /// <code language="C#">
         /// CborHelper.BeginMap(cborWriter)
         ///     .Entry(123, "abc")
         ///     .Entry(456, "def")
@@ -51,23 +51,23 @@ namespace Yubico.YubiKey.Fido2.Cbor
         public static CborMapWriter<TKey> BeginMap<TKey>(CborWriter cbor) => new CborMapWriter<TKey>(cbor);
 
         /// <summary>
-        ///     Read an array of strings, placing them into the given <c>List</c> if
-        ///     it is not null. Create a new <c>List</c> if it the array is null.
-        ///     Return the new <c>List</c> if this method creates one, return the
-        ///     input destination if the method does not.
+        /// Read an array of strings, placing them into the given <c>List</c> if
+        /// it is not null. Create a new <c>List</c> if it the array is null.
+        /// Return the new <c>List</c> if this method creates one, return the
+        /// input destination if the method does not.
         /// </summary>
         /// <param name="cbor">
-        ///     The object that will read the array. This method assumes that this
-        ///     object is "pointing to" the array.
+        /// The object that will read the array. This method assumes that this
+        /// object is "pointing to" the array.
         /// </param>
         /// <param name="destination">
-        ///     If the array is not null, the strings will be deposited here. If it
-        ///     is null, the method will create a new <c>List</c>.
+        /// If the array is not null, the strings will be deposited here. If it
+        /// is null, the method will create a new <c>List</c>.
         /// </param>
         /// <returns>
-        ///     The <c>List</c> containing the strings. If the input
-        ///     <c>destination</c> argument is null, then the return is a new
-        ///     <c>List</c>. Otherwise, <c>destination</c> is returned.
+        /// The <c>List</c> containing the strings. If the input
+        /// <c>destination</c> argument is null, then the return is a new
+        /// <c>List</c>. Otherwise, <c>destination</c> is returned.
         /// </returns>
         public static List<string>? ReadStringArray(CborReader cbor, List<string>? destination)
         {
@@ -87,20 +87,20 @@ namespace Yubico.YubiKey.Fido2.Cbor
         }
 
         /// <summary>
-        ///     Encode an array of strings. This implements <c>CborEncodeDelegate</c>.
+        /// Encode an array of strings. This implements <c>CborEncodeDelegate</c>.
         /// </summary>
         /// <remarks>
-        ///     This method expects the <c>localData</c> to be an instance of
-        ///     <c>IReadOnlyList&lt;string&gt;</c>. If it is null, this method will
-        ///     return an empty byte array.
+        /// This method expects the <c>localData</c> to be an instance of
+        /// <c>IReadOnlyList&lt;string&gt;</c>. If it is null, this method will
+        /// return an empty byte array.
         /// </remarks>
         /// <param name="localData">
-        ///     The list of strings to encode.
+        /// The list of strings to encode.
         /// </param>
         /// <returns>
-        ///     A byte array containing the encoded list. If there is no list
-        ///     (<c>localData</c> is null or a list with <c>Count</c> zero), the
-        ///     return will be an empty byte array.
+        /// A byte array containing the encoded list. If there is no list
+        /// (<c>localData</c> is null or a list with <c>Count</c> zero), the
+        /// return will be an empty byte array.
         /// </returns>
         public static byte[] EncodeStringArray(IReadOnlyList<string>? localData)
         {
@@ -116,29 +116,28 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 cbor.WriteTextString(currentString);
             }
-
             cbor.WriteEndArray();
 
             return cbor.Encode();
         }
 
         /// <summary>
-        ///     Encode an array of objects. This implements <c>CborEncodeDelegate</c>.
+        /// Encode an array of objects. This implements <c>CborEncodeDelegate</c>.
         /// </summary>
         /// <remarks>
-        ///     This method expects the <c>localData</c> to be an instance of
-        ///     <c>IReadOnlyList&lt;ICborEncode&gt;</c>. If it is null, or the list's
-        ///     count is zero, this method will return an empty byte array. So if you
-        ///     want "no entries" to mean "don't write anything", don't call this
-        ///     method.
+        /// This method expects the <c>localData</c> to be an instance of
+        /// <c>IReadOnlyList&lt;ICborEncode&gt;</c>. If it is null, or the list's
+        /// count is zero, this method will return an empty byte array. So if you
+        /// want "no entries" to mean "don't write anything", don't call this
+        /// method.
         /// </remarks>
         /// <param name="localData">
-        ///     The list of objects to encode.
+        /// The list of objects to encode.
         /// </param>
         /// <returns>
-        ///     A byte array containing the encoded list. If there is no list
-        ///     (<c>localData</c> is null or a list with <c>Count</c> zero), the
-        ///     return will be an empty byte array.
+        /// A byte array containing the encoded list. If there is no list
+        /// (<c>localData</c> is null or a list with <c>Count</c> zero), the
+        /// return will be an empty byte array.
         /// </returns>
         public static byte[] EncodeArrayOfObjects(IReadOnlyList<ICborEncode>? localData)
         {
@@ -154,7 +153,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 cbor.WriteEncodedValue(cborEncode.CborEncode());
             }
-
             cbor.WriteEndArray();
 
             return cbor.Encode();

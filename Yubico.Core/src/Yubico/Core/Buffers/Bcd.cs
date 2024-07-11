@@ -17,13 +17,13 @@ using System;
 namespace Yubico.Core.Buffers
 {
     /// <summary>
-    ///     Class for encoding and decoding bytes into BCD (binary coded decimal) format.
+    /// Class for encoding and decoding bytes into BCD (binary coded decimal) format.
     /// </summary>
     /// <remarks>
-    ///     BCD is a way to represent decimal data in a format that is both easy to parse
-    ///     and easily human-readable. Each four bits is one decimal digit. The obvious
-    ///     disadvantage is that the data is far less dense. Each byte can only contain
-    ///     less than seven full bits of data.
+    /// BCD is a way to represent decimal data in a format that is both easy to parse
+    /// and easily human-readable. Each four bits is one decimal digit. The obvious
+    /// disadvantage is that the data is far less dense. Each byte can only contain
+    /// less than seven full bits of data.
     /// </remarks>
     public class Bcd : Base16
     {
@@ -33,25 +33,25 @@ namespace Yubico.Core.Buffers
         // of code.
         private readonly Memory<char> _characterSet = "0123456789".ToCharArray();
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         protected override Span<char> CharacterSet => _characterSet.Span;
 
         #region Static Version
-
         /// <inheritdoc />
         public static new void EncodeBytes(ReadOnlySpan<byte> data, Span<char> encoded) =>
             new Bcd().Encode(data, encoded);
 
         /// <inheritdoc />
-        public static new string EncodeBytes(ReadOnlySpan<byte> data) => new Bcd().Encode(data);
+        public static new string EncodeBytes(ReadOnlySpan<byte> data) =>
+            new Bcd().Encode(data);
 
         /// <inheritdoc />
         public static new void DecodeText(ReadOnlySpan<char> encoded, Span<byte> data) =>
             new Bcd().Decode(encoded, data);
 
         /// <inheritdoc />
-        public static new byte[] DecodeText(string encoded) => new Bcd().Decode(encoded);
-
+        public static new byte[] DecodeText(string encoded) =>
+            new Bcd().Decode(encoded);
         #endregion
     }
 }

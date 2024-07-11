@@ -13,24 +13,26 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
+using System.Security.Cryptography;
 using System.Text;
 using Xunit;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Oath.Commands
 {
     public class ValidateResponseTests
     {
-        private const byte success_sw1 = unchecked((byte)(SWConstants.Success >> 8));
-        private const byte success_sw2 = unchecked((byte)SWConstants.Success);
+        readonly byte[] _fixedBytes = new byte[8] { 0xF1, 0x03, 0xDA, 0x89, 0x01, 0x02, 0x03, 0x04 };
+        private readonly byte[] _password = Encoding.UTF8.GetBytes("test");
+        const byte success_sw1 = unchecked((byte)(SWConstants.Success >> 8));
+        const byte success_sw2 = unchecked((byte)SWConstants.Success);
 
         private const short StatusWordAuthNotEnabled = 0x6984;
-        private readonly byte[] _fixedBytes = new byte[8] { 0xF1, 0x03, 0xDA, 0x89, 0x01, 0x02, 0x03, 0x04 };
-        private readonly byte[] _password = Encoding.UTF8.GetBytes("test");
 
-        private readonly ResponseApdu selectResponseApdu = new ResponseApdu(new byte[]
-        {
+        private readonly ResponseApdu selectResponseApdu = new ResponseApdu(new byte[] {
             0x79, 0x03, 0x05, 0x02, 0x04, 0x71, 0x08, 0xC0, 0xE3, 0xAF,
             0x27, 0xCC, 0x7A, 0x20, 0xEE, 0x74, 0x08, 0xF1, 0x03, 0xDA,
             0x89, 0x58, 0xE4, 0x40, 0x85, 0x7B, 0x01, 0x01, success_sw1, success_sw2
@@ -43,8 +45,8 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
             var selectOathResponse = new SelectOathResponse(selectResponseApdu);
-            var oathData = selectOathResponse.GetData();
-            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+            OathApplicationData oathData = selectOathResponse.GetData();
+            RandomObjectUtility utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
 
             try
             {
@@ -71,12 +73,12 @@ namespace Yubico.YubiKey.Oath.Commands
         [Fact]
         public void Status_AuthNotEnabledResponseApdu_ReturnsFailed()
         {
-            const byte sw1 = StatusWordAuthNotEnabled >> 8;
+            const byte sw1 = unchecked((byte)(StatusWordAuthNotEnabled >> 8));
             const byte sw2 = unchecked((byte)StatusWordAuthNotEnabled);
 
             var selectOathResponse = new SelectOathResponse(selectResponseApdu);
-            var oathData = selectOathResponse.GetData();
-            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+            OathApplicationData oathData = selectOathResponse.GetData();
+            RandomObjectUtility utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
 
             try
             {
@@ -104,8 +106,8 @@ namespace Yubico.YubiKey.Oath.Commands
         public void SuccessResponseApdu_PasswordIsSet_OathResponseInfoCorrect()
         {
             var selectOathResponse = new SelectOathResponse(selectResponseApdu);
-            var oathData = selectOathResponse.GetData();
-            var utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
+            OathApplicationData oathData = selectOathResponse.GetData();
+            RandomObjectUtility utility = RandomObjectUtility.SetRandomProviderFixedBytes(_fixedBytes);
 
             try
             {

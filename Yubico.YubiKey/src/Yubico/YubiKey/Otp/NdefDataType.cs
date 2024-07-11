@@ -15,18 +15,18 @@
 namespace Yubico.YubiKey.Otp
 {
     /// <summary>
-    ///     The NFC Forum well known types that are supported by the YubiKey's NDEF payload.
+    /// The NFC Forum well known types that are supported by the YubiKey's NDEF payload.
     /// </summary>
     public enum NdefDataType
     {
         /// <summary>
-        ///     An NFC text record. Type "T" / "urn:nfc:wkt:T".
+        /// An NFC text record. Type "T" / "urn:nfc:wkt:T".
         /// </summary>
         Text,
 
         /// <summary>
-        ///     An NFC Uniform Resource Identifier (URI) record. Type "U" / "urn:nfc:wkt:U".
+        /// An NFC Uniform Resource Identifier (URI) record. Type "U" / "urn:nfc:wkt:U".
         /// </summary>
-        Uri
+        Uri,
     }
 }

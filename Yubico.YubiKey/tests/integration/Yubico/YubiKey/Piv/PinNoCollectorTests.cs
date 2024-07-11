@@ -26,18 +26,18 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void VerifyPin_Sign_Succeeds(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 var pin = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
 
                 pivSession.ResetApplication();
-                var isValid = pivSession.TryVerifyPin(pin, out var retriesRemaining);
+                bool isValid = pivSession.TryVerifyPin(pin, out int? retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
-                var pinProtect = pivSession.ReadObject<PinProtectedData>();
+                PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
 
                 Assert.True(pivSession.PinVerified);
                 Assert.True(pinProtect.IsEmpty);
@@ -48,19 +48,19 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void VerifyPin_WrongPin_ReturnsFalse(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 var pin = new ReadOnlyMemory<byte>(new byte[] { 0x41, 0x32, 0x33, 0x34, 0x35, 0x36 });
 
                 pivSession.ResetApplication();
-                var isValid = pivSession.TryVerifyPin(pin, out var retriesRemaining);
+                bool isValid = pivSession.TryVerifyPin(pin, out int? retriesRemaining);
                 Assert.False(isValid);
                 _ = Assert.NotNull(retriesRemaining);
                 if (!(retriesRemaining is null))
                 {
-                    Assert.Equal(expected: 2, retriesRemaining);
+                    Assert.Equal(2, retriesRemaining);
                 }
             }
         }
@@ -72,19 +72,19 @@ namespace Yubico.YubiKey.Piv
             var oldPin = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
             var newPin = new ReadOnlyMemory<byte>(new byte[] { 0x41, 0x42, 0x43, 0x44, 0x45, 0x46 });
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
-                var isValid = pivSession.TryVerifyPin(oldPin, out var retriesRemaining);
+                bool isValid = pivSession.TryVerifyPin(oldPin, out int? retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
             }
 
             using (var pivSession = new PivSession(testDevice))
             {
-                var isValid = pivSession.TryChangePin(oldPin, newPin, out var retriesRemaining);
+                bool isValid = pivSession.TryChangePin(oldPin, newPin, out int? retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
-                var pinProtect = pivSession.ReadObject<PinProtectedData>();
+                PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
 
                 Assert.True(pivSession.PinVerified);
                 Assert.True(pinProtect.IsEmpty);
@@ -108,19 +108,19 @@ namespace Yubico.YubiKey.Piv
 
             var newPin = new ReadOnlyMemory<byte>(new byte[] { 0xE4, 0x82, 0x7D, 0x5C, 0xA1, 0x04, 0x70 });
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
-                var isValid = pivSession.TryChangePuk(oldPuk, newPuk, out var retriesRemaining);
+                bool isValid = pivSession.TryChangePuk(oldPuk, newPuk, out int? retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
             }
 
             using (var pivSession = new PivSession(testDevice))
             {
-                var isValid = pivSession.TryResetPin(newPuk, newPin, out var retriesRemaining);
+                bool isValid = pivSession.TryResetPin(newPuk, newPin, out int? retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
@@ -128,7 +128,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
-                var pinProtect = pivSession.ReadObject<PinProtectedData>();
+                PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
 
                 Assert.True(pivSession.PinVerified);
                 Assert.True(pinProtect.IsEmpty);
@@ -139,8 +139,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ChangeRetryCounts_Succeeds(StandardTestDevice testDeviceType)
         {
-            var mgmtKey = new ReadOnlyMemory<byte>(new byte[]
-            {
+            var mgmtKey = new ReadOnlyMemory<byte>(new byte[] {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
@@ -150,13 +149,13 @@ namespace Yubico.YubiKey.Piv
             var oldPuk = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38 });
             var newPuk = new ReadOnlyMemory<byte>(new byte[] { 0x70, 0xE4, 0x82, 0x7D, 0x5C, 0xA1, 0x04 });
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
 
-                var isValid = pivSession.TryChangePin(oldPin, newPin, out var retriesRemaining);
+                bool isValid = pivSession.TryChangePin(oldPin, newPin, out int? retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
@@ -167,7 +166,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(testDevice))
             {
-                var isValid = pivSession.TryVerifyPin(newPin, out var retriesRemaining);
+                bool isValid = pivSession.TryVerifyPin(newPin, out int? retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
@@ -178,7 +177,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(testDevice))
             {
-                var isValid = pivSession.TryVerifyPin(oldPin, out var retriesRemaining);
+                bool isValid = pivSession.TryVerifyPin(oldPin, out int? retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 
@@ -193,8 +192,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(testDevice))
             {
-                var isValid = pivSession.TryChangePinAndPukRetryCounts(mgmtKey, newPin, newRetryCountPin: 7,
-                    newRetryCountPuk: 8, out var retriesRemaining);
+                bool isValid = pivSession.TryChangePinAndPukRetryCounts(mgmtKey, newPin, 7, 8, out int? retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 

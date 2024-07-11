@@ -282,17 +282,15 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// <exception cref="SecurityException">
         ///     The <paramref name="currentManagementKey" /> was incorrect.
         /// </exception>
-        public void ChangeManagementKey(
-            ReadOnlyMemory<byte> currentManagementKey,
-            ReadOnlyMemory<byte> newManagementKey)
+        public void ChangeManagementKey(ReadOnlyMemory<byte> currentManagementKey,
+                                        ReadOnlyMemory<byte> newManagementKey)
         {
             if (!TryChangeManagementKey(currentManagementKey, newManagementKey, out int? retryCount))
             {
-                throw new SecurityException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.YubiHsmAuthMgmtKeyAuthFailed,
-                        retryCount));
+                throw new SecurityException(string.Format(
+                    CultureInfo.CurrentCulture,
+                    ExceptionMessages.YubiHsmAuthMgmtKeyAuthFailed,
+                    retryCount));
             }
         }
     }

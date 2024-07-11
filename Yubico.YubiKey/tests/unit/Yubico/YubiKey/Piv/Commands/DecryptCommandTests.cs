@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -28,8 +29,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa2048)]
         public void ClassType_DerivedFromPivCommand_IsTrue(PivAlgorithm algorithm)
         {
-            var dataToDecrypt = PivCommandResponseTestData.GetEncryptedBlock(algorithm);
-            var decryptCommand = new AuthenticateDecryptCommand(dataToDecrypt, slotNumber: 0x85);
+            byte[] dataToDecrypt = PivCommandResponseTestData.GetEncryptedBlock(algorithm);
+            var decryptCommand = new AuthenticateDecryptCommand(dataToDecrypt, 0x85);
 
             Assert.True(decryptCommand is IYubiKeyCommand<AuthenticateDecryptResponse>);
         }
@@ -38,8 +39,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void FullConstructor_NullData_ThrowsException()
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentException>(() =>
-                new AuthenticateDecryptCommand(dataToDecrypt: null, slotNumber: 0x87));
+            _ = Assert.Throws<ArgumentException>(() => new AuthenticateDecryptCommand(null, 0x87));
 #pragma warning restore CS8625
         }
 
@@ -62,29 +62,29 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(-1)]
         public void Constructor_BadData_ThrowsException(int badFlag)
         {
-            var dataToDecrypt = PivCommandResponseTestData.GetEncryptedBlock(PivAlgorithm.Rsa2048);
+            byte[] dataToDecrypt = PivCommandResponseTestData.GetEncryptedBlock(PivAlgorithm.Rsa2048);
             if (badFlag >= 0)
             {
-                Array.Resize(ref dataToDecrypt, dataToDecrypt.Length + 1);
+                Array.Resize<byte>(ref dataToDecrypt, dataToDecrypt.Length + 1);
                 dataToDecrypt[^1] = 0x44;
             }
             else
             {
-                Array.Resize(ref dataToDecrypt, dataToDecrypt.Length - 1);
+                Array.Resize<byte>(ref dataToDecrypt, dataToDecrypt.Length - 1);
             }
 
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentException>(() => new AuthenticateDecryptCommand(dataToDecrypt, slotNumber: 0x9A));
+            _ = Assert.Throws<ArgumentException>(() => new AuthenticateDecryptCommand(dataToDecrypt, 0x9A));
 #pragma warning restore CS8625
         }
 
         [Fact]
         public void Constructor_Application_Piv()
         {
-            var dataToDecrypt = PivCommandResponseTestData.GetEncryptedBlock(PivAlgorithm.Rsa1024);
-            var command = new AuthenticateDecryptCommand(dataToDecrypt, slotNumber: 0x90);
+            byte[] dataToDecrypt = PivCommandResponseTestData.GetEncryptedBlock(PivAlgorithm.Rsa1024);
+            var command = new AuthenticateDecryptCommand(dataToDecrypt, 0x90);
 
-            var application = command.Application;
+            YubiKeyApplication application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
@@ -94,9 +94,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(0x83, PivAlgorithm.Rsa2048)]
         public void Constructor_Property_SlotNum(byte slotNumber, PivAlgorithm algorithm)
         {
-            var command = GetCommandObject(slotNumber, algorithm);
+            AuthenticateDecryptCommand command = GetCommandObject(slotNumber, algorithm);
 
-            var getSlotNum = command.SlotNumber;
+            byte getSlotNum = command.SlotNumber;
 
             Assert.Equal(slotNumber, getSlotNum);
         }
@@ -108,11 +108,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(PivAlgorithm algorithm)
         {
-            var cmdApdu = GetDecryptCommandApdu(slotNumber: 0x86, algorithm);
+            CommandApdu cmdApdu = GetDecryptCommandApdu(0x86, algorithm);
 
-            var Cla = cmdApdu.Cla;
+            byte Cla = cmdApdu.Cla;
 
-            Assert.Equal(expected: 0, Cla);
+            Assert.Equal(0, Cla);
         }
 
         [Theory]
@@ -122,11 +122,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa4096)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHex87(PivAlgorithm algorithm)
         {
-            var cmdApdu = GetDecryptCommandApdu(slotNumber: 0x90, algorithm);
+            CommandApdu cmdApdu = GetDecryptCommandApdu(0x90, algorithm);
 
-            var Ins = cmdApdu.Ins;
+            byte Ins = cmdApdu.Ins;
 
-            Assert.Equal(expected: 0x87, Ins);
+            Assert.Equal(0x87, Ins);
         }
 
         [Theory]
@@ -134,9 +134,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa2048)]
         public void CreateCommandApdu_GetP1Property_ReturnsAlgorithm(PivAlgorithm expectedAlgorithm)
         {
-            var cmdApdu = GetDecryptCommandApdu(slotNumber: 0x91, expectedAlgorithm);
+            CommandApdu cmdApdu = GetDecryptCommandApdu(0x91, expectedAlgorithm);
 
-            var P1 = cmdApdu.P1;
+            byte P1 = cmdApdu.P1;
 
             Assert.Equal((byte)expectedAlgorithm, P1);
         }
@@ -146,9 +146,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(0x9E, PivAlgorithm.Rsa2048)]
         public void CreateCommandApdu_GetP2Property_ReturnsSlotNum(byte slotNumber, PivAlgorithm algorithm)
         {
-            var cmdApdu = GetDecryptCommandApdu(slotNumber, algorithm);
+            CommandApdu cmdApdu = GetDecryptCommandApdu(slotNumber, algorithm);
 
-            var P2 = cmdApdu.P2;
+            byte P2 = cmdApdu.P2;
 
             Assert.Equal(slotNumber, P2);
         }
@@ -158,9 +158,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa2048, 266)]
         public void CreateCommandApdu_GetNcProperty_ReturnsCorrect(PivAlgorithm algorithm, int expected)
         {
-            var cmdApdu = GetDecryptCommandApdu(slotNumber: 0x94, algorithm);
+            CommandApdu cmdApdu = GetDecryptCommandApdu(0x94, algorithm);
 
-            var Nc = cmdApdu.Nc;
+            int Nc = cmdApdu.Nc;
 
             Assert.Equal(expected, Nc);
         }
@@ -170,24 +170,24 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.Rsa2048)]
         public void CreateCommandApdu_GetNeProperty_ReturnsZero(PivAlgorithm algorithm)
         {
-            var cmdApdu = GetDecryptCommandApdu(slotNumber: 0x95, algorithm);
+            CommandApdu cmdApdu = GetDecryptCommandApdu(0x95, algorithm);
 
-            var Ne = cmdApdu.Ne;
+            int Ne = cmdApdu.Ne;
 
-            Assert.Equal(expected: 0, Ne);
+            Assert.Equal(0, Ne);
         }
 
         [Theory]
         [InlineData(PivAlgorithm.Rsa2048)]
         public void CreateCommandApdu_GetData_ReturnsCorrect(PivAlgorithm algorithm)
         {
-            var prefix = GetDecryptDataPrefix(algorithm);
-            var encryptedData = PivCommandResponseTestData.GetEncryptedBlock(algorithm);
+            byte[] prefix = GetDecryptDataPrefix(algorithm);
+            byte[] encryptedData = PivCommandResponseTestData.GetEncryptedBlock(algorithm);
 
             var expected = new List<byte>(prefix);
             expected.AddRange(encryptedData);
 
-            var cmdApdu = GetDecryptCommandApdu(slotNumber: 0x9C, algorithm);
+            CommandApdu cmdApdu = GetDecryptCommandApdu(0x9C, algorithm);
 
             var result = cmdApdu.Data;
             Assert.Equal(expected.ToArray(), result);
@@ -198,42 +198,37 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
 
-            var command = GetCommandObject(slotNumber: 0x86, PivAlgorithm.Rsa1024);
+            AuthenticateDecryptCommand command = GetCommandObject(0x86, PivAlgorithm.Rsa1024);
 
-            var response = command.CreateResponseForApdu(responseApdu);
+            AuthenticateDecryptResponse response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is AuthenticateDecryptResponse);
         }
 
         private static CommandApdu GetDecryptCommandApdu(byte slotNumber, PivAlgorithm algorithm)
         {
-            var cmd = GetCommandObject(slotNumber, algorithm);
+            AuthenticateDecryptCommand cmd = GetCommandObject(slotNumber, algorithm);
 
             return cmd.CreateCommandApdu();
         }
 
         private static AuthenticateDecryptCommand GetCommandObject(byte slotNumber, PivAlgorithm algorithm)
         {
-            var dataToDecrypt = PivCommandResponseTestData.GetEncryptedBlock(algorithm);
+            byte[] dataToDecrypt = PivCommandResponseTestData.GetEncryptedBlock(algorithm);
             var cmd = new AuthenticateDecryptCommand(dataToDecrypt, slotNumber);
 
             return cmd;
         }
 
         // Get the TL TL TL prefix for each algorithm.
-        private static byte[] GetDecryptDataPrefix(PivAlgorithm algorithm)
+        private static byte[] GetDecryptDataPrefix(PivAlgorithm algorithm) => algorithm switch
         {
-            return algorithm switch
-            {
-                PivAlgorithm.Rsa2048 => new byte[]
-                {
-                    0x7C, 0x82, 0x01, 0x06, 0x82, 0x00, 0x81, 0x82, 0x01, 0x00
-                },
-                _ => new byte[]
-                {
-                    0x7C, 0x81, 0x85, 0x82, 0x00, 0x81, 0x81, 0x80
-                }
-            };
-        }
+            PivAlgorithm.Rsa2048 => new byte[] {
+                0x7C, 0x82, 0x01, 0x06, 0x82, 0x00, 0x81, 0x82, 0x01, 0x00
+            },
+            _ => new byte[] {
+                0x7C, 0x81, 0x85, 0x82, 0x00, 0x81, 0x81, 0x80
+            },
+        };
     }
 }

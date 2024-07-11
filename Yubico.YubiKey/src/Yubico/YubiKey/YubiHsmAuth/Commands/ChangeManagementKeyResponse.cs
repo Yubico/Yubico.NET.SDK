@@ -12,33 +12,34 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    ///     The response class for changing the management key.
+    /// The response class for changing the management key.
     /// </summary>
     /// <remarks>
-    ///     <para>
-    ///         If authentication failed, the <see cref="YubiKeyResponse.Status" />
-    ///         will be set to
-    ///         <see cref="ResponseStatus.AuthenticationRequired" /> and
-    ///         <see cref="BaseYubiHsmAuthResponseWithRetries.RetriesRemaining" />
-    ///         will contain the number of retries remaining for the management key.
-    ///     </para>
-    ///     <para>
-    ///         The associated command class is <see cref="ChangeManagementKeyCommand" />.
-    ///     </para>
+    /// <para>
+    /// If authentication failed, the <see cref="YubiKeyResponse.Status"/>
+    /// will be set to
+    /// <see cref="ResponseStatus.AuthenticationRequired"/> and
+    /// <see cref="BaseYubiHsmAuthResponseWithRetries.RetriesRemaining"/>
+    /// will contain the number of retries remaining for the management key.
+    /// </para>
+    /// <para>
+    /// The associated command class is <see cref="ChangeManagementKeyCommand"/>.
+    /// </para>
     /// </remarks>
     public class ChangeManagementKeyResponse : BaseYubiHsmAuthResponseWithRetries
     {
         /// <summary>
-        ///     Constructs a ChangeManagementKeyResponse based on a ResponseApdu
-        ///     received from the YubiKey.
+        /// Constructs a ChangeManagementKeyResponse based on a ResponseApdu
+        /// received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     The ResponseApdu returned by the YubiKey.
+        /// The ResponseApdu returned by the YubiKey.
         /// </param>
         public ChangeManagementKeyResponse(ResponseApdu responseApdu) :
             base(responseApdu)

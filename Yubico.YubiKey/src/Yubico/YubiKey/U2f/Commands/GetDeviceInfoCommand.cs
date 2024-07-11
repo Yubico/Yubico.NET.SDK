@@ -18,11 +18,11 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
-    ///     Gets detailed information about the YubiKey and its current configuration.
+    /// Gets detailed information about the YubiKey and its current configuration.
     /// </summary>
     /// <remarks>
-    ///     THIS CLASS IS OBSOLETE.
-    ///     It has been replaced by <see cref="GetPagedDeviceInfoResponse" />
+    /// THIS CLASS IS OBSOLETE. 
+    /// It has been replaced by <see cref="GetPagedDeviceInfoResponse"/>
     /// </remarks>
     [Obsolete("This class has been replaced by GetPagedDeviceInfoCommand")]
     public sealed class GetDeviceInfoCommand : IYubiKeyCommand<GetDeviceInfoResponse>
@@ -30,26 +30,25 @@ namespace Yubico.YubiKey.U2f.Commands
         private const byte GetDeviceInfoInstruction = 0xC2;
 
         /// <summary>
-        ///     Constructs an instance of the <see cref="GetDeviceInfoCommand" /> class.
+        /// Gets the YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        /// YubiKeyApplication.FidoU2f
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
+
+        /// <summary>
+        /// Constructs an instance of the <see cref="GetDeviceInfoCommand" /> class.
         /// </summary>
         public GetDeviceInfoCommand()
         {
         }
 
-        /// <summary>
-        ///     Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        ///     YubiKeyApplication.FidoU2f
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
-
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Ins = GetDeviceInfoInstruction
-            };
+        public CommandApdu CreateCommandApdu() => new CommandApdu()
+        {
+            Ins = GetDeviceInfoInstruction
+        };
 
         /// <inheritdoc />
         public GetDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

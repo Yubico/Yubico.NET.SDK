@@ -12,11 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Yubico.YubiKey.Sample.U2fSampleCode
 {
     internal sealed class StartProgram
     {
-        private static void Main()
+        static void Main()
         {
             var u2fSampleRun = new U2fSampleRun(maxInvalidCount: 2);
             u2fSampleRun.RunSample();

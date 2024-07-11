@@ -23,9 +23,9 @@ namespace Yubico.YubiKey
         [InlineData(StandardTestDevice.Fw5)]
         public void TryConnect_YubiHsmAuth(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            var result = testDevice.TryConnect(YubiKeyApplication.YubiHsmAuth, out _);
+            bool result = testDevice.TryConnect(YubiKeyApplication.YubiHsmAuth, out _);
 
             Assert.True(result);
         }

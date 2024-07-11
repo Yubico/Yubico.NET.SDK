@@ -32,8 +32,7 @@ namespace Yubico.YubiKey.Piv
     ///     a session, then call on the methods in the class.
     ///     <para>
     ///         Generally you will choose the YubiKey to use by building an instance of
-    ///         <see cref="IYubiKeyDevice" />. This object will represent the actual
-    ///         hardware.
+    ///         <see cref="IYubiKeyDevice" />. This object will represent the actual hardware.
     ///         <code language="csharp">
     ///             IYubiKeyDevice SelectYubiKey()
     ///             {
@@ -80,16 +79,8 @@ namespace Yubico.YubiKey.Piv
     ///         even if the current PIN has been verified. The documentation for each
     ///         method in this class will indicate if the PIN is needed, and if so, must
     ///         it be verified or entered. See also the User's Manual entries on the
-    ///         <xref href="UsersManualPinPukMgmtKey">
-    ///             PIV PIN, PUK, and
-    ///             Management Key
-    ///         </xref>
-    ///         and
-    ///         <xref href="UsersManualPivAccessControl">
-    ///             PIV commands access
-    ///             control
-    ///         </xref>
-    ///         .
+    ///         <xref href="UsersManualPinPukMgmtKey"> PIV PIN, PUK, and Management Key</xref>
+    ///         and <xref href="UsersManualPivAccessControl"> PIV commands access control</xref>.
     ///     </para>
     ///     <para>
     ///         Note that PIN/PUK/Management Key verification or authentication will
@@ -126,12 +117,10 @@ namespace Yubico.YubiKey.Piv
     ///             management key (hex): 01 02 03 04 05 06 07 08
     ///                                   01 02 03 04 05 06 07 08
     ///                                   01 02 03 04 05 06 07 08
-    ///         </code>
-    ///         <code>
+    ///             
     ///             PIN (hex): 31 32 33 34 35 36
     ///             as an ASCII string, this would be "123456"
-    ///         </code>
-    ///         <code>
+    ///             
     ///             PUK (hex): 31 32 33 34 35 36 37 38
     ///             as an ASCII string, this would be "12345678"
     ///         </code>
@@ -150,10 +139,7 @@ namespace Yubico.YubiKey.Piv
     ///         implementations, unless you replace them. Very few applications will
     ///         choose to replace the defaults, but if you want to, see the documentation
     ///         for that class and the User's Manual entry on
-    ///         <xref href="UsersManualAlternateCrypto">
-    ///             alternate crypto
-    ///             implementations
-    ///         </xref>
+    ///         <xref href="UsersManualAlternateCrypto"> alternate crypto implementations</xref>
     ///         to learn how to do so.
     ///     </para>
     /// </remarks>
@@ -394,14 +380,14 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        ///     Get information about YubiKey Bio multi-protocol.
+        /// Get information about YubiKey Bio multi-protocol.
         /// </summary>
         /// <remarks>
-        ///     This feature is available only on YubiKey Bio multi-protocol keys (FW 5.6 and later). If you call
-        ///     this method on an incompatible YubiKey, it will throw a <c>NotSupportedException</c>.
-        ///     <code language="csharp">
+        /// This feature is available only on YubiKeys Bio multi-protocol (FW 5.6 and later). If you call
+        /// this method on an incompatible YubiKey, it will throw a <c>NotSupportedException</c>.
+        /// <code language="csharp">
         ///     IEnumerable&lt;IYubiKeyDevice&gt; list = YubiKey.FindByTransport(Transport.UsbSmartCard);
-        ///     IYubiKeyDevice yubiKey = list.First();<br />
+        ///     IYubiKeyDevice yubiKey = list.First();<br/>
         ///     using (var pivSession = new PivSession(yubiKey))
         ///     {
         ///         try
@@ -414,20 +400,20 @@ namespace Yubico.YubiKey.Piv
         ///         }
         ///     }
         /// </code>
-        ///     <para>
-        ///         See the User's Manual
-        ///         <xref href="UsersManualPivCommands#get-bio-metadata"> entry on getting bio metadata</xref>
-        ///         for specifics about what information is returned.
-        ///     </para>
+        /// <para>
+        /// See the User's Manual
+        /// <xref href="UsersManualPivCommands#get-bio-metadata"> entry on getting bio metadata</xref>
+        /// for specific information about what information is returned.
+        /// </para>
         /// </remarks>
         /// <returns>
-        ///     A new instance of a <c>PivBioMetadata</c> object.
+        /// A new instance of a <c>PivBioMetadata</c> object.
         /// </returns>
         /// <exception cref="NotSupportedException">
-        ///     The queried YubiKey does not support bio metadata.
+        /// The queried YubiKey does not support bio metadata.
         /// </exception>
         /// <exception cref="ApduException">
-        ///     The operation could not be completed.
+        /// The operation could not be completed.
         /// </exception>
         public PivBioMetadata GetBioMetadata()
         {

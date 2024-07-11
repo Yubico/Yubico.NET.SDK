@@ -18,17 +18,17 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    ///     The response to the <see cref="GetInfoCommand" /> command, containing
-    ///     information about the device and FIDO2 application.
+    /// The response to the <see cref="GetInfoCommand"/> command, containing
+    /// information about the device and FIDO2 application.
     /// </summary>
     public sealed class GetInfoResponse : Fido2Response, IYubiKeyResponseWithData<AuthenticatorInfo>
     {
         /// <summary>
-        ///     Constructs a <c>GetInfoResponse</c> instance based on a ResponseApdu
-        ///     received from the YubiKey.
+        /// Constructs a <c>GetInfoResponse</c> instance based on a ResponseApdu
+        /// received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     The ResponseApdu returned by the YubiKey.
+        /// The ResponseApdu returned by the YubiKey.
         /// </param>
         public GetInfoResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -36,16 +36,16 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        ///     Gets the <see cref="AuthenticatorInfo" /> class that contains details
-        ///     about the authenticator, such as a list of all supported protocol
-        ///     versions, supported extensions, AAGUID of the device, and its
-        ///     capabilities.
+        /// Gets the <see cref="AuthenticatorInfo"/> class that contains details
+        /// about the authenticator, such as a list of all supported protocol
+        /// versions, supported extensions, AAGUID of the device, and its
+        /// capabilities.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        ///     Thrown when <see cref="YubiKeyResponse.Status" /> is not <see cref="ResponseStatus.Success" />.
+        /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
         /// <returns>
-        ///     The data in the response APDU, presented as an <c>AuthenticatorInfo</c> class.
+        /// The data in the response APDU, presented as an <c>AuthenticatorInfo</c> class.
         /// </returns>
         public AuthenticatorInfo GetData()
         {

@@ -35,13 +35,13 @@ namespace Yubico.YubiKey.Fido2.Commands
                     new byte[]
                     {
                         0xA1, // Map (1 entry)
-                        0x05, 0x04 // TagUvRetries = 4,
+                        0x05, 0x04, // TagUvRetries = 4,
                     },
                     SWConstants.Success));
 
-            var retriesRemaining = response.GetData();
+            int retriesRemaining = response.GetData();
 
-            Assert.Equal(expected: 4, retriesRemaining);
+            Assert.Equal(4, retriesRemaining);
         }
 
         [Fact]

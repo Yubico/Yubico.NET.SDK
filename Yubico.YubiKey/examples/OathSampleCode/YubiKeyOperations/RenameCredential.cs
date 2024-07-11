@@ -50,6 +50,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                     credential.Period.Value);
 
                 ReportResult(renamedCredential);
+
             }
             return true;
         }
@@ -68,7 +69,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             _ = outputList.AppendLine($"Counter   : {credential.Counter}");
             _ = outputList.AppendLine($"Touch     : {credential.RequiresTouch}");
 
-            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, outputList.ToString());
+            SampleMenu.WriteMessage(MessageType.Special, 0, outputList.ToString());
         }
 
         // Collect a credential.
@@ -78,10 +79,10 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             out string newIssuer,
             out string newAccount)
         {
-            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter current issuer");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter current issuer");
             _ = SampleMenu.ReadResponse(out string currentIssuer);
 
-            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter current account name");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter current account name");
             _ = SampleMenu.ReadResponse(out string currentAccount);
 
             _ = ChooseCredentialProperties.RunChooseTypeOption(menuObject, out CredentialType? type);
@@ -90,15 +91,14 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
             if (type == CredentialType.Totp)
             {
-                _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject,
-                    out CredentialPeriod? credentialPeriod);
+                _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject, out CredentialPeriod? credentialPeriod);
                 period = credentialPeriod.Value;
             }
 
-            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter new issuer");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter new issuer");
             _ = SampleMenu.ReadResponse(out string issuer);
 
-            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter new account name");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter new account name");
             _ = SampleMenu.ReadResponse(out string account);
 
             newIssuer = issuer;

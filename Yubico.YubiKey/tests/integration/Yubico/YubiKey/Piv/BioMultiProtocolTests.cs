@@ -13,8 +13,11 @@
 // limitations under the License.
 
 using System;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using Xunit;
+using Yubico.PlatformInterop;
 using Yubico.YubiKey.Piv.Commands;
 using Yubico.YubiKey.TestUtilities;
 
@@ -23,101 +26,100 @@ namespace Yubico.YubiKey.Piv
     public class BioMultiProtocolTests
     {
         /// <summary>
-        ///     Verify authentication with YubiKey Bio Multi-protocol
+        /// Verify authentication with YubiKey Bio Multi-protocol
         /// </summary>
         /// <remarks>
-        ///     To run the test, create a PIN and enroll at least one fingerprint. The test will ask twice
-        ///     for fingerprint authentication.
-        ///     <para>
-        ///         Tests with devices without Bio Metadata are skipped.
+        /// To run the test, create a PIN and enroll at least one fingerprint. The test will ask twice
+        /// for fingerprint authentication.
+        /// <para>
+        /// Tests with devices without Bio Metadata are skipped.
         /// </remarks>
         /// <param name="testDeviceType"></param>
         [SkippableTheory(typeof(NotSupportedException))]
         [InlineData(StandardTestDevice.Fw5Bio)]
         public void BioMultiProtocol_Authenticate(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             using (var pivSession = new PivSession(testDevice))
             {
                 var bioMetadata = pivSession.GetBioMetadata();
                 var connection = pivSession.Connection;
 
-                Assert.True(VerifyUv(connection, requestTemporaryPin: false, checkOnly: false).IsEmpty);
+                Assert.True(VerifyUv(connection, false, false).IsEmpty);
                 Assert.False(pivSession.GetBioMetadata().HasTemporaryPin);
 
                 // check verified state
-                Assert.True(VerifyUv(connection, requestTemporaryPin: false, checkOnly: true).IsEmpty);
+                Assert.True(VerifyUv(connection, false, true).IsEmpty);
             }
         }
 
         /// <summary>
-        ///     Verify that AttemptsRemaining value in results is correctly reported
+        /// Verify that AttemptsRemaining value in results is correctly reported
         /// </summary>
         /// <remarks>
-        ///     To run the test, create a PIN and enroll at least one fingerprint.
-        ///     The test will try to authenticate several times and requires following interaction:
-        ///     1st biometric authentication: provide successful match
-        ///     2nd: provide invalid match (attempts remaining is now 2)
-        ///     3rd: provide invalid match (attempts remaining is now 1)
-        ///     4th: provide invalid match (attempts remaining is now 0 and the biometric verification is blocked)
-        ///     The test calls VerifyPin to reset the biometric attempts to 3
-        ///     <para>
-        ///         Tests with devices without Bio Metadata are skipped.
+        /// To run the test, create a PIN and enroll at least one fingerprint.
+        /// The test will try to authenticate several times and requires following interaction:
+        /// 1st biometric authentication: provide successful match
+        /// 2nd: provide invalid match (attempts remaining is now 2)
+        /// 3rd: provide invalid match (attempts remaining is now 1)
+        /// 4th: provide invalid match (attempts remaining is now 0 and the biometric verification is blocked)
+        /// The test calls VerifyPin to reset the biometric attempts to 3
+        /// <para>
+        /// Tests with devices without Bio Metadata are skipped.
         /// </remarks>
         /// <param name="testDeviceType"></param>
         [SkippableTheory(typeof(NotSupportedException))]
         [InlineData(StandardTestDevice.Fw5Bio)]
         public void BioMultiProtocol_AttemptsRemaining(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             using (var pivSession = new PivSession(testDevice))
             {
                 var connection = pivSession.Connection;
 
-                var response = VerifyUv(connection, requestTemporaryPin: false, checkOnly: false);
+                var response = VerifyUv(connection, false, false);
 
-                Assert.Equal(expected: 3, pivSession.GetBioMetadata().AttemptsRemaining);
+                Assert.Equal(3, pivSession.GetBioMetadata().AttemptsRemaining);
 
-                response = VerifyUv(connection, requestTemporaryPin: false, checkOnly: false,
-                    out var attemptsRemaining);
+                response = VerifyUv(connection, false, false, out int? attemptsRemaining);
                 Assert.True(response.IsEmpty);
-                Assert.Equal(expected: 2, attemptsRemaining);
+                Assert.Equal(2, attemptsRemaining);
 
-                response = VerifyUv(connection, requestTemporaryPin: false, checkOnly: false, out attemptsRemaining);
+                response = VerifyUv(connection, false, false, out attemptsRemaining);
                 Assert.True(response.IsEmpty);
-                Assert.Equal(expected: 1, attemptsRemaining);
+                Assert.Equal(1, attemptsRemaining);
 
                 // this last attempt will invalidate the biometric verification
-                response = VerifyUv(connection, requestTemporaryPin: false, checkOnly: false, out attemptsRemaining);
+                response = VerifyUv(connection, false, false, out attemptsRemaining);
                 Assert.True(response.IsEmpty);
-                Assert.Equal(expected: 0, attemptsRemaining);
-                Assert.Equal(expected: 0, pivSession.GetBioMetadata().AttemptsRemaining);
+                Assert.Equal(0, attemptsRemaining);
+                Assert.Equal(0, pivSession.GetBioMetadata().AttemptsRemaining);
 
                 // authenticate with PIN 
                 Assert.Null(VerifyPin(connection));
-                Assert.Equal(expected: 3, pivSession.GetBioMetadata().AttemptsRemaining);
+                Assert.Equal(3, pivSession.GetBioMetadata().AttemptsRemaining);
             }
         }
 
         /// <summary>
-        ///     Verify that using temporary PIN reports expected results
+        /// Verify that using temporary PIN reports expected results
         /// </summary>
         /// <remarks>
-        ///     To run the test, create a PIN and enroll at least one fingerprint.
-        ///     The test will need two successful matches.
-        ///     <para>
-        ///         Tests with devices without Bio Metadata are skipped.
+        /// To run the test, create a PIN and enroll at least one fingerprint.
+        /// The test will need two successful matches.
+        /// <para>
+        /// Tests with devices without Bio Metadata are skipped.
         /// </remarks>
         /// <param name="testDeviceType"></param>
         [SkippableTheory(typeof(NotSupportedException))]
         [InlineData(StandardTestDevice.Fw5Bio)]
         public void BioMultiProtocol_TemporaryPin(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             using (var pivSession = new PivSession(testDevice))
             {
                 var connection = pivSession.Connection;
-                var temporaryPin = VerifyUv(connection, requestTemporaryPin: true, checkOnly: false);
+                var temporaryPin = VerifyUv(connection, true, false);
                 Assert.True(pivSession.GetBioMetadata().HasTemporaryPin);
 
                 // use invalid temporary pin
@@ -126,7 +128,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.GetBioMetadata().HasTemporaryPin);
 
 
-                temporaryPin = VerifyUv(connection, requestTemporaryPin: true, checkOnly: false);
+                temporaryPin = VerifyUv(connection, true, false);
                 Assert.False(temporaryPin.IsEmpty);
                 Assert.True(pivSession.GetBioMetadata().HasTemporaryPin);
 
@@ -167,7 +169,7 @@ namespace Yubico.YubiKey.Piv
         private int? VerifyPin(
             IYubiKeyConnection connection)
         {
-            var pin = Encoding.ASCII.GetBytes("12345678");
+            byte[] pin = Encoding.ASCII.GetBytes("12345678");
             var command = new VerifyPinCommand(pin);
             var response = connection.SendCommand(command);
             return response.GetData();

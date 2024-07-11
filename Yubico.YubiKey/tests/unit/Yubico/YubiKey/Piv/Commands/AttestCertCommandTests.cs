@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void ClassType_DerivedFromPivCommand_IsTrue()
         {
-            var command = new CreateAttestationStatementCommand(slotNumber: 0x9A);
+            var command = new CreateAttestationStatementCommand(0x9A);
 
             Assert.True(command is IYubiKeyCommand<CreateAttestationStatementResponse>);
         }
@@ -31,9 +31,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Application_Piv()
         {
-            var command = new CreateAttestationStatementCommand(slotNumber: 0x9C);
+            var command = new CreateAttestationStatementCommand(0x9C);
 
-            var application = command.Application;
+            YubiKeyApplication application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.Piv.Commands
             byte slotNumber = 0x9C;
             var command = new CreateAttestationStatementCommand(slotNumber);
 
-            var getSlotNum = command.SlotNumber;
+            byte getSlotNum = command.SlotNumber;
 
             Assert.Equal(slotNumber, getSlotNum);
         }
@@ -74,12 +74,12 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(int cStyle)
         {
-            var command = GetCommandObject(cStyle, slotNumber: 0x9D);
-            var cmdApdu = command.CreateCommandApdu();
+            CreateAttestationStatementCommand command = GetCommandObject(cStyle, 0x9D);
+            CommandApdu cmdApdu = command.CreateCommandApdu();
 
-            var Cla = cmdApdu.Cla;
+            byte Cla = cmdApdu.Cla;
 
-            Assert.Equal(expected: 0, Cla);
+            Assert.Equal(0, Cla);
         }
 
         [Theory]
@@ -88,12 +88,12 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHexF9(int cStyle)
         {
-            var command = GetCommandObject(cStyle, slotNumber: 0x9E);
-            var cmdApdu = command.CreateCommandApdu();
+            CreateAttestationStatementCommand command = GetCommandObject(cStyle, 0x9E);
+            CommandApdu cmdApdu = command.CreateCommandApdu();
 
-            var Ins = cmdApdu.Ins;
+            byte Ins = cmdApdu.Ins;
 
-            Assert.Equal(expected: 0xF9, Ins);
+            Assert.Equal(0xF9, Ins);
         }
 
         [Theory]
@@ -111,10 +111,10 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3, PivSlot.CardAuthentication)]
         public void CreateCommandApdu_GetP1Property_ReturnsSlotNum(int cStyle, byte slotNum)
         {
-            var command = GetCommandObject(cStyle, slotNum);
-            var cmdApdu = command.CreateCommandApdu();
+            CreateAttestationStatementCommand command = GetCommandObject(cStyle, slotNum);
+            CommandApdu cmdApdu = command.CreateCommandApdu();
 
-            var P1 = cmdApdu.P1;
+            byte P1 = cmdApdu.P1;
 
             Assert.Equal(slotNum, P1);
         }
@@ -125,12 +125,12 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3)]
         public void CreateCommandApdu_GetP2Property_ReturnsZero(int cStyle)
         {
-            var command = GetCommandObject(cStyle, slotNumber: 0x9A);
-            var cmdApdu = command.CreateCommandApdu();
+            CreateAttestationStatementCommand command = GetCommandObject(cStyle, 0x9A);
+            CommandApdu cmdApdu = command.CreateCommandApdu();
 
-            var P2 = cmdApdu.P2;
+            byte P2 = cmdApdu.P2;
 
-            Assert.Equal(expected: 0, P2);
+            Assert.Equal(0, P2);
         }
 
         [Theory]
@@ -139,12 +139,12 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3)]
         public void CreateCommandApdu_GetNc_ReturnsZero(int cStyle)
         {
-            var command = GetCommandObject(cStyle, slotNumber: 0x9C);
-            var cmdApdu = command.CreateCommandApdu();
+            CreateAttestationStatementCommand command = GetCommandObject(cStyle, 0x9C);
+            CommandApdu cmdApdu = command.CreateCommandApdu();
 
-            var Nc = cmdApdu.Nc;
+            int Nc = cmdApdu.Nc;
 
-            Assert.Equal(expected: 0, Nc);
+            Assert.Equal(0, Nc);
         }
 
         [Theory]
@@ -153,10 +153,10 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3)]
         public void CreateCommandApdu_GetData_ReturnsEmpty(int cStyle)
         {
-            var command = GetCommandObject(cStyle, slotNumber: 0x9D);
-            var cmdApdu = command.CreateCommandApdu();
+            CreateAttestationStatementCommand command = GetCommandObject(cStyle, 0x9D);
+            CommandApdu cmdApdu = command.CreateCommandApdu();
 
-            var data = cmdApdu.Data;
+            ReadOnlyMemory<byte> data = cmdApdu.Data;
 
             Assert.True(data.IsEmpty);
         }
@@ -167,21 +167,21 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3)]
         public void CreateCommandApdu_GetNe_ReturnsZero(int cStyle)
         {
-            var command = GetCommandObject(cStyle, slotNumber: 0x9e);
-            var cmdApdu = command.CreateCommandApdu();
+            CreateAttestationStatementCommand command = GetCommandObject(cStyle, 0x9e);
+            CommandApdu cmdApdu = command.CreateCommandApdu();
 
-            var Ne = cmdApdu.Ne;
+            int Ne = cmdApdu.Ne;
 
-            Assert.Equal(expected: 0, Ne);
+            Assert.Equal(0, Ne);
         }
 
         [Fact]
         public void CreateResponseForApdu_ReturnsCorrectType()
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x69, 0x84 });
-            var command = new CreateAttestationStatementCommand(slotNumber: 0x9c);
+            var command = new CreateAttestationStatementCommand(0x9c);
 
-            var response = command.CreateResponseForApdu(responseApdu);
+            CreateAttestationStatementResponse response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is CreateAttestationStatementResponse);
         }
@@ -210,9 +210,9 @@ namespace Yubico.YubiKey.Piv.Commands
                     break;
 
                 case 2:
-                    cmd = new CreateAttestationStatementCommand
+                    cmd = new CreateAttestationStatementCommand()
                     {
-                        SlotNumber = slotNumber
+                        SlotNumber = slotNumber,
                     };
                     break;
             }

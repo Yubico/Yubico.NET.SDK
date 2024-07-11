@@ -18,36 +18,21 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.Core.Devices.SmartCard.UnitTests
 {
-    internal class FakeSmartCardDevice : ISmartCardDevice
+    class FakeSmartCardDevice : ISmartCardDevice
     {
         public DateTime LastAccessed { get; } = DateTime.Now;
         public string Path { get; } = string.Empty;
         public string? ParentDeviceId { get; } = null;
         public AnswerToReset? Atr { get; }
         public SmartCardConnectionKind Kind { get; }
-
-        public ISmartCardConnection Connect()
-        {
-            throw new NotImplementedException();
-        }
+        public ISmartCardConnection Connect() => throw new NotImplementedException();
     }
 
-    internal class FakeSmartCardListener : SmartCardDeviceListener
+    class FakeSmartCardListener : SmartCardDeviceListener
     {
-        public void FireArrival()
-        {
-            OnArrived(new FakeSmartCardDevice());
-        }
-
-        public void FireRemoval()
-        {
-            OnRemoved(new FakeSmartCardDevice());
-        }
-
-        public void Clear()
-        {
-            ClearEventHandlers();
-        }
+        public void FireArrival() => OnArrived(new FakeSmartCardDevice());
+        public void FireRemoval() => OnRemoved(new FakeSmartCardDevice());
+        public void Clear() => ClearEventHandlers();
     }
 
     public class SmartCardDeviceListenerTests
@@ -105,8 +90,8 @@ namespace Yubico.Core.Devices.SmartCard.UnitTests
         {
             var listener = new FakeSmartCardListener();
 
-            listener.Arrived += (sender, args) => Assert.False(condition: true);
-            listener.Removed += (sender, args) => Assert.False(condition: true);
+            listener.Arrived += (sender, args) => Assert.False(true);
+            listener.Removed += (sender, args) => Assert.False(true);
 
             listener.Clear();
 

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Linq;
 using Xunit;
 
@@ -22,24 +23,24 @@ namespace Yubico.Core.Buffers
         [Fact]
         public void TestDecodeBase16()
         {
-            var bytes = Base16.DecodeText("baaddeadf00d");
-            byte[] expected = { 0xba, 0xad, 0xde, 0xad, 0xf0, 0x0d };
+            byte[] bytes = Base16.DecodeText("baaddeadf00d");
+            byte[] expected = new byte[] { 0xba, 0xad, 0xde, 0xad, 0xf0, 0x0d };
             Assert.True(expected.SequenceEqual(bytes));
         }
 
         [Fact]
         public void TestEncodeModHex()
         {
-            var base16 = Base16.EncodeBytes(new byte[] { 0xba, 0xad, 0xde, 0xad, 0xf0, 0x0d });
-            var expected = "BAADDEADF00D";
+            string base16 = Base16.EncodeBytes(new byte[] { 0xba, 0xad, 0xde, 0xad, 0xf0, 0x0d });
+            string expected = "BAADDEADF00D";
             Assert.Equal(expected, base16);
         }
 
         [Fact]
         public void TestDecodeVaryingCase()
         {
-            var bytes = Base16.DecodeText("bAaDdEaDf00d");
-            byte[] expected = { 0xba, 0xad, 0xde, 0xad, 0xf0, 0x0d };
+            byte[] bytes = Base16.DecodeText("bAaDdEaDf00d");
+            byte[] expected = new byte[] { 0xba, 0xad, 0xde, 0xad, 0xf0, 0x0d };
             Assert.True(expected.SequenceEqual(bytes));
         }
     }

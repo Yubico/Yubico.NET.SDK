@@ -24,6 +24,7 @@ namespace Yubico.PlatformInterop
         public LinuxUnmanagedDynamicLibrary(string fileName) :
             base(OpenLibrary(fileName))
         {
+
         }
 
         private static SafeLibraryHandle OpenLibrary(string fileName)
@@ -37,7 +38,6 @@ namespace Yubico.PlatformInterop
                         ExceptionMessages.LibraryLoadFailed,
                         fileName));
             }
-
             return handle;
         }
 
@@ -50,9 +50,11 @@ namespace Yubico.PlatformInterop
                 d = Marshal.GetDelegateForFunctionPointer<TDelegate>(p);
                 return true;
             }
-
-            d = null;
-            return false;
+            else
+            {
+                d = null;
+                return false;
+            }
         }
     }
 }

@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
@@ -23,8 +24,8 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Sign_InvalidSlot_Exception()
         {
-            var dataToSign = new byte[128];
-            using var random = RandomObjectUtility.GetRandomObject(fixedBytes: null);
+            byte[] dataToSign = new byte[128];
+            using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
             random.GetBytes(dataToSign);
             dataToSign[0] &= 0x7F;
 
@@ -32,30 +33,30 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.Sign(slotNumber: 0x81, dataToSign));
+                _ = Assert.Throws<ArgumentException>(() => pivSession.Sign(0x81, dataToSign));
             }
         }
 
         [Fact]
         public void Sign_InvalidDataLength_Exception()
         {
-            var dataToSign = new byte[127];
-            using var random = RandomObjectUtility.GetRandomObject(fixedBytes: null);
+            byte[] dataToSign = new byte[127];
+            using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
             random.GetBytes(dataToSign);
 
             var yubiKey = new HollowYubiKeyDevice();
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.Sign(slotNumber: 0x9a, dataToSign));
+                _ = Assert.Throws<ArgumentException>(() => pivSession.Sign(0x9a, dataToSign));
             }
         }
 
         [Fact]
         public void Decrypt_InvalidSlot_Exception()
         {
-            var dataToDecrypt = new byte[256];
-            using var random = RandomObjectUtility.GetRandomObject(fixedBytes: null);
+            byte[] dataToDecrypt = new byte[256];
+            using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
             random.GetBytes(dataToDecrypt);
             dataToDecrypt[0] &= 0x7F;
 
@@ -63,22 +64,22 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.Decrypt(slotNumber: 0xf9, dataToDecrypt));
+                _ = Assert.Throws<ArgumentException>(() => pivSession.Decrypt(0xf9, dataToDecrypt));
             }
         }
 
         [Fact]
         public void Decrypt_InvalidDataLength_Exception()
         {
-            var dataToDecrypt = new byte[255];
-            using var random = RandomObjectUtility.GetRandomObject(fixedBytes: null);
+            byte[] dataToDecrypt = new byte[255];
+            using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
             random.GetBytes(dataToDecrypt);
 
             var yubiKey = new HollowYubiKeyDevice();
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.Decrypt(slotNumber: 0x9a, dataToDecrypt));
+                _ = Assert.Throws<ArgumentException>(() => pivSession.Decrypt(0x9a, dataToDecrypt));
             }
         }
 
@@ -90,8 +91,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(yubiKey))
             {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-                _ = Assert.Throws<ArgumentNullException>(() =>
-                    pivSession.KeyAgree(slotNumber: 0x9a, correspondentPublicKey: null));
+                _ = Assert.Throws<ArgumentNullException>(() => pivSession.KeyAgree(0x9a, null));
 #pragma warning restore CS8625 // Testing null input.
             }
         }
@@ -104,7 +104,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.KeyAgree(slotNumber: 0x9a, pivPublicKey));
+                _ = Assert.Throws<ArgumentException>(() => pivSession.KeyAgree(0x9a, pivPublicKey));
             }
         }
 
@@ -113,14 +113,13 @@ namespace Yubico.YubiKey.Piv
         {
             var yubiKey = new HollowYubiKeyDevice();
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, validAttest: false, out _, out var publicKeyPem,
-                out _);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out string publicKeyPem, out _);
             var publicKey = new KeyConverter(publicKeyPem.ToCharArray());
-            var pivPublicKey = publicKey.GetPivPublicKey();
+            PivPublicKey pivPublicKey = publicKey.GetPivPublicKey();
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.KeyAgree(slotNumber: 0x9a, pivPublicKey));
+                _ = Assert.Throws<ArgumentException>(() => pivSession.KeyAgree(0x9a, pivPublicKey));
             }
         }
     }

@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void ClassType_DerivedFromPivCommand_IsTrue()
         {
-            var mgmtKey = GetMgmtKeyArray();
+            byte[] mgmtKey = GetMgmtKeyArray();
             var command = new SetManagementKeyCommand(mgmtKey, PivTouchPolicy.Always);
 
             Assert.True(command is IYubiKeyCommand<SetManagementKeyResponse>);
@@ -32,10 +32,10 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Application_Piv()
         {
-            var mgmtKey = GetMgmtKeyArray();
+            byte[] mgmtKey = GetMgmtKeyArray();
             var command = new SetManagementKeyCommand(mgmtKey, PivTouchPolicy.Always);
 
-            var application = command.Application;
+            YubiKeyApplication application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
@@ -43,11 +43,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Property_TouchPolicy()
         {
-            var mgmtKey = GetMgmtKeyArray();
-            var touchPolicy = PivTouchPolicy.Always;
+            byte[] mgmtKey = GetMgmtKeyArray();
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Always;
             var command = new SetManagementKeyCommand(mgmtKey, touchPolicy);
 
-            var getPolicy = command.TouchPolicy;
+            PivTouchPolicy getPolicy = command.TouchPolicy;
 
             Assert.Equal(touchPolicy, getPolicy);
         }
@@ -59,11 +59,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(int cStyle)
         {
-            var cmdApdu = GetSetManagementKeyCommandApdu(cStyle, PivTouchPolicy.Always);
+            CommandApdu cmdApdu = GetSetManagementKeyCommandApdu(cStyle, PivTouchPolicy.Always);
 
-            var Cla = cmdApdu.Cla;
+            byte Cla = cmdApdu.Cla;
 
-            Assert.Equal(expected: 0, Cla);
+            Assert.Equal(0, Cla);
         }
 
         [Theory]
@@ -73,11 +73,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHexFF(int cStyle)
         {
-            var cmdApdu = GetSetManagementKeyCommandApdu(cStyle, PivTouchPolicy.Always);
+            CommandApdu cmdApdu = GetSetManagementKeyCommandApdu(cStyle, PivTouchPolicy.Always);
 
-            var Ins = cmdApdu.Ins;
+            byte Ins = cmdApdu.Ins;
 
-            Assert.Equal(expected: 0xFF, Ins);
+            Assert.Equal(0xFF, Ins);
         }
 
         [Theory]
@@ -87,11 +87,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4)]
         public void CreateCommandApdu_GetP1Property_ReturnsHexFF(int cStyle)
         {
-            var cmdApdu = GetSetManagementKeyCommandApdu(cStyle, PivTouchPolicy.Always);
+            CommandApdu cmdApdu = GetSetManagementKeyCommandApdu(cStyle, PivTouchPolicy.Always);
 
-            var P1 = cmdApdu.P1;
+            byte P1 = cmdApdu.P1;
 
-            Assert.Equal(expected: 0xFF, P1);
+            Assert.Equal(0xFF, P1);
         }
 
         [Theory]
@@ -102,9 +102,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(2, PivTouchPolicy.Cached, 0xFD)]
         public void CreateCommandApdu_GetP2Property_ReturnsPolicy(int cStyle, PivTouchPolicy policy, byte p2Val)
         {
-            var cmdApdu = GetSetManagementKeyCommandApdu(cStyle, policy);
+            CommandApdu cmdApdu = GetSetManagementKeyCommandApdu(cStyle, policy);
 
-            var P2 = cmdApdu.P2;
+            byte P2 = cmdApdu.P2;
 
             Assert.Equal(p2Val, P2);
         }
@@ -116,11 +116,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4)]
         public void CreateCommandApdu_GetNc_Returns27(int cStyle)
         {
-            var cmdApdu = GetSetManagementKeyCommandApdu(cStyle, PivTouchPolicy.Always);
+            CommandApdu cmdApdu = GetSetManagementKeyCommandApdu(cStyle, PivTouchPolicy.Always);
 
-            var Nc = cmdApdu.Nc;
+            int Nc = cmdApdu.Nc;
 
-            Assert.Equal(expected: 27, Nc);
+            Assert.Equal(27, Nc);
         }
 
         [Theory]
@@ -130,11 +130,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4)]
         public void CreateCommandApdu_GetNe_ReturnsZero(int cStyle)
         {
-            var cmdApdu = GetSetManagementKeyCommandApdu(cStyle, PivTouchPolicy.Always);
+            CommandApdu cmdApdu = GetSetManagementKeyCommandApdu(cStyle, PivTouchPolicy.Always);
 
-            var Ne = cmdApdu.Ne;
+            int Ne = cmdApdu.Ne;
 
-            Assert.Equal(expected: 0, Ne);
+            Assert.Equal(0, Ne);
         }
 
         [Theory]
@@ -144,15 +144,15 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4)]
         public void CreateCommandApdu_GetDataProperty_ReturnsKey(int cStyle)
         {
-            var expected = new byte[27];
+            byte[] expected = new byte[27];
             expected[0] = 0x03;
             expected[1] = 0x9B;
             expected[2] = 0x18;
-            var mgmtKey = GetMgmtKeyArray();
-            Array.Copy(mgmtKey, sourceIndex: 0, expected, destinationIndex: 3, length: 24);
-            var cmdApdu = GetSetManagementKeyCommandApdu(cStyle, PivTouchPolicy.Always);
+            byte[] mgmtKey = GetMgmtKeyArray();
+            Array.Copy(mgmtKey, 0, expected, 3, 24);
+            CommandApdu cmdApdu = GetSetManagementKeyCommandApdu(cStyle, PivTouchPolicy.Always);
 
-            var data = cmdApdu.Data;
+            ReadOnlyMemory<byte> data = cmdApdu.Data;
 
             Assert.False(data.IsEmpty);
             if (data.IsEmpty)
@@ -160,7 +160,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 return;
             }
 
-            var compareResult = data.Span.SequenceEqual(expected);
+            bool compareResult = data.Span.SequenceEqual(expected);
 
             Assert.True(compareResult);
         }
@@ -172,21 +172,21 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4)]
         public void CreateResponseForApdu_ReturnsCorrectType(int cStyle)
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
-            var cmd = GetCommandObject(cStyle, PivTouchPolicy.Default);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            SetManagementKeyCommand cmd = GetCommandObject(cStyle, PivTouchPolicy.Default);
 
-            var response = cmd.CreateResponseForApdu(responseApdu);
+            SetManagementKeyResponse response = cmd.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is SetManagementKeyResponse);
         }
 
         private static CommandApdu GetSetManagementKeyCommandApdu(int cStyle, PivTouchPolicy touchPolicy)
         {
-            var cmd = GetCommandObject(cStyle, touchPolicy);
+            SetManagementKeyCommand cmd = GetCommandObject(cStyle, touchPolicy);
 
-            var returnValue = cmd.CreateCommandApdu();
+            CommandApdu returnValue = cmd.CreateCommandApdu();
 
             return returnValue;
         }
@@ -201,7 +201,7 @@ namespace Yubico.YubiKey.Piv.Commands
         private static SetManagementKeyCommand GetCommandObject(int cStyle, PivTouchPolicy touchPolicy)
         {
             SetManagementKeyCommand cmd;
-            var mgmtKey = GetMgmtKeyArray();
+            byte[] mgmtKey = GetMgmtKeyArray();
 
             switch (cStyle)
             {
@@ -212,7 +212,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 case 2:
                     cmd = new SetManagementKeyCommand(mgmtKey)
                     {
-                        TouchPolicy = touchPolicy
+                        TouchPolicy = touchPolicy,
                     };
                     break;
 
@@ -232,14 +232,12 @@ namespace Yubico.YubiKey.Piv.Commands
             return cmd;
         }
 
-        private static byte[] GetMgmtKeyArray()
+        private static byte[] GetMgmtKeyArray() =>
+            new byte[]
         {
-            return new byte[]
-            {
-                0x46, 0x87, 0x19, 0x18, 0x87, 0x54, 0x54, 0x88,
-                0x93, 0x54, 0x55, 0x60, 0x59, 0x55, 0x94, 0x84,
-                0x13, 0x81, 0x23, 0x76, 0x00, 0x30, 0x53, 0x14
-            };
-        }
+            0x46, 0x87, 0x19, 0x18, 0x87, 0x54, 0x54, 0x88,
+            0x93, 0x54, 0x55, 0x60, 0x59, 0x55, 0x94, 0x84,
+            0x13, 0x81, 0x23, 0x76, 0x00, 0x30, 0x53, 0x14
+        };
     }
 }

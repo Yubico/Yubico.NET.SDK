@@ -32,8 +32,8 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void EnabledUsbCapabilities_SetGet_ReturnsSetValue()
         {
-            var expectedCapabilities = YubiKeyCapabilities.All;
-            var command = new SetDeviceInfoCommand
+            YubiKeyCapabilities expectedCapabilities = YubiKeyCapabilities.All;
+            var command = new SetDeviceInfoCommand()
             {
                 EnabledUsbCapabilities = expectedCapabilities
             };
@@ -52,8 +52,8 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void EnabledNfcCapabilities_SetGet_ReturnsSetValue()
         {
-            var expectedCapabilities = YubiKeyCapabilities.All;
-            var command = new SetDeviceInfoCommand
+            YubiKeyCapabilities expectedCapabilities = YubiKeyCapabilities.All;
+            var command = new SetDeviceInfoCommand()
             {
                 EnabledNfcCapabilities = expectedCapabilities
             };
@@ -107,10 +107,7 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetDeviceInfoCommand();
 
-            void Action()
-            {
-                command.AutoEjectTimeout = value;
-            }
+            void Action() => command.AutoEjectTimeout = value;
 
             _ = Assert.Throws<ArgumentOutOfRangeException>(Action);
         }
@@ -126,7 +123,7 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void DeviceFlags_SetGet_ReturnsSetValue()
         {
-            var expectedFlags = DeviceFlags.RemoteWakeup;
+            DeviceFlags expectedFlags = DeviceFlags.RemoteWakeup;
             var command = new SetDeviceInfoCommand
             {
                 DeviceFlags = expectedFlags
@@ -157,8 +154,8 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void CopyConstructor_EnabledUsbCapabilities_SetGet_ReturnsSetValue()
         {
-            var expectedCapabilities = YubiKeyCapabilities.All;
-            var command = new SetDeviceInfoCommand
+            YubiKeyCapabilities expectedCapabilities = YubiKeyCapabilities.All;
+            var command = new SetDeviceInfoCommand()
             {
                 EnabledUsbCapabilities = expectedCapabilities
             };
@@ -171,8 +168,8 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void CopyConstructor_EnabledNfcCapabilities_SetGet_ReturnsSetValue()
         {
-            var expectedCapabilities = YubiKeyCapabilities.All;
-            var command = new SetDeviceInfoCommand
+            YubiKeyCapabilities expectedCapabilities = YubiKeyCapabilities.All;
+            var command = new SetDeviceInfoCommand()
             {
                 EnabledNfcCapabilities = expectedCapabilities
             };
@@ -213,7 +210,7 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void CopyConstructor_DeviceFlags_SetGet_ReturnsSetValue()
         {
-            var expectedFlags = DeviceFlags.RemoteWakeup;
+            DeviceFlags expectedFlags = DeviceFlags.RemoteWakeup;
             var command = new SetDeviceInfoCommand
             {
                 DeviceFlags = expectedFlags
@@ -250,10 +247,7 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetDeviceInfoCommand();
 
-            void Action()
-            {
-                command.SetLockCode(Array.Empty<byte>());
-            }
+            void Action() => command.SetLockCode(Array.Empty<byte>());
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -263,10 +257,7 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetDeviceInfoCommand();
 
-            void Action()
-            {
-                command.ApplyLockCode(Array.Empty<byte>());
-            }
+            void Action() => command.ApplyLockCode(Array.Empty<byte>());
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -276,9 +267,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetDeviceInfoCommand();
 
-            var cla = command.CreateCommandApdu().Cla;
+            byte cla = command.CreateCommandApdu().Cla;
 
-            Assert.Equal(expected: 0, cla);
+            Assert.Equal(0, cla);
         }
 
         [Fact]
@@ -286,9 +277,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetDeviceInfoCommand();
 
-            var ins = command.CreateCommandApdu().Ins;
+            byte ins = command.CreateCommandApdu().Ins;
 
-            Assert.Equal(expected: 1, ins);
+            Assert.Equal(1, ins);
         }
 
         [Fact]
@@ -296,9 +287,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetDeviceInfoCommand();
 
-            var p1 = command.CreateCommandApdu().P1;
+            byte p1 = command.CreateCommandApdu().P1;
 
-            Assert.Equal(expected: 0x15, p1);
+            Assert.Equal(0x15, p1);
         }
 
         [Fact]
@@ -306,47 +297,47 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetDeviceInfoCommand();
 
-            var p2 = command.CreateCommandApdu().P2;
+            byte p2 = command.CreateCommandApdu().P2;
 
-            Assert.Equal(expected: 0, p2);
+            Assert.Equal(0, p2);
         }
 
         [Fact]
         public void CreateCommandApdu_EnabledUsbCapabilitiesPresent_EncodesCorrectTlv()
         {
-            var expectedCapabilities = YubiKeyCapabilities.All;
+            YubiKeyCapabilities expectedCapabilities = YubiKeyCapabilities.All;
             var command = new SetDeviceInfoCommand
             {
                 EnabledUsbCapabilities = expectedCapabilities
             };
 
-            var data = command.CreateCommandApdu().Data;
+            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
-            Assert.Equal(expected: 0x04, data.Span[index: 0]);
-            Assert.Equal(expected: 0x03, data.Span[index: 1]);
-            Assert.Equal(expected: 0x02, data.Span[index: 2]);
+            Assert.Equal(0x04, data.Span[0]);
+            Assert.Equal(0x03, data.Span[1]);
+            Assert.Equal(0x02, data.Span[2]);
             Assert.Equal(
                 expectedCapabilities,
-                (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(data.Span.Slice(start: 3)));
+                (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(data.Span.Slice(3)));
         }
 
         [Fact]
         public void CreateCommandApdu_EnabledNfcCapabilitiesPresent_EncodesCorrectTlv()
         {
-            var expectedCapabilities = YubiKeyCapabilities.All;
+            YubiKeyCapabilities expectedCapabilities = YubiKeyCapabilities.All;
             var command = new SetDeviceInfoCommand
             {
                 EnabledNfcCapabilities = expectedCapabilities
             };
 
-            var data = command.CreateCommandApdu().Data;
+            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
-            Assert.Equal(expected: 0x04, data.Span[index: 0]);
-            Assert.Equal(expected: 0x0E, data.Span[index: 1]);
-            Assert.Equal(expected: 0x02, data.Span[index: 2]);
+            Assert.Equal(0x04, data.Span[0]);
+            Assert.Equal(0x0E, data.Span[1]);
+            Assert.Equal(0x02, data.Span[2]);
             Assert.Equal(
                 expectedCapabilities,
-                (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(data.Span.Slice(start: 3)));
+                (YubiKeyCapabilities)BinaryPrimitives.ReadInt16BigEndian(data.Span.Slice(3)));
         }
 
         [Fact]
@@ -358,48 +349,48 @@ namespace Yubico.YubiKey.Otp.Commands
                 ChallengeResponseTimeout = expectedTimeout
             };
 
-            var data = command.CreateCommandApdu().Data;
+            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
-            Assert.Equal(expected: 0x03, data.Span[index: 0]);
-            Assert.Equal(expected: 0x07, data.Span[index: 1]);
-            Assert.Equal(expected: 0x01, data.Span[index: 2]);
-            Assert.Equal(expectedTimeout, data.Span[index: 3]);
+            Assert.Equal(0x03, data.Span[0]);
+            Assert.Equal(0x07, data.Span[1]);
+            Assert.Equal(0x01, data.Span[2]);
+            Assert.Equal(expectedTimeout, data.Span[3]);
         }
 
         [Fact]
         public void CreateCommandApdu_AutoEjectTimeoutPresent_EncodesCorrectTlv()
         {
-            var expectedTimeout = ushort.MaxValue - 1;
+            int expectedTimeout = ushort.MaxValue - 1;
             var command = new SetDeviceInfoCommand
             {
                 AutoEjectTimeout = expectedTimeout
             };
 
-            var data = command.CreateCommandApdu().Data;
+            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
-            Assert.Equal(expected: 0x04, data.Span[index: 0]);
-            Assert.Equal(expected: 0x06, data.Span[index: 1]);
-            Assert.Equal(expected: 0x02, data.Span[index: 2]);
+            Assert.Equal(0x04, data.Span[0]);
+            Assert.Equal(0x06, data.Span[1]);
+            Assert.Equal(0x02, data.Span[2]);
             Assert.Equal(
                 expectedTimeout,
-                BinaryPrimitives.ReadUInt16BigEndian(data.Span.Slice(start: 3)));
+                BinaryPrimitives.ReadUInt16BigEndian(data.Span.Slice(3)));
         }
 
         [Fact]
         public void CreateCommandApdu_DeviceFlagsPresent_EncodesCorrectTlv()
         {
-            var expectedFlags = DeviceFlags.RemoteWakeup;
+            DeviceFlags expectedFlags = DeviceFlags.RemoteWakeup;
             var command = new SetDeviceInfoCommand
             {
                 DeviceFlags = expectedFlags
             };
 
-            var data = command.CreateCommandApdu().Data;
+            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
-            Assert.Equal(expected: 0x03, data.Span[index: 0]);
-            Assert.Equal(expected: 0x08, data.Span[index: 1]);
-            Assert.Equal(expected: 0x01, data.Span[index: 2]);
-            Assert.Equal((byte)expectedFlags, data.Span[index: 3]);
+            Assert.Equal(0x03, data.Span[0]);
+            Assert.Equal(0x08, data.Span[1]);
+            Assert.Equal(0x01, data.Span[2]);
+            Assert.Equal((byte)expectedFlags, data.Span[3]);
         }
 
         [Fact]
@@ -407,55 +398,55 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetDeviceInfoCommand();
 
-            var data = command.CreateCommandApdu().Data;
+            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
-            Assert.Equal(expected: 1, data.Length);
-            Assert.Equal(expected: 0, data.Span[index: 0]);
+            Assert.Equal(1, data.Length);
+            Assert.Equal(0, data.Span[0]);
         }
 
         [Fact]
         public void CreateCommandApdu_ResetAfterConfigTrue_EncodesCorrectTlv()
         {
-            var command = new SetDeviceInfoCommand
+            var command = new SetDeviceInfoCommand()
             {
                 ResetAfterConfig = true
             };
 
-            var data = command.CreateCommandApdu().Data;
+            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
-            Assert.Equal(expected: 0x02, data.Span[index: 0]);
-            Assert.Equal(expected: 0x0C, data.Span[index: 1]);
-            Assert.Equal(expected: 0, data.Span[index: 2]);
+            Assert.Equal(0x02, data.Span[0]);
+            Assert.Equal(0x0C, data.Span[1]);
+            Assert.Equal(0, data.Span[2]);
         }
 
         [Fact]
         public void CreateCommandApdu_SetLockCodeCalled_EncodesCorrectTlv()
         {
-            var expectedCode = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+            byte[] expectedCode = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
             var command = new SetDeviceInfoCommand();
             command.SetLockCode(expectedCode);
 
-            var data = command.CreateCommandApdu().Data;
+            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
-            Assert.Equal(expected: 0x12, data.Span[index: 0]);
-            Assert.Equal(expected: 0x0A, data.Span[index: 1]);
-            Assert.Equal(expected: 0x10, data.Span[index: 2]);
-            Assert.True(data.Slice(start: 3).Span.SequenceEqual(expectedCode));
+            Assert.Equal(0x12, data.Span[0]);
+            Assert.Equal(0x0A, data.Span[1]);
+            Assert.Equal(0x10, data.Span[2]);
+            Assert.True(data.Slice(3).Span.SequenceEqual(expectedCode));
         }
 
         [Fact]
         public void CreatecommandApdu_ApplyLockCodeCalled_EncodesCorrectTlv()
         {
-            var expectedCode = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+            byte[] expectedCode = new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
             var command = new SetDeviceInfoCommand();
             command.ApplyLockCode(expectedCode);
 
-            var data = command.CreateCommandApdu().Data;
+            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
-            Assert.Equal(expected: 0x12, data.Span[index: 0]);
-            Assert.Equal(expected: 0x0B, data.Span[index: 1]);
-            Assert.Equal(expected: 0x10, data.Span[index: 2]);
-            Assert.True(data.Slice(start: 3).Span.SequenceEqual(expectedCode));
+            Assert.Equal(0x12, data.Span[0]);
+            Assert.Equal(0x0B, data.Span[1]);
+            Assert.Equal(0x10, data.Span[2]);
+            Assert.True(data.Slice(3).Span.SequenceEqual(expectedCode));
         }
 
         [Fact]
@@ -463,9 +454,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetDeviceInfoCommand();
 
-            var ne = command.CreateCommandApdu().Ne;
+            int ne = command.CreateCommandApdu().Ne;
 
-            Assert.Equal(expected: 0, ne);
+            Assert.Equal(0, ne);
         }
 
         [Fact]

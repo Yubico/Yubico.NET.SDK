@@ -18,17 +18,17 @@ namespace Yubico.YubiKey.Oath
     // to the OathSession class.
     public class SimpleOathKeyCollector
     {
-        public SimpleOathKeyCollector()
-        {
-            KeyFlag = 0;
-        }
-
         // If KeyFlag is set to 0, the current password and 
         // the new password returned will be the alternate.
         // The alternate is the same except the first byte is different: 0x39.
         // If KeyFlag is set to 1, the current will be the alternate and the new
         // will be the default.
         public int KeyFlag { get; set; }
+
+        public SimpleOathKeyCollector()
+        {
+            KeyFlag = 0;
+        }
 
         public bool SimpleKeyCollectorDelegate(KeyEntryData keyEntryData)
         {
@@ -85,9 +85,6 @@ namespace Yubico.YubiKey.Oath
             return true;
         }
 
-        public static byte[] CollectPassword()
-        {
-            return new byte[] { 0x74, 0x65, 0x73, 0x74 };
-        }
+        public static byte[] CollectPassword() => new byte[] { 0x74, 0x65, 0x73, 0x74 };
     }
 }

@@ -225,7 +225,6 @@ namespace Yubico.YubiKey
             yubiKey.FirmwareVersion.Minor = 6;
             Assert.False(yubiKey.HasFeature(YubiKeyFeature.ManagementNfcRestricted));
         }
-
         [Fact]
         public void CheckOtpFeatures()
         {
@@ -302,7 +301,7 @@ namespace Yubico.YubiKey
             byte patch,
             bool expectedResult)
         {
-            var yubiKey = new HollowYubiKeyDevice
+            var yubiKey = new HollowYubiKeyDevice()
             {
                 AvailableUsbCapabilities = YubiKeyCapabilities.YubiHsmAuth
             };
@@ -311,7 +310,7 @@ namespace Yubico.YubiKey
             yubiKey.FirmwareVersion.Minor = minor;
             yubiKey.FirmwareVersion.Patch = patch;
 
-            var actualResult = yubiKey.HasFeature(YubiKeyFeature.YubiHsmAuthApplication);
+            bool actualResult = yubiKey.HasFeature(YubiKeyFeature.YubiHsmAuthApplication);
 
             Assert.Equal(expectedResult, actualResult);
         }

@@ -13,38 +13,36 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
     internal class EnumeratePlugin : PluginBase
     {
-        private bool _interactive;
+        public override string Name => "Enumeration";
+
+        public override string Description => "This plugin displays different types of YubiKeys, both in a scripted and interactive way.";
 
         public EnumeratePlugin(IOutput output) : base(output)
         {
             Parameters["command"].Description = "[transport] The type of YubiKey transport to enumerate. "
-                                                + "Current valid transports are All, HidKeyboard, HidFido, UsbSmartCard, NfcSmartCard, "
-                                                + "and AllSmartCard. If this is not specified, interactive is assumed.";
+                + "Current valid transports are All, HidKeyboard, HidFido, UsbSmartCard, NfcSmartCard, "
+                + "and AllSmartCard. If this is not specified, interactive is assumed.";
             Parameters["interactive"] = new Parameter
             {
                 Name = "Interactive",
                 Shortcut = "i",
                 Description = "This mode prompts the user to select the YubiKey transport to "
-                              + "enumerate. If Command is also specified, it is executed first.",
+                             + "enumerate. If Command is also specified, it is executed first.",
                 Type = typeof(bool),
                 Required = false
             };
         }
 
-        public override string Name => "Enumeration";
-
-        public override string Description =>
-            "This plugin displays different types of YubiKeys, both in a scripted and interactive way.";
-
         public override bool Execute()
         {
-            var result = Command.ToLower() switch
+            bool result = Command.ToLower() switch
             {
                 "all" => OutputDevices(Transport.All),
                 "hidkeyboard" => OutputDevices(Transport.HidKeyboard),
@@ -66,26 +64,26 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         private static ArgumentException GetArgumentException(string command)
         {
-            return new ArgumentException(string.Join(Eol, $"[{command}] is not valid. Valid commands are:", "  All",
-                "  HidKeyboard", "  HidFido", "  UsbSmartCard", "  NfcSmartCard", "  AllSmartCard"));
+            return new ArgumentException(string.Join(Eol, new[] {
+                $"[{ command }] is not valid. Valid commands are:",
+                "  All", "  HidKeyboard", "  HidFido", "  UsbSmartCard",
+                "  NfcSmartCard", "  AllSmartCard" }));
         }
 
         private bool OutputDevices(Transport transport)
         {
-            var keys = IntegrationTestDeviceEnumeration.GetTestDevices(transport);
+            IList<IYubiKeyDevice> keys = IntegrationTestDeviceEnumeration.GetTestDevices(transport);
             if (keys.Count == 0)
             {
                 Output.WriteLine($"No keys found of type [{transport}]");
                 return false;
             }
-
-            for (var i = 0; i < keys.Count; ++i)
+            for (int i = 0; i < keys.Count; ++i)
             {
                 Output.WriteLine($"{Eol}YubiKey # {i + 1}{Eol + keys[i]}");
-                Output.WriteLine(new string(c: '-', ConsoleWidth - 1));
+                Output.WriteLine(new string('-', ConsoleWidth - 1));
             }
-
-            Output.WriteLine(new string(c: '=', ConsoleWidth - 1));
+            Output.WriteLine(new string('=', ConsoleWidth - 1));
             Output.Write(Eol + Eol);
 
             return true;
@@ -99,19 +97,19 @@ namespace Yubico.YubiKey.TestApp.Plugins
             char inputChar;
             do
             {
-                Output.WriteLine("YubiKey Enumeration Options");
-                Output.WriteLine("1. All keys");
-                Output.WriteLine("2. HID Keyboard");
-                Output.WriteLine("3. HID FIDO");
-                Output.WriteLine("4. USB SmartCard");
-                Output.WriteLine("5. NFC SmartCard");
-                Output.WriteLine("6. All SmartCard");
-                Output.WriteLine("");
-                Output.Write("Select an option, or any other key to exit: ");
+                Output.WriteLine($"YubiKey Enumeration Options");
+                Output.WriteLine($"1. All keys");
+                Output.WriteLine($"2. HID Keyboard");
+                Output.WriteLine($"3. HID FIDO");
+                Output.WriteLine($"4. USB SmartCard");
+                Output.WriteLine($"5. NFC SmartCard");
+                Output.WriteLine($"6. All SmartCard");
+                Output.WriteLine($"");
+                Output.Write($"Select an option, or any other key to exit: ");
                 inputChar = Console.ReadKey().KeyChar;
                 Output.WriteLine();
 
-                var transport = inputChar switch
+                Transport transport = inputChar switch
                 {
                     '1' => Transport.All,
                     '2' => Transport.HidKeyboard,
@@ -119,7 +117,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     '4' => Transport.UsbSmartCard,
                     '5' => Transport.NfcSmartCard,
                     '6' => Transport.SmartCard,
-                    _ => Transport.None
+                    _ => Transport.None,
                 };
 
                 if (transport == Transport.None)
@@ -138,9 +136,11 @@ namespace Yubico.YubiKey.TestApp.Plugins
         public override void HandleParameters()
         {
             base.HandleParameters();
-            var interactive = (string?)Parameters["interactive"].Value;
+            string? interactive = (string?)Parameters["interactive"].Value;
             _interactive = interactive != null
-                           && StaticConverters.ParseBool(interactive);
+                && StaticConverters.ParseBool(interactive);
         }
+
+        private bool _interactive;
     }
 }

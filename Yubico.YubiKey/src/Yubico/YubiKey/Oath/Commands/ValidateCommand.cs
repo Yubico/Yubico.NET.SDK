@@ -19,11 +19,11 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    ///     Validates authentication (mutually).
-    ///     The challenge for this comes from the SelectOathResponse.
-    ///     The response computed by performing the correct HMAC function of that challenge with the correct secret.
-    ///     A new challenge is then sent to the application along with the response.
-    ///     The application will then respond with a similar calculation that the host software can verify.
+    /// Validates authentication (mutually).
+    /// The challenge for this comes from the SelectOathResponse.
+    /// The response computed by performing the correct HMAC function of that challenge with the correct secret.
+    /// A new challenge is then sent to the application along with the response.
+    /// The application will then respond with a similar calculation that the host software can verify.
     /// </summary>
     public class ValidateCommand : OathChallengeResponseBaseCommand, IYubiKeyCommand<ValidateResponse>
     {
@@ -32,27 +32,42 @@ namespace Yubico.YubiKey.Oath.Commands
         private const byte ResponseTag = 0x75;
 
         /// <summary>
-        ///     Gets the OATH application information.
+        /// Gets the OATH application information.
         /// </summary>
         private readonly OathApplicationData _oathData;
 
         /// <summary>
-        ///     Gets the password.
+        /// Gets the password.
         /// </summary>
         /// <value>
-        ///     A user-supplied password to validate.
+        /// A user-supplied password to validate.
         /// </value>
         private readonly ReadOnlyMemory<byte> _password;
 
         /// <summary>
-        ///     Constructs an instance of the <see cref="ValidateCommand" /> class.
+        /// Gets and privately sets.
         /// </summary>
-        /// ///
-        /// <param name="password">
-        ///     The user-supplied password to validate.
+        /// <value>
+        /// The response that is calculated with a new generated challenge.
+        /// </value>
+        public ReadOnlyMemory<byte> CalculatedResponse { get; private set; }
+
+        /// <summary>
+        /// Gets the YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        /// YubiKeyApplication.Oath
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Oath;
+
+        /// <summary>
+        /// Constructs an instance of the <see cref="ValidateCommand" /> class.
+        /// </summary>
+        /// /// <param name="password">
+        /// The user-supplied password to validate.
         /// </param>
         /// <param name="oathData">
-        ///     An implementation of <c>OathApplicationData</c>.
+        /// An implementation of <c>OathApplicationData</c>.
         /// </param>
         public ValidateCommand(ReadOnlyMemory<byte> password, OathApplicationData oathData)
         {
@@ -65,22 +80,6 @@ namespace Yubico.YubiKey.Oath.Commands
             _oathData = oathData;
             CalculatedResponse = ReadOnlyMemory<byte>.Empty;
         }
-
-        /// <summary>
-        ///     Gets and privately sets.
-        /// </summary>
-        /// <value>
-        ///     The response that is calculated with a new generated challenge.
-        /// </value>
-        public ReadOnlyMemory<byte> CalculatedResponse { get; private set; }
-
-        /// <summary>
-        ///     Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        ///     YubiKeyApplication.Oath
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Oath;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()

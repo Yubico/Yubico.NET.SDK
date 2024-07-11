@@ -58,36 +58,35 @@ namespace Yubico.YubiKey.Piv.Commands
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                var isValid = pivSession.TryAuthenticateManagementKey();
+                bool isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
-                byte[] keyData =
-                {
+                byte[] keyData = {
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                     0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
                     0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58,
                     0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68
                 };
 
-                var keyLength = algorithm switch
+                int keyLength = algorithm switch
                 {
                     PivAlgorithm.Aes128 => 16,
                     PivAlgorithm.Aes192 => 24,
-                    _ => 32
+                    _ => 32,
                 };
 
-                var mgmtKey = new ReadOnlyMemory<byte>(keyData, start: 0, keyLength);
+                var mgmtKey = new ReadOnlyMemory<byte>(keyData, 0, keyLength);
 
                 var setCmd = new SetManagementKeyCommand(mgmtKey, PivTouchPolicy.Never, algorithm);
 
-                var setRsp = pivSession.Connection.SendCommand(setCmd);
+                SetManagementKeyResponse setRsp = pivSession.Connection.SendCommand(setCmd);
                 Assert.Equal(ResponseStatus.Success, setRsp.Status);
 
                 var getCmd = new GetMetadataCommand(PivSlot.Management);
-                var getRsp = pivSession.Connection.SendCommand(getCmd);
+                GetMetadataResponse getRsp = pivSession.Connection.SendCommand(getCmd);
                 Assert.Equal(ResponseStatus.Success, getRsp.Status);
 
-                var metadata = getRsp.GetData();
+                PivMetadata metadata = getRsp.GetData();
                 Assert.Equal(algorithm, metadata.Algorithm);
             }
         }

@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.Cryptography
         public RsaP1TimingTests(ITestOutputHelper output)
         {
             _output = output;
-            _random = RandomObjectUtility.GetRandomObject(fixedBytes: null);
+            _random = RandomObjectUtility.GetRandomObject(null);
         }
 
         [Theory]
@@ -41,18 +41,18 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2048)]
         public void CorrectPad_Time(int keySizeBits)
         {
-            var isValid = false;
+            bool isValid = false;
             int[] dataLength = { 16, 24, 32, 48 };
 
-            for (var index = 0; index < dataLength.Length; index++)
+            for (int index = 0; index < dataLength.Length; index++)
             {
-                var dataToPad = new byte[dataLength[index]];
+                byte[] dataToPad = new byte[dataLength[index]];
                 _random.GetBytes(dataToPad);
-                var formattedData = RsaFormat.FormatPkcs1Encrypt(dataToPad, keySizeBits);
+                byte[] formattedData = RsaFormat.FormatPkcs1Encrypt(dataToPad, keySizeBits);
 
-                var totalTime = RunTimerP15(formattedData, dataLength[index], out isValid);
+                long totalTime = RunTimerP15(formattedData, dataLength[index], out isValid);
 
-                WriteResult("P1.5", keySizeBits, dataLength[index], errorType: 0, totalTime);
+                WriteResult("P1.5", keySizeBits, dataLength[index], 0, totalTime);
             }
 
             Assert.True(isValid);
@@ -63,19 +63,19 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2048)]
         public void FirstByteWrong_Time(int keySizeBits)
         {
-            var isValid = false;
+            bool isValid = false;
             int[] dataLength = { 16, 24, 32, 48 };
 
-            for (var index = 0; index < dataLength.Length; index++)
+            for (int index = 0; index < dataLength.Length; index++)
             {
-                var dataToPad = new byte[dataLength[index]];
+                byte[] dataToPad = new byte[dataLength[index]];
                 _random.GetBytes(dataToPad);
-                var formattedData = RsaFormat.FormatPkcs1Encrypt(dataToPad, keySizeBits);
+                byte[] formattedData = RsaFormat.FormatPkcs1Encrypt(dataToPad, keySizeBits);
                 formattedData[0] = 1;
 
-                var totalTime = RunTimerP15(formattedData, expectedLength: 0, out isValid);
+                long totalTime = RunTimerP15(formattedData, 0, out isValid);
 
-                WriteResult("P1.5", keySizeBits, dataLength[index], errorType: 1, totalTime);
+                WriteResult("P1.5", keySizeBits, dataLength[index], 1, totalTime);
             }
 
             Assert.False(isValid);
@@ -86,19 +86,19 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2048)]
         public void SecondByteWrong_Time(int keySizeBits)
         {
-            var isValid = false;
+            bool isValid = false;
             int[] dataLength = { 16, 24, 32, 48 };
 
-            for (var index = 0; index < dataLength.Length; index++)
+            for (int index = 0; index < dataLength.Length; index++)
             {
-                var dataToPad = new byte[dataLength[index]];
+                byte[] dataToPad = new byte[dataLength[index]];
                 _random.GetBytes(dataToPad);
-                var formattedData = RsaFormat.FormatPkcs1Encrypt(dataToPad, keySizeBits);
+                byte[] formattedData = RsaFormat.FormatPkcs1Encrypt(dataToPad, keySizeBits);
                 formattedData[1] = 0x06;
 
-                var totalTime = RunTimerP15(formattedData, expectedLength: 0, out isValid);
+                long totalTime = RunTimerP15(formattedData, 0, out isValid);
 
-                WriteResult("P1.5", keySizeBits, dataLength[index], errorType: 2, totalTime);
+                WriteResult("P1.5", keySizeBits, dataLength[index], 2, totalTime);
             }
 
             Assert.False(isValid);
@@ -109,19 +109,19 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2048)]
         public void NotEnoughPad_Time(int keySizeBits)
         {
-            var isValid = false;
+            bool isValid = false;
             int[] dataLength = { 16, 24, 32, 48 };
 
-            for (var index = 0; index < dataLength.Length; index++)
+            for (int index = 0; index < dataLength.Length; index++)
             {
-                var dataToPad = new byte[dataLength[index]];
+                byte[] dataToPad = new byte[dataLength[index]];
                 _random.GetBytes(dataToPad);
-                var formattedData = RsaFormat.FormatPkcs1Encrypt(dataToPad, keySizeBits);
+                byte[] formattedData = RsaFormat.FormatPkcs1Encrypt(dataToPad, keySizeBits);
                 formattedData[8] = 0;
 
-                var totalTime = RunTimerP15(formattedData, expectedLength: 0, out isValid);
+                long totalTime = RunTimerP15(formattedData, 0, out isValid);
 
-                WriteResult("P1.5", keySizeBits, dataLength[index], errorType: 3, totalTime);
+                WriteResult("P1.5", keySizeBits, dataLength[index], 3, totalTime);
             }
 
             Assert.False(isValid);
@@ -132,21 +132,21 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2048)]
         public void MultipleErrors_Time(int keySizeBits)
         {
-            var isValid = false;
+            bool isValid = false;
             int[] dataLength = { 16, 24, 32, 48 };
 
-            for (var index = 0; index < dataLength.Length; index++)
+            for (int index = 0; index < dataLength.Length; index++)
             {
-                var dataToPad = new byte[dataLength[index]];
+                byte[] dataToPad = new byte[dataLength[index]];
                 _random.GetBytes(dataToPad);
-                var formattedData = RsaFormat.FormatPkcs1Encrypt(dataToPad, keySizeBits);
+                byte[] formattedData = RsaFormat.FormatPkcs1Encrypt(dataToPad, keySizeBits);
                 formattedData[0] = 1;
                 formattedData[1] = 3;
                 formattedData[5] = 0;
 
-                var totalTime = RunTimerP15(formattedData, expectedLength: 0, out isValid);
+                long totalTime = RunTimerP15(formattedData, 0, out isValid);
 
-                WriteResult("P1.5", keySizeBits, dataLength[index], errorType: 5, totalTime);
+                WriteResult("P1.5", keySizeBits, dataLength[index], 5, totalTime);
             }
 
             Assert.False(isValid);
@@ -157,12 +157,12 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2048)]
         public void NoZeroByte_Time(int keySizeBits)
         {
-            var bufferSize = keySizeBits / 8;
-            var formattedData = new byte[bufferSize];
+            int bufferSize = keySizeBits / 8;
+            byte[] formattedData = new byte[bufferSize];
             _random.GetBytes(formattedData);
             formattedData[0] = 0;
             formattedData[1] = 2;
-            for (var index = 2; index < bufferSize; index++)
+            for (int index = 2; index < bufferSize; index++)
             {
                 if (formattedData[index] == 0)
                 {
@@ -170,29 +170,28 @@ namespace Yubico.YubiKey.Cryptography
                 }
             }
 
-            var totalTime = RunTimerP15(formattedData, expectedLength: 0, out var isValid);
+            long totalTime = RunTimerP15(formattedData, 0, out bool isValid);
 
             Assert.False(isValid);
 
-            WriteResult("P1.5", keySizeBits, bufferSize, errorType: 4, totalTime);
+            WriteResult("P1.5", keySizeBits, bufferSize, 4, totalTime);
         }
 
         private static long RunTimerP15(byte[] formattedData, int expectedLength, out bool isValid)
         {
             isValid = false;
-            var iterationCount = IterationCount1024;
+            int iterationCount = IterationCount1024;
             if (formattedData.Length == 256)
             {
                 iterationCount = IterationCount2048;
             }
 
-            var outputData = Array.Empty<byte>();
+            byte[] outputData = Array.Empty<byte>();
             var timer = Stopwatch.StartNew();
-            for (var index = 0; index < iterationCount; index++)
+            for (int index = 0; index < iterationCount; index++)
             {
                 isValid = RsaFormat.TryParsePkcs1Decrypt(formattedData, out outputData);
             }
-
             timer.Stop();
 
             if (expectedLength == 0)
@@ -203,20 +202,19 @@ namespace Yubico.YubiKey.Cryptography
             {
                 Assert.Equal(expectedLength, outputData.Length);
             }
-
             return timer.ElapsedMilliseconds;
         }
 
         private void WriteResult(string scheme, int keySizeBits, int dataLength, int errorType, long totalTime)
         {
-            var message = errorType switch
+            string message = errorType switch
             {
                 1 => "first byte wrong",
                 2 => "second byte wrong",
                 3 => "not enough pad",
                 4 => "no zero byte",
                 5 => "first, second, not enough pad",
-                _ => "all correct"
+                _ => "all correct",
             };
 
             _output.WriteLine(

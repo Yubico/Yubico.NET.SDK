@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Security.Cryptography.X509Certificates;
 using Xunit;
 using Yubico.Core.Tlv;
 using Yubico.YubiKey.Piv.Commands;
@@ -28,23 +29,23 @@ namespace Yubico.YubiKey.Piv
         public void Cert_Auth_Req(StandardTestDevice testDeviceType)
         {
             var isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048,
-                out var cert, out var privateKey);
+                out X509Certificate2 cert, out PivPrivateKey privateKey);
             Assert.True(isValid);
 
             var certDer = cert.GetRawCertData();
             byte[] feData = { 0xFE, 0x00 };
             var tlvWriter = new TlvWriter();
-            using (tlvWriter.WriteNestedTlv(tag: 0x53))
+            using (tlvWriter.WriteNestedTlv(0x53))
             {
-                tlvWriter.WriteValue(tag: 0x70, certDer);
-                tlvWriter.WriteByte(tag: 0x71, value: 0);
+                tlvWriter.WriteValue(0x70, certDer);
+                tlvWriter.WriteByte(0x71, 0);
                 tlvWriter.WriteEncoded(feData);
             }
 
             var certData = tlvWriter.Encode();
             tlvWriter.Clear();
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -60,13 +61,13 @@ namespace Yubico.YubiKey.Piv
             {
                 // There should be no data.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Authentication);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
 
                 // Now put some data.
                 // This should fail because the mgmt key is needed.
                 var putDataCommand = new PutDataCommand((int)PivDataTag.Authentication, certData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, putDataResponse.Status);
 
                 // Verify the PIN
@@ -86,7 +87,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.AuthenticateManagementKey();
 
                 var putDataCommand = new PutDataCommand((int)PivDataTag.Authentication, certData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
@@ -94,10 +95,10 @@ namespace Yubico.YubiKey.Piv
             {
                 // There should be data this time.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Authentication);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.Success, getDataResponse.Status);
 
-                var getData = getDataResponse.GetData();
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
                 Assert.Equal(certData.Length, getData.Length);
             }
         }
@@ -106,15 +107,14 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Chuid_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] chuidData =
-            {
+            byte[] chuidData = {
                 0x53, 0x3b, 0x30, 0x19, 0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83,
                 0x68, 0x58, 0x21, 0x08, 0x42, 0x10, 0x84, 0x21, 0xc8, 0x42, 0x10, 0xc3, 0xeb, 0x34, 0x10, 0x39,
                 0x38, 0x37, 0x36, 0x35, 0x34, 0x33, 0x32, 0x49, 0x48, 0x47, 0x46, 0x45, 0x44, 0x43, 0x42, 0x35,
                 0x08, 0x32, 0x30, 0x33, 0x30, 0x30, 0x31, 0x30, 0x31, 0x3e, 0x00, 0xfe, 0x00
             };
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice, new StaticKeys()))
             {
@@ -122,13 +122,13 @@ namespace Yubico.YubiKey.Piv
 
                 // There should be no data.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Chuid);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
 
                 // Now put some data.
                 // This should fail because the mgmt key is needed.
                 var putDataCommand = new PutDataCommand((int)PivDataTag.Chuid, chuidData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, putDataResponse.Status);
 
                 // Verify the PIN
@@ -148,7 +148,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.AuthenticateManagementKey();
 
                 var putDataCommand = new PutDataCommand((int)PivDataTag.Chuid, chuidData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
@@ -157,11 +157,11 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Chuid);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.Success, getDataResponse.Status);
 
-                var getData = getDataResponse.GetData();
-                Assert.Equal(expected: 61, getData.Length);
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
+                Assert.Equal(61, getData.Length);
             }
         }
 
@@ -169,15 +169,14 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Capability_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] capabilityData =
-            {
+            byte[] capabilityData = {
                 0x53, 0x33, 0xF0, 0x15, 0xA0, 0x00, 0x00, 0x01, 0x16, 0xFF, 0x02, 0x21, 0x08, 0x42, 0x10, 0x84,
                 0x21, 0xc8, 0x42, 0x10, 0xc3, 0xeb, 0x34, 0x10, 0x39, 0xF1, 0x01, 0x21, 0xF2, 0x01, 0x21, 0xF3,
                 0x00, 0xF4, 0x01, 0x00, 0xF5, 0x01, 0x10, 0xF6, 0x00, 0xF7, 0x00, 0xFA, 0x00, 0xFB, 0x00, 0xFC,
                 0x00, 0xFD, 0x00, 0xFE, 0x00
             };
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -187,13 +186,13 @@ namespace Yubico.YubiKey.Piv
 #pragma warning disable CS0618 // Testing an obsolete feature
                 var getDataCommand = new GetDataCommand(PivDataTag.Capability);
 #pragma warning restore CS0618 // Type or member is obsolete
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
 
                 // Now put some data.
                 // This should fail because the mgmt key is needed.
                 var putDataCommand = new PutDataCommand((int)PivDataTag.Capability, capabilityData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, putDataResponse.Status);
 
                 // Verify the PIN
@@ -215,7 +214,7 @@ namespace Yubico.YubiKey.Piv
 #pragma warning disable CS0618 // Testing an obsolete feature
                 var putDataCommand = new PutDataCommand(PivDataTag.Capability, capabilityData);
 #pragma warning restore CS0618 // Type or member is obsolete
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
@@ -226,11 +225,11 @@ namespace Yubico.YubiKey.Piv
 #pragma warning disable CS0618 // Testing an obsolete feature
                 var getDataCommand = new GetDataCommand(PivDataTag.Capability);
 #pragma warning restore CS0618 // Type or member is obsolete
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.Success, getDataResponse.Status);
 
-                var getData = getDataResponse.GetData();
-                Assert.Equal(expected: 53, getData.Length);
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
+                Assert.Equal(53, getData.Length);
             }
         }
 
@@ -238,13 +237,12 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Discovery_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] discoveryData =
-            {
+            byte[] discoveryData = {
                 0x7E, 0x12, 0x4F, 0x0B, 0xA0, 0x00, 0x00, 0x03, 0x08, 0x00, 0x00, 0x10, 0x00, 0x01, 0x00, 0x5F,
-                0x2F, 0x02, 0x40, 0x00
+                0x2F, 0x02, 0x40, 0x00,
             };
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -252,11 +250,11 @@ namespace Yubico.YubiKey.Piv
 
                 // There should be data.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Discovery);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.Success, getDataResponse.Status);
 
-                var getData = getDataResponse.GetData();
-                Assert.Equal(expected: 20, getData.Length);
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
+                Assert.Equal(20, getData.Length);
 
                 // Now put some data.
                 // This should throw an exception, it doesn't matter what has or
@@ -270,20 +268,16 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Printed_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] printedData =
-            {
+            byte[] printedData = {
                 0x53, 0x04, 0x04, 0x02, 0xd4, 0xe7
             };
-            byte[] key1 =
-            {
+            byte[] key1 = {
                 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff
             };
-            byte[] key2 =
-            {
+            byte[] key2 = {
                 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x11
             };
-            byte[] key3 =
-            {
+            byte[] key3 = {
                 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff, 0x11, 0x22
             };
             var newKeys = new StaticKeys(key2, key1, key3)
@@ -291,7 +285,7 @@ namespace Yubico.YubiKey.Piv
                 KeyVersionNumber = 2
             };
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -299,7 +293,7 @@ namespace Yubico.YubiKey.Piv
 
                 // There should be no data, but even so, the error should be Auth Required.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Printed);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, getDataResponse.Status);
 
                 // Authenticate the mgmt key and try again. It should still
@@ -320,7 +314,7 @@ namespace Yubico.YubiKey.Piv
                 // Get the data. This time we should be able to see that there's
                 // NoData.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Printed);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
             }
 
@@ -330,8 +324,8 @@ namespace Yubico.YubiKey.Piv
                 // put data into Printed.
                 // With no PIN nor mgmt key, or with only the PIN, this should
                 // fail.
-                var putDataCommand = new PutDataCommand(dataTag: 0x5FC109, printedData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                var putDataCommand = new PutDataCommand(0x5FC109, printedData);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, putDataResponse.Status);
 
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -347,8 +341,8 @@ namespace Yubico.YubiKey.Piv
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
 
-                var putDataCommand = new PutDataCommand(dataTag: 0x5FC109, printedData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                var putDataCommand = new PutDataCommand(0x5FC109, printedData);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
@@ -357,7 +351,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Printed);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, getDataResponse.Status);
 
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
@@ -375,11 +369,11 @@ namespace Yubico.YubiKey.Piv
                 pivSession.VerifyPin();
 
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Printed);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.Success, getDataResponse.Status);
 
-                var getData = getDataResponse.GetData();
-                Assert.Equal(expected: 6, getData.Length);
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
+                Assert.Equal(6, getData.Length);
             }
         }
 
@@ -388,12 +382,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Security_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] securityData =
-            {
+            byte[] securityData = {
                 0x53, 0x08, 0xBA, 0x01, 0x11, 0xBB, 0x01, 0x22, 0xFE, 0x00
             };
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -401,13 +394,13 @@ namespace Yubico.YubiKey.Piv
 
                 // There should be no data.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.SecurityObject);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
 
                 // Now put some data.
                 // This should fail because the mgmt key is needed.
                 var putDataCommand = new PutDataCommand((int)PivDataTag.SecurityObject, securityData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, putDataResponse.Status);
 
                 // Verify the PIN
@@ -427,7 +420,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.AuthenticateManagementKey();
 
                 var putDataCommand = new PutDataCommand((int)PivDataTag.SecurityObject, securityData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
@@ -436,11 +429,11 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.SecurityObject);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.Success, getDataResponse.Status);
 
-                var getData = getDataResponse.GetData();
-                Assert.Equal(expected: 10, getData.Length);
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
+                Assert.Equal(10, getData.Length);
             }
         }
 
@@ -448,12 +441,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void KeyHistory_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] keyHistoryData =
-            {
+            byte[] keyHistoryData = {
                 0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
             };
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -461,13 +453,13 @@ namespace Yubico.YubiKey.Piv
 
                 // There should be no data.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.KeyHistory);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
 
                 // Now put some data.
                 // This should fail because the mgmt key is needed.
                 var putDataCommand = new PutDataCommand((int)PivDataTag.KeyHistory, keyHistoryData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, putDataResponse.Status);
 
                 // Verify the PIN
@@ -487,7 +479,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.AuthenticateManagementKey();
 
                 var putDataCommand = new PutDataCommand((int)PivDataTag.KeyHistory, keyHistoryData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
@@ -496,11 +488,11 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.KeyHistory);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.Success, getDataResponse.Status);
 
-                var getData = getDataResponse.GetData();
-                Assert.Equal(expected: 12, getData.Length);
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
+                Assert.Equal(12, getData.Length);
             }
         }
 
@@ -509,12 +501,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Iris_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] irisData =
-            {
+            byte[] irisData = {
                 0x53, 0x05, 0xBC, 0x01, 0x11, 0xFE, 0x00
             };
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -522,7 +513,7 @@ namespace Yubico.YubiKey.Piv
 
                 // There should be no data, but even so, the error should be Auth Required.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.IrisImages);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, getDataResponse.Status);
 
                 // Authenticate the mgmt key and try to get data again. It should still
@@ -543,7 +534,7 @@ namespace Yubico.YubiKey.Piv
                 // Get the data. This time we should be able to see that there's
                 // NoData.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.IrisImages);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
             }
 
@@ -553,7 +544,7 @@ namespace Yubico.YubiKey.Piv
                 // With no PIN nor mgmt key, or with only the PIN, this should
                 // fail.
                 var putDataCommand = new PutDataCommand((int)PivDataTag.IrisImages, irisData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, putDataResponse.Status);
 
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -570,7 +561,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.AuthenticateManagementKey();
 
                 var putDataCommand = new PutDataCommand((int)PivDataTag.IrisImages, irisData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
@@ -579,7 +570,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.IrisImages);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, getDataResponse.Status);
 
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
@@ -597,11 +588,11 @@ namespace Yubico.YubiKey.Piv
                 pivSession.VerifyPin();
 
                 var getDataCommand = new GetDataCommand((int)PivDataTag.IrisImages);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.Success, getDataResponse.Status);
 
-                var getData = getDataResponse.GetData();
-                Assert.Equal(expected: 7, getData.Length);
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
+                Assert.Equal(7, getData.Length);
             }
         }
 
@@ -610,12 +601,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Facial_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] facialData =
-            {
+            byte[] facialData = {
                 0x53, 0x05, 0xBC, 0x01, 0x11, 0xFE, 0x00
             };
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -623,7 +613,7 @@ namespace Yubico.YubiKey.Piv
 
                 // There should be no data, but even so, the error should be Auth Required.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.FacialImage);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, getDataResponse.Status);
 
                 // Authenticate the mgmt key and try to get data again. It should still
@@ -644,7 +634,7 @@ namespace Yubico.YubiKey.Piv
                 // Get the data. This time we should be able to see that there's
                 // NoData.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.FacialImage);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
             }
 
@@ -654,7 +644,7 @@ namespace Yubico.YubiKey.Piv
                 // With no PIN nor mgmt key, or with only the PIN, this should
                 // fail.
                 var putDataCommand = new PutDataCommand((int)PivDataTag.FacialImage, facialData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, putDataResponse.Status);
 
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -671,7 +661,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.AuthenticateManagementKey();
 
                 var putDataCommand = new PutDataCommand((int)PivDataTag.FacialImage, facialData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
@@ -680,7 +670,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.FacialImage);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, getDataResponse.Status);
 
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
@@ -698,11 +688,11 @@ namespace Yubico.YubiKey.Piv
                 pivSession.VerifyPin();
 
                 var getDataCommand = new GetDataCommand((int)PivDataTag.FacialImage);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.Success, getDataResponse.Status);
 
-                var getData = getDataResponse.GetData();
-                Assert.Equal(expected: 7, getData.Length);
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
+                Assert.Equal(7, getData.Length);
             }
         }
 
@@ -711,12 +701,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Fingerprint_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] fingerprintData =
-            {
+            byte[] fingerprintData = {
                 0x53, 0x05, 0xBC, 0x01, 0x11, 0xFE, 0x00
             };
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -724,7 +713,7 @@ namespace Yubico.YubiKey.Piv
 
                 // There should be no data, but even so, the error should be Auth Required.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Fingerprints);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, getDataResponse.Status);
 
                 // Authenticate the mgmt key and try to get data again. It should still
@@ -745,7 +734,7 @@ namespace Yubico.YubiKey.Piv
                 // Get the data. This time we should be able to see that there's
                 // NoData.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Fingerprints);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
             }
 
@@ -755,7 +744,7 @@ namespace Yubico.YubiKey.Piv
                 // With no PIN nor mgmt key, or with only the PIN, this should
                 // fail.
                 var putDataCommand = new PutDataCommand((int)PivDataTag.Fingerprints, fingerprintData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, putDataResponse.Status);
 
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -772,7 +761,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.AuthenticateManagementKey();
 
                 var putDataCommand = new PutDataCommand((int)PivDataTag.Fingerprints, fingerprintData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
@@ -781,7 +770,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Fingerprints);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, getDataResponse.Status);
 
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
@@ -799,11 +788,11 @@ namespace Yubico.YubiKey.Piv
                 pivSession.VerifyPin();
 
                 var getDataCommand = new GetDataCommand((int)PivDataTag.Fingerprints);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.Success, getDataResponse.Status);
 
-                var getData = getDataResponse.GetData();
-                Assert.Equal(expected: 7, getData.Length);
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
+                Assert.Equal(7, getData.Length);
             }
         }
 
@@ -812,12 +801,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Bitgt_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] bitgtData =
-            {
+            byte[] bitgtData = {
                 0x7F, 0x61, 0x07, 0x02, 0x01, 0x01, 0x7F, 0x60, 0x01, 0x01
             };
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -827,7 +815,7 @@ namespace Yubico.YubiKey.Piv
 #pragma warning disable CS0618 // Testing an obsolete feature
                 var getDataCommand = new GetDataCommand(PivDataTag.BiometricGroupTemplate);
 #pragma warning restore CS0618 // Type or member is obsolete
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
 
                 // Now try to put some data.
@@ -845,12 +833,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void SMSigner_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] smSignerData =
-            {
+            byte[] smSignerData = {
                 0x53, 0x08, 0x70, 0x01, 0x11, 0x71, 0x01, 0x00, 0xFE, 0x00
             };
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -859,7 +846,7 @@ namespace Yubico.YubiKey.Piv
                 // There is no auth required to get data, but there should be no
                 // data at the moment.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.SecureMessageSigner);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
             }
 
@@ -869,7 +856,7 @@ namespace Yubico.YubiKey.Piv
                 // With no PIN nor mgmt key, or with only the PIN, this should
                 // fail.
                 var putDataCommand = new PutDataCommand((int)PivDataTag.SecureMessageSigner, smSignerData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, putDataResponse.Status);
 
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -886,7 +873,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.AuthenticateManagementKey();
 
                 var putDataCommand = new PutDataCommand((int)PivDataTag.SecureMessageSigner, smSignerData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
@@ -895,11 +882,11 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.SecureMessageSigner);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.Success, getDataResponse.Status);
 
-                var getData = getDataResponse.GetData();
-                Assert.Equal(expected: 10, getData.Length);
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
+                Assert.Equal(10, getData.Length);
             }
         }
 
@@ -908,12 +895,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void PCRef_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] pcRefData =
-            {
+            byte[] pcRefData = {
                 0x53, 0x0C, 0x99, 0x08, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0xFE, 0x00
             };
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
@@ -921,7 +907,7 @@ namespace Yubico.YubiKey.Piv
                 // There is no auth required to get data, but there should be no
                 // data at the moment.
                 var getDataCommand = new GetDataCommand((int)PivDataTag.PairingCodeReferenceData);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
             }
 
@@ -931,7 +917,7 @@ namespace Yubico.YubiKey.Piv
                 // With no PIN nor mgmt key, or with only the PIN, this should
                 // fail.
                 var putDataCommand = new PutDataCommand((int)PivDataTag.PairingCodeReferenceData, pcRefData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, putDataResponse.Status);
 
                 pivSession.KeyCollector = PinOnlyKeyCollectorDelegate;
@@ -948,7 +934,7 @@ namespace Yubico.YubiKey.Piv
                 pivSession.AuthenticateManagementKey();
 
                 var putDataCommand = new PutDataCommand((int)PivDataTag.PairingCodeReferenceData, pcRefData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
@@ -957,11 +943,11 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(testDevice))
             {
                 var getDataCommand = new GetDataCommand((int)PivDataTag.PairingCodeReferenceData);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.Success, getDataResponse.Status);
 
-                var getData = getDataResponse.GetData();
-                Assert.Equal(expected: 14, getData.Length);
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
+                Assert.Equal(14, getData.Length);
             }
         }
 
@@ -969,24 +955,23 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void AdminData_Auth_Req(StandardTestDevice testDeviceType)
         {
-            byte[] adminData =
-            {
+            byte[] adminData = {
                 0x53, 0x09, 0x80, 0x07, 0x81, 0x01, 0x00, 0x03, 0x02, 0x5C, 0x29
             };
 
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 // There should be no data.
-                var getDataCommand = new GetDataCommand(dataTag: 0x5FFF00);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                var getDataCommand = new GetDataCommand(0x5FFF00);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.NoData, getDataResponse.Status);
 
                 // Now put some data.
                 // This should fail because the mgmt key is needed.
-                var putDataCommand = new PutDataCommand(dataTag: 0x5FFF00, adminData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                var putDataCommand = new PutDataCommand(0x5FFF00, adminData);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, putDataResponse.Status);
 
                 // Verify the PIN
@@ -1005,20 +990,20 @@ namespace Yubico.YubiKey.Piv
                 pivSession.KeyCollector = MgmtKeyOnlyKeyCollectorDelegate;
                 pivSession.AuthenticateManagementKey();
 
-                var putDataCommand = new PutDataCommand(dataTag: 0x5FFF00, adminData);
-                var putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
+                var putDataCommand = new PutDataCommand(0x5FFF00, adminData);
+                PutDataResponse putDataResponse = pivSession.Connection.SendCommand(putDataCommand);
                 Assert.Equal(ResponseStatus.Success, putDataResponse.Status);
             }
 
             using (var pivSession = new PivSession(testDevice))
             {
                 // There should be data this time.
-                var getDataCommand = new GetDataCommand(dataTag: 0x5FFF00);
-                var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+                var getDataCommand = new GetDataCommand(0x5FFF00);
+                GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
                 Assert.Equal(ResponseStatus.Success, getDataResponse.Status);
 
-                var getData = getDataResponse.GetData();
-                Assert.Equal(expected: 11, getData.Length);
+                ReadOnlyMemory<byte> getData = getDataResponse.GetData();
+                Assert.Equal(11, getData.Length);
             }
         }
 

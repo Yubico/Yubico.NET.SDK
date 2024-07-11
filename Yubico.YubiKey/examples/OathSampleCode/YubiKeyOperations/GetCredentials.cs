@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 _ = outputList.AppendLine("No credentials on this YubiKey");
             }
 
-            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, outputList.ToString());
+            SampleMenu.WriteMessage(MessageType.Special, 0, outputList.ToString());
         }
     }
 }

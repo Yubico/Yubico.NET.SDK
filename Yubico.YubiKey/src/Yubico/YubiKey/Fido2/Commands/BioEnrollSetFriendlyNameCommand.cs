@@ -20,14 +20,14 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    ///     Set the friendly name of an enrolled fingerprint. If there is a friendly
-    ///     name already, this replaces it. This is a subcommand of the CTAP
-    ///     command "authenticatorBioEnrollment".
+    /// Set the friendly name of an enrolled fingerprint. If there is a friendly
+    /// name already, this replaces it. This is a subcommand of the CTAP
+    /// command "authenticatorBioEnrollment".
     /// </summary>
     /// <remarks>
-    ///     The partner Response class is <see cref="Fido2Response" />. This command
-    ///     does not return any data, it only returns "success" or "failure", and has
-    ///     some FIDO2-specific error information.
+    /// The partner Response class is <see cref="Fido2Response"/>. This command
+    /// does not return any data, it only returns "success" or "failure", and has
+    /// some FIDO2-specific error information.
     /// </remarks>
     public sealed class BioEnrollSetFriendlyNameCommand : IYubiKeyCommand<Fido2Response>
     {
@@ -37,6 +37,9 @@ namespace Yubico.YubiKey.Fido2.Commands
 
         private readonly BioEnrollmentCommand _command;
 
+        /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
+
         // The default constructor explicitly defined. We don't want it to be
         // used.
         public BioEnrollSetFriendlyNameCommand()
@@ -45,21 +48,21 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        ///     Constructs an instance of the <see cref="BioEnrollSetFriendlyNameCommand" /> class.
+        /// Constructs an instance of the <see cref="BioEnrollSetFriendlyNameCommand" /> class.
         /// </summary>
         /// <param name="templateId">
-        ///     The ID of the fingerprint template for which the friendly name is
-        ///     being set.
+        /// The ID of the fingerprint template for which the friendly name is
+        /// being set.
         /// </param>
         /// <param name="friendlyName">
-        ///     The name that will be associated with the template.
+        /// The name that will be associated with the template.
         /// </param>
         /// <param name="pinUvAuthToken">
-        ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        ///     key.
+        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
+        /// key.
         /// </param>
         /// <param name="authProtocol">
-        ///     The Auth Protocol used to build the Auth Token.
+        /// The Auth Protocol used to build the Auth Token.
         /// </param>
         public BioEnrollSetFriendlyNameCommand(
             ReadOnlyMemory<byte> templateId,
@@ -75,13 +78,11 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
-
-        /// <inheritdoc />
         public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
-        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) => new Fido2Response(responseApdu);
+        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new Fido2Response(responseApdu);
 
         // This method encodes the parameters. For SetFriendlyName, the
         // parameters consist of the template ID and the name.
@@ -89,10 +90,12 @@ namespace Yubico.YubiKey.Fido2.Commands
         //   map
         //     01 byte string
         //     02 text string
-        private static byte[]? EncodeParams(ReadOnlyMemory<byte> templateId, string friendlyName) =>
-            new CborMapWriter<int>()
+        private static byte[]? EncodeParams(ReadOnlyMemory<byte> templateId, string friendlyName)
+        {
+            return new CborMapWriter<int>()
                 .Entry(KeyTemplateId, templateId)
                 .Entry(KeyFriendlyName, friendlyName)
                 .Encode();
+        }
     }
 }

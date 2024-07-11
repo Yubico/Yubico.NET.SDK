@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Yubico.Core.Iso7816;
@@ -25,10 +26,7 @@ namespace Yubico.YubiKey.Otp.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void Action()
-            {
-                _ = new ChallengeResponseResponse(responseApdu: null, ChallengeResponseAlgorithm.HmacSha1);
-            }
+            static void Action() => _ = new ChallengeResponseResponse(null, ChallengeResponseAlgorithm.HmacSha1);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             _ = Assert.Throws<ArgumentNullException>(Action);
@@ -37,8 +35,8 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
@@ -49,8 +47,8 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
@@ -64,10 +62,7 @@ namespace Yubico.YubiKey.Otp.Commands
             var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
             var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
 
-            void Action()
-            {
-                _ = response.GetData();
-            }
+            void Action() => _ = response.GetData();
 
             _ = Assert.Throws<InvalidOperationException>(Action);
         }
@@ -78,10 +73,7 @@ namespace Yubico.YubiKey.Otp.Commands
             var responseApdu = new ResponseApdu(new byte[] { 1, 2, 3, 4, 0x90, 0x00 });
             var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.YubicoOtp);
 
-            void Action()
-            {
-                _ = response.GetData();
-            }
+            void Action() => _ = response.GetData();
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(Action);
         }
@@ -89,12 +81,12 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void GetData_ValidYubicoOtpResponse_ReturnedSuccessfully()
         {
-            byte[] expectedResponse = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-            var apduBytes = expectedResponse.Concat(new byte[] { 0x90, 0x00 }).ToArray();
+            byte[] expectedResponse = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
+            byte[] apduBytes = expectedResponse.Concat(new byte[] { 0x90, 0x00 }).ToArray();
             var responseApdu = new ResponseApdu(apduBytes);
             var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.YubicoOtp);
 
-            var actualResponse = response.GetData();
+            ReadOnlyMemory<byte> actualResponse = response.GetData();
             Assert.True(expectedResponse.SequenceEqual(actualResponse.ToArray()));
         }
 
@@ -104,10 +96,7 @@ namespace Yubico.YubiKey.Otp.Commands
             var responseApdu = new ResponseApdu(new byte[] { 1, 2, 3, 4, 0x90, 0x00 });
             var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
 
-            void Action()
-            {
-                _ = response.GetData();
-            }
+            void Action() => _ = response.GetData();
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(Action);
         }
@@ -115,15 +104,14 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void GetData_ValidHmacSha1Response_ReturnsSuccessfully()
         {
-            Memory<byte> expectedResponse = new byte[]
-            {
+            Memory<byte> expectedResponse = new byte[] {
                 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20
             };
             var responseApdu = new ResponseApdu(
                 expectedResponse.Span.ToArray().Concat(new byte[] { 0x90, 0x00 }).ToArray());
             var response = new ChallengeResponseResponse(responseApdu, ChallengeResponseAlgorithm.HmacSha1);
 
-            var actualResponse = response.GetData();
+            ReadOnlyMemory<byte> actualResponse = response.GetData();
             Assert.True(expectedResponse.Span.SequenceEqual(actualResponse.Span));
         }
     }

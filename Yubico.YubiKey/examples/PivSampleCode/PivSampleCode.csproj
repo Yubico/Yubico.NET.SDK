@@ -14,15 +14,15 @@ limitations under the License. -->
 
 <Project Sdk="Microsoft.NET.Sdk">
 
-    <PropertyGroup>
-        <OutputType>Exe</OutputType>
-        <TargetFramework>net6.0</TargetFramework>
-        <Nullable>disable</Nullable>
-        <IsPackable>false</IsPackable>
-    </PropertyGroup>
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
 
-    <ItemGroup>
-        <ProjectReference Include="..\SharedSampleCode\SharedSampleCode.csproj"/>
-    </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\SharedSampleCode\SharedSampleCode.csproj" />
+  </ItemGroup>
 
 </Project>

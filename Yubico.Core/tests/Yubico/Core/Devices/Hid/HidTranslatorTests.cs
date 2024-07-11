@@ -47,8 +47,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         public void GetHidCodes_GivenString_ReturnsCorrectCodes(KeyboardLayout layout, byte[] expected)
         {
             var hid = HidCodeTranslator.GetInstance(layout);
-            var s = "Yubico!";
-            var actual = hid.GetHidCodes(s);
+            string s = "Yubico!";
+            byte[] actual = hid.GetHidCodes(s);
             Assert.Equal(expected, actual);
         }
 
@@ -64,7 +64,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         {
             var hid = HidCodeTranslator.GetInstance(layout);
             char[] s = { 'Y', 'u', 'b', 'i', 'c', 'o', '!' };
-            var actual = hid.GetHidCodes(s);
+            byte[] actual = hid.GetHidCodes(s);
             Assert.Equal(expected, actual);
         }
 
@@ -78,9 +78,9 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         [InlineData(KeyboardLayout.sv_SE, new byte[] { 0x9c, 0x18, 0x05, 0x0c, 0x06, 0x12, 0x9e })]
         public void GetString_GivenHidCodes_ReturnsCorrectString(KeyboardLayout layout, byte[] input)
         {
-            var expected = "Yubico!";
+            string expected = "Yubico!";
             var hid = HidCodeTranslator.GetInstance(layout);
-            var actual = hid.GetString(input);
+            string actual = hid.GetString(input);
             Assert.Equal(expected, actual);
         }
 
@@ -99,7 +99,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // layouts.
             var testHid = HidCodeTranslator.GetInstance(layout);
             var modHexHid = HidCodeTranslator.GetInstance(KeyboardLayout.ModHex);
-            foreach (var code in modHexHid.SupportedHidCodes)
+            foreach (byte code in modHexHid.SupportedHidCodes)
             {
                 Assert.Equal(modHexHid[code], testHid[code]);
             }
@@ -119,7 +119,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // that all ModHex chars are the same in non-ModHex layouts.
             var testHid = HidCodeTranslator.GetInstance(layout);
             var modHexHid = HidCodeTranslator.GetInstance(KeyboardLayout.ModHex);
-            foreach (var ch in modHexHid.SupportedCharacters)
+            foreach (char ch in modHexHid.SupportedCharacters)
             {
                 Assert.Equal(modHexHid[ch], testHid[ch]);
             }
@@ -138,8 +138,8 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Since ModHex is a subset of all keyboard layouts, this will confirm
             // that all ModHex chars are the same in non-ModHex layouts.
             var hid = HidCodeTranslator.GetInstance(KeyboardLayout.ModHex);
-            var modHexCodes = hid.SupportedHidCodes;
-            var decoded = HidCodeTranslator.GetInstance(layout).GetString(modHexCodes);
+            byte[] modHexCodes = hid.SupportedHidCodes;
+            string decoded = HidCodeTranslator.GetInstance(layout).GetString(modHexCodes);
             Assert.Equal(hid.SupportedCharactersString, decoded);
         }
 
@@ -163,7 +163,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             // Originally, I hard-coded these, but I decided that it should do
             // this dynamically so that newly added keyboard layouts aren't left
             // out of these tests.
-            foreach (var layout in (KeyboardLayout[])Enum.GetValues(typeof(KeyboardLayout)))
+            foreach (KeyboardLayout layout in (KeyboardLayout[])Enum.GetValues(typeof(KeyboardLayout)))
             {
                 yield return new object[] { layout, GetDataForKeyboard(layout) };
             }
@@ -174,12 +174,12 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         private static (char, byte)[] GetDataForKeyboard(KeyboardLayout layout)
         {
             var cases = new List<(char, byte)>();
-            var hLayout = GetKeyboardLayout(layout);
-            var codes = HidCodeTranslator.GetInstance(layout).SupportedHidCodes;
-            var output = new char[2];
-            var keyboardState = GetCleanKeyboardState();
+            IntPtr hLayout = GetKeyboardLayout(layout);
+            byte[] codes = HidCodeTranslator.GetInstance(layout).SupportedHidCodes;
+            char[] output = new char[2];
+            byte[] keyboardState = GetCleanKeyboardState();
 
-            foreach (var code in codes)
+            foreach (byte code in codes)
             {
                 // If it's shifted, we need to adjust.
                 if ((code & 0x80) != 0)
@@ -192,33 +192,28 @@ namespace Yubico.Core.Devices.Hid.UnitTests
                     keyboardState[0x10] = (byte)(keyboardState[0x10] & ~0x80);
                     keyboardState[0xA0] = (byte)(keyboardState[0x10] & ~0x80);
                 }
-
                 // The actual HID code doesn't use 0x80 for shift.
                 uint scanCode = _scanCodeByHid[(byte)(code & ~0x80)];
 
                 // We need the VKEY to map the keystroke.
-                var vkey = NativeMethods.MapVirtualKeyEx(scanCode, uMapType: 1, hLayout);
+                uint vkey = NativeMethods.MapVirtualKeyEx(scanCode, 1, hLayout);
 
                 // I don't know why ToAsciiEx needs both the VKEY and the scan
                 // code, but it does.
-                var result = NativeMethods.ToAsciiEx(vkey, scanCode, keyboardState, output, uFlags: 0, hLayout);
+                int result = NativeMethods.ToAsciiEx(vkey, scanCode, keyboardState, output, 0, hLayout);
                 if (result != 1)
                 {
-                    var error = result switch
+                    string error = result switch
                     {
-                        -1 =>
-                            "ToAscii returned -1 converting scan code to a char, which means that it is a dead key (https://bit.ly/3tZOIi0).",
-                        0 =>
-                            "ToAscii returned 0 converting scan code to a char, which means that there is no mapping for the current code.",
-                        2 =>
-                            "ToAscii returned 2, which means that a dead key (https://bit.ly/3tZOIi0) had state in the keyboard state buffer. Should never happen here.",
+                        -1 => $"ToAscii returned -1 converting scan code to a char, which means that it is a dead key (https://bit.ly/3tZOIi0).",
+                        0 => $"ToAscii returned 0 converting scan code to a char, which means that there is no mapping for the current code.",
+                        2 => $"ToAscii returned 2, which means that a dead key (https://bit.ly/3tZOIi0) had state in the keyboard state buffer. Should never happen here.",
                         _ => $"ToAscii returned {result}. This is not a documented return value for ToAscii."
                     };
-                    var message = error + Environment.NewLine +
-                                  $"HID Usage Code[{code.ToString("x2")}], PS/2 Scan Code[{scanCode.ToString("x2")}], VKey[{vkey.ToString("x2")}]";
+                    string message = error + Environment.NewLine +
+                        $"HID Usage Code[{code.ToString("x2")}], PS/2 Scan Code[{scanCode.ToString("x2")}], VKey[{vkey.ToString("x2")}]";
                     throw new InvalidOperationException(message);
                 }
-
                 // Windows returns \r for the enter key, so we'll just swap.
                 output[0] = output[0] == '\r' ? '\n' : output[0];
                 cases.Add((output[0], code));
@@ -233,20 +228,20 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         private static readonly Dictionary<byte, byte> _scanCodeByHid =
             new Dictionary<byte, byte>
             {
-                [key: 0x04] = 0x1e, [key: 0x05] = 0x30, [key: 0x06] = 0x2e, [key: 0x07] = 0x20, [key: 0x08] = 0x12,
-                [key: 0x09] = 0x21, [key: 0x0a] = 0x22, [key: 0x0b] = 0x23, [key: 0x0c] = 0x17, [key: 0x0d] = 0x24,
-                [key: 0x0e] = 0x25, [key: 0x0f] = 0x26, [key: 0x10] = 0x32, [key: 0x11] = 0x31, [key: 0x12] = 0x18,
-                [key: 0x13] = 0x19, [key: 0x14] = 0x10, [key: 0x15] = 0x13, [key: 0x16] = 0x1f, [key: 0x17] = 0x14,
-                [key: 0x18] = 0x16, [key: 0x19] = 0x2f, [key: 0x1a] = 0x11, [key: 0x1b] = 0x2d, [key: 0x1c] = 0x15,
-                [key: 0x1d] = 0x2c, [key: 0x1e] = 0x02, [key: 0x1f] = 0x03, [key: 0x20] = 0x04, [key: 0x21] = 0x05,
-                [key: 0x22] = 0x06, [key: 0x23] = 0x07, [key: 0x24] = 0x08, [key: 0x25] = 0x09, [key: 0x26] = 0x0a,
-                [key: 0x27] = 0x0b, [key: 0x28] = 0x1c, [key: 0x2b] = 0x0f, [key: 0x2c] = 0x39, [key: 0x2d] = 0x0c,
-                [key: 0x2e] = 0x0d, [key: 0x2f] = 0x1a, [key: 0x30] = 0x1b, [key: 0x31] = 0x2b, [key: 0x32] = 0x2b,
-                [key: 0x33] = 0x27, [key: 0x34] = 0x28, [key: 0x35] = 0x29, [key: 0x36] = 0x33, [key: 0x37] = 0x34,
-                [key: 0x38] = 0x35, [key: 0x54] = 0xe0, [key: 0x55] = 0x37, [key: 0x56] = 0x4a, [key: 0x57] = 0x4e,
-                [key: 0x58] = 0xe0, [key: 0x59] = 0x4f, [key: 0x5a] = 0x50, [key: 0x5b] = 0x51, [key: 0x5c] = 0x4b,
-                [key: 0x5d] = 0x4c, [key: 0x5e] = 0x4d, [key: 0x5f] = 0x47, [key: 0x60] = 0x48, [key: 0x61] = 0x49,
-                [key: 0x62] = 0x52, [key: 0x63] = 0x53, [key: 0x64] = 0x56, [key: 0x67] = 0x59, [key: 0x85] = 0x7e
+                [0x04] = 0x1e, [0x05] = 0x30, [0x06] = 0x2e, [0x07] = 0x20, [0x08] = 0x12,
+                [0x09] = 0x21, [0x0a] = 0x22, [0x0b] = 0x23, [0x0c] = 0x17, [0x0d] = 0x24,
+                [0x0e] = 0x25, [0x0f] = 0x26, [0x10] = 0x32, [0x11] = 0x31, [0x12] = 0x18,
+                [0x13] = 0x19, [0x14] = 0x10, [0x15] = 0x13, [0x16] = 0x1f, [0x17] = 0x14,
+                [0x18] = 0x16, [0x19] = 0x2f, [0x1a] = 0x11, [0x1b] = 0x2d, [0x1c] = 0x15,
+                [0x1d] = 0x2c, [0x1e] = 0x02, [0x1f] = 0x03, [0x20] = 0x04, [0x21] = 0x05,
+                [0x22] = 0x06, [0x23] = 0x07, [0x24] = 0x08, [0x25] = 0x09, [0x26] = 0x0a,
+                [0x27] = 0x0b, [0x28] = 0x1c, [0x2b] = 0x0f, [0x2c] = 0x39, [0x2d] = 0x0c,
+                [0x2e] = 0x0d, [0x2f] = 0x1a, [0x30] = 0x1b, [0x31] = 0x2b, [0x32] = 0x2b,
+                [0x33] = 0x27, [0x34] = 0x28, [0x35] = 0x29, [0x36] = 0x33, [0x37] = 0x34,
+                [0x38] = 0x35, [0x54] = 0xe0, [0x55] = 0x37, [0x56] = 0x4a, [0x57] = 0x4e,
+                [0x58] = 0xe0, [0x59] = 0x4f, [0x5a] = 0x50, [0x5b] = 0x51, [0x5c] = 0x4b,
+                [0x5d] = 0x4c, [0x5e] = 0x4d, [0x5f] = 0x47, [0x60] = 0x48, [0x61] = 0x49,
+                [0x62] = 0x52, [0x63] = 0x53, [0x64] = 0x56, [0x67] = 0x59, [0x85] = 0x7e,
             };
 
         // The API for getting a character for a scan code uses keyboard state
@@ -264,7 +259,7 @@ namespace Yubico.Core.Devices.Hid.UnitTests
         // toggle state of the NUM LOCK and SCROLL LOCK keys is ignored.
         private static byte[] GetCleanKeyboardState()
         {
-            var keyboardState = new byte[256];
+            byte[] keyboardState = new byte[256];
             keyboardState[0x08] = 0x01;
             keyboardState[0x0d] = 0x01;
             keyboardState[0x10] = 0x01;
@@ -280,24 +275,21 @@ namespace Yubico.Core.Devices.Hid.UnitTests
             return keyboardState;
         }
 
-        private static IntPtr GetKeyboardLayout(KeyboardLayout layout)
-        {
-            return layout switch
+        private static IntPtr GetKeyboardLayout(KeyboardLayout layout) =>
+            layout switch
             {
-                KeyboardLayout.en_US => NativeMethods.LoadKeyboardLayout("00000409", Flags: 0),
-                KeyboardLayout.en_UK => NativeMethods.LoadKeyboardLayout("00000809", Flags: 0),
-                KeyboardLayout.de_DE => NativeMethods.LoadKeyboardLayout("00000407", Flags: 0),
-                KeyboardLayout.fr_FR => NativeMethods.LoadKeyboardLayout("0000040c", Flags: 0),
-                KeyboardLayout.it_IT => NativeMethods.LoadKeyboardLayout("00000410", Flags: 0),
-                KeyboardLayout.es_US => NativeMethods.LoadKeyboardLayout("0000540a", Flags: 0),
-                KeyboardLayout.sv_SE => NativeMethods.LoadKeyboardLayout("0000410d", Flags: 0),
+                KeyboardLayout.en_US => NativeMethods.LoadKeyboardLayout("00000409", 0),
+                KeyboardLayout.en_UK => NativeMethods.LoadKeyboardLayout("00000809", 0),
+                KeyboardLayout.de_DE => NativeMethods.LoadKeyboardLayout("00000407", 0),
+                KeyboardLayout.fr_FR => NativeMethods.LoadKeyboardLayout("0000040c", 0),
+                KeyboardLayout.it_IT => NativeMethods.LoadKeyboardLayout("00000410", 0),
+                KeyboardLayout.es_US => NativeMethods.LoadKeyboardLayout("0000540a", 0),
+                KeyboardLayout.sv_SE => NativeMethods.LoadKeyboardLayout("0000410d", 0),
                 // We'll use the en_US layout for ModHex.
-                KeyboardLayout.ModHex => NativeMethods.LoadKeyboardLayout("00000409", Flags: 0),
+                KeyboardLayout.ModHex => NativeMethods.LoadKeyboardLayout("00000409", 0),
                 _ => throw new NotSupportedException($"Layout [{layout}] not implemented."
-                                                     + Environment.NewLine +
-                                                     "Did you implement a new layout without adding it here?")
+                    + Environment.NewLine + "Did you implement a new layout without adding it here?")
             };
-        }
 
         private static class NativeMethods
         {

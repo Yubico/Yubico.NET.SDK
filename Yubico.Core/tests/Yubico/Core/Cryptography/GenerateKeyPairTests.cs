@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+using System.Security.Cryptography;
 using Xunit;
 
 namespace Yubico.Core.Cryptography
@@ -24,9 +26,9 @@ namespace Yubico.Core.Cryptography
         [InlineData(2)]
         public void Generate_PrivateValueSet(int curveNum)
         {
-            var ecdhObject = EcdhPrimitives.Create();
-            var ecCurve = CryptoSupport.GetNamedCurve(curveNum);
-            var keyPair = ecdhObject.GenerateKeyPair(ecCurve);
+            IEcdhPrimitives ecdhObject = EcdhPrimitives.Create();
+            ECCurve ecCurve = CryptoSupport.GetNamedCurve(curveNum);
+            ECParameters keyPair = ecdhObject.GenerateKeyPair(ecCurve);
 
             Assert.NotNull(keyPair.D);
         }
@@ -37,9 +39,9 @@ namespace Yubico.Core.Cryptography
         [InlineData(2)]
         public void Generate_XCoordinateSet(int curveNum)
         {
-            var ecdhObject = EcdhPrimitives.Create();
-            var ecCurve = CryptoSupport.GetNamedCurve(curveNum);
-            var keyPair = ecdhObject.GenerateKeyPair(ecCurve);
+            IEcdhPrimitives ecdhObject = EcdhPrimitives.Create();
+            ECCurve ecCurve = CryptoSupport.GetNamedCurve(curveNum);
+            ECParameters keyPair = ecdhObject.GenerateKeyPair(ecCurve);
 
             Assert.NotNull(keyPair.Q.X);
         }
@@ -50,9 +52,9 @@ namespace Yubico.Core.Cryptography
         [InlineData(2)]
         public void Generate_YCoordinateSet(int curveNum)
         {
-            var ecdhObject = EcdhPrimitives.Create();
-            var ecCurve = CryptoSupport.GetNamedCurve(curveNum);
-            var keyPair = ecdhObject.GenerateKeyPair(ecCurve);
+            IEcdhPrimitives ecdhObject = EcdhPrimitives.Create();
+            ECCurve ecCurve = CryptoSupport.GetNamedCurve(curveNum);
+            ECParameters keyPair = ecdhObject.GenerateKeyPair(ecCurve);
 
             Assert.NotNull(keyPair.Q.Y);
         }

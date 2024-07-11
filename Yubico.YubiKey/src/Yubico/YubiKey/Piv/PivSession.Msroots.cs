@@ -101,66 +101,66 @@ namespace Yubico.YubiKey.Piv
         private const int MaximumTlvLength = 8;
 
         /// <summary>
-        ///     Write <c>contents</c> to the MSROOTS data objects. This will replace
-        ///     any data already stored in the MSROOTS data objects.
+        /// Write <c>contents</c> to the MSROOTS data objects. This will replace
+        /// any data already stored in the MSROOTS data objects.
         /// </summary>
         /// <remarks>
-        ///     The YubiKey PIV application can store data objects. There is a set of
-        ///     data elements defined by the PIV standard. See the User's Manual
-        ///     entry on <xref href="UsersManualPivCommands#get-data">GET DATA</xref>
-        ///     for information on these elements and their tags. The standard also
-        ///     allows for vendor-defined data objects. MSROOTS is one such
-        ///     vendor-defined element.
-        ///     <para>
-        ///         The intention of the MSROOTS data object is to store (and retrieve) a
-        ///         PKCS 7 constuction containing a set of root certificates. These
-        ///         certificates will make it easier for the SDK to interface with the
-        ///         Microsoft Smart Card Base Crypto Service Provider (CSP).
-        ///     </para>
-        ///     <para>
-        ///         Very few applications will need to use this feature. If you don't
-        ///         already know what the MSROOTS are, how to use them, and that they are
-        ///         part of your application already, then you almost certainly will
-        ///         never need to use this method.
-        ///     </para>
-        ///     <para>
-        ///         This method will take whatever data it is given and store it on the
-        ///         YubiKey under the tag "MSROOTS". This method will not verify that the
-        ///         data is a PKCS 7 construction, or that it contains root certificates,
-        ///         it will simply write the bytes given.
-        ///     </para>
-        ///     <para>
-        ///         Note that in order to store any data on the YubiKey, it must be
-        ///         formatted as a TLV (tag-length-value):
-        ///         <code>
+        /// The YubiKey PIV application can store data objects. There is a set of
+        /// data elements defined by the PIV standard. See the User's Manual
+        /// entry on <xref href="UsersManualPivCommands#get-data">GET DATA</xref>
+        /// for information on these elements and their tags. The standard also
+        /// allows for vendor-defined data objects. MSROOTS is one such
+        /// vendor-defined element.
+        /// <para>
+        /// The intention of the MSROOTS data object is to store (and retrieve) a
+        /// PKCS 7 constuction containing a set of root certificates. These
+        /// certificates will make it easier for the SDK to interface with the
+        /// Microsoft Smart Card Base Crypto Service Provider (CSP).
+        /// </para>
+        /// <para>
+        /// Very few applications will need to use this feature. If you don't
+        /// already know what the MSROOTS are, how to use them, and that they are
+        /// part of your application already, then you almost certainly will
+        /// never need to use this method.
+        /// </para>
+        /// <para>
+        /// This method will take whatever data it is given and store it on the
+        /// YubiKey under the tag "MSROOTS". This method will not verify that the
+        /// data is a PKCS 7 construction, or that it contains root certificates,
+        /// it will simply write the bytes given.
+        /// </para>
+        /// <para>
+        /// Note that in order to store any data on the YubiKey, it must be
+        /// formatted as a TLV (tag-length-value):
+        /// <code>
         ///   tag || length || value
-        /// 
+        ///
         ///   for example, it might be
-        /// 
+        ///
         ///   53 20 (contents, 32 bytes)
-        /// 
+        ///
         ///   or
-        /// 
+        ///
         ///   7F 61 20 (contents, 32 bytes)
         /// </code>
-        ///         The tag used varies depending on the data being stored. This method
-        ///         builds the TLV. That is, the caller supplies the contents only, this
-        ///         method will format it into a construction the YubiKey expects. This
-        ///         method knows what tag to use for MSROOTS and how to specify the
-        ///         length.
-        ///     </para>
-        ///     <para>
-        ///         Note also that there is a limit to the number of bytes that can be
-        ///         stored in a data object. If the contents to store is longer, then
-        ///         this method will break the data into blocks and store each block in a
-        ///         different data object. The caller simply supplies all the data as a
-        ///         single byte array, this method will take care of the bookkeeping of
-        ///         breaking it into blocks and storing them in separate data objects.
-        ///     </para>
-        ///     <para>
-        ///         There is a limit on the number of data objects, however, so there is
-        ///         indeed a limit on the total size of the data.
-        ///         <code>
+        /// The tag used varies depending on the data being stored. This method
+        /// builds the TLV. That is, the caller supplies the contents only, this
+        /// method will format it into a construction the YubiKey expects. This
+        /// method knows what tag to use for MSROOTS and how to specify the
+        /// length.
+        /// </para>
+        /// <para>
+        /// Note also that there is a limit to the number of bytes that can be
+        /// stored in a data object. If the contents to store is longer, then
+        /// this method will break the data into blocks and store each block in a
+        /// different data object. The caller simply supplies all the data as a
+        /// single byte array, this method will take care of the bookkeeping of
+        /// breaking it into blocks and storing them in separate data objects.
+        /// </para>
+        /// <para>
+        /// There is a limit on the number of data objects, however, so there is
+        /// indeed a limit on the total size of the data.
+        /// <code>
         ///    There is a limit of 5 MSROOTS data objects
         ///    The limit on data length for each data object is
         ///      pre 4.0 YubiKeys (e.g. NEO)  :  2030 bytes
@@ -169,70 +169,70 @@ namespace Yubico.YubiKey.Piv
         ///      pre 4.0 YubiKeys (e.g. NEO)  :  2030*5 bytes  :  10,150
         ///      4.0 and later YubiKeys       :  2800*5 bytes  :  14,000
         /// </code>
-        ///         If the data passed in is too long, this method will throw an
-        ///         exception.
-        ///     </para>
-        ///     <para>
-        ///         Note that the input is a <c>ReadOnlySpan</c>. If you have the data in
-        ///         a byte array (<c>byte[]</c>), just pass it in as the argument, it
-        ///         will be cast to a <c>ReadOnlySpan</c> automatically. Also, if you
-        ///         have no data to store (which is the same as <c>DeleteMsroots</c>),
-        ///         you can pass in <c>null</c>, but the preferred input in this case is
-        ///         <c>ReadOnlySpan.Empty</c>.
-        ///     </para>
-        ///     <para>
-        ///         Input with a length of 0 is equivalent to calling
-        ///         <c>DeleteMsroots</c>.
-        ///     </para>
-        ///     <para>
-        ///         In order to perform this operation, the management key must be
-        ///         authenticated during this session. If it has not been authenticated,
-        ///         this method will call <see cref="AuthenticateManagementKey" />. That
-        ///         is, your application does not need to authenticate the management key
-        ///         separately (i.e., call <c>TryAuthenticateManagementKey</c> or
-        ///         <c>AuthenticateManagementKey</c>), this method will determine if the
-        ///         management key has been authenticated or not, and if not, it will
-        ///         make the call to perform mutual authentication.
-        ///     </para>
-        ///     <para>
-        ///         The authentication method will collect the management key using the
-        ///         <c>KeyCollector</c> delegate. If no such delegate has been set, it
-        ///         will throw an exception.
-        ///     </para>
-        ///     <para>
-        ///         The <c>KeyCollector</c> has an option to cancel the operation. That
-        ///         is, the <c>AuthenticateManagementKey</c> method will call the
-        ///         <c>KeyCollector</c> requesting the management key, and it is possible
-        ///         that during the collection operations, the user cancels. The
-        ///         <c>KeyCollector</c> will return to the authentication method noting
-        ///         the cancellation. In that case, it will throw an exception. If you
-        ///         want the authentication to return <c>false</c> on user cancellation,
-        ///         you must call <see cref="TryAuthenticateManagementKey(bool)" /> directly
-        ///         before calling this method.
-        ///     </para>
+        /// If the data passed in is too long, this method will throw an
+        /// exception.
+        /// </para>
+        /// <para>
+        /// Note that the input is a <c>ReadOnlySpan</c>. If you have the data in
+        /// a byte array (<c>byte[]</c>), just pass it in as the argument, it
+        /// will be cast to a <c>ReadOnlySpan</c> automatically. Also, if you
+        /// have no data to store (which is the same as <c>DeleteMsroots</c>),
+        /// you can pass in <c>null</c>, but the preferred input in this case is
+        /// <c>ReadOnlySpan.Empty</c>.
+        /// </para>
+        /// <para>
+        /// Input with a length of 0 is equivalent to calling
+        /// <c>DeleteMsroots</c>.
+        /// </para>
+        /// <para>
+        /// In order to perform this operation, the management key must be
+        /// authenticated during this session. If it has not been authenticated,
+        /// this method will call <see cref="AuthenticateManagementKey"/>. That
+        /// is, your application does not need to authenticate the management key
+        /// separately (i.e., call <c>TryAuthenticateManagementKey</c> or
+        /// <c>AuthenticateManagementKey</c>), this method will determine if the
+        /// management key has been authenticated or not, and if not, it will
+        /// make the call to perform mutual authentication.
+        /// </para>
+        /// <para>
+        /// The authentication method will collect the management key using the
+        /// <c>KeyCollector</c> delegate. If no such delegate has been set, it
+        /// will throw an exception.
+        /// </para>
+        /// <para>
+        /// The <c>KeyCollector</c> has an option to cancel the operation. That
+        /// is, the <c>AuthenticateManagementKey</c> method will call the
+        /// <c>KeyCollector</c> requesting the management key, and it is possible
+        /// that during the collection operations, the user cancels. The
+        /// <c>KeyCollector</c> will return to the authentication method noting
+        /// the cancellation. In that case, it will throw an exception. If you
+        /// want the authentication to return <c>false</c> on user cancellation,
+        /// you must call <see cref="TryAuthenticateManagementKey(bool)"/> directly
+        /// before calling this method.
+        /// </para>
         /// </remarks>
         /// <param name="contents">
-        ///     The data to store, represented as a <c>ReadOnlySpan</c> (a byte
-        ///     array).
+        /// The data to store, represented as a <c>ReadOnlySpan</c> (a byte
+        /// array).
         /// </param>
         /// <exception cref="ArgumentOutOfRangeException">
-        ///     The input data was too long.
+        /// The input data was too long.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        ///     There is no <c>KeyCollector</c> loaded, the key provided was not a
-        ///     valid Triple-DES key, or the YubiKey had some other error, such as
-        ///     unreliable connection.
+        /// There is no <c>KeyCollector</c> loaded, the key provided was not a
+        /// valid Triple-DES key, or the YubiKey had some other error, such as
+        /// unreliable connection.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
-        ///     The YubiKey returned malformed data and authentication, either single
-        ///     or double, could not be performed.
+        /// The YubiKey returned malformed data and authentication, either single
+        /// or double, could not be performed.
         /// </exception>
         /// <exception cref="OperationCanceledException">
-        ///     The user canceled management key collection.
+        /// The user canceled management key collection.
         /// </exception>
         /// <exception cref="SecurityException">
-        ///     Mutual authentication was performed and the YubiKey was not
-        ///     authenticated.
+        /// Mutual authentication was performed and the YubiKey was not
+        /// authenticated.
         /// </exception>
         public void WriteMsroots(ReadOnlySpan<byte> contents)
         {
@@ -242,41 +242,41 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        ///     Write <c>contents</c> to the MSROOTS data objects. This will replace
-        ///     any data already stored in the MSROOTS data objects.
+        /// Write <c>contents</c> to the MSROOTS data objects. This will replace
+        /// any data already stored in the MSROOTS data objects.
         /// </summary>
         /// <remarks>
-        ///     This is the same as <see cref="WriteMsroots" /> except the contents
-        ///     are provided as a Stream.
+        /// This is the same as <see cref="WriteMsroots"/> except the contents
+        /// are provided as a Stream.
         /// </remarks>
         /// <param name="contents">
-        ///     The data to store, represented as a <c>Stream</c> (the <c>CanRead</c>
-        ///     property is <c>true</c> and the data read will be bytes).
+        /// The data to store, represented as a <c>Stream</c> (the <c>CanRead</c>
+        /// property is <c>true</c> and the data read will be bytes).
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     The <c>contents</c> argument is null.
+        /// The <c>contents</c> argument is null.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     The <c>stream</c> is not readable.
+        /// The <c>stream</c> is not readable.
         /// </exception>
         /// <exception cref="ArgumentOutOfRangeException">
-        ///     The input data was too long.
+        /// The input data was too long.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        ///     There is no <c>KeyCollector</c> loaded, the key provided was not a
-        ///     valid Triple-DES key, or the YubiKey had some other error, such as
-        ///     unreliable connection.
+        /// There is no <c>KeyCollector</c> loaded, the key provided was not a
+        /// valid Triple-DES key, or the YubiKey had some other error, such as
+        /// unreliable connection.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
-        ///     The YubiKey returned malformed data and authentication, either single
-        ///     or double, could not be performed.
+        /// The YubiKey returned malformed data and authentication, either single
+        /// or double, could not be performed.
         /// </exception>
         /// <exception cref="OperationCanceledException">
-        ///     The user canceled management key collection.
+        /// The user canceled management key collection.
         /// </exception>
         /// <exception cref="SecurityException">
-        ///     Mutual authentication was performed and the YubiKey was not
-        ///     authenticated.
+        /// Mutual authentication was performed and the YubiKey was not
+        /// authenticated.
         /// </exception>
         public void WriteMsrootsStream(Stream contents)
         {
@@ -329,7 +329,6 @@ namespace Yubico.YubiKey.Piv
             {
                 maxLength = NewMaximumObjectLength;
             }
-
             if (length > maxLength * MsrootsObjectCount)
             {
                 throw new ArgumentOutOfRangeException(
@@ -356,7 +355,6 @@ namespace Yubico.YubiKey.Piv
             int offset = 0;
             byte[] buffer = new byte[maxLength + MaximumTlvLength];
             var encoding = new Memory<byte>(buffer);
-
             // Write to every MSROOTS data object. If there is no data left,
             // we'll write no data, meaning we're making sure an object is empty.
             // Do this in case there was any data left over from a previous write.
@@ -392,7 +390,7 @@ namespace Yubico.YubiKey.Piv
                             ExceptionMessages.InvalidDataEncoding));
                 }
 
-                var putCommand = new PutDataCommand(MsrootsTag + index, encoding.Slice(start: 0, bytesWritten));
+                var putCommand = new PutDataCommand(MsrootsTag + index, encoding.Slice(0, bytesWritten));
                 PutDataResponse putResponse = Connection.SendCommand(putCommand);
                 if (putResponse.Status != ResponseStatus.Success)
                 {
@@ -408,79 +406,78 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        ///     Returns the <c>contents</c> of the MSROOTS data objects.
+        /// Returns the <c>contents</c> of the MSROOTS data objects.
         /// </summary>
         /// <remarks>
-        ///     The YubiKey PIV application can store data objects. There is a set of
-        ///     data elements defined by the PIV standard. See the User's Manual
-        ///     entry on <xref href="UsersManualPivCommands#get-data"> GET DATA</xref>
-        ///     for information on these elements and their tags. The standard also
-        ///     allows for vendor-defined data objects. MSROOTS is one such
-        ///     vendor-defined element.
-        ///     <para>
-        ///         The intention of the MSROOTS data object is to store and retrieve a
-        ///         PKCS 7 construction containing a set of root certificates. These
-        ///         certificates will make it easier for the SDK to interface with the
-        ///         Microsoft Smart Card Base Crypto Service Provider (CSP).
-        ///     </para>
-        ///     <para>
-        ///         Very few applications will need to use this feature. If you don't
-        ///         already know what the MSROOTS are, how to use them, and that they are
-        ///         part of your application already, then you almost certainly will
-        ///         never need to use this method.
-        ///     </para>
-        ///     <para>
-        ///         This method will return whatever data is stored in the YubiKey under
-        ///         the tag "MSROOTS". This method will not verify that the data is a
-        ///         PKCS 7 construction, or that it contains root certificates, it will
-        ///         simply return the bytes from the data object.
-        ///     </para>
-        ///     <para>
-        ///         While it is necessary to authenticate the management key in order to
-        ///         store the MSROOTS data (see <see cref="WriteMsroots" />), it is not
-        ///         needed to retrieve this data. Anyone with access to a YubiKey can
-        ///         retrieve this data.
-        ///     </para>
-        ///     <para>
-        ///         The method will return the data as a new byte array. It is possible
-        ///         there is no data on the YubiKey in the MSROOTS data objects. In that
-        ///         case, this method will return an empty byte array (Length of 0).
-        ///     </para>
-        ///     <para>
-        ///         Note that YubiKey stores the data formatted as a TLV:
-        ///         <code>
+        /// The YubiKey PIV application can store data objects. There is a set of
+        /// data elements defined by the PIV standard. See the User's Manual
+        /// entry on <xref href="UsersManualPivCommands#get-data"> GET DATA</xref>
+        /// for information on these elements and their tags. The standard also
+        /// allows for vendor-defined data objects. MSROOTS is one such
+        /// vendor-defined element.
+        /// <para>
+        /// The intention of the MSROOTS data object is to store and retrieve a
+        /// PKCS 7 construction containing a set of root certificates. These
+        /// certificates will make it easier for the SDK to interface with the
+        /// Microsoft Smart Card Base Crypto Service Provider (CSP).
+        /// </para>
+        /// <para>
+        /// Very few applications will need to use this feature. If you don't
+        /// already know what the MSROOTS are, how to use them, and that they are
+        /// part of your application already, then you almost certainly will
+        /// never need to use this method.
+        /// </para>
+        /// <para>
+        /// This method will return whatever data is stored in the YubiKey under
+        /// the tag "MSROOTS". This method will not verify that the data is a
+        /// PKCS 7 construction, or that it contains root certificates, it will
+        /// simply return the bytes from the data object.
+        /// </para>
+        /// <para>
+        /// While it is necessary to authenticate the management key in order to
+        /// store the MSROOTS data (see <see cref="WriteMsroots"/>), it is not
+        /// needed to retrieve this data. Anyone with access to a YubiKey can
+        /// retrieve this data.
+        /// </para>
+        /// <para>
+        /// The method will return the data as a new byte array. It is possible
+        /// there is no data on the YubiKey in the MSROOTS data objects. In that
+        /// case, this method will return an empty byte array (Length of 0).
+        /// </para>
+        /// <para>
+        /// Note that YubiKey stores the data formatted as a TLV:
+        /// <code>
         ///   tag || length || value
-        /// 
+        ///
         ///   for example, it might be
-        /// 
+        ///
         ///   53 20 (contents, 32 bytes)
-        /// 
+        ///
         ///   or
-        /// 
+        ///
         ///   7F 61 20 (contents, 32 bytes)
         /// </code>
-        ///         The tag used varies depending on the data being stored. This method
-        ///         returns the contents, not the full TLV.
-        ///     </para>
-        ///     <para>
-        ///         Note that the full amount of data might be stored in more than one
-        ///         data object. This method will collect all the data in all the MSROOTS
-        ///         data objects (in order) and concatenate.
-        ///     </para>
+        /// The tag used varies depending on the data being stored. This method
+        /// returns the contents, not the full TLV.
+        /// </para>
+        /// <para>
+        /// Note that the full amount of data might be stored in more than one
+        /// data object. This method will collect all the data in all the MSROOTS
+        /// data objects (in order) and concatenate.
+        /// </para>
         /// </remarks>
         /// <returns>
-        ///     A new byte array containing the data stored in the MSROOTS data
-        ///     objects.
+        /// A new byte array containing the data stored in the MSROOTS data
+        /// objects.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///     The YubiKey encountered an error, such as an unreliable connection.
+        /// The YubiKey encountered an error, such as an unreliable connection.
         /// </exception>
         public byte[] ReadMsroots()
         {
             int totalLength = 0;
             int count = 0;
-            var contentArray = (ReadOnlyMemory<byte>[])Array.CreateInstance(
-                typeof(ReadOnlyMemory<byte>), MsrootsObjectCount);
+            var contentArray = (ReadOnlyMemory<byte>[])Array.CreateInstance(typeof(ReadOnlyMemory<byte>), MsrootsObjectCount);
 
             for (int index = 0; index < MsrootsObjectCount; index++)
             {
@@ -491,7 +488,6 @@ namespace Yubico.YubiKey.Piv
                 {
                     break;
                 }
-
                 if (getResponse.Status != ResponseStatus.Success)
                 {
                     throw new InvalidOperationException(
@@ -523,18 +519,18 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        ///     Returns the contents of the MSROOTS data objects as a <c>Stream</c>.
+        /// Returns the contents of the MSROOTS data objects as a <c>Stream</c>.
         /// </summary>
         /// <remarks>
-        ///     This is the same as the <see cref="ReadMsroots" /> method that returns a byte
-        ///     array, except this method returns a <c>Stream</c>.
+        /// This is the same as the <see cref="ReadMsroots"/> method that returns a byte
+        /// array, except this method returns a <c>Stream</c>.
         /// </remarks>
         /// <returns>
-        ///     A new <c>Stream</c> which will be readable and will contain the
-        ///     MSROOTS contents.
+        /// A new <c>Stream</c> which will be readable and will contain the
+        /// MSROOTS contents.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///     The YubiKey encountered an error, such as an unreliable connection.
+        /// The YubiKey encountered an error, such as an unreliable connection.
         /// </exception>
         public Stream ReadMsrootsStream()
         {
@@ -544,49 +540,49 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        ///     Delete any contents stored in the MSROOTS data objects.
+        /// Delete any contents stored in the MSROOTS data objects.
         /// </summary>
         /// <remarks>
-        ///     In order to perform this operation, the management key must be
-        ///     authenticated during this session. If it has not been authenticated,
-        ///     this method will call <see cref="AuthenticateManagementKey" />. That
-        ///     is, your application does not need to authenticate the management key
-        ///     separately (i.e., call <c>TryAuthenticateManagementKey</c> or
-        ///     <c>AuthenticateManagementKey</c>), this method will determine if the
-        ///     management key has been authenticated or not, and if not, it will
-        ///     make the call to perform mutual authentication.
-        ///     <para>
-        ///         The authentication method will collect the management key using the
-        ///         <c>KeyCollector</c> delegate. If no such delegate has been set, it
-        ///         will throw an exception.
-        ///     </para>
-        ///     <para>
-        ///         The <c>KeyCollector</c> has an option to cancel the operation. That
-        ///         is, the <c>AuthenticateManagementKey</c> method will call the
-        ///         <c>KeyCollector</c> requesting the management key, and it is possible
-        ///         that during the collection operations, the user cancels. The
-        ///         <c>KeyCollector</c> will return to the authentication method noting
-        ///         the cancellation. In that case, it will throw an exception. If you
-        ///         want the authentication to return <c>false</c> on user cancellation,
-        ///         you must call <see cref="TryAuthenticateManagementKey(bool)" /> directly
-        ///         before calling this method.
-        ///     </para>
+        /// In order to perform this operation, the management key must be
+        /// authenticated during this session. If it has not been authenticated,
+        /// this method will call <see cref="AuthenticateManagementKey"/>. That
+        /// is, your application does not need to authenticate the management key
+        /// separately (i.e., call <c>TryAuthenticateManagementKey</c> or
+        /// <c>AuthenticateManagementKey</c>), this method will determine if the
+        /// management key has been authenticated or not, and if not, it will
+        /// make the call to perform mutual authentication.
+        /// <para>
+        /// The authentication method will collect the management key using the
+        /// <c>KeyCollector</c> delegate. If no such delegate has been set, it
+        /// will throw an exception.
+        /// </para>
+        /// <para>
+        /// The <c>KeyCollector</c> has an option to cancel the operation. That
+        /// is, the <c>AuthenticateManagementKey</c> method will call the
+        /// <c>KeyCollector</c> requesting the management key, and it is possible
+        /// that during the collection operations, the user cancels. The
+        /// <c>KeyCollector</c> will return to the authentication method noting
+        /// the cancellation. In that case, it will throw an exception. If you
+        /// want the authentication to return <c>false</c> on user cancellation,
+        /// you must call <see cref="TryAuthenticateManagementKey(bool)"/> directly
+        /// before calling this method.
+        /// </para>
         /// </remarks>
         /// <exception cref="InvalidOperationException">
-        ///     There is no <c>KeyCollector</c> loaded, the key provided was not a
-        ///     valid Triple-DES key, or the YubiKey had some other error, such as
-        ///     unreliable connection.
+        /// There is no <c>KeyCollector</c> loaded, the key provided was not a
+        /// valid Triple-DES key, or the YubiKey had some other error, such as
+        /// unreliable connection.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
-        ///     The YubiKey returned malformed data and authentication, either single
-        ///     or double, could not be performed.
+        /// The YubiKey returned malformed data and authentication, either single
+        /// or double, could not be performed.
         /// </exception>
         /// <exception cref="OperationCanceledException">
-        ///     The user canceled management key collection.
+        /// The user canceled management key collection.
         /// </exception>
         /// <exception cref="SecurityException">
-        ///     Mutual authentication was performed and the YubiKey was not
-        ///     authenticated.
+        /// Mutual authentication was performed and the YubiKey was not
+        /// authenticated.
         /// </exception>
         public void DeleteMsroots() => WriteMsrootsSpan(ReadOnlySpan<byte>.Empty, OldMaximumObjectLength);
     }

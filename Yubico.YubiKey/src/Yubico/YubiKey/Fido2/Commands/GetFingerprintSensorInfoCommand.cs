@@ -17,11 +17,11 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    ///     Gets information about the fingerprint sensor. This is a subcommand of
-    ///     the CTAP command "authenticatorBioEnrollment".
+    /// Gets information about the fingerprint sensor. This is a subcommand of
+    /// the CTAP command "authenticatorBioEnrollment".
     /// </summary>
     /// <remarks>
-    ///     The partner Response class is <see cref="GetFingerprintSensorInfoResponse" />.
+    /// The partner Response class is <see cref="GetFingerprintSensorInfoResponse"/>.
     /// </remarks>
     public sealed class GetFingerprintSensorInfoCommand : IYubiKeyCommand<GetFingerprintSensorInfoResponse>
     {
@@ -29,16 +29,17 @@ namespace Yubico.YubiKey.Fido2.Commands
 
         private readonly BioEnrollmentCommand _command;
 
+        /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
+
         /// <summary>
-        ///     Constructs a new instance of <see cref="GetFingerprintSensorInfoCommand" />.
+        /// Constructs a new instance of <see cref="GetFingerprintSensorInfoCommand"/>.
         /// </summary>
         public GetFingerprintSensorInfoCommand()
+            : base()
         {
             _command = new BioEnrollmentCommand(SubCmdSensorInfo);
         }
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();

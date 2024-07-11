@@ -26,13 +26,13 @@ namespace Yubico.YubiKey.Management
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetDeviceInfo_NoData_ResponseStatusSuccess(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using var connection = testDevice.Connect(YubiKeyApplication.Management);
+            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Management);
 
             var setCommand = new SetDeviceInfoCommand();
 
-            var setDeviceInfoResponse = connection.SendCommand(setCommand);
+            YubiKeyResponse setDeviceInfoResponse = connection.SendCommand(setCommand);
             Assert.Equal(ResponseStatus.Success, setDeviceInfoResponse.Status);
         }
 
@@ -41,19 +41,19 @@ namespace Yubico.YubiKey.Management
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetDeviceInfo_NoChanges_DeviceInfoNotChanged(StandardTestDevice testDeviceType)
         {
-            var beginningTestDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice beginningTestDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            var testDeviceSerialNumber = beginningTestDevice.SerialNumber!.Value;
+            int testDeviceSerialNumber = beginningTestDevice.SerialNumber!.Value;
 
-            using (var connection = beginningTestDevice.Connect(YubiKeyApplication.Management))
+            using (IYubiKeyConnection connection = beginningTestDevice.Connect(YubiKeyApplication.Management))
             {
                 var setCommand = new SetDeviceInfoCommand { ResetAfterConfig = true };
 
-                var setDeviceInfoResponse = connection.SendCommand(setCommand);
+                YubiKeyResponse setDeviceInfoResponse = connection.SendCommand(setCommand);
                 Assert.Equal(ResponseStatus.Success, setDeviceInfoResponse.Status);
             }
 
-            var endingTestDevice =
+            IYubiKeyDevice endingTestDevice =
                 TestDeviceSelection.RenewDeviceEnumeration(testDeviceSerialNumber);
 
             AssertDeviceInfoValueEquals(beginningTestDevice, endingTestDevice);
@@ -64,20 +64,20 @@ namespace Yubico.YubiKey.Management
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void SetDeviceInfo_SameAsCurrentDeviceInfo_NoChange(StandardTestDevice testDeviceType)
         {
-            var beginningTestDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice beginningTestDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            var testDeviceSerialNumber = beginningTestDevice.SerialNumber!.Value;
+            int testDeviceSerialNumber = beginningTestDevice.SerialNumber!.Value;
 
-            using (var connection = beginningTestDevice.Connect(YubiKeyApplication.Management))
+            using (IYubiKeyConnection connection = beginningTestDevice.Connect(YubiKeyApplication.Management))
             {
-                var setCommand = CreateSetDeviceInfoCommand(beginningTestDevice);
+                SetDeviceInfoCommand setCommand = CreateSetDeviceInfoCommand(beginningTestDevice);
                 setCommand.ResetAfterConfig = true;
 
-                var setDeviceInfoResponse = connection.SendCommand(setCommand);
+                YubiKeyResponse setDeviceInfoResponse = connection.SendCommand(setCommand);
                 Assert.Equal(ResponseStatus.Success, setDeviceInfoResponse.Status);
             }
 
-            var endingTestDevice =
+            IYubiKeyDevice endingTestDevice =
                 TestDeviceSelection.RenewDeviceEnumeration(testDeviceSerialNumber);
 
             AssertDeviceInfoValueEquals(beginningTestDevice, endingTestDevice);
@@ -102,9 +102,8 @@ namespace Yubico.YubiKey.Management
             Assert.Equal(expectedDeviceInfo.ConfigurationLocked, actualDeviceInfo.ConfigurationLocked);
         }
 
-        private static SetDeviceInfoCommand CreateSetDeviceInfoCommand(IYubiKeyDeviceInfo deviceInfo)
-        {
-            return new SetDeviceInfoCommand
+        private static SetDeviceInfoCommand CreateSetDeviceInfoCommand(IYubiKeyDeviceInfo deviceInfo) =>
+            new SetDeviceInfoCommand
             {
                 EnabledUsbCapabilities = deviceInfo.EnabledUsbCapabilities,
                 EnabledNfcCapabilities = deviceInfo.EnabledNfcCapabilities,
@@ -112,6 +111,5 @@ namespace Yubico.YubiKey.Management
                 AutoEjectTimeout = deviceInfo.AutoEjectTimeout,
                 DeviceFlags = deviceInfo.DeviceFlags
             };
-        }
     }
 }

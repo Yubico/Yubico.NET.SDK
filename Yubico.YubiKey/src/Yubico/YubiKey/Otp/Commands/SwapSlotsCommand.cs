@@ -17,32 +17,32 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    ///     Swaps the configurations in the short and long press slots.
+    /// Swaps the configurations in the short and long press slots.
     /// </summary>
     public class SwapSlotsCommand : IYubiKeyCommand<ReadStatusResponse>
     {
         /// <summary>
-        ///     Constructs a new instance of the SwapSlotsCommand class.
-        /// </summary>
-        public SwapSlotsCommand()
-        {
-        }
-
-        /// <summary>
-        ///     Gets the YubiKeyApplication to which this command belongs.
+        /// Gets the YubiKeyApplication to which this command belongs.
         /// </summary>
         /// <value>
-        ///     YubiKeyApplication.Otp
+        /// YubiKeyApplication.Otp
         /// </value>
         public YubiKeyApplication Application => YubiKeyApplication.Otp;
 
+        /// <summary>
+        /// Constructs a new instance of the SwapSlotsCommand class.
+        /// </summary>
+        public SwapSlotsCommand()
+        {
+
+        }
+
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Ins = OtpConstants.RequestSlotInstruction,
-                P1 = OtpConstants.SwapSlotsSlot
-            };
+        public CommandApdu CreateCommandApdu() => new CommandApdu
+        {
+            Ins = OtpConstants.RequestSlotInstruction,
+            P1 = OtpConstants.SwapSlotsSlot
+        };
 
         /// <inheritdoc />
         public ReadStatusResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

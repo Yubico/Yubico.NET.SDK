@@ -24,65 +24,65 @@ namespace Yubico.YubiKey.Fido2
     public sealed partial class Fido2Session
     {
         /// <summary>
-        ///     Creates a FIDO2 credential on the YubiKey given a parameters object.
+        /// Creates a FIDO2 credential on the YubiKey given a parameters object.
         /// </summary>
         /// <remarks>
-        ///     Detailed information about the parameters structure and its expected
-        ///     values can be found on the <see cref="MakeCredentialParameters" /> page.
-        ///     Note that a <c>UserEntity</c> is a required element in order to make
-        ///     a credential. The standard specifies that the <c>UserEntity</c> is
-        ///     made up of an <c>ID</c>, a <c>Name</c>, and a <c>DisplayName</c>.
-        ///     The standard also says the <c>Name</c> and <c>DisplayName</c> are
-        ///     optional. It should be possible to make a credential using a
-        ///     <c>UserEntity</c> that contains only an <c>ID</c>. However, YubiKeys
-        ///     prior to version 5.3.0 require a <c>Name</c> in order to make a
-        ///     credential.
-        ///     <para>
-        ///         To make a credential requires "user presence", which for a YubiKey is
-        ///         touch. This method will call the KeyCollector when touch is required
-        ///         (<c>KeyEntryRequest.TouchRequest</c>).
-        ///     </para>
-        ///     <para>
-        ///         The SDK will automatically perform PIN or user verification using the
-        ///         KeyCollector if needed. That is, if this method determines that
-        ///         authentication has been successfully completed, it will not need the
-        ///         PIN or fingerprint, so will not call the KeyCollector. However, if it
-        ///         needs to perform authentication, it will request user verification
-        ///         and/or a PIN using the KeyCollector.
-        ///     </para>
-        ///     <para>
-        ///         It is still possible to call this method with a KeyCollector that
-        ///         does not collect a PIN (you will need to have one that supports at
-        ///         least <c>KeyEntryRequest.TouchRequest</c>). You must simply make sure
-        ///         the appropriate Verify method has been called. See the User's Manual
-        ///         entries on <xref href="Fido2AuthTokens">AuthTokens</xref> and
-        ///         <xref href="SdkAuthTokenLogic">the SDK AuthToken logic</xref> for
-        ///         more information on when to verify. If you do not provide a
-        ///         KeyCollector that can collect the PIN, and the method is not able to
-        ///         perform because of an authentication failure, it will throw an
-        ///         exception.
-        ///     </para>
+        /// Detailed information about the parameters structure and its expected
+        /// values can be found on the <see cref="MakeCredentialParameters"/> page.
+        /// Note that a <c>UserEntity</c> is a required element in order to make
+        /// a credential. The standard specifies that the <c>UserEntity</c> is
+        /// made up of an <c>ID</c>, a <c>Name</c>, and a <c>DisplayName</c>.
+        /// The standard also says the <c>Name</c> and <c>DisplayName</c> are
+        /// optional. It should be possible to make a credential using a
+        /// <c>UserEntity</c> that contains only an <c>ID</c>. However, YubiKeys
+        /// prior to version 5.3.0 require a <c>Name</c> in order to make a
+        /// credential.
+        /// <para>
+        /// To make a credential requires "user presence", which for a YubiKey is
+        /// touch. This method will call the KeyCollector when touch is required
+        /// (<c>KeyEntryRequest.TouchRequest</c>).
+        /// </para>
+        /// <para>
+        /// The SDK will automatically perform PIN or user verification using the
+        /// KeyCollector if needed. That is, if this method determines that
+        /// authentication has been successfully completed, it will not need the
+        /// PIN or fingerprint, so will not call the KeyCollector. However, if it
+        /// needs to perform authentication, it will request user verification
+        /// and/or a PIN using the KeyCollector.
+        /// </para>
+        /// <para>
+        /// It is still possible to call this method with a KeyCollector that
+        /// does not collect a PIN (you will need to have one that supports at
+        /// least <c>KeyEntryRequest.TouchRequest</c>). You must simply make sure
+        /// the appropriate Verify method has been called. See the User's Manual
+        /// entries on <xref href="Fido2AuthTokens">AuthTokens</xref> and
+        /// <xref href="SdkAuthTokenLogic">the SDK AuthToken logic</xref> for
+        /// more information on when to verify. If you do not provide a
+        /// KeyCollector that can collect the PIN, and the method is not able to
+        /// perform because of an authentication failure, it will throw an
+        /// exception.
+        /// </para>
         /// </remarks>
         /// <param name="parameters">
-        ///     A fully populated <see cref="MakeCredentialParameters" /> structure that
-        ///     follows all of the rules set forth by that object.
+        /// A fully populated <see cref="MakeCredentialParameters"/> structure that
+        /// follows all of the rules set forth by that object.
         /// </param>
         /// <returns>
-        ///     An object containing all of the relevant information returned by the YubiKey
-        ///     after calling MakeCredential. This includes the public key for the credential
-        ///     itself, along with supporting information like the attestation statement and
-        ///     other authenticator data.
+        /// An object containing all of the relevant information returned by the YubiKey
+        /// after calling MakeCredential. This includes the public key for the credential
+        /// itself, along with supporting information like the attestation statement and
+        /// other authenticator data.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     The <paramref name="parameters" /> argument was null.
+        /// The <paramref name="parameters"/> argument was null.
         /// </exception>
         /// <exception cref="Fido2Exception">
-        ///     The YubiKey could not complete the operation, likely because of a
-        ///     wrong PIN or fingerprint.
+        /// The YubiKey could not complete the operation, likely because of a
+        /// wrong PIN or fingerprint.
         /// </exception>
         /// <exception cref="TimeoutException">
-        ///     The YubiKey either required touch for a user presence check or a biometric touch for user verification.
-        ///     The YubiKey timed out waiting for this action to be performed.
+        /// The YubiKey either required touch for a user presence check or a biometric touch for user verification.
+        /// The YubiKey timed out waiting for this action to be performed.
         /// </exception>
         public MakeCredentialData MakeCredential(MakeCredentialParameters parameters)
         {
@@ -92,7 +92,6 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
-
             Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
 
             byte[] token = new byte[MaximumAuthTokenLength];
@@ -112,7 +111,7 @@ namespace Yubico.YubiKey.Fido2
                     currentToken.CopyTo(token.AsMemory());
                     parameters.Protocol = AuthProtocol.Protocol;
                     parameters.PinUvAuthParam = AuthProtocol.AuthenticateUsingPinToken(
-                        token, offset: 0, currentToken.Length, clientDataHash);
+                        token, 0, currentToken.Length, clientDataHash);
                 }
                 finally
                 {
@@ -157,8 +156,7 @@ namespace Yubico.YubiKey.Fido2
                 }
 
                 message = rsp.StatusMessage;
-            }
-            while (forceToken);
+            } while (forceToken);
 
             throw new Fido2Exception(message);
         }
@@ -168,11 +166,10 @@ namespace Yubico.YubiKey.Fido2
             Func<KeyEntryData, bool> keyCollector,
             out CtapStatus ctapStatus)
         {
-            var keyEntryData = new KeyEntryData
+            var keyEntryData = new KeyEntryData()
             {
-                Request = KeyEntryRequest.TouchRequest
+                Request = KeyEntryRequest.TouchRequest,
             };
-
             using var touchTask = new TouchFingerprintTask(
                 keyCollector,
                 keyEntryData,
@@ -182,10 +179,7 @@ namespace Yubico.YubiKey.Fido2
             try
             {
                 MakeCredentialResponse rsp = Connection.SendCommand(new MakeCredentialCommand(parameters));
-                ctapStatus = touchTask.IsUserCanceled
-                    ? CtapStatus.KeepAliveCancel
-                    : rsp.CtapStatus;
-
+                ctapStatus = touchTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : rsp.CtapStatus;
                 return rsp;
             }
             finally

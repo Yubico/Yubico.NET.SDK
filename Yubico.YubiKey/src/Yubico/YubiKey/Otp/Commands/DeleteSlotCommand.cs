@@ -15,12 +15,12 @@
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    ///     Command to delete an OTP slot configuration.
+    /// Command to delete an OTP slot configuration.
     /// </summary>
     /// <remarks>
-    ///     The purpose of this command is to build a completely empty APDU (except
-    ///     for a security code, if the slot has one). This is what tells the YubiKey
-    ///     to delete the OTP slot configuration.
+    /// The purpose of this command is to build a completely empty APDU (except
+    /// for a security code, if the slot has one). This is what tells the YubiKey
+    /// to delete the OTP slot configuration.
     /// </remarks>
     public class DeleteSlotCommand : SlotConfigureBase
     {

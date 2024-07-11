@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             else
             {
                 _pin = new byte[pin.Length];
-                pin.CopyTo(_pin, index: 0);
+                pin.CopyTo(_pin, 0);
             }
         }
 
@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             if (protocol.AuthenticatorPublicKey is null)
             {
                 var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
-                var getKeyRsp = Connection.SendCommand(getKeyCmd);
+                GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
                 if (getKeyRsp.Status != ResponseStatus.Success)
                 {
                     return false;
@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 }
                 else
                 {
-                    var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, _pin, permissions, rpId: null);
+                    var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, _pin, permissions, null);
                     getTokenRsp = Connection.SendCommand(getTokenCmd);
                 }
 
@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 }
 
                 var setPinCmd = new SetPinCommand(protocol, _pin);
-                var setPinRsp = Connection.SendCommand(setPinCmd);
+                SetPinResponse setPinRsp = Connection.SendCommand(setPinCmd);
                 if (setPinRsp.Status != ResponseStatus.Success)
                 {
                     return false;
@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             }
             else
             {
-                var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, _pin, permissions, rpId: null);
+                var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, _pin, permissions, null);
                 getTokenRsp = Connection.SendCommand(getTokenCmd);
             }
 

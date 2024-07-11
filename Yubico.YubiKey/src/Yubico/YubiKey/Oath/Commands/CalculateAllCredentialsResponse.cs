@@ -23,8 +23,7 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    ///     The response to the <see cref="CalculateAllCredentialsCommand" /> command, containing the response from the oath
-    ///     application.
+    /// The response to the <see cref="CalculateAllCredentialsCommand"/> command, containing the response from the oath application.
     /// </summary>
     public class CalculateAllCredentialsResponse : OathResponse, IYubiKeyResponseWithData<IDictionary<Credential, Code>>
     {
@@ -35,29 +34,29 @@ namespace Yubico.YubiKey.Oath.Commands
         private const byte NameTag = 0x71;
 
         /// <summary>
-        ///     Constructs an instance of the <see cref="CalculateAllCredentialsResponse" /> class based on a ResponseApdu received
-        ///     from the YubiKey.
+        /// Constructs an instance of the <see cref="CalculateAllCredentialsResponse" /> class based on a ResponseApdu received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     The ResponseApdu returned by the YubiKey.
+        /// The ResponseApdu returned by the YubiKey.
         /// </param>
         public CalculateAllCredentialsResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
+             base(responseApdu)
         {
+
         }
 
         /// <summary>
-        ///     Gets the dictionary of <see cref="Credential" /> and <see cref="Code" /> pair.
+        /// Gets the dictionary of <see cref="Credential"/> and <see cref="Code"/> pair.
         /// </summary>
         /// <returns>
-        ///     Returns name + response for TOTP and just name for HOTP and credentials requiring touch.
+        /// Returns name + response for TOTP and just name for HOTP and credentials requiring touch.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///     Thrown when <see cref="IYubiKeyResponse.Status" /> is not equal to <see cref="ResponseStatus.Success" />
-        ///     or the credential's period is invalid.
+        /// Thrown when <see cref="IYubiKeyResponse.Status"/> is not equal to <see cref="ResponseStatus.Success"/>
+        /// or the credential's period is invalid.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
-        ///     Thrown when the data provided does not meet the expectations, and cannot be parsed.
+        /// Thrown when the data provided does not meet the expectations, and cannot be parsed.
         /// </exception>
         public IDictionary<Credential, Code> GetData()
         {
@@ -84,10 +83,10 @@ namespace Yubico.YubiKey.Oath.Commands
                 string label = tlvReader.PeekTag() switch
                 {
                     NameTag => tlvReader.ReadString(NameTag, Encoding.UTF8),
-                    _ => throw new MalformedYubiKeyResponseException
+                    _ => throw new MalformedYubiKeyResponseException()
                     {
                         ResponseClass = nameof(CalculateAllCredentialsResponse),
-                        ActualDataLength = ResponseApdu.Data.Length
+                        ActualDataLength = ResponseApdu.Data.Length,
                     }
                 };
 
@@ -114,10 +113,10 @@ namespace Yubico.YubiKey.Oath.Commands
                         break;
 
                     default:
-                        throw new MalformedYubiKeyResponseException
+                        throw new MalformedYubiKeyResponseException()
                         {
                             ResponseClass = nameof(CalculateAllCredentialsResponse),
-                            ActualDataLength = ResponseApdu.Data.Length
+                            ActualDataLength = ResponseApdu.Data.Length,
                         };
                 }
 
@@ -142,17 +141,17 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             if (value.Length < 5)
             {
-                throw new MalformedYubiKeyResponseException
+                throw new MalformedYubiKeyResponseException()
                 {
                     ResponseClass = nameof(CalculateCredentialResponse),
-                    ActualDataLength = value.Length
+                    ActualDataLength = value.Length,
                 };
             }
 
             int digits = value.Span[0];
             uint otpValue = BinaryPrimitives.ReadUInt32BigEndian(value.Slice(1).Span);
-            otpValue %= (uint)Math.Pow(x: 10, digits);
-            string otpString = otpValue.ToString(CultureInfo.InvariantCulture).PadLeft(digits, paddingChar: '0');
+            otpValue %= (uint)Math.Pow(10, digits);
+            string otpString = otpValue.ToString(CultureInfo.InvariantCulture).PadLeft(digits, '0');
 
             return (otpString, digits);
         }
@@ -169,3 +168,4 @@ namespace Yubico.YubiKey.Oath.Commands
         }
     }
 }
+

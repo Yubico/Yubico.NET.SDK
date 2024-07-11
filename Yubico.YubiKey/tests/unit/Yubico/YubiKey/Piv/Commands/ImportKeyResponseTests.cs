@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -24,7 +26,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_NullResponseApdu_ThrowsException()
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new ImportAsymmetricKeyResponse(responseApdu: null));
+            _ = Assert.Throws<ArgumentNullException>(() => new ImportAsymmetricKeyResponse(null));
 #pragma warning restore CS8625
         }
 
@@ -34,12 +36,12 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(SWConstants.FunctionNotSupported)]
         public void Constructor_SetsStatusWordCorrectly(short expectedStatusWord)
         {
-            var sw1 = unchecked((byte)(expectedStatusWord >> 8));
-            var sw2 = unchecked((byte)expectedStatusWord);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(expectedStatusWord >> 8));
+            byte sw2 = unchecked((byte)expectedStatusWord);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
             var response = new ImportAsymmetricKeyResponse(responseApdu);
 
-            var StatusWord = response.StatusWord;
+            short StatusWord = response.StatusWord;
 
             Assert.Equal(expectedStatusWord, StatusWord);
         }
@@ -50,12 +52,12 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(SWConstants.FunctionNotSupported, ResponseStatus.Failed)]
         public void Constructor_SetsStatusCorrectly(short statusWord, ResponseStatus expected)
         {
-            var sw1 = unchecked((byte)(statusWord >> 8));
-            var sw2 = unchecked((byte)statusWord);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(statusWord >> 8));
+            byte sw2 = unchecked((byte)statusWord);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
             var response = new ImportAsymmetricKeyResponse(responseApdu);
 
-            var Status = response.Status;
+            ResponseStatus Status = response.Status;
 
             Assert.Equal(expected, Status);
         }

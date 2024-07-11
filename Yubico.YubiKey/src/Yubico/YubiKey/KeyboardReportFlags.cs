@@ -22,6 +22,8 @@ namespace Yubico.YubiKey
         None = 0x00,
         TouchPending = 0x20,
         ReadPending = 0x40,
-        WritePending = 0x80
+        WritePending = 0x80,
     }
+
+
 }

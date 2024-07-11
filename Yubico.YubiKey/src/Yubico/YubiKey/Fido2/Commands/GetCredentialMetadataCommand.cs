@@ -19,16 +19,16 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    ///     Get the YubiKey's FIDO2 credential metadata.
+    /// Get the YubiKey's FIDO2 credential metadata.
     /// </summary>
     /// <remarks>
-    ///     The partner Response class is <see cref="CredentialManagementResponse" />.
-    ///     <para>
-    ///         This returns metadata on all the credentials. The return from this
-    ///         command consists of the <c>existingResidentCredentialsCount</c> and
-    ///         <c>maxPossibleRemainingResidentCredentialsCount</c> (section 6.8 of the
-    ///         standard).
-    ///     </para>
+    /// The partner Response class is <see cref="CredentialManagementResponse"/>.
+    /// <para>
+    /// This returns metadata on all the credentials. The return from this
+    /// command consists of the <c>existingResidentCredentialsCount</c> and
+    /// <c>maxPossibleRemainingResidentCredentialsCount</c> (section 6.8 of the
+    /// standard).
+    /// </para>
     /// </remarks>
     public class GetCredentialMetadataCommand : CredentialMgmtSubCommand, IYubiKeyCommand<GetCredentialMetadataResponse>
     {
@@ -42,19 +42,18 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        ///     Constructs a new instance of <see cref="GetCredentialMetadataCommand" />.
+        /// Constructs a new instance of <see cref="GetCredentialMetadataCommand"/>.
         /// </summary>
         /// <param name="pinUvAuthToken">
-        ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        ///     key.
+        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
+        /// key.
         /// </param>
         /// <param name="authProtocol">
-        ///     The Auth Protocol used to build the Auth Token.
+        /// The Auth Protocol used to build the Auth Token.
         /// </param>
-        public GetCredentialMetadataCommand(ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
-            : base(
-                new CredentialManagementCommand(
-                    SubCmdGetMetadata, subCommandParams: null, pinUvAuthToken, authProtocol))
+        public GetCredentialMetadataCommand(
+            ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
+            : base(new CredentialManagementCommand(SubCmdGetMetadata, null, pinUvAuthToken, authProtocol))
         {
         }
 

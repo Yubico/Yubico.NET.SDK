@@ -14,28 +14,29 @@
 
 using System;
 using System.Buffers.Binary;
+using System.Linq;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    ///     The response to the get serial number command, containing the YubiKey's
-    ///     serial number.
+    /// The response to the get serial number command, containing the YubiKey's
+    /// serial number.
     /// </summary>
     /// <remarks>
-    ///     <para>
-    ///         This is the partner Response class to <see cref="GetSerialNumberCommand" />.
-    ///     </para>
-    ///     <para>
-    ///         The data returned is an <c>int</c>.
-    ///     </para>
-    ///     <para>
-    ///         Example:
-    ///     </para>
-    ///     <code language="csharp">
+    /// <para>
+    /// This is the partner Response class to <see cref="GetSerialNumberCommand"/>.
+    /// </para>
+    /// <para>
+    /// The data returned is an <c>int</c>.
+    /// </para>
+    /// <para>
+    /// Example:
+    /// </para>
+    /// <code language="csharp">
     ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);
     ///   SerialCommand serialCommand = new GetSerialNumberCommand();
-    ///   GetSerialNumberResponse serialResponse = connection.SendCommand(serialCommand);<br />
+    ///   GetSerialNumberResponse serialResponse = connection.SendCommand(serialCommand);<br/>
     ///   if (serialResponse.Status == ResponseStatus.Success)
     ///   {
     ///     int serialNum = serialResponse.GetData();
@@ -47,11 +48,11 @@ namespace Yubico.YubiKey.Piv.Commands
         private const int SerialNumberLength = 4;
 
         /// <summary>
-        ///     Constructs a GetSerialNumberResponse based on a ResponseApdu received
-        ///     from the YubiKey.
+        /// Constructs a GetSerialNumberResponse based on a ResponseApdu received
+        /// from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     The object containing the response APDU<br />returned by the YubiKey.
+        /// The object containing the response APDU<br/>returned by the YubiKey.
         /// </param>
         public GetSerialNumberResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -59,18 +60,18 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        ///     Gets the serial number from the YubiKey response.
+        /// Gets the serial number from the YubiKey response.
         /// </summary>
         /// <returns>
-        ///     The data in the response APDU, presented as an int.
+        /// The data in the response APDU, presented as an int.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///     Thrown if <see cref="YubiKeyResponse.Status" /> is not equal to
-        ///     <see cref="ResponseStatus.Success" />.
+        /// Thrown if <see cref="YubiKeyResponse.Status"/> is not equal to
+        /// <see cref="ResponseStatus.Success"/>.
         /// </exception>
         /// <exception cref="MalformedYubiKeyResponseException">
-        ///     Thrown when the <c>ResponseApdu.Data</c> does not meet the expectations
-        ///     of the parser.
+        /// Thrown when the <c>ResponseApdu.Data</c> does not meet the expectations
+        /// of the parser.
         /// </exception>
         public int GetData()
         {
@@ -81,15 +82,15 @@ namespace Yubico.YubiKey.Piv.Commands
 
             if (ResponseApdu.Data.Length < SerialNumberLength)
             {
-                throw new MalformedYubiKeyResponseException
+                throw new MalformedYubiKeyResponseException()
                 {
                     ResponseClass = nameof(GetSerialNumberResponse),
                     ExpectedDataLength = SerialNumberLength,
-                    ActualDataLength = ResponseApdu.Data.Length
+                    ActualDataLength = ResponseApdu.Data.Length,
                 };
             }
 
-            return BinaryPrimitives.ReadInt32BigEndian(ResponseApdu.Data.Span.Slice(start: 0, length: 4));
+            return BinaryPrimitives.ReadInt32BigEndian(ResponseApdu.Data.Span.Slice(0, 4));
         }
     }
 }

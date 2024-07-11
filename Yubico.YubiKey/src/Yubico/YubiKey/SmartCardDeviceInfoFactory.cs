@@ -15,20 +15,16 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using Yubico.Core.Devices.SmartCard;
-using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.DeviceExtensions;
-using Yubico.YubiKey.Otp.Commands;
-using Yubico.YubiKey.Piv.Commands;
-using GetPagedDeviceInfoCommand = Yubico.YubiKey.Management.Commands.GetPagedDeviceInfoCommand;
-using GetSerialNumberCommand = Yubico.YubiKey.Otp.Commands.GetSerialNumberCommand;
-using GetSerialNumberResponse = Yubico.YubiKey.Otp.Commands.GetSerialNumberResponse;
+using Yubico.YubiKey.Management.Commands;
 
 namespace Yubico.YubiKey
 {
     internal static class SmartCardDeviceInfoFactory
     {
-        public static YubiKeyDeviceInfo GetDeviceInfo(ISmartCardDevice device)
+        public static YubiKeyDeviceInfo GetDeviceInfo(
+            ISmartCardDevice device)
         {
             Logger log = Log.GetLogger();
 
@@ -105,7 +101,7 @@ namespace Yubico.YubiKey
                     return true;
                 }
             }
-            catch (ApduException e)
+            catch (Core.Iso7816.ApduException e)
             {
                 ErrorHandler(
                     e,
@@ -131,8 +127,8 @@ namespace Yubico.YubiKey
                 log.LogInformation("Attempting to read firmware version through OTP.");
                 using var connection = new SmartCardConnection(device, YubiKeyApplication.Otp);
 
-                ReadStatusResponse response =
-                    connection.SendCommand(new ReadStatusCommand());
+                Otp.Commands.ReadStatusResponse response =
+                    connection.SendCommand(new Otp.Commands.ReadStatusCommand());
 
                 if (response.Status == ResponseStatus.Success)
                 {
@@ -146,7 +142,7 @@ namespace Yubico.YubiKey
                     "Reading firmware version via OTP failed with: {Error} {Message}", response.StatusWord,
                     response.StatusMessage);
             }
-            catch (ApduException e)
+            catch (Core.Iso7816.ApduException e)
             {
                 ErrorHandler(
                     e,
@@ -174,7 +170,7 @@ namespace Yubico.YubiKey
                 log.LogInformation("Attempting to read firmware version through the PIV application.");
                 using var connection = new SmartCardConnection(device, YubiKeyApplication.Piv);
 
-                VersionResponse response = connection.SendCommand(new VersionCommand());
+                Piv.Commands.VersionResponse response = connection.SendCommand(new Piv.Commands.VersionCommand());
 
                 if (response.Status == ResponseStatus.Success)
                 {
@@ -188,7 +184,7 @@ namespace Yubico.YubiKey
                     "Reading firmware version via PIV failed with: {Error} {Message}", response.StatusWord,
                     response.StatusMessage);
             }
-            catch (ApduException e)
+            catch (Core.Iso7816.ApduException e)
             {
                 ErrorHandler(
                     e,
@@ -212,8 +208,8 @@ namespace Yubico.YubiKey
                 log.LogInformation("Attempting to read serial number through the OTP application.");
                 using var connection = new SmartCardConnection(device, YubiKeyApplication.Otp);
 
-                GetSerialNumberResponse response =
-                    connection.SendCommand(new GetSerialNumberCommand());
+                Otp.Commands.GetSerialNumberResponse response =
+                    connection.SendCommand(new Otp.Commands.GetSerialNumberCommand());
 
                 if (response.Status == ResponseStatus.Success)
                 {
@@ -227,7 +223,7 @@ namespace Yubico.YubiKey
                     "Reading serial number via OTP failed with: {Error} {Message}", response.StatusWord,
                     response.StatusMessage);
             }
-            catch (ApduException e)
+            catch (Core.Iso7816.ApduException e)
             {
                 ErrorHandler(
                     e,
@@ -271,7 +267,7 @@ namespace Yubico.YubiKey
                     "Reading serial number via PIV failed with: {Error} {Message}", response.StatusWord,
                     response.StatusMessage);
             }
-            catch (ApduException e)
+            catch (Core.Iso7816.ApduException e)
             {
                 ErrorHandler(
                     e,

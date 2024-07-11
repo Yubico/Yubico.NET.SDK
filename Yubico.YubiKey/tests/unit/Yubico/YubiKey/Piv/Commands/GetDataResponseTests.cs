@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Linq;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -24,15 +25,15 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new GetDataResponse(responseApdu: null));
+            _ = Assert.Throws<ArgumentNullException>(() => new GetDataResponse(null));
 #pragma warning restore CS8625
         }
 
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0x30, 0x01, 0x05, sw1, sw2 });
 
             var response = new GetDataResponse(responseApdu);
@@ -43,8 +44,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0x30, 0x01, 0x05, sw1, sw2 });
 
             var response = new GetDataResponse(responseApdu);
@@ -55,9 +56,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_DataNotFoundResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = SWConstants.FileOrApplicationNotFound >> 8;
-            var sw2 = unchecked((byte)SWConstants.FileOrApplicationNotFound);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.FileOrApplicationNotFound >> 8));
+            byte sw2 = unchecked((byte)SWConstants.FileOrApplicationNotFound);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new GetDataResponse(responseApdu);
 
@@ -67,9 +68,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Construct_FailResponseApdu_ExceptionOnGetData()
         {
-            byte sw1 = SWConstants.WarningNvmUnchanged >> 8;
-            var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
+            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new GetDataResponse(responseApdu);
 
@@ -79,20 +80,20 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_GetCorrectData()
         {
-            byte[] testData =
+            byte[] testData = new byte[]
             {
                 0x01, 0x01, 0x11, 0x02, 0x02, 0x03, 0x03, 0x90, 0x00
             };
 
             var expected = new Span<byte>(testData);
-            expected = expected.Slice(start: 0, testData.Length - 2);
+            expected = expected.Slice(0, testData.Length - 2);
             var responseApdu = new ResponseApdu(testData);
 
             var response = new GetDataResponse(responseApdu);
 
-            var getData = response.GetData();
+            ReadOnlyMemory<byte> getData = response.GetData();
 
-            var compareResult = expected.SequenceEqual(getData.Span);
+            bool compareResult = expected.SequenceEqual(getData.Span);
 
             Assert.True(compareResult);
         }

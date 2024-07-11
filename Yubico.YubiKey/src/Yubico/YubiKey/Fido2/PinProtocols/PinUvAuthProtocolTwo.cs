@@ -14,6 +14,7 @@
 
 using System;
 using System.Globalization;
+using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 using Yubico.YubiKey.Cryptography;
@@ -21,8 +22,8 @@ using Yubico.YubiKey.Cryptography;
 namespace Yubico.YubiKey.Fido2.PinProtocols
 {
     /// <summary>
-    ///     This class contains methods that perform the platform operations of
-    ///     FIDO2's PIN/UV auth protocol two.
+    /// This class contains methods that perform the platform operations of
+    /// FIDO2's PIN/UV auth protocol two.
     /// </summary>
     public class PinUvAuthProtocolTwo : PinUvAuthProtocolBase
     {
@@ -34,13 +35,13 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         private const string InfoAes = "CTAP2 AES key";
         private const string InfoHmac = "CTAP2 HMAC key";
 
+        private bool _disposed;
+
         private readonly byte[] _aesKey = new byte[KeyLength];
         private readonly byte[] _hmacKey = new byte[KeyLength];
 
-        private bool _disposed;
-
         /// <summary>
-        ///     Constructs a new instance of <see cref="PinUvAuthProtocolTwo" />.
+        /// Constructs a new instance of <see cref="PinUvAuthProtocolTwo"/>.
         /// </summary>
         public PinUvAuthProtocolTwo()
         {
@@ -62,7 +63,6 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 throw new ArgumentNullException(nameof(plaintext));
             }
-
             if (length == 0 || length % BlockSize != 0 || offset + length > plaintext.Length)
             {
                 throw new ArgumentException(
@@ -86,7 +86,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             using ICryptoTransform aesTransform = aes.CreateEncryptor();
 
             byte[] encryptedData = new byte[BlockSize + length];
-            Array.Copy(initVector, sourceIndex: 0, encryptedData, destinationIndex: 0, BlockSize);
+            Array.Copy(initVector, 0, encryptedData, 0, BlockSize);
             _ = aesTransform.TransformBlock(plaintext, offset, length, encryptedData, BlockSize);
 
             return encryptedData;
@@ -107,7 +107,6 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 throw new ArgumentNullException(nameof(ciphertext));
             }
-
             // The first BlockSize bytes are the IV, so there should be at least
             // 2 blocks.
             if (length < 2 * BlockSize || length % BlockSize != 0 || offset + length > ciphertext.Length)
@@ -120,7 +119,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
 
             // The first BlockSize bytes are the IV, decrypt the rest.
             byte[] initVector = new byte[BlockSize];
-            Array.Copy(ciphertext, offset, initVector, destinationIndex: 0, BlockSize);
+            Array.Copy(ciphertext, offset, initVector, 0, BlockSize);
 
             using Aes aes = CryptographyProviders.AesCreator();
             aes.Mode = CipherMode.CBC;
@@ -130,8 +129,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             using ICryptoTransform aesTransform = aes.CreateDecryptor();
 
             byte[] decryptedData = new byte[length - BlockSize];
-            _ = aesTransform.TransformBlock(
-                ciphertext, BlockSize + offset, length - BlockSize, decryptedData, outputOffset: 0);
+            _ = aesTransform.TransformBlock(ciphertext, BlockSize + offset, length - BlockSize, decryptedData, 0);
 
             return decryptedData;
         }
@@ -204,21 +202,17 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                 // Expand (Aes key)
                 hmacSha256.Key = prk;
                 byte[] infoAes = Encoding.ASCII.GetBytes(InfoAes);
-                _ = hmacSha256.TransformBlock(
-                    infoAes, inputOffset: 0, infoAes.Length, outputBuffer: null, outputOffset: 0);
-
+                _ = hmacSha256.TransformBlock(infoAes, 0, infoAes.Length, null, 0);
                 infoAes[0] = TrailingByte;
-                _ = hmacSha256.TransformFinalBlock(infoAes, inputOffset: 0, TrailingByteCount);
+                _ = hmacSha256.TransformFinalBlock(infoAes, 0, TrailingByteCount);
 
                 Array.Copy(hmacSha256.Hash, _aesKey, KeyLength);
 
                 // Expand (HMAC key)
                 byte[] infoHmac = Encoding.ASCII.GetBytes(InfoHmac);
-                _ = hmacSha256.TransformBlock(
-                    infoHmac, inputOffset: 0, infoHmac.Length, outputBuffer: null, outputOffset: 0);
-
+                _ = hmacSha256.TransformBlock(infoHmac, 0, infoHmac.Length, null, 0);
                 infoHmac[0] = TrailingByte;
-                _ = hmacSha256.TransformFinalBlock(infoHmac, inputOffset: 0, TrailingByteCount);
+                _ = hmacSha256.TransformFinalBlock(infoHmac, 0, TrailingByteCount);
 
                 Array.Copy(hmacSha256.Hash, _hmacKey, KeyLength);
             }
@@ -232,7 +226,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         }
 
         /// <summary>
-        ///     Release resources, overwrite sensitive data.
+        /// Release resources, overwrite sensitive data.
         /// </summary>
         protected override void Dispose(bool disposing)
         {

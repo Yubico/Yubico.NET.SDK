@@ -24,10 +24,7 @@ namespace Yubico.YubiKey.Otp.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void action()
-            {
-                _ = new QueryFipsModeResponse(responseApdu: null);
-            }
+            static void action() => _ = new QueryFipsModeResponse(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             _ = Assert.Throws<ArgumentNullException>(action);
@@ -36,8 +33,8 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
@@ -48,8 +45,8 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
@@ -63,10 +60,7 @@ namespace Yubico.YubiKey.Otp.Commands
             var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
             var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
 
-            void action()
-            {
-                _ = queryFipsModeResponse.GetData();
-            }
+            void action() => _ = queryFipsModeResponse.GetData();
 
             _ = Assert.Throws<InvalidOperationException>(action);
         }
@@ -77,10 +71,7 @@ namespace Yubico.YubiKey.Otp.Commands
             var responseApdu = new ResponseApdu(new byte[] { 0x00, 0x00, 0x90, 0x00 });
             var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
 
-            void action()
-            {
-                _ = queryFipsModeResponse.GetData();
-            }
+            void action() => _ = queryFipsModeResponse.GetData();
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(action);
         }
@@ -91,7 +82,7 @@ namespace Yubico.YubiKey.Otp.Commands
             var responseApdu = new ResponseApdu(new byte[] { 0x00, 0x90, 0x00 });
             var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
 
-            var fipsMode = queryFipsModeResponse.GetData();
+            bool fipsMode = queryFipsModeResponse.GetData();
 
             Assert.False(fipsMode);
         }
@@ -102,7 +93,7 @@ namespace Yubico.YubiKey.Otp.Commands
             var responseApdu = new ResponseApdu(new byte[] { 0x01, 0x90, 0x00 });
             var queryFipsModeResponse = new QueryFipsModeResponse(responseApdu);
 
-            var fipsMode = queryFipsModeResponse.GetData();
+            bool fipsMode = queryFipsModeResponse.GetData();
 
             Assert.True(fipsMode);
         }

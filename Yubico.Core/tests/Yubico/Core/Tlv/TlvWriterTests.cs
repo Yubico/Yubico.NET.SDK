@@ -37,12 +37,9 @@ namespace Yubico.Core.Tlv.UnitTests
         [InlineData(0x7A)]
         public void VerifyTag_Valid_Returns(int tag)
         {
-            void action()
-            {
-                TlvEncoder.VerifyTag(tag);
-            }
+            void action() => TlvEncoder.VerifyTag(tag);
 
-            var ex = Record.Exception(action);
+            Exception? ex = Record.Exception(action);
             Assert.Null(ex);
         }
 
@@ -67,12 +64,9 @@ namespace Yubico.Core.Tlv.UnitTests
         [InlineData(0xFFFFFF)]
         public void VerifyLength_Valid_Returns(int length)
         {
-            void action()
-            {
-                TlvEncoder.VerifyLength(length);
-            }
+            void action() => TlvEncoder.VerifyLength(length);
 
-            var ex = Record.Exception(action);
+            Exception? ex = Record.Exception(action);
             Assert.Null(ex);
         }
 
@@ -98,9 +92,9 @@ namespace Yubico.Core.Tlv.UnitTests
         [InlineData(0x44, 0xFFFFFF)]
         public void ComputTagLength_Valid_ReturnsCorrect(int tag, int length)
         {
-            byte[] tagArray1 = { (byte)tag };
-            byte[] tagArray2 = { (byte)(tag >> 8), (byte)tag };
-            var tagArray = tagArray2;
+            byte[] tagArray1 = new byte[] { (byte)tag };
+            byte[] tagArray2 = new byte[] { (byte)(tag >> 8), (byte)tag };
+            byte[] tagArray = tagArray2;
             if (tag < 0x0100)
             {
                 tagArray = tagArray1;
@@ -109,7 +103,7 @@ namespace Yubico.Core.Tlv.UnitTests
             byte[] lengthArray;
             if (length < 0x80)
             {
-                lengthArray = new[] { (byte)length };
+                lengthArray = new byte[] { (byte)length };
             }
             else if (length < 0x0100)
             {
@@ -124,12 +118,12 @@ namespace Yubico.Core.Tlv.UnitTests
                 lengthArray = new byte[] { 0x83, (byte)(length >> 16), (byte)(length >> 8), (byte)length };
             }
 
-            var concatenation = tagArray.Concat(lengthArray);
-            var expected = concatenation.ToArray();
+            IEnumerable<byte> concatenation = tagArray.Concat(lengthArray);
+            byte[] expected = concatenation.ToArray<byte>();
 
-            var encoding = TlvEncoder.BuildTagAndLength(tag, length);
+            byte[] encoding = TlvEncoder.BuildTagAndLength(tag, length);
 
-            var compareResult = encoding.SequenceEqual(expected);
+            bool compareResult = encoding.SequenceEqual(expected);
 
             Assert.True(compareResult);
         }
@@ -137,14 +131,14 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void AddByte_Encode_ReturnsCorrectEncoding()
         {
-            byte[] expected = { 0x81, 0x01, 0x11 };
+            byte[] expected = new byte[] { 0x81, 0x01, 0x11 };
             var writer = new TlvWriter();
-            writer.WriteByte(tag: 0x81, value: 0x11);
+            writer.WriteByte(0x81, 0x11);
 
-            var encoding = writer.Encode();
+            byte[] encoding = writer.Encode();
             writer.Clear();
 
-            var compareResult = encoding.SequenceEqual(expected);
+            bool compareResult = encoding.SequenceEqual(expected);
 
             Assert.True(compareResult);
         }
@@ -152,14 +146,14 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void AddValueEncoded_Encode_ReturnsCorrectEncoding()
         {
-            byte[] expected = { 0x78, 0x02 };
+            byte[] expected = new byte[] { 0x78, 0x02 };
             var writer = new TlvWriter();
             writer.WriteEncoded(new byte[] { 0x78, 0x02 });
 
-            var encoding = writer.Encode();
+            byte[] encoding = writer.Encode();
             writer.Clear();
 
-            var compareResult = encoding.SequenceEqual(expected);
+            bool compareResult = encoding.SequenceEqual(expected);
 
             Assert.True(compareResult);
         }
@@ -167,37 +161,35 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void AddInt16_TryEncode_ReturnsCorrect()
         {
-            byte[] expected =
-            {
+            byte[] expected = new byte[] {
                 0x81, 0x02, 0xF1, 0xF2
             };
             var writer = new TlvWriter();
-            writer.WriteInt16(tag: 0x81, unchecked((short)0xF1F2));
+            writer.WriteInt16(0x81, unchecked((short)0xF1F2));
 
-            var encoding = new byte[4];
-            var isWritten = writer.TryEncode(encoding, out var encodingLen);
+            byte[] encoding = new byte[4];
+            bool isWritten = writer.TryEncode(encoding, out int encodingLen);
             writer.Clear();
 
-            var compareResult = encoding.SequenceEqual(expected);
+            bool compareResult = encoding.SequenceEqual(expected);
 
             Assert.True(isWritten);
-            Assert.Equal(expected: 4, encodingLen);
+            Assert.Equal(4, encodingLen);
             Assert.True(compareResult);
         }
 
         [Fact]
         public void AddInt16Endian_Encode_ReturnsCorrect()
         {
-            byte[] expected =
-            {
+            byte[] expected = new byte[] {
                 0x7A, 0x02, 0x82, 0x00
             };
             var writer = new TlvWriter();
-            writer.WriteInt16(tag: 0x7A, value: 0x0082, bigEndian: false);
+            writer.WriteInt16(0x7A, 0x0082, false);
 
-            var encoding = writer.Encode();
+            byte[] encoding = writer.Encode();
 
-            var compareResult = encoding.SequenceEqual(expected);
+            bool compareResult = encoding.SequenceEqual(expected);
 
             Assert.True(compareResult);
         }
@@ -205,36 +197,34 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void AddUInt16_TryEncode_ReturnsCorrect()
         {
-            byte[] expected =
-            {
+            byte[] expected = new byte[] {
                 0x81, 0x02, 0xF1, 0xF2
             };
             var writer = new TlvWriter();
-            writer.WriteUInt16(tag: 0x81, value: 0xF1F2);
+            writer.WriteUInt16(0x81, 0xF1F2);
 
-            var encoding = new byte[4];
-            var isWritten = writer.TryEncode(encoding, out var encodingLen);
+            byte[] encoding = new byte[4];
+            bool isWritten = writer.TryEncode(encoding, out int encodingLen);
 
-            var compareResult = encoding.SequenceEqual(expected);
+            bool compareResult = encoding.SequenceEqual(expected);
 
             Assert.True(isWritten);
-            Assert.Equal(expected: 4, encodingLen);
+            Assert.Equal(4, encodingLen);
             Assert.True(compareResult);
         }
 
         [Fact]
         public void AddUInt16Endian_Encode_ReturnsCorrect()
         {
-            byte[] expected =
-            {
+            byte[] expected = new byte[] {
                 0x7A, 0x02, 0x82, 0x00
             };
             var writer = new TlvWriter();
-            writer.WriteUInt16(tag: 0x7A, value: 0x0082, bigEndian: false);
+            writer.WriteUInt16(0x7A, 0x0082, false);
 
-            var encoding = writer.Encode();
+            byte[] encoding = writer.Encode();
 
-            var compareResult = encoding.SequenceEqual(expected);
+            bool compareResult = encoding.SequenceEqual(expected);
 
             Assert.True(compareResult);
         }
@@ -242,37 +232,35 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void AddInt32_TryEncode_ReturnsCorrect()
         {
-            byte[] expected =
-            {
+            byte[] expected = new byte[] {
                 0x11, 0x04, 0xF1, 0xF2, 0xF3, 0xF4
             };
             var writer = new TlvWriter();
-            writer.WriteInt32(tag: 0x11, unchecked((int)0xF1F2F3F4));
+            writer.WriteInt32(0x11, unchecked((int)0xF1F2F3F4));
 
-            var encoding = new byte[6];
-            var isWritten = writer.TryEncode(encoding, out var encodingLen);
+            byte[] encoding = new byte[6];
+            bool isWritten = writer.TryEncode(encoding, out int encodingLen);
             writer.Clear();
 
-            var compareResult = encoding.SequenceEqual(expected);
+            bool compareResult = encoding.SequenceEqual(expected);
 
             Assert.True(isWritten);
-            Assert.Equal(expected: 6, encodingLen);
+            Assert.Equal(6, encodingLen);
             Assert.True(compareResult);
         }
 
         [Fact]
         public void AddInt32Endian_Encode_ReturnsCorrect()
         {
-            byte[] expected =
-            {
+            byte[] expected = new byte[] {
                 0x22, 0x04, 0xFF, 0x00, 0x00, 0x00
             };
             var writer = new TlvWriter();
-            writer.WriteInt32(tag: 0x22, value: 0x000000FF, bigEndian: false);
+            writer.WriteInt32(0x22, unchecked(0x000000FF), false);
 
-            var encoding = writer.Encode();
+            byte[] encoding = writer.Encode();
 
-            var compareResult = encoding.SequenceEqual(expected);
+            bool compareResult = encoding.SequenceEqual(expected);
 
             Assert.True(compareResult);
         }
@@ -280,18 +268,17 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void ASCIIString_Encode_ReturnsCorrect()
         {
-            byte[] expected =
-            {
+            byte[] expected = new byte[] {
                 0xA2, 0x04, 0x41, 0x42, 0x43, 0x44
             };
-            var value = "ABCD";
+            string value = "ABCD";
 
             var writer = new TlvWriter();
-            writer.WriteString(tag: 0xA2, value, Encoding.ASCII);
+            writer.WriteString(0xA2, value, Encoding.ASCII);
 
-            var encoding = writer.Encode();
+            byte[] encoding = writer.Encode();
 
-            var compareResult = encoding.SequenceEqual(expected);
+            bool compareResult = encoding.SequenceEqual(expected);
 
             Assert.True(compareResult);
         }
@@ -299,18 +286,17 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void UTF8String_Encode_ReturnsCorrect()
         {
-            byte[] expected =
-            {
+            byte[] expected = new byte[] {
                 0xA3, 0x04, 0x41, 0xC2, 0xB1, 0x42
             };
-            var value = "A\u00B1B";
+            string value = "A\u00B1B";
 
             var writer = new TlvWriter();
-            writer.WriteString(tag: 0xA3, value, Encoding.UTF8);
+            writer.WriteString(0xA3, value, Encoding.UTF8);
 
-            var encoding = writer.Encode();
+            byte[] encoding = writer.Encode();
 
-            var compareResult = encoding.SequenceEqual(expected);
+            bool compareResult = encoding.SequenceEqual(expected);
 
             Assert.True(compareResult);
         }
@@ -318,24 +304,23 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void SimpleNested_Encode_ReturnsCorrect()
         {
-            byte[] expected =
-            {
+            byte[] expected = new byte[] {
                 0xA1, 0x0C, 0x11, 0x05, 0x01, 0x02, 0x03, 0x04, 0x05, 0x22, 0x03, 0x90, 0xC4, 0x5B
             };
 
             var writer = new TlvWriter();
-            using (var tlvScope = writer.WriteNestedTlv(tag: 0xA1))
+            using (TlvWriter.TlvScope tlvScope = writer.WriteNestedTlv(0xA1))
             {
-                byte[] element1 = { 0x01, 0x02, 0x03, 0x04, 0x05 };
-                writer.WriteValue(tag: 0x11, element1);
-                byte[] element2 = { 0x90, 0xC4, 0x5B };
-                writer.WriteValue(tag: 0x22, element2);
+                byte[] element1 = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
+                writer.WriteValue(0x11, element1);
+                byte[] element2 = new byte[] { 0x90, 0xC4, 0x5B };
+                writer.WriteValue(0x22, element2);
                 tlvScope.Dispose();
             }
 
-            var encoding = writer.Encode();
+            byte[] encoding = writer.Encode();
 
-            var compareResult = encoding.SequenceEqual(expected);
+            bool compareResult = encoding.SequenceEqual(expected);
 
             Assert.True(compareResult);
         }
@@ -343,41 +328,39 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void NestedInNested_TryEncode_ReturnsCorrect()
         {
-            byte[] expected =
-            {
+            byte[] expected = new byte[] {
                 0x04, 0x1A,
-                0x5F, 0x21, 0x03, 0x01, 0x02, 0x03,
-                0x02, 0x0C,
-                0x30, 0x04, 0x11, 0x22, 0x33, 0x44,
-                0x31, 0x00,
-                0x32, 0x02, 0x7f, 0xff,
-                0x5F, 0x22, 0x03, 0x04, 0x05, 0x06
+                      0x5F, 0x21, 0x03, 0x01, 0x02, 0x03,
+                      0x02, 0x0C,
+                            0x30, 0x04, 0x11, 0x22, 0x33, 0x44,
+                            0x31, 0x00,
+                            0x32, 0x02, 0x7f, 0xff,
+                      0x5F, 0x22, 0x03, 0x04, 0x05, 0x06
             };
 
             var writer = new TlvWriter();
-            using (writer.WriteNestedTlv(tag: 0x04))
+            using (writer.WriteNestedTlv(0x04))
             {
-                byte[] element1 = { 0x01, 0x02, 0x03 };
-                writer.WriteValue(tag: 0x5F21, element1);
-                using (writer.WriteNestedTlv(tag: 0x02))
+                byte[] element1 = new byte[] { 0x01, 0x02, 0x03 };
+                writer.WriteValue(0x5F21, element1);
+                using (writer.WriteNestedTlv(0x02))
                 {
-                    writer.WriteInt32(tag: 0x30, value: 0x11223344);
-                    writer.WriteValue(tag: 0x31, value: null);
-                    writer.WriteInt16(tag: 0x32, value: 0x7FFF);
+                    writer.WriteInt32(0x30, 0x11223344);
+                    writer.WriteValue(0x31, null);
+                    writer.WriteInt16(0x32, 0x7FFF);
                 }
-
-                byte[] element2 = { 0x04, 0x05, 0x06 };
-                writer.WriteValue(tag: 0x5F22, element2);
+                byte[] element2 = new byte[] { 0x04, 0x05, 0x06 };
+                writer.WriteValue(0x5F22, element2);
             }
 
-            var encoding = new byte[writer.GetEncodedLength()];
-            var isWritten = writer.TryEncode(encoding, out var encodingLen);
+            byte[] encoding = new byte[writer.GetEncodedLength()];
+            bool isWritten = writer.TryEncode(encoding, out int encodingLen);
             writer.Clear();
 
-            var compareResult = encoding.SequenceEqual(expected);
+            bool compareResult = encoding.SequenceEqual(expected);
 
             Assert.True(isWritten);
-            Assert.Equal(expected: 28, encodingLen);
+            Assert.Equal(28, encodingLen);
             Assert.True(compareResult);
         }
 
@@ -399,15 +382,15 @@ namespace Yubico.Core.Tlv.UnitTests
         public void TryEncode_BufferTooSmall_ReturnsFalse(int decrement)
         {
             var writer = new TlvWriter();
-            using (writer.WriteNestedTlv(tag: 0xA1))
+            using (writer.WriteNestedTlv(0xA1))
             {
-                byte[] element1 = { 0x01, 0x02, 0x03, 0x04, 0x05 };
-                writer.WriteValue(tag: 0x11, element1);
-                byte[] element2 = { 0x90, 0xC4, 0x5B };
-                writer.WriteValue(tag: 0x22, element2);
+                byte[] element1 = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
+                writer.WriteValue(0x11, element1);
+                byte[] element2 = new byte[] { 0x90, 0xC4, 0x5B };
+                writer.WriteValue(0x22, element2);
             }
 
-            var encodingLength = writer.GetEncodedLength();
+            int encodingLength = writer.GetEncodedLength();
             byte[] encoding;
             if (decrement == encodingLength)
             {
@@ -422,23 +405,23 @@ namespace Yubico.Core.Tlv.UnitTests
                 encoding = new byte[encodingLength - decrement];
             }
 
-            var isWritten = writer.TryEncode(encoding, out encodingLength);
+            bool isWritten = writer.TryEncode(encoding, out encodingLength);
             writer.Clear();
 
             Assert.False(isWritten);
-            Assert.Equal(expected: 0, encodingLength);
+            Assert.Equal(0, encodingLength);
         }
 
         [Fact]
         public void WriteString_NullEncoding_ThrowsExcpetion()
         {
-            var value = "ABCD";
+            string value = "ABCD";
 
             var writer = new TlvWriter();
-            writer.WriteString(tag: 0xA2, value, Encoding.ASCII);
+            writer.WriteString(0xA2, value, Encoding.ASCII);
 
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
-            Action actual = () => writer.WriteString(tag: 0x71, value, encoding: null);
+            Action actual = () => writer.WriteString(0x71, value, null);
             Assert.Throws<ArgumentNullException>(actual);
 #pragma warning restore CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
         }
@@ -447,12 +430,12 @@ namespace Yubico.Core.Tlv.UnitTests
         public void GetEncodedLength_IncompleteSchema_ThrowsException()
         {
             var writer = new TlvWriter();
-            using (writer.WriteNestedTlv(tag: 0xA1))
+            using (writer.WriteNestedTlv(0xA1))
             {
-                byte[] element1 = { 0x01, 0x02, 0x03, 0x04, 0x05 };
-                writer.WriteValue(tag: 0x11, element1);
-                byte[] element2 = { 0x90, 0xC4, 0x5B };
-                writer.WriteValue(tag: 0x22, element2);
+                byte[] element1 = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
+                writer.WriteValue(0x11, element1);
+                byte[] element2 = new byte[] { 0x90, 0xC4, 0x5B };
+                writer.WriteValue(0x22, element2);
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
                 Action actual = () => writer.GetEncodedLength();
                 Assert.Throws<TlvException>(actual);
@@ -464,12 +447,12 @@ namespace Yubico.Core.Tlv.UnitTests
         public void Encode_IncompleteSchema_ThrowsException()
         {
             var writer = new TlvWriter();
-            using (writer.WriteNestedTlv(tag: 0xA1))
+            using (writer.WriteNestedTlv(0xA1))
             {
-                byte[] element1 = { 0x01, 0x02, 0x03, 0x04, 0x05 };
-                writer.WriteValue(tag: 0x11, element1);
-                byte[] element2 = { 0x90, 0xC4, 0x5B };
-                writer.WriteValue(tag: 0x22, element2);
+                byte[] element1 = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
+                writer.WriteValue(0x11, element1);
+                byte[] element2 = new byte[] { 0x90, 0xC4, 0x5B };
+                writer.WriteValue(0x22, element2);
 #pragma warning disable CS8625, CA1806, IDE0039, IDE0058 // Cannot convert null literal to non-nullable reference type.
                 Action actual = () => writer.Encode();
                 Assert.Throws<TlvException>(actual);
@@ -481,7 +464,7 @@ namespace Yubico.Core.Tlv.UnitTests
         public void EncodeTag_Has_Correct_LengthAndOffset()
         {
             _testOutputHelper.WriteLine("Output: ");
-            var bytesSize = 128;
+            int bytesSize = 128;
             while (bytesSize < 150000)
             {
                 var writer = new TlvWriter();
@@ -490,7 +473,7 @@ namespace Yubico.Core.Tlv.UnitTests
                 // My visible data
                 data[0] = 0xFF;
 
-                writer.WriteValue(tag: 0x1, data);
+                writer.WriteValue(0x1, data);
                 var encoding = writer.Encode();
                 var reader = new TlvReader(encoding);
                 Assert.Equal(bytesSize, reader.PeekLength());
@@ -506,9 +489,9 @@ namespace Yubico.Core.Tlv.UnitTests
         private void PrettyPrint(int number, IEnumerable<string> bytesAsHex)
         {
             // Print the contents 
-            var numDigits = number.ToString().Length;
-            var spacesNeeded = Math.Max(5 - numDigits, val2: 0);
-            var padding = new string(c: ' ', spacesNeeded);
+            int numDigits = number.ToString().Length;
+            int spacesNeeded = Math.Max(5 - numDigits, 0);
+            string padding = new string(' ', spacesNeeded);
             _testOutputHelper.WriteLine(
                 $"{padding + number}: {string.Join(",", bytesAsHex)}"
             );

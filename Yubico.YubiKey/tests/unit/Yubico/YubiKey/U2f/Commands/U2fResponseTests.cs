@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Globalization;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -25,7 +24,7 @@ namespace Yubico.YubiKey.U2f.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new U2fResponse(responseApdu: null));
+            _ = Assert.Throws<ArgumentNullException>(() => new U2fResponse(null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -46,16 +45,14 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenInvalidCommandDataParameterStatusWord_SetsResponseStatus()
         {
-            var response =
-                new U2fResponse(new ResponseApdu(Array.Empty<byte>(), SWConstants.InvalidCommandDataParameter));
+            var response = new U2fResponse(new ResponseApdu(Array.Empty<byte>(), SWConstants.InvalidCommandDataParameter));
             Assert.Equal(ResponseStatus.Failed, response.Status);
         }
 
         [Fact]
         public void Constructor_GivenInvalidCommandDataParameterStatusWord_SetsStatusMessage()
         {
-            var response =
-                new U2fResponse(new ResponseApdu(Array.Empty<byte>(), SWConstants.InvalidCommandDataParameter));
+            var response = new U2fResponse(new ResponseApdu(Array.Empty<byte>(), SWConstants.InvalidCommandDataParameter));
             Assert.Equal(ResponseStatusMessages.U2fWrongData, response.StatusMessage);
         }
 
@@ -66,7 +63,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenCommandNotAllowedStatusWord_SetsResponseStatus()
         {
-            byte[] responseData = { 0x01 };
+            byte[] responseData = new byte[] { 0x01 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.CommandNotAllowed));
             Assert.Equal(ResponseStatus.Failed, response.Status);
         }
@@ -74,7 +71,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenCommandNotAllowedStatusWord_SetsStatusMessage()
         {
-            byte[] responseData = { 0x01 };
+            byte[] responseData = new byte[] { 0x01 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.CommandNotAllowed));
             Assert.Equal(ResponseStatusMessages.U2fHidErrorInvalidCommand, response.StatusMessage);
         }
@@ -82,7 +79,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenInvalidParameterStatusWord_SetsResponseStatus()
         {
-            byte[] responseData = { 0x02 };
+            byte[] responseData = new byte[] { 0x02 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.InvalidParameter));
             Assert.Equal(ResponseStatus.Failed, response.Status);
         }
@@ -90,7 +87,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenInvalidParameterStatusWord_SetsStatusMessage()
         {
-            byte[] responseData = { 0x02 };
+            byte[] responseData = new byte[] { 0x02 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.InvalidParameter));
             Assert.Equal(ResponseStatusMessages.U2fHidErrorInvalidParameter, response.StatusMessage);
         }
@@ -98,7 +95,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenWrongLengthStatusWord_SetsResponseStatus()
         {
-            byte[] responseData = { 0x03 };
+            byte[] responseData = new byte[] { 0x03 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.WrongLength));
             Assert.Equal(ResponseStatus.Failed, response.Status);
         }
@@ -106,7 +103,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenWrongLengthStatusWord_SetsStatusMessage()
         {
-            byte[] responseData = { 0x03 };
+            byte[] responseData = new byte[] { 0x03 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.WrongLength));
             Assert.Equal(ResponseStatusMessages.U2fHidErrorInvalidLength, response.StatusMessage);
         }
@@ -114,7 +111,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenU2fHidErrInvalidSequenceResult_SetsResponseStatus()
         {
-            byte[] responseData = { 0x04 };
+            byte[] responseData = new byte[] { 0x04 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.NoPreciseDiagnosis));
             Assert.Equal(ResponseStatus.Failed, response.Status);
         }
@@ -122,7 +119,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenU2fHidErrInvalidSequenceResult_SetsStatusMessage()
         {
-            byte[] responseData = { 0x04 };
+            byte[] responseData = new byte[] { 0x04 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.NoPreciseDiagnosis));
             Assert.Equal(ResponseStatusMessages.U2fHidErrorInvalidSequence, response.StatusMessage);
         }
@@ -130,7 +127,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenU2fHidErrTimeoutResult_SetsResponseStatus()
         {
-            byte[] responseData = { 0x05 };
+            byte[] responseData = new byte[] { 0x05 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.NoPreciseDiagnosis));
             Assert.Equal(ResponseStatus.Failed, response.Status);
         }
@@ -138,7 +135,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenU2fHidErrTimeoutResult_SetsStatusMessage()
         {
-            byte[] responseData = { 0x05 };
+            byte[] responseData = new byte[] { 0x05 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.NoPreciseDiagnosis));
             Assert.Equal(ResponseStatusMessages.U2fHidErrorMessageTimeout, response.StatusMessage);
         }
@@ -146,7 +143,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenU2fHidErrChannelBusyResult_SetsResponseStatus()
         {
-            byte[] responseData = { 0x06 };
+            byte[] responseData = new byte[] { 0x06 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.NoPreciseDiagnosis));
             Assert.Equal(ResponseStatus.Failed, response.Status);
         }
@@ -154,7 +151,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenU2fHidErrChannelBusyResult_SetsStatusMessage()
         {
-            byte[] responseData = { 0x06 };
+            byte[] responseData = new byte[] { 0x06 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.NoPreciseDiagnosis));
             Assert.Equal(ResponseStatusMessages.U2fHidErrorChannelBusy, response.StatusMessage);
         }
@@ -162,7 +159,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenU2fHidErrUnknown0x77Result_SetsResponseStatus()
         {
-            byte[] responseData = { 0x77 };
+            byte[] responseData = new byte[] { 0x77 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.NoPreciseDiagnosis));
             Assert.Equal(ResponseStatus.Failed, response.Status);
         }
@@ -170,13 +167,13 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenU2fHidErrUnknown0x77Result_SetsStatusMessage()
         {
-            byte[] responseData = { 0x77 };
+            byte[] responseData = new byte[] { 0x77 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.NoPreciseDiagnosis));
             Assert.Equal(string.Format(
-                    CultureInfo.CurrentCulture,
-                    ResponseStatusMessages.U2fHidErrorUnknown,
-                    responseData[0]),
-                response.StatusMessage);
+                            System.Globalization.CultureInfo.CurrentCulture,
+                            ResponseStatusMessages.U2fHidErrorUnknown,
+                            responseData[0]),
+                            response.StatusMessage);
         }
     }
 }

@@ -20,12 +20,10 @@ namespace Yubico.YubiKey.Scp03.Commands
     internal class ExternalAuthenticateResponse : Scp03Response
     {
         /// <summary>
-        ///     Constructs an ExternalAuthenticateResponse based on a ResponseApdu received from the YubiKey.
+        /// Constructs an ExternalAuthenticateResponse based on a ResponseApdu received from the YubiKey.
         /// </summary>
-        /// <param name="responseApdu">
-        ///     The ResponseApdu that corresponds to the issuance of
-        ///     this command.
-        /// </param>
+        /// <param name="responseApdu">The ResponseApdu that corresponds to the issuance of
+        /// this command.</param>
         public ExternalAuthenticateResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {

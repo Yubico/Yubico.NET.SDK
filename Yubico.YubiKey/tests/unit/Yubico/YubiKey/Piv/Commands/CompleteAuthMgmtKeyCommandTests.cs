@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void ClassType_DerivedFromPivCommand_IsTrue()
         {
-            var command = GetCommandObject(isMutual: true, isRandomFixed: true);
+            CompleteAuthenticateManagementKeyCommand command = GetCommandObject(true, true);
 
             Assert.True(command is IYubiKeyCommand<CompleteAuthenticateManagementKeyResponse>);
         }
@@ -55,9 +55,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Application_Piv()
         {
-            var command = GetCommandObject(isMutual: false, isRandomFixed: false);
+            CompleteAuthenticateManagementKeyCommand command = GetCommandObject(false, false);
 
-            var Application = command.Application;
+            YubiKeyApplication Application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, Application);
         }
@@ -65,17 +65,17 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Mutual_CreateResponse_CorrectType()
         {
-            var successSw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var successSw2 = unchecked((byte)SWConstants.Success);
-            byte[] apduMutual =
+            byte successSw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte successSw2 = unchecked((byte)SWConstants.Success);
+            byte[] apduMutual = new byte[]
             {
                 0x7C, 0x0A, 0x82, 0x08, 0xAC, 0x29, 0xA4, 0x5E, 0x1F, 0x42, 0x8A, 0x23, successSw1, successSw2
             };
 
-            var command = GetCommandObject(isMutual: true, isRandomFixed: true);
+            CompleteAuthenticateManagementKeyCommand command = GetCommandObject(true, true);
             var responseApdu = new ResponseApdu(apduMutual);
 
-            var response = command.CreateResponseForApdu(responseApdu);
+            CompleteAuthenticateManagementKeyResponse response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is IYubiKeyResponseWithData<AuthenticateManagementKeyResult>);
         }
@@ -83,21 +83,19 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_NullResponse_ThrowsException()
         {
-            var mgmtKey = GetMgmtKey();
+            byte[] mgmtKey = GetMgmtKey();
 
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() =>
-                new CompleteAuthenticateManagementKeyCommand(initializeAuthenticationResponse: null, mgmtKey));
+            _ = Assert.Throws<ArgumentNullException>(() => new CompleteAuthenticateManagementKeyCommand(null, mgmtKey));
 #pragma warning restore CS8625
         }
 
         [Fact]
         public void Constructor_NullMgmtKey_ThrowsException()
         {
-            var response = GetInitResponse(isMutualAuth: false);
+            InitializeAuthenticateManagementKeyResponse response = GetInitResponse(false);
 
-            _ = Assert.Throws<ArgumentException>(() =>
-                new CompleteAuthenticateManagementKeyCommand(response, managementKey: null));
+            _ = Assert.Throws<ArgumentException>(() => new CompleteAuthenticateManagementKeyCommand(response, null));
         }
 
         [Theory]
@@ -105,19 +103,19 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(-1)]
         public void Constructor_BadKeyLen_ThrowsException(int difference)
         {
-            var response = GetInitResponse(isMutualAuth: false);
-            var mgmtKey = GetMgmtKey();
+            InitializeAuthenticateManagementKeyResponse response = GetInitResponse(false);
+            byte[] mgmtKey = GetMgmtKey();
 
             if (difference >= 0)
             {
-                var buffer = new byte[25];
-                mgmtKey.CopyTo(buffer, index: 1);
+                byte[] buffer = new byte[25];
+                mgmtKey.CopyTo(buffer, 1);
                 buffer[0] = 0x99;
                 mgmtKey = buffer;
             }
             else
             {
-                mgmtKey = mgmtKey.Take(count: 23).ToArray();
+                mgmtKey = mgmtKey.Take(23).ToArray();
             }
 
             _ = Assert.Throws<ArgumentException>(() => new CompleteAuthenticateManagementKeyCommand(response, mgmtKey));
@@ -128,11 +126,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(false)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(bool isMutual)
         {
-            var cmdApdu = GetCommandApdu(isMutual, isRandomFixed: true);
+            CommandApdu cmdApdu = GetCommandApdu(isMutual, true);
 
-            var Cla = cmdApdu.Cla;
+            byte Cla = cmdApdu.Cla;
 
-            Assert.Equal(expected: 0, Cla);
+            Assert.Equal(0, Cla);
         }
 
         [Theory]
@@ -140,11 +138,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(false)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHex87(bool isMutual)
         {
-            var cmdApdu = GetCommandApdu(isMutual, isRandomFixed: true);
+            CommandApdu cmdApdu = GetCommandApdu(isMutual, true);
 
-            var Ins = cmdApdu.Ins;
+            byte Ins = cmdApdu.Ins;
 
-            Assert.Equal(expected: 0x87, Ins);
+            Assert.Equal(0x87, Ins);
         }
 
         [Theory]
@@ -152,11 +150,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(false)]
         public void CreateCommandApdu_GetP1Property_ReturnsThree(bool isMutual)
         {
-            var cmdApdu = GetCommandApdu(isMutual, isRandomFixed: true);
+            CommandApdu cmdApdu = GetCommandApdu(isMutual, true);
 
-            var P1 = cmdApdu.P1;
+            byte P1 = cmdApdu.P1;
 
-            Assert.Equal(expected: 3, P1);
+            Assert.Equal(3, P1);
         }
 
         [Theory]
@@ -164,11 +162,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(false)]
         public void CreateCommandApdu_GetP2Property_ReturnsHex9B(bool isMutual)
         {
-            var cmdApdu = GetCommandApdu(isMutual, isRandomFixed: true);
+            CommandApdu cmdApdu = GetCommandApdu(isMutual, true);
 
-            var P2 = cmdApdu.P2;
+            byte P2 = cmdApdu.P2;
 
-            Assert.Equal(expected: 0x9B, P2);
+            Assert.Equal(0x9B, P2);
         }
 
         [Theory]
@@ -176,9 +174,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(false, 12)]
         public void CreateCommandApdu_GetNc_ReturnsCorrect(bool isMutual, int length)
         {
-            var cmdApdu = GetCommandApdu(isMutual, isRandomFixed: true);
+            CommandApdu cmdApdu = GetCommandApdu(isMutual, true);
 
-            var Nc = cmdApdu.Nc;
+            int Nc = cmdApdu.Nc;
 
             Assert.Equal(length, Nc);
         }
@@ -188,11 +186,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(false)]
         public void CreateCommandApdu_GetNe_ReturnsZero(bool isMutual)
         {
-            var cmdApdu = GetCommandApdu(isMutual, isRandomFixed: true);
+            CommandApdu cmdApdu = GetCommandApdu(isMutual, true);
 
-            var Ne = cmdApdu.Ne;
+            int Ne = cmdApdu.Ne;
 
-            Assert.Equal(expected: 0, Ne);
+            Assert.Equal(0, Ne);
         }
 
         [Fact]
@@ -204,11 +202,11 @@ namespace Yubico.YubiKey.Piv.Commands
                     0x7C, 0x0A, 0x82, 0x08, 0x54, 0xFE, 0xAA, 0x17, 0xAC, 0x05, 0x02, 0x36
                 });
 
-            var cmdApdu = GetCommandApdu(isMutual: false, isRandomFixed: true);
+            CommandApdu cmdApdu = GetCommandApdu(false, true);
 
-            var data = cmdApdu.Data;
+            ReadOnlyMemory<byte> data = cmdApdu.Data;
 
-            var compareResult = data.ToArray().SequenceEqual(expected);
+            bool compareResult = data.ToArray().SequenceEqual(expected);
 
             Assert.True(compareResult);
         }
@@ -224,27 +222,27 @@ namespace Yubico.YubiKey.Piv.Commands
                 }
             );
 
-            var cmdApdu = GetCommandApdu(isMutual: true, isRandomFixed: true);
+            CommandApdu cmdApdu = GetCommandApdu(true, true);
 
-            var data = cmdApdu.Data;
+            ReadOnlyMemory<byte> data = cmdApdu.Data;
 
-            var compareResult = data.ToArray().SequenceEqual(expected);
+            bool compareResult = data.ToArray().SequenceEqual(expected);
 
             Assert.True(compareResult);
         }
 
         private static CommandApdu GetCommandApdu(bool isMutual, bool isRandomFixed)
         {
-            var command = GetCommandObject(isMutual, isRandomFixed);
+            CompleteAuthenticateManagementKeyCommand command = GetCommandObject(isMutual, isRandomFixed);
 
             return command.CreateCommandApdu();
         }
 
         private static CompleteAuthenticateManagementKeyCommand GetCommandObject(bool isMutual, bool isRandomFixed)
         {
-            var mgmtKey = GetMgmtKey();
+            byte[] mgmtKey = GetMgmtKey();
 
-            var response = GetInitResponse(isMutual);
+            InitializeAuthenticateManagementKeyResponse response = GetInitResponse(isMutual);
 
             RandomObjectUtility? replacement = null;
 
@@ -311,20 +309,17 @@ namespace Yubico.YubiKey.Piv.Commands
             };
         }
 
-        private static byte[] GetMgmtKey()
+        private static byte[] GetMgmtKey() => new byte[]
         {
-            return new byte[]
-            {
-                0x8A, 0x98, 0xF1, 0x10, 0xD3, 0x49, 0x7B, 0x02,
-                0x21, 0x00, 0xB7, 0x74, 0xDF, 0x0E, 0xF9, 0x9B,
-                0x53, 0xEF, 0x4B, 0x8E, 0x3B, 0x91, 0x86, 0x04
-            };
-        }
+            0x8A, 0x98, 0xF1, 0x10, 0xD3, 0x49, 0x7B, 0x02,
+            0x21, 0x00, 0xB7, 0x74, 0xDF, 0x0E, 0xF9, 0x9B,
+            0x53, 0xEF, 0x4B, 0x8E, 0x3B, 0x91, 0x86, 0x04
+        };
 
         private static InitializeAuthenticateManagementKeyResponse GetInitResponse(bool isMutualAuth)
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             byte tag1 = 0x81;
             if (isMutualAuth)
             {

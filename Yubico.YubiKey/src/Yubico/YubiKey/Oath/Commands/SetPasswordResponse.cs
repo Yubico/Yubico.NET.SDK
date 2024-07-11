@@ -17,29 +17,29 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    ///     The response to the <see cref="SetPasswordCommand" /> command.
+    /// The response to the <see cref="SetPasswordCommand"/> command.
     /// </summary>
     public class SetPasswordResponse : OathResponse
     {
+        /// <inheritdoc/>
+        protected override ResponseStatusPair StatusCodeMap =>
+           StatusWord switch
+           {
+               OathSWConstants.NoSuchObject => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.OathResponseDoesNotMatch),
+               _ => base.StatusCodeMap,
+           };
+
         /// <summary>
-        ///     Constructs a SetPasswordResponse instance based on a
-        ///     ResponseApdu received from the YubiKey.
+        /// Constructs a SetPasswordResponse instance based on a
+        /// ResponseApdu received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     The ResponseApdu returned by the YubiKey.
+        /// The ResponseApdu returned by the YubiKey.
         /// </param>
         public SetPasswordResponse(ResponseApdu responseApdu) :
-            base(responseApdu)
+               base(responseApdu)
         {
-        }
 
-        /// <inheritdoc />
-        protected override ResponseStatusPair StatusCodeMap =>
-            StatusWord switch
-            {
-                OathSWConstants.NoSuchObject => new ResponseStatusPair(
-                    ResponseStatus.Failed, ResponseStatusMessages.OathResponseDoesNotMatch),
-                _ => base.StatusCodeMap
-            };
+        }
     }
 }

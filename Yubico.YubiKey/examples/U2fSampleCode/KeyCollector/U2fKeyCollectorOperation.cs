@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Yubico.YubiKey.Sample.U2fSampleCode
 {
     public enum U2fKeyCollectorOperation
@@ -20,6 +22,6 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
         Register = 1,
         Authenticate = 2,
         Reset = 3,
-        Verify = 4
+        Verify = 4,
     }
 }

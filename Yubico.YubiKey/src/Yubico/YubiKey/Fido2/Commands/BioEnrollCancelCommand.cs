@@ -17,15 +17,15 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    ///     Cancel the current BioEnrollment process. This is a subcommand of the
-    ///     CTAP command "authenticatorBioEnrollment".
+    /// Cancel the current BioEnrollment process. This is a subcommand of the
+    /// CTAP command "authenticatorBioEnrollment".
     /// </summary>
     /// <remarks>
-    ///     The partner Response class is <see cref="Fido2Response" />.
-    ///     <para>
-    ///         This does not return data, simply an indication whether it succeeded or
-    ///         not.
-    ///     </para>
+    /// The partner Response class is <see cref="Fido2Response"/>.
+    /// <para>
+    /// This does not return data, simply an indication whether it succeeded or
+    /// not.
+    /// </para>
     /// </remarks>
     public sealed class BioEnrollCancelCommand : IYubiKeyCommand<Fido2Response>
     {
@@ -33,8 +33,11 @@ namespace Yubico.YubiKey.Fido2.Commands
 
         private readonly BioEnrollmentCommand _command;
 
+        /// <inheritdoc />
+        public YubiKeyApplication Application => _command.Application;
+
         /// <summary>
-        ///     Constructs an instance of the <see cref="BioEnrollCancelCommand" /> class.
+        /// Constructs an instance of the <see cref="BioEnrollCancelCommand" /> class.
         /// </summary>
         public BioEnrollCancelCommand()
         {
@@ -42,12 +45,10 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public YubiKeyApplication Application => _command.Application;
-
-        /// <inheritdoc />
         public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
-        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) => new Fido2Response(responseApdu);
+        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new Fido2Response(responseApdu);
     }
 }

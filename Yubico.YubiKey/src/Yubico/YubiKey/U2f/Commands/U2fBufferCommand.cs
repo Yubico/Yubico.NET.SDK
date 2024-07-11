@@ -17,11 +17,11 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
-    ///     The base class for some U2F commands that use the U2fBuffer.
+    /// The base class for some U2F commands that use the U2fBuffer.
     /// </summary>
     /// <remarks>
-    ///     Only the SDK will ever need to create subclasses, there is no reason for
-    ///     any other application to do so.
+    /// Only the SDK will ever need to create subclasses, there is no reason for
+    /// any other application to do so.
     /// </remarks>
     public abstract class U2fBufferCommand : U2fBuffer
     {
@@ -30,7 +30,20 @@ namespace Yubico.YubiKey.U2f.Commands
         private readonly byte _instruction;
 
         /// <summary>
-        ///     Initialize the object to the given values.
+        /// The P1 value to use in the APDU.
+        /// </summary>
+        protected byte Parameter1 { get; set; }
+
+        /// <summary>
+        /// The YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        /// <see cref="YubiKeyApplication.FidoU2f"/>
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
+
+        /// <summary>
+        /// Initialize the object to the given values.
         /// </summary>
         protected U2fBufferCommand(byte instruction, int bufferLength, int appIdOffset, int clientDataOffset)
             : base(bufferLength, appIdOffset, clientDataOffset)
@@ -39,35 +52,22 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <summary>
-        ///     The P1 value to use in the APDU.
-        /// </summary>
-        protected byte Parameter1 { get; set; }
-
-        /// <summary>
-        ///     The YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        ///     <see cref="YubiKeyApplication.FidoU2f" />
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
-
-        /// <summary>
-        ///     Create a U2F Command APDU using the info provided during the life of
-        ///     this object.
+        /// Create a U2F Command APDU using the info provided during the life of
+        /// this object.
         /// </summary>
         public CommandApdu CreateCommandApdu()
         {
-            var innerCommand = new CommandApdu
+            var innerCommand = new CommandApdu()
             {
                 Ins = _instruction,
                 P1 = Parameter1,
-                Data = _buffer
+                Data = _buffer,
             };
 
-            return new CommandApdu
+            return new CommandApdu()
             {
                 Ins = Ctap1MessageInstruction,
-                Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength)
+                Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength),
             };
         }
     }

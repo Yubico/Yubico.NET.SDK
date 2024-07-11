@@ -24,10 +24,7 @@ namespace Yubico.YubiKey.Otp.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void action()
-            {
-                _ = new GetSerialNumberResponse(responseApdu: null);
-            }
+            static void action() => _ = new GetSerialNumberResponse(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             _ = Assert.Throws<ArgumentNullException>(action);
@@ -36,8 +33,8 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var versionResponse = new GetSerialNumberResponse(responseApdu);
@@ -48,8 +45,8 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var versionResponse = new GetSerialNumberResponse(responseApdu);
@@ -63,10 +60,7 @@ namespace Yubico.YubiKey.Otp.Commands
             var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
             var getSerialNumberResponse = new GetSerialNumberResponse(responseApdu);
 
-            void action()
-            {
-                _ = getSerialNumberResponse.GetData();
-            }
+            void action() => _ = getSerialNumberResponse.GetData();
 
             _ = Assert.Throws<InvalidOperationException>(action);
         }
@@ -77,14 +71,11 @@ namespace Yubico.YubiKey.Otp.Commands
             var responseApdu = new ResponseApdu(new byte[] { 0x00, 0x90, 0x00 });
             var getSerialNumberResponse = new GetSerialNumberResponse(responseApdu);
 
-            void action()
-            {
-                _ = getSerialNumberResponse.GetData();
-            }
+            void action() => _ = getSerialNumberResponse.GetData();
 
-            var exception = Assert.Throws<MalformedYubiKeyResponseException>(action);
-            Assert.Equal(expected: 1, exception.ActualDataLength);
-            Assert.Equal(expected: 4, exception.ExpectedDataLength);
+            MalformedYubiKeyResponseException exception = Assert.Throws<MalformedYubiKeyResponseException>(action);
+            Assert.Equal(1, exception.ActualDataLength);
+            Assert.Equal(4, exception.ExpectedDataLength);
         }
 
         [Fact]
@@ -93,9 +84,9 @@ namespace Yubico.YubiKey.Otp.Commands
             var responseApdu = new ResponseApdu(new byte[] { 0x00, 0xBB, 0xCC, 0xDD, 0x90, 0x00 });
             var serialResponse = new GetSerialNumberResponse(responseApdu);
 
-            var serialNum = serialResponse.GetData();
+            int serialNum = serialResponse.GetData();
 
-            Assert.Equal(expected: 0x00BBCCDD, serialNum);
+            Assert.Equal(0x00BBCCDD, serialNum);
         }
     }
 }

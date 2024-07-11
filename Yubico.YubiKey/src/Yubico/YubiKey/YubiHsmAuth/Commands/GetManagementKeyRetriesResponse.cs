@@ -18,19 +18,18 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    ///     The response to the <see cref="GetManagementKeyRetriesCommand" />
-    ///     command, containing the retries remaining for the management key.
+    /// The response to the <see cref="GetManagementKeyRetriesCommand"/>
+    /// command, containing the retries remaining for the management key.
     /// </summary>
     public sealed class GetManagementKeyRetriesResponse :
-        BaseYubiHsmAuthResponse,
-        IYubiKeyResponseWithData<int>
+        BaseYubiHsmAuthResponse, IYubiKeyResponseWithData<int>
     {
         /// <summary>
-        ///     Constructs a GetManagementKeyRetriesResponse instance based on a
-        ///     ResponseApdu received from the YubiKey.
+        /// Constructs a GetManagementKeyRetriesResponse instance based on a
+        /// ResponseApdu received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     The ResponseApdu returned by the YubiKey.
+        /// The ResponseApdu returned by the YubiKey.
         /// </param>
         public GetManagementKeyRetriesResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -38,14 +37,14 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         }
 
         /// <summary>
-        ///     Gets the number of retries remaining for the management key.
+        /// Gets the number of retries remaining for the management key.
         /// </summary>
         /// <returns>
-        ///     The data in the response APDU, as an integer.
+        /// The data in the response APDU, as an integer.
         /// </returns>
         /// <exception cref="InvalidOperationException">
-        ///     Thrown when the <see cref="IYubiKeyResponse.Status" /> is not equal to
-        ///     <see cref="ResponseStatus.Success" />.
+        /// Thrown when the <see cref="IYubiKeyResponse.Status"/> is not equal to
+        /// <see cref="ResponseStatus.Success"/>.
         /// </exception>
         public int GetData()
         {

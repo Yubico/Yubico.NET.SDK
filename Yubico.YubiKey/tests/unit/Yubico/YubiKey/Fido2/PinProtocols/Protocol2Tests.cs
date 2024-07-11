@@ -13,7 +13,9 @@
 // limitations under the License.
 
 using System;
+using System.Collections.ObjectModel;
 using Xunit;
+using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.Fido2.Cose;
 
 namespace Yubico.YubiKey.Fido2.PinProtocols
@@ -23,7 +25,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         [Fact]
         public void Encapsulate_Correct()
         {
-            var encodedKey = GetEncodedPublicKey();
+            byte[] encodedKey = GetEncodedPublicKey();
 
             var pubKey = new CoseEcPublicKey(encodedKey);
             Assert.Equal(CoseEcCurve.P256, pubKey.Curve);
@@ -42,23 +44,22 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         [Fact]
         public void Encrypt_Correct()
         {
-            byte[] dataToEncrypt =
-            {
+            byte[] dataToEncrypt = new byte[] {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
             };
-            var encodedKey = GetEncodedPublicKey();
+            byte[] encodedKey = GetEncodedPublicKey();
             var pubKey = new CoseEcPublicKey(encodedKey);
 
             var p2 = new PinUvAuthProtocolTwo();
             p2.Encapsulate(pubKey);
 
-            var encryptedData = p2.Encrypt(dataToEncrypt, offset: 0, dataToEncrypt.Length);
-            var decryptedData = p2.Decrypt(encryptedData, offset: 0, encryptedData.Length);
+            byte[] encryptedData = p2.Encrypt(dataToEncrypt, 0, dataToEncrypt.Length);
+            byte[] decryptedData = p2.Decrypt(encryptedData, 0, encryptedData.Length);
 
-            var isValid = dataToEncrypt.AsSpan().SequenceEqual(decryptedData.AsSpan());
+            bool isValid = MemoryExtensions.SequenceEqual(dataToEncrypt.AsSpan<byte>(), decryptedData.AsSpan<byte>());
 
             Assert.True(isValid);
         }
@@ -66,26 +67,24 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         [Fact]
         public void Authenticate_Correct()
         {
-            byte[] dataToAuthenticate =
-            {
+            byte[] dataToAuthenticate = new byte[] {
                 0x40, 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f,
                 0x60, 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f
             };
-            var encodedKey = GetEncodedPublicKey();
+            byte[] encodedKey = GetEncodedPublicKey();
             var pubKey = new CoseEcPublicKey(encodedKey);
 
             var p2 = new PinUvAuthProtocolTwo();
             p2.Encapsulate(pubKey);
 
-            var authValue = p2.Authenticate(dataToAuthenticate);
+            byte[] authValue = p2.Authenticate(dataToAuthenticate);
 
-            Assert.Equal(expected: 32, authValue.Length);
+            Assert.Equal(32, authValue.Length);
         }
 
         private byte[] GetEncodedPublicKey()
         {
-            byte[] encodedKey =
-            {
+            byte[] encodedKey = new byte[] {
                 0xa5, 0x01, 0x02, 0x03, 0x38, 0x18, 0x20, 0x01, 0x21, 0x58, 0x20,
                 0x8B, 0x1C, 0x84, 0x52, 0x7E, 0x02, 0x89, 0x9F, 0x58, 0x5C, 0xFF, 0xDB, 0x35, 0x48, 0xC3, 0x6E,
                 0xBC, 0x29, 0xFC, 0xE7, 0xAC, 0x3E, 0x44, 0xCC, 0xC4, 0x21, 0xFA, 0xCB, 0xAA, 0x98, 0x47, 0x5F,
@@ -94,8 +93,8 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                 0x8A, 0x98, 0xF1, 0x10, 0xD3, 0x49, 0x7B, 0x02, 0x21, 0x00, 0xB7, 0x74, 0xDF, 0x0E, 0xF9, 0x9B
             };
 
-            var returnValue = new byte[encodedKey.Length];
-            Array.Copy(encodedKey, sourceIndex: 0, returnValue, destinationIndex: 0, encodedKey.Length);
+            byte[] returnValue = new byte[encodedKey.Length];
+            Array.Copy(encodedKey, 0, returnValue, 0, encodedKey.Length);
 
             return returnValue;
         }

@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Xunit;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
@@ -32,24 +33,24 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             var protocol = new PinUvAuthProtocolTwo();
             var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
-            var getKeyRsp = Connection.SendCommand(getKeyCmd);
+            GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
             Assert.Equal(ResponseStatus.Success, getKeyRsp.Status);
 
             protocol.Encapsulate(getKeyRsp.GetData());
-            var permissions = PinUvAuthTokenPermissions.CredentialManagement;
-            var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, pin, permissions, rpId: null);
-            var getTokenRsp = Connection.SendCommand(getTokenCmd);
+            PinUvAuthTokenPermissions permissions = PinUvAuthTokenPermissions.CredentialManagement;
+            var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, pin, permissions, null);
+            GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
             Assert.Equal(ResponseStatus.Success, getTokenRsp.Status); /*Xunit.Sdk.EqualException
 Assert.Equal() Failure: Values differ
 Expected: Success
 Actual:   Failed*/
-            var pinToken = getTokenRsp.GetData();
+            ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
 
             var cmd = new GetCredentialMetadataCommand(pinToken, protocol);
-            var rsp = Connection.SendCommand(cmd);
+            GetCredentialMetadataResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            (var credCount, var slotCount) = rsp.GetData();
+            (int credCount, int slotCount) = rsp.GetData();
             Assert.True(credCount != 26);
             Assert.True(slotCount != 26);
         }
@@ -61,27 +62,27 @@ Actual:   Failed*/
 
             var protocol = new PinUvAuthProtocolTwo();
             var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
-            var getKeyRsp = Connection.SendCommand(getKeyCmd);
+            GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
             Assert.Equal(ResponseStatus.Success, getKeyRsp.Status);
 
             protocol.Encapsulate(getKeyRsp.GetData());
             var getTokenCmd = new GetPinTokenCommand(protocol, pin);
-            var getTokenRsp = Connection.SendCommand(getTokenCmd);
+            GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
             Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
             /* Xunit.Sdk.EqualException
 Assert.Equal() Failure: Values differ
 Expected: Success
 Actual:   Failed*/
-            var pinToken = getTokenRsp.GetData();
+            ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
 
             var cmd = new GetCredentialMetadataCommand(pinToken, protocol)
             {
                 IsPreview = true
             };
-            var rsp = Connection.SendCommand(cmd);
+            GetCredentialMetadataResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            (var credCount, var slotCount) = rsp.GetData();
+            (int credCount, int slotCount) = rsp.GetData();
             Assert.True(credCount != 26);
             Assert.True(slotCount != 26);
         }

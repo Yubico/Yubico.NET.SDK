@@ -22,6 +22,103 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 {
     public static class ChooseCredentialProperties
     {
+        // Choose credential type.
+        public static bool RunChooseTypeOption(SampleMenu menuObject, out CredentialType? type)
+        {
+            if (menuObject is null)
+            {
+                throw new ArgumentNullException(nameof(menuObject));
+            }
+
+            type = null;
+            // Write out a menu requesting the caller choose one.
+            string[] choices = _types.Keys.ToArray();
+
+            int indexChosen = menuObject.RunMenu("Choose credential type", choices);
+
+            if (indexChosen >= 0 && indexChosen < choices.Length)
+            {
+                type = _types[choices[indexChosen]];
+                return true;
+            }
+
+            SampleMenu.WriteMessage(MessageType.Special, 0, "Invalid response");
+            return false;
+        }
+
+        // Choose credential period.
+        public static bool RunChoosePeriodOption(SampleMenu menuObject, out CredentialPeriod? period)
+        {
+            if (menuObject is null)
+            {
+                throw new ArgumentNullException(nameof(menuObject));
+            }
+
+            period = null;
+            // Write out a menu requesting the caller choose one.
+            string[] choices = _periods.Keys.ToArray();
+
+            int indexChosen = menuObject.RunMenu("Choose credential period", choices);
+
+            if (indexChosen >= 0 && indexChosen < choices.Length)
+            {
+                period = _periods[choices[indexChosen]];
+                return true;
+            }
+
+            SampleMenu.WriteMessage(MessageType.Special, 0, "Invalid response");
+            return false;
+        }
+
+        // Choose credential algorithm.
+        public static bool RunChooseAlgorithmOption(SampleMenu menuObject, out HashAlgorithm? algorithm)
+        {
+            if (menuObject is null)
+            {
+                throw new ArgumentNullException(nameof(menuObject));
+            }
+
+            algorithm = null;
+
+            // Write out a menu requesting the caller choose one.
+            string[] choices = _hashAlgorithms.Keys.ToArray();
+
+            int indexChosen = menuObject.RunMenu("Choose credential algorithm", choices);
+
+            if (indexChosen >= 0 && indexChosen < choices.Length)
+            {
+                algorithm = _hashAlgorithms[choices[indexChosen]];
+                return true;
+            }
+
+            SampleMenu.WriteMessage(MessageType.Special, 0, "Invalid response");
+            return false;
+        }
+
+        // Choose credential digits.
+        public static bool RunChooseDigitsOption(SampleMenu menuObject, out int? digits)
+        {
+            if (menuObject is null)
+            {
+                throw new ArgumentNullException(nameof(menuObject));
+            }
+
+            digits = null;
+            // Write out a menu requesting the caller choose one.
+            string[] choices = _digits.Keys.ToArray();
+
+            int indexChosen = menuObject.RunMenu("Choose the number of digits in OTP code", choices);
+
+            if (indexChosen >= 0 && indexChosen < choices.Length)
+            {
+                digits = _digits[choices[indexChosen]];
+                return true;
+            }
+
+            SampleMenu.WriteMessage(MessageType.Special, 0, "Invalid response");
+            return false;
+        }
+
         private static readonly Dictionary<string, CredentialType> _types =
             new Dictionary<string, CredentialType>
             {
@@ -52,102 +149,5 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 ["7 digits"] = 7,
                 ["8 digits"] = 8
             };
-
-        // Choose credential type.
-        public static bool RunChooseTypeOption(SampleMenu menuObject, out CredentialType? type)
-        {
-            if (menuObject is null)
-            {
-                throw new ArgumentNullException(nameof(menuObject));
-            }
-
-            type = null;
-            // Write out a menu requesting the caller choose one.
-            string[] choices = _types.Keys.ToArray();
-
-            int indexChosen = menuObject.RunMenu("Choose credential type", choices);
-
-            if (indexChosen >= 0 && indexChosen < choices.Length)
-            {
-                type = _types[choices[indexChosen]];
-                return true;
-            }
-
-            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "Invalid response");
-            return false;
-        }
-
-        // Choose credential period.
-        public static bool RunChoosePeriodOption(SampleMenu menuObject, out CredentialPeriod? period)
-        {
-            if (menuObject is null)
-            {
-                throw new ArgumentNullException(nameof(menuObject));
-            }
-
-            period = null;
-            // Write out a menu requesting the caller choose one.
-            string[] choices = _periods.Keys.ToArray();
-
-            int indexChosen = menuObject.RunMenu("Choose credential period", choices);
-
-            if (indexChosen >= 0 && indexChosen < choices.Length)
-            {
-                period = _periods[choices[indexChosen]];
-                return true;
-            }
-
-            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "Invalid response");
-            return false;
-        }
-
-        // Choose credential algorithm.
-        public static bool RunChooseAlgorithmOption(SampleMenu menuObject, out HashAlgorithm? algorithm)
-        {
-            if (menuObject is null)
-            {
-                throw new ArgumentNullException(nameof(menuObject));
-            }
-
-            algorithm = null;
-
-            // Write out a menu requesting the caller choose one.
-            string[] choices = _hashAlgorithms.Keys.ToArray();
-
-            int indexChosen = menuObject.RunMenu("Choose credential algorithm", choices);
-
-            if (indexChosen >= 0 && indexChosen < choices.Length)
-            {
-                algorithm = _hashAlgorithms[choices[indexChosen]];
-                return true;
-            }
-
-            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "Invalid response");
-            return false;
-        }
-
-        // Choose credential digits.
-        public static bool RunChooseDigitsOption(SampleMenu menuObject, out int? digits)
-        {
-            if (menuObject is null)
-            {
-                throw new ArgumentNullException(nameof(menuObject));
-            }
-
-            digits = null;
-            // Write out a menu requesting the caller choose one.
-            string[] choices = _digits.Keys.ToArray();
-
-            int indexChosen = menuObject.RunMenu("Choose the number of digits in OTP code", choices);
-
-            if (indexChosen >= 0 && indexChosen < choices.Length)
-            {
-                digits = _digits[choices[indexChosen]];
-                return true;
-            }
-
-            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "Invalid response");
-            return false;
-        }
     }
 }

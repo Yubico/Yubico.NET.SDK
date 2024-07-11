@@ -24,28 +24,10 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class ValidateHotp : OtpPluginBase
     {
-        public ValidateHotp(IOutput output) : base(output)
-        {
-            // This plugin doesn't actually talk to a YubiKey, so no need for serial-number.
-            _ = Parameters.Remove("serial-number");
-
-            Parameters["password"].Description = "This is the passcode to test. It should be numeric " +
-                                                 "digits between 0 and 9. Other characters will cause an error. If you do not specify " +
-                                                 "a passcode, then the passcode generated from the key and the initial moving factor " +
-                                                 "will be printed. This passcode has to have the same number of digits specified by the " +
-                                                 "digits parameter. If you don't specify, the default is six digits.";
-
-            Parameters["initialmovingfactor"].Description = "Initial moving factor. This is the counter " +
-                                                            "to use for the calculation. Because this plug-in is stateless, this counter will not be " +
-                                                            "used beyond just the one calculation. Unlike programming the YubiKey, there is no " +
-                                                            "constraint on the value being evenly dividable by 16. It still must be between 0 and " +
-                                                            "1048560 (0xffff0).";
-        }
-
         public override string Name => "ValidateHotp";
 
         public override string Description => "Validates a HOTP challenge. Important notice: " +
-                                              "This is a test tool not meant for secure operations!";
+            "This is a test tool not meant for secure operations!";
 
         protected override ParameterUse ParametersUsed =>
             ParameterUse.Key
@@ -53,6 +35,24 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             | ParameterUse.Digits
             | ParameterUse.Password
             | ParameterUse.IMF;
+
+        public ValidateHotp(IOutput output) : base(output)
+        {
+            // This plugin doesn't actually talk to a YubiKey, so no need for serial-number.
+            _ = Parameters.Remove("serial-number");
+
+            Parameters["password"].Description = "This is the passcode to test. It should be numeric " +
+                "digits between 0 and 9. Other characters will cause an error. If you do not specify " +
+                "a passcode, then the passcode generated from the key and the initial moving factor " +
+                "will be printed. This passcode has to have the same number of digits specified by the " +
+                "digits parameter. If you don't specify, the default is six digits.";
+
+            Parameters["initialmovingfactor"].Description = "Initial moving factor. This is the counter " +
+                "to use for the calculation. Because this plug-in is stateless, this counter will not be " +
+                "used beyond just the one calculation. Unlike programming the YubiKey, there is no " +
+                "constraint on the value being evenly dividable by 16. It still must be between 0 and " +
+                "1048560 (0xffff0).";
+        }
 
         public override void HandleParameters()
         {
@@ -100,7 +100,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                         $"Error decoding passcode digits: {ex.Message}",
                         ex));
                 }
-
                 if (_password.Length != _digits)
                 {
                     exceptions.Add(new InvalidOperationException(
@@ -114,43 +113,46 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 throw new InvalidOperationException(
                     $"Invalid IMF ({_imf}). IMF must be between 0 and 1048560 (0xffff0).");
             }
+            else
+            {
+                // The challenge is the counter in network byte order.
+                _challenge = new byte[sizeof(long)];
+                BinaryPrimitives.WriteInt64BigEndian(_challenge, (long)_imf);
+            }
 
-            // The challenge is the counter in network byte order.
-            _challenge = new byte[sizeof(long)];
-            BinaryPrimitives.WriteInt64BigEndian(_challenge, _imf);
 
 
             if (exceptions.Count > 0)
             {
                 throw exceptions.Count == 1
-                    ? exceptions[index: 0]
+                    ? exceptions[0]
                     : new AggregateException(
                         $"{exceptions.Count} errors encountered.",
                         exceptions);
             }
+
         }
 
         public override bool Execute()
         {
             using var hmac = new HMACSHA1(_key);
-            var hash = hmac.ComputeHash(_challenge);
+            byte[] hash = hmac.ComputeHash(_challenge);
 
-            var offset = (byte)(hash[^1] & 0x0f);
+            byte offset = (byte)(hash[^1] & 0x0f);
             // The ykman code reads this as a uint, but masks the top bit. I'll just do the same
             // thing, but treat it as an int since that's CLS-compliant.
-            var dataInt = (int)BinaryPrimitives.ReadUInt32BigEndian(hash.AsSpan(offset)) & 0x7fffffff;
+            int dataInt = (int)BinaryPrimitives.ReadUInt32BigEndian(hash.AsSpan(offset)) & 0x7fffffff;
 
-            var code = (dataInt % (uint)Math.Pow(x: 10, _digits!.Value))
-                .ToString(CultureInfo.InvariantCulture).PadLeft(_digits!.Value, paddingChar: '0');
+            string code = (dataInt % (uint)Math.Pow(10, _digits!.Value))
+                .ToString(CultureInfo.InvariantCulture).PadLeft(_digits!.Value, '0');
             if (!string.IsNullOrWhiteSpace(_password))
             {
-                var pass = code == _password;
+                bool pass = code == _password;
                 Output.Write(pass ? "Verified" : "Invalid", OutputLevel.Quiet);
                 Output.Write(" code: " + code);
                 Output.WriteLine(string.Empty, OutputLevel.Quiet);
                 return pass;
             }
-
             Output.Write("Code: ");
             Output.WriteLine(code, OutputLevel.Quiet);
 

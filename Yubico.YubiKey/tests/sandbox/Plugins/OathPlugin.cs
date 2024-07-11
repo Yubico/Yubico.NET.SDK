@@ -13,19 +13,23 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using Microsoft.Extensions.Logging;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.Oath;
+using Yubico.YubiKey.Oath.Commands;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
     // Use Authenticator Test (https://rootprojects.org/authenticator/) to test OTP values.
     internal class OathPlugin : PluginBase
     {
-        public OathPlugin(IOutput output) : base(output) { }
         public override string Name => "OATH";
         public override string Description => "OATH credential calculation";
+
+        public OathPlugin(IOutput output) : base(output) { }
 
         public override bool Execute()
         {
@@ -39,19 +43,18 @@ namespace Yubico.YubiKey.TestApp.Plugins
                         })
                     .AddFilter(level => level >= LogLevel.Information));
 
-            var keys = YubiKeyDevice.FindAll();
-            var yubiKey = keys.First();
+            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindAll();
+            IYubiKeyDevice? yubiKey = keys.First();
 
 
             using var oathSession = new OathSession(yubiKey);
 
             // Copy URI string from Authenticator Test console and pass here.
-            var uri = new Uri(
-                "otpauth://totp/ACME%20Co:john@example.com?secret=23A3DQA6AB6CAQDKWQOHN4HGHBWASHX6&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30");
+            var uri = new Uri("otpauth://totp/ACME%20Co:john@example.com?secret=23A3DQA6AB6CAQDKWQOHN4HGHBWASHX6&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30");
             var credential = Credential.ParseUri(uri);
 
             oathSession.AddCredential(credential);
-            var otp = oathSession.CalculateCredential(credential);
+            Code otp = oathSession.CalculateCredential(credential);
 
             // Verify OTP value the the value in Authenticator Test.
             Console.WriteLine($"OTP value: {otp.Value}");

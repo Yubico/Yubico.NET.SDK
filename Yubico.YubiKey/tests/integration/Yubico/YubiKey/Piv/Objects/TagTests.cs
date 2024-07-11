@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void AlternateTag_Minimum_Succeeds(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -39,24 +39,23 @@ namespace Yubico.YubiKey.Piv
 
                     pivSession.AuthenticateManagementKey();
 
-                    byte[] arbitraryData =
-                    {
+                    byte[] arbitraryData = {
                         0x53, 0x02, 0x04, 0x00
                     };
 
-                    var putCmd = new PutDataCommand(dataTag: 0x005F0000, arbitraryData);
-                    var putRsp = pivSession.Connection.SendCommand(putCmd);
+                    var putCmd = new PutDataCommand(0x005F0000, arbitraryData);
+                    PutDataResponse putRsp = pivSession.Connection.SendCommand(putCmd);
 
                     Assert.Equal(ResponseStatus.Success, putRsp.Status);
 
-                    var getCmd = new GetDataCommand(dataTag: 0x005F0000);
-                    var getRsp = pivSession.Connection.SendCommand(getCmd);
+                    var getCmd = new GetDataCommand(0x005F0000);
+                    GetDataResponse getRsp = pivSession.Connection.SendCommand(getCmd);
 
                     Assert.Equal(ResponseStatus.Success, getRsp.Status);
 
-                    var theData = getRsp.GetData();
+                    ReadOnlyMemory<byte> theData = getRsp.GetData();
 
-                    var isValid = MemoryExtensions.SequenceEqual(arbitraryData, theData.Span);
+                    bool isValid = MemoryExtensions.SequenceEqual(arbitraryData, theData.Span);
                     Assert.True(isValid);
                 }
                 finally
@@ -70,7 +69,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void AlternateTag_Invalid_Error(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -83,17 +82,15 @@ namespace Yubico.YubiKey.Piv
 
                     pivSession.AuthenticateManagementKey();
 
-                    byte[] arbitraryData =
-                    {
+                    byte[] arbitraryData = {
                         0x53, 0x02, 0x04, 0x00
                     };
 
                     PutDataCommand putCmd;
-                    _ = Assert.Throws<ArgumentException>(() =>
-                        putCmd = new PutDataCommand(dataTag: 0x005EFFFF, arbitraryData));
+                    _ = Assert.Throws<ArgumentException>(() => putCmd = new PutDataCommand(0x005EFFFF, arbitraryData));
 
                     GetDataCommand getCmd;
-                    _ = Assert.Throws<ArgumentException>(() => getCmd = new GetDataCommand(dataTag: 0x005EFFFF));
+                    _ = Assert.Throws<ArgumentException>(() => getCmd = new GetDataCommand(0x005EFFFF));
                 }
                 finally
                 {

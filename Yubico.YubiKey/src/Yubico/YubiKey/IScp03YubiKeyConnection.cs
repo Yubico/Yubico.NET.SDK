@@ -17,13 +17,13 @@ using Yubico.YubiKey.Scp03;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    ///     The connection class that can perform SCP03 operations will implement not
-    ///     only <see cref="IYubiKeyConnection" />, but this interface as well.
+    /// The connection class that can perform SCP03 operations will implement not
+    /// only <see cref="IYubiKeyConnection"/>, but this interface as well.
     /// </summary>
     public interface IScp03YubiKeyConnection : IYubiKeyConnection
     {
         /// <summary>
-        ///     Return a reference to the SCP03 key set used to make the connection.
+        /// Return a reference to the SCP03 key set used to make the connection.
         /// </summary>
         public StaticKeys GetScp03Keys();
     }

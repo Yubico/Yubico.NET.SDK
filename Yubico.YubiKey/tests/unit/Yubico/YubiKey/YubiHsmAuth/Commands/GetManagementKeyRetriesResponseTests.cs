@@ -13,6 +13,8 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
+using System.Text;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -23,9 +25,9 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void GetData_ResponseStatusFailed_ThrowsInvalidOperationException()
         {
-            var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
+            ResponseApdu apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
 
-            var response =
+            GetManagementKeyRetriesResponse response =
                 new GetManagementKeyRetriesResponse(apdu);
 
             Action action = () => response.GetData();
@@ -36,9 +38,9 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void GetData_ResponseStatusFailed_ExceptionMessageMatchesStatusMessage()
         {
-            var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
+            ResponseApdu apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
 
-            var response =
+            GetManagementKeyRetriesResponse response =
                 new GetManagementKeyRetriesResponse(apdu);
 
             try
@@ -54,15 +56,15 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void GetData_SuccessApdu6Retries_Returns6Retries()
         {
-            byte[] dataWithoutSw = { 6 };
-            var apdu = new ResponseApdu(dataWithoutSw, SWConstants.Success);
+            byte[] dataWithoutSw = new byte[] { 6 };
+            ResponseApdu apdu = new ResponseApdu(dataWithoutSw, SWConstants.Success);
 
-            var response =
+            GetManagementKeyRetriesResponse response =
                 new GetManagementKeyRetriesResponse(apdu);
 
-            var retries = response.GetData();
+            int retries = response.GetData();
 
-            Assert.Equal(expected: 6, retries);
+            Assert.Equal(6, retries);
         }
     }
 }

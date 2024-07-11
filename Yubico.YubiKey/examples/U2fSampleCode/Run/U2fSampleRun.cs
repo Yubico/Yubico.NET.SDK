@@ -22,11 +22,12 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
     // on the classes that perform each of the sample operations.
     public partial class U2fSampleRun
     {
-        private readonly Dictionary<string, RegistrationData> _credentials;
-        private readonly U2fSampleKeyCollector _keyCollector;
         private readonly SampleMenu _menuObject;
         private bool _chosenByUser;
         private IYubiKeyDevice _yubiKeyChosen;
+        private readonly U2fSampleKeyCollector _keyCollector;
+
+        private readonly Dictionary<string, RegistrationData> _credentials;
 
         // Provide the max invalid count, this is the number of times in a row
         // the a user can type an invalid response to a menu request before
@@ -76,6 +77,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                         menuItem = U2fMainMenuItem.Exit;
                     }
                 }
+
             } while (menuItem != U2fMainMenuItem.Exit);
         }
 
@@ -100,7 +102,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                     }
 
                     return ChooseYubiKey.RunChooseYubiKey(
-                        alwaysAsk: false,
+                        false,
                         _menuObject,
                         Transport.HidFido,
                         ref _yubiKeyChosen);
@@ -111,7 +113,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
         private bool RunChooseYubiKey()
         {
             _chosenByUser = ChooseYubiKey.RunChooseYubiKey(
-                alwaysAsk: true,
+                true,
                 _menuObject,
                 Transport.HidFido,
                 ref _yubiKeyChosen);

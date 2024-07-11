@@ -18,26 +18,26 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    ///     The response partner to the BioEnrollmentCommand.
+    /// The response partner to the BioEnrollmentCommand.
     /// </summary>
     /// <remarks>
-    ///     The standard specifies that all BioEnrollment responses that return data,
-    ///     return a specified map consisting of several elements. This class will be
-    ///     able to return a data struct that contains all those elements. However,
-    ///     not every response contains all elements. Hence, some will be null.
-    ///     Individual subcommand response classes will call on this class to parse
-    ///     the response, then return only those elements it can.
+    /// The standard specifies that all BioEnrollment responses that return data,
+    /// return a specified map consisting of several elements. This class will be
+    /// able to return a data struct that contains all those elements. However,
+    /// not every response contains all elements. Hence, some will be null.
+    /// Individual subcommand response classes will call on this class to parse
+    /// the response, then return only those elements it can.
     /// </remarks>
     public class BioEnrollmentResponse : Fido2Response, IYubiKeyResponseWithData<BioEnrollmentData>
     {
         /// <summary>
-        ///     Constructs a new instance of
-        ///     <see cref="BioEnrollmentResponse" /> based on a response APDU
-        ///     provided by the YubiKey.
+        /// Constructs a new instance of
+        /// <see cref="BioEnrollmentResponse"/> based on a response APDU
+        /// provided by the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     A response APDU containing the CBOR response data for the
-        ///     <c>authenticatorBioEnrollment</c> command.
+        /// A response APDU containing the CBOR response data for the
+        /// <c>authenticatorBioEnrollment</c> command.
         /// </param>
         public BioEnrollmentResponse(ResponseApdu responseApdu) : base(responseApdu)
         {

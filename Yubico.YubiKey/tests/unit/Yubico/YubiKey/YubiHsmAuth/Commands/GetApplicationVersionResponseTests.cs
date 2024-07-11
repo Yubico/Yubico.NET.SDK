@@ -23,9 +23,9 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void Constructor_ReturnsObject()
         {
-            var apdu = new ResponseApdu(new byte[0], SWConstants.Success);
+            ResponseApdu apdu = new ResponseApdu(new byte[0], SWConstants.Success);
 
-            var response = new GetApplicationVersionResponse(apdu);
+            GetApplicationVersionResponse response = new GetApplicationVersionResponse(apdu);
 
             Assert.NotNull(response);
         }
@@ -33,9 +33,9 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void GetData_ResponseStatusFailed_ThrowsInvalidOperationException()
         {
-            var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
+            ResponseApdu apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
 
-            var response = new GetApplicationVersionResponse(apdu);
+            GetApplicationVersionResponse response = new GetApplicationVersionResponse(apdu);
 
             Action action = () => response.GetData();
 
@@ -45,9 +45,9 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void GetData_ResponseStatusFailed_ExceptionMessageMatchesStatusMessage()
         {
-            var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
+            ResponseApdu apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
 
-            var response = new GetApplicationVersionResponse(apdu);
+            GetApplicationVersionResponse response = new GetApplicationVersionResponse(apdu);
 
             try
             {
@@ -62,14 +62,14 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void GetData_Given1dot2dot3_ReturnsAppV1dot2dot3()
         {
-            var expectedAppVersion = new ApplicationVersion(major: 1, minor: 2, patch: 3);
+            ApplicationVersion expectedAppVersion = new ApplicationVersion(1, 2, 3);
 
-            byte[] dataWithoutSw = { 1, 2, 3 };
-            var apdu = new ResponseApdu(dataWithoutSw, SWConstants.Success);
+            byte[] dataWithoutSw = new byte[] { 1, 2, 3 };
+            ResponseApdu apdu = new ResponseApdu(dataWithoutSw, SWConstants.Success);
 
-            var response = new GetApplicationVersionResponse(apdu);
+            GetApplicationVersionResponse response = new GetApplicationVersionResponse(apdu);
 
-            var appVersion = response.GetData();
+            ApplicationVersion appVersion = response.GetData();
 
             Assert.Equal(expectedAppVersion, appVersion);
         }

@@ -23,8 +23,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void ClassType_DerivedFromPivCommand_IsTrue()
         {
-            var puk = GetPinArray(pinOrPuk: 1, pinLength: 8);
-            var newPin = GetPinArray(pinOrPuk: 0, pinLength: 7);
+            byte[] puk = GetPinArray(1, 8);
+            byte[] newPin = GetPinArray(0, 7);
             var resetRetryCommand = new ResetRetryCommand(puk, newPin);
 
             Assert.True(resetRetryCommand is IYubiKeyCommand<ResetRetryResponse>);
@@ -33,11 +33,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Application_Piv()
         {
-            var puk = GetPinArray(pinOrPuk: 1, pinLength: 8);
-            var newPin = GetPinArray(pinOrPuk: 0, pinLength: 7);
+            byte[] puk = GetPinArray(1, 8);
+            byte[] newPin = GetPinArray(0, 7);
             var command = new ResetRetryCommand(puk, newPin);
 
-            var application = command.Application;
+            YubiKeyApplication application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
@@ -45,61 +45,61 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
-            var cmdApdu = GetResetRetryCommandApdu();
+            CommandApdu cmdApdu = GetResetRetryCommandApdu();
 
-            var Cla = cmdApdu.Cla;
+            byte Cla = cmdApdu.Cla;
 
-            Assert.Equal(expected: 0, Cla);
+            Assert.Equal(0, Cla);
         }
 
         [Fact]
         public void CreateCommandApdu_GetInsProperty_ReturnsHex2C()
         {
-            var cmdApdu = GetResetRetryCommandApdu();
+            CommandApdu cmdApdu = GetResetRetryCommandApdu();
 
-            var Ins = cmdApdu.Ins;
+            byte Ins = cmdApdu.Ins;
 
-            Assert.Equal(expected: 0x2C, Ins);
+            Assert.Equal(0x2C, Ins);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP1Property_ReturnsZero()
         {
-            var cmdApdu = GetResetRetryCommandApdu();
+            CommandApdu cmdApdu = GetResetRetryCommandApdu();
 
-            var P1 = cmdApdu.P1;
+            byte P1 = cmdApdu.P1;
 
-            Assert.Equal(expected: 0, P1);
+            Assert.Equal(0, P1);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP2Property_ReturnsSlotNum()
         {
-            var cmdApdu = GetResetRetryCommandApdu();
+            CommandApdu cmdApdu = GetResetRetryCommandApdu();
 
-            var P2 = cmdApdu.P2;
+            byte P2 = cmdApdu.P2;
 
-            Assert.Equal(expected: 0x80, P2);
+            Assert.Equal(0x80, P2);
         }
 
         [Fact]
         public void CreateCommandApdu_GetNc_Returns16()
         {
-            var cmdApdu = GetResetRetryCommandApdu();
+            CommandApdu cmdApdu = GetResetRetryCommandApdu();
 
-            var Nc = cmdApdu.Nc;
+            int Nc = cmdApdu.Nc;
 
-            Assert.Equal(expected: 16, Nc);
+            Assert.Equal(16, Nc);
         }
 
         [Fact]
         public void CreateCommandApdu_GetNe_ReturnsZero()
         {
-            var cmdApdu = GetResetRetryCommandApdu();
+            CommandApdu cmdApdu = GetResetRetryCommandApdu();
 
-            var Ne = cmdApdu.Ne;
+            int Ne = cmdApdu.Ne;
 
-            Assert.Equal(expected: 0, Ne);
+            Assert.Equal(0, Ne);
         }
 
         [Theory]
@@ -114,13 +114,13 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(8, 8)]
         public void CreateCommandApdu_GetDataProperty_ReturnsPukAndPin(int pukLength, int pinLength)
         {
-            var puk = GetPinArray(pinOrPuk: 1, pukLength);
-            var newPin = GetPinArray(pinOrPuk: 0, pinLength);
+            byte[] puk = GetPinArray(1, pukLength);
+            byte[] newPin = GetPinArray(0, pinLength);
 
             var resetRetryCommand = new ResetRetryCommand(puk, newPin);
-            var cmdApdu = resetRetryCommand.CreateCommandApdu();
+            CommandApdu cmdApdu = resetRetryCommand.CreateCommandApdu();
 
-            var data = cmdApdu.Data;
+            ReadOnlyMemory<byte> data = cmdApdu.Data;
 
             Assert.False(data.IsEmpty);
             if (data.IsEmpty)
@@ -128,11 +128,11 @@ namespace Yubico.YubiKey.Piv.Commands
                 return;
             }
 
-            Assert.Equal(expected: 16, data.Length);
+            Assert.Equal(16, data.Length);
 
             // Verify the first 8 bytes in the Data are the PUK + pad.
-            var compareResult = true;
-            var index = 0;
+            bool compareResult = true;
+            int index = 0;
             for (; index < puk.Length; index++)
             {
                 if (data.Span[index] != puk[index])
@@ -173,11 +173,11 @@ namespace Yubico.YubiKey.Piv.Commands
         public void CreateResponseForApdu_ReturnsCorrectType()
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var puk = GetPinArray(pinOrPuk: 1, pinLength: 8);
-            var newPin = GetPinArray(pinOrPuk: 0, pinLength: 7);
+            byte[] puk = GetPinArray(1, 8);
+            byte[] newPin = GetPinArray(0, 7);
             var resetRetryCommand = new ResetRetryCommand(puk, newPin);
 
-            var resetRetryResponse = resetRetryCommand.CreateResponseForApdu(responseApdu);
+            ResetRetryResponse resetRetryResponse = resetRetryCommand.CreateResponseForApdu(responseApdu);
 
             Assert.True(resetRetryResponse is ResetRetryResponse);
         }
@@ -197,31 +197,31 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(9, 6)]
         public void Constructor_BadPin_CorrectException(int pukLength, int pinLength)
         {
-            var puk = GetPinArray(pinOrPuk: 1, pukLength);
-            var newPin = GetPinArray(pinOrPuk: 0, pinLength);
+            byte[] puk = GetPinArray(1, pukLength);
+            byte[] newPin = GetPinArray(0, pinLength);
             _ = Assert.Throws<ArgumentException>(() => new ResetRetryCommand(puk, newPin));
         }
 
         [Fact]
         public void Constructor_NullPuk_CorrectException()
         {
-            var newPin = GetPinArray(pinOrPuk: 0, pinLength: 6);
-            _ = Assert.Throws<ArgumentException>(() => new ResetRetryCommand(puk: null, newPin));
+            byte[] newPin = GetPinArray(0, 6);
+            _ = Assert.Throws<ArgumentException>(() => new ResetRetryCommand(null, newPin));
         }
 
         [Fact]
         public void Constructor_NullNewPin_CorrectException()
         {
-            var puk = GetPinArray(pinOrPuk: 1, pinLength: 8);
-            _ = Assert.Throws<ArgumentException>(() => new ResetRetryCommand(puk, newPin: null));
+            byte[] puk = GetPinArray(1, 8);
+            _ = Assert.Throws<ArgumentException>(() => new ResetRetryCommand(puk, null));
         }
 
         private static CommandApdu GetResetRetryCommandApdu()
         {
-            var puk = GetPinArray(pinOrPuk: 1, pinLength: 8);
-            var newPin = GetPinArray(pinOrPuk: 0, pinLength: 7);
+            byte[] puk = GetPinArray(1, 8);
+            byte[] newPin = GetPinArray(0, 7);
             var resetRetryCommand = new ResetRetryCommand(puk, newPin);
-            var returnValue = resetRetryCommand.CreateCommandApdu();
+            CommandApdu returnValue = resetRetryCommand.CreateCommandApdu();
 
             return returnValue;
         }
@@ -236,10 +236,10 @@ namespace Yubico.YubiKey.Piv.Commands
                 baseVal = 0x61;
             }
 
-            var returnValue = new byte[pinLength];
-            for (var index = 0; index < pinLength; index++)
+            byte[] returnValue = new byte[pinLength];
+            for (int index = 0; index < pinLength; index++)
             {
-                var value = (byte)(index & 15);
+                byte value = (byte)(index & 15);
                 value += baseVal;
                 returnValue[index] = value;
             }

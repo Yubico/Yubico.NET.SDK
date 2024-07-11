@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new GetPagedDeviceInfoCommand();
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().Cla);
+            Assert.Equal(0, command.CreateCommandApdu().Cla);
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new GetPagedDeviceInfoCommand();
 
-            Assert.Equal(expected: 0xC2, command.CreateCommandApdu().Ins);
+            Assert.Equal(0xC2, command.CreateCommandApdu().Ins);
         }
 
         [Fact]
@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new GetPagedDeviceInfoCommand();
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().P1);
+            Assert.Equal(0, command.CreateCommandApdu().P1);
         }
 
         [Fact]
@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new GetPagedDeviceInfoCommand();
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().P2);
+            Assert.Equal(0, command.CreateCommandApdu().P2);
         }
 
         [Fact]
@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new GetPagedDeviceInfoCommand();
 
-            Assert.Equal(expected: 1, command.CreateCommandApdu().Nc);
+            Assert.Equal(1, command.CreateCommandApdu().Nc);
         }
 
         [Fact]
@@ -64,7 +64,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new GetPagedDeviceInfoCommand();
 
-            Assert.Equal(expected: 1, command.CreateCommandApdu().Data.Length);
+            Assert.Equal(1, command.CreateCommandApdu().Data.Length);
         }
 
         [Fact]
@@ -72,7 +72,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new GetPagedDeviceInfoCommand();
-            var response = command.CreateResponseForApdu(responseApdu);
+            GetPagedDeviceInfoResponse? response = command.CreateResponseForApdu(responseApdu);
 
             Assert.NotNull(response);
         }

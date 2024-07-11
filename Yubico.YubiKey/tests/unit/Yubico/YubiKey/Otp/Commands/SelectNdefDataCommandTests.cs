@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SelectNdefDataCommand();
 
-            var application = command.Application;
+            YubiKeyApplication application = command.Application;
 
             Assert.Equal(YubiKeyApplication.OtpNdef, application);
         }
@@ -35,9 +35,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SelectNdefDataCommand();
 
-            var cla = command.CreateCommandApdu().Cla;
+            byte cla = command.CreateCommandApdu().Cla;
 
-            Assert.Equal(expected: 0, cla);
+            Assert.Equal(0, cla);
         }
 
         [Fact]
@@ -45,9 +45,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SelectNdefDataCommand();
 
-            var ins = command.CreateCommandApdu().Ins;
+            byte ins = command.CreateCommandApdu().Ins;
 
-            Assert.Equal(expected: 0xA4, ins);
+            Assert.Equal(0xA4, ins);
         }
 
         [Fact]
@@ -55,9 +55,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SelectNdefDataCommand();
 
-            var p1 = command.CreateCommandApdu().P1;
+            byte p1 = command.CreateCommandApdu().P1;
 
-            Assert.Equal(expected: 0, p1);
+            Assert.Equal(0, p1);
         }
 
         [Fact]
@@ -65,9 +65,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SelectNdefDataCommand();
 
-            var p2 = command.CreateCommandApdu().P2;
+            byte p2 = command.CreateCommandApdu().P2;
 
-            Assert.Equal(expected: 0x0C, p2);
+            Assert.Equal(0x0C, p2);
         }
 
         [Fact]
@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Otp.Commands
             byte[] expectedBuffer = { 0xE1, 0x04 };
             var command = new SelectNdefDataCommand();
 
-            var data = command.CreateCommandApdu().Data;
+            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
 
             Assert.True(data.Span.SequenceEqual(expectedBuffer));
         }
@@ -86,9 +86,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SelectNdefDataCommand();
 
-            var nc = command.CreateCommandApdu().Nc;
+            int nc = command.CreateCommandApdu().Nc;
 
-            Assert.Equal(expected: 2, nc);
+            Assert.Equal(2, nc);
         }
 
         [Fact]
@@ -96,9 +96,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SelectNdefDataCommand();
 
-            var ne = command.CreateCommandApdu().Ne;
+            int ne = command.CreateCommandApdu().Ne;
 
-            Assert.Equal(expected: 0, ne);
+            Assert.Equal(0, ne);
         }
 
         [Fact]

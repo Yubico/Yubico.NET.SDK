@@ -12,41 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Management.Commands
 {
     /// <summary>
-    ///     Execute device reset.
+    /// Execute device reset.
     /// </summary>
     /// <remarks>
-    ///     This class has a corresponding partner class <see cref="DeviceResetResponse" />
+    /// This class has a corresponding partner class <see cref="DeviceResetResponse"/>
     /// </remarks>
     public class DeviceResetCommand : IYubiKeyCommand<DeviceResetResponse>
     {
         private const byte DeviceResetInstruction = 0x1F;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="DeviceResetCommand" /> class.
-        /// </summary>
-        public DeviceResetCommand()
-        {
-        }
-
-        /// <summary>
-        ///     Gets the YubiKeyApplication to which this command belongs.
+        /// Gets the YubiKeyApplication to which this command belongs.
         /// </summary>
         /// <value>
-        ///     <see cref="YubiKeyApplication.Management" />
+        /// <see cref="YubiKeyApplication.Management"/>
         /// </value>
         public YubiKeyApplication Application => YubiKeyApplication.Management;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeviceResetCommand"/> class.
+        /// </summary>
+        public DeviceResetCommand()
+        {
+
+        }
+
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Ins = DeviceResetInstruction
-            };
+        public CommandApdu CreateCommandApdu() => new CommandApdu
+        {
+            Ins = DeviceResetInstruction
+        };
 
         /// <inheritdoc />
         public DeviceResetResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

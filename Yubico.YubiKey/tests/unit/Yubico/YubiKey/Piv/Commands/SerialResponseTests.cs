@@ -24,15 +24,15 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new GetSerialNumberResponse(responseApdu: null));
+            _ = Assert.Throws<ArgumentNullException>(() => new GetSerialNumberResponse(null));
 #pragma warning restore CS8625
         }
 
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, 0, sw1, sw2 });
 
             var serialResponse = new GetSerialNumberResponse(responseApdu);
@@ -43,8 +43,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, 0, sw1, sw2 });
 
             var serialResponse = new GetSerialNumberResponse(responseApdu);
@@ -55,37 +55,37 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Serial_GivenResponseApdu_NumberEqualsInput()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0x00, 0xBB, 0xCC, 0xDD, sw1, sw2 });
 
             var serialResponse = new GetSerialNumberResponse(responseApdu);
 
-            var serialNum = serialResponse.GetData();
+            int serialNum = serialResponse.GetData();
 
-            Assert.Equal(expected: 0x00BBCCDD, serialNum);
+            Assert.Equal(0x00BBCCDD, serialNum);
         }
 
         [Fact]
         public void Serial_ExtraData_NumberEqualsFirstFour()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0x00, 0xBB, 0xCC, 0xDD, 0xEE, sw1, sw2 });
 
             var serialResponse = new GetSerialNumberResponse(responseApdu);
 
-            var serialNum = serialResponse.GetData();
+            int serialNum = serialResponse.GetData();
 
-            Assert.Equal(expected: 0x00BBCCDD, serialNum);
+            Assert.Equal(0x00BBCCDD, serialNum);
         }
 
         [Fact]
         public void Constructor_FailResponseApdu_SetsStatusWordCorrectly()
         {
-            byte sw1 = SWConstants.WarningNvmUnchanged >> 8;
-            var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
+            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var serialResponse = new GetSerialNumberResponse(responseApdu);
 
@@ -95,9 +95,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_FailResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = SWConstants.WarningNvmUnchanged >> 8;
-            var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
+            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var serialResponse = new GetSerialNumberResponse(responseApdu);
 
@@ -107,9 +107,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Construct_FailResponseApdu_ExceptionOnGetData()
         {
-            byte sw1 = SWConstants.WarningNvmUnchanged >> 8;
-            var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
+            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var serialResponse = new GetSerialNumberResponse(responseApdu);
 
@@ -119,8 +119,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void FailResponseApdu_WithData_ExceptionOnGetData()
         {
-            byte sw1 = SWConstants.WarningNvmUnchanged >> 8;
-            var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
+            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, 0, sw1, sw2 });
 
             var serialResponse = new GetSerialNumberResponse(responseApdu);
@@ -131,13 +131,14 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Construct_ShortResponseApdu_ExceptionOnGetData()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, sw1, sw2 });
 
             var serialResponse = new GetSerialNumberResponse(responseApdu);
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(() => serialResponse.GetData());
         }
+
     }
 }

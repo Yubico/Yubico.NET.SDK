@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var setPasswordResponse = new SetPasswordResponse(responseApdu);
 
@@ -40,7 +40,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var setPasswordResponse = new SetPasswordResponse(responseApdu);
 
@@ -50,10 +50,10 @@ namespace Yubico.YubiKey.Oath.Commands
         [Fact]
         public void Status_ResponseDoesNotMatchResponseApdu_ReturnsFailed()
         {
-            const byte sw1 = StatusWordResponseDoesNotMatch >> 8;
+            const byte sw1 = unchecked((byte)(StatusWordResponseDoesNotMatch >> 8));
             const byte sw2 = unchecked((byte)StatusWordResponseDoesNotMatch);
 
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var setPasswordResponse = new SetPasswordResponse(responseApdu);
 

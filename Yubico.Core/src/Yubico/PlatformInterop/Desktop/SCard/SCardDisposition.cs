@@ -15,28 +15,28 @@
 namespace Yubico.PlatformInterop
 {
     /// <summary>
-    ///     Action to take on the card in the connected reader on close or reconnect.
+    /// Action to take on the card in the connected reader on close or reconnect.
     /// </summary>
     internal enum SCARD_DISPOSITION
     {
         /// <summary>
-        ///     Do not take any action.
+        /// Do not take any action.
         /// </summary>
         LEAVE_CARD = 0,
 
         /// <summary>
-        ///     Reset the card.
+        /// Reset the card.
         /// </summary>
         RESET_CARD = 1,
 
         /// <summary>
-        ///     Power down the card.
+        /// Power down the card.
         /// </summary>
         UNPOWER_CARD = 2,
 
         /// <summary>
-        ///     Eject the card.
+        /// Eject the card.
         /// </summary>
-        EJECT_CARD = 3
+        EJECT_CARD = 3,
     }
 }

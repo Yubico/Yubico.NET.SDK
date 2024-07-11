@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -19,6 +20,13 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     public class BaseYubiHsmAuthResponseTests
     {
+        public class SampleYubiHsmAuthResponse : BaseYubiHsmAuthResponse
+        {
+            public SampleYubiHsmAuthResponse(ResponseApdu responseApdu) : base(responseApdu)
+            {
+            }
+        }
+
         private const string SecurityStatusNotSatisfiedStatusMessage = "The device was not touched.";
         private const string AuthenticationMethodBlockedStatusMessage = "The entry is invalid.";
         private const string ReferenceDataUnusableStatusMessage = "Invalid authentication data.";
@@ -27,9 +35,9 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void Constructor_GivenSuccessApdu_SetsCorrectStatusWord()
         {
-            var expectedSW = SWConstants.Success;
+            short expectedSW = SWConstants.Success;
 
-            var response = new SampleYubiHsmAuthResponse(
+            SampleYubiHsmAuthResponse response = new SampleYubiHsmAuthResponse(
                 new ResponseApdu(new byte[] { }, expectedSW));
 
             Assert.Equal(expectedSW, response.StatusWord);
@@ -42,7 +50,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [InlineData(SWConstants.Success, ResponseStatus.Success)]
         public void Status_GivenStatusWord_ReturnsCorrectResponseStatus(short responseSw, ResponseStatus expectedStatus)
         {
-            var response = new SampleYubiHsmAuthResponse(
+            SampleYubiHsmAuthResponse response = new SampleYubiHsmAuthResponse(
                 new ResponseApdu(new byte[] { }, responseSw));
 
             Assert.Equal(expectedStatus, response.Status);
@@ -55,17 +63,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [InlineData(SWConstants.Success, SuccessStatusMessage)]
         public void Status_GivenStatusWord_ReturnsCorrectResponseMessage(short responseSw, string expectedMessage)
         {
-            var response = new SampleYubiHsmAuthResponse(
+            SampleYubiHsmAuthResponse response = new SampleYubiHsmAuthResponse(
                 new ResponseApdu(new byte[] { }, responseSw));
 
             Assert.Equal(expectedMessage, response.StatusMessage);
-        }
-
-        public class SampleYubiHsmAuthResponse : BaseYubiHsmAuthResponse
-        {
-            public SampleYubiHsmAuthResponse(ResponseApdu responseApdu) : base(responseApdu)
-            {
-            }
         }
     }
 }

@@ -19,57 +19,60 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    ///     Applies a configuration to one of the two configurable NDEF slots. Note that only the primary
-    ///     NDEF slot (Slot.ShortPress) is accessible through NFC.
+    /// Applies a configuration to one of the two configurable NDEF slots. Note that only the primary
+    /// NDEF slot (Slot.ShortPress) is accessible through NFC.
     /// </summary>
     public class ConfigureNdefCommand : IYubiKeyCommand<ReadStatusResponse>
     {
         private const int NdefConfigSize = 62;
         private const int AccessCodeOffset = 56;
 
+        private readonly Slot _ndefSlot;
+        private readonly byte[] _configurationBuffer;
+
         /// <summary>
-        ///     The required size for the AccessCode buffer.
+        /// The required size for the AccessCode buffer.
         /// </summary>
         public const int AccessCodeLength = 6;
 
-        private readonly byte[] _configurationBuffer;
-
-        private readonly Slot _ndefSlot;
+        /// <inheritdoc />
+        public YubiKeyApplication Application => YubiKeyApplication.Otp;
 
         /// <summary>
-        ///     Constructs an instance of the <see cref="ConfigureNdefCommand" /> class.
+        /// Constructs an instance of the <see cref="ConfigureNdefCommand"/> class.
         /// </summary>
         /// <param name="slot">
-        ///     The slot to which the configuration should apply. The <see cref="Slot.ShortPress" /> slot
-        ///     corresponds to the primary NDEF configuration.
+        /// The slot to which the configuration should apply. The <see cref="Slot.ShortPress"/> slot
+        /// corresponds to the primary NDEF configuration.
         /// </param>
         /// <param name="configuration">
-        ///     The configuration data for the slot. Use the <see cref="NdefConfig" /> class and methods
-        ///     to generate this data.
+        /// The configuration data for the slot. Use the <see cref="NdefConfig"/> class and methods
+        /// to generate this data.
         /// </param>
         public ConfigureNdefCommand(Slot slot, ReadOnlySpan<byte> configuration) :
             this(slot, configuration, ReadOnlySpan<byte>.Empty)
         {
+
         }
 
         /// <summary>
-        ///     Constructs an instance of the <see cref="ConfigureNdefCommand" /> class for a slot which
-        ///     is protected by an access code.
+        /// Constructs an instance of the <see cref="ConfigureNdefCommand"/> class for a slot which
+        /// is protected by an access code.
         /// </summary>
         /// <param name="slot">
-        ///     The slot to which the configuration should apply. The <see cref="Slot.ShortPress" /> slot
-        ///     corresponds to the primary NDEF configuration.
+        /// The slot to which the configuration should apply. The <see cref="Slot.ShortPress"/> slot
+        /// corresponds to the primary NDEF configuration.
         /// </param>
         /// <param name="configuration">
-        ///     The configuration data for the slot. Use the <see cref="NdefConfig" /> class and methods
-        ///     to generate this data.
+        /// The configuration data for the slot. Use the <see cref="NdefConfig"/> class and methods
+        /// to generate this data.
         /// </param>
         /// <param name="accessCode">The access code protecting the slot.</param>
         /// <remarks>
-        ///     YubiKey 5 NFC devices with firmware versions 5.0.0 to 5.2.6 and 5.3.0 to 5.3.1 are affected
-        ///     by [YSA-2020-04](https://www.yubico.com/support/security-advisories/ysa-2020-04/). Devices
-        ///     with this firmware will not verify access codes on NDEF slots correctly. Please read the
-        ///     security advisory for more details.
+        /// YubiKey 5 NFC devices with firmware versions 5.0.0 to 5.2.6 and 5.3.0 to 5.3.1 are affected
+        /// by [YSA-2020-04](https://www.yubico.com/support/security-advisories/ysa-2020-04/). Devices
+        /// with this firmware will not verify access codes on NDEF slots correctly. Please read the
+        /// security advisory for more details.
         /// </remarks>
         public ConfigureNdefCommand(Slot slot, ReadOnlySpan<byte> configuration, ReadOnlySpan<byte> accessCode)
         {
@@ -102,19 +105,15 @@ namespace Yubico.YubiKey.Otp.Commands
         }
 
         /// <inheritdoc />
-        public YubiKeyApplication Application => YubiKeyApplication.Otp;
-
-        /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Ins = OtpConstants.RequestSlotInstruction,
-                P1 =
-                    _ndefSlot == Slot.ShortPress
-                        ? OtpConstants.ProgramNDEFShortPress
-                        : OtpConstants.ProgramNDEFLongPress,
-                Data = _configurationBuffer
-            };
+        public CommandApdu CreateCommandApdu() => new CommandApdu()
+        {
+            Ins = OtpConstants.RequestSlotInstruction,
+            P1 =
+                _ndefSlot == Slot.ShortPress
+                ? OtpConstants.ProgramNDEFShortPress
+                : OtpConstants.ProgramNDEFLongPress,
+            Data = _configurationBuffer
+        };
 
         /// <inheritdoc />
         public ReadStatusResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

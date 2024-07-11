@@ -22,7 +22,7 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    ///     Adds or overwrites an OATH credential.
+    /// Adds or overwrites an OATH credential.
     /// </summary>
     public class PutCommand : IYubiKeyCommand<OathResponse>
     {
@@ -39,21 +39,33 @@ namespace Yubico.YubiKey.Oath.Commands
         private const int MinimalSecretLength = 14;
 
         /// <summary>
-        ///     Constructs an instance of the <see cref="PutCommand" /> class.
+        /// The credential to add or overwrite.
+        /// </summary>
+        public Credential? Credential { get; set; }
+
+        /// <summary>
+        /// Gets the YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        /// YubiKeyApplication.Oath
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Oath;
+
+        /// <summary>
+        /// Constructs an instance of the <see cref="PutCommand" /> class.
         /// </summary>
         public PutCommand()
         {
         }
 
         /// <summary>
-        ///     Constructs an instance of the <see cref="PutCommand" /> class.
+        /// Constructs an instance of the <see cref="PutCommand" /> class.
         /// </summary>
-        /// ///
-        /// <param name="credential">
-        ///     The credential to add or overwrite.
+        /// /// <param name="credential">
+        /// The credential to add or overwrite.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     The credential is null.
+        /// The credential is null.
         /// </exception>
         public PutCommand(Credential credential)
         {
@@ -64,19 +76,6 @@ namespace Yubico.YubiKey.Oath.Commands
 
             Credential = credential;
         }
-
-        /// <summary>
-        ///     The credential to add or overwrite.
-        /// </summary>
-        public Credential? Credential { get; set; }
-
-        /// <summary>
-        ///     Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        ///     YubiKeyApplication.Oath
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Oath;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
@@ -95,7 +94,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             fullKey[0] = (byte)(algorithm | type);
             fullKey[1] = (byte)(Credential.Digits ?? DefaultDigits);
-            Array.Copy(secretDecoded, sourceIndex: 0, fullKey, destinationIndex: 2, secretDecoded.Length);
+            Array.Copy(secretDecoded, 0, fullKey, 2, secretDecoded.Length);
 
             var tlvWriter = new TlvWriter();
             tlvWriter.WriteValue(NameTag, nameBytes);
@@ -103,14 +102,14 @@ namespace Yubico.YubiKey.Oath.Commands
 
             if (Credential.RequiresTouch ?? false)
             {
-                tlvWriter.WriteEncoded(new[] { PropertyTag, RequireTouchPropertyByte });
+                tlvWriter.WriteEncoded(new byte[] { PropertyTag, RequireTouchPropertyByte });
             }
 
             if (Credential.Type == CredentialType.Hotp && Credential.Counter.HasValue && Credential.Counter.Value > 0)
             {
                 byte[] buffer = new byte[ImfDataLength];
                 var span = new Span<byte>(buffer);
-                BinaryPrimitives.WriteInt32LittleEndian(span.Slice(start: 0, ImfDataLength), Credential.Counter.Value);
+                BinaryPrimitives.WriteInt32LittleEndian(span.Slice(0, ImfDataLength), Credential.Counter.Value);
                 tlvWriter.WriteValue(ImfTag, buffer);
             }
 
@@ -122,6 +121,7 @@ namespace Yubico.YubiKey.Oath.Commands
         }
 
         /// <inheritdoc />
-        public OathResponse CreateResponseForApdu(ResponseApdu responseApdu) => new OathResponse(responseApdu);
+        public OathResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new OathResponse(responseApdu);
     }
 }

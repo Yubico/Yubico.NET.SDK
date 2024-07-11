@@ -130,13 +130,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         {
             if (keyEntryData.RetriesRemaining == 0)
             {
-                SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0,
-                    "Out of key entry retries, cancelling operation.");
+                SampleMenu.WriteMessage(MessageType.Special, 0, "Out of key entry retries, cancelling operation.");
                 return false;
             }
 
             string title = keyEntryData.RetriesRemaining + " tries remaining, continue?";
-            string[] menuItems =
+            string[] menuItems = new string[]
             {
                 "Yes, try again",
                 "No, cancel operation"
@@ -147,11 +146,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         private bool GetUserInputOnPinComplexityViolation(KeyEntryData keyEntryData)
         {
-            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0,
-                "The provided value violates PIN complexity.");
+            SampleMenu.WriteMessage(MessageType.Special, 0, "The provided value violates PIN complexity.");
 
             string title = "Try again?";
-            string[] menuItems =
+            string[] menuItems = new string[]
             {
                 "Yes, try again",
                 "No, cancel operation"
@@ -166,9 +164,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         // must be one of the private const string values "Default...String".
         public static byte[] CollectValue(string defaultValueString, string name)
         {
-            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter " + name);
-            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
-                "Enter D for default value (" + defaultValueString + ")");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter " + name);
+            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter D for default value (" + defaultValueString + ")");
             char[] collectedValue = SampleMenu.ReadResponse(out int _);
 
             if (collectedValue.Length == 1 && collectedValue[0] == 'D')
@@ -183,12 +180,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
                     },
-                    _ => Array.Empty<byte>()
+                    _ => Array.Empty<byte>(),
                 };
             }
 
             byte[] returnValue = ConvertCharArrayToByteArray(defaultValueString, collectedValue);
-            Array.Fill(collectedValue, value: '0');
+            Array.Fill<char>(collectedValue, '0');
 
             return returnValue;
         }

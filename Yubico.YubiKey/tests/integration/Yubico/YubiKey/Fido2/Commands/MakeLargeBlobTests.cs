@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     public class MakeLargeBlobTests : NeedPinToken
     {
         public MakeLargeBlobTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, pin: null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, null)
         {
         }
 
@@ -33,57 +33,56 @@ namespace Yubico.YubiKey.Fido2.Commands
         public void InitialLargeBlob_Succeeds()
         {
             var getInfoCmd = new GetInfoCommand();
-            var getInfoRsp = Connection.SendCommand(getInfoCmd);
+            GetInfoResponse getInfoRsp = Connection.SendCommand(getInfoCmd);
             Assert.Equal(ResponseStatus.Success, getInfoRsp.Status);
-            var authInfo = getInfoRsp.GetData();
+            AuthenticatorInfo authInfo = getInfoRsp.GetData();
             Assert.NotNull(authInfo.Options);
             if (!(authInfo.Options is null))
             {
-                var maxLargeBlobsLength = authInfo.MaximumSerializedLargeBlobArray ?? 0;
-                Assert.NotEqual(expected: 0, maxLargeBlobsLength);
-                var isKey = authInfo.Options.TryGetValue("largeBlobs", out var isAvailable);
+                int maxLargeBlobsLength = authInfo.MaximumSerializedLargeBlobArray ?? 0;
+                Assert.NotEqual(0, maxLargeBlobsLength);
+                bool isKey = authInfo.Options.TryGetValue("largeBlobs", out bool isAvailable);
                 Assert.True(isKey);
                 Assert.True(isAvailable);
             }
 
-            var getBlobCmd = new GetLargeBlobCommand(offset: 0, count: 900);
-            var getBlobRsp = Connection.SendCommand(getBlobCmd);
+            var getBlobCmd = new GetLargeBlobCommand(0, 900);
+            GetLargeBlobResponse getBlobRsp = Connection.SendCommand(getBlobCmd);
             Assert.Equal(ResponseStatus.Success, getBlobRsp.Status);
-            var blobData = getBlobRsp.GetData();
+            ReadOnlyMemory<byte> blobData = getBlobRsp.GetData();
             Assert.NotEmpty(blobData.ToArray());
         }
 
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void SetLargeBlob_Succeeds()
         {
-            byte[] dataToStore =
-            {
+            byte[] dataToStore = {
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F, 0x50,
                 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
             };
 
             using HashAlgorithm digester = CryptographyProviders.Sha256Creator();
 
-            var dataPlusDigest = BuildDataPlusDigest(dataToStore, dataOffset: 0, dataToStore.Length, digester);
-            var offset = 0;
-            var totalLength = dataToStore.Length;
-            var dataToAuth = BuildDataToAuth(dataPlusDigest, dataOffset: 0, dataPlusDigest.Length, offset, digester);
+            byte[] dataPlusDigest = BuildDataPlusDigest(dataToStore, 0, dataToStore.Length, digester);
+            int offset = 0;
+            int totalLength = dataToStore.Length;
+            byte[] dataToAuth = BuildDataToAuth(dataPlusDigest, 0, dataPlusDigest.Length, offset, digester);
 
             var protocol = new PinUvAuthProtocolTwo();
-            var isValid = GetPinToken(
-                protocol, PinUvAuthTokenPermissions.LargeBlobWrite, out var pinToken);
+            bool isValid = GetPinToken(
+                protocol, PinUvAuthTokenPermissions.LargeBlobWrite, out byte[] pinToken);
             Assert.True(isValid);
-            var pinUvAuthParam = protocol.AuthenticateUsingPinToken(pinToken, dataToAuth);
+            byte[] pinUvAuthParam = protocol.AuthenticateUsingPinToken(pinToken, dataToAuth);
 
             var setBlobCmd = new SetLargeBlobCommand(
                 dataPlusDigest, offset, totalLength + 16, pinUvAuthParam, (int)protocol.Protocol);
-            var setBlobRsp = Connection.SendCommand(setBlobCmd);
+            SetLargeBlobResponse setBlobRsp = Connection.SendCommand(setBlobCmd);
             Assert.Equal(ResponseStatus.Success, setBlobRsp.Status);
 
-            var getBlobCmd = new GetLargeBlobCommand(offset: 0, count: 900);
-            var getBlobRsp = Connection.SendCommand(getBlobCmd);
+            var getBlobCmd = new GetLargeBlobCommand(0, 900);
+            GetLargeBlobResponse getBlobRsp = Connection.SendCommand(getBlobCmd);
             Assert.Equal(ResponseStatus.Success, getBlobRsp.Status);
-            var blobData = getBlobRsp.GetData();
+            ReadOnlyMemory<byte> blobData = getBlobRsp.GetData();
             Assert.NotEmpty(blobData.ToArray());
         }
 
@@ -96,9 +95,9 @@ namespace Yubico.YubiKey.Fido2.Commands
                 throw new ArgumentNullException(nameof(digester.Hash));
             }
 
-            var dataPlusDigest = new byte[dataLength + 16];
-            Array.Copy(inputData, sourceIndex: 0, dataPlusDigest, destinationIndex: 0, dataLength);
-            Array.Copy(digester.Hash, sourceIndex: 0, dataPlusDigest, dataLength, length: 16);
+            byte[] dataPlusDigest = new byte[dataLength + 16];
+            Array.Copy(inputData, 0, dataPlusDigest, 0, dataLength);
+            Array.Copy(digester.Hash, 0, dataPlusDigest, dataLength, 16);
 
             return dataPlusDigest;
         }
@@ -113,13 +112,12 @@ namespace Yubico.YubiKey.Fido2.Commands
                 throw new ArgumentException(nameof(digester.Hash));
             }
 
-            var dataToAuth = new byte[38 + digester.Hash.Length];
-            var index = 0;
+            byte[] dataToAuth = new byte[38 + digester.Hash.Length];
+            int index = 0;
             for (; index < 32; index++)
             {
                 dataToAuth[index] = 0xff;
             }
-
             dataToAuth[index] = 0x0C;
             index++;
             dataToAuth[index] = 0x00;
@@ -132,7 +130,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             index++;
             dataToAuth[index] = (byte)(offset >> 24);
             index++;
-            Array.Copy(digester.Hash, sourceIndex: 0, dataToAuth, index, digester.Hash.Length);
+            Array.Copy(digester.Hash, 0, dataToAuth, index, digester.Hash.Length);
 
             return dataToAuth;
         }

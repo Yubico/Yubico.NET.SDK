@@ -19,22 +19,22 @@ using Yubico.YubiKey.Fido2.Cose;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    ///     This is the partner response class to the
-    ///     <see cref="GetKeyAgreementCommand" /> command class.
+    /// This is the partner response class to the
+    /// <see cref="GetKeyAgreementCommand" /> command class.
     /// </summary>
     public class GetKeyAgreementResponse : Fido2Response, IYubiKeyResponseWithData<CoseEcPublicKey>
     {
         private readonly ClientPinResponse _response;
 
         /// <summary>
-        ///     Constructs a new instance of the
-        ///     <see cref="GetKeyAgreementResponse" /> class based on a response APDU
-        ///     provided by the YubiKey.
+        /// Constructs a new instance of the
+        /// <see cref="GetKeyAgreementResponse"/> class based on a response APDU
+        /// provided by the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     A response APDU containing the CBOR response for the
-        ///     `getKeyAgreement` subcommand of the `authenticatorClientPIN` CTAP2
-        ///     command.
+        /// A response APDU containing the CBOR response for the
+        /// `getKeyAgreement` subcommand of the `authenticatorClientPIN` CTAP2
+        /// command.
         /// </param>
         public GetKeyAgreementResponse(ResponseApdu responseApdu) : base(responseApdu)
         {
@@ -42,8 +42,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        ///     Returns the YubiKey's public key for the key agreement algorithm of
-        ///     the PIN/UV auth protocol specified in the command.
+        /// Returns the YubiKey's public key for the key agreement algorithm of
+        /// the PIN/UV auth protocol specified in the command.
         /// </summary>
         /// <remarks>
         /// </remarks>

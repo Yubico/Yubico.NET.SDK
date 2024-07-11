@@ -30,8 +30,8 @@ namespace Yubico.YubiKey.TestUtilities
     // System.Security.Cryptography.RandomNumberGenerator.
     public class RandomObjectUtility
     {
-        private readonly byte[] _theBytes;
         private int _offset;
+        private readonly byte[] _theBytes;
         private Func<RandomNumberGenerator>? _original;
 
         // Create a new instance of this class, loading the given bytes.
@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.TestUtilities
 
             _theBytes = new byte[bytesToReturn.Length];
 
-            bytesToReturn.CopyTo(_theBytes, index: 0);
+            bytesToReturn.CopyTo(_theBytes, 0);
         }
 
         // Fill the given buffer with random bytes. That is, generate data.Length
@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.TestUtilities
                 throw new ArgumentNullException(nameof(data));
             }
 
-            GetBytes(data, offset: 0, data.Length);
+            GetBytes(data, 0, data.Length);
         }
 
         // Generate count random bytes, placing them into data beginning at
@@ -89,17 +89,14 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 throw new ArgumentNullException(nameof(data));
             }
-
             if (offset < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(offset));
             }
-
             if (count < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
-
             if (offset + count > data.Length)
             {
                 throw new ArgumentException(ExceptionMessages.IncorrectDerivationLength);
@@ -192,8 +189,7 @@ namespace Yubico.YubiKey.TestUtilities
             _ = mock.Setup(rand => rand.GetBytes(It.IsAny<byte[]>()))
                 .Callback<byte[]>(randomBytes => redirect.GetBytes(randomBytes));
             _ = mock.Setup(rand => rand.GetBytes(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()))
-                .Callback<byte[], int, int>((randomBytes, offset, count) =>
-                    redirect.GetBytes(randomBytes, offset, count));
+                .Callback<byte[], int, int>((randomBytes, offset, count) => redirect.GetBytes(randomBytes, offset, count));
 
             return mock.Object;
         }
@@ -221,7 +217,6 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 throw new ArgumentNullException(nameof(fixedBytes));
             }
-
             var randomUtility = new RandomObjectUtility(fixedBytes);
             randomUtility.ReplaceRandomProvider();
 

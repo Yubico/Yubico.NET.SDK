@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using Xunit;
 using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.TestUtilities;
@@ -22,16 +23,14 @@ namespace Yubico.YubiKey.Fido2
     [Trait("Category", "RequiresBio")]
     public class LargeBlobTests
     {
-        private static readonly byte[] _clientDataHash =
-        {
+        static readonly byte[] _clientDataHash = {
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
         };
 
-        private static readonly RelyingParty _rp = new RelyingParty("relyingparty1");
+        static readonly RelyingParty _rp = new RelyingParty("relyingparty1");
 
-        private readonly byte[] _pin =
-        {
+        private readonly byte[] _pin = {
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36
         };
 
@@ -46,7 +45,7 @@ namespace Yubico.YubiKey.Fido2
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void SetLargeBlob_Succeeds()
         {
-            var isValid = Fido2ResetForTest.DoReset(_testDevice.SerialNumber);
+            bool isValid = Fido2ResetForTest.DoReset(_testDevice.SerialNumber);
             Assert.True(isValid);
 
             using (var fido2Session = new Fido2Session(_testDevice))
@@ -66,10 +65,10 @@ namespace Yubico.YubiKey.Fido2
                     ClientDataHash = _clientDataHash
                 };
                 mcParams1.AddExtension("largeBlobKey", new byte[] { 0xF5 });
-                mcParams1.AddOption(AuthenticatorOptions.rk, optionValue: true);
+                mcParams1.AddOption(AuthenticatorOptions.rk, true);
 
                 fido2Session.AddPermissions(PinUvAuthTokenPermissions.AuthenticatorConfiguration);
-                var mcData1 = fido2Session.MakeCredential(mcParams1);
+                MakeCredentialData mcData1 = fido2Session.MakeCredential(mcParams1);
                 Assert.True(mcData1.VerifyAttestation(_clientDataHash));
 
                 var user2 = new UserEntity(new byte[] { 5, 6, 7, 8 })
@@ -83,46 +82,43 @@ namespace Yubico.YubiKey.Fido2
                     ClientDataHash = _clientDataHash
                 };
                 mcParams2.AddExtension("largeBlobKey", new byte[] { 0xF5 });
-                mcParams2.AddOption(AuthenticatorOptions.rk, optionValue: true);
+                mcParams2.AddOption(AuthenticatorOptions.rk, true);
 
-                var mcData2 = fido2Session.MakeCredential(mcParams2);
+                MakeCredentialData mcData2 = fido2Session.MakeCredential(mcParams2);
                 Assert.True(mcData2.VerifyAttestation(_clientDataHash));
 
                 var gaParams = new GetAssertionParameters(_rp, _clientDataHash);
                 gaParams.AddExtension("largeBlobKey", new byte[] { 0xF5 });
 
-                var assertions = fido2Session.GetAssertions(gaParams);
-                Assert.Equal(expected: 2, assertions.Count);
+                IReadOnlyList<GetAssertionData> assertions = fido2Session.GetAssertions(gaParams);
+                Assert.Equal(2, assertions.Count);
 
-                var blobArray = fido2Session.GetSerializedLargeBlobArray();
+                SerializedLargeBlobArray blobArray = fido2Session.GetSerializedLargeBlobArray();
                 _ = Assert.NotNull(blobArray.EncodedArray);
 
-                byte[] blobData1 =
-                {
+                byte[] blobData1 = {
                     0x31,
                     0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x50,
                     0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x50,
                     0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4a, 0x4b, 0x4c, 0x4d, 0x4e, 0x4f, 0x50
                 };
                 _ = Assert.NotNull(mcData1.LargeBlobKey);
-                var key1 = ReadOnlyMemory<byte>.Empty;
+                ReadOnlyMemory<byte> key1 = ReadOnlyMemory<byte>.Empty;
                 if (!(mcData1.LargeBlobKey is null))
                 {
                     key1 = mcData1.LargeBlobKey.Value;
                     blobArray.AddEntry(blobData1, key1);
                 }
-
                 Assert.Null(blobArray.Digest);
 
-                byte[] blobData2 =
-                {
+                byte[] blobData2 = {
                     0x32,
                     0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70,
                     0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70,
                     0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68, 0x69, 0x6a, 0x6b, 0x6c, 0x6d, 0x6e, 0x6f, 0x70
                 };
                 _ = Assert.NotNull(mcData2.LargeBlobKey);
-                var key2 = ReadOnlyMemory<byte>.Empty;
+                ReadOnlyMemory<byte> key2 = ReadOnlyMemory<byte>.Empty;
                 if (!(mcData2.LargeBlobKey is null))
                 {
                     key2 = mcData2.LargeBlobKey.Value;
@@ -133,15 +129,15 @@ namespace Yubico.YubiKey.Fido2
                 _ = Assert.NotNull(blobArray.Digest);
 
                 blobArray = fido2Session.GetSerializedLargeBlobArray();
-                Assert.Equal(expected: 2, blobArray.Entries.Count);
+                Assert.Equal(2, blobArray.Entries.Count);
 
-                var isDecrypted = blobArray.Entries[index: 0].TryDecrypt(key1, out var plaintext1);
+                bool isDecrypted = blobArray.Entries[0].TryDecrypt(key1, out Memory<byte> plaintext1);
                 Assert.True(isDecrypted);
                 isValid = plaintext1.Span.SequenceEqual(blobData1.AsSpan());
                 Assert.True(isValid);
-                isDecrypted = blobArray.Entries[index: 1].TryDecrypt(key1, out var plaintext2);
+                isDecrypted = blobArray.Entries[1].TryDecrypt(key1, out Memory<byte> plaintext2);
                 Assert.False(isDecrypted);
-                isDecrypted = blobArray.Entries[index: 1].TryDecrypt(key2, out plaintext2);
+                isDecrypted = blobArray.Entries[1].TryDecrypt(key2, out plaintext2);
                 Assert.True(isDecrypted);
                 isValid = plaintext2.Span.SequenceEqual(blobData2.AsSpan());
                 Assert.True(isValid);

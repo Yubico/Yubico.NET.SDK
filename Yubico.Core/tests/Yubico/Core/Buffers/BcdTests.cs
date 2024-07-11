@@ -23,16 +23,16 @@ namespace Yubico.Core.Buffers
         [Fact]
         public void TestDecodeBcd()
         {
-            var bytes = Bcd.DecodeText("01234567");
-            byte[] expected = { 0x01, 0x23, 0x45, 0x67 };
+            byte[] bytes = Bcd.DecodeText("01234567");
+            byte[] expected = new byte[] { 0x01, 0x23, 0x45, 0x67 };
             Assert.True(expected.SequenceEqual(bytes));
         }
 
         [Fact]
         public void TestEncodeBcd()
         {
-            var bcd = Bcd.EncodeBytes(new byte[] { 0x01, 0x23, 0x45, 0x67 });
-            var expected = "01234567";
+            string bcd = Bcd.EncodeBytes(new byte[] { 0x01, 0x23, 0x45, 0x67 });
+            string expected = "01234567";
             Assert.Equal(expected, bcd);
         }
 

@@ -19,9 +19,9 @@ Sets repository-wide attribution settings such as Authors, Company, and copyrigh
 -->
 <Project>
 
-    <PropertyGroup Label="Common attribution properties">
-        <Authors>Yubico AB</Authors>
-        <Company>Yubico AB</Company>
-    </PropertyGroup>
+  <PropertyGroup Label="Common attribution properties">
+    <Authors>Yubico AB</Authors>
+    <Company>Yubico AB</Company>
+  </PropertyGroup>
 
 </Project>

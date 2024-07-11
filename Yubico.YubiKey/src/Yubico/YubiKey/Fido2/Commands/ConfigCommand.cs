@@ -21,34 +21,34 @@ using Yubico.YubiKey.Fido2.PinProtocols;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    ///     The <see cref="ConfigCommand" /> is the class for
-    ///     <c>authenticatorConfig</c>. This command has a number of subcommands,
-    ///     each of which is represented by its own class. You will likely never use
-    ///     this class directly, but it does contain code shared by all the
-    ///     subcommands.
+    /// The <see cref="ConfigCommand"/> is the class for
+    /// <c>authenticatorConfig</c>. This command has a number of subcommands,
+    /// each of which is represented by its own class. You will likely never use
+    /// this class directly, but it does contain code shared by all the
+    /// subcommands.
     /// </summary>
     /// <remarks>
-    ///     The <c>authenticatorConfig (0x0D)</c> FIDO2 command can be thought of as
-    ///     a "meta" command. That is, it provides the structure and mechanism for
-    ///     performing a number of subcommands. These subcommands are:
-    ///     <code language="adoc">
+    /// The <c>authenticatorConfig (0x0D)</c> FIDO2 command can be thought of as
+    /// a "meta" command. That is, it provides the structure and mechanism for
+    /// performing a number of subcommands. These subcommands are:
+    /// <code language="adoc">
     /// - enableEnterpriseAttestation (0x01)
     /// - toggleAlwaysUv (0x02)
     /// - setMinPINLength (0x03)
     /// - vendorPrototype (0xFF)
     /// </code>
-    ///     Since the SDK does not have the concept of a subcommand natively, these
-    ///     are all exposed as their own separate commands.
-    ///     <para>
-    ///         See the user manual entry on
-    ///         <xref href="Fido2Confg">Authenticator Config</xref> for a much more in
-    ///         depth guide to working with the config commands. For more information on
-    ///         a particular subcommand, see the API reference documentation for that
-    ///         command class.
-    ///     </para>
-    ///     <para>
-    ///         All of the subcommands return a success or failure response code.
-    ///     </para>
+    /// Since the SDK does not have the concept of a subcommand natively, these
+    /// are all exposed as their own separate commands.
+    /// <para>
+    /// See the user manual entry on
+    /// <xref href="Fido2Confg">Authenticator Config</xref> for a much more in
+    /// depth guide to working with the config commands. For more information on
+    /// a particular subcommand, see the API reference documentation for that
+    /// command class.
+    /// </para>
+    /// <para>
+    /// All of the subcommands return a success or failure response code.
+    /// </para>
     /// </remarks>
     public class ConfigCommand : IYubiKeyCommand<ConfigResponse>
     {
@@ -63,11 +63,66 @@ namespace Yubico.YubiKey.Fido2.Commands
         private readonly byte[]? _encodedParams;
         private readonly int? _protocol;
 
+        /// <inheritdoc />
+        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
+
         /// <summary>
-        ///     This constructor will throw <c>NotImplementedException</c>. It is the
-        ///     default constructor explicitly defined. We don't want it to be used.
-        ///     It is made <c>protected</c> rather than <c>private</c> because there
-        ///     are subclasses.
+        /// The Config subcommand to issue to the YubiKey.
+        /// </summary>
+        /// <remarks>
+        /// This is a mandatory parameter, and must be one of the following values:
+        /// <code language="adoc">
+        /// - enableEnterpriseAttestation (0x01)
+        /// - toggleAlwaysUv (0x02)
+        /// - setMinPINLength (0x03)
+        /// - vendorPrototype (0xFF)
+        /// </code>
+        /// Alternatively - you can use one of the command classes exposed by the
+        /// SDK that represents the subcommand itself. Such a method is
+        /// recommended as these command classes will only expose the parameters
+        /// that are relevant to that subcommand.
+        /// </remarks>
+        public int SubCommand { get; set; }
+
+        /// <summary>
+        /// The encoded params for the specified subcommand. If a subcommand
+        /// has no parameters, this will be null.
+        /// </summary>
+        public ReadOnlyMemory<byte>? SubCommandParameters => _encodedParams?.AsMemory();
+
+        /// <summary>
+        /// The PIN/UV protocol version chosen by the platform.
+        /// </summary>
+        /// <remarks>
+        /// A PIN/UV protocol must be used when performing some of the
+        /// AuthenticatorConfig operations. The specified protocol must be one
+        /// of the protocols that are supported by the YubiKey. This can be
+        /// determined by issuing the AuthenticatorGetInfo command.
+        /// </remarks>
+        public PinUvAuthProtocol? PinUvAuthProtocol { get; set; }
+
+        /// <summary>
+        /// The output of calling authenticate on the PIN/UV protocol specific to
+        /// a particular subcommand.
+        /// </summary>
+        /// <remarks>
+        /// See the User's Manual entry on
+        /// <xref href="Fido2PinProtocol">PIN protocols</xref> for a much more in
+        /// depth guide to working with PINs within FIDO2.
+        /// <para>
+        /// See also the User's Manual entry on
+        /// <xref href="Fido2AuthenticatorConfig">AuthenticatorConfig</xref>
+        /// for more information on building the <c>PIN/UV Auth Param</c>
+        /// specific to the AuthenticatorConfig commands.
+        /// </para>
+        /// </remarks>
+        public ReadOnlyMemory<byte>? PinUvAuthParam { get; set; }
+
+        /// <summary>
+        /// This constructor will throw <c>NotImplementedException</c>. It is the
+        /// default constructor explicitly defined. We don't want it to be used.
+        /// It is made <c>protected</c> rather than <c>private</c> because there
+        /// are subclasses.
         /// </summary>
         protected ConfigCommand()
         {
@@ -75,26 +130,26 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        ///     Constructs a new instance of <see cref="ConfigCommand" />.
+        /// Constructs a new instance of <see cref="ConfigCommand"/>.
         /// </summary>
         /// <remarks>
-        ///     Note that if the command does not need the <c>pinUvAuthToken</c> and
-        ///     <c>authProtocol</c>, use the constructor that takes only the
-        ///     <c>subCommand</c>.
+        /// Note that if the command does not need the <c>pinUvAuthToken</c> and
+        /// <c>authProtocol</c>, use the constructor that takes only the
+        /// <c>subCommand</c>.
         /// </remarks>
         /// <param name="subCommand">
-        ///     The byte representing the subcommand to execute.
+        /// The byte representing the subcommand to execute.
         /// </param>
         /// <param name="subCommandParams">
-        ///     The parameters needed in order to execute the subcommand. Not all
-        ///     subcommands have parameters, so this can be null.
+        /// The parameters needed in order to execute the subcommand. Not all
+        /// subcommands have parameters, so this can be null.
         /// </param>
         /// <param name="pinUvAuthToken">
-        ///     The PIN/UV Auth Token built from the PIN. This is the encrypted token
-        ///     key.
+        /// The PIN/UV Auth Token built from the PIN. This is the encrypted token
+        /// key.
         /// </param>
         /// <param name="authProtocol">
-        ///     The Auth Protocol used to build the Auth Token.
+        /// The Auth Protocol used to build the Auth Token.
         /// </param>
         public ConfigCommand(
             int subCommand,
@@ -117,23 +172,23 @@ namespace Yubico.YubiKey.Fido2.Commands
             // 32*0xFF || 0x0D || subCommand || params.
             int length = subCommandParams?.Length ?? 0;
             byte[] message = new byte[length + 34];
-            message.AsSpan().Fill(0xFF);
-            message[32] = CmdAuthenticatorConfig;
+            message.AsSpan<byte>().Fill(0xFF);
+            message[32] = (byte)CmdAuthenticatorConfig;
             message[33] = (byte)subCommand;
-            subCommandParams?.CopyTo(message, index: 34);
+            subCommandParams?.CopyTo(message, 34);
 
             // The pinUvAuthToken is an encrypted value, so there's no need to
             // overwrite the array.
             byte[] authParam = authProtocol.AuthenticateUsingPinToken(pinUvAuthToken.ToArray(), message);
-            PinUvAuthParam = new ReadOnlyMemory<byte>(authParam, start: 0, length: 16);
+            PinUvAuthParam = new ReadOnlyMemory<byte>(authParam, 0, 16);
             PinUvAuthProtocol = authProtocol.Protocol;
         }
 
         /// <summary>
-        ///     Constructs a new instance of <see cref="ConfigCommand" />.
+        /// Constructs a new instance of <see cref="ConfigCommand"/>.
         /// </summary>
         /// <param name="subCommand">
-        ///     The byte representing the subcommand to execute.
+        /// The byte representing the subcommand to execute.
         /// </param>
         public ConfigCommand(int subCommand)
         {
@@ -144,81 +199,24 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        ///     The Config subcommand to issue to the YubiKey.
+        /// Creates a well-formed CommandApdu to send to the YubiKey.
         /// </summary>
         /// <remarks>
-        ///     This is a mandatory parameter, and must be one of the following values:
-        ///     <code language="adoc">
-        /// - enableEnterpriseAttestation (0x01)
-        /// - toggleAlwaysUv (0x02)
-        /// - setMinPINLength (0x03)
-        /// - vendorPrototype (0xFF)
-        /// </code>
-        ///     Alternatively - you can use one of the command classes exposed by the
-        ///     SDK that represents the subcommand itself. Such a method is
-        ///     recommended as these command classes will only expose the parameters
-        ///     that are relevant to that subcommand.
+        /// This method will first perform validation on all of the parameters and data provided
+        /// to it. The CommandAPDU it creates should contain all of the data payload for the
+        /// command, even if it exceeds 65,535 bytes as specified by the ISO 7816-4 specification.
+        /// The APDU will be properly chained by the device connection prior to being sent to the
+        /// YubiKey, and the responses will collapsed into a single result.
         /// </remarks>
-        public int SubCommand { get; set; }
-
-        /// <summary>
-        ///     The encoded params for the specified subcommand. If a subcommand
-        ///     has no parameters, this will be null.
-        /// </summary>
-        public ReadOnlyMemory<byte>? SubCommandParameters => _encodedParams?.AsMemory();
-
-        /// <summary>
-        ///     The PIN/UV protocol version chosen by the platform.
-        /// </summary>
-        /// <remarks>
-        ///     A PIN/UV protocol must be used when performing some of the
-        ///     AuthenticatorConfig operations. The specified protocol must be one
-        ///     of the protocols that are supported by the YubiKey. This can be
-        ///     determined by issuing the AuthenticatorGetInfo command.
-        /// </remarks>
-        public PinUvAuthProtocol? PinUvAuthProtocol { get; set; }
-
-        /// <summary>
-        ///     The output of calling authenticate on the PIN/UV protocol specific to
-        ///     a particular subcommand.
-        /// </summary>
-        /// <remarks>
-        ///     See the User's Manual entry on
-        ///     <xref href="Fido2PinProtocol">PIN protocols</xref> for a much more in
-        ///     depth guide to working with PINs within FIDO2.
-        ///     <para>
-        ///         See also the User's Manual entry on
-        ///         <xref href="Fido2AuthenticatorConfig">AuthenticatorConfig</xref>
-        ///         for more information on building the <c>PIN/UV Auth Param</c>
-        ///         specific to the AuthenticatorConfig commands.
-        ///     </para>
-        /// </remarks>
-        public ReadOnlyMemory<byte>? PinUvAuthParam { get; set; }
-
-        /// <inheritdoc />
-        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
-
-        /// <summary>
-        ///     Creates a well-formed CommandApdu to send to the YubiKey.
-        /// </summary>
-        /// <remarks>
-        ///     This method will first perform validation on all of the parameters and data provided
-        ///     to it. The CommandAPDU it creates should contain all of the data payload for the
-        ///     command, even if it exceeds 65,535 bytes as specified by the ISO 7816-4 specification.
-        ///     The APDU will be properly chained by the device connection prior to being sent to the
-        ///     YubiKey, and the responses will collapsed into a single result.
-        /// </remarks>
-        /// <returns>
-        ///     A valid CommandApdu that is ready to be sent to the YubiKey, or passed along
-        ///     to additional encoders for further processing.
-        /// </returns>
+        /// <returns>A valid CommandApdu that is ready to be sent to the YubiKey, or passed along
+        /// to additional encoders for further processing.</returns>
         public CommandApdu CreateCommandApdu()
         {
             var cbor = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
 
             CborHelpers.BeginMap<int>(cbor)
-                .Entry(TagSubCommand, SubCommand)
-                .OptionalEntry(TagParams, WriteEncodedParams, _encodedParams)
+                .Entry(TagSubCommand, (int)SubCommand)
+                .OptionalEntry<byte[]>(TagParams, WriteEncodedParams, _encodedParams)
                 .OptionalEntry(TagProtocol, _protocol)
                 .OptionalEntry(TagPinUvAuthParam, PinUvAuthParam)
                 .EndMap();
@@ -233,7 +231,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             data[0] = CmdAuthenticatorConfig;
 
-            return new CommandApdu
+            return new CommandApdu()
             {
                 Ins = CtapConstants.CtapHidCbor,
                 Data = data
@@ -241,7 +239,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public ConfigResponse CreateResponseForApdu(ResponseApdu responseApdu) => new ConfigResponse(responseApdu);
+        public ConfigResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new ConfigResponse(responseApdu);
 
         // This implements CborHelpers.CborEncodeDelegate.
         private static byte[] WriteEncodedParams(byte[]? encodedParams) => encodedParams ?? Array.Empty<byte>();

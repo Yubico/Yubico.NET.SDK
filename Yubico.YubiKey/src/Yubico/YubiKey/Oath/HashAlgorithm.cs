@@ -15,13 +15,13 @@
 namespace Yubico.YubiKey.Oath
 {
     /// <summary>
-    ///     The types of hash algorithms that are used by OATH credentials.
+    /// The types of hash algorithms that are used by OATH credentials.
     /// </summary>
     public enum HashAlgorithm
     {
         None = 0,
         Sha1 = 0x01,
         Sha256 = 0x02,
-        Sha512 = 0x03
+        Sha512 = 0x03,
     }
 }

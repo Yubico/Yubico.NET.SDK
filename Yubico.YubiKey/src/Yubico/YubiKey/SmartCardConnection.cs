@@ -20,25 +20,23 @@ using Yubico.Core.Devices.SmartCard;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.YubiKey.InterIndustry.Commands;
-using Yubico.YubiKey.Oath.Commands;
 using Yubico.YubiKey.Pipelines;
 
 namespace Yubico.YubiKey
 {
     internal class SmartCardConnection : IYubiKeyConnection
     {
-        private readonly byte[]? _applicationId;
         private readonly Logger _log = Log.GetLogger();
-        private readonly ISmartCardConnection _smartCardConnection;
 
         private readonly YubiKeyApplication _yubiKeyApplication;
+        private readonly byte[]? _applicationId;
+        private readonly ISmartCardConnection _smartCardConnection;
         private IApduTransform _apduPipeline;
         private bool _disposedValue;
 
-        protected SmartCardConnection(
-            ISmartCardDevice smartCardDevice,
-            YubiKeyApplication application,
-            byte[]? applicationId)
+        public ISelectApplicationData? SelectApplicationData { get; set; }
+
+        protected SmartCardConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication application, byte[]? applicationId)
         {
             if (applicationId is null && application == YubiKeyApplication.Unknown)
             {
@@ -56,7 +54,7 @@ namespace Yubico.YubiKey
         }
 
         public SmartCardConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication yubiKeyApplication)
-            : this(smartCardDevice, yubiKeyApplication, applicationId: null)
+            : this(smartCardDevice, yubiKeyApplication, null)
         {
             if (yubiKeyApplication == YubiKeyApplication.Fido2)
             {
@@ -87,15 +85,56 @@ namespace Yubico.YubiKey
             SelectApplication();
         }
 
-        private bool IsOath =>
-            _yubiKeyApplication == YubiKeyApplication.Oath
-            || _applicationId != null &&
-            _applicationId.SequenceEqual(YubiKeyApplication.Oath.GetIso7816ApplicationId());
+        // Allow subclasses to build a different pipeline, which means they need
+        // to get the current one.
+        protected IApduTransform GetPipeline() => _apduPipeline;
 
-        public ISelectApplicationData? SelectApplicationData { get; set; }
+        // Allow subclasses to build a different pipeline and set it here in the
+        // base class.
+        protected void SetPipeline(IApduTransform apduPipeline)
+        {
+            _apduPipeline = apduPipeline;
 
-        public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
-            where TResponse : IYubiKeyResponse
+            SelectApplication();
+        }
+
+        private bool IsOath => _yubiKeyApplication == YubiKeyApplication.Oath
+            || (_applicationId != null && _applicationId.SequenceEqual(YubiKeyApplicationExtensions.GetIso7816ApplicationId(YubiKeyApplication.Oath)));
+
+        private IApduTransform AddResponseChainingTransform(IApduTransform pipeline) =>
+            IsOath
+            ? new OathResponseChainingTransform(pipeline)
+            : new ResponseChainingTransform(pipeline);
+
+        private void SelectApplication()
+        {
+            IYubiKeyCommand<ISelectApplicationResponse<ISelectApplicationData>> selectApplicationCommand = _yubiKeyApplication switch
+            {
+                YubiKeyApplication.Oath => new Oath.Commands.SelectOathCommand(),
+                YubiKeyApplication.Unknown => new SelectApplicationCommand(_applicationId!),
+                _ => new SelectApplicationCommand(_yubiKeyApplication),
+            };
+
+            _log.LogInformation("Selecting smart card application [{AID}]", Hex.BytesToHex(_applicationId ?? _yubiKeyApplication.GetIso7816ApplicationId()));
+            ResponseApdu responseApdu = _smartCardConnection.Transmit(selectApplicationCommand.CreateCommandApdu());
+
+            if (responseApdu.SW != SWConstants.Success)
+            {
+                throw new ApduException(
+                      string.Format(
+                          CultureInfo.CurrentCulture,
+                          ExceptionMessages.SmartCardPipelineSetupFailed,
+                          responseApdu.SW))
+                {
+                    SW = responseApdu.SW
+                };
+            }
+
+            ISelectApplicationResponse<ISelectApplicationData>? response = selectApplicationCommand.CreateResponseForApdu(responseApdu);
+            SelectApplicationData = response.GetData();
+        }
+
+        public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand) where TResponse : IYubiKeyResponse
         {
             using (IDisposable _ = _smartCardConnection.BeginTransaction(out bool cardWasReset))
             {
@@ -113,65 +152,6 @@ namespace Yubico.YubiKey
             }
         }
 
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
-        }
-
-        // Allow subclasses to build a different pipeline, which means they need
-        // to get the current one.
-        protected IApduTransform GetPipeline() => _apduPipeline;
-
-        // Allow subclasses to build a different pipeline and set it here in the
-        // base class.
-        protected void SetPipeline(IApduTransform apduPipeline)
-        {
-            _apduPipeline = apduPipeline;
-
-            SelectApplication();
-        }
-
-        private IApduTransform AddResponseChainingTransform(IApduTransform pipeline) =>
-            IsOath
-                ? new OathResponseChainingTransform(pipeline)
-                : new ResponseChainingTransform(pipeline);
-
-        private void SelectApplication()
-        {
-            IYubiKeyCommand<ISelectApplicationResponse<ISelectApplicationData>> selectApplicationCommand =
-                _yubiKeyApplication switch
-                {
-                    YubiKeyApplication.Oath => new SelectOathCommand(),
-                    YubiKeyApplication.Unknown => new SelectApplicationCommand(_applicationId!),
-                    _ => new SelectApplicationCommand(_yubiKeyApplication)
-                };
-
-            _log.LogInformation(
-                "Selecting smart card application [{AID}]",
-                Hex.BytesToHex(_applicationId ?? _yubiKeyApplication.GetIso7816ApplicationId()));
-
-            ResponseApdu responseApdu = _smartCardConnection.Transmit(selectApplicationCommand.CreateCommandApdu());
-
-            if (responseApdu.SW != SWConstants.Success)
-            {
-                throw new ApduException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.SmartCardPipelineSetupFailed,
-                        responseApdu.SW))
-                    {
-                        SW = responseApdu.SW
-                    };
-            }
-
-            ISelectApplicationResponse<ISelectApplicationData>? response =
-                selectApplicationCommand.CreateResponseForApdu(responseApdu);
-
-            SelectApplicationData = response.GetData();
-        }
-
         protected virtual void Dispose(bool disposing)
         {
             if (!_disposedValue)
@@ -184,6 +164,13 @@ namespace Yubico.YubiKey
 
                 _disposedValue = true;
             }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

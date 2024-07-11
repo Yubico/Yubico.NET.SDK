@@ -20,41 +20,18 @@ namespace Yubico.YubiKey.Scp03
 {
     public class PaddingTests
     {
-        private static byte[] Get1BytePayload()
-        {
-            return Hex.HexToBytes("FF");
-        }
-
-        private static byte[] GetPadded1BytePayload()
-        {
-            return Hex.HexToBytes("FF800000000000000000000000000000");
-        }
-
-        private static byte[] Get8BytePayload()
-        {
-            return Hex.HexToBytes("0001020380050607");
-        }
-
-        private static byte[] GetPadded8BytePayload()
-        {
-            return Hex.HexToBytes("00010203800506078000000000000000");
-        }
-
-        private static byte[] Get16BytePayload()
-        {
-            return Hex.HexToBytes("000102038005060708090A0B0C0D0E0F");
-        }
-
-        private static byte[] GetPadded16BytePayload()
-        {
-            return Hex.HexToBytes("000102038005060708090A0B0C0D0E0F80000000000000000000000000000000");
-        }
+        private static byte[] Get1BytePayload() => Hex.HexToBytes("FF");
+        private static byte[] GetPadded1BytePayload() => Hex.HexToBytes("FF800000000000000000000000000000");
+        private static byte[] Get8BytePayload() => Hex.HexToBytes("0001020380050607");
+        private static byte[] GetPadded8BytePayload() => Hex.HexToBytes("00010203800506078000000000000000");
+        private static byte[] Get16BytePayload() => Hex.HexToBytes("000102038005060708090A0B0C0D0E0F");
+        private static byte[] GetPadded16BytePayload() => Hex.HexToBytes("000102038005060708090A0B0C0D0E0F80000000000000000000000000000000");
 
         [Fact]
         public void PadToBlockSize_GivenNullPayload_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => Padding.PadToBlockSize(payload: null));
+            _ = Assert.Throws<ArgumentNullException>(() => Padding.PadToBlockSize(null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -62,7 +39,7 @@ namespace Yubico.YubiKey.Scp03
         public void RemovePadding_GivenNullPayload_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => Padding.RemovePadding(paddedPayload: null));
+            _ = Assert.Throws<ArgumentNullException>(() => Padding.RemovePadding(null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -70,10 +47,10 @@ namespace Yubico.YubiKey.Scp03
         public void PadToBlockSize_Given1BytePayload_ReturnsCorrectlyPaddedBlock()
         {
             // Arrange
-            var payload = Get1BytePayload();
+            byte[] payload = Get1BytePayload();
 
             // Act
-            var paddedPayload = Padding.PadToBlockSize(payload);
+            byte[] paddedPayload = Padding.PadToBlockSize(payload);
 
             // Assert
             Assert.Equal(paddedPayload, GetPadded1BytePayload());
@@ -83,10 +60,10 @@ namespace Yubico.YubiKey.Scp03
         public void PadToBlockSize_Given8BytePayload_ReturnsCorrectlyPaddedBlock()
         {
             // Arrange
-            var payload = Get8BytePayload();
+            byte[] payload = Get8BytePayload();
 
             // Act
-            var paddedPayload = Padding.PadToBlockSize(payload);
+            byte[] paddedPayload = Padding.PadToBlockSize(payload);
 
             // Assert
             Assert.Equal(paddedPayload, GetPadded8BytePayload());
@@ -96,10 +73,10 @@ namespace Yubico.YubiKey.Scp03
         public void PadToBlockSize_Given16BytePayload_ReturnsCorrectlyPaddedBlock()
         {
             // Arrange
-            var payload = Get16BytePayload();
+            byte[] payload = Get16BytePayload();
 
             // Act
-            var paddedPayload = Padding.PadToBlockSize(payload);
+            byte[] paddedPayload = Padding.PadToBlockSize(payload);
 
             // Assert
             Assert.Equal(paddedPayload, GetPadded16BytePayload());
@@ -109,10 +86,10 @@ namespace Yubico.YubiKey.Scp03
         public void RemovePadding_GivenPadded1BytePayload_ReturnsPayloadWithPaddingRemoved()
         {
             // Arrange
-            var paddedPayload = GetPadded1BytePayload();
+            byte[] paddedPayload = GetPadded1BytePayload();
 
             // Act
-            var payload = Padding.RemovePadding(paddedPayload);
+            byte[] payload = Padding.RemovePadding(paddedPayload);
 
             // Assert
             Assert.Equal(payload, Get1BytePayload());
@@ -122,10 +99,10 @@ namespace Yubico.YubiKey.Scp03
         public void RemovePadding_GivenPadded8BytePayload_ReturnsPayloadWithPaddingRemoved()
         {
             // Arrange
-            var paddedPayload = GetPadded8BytePayload();
+            byte[] paddedPayload = GetPadded8BytePayload();
 
             // Act
-            var payload = Padding.RemovePadding(paddedPayload);
+            byte[] payload = Padding.RemovePadding(paddedPayload);
 
             // Assert
             Assert.Equal(payload, Get8BytePayload());
@@ -135,10 +112,10 @@ namespace Yubico.YubiKey.Scp03
         public void RemovePadding_GivenPadded16BytePayload_ReturnsPayloadWithPaddingRemoved()
         {
             // Arrange
-            var paddedPayload = GetPadded16BytePayload();
+            byte[] paddedPayload = GetPadded16BytePayload();
 
             // Act
-            var payload = Padding.RemovePadding(paddedPayload);
+            byte[] payload = Padding.RemovePadding(paddedPayload);
 
             // Assert
             Assert.Equal(payload, Get16BytePayload());

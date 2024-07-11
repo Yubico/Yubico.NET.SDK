@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Fido2
         [Trait("Category", "Simple")]
         public void GetAuthenticator_Succeeds()
         {
-            var yubiKey = YubiKeyDevice.FindAll().First();
+            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
 
             using (var fido2 = new Fido2Session(yubiKey))
             {

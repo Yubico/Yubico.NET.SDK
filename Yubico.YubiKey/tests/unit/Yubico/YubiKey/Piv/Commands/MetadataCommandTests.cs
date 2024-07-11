@@ -41,7 +41,7 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             var command = new GetMetadataCommand();
 
-            var application = command.Application;
+            YubiKeyApplication application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
@@ -49,10 +49,10 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Property_SlotNum()
         {
-            var slotNumber = PivSlot.Retired11;
+            byte slotNumber = PivSlot.Retired11;
             var command = new GetMetadataCommand(slotNumber);
 
-            var getSlotNum = command.SlotNumber;
+            byte getSlotNum = command.SlotNumber;
 
             Assert.Equal(slotNumber, getSlotNum);
         }
@@ -63,11 +63,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3, 0x81)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(int cStyle, byte slotNumber)
         {
-            var cmdApdu = GetMetadataCommandApdu(cStyle, slotNumber);
+            CommandApdu cmdApdu = GetMetadataCommandApdu(cStyle, slotNumber);
 
-            var Cla = cmdApdu.Cla;
+            byte Cla = cmdApdu.Cla;
 
-            Assert.Equal(expected: 0, Cla);
+            Assert.Equal(0, Cla);
         }
 
         [Theory]
@@ -76,11 +76,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3, 0x9D)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHexF7(int cStyle, byte slotNumber)
         {
-            var cmdApdu = GetMetadataCommandApdu(cStyle, slotNumber);
+            CommandApdu cmdApdu = GetMetadataCommandApdu(cStyle, slotNumber);
 
-            var Ins = cmdApdu.Ins;
+            byte Ins = cmdApdu.Ins;
 
-            Assert.Equal(expected: 0xF7, Ins);
+            Assert.Equal(0xF7, Ins);
         }
 
         [Theory]
@@ -89,11 +89,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3, 0x91)]
         public void CreateCommandApdu_GetP1Property_ReturnsZero(int cStyle, byte slotNumber)
         {
-            var cmdApdu = GetMetadataCommandApdu(cStyle, slotNumber);
+            CommandApdu cmdApdu = GetMetadataCommandApdu(cStyle, slotNumber);
 
-            var P1 = cmdApdu.P1;
+            byte P1 = cmdApdu.P1;
 
-            Assert.Equal(expected: 0, P1);
+            Assert.Equal(0, P1);
         }
 
         [Theory]
@@ -102,9 +102,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3, 0x94)]
         public void CreateCommandApdu_GetP2Property_ReturnsSlot(int cStyle, byte slotNumber)
         {
-            var cmdApdu = GetMetadataCommandApdu(cStyle, slotNumber);
+            CommandApdu cmdApdu = GetMetadataCommandApdu(cStyle, slotNumber);
 
-            var P2 = cmdApdu.P2;
+            byte P2 = cmdApdu.P2;
 
             Assert.Equal(slotNumber, P2);
         }
@@ -115,9 +115,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3, 0x83)]
         public void CreateCommandApdu_GetData_ReturnsEmpty(int cStyle, byte slotNumber)
         {
-            var cmdApdu = GetMetadataCommandApdu(cStyle, slotNumber);
+            CommandApdu cmdApdu = GetMetadataCommandApdu(cStyle, slotNumber);
 
-            var data = cmdApdu.Data;
+            ReadOnlyMemory<byte> data = cmdApdu.Data;
 
             Assert.True(data.IsEmpty);
         }
@@ -128,11 +128,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3, 0x86)]
         public void CreateCommandApdu_GetNc_ReturnsZero(int cStyle, byte slotNumber)
         {
-            var cmdApdu = GetMetadataCommandApdu(cStyle, slotNumber);
+            CommandApdu cmdApdu = GetMetadataCommandApdu(cStyle, slotNumber);
 
-            var Nc = cmdApdu.Nc;
+            int Nc = cmdApdu.Nc;
 
-            Assert.Equal(expected: 0, Nc);
+            Assert.Equal(0, Nc);
         }
 
         [Theory]
@@ -141,11 +141,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(3, 0x89)]
         public void CreateCommandApdu_GetNe_ReturnsZero(int cStyle, byte slotNumber)
         {
-            var cmdApdu = GetMetadataCommandApdu(cStyle, slotNumber);
+            CommandApdu cmdApdu = GetMetadataCommandApdu(cStyle, slotNumber);
 
-            var Ne = cmdApdu.Ne;
+            int Ne = cmdApdu.Ne;
 
-            Assert.Equal(expected: 0, Ne);
+            Assert.Equal(0, Ne);
         }
 
         [Fact]
@@ -154,7 +154,7 @@ namespace Yubico.YubiKey.Piv.Commands
             var responseApdu = new ResponseApdu(new byte[] { 0x00, 0x00, 0x00, 0x00, 0x90, 0x00 });
             var metadataCommand = new GetMetadataCommand(PivSlot.Retired4);
 
-            var metadataResponse = metadataCommand.CreateResponseForApdu(responseApdu);
+            GetMetadataResponse metadataResponse = metadataCommand.CreateResponseForApdu(responseApdu);
 
             Assert.True(metadataResponse is GetMetadataResponse);
         }
@@ -162,7 +162,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_BadSlot_CorrectException()
         {
-            _ = Assert.Throws<ArgumentException>(() => new GetMetadataCommand(slotNumber: 0));
+            _ = Assert.Throws<ArgumentException>(() => new GetMetadataCommand(0));
         }
 
         [Fact]
@@ -181,7 +181,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
         private static CommandApdu GetMetadataCommandApdu(int cStyle, byte pivSlot)
         {
-            var metadataCommand = GetCommandObject(cStyle, pivSlot);
+            GetMetadataCommand metadataCommand = GetCommandObject(cStyle, pivSlot);
             return metadataCommand.CreateCommandApdu();
         }
 
@@ -201,9 +201,9 @@ namespace Yubico.YubiKey.Piv.Commands
                     break;
 
                 case 2:
-                    cmd = new GetMetadataCommand
+                    cmd = new GetMetadataCommand()
                     {
-                        SlotNumber = slotNumber
+                        SlotNumber = slotNumber,
                     };
                     break;
 

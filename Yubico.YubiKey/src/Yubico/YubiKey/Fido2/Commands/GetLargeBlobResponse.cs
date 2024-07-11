@@ -18,17 +18,17 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    ///     The response to the <see cref="GetLargeBlobCommand" /> command, returning
-    ///     the large blob.
+    /// The response to the <see cref="GetLargeBlobCommand"/> command, returning
+    /// the large blob.
     /// </summary>
     public sealed class GetLargeBlobResponse : Fido2Response, IYubiKeyResponseWithData<ReadOnlyMemory<byte>>
     {
         /// <summary>
-        ///     Constructs a <c>GetLargeBlobResponse</c> instance based on a ResponseApdu
-        ///     received from the YubiKey.
+        /// Constructs a <c>GetLargeBlobResponse</c> instance based on a ResponseApdu
+        /// received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     The ResponseApdu returned by the YubiKey.
+        /// The ResponseApdu returned by the YubiKey.
         /// </param>
         public GetLargeBlobResponse(ResponseApdu responseApdu) :
             base(responseApdu)
@@ -36,14 +36,14 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <summary>
-        ///     Gets the raw data returned by the YubiKey. The data is not parsed in
-        ///     any way.
+        /// Gets the raw data returned by the YubiKey. The data is not parsed in
+        /// any way.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        ///     Thrown when <see cref="YubiKeyResponse.Status" /> is not <see cref="ResponseStatus.Success" />.
+        /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
         /// <returns>
-        ///     The large blob data.
+        /// The large blob data.
         /// </returns>
         public ReadOnlyMemory<byte> GetData()
         {

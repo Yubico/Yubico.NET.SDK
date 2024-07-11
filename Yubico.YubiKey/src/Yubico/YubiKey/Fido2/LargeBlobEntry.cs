@@ -26,24 +26,24 @@ using Yubico.YubiKey.Fido2.Cbor;
 namespace Yubico.YubiKey.Fido2
 {
     /// <summary>
-    ///     Contains the data from one entry in the Large Blob Array. See also the
-    ///     <xref href="Fido2LargeBlobs">user's manual entry</xref> on large blobs.
+    /// Contains the data from one entry in the Large Blob Array. See also the
+    /// <xref href="Fido2LargeBlobs">user's manual entry</xref> on large blobs.
     /// </summary>
     /// <remarks>
-    ///     The <see cref="SerializedLargeBlobArray" /> class contains a <c>List</c> of
-    ///     <c>LargeBlobEntry</c>, this class. When you get a Large Blob Array from a
-    ///     YubiKey (<see cref="Fido2Session.GetSerializedLargeBlobArray" />), you get a
-    ///     <c>LargeBlobArray</c> object. You then have access to each of the
-    ///     individual entries in the Large Blob Array through that list of
-    ///     <c>LargeBlobEntry</c>. If you want to add a new <c>LargeBlobEntry</c> to
-    ///     the Array's <c>List</c>, call the
-    ///     <see cref="SerializedLargeBlobArray.AddEntry" /> method.
-    ///     <para>
-    ///         This class contains only properties and a <see cref="TryDecrypt" />
-    ///         method. You will not build an individual entry yourself, only the
-    ///         <c>LargeBlobArray</c> class can do that. But you will be able to see the
-    ///         data of the entry.
-    ///     </para>
+    /// The <see cref="SerializedLargeBlobArray"/> class contains a <c>List</c> of
+    /// <c>LargeBlobEntry</c>, this class. When you get a Large Blob Array from a
+    /// YubiKey (<see cref="Fido2Session.GetSerializedLargeBlobArray"/>), you get a
+    /// <c>LargeBlobArray</c> object. You then have access to each of the
+    /// individual entries in the Large Blob Array through that list of
+    /// <c>LargeBlobEntry</c>. If you want to add a new <c>LargeBlobEntry</c> to
+    /// the Array's <c>List</c>, call the
+    /// <see cref="SerializedLargeBlobArray.AddEntry"/> method.
+    /// <para>
+    /// This class contains only properties and a <see cref="TryDecrypt"/>
+    /// method. You will not build an individual entry yourself, only the
+    /// <c>LargeBlobArray</c> class can do that. But you will be able to see the
+    /// data of the entry.
+    /// </para>
     /// </remarks>
     public class LargeBlobEntry
     {
@@ -51,9 +51,7 @@ namespace Yubico.YubiKey.Fido2
         private const int KeyNonce = 2;
         private const int KeyOrigSize = 3;
         private const int NonceSize = 12;
-
         private const int GcmTagSize = 16;
-
         // To write out associated info, which is
         //   62 6C 6F 62 || littleEndian64(originalSize)
         private const int AssociatedDataSize = 12;
@@ -61,6 +59,32 @@ namespace Yubico.YubiKey.Fido2
         private const int AssociatedSizeOffset = 4;
 
         private readonly Logger _log = Log.GetLogger();
+
+        /// <summary>
+        /// The encrypted data. This is either the retrieved encrypted data when
+        /// getting a Large Blob Array, or the provided data encrypted using the
+        /// specified <c>LargeBlobKey</c> when creating a new entry to store. The
+        /// last 16 bytes make up the GCM authentication tag.
+        /// </summary>
+        /// <remarks>
+        /// The plaintext data is compressed before encrypting.
+        /// </remarks>
+        public ReadOnlyMemory<byte> Ciphertext { get; private set; }
+
+        /// <summary>
+        /// The nonce used to perform the AES-GCD operation. This is either the
+        /// retrieved nonce when getting a Large Blob Array, or the generated
+        /// nonce used when creating a new entry to store.
+        /// </summary>
+        public ReadOnlyMemory<byte> Nonce { get; private set; }
+
+        /// <summary>
+        /// The length, in bytes, of the unencrypted, uncompressed data. This is
+        /// either the retrieved <c>origSize</c> in the Large Blob Map when
+        /// getting a Large Blob Array, or the length, in bytes, of the provided
+        /// data when creating a new entry to store.
+        /// </summary>
+        public int OriginalDataLength { get; private set; }
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -70,25 +94,25 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        ///     Build a new instance of <see cref="LargeBlobEntry" /> that will be
-        ///     added to the <see cref="SerializedLargeBlobArray" />.
+        /// Build a new instance of <see cref="LargeBlobEntry"/> that will be
+        /// added to the <see cref="SerializedLargeBlobArray"/>.
         /// </summary>
         /// <remarks>
-        ///     Use this constructor when you want to create a new entry and add it
-        ///     to the array.
-        ///     <para>
-        ///         Generally you will get an assertion, requesting the
-        ///         <c>LargeBlobKey</c> extension, and provide the data you want to store
-        ///         along with the <see cref="GetAssertionData.LargeBlobKey" /> in the
-        ///         returned <see cref="GetAssertionData" /> object.
-        ///     </para>
+        /// Use this constructor when you want to create a new entry and add it
+        /// to the array.
+        /// <para>
+        /// Generally you will get an assertion, requesting the
+        /// <c>LargeBlobKey</c> extension, and provide the data you want to store
+        /// along with the <see cref="GetAssertionData.LargeBlobKey"/> in the
+        /// returned <see cref="GetAssertionData"/> object.
+        /// </para>
         /// </remarks>
         /// <param name="blobData">
-        ///     The data to store in the Large Blob Array.
+        /// The data to store in the Large Blob Array.
         /// </param>
         /// <param name="largeBlobKey">
-        ///     The 32-byte key returned by the YubiKey in an assertion, it will be
-        ///     used to encrypt the <c>blobData</c>.
+        /// The 32-byte key returned by the YubiKey in an assertion, it will be
+        /// used to encrypt the <c>blobData</c>.
         /// </param>
         internal LargeBlobEntry(ReadOnlyMemory<byte> blobData, ReadOnlyMemory<byte> largeBlobKey)
         {
@@ -98,25 +122,25 @@ namespace Yubico.YubiKey.Fido2
 
             using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
             byte[] nonce = new byte[NonceSize];
-            randomObject.GetBytes(nonce, offset: 0, NonceSize);
+            randomObject.GetBytes(nonce, 0, NonceSize);
             Nonce = new ReadOnlyMemory<byte>(nonce);
 
             Ciphertext = EncryptBlobData(blobData, largeBlobKey);
         }
 
         /// <summary>
-        ///     Build a new instance of <see cref="LargeBlobEntry" /> based on the
-        ///     given CBOR encoding.
+        /// Build a new instance of <see cref="LargeBlobEntry"/> based on the
+        /// given CBOR encoding.
         /// </summary>
         /// <remarks>
-        ///     This constructor is used by the <see cref="SerializedLargeBlobArray" />
-        ///     class when it is decoding an existing Serialized Large Blob Array. After
-        ///     decoding, use the <see cref="TryDecrypt" /> method to obtain the
-        ///     actual data.
-        ///     <para>
-        ///         The encoding must follow the definition of the <c>large blob map</c>
-        ///         in section 6.10.3 of the CTAP 2.1 standard:
-        ///         <code>
+        /// This constructor is used by the <see cref="SerializedLargeBlobArray"/>
+        /// class when it is decoding an existing Serialized Large Blob Array. After
+        /// decoding, use the <see cref="TryDecrypt"/> method to obtain the
+        /// actual data.
+        /// <para>
+        /// The encoding must follow the definition of the <c>large blob map</c>
+        /// in section 6.10.3 of the CTAP 2.1 standard:
+        /// <code>
         ///   A3                      -- map of 3 key/value pairs
         ///     01  --byte string--    -- key = 1, value is a byte string
         ///     02  --byte string--    -- key = 2, value is a byte string
@@ -127,15 +151,15 @@ namespace Yubico.YubiKey.Fido2
         ///  and the unsigned int is the length, in bytes, of the original,
         ///    uncompressed data
         /// </code>
-        ///     </para>
+        /// </para>
         /// </remarks>
         /// <param name="cborEncoding">
-        ///     The map that is a large blob array entry, encoded following the CTAP
-        ///     2.1 and CBOR (RFC 8949) standards.
+        /// The map that is a large blob array entry, encoded following the CTAP
+        /// 2.1 and CBOR (RFC 8949) standards.
         /// </param>
         /// <exception cref="Ctap2DataException">
-        ///     The <c>cborEncoding</c> is not a valid CBOR encoding, or it is not a
-        ///     correct encoding for FIDO2 large blob map.
+        /// The <c>cborEncoding</c> is not a valid CBOR encoding, or it is not a
+        /// correct encoding for FIDO2 large blob map.
         /// </exception>
         internal LargeBlobEntry(ReadOnlyMemory<byte> cborEncoding)
         {
@@ -166,71 +190,45 @@ namespace Yubico.YubiKey.Fido2
         }
 
         /// <summary>
-        ///     The encrypted data. This is either the retrieved encrypted data when
-        ///     getting a Large Blob Array, or the provided data encrypted using the
-        ///     specified <c>LargeBlobKey</c> when creating a new entry to store. The
-        ///     last 16 bytes make up the GCM authentication tag.
+        /// Try to decrypt the data using the given key. If the key is correct,
+        /// this will set the return <c>true</c> and return the plaintext in the
+        /// out argument (decrypted and decompressed).
         /// </summary>
         /// <remarks>
-        ///     The plaintext data is compressed before encrypting.
-        /// </remarks>
-        public ReadOnlyMemory<byte> Ciphertext { get; }
-
-        /// <summary>
-        ///     The nonce used to perform the AES-GCD operation. This is either the
-        ///     retrieved nonce when getting a Large Blob Array, or the generated
-        ///     nonce used when creating a new entry to store.
-        /// </summary>
-        public ReadOnlyMemory<byte> Nonce { get; }
-
-        /// <summary>
-        ///     The length, in bytes, of the unencrypted, uncompressed data. This is
-        ///     either the retrieved <c>origSize</c> in the Large Blob Map when
-        ///     getting a Large Blob Array, or the length, in bytes, of the provided
-        ///     data when creating a new entry to store.
-        /// </summary>
-        public int OriginalDataLength { get; }
-
-        /// <summary>
-        ///     Try to decrypt the data using the given key. If the key is correct,
-        ///     this will set the return <c>true</c> and return the plaintext in the
-        ///     out argument (decrypted and decompressed).
-        /// </summary>
-        /// <remarks>
-        ///     Because the data is encrypted using AES-GCD, the ciphertext contains
-        ///     both the encrypted data and an "authentication tag". While any key
-        ///     will be able to decrypt the data and produce a result (some result),
-        ///     only the correct key will be able to authenticate the tag. Hence,
-        ///     this method will be able to determine whether the key provided was
-        ///     the correct key and the decrypted data is the correct data.
-        ///     <para>
-        ///         If the method is able to decrypt using the key, it will then
-        ///         decompress the decrypted data.
-        ///     </para>
-        ///     <para>
-        ///         When reading a Large Blob Array, you will likely obtain the large
-        ///         blob data from the YubiKey, resulting in a
-        ///         <see cref="SerializedLargeBlobArray" /> object. At that point, each of
-        ///         the entries contain only the encrypted data. You will then obtain the
-        ///         <c>LargeBlobKey</c> from the target credential, and use it to try to
-        ///         decrypt the data of each entry in the Large Blob Array.
-        ///     </para>
-        ///     <para>
-        ///         Note that the plaintext returned is a <c>Memory</c> object, not a
-        ///         <c>ReadOnlyMemory</c> object. This is so you can overwrite it for
-        ///         security reasons if you want.
-        ///     </para>
+        /// Because the data is encrypted using AES-GCD, the ciphertext contains
+        /// both the encrypted data and an "authentication tag". While any key
+        /// will be able to decrypt the data and produce a result (some result),
+        /// only the correct key will be able to authenticate the tag. Hence,
+        /// this method will be able to determine whether the key provided was
+        /// the correct key and the decrypted data is the correct data.
+        /// <para>
+        /// If the method is able to decrypt using the key, it will then
+        /// decompress the decrypted data.
+        /// </para>
+        /// <para>
+        /// When reading a Large Blob Array, you will likely obtain the large
+        /// blob data from the YubiKey, resulting in a
+        /// <see cref="SerializedLargeBlobArray"/> object. At that point, each of
+        /// the entries contain only the encrypted data. You will then obtain the
+        /// <c>LargeBlobKey</c> from the target credential, and use it to try to
+        /// decrypt the data of each entry in the Large Blob Array.
+        /// </para>
+        /// <para>
+        /// Note that the plaintext returned is a <c>Memory</c> object, not a
+        /// <c>ReadOnlyMemory</c> object. This is so you can overwrite it for
+        /// security reasons if you want.
+        /// </para>
         /// </remarks>
         /// <param name="largeBlobKey">
-        ///     The key to use to decrypt.
+        /// The key to use to decrypt.
         /// </param>
         /// <param name="plaintext">
-        ///     An output argument. A new object containing the plaintext if the
-        ///     decryption succeeds, or an empty <c>Memory</c> object otherwise.
+        /// An output argument. A new object containing the plaintext if the
+        /// decryption succeeds, or an empty <c>Memory</c> object otherwise.
         /// </param>
         /// <returns>
-        ///     A boolean, <c>true</c> if the data is successfully decrypted using
-        ///     the given key, and <c>false</c> otherwise.
+        /// A boolean, <c>true</c> if the data is successfully decrypted using
+        /// the given key, and <c>false</c> otherwise.
         /// </returns>
         public bool TryDecrypt(ReadOnlyMemory<byte> largeBlobKey, out Memory<byte> plaintext)
         {
@@ -244,12 +242,12 @@ namespace Yubico.YubiKey.Fido2
             {
                 var associatedData = new Span<byte>(new byte[AssociatedDataSize]);
                 BinaryPrimitives.WriteInt32BigEndian(associatedData, AssociatedBlob);
-                BinaryPrimitives.WriteInt64LittleEndian(associatedData.Slice(AssociatedSizeOffset), OriginalDataLength);
+                BinaryPrimitives.WriteInt64LittleEndian(associatedData.Slice(AssociatedSizeOffset), (long)OriginalDataLength);
 
                 IAesGcmPrimitives decryptor = CryptographyProviders.AesGcmPrimitivesCreator();
                 bool returnValue = decryptor.DecryptAndVerify(
                     largeBlobKey.Span, Nonce.Span,
-                    Ciphertext.Slice(start: 0, dataToDecryptLength).Span,
+                    Ciphertext.Slice(0, dataToDecryptLength).Span,
                     Ciphertext.Slice(dataToDecryptLength, GcmTagSize).Span, decryptedData, associatedData);
 
                 if (returnValue)
@@ -303,14 +301,13 @@ namespace Yubico.YubiKey.Fido2
                 var associatedData = new Span<byte>(new byte[AssociatedDataSize]);
                 BinaryPrimitives.WriteInt32BigEndian(associatedData, AssociatedBlob);
                 BinaryPrimitives.WriteInt64LittleEndian(
-                    associatedData.Slice(AssociatedSizeOffset), blobData.Length);
+                    associatedData.Slice(AssociatedSizeOffset), (long)blobData.Length);
 
                 IAesGcmPrimitives encryptor = CryptographyProviders.AesGcmPrimitivesCreator();
                 encryptor.EncryptAndAuthenticate(
                     largeBlobKey.Span, Nonce.Span, dataToEncrypt, encryptedData, gcmTag, associatedData);
-
-                Array.Copy(encryptedData, sourceIndex: 0, ciphertext, destinationIndex: 0, encryptedData.Length);
-                Array.Copy(gcmTag, sourceIndex: 0, ciphertext, encryptedData.Length, gcmTag.Length);
+                Array.Copy(encryptedData, 0, ciphertext, 0, encryptedData.Length);
+                Array.Copy(gcmTag, 0, ciphertext, encryptedData.Length, gcmTag.Length);
 
                 return new ReadOnlyMemory<byte>(ciphertext);
             }
@@ -321,18 +318,19 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
-        /// <inheritdoc />
-        internal byte[] CborEncode() =>
-
+        /// <inheritdoc/>
+        internal byte[] CborEncode()
+        {
             // An encoded LargeBlobEntry is
             //   map
             //     01  byte string: ciphertext
             //     02  byte string: nonce
             //     03  unsigned int : originalplaintext length
-            new CborMapWriter<int>()
+            return new CborMapWriter<int>()
                 .Entry(KeyCiphertext, Ciphertext)
                 .Entry(KeyNonce, Nonce)
                 .Entry(KeyOrigSize, OriginalDataLength)
                 .Encode();
+        }
     }
 }

@@ -14,17 +14,19 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Cryptography;
 using Yubico.YubiKey.Fido2.Commands;
+using Yubico.YubiKey.U2f;
 using Yubico.YubiKey.U2f.Commands;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
-    internal class U2fPlugin : PluginBase
+    class U2fPlugin : PluginBase
     {
-        private bool _runEchoTest, _runRegisterTest;
+        public override string Name => "U2f";
+
+        public override string Description => "Runs U2f tests.";
 
         public U2fPlugin(IOutput output) : base(output)
         {
@@ -32,10 +34,6 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 "[command] The U2f command case to run. Current choices are EchoTest and "
                 + "RegisterCommand. If not specified, both are run.";
         }
-
-        public override string Name => "U2f";
-
-        public override string Description => "Runs U2f tests.";
 
         public override bool Execute()
         {
@@ -46,35 +44,34 @@ namespace Yubico.YubiKey.TestApp.Plugins
             }
 
             IList<IYubiKeyDevice> keys = YubiKeyDevice.FindAll().ToList();
-            for (var i = 0; i < keys.Count; ++i)
+            for (int i = 0; i < keys.Count; ++i)
             {
-                var key = keys[i];
+                IYubiKeyDevice key = keys[i];
 
                 Output.WriteLine($"YubiKey #{i + 1} [ Serial number: {key.SerialNumber} ]");
 
-                using (var u2fConnection = key.Connect(YubiKeyApplication.FidoU2f))
+                using (IYubiKeyConnection u2fConnection = key.Connect(YubiKeyApplication.FidoU2f))
                 {
                     var command = new VersionCommand();
-                    var response = u2fConnection.SendCommand(command);
-                    var version = response.GetData();
+                    VersionResponse response = u2fConnection.SendCommand(command);
+                    FirmwareVersion version = response.GetData();
                     Output.WriteLine($"FWV   : {version.Major}.{version.Minor}.{version.Patch}");
                 }
 
                 if (_runEchoTest)
                 {
-                    using (var u2fConnection = key.Connect(YubiKeyApplication.FidoU2f))
+                    using (IYubiKeyConnection u2fConnection = key.Connect(YubiKeyApplication.FidoU2f))
                     {
                         EchoCommandTestSuite(u2fConnection);
                     }
                 }
-
                 if (_runRegisterTest)
                 {
-                    using (var u2fConnection = key.Connect(YubiKeyApplication.FidoU2f))
+                    using (IYubiKeyConnection u2fConnection = key.Connect(YubiKeyApplication.FidoU2f))
                     {
-                        var challenge = new byte[32];
+                        byte[] challenge = new byte[32];
                         RandomNumberGenerator.Fill(challenge);
-                        var appId = new byte[32];
+                        byte[] appId = new byte[32];
                         RandomNumberGenerator.Fill(appId);
                         var registerCommand = new RegisterCommand(challenge, appId);
 
@@ -84,13 +81,12 @@ namespace Yubico.YubiKey.TestApp.Plugins
                             registerResponse = u2fConnection.SendCommand(registerCommand);
                         } while (registerResponse.Status == ResponseStatus.ConditionsNotSatisfied);
 
-                        var registrationData = registerResponse.GetData();
+                        RegistrationData registrationData = registerResponse.GetData();
 
                         Output.WriteLine($"verifies?: {registrationData.VerifySignature(challenge, appId)}");
                     }
                 }
             }
-
             return true;
         }
 
@@ -113,8 +109,9 @@ namespace Yubico.YubiKey.TestApp.Plugins
             }
         }
 
-        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters",
-            Justification = "<Pending>")]
+        private bool _runEchoTest, _runRegisterTest;
+
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
         private void EchoCommandTestSuite(IYubiKeyConnection u2fConnection)
         {
             Output.WriteLine("\n\n***TestEchoCommand***");
@@ -124,31 +121,31 @@ namespace Yubico.YubiKey.TestApp.Plugins
             TestEchoCommand(u2fConnection);
 
             // -0 length
-            TestEchoCommand(u2fConnection, dataLength: 0);
+            TestEchoCommand(u2fConnection, 0);
 
             // -1 length
-            TestEchoCommand(u2fConnection, dataLength: 1);
+            TestEchoCommand(u2fConnection, 1);
 
             // -n length
-            foreach (var l in Enumerable.Range(start: 1, count: 10))
+            foreach (int l in Enumerable.Range(1, 10))
             {
-                TestEchoCommand(u2fConnection, (int)Math.Pow(x: 2, l));
+                TestEchoCommand(u2fConnection, (int)Math.Pow(2, l));
             }
         }
 
         private void TestEchoCommand(IYubiKeyConnection u2fConnection, int? dataLength = null)
         {
             // Create data to echo
-            var sendData = GenerateRandBytes(dataLength);
+            byte[]? sendData = GenerateRandBytes(dataLength);
 
             // Create echo command
-            var echoCommand = sendData is null ? new EchoCommand() : new EchoCommand(sendData);
+            EchoCommand echoCommand = sendData is null ? new EchoCommand() : new EchoCommand(sendData);
 
             // Send command, get response
-            var echoResponse = u2fConnection.SendCommand(echoCommand);
+            EchoResponse echoResponse = u2fConnection.SendCommand(echoCommand);
 
             // Get data out of response
-            var echoData = echoResponse.GetData();
+            ReadOnlyMemory<byte> echoData = echoResponse.GetData();
 
             // Check that response data matches sent data
             Output.Write($"Test Length = {dataLength,5} || ");
@@ -163,14 +160,13 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 return null;
             }
 
-            var randBytes = new byte[(int)length];
+            byte[] randBytes = new byte[(int)length];
             RandomNumberGenerator.Fill(randBytes);
             return randBytes;
         }
 
-        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters",
-            Justification = "<Pending>")]
-        private bool TestSpanSequenceEqual<T>(ReadOnlySpan<T> span1, ReadOnlySpan<T> span2) where T : IComparable<T>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
+        private bool TestSpanSequenceEqual<T>(ReadOnlySpan<T> span1, ReadOnlySpan<T> span2) where T : System.IComparable<T>
         {
             if (span1.Length != span2.Length)
             {
@@ -178,12 +174,12 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 return false;
             }
 
-            for (var i = 0; i < span1.Length; i++)
+            for (int i = 0; i < span1.Length; i++)
             {
                 if (span1[i].CompareTo(span2[i]) != 0)
                 {
                     Output.WriteLine($"FAIL: Sequence does not match at index {i}.");
-                    PrintContext(span1, span2, i, plusMinusContext: 5);
+                    PrintContext(span1, span2, i, 5);
                     return false;
                 }
             }
@@ -192,12 +188,11 @@ namespace Yubico.YubiKey.TestApp.Plugins
             return true;
         }
 
-        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters",
-            Justification = "<Pending>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
         private void PrintContext<T>(ReadOnlySpan<T> span1, ReadOnlySpan<T> span2, int? index, int plusMinusContext = 0)
         {
             int startIndex, endIndex;
-            var largerLength = span1.Length > span2.Length ? span1.Length : span2.Length;
+            int largerLength = span1.Length > span2.Length ? span1.Length : span2.Length;
 
             if (index is null)
             {
@@ -206,20 +201,20 @@ namespace Yubico.YubiKey.TestApp.Plugins
             }
             else
             {
-                startIndex = Math.Max((int)index - plusMinusContext, val2: 0);
+                startIndex = Math.Max((int)index - plusMinusContext, 0);
                 endIndex = Math.Min((int)index + plusMinusContext, largerLength);
             }
 
             Output.WriteLine($"|{"Index",7}|{"span1",7}|{"span2",7}|");
 
-            for (var i = startIndex; i < endIndex; i++)
+            for (int i = startIndex; i < endIndex; i++)
             {
                 Output.WriteLine
-                (
-                    $"|{i,7}" +
-                    $"|{(i < span1.Length ? span1[i]?.ToString() : "--"),7}" +
-                    $"|{(i < span2.Length ? span2[i]?.ToString() : "--"),7}|"
-                );
+                    (
+                        $"|{i,7}" +
+                        $"|{(i < span1.Length ? span1[i]?.ToString() : "--"),7}" +
+                        $"|{(i < span2.Length ? span2[i]?.ToString() : "--"),7}|"
+                    );
             }
         }
     }

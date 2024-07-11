@@ -139,7 +139,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // ECDH object from the EC parameters. So get the ECDsa object, then
             // get the parameters.
             using var ecDsaObject = (ECDsa)KeyConverter.GetDotNetFromPivPublicKey(publicKey);
-            ECParameters ecParams = ecDsaObject.ExportParameters(includePrivateParameters: false);
+            ECParameters ecParams = ecDsaObject.ExportParameters(false);
 
             // This is the .NET version of the public key associated with the
             // private key on the YubiKey. The correspondent will combine this
@@ -149,7 +149,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             // This will create a new EC Key pair based on the curve.
             // This is the correspondent's public and private key.
             using var correspondentObject = ECDiffieHellman.Create(ecParams.Curve);
-            correspondentPublicKey = KeyConverter.GetPemFromDotNet(correspondentObject, isPrivate: false);
+            correspondentPublicKey = KeyConverter.GetPemFromDotNet(correspondentObject, false);
 
             // With the .NET ECDH key agree classes, the value returned is the
             // digest of the shared secret.

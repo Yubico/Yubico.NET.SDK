@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
@@ -20,28 +21,28 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    ///     Verify the PIV Bio temporary PIN.
+    /// Verify the PIV Bio temporary PIN.
     /// </summary>
     /// <remarks>
-    ///     The partner Response class is <see cref="VerifyTemporaryPinResponse" />.
-    ///     <para>
-    ///         When using biometric verification, clients can request a temporary PIN
-    ///         by calling <see cref="VerifyUvCommand" /> with requestTemporaryPin=true.
-    ///     </para>
-    ///     <para>
-    ///         Example:
-    ///     </para>
-    ///     <code language="csharp">
+    /// The partner Response class is <see cref="VerifyTemporaryPinResponse"/>.
+    /// <para>
+    /// When using biometric verification, clients can request a temporary PIN
+    /// by calling <see cref="VerifyUvCommand"/> with requestTemporaryPin=true.
+    /// </para>
+    /// <para>
+    /// Example:
+    /// </para>
+    /// <code language="csharp">
     ///   /* This example assumes the application has a method to collect a PIN.
     ///   */
-    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br />
+    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   /* request temporary PIN */
-    ///   var verifyUvCommand = new VerifyUvCommand(true, false);<br />
+    ///   var verifyUvCommand = new VerifyUvCommand(true, false);<br/>
     ///   /* a biometric verification will be performed */
     ///   var verifyUvResponse = connection.SendCommand(verifyUvCommand);
     ///   if (verifyUvResponse.Status == ResponseStatus.Success) 
     ///   {
-    ///     var temporaryPin = verifyUvResponse.GetData();<br />
+    ///     var temporaryPin = verifyUvResponse.GetData();<br/>
     ///     /* using temporary PIN will not request biometric verification */
     ///     var verifyTemporaryPinCommand = new VerifyTemporaryPin(temporaryPin);
     ///     var verifyResponse = connection.SendCommand(verifyTemporaryPinCommand);
@@ -60,6 +61,15 @@ namespace Yubico.YubiKey.Piv.Commands
 
         private readonly ReadOnlyMemory<byte> _temporaryPin;
 
+        /// <summary>
+        /// Gets the YubiKeyApplication to which this command belongs. For this
+        /// command it's PIV.
+        /// </summary>
+        /// <value>
+        /// YubiKeyApplication.Piv
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.Piv;
+
         // The default constructor explicitly defined. We don't want it to be
         // used.
         // Note that there is no object-initializer constructor. the only
@@ -70,28 +80,28 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <summary>
-        ///     Initializes a new instance of the VerifyTemporaryPinCommand class which will
-        ///     use the given temporary PIN.
+        /// Initializes a new instance of the VerifyTemporaryPinCommand class which will
+        /// use the given temporary PIN.
         /// </summary>
         /// <remarks>
-        ///     In order to verify a temporary PIN, the caller must supply the temporary PIN.
-        ///     In this class, the temporary PIN is supplied as <c>ReadOnlyMemory&lt;byte&gt;</c>.
-        ///     It is possible to pass a <c>byte[]</c>, because it will be automatically cast.
-        ///     <para>
-        ///         This class will copy references to the temporary PIN (not the values. This
-        ///         means that you can overwrite the temporary PIN in your byte array only after
-        ///         this class is done with it. It will no longer need the temporary PIN after
-        ///         calling <c>connection.SendCommand</c>.
-        ///     </para>
-        ///     <para>
-        ///         A temporary PIN is 16 bytes long.
-        ///     </para>
+        /// In order to verify a temporary PIN, the caller must supply the temporary PIN.
+        /// In this class, the temporary PIN is supplied as <c>ReadOnlyMemory&lt;byte&gt;</c>.
+        /// It is possible to pass a <c>byte[]</c>, because it will be automatically cast.
+        /// <para>
+        /// This class will copy references to the temporary PIN (not the values. This
+        /// means that you can overwrite the temporary PIN in your byte array only after
+        /// this class is done with it. It will no longer need the temporary PIN after
+        /// calling <c>connection.SendCommand</c>.
+        /// </para>
+        /// <para>
+        /// A temporary PIN is 16 bytes long.
+        /// </para>
         /// </remarks>
         /// <param name="temporaryPin">
-        ///     The temporary Pin.
+        /// The temporary Pin.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     The PIN is an invalid length.
+        /// The PIN is an invalid length.
         /// </exception>
         public VerifyTemporaryPinCommand(ReadOnlyMemory<byte> temporaryPin)
         {
@@ -105,15 +115,6 @@ namespace Yubico.YubiKey.Piv.Commands
 
             _temporaryPin = temporaryPin;
         }
-
-        /// <summary>
-        ///     Gets the YubiKeyApplication to which this command belongs. For this
-        ///     command it's PIV.
-        /// </summary>
-        /// <value>
-        ///     YubiKeyApplication.Piv
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.Piv;
 
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
@@ -132,6 +133,6 @@ namespace Yubico.YubiKey.Piv.Commands
 
         /// <inheritdoc />
         public VerifyTemporaryPinResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new VerifyTemporaryPinResponse(responseApdu);
+          new VerifyTemporaryPinResponse(responseApdu);
     }
 }

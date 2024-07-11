@@ -17,32 +17,32 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    ///     Gets the serial number of the YubiKey.
+    /// Gets the serial number of the YubiKey.
     /// </summary>
     public class GetSerialNumberCommand : IYubiKeyCommand<GetSerialNumberResponse>
     {
         /// <summary>
-        ///     Constructs a new instance of the GetSerialNumberCommand class.
-        /// </summary>
-        public GetSerialNumberCommand()
-        {
-        }
-
-        /// <summary>
-        ///     Gets the YubiKeyApplication to which this command belongs.
+        /// Gets the YubiKeyApplication to which this command belongs.
         /// </summary>
         /// <value>
-        ///     YubiKeyApplication.Otp
+        /// YubiKeyApplication.Otp
         /// </value>
         public YubiKeyApplication Application => YubiKeyApplication.Otp;
 
+        /// <summary>
+        /// Constructs a new instance of the GetSerialNumberCommand class.
+        /// </summary>
+        public GetSerialNumberCommand()
+        {
+
+        }
+
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Ins = OtpConstants.RequestSlotInstruction,
-                P1 = OtpConstants.SerialNumberSlot
-            };
+        public CommandApdu CreateCommandApdu() => new CommandApdu
+        {
+            Ins = OtpConstants.RequestSlotInstruction,
+            P1 = OtpConstants.SerialNumberSlot
+        };
 
         /// <inheritdoc />
         public GetSerialNumberResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

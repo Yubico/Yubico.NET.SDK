@@ -12,40 +12,42 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.Core.Iso7816;
+using Yubico.YubiKey.Fido2.PinProtocols;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
     /// <summary>
-    ///     Instruct the YubiKey to reset the FIDO2 application.
+    /// Instruct the YubiKey to reset the FIDO2 application.
     /// </summary>
     /// <remarks>
-    ///     This will delete all credentials and associated information from the FIDO2
-    ///     application and remove the PIN.
+    /// This will delete all credentials and associated information from the FIDO2
+    /// application and remove the PIN.
     /// </remarks>
     public class ResetCommand : IYubiKeyCommand<ResetResponse>
     {
         private const int CtapResetCmd = 0x07;
 
+        /// <inheritdoc />
+        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
+
         /// <summary>
-        ///     Constructs an instance of the <see cref="ResetCommand" />.
+        /// Constructs an instance of the <see cref="ResetCommand"/>.
         /// </summary>
         /// <remarks>
-        ///     This will delete all credentials and associated information from the FIDO2
-        ///     application and remove the PIN.
+        /// This will delete all credentials and associated information from the FIDO2
+        /// application and remove the PIN.
         /// </remarks>
         public ResetCommand()
         {
         }
 
         /// <inheritdoc />
-        public YubiKeyApplication Application => YubiKeyApplication.Fido2;
-
-        /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
         {
-            byte[] payload = { CtapResetCmd };
-            return new CommandApdu
+            byte[] payload = new byte[] { CtapResetCmd };
+            return new CommandApdu()
             {
                 Ins = CtapConstants.CtapHidCbor,
                 Data = payload
@@ -53,6 +55,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public ResetResponse CreateResponseForApdu(ResponseApdu responseApdu) => new ResetResponse(responseApdu);
+        public ResetResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new ResetResponse(responseApdu);
     }
 }

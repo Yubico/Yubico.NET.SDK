@@ -22,18 +22,15 @@ namespace Yubico.YubiKey.Fido2
 {
     public class MinPinLenTests : SimpleIntegrationTestConnection
     {
-        private static readonly byte[] _clientDataHash =
-        {
+        static readonly byte[] _clientDataHash = {
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
         };
-
-        private static readonly RelyingParty _rp = new RelyingParty("rp.minpin.length")
+        static readonly RelyingParty _rp = new RelyingParty("rp.minpin.length")
         {
             Name = "RP MinPinLen"
         };
-
-        private static readonly UserEntity _userEntity = new UserEntity(new byte[] { 1, 2, 3, 4, 5 })
+        static readonly UserEntity _userEntity = new UserEntity(new byte[] { 1, 2, 3, 4, 5 })
         {
             Name = "TestUser",
             DisplayName = "Test User"
@@ -51,9 +48,9 @@ namespace Yubico.YubiKey.Fido2
             using (var fido2Session = new Fido2Session(Device))
             {
                 fido2Session.KeyCollector = LocalKeyCollector;
-                var isSupported = fido2Session.AuthenticatorInfo.IsExtensionSupported("minPinLength");
-                var ovMinPin = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
-                var ovCredMgmt = fido2Session.AuthenticatorInfo.GetOptionValue(
+                bool isSupported = fido2Session.AuthenticatorInfo.IsExtensionSupported("minPinLength");
+                OptionValue ovMinPin = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
+                OptionValue ovCredMgmt = fido2Session.AuthenticatorInfo.GetOptionValue(
                     AuthenticatorOptions.credMgmt);
                 if (ovMinPin != OptionValue.True || ovCredMgmt != OptionValue.True || !isSupported)
                 {
@@ -62,11 +59,11 @@ namespace Yubico.YubiKey.Fido2
 
                 DeleteAddedCredential(fido2Session);
 
-                var isValid = AddCredential(fido2Session, out var mcData);
+                bool isValid = AddCredential(fido2Session, out MakeCredentialData? mcData);
                 Assert.True(isValid);
                 Assert.NotNull(mcData);
 
-                var minPinLen = mcData!.AuthenticatorData.GetMinPinLengthExtension();
+                int? minPinLen = mcData!.AuthenticatorData.GetMinPinLengthExtension();
 
                 _ = Assert.NotNull(minPinLen);
 
@@ -78,11 +75,11 @@ namespace Yubico.YubiKey.Fido2
         {
             mcData = null;
 
-            var rpList = new List<string>(capacity: 1)
+            var rpList = new List<string>(1)
             {
                 _rp.Id
             };
-            var isSet = fido2Session.TrySetPinConfig(newMinPinLength: null, rpList);
+            bool isSet = fido2Session.TrySetPinConfig(null, rpList);
             if (!isSet)
             {
                 return false;
@@ -92,7 +89,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 ClientDataHash = _clientDataHash
             };
-            mcParams.AddOption(AuthenticatorOptions.rk, optionValue: true);
+            mcParams.AddOption(AuthenticatorOptions.rk, true);
             mcParams.AddMinPinLengthExtension(fido2Session.AuthenticatorInfo);
 
             mcData = fido2Session.MakeCredential(mcParams);
@@ -102,15 +99,15 @@ namespace Yubico.YubiKey.Fido2
 
         private void DeleteAddedCredential(Fido2Session fido2Session)
         {
-            var rpList = fido2Session.EnumerateRelyingParties();
-            foreach (var rp in rpList)
+            IReadOnlyList<RelyingParty> rpList = fido2Session.EnumerateRelyingParties();
+            foreach (RelyingParty rp in rpList)
             {
                 if (string.Compare(rp.Id, _rp.Id) == 0)
                 {
-                    var credList =
+                    IReadOnlyList<CredentialUserInfo> credList =
                         fido2Session.EnumerateCredentialsForRelyingParty(rp);
 
-                    foreach (var credInfo in credList)
+                    foreach (CredentialUserInfo credInfo in credList)
                     {
                         fido2Session.DeleteCredential(credInfo.CredentialId);
                     }

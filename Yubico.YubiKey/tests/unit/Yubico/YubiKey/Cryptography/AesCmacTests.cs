@@ -16,37 +16,23 @@ using System;
 using Xunit;
 using Yubico.Core.Buffers;
 using Yubico.Core.Cryptography;
+using Yubico.PlatformInterop;
 
 namespace Yubico.YubiKey.Cryptography
 {
     public class AesCmacTests
     {
-        private static byte[] GetKey()
-        {
-            return Hex.HexToBytes("01020304050607080102030405060708");
-        }
-
-        private static byte[] GetInput()
-        {
-            return Hex.HexToBytes("01010101010101010101010101010101");
-        }
-
-        private static byte[] GetShortInput()
-        {
-            return Hex.HexToBytes("AAFA4DAC615236");
-        }
-
-        private static byte[] GetLongInput()
-        {
-            return Hex.HexToBytes("00000000000000000000000600008001360CB43F4301B894CAAFA4DAC615236A");
-        }
+        private static byte[] GetKey() => Hex.HexToBytes("01020304050607080102030405060708");
+        private static byte[] GetInput() => Hex.HexToBytes("01010101010101010101010101010101");
+        private static byte[] GetShortInput() => Hex.HexToBytes("AAFA4DAC615236");
+        private static byte[] GetLongInput() => Hex.HexToBytes("00000000000000000000000600008001360CB43F4301B894CAAFA4DAC615236A");
 
         [Fact]
         public void AesCmac_GivenNullKey_ThrowsArgumentNullException()
         {
-            var input = GetInput();
+            byte[] input = GetInput();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => AesUtilities.BlockCipher(key: null, input));
+            _ = Assert.Throws<ArgumentNullException>(() => AesUtilities.BlockCipher(null, input));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -54,12 +40,12 @@ namespace Yubico.YubiKey.Cryptography
         public void AesCmac_GivenKeyInput_CalculatesCorrectly()
         {
             // Arrange
-            var key = GetKey();
-            var input = GetInput();
-            var cmac = new byte[16];
+            byte[] key = GetKey();
+            byte[] input = GetInput();
+            byte[] cmac = new byte[16];
 
             // Act
-            using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
             cmacObj.CmacInit(key);
             cmacObj.CmacUpdate(input);
             cmacObj.CmacFinal(cmac);
@@ -72,12 +58,12 @@ namespace Yubico.YubiKey.Cryptography
         public void AesCmac_GivenKeyShortInput_CalculatesCorrectly()
         {
             // Arrange
-            var key = GetKey();
-            var input = GetShortInput();
-            var cmac = new byte[16];
+            byte[] key = GetKey();
+            byte[] input = GetShortInput();
+            byte[] cmac = new byte[16];
 
             // Act
-            using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
             cmacObj.CmacInit(key);
             cmacObj.CmacUpdate(input);
             cmacObj.CmacFinal(cmac);
@@ -90,12 +76,12 @@ namespace Yubico.YubiKey.Cryptography
         public void AesCmac_GivenKeyLongInput_CalculatesCorrectly()
         {
             // Arrange
-            var key = GetKey();
-            var input = GetLongInput();
-            var cmac = new byte[16];
+            byte[] key = GetKey();
+            byte[] input = GetLongInput();
+            byte[] cmac = new byte[16];
 
             // Act
-            using var cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
             cmacObj.CmacInit(key);
             cmacObj.CmacUpdate(input);
             cmacObj.CmacFinal(cmac);

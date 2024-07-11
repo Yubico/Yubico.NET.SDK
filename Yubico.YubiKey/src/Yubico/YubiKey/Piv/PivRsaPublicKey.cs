@@ -19,45 +19,44 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Piv
 {
     /// <summary>
-    ///     This class holds an RSA public key.
+    /// This class holds an RSA public key.
     /// </summary>
     /// <remarks>
-    ///     An RSA public key consists of a modulus and public exponent. To build an
-    ///     RSA key object from the modulus and public exponent, use this class's
-    ///     constructor.
-    ///     <para>
-    ///         Once you have the object built, you can get the encoded public key from
-    ///         either the <c>PivEncodedPublicKey</c> or <c>YubiKeyEncodedPublicKey</c>
-    ///         property.
-    ///     </para>
-    ///     <para>
-    ///         If you have an encoded public key, and want to build an object, use
-    ///         the static factory <c>Create</c> method in the base class
-    ///         <see cref="PivPublicKey" />.
-    ///     </para>
-    ///     <para>
-    ///         The YubiKey supports only 1024-bit and 2048-bit RSA keys, which means
-    ///         that the modulus must be exactly 128 or 256 byte long.
-    ///     </para>
-    ///     <para>
-    ///         The YubiKey supports only F4 (0x010001 = decimal 65,537) as the public
-    ///         exponent. Note that if you have the public exponent as an int, you can
-    ///         convert it to a byte array by using <c>BinaryPrimitives</c>.
-    ///         <code language="csharp">
+    /// An RSA public key consists of a modulus and public exponent. To build an
+    /// RSA key object from the modulus and public exponent, use this class's
+    /// constructor.
+    /// <para>
+    /// Once you have the object built, you can get the encoded public key from
+    /// either the <c>PivEncodedPublicKey</c> or <c>YubiKeyEncodedPublicKey</c>
+    /// property.
+    /// </para>
+    /// <para>If you have an encoded public key, and want to build an object, use
+    /// the static factory <c>Create</c> method in the base class
+    /// <see cref="PivPublicKey"/>.
+    /// </para>
+    /// <para>
+    /// The YubiKey supports only 1024-bit and 2048-bit RSA keys, which means
+    /// that the modulus must be exactly 128 or 256 byte long.
+    /// </para>
+    /// <para>
+    /// The YubiKey supports only F4 (0x010001 = decimal 65,537) as the public
+    /// exponent. Note that if you have the public exponent as an int, you can
+    /// convert it to a byte array by using <c>BinaryPrimitives</c>.
+    /// <code language="csharp">
     ///   var exponentAsArray = new byte[4];
     ///   BinaryPrimitives.WriteInt32BigEndian(exponentAsArray, exponentAsInt);
     /// </code>
-    ///         Unlike the modulus, leading 00 bytes in the public exponent are ignored.
-    ///         If you want to examine the public exponent as an int, you can either
-    ///         know that if the class exists, the input was F4 (<c>0x00010001</c>), or
-    ///         use the <c>BinaryPrimitives.ReadInt32BigEndian</c> method.
-    ///     </para>
-    ///     <para>
-    ///         You can build an object from either the encoded public key (using the
-    ///         <c>PivPublicKey.Create</c> static factory method), and then examine the
-    ///         modulus and public exponent, or you can build an object from the modulus
-    ///         and public exponent, then examine the encoding.
-    ///     </para>
+    /// Unlike the modulus, leading 00 bytes in the public exponent are ignored.
+    /// If you want to examine the public exponent as an int, you can either
+    /// know that if the class exists, the input was F4 (<c>0x00010001</c>), or
+    /// use the <c>BinaryPrimitives.ReadInt32BigEndian</c> method.
+    /// </para>
+    /// <para>
+    /// You can build an object from either the encoded public key (using the
+    /// <c>PivPublicKey.Create</c> static factory method), and then examine the
+    /// modulus and public exponent, or you can build an object from the modulus
+    /// and public exponent, then examine the encoding.
+    /// </para>
     /// </remarks>
     public sealed class PivRsaPublicKey : PivPublicKey
     {
@@ -82,19 +81,19 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        ///     Create a new instance of an RSA public key object based on the
-        ///     given modulus and public exponent.
+        /// Create a new instance of an RSA public key object based on the
+        /// given modulus and public exponent.
         /// </summary>
         /// <param name="modulus">
-        ///     The modulus as a canonical byte array. It must be 128 bytes (1024
-        ///     bits) or 256 bytes (2048 bits) long.
+        /// The modulus as a canonical byte array. It must be 128 bytes (1024
+        /// bits) or 256 bytes (2048 bits) long.
         /// </param>
         /// <param name="publicExponent">
-        ///     The public exponent as a canonical byte array. Note that the YubiKey
-        ///     supports only <c>0x01 0x00 0x01</c> (aka F4) as a public exponent.
+        /// The public exponent as a canonical byte array. Note that the YubiKey
+        /// supports only <c>0x01 0x00 0x01</c> (aka F4) as a public exponent.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     The key data supplied is not supported.
+        /// The key data supplied is not supported.
         /// </exception>
         public PivRsaPublicKey(ReadOnlySpan<byte> modulus, ReadOnlySpan<byte> publicExponent)
         {
@@ -108,38 +107,37 @@ namespace Yubico.YubiKey.Piv
         }
 
         /// <summary>
-        ///     Contains the modulus portion of the RSA public key.
+        /// Contains the modulus portion of the RSA public key.
         /// </summary>
         public ReadOnlySpan<byte> Modulus => _modulus.Span;
 
         /// <summary>
-        ///     Contains the public exponent portion of the RSA public key.
+        /// Contains the public exponent portion of the RSA public key.
         /// </summary>
         public ReadOnlySpan<byte> PublicExponent => _publicExponent.Span;
 
         /// <summary>
-        ///     Try to create a new instance of an RSA public key object based on the
-        ///     encoding.
+        /// Try to create a new instance of an RSA public key object based on the
+        /// encoding.
         /// </summary>
         /// <remarks>
-        ///     This static method will build a <c>PivRsaPublicKey</c> object and set
-        ///     the output parameter <c>publicKeyObject</c> to the resulting key. If
-        ///     the encoding is not of a supported RSA public key, it will return
-        ///     false.
+        /// This static method will build a <c>PivRsaPublicKey</c> object and set
+        /// the output parameter <c>publicKeyObject</c> to the resulting key. If
+        /// the encoding is not of a supported RSA public key, it will return
+        /// false.
         /// </remarks>
         /// <param name="publicKeyObject">
-        ///     Where the resulting public key object will be deposited.
+        /// Where the resulting public key object will be deposited.
         /// </param>
         /// <param name="encodedPublicKey">
-        ///     The PIV TLV encoding.
+        /// The PIV TLV encoding.
         /// </param>
         /// <returns>
-        ///     True if the method was able to create a new RSA public key object,
-        ///     false otherwise.
+        /// True if the method was able to create a new RSA public key object,
+        /// false otherwise.
         /// </returns>
-        internal static bool TryCreate(
-            out PivPublicKey publicKeyObject,
-            ReadOnlyMemory<byte> encodedPublicKey)
+        internal static bool TryCreate(out PivPublicKey publicKeyObject,
+                                       ReadOnlyMemory<byte> encodedPublicKey)
         {
             var returnValue = new PivRsaPublicKey();
             publicKeyObject = returnValue;
@@ -245,10 +243,7 @@ namespace Yubico.YubiKey.Piv
             // The keyOffsetIndex is 4 or 5 for the RSA key sizes we support.
             // The offset of 4 is correct for up to 128 bytes of data (size of RSA1024)
             // The offset of 5 is correct for up to 64 KiB of data - large enough to accomodate any existing larger RSA key sizes.
-            int keyOffsetIndex = Algorithm == PivAlgorithm.Rsa1024
-                ? 4
-                : 5;
-
+            int keyOffsetIndex = Algorithm == PivAlgorithm.Rsa1024 ? 4 : 5;
             YubiKeyEncodedKey = PivEncodedKey[keyOffsetIndex..];
 
             _modulus = new Memory<byte>(modulus.ToArray());
@@ -278,7 +273,7 @@ namespace Yubico.YubiKey.Piv
                 index++;
             }
 
-            return exponent.EndsWith(_exponentF4);
+            return exponent.EndsWith<byte>(_exponentF4);
         }
     }
 }

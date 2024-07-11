@@ -14,7 +14,6 @@
 
 using System;
 using System.Security.Cryptography;
-using System.Text;
 using Xunit;
 
 namespace Yubico.Core.Tlv.UnitTests
@@ -24,34 +23,34 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void Tlv_TryReadValue()
         {
-            byte[] encoding =
+            byte[] encoding = new byte[]
             {
                 0x02, 0x05, 0x31, 0x32, 0x33, 0x34, 0x35
             };
 
             var reader = new TlvReader(encoding);
-            var validRead = reader.TryReadValue(out var value, expectedTag: 0x02);
+            bool validRead = reader.TryReadValue(out ReadOnlyMemory<byte> value, 0x02);
 
             Assert.True(validRead);
-            Assert.Equal(expected: 5, value.Length);
+            Assert.Equal(5, value.Length);
         }
 
         [Fact]
         public void Tlv_TryReadValue_ReturnsCorrectValue()
         {
-            var encoding = new byte[200];
+            byte[] encoding = new byte[200];
             FillWithRandomBytes(encoding);
             encoding[0] = 0x12;
             encoding[1] = 0x81;
             encoding[2] = 0x83;
-            var expected = encoding.AsSpan(start: 3, length: 131);
+            Span<byte> expected = encoding.AsSpan(3, 131);
 
             var reader = new TlvReader(encoding);
-            var validRead = reader.TryReadValue(out var value, expectedTag: 0x12);
+            bool validRead = reader.TryReadValue(out ReadOnlyMemory<byte> value, 0x12);
 
             Assert.True(validRead);
 
-            var compareResult = expected.SequenceEqual(value.Span);
+            bool compareResult = expected.SequenceEqual(value.Span);
 
             Assert.True(compareResult);
         }
@@ -59,7 +58,7 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void Tlv_TryReadNested()
         {
-            byte[] encoding =
+            byte[] encoding = new byte[]
             {
                 0x72, 0x61, 0x0A,
                 0x01, 0x02, 0x41, 0x42,
@@ -67,15 +66,15 @@ namespace Yubico.Core.Tlv.UnitTests
             };
 
             var reader = new TlvReader(encoding);
-            var validRead = reader.TryReadNestedTlv(out var nested, expectedTag: 0x7261);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested, 0x7261);
             if (validRead)
             {
-                validRead = nested.TryReadValue(out var value, expectedTag: 0x01);
+                validRead = nested.TryReadValue(out ReadOnlyMemory<byte> value, 0x01);
                 if (validRead)
                 {
-                    Assert.Equal(expected: 2, value.Length);
-                    validRead = nested.TryReadValue(out value, expectedTag: 0x02);
-                    Assert.Equal(expected: 4, value.Length);
+                    Assert.Equal(2, value.Length);
+                    validRead = nested.TryReadValue(out value, 0x02);
+                    Assert.Equal(4, value.Length);
                 }
             }
 
@@ -85,106 +84,106 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void Tlv_TryReadByte()
         {
-            byte[] encoding = { 0xFF, 0x01, 0x11, 0xFE, 0x02, 0x11, 0x22 };
+            byte[] encoding = new byte[] { 0xFF, 0x01, 0x11, 0xFE, 0x02, 0x11, 0x22 };
 
             var reader = new TlvReader(encoding);
-            var validRead = reader.TryReadByte(out var value, expectedTag: 0xFF);
+            bool validRead = reader.TryReadByte(out byte value, 0xFF);
 
             Assert.True(validRead);
-            Assert.Equal(expected: 0x11, value);
+            Assert.Equal(0x11, value);
         }
 
         [Fact]
         public void Tlv_TryReadInt16()
         {
-            byte[] encoding = { 0xFF, 0x02, 0x11, 0x22, 0xFE, 0x02, 0x33, 0x44 };
+            byte[] encoding = new byte[] { 0xFF, 0x02, 0x11, 0x22, 0xFE, 0x02, 0x33, 0x44 };
 
             var reader = new TlvReader(encoding);
-            var validRead = reader.TryReadInt16(out var value, expectedTag: 0xFF);
+            bool validRead = reader.TryReadInt16(out short value, 0xFF);
 
             Assert.True(validRead);
-            Assert.Equal(expected: 0x1122, value);
+            Assert.Equal(0x1122, value);
         }
 
         [Fact]
         public void Tlv_TryReadInt16_LittleEndian()
         {
-            byte[] encoding = { 0xFF, 0x02, 0x11, 0x22, 0xFE, 0x02, 0x33, 0x44 };
+            byte[] encoding = new byte[] { 0xFF, 0x02, 0x11, 0x22, 0xFE, 0x02, 0x33, 0x44 };
 
             var reader = new TlvReader(encoding);
-            var validRead = reader.TryReadInt16(out var value, expectedTag: 0xFF);
+            bool validRead = reader.TryReadInt16(out short value, 0xFF);
             if (validRead)
             {
-                validRead = reader.TryReadInt16(out value, expectedTag: 0xFE, bigEndian: false);
+                validRead = reader.TryReadInt16(out value, 0xFE, false);
             }
 
             Assert.True(validRead);
-            Assert.Equal(expected: 0x4433, value);
+            Assert.Equal(0x4433, value);
         }
 
         [Fact]
         public void Tlv_TryReadUInt16()
         {
-            byte[] encoding = { 0xFF, 0x02, 0xFF, 0x22, 0xFE, 0x02, 0x33, 0xFF };
+            byte[] encoding = new byte[] { 0xFF, 0x02, 0xFF, 0x22, 0xFE, 0x02, 0x33, 0xFF };
 
             var reader = new TlvReader(encoding);
-            var validRead = reader.TryReadUInt16(out var value, expectedTag: 0xFF);
+            bool validRead = reader.TryReadUInt16(out ushort value, 0xFF);
 
             Assert.True(validRead);
-            Assert.Equal(expected: 0xFF22, value);
+            Assert.Equal(0xFF22, value);
         }
 
         [Fact]
         public void Tlv_TryReadUInt16_LittleEndian()
         {
-            byte[] encoding = { 0xFF, 0x02, 0xFF, 0x22, 0xFE, 0x02, 0x33, 0xFF };
+            byte[] encoding = new byte[] { 0xFF, 0x02, 0xFF, 0x22, 0xFE, 0x02, 0x33, 0xFF };
 
             var reader = new TlvReader(encoding);
-            var validRead = reader.TryReadUInt16(out var value, expectedTag: 0xFF);
+            bool validRead = reader.TryReadUInt16(out ushort value, 0xFF);
             if (validRead)
             {
-                validRead = reader.TryReadUInt16(out value, expectedTag: 0xFE, bigEndian: false);
+                validRead = reader.TryReadUInt16(out value, 0xFE, false);
             }
 
             Assert.True(validRead);
-            Assert.Equal(expected: 0xFF33, value);
+            Assert.Equal(0xFF33, value);
         }
 
         [Fact]
         public void Tlv_TryReadInt32()
         {
-            byte[] encoding = { 0x81, 0x04, 0x11, 0x22, 0x33, 0x44 };
+            byte[] encoding = new byte[] { 0x81, 0x04, 0x11, 0x22, 0x33, 0x44 };
 
             var reader = new TlvReader(encoding);
-            var validRead = reader.TryReadInt32(out var value, expectedTag: 0x81);
+            bool validRead = reader.TryReadInt32(out int value, 0x81);
 
             Assert.True(validRead);
-            Assert.Equal(expected: 0x11223344, value);
+            Assert.Equal(0x11223344, value);
         }
 
         [Fact]
         public void Tlv_TryReadInt32_LittleEndian()
         {
-            byte[] encoding = { 0x82, 0x04, 0x11, 0x22, 0x33, 0x44 };
+            byte[] encoding = new byte[] { 0x82, 0x04, 0x11, 0x22, 0x33, 0x44 };
 
             var reader = new TlvReader(encoding);
-            var validRead = reader.TryReadInt32(out var value, expectedTag: 0x82, bigEndian: false);
+            bool validRead = reader.TryReadInt32(out int value, 0x82, false);
 
             Assert.True(validRead);
-            Assert.Equal(expected: 0x44332211, value);
+            Assert.Equal(0x44332211, value);
         }
 
         [Fact]
         public void Tlv_TryReadString()
         {
-            var expectedValue = "12345";
-            byte[] encoding =
+            string expectedValue = "12345";
+            byte[] encoding = new byte[]
             {
                 0x02, 0x05, 0x31, 0x32, 0x33, 0x34, 0x35
             };
 
             var reader = new TlvReader(encoding);
-            var validRead = reader.TryReadString(out var value, expectedTag: 0x02, Encoding.ASCII);
+            bool validRead = reader.TryReadString(out string value, 0x02, System.Text.Encoding.ASCII);
 
             Assert.True(validRead);
             Assert.Equal(expectedValue, value);
@@ -193,7 +192,7 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TlvTryRead_MultipleValues_Correct()
         {
-            byte[] encoding =
+            byte[] encoding = new byte[]
             {
                 0x72, 0x61, 0x0A,
                 0x01, 0x02, 0x41, 0x42,
@@ -201,21 +200,21 @@ namespace Yubico.Core.Tlv.UnitTests
             };
 
             var reader = new TlvReader(encoding);
-            var validRead = reader.TryReadNestedTlv(out var nested, expectedTag: 0x7261);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested, 0x7261);
             if (validRead)
             {
-                validRead = nested.TryReadValue(out _, expectedTag: 0x91);
+                validRead = nested.TryReadValue(out _, 0x91);
                 Assert.False(validRead);
-                validRead = nested.TryReadValue(out var value, expectedTag: 0x01);
+                validRead = nested.TryReadValue(out ReadOnlyMemory<byte> value, 0x01);
                 if (validRead)
                 {
-                    Assert.Equal(expected: 2, value.Length);
+                    Assert.Equal(2, value.Length);
 
-                    validRead = nested.TryReadValue(out _, expectedTag: 0x92);
+                    validRead = nested.TryReadValue(out _, 0x92);
                     Assert.False(validRead);
 
-                    validRead = nested.TryReadValue(out value, expectedTag: 0x02);
-                    Assert.Equal(expected: 4, value.Length);
+                    validRead = nested.TryReadValue(out value, 0x02);
+                    Assert.Equal(4, value.Length);
                 }
             }
 
@@ -225,22 +224,22 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TryReadValue_TwoByteLength()
         {
-            var encoding = new byte[265];
+            byte[] encoding = new byte[265];
             FillWithRandomBytes(encoding);
             encoding[0] = 0x7F;
             encoding[1] = 0x11;
             encoding[2] = 0x82;
             encoding[3] = 0x01;
             encoding[4] = 0x04;
-            var expected = encoding.AsSpan(start: 5, length: 260);
+            Span<byte> expected = encoding.AsSpan(5, 260);
 
             var reader = new TlvReader(encoding);
-            var validRead = reader.TryReadValue(out var value, expectedTag: 0x7F11);
+            bool validRead = reader.TryReadValue(out ReadOnlyMemory<byte> value, 0x7F11);
 
             Assert.True(validRead);
-            Assert.Equal(expected: 260, value.Length);
+            Assert.Equal(260, value.Length);
 
-            var compareResult = expected.SequenceEqual(value.Span);
+            bool compareResult = expected.SequenceEqual(value.Span);
 
             Assert.True(compareResult);
         }
@@ -248,7 +247,7 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TryReadNested_WrongTag_ReturnsFalse()
         {
-            byte[] encoding =
+            byte[] encoding = new byte[]
             {
                 0x81, 0x13,
                 0x01, 0x02, 0x31, 0x32,
@@ -260,13 +259,13 @@ namespace Yubico.Core.Tlv.UnitTests
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x81);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x81);
             Assert.True(validRead);
-            validRead = nested1.TryReadInt16(out var value1, expectedTag: 0x01);
+            validRead = nested1.TryReadInt16(out short value1, 0x01);
             Assert.True(validRead);
-            Assert.Equal(expected: 0x3132, value1);
+            Assert.Equal(0x3132, value1);
 
-            validRead = nested1.TryReadNestedTlv(out var nested2, expectedTag: 0xA1);
+            validRead = nested1.TryReadNestedTlv(out TlvReader nested2, 0xA1);
 
             Assert.NotNull(nested2);
             Assert.False(validRead);
@@ -275,7 +274,7 @@ namespace Yubico.Core.Tlv.UnitTests
         [Fact]
         public void TryReadValue_WrongTag_ReturnsFalse()
         {
-            byte[] encoding =
+            byte[] encoding = new byte[]
             {
                 0x81, 0x13,
                 0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
@@ -285,18 +284,18 @@ namespace Yubico.Core.Tlv.UnitTests
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x81);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x81);
             Assert.True(validRead);
-            validRead = nested1.TryReadValue(out var value1, expectedTag: 0x01);
+            validRead = nested1.TryReadValue(out ReadOnlyMemory<byte> value1, 0x01);
 
-            Assert.Equal(expected: 0, value1.Length);
+            Assert.Equal(0, value1.Length);
             Assert.False(validRead);
         }
 
         [Fact]
         public void TryReadValue_InvalidLength_ReturnsFalse()
         {
-            byte[] encoding =
+            byte[] encoding = new byte[]
             {
                 0x81, 0x13,
                 0x11, 0x80, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
@@ -306,18 +305,18 @@ namespace Yubico.Core.Tlv.UnitTests
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x81);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x81);
             Assert.True(validRead);
-            validRead = nested1.TryReadValue(out var value1, expectedTag: 0x11);
+            validRead = nested1.TryReadValue(out ReadOnlyMemory<byte> value1, 0x11);
 
-            Assert.Equal(expected: 0, value1.Length);
+            Assert.Equal(0, value1.Length);
             Assert.False(validRead);
         }
 
         [Fact]
         public void TryReadValue_NotEnoughData_ReturnsFalse()
         {
-            byte[] encoding =
+            byte[] encoding = new byte[]
             {
                 0x81, 0x13,
                 0x11, 0x12, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
@@ -327,18 +326,18 @@ namespace Yubico.Core.Tlv.UnitTests
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x81);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x81);
             Assert.True(validRead);
-            validRead = nested1.TryReadValue(out var value1, expectedTag: 0x11);
+            validRead = nested1.TryReadValue(out ReadOnlyMemory<byte> value1, 0x11);
 
-            Assert.Equal(expected: 0, value1.Length);
+            Assert.Equal(0, value1.Length);
             Assert.False(validRead);
         }
 
         [Fact]
         public void TryReadByte_LengthZero_ReturnsFalse()
         {
-            byte[] encoding =
+            byte[] encoding = new byte[]
             {
                 0x81, 0x13,
                 0x91, 0x00,
@@ -348,39 +347,39 @@ namespace Yubico.Core.Tlv.UnitTests
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x81);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x81);
             Assert.True(validRead);
-            validRead = nested1.TryReadByte(out var value1, expectedTag: 0x91);
+            validRead = nested1.TryReadByte(out byte value1, 0x91);
 
-            Assert.Equal(expected: 0, value1);
+            Assert.Equal(0, value1);
             Assert.False(validRead);
         }
 
         [Fact]
         public void TryReadByte_LengthTwo_ReturnsFalse()
         {
-            byte[] encoding =
+            byte[] encoding = new byte[]
             {
                 0x81, 0x15,
                 0x91, 0x02, 0x41, 0x42,
                 0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
-                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65
+                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
             };
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x81);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x81);
             Assert.True(validRead);
-            validRead = nested1.TryReadByte(out var value1, expectedTag: 0x91);
+            validRead = nested1.TryReadByte(out byte value1, 0x91);
 
-            Assert.Equal(expected: 0, value1);
+            Assert.Equal(0, value1);
             Assert.False(validRead);
         }
 
         [Fact]
         public void TryReadInt16_LengthZero_ReturnsFalse()
         {
-            byte[] encoding =
+            byte[] encoding = new byte[]
             {
                 0x81, 0x14,
                 0x91, 0xFF, 0x00,
@@ -390,39 +389,39 @@ namespace Yubico.Core.Tlv.UnitTests
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x81);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x81);
             Assert.True(validRead);
-            validRead = nested1.TryReadInt16(out var value1, expectedTag: 0x91FF);
+            validRead = nested1.TryReadInt16(out short value1, 0x91FF);
 
-            Assert.Equal(expected: 0, value1);
+            Assert.Equal(0, value1);
             Assert.False(validRead);
         }
 
         [Fact]
         public void TryReadInt16_LengthOne_ReturnsFalse()
         {
-            byte[] encoding =
+            byte[] encoding = new byte[]
             {
                 0x81, 0x15,
                 0x91, 0xFF, 0x01, 0x41,
                 0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
-                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65
+                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
             };
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x81);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x81);
             Assert.True(validRead);
-            validRead = nested1.TryReadInt16(out var value1, expectedTag: 0x91FF);
+            validRead = nested1.TryReadInt16(out short value1, 0x91FF);
 
-            Assert.Equal(expected: 0, value1);
+            Assert.Equal(0, value1);
             Assert.False(validRead);
         }
 
         [Fact]
         public void TryReadUInt16_LengthZero_ReturnsFalse()
         {
-            byte[] encoding =
+            byte[] encoding = new byte[]
             {
                 0x81, 0x14,
                 0x91, 0xFF, 0x00,
@@ -432,39 +431,39 @@ namespace Yubico.Core.Tlv.UnitTests
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x81);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x81);
             Assert.True(validRead);
-            validRead = nested1.TryReadUInt16(out var value1, expectedTag: 0x91FF);
+            validRead = nested1.TryReadUInt16(out ushort value1, 0x91FF);
 
-            Assert.Equal(expected: 0, value1);
+            Assert.Equal(0, value1);
             Assert.False(validRead);
         }
 
         [Fact]
         public void TryReadUInt16_LengthOne_ReturnsFalse()
         {
-            byte[] encoding =
+            byte[] encoding = new byte[]
             {
                 0x81, 0x15,
                 0x91, 0xFF, 0x01, 0x41,
                 0x11, 0x08, 0x31, 0x32, 0x82, 0x0B, 0x03, 0x02, 0x41, 0x42,
-                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65
+                0x04, 0x05, 0x61, 0x62, 0x63, 0x64, 0x65,
             };
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x81);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x81);
             Assert.True(validRead);
-            validRead = nested1.TryReadUInt16(out var value1, expectedTag: 0x91FF);
+            validRead = nested1.TryReadUInt16(out ushort value1, 0x91FF);
 
-            Assert.Equal(expected: 0, value1);
+            Assert.Equal(0, value1);
             Assert.False(validRead);
         }
 
         [Fact]
         public void TryReadInt32_LengthZero_ReturnsFalse()
         {
-            var encoding = new byte[256];
+            byte[] encoding = new byte[256];
             FillWithRandomBytes(encoding);
             encoding[0] = 0x48;
             encoding[1] = 0x81;
@@ -477,22 +476,22 @@ namespace Yubico.Core.Tlv.UnitTests
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x48);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x48);
             Assert.True(validRead);
-            validRead = nested1.TryReadValue(out var value1, expectedTag: 0x49);
+            validRead = nested1.TryReadValue(out ReadOnlyMemory<byte> value1, 0x49);
             Assert.True(validRead);
-            Assert.Equal(expected: 0xF8, value1.Length);
+            Assert.Equal(0xF8, value1.Length);
 
-            validRead = nested1.TryReadInt32(out var value2, expectedTag: 0x4A);
+            validRead = nested1.TryReadInt32(out int value2, 0x4A);
 
-            Assert.Equal(expected: 0, value2);
+            Assert.Equal(0, value2);
             Assert.False(validRead);
         }
 
         [Fact]
         public void TryReadInt32_LengthOne_ReturnsFalse()
         {
-            var encoding = new byte[256];
+            byte[] encoding = new byte[256];
             FillWithRandomBytes(encoding);
             encoding[0] = 0x48;
             encoding[1] = 0x81;
@@ -506,22 +505,22 @@ namespace Yubico.Core.Tlv.UnitTests
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x48);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x48);
             Assert.True(validRead);
-            validRead = nested1.TryReadValue(out var value1, expectedTag: 0x49);
+            validRead = nested1.TryReadValue(out ReadOnlyMemory<byte> value1, 0x49);
             Assert.True(validRead);
-            Assert.Equal(expected: 0xF7, value1.Length);
+            Assert.Equal(0xF7, value1.Length);
 
-            validRead = nested1.TryReadInt32(out var value2, expectedTag: 0x4A);
+            validRead = nested1.TryReadInt32(out int value2, 0x4A);
 
-            Assert.Equal(expected: 0, value2);
+            Assert.Equal(0, value2);
             Assert.False(validRead);
         }
 
         [Fact]
         public void TryReadInt32_LengthTwo_ReturnsFalse()
         {
-            var encoding = new byte[256];
+            byte[] encoding = new byte[256];
             FillWithRandomBytes(encoding);
             encoding[0] = 0x48;
             encoding[1] = 0x81;
@@ -536,22 +535,22 @@ namespace Yubico.Core.Tlv.UnitTests
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x48);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x48);
             Assert.True(validRead);
-            validRead = nested1.TryReadValue(out var value1, expectedTag: 0x49);
+            validRead = nested1.TryReadValue(out ReadOnlyMemory<byte> value1, 0x49);
             Assert.True(validRead);
-            Assert.Equal(expected: 0xF6, value1.Length);
+            Assert.Equal(0xF6, value1.Length);
 
-            validRead = nested1.TryReadInt32(out var value2, expectedTag: 0x4A);
+            validRead = nested1.TryReadInt32(out int value2, 0x4A);
 
-            Assert.Equal(expected: 0, value2);
+            Assert.Equal(0, value2);
             Assert.False(validRead);
         }
 
         [Fact]
         public void TryReadInt32_LengthThree_ReturnsFalse()
         {
-            var encoding = new byte[256];
+            byte[] encoding = new byte[256];
             FillWithRandomBytes(encoding);
             encoding[0] = 0x48;
             encoding[1] = 0x81;
@@ -567,22 +566,22 @@ namespace Yubico.Core.Tlv.UnitTests
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x48);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x48);
             Assert.True(validRead);
-            validRead = nested1.TryReadValue(out var value1, expectedTag: 0x49);
+            validRead = nested1.TryReadValue(out ReadOnlyMemory<byte> value1, 0x49);
             Assert.True(validRead);
-            Assert.Equal(expected: 0xF5, value1.Length);
+            Assert.Equal(0xF5, value1.Length);
 
-            validRead = nested1.TryReadInt32(out var value2, expectedTag: 0x4A);
+            validRead = nested1.TryReadInt32(out int value2, 0x4A);
 
-            Assert.Equal(expected: 0, value2);
+            Assert.Equal(0, value2);
             Assert.False(validRead);
         }
 
         [Fact]
         public void TryReadInt32_LengthFive_ReturnsFalse()
         {
-            var encoding = new byte[256];
+            byte[] encoding = new byte[256];
             FillWithRandomBytes(encoding);
             encoding[0] = 0x48;
             encoding[1] = 0x81;
@@ -600,22 +599,22 @@ namespace Yubico.Core.Tlv.UnitTests
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x48);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x48);
             Assert.True(validRead);
-            validRead = nested1.TryReadValue(out var value1, expectedTag: 0x49);
+            validRead = nested1.TryReadValue(out ReadOnlyMemory<byte> value1, 0x49);
             Assert.True(validRead);
-            Assert.Equal(expected: 0xF3, value1.Length);
+            Assert.Equal(0xF3, value1.Length);
 
-            validRead = nested1.TryReadInt32(out var value2, expectedTag: 0x4A);
+            validRead = nested1.TryReadInt32(out int value2, 0x4A);
 
-            Assert.Equal(expected: 0, value2);
+            Assert.Equal(0, value2);
             Assert.False(validRead);
         }
 
         [Fact]
         public void TryReadInt32_LengthFive_RewindsCorrect()
         {
-            var encoding = new byte[256];
+            byte[] encoding = new byte[256];
             FillWithRandomBytes(encoding);
             encoding[0] = 0x48;
             encoding[1] = 0x81;
@@ -630,27 +629,27 @@ namespace Yubico.Core.Tlv.UnitTests
             encoding[253] = 0xFF;
             encoding[254] = 0xFF;
             encoding[255] = 0xFF;
-            var expected = encoding.AsSpan(start: 251, length: 5);
+            Span<byte> expected = encoding.AsSpan(251, 5);
 
             var reader = new TlvReader(encoding);
 
-            var validRead = reader.TryReadNestedTlv(out var nested1, expectedTag: 0x48);
+            bool validRead = reader.TryReadNestedTlv(out TlvReader nested1, 0x48);
             Assert.True(validRead);
-            validRead = nested1.TryReadValue(out var value1, expectedTag: 0x49);
+            validRead = nested1.TryReadValue(out ReadOnlyMemory<byte> value1, 0x49);
             Assert.True(validRead);
-            Assert.Equal(expected: 0xF3, value1.Length);
+            Assert.Equal(0xF3, value1.Length);
 
-            validRead = nested1.TryReadInt32(out var value2, expectedTag: 0x4A);
+            validRead = nested1.TryReadInt32(out int value2, 0x4A);
 
-            Assert.Equal(expected: 0, value2);
+            Assert.Equal(0, value2);
             Assert.False(validRead);
 
-            validRead = nested1.TryReadValue(out var value3, expectedTag: 0x4A);
+            validRead = nested1.TryReadValue(out ReadOnlyMemory<byte> value3, 0x4A);
 
             Assert.True(validRead);
-            Assert.Equal(expected: 5, value3.Length);
+            Assert.Equal(5, value3.Length);
 
-            var compareResult = expected.SequenceEqual(value3.Span);
+            bool compareResult = expected.SequenceEqual(value3.Span);
 
             Assert.True(compareResult);
         }

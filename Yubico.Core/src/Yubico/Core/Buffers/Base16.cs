@@ -18,45 +18,44 @@ using System.Globalization;
 namespace Yubico.Core.Buffers
 {
     /// <summary>
-    ///     Class for encoding and decoding bytes into base-16 encoded text, otherwise known as
-    ///     hexadecimal.
+    /// Class for encoding and decoding bytes into base-16 encoded text, otherwise known as
+    /// hexadecimal.
     /// </summary>
     /// <remarks>
-    ///     <para>
-    ///         This base class is a fully functional encoder/decoder for base-16, also known as
-    ///         hexadecimal. The class <see cref="Hex" /> is an alias so that code using that class
-    ///         can continue unmodified. New code should use this class.
-    ///     </para>
-    ///     <para>
-    ///         See RFC4648 for details (https://datatracker.ietf.org/doc/html/rfc4648) on base-16.
-    ///     </para>
+    /// <para>
+    /// This base class is a fully functional encoder/decoder for base-16, also known as
+    /// hexadecimal. The class <see cref="Hex"/> is an alias so that code using that class
+    /// can continue unmodified. New code should use this class.
+    /// </para>
+    /// <para>
+    /// See RFC4648 for details (https://datatracker.ietf.org/doc/html/rfc4648) on base-16.
+    /// </para>
     /// </remarks>
     public class Base16 : ITextEncoding
     {
         private readonly Memory<char> _characterSet = "0123456789ABCDEF".ToCharArray();
 
         /// <summary>
-        ///     The set of characters that correspond to numbers 0 - 16.
+        /// The set of characters that correspond to numbers 0 - 16.
         /// </summary>
         protected virtual Span<char> CharacterSet => _characterSet.Span;
 
         /// <summary>
-        ///     Indicates the default case of characters for this encoding.
+        /// Indicates the default case of characters for this encoding.
         /// </summary>
         /// <remarks>
-        ///     This is used when decoding data to check for characters that are in
-        ///     an unexpected case. To match nibbles (4-bit values) to a character,
-        ///     we must change the case of the character to match what's expected.
-        ///     For example, the reference string for ModHex is <c>cbdefghijklnrtuv</c>.
-        ///     If we receive a 16-bit value in ModHex that looks like <c>CCCB</c>,
-        ///     then the matching algorithm needs to know to change each character
-        ///     as it is being evaluated to <c>cccb</c>.
+        /// This is used when decoding data to check for characters that are in
+        /// an unexpected case. To match nibbles (4-bit values) to a character,
+        /// we must change the case of the character to match what's expected.
+        /// For example, the reference string for ModHex is <c>cbdefghijklnrtuv</c>.
+        /// If we receive a 16-bit value in ModHex that looks like <c>CCCB</c>,
+        /// then the matching algorithm needs to know to change each character
+        /// as it is being evaluated to <c>cccb</c>.
         /// </remarks>
         protected virtual bool DefaultLowerCase => false;
 
         #region ITextEncoding Version
-
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void Encode(ReadOnlySpan<byte> data, Span<char> encoded)
         {
             if (data.Length > encoded.Length * 2)
@@ -65,12 +64,10 @@ namespace Yubico.Core.Buffers
                     nameof(encoded),
                     ExceptionMessages.EncodingOverflow);
             }
-
             for (int i = 0; i < data.Length; ++i)
             {
                 int highestDigit = CharacterSet.Length - 1;
                 int digit1 = data[i] >> 4;
-
                 // Checking these so that BCD encode throws the right exception.
                 if (digit1 > highestDigit)
                 {
@@ -82,7 +79,6 @@ namespace Yubico.Core.Buffers
                             _characterSet.Span[highestDigit]),
                         nameof(data));
                 }
-
                 encoded[i * 2] = CharacterSet[digit1];
 
                 int digit2 = data[i] & 0x0f;
@@ -96,12 +92,11 @@ namespace Yubico.Core.Buffers
                             _characterSet.Span[highestDigit]),
                         nameof(data));
                 }
-
-                encoded[i * 2 + 1] = CharacterSet[digit2];
+                encoded[(i * 2) + 1] = CharacterSet[digit2];
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public string Encode(ReadOnlySpan<byte> data)
         {
             char[] encoded = new char[data.Length * 2];
@@ -109,14 +104,13 @@ namespace Yubico.Core.Buffers
             return new string(encoded);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public void Decode(ReadOnlySpan<char> encoded, Span<byte> data)
         {
             if (encoded.Length % 2 != 0)
             {
                 throw new ArgumentException(ExceptionMessages.HexNotEvenLength);
             }
-
             if (data.Length < encoded.Length / 2)
             {
                 throw new ArgumentException(ExceptionMessages.DecodingOverflow);
@@ -129,16 +123,10 @@ namespace Yubico.Core.Buffers
 
             // The decoding needs to be case-insensitive. This lets us handle that
             // in cases where the norm is upper or lower.
-            char HandleCase(char c)
-            {
-                return DefaultLowerCase
-                    ? (char)((c - 0x40) * (0x5b - c) > 0
-                        ? c + 0x20
-                        : c)
-                    : (char)((c - 0x60) * (0x7b - c) > 0
-                        ? c - 0x20
-                        : c);
-            }
+            char HandleCase(char c) =>
+                DefaultLowerCase
+                ? (char)((c - 0x40) * (0x5b - c) > 0 ? c + 0x20 : c)
+                : (char)((c - 0x60) * (0x7b - c) > 0 ? c - 0x20 : c);
 
             int GetNibble(char c)
             {
@@ -151,42 +139,39 @@ namespace Yubico.Core.Buffers
                             ExceptionMessages.IllegalCharacter,
                             c));
                 }
-
                 return n;
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public byte[] Decode(string encoded)
         {
             if (encoded is null)
             {
                 throw new ArgumentNullException(nameof(encoded));
             }
-
             byte[] bytes = new byte[encoded.Length / 2];
             Decode(encoded.AsSpan(), bytes);
             return bytes;
         }
-
         #endregion
 
         #region Static Version
-
-        /// <inheritdoc cref="Encode(ReadOnlySpan{byte}, Span{char})" />
+        /// <inheritdoc cref="Encode(ReadOnlySpan{byte}, Span{char})"/>
         public static void EncodeBytes(ReadOnlySpan<byte> data, Span<char> encoded) =>
             new Base16().Encode(data, encoded);
 
-        /// <inheritdoc cref="Encode(ReadOnlySpan{byte})" />
-        public static string EncodeBytes(ReadOnlySpan<byte> data) => new Base16().Encode(data);
+        /// <inheritdoc cref="Encode(ReadOnlySpan{byte})"/>
+        public static string EncodeBytes(ReadOnlySpan<byte> data) =>
+            new Base16().Encode(data);
 
-        /// <inheritdoc cref="Decode(ReadOnlySpan{char}, Span{byte})" />
+        /// <inheritdoc cref="Decode(ReadOnlySpan{char}, Span{byte})"/>
         public static void DecodeText(ReadOnlySpan<char> encoded, Span<byte> data) =>
             new Base16().Decode(encoded, data);
 
-        /// <inheritdoc cref="Decode(string)" />
-        public static byte[] DecodeText(string encoded) => new Base16().Decode(encoded);
-
+        /// <inheritdoc cref="Decode(string)"/>
+        public static byte[] DecodeText(string encoded) =>
+            new Base16().Decode(encoded);
         #endregion
     }
 }

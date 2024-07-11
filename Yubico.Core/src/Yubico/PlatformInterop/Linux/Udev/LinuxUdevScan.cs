@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
+using System.Text;
 using Yubico.Core.Devices.Hid;
 
 namespace Yubico.PlatformInterop
@@ -50,6 +51,7 @@ namespace Yubico.PlatformInterop
         // it to build a struct udev_enumerate *. But here, just build the
         // LinuxUdevScan, it will build all necessary supporting objects.
         public LinuxUdevScan()
+            : base()
         {
             _enumerateObject = NativeMethods.udev_enumerate_new(_udevObject);
             _ = ThrowIfFailedNull(_enumerateObject);
@@ -59,16 +61,20 @@ namespace Yubico.PlatformInterop
         // Set the object with a subsystem. This only says, "When you scan for
         // devices, you will scan for this type of device."
         // If the operation fails, this method will throw an exception.
-        public void EnumerateAddMatchSubsystem(string subsystem) =>
+        public void EnumerateAddMatchSubsystem(string subsystem)
+        {
             _ = ThrowIfFailedNegative(
                 NativeMethods.udev_enumerate_add_match_subsystem(_enumerateObject, subsystem));
+        }
 
         // Perform a scan, looking for devices that match the criteria based on
         // previous add_match calls. After scanning, the object will have its
         // internal list of devices.
-        public void EnumerateScanDevices() =>
+        public void EnumerateScanDevices()
+        {
             _ = ThrowIfFailedNegative(
                 NativeMethods.udev_enumerate_scan_devices(_enumerateObject));
+        }
 
         // Get a list of all the devices discovered, represented as a List of
         // LinuxHidDevice.
@@ -90,7 +96,6 @@ namespace Yubico.PlatformInterop
                 // Get a Device object based on the path.
                 using LinuxUdevDeviceSafeHandle currentDevice =
                     NativeMethods.udev_device_new_from_syspath(_udevObject, Marshal.PtrToStringAnsi(namePtr));
-
                 _ = ThrowIfFailedNull(currentDevice);
 
                 var linuxHid = new LinuxHidDevice(currentDevice);

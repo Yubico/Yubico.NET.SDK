@@ -41,14 +41,13 @@ namespace Yubico.YubiKey.Fido2.Cbor
         [Fact]
         public void ReadMap_IntAndStringKeys_Succeeds()
         {
-            byte[] encoding =
-            {
+            byte[] encoding = new byte[] {
                 0xA3, 0x01, 0xA2, 0x03, 0x44, 0x11, 0x22, 0x33, 0x44, 0x04, 0x42, 0x11, 0x22, 0x02, 0xA2, 0x62,
                 0x5A, 0x31, 0x44, 0x11, 0x22, 0x33, 0x44, 0x62, 0x5A, 0x32, 0x42, 0x11, 0x22, 0x03, 0x82, 0x64,
                 0x59, 0x75, 0x62, 0x69, 0x63, 0x4B, 0x65, 0x79
             };
 
-            var isValid = ReadUsingCborReader(encoding);
+            bool isValid = ReadUsingCborReader(encoding);
             Assert.True(isValid);
             isValid = ReadUsingCborMap(encoding);
             Assert.True(isValid);
@@ -58,15 +57,15 @@ namespace Yubico.YubiKey.Fido2.Cbor
         {
             var cborMap = new CborMap<int>(encoding);
 
-            return cborMap.Contains(key: 3);
+            return cborMap.Contains(3);
         }
 
         private static bool ReadUsingCborReader(byte[] encoding)
         {
             var cbor = new CborReader(encoding, CborConformanceMode.Ctap2Canonical);
 
-            var entries = cbor.ReadStartMap();
-            var count = entries ?? 0;
+            int? entries = cbor.ReadStartMap();
+            int count = entries ?? 0;
 
             if (count != 3)
             {
@@ -75,7 +74,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             while (count > 0)
             {
-                var mapKey = (int)cbor.ReadUInt32();
+                int mapKey = (int)cbor.ReadUInt32();
 
                 switch (mapKey)
                 {
@@ -88,7 +87,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
                         {
                             return false;
                         }
-
                         break;
 
                     case 2:
@@ -97,7 +95,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
                         {
                             return false;
                         }
-
                         break;
 
                     case 3:
@@ -106,7 +103,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
                         {
                             return false;
                         }
-
                         break;
                 }
 
@@ -120,19 +116,19 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
         private static bool ReadMapX1(CborReader cbor)
         {
-            var entries = cbor.ReadStartMap();
-            var count = entries ?? 0;
+            int? entries = cbor.ReadStartMap();
+            int count = entries ?? 0;
 
             if (count != 2)
             {
                 return false;
             }
 
-            var mapKeyOne = (int)cbor.ReadUInt32();
-            var valueOne = cbor.ReadByteString();
+            int mapKeyOne = (int)cbor.ReadUInt32();
+            byte[] valueOne = cbor.ReadByteString();
 
-            var mapKeyTwo = (int)cbor.ReadUInt32();
-            var valueTwo = cbor.ReadByteString();
+            int mapKeyTwo = (int)cbor.ReadUInt32();
+            byte[] valueTwo = cbor.ReadByteString();
 
             cbor.ReadEndMap();
 
@@ -141,21 +137,21 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
         private static bool ReadMapX2(CborReader cbor)
         {
-            var entries = cbor.ReadStartMap();
-            var count = entries ?? 0;
+            int? entries = cbor.ReadStartMap();
+            int count = entries ?? 0;
 
             if (count != 2)
             {
                 return false;
             }
 
-            var mapKeyOne = cbor.ReadTextString();
-            var valueOne = cbor.ReadByteString();
-            var isValidOne = mapKeyOne.Equals("Z1", StringComparison.Ordinal);
+            string mapKeyOne = cbor.ReadTextString();
+            byte[] valueOne = cbor.ReadByteString();
+            bool isValidOne = mapKeyOne.Equals("Z1", StringComparison.Ordinal);
 
-            var mapKeyTwo = cbor.ReadTextString();
-            var valueTwo = cbor.ReadByteString();
-            var isValidTwo = mapKeyTwo.Equals("Z2", StringComparison.Ordinal);
+            string mapKeyTwo = cbor.ReadTextString();
+            byte[] valueTwo = cbor.ReadByteString();
+            bool isValidTwo = mapKeyTwo.Equals("Z2", StringComparison.Ordinal);
 
             cbor.ReadEndMap();
 
@@ -164,19 +160,19 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
         private static bool ReadArrayX3(CborReader cbor)
         {
-            var entries = cbor.ReadStartArray();
-            var count = entries ?? 0;
+            int? entries = cbor.ReadStartArray();
+            int count = entries ?? 0;
 
             if (count != 2)
             {
                 return false;
             }
 
-            var entryOne = cbor.ReadTextString();
-            var isValidOne = entryOne.Equals("Yubi", StringComparison.Ordinal);
+            string entryOne = cbor.ReadTextString();
+            bool isValidOne = entryOne.Equals("Yubi", StringComparison.Ordinal);
 
-            var entryTwo = cbor.ReadTextString();
-            var isValidTwo = entryTwo.Equals("Key", StringComparison.Ordinal);
+            string entryTwo = cbor.ReadTextString();
+            bool isValidTwo = entryTwo.Equals("Key", StringComparison.Ordinal);
 
             cbor.ReadEndArray();
 

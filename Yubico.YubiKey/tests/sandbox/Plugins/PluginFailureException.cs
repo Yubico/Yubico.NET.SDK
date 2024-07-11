@@ -19,13 +19,8 @@ namespace Yubico.YubiKey.TestApp.Plugins
     public class PluginFailureException : ApplicationException
     {
         public PluginFailureException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
-
+            : base(message, innerException) { }
         public PluginFailureException(string message)
-            : base(message)
-        {
-        }
+            : base(message) { }
     }
 }

@@ -16,16 +16,19 @@ using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Management.Commands
 {
-    /// <inheritdoc />
+    /// <inheritdoc/>
     public class SetLegacyDeviceConfigCommand : SetLegacyDeviceConfigBase, IYubiKeyCommand<YubiKeyResponse>
     {
         private const byte SetLegacyDeviceConfigInstruction = 0x16;
         private const byte P1DeviceConfiguration = 0x11;
 
+        /// <inheritdoc/>
+        public YubiKeyApplication Application => YubiKeyApplication.Management;
+
         /// <summary>
-        ///     Initializes a new instance of the <see cref="SetLegacyDeviceConfigCommand" /> class.
+        /// Initializes a new instance of the <see cref="SetLegacyDeviceConfigCommand"/> class.
         /// </summary>
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public SetLegacyDeviceConfigCommand(
             YubiKeyCapabilities yubiKeyInterfaces,
             byte challengeResponseTimeout,
@@ -36,33 +39,31 @@ namespace Yubico.YubiKey.Management.Commands
         }
 
         /// <summary>
-        ///     Creates a new <see cref="SetLegacyDeviceConfigCommand" /> from another object which derives from
-        ///     <see cref="SetLegacyDeviceConfigBase" />.
+        /// Creates a new <see cref="SetLegacyDeviceConfigCommand"/> from another object which derives from
+        /// <see cref="SetLegacyDeviceConfigBase"/>.
         /// </summary>
         /// <remarks>
-        ///     This constructor can be useful to switch between different application-specific
-        ///     implementations of the same base command.
+        /// This constructor can be useful to switch between different application-specific
+        /// implementations of the same base command.
         /// </remarks>
         /// <param name="baseCommand">
-        ///     The SetLegacyDeviceConfig base command object to copy from.
+        /// The SetLegacyDeviceConfig base command object to copy from.
         /// </param>
         public SetLegacyDeviceConfigCommand(SetLegacyDeviceConfigBase baseCommand) : base(baseCommand)
         {
         }
 
-        /// <inheritdoc />
-        public YubiKeyApplication Application => YubiKeyApplication.Management;
-
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public CommandApdu CreateCommandApdu() =>
             new CommandApdu
             {
                 Ins = SetLegacyDeviceConfigInstruction,
                 P1 = P1DeviceConfiguration,
-                Data = GetDataForApdu()
+                Data = GetDataForApdu(),
             };
 
-        /// <inheritdoc />
-        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new YubiKeyResponse(responseApdu);
+        /// <inheritdoc/>
+        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new YubiKeyResponse(responseApdu);
     }
 }

@@ -15,6 +15,7 @@
 using System;
 using Yubico.YubiKey.U2f;
 
+
 namespace Yubico.YubiKey.Sample.U2fSampleCode
 {
     public static class U2fProtocol
@@ -29,8 +30,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             using (var u2fSession = new U2fSession(yubiKey))
             {
                 u2fSession.KeyCollector = KeyCollectorDelegate;
-                if (u2fSession.TryRegister(applicationId, clientDataHash, TimeSpan.FromSeconds(value: 10),
-                        out registrationData))
+                if (u2fSession.TryRegister(applicationId, clientDataHash, TimeSpan.FromSeconds(10), out registrationData))
                 {
                     return registrationData.VerifySignature(applicationId, clientDataHash);
                 }
@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             ReadOnlyMemory<byte> clientDataHash,
             ReadOnlyMemory<byte> keyHandle,
             out bool isVerified
-        )
+            )
         {
             using (var u2fSession = new U2fSession(yubiKey))
             {
@@ -81,7 +81,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
 
                 return u2fSession.TryAuthenticate(
                     applicationId, clientDataHash, keyHandle,
-                    TimeSpan.FromSeconds(value: 10), out authenticationData);
+                    TimeSpan.FromSeconds(10), out authenticationData, true);
             }
         }
     }

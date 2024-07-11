@@ -23,11 +23,24 @@ using Yubico.PlatformInterop;
 namespace Yubico.Core.Devices.Hid
 {
     /// <summary>
-    ///     This class represents Windows HID device.
+    /// This class represents Windows HID device.
     /// </summary>
     internal class WindowsHidDevice : HidDevice
     {
         private readonly Logger _log = Log.GetLogger();
+
+        /// <summary>
+        /// Gets the list of Windows HID devices available to the system.
+        /// </summary>
+        /// <returns>List of <see cref="HidDevice"/> objects.</returns>
+        public static IEnumerable<HidDevice> GetList() => CmDevice
+            .GetList(CmInterfaceGuid.Hid)
+            .Where(cmDevice => cmDevice.InterfacePath != null)
+            .Select(cmDevice => new WindowsHidDevice(
+                cmDevice.InterfacePath!, // Null forgiveness as compiler isn't aware of previous null check
+                cmDevice.ContainerId,
+                cmDevice.HidUsageId,
+                (HidUsagePage)cmDevice.HidUsagePage));
 
         private WindowsHidDevice(string instancePath, Guid containerId, short usage, HidUsagePage usagePage) :
             base(instancePath)
@@ -40,7 +53,7 @@ namespace Yubico.Core.Devices.Hid
         }
 
         /// <summary>
-        ///     Constructs a <see cref="WindowsHidDevice" />.
+        /// Constructs a <see cref="WindowsHidDevice"/>.
         /// </summary>
         internal WindowsHidDevice(CmDevice device) :
             base(device.InterfacePath!)
@@ -56,24 +69,7 @@ namespace Yubico.Core.Devices.Hid
             UsagePage = (HidUsagePage)device.HidUsagePage;
         }
 
-        /// <summary>
-        ///     Gets the list of Windows HID devices available to the system.
-        /// </summary>
-        /// <returns>List of <see cref="HidDevice" /> objects.</returns>
-        public static IEnumerable<HidDevice> GetList() =>
-            CmDevice
-                .GetList(CmInterfaceGuid.Hid)
-                .Where(cmDevice => cmDevice.InterfacePath != null)
-                .Select(
-                    cmDevice => new WindowsHidDevice(
-                        cmDevice.InterfacePath!, // Null forgiveness as compiler isn't aware of previous null check
-                        cmDevice.ContainerId,
-                        cmDevice.HidUsageId,
-                        (HidUsagePage)cmDevice.HidUsagePage));
-
-        [SuppressMessage(
-            "Globalization", "CA1307:Specify StringComparison for clarity",
-            Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
+        [SuppressMessage("Globalization", "CA1307:Specify StringComparison for clarity", Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
         private void ResolveIdsFromInstancePath(string instancePath)
         {
             // \\?\HID#VID_1050&PID_0407&MI_00#7
@@ -83,11 +79,11 @@ namespace Yubico.Core.Devices.Hid
             if (instancePath.ToUpperInvariant().Contains("VID") && instancePath.ToUpperInvariant().Contains("HID"))
             {
                 // If this fails, vendorId will be 0.
-                _ = TryGetHexShort(instancePath, offset: 12, length: 4, out ushort vendorId);
+                _ = TryGetHexShort(instancePath, 12, 4, out ushort vendorId);
                 VendorId = (short)vendorId;
 
                 // If this fails, productId will be 0.
-                _ = TryGetHexShort(instancePath, offset: 21, length: 4, out ushort productId);
+                _ = TryGetHexShort(instancePath, 21, 4, out ushort productId);
                 ProductId = (short)productId;
             }
             else
@@ -97,30 +93,28 @@ namespace Yubico.Core.Devices.Hid
             }
         }
 
-        [SuppressMessage(
-            "Performance", "CA1846:Prefer \'AsSpan\' over \'Substring\'",
-            Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
+        [SuppressMessage("Performance", "CA1846:Prefer \'AsSpan\' over \'Substring\'", Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
         private static bool TryGetHexShort(string s, int offset, int length, out ushort result) =>
-            ushort.TryParse(
-                s.Substring(offset, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out result);
+            ushort.TryParse(s.Substring(offset, length), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out result);
 
         /// <summary>
-        ///     Opens an active connection to the Windows HID device.
+        /// Opens an active connection to the Windows HID device.
         /// </summary>
-        /// <returns>An open <see cref="IHidConnection" />.</returns>
-        public override IHidConnection ConnectToFeatureReports() => new WindowsHidFeatureReportConnection(this, Path);
+        /// <returns>An open <see cref="IHidConnection"/>.</returns>
+        public override IHidConnection ConnectToFeatureReports() =>
+            new WindowsHidFeatureReportConnection(this, Path);
 
         /// <summary>
-        ///     Opens an active connection to the Windows HID device.
+        /// Opens an active connection to the Windows HID device.
         /// </summary>
-        /// <returns>An open <see cref="IHidConnection" />.</returns>
-        public override IHidConnection ConnectToIOReports() => new WindowsHidIOReportConnection(this, Path);
+        /// <returns>An open <see cref="IHidConnection"/>.</returns>
+        public override IHidConnection ConnectToIOReports() =>
+            new WindowsHidIOReportConnection(this, Path);
 
         public void LogDeviceAccessTime()
         {
             LastAccessed = DateTime.Now;
-            _log.LogInformation(
-                "Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
+            _log.LogInformation("Updating last used for {Device} to {LastAccessed:hh:mm:ss.fffffff}", this, LastAccessed);
         }
     }
 }

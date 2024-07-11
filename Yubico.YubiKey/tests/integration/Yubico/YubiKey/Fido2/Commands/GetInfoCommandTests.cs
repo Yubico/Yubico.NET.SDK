@@ -25,10 +25,10 @@ namespace Yubico.YubiKey.Fido2.Commands
         public void GetInfoCommand_Succeeds()
         {
             var cmd = new GetInfoCommand();
-            var rsp = Connection.SendCommand(cmd);
+            GetInfoResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            var deviceInfo = rsp.GetData();
+            AuthenticatorInfo deviceInfo = rsp.GetData();
             Assert.NotEmpty(deviceInfo.Versions);
         }
     }

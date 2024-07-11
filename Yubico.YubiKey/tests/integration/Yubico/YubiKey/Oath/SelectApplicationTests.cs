@@ -24,12 +24,12 @@ namespace Yubico.YubiKey.Oath
         [InlineData(StandardTestDevice.Fw5)]
         public void ConnectOathHasData(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using var connection = testDevice.Connect(YubiKeyApplication.Oath);
+            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Oath);
 
             Assert.NotNull(connection!.SelectApplicationData);
-            var data = Assert.IsType<OathApplicationData>(connection!.SelectApplicationData);
+            OathApplicationData data = Assert.IsType<OathApplicationData>(connection!.SelectApplicationData);
 
             Assert.False(data.Salt.IsEmpty);
             Assert.True(data.Salt.Length >= 8);

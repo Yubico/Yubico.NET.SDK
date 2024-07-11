@@ -33,8 +33,7 @@ namespace Yubico.Core.Tlv.UnitTests
         }
 
         [Fact]
-        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters",
-            Justification = "Unit test")]
+        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Unit test")]
         public void Constructor_GivenMessageParameter_SetsMessageProperty()
         {
             // Arrange
@@ -48,8 +47,7 @@ namespace Yubico.Core.Tlv.UnitTests
         }
 
         [Fact]
-        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters",
-            Justification = "Unit test")]
+        [SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "Unit test")]
         public void Constructor_GivenInnerException_SetsInnerExceptionProperty()
         {
             // Arrange

@@ -16,17 +16,65 @@ using System;
 using Yubico.Core.Iso7816;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
+
 using static Yubico.PlatformInterop.NativeMethods;
 
 namespace Yubico.Core.Devices.SmartCard
 {
     public class DesktopSmartCardConnection : ISmartCardConnection
     {
-        private readonly SCardCardHandle _cardHandle;
-        private readonly SCardContext _context;
-        private readonly DesktopSmartCardDevice _device;
         private readonly Logger _log = Log.GetLogger();
+        private readonly DesktopSmartCardDevice _device;
+        private readonly SCardContext _context;
+        private readonly SCardCardHandle _cardHandle;
         private SCARD_PROTOCOL _activeProtocol;
+
+        private class TransactionScope : IDisposable
+        {
+            private readonly Logger _log = Log.GetLogger();
+            private readonly DesktopSmartCardConnection _thisConnection;
+            private readonly IDisposable? _logScope;
+            private bool _disposedValue;
+
+            public TransactionScope(DesktopSmartCardConnection thisConnection)
+            {
+                _logScope = _log.BeginTransactionScope(this);
+
+                _thisConnection = thisConnection;
+            }
+
+            protected virtual void Dispose(bool disposing)
+            {
+                if (!_disposedValue)
+                {
+                    uint result = SCardEndTransaction(
+                        _thisConnection._cardHandle,
+                        SCARD_DISPOSITION.LEAVE_CARD);
+
+                    _log.SCardApiCall(nameof(SCardEndTransaction), result);
+
+                    _disposedValue = true;
+                }
+
+                if (disposing)
+                {
+                    _logScope?.Dispose();
+                }
+            }
+
+            ~TransactionScope()
+            {
+                // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+                Dispose(disposing: false);
+            }
+
+            public void Dispose()
+            {
+                // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+                Dispose(disposing: true);
+                GC.SuppressFinalize(this);
+            }
+        }
 
         internal DesktopSmartCardConnection(
             DesktopSmartCardDevice device,
@@ -41,14 +89,14 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         /// <summary>
-        ///     Begins a transacted connection to the smart card.
+        /// Begins a transacted connection to the smart card.
         /// </summary>
         /// <remarks>
-        ///     This method has no effect on platforms which do not support transactions.
+        /// This method has no effect on platforms which do not support transactions.
         /// </remarks>
         /// <returns>An IDisposable that represents the transaction.</returns>
         /// <exception cref="SCardException">
-        ///     Thrown when the underlying platform smart card subsystem encounters an error.
+        /// Thrown when the underlying platform smart card subsystem encounters an error.
         /// </exception>
         public IDisposable BeginTransaction(out bool cardWasReset)
         {
@@ -78,15 +126,15 @@ namespace Yubico.Core.Devices.SmartCard
         }
 
         /// <summary>
-        ///     Synchronously transmit a command APDU to the smart card.
+        /// Synchronously transmit a command APDU to the smart card.
         /// </summary>
         /// <param name="commandApdu">A command to send to the smart card.</param>
         /// <returns>A response APDU containing the smart card's reply.</returns>
         /// <exception cref="ArgumentNullException">
-        ///     <paramref name="commandApdu" /> is null.
+        /// <paramref name="commandApdu"/> is null.
         /// </exception>
         /// <exception cref="SCardException">
-        ///     Thrown when the underlying platform smart card subsystem encounters an error.
+        /// Thrown when the underlying platform smart card subsystem encounters an error.
         /// </exception>
         public ResponseApdu Transmit(CommandApdu commandApdu)
         {
@@ -130,7 +178,6 @@ namespace Yubico.Core.Devices.SmartCard
                 SCARD_PROTOCOL.T1,
                 SCARD_DISPOSITION.RESET_CARD,
                 out SCARD_PROTOCOL updatedActiveProtocol);
-
             _log.SCardApiCall(nameof(SCardReconnect), result);
 
             if (result != ErrorCode.SCARD_S_SUCCESS)
@@ -141,55 +188,7 @@ namespace Yubico.Core.Devices.SmartCard
             _activeProtocol = updatedActiveProtocol;
         }
 
-        private class TransactionScope : IDisposable
-        {
-            private readonly Logger _log = Log.GetLogger();
-            private readonly IDisposable? _logScope;
-            private readonly DesktopSmartCardConnection _thisConnection;
-            private bool _disposedValue;
-
-            public TransactionScope(DesktopSmartCardConnection thisConnection)
-            {
-                _logScope = _log.BeginTransactionScope(this);
-
-                _thisConnection = thisConnection;
-            }
-
-            public void Dispose()
-            {
-                // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-                Dispose(disposing: true);
-                GC.SuppressFinalize(this);
-            }
-
-            protected virtual void Dispose(bool disposing)
-            {
-                if (!_disposedValue)
-                {
-                    uint result = SCardEndTransaction(
-                        _thisConnection._cardHandle,
-                        SCARD_DISPOSITION.LEAVE_CARD);
-
-                    _log.SCardApiCall(nameof(SCardEndTransaction), result);
-
-                    _disposedValue = true;
-                }
-
-                if (disposing)
-                {
-                    _logScope?.Dispose();
-                }
-            }
-
-            ~TransactionScope()
-            {
-                // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-                Dispose(disposing: false);
-            }
-        }
-
         #region IDisposable Support
-
         private bool _disposed;
 
         /// <inheritdoc />
@@ -214,7 +213,6 @@ namespace Yubico.Core.Devices.SmartCard
 
             _disposed = true;
         }
-
         #endregion
     }
 }

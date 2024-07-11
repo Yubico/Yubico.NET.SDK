@@ -23,16 +23,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class Hotp : OtpPluginBase
     {
-        public Hotp(IOutput output) : base(output)
-        {
-            // We're reusing ParameterUse.Generate, so we'll update the description.
-            Parameters["generate"].Description = "Generate a random key. Conflicts with key.";
-            // We're reusing ParameterUse.Key, so we'll update it.
-            var keyParam = Parameters["key"];
-            keyParam.Description = "Key. This is to be provided as a base-32 encoded string.";
-            keyParam.Type = typeof(Base32Bytes);
-        }
-
         public override string Name => "HOTP";
 
         public override string Description => "Program an HMAC-SHA1 OATH-HOTP credential.";
@@ -45,6 +35,16 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             | ParameterUse.NoEnter
             | ParameterUse.Generate
             | ParameterUse.Force;
+
+        public Hotp(IOutput output) : base(output)
+        {
+            // We're reusing ParameterUse.Generate, so we'll update the description.
+            Parameters["generate"].Description = "Generate a random key. Conflicts with key.";
+            // We're reusing ParameterUse.Key, so we'll update it.
+            Parameter keyParam = Parameters["key"];
+            keyParam.Description = "Key. This is to be provided as a base-32 encoded string.";
+            keyParam.Type = typeof(Base32Bytes);
+        }
 
         public override void HandleParameters()
         {
@@ -61,7 +61,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 {
                     exceptions.Add(
                         new InvalidOperationException("You must either specify a key " +
-                                                      "or specify that the key should be generated."));
+                        "or specify that the key should be generated."));
                 }
                 else if (_key.Length < ConfigureHotp.HmacKeySize)
                 {
@@ -84,7 +84,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 exceptions.Add(
                     new InvalidOperationException("OATH-HOTP passwords must be six or eight " +
-                                                  "digits. If you don't specify, 6 is default."));
+                    "digits. If you don't specify, 6 is default."));
             }
 
             try
@@ -99,7 +99,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             if (exceptions.Count > 0)
             {
                 throw exceptions.Count == 1
-                    ? exceptions[index: 0]
+                    ? exceptions[0]
                     : new AggregateException(
                         $"{exceptions.Count} errors encountered.",
                         exceptions);
@@ -115,10 +115,9 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Output.WriteLine("Aborted.", OutputLevel.Error);
                 return false;
             }
-
             try
             {
-                var op = GetOperation(otp);
+                ConfigureHotp op = GetOperation(otp);
                 op.Execute();
                 OutputResult(op);
             }
@@ -134,7 +133,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
         private ConfigureHotp GetOperation(OtpSession otp)
         {
-            var op = otp.ConfigureHotp(_slot)
+            ConfigureHotp op = otp.ConfigureHotp(_slot)
                 .UseCurrentAccessCode((SlotAccessCode)_currentAccessCode)
                 .SetNewAccessCode((SlotAccessCode)_newAccessCode)
                 .AppendCarriageReturn(!_noEnter)

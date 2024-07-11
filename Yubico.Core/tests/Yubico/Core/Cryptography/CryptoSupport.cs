@@ -12,7 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using System.Security.Cryptography;
+using Xunit;
 
 namespace Yubico.Core.Cryptography
 {
@@ -25,14 +27,11 @@ namespace Yubico.Core.Cryptography
         //    2, return P-512
         // If the curveNum is any other value (other than 0, 1, or 2), return
         // P-256.
-        public static ECCurve GetNamedCurve(int curveNum)
+        public static ECCurve GetNamedCurve(int curveNum) => curveNum switch
         {
-            return curveNum switch
-            {
-                1 => ECCurve.NamedCurves.nistP384,
-                2 => ECCurve.NamedCurves.nistP521,
-                _ => ECCurve.NamedCurves.nistP256
-            };
-        }
+            1 => ECCurve.NamedCurves.nistP384,
+            2 => ECCurve.NamedCurves.nistP521,
+            _ => ECCurve.NamedCurves.nistP256,
+        };
     }
 }

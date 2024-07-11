@@ -19,7 +19,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
 {
     public class CredentialRetryPairTests
     {
-        private readonly Credential cred = new Credential
+        readonly Credential cred = new Credential()
         {
             KeyType = CryptographicKeyType.Aes128,
             TouchRequired = false,
@@ -29,21 +29,21 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [Fact]
         public void Constructor_ReturnsObject()
         {
-            var pair = new CredentialRetryPair(cred, retries: 0);
+            CredentialRetryPair pair = new CredentialRetryPair(cred, 0);
             Assert.NotNull(pair);
         }
 
         [Fact]
         public void Constructor_Given2Retries_SetsRetriesTo2()
         {
-            var pair = new CredentialRetryPair(cred, retries: 2);
-            Assert.Equal(expected: 2, pair.Retries);
+            CredentialRetryPair pair = new CredentialRetryPair(cred, 2);
+            Assert.Equal(2, pair.Retries);
         }
 
         [Fact]
         public void Constructor_NegativeRetries_ThrowsArgOutOfRangeException()
         {
-            Action action = () => new CredentialRetryPair(cred, retries: -1);
+            Action action = () => new CredentialRetryPair(cred, -1);
             _ = Assert.Throws<ArgumentOutOfRangeException>(action);
         }
     }

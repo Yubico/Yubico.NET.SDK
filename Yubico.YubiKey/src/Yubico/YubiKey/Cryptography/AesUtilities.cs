@@ -24,10 +24,10 @@ namespace Yubico.YubiKey.Cryptography
         public const int BlockSizeBits = 128;
 
         /// <summary>
-        ///     Computes the raw AES128 encryption of the input block using the specified key.
+        /// Computes the raw AES128 encryption of the input block using the specified key.
         /// </summary>
         /// <remarks>
-        ///     This is not a secure authenticated encryption scheme.
+        /// This is not a secure authenticated encryption scheme.
         /// </remarks>
         /// <param name="key">16-byte AES128 key</param>
         /// <param name="plaintext">16-byte input block</param>
@@ -53,24 +53,23 @@ namespace Yubico.YubiKey.Cryptography
 
             using (Aes aesObj = CryptographyProviders.AesCreator())
             {
-                #pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
+#pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
                 aesObj.Mode = CipherMode.ECB;
-                #pragma warning restore CA5358
+#pragma warning restore CA5358
                 aesObj.KeySize = BlockSizeBits;
                 aesObj.BlockSize = BlockSizeBits;
                 aesObj.Key = key;
                 aesObj.IV = new byte[BlockSizeBytes];
                 aesObj.Padding = PaddingMode.None;
-                #pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
-
+#pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
                 // a non-default initialization vector
                 ICryptoTransform encryptor = aesObj.CreateEncryptor();
-                #pragma warning restore CA5401
+#pragma warning restore CA5401
                 using (var msEncrypt = new MemoryStream())
                 {
                     using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
                     {
-                        csEncrypt.Write(plaintext.ToArray(), offset: 0, plaintext.Length);
+                        csEncrypt.Write(plaintext.ToArray(), 0, plaintext.Length);
                         ciphertext = msEncrypt.ToArray();
                     }
                 }
@@ -80,10 +79,10 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         /// <summary>
-        ///     Computes the AES-CBC encryption of the input blocks using the specified key.
+        /// Computes the AES-CBC encryption of the input blocks using the specified key.
         /// </summary>
         /// <remarks>
-        ///     This is not a secure authenticated encryption scheme. No padding occurs.
+        /// This is not a secure authenticated encryption scheme. No padding occurs.
         /// </remarks>
         /// <param name="key">16-byte AES128 key</param>
         /// <param name="iv">16-byte initialization vector (IV)</param>
@@ -126,16 +125,15 @@ namespace Yubico.YubiKey.Cryptography
                 aesObj.Key = key;
                 aesObj.IV = iv;
                 aesObj.Padding = PaddingMode.None;
-                #pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
-
+#pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
                 // a non-default initialization vector
                 ICryptoTransform encryptor = aesObj.CreateEncryptor();
-                #pragma warning restore CA5401
+#pragma warning restore CA5401
                 using (var msEncrypt = new MemoryStream())
                 {
                     using (var csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
                     {
-                        csEncrypt.Write(plaintext.ToArray(), offset: 0, plaintext.Length);
+                        csEncrypt.Write(plaintext.ToArray(), 0, plaintext.Length);
                         ciphertext = msEncrypt.ToArray();
                     }
                 }
@@ -145,10 +143,10 @@ namespace Yubico.YubiKey.Cryptography
         }
 
         /// <summary>
-        ///     Computes the AES-CBC decryption of the input blocks using the specified key.
+        /// Computes the AES-CBC decryption of the input blocks using the specified key.
         /// </summary>
         /// <remarks>
-        ///     This is not a secure authenticated encryption scheme. No padding occurs.
+        /// This is not a secure authenticated encryption scheme. No padding occurs.
         /// </remarks>
         /// <param name="key">16-byte AES128 key</param>
         /// <param name="iv">16-byte initialization vector (IV)</param>
@@ -198,7 +196,7 @@ namespace Yubico.YubiKey.Cryptography
                 {
                     using (var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Write))
                     {
-                        csDecrypt.Write(ciphertext.ToArray(), offset: 0, ciphertext.Length);
+                        csDecrypt.Write(ciphertext.ToArray(), 0, ciphertext.Length);
                         plaintext = msDecrypt.ToArray();
                     }
                 }

@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var history = new KeyHistory();
 
-            Assert.Equal(expected: 0x005FC10C, history.DataTag);
+            Assert.Equal(0x005FC10C, history.DataTag);
         }
 
         [Fact]
@@ -41,8 +41,8 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var history = new KeyHistory();
 
-            var definedTag = history.GetDefinedDataTag();
-            Assert.Equal(expected: 0x005FC10C, definedTag);
+            int definedTag = history.GetDefinedDataTag();
+            Assert.Equal(0x005FC10C, definedTag);
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Piv.Objects
             using var history = new KeyHistory();
             history.DataTag = 0x005F2210;
 
-            Assert.Equal(expected: 0x005F2210, history.DataTag);
+            Assert.Equal(0x005F2210, history.DataTag);
         }
 
         [Fact]
@@ -60,8 +60,8 @@ namespace Yubico.YubiKey.Piv.Objects
             using var history = new KeyHistory();
             history.DataTag = 0x005F2210;
 
-            var definedTag = history.GetDefinedDataTag();
-            Assert.Equal(expected: 0x005FC10C, definedTag);
+            int definedTag = history.GetDefinedDataTag();
+            Assert.Equal(0x005FC10C, definedTag);
         }
 
         [Theory]
@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var history = new KeyHistory();
 
-            Assert.Equal(expected: 0, history.OnCardCertificates);
+            Assert.Equal(0, history.OnCardCertificates);
         }
 
         [Fact]
@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var history = new KeyHistory();
 
-            Assert.Equal(expected: 0, history.OffCardCertificates);
+            Assert.Equal(0, history.OffCardCertificates);
         }
 
         [Fact]
@@ -173,7 +173,7 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void LongUrl_Throws()
         {
-            var someName = "file://users/certs/somelongname/evenlonger/reallylongname/needevenmore";
+            string someName = "file://users/certs/somelongname/evenlonger/reallylongname/needevenmore";
             someName += "/stillmoreneeded/118charactersisactuallyquitelong";
             using var history = new KeyHistory();
             history.OffCardCertificates = 4;
@@ -186,54 +186,51 @@ namespace Yubico.YubiKey.Piv.Objects
             var expected = new Span<byte>(new byte[] { 0x53, 0x00 });
             using var history = new KeyHistory();
 
-            var encoding = history.Encode();
-            var isValid = expected.SequenceEqual(encoding);
+            byte[] encoding = history.Encode();
+            bool isValid = MemoryExtensions.SequenceEqual(expected, encoding);
             Assert.True(isValid);
         }
 
         [Fact]
         public void Encode_ZeroOffCard_Correct()
         {
-            var expectedValue = new Span<byte>(new byte[]
-            {
+            var expectedValue = new Span<byte>(new byte[] {
                 0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
             });
 
             using var history = new KeyHistory();
             history.OffCardCertificates = 0;
 
-            var encodedHistory = history.Encode();
+            byte[] encodedHistory = history.Encode();
 
-            var isValid = expectedValue.SequenceEqual(encodedHistory);
+            bool isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, encodedHistory);
             Assert.True(isValid);
         }
 
         [Fact]
         public void Encode_ZeroOnCard_Correct()
         {
-            var expectedValue = new Span<byte>(new byte[]
-            {
+            var expectedValue = new Span<byte>(new byte[] {
                 0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
             });
 
             using var history = new KeyHistory();
             history.OnCardCertificates = 0;
 
-            var encodedHistory = history.Encode();
+            byte[] encodedHistory = history.Encode();
 
-            var isValid = expectedValue.SequenceEqual(encodedHistory);
+            bool isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, encodedHistory);
             Assert.True(isValid);
         }
 
         [Fact]
         public void Encode_SetUrl_Correct()
         {
-            var expectedValue = new Span<byte>(new byte[]
-            {
+            var expectedValue = new Span<byte>(new byte[] {
                 0x53, 0x1B,
                 0xC1, 0x01, 0x01, 0xC2, 0x01, 0x01,
                 0xF3, 0x11,
-                0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
+                      0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
                 0xFE, 0x00
             });
 
@@ -242,72 +239,69 @@ namespace Yubico.YubiKey.Piv.Objects
             history.OffCardCertificates = 1;
             history.OffCardCertificateUrl = new Uri("file://user/certs");
 
-            var encodedHistory = history.Encode();
+            byte[] encodedHistory = history.Encode();
 
-            var isValid = expectedValue.SequenceEqual(encodedHistory);
+            bool isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, encodedHistory);
             Assert.True(isValid);
         }
 
         [Fact]
         public void Decode_OnCard_Correct()
         {
-            var dataToDecode = new ReadOnlyMemory<byte>(new byte[]
-            {
+            var dataToDecode = new ReadOnlyMemory<byte>(new byte[] {
                 0x53, 0x1B,
-                0xC1, 0x01, 0x01, 0xC2, 0x01, 0x02,
-                0xF3, 0x11,
-                0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
-                0xFE, 0x00
+                      0xC1, 0x01, 0x01, 0xC2, 0x01, 0x02,
+                      0xF3, 0x11,
+                            0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
+                      0xFE, 0x00
             });
 
             using var history = new KeyHistory();
-            var isValid = history.TryDecode(dataToDecode);
+            bool isValid = history.TryDecode(dataToDecode);
             Assert.True(isValid);
-            Assert.Equal(expected: 1, history.OnCardCertificates);
+            Assert.Equal(1, history.OnCardCertificates);
         }
 
         [Fact]
         public void Decode_OffCard_Correct()
         {
-            var dataToDecode = new ReadOnlyMemory<byte>(new byte[]
-            {
+            var dataToDecode = new ReadOnlyMemory<byte>(new byte[] {
                 0x53, 0x1B,
-                0xC1, 0x01, 0x01, 0xC2, 0x01, 0x02,
-                0xF3, 0x11,
-                0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
-                0xFE, 0x00
+                      0xC1, 0x01, 0x01, 0xC2, 0x01, 0x02,
+                      0xF3, 0x11,
+                            0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
+                      0xFE, 0x00
             });
 
             using var history = new KeyHistory();
-            var isValid = history.TryDecode(dataToDecode);
+            bool isValid = history.TryDecode(dataToDecode);
             Assert.True(isValid);
-            Assert.Equal(expected: 2, history.OffCardCertificates);
+            Assert.Equal(2, history.OffCardCertificates);
         }
 
         [Fact]
         public void Decode_WithUrl_CorrectUrl()
         {
-            var dataToDecode = new ReadOnlyMemory<byte>(new byte[]
-            {
+            var dataToDecode = new ReadOnlyMemory<byte>(new byte[] {
                 0x53, 0x1B,
-                0xC1, 0x01, 0x01, 0xC2, 0x01, 0x01,
-                0xF3, 0x11,
-                0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
-                0xFE, 0x00
+                      0xC1, 0x01, 0x01, 0xC2, 0x01, 0x01,
+                      0xF3, 0x11,
+                            0x66, 0x69, 0x6c, 0x65, 0x3a, 0x2f, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2f, 0x63, 0x65, 0x72, 0x74, 0x73,
+                      0xFE, 0x00
             });
 
-            var expectedValue = dataToDecode.Span.Slice(start: 10, length: 17);
+            ReadOnlySpan<byte> expectedValue = dataToDecode.Span.Slice(10, 17);
 
             using var history = new KeyHistory();
-            var isValid = history.TryDecode(dataToDecode);
+            bool isValid = history.TryDecode(dataToDecode);
             Assert.True(isValid);
             Assert.NotNull(history.OffCardCertificateUrl);
 
             if (!(history.OffCardCertificateUrl is null))
             {
-                var getUrl = Encoding.UTF8.GetBytes(history.OffCardCertificateUrl.AbsoluteUri);
+                byte[] getUrl = Encoding.UTF8.GetBytes(history.OffCardCertificateUrl.AbsoluteUri);
 
-                isValid = expectedValue.SequenceEqual(getUrl);
+                isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, getUrl);
                 Assert.True(isValid);
             }
         }
@@ -315,41 +309,38 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_ZeroAndNoUrl_CorrectOnCard()
         {
-            var dataToDecode = new ReadOnlyMemory<byte>(new byte[]
-            {
+            var dataToDecode = new ReadOnlyMemory<byte>(new byte[] {
                 0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
             });
 
             using var history = new KeyHistory();
-            var isValid = history.TryDecode(dataToDecode);
+            bool isValid = history.TryDecode(dataToDecode);
             Assert.True(isValid);
-            Assert.Equal(expected: 0, history.OnCardCertificates);
+            Assert.Equal(0, history.OnCardCertificates);
         }
 
         [Fact]
         public void Decode_ZeroAndNoUrl_CorrectOffCard()
         {
-            var dataToDecode = new ReadOnlyMemory<byte>(new byte[]
-            {
+            var dataToDecode = new ReadOnlyMemory<byte>(new byte[] {
                 0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
             });
 
             using var history = new KeyHistory();
-            var isValid = history.TryDecode(dataToDecode);
+            bool isValid = history.TryDecode(dataToDecode);
             Assert.True(isValid);
-            Assert.Equal(expected: 0, history.OffCardCertificates);
+            Assert.Equal(0, history.OffCardCertificates);
         }
 
         [Fact]
         public void Decode_ZeroAndNoUrl_NullUrl()
         {
-            var dataToDecode = new ReadOnlyMemory<byte>(new byte[]
-            {
+            var dataToDecode = new ReadOnlyMemory<byte>(new byte[] {
                 0x53, 0x0A, 0xC1, 0x01, 0x00, 0xC2, 0x01, 0x00, 0xF3, 0x00, 0xFE, 0x00
             });
 
             using var history = new KeyHistory();
-            var isValid = history.TryDecode(dataToDecode);
+            bool isValid = history.TryDecode(dataToDecode);
             Assert.True(isValid);
             Assert.Null(history.OffCardCertificateUrl);
         }

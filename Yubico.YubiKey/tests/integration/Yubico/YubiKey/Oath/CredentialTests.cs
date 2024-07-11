@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System.Collections.Generic;
 using Xunit;
 using Yubico.YubiKey.Oath.Commands;
 using Yubico.YubiKey.TestUtilities;
@@ -23,7 +24,7 @@ namespace Yubico.YubiKey.Oath
     public class CredentialTests : IClassFixture<CredentialFixture>
     {
         // Shared object instance across tests.
-        private readonly CredentialFixture _fixture;
+        readonly CredentialFixture _fixture;
 
         // Shared setup for every test that is run.
         public CredentialTests(CredentialFixture fixture)
@@ -31,85 +32,79 @@ namespace Yubico.YubiKey.Oath
             _fixture = fixture;
         }
 
-        [Theory]
-        [TestPriority(priority: 1)]
+        [Theory, TestPriority(1)]
         [InlineData(StandardTestDevice.Fw5)]
         public void AddCredential_Totp(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using var connection = testDevice.Connect(YubiKeyApplication.Oath);
+            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Oath);
 
-            var response = connection.SendCommand(new PutCommand(_fixture.TotpCredential));
+            OathResponse response = connection.SendCommand(new PutCommand(_fixture.TotpCredential));
             Assert.Equal(ResponseStatus.Success, response.Status);
         }
 
-        [Theory]
-        [TestPriority(priority: 1)]
+        [Theory, TestPriority(1)]
         [InlineData(StandardTestDevice.Fw5)]
         public void AddCredential_Hotp(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using var connection = testDevice.Connect(YubiKeyApplication.Oath);
+            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Oath);
 
-            var response = connection.SendCommand(new PutCommand(_fixture.HotpCredential));
+            OathResponse response = connection.SendCommand(new PutCommand(_fixture.HotpCredential));
             Assert.Equal(ResponseStatus.Success, response.Status);
         }
 
-        [Theory]
-        [TestPriority(priority: 2)]
+        [Theory, TestPriority(2)]
         [InlineData(StandardTestDevice.Fw5)]
         public void FindAddedCredentials(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using var connection = testDevice.Connect(YubiKeyApplication.Oath);
+            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Oath);
 
-            var response = connection.SendCommand(new ListCommand());
-            var data = response.GetData();
+            ListResponse response = connection.SendCommand(new ListCommand());
+            List<Credential> data = response.GetData();
             Assert.Contains(_fixture.TotpCredential, data);
             Assert.Contains(_fixture.HotpCredential, data);
         }
 
-        [Theory]
-        [TestPriority(priority: 3)]
+        [Theory, TestPriority(3)]
         [InlineData(StandardTestDevice.Fw5)]
         public void CalculateCredential_Totp(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using var connection = testDevice.Connect(YubiKeyApplication.Oath);
+            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Oath);
 
-            var response = connection.SendCommand(
+            CalculateCredentialResponse response = connection.SendCommand(
                 new CalculateCredentialCommand(_fixture.TotpCredential, ResponseFormat.Truncated));
             Assert.Equal(ResponseStatus.Success, response.Status);
             Assert.NotNull(response.GetData().Value);
         }
 
-        [Theory]
-        [TestPriority(priority: 3)]
+        [Theory, TestPriority(3)]
         [InlineData(StandardTestDevice.Fw5)]
         public void CalculateCredential_Hotp(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using var connection = testDevice.Connect(YubiKeyApplication.Oath);
+            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Oath);
 
-            var response = connection.SendCommand(
+            CalculateCredentialResponse response = connection.SendCommand(
                 new CalculateCredentialCommand(_fixture.HotpCredential, ResponseFormat.Truncated));
             Assert.Equal(ResponseStatus.Success, response.Status);
             Assert.NotNull(response.GetData().Value);
         }
 
-        [Theory]
-        [TestPriority(priority: 4)]
+        [Theory, TestPriority(4)]
         [InlineData(StandardTestDevice.Fw5)]
         public void RenameCredential_Totp(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using var connection = testDevice.Connect(YubiKeyApplication.Oath);
+            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Oath);
 
             var renameCommand = new RenameCommand(_fixture.TotpCredential, "Test", "test@example.com");
             OathResponse response = connection.SendCommand(renameCommand);
@@ -117,14 +112,13 @@ namespace Yubico.YubiKey.Oath
             Assert.Equal(ResponseStatus.Success, response.Status);
         }
 
-        [Theory]
-        [TestPriority(priority: 5)]
+        [Theory, TestPriority(5)]
         [InlineData(StandardTestDevice.Fw5)]
         public void RenameCredential_EmptyIssuer(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using var connection = testDevice.Connect(YubiKeyApplication.Oath);
+            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Oath);
 
             _fixture.TotpCredential.Issuer = "Test";
             _fixture.TotpCredential.AccountName = "test@example.com";
@@ -135,32 +129,30 @@ namespace Yubico.YubiKey.Oath
             Assert.Equal(ResponseStatus.Success, response.Status);
         }
 
-        [Theory]
-        [TestPriority(priority: 6)]
+        [Theory, TestPriority(6)]
         [InlineData(StandardTestDevice.Fw5)]
         public void DeleteCredential_Totp(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using var connection = testDevice.Connect(YubiKeyApplication.Oath);
+            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Oath);
 
             _fixture.TotpCredential.Issuer = "";
             _fixture.TotpCredential.AccountName = "test@example.com";
 
-            var response = connection.SendCommand(new DeleteCommand(_fixture.TotpCredential));
+            DeleteResponse response = connection.SendCommand(new DeleteCommand(_fixture.TotpCredential));
             Assert.Equal(ResponseStatus.Success, response.Status);
         }
 
-        [Theory]
-        [TestPriority(priority: 6)]
+        [Theory, TestPriority(6)]
         [InlineData(StandardTestDevice.Fw5)]
         public void DeleteCredential_Hotp(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
-            using var connection = testDevice.Connect(YubiKeyApplication.Oath);
+            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Oath);
 
-            var response = connection.SendCommand(new DeleteCommand(_fixture.HotpCredential));
+            DeleteResponse response = connection.SendCommand(new DeleteCommand(_fixture.HotpCredential));
             Assert.Equal(ResponseStatus.Success, response.Status);
         }
     }

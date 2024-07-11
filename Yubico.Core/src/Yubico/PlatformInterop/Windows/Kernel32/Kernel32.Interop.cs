@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Runtime.InteropServices;
 using Microsoft.Win32.SafeHandles;
 
@@ -24,10 +23,8 @@ namespace Yubico.PlatformInterop
         #region Enumerations and flags
 
         [Flags]
-        [SuppressMessage(
-            "Design", "CA1069:Enums values should not be duplicated",
-            Justification = "Keeping interop as close to original C headers as possible")]
-        internal enum DESIRED_ACCESS
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1069:Enums values should not be duplicated", Justification = "Keeping interop as close to original C headers as possible")]
+        internal enum DESIRED_ACCESS : int
         {
             NONE = 0x0,
 
@@ -72,21 +69,18 @@ namespace Yubico.PlatformInterop
 
             SPECIFIC_RIGHTS_ALL = 0x0000_FFFF,
 
-            FILE_GENERIC_READ = STANDARD_RIGHTS_READ | FILE_READ_DATA | FILE_READ_ATTRIBUTES | FILE_READ_EA |
-                SYNCHRONIZE,
-
-            FILE_GENERIC_WRITE = STANDARD_RIGHTS_WRITE | FILE_WRITE_DATA | FILE_WRITE_ATTRIBUTES | FILE_WRITE_EA |
-                FILE_APPEND_DATA | SYNCHRONIZE,
+            FILE_GENERIC_READ = STANDARD_RIGHTS_READ | FILE_READ_DATA | FILE_READ_ATTRIBUTES | FILE_READ_EA | SYNCHRONIZE,
+            FILE_GENERIC_WRITE = STANDARD_RIGHTS_WRITE | FILE_WRITE_DATA | FILE_WRITE_ATTRIBUTES | FILE_WRITE_EA | FILE_APPEND_DATA | SYNCHRONIZE,
             FILE_GENERIC_EXECUTE = STANDARD_RIGHTS_EXECUTE | FILE_READ_ATTRIBUTES | FILE_EXECUTE | SYNCHRONIZE,
 
             GENERIC_READ = unchecked((int)0x8000_0000),
             GENERIC_WRITE = 0x4000_0000,
             GENERIC_EXECUTE = 0x2000_0000,
-            GENERIC_ALL = 0x1000_0000
+            GENERIC_ALL = 0x1000_0000,
         }
 
         [Flags]
-        internal enum FILE_SHARE
+        internal enum FILE_SHARE : int
         {
             NONE = 0x00,
             READ = 0x01,
@@ -94,23 +88,21 @@ namespace Yubico.PlatformInterop
             DELETE = 0x04,
 
             READWRITE = READ | WRITE,
-            ALL = READWRITE | DELETE
+            ALL = READWRITE | DELETE,
         }
 
-        internal enum CREATION_DISPOSITION
+        internal enum CREATION_DISPOSITION : int
         {
             CREATE_NEW = 1,
             CREATE_ALWAYS = 2,
             OPEN_EXISTING = 3,
             OPEN_ALWAYS = 4,
-            TRUNACTE_EXISTING = 5
+            TRUNACTE_EXISTING = 5,
         }
 
         [Flags]
-        [SuppressMessage(
-            "Design", "CA1069:Enums values should not be duplicated",
-            Justification = "Keeping interop as close to original C headers as possible")]
-        internal enum FILE_FLAG
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1069:Enums values should not be duplicated", Justification = "Keeping interop as close to original C headers as possible")]
+        internal enum FILE_FLAG : int
         {
             // Attributes
             READONLY = 0x0000_0001,
@@ -149,7 +141,7 @@ namespace Yubico.PlatformInterop
             OPEN_REPARSE_POINT = 0x0020_0000,
             OPEN_NO_RECALL = 0x0010_0000,
             FIRST_PIPE_INSTANCE = 0x0008_0000,
-            FLAG_OPEN_REQUIRING_OPLOCK = 0x0004_0000
+            FLAG_OPEN_REQUIRING_OPLOCK = 0x0004_0000,
 
             // Security QOS
         }
@@ -165,32 +157,37 @@ namespace Yubico.PlatformInterop
         // that it will be supported by these platforms in the future.
         [DllImport(Libraries.Kernel32, CharSet = CharSet.Unicode, EntryPoint = "CreateFileW", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        internal static extern SafeFileHandle CreateFile(
+        internal extern static SafeFileHandle CreateFile(
             string lpFileName,
             DESIRED_ACCESS dwDesiredAccess,
             FILE_SHARE dwShareMode,
             IntPtr lpSecurityAttributes,
             CREATION_DISPOSITION dwCreationDisposition,
             FILE_FLAG dwFlagsAndAttributes,
-            IntPtr hTemplateFile);
+            IntPtr hTemplateFile
+            );
 
         [DllImport(Libraries.Kernel32, CharSet = CharSet.Unicode, EntryPoint = "WriteFile", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        internal static extern bool WriteFile(
+        internal extern static bool WriteFile(
             SafeFileHandle handle,
             byte[] lpBuffer,
             int numBytesToWrite,
             out int numBytesWritten,
-            IntPtr mustBeZero);
+            IntPtr mustBeZero
+            );
 
         [DllImport(Libraries.Kernel32, CharSet = CharSet.Unicode, EntryPoint = "ReadFile", SetLastError = true)]
         [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
-        internal static extern bool ReadFile(
+        internal extern static bool ReadFile(
             SafeFileHandle handle,
             byte[] lpBuffer,
             int numBytesToRead,
             out int numBytesRead,
-            IntPtr mustBeZero);
+            IntPtr mustBeZero
+            );
+
+
 
         #endregion
     }

@@ -20,29 +20,28 @@ using Yubico.YubiKey.Fido2.Cbor;
 namespace Yubico.YubiKey.Fido2.Cose
 {
     /// <summary>
-    ///     A representation of an Elliptic Curve public key in COSE form.
+    /// A representation of an Elliptic Curve public key in COSE form.
     /// </summary>
     /// <remarks>
-    ///     <para>
-    ///         An ECC public key consists of a curve and public point. In FIDO2, the curve is represented by the
-    ///         <see cref="CoseAlgorithmIdentifier" /> and the public point is simply an x-coordinate and a y-coordinate.
-    ///     </para>
-    ///     <para>
-    ///         The FIDO2 standard also specifies an encoding of the public key information. It uses the representation defined
-    ///         in RFC8152: CBOR Object Signing and Encryption (COSE) standard. Supplementary information can be found in
-    ///         section 6.5.6 of the CTAP2.1 specification (under the heading `getPublicKey()`).
-    ///     </para>
-    ///     <para>
-    ///         This class has multiple constructors. One constructs an empty object and allows the caller to set the key
-    ///         parameters via the properties on this class. Another constructs a key based on the COSE form encoded in CBOR.
-    ///         Lastly, there is a constructor that takes in a .NET representation of an EC public key used for interoperating
-    ///         with the .NET cryptographic library.
-    ///     </para>
-    ///     <para>
-    ///         The YubiKey's FIDO2 application currently only supports the NIST P-256 curve. Thus, the SDK - as of version
-    ///         1.5.0
-    ///         - will also only support this curve.
-    ///     </para>
+    /// <para>
+    /// An ECC public key consists of a curve and public point. In FIDO2, the curve is represented by the
+    /// <see cref="CoseAlgorithmIdentifier"/> and the public point is simply an x-coordinate and a y-coordinate.
+    /// </para>
+    /// <para>
+    /// The FIDO2 standard also specifies an encoding of the public key information. It uses the representation defined
+    /// in RFC8152: CBOR Object Signing and Encryption (COSE) standard. Supplementary information can be found in
+    /// section 6.5.6 of the CTAP2.1 specification (under the heading `getPublicKey()`).
+    /// </para>
+    /// <para>
+    /// This class has multiple constructors. One constructs an empty object and allows the caller to set the key
+    /// parameters via the properties on this class. Another constructs a key based on the COSE form encoded in CBOR.
+    /// Lastly, there is a constructor that takes in a .NET representation of an EC public key used for interoperating
+    /// with the .NET cryptographic library.
+    /// </para>
+    /// <para>
+    /// The YubiKey's FIDO2 application currently only supports the NIST P-256 curve. Thus, the SDK - as of version 1.5.0
+    /// - will also only support this curve.
+    /// </para>
     /// </remarks>
     public class CoseEcPublicKey : CoseKey
     {
@@ -54,10 +53,78 @@ namespace Yubico.YubiKey.Fido2.Cose
 
         // We currently support only one coordinate size
         private const int P256CoordinateLength = 32;
-        private CoseEcCurve _curve;
 
         private byte[] _xCoordinate = Array.Empty<byte>();
         private byte[] _yCoordinate = Array.Empty<byte>();
+        private CoseEcCurve _curve;
+
+        /// <summary>
+        /// The Elliptic Curve that the key resides on.
+        /// </summary>
+        /// <exception cref="NotSupportedException">
+        /// On set, the curve specified is not supported.
+        /// </exception>
+        public CoseEcCurve Curve
+        {
+            get => _curve;
+            set
+            {
+                if (value != CoseEcCurve.P256)
+                {
+                    throw new NotSupportedException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.UnsupportedAlgorithm));
+                }
+                _curve = value;
+            }
+        }
+
+        /// <summary>
+        /// The X-coordinate of the public point.
+        /// </summary>
+        /// <exception cref="ArgumentException">
+        /// On set, the coordinate in not the correct length.
+        /// </exception>
+        public ReadOnlyMemory<byte> XCoordinate
+        {
+            get => _xCoordinate;
+            set
+            {
+                if (value.Length != P256CoordinateLength)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidPublicKeyData));
+                }
+
+                _xCoordinate = value.ToArray();
+            }
+        }
+
+        /// <summary>
+        /// The Y-coordinate of the public point.
+        /// </summary>
+        /// <exception cref="ArgumentException">
+        /// On set, the coordinate in not the correct length.
+        /// </exception>
+        public ReadOnlyMemory<byte> YCoordinate
+        {
+            get => _yCoordinate;
+            set
+            {
+                if (value.Length != P256CoordinateLength)
+                {
+                    throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.InvalidPublicKeyData));
+                }
+
+                _yCoordinate = value.ToArray();
+            }
+        }
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -67,26 +134,26 @@ namespace Yubico.YubiKey.Fido2.Cose
         }
 
         /// <summary>
-        ///     Construct a <see cref="CoseEcPublicKey" /> based on the curve and
-        ///     point.
+        /// Construct a <see cref="CoseEcPublicKey"/> based on the curve and
+        /// point.
         /// </summary>
         /// <remarks>
-        ///     An ECC public key is a curve and public point. This class supports
-        ///     only one curve: NIST P-256 (<c>CoseEcCurve.P256</c>). This
-        ///     constructor expects the length of each coordinate to be at least one
-        ///     byte and 32 bytes or fewer.
+        /// An ECC public key is a curve and public point. This class supports
+        /// only one curve: NIST P-256 (<c>CoseEcCurve.P256</c>). This
+        /// constructor expects the length of each coordinate to be at least one
+        /// byte and 32 bytes or fewer.
         /// </remarks>
         /// <param name="curve">
-        ///     The curve for this public key.
+        /// The curve for this public key.
         /// </param>
         /// <param name="xCoordinate">
-        ///     The x-coordinate of the public point.
+        /// The x-coordinate of the public point.
         /// </param>
         /// <param name="yCoordinate">
-        ///     The y-coordinate of the public point.
+        /// The y-coordinate of the public point.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     The <c>encodedPoint</c> is not a correct EC Point encoding.
+        /// The <c>encodedPoint</c> is not a correct EC Point encoding.
         /// </exception>
         public CoseEcPublicKey(CoseEcCurve curve, ReadOnlyMemory<byte> xCoordinate, ReadOnlyMemory<byte> yCoordinate)
         {
@@ -104,14 +171,14 @@ namespace Yubico.YubiKey.Fido2.Cose
         }
 
         /// <summary>
-        ///     Construct a <see cref="CoseEcPublicKey" /> based on the CBOR encoding
-        ///     of a <c>COSE_Key</c>.
+        /// Construct a <see cref="CoseEcPublicKey"/> based on the CBOR encoding
+        /// of a <c>COSE_Key</c>.
         /// </summary>
         /// <param name="encodedCoseKey">
-        ///     The CBOR encoding.
+        /// The CBOR encoding.
         /// </param>
         /// <exception cref="Ctap2DataException">
-        ///     The <c>encodedCoseKey</c> is not a correct EC Public Key encoding.
+        /// The <c>encodedCoseKey</c> is not a correct EC Public Key encoding.
         /// </exception>
         public CoseEcPublicKey(ReadOnlyMemory<byte> encodedCoseKey)
         {
@@ -125,16 +192,16 @@ namespace Yubico.YubiKey.Fido2.Cose
         }
 
         /// <summary>
-        ///     Construct a <see cref="CoseEcPublicKey" /> based on .NET elliptic curve parameters.
+        /// Construct a <see cref="CoseEcPublicKey"/> based on .NET elliptic curve parameters.
         /// </summary>
         /// <param name="ecParameters">
-        ///     An `ECParameters` structure with a specified Curve and a public point Q.
+        /// An `ECParameters` structure with a specified Curve and a public point Q.
         /// </param>
         /// <exception cref="ArgumentException">
-        ///     The <c>ECParameters</c> object does not contain a valid curve and
+        /// The <c>ECParameters</c> object does not contain a valid curve and
         /// </exception>
         /// <exception cref="NotSupportedException">
-        ///     The parameters/public key specified is not supported.
+        /// The parameters/public key specified is not supported.
         /// </exception>
         public CoseEcPublicKey(ECParameters ecParameters)
         {
@@ -159,80 +226,11 @@ namespace Yubico.YubiKey.Fido2.Cose
         }
 
         /// <summary>
-        ///     The Elliptic Curve that the key resides on.
-        /// </summary>
-        /// <exception cref="NotSupportedException">
-        ///     On set, the curve specified is not supported.
-        /// </exception>
-        public CoseEcCurve Curve
-        {
-            get => _curve;
-            set
-            {
-                if (value != CoseEcCurve.P256)
-                {
-                    throw new NotSupportedException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.UnsupportedAlgorithm));
-                }
-
-                _curve = value;
-            }
-        }
-
-        /// <summary>
-        ///     The X-coordinate of the public point.
-        /// </summary>
-        /// <exception cref="ArgumentException">
-        ///     On set, the coordinate in not the correct length.
-        /// </exception>
-        public ReadOnlyMemory<byte> XCoordinate
-        {
-            get => _xCoordinate;
-            set
-            {
-                if (value.Length != P256CoordinateLength)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPublicKeyData));
-                }
-
-                _xCoordinate = value.ToArray();
-            }
-        }
-
-        /// <summary>
-        ///     The Y-coordinate of the public point.
-        /// </summary>
-        /// <exception cref="ArgumentException">
-        ///     On set, the coordinate in not the correct length.
-        /// </exception>
-        public ReadOnlyMemory<byte> YCoordinate
-        {
-            get => _yCoordinate;
-            set
-            {
-                if (value.Length != P256CoordinateLength)
-                {
-                    throw new ArgumentException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidPublicKeyData));
-                }
-
-                _yCoordinate = value.ToArray();
-            }
-        }
-
-        /// <summary>
-        ///     Returns the COSE key as a new .NET <c>ECParameters</c> structure. Used
-        ///     for interoperating with the .NET crypto library.
+        /// Returns the COSE key as a new .NET <c>ECParameters</c> structure. Used
+        /// for interoperating with the .NET crypto library.
         /// </summary>
         /// <returns>
-        ///     The public key in the form of an <c>ECParameters</c> structure.
+        /// The public key in the form of an <c>ECParameters</c> structure.
         /// </returns>
         public ECParameters ToEcParameters()
         {
@@ -247,7 +245,7 @@ namespace Yubico.YubiKey.Fido2.Cose
             return ecParams;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc/>
         public override byte[] Encode()
         {
             if (_xCoordinate.Length != P256CoordinateLength || _yCoordinate.Length != P256CoordinateLength)

@@ -17,38 +17,35 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
-    ///     The response to the U2F Set Device Info command.
+    /// The response to the U2F Set Device Info command.
     /// </summary>
     /// <remarks>
-    ///     This is the partner response class to <see cref="SetDeviceInfoCommand" />.
-    ///     <para>
-    ///         After executing the <c>SetDeviceInfoCommand</c>, the result is an
-    ///         instance of this class. There is no data to return. Simply check the
-    ///         <c>Status</c> property. If it is <c>ResponseStatus.Success</c> the
-    ///         command succeeded.
-    ///     </para>
+    /// This is the partner response class to <see cref="SetDeviceInfoCommand"/>.
+    /// <para>
+    /// After executing the <c>SetDeviceInfoCommand</c>, the result is an
+    /// instance of this class. There is no data to return. Simply check the
+    /// <c>Status</c> property. If it is <c>ResponseStatus.Success</c> the
+    /// command succeeded.
+    /// </para>
     /// </remarks>
     public sealed class SetDeviceInfoResponse : YubiKeyResponse, IYubiKeyResponse
     {
         /// <summary>
-        ///     Constructs a SetDeviceInfoResponse from the given ResponseApdu.
+        /// Constructs a SetDeviceInfoResponse from the given ResponseApdu.
         /// </summary>
-        /// <param name="responseApdu">
-        ///     The response to a
-        ///     <see cref="SetDeviceInfoCommand" />.
+        /// <param name="responseApdu">The response to a
+        /// <see cref="SetDeviceInfoCommand"/>.
         /// </param>
         public SetDeviceInfoResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
         }
 
-        /// <inheritdoc />
-        protected override ResponseStatusPair StatusCodeMap =>
-            StatusWord switch
-            {
-                SWConstants.NoPreciseDiagnosis => new ResponseStatusPair(
-                    ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.BaseConditionsNotSatisfied),
-                _ => base.StatusCodeMap
-            };
+        /// <inheritdoc/>
+        protected override ResponseStatusPair StatusCodeMap => StatusWord switch
+        {
+            SWConstants.NoPreciseDiagnosis => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.BaseConditionsNotSatisfied),
+            _ => base.StatusCodeMap,
+        };
     }
 }

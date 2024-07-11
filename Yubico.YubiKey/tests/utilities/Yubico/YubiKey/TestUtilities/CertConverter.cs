@@ -43,6 +43,12 @@ namespace Yubico.YubiKey.TestUtilities
         private readonly X509Certificate2 _certificateObject;
         private bool _disposedValue;
 
+        // Get the algorithm of the subject public key.
+        public PivAlgorithm Algorithm { get; private set; }
+
+        // Get the bit size of the subject public key.
+        public int KeySize { get; private set; }
+
         // Build a local cert object from the "string".
         // Note that this takes in a char array. This is to match KeyConverter,
         // which uses a char array so that you can overwrite sensitive data if
@@ -58,7 +64,7 @@ namespace Yubico.YubiKey.TestUtilities
         // constructor will not build a cert.
         public CertConverter(char[] pemCertString)
         {
-            var certDer = Convert.FromBase64CharArray(
+            byte[] certDer = Convert.FromBase64CharArray(
                 pemCertString,
                 CertificateStartLength,
                 pemCertString.Length - (CertificateStartLength + CertificateEndLength));
@@ -81,22 +87,9 @@ namespace Yubico.YubiKey.TestUtilities
         // copy it into the local object.
         public CertConverter(X509Certificate2 cert)
         {
-            var certDer = cert.GetRawCertData();
+            byte[] certDer = cert.GetRawCertData();
             _certificateObject = new X509Certificate2(certDer);
             SetAlgorithm();
-        }
-
-        // Get the algorithm of the subject public key.
-        public PivAlgorithm Algorithm { get; private set; }
-
-        // Get the bit size of the subject public key.
-        public int KeySize { get; private set; }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
 
         // Get the cert in the form of an X509Certificate2 object.
@@ -106,7 +99,7 @@ namespace Yubico.YubiKey.TestUtilities
         // object here will not contain that private key.
         public X509Certificate2 GetCertObject()
         {
-            var certDer = _certificateObject.GetRawCertData();
+            byte[] certDer = _certificateObject.GetRawCertData();
             return new X509Certificate2(certDer);
         }
 
@@ -118,30 +111,30 @@ namespace Yubico.YubiKey.TestUtilities
 
         public char[] GetCertPem()
         {
-            var certDer = _certificateObject.GetRawCertData();
-            var prefix = CertificateStart.ToCharArray();
-            var suffix = CertificateEnd.ToCharArray();
+            byte[] certDer = _certificateObject.GetRawCertData();
+            char[] prefix = CertificateStart.ToCharArray();
+            char[] suffix = CertificateEnd.ToCharArray();
 
             // The length of the char array will be the lengths of the
             // prefix and suffix, along with the length of the Base64
             // data, and new line characters. Create an upper bound.
-            var blockCount = (certDer.Length + 2) / 3;
-            var totalLength = blockCount * 4;
-            var lineCount = (totalLength + 75) / 76;
+            int blockCount = (certDer.Length + 2) / 3;
+            int totalLength = blockCount * 4;
+            int lineCount = (totalLength + 75) / 76;
             totalLength += lineCount * 4;
             totalLength += prefix.Length;
             totalLength += suffix.Length;
 
-            var temp = new char[totalLength];
-            Array.Copy(prefix, sourceIndex: 0, temp, destinationIndex: 0, prefix.Length);
-            var count = Convert.ToBase64CharArray(
-                certDer, offsetIn: 0, certDer.Length,
+            char[] temp = new char[totalLength];
+            Array.Copy(prefix, 0, temp, 0, prefix.Length);
+            int count = Convert.ToBase64CharArray(
+                certDer, 0, certDer.Length,
                 temp, prefix.Length,
                 Base64FormattingOptions.InsertLineBreaks);
-            Array.Copy(suffix, sourceIndex: 0, temp, prefix.Length + count, suffix.Length);
+            Array.Copy(suffix, 0, temp, prefix.Length + count, suffix.Length);
             totalLength = prefix.Length + suffix.Length + count;
-            var returnValue = new char[totalLength];
-            Array.Copy(temp, sourceIndex: 0, returnValue, destinationIndex: 0, totalLength);
+            char[] returnValue = new char[totalLength];
+            Array.Copy(temp, 0, returnValue, 0, totalLength);
 
             return returnValue;
         }
@@ -152,16 +145,14 @@ namespace Yubico.YubiKey.TestUtilities
         {
             if (Algorithm.IsRsa())
             {
-                var rsaObject = _certificateObject.PublicKey.GetRSAPublicKey()!;
-                var rsaParams = rsaObject.ExportParameters(includePrivateParameters: false);
+                RSA? rsaObject = _certificateObject.PublicKey.GetRSAPublicKey()!;
+                RSAParameters rsaParams = rsaObject.ExportParameters(false);
                 return new PivRsaPublicKey(rsaParams.Modulus, rsaParams.Exponent);
             }
-
             if (Algorithm.IsEcc())
             {
                 return new PivEccPublicKey(_certificateObject.PublicKey.EncodedKeyValue.RawData);
             }
-
             throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
         }
 
@@ -179,8 +170,8 @@ namespace Yubico.YubiKey.TestUtilities
                 throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
             }
 
-            var rsaObject = _certificateObject.PublicKey.GetRSAPublicKey()!;
-            var rsaParams = rsaObject.ExportParameters(includePrivateParameters: false);
+            RSA? rsaObject = _certificateObject.PublicKey.GetRSAPublicKey()!;
+            RSAParameters rsaParams = rsaObject.ExportParameters(false);
 
             return RSA.Create(rsaParams);
         }
@@ -194,7 +185,7 @@ namespace Yubico.YubiKey.TestUtilities
         // throw an exception.
         public ECDsa GetEccObject()
         {
-            var coordLength = KeySize / 8;
+            int coordLength = KeySize / 8;
             var eccCurve = ECCurve.CreateFromValue("1.2.840.10045.3.1.7");
             if (Algorithm != PivAlgorithm.EccP256)
             {
@@ -202,21 +193,17 @@ namespace Yubico.YubiKey.TestUtilities
                 {
                     throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
                 }
-
                 eccCurve = ECCurve.CreateFromValue("1.3.132.0.34");
             }
-
             var eccParams = new ECParameters
             {
-                Curve = eccCurve
+                Curve = (ECCurve)eccCurve
             };
 
-            var xCoord = new byte[coordLength];
-            var yCoord = new byte[coordLength];
-            Array.Copy(_certificateObject.PublicKey.EncodedKeyValue.RawData, sourceIndex: 1, xCoord,
-                destinationIndex: 0, coordLength);
-            Array.Copy(_certificateObject.PublicKey.EncodedKeyValue.RawData, coordLength + 1, yCoord,
-                destinationIndex: 0, coordLength);
+            byte[] xCoord = new byte[coordLength];
+            byte[] yCoord = new byte[coordLength];
+            Array.Copy(_certificateObject.PublicKey.EncodedKeyValue.RawData, 1, xCoord, 0, coordLength);
+            Array.Copy(_certificateObject.PublicKey.EncodedKeyValue.RawData, coordLength + 1, yCoord, 0, coordLength);
 
             eccParams.Q.X = xCoord;
             eccParams.Q.Y = yCoord;
@@ -235,8 +222,8 @@ namespace Yubico.YubiKey.TestUtilities
             }
             else if (string.Compare(_certificateObject.PublicKey.Oid.FriendlyName, "ECC") == 0)
             {
-                byte[] oid256 = { 0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07 };
-                byte[] oid384 = { 0x06, 0x05, 0x2b, 0x81, 0x04, 0x00, 0x22 };
+                byte[] oid256 = new byte[] { 0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07 };
+                byte[] oid384 = new byte[] { 0x06, 0x05, 0x2b, 0x81, 0x04, 0x00, 0x22 };
                 if (oid256.SequenceEqual(_certificateObject.PublicKey.EncodedParameters.RawData))
                 {
                     KeySize = 256;
@@ -255,7 +242,7 @@ namespace Yubico.YubiKey.TestUtilities
                 2048 => PivAlgorithm.Rsa2048,
                 3072 => PivAlgorithm.Rsa3072,
                 4096 => PivAlgorithm.Rsa4096,
-                _ => throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm)
+                _ => throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm),
             };
         }
 
@@ -267,9 +254,15 @@ namespace Yubico.YubiKey.TestUtilities
                 {
                     _certificateObject.Dispose();
                 }
-
                 _disposedValue = true;
             }
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

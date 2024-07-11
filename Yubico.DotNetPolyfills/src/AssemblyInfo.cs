@@ -14,4 +14,4 @@
 
 using System;
 
-[assembly: CLSCompliant(isCompliant: true)]
+[assembly: CLSCompliant(true)]

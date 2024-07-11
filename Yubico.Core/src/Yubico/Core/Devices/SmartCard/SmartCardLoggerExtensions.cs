@@ -27,6 +27,7 @@ namespace Yubico.Core.Devices.SmartCard
             }
         }
 
-        public static void CardReset(this Logger logger) => logger.LogWarning("The smart card was reset.");
+        public static void CardReset(this Logger logger) =>
+            logger.LogWarning("The smart card was reset.");
     }
 }

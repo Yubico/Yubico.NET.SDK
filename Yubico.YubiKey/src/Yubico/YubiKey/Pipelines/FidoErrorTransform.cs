@@ -18,8 +18,8 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Pipelines
 {
     /// <summary>
-    ///     Used to parse out the CTAP status byte from a response APDU and reform the response APDU in the SW + Data
-    ///     format that the SDK's command layer can understand.
+    /// Used to parse out the CTAP status byte from a response APDU and reform the response APDU in the SW + Data
+    /// format that the SDK's command layer can understand.
     /// </summary>
     internal class FidoErrorTransform : IApduTransform
     {

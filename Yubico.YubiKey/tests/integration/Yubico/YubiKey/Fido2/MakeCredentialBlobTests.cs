@@ -25,22 +25,20 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void CredBlobExtension_Correct()
         {
-            var yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevices()[index: 0];
-            var connection = yubiKeyDevice.Connect(YubiKeyApplication.Fido2);
+            IYubiKeyDevice yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevices()[0];
+            IYubiKeyConnection connection = yubiKeyDevice.Connect(YubiKeyApplication.Fido2);
 
             var getInfoCmd = new GetInfoCommand();
-            var getInfoRsp = connection.SendCommand(getInfoCmd);
+            GetInfoResponse getInfoRsp = connection.SendCommand(getInfoCmd);
             Assert.Equal(ResponseStatus.Success, getInfoRsp.Status);
-            var authInfo = getInfoRsp.GetData();
-            Assert.Equal(expected: 32,
-                authInfo
-                    .MaximumCredentialBlobLength); /* Assert.Equal() Failure: Values differExpected: 32 Actual: null */
+            AuthenticatorInfo authInfo = getInfoRsp.GetData();
+            Assert.Equal(32, authInfo.MaximumCredentialBlobLength); /* Assert.Equal() Failure: Values differExpected: 32 Actual: null */
 
-            var maxCredBlobLength = authInfo.MaximumCredentialBlobLength ?? 0;
+            int maxCredBlobLength = authInfo.MaximumCredentialBlobLength ?? 0;
             Assert.NotNull(authInfo.Extensions);
             if (!(authInfo.Extensions is null))
             {
-                var isValid = authInfo.Extensions.Contains<string>("credBlob") && maxCredBlobLength > 0;
+                bool isValid = authInfo.Extensions.Contains<string>("credBlob") && maxCredBlobLength > 0;
                 Assert.True(isValid);
             }
         }
@@ -50,13 +48,12 @@ namespace Yubico.YubiKey.Fido2
         {
             var pin = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
 
-            var yubiKey = YubiKeyDevice.FindAll().First();
+            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
 
             using (var fido2Session = new Fido2Session(yubiKey))
             {
                 _ = fido2Session.TrySetPin(pin);
-                var isValid = fido2Session.TryVerifyPin(pin, permissions: null, relyingPartyId: null,
-                    out var retriesRemaining, out var reboot);
+                bool isValid = fido2Session.TryVerifyPin(pin, null, null, out int? retriesRemaining, out bool? reboot);
                 Assert.True(isValid);
 
                 isValid = SupportsLargeBlobs(fido2Session.AuthenticatorInfo);
@@ -65,7 +62,7 @@ Assert.True() Failure
 Expected: True
 Actual:   False*/
 
-                isValid = GetParams(fido2Session, out var makeParams);
+                isValid = GetParams(fido2Session, out MakeCredentialParameters makeParams);
                 Assert.True(isValid);
             }
         }
@@ -99,13 +96,13 @@ Actual:   False*/
 
             var rp = new RelyingParty("SomeRpId")
             {
-                Name = "SomeRpName"
+                Name = "SomeRpName",
             };
             byte[] userId = { 0x11, 0x22, 0x33, 0x44 };
             var user = new UserEntity(new ReadOnlyMemory<byte>(userId))
             {
                 Name = "SomeUserName",
-                DisplayName = "User"
+                DisplayName = "User",
             };
 
             makeParams = new MakeCredentialParameters(rp, user);
@@ -116,14 +113,14 @@ Actual:   False*/
             }
 
             var token = (ReadOnlyMemory<byte>)fido2Session.AuthToken;
-            var pinUvAuthParam = fido2Session.AuthProtocol.AuthenticateUsingPinToken(
+            byte[] pinUvAuthParam = fido2Session.AuthProtocol.AuthenticateUsingPinToken(
                 token.ToArray(), clientDataHash);
 
             makeParams.ClientDataHash = clientDataHash;
             makeParams.Protocol = fido2Session.AuthProtocol.Protocol;
             makeParams.PinUvAuthParam = pinUvAuthParam;
 
-            makeParams.AddOption(AuthenticatorOptions.rk, optionValue: true);
+            makeParams.AddOption(AuthenticatorOptions.rk, true);
             makeParams.AddExtension("largeBlob", arbitraryData);
 
             return true;

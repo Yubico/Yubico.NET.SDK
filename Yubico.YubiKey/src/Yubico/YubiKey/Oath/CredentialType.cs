@@ -12,33 +12,35 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
+
 namespace Yubico.YubiKey.Oath
 {
     /// <summary>
-    ///     Describes the class of one-time password algorithm to be used.
+    /// Describes the class of one-time password algorithm to be used.
     /// </summary>
     public enum CredentialType
     {
         /// <summary>
-        ///     No type is specified.
+        /// No type is specified.
         /// </summary>
         None = 0,
 
         /// <summary>
-        ///     HMAC-based One-time Password algorithm (HOTP) is generated based on HMAC algorithm using an authentication counter.
+        /// HMAC-based One-time Password algorithm (HOTP) is generated based on HMAC algorithm using an authentication counter.
         /// </summary>
         /// <remarks>
-        ///     The algorithm is specified in RFC 4226.
+        /// The algorithm is specified in RFC 4226.
         /// </remarks>
         Hotp = 0x10,
 
         /// <summary>
-        ///     A time-based one-time password (TOTP) is generated based on HMAC algorithm using the current time.
+        /// A time-based one-time password (TOTP) is generated based on HMAC algorithm using the current time.
         /// </summary>
         /// <remarks>
-        ///     It expires after 15, 30 or 60 seconds.
-        ///     The algorithm is specified in RFC 6238.
+        /// It expires after 15, 30 or 60 seconds.
+        /// The algorithm is specified in RFC 6238.
         /// </remarks>
-        Totp = 0x20
+        Totp = 0x20,
     }
 }

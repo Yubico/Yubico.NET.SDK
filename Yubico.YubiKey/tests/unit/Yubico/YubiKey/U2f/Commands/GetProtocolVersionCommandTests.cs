@@ -32,24 +32,13 @@ namespace Yubico.YubiKey.U2f.Commands
 
         private const int offsetData = offsetLc + lengthLc;
 
-        [Fact]
-        public void CreateResponseApdu_ReturnsCorrectType()
-        {
-            var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            var command = new GetProtocolVersionCommand();
-            var response = command.CreateResponseForApdu(responseApdu);
-
-            _ = Assert.IsType<GetProtocolVersionResponse>(response);
-        }
-
         #region Outer APDU
-
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
             var command = new GetProtocolVersionCommand();
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().Cla);
+            Assert.Equal(0, command.CreateCommandApdu().Cla);
         }
 
         [Fact]
@@ -57,7 +46,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new GetProtocolVersionCommand();
 
-            Assert.Equal(expected: 0x03, command.CreateCommandApdu().Ins);
+            Assert.Equal(0x03, command.CreateCommandApdu().Ins);
         }
 
         [Fact]
@@ -65,7 +54,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new GetProtocolVersionCommand();
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().P1);
+            Assert.Equal(0, command.CreateCommandApdu().P1);
         }
 
         [Fact]
@@ -73,19 +62,19 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new GetProtocolVersionCommand();
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().P2);
+            Assert.Equal(0, command.CreateCommandApdu().P2);
         }
 
         [Fact]
         public void CreateCommandApdu_GetNcProperty_Returns4()
         {
-            var expectedInnerData = Array.Empty<byte>();
-            var expectedInnerLc = Array.Empty<byte>();
+            byte[] expectedInnerData = Array.Empty<byte>();
+            byte[] expectedInnerLc = Array.Empty<byte>();
 
-            var expectedInnerCommandLength = lengthHeader + expectedInnerLc.Length + expectedInnerData.Length;
+            int expectedInnerCommandLength = lengthHeader + expectedInnerLc.Length + expectedInnerData.Length;
 
             var command = new EchoCommand(expectedInnerData);
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
             Assert.Equal(commandApdu.Nc, expectedInnerCommandLength);
         }
@@ -97,21 +86,19 @@ namespace Yubico.YubiKey.U2f.Commands
 
             Assert.False(command.CreateCommandApdu().Data.IsEmpty);
         }
-
         #endregion Outer APDU
 
         #region Inner APDU
-
         [Fact]
         public void CreateCommandApdu_InnerCommandCla0x00()
         {
             byte expectedInnerCla = 0;
 
             var command = new GetProtocolVersionCommand();
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandCla = actualInnerCommandApdu.Span[offsetCla];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandCla = actualInnerCommandApdu.Span[offsetCla];
 
             Assert.Equal(actualInnerCommandCla, expectedInnerCla);
         }
@@ -122,10 +109,10 @@ namespace Yubico.YubiKey.U2f.Commands
             byte expectedInnerIns = 0x03;
 
             var command = new GetProtocolVersionCommand();
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandIns = actualInnerCommandApdu.Span[offsetIns];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandIns = actualInnerCommandApdu.Span[offsetIns];
 
             Assert.Equal(actualInnerCommandIns, expectedInnerIns);
         }
@@ -136,10 +123,10 @@ namespace Yubico.YubiKey.U2f.Commands
             byte expectedInnerP1 = 0;
 
             var command = new GetProtocolVersionCommand();
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandP1 = actualInnerCommandApdu.Span[offsetP1];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandP1 = actualInnerCommandApdu.Span[offsetP1];
 
             Assert.Equal(actualInnerCommandP1, expectedInnerP1);
         }
@@ -150,14 +137,23 @@ namespace Yubico.YubiKey.U2f.Commands
             byte expectedInnerP2 = 0;
 
             var command = new GetProtocolVersionCommand();
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandP2 = actualInnerCommandApdu.Span[offsetP2];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandP2 = actualInnerCommandApdu.Span[offsetP2];
 
             Assert.Equal(actualInnerCommandP2, expectedInnerP2);
         }
-
         #endregion Inner APDU
+
+        [Fact]
+        public void CreateResponseApdu_ReturnsCorrectType()
+        {
+            var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
+            var command = new GetProtocolVersionCommand();
+            GetProtocolVersionResponse response = command.CreateResponseForApdu(responseApdu);
+
+            _ = Assert.IsType<GetProtocolVersionResponse>(response);
+        }
     }
 }

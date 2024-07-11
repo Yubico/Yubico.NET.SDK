@@ -13,21 +13,23 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
+using System.Text;
 
 namespace Yubico.YubiKey.InterIndustry.Commands
 {
-    /// <inheritdoc cref="ISelectApplicationData" />
+    /// <inheritdoc cref="ISelectApplicationData"/>
     public class GenericSelectApplicationData : ISelectApplicationData
     {
+        /// <inheritdoc/>
+        public ReadOnlyMemory<byte> RawData { get; }
+
         /// <summary>
-        ///     Constructs an instance of the <see cref="GenericSelectApplicationData" /> class.
+        /// Constructs an instance of the <see cref="GenericSelectApplicationData" /> class.
         /// </summary>
         public GenericSelectApplicationData(ReadOnlyMemory<byte> rawData)
         {
             RawData = rawData;
         }
-
-        /// <inheritdoc />
-        public ReadOnlyMemory<byte> RawData { get; }
     }
 }

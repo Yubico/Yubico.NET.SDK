@@ -26,10 +26,7 @@ namespace Yubico.YubiKey.U2f.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullException()
         {
 #nullable disable
-            static void action()
-            {
-                _ = new GetProtocolVersionResponse(responseApdu: null);
-            }
+            static void action() => _ = new GetProtocolVersionResponse(null);
 #nullable enable
 
             _ = Assert.Throws<ArgumentNullException>(action);
@@ -38,8 +35,8 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var registerResponse = new GetProtocolVersionResponse(responseApdu);
@@ -50,8 +47,8 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var registerResponse = new GetProtocolVersionResponse(responseApdu);
@@ -62,8 +59,8 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_ConditionsNotSatisfiedResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = SWConstants.InsNotSupported >> 8;
-            var sw2 = unchecked((byte)SWConstants.InsNotSupported);
+            byte sw1 = unchecked((byte)(SWConstants.InsNotSupported >> 8));
+            byte sw2 = unchecked((byte)SWConstants.InsNotSupported);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var registerResponse = new GetProtocolVersionResponse(responseApdu);
@@ -74,14 +71,14 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_EmptyResponseData_ReturnsEmptyString()
         {
-            var expectedData = string.Empty;
+            string expectedData = string.Empty;
 
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new GetProtocolVersionResponse(responseApdu);
-            var actualData = response.GetData();
+            string actualData = response.GetData();
 
             Assert.Equal(expectedData, actualData);
         }
@@ -91,11 +88,11 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var commandResponseData = new List<byte>();
 
-            var expectedString = "ABCD";
+            string expectedString = "ABCD";
 
-            var data = Encoding.ASCII.GetBytes(expectedString);
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte[] data = Encoding.ASCII.GetBytes(expectedString);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
 
             commandResponseData.AddRange(data);
             commandResponseData.Add(sw1);
@@ -104,7 +101,7 @@ namespace Yubico.YubiKey.U2f.Commands
             var responseApdu = new ResponseApdu(commandResponseData.ToArray());
 
             var response = new GetProtocolVersionResponse(responseApdu);
-            var actualString = response.GetData();
+            string actualString = response.GetData();
 
             Assert.Equal(expectedString, actualString);
         }
@@ -112,16 +109,12 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_ResponseApduFailed_ThrowsException()
         {
-            byte sw1 = SWConstants.InsNotSupported >> 8;
-            var sw2 = unchecked((byte)SWConstants.InsNotSupported);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.InsNotSupported >> 8));
+            byte sw2 = unchecked((byte)SWConstants.InsNotSupported);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var response = new GetProtocolVersionResponse(responseApdu);
-
-            void action()
-            {
-                response.GetData();
-            }
+            void action() => response.GetData();
 
             _ = Assert.Throws<InvalidOperationException>(action);
         }

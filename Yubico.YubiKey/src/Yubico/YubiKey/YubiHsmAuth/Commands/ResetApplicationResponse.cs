@@ -12,24 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     /// <summary>
-    ///     The response class for resetting the YubiHSM Auth application.
+    /// The response class for resetting the YubiHSM Auth application.
     /// </summary>
     /// <remarks>
-    ///     The partner class is <see cref="ResetApplicationCommand" />.
+    /// The partner class is <see cref="ResetApplicationCommand"/>.
     /// </remarks>
     public class ResetApplicationResponse : BaseYubiHsmAuthResponse
     {
         /// <summary>
-        ///     Constructs an ResetApplicationResponse based on a ResponseApdu
-        ///     received from the YubiKey.
+        /// Constructs an ResetApplicationResponse based on a ResponseApdu
+        /// received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     The ResponseApdu returned by the YubiKey.
+        /// The ResponseApdu returned by the YubiKey.
         /// </param>
         public ResetApplicationResponse(ResponseApdu responseApdu) :
             base(responseApdu)

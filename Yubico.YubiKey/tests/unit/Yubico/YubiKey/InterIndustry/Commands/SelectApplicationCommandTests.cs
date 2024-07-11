@@ -29,34 +29,34 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
-            Assert.Equal(expected: 0, GetSelectApplicationCommandApdu().Cla);
+            Assert.Equal(0, GetSelectApplicationCommandApdu().Cla);
         }
 
         [Fact]
         public void CreateCommandApdu_GetInsProperty_ReturnsHexA4()
         {
-            Assert.Equal(expected: 0xA4, GetSelectApplicationCommandApdu().Ins);
+            Assert.Equal(0xA4, GetSelectApplicationCommandApdu().Ins);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP1Property_Returns4()
         {
-            Assert.Equal(expected: 0x04, GetSelectApplicationCommandApdu().P1);
+            Assert.Equal(0x04, GetSelectApplicationCommandApdu().P1);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP2Property_ReturnsZero()
         {
-            Assert.Equal(expected: 0, GetSelectApplicationCommandApdu().P2);
+            Assert.Equal(0, GetSelectApplicationCommandApdu().P2);
         }
 
         [Fact]
         public void CreateCommandApdu_GetDataConstructedWithBytes_ReturnsBytes()
         {
-            byte[] fakeAid = { 1, 2, 3, 4 };
+            byte[] fakeAid = new byte[] { 1, 2, 3, 4 };
             var selectApplicationCommand = new SelectApplicationCommand(fakeAid);
 
-            var commandApdu = selectApplicationCommand.CreateCommandApdu();
+            CommandApdu commandApdu = selectApplicationCommand.CreateCommandApdu();
 
             Assert.Equal(fakeAid, commandApdu.Data);
             Assert.Equal(fakeAid.Length, commandApdu.Nc);
@@ -65,10 +65,10 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         [Fact]
         public void CreateCommandApdu_GetDataConstructedWithEnum_ReturnsApplicationIdInBytes()
         {
-            byte[] pivAid = { 0xa0, 0x00, 0x00, 0x03, 0x08 };
+            byte[] pivAid = new byte[] { 0xa0, 0x00, 0x00, 0x03, 0x08 };
             var selectApplicationCommand = new SelectApplicationCommand(YubiKeyApplication.Piv);
 
-            var commandApdu = selectApplicationCommand.CreateCommandApdu();
+            CommandApdu commandApdu = selectApplicationCommand.CreateCommandApdu();
 
             Assert.True(commandApdu.Data.Span.SequenceEqual(pivAid));
             Assert.Equal(pivAid.Length, commandApdu.Nc);
@@ -77,7 +77,7 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         [Fact]
         public void CreateCommandApdu_GetNe_ReturnsZero()
         {
-            Assert.Equal(expected: 0, GetSelectApplicationCommandApdu().Ne);
+            Assert.Equal(0, GetSelectApplicationCommandApdu().Ne);
         }
 
         private static CommandApdu GetSelectApplicationCommandApdu()

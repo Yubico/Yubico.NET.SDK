@@ -13,17 +13,16 @@
 // limitations under the License.
 
 using Yubico.Core.Iso7816;
-using Yubico.YubiKey.InterIndustry.Commands;
 
 namespace Yubico.YubiKey.Oath.Commands
 {
     /// <summary>
-    ///     Selects an OATH application.
+    /// Selects an OATH application.
     /// </summary>
-    public class SelectOathCommand : BaseSelectApplicationCommand<SelectOathResponse>
+    public class SelectOathCommand : InterIndustry.Commands.BaseSelectApplicationCommand<SelectOathResponse>
     {
         /// <summary>
-        ///     Constructs an instance of the <see cref="SelectOathCommand" /> class.
+        /// Constructs an instance of the <see cref="SelectOathCommand" /> class.
         /// </summary>
         public SelectOathCommand() : base(YubiKeyApplication.Oath)
         {
@@ -31,6 +30,6 @@ namespace Yubico.YubiKey.Oath.Commands
 
         /// <inheritdoc />
         public override SelectOathResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new SelectOathResponse(responseApdu);
+                new SelectOathResponse(responseApdu);
     }
 }

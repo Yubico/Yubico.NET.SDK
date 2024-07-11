@@ -18,21 +18,21 @@ using Yubico.Core.Tlv;
 namespace Yubico.YubiKey.Piv
 {
     /// <summary>
-    ///     Extension methods to operate on the PivDataTag enum.
+    /// Extension methods to operate on the PivDataTag enum.
     /// </summary>
     public static class PivDataTagExtensions
     {
         private const byte PivPutDataTag = 0x53;
 
         /// <summary>
-        ///     Is the given tag allowed to be used in a standard version of PUT DATA.
+        /// Is the given tag allowed to be used in a standard version of PUT DATA.
         /// </summary>
         /// <param name="tag">
-        ///     The tag to check.
+        /// The tag to check.
         /// </param>
         /// <returns>
-        ///     A boolean, true if the tag is allowed to be used in PUT DATA, and
-        ///     false otherwise.
+        /// A boolean, true if the tag is allowed to be used in PUT DATA, and
+        /// false otherwise.
         /// </returns>
         public static bool IsValidTagForPut(this PivDataTag tag) =>
             tag switch
@@ -40,26 +40,26 @@ namespace Yubico.YubiKey.Piv
                 PivDataTag.Printed => false,
                 PivDataTag.Discovery => false,
                 PivDataTag.BiometricGroupTemplate => false,
-                _ => true
+                _ => true,
             };
 
         /// <summary>
-        ///     Is the given encoding valid for PUT DATA using the specified tag.
+        /// Is the given encoding valid for PUT DATA using the specified tag.
         /// </summary>
         /// <remarks>
-        ///     Each tag has a defined encoding format for the data to PUT. This
-        ///     method will verify that the data follows the correct format. It does
-        ///     not verify the content, it simply verifies the format.
+        /// Each tag has a defined encoding format for the data to PUT. This
+        /// method will verify that the data follows the correct format. It does
+        /// not verify the content, it simply verifies the format.
         /// </remarks>
         /// <param name="tag">
-        ///     The tag to check.
+        /// The tag to check.
         /// </param>
         /// <param name="encoding">
-        ///     The encoding to check.
+        /// The encoding to check.
         /// </param>
         /// <returns>
-        ///     A boolean, true if the encoding follows the defined encoding format,
-        ///     and false otherwise.
+        /// A boolean, true if the encoding follows the defined encoding format,
+        /// and false otherwise.
         /// </returns>
         public static bool IsValidEncodingForPut(this PivDataTag tag, ReadOnlyMemory<byte> encoding)
         {
@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Piv
                     //     --expiration data, ASCII YYYYMMDD, fixed at 8 bytes--
                     //  3E 00
                     //  FE 00
-                    expectedFormat = new[]
+                    expectedFormat = new int[]
                     {
                         0x30, 0, 25,
                         0x34, 0, 16,
@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.Piv
                     //  FC 00
                     //  FD 00
                     //  FE 00
-                    expectedFormat = new[]
+                    expectedFormat = new int[]
                     {
                         0xF0, 0, 21,
                         0xF1, 0, 1,
@@ -167,7 +167,7 @@ namespace Yubico.YubiKey.Piv
                     //  FE 00
                     // Note that the PIV standard says certs are limited to 1856
                     // bytes, but the YubiKey accepts certs up to 3052 bytes.
-                    expectedFormat = new[]
+                    expectedFormat = new int[]
                     {
                         0x70, 3052, 0,
                         0x71, 0, 1,
@@ -183,7 +183,7 @@ namespace Yubico.YubiKey.Piv
                     //  BB L
                     //     --up to 1298 bytes--
                     //  FE 00
-                    expectedFormat = new[]
+                    expectedFormat = new int[]
                     {
                         0xBA, 30, 0,
                         0xBB, 1298, 0,
@@ -201,7 +201,7 @@ namespace Yubico.YubiKey.Piv
                     //  F3 L
                     //     --up to 118 bytes--
                     //  FE 00
-                    expectedFormat = new[]
+                    expectedFormat = new int[]
                     {
                         0xC1, 0, 1,
                         0xC2, 0, 1,
@@ -216,7 +216,7 @@ namespace Yubico.YubiKey.Piv
                     //  BC L
                     //     --image, up to 7100 bytes--
                     //  FE 00
-                    expectedFormat = new[]
+                    expectedFormat = new int[]
                     {
                         0xBC, 7100, 0,
                         0xFE, 0, 0
@@ -229,7 +229,7 @@ namespace Yubico.YubiKey.Piv
                     //  BC L
                     //     --image, up to 12,704 bytes--
                     //  FE 00
-                    expectedFormat = new[]
+                    expectedFormat = new int[]
                     {
                         0xBC, 12704, 0,
                         0xFE, 0, 0
@@ -242,7 +242,7 @@ namespace Yubico.YubiKey.Piv
                     //  BC L
                     //     --up to 4000 bytes--
                     //  FE 00
-                    expectedFormat = new[]
+                    expectedFormat = new int[]
                     {
                         0xBC, 4000, 0,
                         0xFE, 0, 0
@@ -275,7 +275,7 @@ namespace Yubico.YubiKey.Piv
                         return false;
                     }
 
-                    expectedFormat = new[]
+                    expectedFormat = new int[]
                     {
                         0x70, 3048, 0,
                         0x71, 0, 1,
@@ -292,7 +292,7 @@ namespace Yubico.YubiKey.Piv
                     //  99 08
                     //     --fixed at 8 bytes--
                     //  FE 00
-                    expectedFormat = new[]
+                    expectedFormat = new int[]
                     {
                         0x99, 0, 8,
                         0xFE, 0, 0

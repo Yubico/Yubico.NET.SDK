@@ -30,35 +30,35 @@ limitations under the License. -->
   -->
 <Project>
 
+  <!--
+  Define project types in this group. Other properties that need to be set according to one of these
+  project types should be done in a separate property group.
+  -->
+  <PropertyGroup Label="Project type detection using convention based approach">
+
     <!--
-    Define project types in this group. Other properties that need to be set according to one of these
-    project types should be done in a separate property group.
+    A project is a test project if it it ends with Tests in the project name. For example:
+    MyProject.UnitTests.csproj will pick up this property. MyProject.UnitTest.csproj will not.
+    The filename convention is case Insensitive.
     -->
-    <PropertyGroup Label="Project type detection using convention based approach">
+    <IsTestProject Condition="$(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase))">true</IsTestProject>
+    <IsTestProject Condition="!$(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase))">false</IsTestProject>
 
-        <!--
-        A project is a test project if it it ends with Tests in the project name. For example:
-        MyProject.UnitTests.csproj will pick up this property. MyProject.UnitTest.csproj will not.
-        The filename convention is case Insensitive.
-        -->
-        <IsTestProject Condition="$(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase))">true</IsTestProject>
-        <IsTestProject Condition="!$(MSBuildProjectName.EndsWith('Tests', StringComparison.OrdinalIgnoreCase))">false</IsTestProject>
+    <!--
+    A project is a reference assembly project if it ends with Ref in the project name. For
+    example: MyProject.Ref.csproj will pick up this property. The filename convention is case
+    insensitive.
+    -->
+    <IsRefProject Condition="$(MSBuildProjectName.EndsWith('Ref', StringComparison.OrdinalIgnoreCase))">true</IsRefProject>
+    <IsRefProject Condition="!$(MSBuildProjectName.EndsWith('Ref', StringComparison.OrdinalIgnoreCase))">false</IsRefProject>
 
-        <!--
-        A project is a reference assembly project if it ends with Ref in the project name. For
-        example: MyProject.Ref.csproj will pick up this property. The filename convention is case
-        insensitive.
-        -->
-        <IsRefProject Condition="$(MSBuildProjectName.EndsWith('Ref', StringComparison.OrdinalIgnoreCase))">true</IsRefProject>
-        <IsRefProject Condition="!$(MSBuildProjectName.EndsWith('Ref', StringComparison.OrdinalIgnoreCase))">false</IsRefProject>
+    <!--
+    A project is a production project if it does not end in any of the other special suffixes handled
+    previously.
+    -->
+    <IsProdProject Condition="('$(IsTestProject)' == 'false') AND ('$(IsRefProject)' == 'false')">true</IsProdProject>
+    <IsProdProject Condition="('$(IsTestProject)' == 'true') OR ('$(IsRefProject)' == 'true')">false</IsProdProject>
 
-        <!--
-        A project is a production project if it does not end in any of the other special suffixes handled
-        previously.
-        -->
-        <IsProdProject Condition="('$(IsTestProject)' == 'false') AND ('$(IsRefProject)' == 'false')">true</IsProdProject>
-        <IsProdProject Condition="('$(IsTestProject)' == 'true') OR ('$(IsRefProject)' == 'true')">false</IsProdProject>
-
-    </PropertyGroup>
+  </PropertyGroup>
 
 </Project>

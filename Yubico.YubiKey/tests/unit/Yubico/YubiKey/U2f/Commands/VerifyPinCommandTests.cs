@@ -30,14 +30,14 @@ namespace Yubico.YubiKey.U2f.Commands
 
         private const int offsetData = offsetLc + lengthLc;
 
-        private readonly byte[] Pin = { 1, 2, 3, 4, 5, 6 };
+        private readonly byte[] Pin = new byte[] { 1, 2, 3, 4, 5, 6 };
 
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
             var command = new VerifyPinCommand(Pin);
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().Cla);
+            Assert.Equal(0, command.CreateCommandApdu().Cla);
         }
 
         [Fact]
@@ -45,7 +45,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new VerifyPinCommand(Pin);
 
-            Assert.Equal(expected: 0x03, command.CreateCommandApdu().Ins);
+            Assert.Equal(0x03, command.CreateCommandApdu().Ins);
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new VerifyPinCommand(Pin);
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().P1);
+            Assert.Equal(0, command.CreateCommandApdu().P1);
         }
 
         [Fact]
@@ -61,17 +61,17 @@ namespace Yubico.YubiKey.U2f.Commands
         {
             var command = new VerifyPinCommand(Pin);
 
-            Assert.Equal(expected: 0, command.CreateCommandApdu().P2);
+            Assert.Equal(0, command.CreateCommandApdu().P2);
         }
 
         [Fact]
         public void CreateCommandApdu_GetNcProperty_ReturnsCorrectLength()
         {
-            byte[] expectedInnerLc = { 0x00, 0x00, (byte)Pin.Length };
-            var expectedCommandLength = lengthHeader + expectedInnerLc.Length + Pin.Length;
+            byte[] expectedInnerLc = new byte[] { 0x00, 0x00, (byte)Pin.Length };
+            int expectedCommandLength = lengthHeader + expectedInnerLc.Length + Pin.Length;
 
             var command = new VerifyPinCommand(Pin);
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
             Assert.Equal(commandApdu.Nc, expectedCommandLength);
         }
@@ -80,60 +80,60 @@ namespace Yubico.YubiKey.U2f.Commands
         public void CreateCommandApdu_InnerCommandGetClaProperty_ReturnsZero()
         {
             var command = new VerifyPinCommand(Pin);
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandCla = actualInnerCommandApdu.Span[offsetCla];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandCla = actualInnerCommandApdu.Span[offsetCla];
 
-            Assert.Equal(expected: 0, actualInnerCommandCla);
+            Assert.Equal(0, actualInnerCommandCla);
         }
 
         [Fact]
         public void CreateCommandApdu_InnerCommandGetInsProperty_Returns0x43()
         {
             var command = new VerifyPinCommand(Pin);
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandIns = actualInnerCommandApdu.Span[offsetIns];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandIns = actualInnerCommandApdu.Span[offsetIns];
 
-            Assert.Equal(expected: 0x43, actualInnerCommandIns);
+            Assert.Equal(0x43, actualInnerCommandIns);
         }
 
         [Fact]
         public void CreateCommandApdu_InnerCommandGetP1Property_ReturnsZero()
         {
             var command = new VerifyPinCommand(Pin);
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandP1 = actualInnerCommandApdu.Span[offsetP1];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandP1 = actualInnerCommandApdu.Span[offsetP1];
 
-            Assert.Equal(expected: 0, actualInnerCommandP1);
+            Assert.Equal(0, actualInnerCommandP1);
         }
 
         [Fact]
         public void CreateCommandApdu_InnerCommandGetP2Property_ReturnsZero()
         {
             var command = new VerifyPinCommand(Pin);
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandP2 = actualInnerCommandApdu.Span[offsetP2];
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            byte actualInnerCommandP2 = actualInnerCommandApdu.Span[offsetP2];
 
-            Assert.Equal(expected: 0, actualInnerCommandP2);
+            Assert.Equal(0, actualInnerCommandP2);
         }
 
         [Fact]
         public void CreateCommandApdu_InnerCommandGetNcProperty_ReturnsCorrectLength()
         {
-            byte[] expectedInnerLc = { 0x00, 0x00, (byte)Pin.Length };
+            byte[] expectedInnerLc = new byte[] { 0x00, 0x00, (byte)Pin.Length };
 
             var command = new VerifyPinCommand(Pin);
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandLc = actualInnerCommandApdu.Slice(offsetLc, lengthLc).Span;
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            ReadOnlySpan<byte> actualInnerCommandLc = actualInnerCommandApdu.Slice(offsetLc, lengthLc).Span;
 
             Assert.True(actualInnerCommandLc.SequenceEqual(expectedInnerLc));
         }
@@ -142,10 +142,10 @@ namespace Yubico.YubiKey.U2f.Commands
         public void CreateCommandApdu_InnerCommandGetData_ReturnsCorrectData()
         {
             var command = new VerifyPinCommand(Pin);
-            var commandApdu = command.CreateCommandApdu();
+            CommandApdu commandApdu = command.CreateCommandApdu();
 
-            var actualInnerCommandApdu = commandApdu.Data;
-            var actualInnerCommandData = actualInnerCommandApdu.Slice(offsetData, Pin.Length).Span;
+            ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
+            ReadOnlySpan<byte> actualInnerCommandData = actualInnerCommandApdu.Slice(offsetData, Pin.Length).Span;
 
             Assert.True(actualInnerCommandData.SequenceEqual(Pin));
         }

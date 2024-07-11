@@ -13,12 +13,24 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using Yubico.YubiKey.Otp;
 
 namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class UpdateSlot : OtpPluginBase
     {
+        public override string Name => "Update";
+
+        public override string Description => "Updates non-security related parameters on a YubiKey.";
+
+        protected override ParameterUse ParametersUsed =>
+            ParameterUse.Slot
+            | ParameterUse.CurrentAccessCode
+            | ParameterUse.NewAccessCode
+            | ParameterUse.Force
+            | ParameterUse.NoEnter;
+
         public UpdateSlot(IOutput output) : base(output)
         {
             // We'll use the base class for things that are common to other plug-ins.
@@ -37,8 +49,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Name = "FastTrigger",
                 Shortcut = "ft",
                 Description = "Causes the trigger action of the YubiKey button to become faster. " +
-                              "This only applies when one configuration is written. If both configurations " +
-                              "are active, this setting has no effect.",
+                    "This only applies when one configuration is written. If both configurations " +
+                    "are active, this setting has no effect.",
                 Type = typeof(bool)
             };
             Parameters["invertled"] = new Parameter
@@ -53,8 +65,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Name = "SerialApi",
                 Shortcut = "sa",
                 Description = "Allows the serial number to be read by proprietary means, including " +
-                              "being visible to the Yubico.YubiKey SDK. This is a device wide setting. " +
-                              "If it is set in either configurable slot, it is considered enabled by the device.",
+                    "being visible to the Yubico.YubiKey SDK. This is a device wide setting. " +
+                    "If it is set in either configurable slot, it is considered enabled by the device.",
                 Type = typeof(bool)
             };
             Parameters["serialbutton"] = new Parameter
@@ -62,10 +74,10 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Name = "SerialButton",
                 Shortcut = "sb",
                 Description = "Allows the serial number to be retrieved by holding down the YubiKey " +
-                              "button while inserting the device into the USB port. Once the LED starts to " +
-                              "flash, release the button and the serial number will then be sent as a string " +
-                              "of digits. This is a device wide setting. If it is set in either configurable " +
-                              "slot, it is considered enabled by the device.",
+                    "button while inserting the device into the USB port. Once the LED starts to " +
+                    "flash, release the button and the serial number will then be sent as a string " +
+                    "of digits. This is a device wide setting. If it is set in either configurable " +
+                    "slot, it is considered enabled by the device.",
                 Type = typeof(bool)
             };
             Parameters["serialusb"] = new Parameter
@@ -73,9 +85,9 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Name = "SerialUsb",
                 Shortcut = "su",
                 Description = "Makes the serial number appear in the YubiKey's USB descriptor's " +
-                              "iSerialNumber field. This makes each device unique from the host computer's " +
-                              "view. This is a device wide setting. If it is set in either configurable slot, " +
-                              "it is considered enabled by the device.",
+                    "iSerialNumber field. This makes each device unique from the host computer's " +
+                    "view. This is a device wide setting. If it is set in either configurable slot, " +
+                    "it is considered enabled by the device.",
                 Type = typeof(bool)
             };
             Parameters["numerickeypad"] = new Parameter
@@ -83,7 +95,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Name = "NumericKeypad",
                 Shortcut = "nk",
                 Description = "Causes numeric characters to be sent as keystrokes from the numeric " +
-                              "keypad rather than the normal numeric keys on an 84-key keyboard.",
+                    "keypad rather than the normal numeric keys on an 84-key keyboard.",
                 Type = typeof(bool)
             };
             Parameters["sendtabfirst"] = new Parameter
@@ -126,8 +138,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Name = "Use10msPacing",
                 Shortcut = "10ms",
                 Description = "Adds an inter-character pacing time of 10ms between each keystroke. " +
-                              "This setting is not compatible with challenge-response (YubiOtp or HMAC-SHA1). " +
-                              "You can combine this setting with Use20msPacing to get 30ms pacing.",
+                    "This setting is not compatible with challenge-response (YubiOtp or HMAC-SHA1). " +
+                    "You can combine this setting with Use20msPacing to get 30ms pacing.",
                 Type = typeof(bool)
             };
             Parameters["use20mspacing"] = new Parameter
@@ -135,8 +147,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Name = "Use20msPacing",
                 Shortcut = "20ms",
                 Description = "Adds an inter-character pacing time of 20ms between each keystroke. " +
-                              "This setting is not compatible with challenge-response (YubiOtp or HMAC-SHA1). " +
-                              "You can combine this setting with Use10msPacing to get 30ms pacing.",
+                    "This setting is not compatible with challenge-response (YubiOtp or HMAC-SHA1). " +
+                    "You can combine this setting with Use10msPacing to get 30ms pacing.",
                 Type = typeof(bool)
             };
             Parameters["allowupdate"] = new Parameter
@@ -147,17 +159,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Type = typeof(bool)
             };
         }
-
-        public override string Name => "Update";
-
-        public override string Description => "Updates non-security related parameters on a YubiKey.";
-
-        protected override ParameterUse ParametersUsed =>
-            ParameterUse.Slot
-            | ParameterUse.CurrentAccessCode
-            | ParameterUse.NewAccessCode
-            | ParameterUse.Force
-            | ParameterUse.NoEnter;
 
         public override void HandleParameters()
         {
@@ -192,7 +193,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         }
 
         /// <summary>
-        ///     Change non-security-related settings on the YubiKey.
+        /// Change non-security-related settings on the YubiKey.
         /// </summary>
         /// <inheritdoc cref="YubiKey.Otp.OtpSettings{T}.AllowUpdate(bool)" path="/remarks" />
         /// <returns>True if success, false if not.</returns>
@@ -200,10 +201,10 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         {
             var otp = new OtpSession(_yubiKey!);
 
-            var ready =
+            bool ready =
                 _slot == Slot.ShortPress
-                    ? otp.IsShortPressConfigured
-                    : otp.IsLongPressConfigured;
+                ? otp.IsShortPressConfigured
+                : otp.IsLongPressConfigured;
             if (!ready)
             {
                 Output.WriteLine($"Slot[{_slot}] is not programmed and can't be updated.");
@@ -216,7 +217,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Output.WriteLine("Aborted.", OutputLevel.Error);
                 return false;
             }
-
             otp.UpdateSlot(_slot)
                 .SetDormant(_dormant)
                 .SetFastTrigger(_fastTrigger)
@@ -244,40 +244,35 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             Output.WriteLine(_force
                 ? $"Updating Configuration for Slot [{_slot}]:"
                 : $"Proposed Configuration for slot [{_slot}]:");
-            Output.WriteLine(new string(c: '-', count: 80));
+            Output.WriteLine(new string('-', 80));
             Output.Write($"AppendDelayToFixed:    | {Val(_appendDelayToFixed)} | AppendDelayToOtp: ");
             Output.WriteLine($"{Val(_appendDelayToOtp)} | Dormant:    {Val(_dormant)}");
-            Output.WriteLine(new string(c: '-', count: 80));
+            Output.WriteLine(new string('-', 80));
             Output.Write($"SerialVisibleToApi:    | {Val(_serialApi)} | UseNumericKeypad: ");
             Output.WriteLine($"{Val(_numericKeypad)} | 10msPacing: {Val(_use10msPacing)}");
-            Output.WriteLine(new string(c: '-', count: 80));
+            Output.WriteLine(new string('-', 80));
             Output.Write($"SerialVisibleToButton: | {Val(_serialButton)} | AppendTabToFixed: ");
             Output.WriteLine($"{Val(_appendTabToFixed)} | 20msPacing: {Val(_use20msPacing)}");
-            Output.WriteLine(new string(c: '-', count: 80));
+            Output.WriteLine(new string('-', 80));
             Output.Write($"SerialVisibleToUsb:    | {Val(_serialUsb)} | AppendTabToOtp:   ");
             Output.WriteLine($"{Val(_appendTabToOtp)} | NoEnter:    {Val(_noEnter)}");
-            Output.WriteLine(new string(c: '-', count: 80));
+            Output.WriteLine(new string('-', 80));
             Output.Write($"SendTabFirst:          | {Val(_sendTabFirst)} | FastTrigger:      ");
             Output.WriteLine($"{Val(_fastTrigger)} | InvertLed:  {Val(_invertLed)}");
-            Output.WriteLine(new string(c: '-', count: 80) + Environment.NewLine);
+            Output.WriteLine(new string('-', 80) + Environment.NewLine);
 
             if (_force)
             {
                 return true;
             }
-
             Output.WriteLine("Type \"Yes\" and press [Enter] to proceed.");
             Output.WriteLine("Type anything else or hit [Ctrl] + [C] to abort.");
             return Console.ReadLine()?.ToLower() == "yes";
 
-            static string Val(bool val)
-            {
-                return val ? "true " : "false";
-            }
+            static string Val(bool val) => val ? "true " : "false";
         }
 
         #region Private Fields
-
         private bool _dormant;
         private bool _fastTrigger;
         private bool _invertLed;
@@ -293,7 +288,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         private bool _use10msPacing;
         private bool _use20msPacing;
         private bool _allowUpdate;
-
         #endregion
     }
 }

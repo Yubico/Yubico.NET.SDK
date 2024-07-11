@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Xunit;
 using Yubico.YubiKey.Fido2.PinProtocols;
 using Yubico.YubiKey.TestUtilities;
@@ -33,35 +34,35 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             var protocol = new PinUvAuthProtocolTwo();
             var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
-            var getKeyRsp = Connection.SendCommand(getKeyCmd);
+            GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
             Assert.Equal(ResponseStatus.Success, getKeyRsp.Status);
 
             protocol.Encapsulate(getKeyRsp.GetData());
-            var permissions = PinUvAuthTokenPermissions.CredentialManagement;
-            var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, pin, permissions, rpId: null);
-            var getTokenRsp = Connection.SendCommand(getTokenCmd);
+            PinUvAuthTokenPermissions permissions = PinUvAuthTokenPermissions.CredentialManagement;
+            var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(protocol, pin, permissions, null);
+            GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
             Assert.Equal(ResponseStatus.Success, getTokenRsp.Status); /*Xunit.Sdk.EqualException
 Assert.Equal() Failure: Values differ
 Expected: Success
 Actual:   Failed*/
 
-            var pinToken = getTokenRsp.GetData();
+            ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
             var cmd = new EnumerateRpsBeginCommand(pinToken, protocol);
-            var rsp = Connection.SendCommand(cmd);
+            EnumerateRpsBeginResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            (var rpCount, var rpZero) = rsp.GetData();
-            Assert.NotEqual(expected: 26, rpCount);
-            Assert.True(rpZero.RelyingPartyIdHash.Span[index: 0] != 0);
+            (int rpCount, RelyingParty rpZero) = rsp.GetData();
+            Assert.NotEqual(26, rpCount);
+            Assert.True(rpZero.RelyingPartyIdHash.Span[0] != 0);
 
-            for (var index = 1; index < rpCount; index++)
+            for (int index = 1; index < rpCount; index++)
             {
                 var getNextCmd = new EnumerateRpsGetNextCommand();
-                var getNextRsp = Connection.SendCommand(getNextCmd);
+                EnumerateRpsGetNextResponse getNextRsp = Connection.SendCommand(getNextCmd);
                 Assert.Equal(ResponseStatus.Success, getNextRsp.Status);
 
-                var nextRp = getNextRsp.GetData();
-                Assert.True(nextRp.RelyingPartyIdHash.Span[index: 0] != 0);
+                RelyingParty nextRp = getNextRsp.GetData();
+                Assert.True(nextRp.RelyingPartyIdHash.Span[0] != 0);
             }
         }
 
@@ -72,43 +73,43 @@ Actual:   Failed*/
 
             var protocol = new PinUvAuthProtocolTwo();
             var getKeyCmd = new GetKeyAgreementCommand(protocol.Protocol);
-            var getKeyRsp = Connection.SendCommand(getKeyCmd);
+            GetKeyAgreementResponse getKeyRsp = Connection.SendCommand(getKeyCmd);
             Assert.Equal(ResponseStatus.Success, getKeyRsp.Status);
 
             protocol.Encapsulate(getKeyRsp.GetData());
             var getTokenCmd = new GetPinTokenCommand(protocol, pin);
-            var getTokenRsp = Connection.SendCommand(getTokenCmd);
+            GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
             Assert.Equal(ResponseStatus.Success, getTokenRsp.Status); /*Xunit.Sdk.EqualException
 Assert.Equal() Failure: Values differ
 Expected: Success
 Actual:   Failed*/
-            var pinToken = getTokenRsp.GetData();
+            ReadOnlyMemory<byte> pinToken = getTokenRsp.GetData();
 
             var cmd = new EnumerateRpsBeginCommand(pinToken, protocol)
             {
                 IsPreview = true
             };
-            var rsp = Connection.SendCommand(cmd);
+            EnumerateRpsBeginResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status); /*Xunit.Sdk.EqualException
 Assert.Equal() Failure: Values differ
 Expected: Success
 Actual:   NoData*/
 
-            (var rpCount, var rpZero) = rsp.GetData();
-            Assert.NotEqual(expected: 26, rpCount);
-            Assert.True(rpZero.RelyingPartyIdHash.Span[index: 0] != 0);
+            (int rpCount, RelyingParty rpZero) = rsp.GetData();
+            Assert.NotEqual(26, rpCount);
+            Assert.True(rpZero.RelyingPartyIdHash.Span[0] != 0);
 
-            for (var index = 1; index < rpCount; index++)
+            for (int index = 1; index < rpCount; index++)
             {
                 var getNextCmd = new EnumerateRpsGetNextCommand
                 {
                     IsPreview = true
                 };
-                var getNextRsp = Connection.SendCommand(getNextCmd);
+                EnumerateRpsGetNextResponse getNextRsp = Connection.SendCommand(getNextCmd);
                 Assert.Equal(ResponseStatus.Success, getNextRsp.Status);
 
-                var nextRp = getNextRsp.GetData();
-                Assert.True(nextRp.RelyingPartyIdHash.Span[index: 0] != 0);
+                RelyingParty nextRp = getNextRsp.GetData();
+                Assert.True(nextRp.RelyingPartyIdHash.Span[0] != 0);
             }
         }
     }

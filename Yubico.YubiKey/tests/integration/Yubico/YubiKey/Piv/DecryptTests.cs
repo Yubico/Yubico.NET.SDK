@@ -29,8 +29,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivPinPolicy.Never, StandardTestDevice.Fw5)]
         public void Decrypt_1024_Succeeds(PivPinPolicy pinPolicy, StandardTestDevice testDeviceType)
         {
-            byte[] dataToDecrypt =
-            {
+            byte[] dataToDecrypt = {
                 0x64, 0x92, 0xd1, 0x38, 0x24, 0x8a, 0x78, 0xe5, 0x64, 0x68, 0x92, 0xe7, 0x13, 0xc6, 0x81, 0xa0,
                 0xe9, 0xeb, 0x43, 0x8f, 0x54, 0x76, 0x55, 0x84, 0x16, 0x3e, 0x47, 0x76, 0x31, 0x6a, 0xc2, 0x7d,
                 0x27, 0x0f, 0x6c, 0x4f, 0xd5, 0x17, 0x52, 0xea, 0x3e, 0xce, 0xe5, 0xd6, 0x5c, 0x09, 0xac, 0xc2,
@@ -41,8 +40,7 @@ namespace Yubico.YubiKey.Piv
                 0x5a, 0xa7, 0x94, 0xde, 0x68, 0x1b, 0xaa, 0x8b, 0x58, 0x95, 0x04, 0x22, 0xd6, 0xfc, 0x3f, 0xbc
             };
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, validAttest: false, out _, out _,
-                out var privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out _, out var privateKeyPem);
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             var pivPrivateKey = privateKey.GetPivPrivateKey();
 
@@ -53,20 +51,18 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.ImportPrivateKey(slotNumber: 0x89, pivPrivateKey, pinPolicy, PivTouchPolicy.Never);
+                pivSession.ImportPrivateKey(0x89, pivPrivateKey, pinPolicy, PivTouchPolicy.Never);
 
-                var decryptedData = pivSession.Decrypt(slotNumber: 0x89, dataToDecrypt);
+                var decryptedData = pivSession.Decrypt(0x89, dataToDecrypt);
                 Assert.Equal(dataToDecrypt.Length, decryptedData.Length);
             }
         }
-
         [Theory]
         [InlineData(PivPinPolicy.Always, StandardTestDevice.Fw5)]
         [InlineData(PivPinPolicy.Never, StandardTestDevice.Fw5)]
         public void Decrypt_2048_Succeeds(PivPinPolicy pinPolicy, StandardTestDevice testDeviceType)
         {
-            byte[] dataToDecrypt =
-            {
+            byte[] dataToDecrypt = {
                 0x64, 0x92, 0xd1, 0x38, 0x24, 0x8a, 0x78, 0xe5, 0x64, 0x68, 0x92, 0xe7, 0x13, 0xc6, 0x81, 0xa0,
                 0xe9, 0xeb, 0x43, 0x8f, 0x54, 0x76, 0x55, 0x84, 0x16, 0x3e, 0x47, 0x76, 0x31, 0x6a, 0xc2, 0x7d,
                 0x27, 0x0f, 0x6c, 0x4f, 0xd5, 0x17, 0x52, 0xea, 0x3e, 0xce, 0xe5, 0xd6, 0x5c, 0x09, 0xac, 0xc2,
@@ -85,8 +81,7 @@ namespace Yubico.YubiKey.Piv
                 0x21, 0x00, 0xC5, 0xCD, 0x80, 0x23, 0x17, 0x2D, 0xB0, 0xFE, 0x9D, 0xF0, 0x28, 0x6C, 0x50, 0xBD
             };
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, validAttest: false, out _, out _,
-                out var privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out _, out var privateKeyPem);
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             var pivPrivateKey = privateKey.GetPivPrivateKey();
 
@@ -97,9 +92,9 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.ImportPrivateKey(slotNumber: 0x87, pivPrivateKey, pinPolicy, PivTouchPolicy.Never);
+                pivSession.ImportPrivateKey(0x87, pivPrivateKey, pinPolicy, PivTouchPolicy.Never);
 
-                var decryptedData = pivSession.Decrypt(slotNumber: 0x87, dataToDecrypt);
+                var decryptedData = pivSession.Decrypt(0x87, dataToDecrypt);
                 Assert.Equal(dataToDecrypt.Length, decryptedData.Length);
             }
         }
@@ -114,9 +109,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.Rsa2048, 0x95, RsaFormat.Sha256, 2, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.Rsa2048, 0x95, RsaFormat.Sha384, 2, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.Rsa2048, 0x95, RsaFormat.Sha512, 2, StandardTestDevice.Fw5)]
-        public void EncryptCSharp_Decrypt_Correct(
-            PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm, int paddingScheme,
-            StandardTestDevice testDeviceType)
+        public void EncryptCSharp_Decrypt_Correct(PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm, int paddingScheme, StandardTestDevice testDeviceType)
         {
             var rsaPadding = RSAEncryptionPadding.Pkcs1;
             if (paddingScheme != 1)
@@ -126,15 +119,14 @@ namespace Yubico.YubiKey.Piv
                     RsaFormat.Sha256 => RSAEncryptionPadding.OaepSHA256,
                     RsaFormat.Sha384 => RSAEncryptionPadding.OaepSHA384,
                     RsaFormat.Sha512 => RSAEncryptionPadding.OaepSHA512,
-                    _ => RSAEncryptionPadding.OaepSHA1
+                    _ => RSAEncryptionPadding.OaepSHA1,
                 };
             }
 
             var dataToEncrypt = new byte[16];
             GetArbitraryData(dataToEncrypt);
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, validAttest: false, out _, out var pubKeyPem,
-                out var priKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out var pubKeyPem, out var priKeyPem);
             var pubKey = new KeyConverter(pubKeyPem.ToCharArray());
             var priKey = new KeyConverter(priKeyPem.ToCharArray());
 
@@ -163,7 +155,6 @@ namespace Yubico.YubiKey.Piv
                 {
                     isValid = RsaFormat.TryParsePkcs1Oaep(formattedData, digestAlgorithm, out decryptedData);
                 }
-
                 Assert.True(isValid);
 
                 isValid = dataToEncrypt.SequenceEqual(decryptedData);
@@ -187,15 +178,14 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ResetApplication();
 
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.Decrypt(slotNumber: 0x9a, dataToDecrypt));
+                _ = Assert.Throws<InvalidOperationException>(() => pivSession.Decrypt(0x9a, dataToDecrypt));
             }
         }
 
         // Fill a byte array with "random" data. Up to 256 bytes.
         private static void GetArbitraryData(byte[] bufferToFill)
         {
-            byte[] arbitraryData =
-            {
+            byte[] arbitraryData = {
                 0x3E, 0xE8, 0xC1, 0xBE, 0xFB, 0x55, 0x48, 0x82, 0xE6, 0xAD, 0x9A, 0xBC, 0x84, 0x04, 0xF4, 0xA4,
                 0xF0, 0xE3, 0x08, 0x53, 0x02, 0x03, 0x01, 0x00, 0x01, 0x02, 0x41, 0x00, 0xAA, 0xA0, 0xBB, 0x04,
                 0x9E, 0xD7, 0xBA, 0x33, 0x0D, 0x44, 0x84, 0xEC, 0x30, 0x0A, 0xB0, 0x8E, 0xF2, 0x47, 0x1D, 0x89,
@@ -220,7 +210,7 @@ namespace Yubico.YubiKey.Piv
                 count = bufferToFill.Length;
             }
 
-            Array.Copy(arbitraryData, sourceIndex: 0, bufferToFill, destinationIndex: 0, count);
+            Array.Copy(arbitraryData, 0, bufferToFill, 0, count);
         }
     }
 }

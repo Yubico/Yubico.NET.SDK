@@ -17,26 +17,26 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Otp.Commands
 {
     /// <summary>
-    ///     Determines if the YubiKey supports FIPS, and if so, what the status of it is.
+    /// Determines if the YubiKey supports FIPS, and if so, what the status of it is.
     /// </summary>
     public class QueryFipsModeCommand : IYubiKeyCommand<QueryFipsModeResponse>
     {
+        public YubiKeyApplication Application => YubiKeyApplication.Otp;
+
         /// <summary>
-        ///     Constructs a new instance of the QueryFipsModeCommand class.
+        /// Constructs a new instance of the QueryFipsModeCommand class.
         /// </summary>
         public QueryFipsModeCommand()
         {
+
         }
 
-        public YubiKeyApplication Application => YubiKeyApplication.Otp;
-
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Ins = OtpConstants.RequestSlotInstruction,
-                P1 = OtpConstants.QueryFipsSlot
-            };
+        public CommandApdu CreateCommandApdu() => new CommandApdu
+        {
+            Ins = OtpConstants.RequestSlotInstruction,
+            P1 = OtpConstants.QueryFipsSlot
+        };
 
         /// <inheritdoc />
         public QueryFipsModeResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

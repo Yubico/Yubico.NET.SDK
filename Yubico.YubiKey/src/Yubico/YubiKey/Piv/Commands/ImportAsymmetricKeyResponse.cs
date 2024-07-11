@@ -17,31 +17,31 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.Piv.Commands
 {
     /// <summary>
-    ///     The response to the import asymmetric key command, containing the result
-    ///     of the import process.
+    /// The response to the import asymmetric key command, containing the result
+    /// of the import process.
     /// </summary>
     /// <remarks>
-    ///     This is the partner Response class to <see cref="ImportAsymmetricKeyCommand" />.
-    ///     <para>
-    ///         This class does not return any Data (there is no <c>GetData</c> method).
-    ///     </para>
-    ///     <para>
-    ///         To determine the status of the command, examine the <c>Status</c> property.
-    ///         <c>ResponseStatus.Success</c> means the command executed correctly. Other
-    ///         values represent various errors. For example, <c>ResponseStatus.AuthenticationRequired</c>
-    ///         indicates that the user verification (management key) failed, so the command
-    ///         was not successful.
-    ///     </para>
-    ///     <para>
-    ///         Example:
-    ///     </para>
-    ///     <code language="csharp">
+    /// This is the partner Response class to <see cref="ImportAsymmetricKeyCommand"/>.
+    /// <para>
+    /// This class does not return any Data (there is no <c>GetData</c> method).
+    /// </para>
+    /// <para>
+    /// To determine the status of the command, examine the <c>Status</c> property.
+    /// <c>ResponseStatus.Success</c> means the command executed correctly. Other
+    /// values represent various errors. For example, <c>ResponseStatus.AuthenticationRequired</c>
+    /// indicates that the user verification (management key) failed, so the command
+    /// was not successful.
+    /// </para>
+    /// <para>
+    /// Example:
+    /// </para>
+    /// <code language="csharp">
     ///   var privateKey = new PivEccPrivateKey(privateValue);
-    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br />
+    ///   IYubiKeyConnection connection = key.Connect(YubiKeyApplication.Piv);<br/>
     ///   var importKeyCommand = new ImportAsymmetricKeyCommand(
     ///       privateKey, PivSlot.Signing, PivPinPolicy.Default, PivTouchPolicy.Default);
     ///   ImportAsymmetricKeyResponse importAsymmetricKeyResponse =
-    ///       connection.SendCommand(importAsymmetricKeyCommand);<br />
+    ///       connection.SendCommand(importAsymmetricKeyCommand);<br/>
     ///   if (importAsymmetricKeyResponse.Status != ResponseStatus.Success)
     ///   {
     ///       // Handle error
@@ -52,11 +52,11 @@ namespace Yubico.YubiKey.Piv.Commands
     public class ImportAsymmetricKeyResponse : PivResponse
     {
         /// <summary>
-        ///     Constructs an ImportAsymmetricKeyResponse based on a ResponseApdu
-        ///     received from the YubiKey.
+        /// Constructs an ImportAsymmetricKeyResponse based on a ResponseApdu
+        /// received from the YubiKey.
         /// </summary>
         /// <param name="responseApdu">
-        ///     The object containing the response APDU<br />returned by the YubiKey.
+        /// The object containing the response APDU<br/>returned by the YubiKey.
         /// </param>
         public ImportAsymmetricKeyResponse(ResponseApdu responseApdu) :
             base(responseApdu)

@@ -17,12 +17,12 @@ using Yubico.Core.Iso7816;
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <summary>
-    ///     Determines if the YubiKey is in a FIPS-approved operating mode.
+    /// Determines if the YubiKey is in a FIPS-approved operating mode.
     /// </summary>
     /// <remarks>
-    ///     For the YubiKey FIPS U2F sub-module to be in a FIPS approved mode of operation, an Admin PIN must be set.
-    ///     By default, no Admin PIN is set. Further, if the YubiKey FIPS U2F sub-module has been reset,
-    ///     it cannot be set into a FIPS approved mode of operation, even with the Admin PIN set.
+    /// For the YubiKey FIPS U2F sub-module to be in a FIPS approved mode of operation, an Admin PIN must be set.
+    /// By default, no Admin PIN is set. Further, if the YubiKey FIPS U2F sub-module has been reset,
+    /// it cannot be set into a FIPS approved mode of operation, even with the Admin PIN set.
     /// </remarks>
     public sealed class VerifyFipsModeCommand : IYubiKeyCommand<VerifyFipsModeResponse>
     {
@@ -30,32 +30,32 @@ namespace Yubico.YubiKey.U2f.Commands
         private const byte VerifyFipsModeInstruction = 0x46;
 
         /// <summary>
-        ///     Constructs an instance of the <see cref="VerifyFipsModeCommand" /> class.
+        /// Gets the YubiKeyApplication to which this command belongs.
+        /// </summary>
+        /// <value>
+        /// YubiKeyApplication.FidoU2f
+        /// </value>
+        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
+
+        /// <summary>
+        /// Constructs an instance of the <see cref="VerifyFipsModeCommand" /> class.
         /// </summary>
         public VerifyFipsModeCommand()
         {
         }
 
-        /// <summary>
-        ///     Gets the YubiKeyApplication to which this command belongs.
-        /// </summary>
-        /// <value>
-        ///     YubiKeyApplication.FidoU2f
-        /// </value>
-        public YubiKeyApplication Application => YubiKeyApplication.FidoU2f;
-
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
         {
-            var innerCommand = new CommandApdu
+            var innerCommand = new CommandApdu()
             {
-                Ins = VerifyFipsModeInstruction
+                Ins = VerifyFipsModeInstruction,
             };
 
-            return new CommandApdu
+            return new CommandApdu()
             {
                 Ins = Ctap1MessageInstruction,
-                Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength)
+                Data = innerCommand.AsByteArray(ApduEncoding.ExtendedLength),
             };
         }
 

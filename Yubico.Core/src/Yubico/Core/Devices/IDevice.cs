@@ -17,47 +17,47 @@ using System;
 namespace Yubico.Core.Devices
 {
     /// <summary>
-    ///     Represents properties and methods common to all devices.
+    /// Represents properties and methods common to all devices.
     /// </summary>
     public interface IDevice
     {
         /// <summary>
-        ///     Gets the platform defined path to the device.
+        /// Gets the platform defined path to the device.
         /// </summary>
         /// <remarks>
-        ///     The exact meaning of this property may vary between operating systems and device types. The SDK treats this
-        ///     property as an opaque value and only uses it to check for uniqueness across device instances. It is strongly
-        ///     recommended that you do not take a dependency on the exact format or meaning of the value of this property.
+        /// The exact meaning of this property may vary between operating systems and device types. The SDK treats this
+        /// property as an opaque value and only uses it to check for uniqueness across device instances. It is strongly
+        /// recommended that you do not take a dependency on the exact format or meaning of the value of this property.
         /// </remarks>
         string Path { get; }
 
         /// <summary>
-        ///     A unique identifier corresponding to the parent USB composite device, if available.
+        /// A unique identifier corresponding to the parent USB composite device, if available.
         /// </summary>
         /// <remarks>
-        ///     <para>
-        ///         Certain devices that this SDK works with, like the YubiKey, are presented to the operating system as a
-        ///         composite device. This means that, to the operating system, multiple devices may be detected even though
-        ///         you have only plugged in one physical device. OSes that do this still expose a single "composite" device
-        ///         in their device tree. This is the common parent across all of the sub-devices.
-        ///     </para>
-        ///     <para>
-        ///         Keeping track of this information, if available, can greatly increase the SDK's performance when it attempts
-        ///         to reconstruct the single, composite device out of all of the sub-devices. This isn't always possible,
-        ///         however, as the OS services that we use to enumerate the sub-devices don't always provide much information
-        ///         about its parent device. macOS and Windows 7, for example, cannot provide parent information for smart card
-        ///         devices. In those cases, we'll have to make do and attempt to match these devices some other way.
-        ///     </para>
+        /// <para>
+        /// Certain devices that this SDK works with, like the YubiKey, are presented to the operating system as a
+        /// composite device. This means that, to the operating system, multiple devices may be detected even though
+        /// you have only plugged in one physical device. OSes that do this still expose a single "composite" device
+        /// in their device tree. This is the common parent across all of the sub-devices.
+        /// </para>
+        /// <para>
+        /// Keeping track of this information, if available, can greatly increase the SDK's performance when it attempts
+        /// to reconstruct the single, composite device out of all of the sub-devices. This isn't always possible,
+        /// however, as the OS services that we use to enumerate the sub-devices don't always provide much information
+        /// about its parent device. macOS and Windows 7, for example, cannot provide parent information for smart card
+        /// devices. In those cases, we'll have to make do and attempt to match these devices some other way.
+        /// </para>
         /// </remarks>
         string? ParentDeviceId { get; }
 
         /// <summary>
-        ///     The time when this device was last accessed.
+        /// The time when this device was last accessed.
         /// </summary>
         /// <remarks>
-        ///     Certain Yubico devices, such as the YubiKey, require a short delay before switching to and communicating with
-        ///     a different USB interface. This is called the reclaim timeout. The YubiKey SDK must keep track of the last
-        ///     interface to have been accessed and when in order to properly implement this delay.
+        /// Certain Yubico devices, such as the YubiKey, require a short delay before switching to and communicating with
+        /// a different USB interface. This is called the reclaim timeout. The YubiKey SDK must keep track of the last
+        /// interface to have been accessed and when in order to properly implement this delay.
         /// </remarks>
         DateTime LastAccessed { get; }
     }

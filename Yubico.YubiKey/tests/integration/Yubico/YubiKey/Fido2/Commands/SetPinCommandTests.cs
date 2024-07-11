@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 using Yubico.YubiKey.Fido2.Cose;
@@ -37,22 +38,22 @@ namespace Yubico.YubiKey.Fido2.Commands
             byte[] newPin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
             var resetCmd = new ResetCommand();
-            var resetRsp = Connection.SendCommand(resetCmd);
+            ResetResponse resetRsp = Connection.SendCommand(resetCmd);
             Assert.Equal(ResponseStatus.ConditionsNotSatisfied, resetRsp.Status);
 
             var protocol = new PinUvAuthProtocolOne();
 
             var cmd = new GetKeyAgreementCommand(protocol.Protocol);
-            var rsp = Connection.SendCommand(cmd);
+            GetKeyAgreementResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            var authenticatorPubKey = rsp.GetData();
+            CoseEcPublicKey authenticatorPubKey = rsp.GetData();
             Assert.Equal(CoseEcCurve.P256, authenticatorPubKey.Curve);
 
             protocol.Encapsulate(authenticatorPubKey);
 
             var setPinCmd = new SetPinCommand(protocol, newPin);
-            var setPinRsp = Connection.SendCommand(setPinCmd);
+            SetPinResponse setPinRsp = Connection.SendCommand(setPinCmd);
             Assert.Equal(ResponseStatus.Success, setPinRsp.Status);
         }
 
@@ -65,16 +66,16 @@ namespace Yubico.YubiKey.Fido2.Commands
             var protocol = new PinUvAuthProtocolOne();
 
             var cmd = new GetKeyAgreementCommand(protocol.Protocol);
-            var rsp = Connection.SendCommand(cmd);
+            GetKeyAgreementResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            var authenticatorPubKey = rsp.GetData();
+            CoseEcPublicKey authenticatorPubKey = rsp.GetData();
             Assert.Equal(CoseEcCurve.P256, authenticatorPubKey.Curve);
 
             protocol.Encapsulate(authenticatorPubKey);
 
             var changePinCmd = new ChangePinCommand(protocol, currentPin, newPin);
-            var changePinRsp = Connection.SendCommand(changePinCmd);
+            ChangePinResponse changePinRsp = Connection.SendCommand(changePinCmd);
             Assert.Equal(ResponseStatus.Success, changePinRsp.Status);
         }
 
@@ -86,24 +87,24 @@ namespace Yubico.YubiKey.Fido2.Commands
             var protocol = new PinUvAuthProtocolOne();
 
             var cmd = new GetKeyAgreementCommand(protocol.Protocol);
-            var rsp = Connection.SendCommand(cmd);
+            GetKeyAgreementResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            var authenticatorPubKey = rsp.GetData();
+            CoseEcPublicKey authenticatorPubKey = rsp.GetData();
             Assert.Equal(CoseEcCurve.P256, authenticatorPubKey.Curve);
 
             protocol.Encapsulate(authenticatorPubKey);
 
             var getTokenCmd = new GetPinTokenCommand(protocol, currentPin);
-            var getTokenRsp = Connection.SendCommand(getTokenCmd);
+            GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
             Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
 
-            var expectedLength = protocol.Protocol == PinUvAuthProtocol.ProtocolOne ? 32 : 48;
-            var encryptedToken = getTokenRsp.GetData();
+            int expectedLength = protocol.Protocol == PinUvAuthProtocol.ProtocolOne ? 32 : 48;
+            ReadOnlyMemory<byte> encryptedToken = getTokenRsp.GetData();
             Assert.Equal(expectedLength, encryptedToken.Length);
 
-            var token = protocol.Decrypt(encryptedToken.ToArray(), offset: 0, encryptedToken.Length);
-            Assert.Equal(expected: 32, token.Length);
+            byte[] token = protocol.Decrypt(encryptedToken.ToArray(), 0, encryptedToken.Length);
+            Assert.Equal(32, token.Length);
         }
 
         [SkippableFact(typeof(DeviceNotFoundException))]
@@ -111,22 +112,22 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             byte[] currentPin = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 
-            var isSupported = IsSupportedWithPermissions(Fido2AuthPin);
+            bool isSupported = IsSupportedWithPermissions(Fido2AuthPin);
 
             var protocol = new PinUvAuthProtocolTwo();
 
             var cmd = new GetKeyAgreementCommand(protocol.Protocol);
-            var rsp = Connection.SendCommand(cmd);
+            GetKeyAgreementResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            var authenticatorPubKey = rsp.GetData();
+            CoseEcPublicKey authenticatorPubKey = rsp.GetData();
             Assert.Equal(CoseEcCurve.P256, authenticatorPubKey.Curve);
 
             protocol.Encapsulate(authenticatorPubKey);
 
             var getTokenCmd = new GetPinUvAuthTokenUsingPinCommand(
-                protocol, currentPin, PinUvAuthTokenPermissions.BioEnrollment, rpId: null);
-            var getTokenRsp = Connection.SendCommand(getTokenCmd);
+                protocol, currentPin, PinUvAuthTokenPermissions.BioEnrollment, null);
+            GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
 
             if (!isSupported)
             {
@@ -137,33 +138,33 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
 
-            var expectedLength = protocol.Protocol == PinUvAuthProtocol.ProtocolOne ? 32 : 48;
-            var encryptedToken = getTokenRsp.GetData();
+            int expectedLength = protocol.Protocol == PinUvAuthProtocol.ProtocolOne ? 32 : 48;
+            ReadOnlyMemory<byte> encryptedToken = getTokenRsp.GetData();
             Assert.Equal(expectedLength, encryptedToken.Length);
 
-            var token = protocol.Decrypt(encryptedToken.ToArray(), offset: 0, encryptedToken.Length);
-            Assert.Equal(expected: 32, token.Length);
+            byte[] token = protocol.Decrypt(encryptedToken.ToArray(), 0, encryptedToken.Length);
+            Assert.Equal(32, token.Length);
         }
 
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void GetPinUvAuthTokenUsingUvCommand_Correct()
         {
-            var isSupported = IsSupportedWithPermissions(Fido2AuthUv);
+            bool isSupported = IsSupportedWithPermissions(Fido2AuthUv);
 
             var protocol = new PinUvAuthProtocolOne();
 
             var cmd = new GetKeyAgreementCommand(protocol.Protocol);
-            var rsp = Connection.SendCommand(cmd);
+            GetKeyAgreementResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            var authenticatorPubKey = rsp.GetData();
+            CoseEcPublicKey authenticatorPubKey = rsp.GetData();
             Assert.Equal(CoseEcCurve.P256, authenticatorPubKey.Curve);
 
             protocol.Encapsulate(authenticatorPubKey);
 
             var getTokenCmd = new GetPinUvAuthTokenUsingUvCommand(
-                protocol, PinUvAuthTokenPermissions.BioEnrollment, rpId: null);
-            var getTokenRsp = Connection.SendCommand(getTokenCmd);
+                protocol, PinUvAuthTokenPermissions.BioEnrollment, null);
+            GetPinUvAuthTokenResponse getTokenRsp = Connection.SendCommand(getTokenCmd);
 
             if (!isSupported)
             {
@@ -174,12 +175,12 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             Assert.Equal(ResponseStatus.Success, getTokenRsp.Status);
 
-            var expectedLength = protocol.Protocol == PinUvAuthProtocol.ProtocolOne ? 32 : 48;
-            var encryptedToken = getTokenRsp.GetData();
+            int expectedLength = protocol.Protocol == PinUvAuthProtocol.ProtocolOne ? 32 : 48;
+            ReadOnlyMemory<byte> encryptedToken = getTokenRsp.GetData();
             Assert.Equal(expectedLength, encryptedToken.Length);
 
-            var token = protocol.Decrypt(encryptedToken.ToArray(), offset: 0, encryptedToken.Length);
-            Assert.Equal(expected: 32, token.Length);
+            byte[] token = protocol.Decrypt(encryptedToken.ToArray(), 0, encryptedToken.Length);
+            Assert.Equal(32, token.Length);
         }
 
         // If auth is Fido2AuthPin (int = 1), then see if
@@ -187,13 +188,13 @@ namespace Yubico.YubiKey.Fido2.Commands
         // Otherwise see if GetPinUvAuthTokenUsingUv is supported.
         private bool IsSupportedWithPermissions(int auth)
         {
-            var keyToken = "pinUvAuthToken";
-            var keyAuth = auth == Fido2AuthPin ? "clientPin" : "uv";
+            string keyToken = "pinUvAuthToken";
+            string keyAuth = auth == Fido2AuthPin ? "clientPin" : "uv";
             var cmd = new GetInfoCommand();
-            var rsp = Connection.SendCommand(cmd);
+            GetInfoResponse rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            var deviceInfo = rsp.GetData();
+            AuthenticatorInfo deviceInfo = rsp.GetData();
             if (deviceInfo.Options is null)
             {
                 return false;

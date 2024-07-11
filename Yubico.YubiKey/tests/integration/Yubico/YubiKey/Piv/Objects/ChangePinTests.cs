@@ -26,20 +26,20 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void NoAdminData_ChangePin_NoUpdate(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
-                    var collectorObj = new Simple39KeyCollector(setKeyFlagOnChange: true);
+                    var collectorObj = new Simple39KeyCollector(true);
                     pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                     pivSession.ResetApplication();
 
                     pivSession.ChangePin();
 
-                    var adminData = pivSession.ReadObject<AdminData>();
+                    AdminData adminData = pivSession.ReadObject<AdminData>();
 
                     Assert.True(adminData.IsEmpty);
                 }
@@ -54,13 +54,13 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void AdminData_ChangePin_Updated(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
-                    var collectorObj = new Simple39KeyCollector(setKeyFlagOnChange: true);
+                    var collectorObj = new Simple39KeyCollector(true);
                     pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                     pivSession.ResetApplication();
@@ -90,13 +90,13 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void AdminData_ResetPin_NotUpdated(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
-                    var collectorObj = new Simple39KeyCollector(setKeyFlagOnChange: true);
+                    var collectorObj = new Simple39KeyCollector(true);
                     pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                     pivSession.ResetApplication();
@@ -126,13 +126,13 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void AdminData_ResetRetry_Updated(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
-                    var collectorObj = new Simple39KeyCollector(setKeyFlagOnChange: true);
+                    var collectorObj = new Simple39KeyCollector(true);
                     pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                     pivSession.ResetApplication();
@@ -143,7 +143,7 @@ namespace Yubico.YubiKey.Piv
                     };
                     pivSession.WriteObject(adminData);
 
-                    pivSession.ChangePinAndPukRetryCounts(newRetryCountPin: 5, newRetryCountPuk: 5);
+                    pivSession.ChangePinAndPukRetryCounts(5, 5);
 
                     adminData = pivSession.ReadObject<AdminData>();
 
@@ -162,13 +162,13 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void AdminData_ChangePuk_NoUpdate(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
-                    var collectorObj = new Simple39KeyCollector(setKeyFlagOnChange: true);
+                    var collectorObj = new Simple39KeyCollector(true);
                     pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                     pivSession.ResetApplication();
@@ -198,20 +198,20 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void AdminData_ChangeMgmtKey_NoUpdate(StandardTestDevice testDeviceType)
         {
-            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 try
                 {
-                    var collectorObj = new Simple39KeyCollector(setKeyFlagOnChange: true);
+                    var collectorObj = new Simple39KeyCollector(true);
                     pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
                     pivSession.ResetApplication();
 
                     var adminData = new AdminData
                     {
-                        PinLastUpdated = new DateTime(year: 2000, month: 2, day: 29)
+                        PinLastUpdated = new DateTime(2000, 2, 29)
                     };
 
                     pivSession.WriteObject(adminData);
@@ -225,9 +225,9 @@ namespace Yubico.YubiKey.Piv
                     if (!(adminData.PinLastUpdated is null))
                     {
                         var check = (DateTime)adminData.PinLastUpdated;
-                        Assert.Equal(expected: 29, check.Day);
-                        Assert.Equal(expected: 2, check.Month);
-                        Assert.Equal(expected: 2000, check.Year);
+                        Assert.Equal(29, check.Day);
+                        Assert.Equal(2, check.Month);
+                        Assert.Equal(2000, check.Year);
                     }
                 }
                 finally

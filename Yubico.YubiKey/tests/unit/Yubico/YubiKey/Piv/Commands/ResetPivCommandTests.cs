@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -32,7 +33,7 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             var command = new ResetPivCommand();
 
-            var application = command.Application;
+            YubiKeyApplication application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
@@ -40,49 +41,49 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
-            var cmdApdu = GetResetPivCommandApdu();
+            CommandApdu cmdApdu = GetResetPivCommandApdu();
 
-            var Cla = cmdApdu.Cla;
+            byte Cla = cmdApdu.Cla;
 
-            Assert.Equal(expected: 0, Cla);
+            Assert.Equal(0, Cla);
         }
 
         [Fact]
         public void CreateCommandApdu_GetInsProperty_ReturnsHexFB()
         {
-            var cmdApdu = GetResetPivCommandApdu();
+            CommandApdu cmdApdu = GetResetPivCommandApdu();
 
-            var Ins = cmdApdu.Ins;
+            byte Ins = cmdApdu.Ins;
 
-            Assert.Equal(expected: 0xFB, Ins);
+            Assert.Equal(0xFB, Ins);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP1Property_ReturnsZero()
         {
-            var cmdApdu = GetResetPivCommandApdu();
+            CommandApdu cmdApdu = GetResetPivCommandApdu();
 
-            var P1 = cmdApdu.P1;
+            byte P1 = cmdApdu.P1;
 
-            Assert.Equal(expected: 0, P1);
+            Assert.Equal(0, P1);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP2Property_ReturnsZero()
         {
-            var cmdApdu = GetResetPivCommandApdu();
+            CommandApdu cmdApdu = GetResetPivCommandApdu();
 
-            var P2 = cmdApdu.P2;
+            byte P2 = cmdApdu.P2;
 
-            Assert.Equal(expected: 0, P2);
+            Assert.Equal(0, P2);
         }
 
         [Fact]
         public void CreateCommandApdu_GetData_ReturnsEmpty()
         {
-            var cmdApdu = GetResetPivCommandApdu();
+            CommandApdu cmdApdu = GetResetPivCommandApdu();
 
-            var data = cmdApdu.Data;
+            ReadOnlyMemory<byte> data = cmdApdu.Data;
 
             Assert.True(data.IsEmpty);
         }
@@ -90,32 +91,32 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void CreateCommandApdu_GetNc_ReturnsZero()
         {
-            var cmdApdu = GetResetPivCommandApdu();
+            CommandApdu cmdApdu = GetResetPivCommandApdu();
 
-            var Nc = cmdApdu.Nc;
+            int Nc = cmdApdu.Nc;
 
-            Assert.Equal(expected: 0, Nc);
+            Assert.Equal(0, Nc);
         }
 
         [Fact]
         public void CreateCommandApdu_GetNe_ReturnsZero()
         {
-            var cmdApdu = GetResetPivCommandApdu();
+            CommandApdu cmdApdu = GetResetPivCommandApdu();
 
-            var Ne = cmdApdu.Ne;
+            int Ne = cmdApdu.Ne;
 
-            Assert.Equal(expected: 0, Ne);
+            Assert.Equal(0, Ne);
         }
 
         [Fact]
         public void CreateResponseForApdu_ReturnsCorrectType()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
             var resetPivCommand = new ResetPivCommand();
 
-            var resetPivResponse = resetPivCommand.CreateResponseForApdu(responseApdu);
+            ResetPivResponse resetPivResponse = resetPivCommand.CreateResponseForApdu(responseApdu);
 
             Assert.True(resetPivResponse is ResetPivResponse);
         }

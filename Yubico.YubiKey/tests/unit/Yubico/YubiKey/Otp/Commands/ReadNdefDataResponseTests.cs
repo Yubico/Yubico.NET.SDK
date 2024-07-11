@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -24,10 +25,7 @@ namespace Yubico.YubiKey.Otp.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void Action()
-            {
-                _ = new ReadNdefDataResponse(responseApdu: null);
-            }
+            static void Action() => _ = new ReadNdefDataResponse(null);
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             _ = Assert.Throws<ArgumentNullException>(Action);
@@ -36,8 +34,8 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, sw1, sw2 });
 
             var readNdefDataResponse = new ReadNdefDataResponse(responseApdu);
@@ -48,8 +46,8 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, sw1, sw2 });
 
             var readNdefDataResponse = new ReadNdefDataResponse(responseApdu);
@@ -63,10 +61,7 @@ namespace Yubico.YubiKey.Otp.Commands
             var responseApdu = new ResponseApdu(new byte[] { SW1Constants.NoPreciseDiagnosis, 0x00 });
             var readNdefDataResponse = new ReadNdefDataResponse(responseApdu);
 
-            void Action()
-            {
-                _ = readNdefDataResponse.GetData();
-            }
+            void Action() => _ = readNdefDataResponse.GetData();
 
             _ = Assert.Throws<InvalidOperationException>(Action);
         }
@@ -74,12 +69,12 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void GetData_SuccessResponseApdu_ReturnsData()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 1, 2, 3, sw1, sw2 });
             var readNdefStatusResponse = new ReadNdefDataResponse(responseApdu);
 
-            var data = readNdefStatusResponse.GetData();
+            ReadOnlyMemory<byte> data = readNdefStatusResponse.GetData();
 
             Assert.True(data.Span.SequenceEqual(new byte[] { 1, 2, 3 }));
         }

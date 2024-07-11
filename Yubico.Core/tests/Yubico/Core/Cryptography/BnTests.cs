@@ -22,7 +22,7 @@ namespace Yubico.Core.Cryptography
         [Fact]
         public void CreateBn_Succeeds()
         {
-            using var safeBigNum = NativeMethods.BnNew();
+            using SafeBigNum safeBigNum = NativeMethods.BnNew();
 
             Assert.False(safeBigNum.IsInvalid);
         }

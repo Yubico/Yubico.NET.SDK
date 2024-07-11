@@ -40,10 +40,10 @@ namespace Yubico.YubiKey.Fido2.Commands
                     },
                     SWConstants.Success));
 
-            (var retriesRemaining, var powerCycleRequired) = response.GetData();
+            (int retriesRemaining, bool? powerCycleRequired) = response.GetData();
 
-            Assert.Equal(expected: 8, retriesRemaining);
-            Assert.Equal(expected: true, powerCycleRequired);
+            Assert.Equal(8, retriesRemaining);
+            Assert.Equal(true, powerCycleRequired);
         }
 
         [Fact]
@@ -54,13 +54,13 @@ namespace Yubico.YubiKey.Fido2.Commands
                     new byte[]
                     {
                         0xA1, // Map (1 entry)
-                        0x03, 0x08 // TagPinRetries = 8
+                        0x03, 0x08, // TagPinRetries = 8
                     },
                     SWConstants.Success));
 
-            (var retriesRemaining, var powerCycleRequired) = response.GetData();
+            (int retriesRemaining, bool? powerCycleRequired) = response.GetData();
 
-            Assert.Equal(expected: 8, retriesRemaining);
+            Assert.Equal(8, retriesRemaining);
             Assert.Null(powerCycleRequired);
         }
 

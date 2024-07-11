@@ -29,7 +29,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4)]
         public void ClassType_DerivedFromPivCommand_IsTrue(int cStyle)
         {
-            var command = GetCommandObject(cStyle, PivDataTag.Chuid);
+            GetDataCommand command = GetCommandObject(cStyle, PivDataTag.Chuid);
 
             Assert.True(command is IYubiKeyCommand<GetDataResponse>);
         }
@@ -47,7 +47,7 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             var command = new GetDataCommand();
 
-            var application = command.Application;
+            YubiKeyApplication application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
@@ -63,7 +63,7 @@ namespace Yubico.YubiKey.Piv.Commands
 #pragma warning disable CS0618 // Testing an obsolete feature
             var command = new GetDataCommand(tag);
 
-            var getTag = command.Tag;
+            PivDataTag getTag = command.Tag;
 #pragma warning restore CS0618 // Type or member is obsolete
 
             Assert.Equal(tag, getTag);
@@ -76,11 +76,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4, PivDataTag.Retired10)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(int cStyle, PivDataTag tag)
         {
-            var cmdApdu = GetDataCommandApdu(cStyle, tag);
+            CommandApdu cmdApdu = GetDataCommandApdu(cStyle, tag);
 
-            var Cla = cmdApdu.Cla;
+            byte Cla = cmdApdu.Cla;
 
-            Assert.Equal(expected: 0, Cla);
+            Assert.Equal(0, Cla);
         }
 
         [Theory]
@@ -90,11 +90,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4, PivDataTag.Retired10)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHexCB(int cStyle, PivDataTag tag)
         {
-            var cmdApdu = GetDataCommandApdu(cStyle, tag);
+            CommandApdu cmdApdu = GetDataCommandApdu(cStyle, tag);
 
-            var Ins = cmdApdu.Ins;
+            byte Ins = cmdApdu.Ins;
 
-            Assert.Equal(expected: 0xCB, Ins);
+            Assert.Equal(0xCB, Ins);
         }
 
         [Theory]
@@ -104,11 +104,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4, PivDataTag.Capability)]
         public void CreateCommandApdu_GetP1Property_ReturnsHex3F(int cStyle, PivDataTag tag)
         {
-            var cmdApdu = GetDataCommandApdu(cStyle, tag);
+            CommandApdu cmdApdu = GetDataCommandApdu(cStyle, tag);
 
-            var P1 = cmdApdu.P1;
+            byte P1 = cmdApdu.P1;
 
-            Assert.Equal(expected: 0x3F, P1);
+            Assert.Equal(0x3F, P1);
         }
 
         [Theory]
@@ -118,11 +118,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4, PivDataTag.CardAuthentication)]
         public void CreateCommandApdu_GetP2Property_ReturnsHexFF(int cStyle, PivDataTag tag)
         {
-            var cmdApdu = GetDataCommandApdu(cStyle, tag);
+            CommandApdu cmdApdu = GetDataCommandApdu(cStyle, tag);
 
-            var P2 = cmdApdu.P2;
+            byte P2 = cmdApdu.P2;
 
-            Assert.Equal(expected: 0xFF, P2);
+            Assert.Equal(0xFF, P2);
         }
 
         [Theory]
@@ -132,9 +132,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4, PivDataTag.Retired3, 5)]
         public void CreateCommandApdu_GetLc_ReturnsCorrect(int cStyle, PivDataTag tag, int expectedLength)
         {
-            var cmdApdu = GetDataCommandApdu(cStyle, tag);
+            CommandApdu cmdApdu = GetDataCommandApdu(cStyle, tag);
 
-            var Lc = cmdApdu.Nc;
+            int Lc = cmdApdu.Nc;
 
             Assert.Equal(expectedLength, Lc);
         }
@@ -146,11 +146,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4, PivDataTag.Chuid)]
         public void CreateCommandApdu_GetLe_ReturnsZero(int cStyle, PivDataTag tag)
         {
-            var cmdApdu = GetDataCommandApdu(cStyle, tag);
+            CommandApdu cmdApdu = GetDataCommandApdu(cStyle, tag);
 
-            var Le = cmdApdu.Ne;
+            int Le = cmdApdu.Ne;
 
-            Assert.Equal(expected: 0, Le);
+            Assert.Equal(0, Le);
         }
 
         [Theory]
@@ -192,12 +192,12 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivDataTag.PairingCodeReferenceData)]
         public void GetCommandApdu_Data_Correct(PivDataTag tag)
         {
-            var cmdApdu = GetDataCommandApdu(cStyle: 4, tag);
-            var expected = PivCommandResponseTestData.GetDataCommandExpectedApduData(tag);
+            CommandApdu cmdApdu = GetDataCommandApdu(4, tag);
+            List<byte> expected = PivCommandResponseTestData.GetDataCommandExpectedApduData(tag);
 
-            var data = cmdApdu.Data;
+            ReadOnlyMemory<byte> data = cmdApdu.Data;
 
-            var compareResult = expected.SequenceEqual(data.ToArray());
+            bool compareResult = expected.SequenceEqual(data.ToArray());
 
             Assert.True(compareResult);
         }
@@ -205,16 +205,15 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void GetDiscovery_Data_Correct()
         {
-            var cmdApdu = GetDataCommandApdu(cStyle: 2, PivDataTag.Discovery);
+            CommandApdu cmdApdu = GetDataCommandApdu(2, PivDataTag.Discovery);
 
-            var expected = new List<byte>(new byte[]
-            {
+            var expected = new List<byte>(new byte[] {
                 0x5C, 0x01, 0x7E
             });
 
-            var data = cmdApdu.Data;
+            ReadOnlyMemory<byte> data = cmdApdu.Data;
 
-            var compareResult = expected.SequenceEqual(data.ToArray());
+            bool compareResult = expected.SequenceEqual(data.ToArray());
 
             Assert.True(compareResult);
         }
@@ -225,7 +224,7 @@ namespace Yubico.YubiKey.Piv.Commands
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new GetDataCommand((int)PivDataTag.Signature);
 
-            var response = command.CreateResponseForApdu(responseApdu);
+            GetDataResponse response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is GetDataResponse);
         }
@@ -237,7 +236,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(4)]
         public void Constructor_BadTag_CorrectException(int cStyle)
         {
-            _ = Assert.Throws<ArgumentException>(() => GetCommandObject(cStyle, tag: 0));
+            _ = Assert.Throws<ArgumentException>(() => GetCommandObject(cStyle, 0));
         }
 
         [Fact]
@@ -273,19 +272,19 @@ namespace Yubico.YubiKey.Piv.Commands
         public void IntTag_CmdApdu_Correct(int tag)
         {
             var command = new GetDataCommand(tag);
-            var cmdApdu = command.CreateCommandApdu();
-            var expected = PivCommandResponseTestData.GetDataCommandExpectedApduDataInt(tag);
+            CommandApdu cmdApdu = command.CreateCommandApdu();
+            List<byte> expected = PivCommandResponseTestData.GetDataCommandExpectedApduDataInt(tag);
 
-            var data = cmdApdu.Data;
+            ReadOnlyMemory<byte> data = cmdApdu.Data;
 
-            var compareResult = expected.SequenceEqual(data.ToArray());
+            bool compareResult = expected.SequenceEqual(data.ToArray());
 
             Assert.True(compareResult);
         }
 
         private static CommandApdu GetDataCommandApdu(int cStyle, PivDataTag tag)
         {
-            var command = GetCommandObject(cStyle, tag);
+            GetDataCommand command = GetCommandObject(cStyle, tag);
             return command.CreateCommandApdu();
         }
 
@@ -307,9 +306,9 @@ namespace Yubico.YubiKey.Piv.Commands
                     break;
 
                 case 2:
-                    cmd = new GetDataCommand
+                    cmd = new GetDataCommand()
                     {
-                        DataTag = (int)tag
+                        DataTag = (int)tag,
                     };
                     break;
 

@@ -14,6 +14,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading;
 using Yubico.Core.Devices;
@@ -26,22 +27,37 @@ using Yubico.YubiKey.DeviceExtensions;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    ///     This class provides events for YubiKeyDevice arrival and removal.
+    /// This class provides events for YubiKeyDevice arrival and removal.
     /// </summary>
     public class YubiKeyDeviceListener : IDisposable
     {
+        /// <summary>
+        /// Subscribe to receive an event whenever a YubiKey is added to the computer.
+        /// </summary>
+        public event EventHandler<YubiKeyDeviceEventArgs>? Arrived;
+
+        /// <summary>
+        /// Subscribe to receive an event whenever a YubiKey is removed from the computer.
+        /// </summary>
+        public event EventHandler<YubiKeyDeviceEventArgs>? Removed;
+
+        /// <summary>
+        /// An instance of a <see cref="YubiKeyDeviceListener"/>.
+        /// </summary>
+        public static YubiKeyDeviceListener Instance => _lazyInstance.Value;
+
         private static readonly Lazy<YubiKeyDeviceListener> _lazyInstance =
             new Lazy<YubiKeyDeviceListener>(() => new YubiKeyDeviceListener());
 
         private static readonly ReaderWriterLockSlim RwLock = new ReaderWriterLockSlim(LockRecursionPolicy.NoRecursion);
-        private readonly HidDeviceListener _hidListener = HidDeviceListener.Create();
-        private readonly Dictionary<IYubiKeyDevice, bool> _internalCache = new Dictionary<IYubiKeyDevice, bool>();
-        private readonly bool _isListening;
-
-        private readonly Thread? _listenerThread;
 
         private readonly Logger _log = Log.GetLogger();
+        private readonly Dictionary<IYubiKeyDevice, bool> _internalCache = new Dictionary<IYubiKeyDevice, bool>();
+        private readonly HidDeviceListener _hidListener = HidDeviceListener.Create();
         private readonly SmartCardDeviceListener _smartCardListener = SmartCardDeviceListener.Create();
+
+        private readonly Thread? _listenerThread;
+        private readonly bool _isListening;
 
         private YubiKeyDeviceListener()
         {
@@ -56,29 +72,13 @@ namespace Yubico.YubiKey
             _listenerThread.Start();
         }
 
-        /// <summary>
-        ///     An instance of a <see cref="YubiKeyDeviceListener" />.
-        /// </summary>
-        public static YubiKeyDeviceListener Instance => _lazyInstance.Value;
-
-        /// <summary>
-        ///     Subscribe to receive an event whenever a YubiKey is added to the computer.
-        /// </summary>
-        public event EventHandler<YubiKeyDeviceEventArgs>? Arrived;
-
-        /// <summary>
-        ///     Subscribe to receive an event whenever a YubiKey is removed from the computer.
-        /// </summary>
-        public event EventHandler<YubiKeyDeviceEventArgs>? Removed;
-
         internal List<IYubiKeyDevice> GetAll() => _internalCache.Keys.ToList();
 
         private void ListenForChanges()
         {
             using var updateEvent = new ManualResetEvent(false);
 
-            _log.LogInformation(
-                "YubiKey device listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
+            _log.LogInformation("YubiKey device listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
 
             _smartCardListener.Arrived += (s, e) =>
             {
@@ -108,8 +108,7 @@ namespace Yubico.YubiKey
             {
                 _ = updateEvent.WaitOne();
                 Thread.Sleep(200); // I really dislike sleeps, but here, it does seem like a good idea to give the
-
-                // system some time to quiet down in terms of PnP activity.
+                                   // system some time to quiet down in terms of PnP activity.
                 _ = updateEvent.Reset();
                 Update();
             }
@@ -170,8 +169,7 @@ namespace Yubico.YubiKey
                 }
                 catch (Exception ex) when (ex is SCardException || ex is PlatformApiException)
                 {
-                    _log.LogError(
-                        "Encountered a YubiKey but was unable to connect to it. This interface will be ignored.");
+                    _log.LogError("Encountered a YubiKey but was unable to connect to it. This interface will be ignored.");
 
                     continue;
                 }
@@ -257,9 +255,7 @@ namespace Yubico.YubiKey
             }
         }
 
-        private void MergeAndMarkExistingYubiKey(
-            YubiKeyDevice mergeTarget,
-            YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo)
+        private void MergeAndMarkExistingYubiKey(YubiKeyDevice mergeTarget, YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo)
         {
             _log.LogInformation(
                 "Device was not found in the cache, but appears to be YubiKey {Serial}. Merging devices.",
@@ -289,9 +285,7 @@ namespace Yubico.YubiKey
             _internalCache[existingEntry] = true;
         }
 
-        private void CreateAndMarkNewYubiKey(
-            YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo,
-            List<IYubiKeyDevice> addedYubiKeys)
+        private void CreateAndMarkNewYubiKey(YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo, List<IYubiKeyDevice> addedYubiKeys)
         {
             _log.LogInformation(
                 "Device appears to be a brand new YubiKey with serial {Serial}",
@@ -304,12 +298,12 @@ namespace Yubico.YubiKey
         }
 
         /// <summary>
-        ///     Raises event on device arrival.
+        /// Raises event on device arrival.
         /// </summary>
         private void OnDeviceArrived(YubiKeyDeviceEventArgs e) => Arrived?.Invoke(typeof(YubiKeyDevice), e);
 
         /// <summary>
-        ///     Raises event on device removal.
+        /// Raises event on device removal.
         /// </summary>
         private void OnDeviceRemoved(YubiKeyDeviceEventArgs e) => Removed?.Invoke(typeof(YubiKeyDevice), e);
 
@@ -321,7 +315,7 @@ namespace Yubico.YubiKey
                     .GetHidDevices()
                     .Where(d => d.IsYubicoDevice() && d.IsFido());
             }
-            catch (PlatformApiException e) { ErrorHandler(e); }
+            catch (PlatformInterop.PlatformApiException e) { ErrorHandler(e); }
 
             return Enumerable.Empty<IDevice>();
         }
@@ -334,7 +328,7 @@ namespace Yubico.YubiKey
                     .GetHidDevices()
                     .Where(d => d.IsYubicoDevice() && d.IsKeyboard());
             }
-            catch (PlatformApiException e) { ErrorHandler(e); }
+            catch (PlatformInterop.PlatformApiException e) { ErrorHandler(e); }
 
             return Enumerable.Empty<IDevice>();
         }
@@ -344,10 +338,10 @@ namespace Yubico.YubiKey
             try
             {
                 return SmartCardDevice
-                    .GetSmartCardDevices()
-                    .Where(d => d.IsYubicoDevice());
+                        .GetSmartCardDevices()
+                        .Where(d => d.IsYubicoDevice());
             }
-            catch (SCardException e) { ErrorHandler(e); }
+            catch (PlatformInterop.SCardException e) { ErrorHandler(e); }
 
             return Enumerable.Empty<IDevice>();
         }
@@ -360,7 +354,7 @@ namespace Yubico.YubiKey
         private bool _disposedValue;
 
         /// <summary>
-        ///     Disposes the objects.
+        /// Disposes the objects.
         /// </summary>
         /// <param name="disposing"></param>
         protected virtual void Dispose(bool disposing)
@@ -371,7 +365,6 @@ namespace Yubico.YubiKey
                 {
                     RwLock.Dispose();
                 }
-
                 _disposedValue = true;
             }
         }
@@ -384,7 +377,7 @@ namespace Yubico.YubiKey
 
         // This code added to correctly implement the disposable pattern.
         /// <summary>
-        ///     Calls Dispose(true).
+        /// Calls Dispose(true).
         /// </summary>
         public void Dispose()
         {

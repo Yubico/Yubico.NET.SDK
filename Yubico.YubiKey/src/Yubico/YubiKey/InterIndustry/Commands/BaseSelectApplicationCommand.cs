@@ -13,15 +13,17 @@
 // limitations under the License.
 
 using System;
+using System.Collections.Generic;
+using System.Text;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.InterIndustry.Commands
 {
     /// <summary>
-    ///     Selects a smart card application.
+    /// Selects a smart card application.
     /// </summary>
     public abstract class BaseSelectApplicationCommand<TSelectResponse> : ISelectApplicationCommand<TSelectResponse>
-        where TSelectResponse : ISelectApplicationResponse<ISelectApplicationData>
+            where TSelectResponse : ISelectApplicationResponse<ISelectApplicationData>
     {
         private const byte INS_SELECT = 0xA4;
 
@@ -29,10 +31,10 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         // identifier).
         private const byte P1_SELECT_BY_DF_NAME = 0b0100;
 
-        private readonly byte[] _applicationId;
+        readonly private byte[] _applicationId;
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="SelectApplicationCommand" /> class.
+        /// Initializes a new instance of the <see cref="SelectApplicationCommand"/> class.
         /// </summary>
         /// <param name="applicationId">The byte representation of an application identifier.</param>
         protected BaseSelectApplicationCommand(byte[] applicationId)
@@ -41,10 +43,10 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="SelectApplicationCommand" /> class.
+        /// Initializes a new instance of the <see cref="SelectApplicationCommand"/> class.
         /// </summary>
         /// <param name="yubiKeyApplication">
-        ///     The YubiKey application. `YubiKeyApplication.InterIndustry` is not a valid option.
+        /// The YubiKey application. `YubiKeyApplication.InterIndustry` is not a valid option.
         /// </param>
         protected BaseSelectApplicationCommand(YubiKeyApplication yubiKeyApplication)
         {
@@ -57,30 +59,30 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         }
 
         /// <summary>
-        ///     Gets the YubiKeyApplication (e.g. PIV, OATH, etc.) that this command applies to.
+        /// Gets the YubiKeyApplication (e.g. PIV, OATH, etc.) that this command applies to.
         /// </summary>
         /// <value>
-        ///     The value will always be `YubiKeyApplication.InterIndustry` for this command.
+        /// The value will always be `YubiKeyApplication.InterIndustry` for this command.
         /// </value>
         public YubiKeyApplication Application => YubiKeyApplication.InterIndustry;
 
         /// <summary>
-        ///     Creates a CommandApdu instance that instructs the smart card to select the previously
-        ///     specified application.
+        /// Creates a CommandApdu instance that instructs the smart card to select the previously
+        /// specified application.
         /// </summary>
-        public CommandApdu CreateCommandApdu() =>
-            new CommandApdu
-            {
-                Ins = INS_SELECT,
-                P1 = P1_SELECT_BY_DF_NAME,
-                Data = _applicationId
-            };
+        public CommandApdu CreateCommandApdu() => new CommandApdu
+        {
+            Ins = INS_SELECT,
+            P1 = P1_SELECT_BY_DF_NAME,
+            Data = _applicationId
+        };
 
         /// <summary>
-        ///     Creates the appropriate response class that can parse the ResponseApdu.
+        /// Creates the appropriate response class that can parse the ResponseApdu.
         /// </summary>
         /// <param name="responseApdu">The ResponseApdu from the YubiKey.</param>
         /// <returns></returns>
         public abstract TSelectResponse CreateResponseForApdu(ResponseApdu responseApdu);
     }
+
 }

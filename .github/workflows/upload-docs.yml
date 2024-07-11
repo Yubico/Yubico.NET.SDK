@@ -14,7 +14,7 @@
 
 name: Upload documentation to GCP
 
-on:
+on: 
   workflow_call:
 
 permissions:

@@ -63,7 +63,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                var isValid = pivSession.TryReadObject(out AdminData adminData);
+                bool isValid = pivSession.TryReadObject(out AdminData adminData);
                 using (adminData)
                 {
                     Assert.True(isValid);
@@ -80,19 +80,17 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                byte[] currentPin =
-                {
+                byte[] currentPin = {
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36
                 };
-                byte[] newPin =
-                {
+                byte[] newPin = {
                     0x39, 0x32, 0x33, 0x34, 0x35, 0x36
                 };
 
                 Assert.False(pivSession.PinVerified);
                 Assert.False(pivSession.ManagementKeyAuthenticated);
 
-                var isChanged = pivSession.TryChangePin(currentPin, newPin, out var retriesRemaining);
+                bool isChanged = pivSession.TryChangePin(currentPin, newPin, out int? retriesRemaining);
                 Assert.True(isChanged);
             }
 
@@ -104,13 +102,13 @@ namespace Yubico.YubiKey.Piv
                 };
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                var isValid = pivSession.TryAuthenticateManagementKey();
+                bool isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
             }
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                var isValid = pivSession.TryReadObject(out AdminData adminData);
+                bool isValid = pivSession.TryReadObject(out AdminData adminData);
                 using (adminData)
                 {
                     Assert.True(isValid);
@@ -123,7 +121,7 @@ namespace Yubico.YubiKey.Piv
                         var src = (ReadOnlyMemory<byte>)adminData.Salt;
                         src.CopyTo(secondSalt);
 
-                        var isSame = firstSalt.Span.SequenceEqual(secondSalt.Span);
+                        bool isSame = firstSalt.Span.SequenceEqual(secondSalt.Span);
                         Assert.False(isSame);
                     }
                 }
@@ -137,19 +135,17 @@ namespace Yubico.YubiKey.Piv
         {
             using (var pivSession = new PivSession(yubiKey))
             {
-                byte[] currentPin =
-                {
+                byte[] currentPin = {
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36
                 };
-                byte[] newPin =
-                {
+                byte[] newPin = {
                     0x39, 0x32, 0x33, 0x34, 0x35, 0x36
                 };
 
                 Assert.False(pivSession.PinVerified);
                 Assert.False(pivSession.ManagementKeyAuthenticated);
 
-                var isChanged = pivSession.TryChangePin(currentPin, newPin, out var retriesRemaining);
+                bool isChanged = pivSession.TryChangePin(currentPin, newPin, out int? retriesRemaining);
             }
 
             using (var pivSession = new PivSession(yubiKey))
@@ -171,16 +167,14 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                byte[] currentPin =
-                {
+                byte[] currentPin = {
                     0x39, 0x32, 0x33, 0x34, 0x35, 0x36
                 };
 
                 if (whichCall == 1)
                 {
-                    var isChanged = pivSession.TryChangePinAndPukRetryCounts(
-                        ReadOnlyMemory<byte>.Empty, currentPin, newRetryCountPin: 12, newRetryCountPuk: 13,
-                        out var retriesRemaining);
+                    bool isChanged = pivSession.TryChangePinAndPukRetryCounts(
+                        ReadOnlyMemory<byte>.Empty, currentPin, 12, 13, out int? retriesRemaining);
                     Assert.True(isChanged);
                     Assert.Null(retriesRemaining);
                 }
@@ -191,7 +185,7 @@ namespace Yubico.YubiKey.Piv
                         KeyFlag = 1
                     };
                     pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-                    pivSession.ChangePinAndPukRetryCounts(newRetryCountPin: 13, newRetryCountPuk: 14);
+                    pivSession.ChangePinAndPukRetryCounts(13, 14);
                 }
             }
 
@@ -200,7 +194,7 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                var isValid = pivSession.TryAuthenticateManagementKey();
+                bool isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
                 isValid = pivSession.TryVerifyPin();
                 Assert.True(isValid);
@@ -208,7 +202,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                var isValid = pivSession.TryReadObject(out AdminData adminData);
+                bool isValid = pivSession.TryReadObject(out AdminData adminData);
                 using (adminData)
                 {
                     Assert.True(isValid);
@@ -246,7 +240,7 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                var isValid = pivSession.TryReadObject(out PinProtectedData pinProtect);
+                bool isValid = pivSession.TryReadObject(out PinProtectedData pinProtect);
                 using (pinProtect)
                 {
                     Assert.True(isValid);
@@ -276,7 +270,7 @@ namespace Yubico.YubiKey.Piv
                 }
                 else
                 {
-                    var isValid = pivSession.TryChangePin();
+                    bool isValid = pivSession.TryChangePin();
                     Assert.True(isValid);
                 }
 
@@ -294,7 +288,7 @@ namespace Yubico.YubiKey.Piv
                 };
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                var isValid = pivSession.TryAuthenticateManagementKey();
+                bool isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
             }
 
@@ -306,7 +300,7 @@ namespace Yubico.YubiKey.Piv
                 };
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                var isValid = pivSession.TryReadObject(out PinProtectedData pinProtect);
+                bool isValid = pivSession.TryReadObject(out PinProtectedData pinProtect);
                 using (pinProtect)
                 {
                     Assert.True(isValid);
@@ -319,7 +313,7 @@ namespace Yubico.YubiKey.Piv
                         Assert.True(isValid);
                         Assert.True(pivSession.ManagementKeyAuthenticated);
 
-                        var isSame = firstKey.Span.SequenceEqual(secondKey.Span);
+                        bool isSame = firstKey.Span.SequenceEqual(secondKey.Span);
                         Assert.False(isSame);
                     }
                 }
@@ -327,7 +321,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                var isValid = pivSession.TryReadObject(out AdminData adminData);
+                bool isValid = pivSession.TryReadObject(out AdminData adminData);
                 using (adminData)
                 {
                     Assert.True(isValid);

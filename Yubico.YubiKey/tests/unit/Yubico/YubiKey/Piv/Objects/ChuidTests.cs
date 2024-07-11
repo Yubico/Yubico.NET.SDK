@@ -13,6 +13,7 @@
 // limitations under the License.
 
 using System;
+using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
@@ -33,7 +34,7 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var chuid = new CardholderUniqueId();
 
-            Assert.Equal(expected: 0x005FC102, chuid.DataTag);
+            Assert.Equal(0x005FC102, chuid.DataTag);
         }
 
         [Fact]
@@ -41,8 +42,8 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var chuid = new CardholderUniqueId();
 
-            var definedTag = chuid.GetDefinedDataTag();
-            Assert.Equal(expected: 0x005FC102, definedTag);
+            int definedTag = chuid.GetDefinedDataTag();
+            Assert.Equal(0x005FC102, definedTag);
         }
 
         [Fact]
@@ -51,7 +52,7 @@ namespace Yubico.YubiKey.Piv.Objects
             using var chuid = new CardholderUniqueId();
             chuid.DataTag = 0x005F0010;
 
-            Assert.Equal(expected: 0x005F0010, chuid.DataTag);
+            Assert.Equal(0x005F0010, chuid.DataTag);
         }
 
         [Fact]
@@ -60,8 +61,8 @@ namespace Yubico.YubiKey.Piv.Objects
             using var chuid = new CardholderUniqueId();
             chuid.DataTag = 0x005F0010;
 
-            var definedTag = chuid.GetDefinedDataTag();
-            Assert.Equal(expected: 0x005FC102, definedTag);
+            int definedTag = chuid.GetDefinedDataTag();
+            Assert.Equal(0x005FC102, definedTag);
         }
 
         [Theory]
@@ -89,8 +90,8 @@ namespace Yubico.YubiKey.Piv.Objects
             var expected = new Span<byte>(new byte[] { 0x53, 0x00 });
             using var chuid = new CardholderUniqueId();
 
-            var encoding = chuid.Encode();
-            var isValid = expected.SequenceEqual(encoding);
+            byte[] encoding = chuid.Encode();
+            bool isValid = MemoryExtensions.SequenceEqual(expected, encoding);
             Assert.True(isValid);
         }
 
@@ -117,8 +118,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void SetGuid_Valid_NotEmpty()
         {
-            var random = RandomObjectUtility.GetRandomObject(fixedBytes: null);
-            var newGuid = new byte[16];
+            RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
+            byte[] newGuid = new byte[16];
             random.GetBytes(newGuid);
 
             using var chuid = new CardholderUniqueId();
@@ -130,25 +131,23 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void SetGuid_Valid_CorrectData()
         {
-            var expectedValue = new Span<byte>(new byte[]
-            {
+            var expectedValue = new Span<byte>(new byte[] {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
             });
-            var newGuid = GetFixedGuidBytes();
+            byte[] newGuid = GetFixedGuidBytes();
 
             using var chuid = new CardholderUniqueId();
 
             chuid.SetGuid(newGuid);
 
-            var isValid = expectedValue.SequenceEqual(chuid.GuidValue.Span);
+            bool isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, chuid.GuidValue.Span);
             Assert.True(isValid);
         }
 
         [Fact]
         public void SetGuid_BadLength_Throws()
         {
-            byte[] newGuid =
-            {
+            byte[] newGuid = new byte[] {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E
             };
 
@@ -160,22 +159,21 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Encode_Valid_CorrectData()
         {
-            var expectedValue = new Span<byte>(new byte[]
-            {
+            var expectedValue = new Span<byte>(new byte[] {
                 0x53, 0x3B, 0x30, 0x19, 0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83,
                 0x68, 0x58, 0x21, 0x08, 0x42, 0x10, 0x84, 0x21, 0xc8, 0x42, 0x10, 0xc3, 0xeb, 0x34, 0x10, 0x00,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x35,
                 0x08, 0x32, 0x30, 0x33, 0x30, 0x30, 0x31, 0x30, 0x31, 0x3e, 0x00, 0xfe, 0x00
             });
-            var newGuid = GetFixedGuidBytes();
+            byte[] newGuid = GetFixedGuidBytes();
 
             using var chuid = new CardholderUniqueId();
 
             chuid.SetGuid(newGuid);
-            var encoding = chuid.Encode();
+            byte[] encoding = chuid.Encode();
             var encodingSpan = new Span<byte>(encoding);
 
-            var isValid = expectedValue.SequenceEqual(encodingSpan);
+            bool isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, encodingSpan);
 
             Assert.True(isValid);
         }
@@ -183,8 +181,7 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_Valid_IsEmptyFalse()
         {
-            var encodedValue = new Memory<byte>(new byte[]
-            {
+            var encodedValue = new Memory<byte>(new byte[] {
                 0x53, 0x3B, 0x30, 0x19, 0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83,
                 0x68, 0x58, 0x21, 0x08, 0x42, 0x10, 0x84, 0x21, 0xc8, 0x42, 0x10, 0xc3, 0xeb, 0x34, 0x10, 0x00,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x35,
@@ -200,22 +197,20 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_Valid_CorrectGuid()
         {
-            var encodedValue = new Memory<byte>(new byte[]
-            {
+            var encodedValue = new Memory<byte>(new byte[] {
                 0x53, 0x3B, 0x30, 0x19, 0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83,
                 0x68, 0x58, 0x21, 0x08, 0x42, 0x10, 0x84, 0x21, 0xc8, 0x42, 0x10, 0xc3, 0xeb, 0x34, 0x10, 0x00,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x35,
                 0x08, 0x32, 0x30, 0x33, 0x30, 0x30, 0x31, 0x30, 0x31, 0x3e, 0x00, 0xfe, 0x00
             });
-            var expectedValue = new Span<byte>(new byte[]
-            {
+            var expectedValue = new Span<byte>(new byte[] {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
             });
 
             using var chuid = new CardholderUniqueId();
             chuid.Decode(encodedValue);
 
-            var isValid = expectedValue.SequenceEqual(chuid.GuidValue.Span);
+            bool isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, chuid.GuidValue.Span);
 
             Assert.True(isValid);
         }
@@ -223,8 +218,7 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_InvalidFascn_Throws()
         {
-            var encodedValue = new Memory<byte>(new byte[]
-            {
+            var encodedValue = new Memory<byte>(new byte[] {
                 0x53, 0x3B, 0x30, 0x19, 0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83,
                 0x68, 0x58, 0x21, 0x08, 0x42, 0x10, 0x84, 0x21, 0xc8, 0x42, 0x10, 0xc3, 0xea, 0x34, 0x10, 0x00,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x35,
@@ -238,8 +232,7 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_InvalidGuid_Throws()
         {
-            var encodedValue = new Memory<byte>(new byte[]
-            {
+            var encodedValue = new Memory<byte>(new byte[] {
                 0x53, 0x3C, 0x30, 0x19, 0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83,
                 0x68, 0x58, 0x21, 0x08, 0x42, 0x10, 0x84, 0x21, 0xc8, 0x42, 0x10, 0xc3, 0xeb, 0x34, 0x11, 0x00,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x35, 0x35,
@@ -253,8 +246,7 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_InvalidDate_Throws()
         {
-            var encodedValue = new Memory<byte>(new byte[]
-            {
+            var encodedValue = new Memory<byte>(new byte[] {
                 0x53, 0x3B, 0x30, 0x19, 0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83,
                 0x68, 0x58, 0x21, 0x08, 0x42, 0x10, 0x84, 0x21, 0xc8, 0x42, 0x10, 0xc3, 0xeb, 0x34, 0x10, 0x00,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x35,
@@ -268,8 +260,7 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_InvalidSig_Throws()
         {
-            var encodedValue = new Memory<byte>(new byte[]
-            {
+            var encodedValue = new Memory<byte>(new byte[] {
                 0x53, 0x3B, 0x30, 0x19, 0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83,
                 0x68, 0x58, 0x21, 0x08, 0x42, 0x10, 0x84, 0x21, 0xc8, 0x42, 0x10, 0xc3, 0xeb, 0x34, 0x10, 0x00,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x35,
@@ -283,8 +274,7 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_InvalidLrc_Throws()
         {
-            var encodedValue = new Memory<byte>(new byte[]
-            {
+            var encodedValue = new Memory<byte>(new byte[] {
                 0x53, 0x3C, 0x30, 0x19, 0xd4, 0xe7, 0x39, 0xda, 0x73, 0x9c, 0xed, 0x39, 0xce, 0x73, 0x9d, 0x83,
                 0x68, 0x58, 0x21, 0x08, 0x42, 0x10, 0x84, 0x21, 0xc8, 0x42, 0x10, 0xc3, 0xeb, 0x34, 0x10, 0x00,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x35,
@@ -295,12 +285,9 @@ namespace Yubico.YubiKey.Piv.Objects
             _ = Assert.Throws<ArgumentException>(() => chuid.Decode(encodedValue));
         }
 
-        private byte[] GetFixedGuidBytes()
-        {
-            return new byte[]
-            {
+        private byte[] GetFixedGuidBytes() =>
+            new byte[] {
                 0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F
             };
-        }
     }
 }

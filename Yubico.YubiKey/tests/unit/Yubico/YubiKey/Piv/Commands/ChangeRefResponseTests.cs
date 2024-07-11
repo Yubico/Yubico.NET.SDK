@@ -24,16 +24,16 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new ChangeReferenceDataResponse(responseApdu: null));
+            _ = Assert.Throws<ArgumentNullException>(() => new ChangeReferenceDataResponse(null));
 #pragma warning restore CS8625
         }
 
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var changeRefDataResponse = new ChangeReferenceDataResponse(responseApdu);
 
@@ -43,9 +43,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var changeRefDataResponse = new ChangeReferenceDataResponse(responseApdu);
 
@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             byte sw1 = 0x63;
             byte sw2 = 0xC1;
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var changeRefDataResponse = new ChangeReferenceDataResponse(responseApdu);
 
@@ -67,7 +67,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_AuthenticationMethodBlockedResponseApdu_SetsStatusCorrectly()
         {
-            var statusWord = SWConstants.AuthenticationMethodBlocked;
+            short statusWord = SWConstants.AuthenticationMethodBlocked;
             var responseApdu = new ResponseApdu(Array.Empty<byte>(), statusWord);
 
             var changeRefDataResponse = new ChangeReferenceDataResponse(responseApdu);
@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_SecurityStatusNotSatisfiedResponseApdu_SetsStatusCorrectly()
         {
-            var statusWord = SWConstants.SecurityStatusNotSatisfied;
+            short statusWord = SWConstants.SecurityStatusNotSatisfied;
             var responseApdu = new ResponseApdu(Array.Empty<byte>(), statusWord);
 
             var changeRefDataResponse = new ChangeReferenceDataResponse(responseApdu);
@@ -89,9 +89,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_ErrorResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = SWConstants.ExecutionError >> 8;
-            var sw2 = unchecked((byte)SWConstants.ExecutionError);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.ExecutionError >> 8));
+            byte sw2 = unchecked((byte)SWConstants.ExecutionError);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var changeRefDataResponse = new ChangeReferenceDataResponse(responseApdu);
 
@@ -101,13 +101,13 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_GetDataCorrectInt()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var changeRefDataResponse = new ChangeReferenceDataResponse(responseApdu);
 
-            var retryCount = changeRefDataResponse.GetData();
+            int? retryCount = changeRefDataResponse.GetData();
 
             Assert.Null(retryCount);
         }
@@ -117,44 +117,40 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             byte sw1 = 0x63;
             byte sw2 = 0xCA;
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var changeRefDataResponse = new ChangeReferenceDataResponse(responseApdu);
 
-            var retryCount = changeRefDataResponse.GetData();
+            int? retryCount = changeRefDataResponse.GetData();
 
-            Assert.Equal(expected: 10, retryCount);
+            Assert.Equal(10, retryCount);
         }
 
         [Fact]
         public void Constructor_BlockedPinResponseApdu_GetDataCorrectInt()
         {
-            byte sw1 = SWConstants.AuthenticationMethodBlocked >> 8;
-            var sw2 = unchecked((byte)SWConstants.AuthenticationMethodBlocked);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.AuthenticationMethodBlocked >> 8));
+            byte sw2 = unchecked((byte)SWConstants.AuthenticationMethodBlocked);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var changeRefDataResponse = new ChangeReferenceDataResponse(responseApdu);
 
-            var retryCount = changeRefDataResponse.GetData();
+            int? retryCount = changeRefDataResponse.GetData();
 
-            Assert.Equal(expected: 0, retryCount);
+            Assert.Equal(0, retryCount);
         }
 
         [Fact]
         public void GetData_SuccessResponseApdu_NoExceptionThrown()
         {
-            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            var sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            byte sw2 = unchecked((byte)SWConstants.Success);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var changeRefDataResponse = new ChangeReferenceDataResponse(responseApdu);
+            void action() => changeRefDataResponse.GetData();
 
-            void action()
-            {
-                changeRefDataResponse.GetData();
-            }
-
-            var ex = Record.Exception(action);
+            Exception? ex = Record.Exception(action);
             Assert.Null(ex);
         }
 
@@ -163,25 +159,21 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             byte sw1 = 0x63;
             byte sw2 = 0xC2;
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var changeRefDataResponse = new ChangeReferenceDataResponse(responseApdu);
+            void action() => changeRefDataResponse.GetData();
 
-            void action()
-            {
-                changeRefDataResponse.GetData();
-            }
-
-            var ex = Record.Exception(action);
+            Exception? ex = Record.Exception(action);
             Assert.Null(ex);
         }
 
         [Fact]
         public void GetData_FailResponseApdu_ThrowsException()
         {
-            byte sw1 = SWConstants.RecordNotFound >> 8;
-            var sw2 = unchecked((byte)SWConstants.RecordNotFound);
-            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            byte sw1 = unchecked((byte)(SWConstants.RecordNotFound >> 8));
+            byte sw2 = unchecked((byte)SWConstants.RecordNotFound);
+            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
 
             var changeRefDataResponse = new ChangeReferenceDataResponse(responseApdu);
 

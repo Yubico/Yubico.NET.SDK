@@ -19,7 +19,7 @@ namespace Yubico.PlatformInterop
 {
     public class SafeBigNum : SafeHandle
     {
-        public SafeBigNum() : base(IntPtr.Zero, ownsHandle: true)
+        public SafeBigNum() : base(IntPtr.Zero, true)
         {
         }
 
@@ -27,9 +27,6 @@ namespace Yubico.PlatformInterop
         public SafeBigNum(IntPtr invalidHandleValue, bool ownsHandle) : base(invalidHandleValue, ownsHandle)
         {
         }
-
-        /// <inheritdoc />
-        public override bool IsInvalid => handle == IntPtr.Zero;
 
         /// <inheritdoc />
         protected override bool ReleaseHandle()
@@ -41,5 +38,8 @@ namespace Yubico.PlatformInterop
 
             return true;
         }
+
+        /// <inheritdoc />
+        public override bool IsInvalid => handle == IntPtr.Zero;
     }
 }

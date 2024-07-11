@@ -22,15 +22,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
     // This class stores information about what is in a slot.
     public class SamplePivSlotContents
     {
-        private byte[] _certRequestDer;
-
-        public SamplePivSlotContents()
-        {
-            Algorithm = PivAlgorithm.None;
-            PublicKey = new PivPublicKey();
-            _certRequestDer = Array.Empty<byte>();
-        }
-
         public byte SlotNumber { get; set; }
 
         public PivAlgorithm Algorithm { get; set; }
@@ -43,10 +34,19 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
         public CertificateRequest CertRequest { get; set; }
 
+        private byte[] _certRequestDer;
+
+        public SamplePivSlotContents()
+        {
+            Algorithm = PivAlgorithm.None;
+            PublicKey = new PivPublicKey();
+            _certRequestDer = Array.Empty<byte>();
+        }
+
         public void PrintPublicKeyPem()
         {
             char[] pubKeyPem = KeyConverter.GetPemFromPivPublicKey(PublicKey);
-            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "\n" + new string(pubKeyPem) + "\n");
+            SampleMenu.WriteMessage(MessageType.Title, 0, "\n" + new string(pubKeyPem) + "\n");
         }
 
         public char[] GetCertRequestPem()
@@ -69,7 +69,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             if (_certRequestDer.Length > 0)
             {
                 char[] requestPem = GetCertRequestPem();
-                SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "\n" + new string(requestPem) + "\n");
+                SampleMenu.WriteMessage(MessageType.Title, 0, "\n" + new string(requestPem) + "\n");
             }
         }
     }

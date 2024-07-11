@@ -28,49 +28,49 @@ for external milestones.
 -->
 <Project>
 
-  <PropertyGroup Label="Versions for all projects">
+    <PropertyGroup Label="Versions for all projects">
 
-    <!--
-    Yubico.DotNetPolyfills project
+        <!--
+        Yubico.DotNetPolyfills project
+    
+        This project includes polyfill code that allows other projects in this repository to use .NET
+        library features and APIs in older versions of the .NET Standard.
+    
+        Increment the major version whenever we remove support for a .NET version.
+        Increment the minor version whenever we add support for a new class or type.
+        Increment the patch version for bug fixes.
+        -->
+        <YubicoDotNetPolyfillsVersion>1.11.0</YubicoDotNetPolyfillsVersion>
 
-    This project includes polyfill code that allows other projects in this repository to use .NET
-    library features and APIs in older versions of the .NET Standard.
+        <!--
+        Yubico.Core project
+    
+        This project provides foundational components and platform abstractions to other libraries
+        so that they may be written in a platform-agnostic manner.
+    
+        Increment the major version whenever a new platform is added or removed, or a breaking change
+        must take place.
+        Increment the minor version for any cross-platform feature work or improvements.
+        Increment the patch version for bug fixes.
+    
+        This project can, and should, use pre-release suffixes for development milestones.
+        -->
+        <YubicoCoreVersion>1.11.0</YubicoCoreVersion>
 
-    Increment the major version whenever we remove support for a .NET version.
-    Increment the minor version whenever we add support for a new class or type.
-    Increment the patch version for bug fixes.
-    -->
-    <YubicoDotNetPolyfillsVersion>1.11.0</YubicoDotNetPolyfillsVersion>
+        <!--
+        Yubico.Authenticator project
+    
+        This project defines the concept of a YubiKey as well as all of the public capabilities of
+        of a YubiKey authenticator token. This project is platform-agnostic.
+    
+        Increment the major version whenever a breaking API change must take place.
+        Increment the minor version whenever a new feature or improvement is added.
+        Increment the patch version for bug fixes.
+    
+        This project can, and should, use pre-release suffixes for development milestones.
+        -->
+        <YubicoYubiKeyVersion>1.11.0</YubicoYubiKeyVersion>
 
-    <!--
-    Yubico.Core project
-
-    This project provides foundational components and platform abstractions to other libraries
-    so that they may be written in a platform-agnostic manner.
-
-    Increment the major version whenever a new platform is added or removed, or a breaking change
-    must take place.
-    Increment the minor version for any cross-platform feature work or improvements.
-    Increment the patch version for bug fixes.
-
-    This project can, and should, use pre-release suffixes for development milestones.
-    -->
-    <YubicoCoreVersion>1.11.0</YubicoCoreVersion>
-
-    <!--
-    Yubico.Authenticator project
-
-    This project defines the concept of a YubiKey as well as all of the public capabilities of
-    of a YubiKey authenticator token. This project is platform-agnostic.
-
-    Increment the major version whenever a breaking API change must take place.
-    Increment the minor version whenever a new feature or improvement is added.
-    Increment the patch version for bug fixes.
-
-    This project can, and should, use pre-release suffixes for development milestones.
-    -->
-    <YubicoYubiKeyVersion>1.11.0</YubicoYubiKeyVersion>
-
-  </PropertyGroup>
+    </PropertyGroup>
 
 </Project>

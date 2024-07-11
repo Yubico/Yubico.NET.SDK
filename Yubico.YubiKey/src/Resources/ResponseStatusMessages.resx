@@ -1,369 +1,374 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <!-- 
-    Microsoft ResX Schema 
-    
-    Version 2.0
-    
-    The primary goals of this format is to allow a simple XML format 
-    that is mostly human readable. The generation and parsing of the 
-    various data types are done through the TypeConverter classes 
-    associated with the data types.
-    
-    Example:
-    
-    ... ado.net/XML headers & schema ...
-    <resheader name="resmimetype">text/microsoft-resx</resheader>
-    <resheader name="version">2.0</resheader>
-    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
-    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
-    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
-    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
-    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
-        <value>[base64 mime encoded serialized .NET Framework object]</value>
-    </data>
-    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
-        <comment>This is a comment</comment>
-    </data>
-                
-    There are any number of "resheader" rows that contain simple 
-    name/value pairs.
-    
-    Each data row contains a name, and value. The row also contains a 
-    type or mimetype. Type corresponds to a .NET class that support 
-    text/value conversion through the TypeConverter architecture. 
-    Classes that don't support this are serialized and stored with the 
-    mimetype set.
-    
-    The mimetype is used for serialized objects, and tells the 
-    ResXResourceReader how to depersist the object. This is currently not 
-    extensible. For a given mimetype the value must be set accordingly:
-    
-    Note - application/x-microsoft.net.object.binary.base64 is the format 
-    that the ResXResourceWriter will generate, however the reader can 
-    read any of the formats listed below.
-    
-    mimetype: application/x-microsoft.net.object.binary.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
-            : and then encoded with base64 encoding.
-    
-    mimetype: application/x-microsoft.net.object.soap.base64
-    value   : The object must be serialized with 
-            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
-            : and then encoded with base64 encoding.
-
-    mimetype: application/x-microsoft.net.object.bytearray.base64
-    value   : The object must be serialized into a byte array 
-            : using a System.ComponentModel.TypeConverter
-            : and then encoded with base64 encoding.
-    -->
-  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
-    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
-    <xsd:element name="root" msdata:IsDataSet="true">
-      <xsd:complexType>
-        <xsd:choice maxOccurs="unbounded">
-          <xsd:element name="metadata">
+    <!-- 
+      Microsoft ResX Schema 
+      
+      Version 2.0
+      
+      The primary goals of this format is to allow a simple XML format 
+      that is mostly human readable. The generation and parsing of the 
+      various data types are done through the TypeConverter classes 
+      associated with the data types.
+      
+      Example:
+      
+      ... ado.net/XML headers & schema ...
+      <resheader name="resmimetype">text/microsoft-resx</resheader>
+      <resheader name="version">2.0</resheader>
+      <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+      <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+      <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+      <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+      <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+          <value>[base64 mime encoded serialized .NET Framework object]</value>
+      </data>
+      <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+          <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+          <comment>This is a comment</comment>
+      </data>
+                  
+      There are any number of "resheader" rows that contain simple 
+      name/value pairs.
+      
+      Each data row contains a name, and value. The row also contains a 
+      type or mimetype. Type corresponds to a .NET class that support 
+      text/value conversion through the TypeConverter architecture. 
+      Classes that don't support this are serialized and stored with the 
+      mimetype set.
+      
+      The mimetype is used for serialized objects, and tells the 
+      ResXResourceReader how to depersist the object. This is currently not 
+      extensible. For a given mimetype the value must be set accordingly:
+      
+      Note - application/x-microsoft.net.object.binary.base64 is the format 
+      that the ResXResourceWriter will generate, however the reader can 
+      read any of the formats listed below.
+      
+      mimetype: application/x-microsoft.net.object.binary.base64
+      value   : The object must be serialized with 
+              : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+              : and then encoded with base64 encoding.
+      
+      mimetype: application/x-microsoft.net.object.soap.base64
+      value   : The object must be serialized with 
+              : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+              : and then encoded with base64 encoding.
+  
+      mimetype: application/x-microsoft.net.object.bytearray.base64
+      value   : The object must be serialized into a byte array 
+              : using a System.ComponentModel.TypeConverter
+              : and then encoded with base64 encoding.
+      -->
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" id="root"
+                xmlns="">
+        <xsd:import namespace="http://www.w3.org/XML/1998/namespace"/>
+        <xsd:element name="root" msdata:IsDataSet="true">
             <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" />
-              </xsd:sequence>
-              <xsd:attribute name="name" use="required" type="xsd:string" />
-              <xsd:attribute name="type" type="xsd:string" />
-              <xsd:attribute name="mimetype" type="xsd:string" />
-              <xsd:attribute ref="xml:space" />
+                <xsd:choice maxOccurs="unbounded">
+                    <xsd:element name="metadata">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" use="required" type="xsd:string"/>
+                            <xsd:attribute name="type" type="xsd:string"/>
+                            <xsd:attribute name="mimetype" type="xsd:string"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="assembly">
+                        <xsd:complexType>
+                            <xsd:attribute name="alias" type="xsd:string"/>
+                            <xsd:attribute name="name" type="xsd:string"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="data">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1"/>
+                            <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3"/>
+                            <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4"/>
+                            <xsd:attribute ref="xml:space"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                    <xsd:element name="resheader">
+                        <xsd:complexType>
+                            <xsd:sequence>
+                                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1"/>
+                            </xsd:sequence>
+                            <xsd:attribute name="name" type="xsd:string" use="required"/>
+                        </xsd:complexType>
+                    </xsd:element>
+                </xsd:choice>
             </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="assembly">
-            <xsd:complexType>
-              <xsd:attribute name="alias" type="xsd:string" />
-              <xsd:attribute name="name" type="xsd:string" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="data">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
-              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
-              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
-              <xsd:attribute ref="xml:space" />
-            </xsd:complexType>
-          </xsd:element>
-          <xsd:element name="resheader">
-            <xsd:complexType>
-              <xsd:sequence>
-                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
-              </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" use="required" />
-            </xsd:complexType>
-          </xsd:element>
-        </xsd:choice>
-      </xsd:complexType>
-    </xsd:element>
-  </xsd:schema>
-  <resheader name="resmimetype">
-    <value>text/microsoft-resx</value>
-  </resheader>
-  <resheader name="version">
-    <value>2.0</value>
-  </resheader>
-  <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
-  </resheader>
-  <data name="BaseAuthenticationMethodBlocked" xml:space="preserve">
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>2.0</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral,
+            PublicKeyToken=b77a5c561934e089
+        </value>
+    </resheader>
+    <data name="BaseAuthenticationMethodBlocked" xml:space="preserve">
     <value>Authentication method blocked.</value>
   </data>
-  <data name="BaseCommandChainingNotSupported" xml:space="preserve">
+    <data name="BaseCommandChainingNotSupported" xml:space="preserve">
     <value>Command chaining not supported.</value>
   </data>
-  <data name="BaseCommandNotAllowed" xml:space="preserve">
+    <data name="BaseCommandNotAllowed" xml:space="preserve">
     <value>Command not allowed.</value>
   </data>
-  <data name="BaseCommandNotAllowedNoEF" xml:space="preserve">
+    <data name="BaseCommandNotAllowedNoEF" xml:space="preserve">
     <value>Command not allowed (no current elementary file).</value>
   </data>
-  <data name="BaseConditionsNotSatisfied" xml:space="preserve">
+    <data name="BaseConditionsNotSatisfied" xml:space="preserve">
     <value>Conditions of use not satisfied.</value>
   </data>
-  <data name="BaseDataNotFound" xml:space="preserve">
+    <data name="BaseDataNotFound" xml:space="preserve">
     <value>Referenced data or reference data not found.</value>
   </data>
-  <data name="BaseDFNameAlreadyExists" xml:space="preserve">
+    <data name="BaseDFNameAlreadyExists" xml:space="preserve">
     <value>Dedicated file name already exists.</value>
   </data>
-  <data name="BaseEOFReached" xml:space="preserve">
+    <data name="BaseEOFReached" xml:space="preserve">
     <value>End of file or record reached before reading the expected number of bytes.</value>
   </data>
-  <data name="BaseErrorNvmChanged" xml:space="preserve">
+    <data name="BaseErrorNvmChanged" xml:space="preserve">
     <value>Error, state of non-volatile memory has changed.</value>
   </data>
-  <data name="BaseExecutionError" xml:space="preserve">
+    <data name="BaseExecutionError" xml:space="preserve">
     <value>Execution error.</value>
   </data>
-  <data name="BaseFailed" xml:space="preserve">
+    <data name="BaseFailed" xml:space="preserve">
     <value>The command failed to complete.</value>
   </data>
-  <data name="BaseFileAlreadyExists" xml:space="preserve">
+    <data name="BaseFileAlreadyExists" xml:space="preserve">
     <value>File already exists.</value>
   </data>
-  <data name="BaseFileDeactivated" xml:space="preserve">
+    <data name="BaseFileDeactivated" xml:space="preserve">
     <value>Selected file deactivated.</value>
   </data>
-  <data name="BaseFileOrApplicationNotFound" xml:space="preserve">
+    <data name="BaseFileOrApplicationNotFound" xml:space="preserve">
     <value>File or application not found.</value>
   </data>
-  <data name="BaseFileTerminated" xml:space="preserve">
+    <data name="BaseFileTerminated" xml:space="preserve">
     <value>Selected file in termination state.</value>
   </data>
-  <data name="BaseFunctionError" xml:space="preserve">
+    <data name="BaseFunctionError" xml:space="preserve">
     <value>Function error.</value>
   </data>
-  <data name="BaseFunctionNotSupported" xml:space="preserve">
+    <data name="BaseFunctionNotSupported" xml:space="preserve">
     <value>Function not supported.</value>
   </data>
-  <data name="BaseIncompatibleCommand" xml:space="preserve">
+    <data name="BaseIncompatibleCommand" xml:space="preserve">
     <value>Command incompatible with file structure.</value>
   </data>
-  <data name="BaseInconsistentLengthWithP1P2" xml:space="preserve">
+    <data name="BaseInconsistentLengthWithP1P2" xml:space="preserve">
     <value>Number of sent bytes inconsistent with parameters P1-P2.</value>
   </data>
-  <data name="BaseInconsistentLengthWithTlv" xml:space="preserve">
+    <data name="BaseInconsistentLengthWithTlv" xml:space="preserve">
     <value>Number of sent bytes inconsistent with TLV structure.</value>
   </data>
-  <data name="BaseIncorrectP1orP2" xml:space="preserve">
+    <data name="BaseIncorrectP1orP2" xml:space="preserve">
     <value>Incorrect parameters P1-P2.</value>
   </data>
-  <data name="BaseInvalidCommandDataParameter" xml:space="preserve">
+    <data name="BaseInvalidCommandDataParameter" xml:space="preserve">
     <value>Incorrect parameters in the command data field.</value>
   </data>
-  <data name="BaseInvalidFileFormat" xml:space="preserve">
+    <data name="BaseInvalidFileFormat" xml:space="preserve">
     <value>File control information not formatted correctly.</value>
   </data>
-  <data name="BaseInvalidParameter" xml:space="preserve">
+    <data name="BaseInvalidParameter" xml:space="preserve">
     <value>Invalid parameters.</value>
   </data>
-  <data name="BaseLastCommandOfChainExpected" xml:space="preserve">
+    <data name="BaseLastCommandOfChainExpected" xml:space="preserve">
     <value>Last command of the chain expected.</value>
   </data>
-  <data name="BaseLogicalChannelNotSupported" xml:space="preserve">
+    <data name="BaseLogicalChannelNotSupported" xml:space="preserve">
     <value>Logical channel not supported.</value>
   </data>
-  <data name="BaseMemoryFailure" xml:space="preserve">
+    <data name="BaseMemoryFailure" xml:space="preserve">
     <value>Memory failure.</value>
   </data>
-  <data name="BaseNoMoreSpaceInFile" xml:space="preserve">
+    <data name="BaseNoMoreSpaceInFile" xml:space="preserve">
     <value>File filled up by the last write</value>
   </data>
-  <data name="BaseNoSensorData" xml:space="preserve">
+    <data name="BaseNoSensorData" xml:space="preserve">
     <value>No input data available from a sensor on the card.</value>
   </data>
-  <data name="BaseNotEnoughSpace" xml:space="preserve">
+    <data name="BaseNotEnoughSpace" xml:space="preserve">
     <value>Not enough memory space in the file.</value>
   </data>
-  <data name="BasePartialCorruption" xml:space="preserve">
+    <data name="BasePartialCorruption" xml:space="preserve">
     <value>Part of returned data may be corrupted.</value>
   </data>
-  <data name="BaseRecordNotFound" xml:space="preserve">
+    <data name="BaseRecordNotFound" xml:space="preserve">
     <value>Record not found.</value>
   </data>
-  <data name="BaseReferenceDataUnusable" xml:space="preserve">
+    <data name="BaseReferenceDataUnusable" xml:space="preserve">
     <value>Reference data not usable.</value>
   </data>
-  <data name="BaseResponseRequired" xml:space="preserve">
+    <data name="BaseResponseRequired" xml:space="preserve">
     <value>Immediate response required by the card.</value>
   </data>
-  <data name="BaseSecureMessageDataMissing" xml:space="preserve">
+    <data name="BaseSecureMessageDataMissing" xml:space="preserve">
     <value>Expected secure messaging data objects missing.</value>
   </data>
-  <data name="BaseSecureMessageMalformed" xml:space="preserve">
+    <data name="BaseSecureMessageMalformed" xml:space="preserve">
     <value>Incorrect secure messaging data objects.</value>
   </data>
-  <data name="BaseSecureMessagingNotSupported" xml:space="preserve">
+    <data name="BaseSecureMessagingNotSupported" xml:space="preserve">
     <value>Secure messaging not supported.</value>
   </data>
-  <data name="BaseSecurityStatusNotSatisfied" xml:space="preserve">
+    <data name="BaseSecurityStatusNotSatisfied" xml:space="preserve">
     <value>Security status not satisfied.</value>
   </data>
-  <data name="BaseSuccess" xml:space="preserve">
+    <data name="BaseSuccess" xml:space="preserve">
     <value>The command succeeded.</value>
   </data>
-  <data name="BaseWarningNvmChanged" xml:space="preserve">
+    <data name="BaseWarningNvmChanged" xml:space="preserve">
     <value>Warning, state of non-volatile memory has changed.</value>
   </data>
-  <data name="BaseWarningNvmUnchanged" xml:space="preserve">
+    <data name="BaseWarningNvmUnchanged" xml:space="preserve">
     <value>Warning, state of non-volatile memory is unchanged.</value>
   </data>
-  <data name="OathAuthNotEnabled" xml:space="preserve">
+    <data name="OathAuthNotEnabled" xml:space="preserve">
     <value>Authentication is not enabled.</value>
   </data>
-  <data name="OathGenericError" xml:space="preserve">
+    <data name="OathGenericError" xml:space="preserve">
     <value>Generic error.</value>
   </data>
-  <data name="OathNoSuchObject" xml:space="preserve">
+    <data name="OathNoSuchObject" xml:space="preserve">
     <value>No such object.</value>
   </data>
-  <data name="OathResponseDoesNotMatch" xml:space="preserve">
+    <data name="OathResponseDoesNotMatch" xml:space="preserve">
     <value>Response does not match.</value>
   </data>
-  <data name="OathWrongSyntax" xml:space="preserve">
+    <data name="OathWrongSyntax" xml:space="preserve">
     <value>Wrong syntax.</value>
   </data>
-  <data name="PivPinPukBlocked" xml:space="preserve">
+    <data name="PivPinPukBlocked" xml:space="preserve">
     <value>Maximum number of retries for user verification (PIN or PUK) exceeded. 0 retries remaining.</value>
   </data>
-  <data name="PivBioUvBlocked" xml:space="preserve">
+    <data name="PivBioUvBlocked" xml:space="preserve">
     <value>Maximum number of retries for biometric user verification exceeded. 0 retries remaining.</value>
   </data>
-  <data name="PivPinPukFailedWithRetries" xml:space="preserve">
+    <data name="PivPinPukFailedWithRetries" xml:space="preserve">
     <value>User verification (PIN or PUK) failed. Retries remaining: {0}.</value>
   </data>
-  <data name="PivBioUVFailedWithRetries" xml:space="preserve">
+    <data name="PivBioUVFailedWithRetries" xml:space="preserve">
     <value>User biometric verification failed. Retries remaining: {0}.</value>
-  </data>  
-  <data name="PivSecurityStatusNotSatisfied" xml:space="preserve">
+  </data>
+    <data name="PivSecurityStatusNotSatisfied" xml:space="preserve">
     <value>User verification (PIN, PUK, or Management Key) or presence (touch) requirement not satisfied.</value>
   </data>
-  <data name="OathSecurityStatusNotSatisfied" xml:space="preserve">
+    <data name="OathSecurityStatusNotSatisfied" xml:space="preserve">
     <value>Authentication with a password is required to access the OATH application.</value>
   </data>
-  <data name="BaseClaNotSupported" xml:space="preserve">
+    <data name="BaseClaNotSupported" xml:space="preserve">
     <value>Class value either not supported or invalid.</value>
   </data>
-  <data name="BaseInsNotSupported" xml:space="preserve">
+    <data name="BaseInsNotSupported" xml:space="preserve">
     <value>Instruction value either not supported or invalid.</value>
   </data>
-  <data name="BaseWrongLength" xml:space="preserve">
+    <data name="BaseWrongLength" xml:space="preserve">
     <value>Wrong length.</value>
   </data>
-  <data name="Fido2NoCredentials" xml:space="preserve">
+    <data name="Fido2NoCredentials" xml:space="preserve">
     <value>The YubiKey possessed no FIDO2 credentials matching the request parameters.</value>
   </data>
-  <data name="Fido2NotAllowed" xml:space="preserve">
+    <data name="Fido2NotAllowed" xml:space="preserve">
     <value>The request was rejected because the operation is not allowed.</value>
   </data>
-  <data name="Fido2PinNotSet" xml:space="preserve">
+    <data name="Fido2PinNotSet" xml:space="preserve">
     <value>The request was rejected because there is no PIN set for the FIDO2 application on this YubiKey.</value>
   </data>
-  <data name="Fido2PinNotVerified" xml:space="preserve">
+    <data name="Fido2PinNotVerified" xml:space="preserve">
     <value>The request was rejected because the PIN and/or UV was not verified.</value>
   </data>
-  <data name="Fido2PinComplexityViolation" xml:space="preserve">
+    <data name="Fido2PinComplexityViolation" xml:space="preserve">
     <value>The request was rejected because the PIN violates PIN complexity setting.</value>
   </data>
-  <data name="Fido2PinBlocked" xml:space="preserve">
+    <data name="Fido2PinBlocked" xml:space="preserve">
     <value>The request was rejected because the PIN and/or the UV was blocked.</value>
   </data>
-  <data name="Fido2Timeout" xml:space="preserve">
+    <data name="Fido2Timeout" xml:space="preserve">
     <value>The request was rejected because the FIDO2 application timed out.</value>
   </data>
-  <data name="Fido2ResetProcess" xml:space="preserve">
+    <data name="Fido2ResetProcess" xml:space="preserve">
     <value>The FIDO2 reset command must be sent within 10 seconds of the YubiKey being removed and reinserted.</value>
   </data>
-  <data name="Fido2ResetTimeout" xml:space="preserve">
+    <data name="Fido2ResetTimeout" xml:space="preserve">
     <value>The FIDO2 reset command could not complete because the YubiKey was not touched within the time limit.</value>
   </data>
-  <data name="Fido2AuthInvalid" xml:space="preserve">
+    <data name="Fido2AuthInvalid" xml:space="preserve">
     <value>The authentication was invalid for the requested FIDO2 operation.</value>
   </data>
-  <data name="Fido2OperationCanceled" xml:space="preserve">
+    <data name="Fido2OperationCanceled" xml:space="preserve">
     <value>The operation was canceled by the caller or user.</value>
   </data>
-  <data name="Fido2CredentialExcluded" xml:space="preserve">
+    <data name="Fido2CredentialExcluded" xml:space="preserve">
     <value>The credential was rejected because it is on the relying party's exclude list.</value>
   </data>
-  <data name="Fido2OptionExtension" xml:space="preserve">
+    <data name="Fido2OptionExtension" xml:space="preserve">
     <value>An option or extension specified is either unsupported or invalid for the connected YubiKey.</value>
   </data>
-  <data name="U2fPinNotVerified" xml:space="preserve">
+    <data name="U2fPinNotVerified" xml:space="preserve">
     <value>The request was rejected because the PIN was not verified.</value>
   </data>
-  <data name="U2fConditionsNotSatisfied" xml:space="preserve">
+    <data name="U2fConditionsNotSatisfied" xml:space="preserve">
     <value>The request was rejected due to test-of-user-presence being required.</value>
   </data>
-  <data name="U2fWrongData" xml:space="preserve">
+    <data name="U2fWrongData" xml:space="preserve">
     <value>The request was rejected due to an invalid key handle.</value>
   </data>
-  <data name="U2fHidErrorChannelBusy" xml:space="preserve">
+    <data name="U2fHidErrorChannelBusy" xml:space="preserve">
     <value>The device is busy on the requested channel.</value>
   </data>
-  <data name="U2fHidErrorInvalidSequence" xml:space="preserve">
+    <data name="U2fHidErrorInvalidSequence" xml:space="preserve">
     <value>The packet contained an invalid or out of order sequence number.</value>
   </data>
-  <data name="U2fHidErrorMessageTimeout" xml:space="preserve">
+    <data name="U2fHidErrorMessageTimeout" xml:space="preserve">
     <value>The message has timed out.</value>
   </data>
-  <data name="U2fHidErrorUnknown" xml:space="preserve">
+    <data name="U2fHidErrorUnknown" xml:space="preserve">
     <value>An unknown error occurred (U2F HID error code {0}).</value>
   </data>
-  <data name="U2fHidErrorInvalidCommand" xml:space="preserve">
+    <data name="U2fHidErrorInvalidCommand" xml:space="preserve">
     <value>The command in the request is invalid.</value>
   </data>
-  <data name="U2fHidErrorInvalidLength" xml:space="preserve">
+    <data name="U2fHidErrorInvalidLength" xml:space="preserve">
     <value>The length field is invalid for the request.</value>
   </data>
-  <data name="U2fHidErrorInvalidParameter" xml:space="preserve">
+    <data name="U2fHidErrorInvalidParameter" xml:space="preserve">
     <value>The parameter(s) in the request is invalid.</value>
   </data>
-  <data name="YubiHsmAuthAuthenticationRequired" xml:space="preserve">
+    <data name="YubiHsmAuthAuthenticationRequired" xml:space="preserve">
     <value>Wrong password or authentication key. Retries remaining: {0}.</value>
   </data>
-  <data name="YubiHsmAuthInvalidAuthData" xml:space="preserve">
+    <data name="YubiHsmAuthInvalidAuthData" xml:space="preserve">
     <value>Invalid authentication data.</value>
   </data>
-  <data name="YubiHsmAuthInvalidEntry" xml:space="preserve">
+    <data name="YubiHsmAuthInvalidEntry" xml:space="preserve">
     <value>The entry is invalid.</value>
   </data>
-  <data name="YubiHsmAuthTouchRequired" xml:space="preserve">
+    <data name="YubiHsmAuthTouchRequired" xml:space="preserve">
     <value>The device was not touched.</value>
   </data>
-  <data name="YubiHsmAuthLabelConflict" xml:space="preserve">
+    <data name="YubiHsmAuthLabelConflict" xml:space="preserve">
     <value>A credential with that label already exists.</value>
   </data>
 </root>

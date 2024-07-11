@@ -14,169 +14,169 @@ limitations under the License. -->
 
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup Label="Assembly level settings">
+    <PropertyGroup Label="Assembly level settings">
 
-    <!--
-    Target frameworks specifies which version(s) of .NET that we should be "linking" against.
-    As of 2020, netstandard2.0 allows us to reach the widest audience while providing a large
-    enough set of the .NET library to be productive.
-    -->
-    <TargetFrameworks>netstandard2.0;netstandard2.1;net47</TargetFrameworks>
+        <!--
+        Target frameworks specifies which version(s) of .NET that we should be "linking" against.
+        As of 2020, netstandard2.0 allows us to reach the widest audience while providing a large
+        enough set of the .NET library to be productive.
+        -->
+        <TargetFrameworks>netstandard2.0;netstandard2.1;net47</TargetFrameworks>
 
-    <RootNamespace></RootNamespace>
+        <RootNamespace></RootNamespace>
 
-    <Configurations>Debug;Release;ReleaseWithDocs</Configurations>
+        <Configurations>Debug;Release;ReleaseWithDocs</Configurations>
 
-    <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
-    <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+        <PackageLicenseFile>LICENSE.txt</PackageLicenseFile>
 
-    <!-- DocFX will throw a warning (which we set as an error) if it doesn't find a reference assembly. -->
-    <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
+        <!-- DocFX will throw a warning (which we set as an error) if it doesn't find a reference assembly. -->
+        <ProduceReferenceAssembly>True</ProduceReferenceAssembly>
 
-    <!-- XML Documentation -->
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+        <!-- XML Documentation -->
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
 
-    <!-- NuGet properties -->
-    <Description>
-      Yubico.YubiKey is the official .NET library for integrating with the YubiKey hardware authenticator. This library supports both macOS and Windows operating systems.
-    </Description>
-    <PackageIcon>yubico-circle-y-mark.png</PackageIcon>
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <IncludeSymbols>true</IncludeSymbols>
-    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        <!-- NuGet properties -->
+        <Description>
+            Yubico.YubiKey is the official .NET library for integrating with the YubiKey hardware authenticator. This library supports both macOS and Windows operating systems.
+        </Description>
+        <PackageIcon>yubico-circle-y-mark.png</PackageIcon>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
 
-    <DocFxVersion>2.58.4</DocFxVersion>
+        <DocFxVersion>2.58.4</DocFxVersion>
 
-    <!-- StrongName signing -->
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+        <!-- StrongName signing -->
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
-    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(GITHUB_ACTIONS)' == 'true'">
+        <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    </PropertyGroup>
 
-  <PropertyGroup Label="DocFX settings" Condition="$(Configuration.Contains('WithDocs')) and $(TargetFramework)=='netstandard2.0'">
-    <LogFile>..\docs\log.txt</LogFile>
-    <LogLevel>Warning</LogLevel>
-    <DocParameters>--warningsAsErrors</DocParameters>
-  </PropertyGroup>
+    <PropertyGroup Label="DocFX settings" Condition="$(Configuration.Contains('WithDocs')) and $(TargetFramework)=='netstandard2.0'">
+        <LogFile>..\docs\log.txt</LogFile>
+        <LogLevel>Warning</LogLevel>
+        <DocParameters>--warningsAsErrors</DocParameters>
+    </PropertyGroup>
 
-  <ItemGroup Label="Grouping OtpSettings partial classes">
-    <Compile Update="Yubico\YubiKey\Otp\OtpSettings.ExtendedFlags.cs">
-      <DependentUpon>OtpSettings.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Yubico\YubiKey\Otp\OtpSettings.TicketFlags.cs">
-      <DependentUpon>OtpSettings.cs</DependentUpon>
-    </Compile>
-    <Compile Update="Yubico\YubiKey\Otp\OtpSettings.ConfigurationFlags.cs">
-      <DependentUpon>OtpSettings.cs</DependentUpon>
-    </Compile>
-  </ItemGroup>
-
-  <ItemGroup Label="Resource file definition">
-
-    <Compile Update="Resources\ExceptionMessages.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ExceptionMessages.resx</DependentUpon>
-    </Compile>
-
-    <Compile Update="Resources\ResponseStatusMessages.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ResponseStatusMessages.resx</DependentUpon>
-    </Compile>
-
-    <EmbeddedResource Update="Resources\ExceptionMessages.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ExceptionMessages.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>Yubico.YubiKey</CustomToolNamespace>
-    </EmbeddedResource>
-
-    <EmbeddedResource Update="Resources\ResponseStatusMessages.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>ResponseStatusMessages.Designer.cs</LastGenOutput>
-      <CustomToolNamespace>Yubico.YubiKey</CustomToolNamespace>
-    </EmbeddedResource>
-
-    <None Include="..\..\LICENSE.txt" Pack="true" PackagePath="" />
-    <None Include="..\..\yubico-circle-y-mark.png" Pack="true" PackagePath="" />
-    <None Include="..\..\Yubico.NET.SDK.snk">
-      <Link>Yubico.NET.SDK.snk</Link>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup Label="Package references specific to Yubico.YubiKey.dll">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All" />
-    <PackageReference Include="docfx.console" Condition="$(Configuration.Contains('WithDocs')) and $(TargetFramework)=='netstandard2.0'" Version="$(DocFxVersion)" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive" />
-
-    <!-- This is a DocFX plugin and tempate separates class and struct members into their own documentation pages. -->
-    <PackageReference Include="memberpage" Condition="$(Configuration.Contains('WithDocs')) and $(TargetFramework)=='netstandard2.0'" Version="$(DocFxVersion)" PrivateAssets="all" IncludeAssets="contentfiles" GeneratePathProperty="true" />
-
-    <PackageReference Include="Nullable" Version="1.3.1">
-      <PrivateAssets>all</PrivateAssets>
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-    </PackageReference>
-
-    <!-- Remove ExcludeAssets once the package supports netcoreapp and net462 properly -->
-    <PackageReference Include="System.Formats.Cbor" Version="7.0.0" ExcludeAssets="buildtransitive" />
-    <ProjectReference Include="..\..\Yubico.Core\src\Yubico.Core.csproj" />
-
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
-    <Reference Include="System.Web" />
-  </ItemGroup>
-
-  <ItemGroup Label="Expose internal test hooks to Unit Test projects">
-
-    <!-- Expose internal test hooks -->
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>$(AssemblyName).UnitTests,PublicKey=00240000048000001401000006020000002400005253413100080000010001003312c63e1417ad4652242148c599b55c50d3213c7610b4cc1f467b193bfb8d131de6686268a9db307fcef9efcd5e467483fe9015307e5d0cf9d2fd4df12f29a1c7a72e531d8811ca70f6c80c4aeb598c10bb7fc48742ab86aa7986b0ae9a2f4876c61e0b81eb38e5b549f1fc861c633206f5466bfde021cb08d094742922a8258b582c3bc029eab88c98d476dac6e6f60bc0016746293f5337c68b22e528931b6494acddf1c02b9ea3986754716a9f2a32c59ff3d97f1e35ee07ca2972b0269a4cde86f7b64f80e7c13152c0f84083b5cc4f06acc0efb4316ff3f08c79bc0170229007fb27c97fb494b22f9f7b07f45547e263a44d5a7fe7da6a945a5e47afc9</_Parameter1>
-    </AssemblyAttribute>
-
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>$(AssemblyName).IntegrationTests,PublicKey=00240000048000001401000006020000002400005253413100080000010001003312c63e1417ad4652242148c599b55c50d3213c7610b4cc1f467b193bfb8d131de6686268a9db307fcef9efcd5e467483fe9015307e5d0cf9d2fd4df12f29a1c7a72e531d8811ca70f6c80c4aeb598c10bb7fc48742ab86aa7986b0ae9a2f4876c61e0b81eb38e5b549f1fc861c633206f5466bfde021cb08d094742922a8258b582c3bc029eab88c98d476dac6e6f60bc0016746293f5337c68b22e528931b6494acddf1c02b9ea3986754716a9f2a32c59ff3d97f1e35ee07ca2972b0269a4cde86f7b64f80e7c13152c0f84083b5cc4f06acc0efb4316ff3f08c79bc0170229007fb27c97fb494b22f9f7b07f45547e263a44d5a7fe7da6a945a5e47afc9</_Parameter1>
-    </AssemblyAttribute>
-
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>$(AssemblyName).TestUtilities,PublicKey=00240000048000001401000006020000002400005253413100080000010001003312c63e1417ad4652242148c599b55c50d3213c7610b4cc1f467b193bfb8d131de6686268a9db307fcef9efcd5e467483fe9015307e5d0cf9d2fd4df12f29a1c7a72e531d8811ca70f6c80c4aeb598c10bb7fc48742ab86aa7986b0ae9a2f4876c61e0b81eb38e5b549f1fc861c633206f5466bfde021cb08d094742922a8258b582c3bc029eab88c98d476dac6e6f60bc0016746293f5337c68b22e528931b6494acddf1c02b9ea3986754716a9f2a32c59ff3d97f1e35ee07ca2972b0269a4cde86f7b64f80e7c13152c0f84083b5cc4f06acc0efb4316ff3f08c79bc0170229007fb27c97fb494b22f9f7b07f45547e263a44d5a7fe7da6a945a5e47afc9</_Parameter1>
-    </AssemblyAttribute>
-
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>YubiKeyTestApp,PublicKey=00240000048000001401000006020000002400005253413100080000010001003312c63e1417ad4652242148c599b55c50d3213c7610b4cc1f467b193bfb8d131de6686268a9db307fcef9efcd5e467483fe9015307e5d0cf9d2fd4df12f29a1c7a72e531d8811ca70f6c80c4aeb598c10bb7fc48742ab86aa7986b0ae9a2f4876c61e0b81eb38e5b549f1fc861c633206f5466bfde021cb08d094742922a8258b582c3bc029eab88c98d476dac6e6f60bc0016746293f5337c68b22e528931b6494acddf1c02b9ea3986754716a9f2a32c59ff3d97f1e35ee07ca2972b0269a4cde86f7b64f80e7c13152c0f84083b5cc4f06acc0efb4316ff3f08c79bc0170229007fb27c97fb494b22f9f7b07f45547e263a44d5a7fe7da6a945a5e47afc9</_Parameter1>
-    </AssemblyAttribute>
-
-    <!-- Enable use of the Moq framework-->
-    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
-      <_Parameter1>DynamicProxyGenAssembly2,PublicKey=0024000004800000940000000602000000240000525341310004000001000100c547cac37abd99c8db225ef2f6c8a3602f3b3606cc9891605d02baa56104f4cfc0734aa39b93bf7852f7d9266654753cc297e7d2edfe0bac1cdcf9f717241550e0a7b191195b7667bb4f64bcb8e2121380fd1d9d46ad2d92d2d15605093924cceaf74c4861eff62abf69b9291ed0a340e113be11e6a7d3113e92484cf7045cc7</_Parameter1>
-    </AssemblyAttribute>
-
-  </ItemGroup>
-
-  <!-- Clean up DocFX output -->
-  <Target Name="CleanDocFX" AfterTargets="DocClean" Condition="$(Configuration.Contains('WithDocs')) and $(TargetFramework)=='netstandard2.0'">
-    <Message Text="Cleaning up DocFX generated documentation." Importance="high" />
-    <RemoveDir Directories="$(ProjectDir)..\docs\_site\;$(ProjectDir)..\docs\memberpage\" />
-    <ItemGroup Label="DocFX Artifacts to Clean">
-      <FilesToDelete Include="$(ProjectDir)..\docs\core-api\*.yml" />
-      <FilesToDelete Include="$(ProjectDir)..\docs\core-api\.manifest" />
-      <FilesToDelete Include="$(ProjectDir)..\docs\yubikey-api\*.yml" />
-      <FilesToDelete Include="$(ProjectDir)..\docs\yubikey-api\.manifest" />
-      <FilesToDelete Include="$(ProjectDir)..\docs\log.txt" />
+    <ItemGroup Label="Grouping OtpSettings partial classes">
+        <Compile Update="Yubico\YubiKey\Otp\OtpSettings.ExtendedFlags.cs">
+            <DependentUpon>OtpSettings.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Yubico\YubiKey\Otp\OtpSettings.TicketFlags.cs">
+            <DependentUpon>OtpSettings.cs</DependentUpon>
+        </Compile>
+        <Compile Update="Yubico\YubiKey\Otp\OtpSettings.ConfigurationFlags.cs">
+            <DependentUpon>OtpSettings.cs</DependentUpon>
+        </Compile>
     </ItemGroup>
-    <Delete Files="@(FilesToDelete)" />
-  </Target>
 
-  <!-- Prepare memberpage -->
-  <Target Name="CopyMemberPageToBuildDir" BeforeTargets="DocBuild">
-    <Message Text="Copying memberpage $(DocFxVersion) to build directory." Importance="high" />
-    <ItemGroup>
-      <MemberpageContentFiles Include="$(Pkgmemberpage)\content\**\*.*" />
+    <ItemGroup Label="Resource file definition">
+
+        <Compile Update="Resources\ExceptionMessages.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>ExceptionMessages.resx</DependentUpon>
+        </Compile>
+
+        <Compile Update="Resources\ResponseStatusMessages.Designer.cs">
+            <DesignTime>True</DesignTime>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>ResponseStatusMessages.resx</DependentUpon>
+        </Compile>
+
+        <EmbeddedResource Update="Resources\ExceptionMessages.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>ExceptionMessages.Designer.cs</LastGenOutput>
+            <CustomToolNamespace>Yubico.YubiKey</CustomToolNamespace>
+        </EmbeddedResource>
+
+        <EmbeddedResource Update="Resources\ResponseStatusMessages.resx">
+            <Generator>ResXFileCodeGenerator</Generator>
+            <LastGenOutput>ResponseStatusMessages.Designer.cs</LastGenOutput>
+            <CustomToolNamespace>Yubico.YubiKey</CustomToolNamespace>
+        </EmbeddedResource>
+
+        <None Include="..\..\LICENSE.txt" Pack="true" PackagePath=""/>
+        <None Include="..\..\yubico-circle-y-mark.png" Pack="true" PackagePath=""/>
+        <None Include="..\..\Yubico.NET.SDK.snk">
+            <Link>Yubico.NET.SDK.snk</Link>
+        </None>
     </ItemGroup>
-    <Copy SourceFiles="@(MemberpageContentFiles)" DestinationFolder="$(ProjectDir)..\docs\memberpage\%(RecursiveDir)" SkipUnchangedFiles="true" />
-  </Target>
+
+    <ItemGroup Label="Package references specific to Yubico.YubiKey.dll">
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1" PrivateAssets="All"/>
+        <PackageReference Include="docfx.console" Condition="$(Configuration.Contains('WithDocs')) and $(TargetFramework)=='netstandard2.0'" Version="$(DocFxVersion)" PrivateAssets="all" IncludeAssets="runtime; build; native; contentfiles; analyzers; buildtransitive"/>
+
+        <!-- This is a DocFX plugin and tempate separates class and struct members into their own documentation pages. -->
+        <PackageReference Include="memberpage" Condition="$(Configuration.Contains('WithDocs')) and $(TargetFramework)=='netstandard2.0'" Version="$(DocFxVersion)" PrivateAssets="all" IncludeAssets="contentfiles" GeneratePathProperty="true"/>
+
+        <PackageReference Include="Nullable" Version="1.3.1">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+
+        <!-- Remove ExcludeAssets once the package supports netcoreapp and net462 properly -->
+        <PackageReference Include="System.Formats.Cbor" Version="7.0.0" ExcludeAssets="buildtransitive"/>
+        <ProjectReference Include="..\..\Yubico.Core\src\Yubico.Core.csproj"/>
+
+    </ItemGroup>
+
+    <ItemGroup Condition="'$(TargetFramework)' == 'net47'">
+        <Reference Include="System.Web"/>
+    </ItemGroup>
+
+    <ItemGroup Label="Expose internal test hooks to Unit Test projects">
+
+        <!-- Expose internal test hooks -->
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>$(AssemblyName).UnitTests,PublicKey=00240000048000001401000006020000002400005253413100080000010001003312c63e1417ad4652242148c599b55c50d3213c7610b4cc1f467b193bfb8d131de6686268a9db307fcef9efcd5e467483fe9015307e5d0cf9d2fd4df12f29a1c7a72e531d8811ca70f6c80c4aeb598c10bb7fc48742ab86aa7986b0ae9a2f4876c61e0b81eb38e5b549f1fc861c633206f5466bfde021cb08d094742922a8258b582c3bc029eab88c98d476dac6e6f60bc0016746293f5337c68b22e528931b6494acddf1c02b9ea3986754716a9f2a32c59ff3d97f1e35ee07ca2972b0269a4cde86f7b64f80e7c13152c0f84083b5cc4f06acc0efb4316ff3f08c79bc0170229007fb27c97fb494b22f9f7b07f45547e263a44d5a7fe7da6a945a5e47afc9</_Parameter1>
+        </AssemblyAttribute>
+
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>$(AssemblyName).IntegrationTests,PublicKey=00240000048000001401000006020000002400005253413100080000010001003312c63e1417ad4652242148c599b55c50d3213c7610b4cc1f467b193bfb8d131de6686268a9db307fcef9efcd5e467483fe9015307e5d0cf9d2fd4df12f29a1c7a72e531d8811ca70f6c80c4aeb598c10bb7fc48742ab86aa7986b0ae9a2f4876c61e0b81eb38e5b549f1fc861c633206f5466bfde021cb08d094742922a8258b582c3bc029eab88c98d476dac6e6f60bc0016746293f5337c68b22e528931b6494acddf1c02b9ea3986754716a9f2a32c59ff3d97f1e35ee07ca2972b0269a4cde86f7b64f80e7c13152c0f84083b5cc4f06acc0efb4316ff3f08c79bc0170229007fb27c97fb494b22f9f7b07f45547e263a44d5a7fe7da6a945a5e47afc9</_Parameter1>
+        </AssemblyAttribute>
+
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>$(AssemblyName).TestUtilities,PublicKey=00240000048000001401000006020000002400005253413100080000010001003312c63e1417ad4652242148c599b55c50d3213c7610b4cc1f467b193bfb8d131de6686268a9db307fcef9efcd5e467483fe9015307e5d0cf9d2fd4df12f29a1c7a72e531d8811ca70f6c80c4aeb598c10bb7fc48742ab86aa7986b0ae9a2f4876c61e0b81eb38e5b549f1fc861c633206f5466bfde021cb08d094742922a8258b582c3bc029eab88c98d476dac6e6f60bc0016746293f5337c68b22e528931b6494acddf1c02b9ea3986754716a9f2a32c59ff3d97f1e35ee07ca2972b0269a4cde86f7b64f80e7c13152c0f84083b5cc4f06acc0efb4316ff3f08c79bc0170229007fb27c97fb494b22f9f7b07f45547e263a44d5a7fe7da6a945a5e47afc9</_Parameter1>
+        </AssemblyAttribute>
+
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>YubiKeyTestApp,PublicKey=00240000048000001401000006020000002400005253413100080000010001003312c63e1417ad4652242148c599b55c50d3213c7610b4cc1f467b193bfb8d131de6686268a9db307fcef9efcd5e467483fe9015307e5d0cf9d2fd4df12f29a1c7a72e531d8811ca70f6c80c4aeb598c10bb7fc48742ab86aa7986b0ae9a2f4876c61e0b81eb38e5b549f1fc861c633206f5466bfde021cb08d094742922a8258b582c3bc029eab88c98d476dac6e6f60bc0016746293f5337c68b22e528931b6494acddf1c02b9ea3986754716a9f2a32c59ff3d97f1e35ee07ca2972b0269a4cde86f7b64f80e7c13152c0f84083b5cc4f06acc0efb4316ff3f08c79bc0170229007fb27c97fb494b22f9f7b07f45547e263a44d5a7fe7da6a945a5e47afc9</_Parameter1>
+        </AssemblyAttribute>
+
+        <!-- Enable use of the Moq framework-->
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+            <_Parameter1>DynamicProxyGenAssembly2,PublicKey=0024000004800000940000000602000000240000525341310004000001000100c547cac37abd99c8db225ef2f6c8a3602f3b3606cc9891605d02baa56104f4cfc0734aa39b93bf7852f7d9266654753cc297e7d2edfe0bac1cdcf9f717241550e0a7b191195b7667bb4f64bcb8e2121380fd1d9d46ad2d92d2d15605093924cceaf74c4861eff62abf69b9291ed0a340e113be11e6a7d3113e92484cf7045cc7</_Parameter1>
+        </AssemblyAttribute>
+
+    </ItemGroup>
+
+    <!-- Clean up DocFX output -->
+    <Target Name="CleanDocFX" AfterTargets="DocClean" Condition="$(Configuration.Contains('WithDocs')) and $(TargetFramework)=='netstandard2.0'">
+        <Message Text="Cleaning up DocFX generated documentation." Importance="high"/>
+        <RemoveDir Directories="$(ProjectDir)..\docs\_site\;$(ProjectDir)..\docs\memberpage\"/>
+        <ItemGroup Label="DocFX Artifacts to Clean">
+            <FilesToDelete Include="$(ProjectDir)..\docs\core-api\*.yml"/>
+            <FilesToDelete Include="$(ProjectDir)..\docs\core-api\.manifest"/>
+            <FilesToDelete Include="$(ProjectDir)..\docs\yubikey-api\*.yml"/>
+            <FilesToDelete Include="$(ProjectDir)..\docs\yubikey-api\.manifest"/>
+            <FilesToDelete Include="$(ProjectDir)..\docs\log.txt"/>
+        </ItemGroup>
+        <Delete Files="@(FilesToDelete)"/>
+    </Target>
+
+    <!-- Prepare memberpage -->
+    <Target Name="CopyMemberPageToBuildDir" BeforeTargets="DocBuild">
+        <Message Text="Copying memberpage $(DocFxVersion) to build directory." Importance="high"/>
+        <ItemGroup>
+            <MemberpageContentFiles Include="$(Pkgmemberpage)\content\**\*.*"/>
+        </ItemGroup>
+        <Copy SourceFiles="@(MemberpageContentFiles)" DestinationFolder="$(ProjectDir)..\docs\memberpage\%(RecursiveDir)" SkipUnchangedFiles="true"/>
+    </Target>
 
 </Project>

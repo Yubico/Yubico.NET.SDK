@@ -14,29 +14,29 @@ limitations under the License. -->
 
 <Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <AssemblyName>Yubico.YubiKey.TestUtilities</AssemblyName>
-    <RootNamespace></RootNamespace>
-    <PackageId>Yubico.YubiKey.TestUtilities</PackageId>
+    <PropertyGroup>
+        <AssemblyName>Yubico.YubiKey.TestUtilities</AssemblyName>
+        <RootNamespace></RootNamespace>
+        <PackageId>Yubico.YubiKey.TestUtilities</PackageId>
 
-    <TargetFramework>net6.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
 
-    <AnalysisMode>Minimum</AnalysisMode>
+        <AnalysisMode>Minimum</AnalysisMode>
 
-    <!-- StrongName signing -->
-    <!-- StrongNaming requires that friend assemblies are strong named as well. That means this unit test project must
-         be strong named, since it uses InternalsVisibleTo. -->
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+        <!-- StrongName signing -->
+        <!-- StrongNaming requires that friend assemblies are strong named as well. That means this unit test project must
+             be strong named, since it uses InternalsVisibleTo. -->
+        <SignAssembly>true</SignAssembly>
+        <AssemblyOriginatorKeyFile>..\..\..\Yubico.NET.SDK.snk</AssemblyOriginatorKeyFile>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Moq" Version="4.16.1" />
-    <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Moq" Version="4.16.1"/>
+        <PackageReference Include="Xunit.SkippableFact" Version="1.4.13"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\..\src\Yubico.YubiKey.csproj"/>
+    </ItemGroup>
 
 </Project>

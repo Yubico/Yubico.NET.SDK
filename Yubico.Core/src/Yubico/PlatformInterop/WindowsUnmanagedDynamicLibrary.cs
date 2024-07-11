@@ -26,7 +26,7 @@ namespace Yubico.PlatformInterop
 
         private static SafeLibraryHandle OpenLibrary(string fileName)
         {
-            SafeWindowsLibraryHandle handle = NativeMethods.LoadLibraryEx(fileName, IntPtr.Zero, 0);
+            SafeWindowsLibraryHandle handle = NativeMethods.LoadLibraryEx(fileName, IntPtr.Zero, flags: 0);
             if (handle.IsInvalid)
             {
                 int hr = Marshal.GetHRForLastWin32Error();
@@ -55,11 +55,9 @@ namespace Yubico.PlatformInterop
                 d = Marshal.GetDelegateForFunctionPointer<TDelegate>(p);
                 return true;
             }
-            else
-            {
-                d = null;
-                return false;
-            }
+
+            d = null;
+            return false;
         }
     }
 }

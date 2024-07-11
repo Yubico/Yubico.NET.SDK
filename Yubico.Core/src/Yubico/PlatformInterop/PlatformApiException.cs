@@ -25,7 +25,8 @@ namespace Yubico.PlatformInterop
         public PlatformApiException() :
             this(ExceptionMessages.UnknownPlatformApiError)
         {
-            Debug.Assert(false, "You should always call a more specific constructor for this exception type.");
+            Debug.Assert(
+                condition: false, "You should always call a more specific constructor for this exception type.");
         }
 
         public PlatformApiException(string message) : base(message)

@@ -24,15 +24,12 @@ namespace Yubico.Core.Devices.Hid
     internal class LinuxHidIOReportConnection : IHidConnection
     {
         private const int YubiKeyIOReportSize = 64;
-
-        private readonly LinuxFileSafeHandle _handle;
-        private bool _isDisposed;
-
-        private readonly Logger _log = Log.GetLogger();
         private readonly LinuxHidDevice _device;
 
-        public int InputReportSize { get; private set; }
-        public int OutputReportSize { get; private set; }
+        private readonly LinuxFileSafeHandle _handle;
+
+        private readonly Logger _log = Log.GetLogger();
+        private bool _isDisposed;
 
         public LinuxHidIOReportConnection(LinuxHidDevice device, string devnode)
         {
@@ -54,6 +51,9 @@ namespace Yubico.Core.Devices.Hid
                         ExceptionMessages.LinuxHidOpenFailed));
             }
         }
+
+        public int InputReportSize { get; }
+        public int OutputReportSize { get; }
 
         // Send the given report to the FIDO device. All FIDO messages are
         // exactly 64 bytes long.

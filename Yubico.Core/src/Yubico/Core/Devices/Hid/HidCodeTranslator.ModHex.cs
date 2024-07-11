@@ -31,7 +31,7 @@ namespace Yubico.Core.Devices.Hid
                 ['l'] = 0x0f, ['L'] = 0x0f | _shift, ['n'] = 0x11, ['N'] = 0x11 | _shift,
                 ['r'] = 0x15, ['R'] = 0x15 | _shift, ['t'] = 0x17, ['T'] = 0x17 | _shift,
                 ['u'] = 0x18, ['U'] = 0x18 | _shift, ['v'] = 0x19, ['V'] = 0x19 | _shift,
-                ['\n'] = 0x28, ['\t'] = 0x2b,
+                ['\n'] = 0x28, ['\t'] = 0x2b
             };
 
             var byCode = new Dictionary<byte, char>
@@ -44,7 +44,7 @@ namespace Yubico.Core.Devices.Hid
                 [0x0f] = 'l', [0x0f | _shift] = 'L', [0x11] = 'n', [0x11 | _shift] = 'N',
                 [0x15] = 'r', [0x15 | _shift] = 'R', [0x17] = 't', [0x17 | _shift] = 'T',
                 [0x18] = 'u', [0x18 | _shift] = 'U', [0x19] = 'v', [0x19 | _shift] = 'V',
-                [0x28] = '\n', [0x2b] = '\t',
+                [0x28] = '\n', [0x2b] = '\t'
             };
 
             return new HidCodeTranslator(byChar, byCode, KeyboardLayout.ModHex);

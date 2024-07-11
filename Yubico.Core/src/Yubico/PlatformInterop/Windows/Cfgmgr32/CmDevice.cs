@@ -18,7 +18,9 @@ using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using Microsoft.Win32.SafeHandles;
+using Yubico.Core;
 using Yubico.Core.Buffers;
 using static Yubico.PlatformInterop.NativeMethods;
 
@@ -26,17 +28,6 @@ namespace Yubico.PlatformInterop
 {
     public class CmDevice
     {
-        public string InstanceId { get; private set; }
-        public int Instance { get; private set; }
-        public string Class { get; private set; }
-        public Guid ClassGuid { get; private set; }
-        public string Path { get; private set; }
-        public Guid ContainerId { get; private set; }
-        public string? InterfacePath { get; private set; }
-
-        public short HidUsageId { get; private set; }
-        public short HidUsagePage { get; private set; }
-
         public CmDevice(string devicePath)
         {
             InterfacePath = devicePath;
@@ -71,8 +62,19 @@ namespace Yubico.PlatformInterop
             }
         }
 
+        public string InstanceId { get; }
+        public int Instance { get; }
+        public string Class { get; private set; }
+        public Guid ClassGuid { get; }
+        public string Path { get; }
+        public Guid ContainerId { get; private set; }
+        public string? InterfacePath { get; private set; }
+
+        public short HidUsageId { get; private set; }
+        public short HidUsagePage { get; private set; }
+
         public static IList<CmDevice> GetList(Guid classGuid) =>
-            GetDevicePaths(classGuid, null).Select(path => new CmDevice(path)).ToList();
+            GetDevicePaths(classGuid, deviceInstanceId: null).Select(path => new CmDevice(path)).ToList();
 
         public bool TryGetProperty<T>(CmDeviceProperty property, out T? value) where T : class
         {
@@ -98,7 +100,7 @@ namespace Yubico.PlatformInterop
                 CmDeviceProperty.Siblings => DEVPKEY_Device_Siblings,
                 CmDeviceProperty.Model => DEVPKEY_Device_Model,
                 CmDeviceProperty.ContainerId => DEVPKEY_Device_ContainerId,
-                _ => throw new ArgumentException(Core.ExceptionMessages.CmPropertyNotSupported, nameof(property)),
+                _ => throw new ArgumentException(ExceptionMessages.CmPropertyNotSupported, nameof(property))
             };
 
             value = (T?)CmPropertyAccessHelper.TryGetProperty(CM_Get_DevNode_Property, Instance, propKey);
@@ -211,8 +213,8 @@ namespace Yubico.PlatformInterop
 
             if (!(hidUsageHardwareId is null) && hidUsageHardwareId.Length >= 25)
             {
-                HidUsagePage = GetHexShort(hidUsageHardwareId, 14, 4);
-                HidUsageId = GetHexShort(hidUsageHardwareId, 21, 4);
+                HidUsagePage = GetHexShort(hidUsageHardwareId, offset: 14, length: 4);
+                HidUsageId = GetHexShort(hidUsageHardwareId, offset: 21, length: 4);
             }
         }
 
@@ -255,7 +257,7 @@ namespace Yubico.PlatformInterop
                     );
             }
 
-            return MultiString.GetStrings(buffer, System.Text.Encoding.Unicode);
+            return MultiString.GetStrings(buffer, Encoding.Unicode);
         }
 
         private int LocateDevNode()

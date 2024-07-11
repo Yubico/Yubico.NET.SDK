@@ -13,22 +13,21 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 
 namespace Yubico.Core.Tlv
 {
     /// <summary>
-    /// An interface for representing a class that can encode itself into a TLV:
-    /// tag || length || value
+    ///     An interface for representing a class that can encode itself into a TLV:
+    ///     tag || length || value
     /// </summary>
     /// <remarks>
-    /// Classes that implement this interface can be called upon to build a TLV
-    /// based on the tag and value loaded. The length is encoded following the
-    /// DER rules. E.g. decimal 32 is encoded as 0x20, 128 is 0x81 80, and so on.
-    /// <para>
-    /// It is possible a class that implements this will be a single TLV, or a
-    /// nested construction, namely TL { TLV, TLV, ..., TLV }.
-    /// </para>
+    ///     Classes that implement this interface can be called upon to build a TLV
+    ///     based on the tag and value loaded. The length is encoded following the
+    ///     DER rules. E.g. decimal 32 is encoded as 0x20, 128 is 0x81 80, and so on.
+    ///     <para>
+    ///         It is possible a class that implements this will be a single TLV, or a
+    ///         nested construction, namely TL { TLV, TLV, ..., TLV }.
+    ///     </para>
     /// </remarks>
     internal abstract class TlvEncoder
     {
@@ -45,33 +44,33 @@ namespace Yubico.Core.Tlv
         private const int MaximumTagLengthLength = 6;
 
         /// <summary>
-        /// How long will the encoding of this element or NestedTlv be?
+        ///     How long will the encoding of this element or NestedTlv be?
         /// </summary>
         public abstract int EncodedLength { get; }
 
         /// <summary>
-        /// Build a buffer that holds the tag and length.
+        ///     Build a buffer that holds the tag and length.
         /// </summary>
         /// <remarks>
-        /// The tag might be one or two bytes, the length might be one byte, it
-        /// might be 81 xx, 82 xx xx, and so on.
-        /// <para>
-        /// This method will verify the tag is supported (any two-byte tag is
-        /// supported, so any value &gt;=0 and &lt;= 0x0000FFFF). It will also verify
-        /// the length is supported (any length &gt;=0 and &lt;= 0x00FFFFFF).
-        /// </para>
+        ///     The tag might be one or two bytes, the length might be one byte, it
+        ///     might be 81 xx, 82 xx xx, and so on.
+        ///     <para>
+        ///         This method will verify the tag is supported (any two-byte tag is
+        ///         supported, so any value &gt;=0 and &lt;= 0x0000FFFF). It will also verify
+        ///         the length is supported (any length &gt;=0 and &lt;= 0x00FFFFFF).
+        ///     </para>
         /// </remarks>
         /// <param name="tag">
-        /// The tag to write out.
+        ///     The tag to write out.
         /// </param>
         /// <param name="length">
-        /// The length to write out.
+        ///     The length to write out.
         /// </param>
         /// <returns>
-        /// A new byte array containing the tag and length.
+        ///     A new byte array containing the tag and length.
         /// </returns>
         /// <exception cref="TlvException">
-        /// The tag or length is unsupported.
+        ///     The tag or length is unsupported.
         /// </exception>
         public static byte[] BuildTagAndLength(int tag, int length)
         {
@@ -89,7 +88,7 @@ namespace Yubico.Core.Tlv
             encoding[index] = (byte)tag;
             index++;
 
-            byte[] fullLength = new byte[] { 0x83, 0x82, 0x81, (byte)length };
+            byte[] fullLength = { 0x83, 0x82, 0x81, (byte)length };
             int count = 1;
             if (length > 0x7F)
             {
@@ -114,18 +113,18 @@ namespace Yubico.Core.Tlv
         }
 
         /// <summary>
-        /// Verify that the tag is valid, that it is a tag the TLV code supports.
+        ///     Verify that the tag is valid, that it is a tag the TLV code supports.
         /// </summary>
         /// <remarks>
-        /// If the tag is valid, the method returns. If not, it throws an
-        /// exception.
-        /// <para>
-        /// Currently supported are one- and two-byte tags, so any input tag that
-        /// is &gt;=0 and &lt;= 0x0000FFFF will be valid.
-        /// </para>
+        ///     If the tag is valid, the method returns. If not, it throws an
+        ///     exception.
+        ///     <para>
+        ///         Currently supported are one- and two-byte tags, so any input tag that
+        ///         is &gt;=0 and &lt;= 0x0000FFFF will be valid.
+        ///     </para>
         /// </remarks>
         /// <param name="tag">
-        /// The tag to verify.
+        ///     The tag to verify.
         /// </param>
         public static void VerifyTag(int tag)
         {
@@ -136,18 +135,18 @@ namespace Yubico.Core.Tlv
         }
 
         /// <summary>
-        /// Verify that the length is valid, that it is a length the TLV code
-        /// supports.
+        ///     Verify that the length is valid, that it is a length the TLV code
+        ///     supports.
         /// </summary>
         /// <remarks>
-        /// If the length is valid, the method returns. If not, it throws an
-        /// exception.
-        /// <para>
-        /// Currently supported are lengths from 0 to 0x00FFFFFF.
-        /// </para>
+        ///     If the length is valid, the method returns. If not, it throws an
+        ///     exception.
+        ///     <para>
+        ///         Currently supported are lengths from 0 to 0x00FFFFFF.
+        ///     </para>
         /// </remarks>
         /// <param name="length">
-        /// The length to verify.
+        ///     The length to verify.
         /// </param>
         public static void VerifyLength(int length)
         {
@@ -158,34 +157,34 @@ namespace Yubico.Core.Tlv
         }
 
         /// <summary>
-        /// Place the TLV of this element into the given <c>Span</c>, beginning
-        /// at offset.
+        ///     Place the TLV of this element into the given <c>Span</c>, beginning
+        ///     at offset.
         /// </summary>
         /// <remarks>
-        /// If the size of the Span is not big enough to hold the TLV, it will
-        /// return false and bytesWritten will be set to 0.
+        ///     If the size of the Span is not big enough to hold the TLV, it will
+        ///     return false and bytesWritten will be set to 0.
         /// </remarks>
         /// <param name="encoding">
-        /// The buffer into which the TLV will be placed.
+        ///     The buffer into which the TLV will be placed.
         /// </param>
         /// <param name="offset">
-        /// The offset into encoding where the method will begin placing the TLV.
+        ///     The offset into encoding where the method will begin placing the TLV.
         /// </param>
         /// <param name="bytesWritten">
-        /// On success, receives the number of bytes written into the encoding.
+        ///     On success, receives the number of bytes written into the encoding.
         /// </param>
         /// <returns>
-        /// A bool, true if the method successfully encoded, false otherwise.
+        ///     A bool, true if the method successfully encoded, false otherwise.
         /// </returns>
         public abstract bool TryEncode(Span<byte> encoding, int offset, out int bytesWritten);
 
         /// <summary>
-        /// Clear any data that had been copied from input.
+        ///     Clear any data that had been copied from input.
         /// </summary>
         /// <remarks>
-        /// If any of the data to encode had been sensitive (such as private key
-        /// material), then call the Clear method after encoding to make sure it
-        /// is overwritten.
+        ///     If any of the data to encode had been sensitive (such as private key
+        ///     material), then call the Clear method after encoding to make sure it
+        ///     is overwritten.
         /// </remarks>
         public abstract void Clear();
     }

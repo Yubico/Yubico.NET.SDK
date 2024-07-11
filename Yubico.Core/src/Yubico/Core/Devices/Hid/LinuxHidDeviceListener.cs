@@ -24,6 +24,10 @@ namespace Yubico.Core.Devices.Hid
 {
     internal class LinuxHidDeviceListener : HidDeviceListener
     {
+        private readonly LinuxUdevMonitorSafeHandle _monitorObject;
+
+        private readonly LinuxUdevSafeHandle _udevObject;
+
         // Note that both the main thread and the created thread (sub-thread)
         // will have access to _isListening. That seems like we will have race
         // conditions and hence we need a lock.
@@ -44,9 +48,6 @@ namespace Yubico.Core.Devices.Hid
         // This is exactly what would happen if we had a lock.
         private bool _isListening;
         private Thread? _listenerThread;
-
-        private readonly LinuxUdevMonitorSafeHandle _monitorObject;
-        private readonly LinuxUdevSafeHandle _udevObject;
 
         public LinuxHidDeviceListener()
         {
@@ -71,22 +72,22 @@ namespace Yubico.Core.Devices.Hid
         }
 
         /// <summary>
-        /// Call this method after you have added the EventHandlers.
+        ///     Call this method after you have added the EventHandlers.
         /// </summary>
         /// <remarks>
-        /// If you call this method and the object is already listening, it will
-        /// do nothing, the object will simply continue its previously started
-        /// listening session.
-        /// <para>
-        /// If the object has stopped listening, this method will start listening
-        /// again.
-        /// </para>
+        ///     If you call this method and the object is already listening, it will
+        ///     do nothing, the object will simply continue its previously started
+        ///     listening session.
+        ///     <para>
+        ///         If the object has stopped listening, this method will start listening
+        ///         again.
+        ///     </para>
         /// </remarks>
         private void StartListening()
         {
             _ = ThrowIfFailedNegative(
                 udev_monitor_filter_add_match_subsystem_devtype(
-                    _monitorObject, UdevSubsystemName, null));
+                    _monitorObject, UdevSubsystemName, devtype: null));
 
             _ = ThrowIfFailedNegative(udev_monitor_enable_receiving(_monitorObject));
 
@@ -110,11 +111,11 @@ namespace Yubico.Core.Devices.Hid
         }
 
         /// <summary>
-        /// Let the object know it should stop listening.
+        ///     Let the object know it should stop listening.
         /// </summary>
         /// <remarks>
-        /// If the object has already stopped listening, this method will do
-        /// nothing.
+        ///     If the object has already stopped listening, this method will do
+        ///     nothing.
         /// </remarks>
         private void StopListening()
         {

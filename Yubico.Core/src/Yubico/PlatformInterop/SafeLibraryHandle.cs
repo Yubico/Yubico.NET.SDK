@@ -28,9 +28,6 @@ namespace Yubico.PlatformInterop
         // CA1419: Provide a parameterless constructor that is as visible as the
         // containing type for concrete types derived from
         // 'System.Runtime.InteropServices.SafeHandle'
-        public SafeWindowsLibraryHandle() : base()
-        {
-        }
 
         protected override bool ReleaseHandle() => NativeMethods.FreeLibrary(handle);
     }
@@ -40,9 +37,6 @@ namespace Yubico.PlatformInterop
         // CA1419: Provide a parameterless constructor that is as visible as the
         // containing type for concrete types derived from
         // 'System.Runtime.InteropServices.SafeHandle'
-        public SafeMacOSLibraryHandle() : base()
-        {
-        }
 
         protected override bool ReleaseHandle() => NativeMethods.mac_dlclose(handle) == 0;
     }
@@ -52,9 +46,6 @@ namespace Yubico.PlatformInterop
         // CA1419: Provide a parameterless constructor that is as visible as the
         // containing type for concrete types derived from
         // 'System.Runtime.InteropServices.SafeHandle'
-        public SafeLinuxLibraryHandle() : base()
-        {
-        }
 
         protected override bool ReleaseHandle() => NativeMethods.linux_dlclose(handle) == 0;
     }

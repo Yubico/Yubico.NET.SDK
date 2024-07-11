@@ -26,7 +26,7 @@ namespace Yubico.PlatformInterop
         private static extern IntPtr EcPointNew(IntPtr ecGroup);
 
         public static SafeEcPoint EcPointNew(SafeEcGroup ecGroup) =>
-            new SafeEcPoint(EcPointNew(ecGroup.DangerousGetHandle()), true);
+            new SafeEcPoint(EcPointNew(ecGroup.DangerousGetHandle()), ownsHandle: true);
 
         // void EC_POINT_free(EC_POINT* point);
         [DllImport(

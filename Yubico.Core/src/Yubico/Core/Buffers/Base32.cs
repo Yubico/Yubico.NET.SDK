@@ -18,7 +18,7 @@ using System.Globalization;
 namespace Yubico.Core.Buffers
 {
     /// <summary>
-    /// Class for encoding and decoding bytes into Base32.
+    ///     Class for encoding and decoding bytes into Base32.
     /// </summary>
     /// <remarks>See RFC4648 for details (https://datatracker.ietf.org/doc/html/rfc4648) on base-32.</remarks>
     public class Base32 : ITextEncoding
@@ -53,18 +53,18 @@ namespace Yubico.Core.Buffers
             int ch = 0, bits = 5, index = 0;
             foreach (byte b in data)
             {
-                ch |= b >> (8 - bits);
+                ch |= b >> 8 - bits;
                 encoded[index++] = EncodeBase32Digit(ch);
 
                 if (bits < 4)
                 {
-                    ch = (b >> (3 - bits)) & Base32Mask;
+                    ch = b >> 3 - bits & Base32Mask;
                     encoded[index++] = EncodeBase32Digit(ch);
                     bits += 5;
                 }
 
                 bits -= 3;
-                ch = (b << bits) & Base32Mask;
+                ch = b << bits & Base32Mask;
             }
 
             // Handle stray bits at the end.
@@ -119,16 +119,16 @@ namespace Yubico.Core.Buffers
 
                 if (bits > 5)
                 {
-                    mask = base32 << (bits - 5);
+                    mask = base32 << bits - 5;
                     curByte = (byte)(curByte | mask);
                     bits -= 5;
                 }
                 else
                 {
-                    mask = base32 >> (5 - bits);
+                    mask = base32 >> 5 - bits;
                     curByte = (byte)(curByte | mask);
                     data[index++] = curByte;
-                    curByte = (byte)(base32 << (3 + bits));
+                    curByte = (byte)(base32 << 3 + bits);
                     bits += 3;
                 }
             }
@@ -157,18 +157,18 @@ namespace Yubico.Core.Buffers
 
         #region Static Version
 
-        /// <inheritdoc cref="Encode(ReadOnlySpan{byte}, Span{char})"/>
+        /// <inheritdoc cref="Encode(ReadOnlySpan{byte}, Span{char})" />
         public static void EncodeBytes(ReadOnlySpan<byte> data, Span<char> encoded) =>
             new Base32().Encode(data, encoded);
 
         /// <inheritdoc cref="Encode(ReadOnlySpan{byte})" />
         public static string EncodeBytes(ReadOnlySpan<byte> data) => new Base32().Encode(data);
 
-        /// <inheritdoc cref="Decode(ReadOnlySpan{char}, Span{byte})"/>
+        /// <inheritdoc cref="Decode(ReadOnlySpan{char}, Span{byte})" />
         public static void DecodeText(ReadOnlySpan<char> encoded, Span<byte> data) =>
             new Base32().Decode(encoded, data);
 
-        /// <inheritdoc cref="Decode(string)"/>
+        /// <inheritdoc cref="Decode(string)" />
         public static byte[] DecodeText(string encoded) => new Base32().Decode(encoded);
 
         #endregion
@@ -176,27 +176,27 @@ namespace Yubico.Core.Buffers
         #region Static Utility Methods
 
         /// <summary>
-        /// Gets the number of characters needed to encode the data.
+        ///     Gets the number of characters needed to encode the data.
         /// </summary>
         /// <remarks>
-        /// The other encoding classes don't have the Get*Size methods. However,
-        /// base-32 encoding represents five bits per character, and padding has
-        /// to be accounted for, so it's a complex enough of an operation to
-        /// merit a helper.
+        ///     The other encoding classes don't have the Get*Size methods. However,
+        ///     base-32 encoding represents five bits per character, and padding has
+        ///     to be accounted for, so it's a complex enough of an operation to
+        ///     merit a helper.
         /// </remarks>
         /// <param name="lengthInBytes">The length of the data to encode.</param>
         /// <returns>The number of characters needed.</returns>
         public static int GetEncodedSize(int lengthInBytes) =>
-            ((lengthInBytes / 5) + (lengthInBytes % 5 > 0
+            (lengthInBytes / 5 + (lengthInBytes % 5 > 0
                 ? 1
                 : 0)) * 8;
 
         /// <summary>
-        /// Get the number of bytes in data represented by base-32 encoded text.
+        ///     Get the number of bytes in data represented by base-32 encoded text.
         /// </summary>
-        /// <inheritdoc cref="GetEncodedSize(int)" path="/remarks"/>
+        /// <inheritdoc cref="GetEncodedSize(int)" path="/remarks" />
         /// <param name="encoded">The text to be decoded.</param>
-        /// <returns>An <see cref="int"/> representing the number of bytes.</returns>
+        /// <returns>An <see cref="int" /> representing the number of bytes.</returns>
         public static int GetDecodedSize(ReadOnlySpan<char> encoded) => StripPadding(encoded).Length * 5 / 8;
 
         private static ReadOnlySpan<char> StripPadding(ReadOnlySpan<char> encoded)
@@ -210,7 +210,7 @@ namespace Yubico.Core.Buffers
                 }
             }
 
-            return encoded.Slice(0, length);
+            return encoded.Slice(start: 0, length);
         }
 
         private static char EncodeBase32Digit(int b) =>

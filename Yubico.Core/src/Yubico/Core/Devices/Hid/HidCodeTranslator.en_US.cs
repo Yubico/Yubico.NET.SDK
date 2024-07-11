@@ -48,7 +48,7 @@ namespace Yubico.Core.Devices.Hid
                 [':'] = 0x33 | _shift, ['\''] = 0x34, ['"'] = 0x34 | _shift, ['`'] = 0x35,
                 ['~'] = 0x35 | _shift, [','] = 0x36, ['<'] = 0x36 | _shift, ['.'] = 0x37,
                 ['>'] = 0x37 | _shift, ['/'] = 0x38, ['?'] = 0x38 | _shift, ['\\'] = 0x64,
-                ['|'] = 0x64 | _shift,
+                ['|'] = 0x64 | _shift
             };
 
             var byCode = new Dictionary<byte, char>
@@ -78,7 +78,7 @@ namespace Yubico.Core.Devices.Hid
                 [0x33 | _shift] = ':', [0x34] = '\'', [0x34 | _shift] = '"', [0x35] = '`',
                 [0x35 | _shift] = '~', [0x36] = ',', [0x36 | _shift] = '<', [0x37] = '.',
                 [0x37 | _shift] = '>', [0x38] = '/', [0x38 | _shift] = '?', [0x64] = '\\',
-                [0x64 | _shift] = '|',
+                [0x64 | _shift] = '|'
             };
 
             return new HidCodeTranslator(byChar, byCode, KeyboardLayout.en_US);

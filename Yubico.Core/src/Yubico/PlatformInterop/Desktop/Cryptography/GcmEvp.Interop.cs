@@ -32,7 +32,7 @@ namespace Yubico.PlatformInterop
         {
             Unknown = 0,
             GetTag = 16,
-            SetTag = 17,
+            SetTag = 17
         }
 
         // EVP_CIPHER_CTX* EVP_CIPHER_CTX_new(void);
@@ -42,7 +42,8 @@ namespace Yubico.PlatformInterop
         [DefaultDllImportSearchPaths(DllImportSearchPath.SafeDirectories)]
         private static extern IntPtr EvpCipherCtxNewIntPtr();
 
-        public static SafeEvpCipherCtx EvpCipherCtxNew() => new SafeEvpCipherCtx(EvpCipherCtxNewIntPtr(), true);
+        public static SafeEvpCipherCtx EvpCipherCtxNew() =>
+            new SafeEvpCipherCtx(EvpCipherCtxNewIntPtr(), ownsHandle: true);
 
         // void EVP_CIPHER_CTX_free(EVP_CIPHER_CTX* c);
         [DllImport(

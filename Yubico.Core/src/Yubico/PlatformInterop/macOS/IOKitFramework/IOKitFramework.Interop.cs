@@ -125,7 +125,7 @@ namespace Yubico.PlatformInterop
         IOReturnIsoTooOld,
         IOReturnIsoTooNew,
         IOReturnNotFound,
-        IOReturnInvalid,
+        IOReturnInvalid
     }
 
     /*

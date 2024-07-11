@@ -18,19 +18,19 @@ using System.Collections.Generic;
 namespace Yubico.Core.Tlv
 {
     /// <summary>
-    /// A Tag-Length-Value that has sub-elements.
+    ///     A Tag-Length-Value that has sub-elements.
     /// </summary>
     /// <remarks>
-    /// There are two types of Nested TLV. One, the sub-elements are presented as a
-    /// concatenation:
-    /// <code>
+    ///     There are two types of Nested TLV. One, the sub-elements are presented as a
+    ///     concatenation:
+    ///     <code>
     ///   TLV || TLV || ... TLV
     ///   for example: 81 02 05 05 82 01 14 83 04 00 72 9A 1E
     ///              81 02 05 05   82 01 14   83 04 00 72 9A 1E
     /// </code>
-    /// And two, a "tree" where the Nested TLV has a tag and the value is a
-    /// collection of sub-elements:
-    /// <code>
+    ///     And two, a "tree" where the Nested TLV has a tag and the value is a
+    ///     collection of sub-elements:
+    ///     <code>
     ///   TL { TLV || TLV || ... TLV }
     ///   for example: 7C 0D 81 02 05 05 82 01 14 83 04 00 72 9A 1E
     ///     7C 0D
@@ -44,23 +44,19 @@ namespace Yubico.Core.Tlv
     /// </remarks>
     internal class TlvNestedTlv : TlvEncoder
     {
-        private int _encodedLength;
-
-        /// <inheritdoc/>
-        override public int EncodedLength => _encodedLength;
-
         private readonly List<TlvEncoder> _subElements = new List<TlvEncoder>();
-        private int _subElementLength;
         private readonly int _tag;
+        private int _encodedLength;
+        private int _subElementLength;
         private byte[] _tagAndLength;
 
         /// <summary>
-        /// Build a new NestedTlv that will organize as a concatenation.
+        ///     Build a new NestedTlv that will organize as a concatenation.
         /// </summary>
         /// <remarks>
-        /// The sub-elements added to this Nested TLV will be encoded as a
-        /// concatenation:
-        /// <code>
+        ///     The sub-elements added to this Nested TLV will be encoded as a
+        ///     concatenation:
+        ///     <code>
         ///   TLV || TLV || ... TLV
         ///   for example: 81 02 05 05 82 01 14 83 04 00 72 9A 1E
         ///              81 02 05 05   82 01 14   83 04 00 72 9A 1E
@@ -73,12 +69,12 @@ namespace Yubico.Core.Tlv
         }
 
         /// <summary>
-        /// Build a new NestedTlv that will organize as a tree with the given tag.
+        ///     Build a new NestedTlv that will organize as a tree with the given tag.
         /// </summary>
         /// <remarks>
-        /// The sub-elements added to this Nested TLV will be encoded as a tree:
-        /// <code>
-        ///   var ykInfo = new TlvNestedTlv(0x7C);<br/>
+        ///     The sub-elements added to this Nested TLV will be encoded as a tree:
+        ///     <code>
+        ///   var ykInfo = new TlvNestedTlv(0x7C);<br />
         ///   TL { TLV || TLV || ... TLV }
         ///   for example: 7C 0D 81 02 05 05 82 01 14 83 04 00 72 9A 1E
         ///     7C 0D
@@ -91,27 +87,30 @@ namespace Yubico.Core.Tlv
         /// </code>
         /// </remarks>
         /// <exception cref="TlvException">
-        /// The tag is unsupported.
+        ///     The tag is unsupported.
         /// </exception>
         public TlvNestedTlv(int tag)
         {
             _tag = tag;
-            _tagAndLength = BuildTagAndLength(tag, 0);
+            _tagAndLength = BuildTagAndLength(tag, length: 0);
             _encodedLength = _tagAndLength.Length;
         }
 
+        /// <inheritdoc />
+        public override int EncodedLength => _encodedLength;
+
         /// <summary>
-        /// Add a new sub-element to this Nested TLV.
+        ///     Add a new sub-element to this Nested TLV.
         /// </summary>
         /// <remarks>
-        /// The subElement might be a TlvSubElement, it might be a TlvNestedTlv
-        /// as well.
+        ///     The subElement might be a TlvSubElement, it might be a TlvNestedTlv
+        ///     as well.
         /// </remarks>
         /// <param name="subElement">
-        /// The sub-element to add.
+        ///     The sub-element to add.
         /// </param>
         /// <exception cref="TlvException">
-        /// The tag or length is unsupported.
+        ///     The tag or length is unsupported.
         /// </exception>
         public void AddSubElement(TlvEncoder subElement)
         {
@@ -126,7 +125,7 @@ namespace Yubico.Core.Tlv
         }
 
         /// <inheritdoc />
-        override public bool TryEncode(Span<byte> encoding, int offset, out int bytesWritten)
+        public override bool TryEncode(Span<byte> encoding, int offset, out int bytesWritten)
         {
             bytesWritten = 0;
             if (encoding.Length < offset + _encodedLength)
@@ -157,7 +156,7 @@ namespace Yubico.Core.Tlv
         }
 
         /// <inheritdoc />
-        override public void Clear()
+        public override void Clear()
         {
             foreach (TlvEncoder element in _subElements)
             {

@@ -15,17 +15,17 @@
 namespace Yubico.Core.Cryptography
 {
     /// <summary>
-    /// Factory class that will return the <c>Yubico.Core</c> implementation of
-    /// the <see cref="IAesGcmPrimitives"/> interface.
+    ///     Factory class that will return the <c>Yubico.Core</c> implementation of
+    ///     the <see cref="IAesGcmPrimitives" /> interface.
     /// </summary>
     public static class AesGcmPrimitives
     {
         /// <summary>
-        /// Creates a new instance of an implementation of the low level AES-GCM
-        /// functions.
+        ///     Creates a new instance of an implementation of the low level AES-GCM
+        ///     functions.
         /// </summary>
         /// <returns>
-        /// A new instance of the default implementation of this interface.
+        ///     A new instance of the default implementation of this interface.
         /// </returns>
         public static IAesGcmPrimitives Create() => new AesGcmPrimitivesOpenSsl();
     }

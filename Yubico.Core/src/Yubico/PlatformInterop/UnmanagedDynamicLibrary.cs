@@ -21,8 +21,20 @@ namespace Yubico.PlatformInterop
 {
     internal abstract class UnmanagedDynamicLibrary : IDisposable
     {
-        private bool disposedValue;
         protected readonly SafeLibraryHandle _handle;
+        private bool disposedValue;
+
+        protected UnmanagedDynamicLibrary(SafeLibraryHandle handle)
+        {
+            _handle = handle;
+        }
+
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
+        }
 
         public static UnmanagedDynamicLibrary Open(string fileName) =>
             SdkPlatformInfo.OperatingSystem switch
@@ -32,11 +44,6 @@ namespace Yubico.PlatformInterop
                 SdkPlatform.Linux => new LinuxUnmanagedDynamicLibrary(fileName),
                 _ => throw new PlatformNotSupportedException()
             };
-
-        protected UnmanagedDynamicLibrary(SafeLibraryHandle handle)
-        {
-            _handle = handle;
-        }
 
         public void GetFunction<TDelegate>(string functionName, out TDelegate d) where TDelegate : class
         {
@@ -66,13 +73,6 @@ namespace Yubico.PlatformInterop
 
                 disposedValue = true;
             }
-        }
-
-        public void Dispose()
-        {
-            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
-            Dispose(disposing: true);
-            GC.SuppressFinalize(this);
         }
     }
 }

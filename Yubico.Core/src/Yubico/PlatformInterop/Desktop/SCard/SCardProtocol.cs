@@ -28,24 +28,24 @@ namespace Yubico.PlatformInterop
         Optimal = 0x00000000,
 
         /// <summary>
-        /// Use the T=0 protocol - an asynchronous, character-oriented half-duplex transmission
-        /// protocol.
+        ///     Use the T=0 protocol - an asynchronous, character-oriented half-duplex transmission
+        ///     protocol.
         /// </summary>
         T0 = 0x00000001,
 
         /// <summary>
-        /// Use the T=1 protocol - an asynchronous, block-oriented half-duplex transmission
-        /// protocol.
+        ///     Use the T=1 protocol - an asynchronous, block-oriented half-duplex transmission
+        ///     protocol.
         /// </summary>
         T1 = 0x00000002,
 
         Raw = 0x00010000,
 
         /// <summary>
-        /// Both the T=0 and T=1 protocol may be used.
+        ///     Both the T=0 and T=1 protocol may be used.
         /// </summary>
         Tx = T0 | T1,
 
-        Default = unchecked((int)0x80000000),
+        Default = unchecked((int)0x80000000)
     }
 }

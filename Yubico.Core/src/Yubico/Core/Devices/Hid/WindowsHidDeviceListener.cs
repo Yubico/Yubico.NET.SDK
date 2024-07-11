@@ -16,6 +16,7 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Text;
 using Yubico.Core.Logging;
 using Yubico.PlatformInterop;
 using static Yubico.PlatformInterop.NativeMethods;
@@ -24,11 +25,10 @@ namespace Yubico.Core.Devices.Hid
 {
     internal class WindowsHidDeviceListener : HidDeviceListener
     {
-        private IntPtr _notificationContext;
-        private GCHandle? _marshalableThisPtr;
-        private CM_NOTIFY_CALLBACK? _callbackDelegate;
-
         private readonly Logger _log = Log.GetLogger();
+        private CM_NOTIFY_CALLBACK? _callbackDelegate;
+        private GCHandle? _marshalableThisPtr;
+        private IntPtr _notificationContext;
 
         public WindowsHidDeviceListener()
         {
@@ -53,11 +53,11 @@ namespace Yubico.Core.Devices.Hid
             try
             {
                 // Set all the bytes to zero.
-                Marshal.Copy(zeroBytes, 0, pFilter, zeroBytes.Length);
+                Marshal.Copy(zeroBytes, startIndex: 0, pFilter, zeroBytes.Length);
                 Marshal.WriteInt32(pFilter, OffsetCbSize, CmNotifyFilterSize);
-                Marshal.WriteInt32(pFilter, OffsetFlags, 0);
+                Marshal.WriteInt32(pFilter, OffsetFlags, val: 0);
                 Marshal.WriteInt32(pFilter, OffsetFilterType, (int)CM_NOTIFY_FILTER_TYPE.DEVINTERFACE);
-                Marshal.WriteInt32(pFilter, OffsetReserved, 0);
+                Marshal.WriteInt32(pFilter, OffsetReserved, val: 0);
                 for (int index = 0; index < guidBytes.Length; index++)
                 {
                     Marshal.WriteByte(pFilter, OffsetGuidData1 + index, guidBytes[index]);
@@ -111,7 +111,7 @@ namespace Yubico.Core.Devices.Hid
             IntPtr eventDataPtr,
             int eventDataSize)
         {
-            GCHandle thisPtr = GCHandle.FromIntPtr(context);
+            var thisPtr = GCHandle.FromIntPtr(context);
             var thisObj = thisPtr.Target as WindowsHidDeviceListener;
             thisObj?._log.LogInformation("ConfigMgr callback received.");
 
@@ -123,11 +123,11 @@ namespace Yubico.Core.Devices.Hid
             int stringSize = eventDataSize - stringOffset;
             byte[] buffer = new byte[eventDataSize];
 
-            Marshal.Copy(eventDataPtr + stringOffset, buffer, 0, stringSize);
+            Marshal.Copy(eventDataPtr + stringOffset, buffer, startIndex: 0, stringSize);
 
             if (action == CM_NOTIFY_ACTION.DEVICEINTERFACEARRIVAL)
             {
-                string instancePath = System.Text.Encoding.Unicode.GetString(buffer);
+                string instancePath = Encoding.Unicode.GetString(buffer);
                 var cmDevice = new CmDevice(instancePath);
                 var device = new WindowsHidDevice(cmDevice);
                 thisObj?.OnArrived(device);

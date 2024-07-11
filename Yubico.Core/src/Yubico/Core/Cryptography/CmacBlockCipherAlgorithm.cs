@@ -15,29 +15,29 @@
 namespace Yubico.Core.Cryptography
 {
     /// <summary>
-    /// This enumeration lists the block cipher algorithms supported by the
-    /// <see cref="ICmacPrimitives"/> interface.
+    ///     This enumeration lists the block cipher algorithms supported by the
+    ///     <see cref="ICmacPrimitives" /> interface.
     /// </summary>
     public enum CmacBlockCipherAlgorithm
     {
         /// <summary>
-        /// Use this enum value in order to specify CMAC with AES-128.
+        ///     Use this enum value in order to specify CMAC with AES-128.
         /// </summary>
         Unknown = 0,
 
         /// <summary>
-        /// Use this enum value in order to specify CMAC with AES-128.
+        ///     Use this enum value in order to specify CMAC with AES-128.
         /// </summary>
         Aes128 = 1,
 
         /// <summary>
-        /// Use this enum value in order to specify CMAC with AES-192.
+        ///     Use this enum value in order to specify CMAC with AES-192.
         /// </summary>
         Aes192 = 2,
 
         /// <summary>
-        /// Use this enum value in order to specify CMAC with AES-256.
+        ///     Use this enum value in order to specify CMAC with AES-256.
         /// </summary>
-        Aes256 = 3,
+        Aes256 = 3
     }
 }

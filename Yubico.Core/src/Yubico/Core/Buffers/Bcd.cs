@@ -17,13 +17,13 @@ using System;
 namespace Yubico.Core.Buffers
 {
     /// <summary>
-    /// Class for encoding and decoding bytes into BCD (binary coded decimal) format.
+    ///     Class for encoding and decoding bytes into BCD (binary coded decimal) format.
     /// </summary>
     /// <remarks>
-    /// BCD is a way to represent decimal data in a format that is both easy to parse
-    /// and easily human-readable. Each four bits is one decimal digit. The obvious
-    /// disadvantage is that the data is far less dense. Each byte can only contain
-    /// less than seven full bits of data.
+    ///     BCD is a way to represent decimal data in a format that is both easy to parse
+    ///     and easily human-readable. Each four bits is one decimal digit. The obvious
+    ///     disadvantage is that the data is far less dense. Each byte can only contain
+    ///     less than seven full bits of data.
     /// </remarks>
     public class Bcd : Base16
     {
@@ -33,7 +33,7 @@ namespace Yubico.Core.Buffers
         // of code.
         private readonly Memory<char> _characterSet = "0123456789".ToCharArray();
 
-        /// <inheritdoc/>
+        /// <inheritdoc />
         protected override Span<char> CharacterSet => _characterSet.Span;
 
         #region Static Version

@@ -22,8 +22,13 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// Instruct the YubiKey to reset the FIDO2 application.
     /// </summary>
     /// <remarks>
+    /// <para>
     /// This will delete all credentials and associated information from the FIDO2
     /// application and remove the PIN.
+    /// </para>
+    /// <para>
+    /// ResetCommand is not compatible with YubiKey Bio Multi-protocol Edition keys. To reset a Bio Multi-protocol key, see <see cref="IYubiKeyDevice.DeviceReset"/>.
+    /// </para>
     /// </remarks>
     public class ResetCommand : IYubiKeyCommand<ResetResponse>
     {
@@ -36,8 +41,13 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// Constructs an instance of the <see cref="ResetCommand"/>.
         /// </summary>
         /// <remarks>
+        /// <para>
         /// This will delete all credentials and associated information from the FIDO2
         /// application and remove the PIN.
+        /// </para>
+        /// <para>
+        /// ResetCommand is not compatible with YubiKey Bio Multi-protocol Edition keys. To reset a Bio Multi-protocol key, see <see cref="IYubiKeyDevice.DeviceReset"/>.
+        /// </para>
         /// </remarks>
         public ResetCommand()
         {

@@ -26,15 +26,15 @@ YubiKey firmware 2.3.2 and later
 
 ## Command APDU info
 
-|  CLA  |  INS  |  P1   |  P2   |    Lc    |   Data   |
-| :---: | :---: | :---: | :---: | :------: | :------: |
-| 0x00  | 0x01  | 0x06  | 0x00  | (absent) | (absent) |
+| CLA  | INS  |  P1  |  P2  |    Lc    |   Data   |
+|:----:|:----:|:----:|:----:|:--------:|:--------:|
+| 0x00 | 0x01 | 0x06 | 0x00 | (absent) | (absent) |
 
 ## Response APDU info
 
-|  Lr   |                 Data                  |  SW1  |  SW1  |
-| :---: | :-----------------------------------: | :---: | :---: |
-| 0x06  | [Status structure](xref:OtpCommands#status-structure) | 0x90  | 0x00  |
+|  Lr  |                         Data                          | SW1  | SW1  |
+|:----:|:-----------------------------------------------------:|:----:|:----:|
+| 0x06 | [Status structure](xref:OtpCommands#status-structure) | 0x90 | 0x00 |
 
 ## Examples
 

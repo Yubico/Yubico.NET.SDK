@@ -30,13 +30,13 @@ YubiKey.
 
 ## Maximum size for a single certificate
 
-| YubiKey Version | Maximum Size in Bytes |
-| :-------------: | :-------------------: |
-| before 4.0 (e.g. NEO) | 2025 |
-| 4.x | 3052 |
-| 4.x FIPS | 3052 |
-| 5.x | 3052 |
-| 5.x FIPS | 3052 |
+|    YubiKey Version    | Maximum Size in Bytes |
+|:---------------------:|:---------------------:|
+| before 4.0 (e.g. NEO) |         2025          |
+|          4.x          |         3052          |
+|       4.x FIPS        |         3052          |
+|          5.x          |         3052          |
+|       5.x FIPS        |         3052          |
 
 ## Total space available for certificates
 
@@ -46,13 +46,13 @@ able to store 24 certs that big.
 A NEO (pre-4.0), only has four slots, and will be able to hold four certs of the maximum
 length.
 
-| YubiKey Version | Maximum Total Cert<br/>Space Available | Number of Certs<br/>at Size | Number of Certs<br/>at Maximum Size |
-| :----: | :----: | :----: | :----: |
-| before 4.0 (e.g. NEO) | 8100 | 4 certs at 2025 bytes | 4 certs at 2025 bytes |
-| 4.x | about 49,800 | 24 certs at 2075 bytes | 16 certs at 3052 bytes |
-| 4.x FIPS | about 49,800 | 24 certs at 2075 bytes | 16 certs at 3052 bytes |
-| 5.x | about 50,000 | 24 certs at 2084 bytes | 16 certs at 3052 bytes |
-| 5.x FIPS | about 49,890 | 24 certs at 2079 bytes | 16 certs at 3052 bytes |
+|    YubiKey Version    | Maximum Total Cert<br/>Space Available | Number of Certs<br/>at Size | Number of Certs<br/>at Maximum Size |
+|:---------------------:|:--------------------------------------:|:---------------------------:|:-----------------------------------:|
+| before 4.0 (e.g. NEO) |                  8100                  |    4 certs at 2025 bytes    |        4 certs at 2025 bytes        |
+|          4.x          |              about 49,800              |   24 certs at 2075 bytes    |       16 certs at 3052 bytes        |
+|       4.x FIPS        |              about 49,800              |   24 certs at 2075 bytes    |       16 certs at 3052 bytes        |
+|          5.x          |              about 50,000              |   24 certs at 2084 bytes    |       16 certs at 3052 bytes        |
+|       5.x FIPS        |              about 49,890              |   24 certs at 2079 bytes    |       16 certs at 3052 bytes        |
 
 Note that that total amount of storage on a YubiKey (for certs, for PUT DATA objects,
 etc.) is about 51,000 bytes. Hence, if a YubiKey is loaded with 49,000 bytes of certs,

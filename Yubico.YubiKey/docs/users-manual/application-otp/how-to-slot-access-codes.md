@@ -18,15 +18,20 @@ limitations under the License. -->
 
 # How to set, reset, remove, and use slot access codes
 
-The YubiKey's OTP application [slots](xref:OtpSlots) can be protected by a six-byte access code. Once a slot is configured with an access code, that slot cannot be reconfigured in any way unless the correct access code in provided during the reconfiguration operation. 
+The YubiKey's OTP application [slots](xref:OtpSlots) can be protected by a six-byte access code. Once a slot is
+configured with an access code, that slot cannot be reconfigured in any way unless the correct access code in provided
+during the reconfiguration operation.
 
-> [!NOTE] 
-> Attempting to perform an OTP application configuration operation without providing the correct access code will result in the following exception:
-> 
+> [!NOTE]
+> Attempting to perform an OTP application configuration operation without providing the correct access code will result
+> in the following exception:
+>
 > ```System.InvalidOperationException has been thrown.```
 > ```YubiKey Operation Failed. [Warning, state of non-volatile memory is unchanged.]```
 
-So for example, let's say that the short press slot of a key was configured with a Yubico OTP credential and a slot access code. If you want to reconfigure the slot with an OATH HOTP credential, you will have to provide the slot's access code when calling ``ConfigureHotp()``. 
+So for example, let's say that the short press slot of a key was configured with a Yubico OTP credential and a slot
+access code. If you want to reconfigure the slot with an OATH HOTP credential, you will have to provide the slot's
+access code when calling ``ConfigureHotp()``.
 
 Access codes can only be set, reset, or removed during another slot configuration operation:
 
@@ -36,18 +41,27 @@ Access codes can only be set, reset, or removed during another slot configuratio
 - [ConfigureStaticPassword()](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureStaticPassword%28Yubico.YubiKey.Otp.Slot%29)
 - [UpdateSlot()](xref:Yubico.YubiKey.Otp.OtpSession.UpdateSlot%28Yubico.YubiKey.Otp.Slot%29)
 
-> [!NOTE] 
-> If a slot is configured with an access code, calling [ConfigureNdef()](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureNdef%28Yubico.YubiKey.Otp.Slot%29) will fail, even if the correct access code is provided during the operation. Similarly, if a slot is not configured with an access code, you cannot set one when calling ``ConfigureNdef()``.
+> [!NOTE]
+> If a slot is configured with an access code,
+> calling [ConfigureNdef()](xref:Yubico.YubiKey.Otp.OtpSession.ConfigureNdef%28Yubico.YubiKey.Otp.Slot%29) will fail, even
+> if the correct access code is provided during the operation. Similarly, if a slot is not configured with an access code,
+> you cannot set one when calling ``ConfigureNdef()``.
 
 ## Slot access code properties
 
-Access codes must be exactly six bytes ([MaxAccessCodeLength](xref:Yubico.YubiKey.Otp.SlotAccessCode.MaxAccessCodeLength)). The [SlotAccessCode](xref:Yubico.YubiKey.Otp.SlotAccessCode) container class pads the code with zeros (0x00) if less than six bytes are provided and throws an exception if more than six bytes are provided.
+Access codes must be exactly six
+bytes ([MaxAccessCodeLength](xref:Yubico.YubiKey.Otp.SlotAccessCode.MaxAccessCodeLength)).
+The [SlotAccessCode](xref:Yubico.YubiKey.Otp.SlotAccessCode) container class pads the code with zeros (0x00) if less
+than six bytes are provided and throws an exception if more than six bytes are provided.
 
-If a slot is configured with an access code, that code must be specified during any reconfiguration operation. In addition, if you don’t also resupply the same (or any) code as a "new" access code, an access code will not be carried over to the new slot configuration, and the slot will no longer be protected after reconfiguration.
+If a slot is configured with an access code, that code must be specified during any reconfiguration operation. In
+addition, if you don’t also resupply the same (or any) code as a "new" access code, an access code will not be carried
+over to the new slot configuration, and the slot will no longer be protected after reconfiguration.
 
 ## Example code
 
-Before running any of the code provided below, make sure you have already connected to a particular YubiKey on your host device via the [YubiKeyDevice](xref:Yubico.YubiKey.YubiKeyDevice) class. 
+Before running any of the code provided below, make sure you have already connected to a particular YubiKey on your host
+device via the [YubiKeyDevice](xref:Yubico.YubiKey.YubiKeyDevice) class.
 
 To select the first available YubiKey connected to your host, use:
 
@@ -59,7 +73,11 @@ var yubiKey = yubiKeyList.First();
 
 ## Exampe: set a slot access code
 
-To set a slot's access code when no access code is present, call [SetNewAccessCode()](xref:Yubico.YubiKey.Otp.Operations.OperationBase%601.SetNewAccessCode%28Yubico.YubiKey.Otp.SlotAccessCode%29) during a slot configuration operation, and provide the access code as a ``SlotAccessCode`` object. Prior to the configuration operation, initialize the ``SlotAccessCode`` object by passing it the access code in ``ReadOnlyMemory<byte>`` form. 
+To set a slot's access code when no access code is present,
+call [SetNewAccessCode()](xref:Yubico.YubiKey.Otp.Operations.OperationBase%601.SetNewAccessCode%28Yubico.YubiKey.Otp.SlotAccessCode%29)
+during a slot configuration operation, and provide the access code as a ``SlotAccessCode`` object. Prior to the
+configuration operation, initialize the ``SlotAccessCode`` object by passing it the access code
+in ``ReadOnlyMemory<byte>`` form.
 
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
@@ -78,7 +96,9 @@ using (OtpSession otp = new OtpSession(yubiKey))
 
 ## Example: reset a slot access code
 
-To reset a slot's access code, you must provide the current access code with [UseCurrentAccessCode()](xref:Yubico.YubiKey.Otp.Operations.OperationBase%601.UseCurrentAccessCode%28Yubico.YubiKey.Otp.SlotAccessCode%29) followed by the new access code with ``SetNewAccessCode()``:
+To reset a slot's access code, you must provide the current access code
+with [UseCurrentAccessCode()](xref:Yubico.YubiKey.Otp.Operations.OperationBase%601.UseCurrentAccessCode%28Yubico.YubiKey.Otp.SlotAccessCode%29)
+followed by the new access code with ``SetNewAccessCode()``:
 
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
@@ -104,15 +124,19 @@ using (OtpSession otp = new OtpSession(yubiKey))
 If you want to remove a slot's access code, you must either:
 
 - provide a new access code of all zeros, or
-- only call ``UseCurrentAccessCode()`` during the reconfiguration operation. The slot's access code will be removed if a code is not provided via ``SetNewAccessCode()`` after calling ``UseCurrentAccessCode()``.
+- only call ``UseCurrentAccessCode()`` during the reconfiguration operation. The slot's access code will be removed if a
+  code is not provided via ``SetNewAccessCode()`` after calling ``UseCurrentAccessCode()``.
 
-> [!NOTE] 
-> A 6-byte access code of zeros (0x00) is considered no access code. The factory default state of the access code for each OTP slot is all zeros.
+> [!NOTE]
+> A 6-byte access code of zeros (0x00) is considered no access code. The factory default state of the access code for
+> each OTP slot is all zeros.
 
-Once the access code is removed, you do not need to call ``UseCurrentAccessCode()`` with subsequent configuration operations. 
+Once the access code is removed, you do not need to call ``UseCurrentAccessCode()`` with subsequent configuration
+operations.
 
-> [!NOTE] 
-> Technically, if a slot does not have an access code, you could provide any 6-byte code with ``UseCurrentAccessCode()``, and the operation would succeed.
+> [!NOTE]
+> Technically, if a slot does not have an access code, you could provide any 6-byte code
+> with ``UseCurrentAccessCode()``, and the operation would succeed.
 
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
@@ -136,7 +160,9 @@ using (OtpSession otp = new OtpSession(yubiKey))
 
 ## Example: provide a slot access code during a configuration operation
 
-Once a slot has been configured with an access code, you must provide that access code with ``UseCurrentAccessCode()`` when performing a configuration operation on that slot. To retain the access code, you must also call ``SetNewAccessCode()``. If you do not call ``SetNewAccessCode()``, the access code will be removed. 
+Once a slot has been configured with an access code, you must provide that access code with ``UseCurrentAccessCode()``
+when performing a configuration operation on that slot. To retain the access code, you must also
+call ``SetNewAccessCode()``. If you do not call ``SetNewAccessCode()``, the access code will be removed.
 
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
@@ -157,11 +183,15 @@ using (OtpSession otp = new OtpSession(yubiKey))
 }
 ```
 
-In this example, the slot is now configured with a Yubico OTP credential and is still protected by the same access code (``currentAccessCode``). 
+In this example, the slot is now configured with a Yubico OTP credential and is still protected by the same access
+code (``currentAccessCode``).
 
 ## Deleting a slot configuration when an access code is present
 
-To delete a slot configuration that is protected with an access code, you must call [DeleteSlotConfiguration](xref:Yubico.YubiKey.Otp.OtpSession.DeleteSlotConfiguration%28Yubico.YubiKey.Otp.Slot%29) and provide the current access code with ``UseCurrentAccessCode()``. You cannot set a new access code during this operation--calling ``SetNewAccessCode()`` will succeed, but the operation will not be applied. 
+To delete a slot configuration that is protected with an access code, you must
+call [DeleteSlotConfiguration](xref:Yubico.YubiKey.Otp.OtpSession.DeleteSlotConfiguration%28Yubico.YubiKey.Otp.Slot%29)
+and provide the current access code with ``UseCurrentAccessCode()``. You cannot set a new access code during this
+operation--calling ``SetNewAccessCode()`` will succeed, but the operation will not be applied.
 
 ```C#
 using (OtpSession otp = new OtpSession(yubiKey))
@@ -175,4 +205,5 @@ using (OtpSession otp = new OtpSession(yubiKey))
 }
 ```
 
-To delete a slot configuration that is not protected with an access code, use [DeleteSlot()](xref:Yubico.YubiKey.Otp.OtpSession.DeleteSlot%28Yubico.YubiKey.Otp.Slot%29). 
+To delete a slot configuration that is not protected with an access code,
+use [DeleteSlot()](xref:Yubico.YubiKey.Otp.OtpSession.DeleteSlot%28Yubico.YubiKey.Otp.Slot%29). 

@@ -121,42 +121,43 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Otp", "Otp", "{BA01E787-FF0
 		Yubico.YubiKey\docs\users-manual\application-otp\slots.md = Yubico.YubiKey\docs\users-manual\application-otp\slots.md
 		Yubico.YubiKey\docs\users-manual\application-otp\static-password.md = Yubico.YubiKey\docs\users-manual\application-otp\static-password.md
 		Yubico.YubiKey\docs\users-manual\application-otp\yubico-otp.md = Yubico.YubiKey\docs\users-manual\application-otp\yubico-otp.md
+		Yubico.YubiKey\docs\users-manual\application-otp\challenge-response.md = Yubico.YubiKey\docs\users-manual\application-otp\challenge-response.md
+		Yubico.YubiKey\docs\users-manual\application-otp\commands-challenge-response.md = Yubico.YubiKey\docs\users-manual\application-otp\commands-challenge-response.md
+		Yubico.YubiKey\docs\users-manual\application-otp\commands-configure-slot.md = Yubico.YubiKey\docs\users-manual\application-otp\commands-configure-slot.md
+		Yubico.YubiKey\docs\users-manual\application-otp\commands-get-device-info.md = Yubico.YubiKey\docs\users-manual\application-otp\commands-get-device-info.md
+		Yubico.YubiKey\docs\users-manual\application-otp\commands-get-serial.md = Yubico.YubiKey\docs\users-manual\application-otp\commands-get-serial.md
+		Yubico.YubiKey\docs\users-manual\application-otp\commands-program-ndef.md = Yubico.YubiKey\docs\users-manual\application-otp\commands-program-ndef.md
+		Yubico.YubiKey\docs\users-manual\application-otp\commands-query-fips-mode.md = Yubico.YubiKey\docs\users-manual\application-otp\commands-query-fips-mode.md
+		Yubico.YubiKey\docs\users-manual\application-otp\commands-read-ndef.md = Yubico.YubiKey\docs\users-manual\application-otp\commands-read-ndef.md
+		Yubico.YubiKey\docs\users-manual\application-otp\commands-read-status.md = Yubico.YubiKey\docs\users-manual\application-otp\commands-read-status.md
+		Yubico.YubiKey\docs\users-manual\application-otp\commands-swap-slots.md = Yubico.YubiKey\docs\users-manual\application-otp\commands-swap-slots.md
+		Yubico.YubiKey\docs\users-manual\application-otp\commands-update-scan-code-map.md = Yubico.YubiKey\docs\users-manual\application-otp\commands-update-scan-code-map.md
+		Yubico.YubiKey\docs\users-manual\application-otp\commands-update-slot.md = Yubico.YubiKey\docs\users-manual\application-otp\commands-update-slot.md
+		Yubico.YubiKey\docs\users-manual\application-otp\how-to-program-an-hotp-credential.md = Yubico.YubiKey\docs\users-manual\application-otp\how-to-program-an-hotp-credential.md
+		Yubico.YubiKey\docs\users-manual\application-otp\how-to-slot-access-codes.md = Yubico.YubiKey\docs\users-manual\application-otp\how-to-slot-access-codes.md
+		Yubico.YubiKey\docs\users-manual\application-otp\how-tos-overview.md = Yubico.YubiKey\docs\users-manual\application-otp\how-tos-overview.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Piv", "Piv", "{DBCBCAC7-DDB0-4062-A6FF-4386702F9D4F}"
 	ProjectSection(SolutionItems) = preProject
 		Yubico.YubiKey\docs\users-manual\application-piv\access-control.md = Yubico.YubiKey\docs\users-manual\application-piv\access-control.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\attest.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\attest.md
 		Yubico.YubiKey\docs\users-manual\application-piv\attestation.md = Yubico.YubiKey\docs\users-manual\application-piv\attestation.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-decrypt.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-decrypt.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-key-agree.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-key-agree.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-mgmt.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-mgmt.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-sign.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-sign.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\change-ref.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\change-ref.md
+		Yubico.YubiKey\docs\users-manual\application-piv\cert-request.md = Yubico.YubiKey\docs\users-manual\application-piv\cert-request.md
+		Yubico.YubiKey\docs\users-manual\application-piv\cert-size.md = Yubico.YubiKey\docs\users-manual\application-piv\cert-size.md
 		Yubico.YubiKey\docs\users-manual\application-piv\commands.md = Yubico.YubiKey\docs\users-manual\application-piv\commands.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\generate-pair.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\generate-pair.md
+		Yubico.YubiKey\docs\users-manual\application-piv\ecdsa-signatures.md = Yubico.YubiKey\docs\users-manual\application-piv\ecdsa-signatures.md
 		Yubico.YubiKey\docs\users-manual\application-piv\get-and-put-data.md = Yubico.YubiKey\docs\users-manual\application-piv\get-and-put-data.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\get-data.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\get-data.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\import-asym.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\import-asym.md
 		Yubico.YubiKey\docs\users-manual\application-piv\keeping-track.md = Yubico.YubiKey\docs\users-manual\application-piv\keeping-track.md
 		Yubico.YubiKey\docs\users-manual\application-piv\key-agreement.md = Yubico.YubiKey\docs\users-manual\application-piv\key-agreement.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\metadata.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\metadata.md
 		Yubico.YubiKey\docs\users-manual\application-piv\migrate-smartcardnet.md = Yubico.YubiKey\docs\users-manual\application-piv\migrate-smartcardnet.md
+		Yubico.YubiKey\docs\users-manual\application-piv\pin-only.md = Yubico.YubiKey\docs\users-manual\application-piv\pin-only.md
 		Yubico.YubiKey\docs\users-manual\application-piv\pin-puk-mgmt-key.md = Yubico.YubiKey\docs\users-manual\application-piv\pin-puk-mgmt-key.md
 		Yubico.YubiKey\docs\users-manual\application-piv\pin-touch-policies.md = Yubico.YubiKey\docs\users-manual\application-piv\pin-touch-policies.md
+		Yubico.YubiKey\docs\users-manual\application-piv\piv-objects.md = Yubico.YubiKey\docs\users-manual\application-piv\piv-objects.md
 		Yubico.YubiKey\docs\users-manual\application-piv\piv-overview.md = Yubico.YubiKey\docs\users-manual\application-piv\piv-overview.md
 		Yubico.YubiKey\docs\users-manual\application-piv\private-keys.md = Yubico.YubiKey\docs\users-manual\application-piv\private-keys.md
 		Yubico.YubiKey\docs\users-manual\application-piv\public-keys.md = Yubico.YubiKey\docs\users-manual\application-piv\public-keys.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-data.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-data.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-vendor-data.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\put-vendor-data.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-piv.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-piv.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-retry.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\reset-retry.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\serial.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\serial.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-mgmt-key.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-mgmt-key.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-pin-retries.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-pin-retries.md
 		Yubico.YubiKey\docs\users-manual\application-piv\slots.md = Yubico.YubiKey\docs\users-manual\application-piv\slots.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\verify.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\verify.md
-		Yubico.YubiKey\docs\users-manual\application-piv\apdu\version.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\version.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Getting Started", "Getting Started", "{D8091437-C063-4CC2-A52A-5734AE23FB0F}"
@@ -180,6 +181,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Sdk Programming Guide", "Sd
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\sensitive-data.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\sensitive-data.md
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\threads.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\threads.md
 		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\appcompat.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\appcompat.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\key-collector-touch.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\key-collector-touch.md
+		Yubico.YubiKey\docs\users-manual\sdk-programming-guide\pin-complexity-policy.md = Yubico.YubiKey\docs\users-manual\sdk-programming-guide\pin-complexity-policy.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{BA394A0D-B336-4B6E-83B8-B41FC165D6D9}"
@@ -189,6 +192,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{BA394A0D-B
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-key-agree.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-key-agree.md
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-mgmt.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-mgmt.md
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-sign.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\auth-sign.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\bio-metadata.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\bio-metadata.md
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\change-ref.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\change-ref.md
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\generate-pair.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\generate-pair.md
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\get-data.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\get-data.md
@@ -201,6 +205,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Apdu", "Apdu", "{BA394A0D-B
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\serial.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\serial.md
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-mgmt-key.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-mgmt-key.md
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-pin-retries.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\set-pin-retries.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\verify-temporary-pin.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\verify-temporary-pin.md
+		Yubico.YubiKey\docs\users-manual\application-piv\apdu\verify-uv.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\verify-uv.md
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\verify.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\verify.md
 		Yubico.YubiKey\docs\users-manual\application-piv\apdu\version.md = Yubico.YubiKey\docs\users-manual\application-piv\apdu\version.md
 	EndProjectSection
@@ -218,7 +224,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiKey Reference", "YubiKey Reference", "{E7B994D1-AB44-4799-B98B-00515A9C63CE}"
 	ProjectSection(SolutionItems) = preProject
 		Yubico.YubiKey\docs\users-manual\yubikey-reference\apdu.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\apdu.md
-		Yubico.YubiKey\docs\users-manual\yubikey-reference\hardware.md = Yubico.YubiKey\docs\users-manual\yubikey-reference\hardware.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Transports", "Transports", "{FEE624EE-2E54-4E02-9492-C646D6FB3C68}"
@@ -288,6 +293,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Fido2", "Fido2", "{8CE9438B
 		Yubico.YubiKey\docs\users-manual\application-fido2\how-fido2-works.md = Yubico.YubiKey\docs\users-manual\application-fido2\how-fido2-works.md
 		Yubico.YubiKey\docs\users-manual\application-fido2\large-blobs.md = Yubico.YubiKey\docs\users-manual\application-fido2\large-blobs.md
 		Yubico.YubiKey\docs\users-manual\application-fido2\pin-uv-auth-protocols.md = Yubico.YubiKey\docs\users-manual\application-fido2\pin-uv-auth-protocols.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-auth-tokens.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-auth-tokens.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-auth.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-auth.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-authenticator-config.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-authenticator-config.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-bio-enrollment.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-bio-enrollment.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-min-pin-len.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-min-pin-len.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\fido2-touch-notification.md = Yubico.YubiKey\docs\users-manual\application-fido2\fido2-touch-notification.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\hmac-secret.md = Yubico.YubiKey\docs\users-manual\application-fido2\hmac-secret.md
+		Yubico.YubiKey\docs\users-manual\application-fido2\sdk-auth-token-logic.md = Yubico.YubiKey\docs\users-manual\application-fido2\sdk-auth-token-logic.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "YubiHSM Auth", "YubiHSM Auth", "{4176F4C2-3A9E-4C89-96B6-48CF41DD98C2}"

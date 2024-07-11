@@ -15,7 +15,6 @@
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
-using Yubico.YubiKey;
 
 namespace Yubico.YubiKey.Sample.SharedCode
 {
@@ -61,7 +60,7 @@ namespace Yubico.YubiKey.Sample.SharedCode
                 outputList += "\n";
             }
 
-            SampleMenu.WriteMessage(MessageType.Special, 0, outputList);
+            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, outputList);
         }
     }
 }

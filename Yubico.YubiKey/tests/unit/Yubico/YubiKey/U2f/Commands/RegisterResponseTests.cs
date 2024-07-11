@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Security.Cryptography;
 using Xunit;
@@ -28,7 +27,10 @@ namespace Yubico.YubiKey.U2f.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void action() => _ = new RegisterResponse(null);
+            static void action()
+            {
+                _ = new RegisterResponse(responseApdu: null);
+            }
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             _ = Assert.Throws<ArgumentNullException>(action);
@@ -37,8 +39,8 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var registerResponse = new RegisterResponse(responseApdu);
@@ -49,8 +51,8 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var registerResponse = new RegisterResponse(responseApdu);
@@ -61,8 +63,8 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_ConditionsNotSatisfiedResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.ConditionsNotSatisfied >> 8));
-            byte sw2 = unchecked((byte)SWConstants.ConditionsNotSatisfied);
+            var sw1 = (byte)(SWConstants.ConditionsNotSatisfied >> 8);
+            var sw2 = unchecked((byte)SWConstants.ConditionsNotSatisfied);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var registerResponse = new RegisterResponse(responseApdu);
@@ -75,7 +77,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [InlineData(false, true)]
         public void GetData_BadResponseData_Throws(bool validPubKey, bool validKeyHandle)
         {
-            byte[] encoding = RegistrationDataTests.GetEncodedRegistration(validPubKey, validKeyHandle);
+            var encoding = RegistrationDataTests.GetEncodedRegistration(validPubKey, validKeyHandle);
             var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
 
             var registerResponse = new RegisterResponse(responseApdu);
@@ -86,7 +88,7 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_GoodResponseData_Succeeds()
         {
-            byte[] encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
+            var encoding = RegistrationDataTests.GetEncodedRegistration(validPubKey: true, validKeyHandle: true);
             var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
 
             var registerResponse = new RegisterResponse(responseApdu);
@@ -97,16 +99,16 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_GoodResponseData_SetsUserPublicKeyCorrectly()
         {
-            byte[] encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
+            var encoding = RegistrationDataTests.GetEncodedRegistration(validPubKey: true, validKeyHandle: true);
             var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
 
             var registerResponse = new RegisterResponse(responseApdu);
 
-            RegistrationData data = registerResponse.GetData();
+            var data = registerResponse.GetData();
             var pubKeyPoint = new ECPoint
             {
-                X = data.UserPublicKey.Slice(1, 32).ToArray(),
-                Y = data.UserPublicKey.Slice(33, 32).ToArray(),
+                X = data.UserPublicKey.Slice(start: 1, length: 32).ToArray(),
+                Y = data.UserPublicKey.Slice(start: 33, length: 32).ToArray()
             };
 
             Assert.Equal(RegistrationDataTests.GetPubKeyX(), Hex.BytesToHex(pubKeyPoint.X));
@@ -116,38 +118,38 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void GetData_GoodResponseData_SetsKeyHandleCorrectly()
         {
-            byte[] encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
+            var encoding = RegistrationDataTests.GetEncodedRegistration(validPubKey: true, validKeyHandle: true);
             var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
 
             var registerResponse = new RegisterResponse(responseApdu);
 
-            RegistrationData data = registerResponse.GetData();
-            string keyHandle = RegistrationDataTests.GetKeyHandle(true, out string _);
+            var data = registerResponse.GetData();
+            var keyHandle = RegistrationDataTests.GetKeyHandle(isValid: true, out var _);
             Assert.Equal(keyHandle, Hex.BytesToHex(data.KeyHandle.ToArray()));
         }
 
         [Fact]
         public void GetData_GoodResponseData_SetsCertificateCorrectly()
         {
-            byte[] encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
+            var encoding = RegistrationDataTests.GetEncodedRegistration(validPubKey: true, validKeyHandle: true);
             var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
 
             var registerResponse = new RegisterResponse(responseApdu);
 
-            RegistrationData data = registerResponse.GetData();
-            string cert = RegistrationDataTests.GetAttestationCert();
+            var data = registerResponse.GetData();
+            var cert = RegistrationDataTests.GetAttestationCert();
             Assert.Equal(cert, Hex.BytesToHex(data.AttestationCert.RawData.ToArray()));
         }
 
         [Fact]
         public void GetData_GoodResponseData_SetsSignatureCorrectly()
         {
-            byte[] encoding = RegistrationDataTests.GetEncodedRegistration(true, true);
+            var encoding = RegistrationDataTests.GetEncodedRegistration(validPubKey: true, validKeyHandle: true);
             var responseApdu = new ResponseApdu(encoding, SWConstants.Success);
 
             var registerResponse = new RegisterResponse(responseApdu);
 
-            RegistrationData data = registerResponse.GetData();
+            var data = registerResponse.GetData();
             Assert.Equal(RegistrationDataTests.GetRegSignature(), Hex.BytesToHex(data.Signature.ToArray()));
         }
     }

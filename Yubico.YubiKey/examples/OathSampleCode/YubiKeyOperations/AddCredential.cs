@@ -205,16 +205,16 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             _ = outputList.AppendLine($"Counter   : {credential.Counter}");
             _ = outputList.AppendLine($"Touch     : {credential.RequiresTouch}");
 
-            SampleMenu.WriteMessage(MessageType.Special, 0, outputList.ToString());
+            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, outputList.ToString());
         }
 
         // Collect a default TOTP credential.
         private static Credential CollectDefaultTotpCredential()
         {
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter issuer");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter issuer");
             _ = SampleMenu.ReadResponse(out string issuer);
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter account name");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter account name");
             _ = SampleMenu.ReadResponse(out string account);
 
             var credential = new Credential(issuer, account, CredentialType.Totp, CredentialPeriod.Period30);
@@ -225,10 +225,10 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
         // Collect a default HOTP credential.
         private static Credential CollectDefaultHotpCredential()
         {
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter issuer");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter issuer");
             _ = SampleMenu.ReadResponse(out string issuer);
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter account name");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter account name");
             _ = SampleMenu.ReadResponse(out string account);
 
             var credential = new Credential(issuer, account, CredentialType.Hotp, CredentialPeriod.Undefined);
@@ -239,7 +239,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
         // Collect a string from URI.
         private static string CollectStringFromUri()
         {
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter string from URI");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter string from URI");
             _ = SampleMenu.ReadResponse(out string stringFromUri);
 
             return stringFromUri;
@@ -248,22 +248,23 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
         // Collect a TOTP credential.
         private static Credential CollectTotpCredential(SampleMenu menuObject)
         {
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter issuer");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter issuer");
             _ = SampleMenu.ReadResponse(out string issuer);
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter account name");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter account name");
             _ = SampleMenu.ReadResponse(out string account);
 
             _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject, out CredentialPeriod? period);
 
             _ = ChooseCredentialProperties.RunChooseAlgorithmOption(menuObject, out HashAlgorithm? algorithm);
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter secret");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter secret");
             _ = SampleMenu.ReadResponse(out string secret);
 
             _ = ChooseCredentialProperties.RunChooseDigitsOption(menuObject, out int? digits);
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Set require touch property? Answer Yes or No.");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
+                "Set require touch property? Answer Yes or No.");
             _ = SampleMenu.ReadResponse(out string touch);
 
             var credential = new Credential
@@ -284,23 +285,24 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
         // Collect a HOTP credential.
         private static Credential CollectHotpCredential(SampleMenu menuObject)
         {
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter issuer");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter issuer");
             _ = SampleMenu.ReadResponse(out string issuer);
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter account name");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter account name");
             _ = SampleMenu.ReadResponse(out string account);
 
             _ = ChooseCredentialProperties.RunChooseAlgorithmOption(menuObject, out HashAlgorithm? algorithm);
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter secret");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter secret");
             _ = SampleMenu.ReadResponse(out string secret);
 
             _ = ChooseCredentialProperties.RunChooseDigitsOption(menuObject, out int? digits);
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter counter.");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter counter.");
             _ = SampleMenu.ReadResponse(out string counter);
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Set require touch property? Answer Yes or No.");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
+                "Set require touch property? Answer Yes or No.");
             _ = SampleMenu.ReadResponse(out string touch);
 
             var credential = new Credential

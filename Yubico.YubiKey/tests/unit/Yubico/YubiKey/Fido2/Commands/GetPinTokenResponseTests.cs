@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void Constructor_SuccessApdu_CreatesObject()
         {
-            byte[] responseBytes = new byte[]
+            var responseBytes = new byte[]
             {
                 0xA1, 0x02, 0x58, 0x20,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void WP_Constructor_SuccessApdu_CreatesObject()
         {
-            byte[] responseBytes = new byte[]
+            var responseBytes = new byte[]
             {
                 0xA1, 0x02, 0x58, 0x20,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -53,7 +53,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void Constructor_SuccessApdu_SetsStatus()
         {
-            byte[] responseBytes = new byte[]
+            var responseBytes = new byte[]
             {
                 0xA1, 0x02, 0x58, 0x20,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void WP_Constructor_SuccessApdu_SetsStatus()
         {
-            byte[] responseBytes = new byte[]
+            var responseBytes = new byte[]
             {
                 0xA1, 0x02, 0x58, 0x20,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void Constructor_ErrorApdu_SetsStatus()
         {
-            byte[] responseBytes = new byte[]
+            var responseBytes = new byte[]
             {
                 0x69, 0x00
             };
@@ -95,7 +95,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void WP_Constructor_ErrorApdu_SetsStatus()
         {
-            byte[] responseBytes = new byte[]
+            var responseBytes = new byte[]
             {
                 0x69, 0x00
             };
@@ -107,7 +107,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void GetData_ReturnsCorrect()
         {
-            byte[] responseBytes = new byte[]
+            var responseBytes = new byte[]
             {
                 0xA1, 0x02, 0x58, 0x20,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -117,16 +117,16 @@ namespace Yubico.YubiKey.Fido2.Commands
             var expected = new ReadOnlyMemory<byte>(responseBytes);
 
             var response = new GetPinUvAuthTokenResponse(new ResponseApdu(responseBytes));
-            ReadOnlyMemory<byte> token = response.GetData();
+            var token = response.GetData();
 
-            bool isValid = MemoryExtensions.SequenceEqual(expected.Slice(4, 32).Span, token.Span);
+            var isValid = expected.Slice(start: 4, length: 32).Span.SequenceEqual(token.Span);
             Assert.True(isValid);
         }
 
         [Fact]
         public void WP_GetData_ReturnsCorrect()
         {
-            byte[] responseBytes = new byte[]
+            var responseBytes = new byte[]
             {
                 0xA1, 0x02, 0x58, 0x20,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
@@ -136,9 +136,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             var expected = new ReadOnlyMemory<byte>(responseBytes);
 
             var response = new GetPinUvAuthTokenResponse(new ResponseApdu(responseBytes));
-            ReadOnlyMemory<byte> token = response.GetData();
+            var token = response.GetData();
 
-            bool isValid = MemoryExtensions.SequenceEqual(expected.Slice(4, 32).Span, token.Span);
+            var isValid = expected.Slice(start: 4, length: 32).Span.SequenceEqual(token.Span);
             Assert.True(isValid);
         }
     }

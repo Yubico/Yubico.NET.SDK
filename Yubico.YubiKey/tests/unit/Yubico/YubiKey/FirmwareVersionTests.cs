@@ -24,7 +24,7 @@ namespace Yubico.YubiKey
         public void Major_GetSet_Succeeds()
         {
             var fw = new FirmwareVersion();
-            byte expectedValue = GetRandomByte();
+            var expectedValue = GetRandomByte();
 
             fw.Major = expectedValue;
 
@@ -35,7 +35,7 @@ namespace Yubico.YubiKey
         public void Minor_GetSet_Succeeds()
         {
             var fw = new FirmwareVersion();
-            byte expectedValue = GetRandomByte();
+            var expectedValue = GetRandomByte();
 
             fw.Minor = expectedValue;
 
@@ -46,7 +46,7 @@ namespace Yubico.YubiKey
         public void Patch_GetSet_Succeeds()
         {
             var fw = new FirmwareVersion();
-            byte expectedValue = GetRandomByte();
+            var expectedValue = GetRandomByte();
 
             fw.Patch = expectedValue;
 
@@ -65,7 +65,7 @@ namespace Yubico.YubiKey
         [Fact]
         public void Constructor_GivenMajor_Returns1_0_0()
         {
-            var fw = new FirmwareVersion(1);
+            var fw = new FirmwareVersion(major: 1);
             Assert.True(fw.Major == 1);
             Assert.True(fw.Minor == 0);
             Assert.True(fw.Patch == 0);
@@ -74,7 +74,7 @@ namespace Yubico.YubiKey
         [Fact]
         public void Constructor_GivenMajorMinor_Returns1_2_0()
         {
-            var fw = new FirmwareVersion(1, 2);
+            var fw = new FirmwareVersion(major: 1, minor: 2);
             Assert.True(fw.Major == 1);
             Assert.True(fw.Minor == 2);
             Assert.True(fw.Patch == 0);
@@ -83,7 +83,7 @@ namespace Yubico.YubiKey
         [Fact]
         public void Constructor_GivenMajorMinorPatch_Returns1_2_3()
         {
-            var fw = new FirmwareVersion(1, 2, 3);
+            var fw = new FirmwareVersion(major: 1, minor: 2, patch: 3);
             Assert.True(fw.Major == 1);
             Assert.True(fw.Minor == 2);
             Assert.True(fw.Patch == 3);
@@ -236,7 +236,7 @@ namespace Yubico.YubiKey
         [Fact]
         public void VersionTwoZeroZero_IEquatableEquals_SameObject_ReturnsTrue()
         {
-            FirmwareVersion other = FirmwareVersion.V2_0_0;
+            var other = FirmwareVersion.V2_0_0;
 
             Assert.True(FirmwareVersion.V2_0_0.Equals(other));
         }
@@ -253,8 +253,8 @@ namespace Yubico.YubiKey
         {
             object fwTest = new FirmwareVersion(major, minor, patch);
 
-            int result = FirmwareVersion.V2_0_0.CompareTo(fwTest);
-            int normalizedResult = result == 0 ? 0 : result > 0 ? 1 : -1;
+            var result = FirmwareVersion.V2_0_0.CompareTo(fwTest);
+            var normalizedResult = result == 0 ? 0 : result > 0 ? 1 : -1;
 
             Assert.Equal(expected, normalizedResult);
         }
@@ -271,7 +271,7 @@ namespace Yubico.YubiKey
         {
             List<byte>? byteList = null;
 
-            Assert.Equal(1, FirmwareVersion.V2_0_0.CompareTo(byteList));
+            Assert.Equal(expected: 1, FirmwareVersion.V2_0_0.CompareTo(byteList));
         }
 
         [Fact]
@@ -279,7 +279,7 @@ namespace Yubico.YubiKey
         {
             object? other = FirmwareVersion.V2_0_0;
 
-            Assert.Equal(0, FirmwareVersion.V2_0_0.CompareTo(other));
+            Assert.Equal(expected: 0, FirmwareVersion.V2_0_0.CompareTo(other));
         }
 
         [Theory]
@@ -295,8 +295,8 @@ namespace Yubico.YubiKey
         {
             var fwTest = new FirmwareVersion(major, minor, patch);
 
-            int result = FirmwareVersion.V2_0_0.CompareTo(fwTest);
-            int normalizedResult = result == 0 ? 0 : result > 0 ? 1 : -1;
+            var result = FirmwareVersion.V2_0_0.CompareTo(fwTest);
+            var normalizedResult = result == 0 ? 0 : result > 0 ? 1 : -1;
 
             Assert.Equal(expected, normalizedResult);
         }
@@ -307,23 +307,23 @@ namespace Yubico.YubiKey
 #nullable disable
             FirmwareVersion fwTest = null;
 
-            Assert.Equal(1, FirmwareVersion.V2_0_0.CompareTo(fwTest));
+            Assert.Equal(expected: 1, FirmwareVersion.V2_0_0.CompareTo(fwTest));
 #nullable enable
         }
 
         [Fact]
         public void VersionTwoZeroZero_IComparableFirmwareVersionCompareTo_SameObject_Returns0()
         {
-            FirmwareVersion other = FirmwareVersion.V2_0_0;
+            var other = FirmwareVersion.V2_0_0;
 
-            Assert.Equal(0, FirmwareVersion.V2_0_0.CompareTo(other));
+            Assert.Equal(expected: 0, FirmwareVersion.V2_0_0.CompareTo(other));
         }
 
         [Fact]
         public void Version_LessThan_HigherVersion_ReturnsTrue()
         {
-            var versionLeft = new ImageProcessorVersion(3, 7, 9);
-            var versionRight = new ImageProcessorVersion(3, 7, 10);
+            var versionLeft = new ImageProcessorVersion(major: 3, minor: 7, patch: 9);
+            var versionRight = new ImageProcessorVersion(major: 3, minor: 7, patch: 10);
 
             Assert.True(versionLeft < versionRight);
         }
@@ -331,7 +331,7 @@ namespace Yubico.YubiKey
         private static byte GetRandomByte()
         {
             var rng = new Random();
-            return (byte)rng.Next(0, 255);
+            return (byte)rng.Next(minValue: 0, maxValue: 255);
         }
     }
 }

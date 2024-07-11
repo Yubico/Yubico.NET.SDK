@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
@@ -39,7 +39,7 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
@@ -52,10 +52,10 @@ namespace Yubico.YubiKey.Oath.Commands
             const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             const byte sw2 = unchecked((byte)SWConstants.Success);
 
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
-            System.Collections.Generic.IDictionary<Credential, Code>? data = calculateAllCredentialsResponse.GetData();
+            var data = calculateAllCredentialsResponse.GetData();
 
             Assert.Equal(SWConstants.Success, calculateAllCredentialsResponse.StatusWord);
             Assert.Empty(data);
@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.Oath.Commands
 
             var calculateAllCredentialsResponse = new CalculateAllCredentialsResponse(responseApdu);
 
-            System.Collections.Generic.IDictionary<Credential, Code>? data = calculateAllCredentialsResponse.GetData();
+            var data = calculateAllCredentialsResponse.GetData();
             var credentialHotp =
                 new Credential("Apple", "test@icloud.com", CredentialType.Hotp, CredentialPeriod.Undefined);
             var credentialTotp = new Credential
@@ -91,7 +91,7 @@ namespace Yubico.YubiKey.Oath.Commands
             };
 
             Assert.Equal(SWConstants.Success, calculateAllCredentialsResponse.StatusWord);
-            Assert.Equal(2, data.Count);
+            Assert.Equal(expected: 2, data.Count);
             Assert.Contains(credentialTotp, data.Keys);
             Assert.Contains(credentialHotp, data.Keys);
         }

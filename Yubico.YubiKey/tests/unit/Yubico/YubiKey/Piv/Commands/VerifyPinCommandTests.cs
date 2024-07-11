@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void ClassType_DerivedFromPivCommand_IsTrue()
         {
-            byte[] pin = GetPinArray(8);
+            var pin = GetPinArray(pinLength: 8);
             var verifyPinCommand = new VerifyPinCommand(pin);
 
             Assert.True(verifyPinCommand is IYubiKeyCommand<VerifyPinResponse>);
@@ -32,10 +32,10 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Application_Piv()
         {
-            byte[] pin = GetPinArray(8);
+            var pin = GetPinArray(pinLength: 8);
             var command = new VerifyPinCommand(pin);
 
-            YubiKeyApplication application = command.Application;
+            var application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
@@ -43,51 +43,51 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
-            CommandApdu cmdApdu = GetVerifyCommandApdu();
+            var cmdApdu = GetVerifyCommandApdu();
 
-            byte Cla = cmdApdu.Cla;
+            var Cla = cmdApdu.Cla;
 
-            Assert.Equal(0, Cla);
+            Assert.Equal(expected: 0, Cla);
         }
 
         [Fact]
         public void CreateCommandApdu_GetInsProperty_ReturnsHex20()
         {
-            CommandApdu cmdApdu = GetVerifyCommandApdu();
+            var cmdApdu = GetVerifyCommandApdu();
 
-            byte Ins = cmdApdu.Ins;
+            var Ins = cmdApdu.Ins;
 
-            Assert.Equal(0x20, Ins);
+            Assert.Equal(expected: 0x20, Ins);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP1Property_ReturnsZero()
         {
-            CommandApdu cmdApdu = GetVerifyCommandApdu();
+            var cmdApdu = GetVerifyCommandApdu();
 
-            byte P1 = cmdApdu.P1;
+            var P1 = cmdApdu.P1;
 
-            Assert.Equal(0, P1);
+            Assert.Equal(expected: 0, P1);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP2Property_ReturnsHex80()
         {
-            CommandApdu cmdApdu = GetVerifyCommandApdu();
+            var cmdApdu = GetVerifyCommandApdu();
 
-            byte P2 = cmdApdu.P2;
+            var P2 = cmdApdu.P2;
 
-            Assert.Equal(0x80, P2);
+            Assert.Equal(expected: 0x80, P2);
         }
 
         [Fact]
         public void CreateCommandApdu_GetNc_Returns8()
         {
-            CommandApdu cmdApdu = GetVerifyCommandApdu();
+            var cmdApdu = GetVerifyCommandApdu();
 
-            int Nc = cmdApdu.Nc;
+            var Nc = cmdApdu.Nc;
 
-            Assert.Equal(8, Nc);
+            Assert.Equal(expected: 8, Nc);
         }
 
         [Theory]
@@ -96,10 +96,10 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(8)]
         public void CreateCommandApdu_GetDataProperty_ReturnsCorrectLength(int pinLength)
         {
-            byte[] pin = GetPinArray(pinLength);
+            var pin = GetPinArray(pinLength);
 
             var verifyPinCommand = new VerifyPinCommand(pin);
-            CommandApdu cmdApdu = verifyPinCommand.CreateCommandApdu();
+            var cmdApdu = verifyPinCommand.CreateCommandApdu();
 
             Assert.False(cmdApdu.Data.IsEmpty);
             if (cmdApdu.Data.IsEmpty)
@@ -116,10 +116,10 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(8)]
         public void CreateCommandApdu_GetDataProperty_ReturnsPin(int pinLength)
         {
-            byte[] pin = GetPinArray(pinLength);
+            var pin = GetPinArray(pinLength);
 
             var verifyPinCommand = new VerifyPinCommand(pin);
-            CommandApdu cmdApdu = verifyPinCommand.CreateCommandApdu();
+            var cmdApdu = verifyPinCommand.CreateCommandApdu();
 
             Assert.False(cmdApdu.Data.IsEmpty);
             if (cmdApdu.Data.IsEmpty)
@@ -127,10 +127,10 @@ namespace Yubico.YubiKey.Piv.Commands
                 return;
             }
 
-            Assert.Equal(8, cmdApdu.Data.Length);
+            Assert.Equal(expected: 8, cmdApdu.Data.Length);
 
-            bool compareResult = true;
-            int index = 0;
+            var compareResult = true;
+            var index = 0;
             for (; index < pin.Length; index++)
             {
                 if (cmdApdu.Data.Span[index] != pin[index])
@@ -153,21 +153,21 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void CreateCommandApdu_GetNe_ReturnsZero()
         {
-            CommandApdu cmdApdu = GetVerifyCommandApdu();
+            var cmdApdu = GetVerifyCommandApdu();
 
-            int Ne = cmdApdu.Ne;
+            var Ne = cmdApdu.Ne;
 
-            Assert.Equal(0, Ne);
+            Assert.Equal(expected: 0, Ne);
         }
 
         [Fact]
         public void CreateResponseForApdu_ReturnsCorrectType()
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            byte[] pin = GetPinArray(8);
+            var pin = GetPinArray(pinLength: 8);
             var verifyPinCommand = new VerifyPinCommand(pin);
 
-            VerifyPinResponse verifyPinResponse = verifyPinCommand.CreateResponseForApdu(responseApdu);
+            var verifyPinResponse = verifyPinCommand.CreateResponseForApdu(responseApdu);
 
             Assert.True(verifyPinResponse is VerifyPinResponse);
         }
@@ -181,31 +181,31 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(9)]
         public void Constructor_BadPin_CorrectException(int pinLength)
         {
-            byte[] pin = GetPinArray(pinLength);
+            var pin = GetPinArray(pinLength);
             _ = Assert.Throws<ArgumentException>(() => new VerifyPinCommand(pin));
         }
 
         [Fact]
         public void Constructor_NullPin_CorrectException()
         {
-            _ = Assert.Throws<ArgumentException>(() => new VerifyPinCommand(null));
+            _ = Assert.Throws<ArgumentException>(() => new VerifyPinCommand(pin: null));
         }
 
         private static CommandApdu GetVerifyCommandApdu()
         {
-            byte[] pin = GetPinArray(8);
+            var pin = GetPinArray(pinLength: 8);
             var verifyPinCommand = new VerifyPinCommand(pin);
-            CommandApdu returnValue = verifyPinCommand.CreateCommandApdu();
+            var returnValue = verifyPinCommand.CreateCommandApdu();
 
             return returnValue;
         }
 
         private static byte[] GetPinArray(int pinLength)
         {
-            byte[] returnValue = new byte[pinLength];
-            for (int index = 0; index < pinLength; index++)
+            var returnValue = new byte[pinLength];
+            for (var index = 0; index < pinLength; index++)
             {
-                byte value = (byte)(index & 15);
+                var value = (byte)(index & 15);
                 value += 0x31;
                 returnValue[index] = value;
             }

@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             var command = new InitializeAuthenticateManagementKeyCommand();
 
-            YubiKeyApplication application = command.Application;
+            var application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
@@ -44,11 +44,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(2)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(int constructor)
         {
-            CommandApdu cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
+            var cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
 
-            byte Cla = cmdApdu.Cla;
+            var Cla = cmdApdu.Cla;
 
-            Assert.Equal(0, Cla);
+            Assert.Equal(expected: 0, Cla);
         }
 
         [Theory]
@@ -57,11 +57,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(2)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHex87(int constructor)
         {
-            CommandApdu cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
+            var cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
 
-            byte Ins = cmdApdu.Ins;
+            var Ins = cmdApdu.Ins;
 
-            Assert.Equal(0x87, Ins);
+            Assert.Equal(expected: 0x87, Ins);
         }
 
         [Theory]
@@ -70,11 +70,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(2)]
         public void CreateCommandApdu_GetP1Property_ReturnsThree(int constructor)
         {
-            CommandApdu cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
+            var cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
 
-            byte P1 = cmdApdu.P1;
+            var P1 = cmdApdu.P1;
 
-            Assert.Equal(3, P1);
+            Assert.Equal(expected: 3, P1);
         }
 
         [Theory]
@@ -83,11 +83,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(2)]
         public void CreateCommandApdu_GetP2Property_ReturnsHex9B(int constructor)
         {
-            CommandApdu cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
+            var cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
 
-            byte P2 = cmdApdu.P2;
+            var P2 = cmdApdu.P2;
 
-            Assert.Equal(0x9B, P2);
+            Assert.Equal(expected: 0x9B, P2);
         }
 
         [Theory]
@@ -96,11 +96,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(2)]
         public void CreateCommandApdu_GetNc_Returns4(int constructor)
         {
-            CommandApdu cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
+            var cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
 
-            int Nc = cmdApdu.Nc;
+            var Nc = cmdApdu.Nc;
 
-            Assert.Equal(4, Nc);
+            Assert.Equal(expected: 4, Nc);
         }
 
         [Theory]
@@ -109,11 +109,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(2)]
         public void CreateCommandApdu_GetNe_ReturnsZero(int constructor)
         {
-            CommandApdu cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
+            var cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
 
-            int Ne = cmdApdu.Ne;
+            var Ne = cmdApdu.Ne;
 
-            Assert.Equal(0, Ne);
+            Assert.Equal(expected: 0, Ne);
         }
 
         [Theory]
@@ -122,20 +122,20 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(2, 0x80)]
         public void CreateCommandApdu_GetData_ReturnsCorrect(int constructor, byte tag2)
         {
-            byte[] expected = new byte[4]
+            var expected = new byte[4]
             {
                 0x7C, 0x02, tag2, 0x00
             };
-            CommandApdu cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
+            var cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
 
-            ReadOnlyMemory<byte> data = cmdApdu.Data;
+            var data = cmdApdu.Data;
             Assert.False(data.IsEmpty);
             if (data.IsEmpty)
             {
                 return;
             }
 
-            bool compareResult = data.Span.SequenceEqual(expected);
+            var compareResult = data.Span.SequenceEqual(expected);
 
             Assert.True(compareResult);
         }
@@ -143,13 +143,13 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void CreateResponseForApdu_ReturnsCorrectType()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(
                 new byte[] { 0x7C, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
             var command = new InitializeAuthenticateManagementKeyCommand();
 
-            InitializeAuthenticateManagementKeyResponse? response = command.CreateResponseForApdu(responseApdu);
+            var response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is InitializeAuthenticateManagementKeyResponse);
         }
@@ -163,11 +163,11 @@ namespace Yubico.YubiKey.Piv.Commands
         // 0 or 1.
         private static CommandApdu GetInitAuthMgmtKeyCommandApdu(int constructor)
         {
-            InitializeAuthenticateManagementKeyCommand command = constructor switch
+            var command = constructor switch
             {
-                0 => new InitializeAuthenticateManagementKeyCommand(false),
-                1 => new InitializeAuthenticateManagementKeyCommand(true),
-                _ => new InitializeAuthenticateManagementKeyCommand(),
+                0 => new InitializeAuthenticateManagementKeyCommand(mutualAuthentication: false),
+                1 => new InitializeAuthenticateManagementKeyCommand(mutualAuthentication: true),
+                _ => new InitializeAuthenticateManagementKeyCommand()
             };
 
             return command.CreateCommandApdu();

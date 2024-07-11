@@ -30,8 +30,8 @@ namespace Yubico.YubiKey.TestUtilities
     // System.Security.Cryptography.RandomNumberGenerator.
     public class RandomObjectUtility
     {
-        private int _offset;
         private readonly byte[] _theBytes;
+        private int _offset;
         private Func<RandomNumberGenerator>? _original;
 
         // Create a new instance of this class, loading the given bytes.
@@ -66,7 +66,7 @@ namespace Yubico.YubiKey.TestUtilities
 
             _theBytes = new byte[bytesToReturn.Length];
 
-            bytesToReturn.CopyTo(_theBytes, 0);
+            bytesToReturn.CopyTo(_theBytes, index: 0);
         }
 
         // Fill the given buffer with random bytes. That is, generate data.Length
@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.TestUtilities
                 throw new ArgumentNullException(nameof(data));
             }
 
-            GetBytes(data, 0, data.Length);
+            GetBytes(data, offset: 0, data.Length);
         }
 
         // Generate count random bytes, placing them into data beginning at

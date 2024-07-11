@@ -20,15 +20,15 @@ namespace Yubico.YubiKey.Oath.Commands
 {
     public class PutCredentialCommandTests
     {
-        readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp,
-            HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
+        private readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp,
+            HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, digits: 6, counter: 0, requireTouch: false);
 
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
             var command = new PutCommand { Credential = credential };
 
-            Assert.Equal(0, command.CreateCommandApdu().Cla);
+            Assert.Equal(expected: 0, command.CreateCommandApdu().Cla);
         }
 
         [Fact]
@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new PutCommand { Credential = credential };
 
-            Assert.Equal(0x01, command.CreateCommandApdu().Ins);
+            Assert.Equal(expected: 0x01, command.CreateCommandApdu().Ins);
         }
 
         [Fact]
@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new PutCommand { Credential = credential };
 
-            Assert.Equal(0, command.CreateCommandApdu().P1);
+            Assert.Equal(expected: 0, command.CreateCommandApdu().P1);
         }
 
         [Fact]
@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new PutCommand { Credential = credential };
 
-            Assert.Equal(0, command.CreateCommandApdu().P2);
+            Assert.Equal(expected: 0, command.CreateCommandApdu().P2);
         }
 
         [Fact]
@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
             };
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+            var data = command.CreateCommandApdu().Data;
 
             Assert.Equal(dataList.Length, command.CreateCommandApdu().Nc);
             Assert.True(data.Span.SequenceEqual(dataList));
@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.Oath.Commands
         public void CreateCommandApdu_GetDataAndNcProperties_WithTouchRequiredProperty_ReturnsCorrectDataAndLength()
         {
             var credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp, HashAlgorithm.Sha1,
-                "tt", CredentialPeriod.Period30, 6, 0, true);
+                "tt", CredentialPeriod.Period30, digits: 6, counter: 0, requireTouch: true);
             var command = new PutCommand { Credential = credential };
             byte[] dataList =
             {
@@ -89,7 +89,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x78, 0x02
             };
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+            var data = command.CreateCommandApdu().Data;
 
             Assert.Equal(dataList.Length, command.CreateCommandApdu().Nc);
             Assert.True(data.Span.SequenceEqual(dataList));
@@ -100,7 +100,7 @@ namespace Yubico.YubiKey.Oath.Commands
             CreateCommandApdu_GetDataAndNcProperties_CredentialWithHotpTypeAndTouchRequiredProperty_ReturnsCorrectDataAndLength()
         {
             var credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Hotp, HashAlgorithm.Sha1,
-                "tt", CredentialPeriod.Undefined, 6, 4, true);
+                "tt", CredentialPeriod.Undefined, digits: 6, counter: 4, requireTouch: true);
             var command = new PutCommand { Credential = credential };
             byte[] dataList =
             {
@@ -112,7 +112,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 0x04, 0x00, 0x00, 0x00
             };
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+            var data = command.CreateCommandApdu().Data;
 
             Assert.Equal(dataList.Length, command.CreateCommandApdu().Nc);
             Assert.True(data.Span.SequenceEqual(dataList));
@@ -122,7 +122,7 @@ namespace Yubico.YubiKey.Oath.Commands
         public void CreateCommandApdu_GetDataAndNcProperties_CredentialWithHotpType_ReturnsCorrectDataAndLength()
         {
             var credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Hotp, HashAlgorithm.Sha1,
-                "tt", CredentialPeriod.Undefined, 6, 4, false);
+                "tt", CredentialPeriod.Undefined, digits: 6, counter: 4, requireTouch: false);
             var command = new PutCommand { Credential = credential };
             byte[] dataList =
             {
@@ -134,7 +134,7 @@ namespace Yubico.YubiKey.Oath.Commands
                 0x00, 0x00
             };
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+            var data = command.CreateCommandApdu().Data;
 
             Assert.Equal(dataList.Length, command.CreateCommandApdu().Nc);
             Assert.True(data.Span.SequenceEqual(dataList));
@@ -145,7 +145,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new PutCommand { Credential = credential };
-            OathResponse response = command.CreateResponseForApdu(responseApdu);
+            var response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is OathResponse);
         }

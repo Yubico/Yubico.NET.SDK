@@ -13,24 +13,12 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using Yubico.YubiKey.Otp;
 
 namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class UpdateSlot : OtpPluginBase
     {
-        public override string Name => "Update";
-
-        public override string Description => "Updates non-security related parameters on a YubiKey.";
-
-        protected override ParameterUse ParametersUsed =>
-            ParameterUse.Slot
-            | ParameterUse.CurrentAccessCode
-            | ParameterUse.NewAccessCode
-            | ParameterUse.Force
-            | ParameterUse.NoEnter;
-
         public UpdateSlot(IOutput output) : base(output)
         {
             // We'll use the base class for things that are common to other plug-ins.
@@ -160,6 +148,17 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             };
         }
 
+        public override string Name => "Update";
+
+        public override string Description => "Updates non-security related parameters on a YubiKey.";
+
+        protected override ParameterUse ParametersUsed =>
+            ParameterUse.Slot
+            | ParameterUse.CurrentAccessCode
+            | ParameterUse.NewAccessCode
+            | ParameterUse.Force
+            | ParameterUse.NoEnter;
+
         public override void HandleParameters()
         {
             base.HandleParameters();
@@ -193,7 +192,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         }
 
         /// <summary>
-        /// Change non-security-related settings on the YubiKey.
+        ///     Change non-security-related settings on the YubiKey.
         /// </summary>
         /// <inheritdoc cref="YubiKey.Otp.OtpSettings{T}.AllowUpdate(bool)" path="/remarks" />
         /// <returns>True if success, false if not.</returns>
@@ -201,7 +200,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         {
             var otp = new OtpSession(_yubiKey!);
 
-            bool ready =
+            var ready =
                 _slot == Slot.ShortPress
                     ? otp.IsShortPressConfigured
                     : otp.IsLongPressConfigured;
@@ -245,22 +244,22 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             Output.WriteLine(_force
                 ? $"Updating Configuration for Slot [{_slot}]:"
                 : $"Proposed Configuration for slot [{_slot}]:");
-            Output.WriteLine(new string('-', 80));
+            Output.WriteLine(new string(c: '-', count: 80));
             Output.Write($"AppendDelayToFixed:    | {Val(_appendDelayToFixed)} | AppendDelayToOtp: ");
             Output.WriteLine($"{Val(_appendDelayToOtp)} | Dormant:    {Val(_dormant)}");
-            Output.WriteLine(new string('-', 80));
+            Output.WriteLine(new string(c: '-', count: 80));
             Output.Write($"SerialVisibleToApi:    | {Val(_serialApi)} | UseNumericKeypad: ");
             Output.WriteLine($"{Val(_numericKeypad)} | 10msPacing: {Val(_use10msPacing)}");
-            Output.WriteLine(new string('-', 80));
+            Output.WriteLine(new string(c: '-', count: 80));
             Output.Write($"SerialVisibleToButton: | {Val(_serialButton)} | AppendTabToFixed: ");
             Output.WriteLine($"{Val(_appendTabToFixed)} | 20msPacing: {Val(_use20msPacing)}");
-            Output.WriteLine(new string('-', 80));
+            Output.WriteLine(new string(c: '-', count: 80));
             Output.Write($"SerialVisibleToUsb:    | {Val(_serialUsb)} | AppendTabToOtp:   ");
             Output.WriteLine($"{Val(_appendTabToOtp)} | NoEnter:    {Val(_noEnter)}");
-            Output.WriteLine(new string('-', 80));
+            Output.WriteLine(new string(c: '-', count: 80));
             Output.Write($"SendTabFirst:          | {Val(_sendTabFirst)} | FastTrigger:      ");
             Output.WriteLine($"{Val(_fastTrigger)} | InvertLed:  {Val(_invertLed)}");
-            Output.WriteLine(new string('-', 80) + Environment.NewLine);
+            Output.WriteLine(new string(c: '-', count: 80) + Environment.NewLine);
 
             if (_force)
             {
@@ -271,7 +270,10 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             Output.WriteLine("Type anything else or hit [Ctrl] + [C] to abort.");
             return Console.ReadLine()?.ToLower() == "yes";
 
-            static string Val(bool val) => val ? "true " : "false";
+            static string Val(bool val)
+            {
+                return val ? "true " : "false";
+            }
         }
 
         #region Private Fields

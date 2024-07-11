@@ -21,17 +21,18 @@ namespace Yubico.YubiKey.Oath.Commands
     public class RenameCredentialCommandTests
     {
         private readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp,
-            HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
+            HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, digits: 6, counter: 0, requireTouch: false);
+
+        private readonly string newAccount = "test@example.com";
 
         private readonly string newIssuer = "test";
-        private readonly string newAccount = "test@example.com";
 
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
             var command = new RenameCommand(credential, newIssuer, newAccount);
 
-            Assert.Equal(0, command.CreateCommandApdu().Cla);
+            Assert.Equal(expected: 0, command.CreateCommandApdu().Cla);
         }
 
         [Fact]
@@ -39,7 +40,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new RenameCommand(credential, newIssuer, newAccount);
 
-            Assert.Equal(0x05, command.CreateCommandApdu().Ins);
+            Assert.Equal(expected: 0x05, command.CreateCommandApdu().Ins);
         }
 
         [Fact]
@@ -47,7 +48,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new RenameCommand(credential, newIssuer, newAccount);
 
-            Assert.Equal(0, command.CreateCommandApdu().P1);
+            Assert.Equal(expected: 0, command.CreateCommandApdu().P1);
         }
 
         [Fact]
@@ -55,7 +56,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new RenameCommand(credential, newIssuer, newAccount);
 
-            Assert.Equal(0, command.CreateCommandApdu().P2);
+            Assert.Equal(expected: 0, command.CreateCommandApdu().P2);
         }
 
         [Fact]
@@ -72,8 +73,8 @@ namespace Yubico.YubiKey.Oath.Commands
                 0x6d
             };
 
-            CommandApdu commandApdu = command.CreateCommandApdu();
-            ReadOnlyMemory<byte> data = commandApdu.Data;
+            var commandApdu = command.CreateCommandApdu();
+            var data = commandApdu.Data;
 
             Assert.Equal(dataList.Length, commandApdu.Nc);
             Assert.True(data.Span.SequenceEqual(dataList));
@@ -84,7 +85,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new RenameCommand(credential, newIssuer, newAccount);
-            RenameResponse? response = command.CreateResponseForApdu(responseApdu);
+            var response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is RenameResponse);
         }

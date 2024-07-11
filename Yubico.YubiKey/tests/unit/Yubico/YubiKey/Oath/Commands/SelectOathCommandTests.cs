@@ -23,34 +23,34 @@ namespace Yubico.YubiKey.Oath.Commands
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
-            Assert.Equal(0, GetSelectApplicationCommandApdu().Cla);
+            Assert.Equal(expected: 0, GetSelectApplicationCommandApdu().Cla);
         }
 
         [Fact]
         public void CreateCommandApdu_GetInsProperty_Returns0xA4()
         {
-            Assert.Equal(0xA4, GetSelectApplicationCommandApdu().Ins);
+            Assert.Equal(expected: 0xA4, GetSelectApplicationCommandApdu().Ins);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP1Property_Returns0x04()
         {
-            Assert.Equal(0x04, GetSelectApplicationCommandApdu().P1);
+            Assert.Equal(expected: 0x04, GetSelectApplicationCommandApdu().P1);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP2Property_ReturnsZero()
         {
-            Assert.Equal(0, GetSelectApplicationCommandApdu().P2);
+            Assert.Equal(expected: 0, GetSelectApplicationCommandApdu().P2);
         }
 
         [Fact]
         public void CreateCommandApdu_GetDataConstructedWithBytes_ReturnsBytes()
         {
-            byte[] aid = new byte[] { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01 };
+            var aid = new byte[] { 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01 };
             var selectApplicationCommand = new SelectOathCommand();
 
-            CommandApdu commandApdu = selectApplicationCommand.CreateCommandApdu();
+            var commandApdu = selectApplicationCommand.CreateCommandApdu();
 
             Assert.True(commandApdu.Data.Span.SequenceEqual(aid));
             Assert.Equal(aid.Length, commandApdu.Nc);
@@ -59,7 +59,7 @@ namespace Yubico.YubiKey.Oath.Commands
         [Fact]
         public void CreateCommandApdu_GetNe_ReturnsZero()
         {
-            Assert.Equal(0, GetSelectApplicationCommandApdu().Ne);
+            Assert.Equal(expected: 0, GetSelectApplicationCommandApdu().Ne);
         }
 
         [Fact]
@@ -67,7 +67,7 @@ namespace Yubico.YubiKey.Oath.Commands
         {
             var command = new SelectOathCommand();
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
-            SelectOathResponse? response = command.CreateResponseForApdu(responseApdu);
+            var response = command.CreateResponseForApdu(responseApdu);
 
             Assert.True(response is SelectOathResponse);
         }

@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
-using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
@@ -31,7 +29,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(3, 2049)]
         public void Format_WrongKeySize_Exception(int format, int keySize)
         {
-            byte[] digest = new byte[]
+            var digest = new byte[]
             {
                 0x01, 0xFF, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20
@@ -45,7 +43,7 @@ namespace Yubico.YubiKey.Cryptography
                     RsaFormat.FormatPkcs1Pss(digest, RsaFormat.Sha256, keySize)),
                 3 => Assert.Throws<ArgumentException>(() => RsaFormat.FormatPkcs1Encrypt(digest, keySize)),
                 _ => Assert.Throws<ArgumentException>(
-                    () => RsaFormat.FormatPkcs1Oaep(digest, RsaFormat.Sha256, keySize)),
+                    () => RsaFormat.FormatPkcs1Oaep(digest, RsaFormat.Sha256, keySize))
             };
         }
 
@@ -60,28 +58,28 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(4, 254)]
         public void Parse_WrongInputSize_Exception(int format, int bufferSize)
         {
-            byte[] buffer = new byte[bufferSize];
-            using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
+            var buffer = new byte[bufferSize];
+            using var random = RandomObjectUtility.GetRandomObject(fixedBytes: null);
             random.GetBytes(buffer);
 
-            Span<byte> digest = new Span<byte>(buffer).Slice(4, 20);
+            var digest = new Span<byte>(buffer).Slice(start: 4, length: 20);
 
 #pragma warning disable IDE0018 // VS reports this error, but the suggested change does not compile.
             byte[] outputBuffer;
 #pragma warning restore IDE0018 // Inline variable declaration
-            int digestAlgorithm = 0;
-            bool isVerified = false;
-            bool isValid = format switch
+            var digestAlgorithm = 0;
+            var isVerified = false;
+            var isValid = format switch
             {
                 1 => RsaFormat.TryParsePkcs1Verify(buffer, out digestAlgorithm, out outputBuffer),
                 2 => RsaFormat.TryParsePkcs1Pss(buffer, digest, RsaFormat.Sha1, out outputBuffer, out isVerified),
                 3 => RsaFormat.TryParsePkcs1Decrypt(buffer, out outputBuffer),
-                _ => RsaFormat.TryParsePkcs1Oaep(buffer, RsaFormat.Sha1, out outputBuffer),
+                _ => RsaFormat.TryParsePkcs1Oaep(buffer, RsaFormat.Sha1, out outputBuffer)
             };
 
             Assert.False(isValid);
             Assert.Empty(outputBuffer);
-            Assert.Equal(0, digestAlgorithm);
+            Assert.Equal(expected: 0, digestAlgorithm);
             Assert.False(isVerified);
         }
 
@@ -94,7 +92,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(4, 106, 2048)]
         public void Format_WrongDigestAlg_Exception(int format, int digestAlgorithm, int keySize)
         {
-            byte[] digest = new byte[]
+            var digest = new byte[]
             {
                 0x01, 0xFF, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20
@@ -106,7 +104,7 @@ namespace Yubico.YubiKey.Cryptography
                     RsaFormat.FormatPkcs1Sign(digest, digestAlgorithm, keySize)),
                 2 => Assert.Throws<ArgumentException>(() => RsaFormat.FormatPkcs1Pss(digest, digestAlgorithm, keySize)),
                 _ => Assert.Throws<ArgumentException>(() =>
-                    RsaFormat.FormatPkcs1Oaep(digest, digestAlgorithm, keySize)),
+                    RsaFormat.FormatPkcs1Oaep(digest, digestAlgorithm, keySize))
             };
         }
 
@@ -117,9 +115,9 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(4, 104, 256)]
         public void Parse_WrongDigest_Exception(int format, int digestAlgorithm, int bufferSize)
         {
-            byte[] buffer = new byte[bufferSize];
-            byte[] digest = new byte[20];
-            RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
+            var buffer = new byte[bufferSize];
+            var digest = new byte[20];
+            var random = RandomObjectUtility.GetRandomObject(fixedBytes: null);
             random.GetBytes(buffer);
             buffer[0] &= 0x7F;
             random.GetBytes(digest);
@@ -130,9 +128,9 @@ namespace Yubico.YubiKey.Cryptography
             _ = format switch
             {
                 2 => Assert.Throws<ArgumentException>(() =>
-                    RsaFormat.TryParsePkcs1Pss(buffer, digest, digestAlgorithm, out outputBuffer, out bool isVerified)),
+                    RsaFormat.TryParsePkcs1Pss(buffer, digest, digestAlgorithm, out outputBuffer, out var isVerified)),
                 _ => Assert.Throws<ArgumentException>(() =>
-                    RsaFormat.TryParsePkcs1Oaep(buffer, digestAlgorithm, out outputBuffer)),
+                    RsaFormat.TryParsePkcs1Oaep(buffer, digestAlgorithm, out outputBuffer))
             };
         }
 
@@ -146,7 +144,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(RsaFormat.Sha512, 2048)]
         public void FormatP1Sign_WrongDigestLength_Exception(int digestAlgorithm, int keySize)
         {
-            byte[] digest = new byte[]
+            var digest = new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
@@ -154,12 +152,12 @@ namespace Yubico.YubiKey.Cryptography
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x39, 0x3A, 0x3B, 0x3C, 0x3D, 0x3E, 0x3F, 0x40
             };
 
-            int newSize = digestAlgorithm switch
+            var newSize = digestAlgorithm switch
             {
                 RsaFormat.Sha1 => 19,
                 RsaFormat.Sha256 => 31,
                 RsaFormat.Sha384 => 47,
-                _ => 63,
+                _ => 63
             };
 
             Array.Resize(ref digest, newSize);
@@ -173,7 +171,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(0x00, 0x01, 0x01)]
         public void ParseP1Sign_WrongMarkerBytes_ReturnFalse(byte leadByte, byte algByte, byte separator)
         {
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x00, 0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -189,18 +187,18 @@ namespace Yubico.YubiKey.Cryptography
             formattedData[1] = algByte;
             formattedData[76] = separator;
 
-            bool isValid =
-                RsaFormat.TryParsePkcs1Verify(formattedData, out int digestAlgorithm, out byte[] outputBuffer);
+            var isValid =
+                RsaFormat.TryParsePkcs1Verify(formattedData, out var digestAlgorithm, out var outputBuffer);
 
             Assert.False(isValid);
             Assert.Empty(outputBuffer);
-            Assert.Equal(0, digestAlgorithm);
+            Assert.Equal(expected: 0, digestAlgorithm);
         }
 
         [Fact]
         public void ParseP1Sign_SevenPadBytes_ReturnFalse()
         {
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x00, 0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x30, 0x75, 0x30, 0x0d, 0x06, 0x09,
                 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04, 0x02, 0x01, 0x05, 0x00, 0x04, 0x63, 0x01, 0x02, 0x03,
@@ -212,18 +210,18 @@ namespace Yubico.YubiKey.Cryptography
                 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20, 0x11, 0x22, 0x33
             };
 
-            bool isValid =
-                RsaFormat.TryParsePkcs1Verify(formattedData, out int digestAlgorithm, out byte[] outputBuffer);
+            var isValid =
+                RsaFormat.TryParsePkcs1Verify(formattedData, out var digestAlgorithm, out var outputBuffer);
 
             Assert.False(isValid);
             Assert.Empty(outputBuffer);
-            Assert.Equal(0, digestAlgorithm);
+            Assert.Equal(expected: 0, digestAlgorithm);
         }
 
         [Fact]
         public void ParseP1Sign_AllPadBytes_ReturnFalse()
         {
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x00, 0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -235,12 +233,12 @@ namespace Yubico.YubiKey.Cryptography
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
             };
 
-            bool isValid =
-                RsaFormat.TryParsePkcs1Verify(formattedData, out int digestAlgorithm, out byte[] outputBuffer);
+            var isValid =
+                RsaFormat.TryParsePkcs1Verify(formattedData, out var digestAlgorithm, out var outputBuffer);
 
             Assert.False(isValid);
             Assert.Empty(outputBuffer);
-            Assert.Equal(0, digestAlgorithm);
+            Assert.Equal(expected: 0, digestAlgorithm);
         }
 
         [Theory]
@@ -248,7 +246,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(0x01, false)]
         public void ParseP1Sign_WrongDigestInfo_ReturnFalse(byte oidByte, bool nullParams)
         {
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x00, 0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
                 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
@@ -261,7 +259,7 @@ namespace Yubico.YubiKey.Cryptography
             };
 
             formattedData[91] = oidByte;
-            int expectedAlgorithm = 0;
+            var expectedAlgorithm = 0;
             if (nullParams == false)
             {
                 formattedData[80] = 0x0E;
@@ -271,18 +269,18 @@ namespace Yubico.YubiKey.Cryptography
                 expectedAlgorithm = RsaFormat.Sha256;
             }
 
-            bool isValid =
-                RsaFormat.TryParsePkcs1Verify(formattedData, out int digestAlgorithm, out byte[] outputBuffer);
+            var isValid =
+                RsaFormat.TryParsePkcs1Verify(formattedData, out var digestAlgorithm, out var outputBuffer);
 
             Assert.False(isValid);
-            Assert.Equal(0x20, outputBuffer[^1]);
+            Assert.Equal(expected: 0x20, outputBuffer[^1]);
             Assert.Equal(expectedAlgorithm, digestAlgorithm);
         }
 
         [Fact]
         public void FormatPss_InvalidPS_Exception()
         {
-            byte[] digest = new byte[]
+            var digest = new byte[]
             {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20,
@@ -297,12 +295,12 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void ParsePss_WrongMSBit_ReturnFalse()
         {
-            byte[] digest = new byte[]
+            var digest = new byte[]
             {
                 0x01, 0xff, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20
             };
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x64, 0x92, 0xd1, 0x38, 0x24, 0x8a, 0x78, 0xe5, 0x64, 0x68, 0x92, 0xe7, 0x13, 0xc6, 0x81, 0xa0,
                 0xe9, 0xeb, 0x43, 0x8f, 0x54, 0x76, 0x55, 0x84, 0x16, 0x3e, 0x47, 0x76, 0x31, 0x6a, 0xc2, 0x7d,
@@ -316,8 +314,8 @@ namespace Yubico.YubiKey.Cryptography
 
             formattedData[0] = 0xe4;
 
-            bool isValid = RsaFormat.TryParsePkcs1Pss(formattedData, digest, RsaFormat.Sha256, out byte[] mPrimePlus,
-                out bool isVerified);
+            var isValid = RsaFormat.TryParsePkcs1Pss(formattedData, digest, RsaFormat.Sha256, out var mPrimePlus,
+                out var isVerified);
 
             Assert.False(isValid);
             Assert.Empty(mPrimePlus);
@@ -327,12 +325,12 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void ParsePss_WrongTrail_ReturnFalse()
         {
-            byte[] digest = new byte[]
+            var digest = new byte[]
             {
                 0x01, 0xff, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20
             };
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x64, 0x92, 0xd1, 0x38, 0x24, 0x8a, 0x78, 0xe5, 0x64, 0x68, 0x92, 0xe7, 0x13, 0xc6, 0x81, 0xa0,
                 0xe9, 0xeb, 0x43, 0x8f, 0x54, 0x76, 0x55, 0x84, 0x16, 0x3e, 0x47, 0x76, 0x31, 0x6a, 0xc2, 0x7d,
@@ -346,8 +344,8 @@ namespace Yubico.YubiKey.Cryptography
 
             formattedData[^1] = 0xcc;
 
-            bool isValid = RsaFormat.TryParsePkcs1Pss(formattedData, digest, RsaFormat.Sha256, out byte[] mPrimePlus,
-                out bool isVerified);
+            var isValid = RsaFormat.TryParsePkcs1Pss(formattedData, digest, RsaFormat.Sha256, out var mPrimePlus,
+                out var isVerified);
 
             Assert.False(isValid);
             Assert.Empty(mPrimePlus);
@@ -357,12 +355,12 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void ParsePss_WrongPSLength_ReturnFalse()
         {
-            byte[] digest = new byte[]
+            var digest = new byte[]
             {
                 0x01, 0xff, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20
             };
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x64, 0x92, 0xd1, 0x38, 0x24, 0x8a, 0x78, 0xe5, 0x64, 0x68, 0x92, 0xe7, 0x13, 0xc6, 0x81, 0xa0,
                 0xe9, 0xeb, 0x43, 0x8f, 0x54, 0x76, 0x55, 0x84, 0x16, 0x3e, 0x47, 0x76, 0x31, 0x6a, 0xc2, 0x7d,
@@ -376,8 +374,8 @@ namespace Yubico.YubiKey.Cryptography
 
             formattedData[8] = 0x65;
 
-            bool isValid = RsaFormat.TryParsePkcs1Pss(formattedData, digest, RsaFormat.Sha256, out byte[] mPrimePlus,
-                out bool isVerified);
+            var isValid = RsaFormat.TryParsePkcs1Pss(formattedData, digest, RsaFormat.Sha256, out var mPrimePlus,
+                out var isVerified);
 
             Assert.False(isValid);
             Assert.Empty(mPrimePlus);
@@ -387,12 +385,12 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void ParsePss_WrongSeparator_ReturnFalse()
         {
-            byte[] digest = new byte[]
+            var digest = new byte[]
             {
                 0x01, 0xff, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20
             };
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x64, 0x92, 0xd1, 0x38, 0x24, 0x8a, 0x78, 0xe5, 0x64, 0x68, 0x92, 0xe7, 0x13, 0xc6, 0x81, 0xa0,
                 0xe9, 0xeb, 0x43, 0x8f, 0x54, 0x76, 0x55, 0x84, 0x16, 0x3e, 0x47, 0x76, 0x31, 0x6a, 0xc2, 0x7d,
@@ -406,8 +404,8 @@ namespace Yubico.YubiKey.Cryptography
 
             formattedData[62] = 0xcc;
 
-            bool isValid = RsaFormat.TryParsePkcs1Pss(formattedData, digest, RsaFormat.Sha256, out byte[] mPrimePlus,
-                out bool isVerified);
+            var isValid = RsaFormat.TryParsePkcs1Pss(formattedData, digest, RsaFormat.Sha256, out var mPrimePlus,
+                out var isVerified);
 
             Assert.False(isValid);
             Assert.Empty(mPrimePlus);
@@ -417,12 +415,12 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void ParsePss_WrongDigest_IsVerifiedFalse()
         {
-            byte[] digest = new byte[]
+            var digest = new byte[]
             {
                 0x01, 0xff, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20
             };
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x64, 0x92, 0xd1, 0x38, 0x24, 0x8a, 0x78, 0xe5, 0x64, 0x68, 0x92, 0xe7, 0x13, 0xc6, 0x81, 0xa0,
                 0xe9, 0xeb, 0x43, 0x8f, 0x54, 0x76, 0x55, 0x84, 0x16, 0x3e, 0x47, 0x76, 0x31, 0x6a, 0xc2, 0x7d,
@@ -435,8 +433,8 @@ namespace Yubico.YubiKey.Cryptography
             };
 
             digest[^1] = 0x21;
-            bool isValid =
-                RsaFormat.TryParsePkcs1Pss(formattedData, digest, RsaFormat.Sha256, out _, out bool isVerified);
+            var isValid =
+                RsaFormat.TryParsePkcs1Pss(formattedData, digest, RsaFormat.Sha256, out _, out var isVerified);
 
             Assert.True(isValid);
             Assert.False(isVerified);
@@ -447,14 +445,14 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(2048)]
         public void Format_P15Encrypt_TooMuchData_Exception(int keySize)
         {
-            int dataLength = 118;
+            var dataLength = 118;
             if (keySize == 2048)
             {
                 dataLength = 246;
             }
 
-            byte[] buffer = new byte[dataLength];
-            using RandomNumberGenerator random = RandomObjectUtility.GetRandomObject(null);
+            var buffer = new byte[dataLength];
+            using var random = RandomObjectUtility.GetRandomObject(fixedBytes: null);
             random.GetBytes(buffer);
 
             _ = Assert.Throws<ArgumentException>(() => RsaFormat.FormatPkcs1Encrypt(buffer, keySize));
@@ -465,7 +463,7 @@ namespace Yubico.YubiKey.Cryptography
         [InlineData(0x00, 0x01)]
         public void ParseP1Decrypt_WrongMarkerBytes_ReturnFalse(byte leadByte, byte algByte)
         {
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x00, 0x02, 0x43, 0x8f, 0x54, 0x76, 0x55, 0x84, 0x16, 0x3e, 0x47, 0x76, 0x31, 0x6a, 0xc2, 0x7d,
                 0x27, 0x0f, 0x6c, 0x4f, 0xd5, 0x17, 0x52, 0xea, 0x3e, 0xce, 0xe5, 0xd6, 0x5c, 0x09, 0xac, 0xc2,
@@ -480,7 +478,7 @@ namespace Yubico.YubiKey.Cryptography
             formattedData[0] = leadByte;
             formattedData[1] = algByte;
 
-            bool isValid = RsaFormat.TryParsePkcs1Decrypt(formattedData, out byte[] outputBuffer);
+            var isValid = RsaFormat.TryParsePkcs1Decrypt(formattedData, out var outputBuffer);
 
             Assert.False(isValid);
             Assert.Empty(outputBuffer);
@@ -489,7 +487,7 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void ParseP1Decrypt_NotEnoughPad_ReturnFalse()
         {
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x00, 0x02, 0x43, 0x8f, 0x54, 0x76, 0x55, 0x84, 0x16, 0x3e, 0x47, 0x76, 0x31, 0x6a, 0xc2, 0x7d,
                 0x27, 0x0f, 0x6c, 0x4f, 0xd5, 0x17, 0x52, 0xea, 0x3e, 0xce, 0xe5, 0xd6, 0x5c, 0x09, 0xac, 0xc2,
@@ -503,7 +501,7 @@ namespace Yubico.YubiKey.Cryptography
 
             formattedData[8] = 0;
 
-            bool isValid = RsaFormat.TryParsePkcs1Decrypt(formattedData, out byte[] outputBuffer);
+            var isValid = RsaFormat.TryParsePkcs1Decrypt(formattedData, out var outputBuffer);
 
             Assert.False(isValid);
             Assert.Empty(outputBuffer);
@@ -512,7 +510,7 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void ParseP1Decrypt_NoSeparator_ReturnFalse()
         {
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x00, 0x02, 0x43, 0x8f, 0x54, 0x76, 0x55, 0x84, 0x16, 0x3e, 0x47, 0x76, 0x31, 0x6a, 0xc2, 0x7d,
                 0x27, 0x0f, 0x6c, 0x4f, 0xd5, 0x17, 0x52, 0xea, 0x3e, 0xce, 0xe5, 0xd6, 0x5c, 0x09, 0xac, 0xc2,
@@ -526,7 +524,7 @@ namespace Yubico.YubiKey.Cryptography
 
             formattedData[95] = 0x01;
 
-            bool isValid = RsaFormat.TryParsePkcs1Decrypt(formattedData, out byte[] outputBuffer);
+            var isValid = RsaFormat.TryParsePkcs1Decrypt(formattedData, out var outputBuffer);
 
             Assert.False(isValid);
             Assert.Empty(outputBuffer);
@@ -535,7 +533,7 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void ParseOaep_WrongDigest_ReturnFalse()
         {
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x00, 0xaf, 0x3d, 0x2d, 0x62, 0xe4, 0xb6, 0xd0, 0xa4, 0x8d, 0xf8, 0xad, 0xee, 0x6d, 0xa9, 0x13,
                 0xa2, 0x7b, 0x67, 0xd3, 0x65, 0x4e, 0x2c, 0x8a, 0x1a, 0x9d, 0x4b, 0xed, 0x95, 0x80, 0x69, 0x8d,
@@ -547,7 +545,7 @@ namespace Yubico.YubiKey.Cryptography
                 0x1c, 0x2c, 0x9c, 0x0f, 0x3c, 0xc2, 0xdd, 0xaa, 0x94, 0xc9, 0x56, 0x1f, 0x95, 0xb5, 0x6c, 0x20
             };
 
-            bool isValid = RsaFormat.TryParsePkcs1Oaep(formattedData, RsaFormat.Sha512, out byte[] outputData);
+            var isValid = RsaFormat.TryParsePkcs1Oaep(formattedData, RsaFormat.Sha512, out var outputData);
 
             Assert.False(isValid);
             Assert.Empty(outputData);
@@ -556,7 +554,7 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void ParseOaep_WrongLeadByte_ReturnFalse()
         {
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x00, 0xaf, 0x3d, 0x2d, 0x62, 0xe4, 0xb6, 0xd0, 0xa4, 0x8d, 0xf8, 0xad, 0xee, 0x6d, 0xa9, 0x13,
                 0xa2, 0x7b, 0x67, 0xd3, 0x65, 0x4e, 0x2c, 0x8a, 0x1a, 0x9d, 0x4b, 0xed, 0x95, 0x80, 0x69, 0x8d,
@@ -570,7 +568,7 @@ namespace Yubico.YubiKey.Cryptography
 
             formattedData[0] = 0x01;
 
-            bool isValid = RsaFormat.TryParsePkcs1Oaep(formattedData, RsaFormat.Sha256, out byte[] outputData);
+            var isValid = RsaFormat.TryParsePkcs1Oaep(formattedData, RsaFormat.Sha256, out var outputData);
 
             Assert.False(isValid);
             Assert.Empty(outputData);
@@ -579,7 +577,7 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void ParseOaep_WrongData_ReturnFalse()
         {
-            byte[] formattedData = new byte[]
+            var formattedData = new byte[]
             {
                 0x00, 0xaf, 0x3d, 0x2d, 0x62, 0xe4, 0xb6, 0xd0, 0xa4, 0x8d, 0xf8, 0xad, 0xee, 0x6d, 0xa9, 0x13,
                 0xa2, 0x7b, 0x67, 0xd3, 0x65, 0x4e, 0x2c, 0x8a, 0x1a, 0x9d, 0x4b, 0xed, 0x95, 0x80, 0x69, 0x8d,
@@ -593,7 +591,7 @@ namespace Yubico.YubiKey.Cryptography
 
             formattedData[^1] = 0x21;
 
-            bool isValid = RsaFormat.TryParsePkcs1Oaep(formattedData, RsaFormat.Sha256, out byte[] outputData);
+            var isValid = RsaFormat.TryParsePkcs1Oaep(formattedData, RsaFormat.Sha256, out var outputData);
 
             Assert.False(isValid);
             Assert.Empty(outputData);

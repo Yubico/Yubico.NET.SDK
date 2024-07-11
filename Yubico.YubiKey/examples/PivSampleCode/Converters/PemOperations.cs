@@ -81,15 +81,15 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 totalLength += suffix.Length;
 
                 temp = new char[totalLength];
-                Array.Copy(prefix, 0, temp, 0, prefix.Length);
+                Array.Copy(prefix, sourceIndex: 0, temp, destinationIndex: 0, prefix.Length);
                 int count = Convert.ToBase64CharArray(
-                    encoding, 0, encoding.Length,
+                    encoding, offsetIn: 0, encoding.Length,
                     temp, prefix.Length,
                     Base64FormattingOptions.InsertLineBreaks);
-                Array.Copy(suffix, 0, temp, prefix.Length + count, suffix.Length);
+                Array.Copy(suffix, sourceIndex: 0, temp, prefix.Length + count, suffix.Length);
                 totalLength = prefix.Length + suffix.Length + count;
                 char[] returnValue = new char[totalLength];
-                Array.Copy(temp, 0, returnValue, 0, totalLength);
+                Array.Copy(temp, sourceIndex: 0, returnValue, destinationIndex: 0, totalLength);
 
                 return returnValue;
             }
@@ -126,15 +126,15 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             int titleLength = 0;
 
             // Find the title and verify the header and footer match.
-            if (CompareToTarget(pemString, 0, Part1.ToCharArray()))
+            if (CompareToTarget(pemString, offset: 0, Part1.ToCharArray()))
             {
                 int indexStart = Part1Length;
-                int indexEnd = Array.FindIndex<char>(pemString, indexStart, x => x == '-');
+                int indexEnd = Array.FindIndex(pemString, indexStart, x => x == '-');
                 if (indexEnd > 0)
                 {
                     titleLength = indexEnd - indexStart;
                     char[] titleChars = new char[titleLength];
-                    Array.Copy(pemString, indexStart, titleChars, 0, titleLength);
+                    Array.Copy(pemString, indexStart, titleChars, destinationIndex: 0, titleLength);
                     title = new string(titleChars);
                     isValid = VerifyPemHeaderAndFooter(pemString, title);
                 }
@@ -187,7 +187,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             bool returnValue = false;
             if (pemKeyString.Length > targetStart.Length + targetEnd.Length)
             {
-                if (CompareToTarget(pemKeyString, 0, targetStart))
+                if (CompareToTarget(pemKeyString, offset: 0, targetStart))
                 {
                     returnValue = CompareToTarget(pemKeyString, pemKeyString.Length - targetEnd.Length, targetEnd);
                 }

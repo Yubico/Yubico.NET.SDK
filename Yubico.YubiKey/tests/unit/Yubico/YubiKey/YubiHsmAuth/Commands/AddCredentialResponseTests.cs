@@ -12,9 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -25,9 +22,9 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void Constructor_ReturnsObject()
         {
-            ResponseApdu apdu = new ResponseApdu(new byte[0], SWConstants.Success);
+            var apdu = new ResponseApdu(new byte[0], SWConstants.Success);
 
-            AddCredentialResponse response = new AddCredentialResponse(apdu);
+            var response = new AddCredentialResponse(apdu);
 
             Assert.NotNull(response);
         }
@@ -35,9 +32,9 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void ResponseStatus_GivenStatusWord0x6983_ReturnsFailed()
         {
-            ResponseApdu apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
+            var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
 
-            AddCredentialResponse response = new AddCredentialResponse(apdu);
+            var response = new AddCredentialResponse(apdu);
 
             Assert.Equal(ResponseStatus.Failed, response.Status);
         }
@@ -45,11 +42,11 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void StatusMessage_GivenStatusWord0x6983_ReturnsCorrectMessage()
         {
-            string expectedMessage = "A credential with that label already exists.";
+            var expectedMessage = "A credential with that label already exists.";
 
-            ResponseApdu apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
+            var apdu = new ResponseApdu(new byte[0], SWConstants.AuthenticationMethodBlocked);
 
-            AddCredentialResponse response = new AddCredentialResponse(apdu);
+            var response = new AddCredentialResponse(apdu);
 
             Assert.Equal(expectedMessage, response.StatusMessage);
         }
@@ -58,9 +55,9 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void ResponseStatus_GivenStatusWord0x63C0_ReturnsAuthenticationRequired()
         {
-            ResponseApdu apdu = new ResponseApdu(new byte[0], SWConstants.VerifyFail);
+            var apdu = new ResponseApdu(new byte[0], SWConstants.VerifyFail);
 
-            AddCredentialResponse response = new AddCredentialResponse(apdu);
+            var response = new AddCredentialResponse(apdu);
 
             Assert.Equal(ResponseStatus.AuthenticationRequired, response.Status);
         }

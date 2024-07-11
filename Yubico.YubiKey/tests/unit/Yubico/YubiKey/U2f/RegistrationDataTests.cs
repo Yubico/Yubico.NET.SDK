@@ -13,13 +13,10 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
+using System.Globalization;
 using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Xunit;
 using Yubico.Core.Buffers;
-using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f
 {
@@ -28,24 +25,26 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void Constructor_GivenIncorrectUserPublicKey_ThrowsArgumentException()
         {
-            _ = Assert.Throws<ArgumentException>(() => new RegistrationData(GetEncodedRegistration(false, true)));
+            _ = Assert.Throws<ArgumentException>(() =>
+                new RegistrationData(GetEncodedRegistration(validPubKey: false, validKeyHandle: true)));
         }
 
         [Fact]
         public void Constructor_IncorrectKeyHandle_ThrowsArgumentException()
         {
-            _ = Assert.Throws<ArgumentException>(() => new RegistrationData(GetEncodedRegistration(true, false)));
+            _ = Assert.Throws<ArgumentException>(() =>
+                new RegistrationData(GetEncodedRegistration(validPubKey: true, validKeyHandle: false)));
         }
 
         [Fact]
         public void Constructor_GivenGoodData_SetsUserPublicKeyCorrectly()
         {
-            RegistrationData registrationData = GetGoodRegistrationData();
+            var registrationData = GetGoodRegistrationData();
 
             var pubKeyPoint = new ECPoint
             {
-                X = registrationData.UserPublicKey.Slice(1, 32).ToArray(),
-                Y = registrationData.UserPublicKey.Slice(33, 32).ToArray(),
+                X = registrationData.UserPublicKey.Slice(start: 1, length: 32).ToArray(),
+                Y = registrationData.UserPublicKey.Slice(start: 33, length: 32).ToArray()
             };
             Assert.Equal(GetPubKeyX(), Hex.BytesToHex(pubKeyPoint.X));
             Assert.Equal(GetPubKeyY(), Hex.BytesToHex(pubKeyPoint.Y));
@@ -54,9 +53,9 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void Constructor_GivenGoodData_SetsKeyHandle()
         {
-            RegistrationData registrationData = GetGoodRegistrationData();
+            var registrationData = GetGoodRegistrationData();
 
-            string expected = GetKeyHandle(true, out string _);
+            var expected = GetKeyHandle(isValid: true, out var _);
 
             Assert.Equal(expected, Hex.BytesToHex(registrationData.KeyHandle.ToArray()));
         }
@@ -64,7 +63,7 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void Constructor_GivenGoodData_SetsCertificate()
         {
-            RegistrationData registrationData = GetGoodRegistrationData();
+            var registrationData = GetGoodRegistrationData();
 
             Assert.Equal(GetAttestationCert(), Hex.BytesToHex(registrationData.AttestationCert.RawData));
         }
@@ -72,7 +71,7 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void Constructor_GivenGoodData_SetsSignature()
         {
-            RegistrationData registrationData = GetGoodRegistrationData();
+            var registrationData = GetGoodRegistrationData();
 
             Assert.Equal(GetRegSignature(), Hex.BytesToHex(registrationData.Signature.ToArray()));
         }
@@ -80,7 +79,7 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void IsSignatureValid_GivenBadClientDataHash_ThrowsArgumentException()
         {
-            RegistrationData registrationData = GetGoodRegistrationData();
+            var registrationData = GetGoodRegistrationData();
 
             _ = Assert.Throws<ArgumentException>(() => registrationData.VerifySignature(new byte[10], new byte[32]));
         }
@@ -88,7 +87,7 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void IsSignatureValid_GivenBadAppId_ThrowsArgumentException()
         {
-            RegistrationData registrationData = GetGoodRegistrationData();
+            var registrationData = GetGoodRegistrationData();
 
             _ = Assert.Throws<ArgumentException>(() => registrationData.VerifySignature(new byte[32], new byte[10]));
         }
@@ -96,10 +95,10 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void VerifySignature_GivenCorrectData_ReturnsTrue()
         {
-            byte[] appId = Hex.HexToBytes(GetAppId(true));
-            byte[] clientDataHash = Hex.HexToBytes(GetClientDataHash(true));
+            var appId = Hex.HexToBytes(GetAppId(isValid: true));
+            var clientDataHash = Hex.HexToBytes(GetClientDataHash(isValid: true));
 
-            RegistrationData registrationData = GetGoodRegistrationData();
+            var registrationData = GetGoodRegistrationData();
 
             Assert.True(registrationData.VerifySignature(appId, clientDataHash));
         }
@@ -107,17 +106,17 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void IsSignatureValid_GivenIncorrectData_ReturnsFalse()
         {
-            byte[] appId = Hex.HexToBytes(GetAppId(false));
-            byte[] clientDataHash = Hex.HexToBytes(GetClientDataHash(true));
+            var appId = Hex.HexToBytes(GetAppId(isValid: false));
+            var clientDataHash = Hex.HexToBytes(GetClientDataHash(isValid: true));
 
-            RegistrationData registrationData = GetGoodRegistrationData();
+            var registrationData = GetGoodRegistrationData();
 
             Assert.False(registrationData.VerifySignature(appId, clientDataHash));
         }
 
         public static RegistrationData GetGoodRegistrationData()
         {
-            return new RegistrationData(GetEncodedRegistration(true, true));
+            return new RegistrationData(GetEncodedRegistration(validPubKey: true, validKeyHandle: true));
         }
 
         // Return a byte array containing an encoded RegistrationData.
@@ -126,9 +125,9 @@ namespace Yubico.YubiKey.U2f
         // Same for the other valids.
         public static byte[] GetEncodedRegistration(bool validPubKey, bool validKeyHandle)
         {
-            string keyHandle = GetKeyHandle(validKeyHandle, out string handleLength);
-            string regData = "05" + GetPubKey(validPubKey) + handleLength + keyHandle + GetAttestationCert() +
-                             GetRegSignature();
+            var keyHandle = GetKeyHandle(validKeyHandle, out var handleLength);
+            var regData = "05" + GetPubKey(validPubKey) + handleLength + keyHandle + GetAttestationCert() +
+                          GetRegSignature();
 
             return Hex.HexToBytes(regData);
         }
@@ -138,7 +137,7 @@ namespace Yubico.YubiKey.U2f
         // value with incorrect data
         public static string GetPubKey(bool isValid)
         {
-            string prefix = "03";
+            var prefix = "03";
             if (isValid)
             {
                 prefix = "04";
@@ -178,18 +177,18 @@ namespace Yubico.YubiKey.U2f
 
         public static byte[] GetGoodAuthDataArray()
         {
-            byte[] signature = RegistrationDataTests.GetAuthSignatureArray(
-                out U2fAuthenticationType controlByte, out int counter);
+            var signature = GetAuthSignatureArray(
+                out var controlByte, out var counter);
 
-            byte[] authData = new byte[signature.Length + 5];
-            int userPresence = controlByte == U2fAuthenticationType.EnforceUserPresence ? 1 : 0;
+            var authData = new byte[signature.Length + 5];
+            var userPresence = controlByte == U2fAuthenticationType.EnforceUserPresence ? 1 : 0;
             authData[0] = (byte)userPresence;
             authData[1] = (byte)(counter >> 24);
             authData[2] = (byte)(counter >> 16);
             authData[3] = (byte)(counter >> 8);
             authData[4] = (byte)counter;
 
-            Array.Copy(signature, 0, authData, 5, signature.Length);
+            Array.Copy(signature, sourceIndex: 0, authData, destinationIndex: 5, signature.Length);
 
             return authData;
         }
@@ -210,8 +209,8 @@ namespace Yubico.YubiKey.U2f
 
         public static byte[] GetKeyHandleArray(bool isValid, out byte handleLength)
         {
-            byte[] returnValue = Hex.HexToBytes(GetKeyHandle(isValid, out string hLength));
-            int numValue = int.Parse(hLength, System.Globalization.NumberStyles.HexNumber);
+            var returnValue = Hex.HexToBytes(GetKeyHandle(isValid, out var hLength));
+            var numValue = int.Parse(hLength, NumberStyles.HexNumber);
             handleLength = (byte)numValue;
             return returnValue;
         }

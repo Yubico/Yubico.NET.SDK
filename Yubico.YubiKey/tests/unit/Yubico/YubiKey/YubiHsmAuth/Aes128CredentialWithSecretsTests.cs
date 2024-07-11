@@ -14,12 +14,13 @@
 
 using System;
 using Xunit;
-using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.YubiHsmAuth
 {
     public class Aes128CredentialWithSecretsTests
     {
+        private const bool _touchRequired = true;
+
         private static readonly byte[] _password =
             new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
 
@@ -30,7 +31,6 @@ namespace Yubico.YubiKey.YubiHsmAuth
             new byte[16] { 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31 };
 
         private static readonly string _label = "abc";
-        private const bool _touchRequired = true;
 
         private Aes128CredentialWithSecrets _aes128Cred => new Aes128CredentialWithSecrets(
             _password,
@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [InlineData(17)]
         public void Constructor_InvalidEncKeyLength_ThrowsArgException(int len)
         {
-            byte[] invalidEncKey = new byte[len];
+            var invalidEncKey = new byte[len];
 
             _ = Assert.Throws<ArgumentException>(
                 () => new Aes128CredentialWithSecrets(
@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [InlineData(17)]
         public void Constructor_InvalidMacKeyLength_ThrowsArgException(int len)
         {
-            byte[] invalidMacKey = new byte[len];
+            var invalidMacKey = new byte[len];
 
             _ = Assert.Throws<ArgumentException>(
                 () => new Aes128CredentialWithSecrets(
@@ -82,7 +82,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [Fact]
         public void Constructor_SetGetLabel()
         {
-            Aes128CredentialWithSecrets aes128Cred = new Aes128CredentialWithSecrets(
+            var aes128Cred = new Aes128CredentialWithSecrets(
                 _password,
                 _encKey,
                 _macKey,
@@ -95,7 +95,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [Fact]
         public void Constructor_SetGetTouchRequired()
         {
-            Aes128CredentialWithSecrets aes128Cred = new Aes128CredentialWithSecrets(
+            var aes128Cred = new Aes128CredentialWithSecrets(
                 _password,
                 _encKey,
                 _macKey,

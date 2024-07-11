@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ReadPinProtect_IsEmpty_Correct(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ResetApplication();
 
-                PinProtectedData pinProtect = pivSession.ReadObject<PinProtectedData>();
+                var pinProtect = pivSession.ReadObject<PinProtectedData>();
 
                 Assert.True(pinProtect.IsEmpty);
             }
@@ -45,12 +45,12 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteMgmtKey_Read_NotEmpty(StandardTestDevice testDeviceType)
         {
-            Memory<byte> mgmtKey = GetArbitraryMgmtKey();
+            var mgmtKey = GetArbitraryMgmtKey();
 
             using var pinProtect = new PinProtectedData();
             pinProtect.SetManagementKey(mgmtKey);
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -62,7 +62,7 @@ namespace Yubico.YubiKey.Piv
                     pivSession.ResetApplication();
                     pivSession.WriteObject(pinProtect);
 
-                    PinProtectedData pinProtectCopy = pivSession.ReadObject<PinProtectedData>();
+                    var pinProtectCopy = pivSession.ReadObject<PinProtectedData>();
                     Assert.False(pinProtectCopy.IsEmpty);
                 }
                 finally
@@ -76,12 +76,12 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteMgmtKey_Read_Correct(StandardTestDevice testDeviceType)
         {
-            Memory<byte> mgmtKey = GetArbitraryMgmtKey();
+            var mgmtKey = GetArbitraryMgmtKey();
 
             using var pinProtect = new PinProtectedData();
             pinProtect.SetManagementKey(mgmtKey);
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -93,13 +93,13 @@ namespace Yubico.YubiKey.Piv
                     pivSession.ResetApplication();
                     pivSession.WriteObject(pinProtect);
 
-                    PinProtectedData pinProtectCopy = pivSession.ReadObject<PinProtectedData>();
+                    var pinProtectCopy = pivSession.ReadObject<PinProtectedData>();
 
                     _ = Assert.NotNull(pinProtectCopy.ManagementKey);
                     if (!(pinProtectCopy.ManagementKey is null))
                     {
                         var getData = (ReadOnlyMemory<byte>)pinProtectCopy.ManagementKey;
-                        bool isValid = mgmtKey.Span.SequenceEqual(getData.Span);
+                        var isValid = mgmtKey.Span.SequenceEqual(getData.Span);
                         Assert.True(isValid);
                     }
                 }

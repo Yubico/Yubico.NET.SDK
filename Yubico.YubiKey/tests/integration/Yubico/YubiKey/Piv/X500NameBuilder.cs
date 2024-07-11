@@ -91,20 +91,20 @@ namespace Yubico.YubiKey.Piv
         // If no elements had been added, this method will throw an exception.
         public byte[] GetEncodedName()
         {
-            Array enumValues = Enum.GetValues(typeof(X500NameElement));
+            var enumValues = Enum.GetValues(typeof(X500NameElement));
 
             // The DER encoding is simply the SEQUENCE of each element.
             // Get each encoding in order. That is, no matter what order they
             // were added to _elements, get them out in the order of the Enum.
-            int count = 0;
+            var count = 0;
             var tlvWriter = new TlvWriter();
-            using (tlvWriter.WriteNestedTlv(0x30))
+            using (tlvWriter.WriteNestedTlv(tag: 0x30))
             {
                 foreach (X500NameElement? nameElement in enumValues)
                 {
                     if (!(nameElement is null))
                     {
-                        if (_elements.TryGetValue((X500NameElement)nameElement, out byte[]? encodedValue))
+                        if (_elements.TryGetValue((X500NameElement)nameElement, out var encodedValue))
                         {
                             tlvWriter.WriteEncoded(encodedValue);
                             count++;
@@ -138,7 +138,7 @@ namespace Yubico.YubiKey.Piv
         State = 1,
         Locality = 2,
         Organization = 3,
-        CommonName = 4,
+        CommonName = 4
     }
 
     public static class X500NameElementExtensions
@@ -159,14 +159,14 @@ namespace Yubico.YubiKey.Piv
         // then convert those chars into bytes by keeping only the low order byte.
         public static byte[] GetDerEncoding(this X500NameElement nameElement, string value)
         {
-            byte[] valueBytes = Array.Empty<byte>();
+            var valueBytes = Array.Empty<byte>();
 
             if (!(value is null))
             {
                 // Convert the string to a byte array.
-                char[] valueArray = value.ToCharArray();
+                var valueArray = value.ToCharArray();
                 valueBytes = new byte[valueArray.Length];
-                for (int index = 0; index < valueArray.Length; index++)
+                for (var index = 0; index < valueArray.Length; index++)
                 {
                     valueBytes[index] = (byte)valueArray[index];
                 }
@@ -175,12 +175,12 @@ namespace Yubico.YubiKey.Piv
             if (nameElement.IsValidValueLength(valueBytes.Length))
             {
                 var tlvWriter = new TlvWriter();
-                using (tlvWriter.WriteNestedTlv(0x31))
+                using (tlvWriter.WriteNestedTlv(tag: 0x31))
                 {
-                    using (tlvWriter.WriteNestedTlv(0x30))
+                    using (tlvWriter.WriteNestedTlv(tag: 0x30))
                     {
-                        tlvWriter.WriteValue(0x06, nameElement.GetOid());
-                        tlvWriter.WriteValue(0x13, valueBytes);
+                        tlvWriter.WriteValue(tag: 0x06, nameElement.GetOid());
+                        tlvWriter.WriteValue(tag: 0x13, valueBytes);
                     }
                 }
 
@@ -190,25 +190,31 @@ namespace Yubico.YubiKey.Piv
             throw new ArgumentException(X500NameBuilder.InvalidElementMessage);
         }
 
-        public static byte[] GetOid(this X500NameElement nameElement) => nameElement switch
+        public static byte[] GetOid(this X500NameElement nameElement)
         {
-            X500NameElement.Country => new byte[] { 0x55, 0x04, 0x06 },
-            X500NameElement.State => new byte[] { 0x55, 0x04, 0x08 },
-            X500NameElement.Locality => new byte[] { 0x55, 0x04, 0x07 },
-            X500NameElement.Organization => new byte[] { 0x55, 0x04, 0x0A },
-            X500NameElement.CommonName => new byte[] { 0x55, 0x04, 0x03 },
-            _ => throw new ArgumentException(X500NameBuilder.InvalidElementMessage),
-        };
+            return nameElement switch
+            {
+                X500NameElement.Country => new byte[] { 0x55, 0x04, 0x06 },
+                X500NameElement.State => new byte[] { 0x55, 0x04, 0x08 },
+                X500NameElement.Locality => new byte[] { 0x55, 0x04, 0x07 },
+                X500NameElement.Organization => new byte[] { 0x55, 0x04, 0x0A },
+                X500NameElement.CommonName => new byte[] { 0x55, 0x04, 0x03 },
+                _ => throw new ArgumentException(X500NameBuilder.InvalidElementMessage)
+            };
+        }
 
         // Is the given length valid for the specified nameElement?
-        public static bool IsValidValueLength(this X500NameElement nameElement, int length) => nameElement switch
+        public static bool IsValidValueLength(this X500NameElement nameElement, int length)
         {
-            X500NameElement.Country => length == 2,
-            X500NameElement.State => length > 0 && length < 32,
-            X500NameElement.Locality => length > 0 && length < 32,
-            X500NameElement.Organization => length > 0 && length < 64,
-            X500NameElement.CommonName => length > 0 && length < 64,
-            _ => throw new ArgumentException(X500NameBuilder.InvalidElementMessage),
-        };
+            return nameElement switch
+            {
+                X500NameElement.Country => length == 2,
+                X500NameElement.State => length > 0 && length < 32,
+                X500NameElement.Locality => length > 0 && length < 32,
+                X500NameElement.Organization => length > 0 && length < 64,
+                X500NameElement.CommonName => length > 0 && length < 64,
+                _ => throw new ArgumentException(X500NameBuilder.InvalidElementMessage)
+            };
+        }
     }
 }

@@ -23,6 +23,16 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class Hotp : OtpPluginBase
     {
+        public Hotp(IOutput output) : base(output)
+        {
+            // We're reusing ParameterUse.Generate, so we'll update the description.
+            Parameters["generate"].Description = "Generate a random key. Conflicts with key.";
+            // We're reusing ParameterUse.Key, so we'll update it.
+            var keyParam = Parameters["key"];
+            keyParam.Description = "Key. This is to be provided as a base-32 encoded string.";
+            keyParam.Type = typeof(Base32Bytes);
+        }
+
         public override string Name => "HOTP";
 
         public override string Description => "Program an HMAC-SHA1 OATH-HOTP credential.";
@@ -35,16 +45,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             | ParameterUse.NoEnter
             | ParameterUse.Generate
             | ParameterUse.Force;
-
-        public Hotp(IOutput output) : base(output)
-        {
-            // We're reusing ParameterUse.Generate, so we'll update the description.
-            Parameters["generate"].Description = "Generate a random key. Conflicts with key.";
-            // We're reusing ParameterUse.Key, so we'll update it.
-            Parameter keyParam = Parameters["key"];
-            keyParam.Description = "Key. This is to be provided as a base-32 encoded string.";
-            keyParam.Type = typeof(Base32Bytes);
-        }
 
         public override void HandleParameters()
         {
@@ -99,7 +99,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             if (exceptions.Count > 0)
             {
                 throw exceptions.Count == 1
-                    ? exceptions[0]
+                    ? exceptions[index: 0]
                     : new AggregateException(
                         $"{exceptions.Count} errors encountered.",
                         exceptions);
@@ -118,7 +118,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             try
             {
-                ConfigureHotp op = GetOperation(otp);
+                var op = GetOperation(otp);
                 op.Execute();
                 OutputResult(op);
             }
@@ -134,7 +134,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
         private ConfigureHotp GetOperation(OtpSession otp)
         {
-            ConfigureHotp op = otp.ConfigureHotp(_slot)
+            var op = otp.ConfigureHotp(_slot)
                 .UseCurrentAccessCode((SlotAccessCode)_currentAccessCode)
                 .SetNewAccessCode((SlotAccessCode)_newAccessCode)
                 .AppendCarriageReturn(!_noEnter)

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -27,7 +26,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(8)]
         public void IsValidPinLength_CorrectPinLength_ReturnsTrue(int pinLength)
         {
-            bool isValidLength = PivPinUtilities.IsValidPinLength(pinLength);
+            var isValidLength = PivPinUtilities.IsValidPinLength(pinLength);
             Assert.True(isValidLength);
         }
 
@@ -42,7 +41,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(17)]
         public void IsValidPinLength_BadPinLength_ReturnsFalse(int pinLength)
         {
-            bool isValidLength = PivPinUtilities.IsValidPinLength(pinLength);
+            var isValidLength = PivPinUtilities.IsValidPinLength(pinLength);
             Assert.False(isValidLength);
         }
 
@@ -52,7 +51,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(0x63C0)]
         public void HasRetryCountSW_WrongPinWithRetriesStatusWord_ReturnsTrue(short statusWord)
         {
-            bool result = PivPinUtilities.HasRetryCount(statusWord);
+            var result = PivPinUtilities.HasRetryCount(statusWord);
 
             Assert.True(result);
         }
@@ -65,7 +64,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(SWConstants.FunctionError)]
         public void HasRetryCountSW_NotWrongPinStatusWord_ReturnsFalse(short statusWord)
         {
-            bool result = PivPinUtilities.HasRetryCount(statusWord);
+            var result = PivPinUtilities.HasRetryCount(statusWord);
 
             Assert.False(result);
         }
@@ -76,8 +75,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(0x63C0)]
         public void ParseSW_WrongPin_ReturnsAuthRequired(short statusWord)
         {
-            int count = (int)(statusWord & 15);
-            int parseResponse = PivPinUtilities.GetRetriesRemaining(statusWord);
+            var count = statusWord & 15;
+            var parseResponse = PivPinUtilities.GetRetriesRemaining(statusWord);
 
             Assert.Equal(count, parseResponse);
         }
@@ -96,26 +95,26 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void CopyPin_NullPin_ThrowsException()
         {
-            _ = Assert.Throws<ArgumentException>(() => PivPinUtilities.CopySinglePinWithPadding(null));
+            _ = Assert.Throws<ArgumentException>(() => PivPinUtilities.CopySinglePinWithPadding(pin: null));
         }
 
         [Fact]
         public void CopyPin_BadPin_ThrowsException()
         {
-            byte[] badPin = new byte[] { 0x31, 0x32, 0x33 };
+            var badPin = new byte[] { 0x31, 0x32, 0x33 };
             _ = Assert.Throws<ArgumentException>(() => PivPinUtilities.CopySinglePinWithPadding(badPin));
         }
 
         [Fact]
         public void CopyPin_ReturnsPaddedPin()
         {
-            byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-            byte[] paddedPin = PivPinUtilities.CopySinglePinWithPadding(pin);
+            var pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            var paddedPin = PivPinUtilities.CopySinglePinWithPadding(pin);
 
-            Assert.Equal(8, paddedPin.Length);
+            Assert.Equal(expected: 8, paddedPin.Length);
 
-            bool compareResult = true;
-            int index = 0;
+            var compareResult = true;
+            var index = 0;
             for (; index < pin.Length; index++)
             {
                 if (paddedPin[index] != pin[index])
@@ -138,44 +137,44 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void CopyTwoPins_NullPin1_ThrowsException()
         {
-            byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-            _ = Assert.Throws<ArgumentException>(() => PivPinUtilities.CopyTwoPinsWithPadding(null, pin));
+            var pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            _ = Assert.Throws<ArgumentException>(() => PivPinUtilities.CopyTwoPinsWithPadding(firstPin: null, pin));
         }
 
         [Fact]
         public void CopyTwoPins_NullPin2_ThrowsException()
         {
-            byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-            _ = Assert.Throws<ArgumentException>(() => PivPinUtilities.CopyTwoPinsWithPadding(pin, null));
+            var pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            _ = Assert.Throws<ArgumentException>(() => PivPinUtilities.CopyTwoPinsWithPadding(pin, secondPin: null));
         }
 
         [Fact]
         public void CopyTwoPins_BadPin1_ThrowsException()
         {
-            byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35 };
-            byte[] puk = new byte[] { 0x41, 0x42, 0x43, 0x44, 0x45, 0x46 };
+            var pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35 };
+            var puk = new byte[] { 0x41, 0x42, 0x43, 0x44, 0x45, 0x46 };
             _ = Assert.Throws<ArgumentException>(() => PivPinUtilities.CopyTwoPinsWithPadding(pin, puk));
         }
 
         [Fact]
         public void CopyTwoPins_BadPin2_ThrowsException()
         {
-            byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-            byte[] puk = new byte[] { 0x41, 0x42, 0x43, 0x44, 0x45 };
+            var pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            var puk = new byte[] { 0x41, 0x42, 0x43, 0x44, 0x45 };
             _ = Assert.Throws<ArgumentException>(() => PivPinUtilities.CopyTwoPinsWithPadding(pin, puk));
         }
 
         [Fact]
         public void Copy2Pins_ReturnsPaddedPin()
         {
-            byte[] pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
-            byte[] puk = new byte[] { 0x41, 0x42, 0x43, 0x44, 0x45, 0x46 };
-            byte[] paddedPin = PivPinUtilities.CopyTwoPinsWithPadding(pin, puk);
+            var pin = new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
+            var puk = new byte[] { 0x41, 0x42, 0x43, 0x44, 0x45, 0x46 };
+            var paddedPin = PivPinUtilities.CopyTwoPinsWithPadding(pin, puk);
 
-            Assert.Equal(16, paddedPin.Length);
+            Assert.Equal(expected: 16, paddedPin.Length);
 
-            bool compareResult = true;
-            int index = 0;
+            var compareResult = true;
+            var index = 0;
             for (; index < pin.Length; index++)
             {
                 if (paddedPin[index] != pin[index])

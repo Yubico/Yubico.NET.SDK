@@ -21,8 +21,8 @@ namespace Yubico.PlatformInterop
     [Trait("Category", "Simple")]
     public class ListenHidTests
     {
-        private int _counter;
         private readonly ITestOutputHelper _output;
+        private int _counter;
 
         public ListenHidTests(ITestOutputHelper output)
         {

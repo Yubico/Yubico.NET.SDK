@@ -23,24 +23,24 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    /// Tests device that it will not accept PINs or PUKs which violate PIN complexity
-    /// Before running the tests, reset the FIDO2/PIV application on the device
+    ///     Tests device that it will not accept PINs or PUKs which violate PIN complexity
+    ///     Before running the tests, reset the FIDO2/PIV application on the device
     /// </summary>
     public class PinComplexityTests
     {
-        private readonly ReadOnlyMemory<byte> _defaultPin = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("123456"));
-
         private readonly ReadOnlyMemory<byte> _complexPin =
             new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("11234567"));
 
-        private readonly ReadOnlyMemory<byte> _invalidPin =
-            new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("33333333"));
+        private readonly ReadOnlyMemory<byte> _complexPuk =
+            new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("11234567"));
+
+        private readonly ReadOnlyMemory<byte> _defaultPin = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("123456"));
 
         private readonly ReadOnlyMemory<byte> _defaultPuk =
             new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("12345678"));
 
-        private readonly ReadOnlyMemory<byte> _complexPuk =
-            new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("11234567"));
+        private readonly ReadOnlyMemory<byte> _invalidPin =
+            new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("33333333"));
 
         private readonly ReadOnlyMemory<byte> _invalidPuk =
             new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("33333333"));
@@ -147,8 +147,8 @@ namespace Yubico.YubiKey
 
         private class PinComplexityKeyCollector
         {
-            public ReadOnlyMemory<byte> NewPin { get; set; }
             private ReadOnlyMemory<byte> _currentPin;
+            public ReadOnlyMemory<byte> NewPin { get; set; }
 
             public bool KeyCollectorDelegate(KeyEntryData keyEntryData)
             {

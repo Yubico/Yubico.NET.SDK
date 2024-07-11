@@ -26,17 +26,17 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ConnectOathHasData(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            using IYubiKeyConnection connection = testDevice.Connect(YubiKeyApplication.Piv);
+            using var connection = testDevice.Connect(YubiKeyApplication.Piv);
             Assert.NotNull(connection);
 
             // Connect does not actually select the app.  We need a command for this.  It can be anything.
             _ = connection!.SendCommand(new GetSerialNumberCommand());
 
             Assert.NotNull(connection!.SelectApplicationData);
-            GenericSelectApplicationData? data =
+            var data =
                 Assert.IsType<GenericSelectApplicationData>(connection.SelectApplicationData);
 
             Assert.False(data!.RawData.IsEmpty);

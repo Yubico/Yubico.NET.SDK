@@ -38,18 +38,18 @@ namespace Yubico.YubiKey.Fido2.Commands
 
         private readonly RelyingParty _rp = new RelyingParty("SomeRpId")
         {
-            Name = "SomeRpName",
+            Name = "SomeRpName"
         };
 
         private readonly UserEntity _user =
             new UserEntity(new ReadOnlyMemory<byte>(new byte[] { 0x11, 0x22, 0x33, 0x44 }))
             {
                 Name = "SomeUserName",
-                DisplayName = "User",
+                DisplayName = "User"
             };
 
         public MakeCredBlobTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, pin: null)
         {
         }
 
@@ -59,26 +59,26 @@ namespace Yubico.YubiKey.Fido2.Commands
             var protocol = new PinUvAuthProtocolTwo();
 
             var getInfoCmd = new GetInfoCommand();
-            GetInfoResponse getInfoRsp = Connection.SendCommand(getInfoCmd);
+            var getInfoRsp = Connection.SendCommand(getInfoCmd);
             Assert.Equal(ResponseStatus.Success, getInfoRsp.Status);
-            AuthenticatorInfo authInfo = getInfoRsp.GetData();
+            var authInfo = getInfoRsp.GetData();
 
-            bool isValid = GetParamsMake(authInfo, protocol, out MakeCredentialParameters makeParams);
+            var isValid = GetParamsMake(authInfo, protocol, out var makeParams);
             Assert.True(isValid);
 
             var cmd = new MakeCredentialCommand(makeParams);
-            MakeCredentialResponse rsp = Connection.SendCommand(cmd);
+            var rsp = Connection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
-            MakeCredentialData cData = rsp.GetData();
+            var cData = rsp.GetData();
             isValid = cData.VerifyAttestation(makeParams.ClientDataHash);
             Assert.True(isValid);
 
-            isValid = GetParamsAssert(protocol, out GetAssertionParameters assertionParams);
+            isValid = GetParamsAssert(protocol, out var assertionParams);
             Assert.True(isValid);
             var getAssertionCmd = new GetAssertionCommand(assertionParams);
-            GetAssertionResponse getAssertionRsp = Connection.SendCommand(getAssertionCmd);
+            var getAssertionRsp = Connection.SendCommand(getAssertionCmd);
             Assert.Equal(ResponseStatus.Success, getAssertionRsp.Status);
-            GetAssertionData aData = getAssertionRsp.GetData();
+            var aData = getAssertionRsp.GetData();
             Assert.NotNull(cData.AuthenticatorData.CredentialPublicKey);
             if (!(cData.AuthenticatorData.CredentialPublicKey is null))
             {
@@ -97,18 +97,18 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             makeParams = new MakeCredentialParameters(_rp, _user);
 
-            if (!GetPinToken(protocol, PinUvAuthTokenPermissions.None, out byte[] pinToken))
+            if (!GetPinToken(protocol, PinUvAuthTokenPermissions.None, out var pinToken))
             {
                 return false;
             }
 
-            byte[] pinUvAuthParam = protocol.AuthenticateUsingPinToken(pinToken, _clientDataHash);
+            var pinUvAuthParam = protocol.AuthenticateUsingPinToken(pinToken, _clientDataHash);
 
             makeParams.ClientDataHash = _clientDataHash;
             makeParams.Protocol = protocol.Protocol;
             makeParams.PinUvAuthParam = pinUvAuthParam;
 
-            makeParams.AddOption(AuthenticatorOptions.rk, true);
+            makeParams.AddOption(AuthenticatorOptions.rk, optionValue: true);
             makeParams.AddCredBlobExtension(_credBlobValue, authInfo);
 
             return true;
@@ -120,17 +120,17 @@ namespace Yubico.YubiKey.Fido2.Commands
         {
             assertionParams = new GetAssertionParameters(_rp, _clientDataHash);
 
-            if (!GetPinToken(protocol, PinUvAuthTokenPermissions.None, out byte[] pinToken))
+            if (!GetPinToken(protocol, PinUvAuthTokenPermissions.None, out var pinToken))
             {
                 return false;
             }
 
-            byte[] pinUvAuthParam = protocol.AuthenticateUsingPinToken(pinToken, _clientDataHash);
+            var pinUvAuthParam = protocol.AuthenticateUsingPinToken(pinToken, _clientDataHash);
 
             assertionParams.Protocol = protocol.Protocol;
             assertionParams.PinUvAuthParam = pinUvAuthParam;
 
-            assertionParams.AddOption("up", true);
+            assertionParams.AddOption("up", optionValue: true);
             assertionParams.AddExtension("credBlob", new byte[] { 0xF5 });
 
             return true;
@@ -138,7 +138,7 @@ namespace Yubico.YubiKey.Fido2.Commands
 
         private bool CheckCredBlob(GetAssertionData aData)
         {
-            byte[] credBlobData = aData.AuthenticatorData.GetCredBlobExtension();
+            var credBlobData = aData.AuthenticatorData.GetCredBlobExtension();
             if (MemoryExtensions.SequenceEqual<byte>(credBlobData, _credBlobValue))
             {
                 return true;

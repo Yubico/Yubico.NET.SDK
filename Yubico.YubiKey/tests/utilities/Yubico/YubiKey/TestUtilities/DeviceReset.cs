@@ -13,7 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
+using System.Threading;
+using Yubico.YubiKey.Management.Commands;
 using Yubico.YubiKey.Oath;
 using Yubico.YubiKey.Piv;
 using Yubico.YubiKey.YubiHsmAuth;
@@ -21,15 +22,15 @@ using Yubico.YubiKey.YubiHsmAuth;
 namespace Yubico.YubiKey.TestUtilities
 {
     /// <summary>
-    /// These methods help get the YubiKey under test into a known state
-    /// by enabling capabilities and resetting applications.
+    ///     These methods help get the YubiKey under test into a known state
+    ///     by enabling capabilities and resetting applications.
     /// </summary>
     public class DeviceReset
     {
         /// <summary>
-        /// Enables all USB and NFC capabilities
-        /// and resets the PIV, OATH, and YubiHSM Auth applications
-        /// to the default state
+        ///     Enables all USB and NFC capabilities
+        ///     and resets the PIV, OATH, and YubiHSM Auth applications
+        ///     to the default state
         /// </summary>
         public static IYubiKeyDevice ResetAll(IYubiKeyDevice key)
         {
@@ -42,7 +43,7 @@ namespace Yubico.YubiKey.TestUtilities
         }
 
         /// <summary>
-        /// Resets the PIV application to the default state.
+        ///     Resets the PIV application to the default state.
         /// </summary>
         public static IYubiKeyDevice ResetPiv(IYubiKeyDevice key)
         {
@@ -55,7 +56,7 @@ namespace Yubico.YubiKey.TestUtilities
         }
 
         /// <summary>
-        /// Resets the OATH application to the default state.
+        ///     Resets the OATH application to the default state.
         /// </summary>
         public static IYubiKeyDevice ResetOath(IYubiKeyDevice key)
         {
@@ -68,7 +69,7 @@ namespace Yubico.YubiKey.TestUtilities
         }
 
         /// <summary>
-        /// Resets the YubiHSM Auth application to the default state.
+        ///     Resets the YubiHSM Auth application to the default state.
         /// </summary>
         public static IYubiKeyDevice ResetYubiHsmAuth(IYubiKeyDevice key)
         {
@@ -81,26 +82,26 @@ namespace Yubico.YubiKey.TestUtilities
         }
 
         /// <summary>
-        /// Enables all USB and NFC capabilities.
+        ///     Enables all USB and NFC capabilities.
         /// </summary>
         /// <remarks>
-        /// The <paramref name="key"/> must have a serial number. The serial
-        /// number is what is used to find the YubiKey after it resets. The
-        /// "re-found" <c>IYubiKeyDevice</c> is returned by this method.
+        ///     The <paramref name="key" /> must have a serial number. The serial
+        ///     number is what is used to find the YubiKey after it resets. The
+        ///     "re-found" <c>IYubiKeyDevice</c> is returned by this method.
         /// </remarks>
         public static IYubiKeyDevice EnableAllCapabilities(IYubiKeyDevice key)
         {
-            int serialNumber =
+            var serialNumber =
                 key.SerialNumber ?? throw new InvalidOperationException("Serial number required");
 
-            var setCommand = new Management.Commands.SetDeviceInfoCommand
+            var setCommand = new SetDeviceInfoCommand
             {
                 EnabledUsbCapabilities = key.AvailableUsbCapabilities,
                 EnabledNfcCapabilities = key.AvailableNfcCapabilities,
-                ResetAfterConfig = true,
+                ResetAfterConfig = true
             };
 
-            IYubiKeyResponse setDeviceInfoResponse = SetDeviceInfo(key, setCommand);
+            var setDeviceInfoResponse = SetDeviceInfo(key, setCommand);
 
             if (setDeviceInfoResponse.Status != ResponseStatus.Success)
             {
@@ -108,14 +109,14 @@ namespace Yubico.YubiKey.TestUtilities
             }
 
             // Get the new device handle once the YubiKey reconnects
-            System.Threading.Thread.Sleep(1000);
+            Thread.Sleep(millisecondsTimeout: 1000);
             key = TestDeviceSelection.RenewDeviceEnumeration(serialNumber);
 
             return key;
         }
 
         /// <summary>
-        /// Sets which USB features are enabled (and disabled).
+        ///     Sets which USB features are enabled (and disabled).
         /// </summary>
         private static IYubiKeyDevice SetEnabledUsbCapabilities(
             IYubiKeyDevice key,
@@ -126,13 +127,13 @@ namespace Yubico.YubiKey.TestUtilities
                 throw new InvalidOperationException(ExceptionMessages.MustEnableOneAvailableUsbCapability);
             }
 
-            var setCommand = new Management.Commands.SetDeviceInfoCommand
+            var setCommand = new SetDeviceInfoCommand
             {
                 EnabledUsbCapabilities = yubiKeyCapabilities,
-                ResetAfterConfig = true,
+                ResetAfterConfig = true
             };
 
-            IYubiKeyResponse setDeviceInfoResponse = SetDeviceInfo(key, setCommand);
+            var setDeviceInfoResponse = SetDeviceInfo(key, setCommand);
 
             if (setDeviceInfoResponse.Status != ResponseStatus.Success)
             {
@@ -143,19 +144,19 @@ namespace Yubico.YubiKey.TestUtilities
         }
 
         /// <summary>
-        /// Sets which NFC features are enabled (and disabled).
+        ///     Sets which NFC features are enabled (and disabled).
         /// </summary>
         private static IYubiKeyDevice SetEnabledNfcCapabilities(
             IYubiKeyDevice key,
             YubiKeyCapabilities yubiKeyCapabilities)
         {
-            var setCommand = new Management.Commands.SetDeviceInfoCommand
+            var setCommand = new SetDeviceInfoCommand
             {
                 EnabledNfcCapabilities = yubiKeyCapabilities,
-                ResetAfterConfig = true,
+                ResetAfterConfig = true
             };
 
-            IYubiKeyResponse setDeviceInfoResponse = SetDeviceInfo(key, setCommand);
+            var setDeviceInfoResponse = SetDeviceInfo(key, setCommand);
 
             if (setDeviceInfoResponse.Status != ResponseStatus.Success)
             {
@@ -167,13 +168,13 @@ namespace Yubico.YubiKey.TestUtilities
 
         private static IYubiKeyResponse SetDeviceInfo(
             IYubiKeyDevice key,
-            Management.Commands.SetDeviceInfoBaseCommand baseCommand)
+            SetDeviceInfoBaseCommand baseCommand)
         {
             IYubiKeyCommand<IYubiKeyResponse> command;
 
-            if (key.TryConnect(YubiKeyApplication.Management, out IYubiKeyConnection? connection))
+            if (key.TryConnect(YubiKeyApplication.Management, out var connection))
             {
-                command = new Management.Commands.SetDeviceInfoCommand(baseCommand);
+                command = new SetDeviceInfoCommand(baseCommand);
             }
             else if (key.TryConnect(YubiKeyApplication.Otp, out connection))
             {

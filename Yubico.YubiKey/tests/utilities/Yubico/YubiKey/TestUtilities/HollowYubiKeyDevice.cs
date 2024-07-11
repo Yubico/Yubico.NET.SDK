@@ -31,73 +31,6 @@ namespace Yubico.YubiKey.TestUtilities
     {
         private readonly bool _alwaysAuthenticatePiv;
 
-        public bool HasSmartCard { get; }
-        public bool HasHidFido { get; }
-        public bool HasHidKeyboard { get; }
-
-        public Transport AvailableTransports => Transport.All;
-
-        #region IYubiKeyDeviceInfo
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities AvailableUsbCapabilities { get; set; }
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities EnabledUsbCapabilities { get; private set; }
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities AvailableNfcCapabilities { get; private set; }
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities EnabledNfcCapabilities { get; private set; }
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities FipsApproved { get; private set; }
-
-        /// <inheritdoc />
-        public YubiKeyCapabilities FipsCapable { get; private set; }
-
-        public YubiKeyCapabilities ResetBlocked { get; private set; }
-
-        public bool IsNfcRestricted { get; } = false;
-        public string? PartNumber { get; }
-        public bool IsPinComplexityEnabled { get; } = false;
-
-        /// <inheritdoc />
-        public int? SerialNumber { get; private set; }
-
-        /// <inheritdoc />
-        public bool IsFipsSeries { get; private set; }
-
-        /// <inheritdoc />
-        public bool IsSkySeries { get; private set; }
-
-        /// <inheritdoc />
-        public FormFactor FormFactor { get; private set; }
-
-        /// <inheritdoc />
-        public FirmwareVersion FirmwareVersion { get; set; }
-
-        /// <inheritdoc />
-        public TemplateStorageVersion TemplateStorageVersion { get; set; }
-
-        /// <inheritdoc />
-        public ImageProcessorVersion ImageProcessorVersion { get; set; }
-
-        /// <inheritdoc />
-        public int AutoEjectTimeout { get; private set; }
-
-        /// <inheritdoc />
-        public byte ChallengeResponseTimeout { get; private set; }
-
-        /// <inheritdoc />
-        public DeviceFlags DeviceFlags { get; private set; }
-
-        /// <inheritdoc />
-        public bool ConfigurationLocked { get; private set; }
-
-        #endregion
-
         // If no arg is given, the object will never authenticate or verify PIV
         // elements. But if it is given and it is true, any time PIV auth or
         // verification is requested, it will do so, assuming the caller uses the
@@ -142,11 +75,17 @@ namespace Yubico.YubiKey.TestUtilities
             EnabledUsbCapabilities = 0;
         }
 
+        public bool HasSmartCard { get; }
+        public bool HasHidFido { get; }
+        public bool HasHidKeyboard { get; }
+
+        public Transport AvailableTransports => Transport.All;
+
         public IYubiKeyConnection Connect(YubiKeyApplication yubikeyApplication)
         {
             var connection = new HollowConnection(yubikeyApplication, FirmwareVersion)
             {
-                AlwaysAuthenticatePiv = _alwaysAuthenticatePiv,
+                AlwaysAuthenticatePiv = _alwaysAuthenticatePiv
             };
 
             return connection;
@@ -203,14 +142,20 @@ namespace Yubico.YubiKey.TestUtilities
             throw new NotImplementedException();
         }
 
-        public void SetEnabledNfcCapabilities(YubiKeyCapabilities yubiKeyCapabilities) =>
+        public void SetEnabledNfcCapabilities(YubiKeyCapabilities yubiKeyCapabilities)
+        {
             throw new NotImplementedException();
+        }
 
-        public void SetEnabledUsbCapabilities(YubiKeyCapabilities yubiKeyCapabilities) =>
+        public void SetEnabledUsbCapabilities(YubiKeyCapabilities yubiKeyCapabilities)
+        {
             throw new NotImplementedException();
+        }
 
-        public void SetChallengeResponseTimeout(int seconds) =>
+        public void SetChallengeResponseTimeout(int seconds)
+        {
             throw new NotImplementedException();
+        }
 
         public int CompareTo(IYubiKeyDevice? other)
         {
@@ -268,5 +213,66 @@ namespace Yubico.YubiKey.TestUtilities
         {
             throw new NotImplementedException();
         }
+
+        #region IYubiKeyDeviceInfo
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities AvailableUsbCapabilities { get; set; }
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities EnabledUsbCapabilities { get; }
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities AvailableNfcCapabilities { get; }
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities EnabledNfcCapabilities { get; }
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities FipsApproved { get; }
+
+        /// <inheritdoc />
+        public YubiKeyCapabilities FipsCapable { get; }
+
+        public YubiKeyCapabilities ResetBlocked { get; }
+
+        public bool IsNfcRestricted { get; } = false;
+        public string? PartNumber { get; }
+        public bool IsPinComplexityEnabled { get; } = false;
+
+        /// <inheritdoc />
+        public int? SerialNumber { get; }
+
+        /// <inheritdoc />
+        public bool IsFipsSeries { get; }
+
+        /// <inheritdoc />
+        public bool IsSkySeries { get; }
+
+        /// <inheritdoc />
+        public FormFactor FormFactor { get; }
+
+        /// <inheritdoc />
+        public FirmwareVersion FirmwareVersion { get; set; }
+
+        /// <inheritdoc />
+        public TemplateStorageVersion TemplateStorageVersion { get; set; }
+
+        /// <inheritdoc />
+        public ImageProcessorVersion ImageProcessorVersion { get; set; }
+
+        /// <inheritdoc />
+        public int AutoEjectTimeout { get; }
+
+        /// <inheritdoc />
+        public byte ChallengeResponseTimeout { get; }
+
+        /// <inheritdoc />
+        public DeviceFlags DeviceFlags { get; }
+
+        /// <inheritdoc />
+        public bool ConfigurationLocked { get; }
+
+        #endregion
     }
 }

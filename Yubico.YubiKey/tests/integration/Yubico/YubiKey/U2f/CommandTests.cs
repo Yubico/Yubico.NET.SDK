@@ -35,10 +35,10 @@ namespace Yubico.YubiKey.U2f
                 }
             }
 
-            IEnumerable<HidDevice> devices = HidDevice.GetHidDevices();
+            var devices = HidDevice.GetHidDevices();
             Assert.NotNull(devices);
 
-            HidDevice? deviceToUse = GetFidoHid(devices);
+            var deviceToUse = GetFidoHid(devices);
             Assert.NotNull(deviceToUse);
 
             if (deviceToUse is null)
@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.U2f
         public void RunGetDeviceInfo()
         {
             var cmd = new GetPagedDeviceInfoCommand();
-            GetPagedDeviceInfoResponse rsp = _fidoConnection.SendCommand(cmd);
+            var rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
             var deviceInfo = YubiKeyDeviceInfo.CreateFromResponseData(rsp.GetData());
@@ -83,16 +83,16 @@ namespace Yubico.YubiKey.U2f
         public void VerifyFipsMode()
         {
             var cmd = new VerifyFipsModeCommand();
-            VerifyFipsModeResponse rsp = _fidoConnection.SendCommand(cmd);
+            var rsp = _fidoConnection.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
 
-            bool getData = rsp.GetData();
+            var getData = rsp.GetData();
             Assert.False(getData);
         }
 
         public static HidDevice? GetFidoHid(IEnumerable<HidDevice> devices)
         {
-            foreach (HidDevice currentDevice in devices)
+            foreach (var currentDevice in devices)
             {
                 if (currentDevice.VendorId == 0x1050 &&
                     currentDevice.UsagePage == HidUsagePage.Fido)

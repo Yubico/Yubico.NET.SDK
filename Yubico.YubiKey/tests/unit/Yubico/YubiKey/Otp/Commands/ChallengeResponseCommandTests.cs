@@ -23,10 +23,13 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void OtpSlot_SetInvalidOtpSlot_ThrowsArgumentException()
         {
-            static void Action() => _ = new ChallengeResponseCommand(
-                (Slot)0x5, // Some invalid value
-                ChallengeResponseAlgorithm.HmacSha1,
-                Array.Empty<byte>());
+            static void Action()
+            {
+                _ = new ChallengeResponseCommand(
+                    (Slot)0x5, // Some invalid value
+                    ChallengeResponseAlgorithm.HmacSha1,
+                    Array.Empty<byte>());
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -34,10 +37,13 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void Algorithm_SetInvalidAlgorithm_ThrowsArgumentException()
         {
-            static void Action() => _ = new ChallengeResponseCommand(
-                Slot.LongPress,
-                (ChallengeResponseAlgorithm)0x5, // Some invalid value
-                Array.Empty<byte>());
+            static void Action()
+            {
+                _ = new ChallengeResponseCommand(
+                    Slot.LongPress,
+                    (ChallengeResponseAlgorithm)0x5, // Some invalid value
+                    Array.Empty<byte>());
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -50,7 +56,7 @@ namespace Yubico.YubiKey.Otp.Commands
                 ChallengeResponseAlgorithm.HmacSha1,
                 Array.Empty<byte>());
 
-            YubiKeyApplication application = command.Application;
+            var application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Otp, application);
         }
@@ -58,12 +64,12 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void FullConstructor_GivenParameters_SetsAllParameters()
         {
-            Slot expectedSlot = Slot.LongPress;
-            ChallengeResponseAlgorithm expectedAlgorithm = ChallengeResponseAlgorithm.HmacSha1;
+            var expectedSlot = Slot.LongPress;
+            var expectedAlgorithm = ChallengeResponseAlgorithm.HmacSha1;
             var command = new ChallengeResponseCommand(expectedSlot, expectedAlgorithm, Array.Empty<byte>());
 
-            Slot actualSlot = command.OtpSlot;
-            ChallengeResponseAlgorithm actualAlgorithm = command.Algorithm;
+            var actualSlot = command.OtpSlot;
+            var actualAlgorithm = command.Algorithm;
 
             Assert.Equal(expectedSlot, actualSlot);
             Assert.Equal(expectedAlgorithm, actualAlgorithm);
@@ -72,13 +78,13 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void FullConstructor_GivenChallenge_SetsChallengeInBuffer()
         {
-            byte[] expectedChallenge = new byte[] { 0, 1, 2, 3 };
+            var expectedChallenge = new byte[] { 0, 1, 2, 3 };
             var command = new ChallengeResponseCommand(
                 Slot.LongPress,
                 ChallengeResponseAlgorithm.HmacSha1,
                 expectedChallenge);
 
-            ReadOnlyMemory<byte> actualChallenge = command.CreateCommandApdu().Data;
+            var actualChallenge = command.CreateCommandApdu().Data;
 
             Assert.Equal(expectedChallenge, actualChallenge);
         }
@@ -86,10 +92,13 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void FullConstructor_YubicoOtpGivenChallengeThatIsNot6Bytes_ThrowsArgumentException()
         {
-            static void Action() => _ = new ChallengeResponseCommand(
-                Slot.LongPress,
-                ChallengeResponseAlgorithm.YubicoOtp,
-                Array.Empty<byte>());
+            static void Action()
+            {
+                _ = new ChallengeResponseCommand(
+                    Slot.LongPress,
+                    ChallengeResponseAlgorithm.YubicoOtp,
+                    Array.Empty<byte>());
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -97,10 +106,13 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void FullConstructor_HmacSha1GivenChallengeGreaterThan64Bytes_ThrowsArgumentException()
         {
-            static void Action() => _ = new ChallengeResponseCommand(
-                Slot.LongPress,
-                ChallengeResponseAlgorithm.HmacSha1,
-                new byte[65]);
+            static void Action()
+            {
+                _ = new ChallengeResponseCommand(
+                    Slot.LongPress,
+                    ChallengeResponseAlgorithm.HmacSha1,
+                    new byte[65]);
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -113,9 +125,9 @@ namespace Yubico.YubiKey.Otp.Commands
                 ChallengeResponseAlgorithm.HmacSha1,
                 Array.Empty<byte>());
 
-            byte cla = command.CreateCommandApdu().Cla;
+            var cla = command.CreateCommandApdu().Cla;
 
-            Assert.Equal(0, cla);
+            Assert.Equal(expected: 0, cla);
         }
 
         [Fact]
@@ -126,9 +138,9 @@ namespace Yubico.YubiKey.Otp.Commands
                 ChallengeResponseAlgorithm.HmacSha1,
                 Array.Empty<byte>());
 
-            byte ins = command.CreateCommandApdu().Ins;
+            var ins = command.CreateCommandApdu().Ins;
 
-            Assert.Equal(1, ins);
+            Assert.Equal(expected: 1, ins);
         }
 
         [Theory]
@@ -143,7 +155,7 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ChallengeResponseCommand(otpSlot, algorithm, new byte[] { 1, 2, 3, 4, 5, 6 });
 
-            byte actualSlotValue = command.CreateCommandApdu().P1;
+            var actualSlotValue = command.CreateCommandApdu().P1;
 
             Assert.Equal(expectedSlotValue, actualSlotValue);
         }
@@ -156,21 +168,21 @@ namespace Yubico.YubiKey.Otp.Commands
                 ChallengeResponseAlgorithm.HmacSha1,
                 Array.Empty<byte>());
 
-            byte p2 = command.CreateCommandApdu().P2;
+            var p2 = command.CreateCommandApdu().P2;
 
-            Assert.Equal(0, p2);
+            Assert.Equal(expected: 0, p2);
         }
 
         [Fact]
         public void CreateCommandApdu_GetNc_ReturnsChallengeSize()
         {
-            byte[] challenge = new byte[] { 1, 2, 3, 4 };
+            var challenge = new byte[] { 1, 2, 3, 4 };
             var command = new ChallengeResponseCommand(
                 Slot.LongPress,
                 ChallengeResponseAlgorithm.HmacSha1,
                 challenge);
 
-            int nc = command.CreateCommandApdu().Nc;
+            var nc = command.CreateCommandApdu().Nc;
 
             Assert.Equal(challenge.Length, nc);
         }

@@ -24,7 +24,10 @@ namespace Yubico.YubiKey.Otp
         public void CreateUriConfig_WithNullUri_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void Action() => _ = NdefConfig.CreateUriConfig(null);
+            static void Action()
+            {
+                _ = NdefConfig.CreateUriConfig(uri: null);
+            }
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             _ = Assert.Throws<ArgumentNullException>(Action);
@@ -33,7 +36,7 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void CreateUriConfig_OnSuccess_SecondByteAlwaysU()
         {
-            byte[] config = NdefConfig.CreateUriConfig(new Uri("https://www.test.com/"));
+            var config = NdefConfig.CreateUriConfig(new Uri("https://www.test.com/"));
 
             Assert.Equal((byte)'U', config[1]);
         }
@@ -41,18 +44,18 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void CreateUriConfig_RecognizedPrefix_ThirdByteIsPrefixCode()
         {
-            byte[] config = NdefConfig.CreateUriConfig(new Uri("https://www.test.com/"));
+            var config = NdefConfig.CreateUriConfig(new Uri("https://www.test.com/"));
 
-            Assert.Equal(2, config[2]);
+            Assert.Equal(expected: 2, config[2]);
         }
 
         [Fact]
         public void CreateUriConfig_RecognizedPrefix_UriWithoutPrefixInData()
         {
-            byte[] config = NdefConfig.CreateUriConfig(new Uri("https://www.test.com/"));
+            var config = NdefConfig.CreateUriConfig(new Uri("https://www.test.com/"));
 
-            Span<byte> expected = Encoding.ASCII.GetBytes("test.com/").AsSpan();
-            Span<byte> actual = config.AsSpan(3, 9);
+            var expected = Encoding.ASCII.GetBytes("test.com/").AsSpan();
+            var actual = config.AsSpan(start: 3, length: 9);
 
             Assert.True(expected.SequenceEqual(actual));
         }
@@ -60,18 +63,18 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void CreateUriConfig_UnrecognizedPrefix_PrefixCodeIsZero()
         {
-            byte[] config = NdefConfig.CreateUriConfig(new Uri("test://www.test.com/"));
+            var config = NdefConfig.CreateUriConfig(new Uri("test://www.test.com/"));
 
-            Assert.Equal(0, config[2]);
+            Assert.Equal(expected: 0, config[2]);
         }
 
         [Fact]
         public void CreateUriConfig_UnrecognizedPrefix_FullUriInData()
         {
-            byte[] config = NdefConfig.CreateUriConfig(new Uri("test://www.test.com/"));
+            var config = NdefConfig.CreateUriConfig(new Uri("test://www.test.com/"));
 
             Span<byte> expected = Encoding.ASCII.GetBytes("test://www.test.com/");
-            Span<byte> actual = config.AsSpan(3, expected.Length);
+            var actual = config.AsSpan(start: 3, expected.Length);
 
             Assert.True(expected.SequenceEqual(actual));
         }
@@ -79,8 +82,11 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void CreateUriConfig_EncodedUriLongerThanDataSize_ThrowsArgumentException()
         {
-            static void Action() => _ = NdefConfig.CreateUriConfig(
-                new Uri("https://www.1234567890.com/1234567890123456789012345678901234567890"));
+            static void Action()
+            {
+                _ = NdefConfig.CreateUriConfig(
+                    new Uri("https://www.1234567890.com/1234567890123456789012345678901234567890"));
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -89,7 +95,10 @@ namespace Yubico.YubiKey.Otp
         public void CreateTextConfig_WithNullValue_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void Action() => _ = NdefConfig.CreateTextConfig(null, "foo");
+            static void Action()
+            {
+                _ = NdefConfig.CreateTextConfig(value: null, "foo");
+            }
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             _ = Assert.Throws<ArgumentNullException>(Action);
@@ -99,7 +108,10 @@ namespace Yubico.YubiKey.Otp
         public void CreateTextConfig_WithNullLanguageCode_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void Action() => _ = NdefConfig.CreateTextConfig("foo", null);
+            static void Action()
+            {
+                _ = NdefConfig.CreateTextConfig("foo", languageCode: null);
+            }
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             _ = Assert.Throws<ArgumentNullException>(Action);
@@ -108,9 +120,12 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void CreateTextConfig_LargeValueAndLanguage_ThrowsArgumentException()
         {
-            static void Action() => _ = NdefConfig.CreateTextConfig(
-                "123456789012345678901234567890",
-                "123456789012345678901234567890");
+            static void Action()
+            {
+                _ = NdefConfig.CreateTextConfig(
+                    "123456789012345678901234567890",
+                    "123456789012345678901234567890");
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -118,10 +133,10 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void CreateTextConfig_OnSuccess_FirstByteIsDataLength()
         {
-            string value = "test";
-            int expectedLength = (value.Length * 2) + 1;
+            var value = "test";
+            var expectedLength = (value.Length * 2) + 1;
 
-            byte[] buffer = NdefConfig.CreateTextConfig(value, value);
+            var buffer = NdefConfig.CreateTextConfig(value, value);
             int actualLength = buffer[0];
 
             Assert.Equal(expectedLength, actualLength);
@@ -130,7 +145,7 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void CreateTextConfig_OnSuccess_SecondByteAlwaysT()
         {
-            byte[] config = NdefConfig.CreateTextConfig("test", "test");
+            var config = NdefConfig.CreateTextConfig("test", "test");
 
             Assert.Equal((byte)'T', config[1]);
         }
@@ -138,8 +153,8 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void CreateTextConfig_LanguageFieldLength_EncodedInThirdByte()
         {
-            string lang = "test";
-            byte[] config = NdefConfig.CreateTextConfig("foo", lang);
+            var lang = "test";
+            var config = NdefConfig.CreateTextConfig("foo", lang);
 
             Assert.Equal(lang.Length, config[2] & 0x3F);
         }
@@ -147,9 +162,12 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void CreateTextConfig_LanguageFieldLongerThan63_ThrowsArgumentException()
         {
-            static void Action() => _ = NdefConfig.CreateTextConfig(
-                "",
-                "1234567890123456789012345678901234567890123456789012345678901234");
+            static void Action()
+            {
+                _ = NdefConfig.CreateTextConfig(
+                    "",
+                    "1234567890123456789012345678901234567890123456789012345678901234");
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -157,19 +175,19 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void CreateTextConfig_EncodeAsUtf16_SetsMostSignificantBitInThirdByte()
         {
-            byte[] config = NdefConfig.CreateTextConfig("foo", "foo", true);
+            var config = NdefConfig.CreateTextConfig("foo", "foo", encodeAsUtf16: true);
 
-            Assert.Equal(0x80, config[2] & 0x80);
+            Assert.Equal(expected: 0x80, config[2] & 0x80);
         }
 
         [Fact]
         public void CreateTextConfig_EncodeAsUtf16_MessageIsUtf16BigEndian()
         {
-            string text = "test";
-            byte[] config = NdefConfig.CreateTextConfig(text, "", true);
+            var text = "test";
+            var config = NdefConfig.CreateTextConfig(text, "", encodeAsUtf16: true);
 
-            Span<byte> expected = Encoding.BigEndianUnicode.GetBytes(text).AsSpan();
-            Span<byte> actual = config.AsSpan(3, expected.Length);
+            var expected = Encoding.BigEndianUnicode.GetBytes(text).AsSpan();
+            var actual = config.AsSpan(start: 3, expected.Length);
 
             Assert.True(expected.SequenceEqual(actual));
         }
@@ -177,11 +195,11 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void CreateTextConfig_OnSuccess_MessageIsUtf8()
         {
-            string text = "test";
-            byte[] config = NdefConfig.CreateTextConfig(text, "", false);
+            var text = "test";
+            var config = NdefConfig.CreateTextConfig(text, "", encodeAsUtf16: false);
 
-            Span<byte> expected = Encoding.UTF8.GetBytes(text).AsSpan();
-            Span<byte> actual = config.AsSpan(3, expected.Length);
+            var expected = Encoding.UTF8.GetBytes(text).AsSpan();
+            var actual = config.AsSpan(start: 3, expected.Length);
 
             Assert.True(expected.SequenceEqual(actual));
         }

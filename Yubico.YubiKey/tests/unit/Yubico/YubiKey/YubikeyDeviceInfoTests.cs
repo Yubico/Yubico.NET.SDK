@@ -56,13 +56,14 @@ namespace Yubico.YubiKey
         {
             const int serialNumberTag = 0x02;
             Assert.Null(DeviceInfoFor(serialNumberTag).SerialNumber);
-            Assert.Equal(123456789, DeviceInfoFor(serialNumberTag, FromHex("075BCD15")).SerialNumber);
+            Assert.Equal(expected: 123456789, DeviceInfoFor(serialNumberTag, FromHex("075BCD15")).SerialNumber);
         }
 
         [Fact]
         public void CreateFromResponseData_Returns_ExpectedFirmwareVersion()
         {
-            Assert.Equal(new FirmwareVersion(5, 3, 4), DeviceInfoFor(0x05, FromHex("050304")).FirmwareVersion);
+            Assert.Equal(new FirmwareVersion(major: 5, minor: 3, patch: 4),
+                DeviceInfoFor(tag: 0x05, FromHex("050304")).FirmwareVersion);
         }
 
         [Theory]
@@ -167,7 +168,7 @@ namespace Yubico.YubiKey
         {
             const int templateStorageVersionTag = 0x20;
             Assert.Null(DeviceInfoFor(templateStorageVersionTag).TemplateStorageVersion);
-            Assert.Equal(new TemplateStorageVersion(5, 6, 6),
+            Assert.Equal(new TemplateStorageVersion(major: 5, minor: 6, patch: 6),
                 DeviceInfoFor(templateStorageVersionTag, FromHex("050606")).TemplateStorageVersion);
         }
 
@@ -176,16 +177,18 @@ namespace Yubico.YubiKey
         {
             const int imageProcessorVersionTag = 0x21;
             Assert.Null(DeviceInfoFor(imageProcessorVersionTag).ImageProcessorVersion);
-            Assert.Equal(new ImageProcessorVersion(7, 0, 5),
+            Assert.Equal(new ImageProcessorVersion(major: 7, minor: 0, patch: 5),
                 DeviceInfoFor(imageProcessorVersionTag, FromHex("070005")).ImageProcessorVersion);
         }
 
-        private static YubiKeyDeviceInfo DeviceInfoFor(int tag, FirmwareVersion? version = null) =>
-            DeviceInfoFor(tag, Array.Empty<byte>());
+        private static YubiKeyDeviceInfo DeviceInfoFor(int tag, FirmwareVersion? version = null)
+        {
+            return DeviceInfoFor(tag, Array.Empty<byte>());
+        }
 
         private static YubiKeyDeviceInfo DeviceInfoFor(int tag, byte[] data, FirmwareVersion? version = null)
         {
-            byte[] versionAsBytes = version is { }
+            var versionAsBytes = version is { }
                 ? VersionToBytes(version)
                 : VersionToBytes(FirmwareVersion.V2_2_0);
 
@@ -196,16 +199,21 @@ namespace Yubico.YubiKey
                 tlvs.Add(versionTag, versionAsBytes);
             }
 
-            YubiKeyDeviceInfo info = data.Length == 0
+            var info = data.Length == 0
                 ? new YubiKeyDeviceInfo()
                 : YubiKeyDeviceInfo.CreateFromResponseData(tlvs); //We're testing this method
 
             return info;
         }
 
-        private static byte[] VersionToBytes(FirmwareVersion version) =>
-            new[] { version.Major, version.Minor, version.Patch };
+        private static byte[] VersionToBytes(FirmwareVersion version)
+        {
+            return new[] { version.Major, version.Minor, version.Patch };
+        }
 
-        private static byte[] FromHex(string? hex) => hex != null ? Base16.DecodeText(hex) : Array.Empty<byte>();
+        private static byte[] FromHex(string? hex)
+        {
+            return hex != null ? Base16.DecodeText(hex) : Array.Empty<byte>();
+        }
     }
 }

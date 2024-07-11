@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System.Linq;
-using System.Security.Cryptography;
 using Xunit;
 using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.Piv.Commands;
@@ -28,7 +27,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void VerifyPin(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -37,7 +36,7 @@ namespace Yubico.YubiKey.Piv
 
                 Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-                bool isVerified = pivSession.TryVerifyPin();
+                var isVerified = pivSession.TryVerifyPin();
 
                 Assert.True(isVerified);
                 Assert.True(pivSession.PinVerified);
@@ -48,7 +47,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void VerifyPin_WrongPin(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -58,7 +57,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
                 collectorObj.KeyFlag = 1;
-                bool isVerified = pivSession.TryVerifyPin();
+                var isVerified = pivSession.TryVerifyPin();
 
                 Assert.False(isVerified);
                 Assert.False(pivSession.PinVerified);
@@ -75,7 +74,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void AuthenticateMgmtKey_Single(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -84,7 +83,7 @@ namespace Yubico.YubiKey.Piv
 
                 Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-                bool isAuthenticated = pivSession.TryAuthenticateManagementKey(false);
+                var isAuthenticated = pivSession.TryAuthenticateManagementKey(mutualAuthentication: false);
 
                 Assert.True(isAuthenticated);
                 Assert.Equal(
@@ -96,7 +95,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void AuthenticateMgmtKey_Mutual(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -105,7 +104,7 @@ namespace Yubico.YubiKey.Piv
 
                 Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-                bool isAuthenticated = pivSession.TryAuthenticateManagementKey();
+                var isAuthenticated = pivSession.TryAuthenticateManagementKey();
 
                 Assert.True(isAuthenticated);
                 Assert.Equal(
@@ -118,7 +117,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ChangeMgmtKey(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -128,13 +127,13 @@ namespace Yubico.YubiKey.Piv
 
                 // This should fail, the mgmt key is not authenticated.
                 var genPairCommand = new GenerateKeyPairCommand(
-                    0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
-                GenerateKeyPairResponse genPairResponse =
+                    slotNumber: 0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                var genPairResponse =
                     pivSession.Connection.SendCommand(genPairCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
 
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-                bool isChanged = pivSession.TryChangeManagementKey();
+                var isChanged = pivSession.TryChangeManagementKey();
 
                 Assert.True(isChanged);
                 Assert.Equal(
@@ -142,7 +141,7 @@ namespace Yubico.YubiKey.Piv
                     pivSession.ManagementKeyAuthenticationResult);
 
                 genPairCommand = new GenerateKeyPairCommand(
-                    0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                    slotNumber: 0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
                 genPairResponse = pivSession.Connection.SendCommand(genPairCommand);
 
                 collectorObj.KeyFlag = 1;
@@ -156,7 +155,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void Auth_ThenWrongKey(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -166,25 +165,25 @@ namespace Yubico.YubiKey.Piv
 
                 // This should fail, the mgmt key is not authenticated.
                 var genPairCommand = new GenerateKeyPairCommand(
-                    0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
-                GenerateKeyPairResponse genPairResponse =
+                    slotNumber: 0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                var genPairResponse =
                     pivSession.Connection.SendCommand(genPairCommand);
                 Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
 
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-                bool isAuthenticated = pivSession.TryAuthenticateManagementKey();
+                var isAuthenticated = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isAuthenticated);
                 Assert.Equal(
                     AuthenticateManagementKeyResult.MutualFullyAuthenticated,
                     pivSession.ManagementKeyAuthenticationResult);
 
                 genPairCommand = new GenerateKeyPairCommand(
-                    0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                    slotNumber: 0x86, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
                 genPairResponse = pivSession.Connection.SendCommand(genPairCommand);
                 Assert.Equal(ResponseStatus.Success, genPairResponse.Status);
 
                 collectorObj.KeyFlag = 1;
-                isAuthenticated = pivSession.TryAuthenticateManagementKey(false);
+                isAuthenticated = pivSession.TryAuthenticateManagementKey(mutualAuthentication: false);
 
                 Assert.False(isAuthenticated);
                 Assert.Equal(
@@ -192,7 +191,7 @@ namespace Yubico.YubiKey.Piv
                     pivSession.ManagementKeyAuthenticationResult);
 
                 genPairCommand = new GenerateKeyPairCommand(
-                    0x87, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
+                    slotNumber: 0x87, PivAlgorithm.EccP256, PivPinPolicy.Default, PivTouchPolicy.Never);
                 genPairResponse = pivSession.Connection.SendCommand(genPairCommand);
 
                 Assert.Equal(ResponseStatus.AuthenticationRequired, genPairResponse.Status);
@@ -203,7 +202,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ChangePin(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -212,10 +211,10 @@ namespace Yubico.YubiKey.Piv
 
                 Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-                bool isValid = pivSession.TryAuthenticateManagementKey();
+                var isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
-                isValid = TryGenerate(pivSession, 0x86, ResponseStatus.Success);
+                isValid = TryGenerate(pivSession, slotNumber: 0x86, ResponseStatus.Success);
                 Assert.True(isValid);
             }
 
@@ -226,21 +225,21 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                bool isValid = TrySign(pivSession, 0x86, ResponseStatus.AuthenticationRequired);
+                var isValid = TrySign(pivSession, slotNumber: 0x86, ResponseStatus.AuthenticationRequired);
                 Assert.True(isValid);
 
-                bool isChanged = pivSession.TryChangePin();
+                var isChanged = pivSession.TryChangePin();
                 Assert.True(isChanged);
                 Assert.False(pivSession.PinVerified);
 
-                isValid = TrySign(pivSession, 0x86, ResponseStatus.AuthenticationRequired);
+                isValid = TrySign(pivSession, slotNumber: 0x86, ResponseStatus.AuthenticationRequired);
                 Assert.True(isValid);
 
                 collectorObj.KeyFlag = 1;
-                bool isVerified = pivSession.TryVerifyPin();
+                var isVerified = pivSession.TryVerifyPin();
                 Assert.True(isVerified);
 
-                isValid = TrySign(pivSession, 0x86, ResponseStatus.Success);
+                isValid = TrySign(pivSession, slotNumber: 0x86, ResponseStatus.Success);
                 Assert.True(isValid);
 
                 collectorObj.KeyFlag = 1;
@@ -250,7 +249,7 @@ namespace Yubico.YubiKey.Piv
                 isVerified = pivSession.TryVerifyPin();
                 Assert.True(isVerified);
 
-                isValid = TrySign(pivSession, 0x86, ResponseStatus.Success);
+                isValid = TrySign(pivSession, slotNumber: 0x86, ResponseStatus.Success);
                 Assert.True(isValid);
             }
         }
@@ -259,7 +258,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ChangePuk(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -268,7 +267,7 @@ namespace Yubico.YubiKey.Piv
 
                 Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-                bool isChanged = pivSession.TryChangePuk();
+                var isChanged = pivSession.TryChangePuk();
                 Assert.True(isChanged);
 
                 collectorObj.KeyFlag = 1;
@@ -281,7 +280,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ResetPin(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -290,7 +289,7 @@ namespace Yubico.YubiKey.Piv
 
                 Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-                bool isChanged = pivSession.TryResetPin();
+                var isChanged = pivSession.TryResetPin();
                 Assert.True(isChanged);
 
                 isChanged = pivSession.TryChangePuk();
@@ -310,7 +309,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ResetPin_WrongPuk(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -320,7 +319,7 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
                 collectorObj.KeyFlag = 1;
-                bool isChanged = pivSession.TryResetPin();
+                var isChanged = pivSession.TryResetPin();
                 Assert.False(isChanged);
 
                 collectorObj.KeyFlag = 0;
@@ -345,7 +344,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ResetPiv(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -354,19 +353,19 @@ namespace Yubico.YubiKey.Piv
 
                 Assert.True(testDevice.EnabledUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-                bool isValid = pivSession.TryAuthenticateManagementKey();
+                var isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
-                isValid = TryGenerate(pivSession, 0x86, ResponseStatus.Success);
+                isValid = TryGenerate(pivSession, slotNumber: 0x86, ResponseStatus.Success);
                 Assert.True(isValid);
 
-                bool isVerified = pivSession.TryVerifyPin();
+                var isVerified = pivSession.TryVerifyPin();
                 Assert.True(isVerified);
 
-                isValid = TrySign(pivSession, 0x86, ResponseStatus.Success);
+                isValid = TrySign(pivSession, slotNumber: 0x86, ResponseStatus.Success);
                 Assert.True(isValid);
 
-                bool isChanged = pivSession.TryChangePin();
+                var isChanged = pivSession.TryChangePin();
                 Assert.True(isChanged);
                 Assert.True(pivSession.PinVerified);
 
@@ -378,16 +377,16 @@ namespace Yubico.YubiKey.Piv
                 Assert.False(pivSession.ManagementKeyAuthenticated);
                 Assert.False(pivSession.PinVerified);
 
-                isValid = TryGenerate(pivSession, 0x87, ResponseStatus.AuthenticationRequired);
+                isValid = TryGenerate(pivSession, slotNumber: 0x87, ResponseStatus.AuthenticationRequired);
                 Assert.True(isValid);
 
                 isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
-                isValid = TryGenerate(pivSession, 0x87, ResponseStatus.Success);
+                isValid = TryGenerate(pivSession, slotNumber: 0x87, ResponseStatus.Success);
                 Assert.True(isValid);
 
-                isValid = TrySign(pivSession, 0x87, ResponseStatus.AuthenticationRequired);
+                isValid = TrySign(pivSession, slotNumber: 0x87, ResponseStatus.AuthenticationRequired);
                 Assert.True(isValid);
 
                 collectorObj.KeyFlag = 1;
@@ -398,10 +397,10 @@ namespace Yubico.YubiKey.Piv
                 isVerified = pivSession.TryVerifyPin();
                 Assert.True(isVerified);
 
-                isValid = TrySign(pivSession, 0x86, ResponseStatus.Failed);
+                isValid = TrySign(pivSession, slotNumber: 0x86, ResponseStatus.Failed);
                 Assert.True(isValid);
 
-                isValid = TrySign(pivSession, 0x87, ResponseStatus.Success);
+                isValid = TrySign(pivSession, slotNumber: 0x87, ResponseStatus.Success);
                 Assert.True(isValid);
             }
         }
@@ -421,11 +420,11 @@ namespace Yubico.YubiKey.Piv
 
             try
             {
-                RandomNumberGenerator random = CryptographyProviders.RngCreator();
+                var random = CryptographyProviders.RngCreator();
 
-                byte[] randomBytes = new byte[32];
+                var randomBytes = new byte[32];
                 random.GetBytes(randomBytes);
-                bool compareResult = randomBytes.SequenceEqual(fixedBytes);
+                var compareResult = randomBytes.SequenceEqual(fixedBytes);
                 Assert.True(compareResult);
             }
             finally
@@ -438,7 +437,7 @@ namespace Yubico.YubiKey.Piv
         {
             var genPairCommand = new GenerateKeyPairCommand(
                 slotNumber, PivAlgorithm.EccP256, PivPinPolicy.Always, PivTouchPolicy.Never);
-            GenerateKeyPairResponse genPairResponse = pivSession.Connection.SendCommand(genPairCommand);
+            var genPairResponse = pivSession.Connection.SendCommand(genPairCommand);
 
             return genPairResponse.Status == expectedStatus;
         }
@@ -454,7 +453,7 @@ namespace Yubico.YubiKey.Piv
             };
 
             var signCommand = new AuthenticateSignCommand(dataToSign, slotNumber);
-            AuthenticateSignResponse signResponse = pivSession.Connection.SendCommand(signCommand);
+            var signResponse = pivSession.Connection.SendCommand(signCommand);
 
             return signResponse.Status == expectedStatus;
         }

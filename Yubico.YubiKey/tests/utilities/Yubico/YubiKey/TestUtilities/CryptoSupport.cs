@@ -27,24 +27,24 @@ namespace Yubico.YubiKey.TestUtilities
         {
             processedData = Array.Empty<byte>();
             var publicKey = new KeyConverter(pemPublicKey.ToCharArray());
-            using RSA rsaObject = publicKey.GetRsaObject();
+            using var rsaObject = publicKey.GetRsaObject();
 
-            int bufferLength = 128;
+            var bufferLength = 128;
             if (publicKey.Algorithm == PivAlgorithm.Rsa2048)
             {
                 bufferLength = 256;
             }
 
-            RSAParameters rsaParams = rsaObject.ExportParameters(false);
-            byte[] temp = Array.Empty<byte>();
+            var rsaParams = rsaObject.ExportParameters(includePrivateParameters: false);
+            var temp = Array.Empty<byte>();
             try
             {
-                var value = new BigInteger(dataToProcess, true, true);
-                var expo = new BigInteger(rsaParams.Exponent, true, true);
-                var mod = new BigInteger(rsaParams.Modulus, true, true);
+                var value = new BigInteger(dataToProcess, isUnsigned: true, isBigEndian: true);
+                var expo = new BigInteger(rsaParams.Exponent, isUnsigned: true, isBigEndian: true);
+                var mod = new BigInteger(rsaParams.Modulus, isUnsigned: true, isBigEndian: true);
 
                 var result = BigInteger.ModPow(value, expo, mod);
-                temp = result.ToByteArray(true, true);
+                temp = result.ToByteArray(isUnsigned: true, isBigEndian: true);
 
                 return ToFixedLengthArray(temp, bufferLength, out processedData);
             }
@@ -61,25 +61,25 @@ namespace Yubico.YubiKey.TestUtilities
         {
             processedData = Array.Empty<byte>();
             var privateKey = new KeyConverter(pemPrivateKey.ToCharArray());
-            using RSA rsaObject = privateKey.GetRsaObject();
+            using var rsaObject = privateKey.GetRsaObject();
 
-            int bufferLength = 128;
+            var bufferLength = 128;
             if (privateKey.Algorithm == PivAlgorithm.Rsa2048)
             {
                 bufferLength = 256;
             }
 
-            RSAParameters rsaParams = rsaObject.ExportParameters(true);
-            byte[] temp = Array.Empty<byte>();
+            var rsaParams = rsaObject.ExportParameters(includePrivateParameters: true);
+            var temp = Array.Empty<byte>();
 
             try
             {
-                var value = new BigInteger(dataToProcess, true, true);
-                var expo = new BigInteger(rsaParams.D, true, true);
-                var mod = new BigInteger(rsaParams.Modulus, true, true);
+                var value = new BigInteger(dataToProcess, isUnsigned: true, isBigEndian: true);
+                var expo = new BigInteger(rsaParams.D, isUnsigned: true, isBigEndian: true);
+                var mod = new BigInteger(rsaParams.Modulus, isUnsigned: true, isBigEndian: true);
 
                 var result = BigInteger.ModPow(value, expo, mod);
-                temp = result.ToByteArray(true, true);
+                temp = result.ToByteArray(isUnsigned: true, isBigEndian: true);
 
                 return ToFixedLengthArray(temp, bufferLength, out processedData);
             }
@@ -101,13 +101,13 @@ namespace Yubico.YubiKey.TestUtilities
 
             if (inputArray.Length <= fixedLength)
             {
-                Array.Copy(inputArray, 0, outputArray, fixedLength - inputArray.Length, inputArray.Length);
+                Array.Copy(inputArray, sourceIndex: 0, outputArray, fixedLength - inputArray.Length, inputArray.Length);
             }
             else
             {
-                int count = inputArray.Length - fixedLength;
+                var count = inputArray.Length - fixedLength;
 
-                for (int index = 0; index < count; index++)
+                for (var index = 0; index < count; index++)
                 {
                     if (inputArray[index] != 0)
                     {
@@ -116,7 +116,7 @@ namespace Yubico.YubiKey.TestUtilities
                     }
                 }
 
-                Array.Copy(inputArray, count, outputArray, 0, fixedLength);
+                Array.Copy(inputArray, count, outputArray, destinationIndex: 0, fixedLength);
             }
 
             return true;

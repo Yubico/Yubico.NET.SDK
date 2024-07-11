@@ -16,7 +16,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 {
     internal sealed class StartProgram
     {
-        static void Main()
+        private static void Main()
         {
             var sampleRun = new OathSampleRun(maxInvalidCount: 2);
             sampleRun.RunSample();

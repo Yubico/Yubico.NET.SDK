@@ -17,25 +17,25 @@ using System;
 namespace Yubico.YubiKey.YubiHsmAuth
 {
     /// <summary>
-    /// This class is used to perform integration testing on the YubiHSM
-    /// Auth session methods. It returns values stored in
-    /// <see cref="YhaTestUtilities"/>.
+    ///     This class is used to perform integration testing on the YubiHSM
+    ///     Auth session methods. It returns values stored in
+    ///     <see cref="YhaTestUtilities" />.
     /// </summary>
     public class SimpleKeyCollector
     {
         /// <summary>
-        /// Used by the flip flop delegate to determine whether to return
-        /// "default" or "alternate" values.
+        ///     Used by the flip flop delegate to determine whether to return
+        ///     "default" or "alternate" values.
         /// </summary>
         public bool UseDefaultValue = true;
 
         /// <summary>
-        /// Alternates between returning values from the "default" and
-        /// "alternate" set.
+        ///     Alternates between returning values from the "default" and
+        ///     "alternate" set.
         /// </summary>
         public bool FlipFlopCollectorDelegate(KeyEntryData keyEntryData)
         {
-            bool returnValue =
+            var returnValue =
                 UseDefaultValue
                     ? DefaultValueCollectorDelegate(keyEntryData)
                     : AlternateValueCollectorDelegate(keyEntryData);
@@ -45,7 +45,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         }
 
         /// <summary>
-        /// Returns values from the "default" set.
+        ///     Returns values from the "default" set.
         /// </summary>
         public static bool DefaultValueCollectorDelegate(KeyEntryData keyEntryData)
         {
@@ -82,7 +82,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         }
 
         /// <summary>
-        /// Returns values from the "alternate" set.
+        ///     Returns values from the "alternate" set.
         /// </summary>
         public static bool AlternateValueCollectorDelegate(KeyEntryData keyEntryData)
         {
@@ -120,8 +120,11 @@ namespace Yubico.YubiKey.YubiHsmAuth
         }
 
         /// <summary>
-        /// Always returns false.
+        ///     Always returns false.
         /// </summary>
-        public static bool ReturnsFalseCollectorDelegate(KeyEntryData _) => false;
+        public static bool ReturnsFalseCollectorDelegate(KeyEntryData _)
+        {
+            return false;
+        }
     }
 }

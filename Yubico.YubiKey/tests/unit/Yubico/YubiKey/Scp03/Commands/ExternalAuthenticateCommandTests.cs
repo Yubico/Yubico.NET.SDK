@@ -23,31 +23,31 @@ namespace Yubico.YubiKey.Scp03.Commands
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsHex84()
         {
-            Assert.Equal(0x84, GetExternalAuthenticateCommandApdu().Cla);
+            Assert.Equal(expected: 0x84, GetExternalAuthenticateCommandApdu().Cla);
         }
 
         [Fact]
         public void CreateCommandApdu_GetInsProperty_ReturnsHex82()
         {
-            Assert.Equal(0x82, GetExternalAuthenticateCommandApdu().Ins);
+            Assert.Equal(expected: 0x82, GetExternalAuthenticateCommandApdu().Ins);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP1Property_ReturnsHex33()
         {
-            Assert.Equal(0x33, GetExternalAuthenticateCommandApdu().P1);
+            Assert.Equal(expected: 0x33, GetExternalAuthenticateCommandApdu().P1);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP2Property_ReturnsZero()
         {
-            Assert.Equal(0, GetExternalAuthenticateCommandApdu().P2);
+            Assert.Equal(expected: 0, GetExternalAuthenticateCommandApdu().P2);
         }
 
         [Fact]
         public void CreateCommandApdu_GetData_ReturnsData()
         {
-            ReadOnlyMemory<byte> data = GetExternalAuthenticateCommandApdu().Data;
+            var data = GetExternalAuthenticateCommandApdu().Data;
             Assert.True(data.Span.SequenceEqual(GetData()));
         }
 
@@ -60,7 +60,7 @@ namespace Yubico.YubiKey.Scp03.Commands
         [Fact]
         public void CreateCommandApdu_GetNe_ReturnsZero()
         {
-            Assert.Equal(0, GetExternalAuthenticateCommandApdu().Ne);
+            Assert.Equal(expected: 0, GetExternalAuthenticateCommandApdu().Ne);
         }
 
         private static byte[] GetData()

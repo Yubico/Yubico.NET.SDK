@@ -42,18 +42,18 @@ namespace Yubico.YubiKey.Scp03.Commands
             var currentKeys = new StaticKeys();
             var newKeys = new StaticKeys(key2, key1, key3);
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys,
-                out IScp03YubiKeyConnection? connection);
+                out var connection);
 
             Assert.True(isValid);
             Assert.NotNull(connection);
 
             var cmd = new PutKeyCommand(currentKeys, newKeys);
-            PutKeyResponse rsp = connection!.SendCommand(cmd);
+            var rsp = connection!.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
-            ReadOnlyMemory<byte> checksum = rsp.GetData();
-            bool isEqual = checksum.Span.SequenceEqual(cmd.ExpectedChecksum.Span);
+            var checksum = rsp.GetData();
+            var isEqual = checksum.Span.SequenceEqual(cmd.ExpectedChecksum.Span);
             Assert.True(isEqual);
         }
 
@@ -76,7 +76,7 @@ namespace Yubico.YubiKey.Scp03.Commands
             };
             byte[] newKey1 =
             {
-                0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xee,
+                0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xee
             };
             byte[] newKey2 =
             {
@@ -93,18 +93,18 @@ namespace Yubico.YubiKey.Scp03.Commands
                 KeyVersionNumber = 2
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys,
-                out IScp03YubiKeyConnection? connection);
+                out var connection);
 
             Assert.True(isValid);
             Assert.NotNull(connection);
 
             var cmd = new PutKeyCommand(currentKeys, newKeys);
-            PutKeyResponse rsp = connection!.SendCommand(cmd);
+            var rsp = connection!.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
-            ReadOnlyMemory<byte> checksum = rsp.GetData();
-            bool isEqual = checksum.Span.SequenceEqual(cmd.ExpectedChecksum.Span);
+            var checksum = rsp.GetData();
+            var isEqual = checksum.Span.SequenceEqual(cmd.ExpectedChecksum.Span);
             Assert.True(isEqual);
         }
 
@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.Scp03.Commands
         {
             byte[] key1 =
             {
-                0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xee,
+                0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xee
             };
             byte[] key2 =
             {
@@ -127,15 +127,15 @@ namespace Yubico.YubiKey.Scp03.Commands
             };
             byte[] newKey1 =
             {
-                0x33, 0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd,
+                0x33, 0xff, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd
             };
             byte[] newKey2 =
             {
-                0x33, 0xee, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xff,
+                0x33, 0xee, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xdd, 0xff
             };
             byte[] newKey3 =
             {
-                0x33, 0xdd, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xee, 0xff, 0x11,
+                0x33, 0xdd, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99, 0x00, 0xaa, 0xbb, 0xcc, 0xee, 0xff, 0x11
             };
 
             var currentKeys = new StaticKeys(key2, key1, key3)
@@ -147,18 +147,18 @@ namespace Yubico.YubiKey.Scp03.Commands
                 KeyVersionNumber = 3
             };
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             var isValid = testDevice.TryConnectScp03(YubiKeyApplication.Scp03, currentKeys,
-                out IScp03YubiKeyConnection? connection);
+                out var connection);
 
             Assert.True(isValid);
             Assert.NotNull(connection);
 
             var cmd = new PutKeyCommand(currentKeys, newKeys);
-            PutKeyResponse rsp = connection!.SendCommand(cmd);
+            var rsp = connection!.SendCommand(cmd);
             Assert.Equal(ResponseStatus.Success, rsp.Status);
-            ReadOnlyMemory<byte> checksum = rsp.GetData();
-            bool isEqual = checksum.Span.SequenceEqual(cmd.ExpectedChecksum.Span);
+            var checksum = rsp.GetData();
+            var isEqual = checksum.Span.SequenceEqual(cmd.ExpectedChecksum.Span);
             Assert.True(isEqual);
         }
     }

@@ -14,23 +14,12 @@
 
 using System;
 using Xunit;
-using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.YubiHsmAuth
 {
     public class CredentialWithSecretsTests
     {
-        private class SampleCredWithSecrets : CredentialWithSecrets
-        {
-            public SampleCredWithSecrets(
-                ReadOnlyMemory<byte> credentialPassword,
-                CryptographicKeyType keyType,
-                string label,
-                bool touchRequired)
-                : base(credentialPassword, keyType, label, touchRequired)
-            {
-            }
-        }
+        private const bool _touchRequired = true;
 
         private static readonly byte[] _sampleCredPassword =
             new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
@@ -38,7 +27,6 @@ namespace Yubico.YubiKey.YubiHsmAuth
         private static readonly CryptographicKeyType _expectedKeyType = CryptographicKeyType.Aes128;
 
         private static readonly string _label = "abc";
-        private const bool _touchRequired = true;
 
         private SampleCredWithSecrets _sampleCredWithSecrets => new SampleCredWithSecrets(
             _sampleCredPassword,
@@ -57,7 +45,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         [InlineData(17)]
         public void Constructor_InvalidPasswordLength_ThrowsArgException(int len)
         {
-            byte[] password = new byte[len];
+            var password = new byte[len];
 
             _ = Assert.Throws<ArgumentException>(() =>
                 new SampleCredWithSecrets(
@@ -65,6 +53,18 @@ namespace Yubico.YubiKey.YubiHsmAuth
                     _expectedKeyType,
                     _label,
                     _touchRequired));
+        }
+
+        private class SampleCredWithSecrets : CredentialWithSecrets
+        {
+            public SampleCredWithSecrets(
+                ReadOnlyMemory<byte> credentialPassword,
+                CryptographicKeyType keyType,
+                string label,
+                bool touchRequired)
+                : base(credentialPassword, keyType, label, touchRequired)
+            {
+            }
         }
 
         /* ADD CRED PASSWORD GET/SET TESTS */

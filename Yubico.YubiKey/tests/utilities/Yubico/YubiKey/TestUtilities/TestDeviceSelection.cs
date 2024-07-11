@@ -15,6 +15,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using TestDev = Yubico.YubiKey.TestUtilities.IntegrationTestDeviceEnumeration;
 
 namespace Yubico.YubiKey.TestUtilities
@@ -22,20 +23,20 @@ namespace Yubico.YubiKey.TestUtilities
     public static class TestDeviceSelection
     {
         /// <summary>
-        /// Persistent enumeration to find a specific YubiKey test device by serial number.
+        ///     Persistent enumeration to find a specific YubiKey test device by serial number.
         /// </summary>
         /// <exception cref="InvalidOperationException">
-        /// Thrown if the test device could not be found.
+        ///     Thrown if the test device could not be found.
         /// </exception>
         public static IYubiKeyDevice RenewDeviceEnumeration(int serialNumber)
         {
             const int maxReconnectAttempts = 40;
             const int sleepDuration = 100; //ms
 
-            int reconnectAttempts = 0;
+            var reconnectAttempts = 0;
             do
             {
-                System.Threading.Thread.Sleep(sleepDuration);
+                Thread.Sleep(sleepDuration);
 
                 try
                 {
@@ -53,13 +54,13 @@ namespace Yubico.YubiKey.TestUtilities
         }
 
         /// <summary>
-        /// Retrieves a single <see cref="IYubiKeyDevice"/> based on test device requirements.
+        ///     Retrieves a single <see cref="IYubiKeyDevice" /> based on test device requirements.
         /// </summary>
         /// <exception cref="ArgumentException">
-        /// Thrown when <paramref name="testDevice"/> is not a recognized value.
+        ///     Thrown when <paramref name="testDevice" /> is not a recognized value.
         /// </exception>
         /// <exception cref="InvalidOperationException">
-        /// Thrown when the input sequence did not contain a valid test device.
+        ///     Thrown when the input sequence did not contain a valid test device.
         /// </exception>
         public static IYubiKeyDevice SelectRequiredTestDevice(
             this IEnumerable<IYubiKeyDevice> yubiKeys,
@@ -73,12 +74,13 @@ namespace Yubico.YubiKey.TestUtilities
 
             return testDevice switch
             {
-                StandardTestDevice.Fw3 => SelectDevice(3),
-                StandardTestDevice.Fw4Fips => SelectDevice(4, isFipsSeries: true),
-                StandardTestDevice.Fw5 => SelectDevice(5, formFactor: null),
-                StandardTestDevice.Fw5Fips => SelectDevice(5, formFactor: FormFactor.UsbAKeychain, isFipsSeries: true),
-                StandardTestDevice.Fw5Bio => SelectDevice(5, formFactor: FormFactor.UsbABiometricKeychain),
-                _ => throw new ArgumentException("Invalid test device value.", nameof(testDevice)),
+                StandardTestDevice.Fw3 => SelectDevice(majorVersion: 3),
+                StandardTestDevice.Fw4Fips => SelectDevice(majorVersion: 4, isFipsSeries: true),
+                StandardTestDevice.Fw5 => SelectDevice(majorVersion: 5, formFactor: null),
+                StandardTestDevice.Fw5Fips => SelectDevice(majorVersion: 5, FormFactor.UsbAKeychain,
+                    isFipsSeries: true),
+                StandardTestDevice.Fw5Bio => SelectDevice(majorVersion: 5, FormFactor.UsbABiometricKeychain),
+                _ => throw new ArgumentException("Invalid test device value.", nameof(testDevice))
             };
 
             IYubiKeyDevice SelectDevice(int majorVersion, FormFactor? formFactor = null, bool isFipsSeries = false)
@@ -92,7 +94,7 @@ namespace Yubico.YubiKey.TestUtilities
                 }
                 catch (InvalidOperationException)
                 {
-                    string connectedDevices = yubiKeyDevices.Any()
+                    var connectedDevices = yubiKeyDevices.Any()
                         ? "Connected devices: " + string.Join(", ",
                             yubiKeyDevices.Select(y => $"{{{y.FirmwareVersion}, {y.FormFactor}}}"))
                         : string.Empty;

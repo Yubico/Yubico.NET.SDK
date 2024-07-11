@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using System.Buffers.Binary;
 using Xunit;
 using Yubico.Core.Iso7816;
@@ -26,10 +25,10 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
-            YubiKeyCapabilities expectedMode = YubiKeyCapabilities.Ccid;
+                challengeResponseTimeout: 0,
+                touchEjectEnabled: false,
+                autoEjectTimeout: 0);
+            var expectedMode = YubiKeyCapabilities.Ccid;
 
             command.YubiKeyInterfaces = expectedMode;
 
@@ -41,9 +40,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+                challengeResponseTimeout: 0,
+                touchEjectEnabled: false,
+                autoEjectTimeout: 0);
             byte expectedTimeout = 7;
 
             command.ChallengeResponseTimeout = expectedTimeout;
@@ -56,10 +55,10 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
-            int expectedTimeout = 1234;
+                challengeResponseTimeout: 0,
+                touchEjectEnabled: false,
+                autoEjectTimeout: 0);
+            var expectedTimeout = 1234;
 
             command.AutoEjectTimeout = expectedTimeout;
 
@@ -71,9 +70,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+                challengeResponseTimeout: 0,
+                touchEjectEnabled: false,
+                autoEjectTimeout: 0);
 
             Assert.Equal(YubiKeyApplication.Otp, command.Application);
         }
@@ -81,10 +80,10 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void FullConstructor_GivenValues_SetsProperties()
         {
-            YubiKeyCapabilities expectedMode = YubiKeyCapabilities.Ccid;
+            var expectedMode = YubiKeyCapabilities.Ccid;
             byte expectedCrTimeout = 7;
-            bool touchEjectEnabled = true;
-            int expectedAeTimeout = 1234;
+            var touchEjectEnabled = true;
+            var expectedAeTimeout = 1234;
 
             var command = new SetLegacyDeviceConfigCommand(
                 expectedMode,
@@ -103,13 +102,13 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+                challengeResponseTimeout: 0,
+                touchEjectEnabled: false,
+                autoEjectTimeout: 0);
 
-            byte cla = command.CreateCommandApdu().Cla;
+            var cla = command.CreateCommandApdu().Cla;
 
-            Assert.Equal(0, cla);
+            Assert.Equal(expected: 0, cla);
         }
 
         [Fact]
@@ -117,13 +116,13 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+                challengeResponseTimeout: 0,
+                touchEjectEnabled: false,
+                autoEjectTimeout: 0);
 
-            byte ins = command.CreateCommandApdu().Ins;
+            var ins = command.CreateCommandApdu().Ins;
 
-            Assert.Equal(1, ins);
+            Assert.Equal(expected: 1, ins);
         }
 
         [Fact]
@@ -131,13 +130,13 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+                challengeResponseTimeout: 0,
+                touchEjectEnabled: false,
+                autoEjectTimeout: 0);
 
-            byte p1 = command.CreateCommandApdu().P1;
+            var p1 = command.CreateCommandApdu().P1;
 
-            Assert.Equal(0x11, p1);
+            Assert.Equal(expected: 0x11, p1);
         }
 
         [Fact]
@@ -145,13 +144,13 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+                challengeResponseTimeout: 0,
+                touchEjectEnabled: false,
+                autoEjectTimeout: 0);
 
-            byte p2 = command.CreateCommandApdu().P2;
+            var p2 = command.CreateCommandApdu().P2;
 
-            Assert.Equal(0, p2);
+            Assert.Equal(expected: 0, p2);
         }
 
         [Fact]
@@ -160,13 +159,13 @@ namespace Yubico.YubiKey.Otp.Commands
             byte expectedMode = 0x01;
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.Ccid,
-                0,
-                false,
-                0);
+                challengeResponseTimeout: 0,
+                touchEjectEnabled: false,
+                autoEjectTimeout: 0);
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+            var data = command.CreateCommandApdu().Data;
 
-            byte actualModeValue = (byte)(data.Span[0] & 0b0111_1111);
+            var actualModeValue = (byte)(data.Span[index: 0] & 0b0111_1111);
 
             Assert.Equal(expectedMode, actualModeValue);
         }
@@ -178,12 +177,12 @@ namespace Yubico.YubiKey.Otp.Commands
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.All,
                 expectedTimeout,
-                false,
-                0);
+                touchEjectEnabled: false,
+                autoEjectTimeout: 0);
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+            var data = command.CreateCommandApdu().Data;
 
-            Assert.Equal(expectedTimeout, data.Span[1]);
+            Assert.Equal(expectedTimeout, data.Span[index: 1]);
         }
 
         [Fact]
@@ -191,15 +190,15 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.All,
-                0,
-                true,
-                0);
+                challengeResponseTimeout: 0,
+                touchEjectEnabled: true,
+                autoEjectTimeout: 0);
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+            var data = command.CreateCommandApdu().Data;
 
             byte expectedTouchEjectValue = 0x80;
 
-            byte actualTouchEjectValue = (byte)(data.Span[0] & expectedTouchEjectValue);
+            var actualTouchEjectValue = (byte)(data.Span[index: 0] & expectedTouchEjectValue);
 
             Assert.Equal(actualTouchEjectValue, expectedTouchEjectValue);
         }
@@ -207,15 +206,15 @@ namespace Yubico.YubiKey.Otp.Commands
         [Fact]
         public void CreateCommandApdu_GetData_AeTimeoutPlacedAsLastTwoBytes()
         {
-            int expectedTimeout = 1234;
+            var expectedTimeout = 1234;
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.All,
-                0,
-                true,
+                challengeResponseTimeout: 0,
+                touchEjectEnabled: true,
                 expectedTimeout);
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
-            int actualTimeout = BinaryPrimitives.ReadUInt16LittleEndian(data.Span.Slice(2));
+            var data = command.CreateCommandApdu().Data;
+            int actualTimeout = BinaryPrimitives.ReadUInt16LittleEndian(data.Span.Slice(start: 2));
 
             Assert.Equal(expectedTimeout, actualTimeout);
         }
@@ -225,12 +224,12 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
-            int nc = command.CreateCommandApdu().Nc;
+                challengeResponseTimeout: 0,
+                touchEjectEnabled: false,
+                autoEjectTimeout: 0);
+            var nc = command.CreateCommandApdu().Nc;
 
-            Assert.Equal(4, nc);
+            Assert.Equal(expected: 4, nc);
         }
 
         [Fact]
@@ -238,13 +237,13 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+                challengeResponseTimeout: 0,
+                touchEjectEnabled: false,
+                autoEjectTimeout: 0);
 
-            int ne = command.CreateCommandApdu().Ne;
+            var ne = command.CreateCommandApdu().Ne;
 
-            Assert.Equal(0, ne);
+            Assert.Equal(expected: 0, ne);
         }
 
         [Fact]
@@ -254,12 +253,12 @@ namespace Yubico.YubiKey.Otp.Commands
             var responseApdu = new ResponseApdu(new byte[] { 0x90, 0x00 });
             var command = new SetLegacyDeviceConfigCommand(
                 YubiKeyCapabilities.All,
-                0,
-                false,
-                0);
+                challengeResponseTimeout: 0,
+                touchEjectEnabled: false,
+                autoEjectTimeout: 0);
 
             // Act
-            OtpResponse response = command.CreateResponseForApdu(responseApdu);
+            var response = command.CreateResponseForApdu(responseApdu);
 
             // Assert
             Assert.True(response is ReadStatusResponse);

@@ -23,72 +23,75 @@ namespace Yubico.YubiKey.Scp03
     public class PutDeleteTests
     {
         [Fact]
-        [TestPriority(3)]
+        [TestPriority(priority: 3)]
         public void PutKey_Succeeds()
         {
             using var staticKeys = new StaticKeys();
-            IYubiKeyDevice device = IntegrationTestDeviceEnumeration.GetTestDevice(
-                Transport.SmartCard,
-                minimumFirmwareVersion: FirmwareVersion.V5_3_0);
-
-            using (var scp03Session = new Scp03Session(device, staticKeys))
-            {
-                using StaticKeys newKeys = GetKeySet(1);
-                scp03Session.PutKeySet(newKeys);
-
-                using StaticKeys nextKeys = GetKeySet(2);
-                scp03Session.PutKeySet(nextKeys);
-            }
-
-            using StaticKeys keySet2 = GetKeySet(2);
-
-            using (var scp03Session = new Scp03Session(device, keySet2))
-            {
-                using StaticKeys keySet3 = GetKeySet(3);
-                scp03Session.PutKeySet(keySet3);
-            }
-        }
-
-        [Fact]
-        [TestPriority(3)]
-        public void ReplaceKey_Succeeds()
-        {
-            using StaticKeys staticKeys = GetKeySet(2);
-            IYubiKeyDevice device = IntegrationTestDeviceEnumeration.GetTestDevice(
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(
                 Transport.SmartCard,
                 FirmwareVersion.V5_3_0);
 
             using (var scp03Session = new Scp03Session(device, staticKeys))
             {
-                using StaticKeys newKeys = GetKeySet(1);
+                using var newKeys = GetKeySet(setNumber: 1);
+                scp03Session.PutKeySet(newKeys);
+
+                using var nextKeys = GetKeySet(setNumber: 2);
+                scp03Session.PutKeySet(nextKeys);
+            }
+
+            using var keySet2 = GetKeySet(setNumber: 2);
+
+            using (var scp03Session = new Scp03Session(device, keySet2))
+            {
+                using var keySet3 = GetKeySet(setNumber: 3);
+                scp03Session.PutKeySet(keySet3);
+            }
+        }
+
+        [Fact]
+        [TestPriority(priority: 3)]
+        public void ReplaceKey_Succeeds()
+        {
+            using var staticKeys = GetKeySet(setNumber: 2);
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(
+                Transport.SmartCard,
+                FirmwareVersion.V5_3_0);
+
+            using (var scp03Session = new Scp03Session(device, staticKeys))
+            {
+                using var newKeys = GetKeySet(setNumber: 1);
                 newKeys.KeyVersionNumber = 2;
                 scp03Session.PutKeySet(newKeys);
             }
         }
 
         [Fact]
-        [TestPriority(0)]
+        [TestPriority(priority: 0)]
         public void DeleteKey_Succeeds()
         {
-            using StaticKeys staticKeys = GetKeySet(3);
-            IYubiKeyDevice device = IntegrationTestDeviceEnumeration.GetTestDevice(
+            using var staticKeys = GetKeySet(setNumber: 3);
+            var device = IntegrationTestDeviceEnumeration.GetTestDevice(
                 Transport.SmartCard,
                 FirmwareVersion.V5_3_0);
 
             using var scp03Session = new Scp03Session(device, staticKeys);
-            scp03Session.DeleteKeySet(1);
-            scp03Session.DeleteKeySet(2);
+            scp03Session.DeleteKeySet(keyVersionNumber: 1);
+            scp03Session.DeleteKeySet(keyVersionNumber: 2);
 
-            scp03Session.DeleteKeySet(3, true);
+            scp03Session.DeleteKeySet(keyVersionNumber: 3, isLastKey: true);
         }
 
         // The setNumber is to be 1, 2, or 3
-        private StaticKeys GetKeySet(int setNumber) => setNumber switch
+        private StaticKeys GetKeySet(int setNumber)
         {
-            1 => GetKeySet1(),
-            2 => GetKeySet2(),
-            _ => GetKeySet3()
-        };
+            return setNumber switch
+            {
+                1 => GetKeySet1(),
+                2 => GetKeySet2(),
+                _ => GetKeySet3()
+            };
+        }
 
         private StaticKeys GetKeySet1()
         {

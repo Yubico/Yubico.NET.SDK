@@ -14,7 +14,6 @@
 
 using System;
 using Xunit;
-using Yubico.Core.Iso7816;
 using Yubico.Core.Tlv;
 
 namespace Yubico.YubiKey.YubiHsmAuth.Commands
@@ -33,7 +32,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void Application_Get_ReturnsYubiHsmAuth()
         {
-            ChangeManagementKeyCommand command = _command;
+            var command = _command;
 
             Assert.Equal(YubiKeyApplication.YubiHsmAuth, command.Application);
         }
@@ -41,52 +40,52 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_Cla0()
         {
-            ChangeManagementKeyCommand command = _command;
-            CommandApdu apdu = command.CreateCommandApdu();
+            var command = _command;
+            var apdu = command.CreateCommandApdu();
 
-            Assert.Equal(0, apdu.Cla);
+            Assert.Equal(expected: 0, apdu.Cla);
         }
 
         [Fact]
         public void CreateCommandApdu_Ins0x08()
         {
-            ChangeManagementKeyCommand command = _command;
-            CommandApdu apdu = command.CreateCommandApdu();
+            var command = _command;
+            var apdu = command.CreateCommandApdu();
 
-            Assert.Equal(0x08, apdu.Ins);
+            Assert.Equal(expected: 0x08, apdu.Ins);
         }
 
         [Fact]
         public void CreateCommandApdu_P1Is0()
         {
-            ChangeManagementKeyCommand command = _command;
-            CommandApdu apdu = command.CreateCommandApdu();
+            var command = _command;
+            var apdu = command.CreateCommandApdu();
 
-            Assert.Equal(0, apdu.P1);
+            Assert.Equal(expected: 0, apdu.P1);
         }
 
         [Fact]
         public void CreateCommandApdu_P2Is0()
         {
-            ChangeManagementKeyCommand command = _command;
-            CommandApdu apdu = command.CreateCommandApdu();
+            var command = _command;
+            var apdu = command.CreateCommandApdu();
 
-            Assert.Equal(0, apdu.P2);
+            Assert.Equal(expected: 0, apdu.P2);
         }
 
         [Fact]
         public void CreateCommandApdu_DataContainsTwoMgmtKeyTags()
         {
-            ChangeManagementKeyCommand command = _command;
-            CommandApdu apdu = command.CreateCommandApdu();
+            var command = _command;
+            var apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
 
-            int mgmtKeyTagCount = 0;
+            var mgmtKeyTagCount = 0;
 
             while (reader.HasData)
             {
-                int tag = reader.PeekTag();
+                var tag = reader.PeekTag();
                 if (tag == 0x7b)
                 {
                     mgmtKeyTagCount++;
@@ -95,23 +94,23 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                 _ = reader.ReadValue(tag);
             }
 
-            Assert.Equal(2, mgmtKeyTagCount);
+            Assert.Equal(expected: 2, mgmtKeyTagCount);
         }
 
         [Fact]
         public void CreateCommandApdu_DataContainsCurrentMgmtKeyValue()
         {
-            ChangeManagementKeyCommand command = _command;
-            CommandApdu apdu = command.CreateCommandApdu();
+            var command = _command;
+            var apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
 
-            int mgmtKeyTagCount = 0;
-            byte[] value = Array.Empty<byte>();
+            var mgmtKeyTagCount = 0;
+            var value = Array.Empty<byte>();
 
             while (reader.HasData && mgmtKeyTagCount < 1)
             {
-                int tag = reader.PeekTag();
+                var tag = reader.PeekTag();
                 if (tag == 0x7b)
                 {
                     mgmtKeyTagCount++;
@@ -126,17 +125,17 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Fact]
         public void CreateCommandApdu_DataContainsNewMgmtKeyValue()
         {
-            ChangeManagementKeyCommand command = _command;
-            CommandApdu apdu = command.CreateCommandApdu();
+            var command = _command;
+            var apdu = command.CreateCommandApdu();
 
-            TlvReader reader = new TlvReader(apdu.Data);
+            var reader = new TlvReader(apdu.Data);
 
-            int mgmtKeyTagCount = 0;
-            byte[] value = Array.Empty<byte>();
+            var mgmtKeyTagCount = 0;
+            var value = Array.Empty<byte>();
 
             while (reader.HasData && mgmtKeyTagCount < 2)
             {
-                int tag = reader.PeekTag();
+                var tag = reader.PeekTag();
                 if (tag == 0x7b)
                 {
                     mgmtKeyTagCount++;

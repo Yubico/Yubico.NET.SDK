@@ -27,42 +27,45 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
     // make the appropriate calls to perform the operation selected.
     public partial class U2fSampleRun
     {
-        public bool RunMenuItem(U2fMainMenuItem menuItem) => menuItem switch
+        public bool RunMenuItem(U2fMainMenuItem menuItem)
         {
-            U2fMainMenuItem.Exit => false,
-            // Find all currently connected YubiKeys that can communicate
-            // over the HID FIDO protocol. This is the protocol used to
-            // communicate with the U2F application.
-            // Using Transport.HidFido finds all YubiKeys connected via USB.
-            U2fMainMenuItem.ListYubiKeys => ListYubiKeys.RunListYubiKeys(Transport.HidFido),
-            U2fMainMenuItem.ChooseYubiKey => RunChooseYubiKey(),
-            U2fMainMenuItem.IsYubiKeyFipsSeries => RunIsYubiKeyFipsSeries(),
-            U2fMainMenuItem.SetPin => RunSetPin(),
-            U2fMainMenuItem.ChangePin => RunChangePin(),
-            U2fMainMenuItem.VerifyPin => RunVerifyPin(),
-            U2fMainMenuItem.GetFipsMode => RunGetFipsMode(),
-            U2fMainMenuItem.RegisterCredential => RunRegisterCredential(),
-            U2fMainMenuItem.ListCredentials => RunListCredentials(),
-            U2fMainMenuItem.AuthenticateCredential => RunAuthenticateCredential(),
-            U2fMainMenuItem.Reset => RunReset(),
-            _ => RunUnimplementedOperation(),
-        };
+            return menuItem switch
+            {
+                U2fMainMenuItem.Exit => false,
+                // Find all currently connected YubiKeys that can communicate
+                // over the HID FIDO protocol. This is the protocol used to
+                // communicate with the U2F application.
+                // Using Transport.HidFido finds all YubiKeys connected via USB.
+                U2fMainMenuItem.ListYubiKeys => ListYubiKeys.RunListYubiKeys(Transport.HidFido),
+                U2fMainMenuItem.ChooseYubiKey => RunChooseYubiKey(),
+                U2fMainMenuItem.IsYubiKeyFipsSeries => RunIsYubiKeyFipsSeries(),
+                U2fMainMenuItem.SetPin => RunSetPin(),
+                U2fMainMenuItem.ChangePin => RunChangePin(),
+                U2fMainMenuItem.VerifyPin => RunVerifyPin(),
+                U2fMainMenuItem.GetFipsMode => RunGetFipsMode(),
+                U2fMainMenuItem.RegisterCredential => RunRegisterCredential(),
+                U2fMainMenuItem.ListCredentials => RunListCredentials(),
+                U2fMainMenuItem.AuthenticateCredential => RunAuthenticateCredential(),
+                U2fMainMenuItem.Reset => RunReset(),
+                _ => RunUnimplementedOperation()
+            };
+        }
 
         public static bool RunInvalidEntry()
         {
-            SampleMenu.WriteMessage(MessageType.Special, 0, "Invalid entry");
+            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "Invalid entry");
             return true;
         }
 
         public static bool RunUnimplementedOperation()
         {
-            SampleMenu.WriteMessage(MessageType.Special, 0, "Unimplemented operation");
+            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "Unimplemented operation");
             return true;
         }
 
         public bool RunIsYubiKeyFipsSeries()
         {
-            SampleMenu.WriteMessage(MessageType.Special, 0,
+            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0,
                 "The chosen YubiKey is " + (_yubiKeyChosen.IsFipsSeries ? "" : "not ") + "FIPS series");
             return true;
         }
@@ -72,11 +75,11 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             bool isFips = U2fFips.GetFipsMode(_yubiKeyChosen, out bool isFipsMode);
             if (!isFips)
             {
-                SampleMenu.WriteMessage(MessageType.Special, 0, "The chosen YubiKey is not FIPS series");
+                SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "The chosen YubiKey is not FIPS series");
             }
             else
             {
-                SampleMenu.WriteMessage(MessageType.Special, 0,
+                SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0,
                     "The chosen YubiKey is FIPS series " + (isFipsMode ? "" : "not ") + "in FIPS mode");
             }
 
@@ -91,7 +94,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             bool isFips = U2fFips.GetFipsMode(_yubiKeyChosen, out bool isFipsMode);
             if (!isFips)
             {
-                SampleMenu.WriteMessage(MessageType.Special, 0, "The chosen YubiKey is not FIPS series");
+                SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "The chosen YubiKey is not FIPS series");
             }
             else
             {
@@ -110,7 +113,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             bool isFips = U2fFips.GetFipsMode(_yubiKeyChosen, out bool isFipsMode);
             if (!isFips)
             {
-                SampleMenu.WriteMessage(MessageType.Special, 0, "The chosen YubiKey is not FIPS series");
+                SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "The chosen YubiKey is not FIPS series");
             }
             else
             {
@@ -126,7 +129,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             bool isFips = U2fFips.GetFipsMode(_yubiKeyChosen, out bool isFipsMode);
             if (!isFips)
             {
-                SampleMenu.WriteMessage(MessageType.Special, 0, "The chosen YubiKey is not FIPS series");
+                SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "The chosen YubiKey is not FIPS series");
             }
             else
             {
@@ -197,31 +200,33 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
 
         public bool RunListCredentials()
         {
-            string[] nameList = _credentials.Keys.ToArray<string>();
+            string[] nameList = _credentials.Keys.ToArray();
 
             if (nameList.Length == 0)
             {
-                SampleMenu.WriteMessage(MessageType.Special, 0, "There are currently no U2F credentials");
+                SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0,
+                    "There are currently no U2F credentials");
                 return true;
             }
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "U2F Credentials");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "U2F Credentials");
             for (int index = 0; index < nameList.Length; index++)
             {
-                SampleMenu.WriteMessage(MessageType.Title, 0, "    " + nameList[index]);
+                SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "    " + nameList[index]);
             }
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "\n");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "\n");
             return true;
         }
 
         public bool RunAuthenticateCredential()
         {
-            string[] nameList = _credentials.Keys.ToArray<string>();
+            string[] nameList = _credentials.Keys.ToArray();
 
             if (nameList.Length == 0)
             {
-                SampleMenu.WriteMessage(MessageType.Special, 0, "There are currently no U2F credentials");
+                SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0,
+                    "There are currently no U2F credentials");
                 return true;
             }
 
@@ -244,7 +249,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
 
             if (!isVerified)
             {
-                SampleMenu.WriteMessage(MessageType.Title, 0,
+                SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                     "Credential did not authenticate: key handle did not match.\n");
                 return true;
             }
@@ -276,11 +281,11 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             if (authenticationData.VerifySignature(
                     regData.UserPublicKey, regData.ApplicationId, regData.ClientDataHash))
             {
-                SampleMenu.WriteMessage(MessageType.Special, 0, "Credential authenticates");
+                SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "Credential authenticates");
             }
             else
             {
-                SampleMenu.WriteMessage(MessageType.Special, 0, "Credential did not authenticate");
+                SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, "Credential did not authenticate");
             }
 
             return true;
@@ -290,42 +295,42 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
         {
             string versionNumber = _yubiKeyChosen.FirmwareVersion.ToString();
 
-            if (_yubiKeyChosen.FirmwareVersion >= new FirmwareVersion(5, 0, 0)
-                || _yubiKeyChosen.FirmwareVersion < new FirmwareVersion(4, 0, 0)
+            if (_yubiKeyChosen.FirmwareVersion >= new FirmwareVersion(major: 5, minor: 0, patch: 0)
+                || _yubiKeyChosen.FirmwareVersion < new FirmwareVersion(major: 4, minor: 0, patch: 0)
                 || !_yubiKeyChosen.IsFipsSeries)
             {
-                SampleMenu.WriteMessage(MessageType.Title, 0,
+                SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                     "It is possible to reset the U2F application on only version 4");
-                SampleMenu.WriteMessage(MessageType.Title, 0, "FIPS series YubiKeys.");
+                SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "FIPS series YubiKeys.");
                 if (_yubiKeyChosen.IsFipsSeries)
                 {
-                    SampleMenu.WriteMessage(MessageType.Title, 0,
+                    SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                         "Although this is a FIPS series YubiKey, the version is");
-                    SampleMenu.WriteMessage(MessageType.Title, 0, versionNumber + "\n");
+                    SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, versionNumber + "\n");
                 }
                 else
                 {
-                    SampleMenu.WriteMessage(MessageType.Title, 0,
-                        "This YubiKey is version " + _yubiKeyChosen.FirmwareVersion.ToString());
-                    SampleMenu.WriteMessage(MessageType.Title, 0, "and is not FIPS series.\n");
+                    SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
+                        "This YubiKey is version " + _yubiKeyChosen.FirmwareVersion);
+                    SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "and is not FIPS series.\n");
                 }
 
                 return true;
             }
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "DANGER!!!");
-            SampleMenu.WriteMessage(MessageType.Title, 0,
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "DANGER!!!");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                 "Resetting the U2F application will mean losing all U2F credentials");
-            SampleMenu.WriteMessage(MessageType.Title, 0,
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                 "on this YubiKey, taking the U2F application out of FIPS mode, and");
-            SampleMenu.WriteMessage(MessageType.Title, 0,
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                 "preventing this YubiKey's U2F application from ever being put into");
-            SampleMenu.WriteMessage(MessageType.Title, 0, "FIPS mode again.\n");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "FIPS mode again.\n");
 
-            string[] menuItems = new string[]
+            string[] menuItems =
             {
                 "Yes",
-                "No",
+                "No"
             };
 
             int response = _menuObject.RunMenu("Do you want to continue?", menuItems);
@@ -334,17 +339,19 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                 return true;
             }
 
-            SampleMenu.WriteMessage(MessageType.Title, 0,
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                 "This is the YubiKey for which the U2F application will be reset.\n");
 
             int? serial = _yubiKeyChosen.SerialNumber;
             if (serial is null)
             {
-                SampleMenu.WriteMessage(MessageType.Title, 0, "Unknown serial number : version = " + versionNumber);
+                SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
+                    "Unknown serial number : version = " + versionNumber);
             }
             else
             {
-                SampleMenu.WriteMessage(MessageType.Title, 0, serial.ToString() + " : version = " + versionNumber);
+                SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
+                    serial + " : version = " + versionNumber);
             }
 
             response = _menuObject.RunMenu("\nIs this correct?", menuItems);
@@ -353,9 +360,9 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                 return true;
             }
 
-            SampleMenu.WriteMessage(MessageType.Title, 0,
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                 "To reset, when prompted, you will need to remove, then re-insert");
-            SampleMenu.WriteMessage(MessageType.Title, 0,
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                 "the YubiKey, then, when prompted, touch the YubiKey's contact.\n");
             response = _menuObject.RunMenu("Do you want to continue?", menuItems);
             if (response != 0)
@@ -369,28 +376,33 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
 
         private static string GetRelyingPartyName()
         {
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter a value to represent the relying party name");
-            SampleMenu.WriteMessage(MessageType.Title, 0, "It is the value the relying party sends to the client");
-            SampleMenu.WriteMessage(MessageType.Title, 0, "This will represent the appId\n");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
+                "Enter a value to represent the relying party name");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
+                "It is the value the relying party sends to the client");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "This will represent the appId\n");
             _ = SampleMenu.ReadResponse(out string rpName);
-            SampleMenu.WriteMessage(MessageType.Title, 0, "\n");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "\n");
 
             return rpName;
         }
 
         private string GetClientComputedOrigin(string relyingPartyName)
         {
-            SampleMenu.WriteMessage(MessageType.Title, 0, "The client (browser) determines with whom it is connected");
-            SampleMenu.WriteMessage(MessageType.Title, 0,
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
+                "The client (browser) determines with whom it is connected");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                 "If everything is correct, it is the same as the appId supplied by the relying party");
-            SampleMenu.WriteMessage(MessageType.Title, 0, "This is the listed appId:\n\n" + relyingPartyName);
-            SampleMenu.WriteMessage(MessageType.Title, 0, "\nDo you want to say the client computed the same value?");
-            SampleMenu.WriteMessage(MessageType.Title, 0,
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
+                "This is the listed appId:\n\n" + relyingPartyName);
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
+                "\nDo you want to say the client computed the same value?");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                 "Or do you want to see what happens when they are different?");
-            string[] menuItems = new string[]
+            string[] menuItems =
             {
                 "The computed origin is the same as the appId",
-                "Enter a (possibly) different computed origin",
+                "Enter a (possibly) different computed origin"
             };
 
             int response = _menuObject.RunMenu("Computed Origin", menuItems);
@@ -399,7 +411,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                 return relyingPartyName;
             }
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter the computed origin");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter the computed origin");
             _ = SampleMenu.ReadResponse(out string computedOrigin);
 
             return computedOrigin;
@@ -407,15 +419,15 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
 
         private static string GetRelyingPartyChallenge()
         {
-            SampleMenu.WriteMessage(MessageType.Title, 0,
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0,
                 "For this sample code, the challenge is a random value base-64 encoded\n");
 
             byte[] randomBytes = new byte[9];
             using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
-            randomObject.GetBytes(randomBytes, 0, randomBytes.Length);
+            randomObject.GetBytes(randomBytes, offset: 0, randomBytes.Length);
             string challenge = Convert.ToBase64String(randomBytes);
-            SampleMenu.WriteMessage(MessageType.Title, 0, "challenge = " + challenge);
-            SampleMenu.WriteMessage(MessageType.Title, 0, "\n");
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "challenge = " + challenge);
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "\n");
 
             return challenge;
         }
@@ -432,7 +444,8 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
 
         private static void WritePinMessage(string operation, bool result)
         {
-            SampleMenu.WriteMessage(MessageType.Special, 0, operation + (result ? ", success" : ", user canceled"));
+            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0,
+                operation + (result ? ", success" : ", user canceled"));
         }
     }
 }

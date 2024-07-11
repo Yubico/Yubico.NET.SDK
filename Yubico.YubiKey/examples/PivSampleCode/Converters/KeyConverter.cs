@@ -180,7 +180,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         {
             if (!(buffer is null))
             {
-                Array.Fill<byte>(buffer, 0);
+                Array.Fill<byte>(buffer, value: 0);
             }
         }
 
@@ -188,7 +188,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         {
             if (!(buffer is null))
             {
-                Array.Fill<char>(buffer, '0');
+                Array.Fill(buffer, value: '0');
             }
         }
     }

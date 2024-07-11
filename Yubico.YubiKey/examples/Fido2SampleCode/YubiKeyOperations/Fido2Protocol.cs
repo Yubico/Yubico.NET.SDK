@@ -58,12 +58,12 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
             var relyingParty = new RelyingParty(relyingPartyId)
             {
-                Name = relyingPartyName,
+                Name = relyingPartyName
             };
             var userEntity = new UserEntity(userId)
             {
                 Name = userName,
-                DisplayName = userDisplayName,
+                DisplayName = userDisplayName
             };
 
             using (var fido2Session = new Fido2Session(yubiKey))
@@ -72,7 +72,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
                 var makeCredentialParameters = new MakeCredentialParameters(relyingParty, userEntity)
                 {
-                    ClientDataHash = clientDataHash,
+                    ClientDataHash = clientDataHash
                 };
 
                 // Although the standard specifies the Options as optional,
@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 // If it is not discoverable, the credential ID must be supplied
                 // in the AllowList for the call to GetAssertion.
                 // This sample code wants all credentials to be discoverable.
-                makeCredentialParameters.AddOption("rk", true);
+                makeCredentialParameters.AddOption("rk", optionValue: true);
 
                 if (fido2Session.AuthenticatorInfo.Extensions.Contains("hmac-secret"))
                 {
@@ -355,7 +355,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 }
                 else
                 {
-                    sensorInfo = new FingerprintSensorInfo(0, 0, 0);
+                    sensorInfo =
+                        new FingerprintSensorInfo(fingerprintKind: 0, maxCaptureCount: 0, maxFrienlyNameBytes: 0);
                     templates = new List<TemplateInfo>();
                 }
             }
@@ -381,12 +382,10 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                         friendlyName,
                         timeoutMilliseconds);
                 }
-                else
-                {
-                    return fido2Session.EnrollFingerprint(
-                        friendlyName,
-                        null);
-                }
+
+                return fido2Session.EnrollFingerprint(
+                    friendlyName,
+                    timeoutMilliseconds: null);
             }
         }
 
@@ -477,6 +476,5 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 return fido2Session.TrySetPinConfig(newMinPinLength, relyingPartyIds, forceChangePin);
             }
         }
-#nullable restore
     }
 }

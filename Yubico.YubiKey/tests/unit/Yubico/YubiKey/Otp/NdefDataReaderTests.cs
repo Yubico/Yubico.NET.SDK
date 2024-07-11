@@ -25,9 +25,12 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void Constructor_GivenBufferWithFirstByteNonZero_ThrowsArgumentInvalidException()
         {
-            byte[] invalidBuffer = new byte[] { 1 };
+            var invalidBuffer = new byte[] { 1 };
 
-            void Action() => _ = new NdefDataReader(invalidBuffer);
+            void Action()
+            {
+                _ = new NdefDataReader(invalidBuffer);
+            }
 
             _ = Assert.Throws<ArgumentException>(Action);
         }
@@ -35,9 +38,12 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void Constructor_BufferWithTypeLengthGreaterThanOne_ThrowsNotSupportedException()
         {
-            byte[] invalidBuffer = new byte[] { 0, 4, 0xD1, 2, 0, 0 };
+            var invalidBuffer = new byte[] { 0, 4, 0xD1, 2, 0, 0 };
 
-            void Action() => _ = new NdefDataReader(invalidBuffer);
+            void Action()
+            {
+                _ = new NdefDataReader(invalidBuffer);
+            }
 
             _ = Assert.Throws<NotSupportedException>(Action);
         }
@@ -45,9 +51,12 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void Constructor_UnsupportedRecordType_ThrowsNotSupportedException()
         {
-            byte[] invalidBuffer = new byte[] { 0, 4, 0xD1, 1, 0, 0 };
+            var invalidBuffer = new byte[] { 0, 4, 0xD1, 1, 0, 0 };
 
-            void Action() => _ = new NdefDataReader(invalidBuffer);
+            void Action()
+            {
+                _ = new NdefDataReader(invalidBuffer);
+            }
 
             _ = Assert.Throws<NotSupportedException>(Action);
         }
@@ -57,7 +66,7 @@ namespace Yubico.YubiKey.Otp
         [InlineData('U', NdefDataType.Uri)]
         public void Constructor_GivenWellFormedData_SetsTypeProperty(char typeByte, NdefDataType expectedType)
         {
-            byte[] buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)typeByte, 4, 1, 2, 3 };
+            var buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)typeByte, 4, 1, 2, 3 };
 
             var reader = new NdefDataReader(buffer);
 
@@ -67,7 +76,7 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void Constructor_GivenWellFormedData_SetsDataProperty()
         {
-            byte[] buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)'U', 1, 2, 3, 4 };
+            var buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)'U', 1, 2, 3, 4 };
 
             var reader = new NdefDataReader(buffer);
 
@@ -77,10 +86,13 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void ToText_GivenNonTextRecordType_ThrowsInvalidOperationException()
         {
-            byte[] buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)'U', 1, 2, 3, 4 };
+            var buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)'U', 1, 2, 3, 4 };
             var reader = new NdefDataReader(buffer);
 
-            void Action() => _ = reader.ToText();
+            void Action()
+            {
+                _ = reader.ToText();
+            }
 
             _ = Assert.Throws<InvalidOperationException>(Action);
         }
@@ -91,10 +103,10 @@ namespace Yubico.YubiKey.Otp
         public void ToText_GivenWellFormedData_ReturnsEncodingCorrectly(
             byte headerByte, NdefTextEncoding expectedEncoding)
         {
-            byte[] buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)'T', headerByte, 0, 1, 2 };
+            var buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)'T', headerByte, 0, 1, 2 };
             var reader = new NdefDataReader(buffer);
 
-            NdefText ndefText = reader.ToText();
+            var ndefText = reader.ToText();
 
             Assert.Equal(expectedEncoding, ndefText.Encoding);
         }
@@ -110,7 +122,7 @@ namespace Yubico.YubiKey.Otp
             }
 
             // Arrange
-            byte length = (byte)cultureString.Length;
+            var length = (byte)cultureString.Length;
 
             using var buffer = new MemoryStream();
             buffer.Write(
@@ -120,7 +132,7 @@ namespace Yubico.YubiKey.Otp
             var reader = new NdefDataReader(buffer.ToArray());
 
             // Act
-            NdefText ndefText = reader.ToText();
+            var ndefText = reader.ToText();
 
             // Assert
             Assert.Equal(new CultureInfo(cultureString), ndefText.Language);
@@ -129,10 +141,10 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void ToText_GivenWellFormedData_ReturnsTextCorrectly()
         {
-            byte[] buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)'T', 0, (byte)'A', (byte)'B', (byte)'C' };
+            var buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)'T', 0, (byte)'A', (byte)'B', (byte)'C' };
             var reader = new NdefDataReader(buffer);
 
-            NdefText ndefText = reader.ToText();
+            var ndefText = reader.ToText();
 
             Assert.Equal("ABC", ndefText.Text);
         }
@@ -141,10 +153,10 @@ namespace Yubico.YubiKey.Otp
         public void ToText_GivenUtf16BeWithBom_ReturnsTextCorrectly()
         {
             // Arrange
-            string expectedText = "Test";
-            byte[] bom = Encoding.BigEndianUnicode.GetPreamble();
-            byte[] text = Encoding.BigEndianUnicode.GetBytes(expectedText);
-            byte length = (byte)(bom.Length + text.Length);
+            var expectedText = "Test";
+            var bom = Encoding.BigEndianUnicode.GetPreamble();
+            var text = Encoding.BigEndianUnicode.GetBytes(expectedText);
+            var length = (byte)(bom.Length + text.Length);
 
             using var buffer = new MemoryStream();
             buffer.Write(new byte[] { 0, (byte)(5 + length), 0xD1, 1, (byte)(1 + length), (byte)'T', 0x80 });
@@ -154,7 +166,7 @@ namespace Yubico.YubiKey.Otp
             var reader = new NdefDataReader(buffer.ToArray());
 
             // Act
-            NdefText ndefText = reader.ToText();
+            var ndefText = reader.ToText();
 
             // Assert
             Assert.Equal(expectedText, ndefText.Text);
@@ -164,10 +176,10 @@ namespace Yubico.YubiKey.Otp
         public void ToText_GivenUtf16LeWithBom_ReturnsTextCorrectly()
         {
             // Arrange
-            string expectedText = "Test";
-            byte[] bom = Encoding.Unicode.GetPreamble();
-            byte[] text = Encoding.Unicode.GetBytes(expectedText);
-            byte length = (byte)(bom.Length + text.Length);
+            var expectedText = "Test";
+            var bom = Encoding.Unicode.GetPreamble();
+            var text = Encoding.Unicode.GetBytes(expectedText);
+            var length = (byte)(bom.Length + text.Length);
 
             using var buffer = new MemoryStream();
             buffer.Write(new byte[] { 0, (byte)(5 + length), 0xD1, 1, (byte)(1 + length), (byte)'T', 0x80 });
@@ -177,7 +189,7 @@ namespace Yubico.YubiKey.Otp
             var reader = new NdefDataReader(buffer.ToArray());
 
             // Act
-            NdefText ndefText = reader.ToText();
+            var ndefText = reader.ToText();
 
             // Assert
             Assert.Equal(expectedText, ndefText.Text);
@@ -187,9 +199,9 @@ namespace Yubico.YubiKey.Otp
         public void ToText_GivenUtf16BeWithoutBom_ReturnsTextCorrectly()
         {
             // Arrange
-            string expectedText = "Test";
-            byte[] text = Encoding.BigEndianUnicode.GetBytes(expectedText);
-            byte length = (byte)text.Length;
+            var expectedText = "Test";
+            var text = Encoding.BigEndianUnicode.GetBytes(expectedText);
+            var length = (byte)text.Length;
 
             using var buffer = new MemoryStream();
             buffer.Write(new byte[] { 0, (byte)(5 + length), 0xD1, 1, (byte)(1 + length), (byte)'T', 0x80 });
@@ -198,7 +210,7 @@ namespace Yubico.YubiKey.Otp
             var reader = new NdefDataReader(buffer.ToArray());
 
             // Act
-            NdefText ndefText = reader.ToText();
+            var ndefText = reader.ToText();
 
             // Assert
             Assert.Equal(expectedText, ndefText.Text);
@@ -208,9 +220,9 @@ namespace Yubico.YubiKey.Otp
         public void ToText_GivenUtf16LeWithoutBom_ReturnsTextCorrectly()
         {
             // Arrange
-            string expectedText = "Test";
-            byte[] text = Encoding.Unicode.GetBytes(expectedText);
-            byte length = (byte)text.Length;
+            var expectedText = "Test";
+            var text = Encoding.Unicode.GetBytes(expectedText);
+            var length = (byte)text.Length;
 
             using var buffer = new MemoryStream();
             buffer.Write(new byte[] { 0, (byte)(5 + length), 0xD1, 1, (byte)(1 + length), (byte)'T', 0x80 });
@@ -219,7 +231,7 @@ namespace Yubico.YubiKey.Otp
             var reader = new NdefDataReader(buffer.ToArray());
 
             // Act
-            NdefText ndefText = reader.ToText();
+            var ndefText = reader.ToText();
 
             // Assert
             Assert.Equal(expectedText, ndefText.Text);
@@ -228,10 +240,13 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void ToUri_GivenNonUriRecordType_ThrowsInvalidOperationException()
         {
-            byte[] buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)'T', 1, 2, 3, 4 };
+            var buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)'T', 1, 2, 3, 4 };
             var reader = new NdefDataReader(buffer);
 
-            void Action() => _ = reader.ToUri();
+            void Action()
+            {
+                _ = reader.ToUri();
+            }
 
             _ = Assert.Throws<InvalidOperationException>(Action);
         }
@@ -239,10 +254,13 @@ namespace Yubico.YubiKey.Otp
         [Fact]
         public void ToUri_GivenUnsupportedPrefix_ThrowsInvalidOperationException()
         {
-            byte[] buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)'U', 36, 1, 2, 3 }; // 36 is out of range
+            var buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)'U', 36, 1, 2, 3 }; // 36 is out of range
             var reader = new NdefDataReader(buffer);
 
-            void Action() => _ = reader.ToUri();
+            void Action()
+            {
+                _ = reader.ToUri();
+            }
 
             _ = Assert.Throws<InvalidOperationException>(Action);
         }
@@ -286,7 +304,7 @@ namespace Yubico.YubiKey.Otp
         [InlineData(35, "urn:nfc:", "")]
         public void ToUri_GivenValidPrefixAndString_ReturnsValidUri(int prefixCode, string prefix, string suffix)
         {
-            byte[] buffer = new byte[]
+            var buffer = new byte[]
                 { 0, 8, 0xD1, 1, 4, (byte)'U', (byte)prefixCode, (byte)'a', (byte)'b', (byte)'c' };
             var reader = new NdefDataReader(buffer);
 
@@ -299,8 +317,8 @@ namespace Yubico.YubiKey.Otp
         public void ToUri_CustomPrefix_ReturnsValidUri()
         {
             // Arrange
-            string customUri = "ykprogram://customurl";
-            byte length = (byte)customUri.Length;
+            var customUri = "ykprogram://customurl";
+            var length = (byte)customUri.Length;
 
             using var buffer = new MemoryStream();
             buffer.Write(new byte[] { 0, (byte)(5 + length), 0xD1, 1, (byte)(1 + length), (byte)'U', 0 });

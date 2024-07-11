@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
         // Collect a value.
         private static byte[] CollectPassword(string name)
         {
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Enter " + name);
+            SampleMenu.WriteMessage(MessageType.Title, numberToWrite: 0, "Enter " + name);
             _ = SampleMenu.ReadResponse(out string collectedValue);
             byte[] bytes = Encoding.UTF8.GetBytes(collectedValue);
 

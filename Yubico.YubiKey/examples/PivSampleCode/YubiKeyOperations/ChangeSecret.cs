@@ -118,7 +118,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
         {
             string resultMessage = changeResult ? "Successfully changed " : "Was not able to change ";
 
-            SampleMenu.WriteMessage(MessageType.Special, 0, resultMessage + valueToChange);
+            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, resultMessage + valueToChange);
         }
     }
 }

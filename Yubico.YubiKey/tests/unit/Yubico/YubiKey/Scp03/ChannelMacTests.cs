@@ -21,20 +21,60 @@ namespace Yubico.YubiKey.Scp03
 {
     public class ChannelMacTests
     {
-        private static byte[] GetKey() => Hex.HexToBytes("404142434445464748494A4B4C4D4E4F");
-        private static byte[] GetBadKey() => Hex.HexToBytes("40414243");
-        private static CommandApdu GetApdu() => new CommandApdu() { Ins = 0xFD };
-        private static byte[] GetCorrectMacdApduBytes() => Hex.HexToBytes("00FD00000806e58094d47d8908");
-        private static byte[] GetMac() => Hex.HexToBytes("CB85E66F9DD7C009");
-        private static byte[] GetMcv() => Hex.HexToBytes("CB85E66F9DD7C009CB85E66F9DD7C009");
-        private static byte[] GetBadMcv() => Hex.HexToBytes("B85E66F9DD7C09");
+        private static byte[] GetKey()
+        {
+            return Hex.HexToBytes("404142434445464748494A4B4C4D4E4F");
+        }
 
-        private static byte[] GetResponseForVerify() =>
-            Hex.HexToBytes("5F67E9E059DF3C52809DC9F6DDFBEF3E4C45691B2C8CDDD8");
+        private static byte[] GetBadKey()
+        {
+            return Hex.HexToBytes("40414243");
+        }
 
-        private static byte[] GetBadResponse() => Hex.HexToBytes("5F67E9E059DF3C52809DC9F6DDFBEF3E4C45691B2C8CDDD9");
-        private static byte[] GetMcvForVerify() => Hex.HexToBytes("53C2C04391250CCEC0213FF68C877EDA");
-        private static byte[] GetRmacKey() => Hex.HexToBytes("38C0C6E3D0B6AED40FBB420B51399081");
+        private static CommandApdu GetApdu()
+        {
+            return new CommandApdu { Ins = 0xFD };
+        }
+
+        private static byte[] GetCorrectMacdApduBytes()
+        {
+            return Hex.HexToBytes("00FD00000806e58094d47d8908");
+        }
+
+        private static byte[] GetMac()
+        {
+            return Hex.HexToBytes("CB85E66F9DD7C009");
+        }
+
+        private static byte[] GetMcv()
+        {
+            return Hex.HexToBytes("CB85E66F9DD7C009CB85E66F9DD7C009");
+        }
+
+        private static byte[] GetBadMcv()
+        {
+            return Hex.HexToBytes("B85E66F9DD7C09");
+        }
+
+        private static byte[] GetResponseForVerify()
+        {
+            return Hex.HexToBytes("5F67E9E059DF3C52809DC9F6DDFBEF3E4C45691B2C8CDDD8");
+        }
+
+        private static byte[] GetBadResponse()
+        {
+            return Hex.HexToBytes("5F67E9E059DF3C52809DC9F6DDFBEF3E4C45691B2C8CDDD9");
+        }
+
+        private static byte[] GetMcvForVerify()
+        {
+            return Hex.HexToBytes("53C2C04391250CCEC0213FF68C877EDA");
+        }
+
+        private static byte[] GetRmacKey()
+        {
+            return Hex.HexToBytes("38C0C6E3D0B6AED40FBB420B51399081");
+        }
 
         [Fact]
         public void MacApdu_GivenBadKey_ThrowsArgumentException()
@@ -51,7 +91,7 @@ namespace Yubico.YubiKey.Scp03
         [Fact]
         public void MacApdu_GivenCorrectKeyPayload_ReturnsCorrectMacdApdu()
         {
-            (CommandApdu output, _) = ChannelMac.MacApdu(GetApdu(), GetKey(), GetMcv());
+            var (output, _) = ChannelMac.MacApdu(GetApdu(), GetKey(), GetMcv());
             Assert.Equal(GetCorrectMacdApduBytes(), output.AsByteArray());
         }
 

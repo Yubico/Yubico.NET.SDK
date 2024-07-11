@@ -20,31 +20,46 @@ namespace Yubico.YubiKey.Cryptography
 {
     public class AesUtilitiesTests
     {
-        private static byte[] GetKey() => Hex.HexToBytes("01020304050607080102030405060708");
-        private static byte[] GetIV() => Hex.HexToBytes("deadbeefdeadbeefdeadbeefdeadbeef");
-        private static byte[] GetPlaintext() => Hex.HexToBytes("01010101010101010101010101010101");
-        private static byte[] GetCiphertext() => Hex.HexToBytes("01010101010101010101010101010101");
+        private static byte[] GetKey()
+        {
+            return Hex.HexToBytes("01020304050607080102030405060708");
+        }
+
+        private static byte[] GetIV()
+        {
+            return Hex.HexToBytes("deadbeefdeadbeefdeadbeefdeadbeef");
+        }
+
+        private static byte[] GetPlaintext()
+        {
+            return Hex.HexToBytes("01010101010101010101010101010101");
+        }
+
+        private static byte[] GetCiphertext()
+        {
+            return Hex.HexToBytes("01010101010101010101010101010101");
+        }
 
         [Fact]
         public void AesBlockCipher_GivenNullKey_ThrowsArgumentNullException()
         {
-            byte[] plaintext = GetPlaintext();
+            var plaintext = GetPlaintext();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => AesUtilities.BlockCipher(null, plaintext));
+            _ = Assert.Throws<ArgumentNullException>(() => AesUtilities.BlockCipher(key: null, plaintext));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
         [Fact]
         public void AesBlockCipher_GivenKeyWrongLength_ThrowsArgumentException()
         {
-            byte[] plaintext = GetPlaintext();
+            var plaintext = GetPlaintext();
             _ = Assert.Throws<ArgumentException>(() => AesUtilities.BlockCipher(new byte[9], plaintext));
         }
 
         [Fact]
         public void AesBlockCipher_GivenPlaintextWrongLength_ThrowsArgumentException()
         {
-            byte[] key = GetKey();
+            var key = GetKey();
             _ = Assert.Throws<ArgumentException>(() => AesUtilities.BlockCipher(key, new byte[9]));
         }
 
@@ -52,11 +67,11 @@ namespace Yubico.YubiKey.Cryptography
         public void AesBlockCipher_GivenKeyPlaintext_EncryptsCorrectly()
         {
             // Arrange
-            byte[] key = GetKey();
-            byte[] plaintext = GetPlaintext();
+            var key = GetKey();
+            var plaintext = GetPlaintext();
 
             // Act
-            byte[] result = AesUtilities.BlockCipher(key, plaintext);
+            var result = AesUtilities.BlockCipher(key, plaintext);
 
             // Assert
             Assert.Equal(result, Hex.HexToBytes("dcc0c378ec111cb23048486ef9d9a6b7"));
@@ -65,18 +80,18 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void AesCbcEncrypt_GivenNullKey_ThrowsArgumentNullException()
         {
-            byte[] plaintext = GetPlaintext();
-            byte[] iv = GetIV();
+            var plaintext = GetPlaintext();
+            var iv = GetIV();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => AesUtilities.AesCbcEncrypt(null, iv, plaintext));
+            _ = Assert.Throws<ArgumentNullException>(() => AesUtilities.AesCbcEncrypt(key: null, iv, plaintext));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
         [Fact]
         public void AesCbcEncrypt_GivenKeyWrongLength_ThrowsArgumentException()
         {
-            byte[] plaintext = GetPlaintext();
-            byte[] iv = GetIV();
+            var plaintext = GetPlaintext();
+            var iv = GetIV();
             _ = Assert.Throws<ArgumentException>(() => AesUtilities.AesCbcEncrypt(new byte[9], iv, plaintext));
         }
 
@@ -84,26 +99,26 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void AesCbcEncrypt_GivenNullIV_ThrowsArgumentNullException()
         {
-            byte[] key = GetKey();
-            byte[] plaintext = GetPlaintext();
+            var key = GetKey();
+            var plaintext = GetPlaintext();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => AesUtilities.AesCbcEncrypt(key, null, plaintext));
+            _ = Assert.Throws<ArgumentNullException>(() => AesUtilities.AesCbcEncrypt(key, iv: null, plaintext));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
         [Fact]
         public void AesCbcEncrypt_GivenIVWrongLength_ThrowsArgumentException()
         {
-            byte[] key = GetKey();
-            byte[] plaintext = GetPlaintext();
+            var key = GetKey();
+            var plaintext = GetPlaintext();
             _ = Assert.Throws<ArgumentException>(() => AesUtilities.AesCbcEncrypt(key, new byte[9], plaintext));
         }
 
         [Fact]
         public void AesCbcEncrypt_GivenPlaintextWrongLength_ThrowsArgumentException()
         {
-            byte[] key = GetKey();
-            byte[] iv = GetIV();
+            var key = GetKey();
+            var iv = GetIV();
             _ = Assert.Throws<ArgumentException>(() => AesUtilities.AesCbcEncrypt(key, iv, new byte[9]));
         }
 
@@ -111,12 +126,12 @@ namespace Yubico.YubiKey.Cryptography
         public void AesCbcEncrypt_GivenKeyIVPlaintext_EncryptsCorrectly()
         {
             // Arrange
-            byte[] key = GetKey();
-            byte[] plaintext = GetPlaintext();
-            byte[] iv = GetIV();
+            var key = GetKey();
+            var plaintext = GetPlaintext();
+            var iv = GetIV();
 
             // Act
-            byte[] result = AesUtilities.AesCbcEncrypt(key, iv, plaintext);
+            var result = AesUtilities.AesCbcEncrypt(key, iv, plaintext);
 
             // Assert
             Assert.Equal(result, Hex.HexToBytes("da19df061b1bcba151d692a4a9e63901"));
@@ -125,44 +140,44 @@ namespace Yubico.YubiKey.Cryptography
         [Fact]
         public void AesCbcDecrypt_GivenNullKey_ThrowsArgumentNullException()
         {
-            byte[] ciphertext = GetCiphertext();
-            byte[] iv = GetIV();
+            var ciphertext = GetCiphertext();
+            var iv = GetIV();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => AesUtilities.AesCbcDecrypt(null, iv, ciphertext));
+            _ = Assert.Throws<ArgumentNullException>(() => AesUtilities.AesCbcDecrypt(key: null, iv, ciphertext));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
         [Fact]
         public void AesCbcDecrypt_GivenKeyWrongLength_ThrowsArgumentException()
         {
-            byte[] ciphertext = GetCiphertext();
-            byte[] iv = GetIV();
+            var ciphertext = GetCiphertext();
+            var iv = GetIV();
             _ = Assert.Throws<ArgumentException>(() => AesUtilities.AesCbcDecrypt(new byte[9], iv, ciphertext));
         }
 
         [Fact]
         public void AesCbcDecrypt_GivenNullIV_ThrowsArgumentNullException()
         {
-            byte[] key = GetKey();
-            byte[] ciphertext = GetCiphertext();
+            var key = GetKey();
+            var ciphertext = GetCiphertext();
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => AesUtilities.AesCbcDecrypt(key, null, ciphertext));
+            _ = Assert.Throws<ArgumentNullException>(() => AesUtilities.AesCbcDecrypt(key, iv: null, ciphertext));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
         [Fact]
         public void AesCbcDecrypt_GivenIVWrongLength_ThrowsArgumentException()
         {
-            byte[] key = GetKey();
-            byte[] ciphertext = GetCiphertext();
+            var key = GetKey();
+            var ciphertext = GetCiphertext();
             _ = Assert.Throws<ArgumentException>(() => AesUtilities.AesCbcDecrypt(key, new byte[9], ciphertext));
         }
 
         [Fact]
         public void AesCbcDecrypt_GivenCiphertextWrongLength_ThrowsArgumentException()
         {
-            byte[] key = GetKey();
-            byte[] iv = GetIV();
+            var key = GetKey();
+            var iv = GetIV();
             _ = Assert.Throws<ArgumentException>(() => AesUtilities.AesCbcDecrypt(key, iv, new byte[9]));
         }
 
@@ -170,12 +185,12 @@ namespace Yubico.YubiKey.Cryptography
         public void AesCbcDecrypt_GivenKeyIVCiphertext_EncryptsCorrectly()
         {
             // Arrange
-            byte[] key = GetKey();
-            byte[] ciphertext = GetCiphertext();
-            byte[] iv = GetIV();
+            var key = GetKey();
+            var ciphertext = GetCiphertext();
+            var iv = GetIV();
 
             // Act
-            byte[] result = AesUtilities.AesCbcDecrypt(key, iv, ciphertext);
+            var result = AesUtilities.AesCbcDecrypt(key, iv, ciphertext);
 
             // Assert
             Assert.Equal(result, Hex.HexToBytes("d1af13631ea24595793ddf5bf6f9c42c"));

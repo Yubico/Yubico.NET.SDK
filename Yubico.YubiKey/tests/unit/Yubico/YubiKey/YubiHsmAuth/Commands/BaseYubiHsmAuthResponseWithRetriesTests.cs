@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -20,15 +19,6 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
 {
     public class BaseYubiHsmAuthResponseWithRetriesTests
     {
-        public class SampleYubiHsmAuthResponseWithRetries : BaseYubiHsmAuthResponseWithRetries
-        {
-            public SampleYubiHsmAuthResponseWithRetries(ResponseApdu responseApdu) : base(responseApdu)
-            {
-            }
-
-            public bool HasRetries => StatusWordContainsRetries;
-        }
-
         private const string AuthenticationRequired0RetriesStatusMessage =
             "Wrong password or authentication key. Retries remaining: 0.";
 
@@ -40,7 +30,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [InlineData(0x63cf, ResponseStatus.AuthenticationRequired)]
         public void Status_GivenStatusWord_ReturnsCorrectResponseStatus(short responseSw, ResponseStatus expectedStatus)
         {
-            SampleYubiHsmAuthResponseWithRetries response = new SampleYubiHsmAuthResponseWithRetries(
+            var response = new SampleYubiHsmAuthResponseWithRetries(
                 new ResponseApdu(new byte[] { }, responseSw));
 
             Assert.Equal(expectedStatus, response.Status);
@@ -51,7 +41,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [InlineData(0x63cf, AuthenticationRequired15RetriesStatusMessage)]
         public void Status_GivenStatusWord_ReturnsCorrectResponseMessage(short responseSw, string expectedMessage)
         {
-            SampleYubiHsmAuthResponseWithRetries response = new SampleYubiHsmAuthResponseWithRetries(
+            var response = new SampleYubiHsmAuthResponseWithRetries(
                 new ResponseApdu(new byte[] { }, responseSw));
 
             Assert.Equal(expectedMessage, response.StatusMessage);
@@ -64,7 +54,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [InlineData(SWConstants.InvalidParameter, false)]
         public void SwContainsRetries_GivenSw_ReturnsTrueWhenRetriesPresent(short responseSw, bool expectedResponse)
         {
-            SampleYubiHsmAuthResponseWithRetries response = new SampleYubiHsmAuthResponseWithRetries(
+            var response = new SampleYubiHsmAuthResponseWithRetries(
                 new ResponseApdu(new byte[] { }, responseSw));
 
             Assert.Equal(expectedResponse, response.HasRetries);
@@ -76,7 +66,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         public void RetriesRemaining_GivenSwWithRetryCount_ReturnsCorrectRetryCount(
             short responseSw, int? expectedCount)
         {
-            SampleYubiHsmAuthResponseWithRetries response = new SampleYubiHsmAuthResponseWithRetries(
+            var response = new SampleYubiHsmAuthResponseWithRetries(
                 new ResponseApdu(new byte[] { }, responseSw));
 
             Assert.Equal(expectedCount, response.RetriesRemaining);
@@ -87,10 +77,19 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [InlineData(SWConstants.InvalidParameter)]
         public void RetriesRemaining_GivenSwNoRetryCount_ReturnsNull(short responseSw)
         {
-            SampleYubiHsmAuthResponseWithRetries response = new SampleYubiHsmAuthResponseWithRetries(
+            var response = new SampleYubiHsmAuthResponseWithRetries(
                 new ResponseApdu(new byte[] { }, responseSw));
 
             Assert.True(!response.RetriesRemaining.HasValue);
+        }
+
+        public class SampleYubiHsmAuthResponseWithRetries : BaseYubiHsmAuthResponseWithRetries
+        {
+            public SampleYubiHsmAuthResponseWithRetries(ResponseApdu responseApdu) : base(responseApdu)
+            {
+            }
+
+            public bool HasRetries => StatusWordContainsRetries;
         }
     }
 }

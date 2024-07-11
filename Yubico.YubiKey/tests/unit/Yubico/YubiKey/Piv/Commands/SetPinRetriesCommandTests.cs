@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void ClassType_DerivedFromPivCommand_IsTrue()
         {
-            var setPinRetriesCommand = new SetPinRetriesCommand(5, 5);
+            var setPinRetriesCommand = new SetPinRetriesCommand(pinRetryCount: 5, pukRetryCount: 5);
 
             Assert.True(setPinRetriesCommand is IYubiKeyCommand<SetPinRetriesResponse>);
         }
@@ -31,9 +31,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_Application_Piv()
         {
-            var command = new SetPinRetriesCommand(5, 5);
+            var command = new SetPinRetriesCommand(pinRetryCount: 5, pukRetryCount: 5);
 
-            YubiKeyApplication application = command.Application;
+            var application = command.Application;
 
             Assert.Equal(YubiKeyApplication.Piv, application);
         }
@@ -45,7 +45,7 @@ namespace Yubico.YubiKey.Piv.Commands
             byte pukCount = 55;
             var command = new SetPinRetriesCommand(pinCount, pukCount);
 
-            byte count = command.PinRetryCount;
+            var count = command.PinRetryCount;
 
             Assert.Equal(pinCount, count);
         }
@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.Piv.Commands
             byte pukCount = 55;
             var command = new SetPinRetriesCommand(pinCount, pukCount);
 
-            byte count = command.PukRetryCount;
+            var count = command.PukRetryCount;
 
             Assert.Equal(pukCount, count);
         }
@@ -73,11 +73,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(8)]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero(int cStyle)
         {
-            CommandApdu cmdApdu = GetPinRetriesCommandApdu(cStyle, 6, 4);
+            var cmdApdu = GetPinRetriesCommandApdu(cStyle, pinRetries: 6, pukRetries: 4);
 
-            byte Cla = cmdApdu.Cla;
+            var Cla = cmdApdu.Cla;
 
-            Assert.Equal(0, Cla);
+            Assert.Equal(expected: 0, Cla);
         }
 
         [Theory]
@@ -91,11 +91,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(8)]
         public void CreateCommandApdu_GetInsProperty_ReturnsHexFA(int cStyle)
         {
-            CommandApdu cmdApdu = GetPinRetriesCommandApdu(cStyle, 22, 100);
+            var cmdApdu = GetPinRetriesCommandApdu(cStyle, pinRetries: 22, pukRetries: 100);
 
-            byte Ins = cmdApdu.Ins;
+            var Ins = cmdApdu.Ins;
 
-            Assert.Equal(0xFA, Ins);
+            Assert.Equal(expected: 0xFA, Ins);
         }
 
         [Theory]
@@ -109,9 +109,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(8, 88, 3)]
         public void CreateCommandApdu_GetP1Property_ReturnsPinRetries(int cStyle, byte count, byte expected)
         {
-            CommandApdu cmdApdu = GetPinRetriesCommandApdu(cStyle, count, 11);
+            var cmdApdu = GetPinRetriesCommandApdu(cStyle, count, pukRetries: 11);
 
-            byte P1 = cmdApdu.P1;
+            var P1 = cmdApdu.P1;
 
             Assert.Equal(expected, P1);
         }
@@ -127,9 +127,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(8, 88, 3)]
         public void CreateCommandApdu_GetP2Property_ReturnsPukRetries(int cStyle, byte count, byte expected)
         {
-            CommandApdu cmdApdu = GetPinRetriesCommandApdu(cStyle, 50, count);
+            var cmdApdu = GetPinRetriesCommandApdu(cStyle, pinRetries: 50, count);
 
-            byte P2 = cmdApdu.P2;
+            var P2 = cmdApdu.P2;
 
             Assert.Equal(expected, P2);
         }
@@ -145,11 +145,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(8)]
         public void CreateCommandApdu_GetNc_ReturnsZero(int cStyle)
         {
-            CommandApdu cmdApdu = GetPinRetriesCommandApdu(cStyle, 255, 1);
+            var cmdApdu = GetPinRetriesCommandApdu(cStyle, pinRetries: 255, pukRetries: 1);
 
-            int Nc = cmdApdu.Nc;
+            var Nc = cmdApdu.Nc;
 
-            Assert.Equal(0, Nc);
+            Assert.Equal(expected: 0, Nc);
         }
 
         [Theory]
@@ -163,11 +163,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(8)]
         public void CreateCommandApdu_GetNe_ReturnsZero(int cStyle)
         {
-            CommandApdu cmdApdu = GetPinRetriesCommandApdu(cStyle, 16, 15);
+            var cmdApdu = GetPinRetriesCommandApdu(cStyle, pinRetries: 16, pukRetries: 15);
 
-            int Ne = cmdApdu.Ne;
+            var Ne = cmdApdu.Ne;
 
-            Assert.Equal(0, Ne);
+            Assert.Equal(expected: 0, Ne);
         }
 
         [Theory]
@@ -181,9 +181,9 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(8)]
         public void CreateCommandApdu_GetData_ReturnsEmpty(int cStyle)
         {
-            CommandApdu cmdApdu = GetPinRetriesCommandApdu(cStyle, 4, 255);
+            var cmdApdu = GetPinRetriesCommandApdu(cStyle, pinRetries: 4, pukRetries: 255);
 
-            ReadOnlyMemory<byte> data = cmdApdu.Data;
+            var data = cmdApdu.Data;
 
             Assert.True(data.Span.IsEmpty);
         }
@@ -191,12 +191,12 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void CreateResponseForApdu_ReturnsCorrectType()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
-            var setPinRetriesCommand = new SetPinRetriesCommand(2, 3);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
+            var setPinRetriesCommand = new SetPinRetriesCommand(pinRetryCount: 2, pukRetryCount: 3);
 
-            SetPinRetriesResponse setPinRetriesResponse = setPinRetriesCommand.CreateResponseForApdu(responseApdu);
+            var setPinRetriesResponse = setPinRetriesCommand.CreateResponseForApdu(responseApdu);
 
             Assert.True(setPinRetriesResponse is SetPinRetriesResponse);
         }
@@ -211,8 +211,8 @@ namespace Yubico.YubiKey.Piv.Commands
 
         private static CommandApdu GetPinRetriesCommandApdu(int cStyle, byte pinRetries, byte pukRetries)
         {
-            SetPinRetriesCommand command = GetCommandObject(cStyle, pinRetries, pukRetries);
-            CommandApdu returnValue = command.CreateCommandApdu();
+            var command = GetCommandObject(cStyle, pinRetries, pukRetries);
+            var returnValue = command.CreateCommandApdu();
 
             return returnValue;
         }
@@ -247,10 +247,10 @@ namespace Yubico.YubiKey.Piv.Commands
                     break;
 
                 case 2:
-                    cmd = new SetPinRetriesCommand()
+                    cmd = new SetPinRetriesCommand
                     {
                         PinRetryCount = pinRetryCount,
-                        PukRetryCount = pukRetryCount,
+                        PukRetryCount = pukRetryCount
                     };
                     break;
 
@@ -261,9 +261,9 @@ namespace Yubico.YubiKey.Piv.Commands
                     break;
 
                 case 4:
-                    cmd = new SetPinRetriesCommand()
+                    cmd = new SetPinRetriesCommand
                     {
-                        PukRetryCount = pukRetryCount,
+                        PukRetryCount = pukRetryCount
                     };
                     break;
 
@@ -273,9 +273,9 @@ namespace Yubico.YubiKey.Piv.Commands
                     break;
 
                 case 6:
-                    cmd = new SetPinRetriesCommand()
+                    cmd = new SetPinRetriesCommand
                     {
-                        PinRetryCount = pinRetryCount,
+                        PinRetryCount = pinRetryCount
                     };
                     break;
 

@@ -13,17 +13,13 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.TestApp.Plugins
 {
     internal class EnumeratePlugin : PluginBase
     {
-        public override string Name => "Enumeration";
-
-        public override string Description =>
-            "This plugin displays different types of YubiKeys, both in a scripted and interactive way.";
+        private bool _interactive;
 
         public EnumeratePlugin(IOutput output) : base(output)
         {
@@ -41,9 +37,14 @@ namespace Yubico.YubiKey.TestApp.Plugins
             };
         }
 
+        public override string Name => "Enumeration";
+
+        public override string Description =>
+            "This plugin displays different types of YubiKeys, both in a scripted and interactive way.";
+
         public override bool Execute()
         {
-            bool result = Command.ToLower() switch
+            var result = Command.ToLower() switch
             {
                 "all" => OutputDevices(Transport.All),
                 "hidkeyboard" => OutputDevices(Transport.HidKeyboard),
@@ -65,30 +66,26 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         private static ArgumentException GetArgumentException(string command)
         {
-            return new ArgumentException(string.Join(Eol, new[]
-            {
-                $"[{command}] is not valid. Valid commands are:",
-                "  All", "  HidKeyboard", "  HidFido", "  UsbSmartCard",
-                "  NfcSmartCard", "  AllSmartCard"
-            }));
+            return new ArgumentException(string.Join(Eol, $"[{command}] is not valid. Valid commands are:", "  All",
+                "  HidKeyboard", "  HidFido", "  UsbSmartCard", "  NfcSmartCard", "  AllSmartCard"));
         }
 
         private bool OutputDevices(Transport transport)
         {
-            IList<IYubiKeyDevice> keys = IntegrationTestDeviceEnumeration.GetTestDevices(transport);
+            var keys = IntegrationTestDeviceEnumeration.GetTestDevices(transport);
             if (keys.Count == 0)
             {
                 Output.WriteLine($"No keys found of type [{transport}]");
                 return false;
             }
 
-            for (int i = 0; i < keys.Count; ++i)
+            for (var i = 0; i < keys.Count; ++i)
             {
                 Output.WriteLine($"{Eol}YubiKey # {i + 1}{Eol + keys[i]}");
-                Output.WriteLine(new string('-', ConsoleWidth - 1));
+                Output.WriteLine(new string(c: '-', ConsoleWidth - 1));
             }
 
-            Output.WriteLine(new string('=', ConsoleWidth - 1));
+            Output.WriteLine(new string(c: '=', ConsoleWidth - 1));
             Output.Write(Eol + Eol);
 
             return true;
@@ -102,19 +99,19 @@ namespace Yubico.YubiKey.TestApp.Plugins
             char inputChar;
             do
             {
-                Output.WriteLine($"YubiKey Enumeration Options");
-                Output.WriteLine($"1. All keys");
-                Output.WriteLine($"2. HID Keyboard");
-                Output.WriteLine($"3. HID FIDO");
-                Output.WriteLine($"4. USB SmartCard");
-                Output.WriteLine($"5. NFC SmartCard");
-                Output.WriteLine($"6. All SmartCard");
-                Output.WriteLine($"");
-                Output.Write($"Select an option, or any other key to exit: ");
+                Output.WriteLine("YubiKey Enumeration Options");
+                Output.WriteLine("1. All keys");
+                Output.WriteLine("2. HID Keyboard");
+                Output.WriteLine("3. HID FIDO");
+                Output.WriteLine("4. USB SmartCard");
+                Output.WriteLine("5. NFC SmartCard");
+                Output.WriteLine("6. All SmartCard");
+                Output.WriteLine("");
+                Output.Write("Select an option, or any other key to exit: ");
                 inputChar = Console.ReadKey().KeyChar;
                 Output.WriteLine();
 
-                Transport transport = inputChar switch
+                var transport = inputChar switch
                 {
                     '1' => Transport.All,
                     '2' => Transport.HidKeyboard,
@@ -122,7 +119,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     '4' => Transport.UsbSmartCard,
                     '5' => Transport.NfcSmartCard,
                     '6' => Transport.SmartCard,
-                    _ => Transport.None,
+                    _ => Transport.None
                 };
 
                 if (transport == Transport.None)
@@ -141,11 +138,9 @@ namespace Yubico.YubiKey.TestApp.Plugins
         public override void HandleParameters()
         {
             base.HandleParameters();
-            string? interactive = (string?)Parameters["interactive"].Value;
+            var interactive = (string?)Parameters["interactive"].Value;
             _interactive = interactive != null
                            && StaticConverters.ParseBool(interactive);
         }
-
-        private bool _interactive;
     }
 }

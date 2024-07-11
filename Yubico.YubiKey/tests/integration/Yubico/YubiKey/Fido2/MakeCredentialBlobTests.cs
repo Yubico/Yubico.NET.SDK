@@ -25,22 +25,22 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void CredBlobExtension_Correct()
         {
-            IYubiKeyDevice yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevices()[0];
-            IYubiKeyConnection connection = yubiKeyDevice.Connect(YubiKeyApplication.Fido2);
+            var yubiKeyDevice = IntegrationTestDeviceEnumeration.GetTestDevices()[index: 0];
+            var connection = yubiKeyDevice.Connect(YubiKeyApplication.Fido2);
 
             var getInfoCmd = new GetInfoCommand();
-            GetInfoResponse getInfoRsp = connection.SendCommand(getInfoCmd);
+            var getInfoRsp = connection.SendCommand(getInfoCmd);
             Assert.Equal(ResponseStatus.Success, getInfoRsp.Status);
-            AuthenticatorInfo authInfo = getInfoRsp.GetData();
-            Assert.Equal(32,
+            var authInfo = getInfoRsp.GetData();
+            Assert.Equal(expected: 32,
                 authInfo
                     .MaximumCredentialBlobLength); /* Assert.Equal() Failure: Values differExpected: 32 Actual: null */
 
-            int maxCredBlobLength = authInfo.MaximumCredentialBlobLength ?? 0;
+            var maxCredBlobLength = authInfo.MaximumCredentialBlobLength ?? 0;
             Assert.NotNull(authInfo.Extensions);
             if (!(authInfo.Extensions is null))
             {
-                bool isValid = authInfo.Extensions.Contains<string>("credBlob") && maxCredBlobLength > 0;
+                var isValid = authInfo.Extensions.Contains<string>("credBlob") && maxCredBlobLength > 0;
                 Assert.True(isValid);
             }
         }
@@ -50,12 +50,13 @@ namespace Yubico.YubiKey.Fido2
         {
             var pin = new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 });
 
-            IYubiKeyDevice yubiKey = YubiKeyDevice.FindAll().First();
+            var yubiKey = YubiKeyDevice.FindAll().First();
 
             using (var fido2Session = new Fido2Session(yubiKey))
             {
                 _ = fido2Session.TrySetPin(pin);
-                bool isValid = fido2Session.TryVerifyPin(pin, null, null, out int? retriesRemaining, out bool? reboot);
+                var isValid = fido2Session.TryVerifyPin(pin, permissions: null, relyingPartyId: null,
+                    out var retriesRemaining, out var reboot);
                 Assert.True(isValid);
 
                 isValid = SupportsLargeBlobs(fido2Session.AuthenticatorInfo);
@@ -64,7 +65,7 @@ Assert.True() Failure
 Expected: True
 Actual:   False*/
 
-                isValid = GetParams(fido2Session, out MakeCredentialParameters makeParams);
+                isValid = GetParams(fido2Session, out var makeParams);
                 Assert.True(isValid);
             }
         }
@@ -98,13 +99,13 @@ Actual:   False*/
 
             var rp = new RelyingParty("SomeRpId")
             {
-                Name = "SomeRpName",
+                Name = "SomeRpName"
             };
             byte[] userId = { 0x11, 0x22, 0x33, 0x44 };
             var user = new UserEntity(new ReadOnlyMemory<byte>(userId))
             {
                 Name = "SomeUserName",
-                DisplayName = "User",
+                DisplayName = "User"
             };
 
             makeParams = new MakeCredentialParameters(rp, user);
@@ -115,14 +116,14 @@ Actual:   False*/
             }
 
             var token = (ReadOnlyMemory<byte>)fido2Session.AuthToken;
-            byte[] pinUvAuthParam = fido2Session.AuthProtocol.AuthenticateUsingPinToken(
+            var pinUvAuthParam = fido2Session.AuthProtocol.AuthenticateUsingPinToken(
                 token.ToArray(), clientDataHash);
 
             makeParams.ClientDataHash = clientDataHash;
             makeParams.Protocol = fido2Session.AuthProtocol.Protocol;
             makeParams.PinUvAuthParam = pinUvAuthParam;
 
-            makeParams.AddOption(AuthenticatorOptions.rk, true);
+            makeParams.AddOption(AuthenticatorOptions.rk, optionValue: true);
             makeParams.AddExtension("largeBlob", arbitraryData);
 
             return true;

@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ReadHistory_IsEmpty_Correct(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -35,7 +35,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ResetApplication();
 
-                KeyHistory history = pivSession.ReadObject<KeyHistory>();
+                var history = pivSession.ReadObject<KeyHistory>();
 
                 Assert.True(history.IsEmpty);
             }
@@ -54,7 +54,7 @@ namespace Yubico.YubiKey.Piv
                 0xFE, 0x00
             });
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             try
             {
@@ -65,30 +65,30 @@ namespace Yubico.YubiKey.Piv
 
                     pivSession.ResetApplication();
 
-                    KeyHistory history = pivSession.ReadObject<KeyHistory>();
+                    var history = pivSession.ReadObject<KeyHistory>();
                     Assert.True(history.IsEmpty);
 
                     history.OnCardCertificates = 1;
                     history.OffCardCertificates = 2;
-                    string urlString = "file://user/certs";
+                    var urlString = "file://user/certs";
                     history.OffCardCertificateUrl = new Uri(urlString);
 
                     pivSession.WriteObject(history);
 
-                    KeyHistory historyCopy = pivSession.ReadObject<KeyHistory>();
+                    var historyCopy = pivSession.ReadObject<KeyHistory>();
                     Assert.False(historyCopy.IsEmpty);
-                    Assert.Equal(1, historyCopy.OnCardCertificates);
-                    Assert.Equal(2, historyCopy.OffCardCertificates);
+                    Assert.Equal(expected: 1, historyCopy.OnCardCertificates);
+                    Assert.Equal(expected: 2, historyCopy.OffCardCertificates);
                     Assert.NotNull(historyCopy.OffCardCertificateUrl);
                     if (!(historyCopy.OffCardCertificateUrl is null))
                     {
-                        int cmpResult = urlString.CompareTo(historyCopy.OffCardCertificateUrl.AbsoluteUri);
-                        Assert.Equal(0, cmpResult);
+                        var cmpResult = urlString.CompareTo(historyCopy.OffCardCertificateUrl.AbsoluteUri);
+                        Assert.Equal(expected: 0, cmpResult);
                     }
 
-                    byte[] encodedHistory = historyCopy.Encode();
+                    var encodedHistory = historyCopy.Encode();
 
-                    bool isValid = expected.Span.SequenceEqual(encodedHistory);
+                    var isValid = expected.Span.SequenceEqual(encodedHistory);
                     Assert.True(isValid);
                 }
             }
@@ -105,7 +105,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteEmpty_ThenData_Correct(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             try
             {
@@ -116,34 +116,34 @@ namespace Yubico.YubiKey.Piv
 
                     pivSession.ResetApplication();
 
-                    KeyHistory history = pivSession.ReadObject<KeyHistory>();
+                    var history = pivSession.ReadObject<KeyHistory>();
                     Assert.True(history.IsEmpty);
 
                     history.OnCardCertificates = 0;
                     pivSession.WriteObject(history);
 
-                    KeyHistory historyCopy = pivSession.ReadObject<KeyHistory>();
+                    var historyCopy = pivSession.ReadObject<KeyHistory>();
                     Assert.False(historyCopy.IsEmpty);
-                    Assert.Equal(0, historyCopy.OnCardCertificates);
-                    Assert.Equal(0, historyCopy.OffCardCertificates);
+                    Assert.Equal(expected: 0, historyCopy.OnCardCertificates);
+                    Assert.Equal(expected: 0, historyCopy.OffCardCertificates);
                     Assert.Null(historyCopy.OffCardCertificateUrl);
 
                     history.OnCardCertificates = 1;
                     history.OffCardCertificates = 2;
-                    string urlString = "file://user/certs";
+                    var urlString = "file://user/certs";
                     history.OffCardCertificateUrl = new Uri(urlString);
 
                     pivSession.WriteObject(history);
 
                     historyCopy = pivSession.ReadObject<KeyHistory>();
                     Assert.False(historyCopy.IsEmpty);
-                    Assert.Equal(1, historyCopy.OnCardCertificates);
-                    Assert.Equal(2, historyCopy.OffCardCertificates);
+                    Assert.Equal(expected: 1, historyCopy.OnCardCertificates);
+                    Assert.Equal(expected: 2, historyCopy.OffCardCertificates);
                     Assert.NotNull(historyCopy.OffCardCertificateUrl);
                     if (!(historyCopy.OffCardCertificateUrl is null))
                     {
-                        int cmpResult = urlString.CompareTo(historyCopy.OffCardCertificateUrl.AbsoluteUri);
-                        Assert.Equal(0, cmpResult);
+                        var cmpResult = urlString.CompareTo(historyCopy.OffCardCertificateUrl.AbsoluteUri);
+                        Assert.Equal(expected: 0, cmpResult);
                     }
                 }
             }

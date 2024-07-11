@@ -24,19 +24,20 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new GetMetadataResponse(null, 0x9C));
+            _ = Assert.Throws<ArgumentNullException>(
+                () => new GetMetadataResponse(responseApdu: null, slotNumber: 0x9C));
 #pragma warning restore CS8625
         }
 
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[]
                 { 0x01, 0x01, 0xFF, 0x05, 0x01, 0x01, 0x06, 0x02, 0x05, 0x05, sw1, sw2 });
 
-            var metadataResponse = new GetMetadataResponse(responseApdu, 0x80);
+            var metadataResponse = new GetMetadataResponse(responseApdu, slotNumber: 0x80);
 
             Assert.Equal(SWConstants.Success, metadataResponse.StatusWord);
         }
@@ -44,12 +45,12 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[]
                 { 0x01, 0x01, 0xFF, 0x05, 0x01, 0x01, 0x06, 0x02, 0x05, 0x05, sw1, sw2 });
 
-            var metadataResponse = new GetMetadataResponse(responseApdu, 0x80);
+            var metadataResponse = new GetMetadataResponse(responseApdu, slotNumber: 0x80);
 
             Assert.Equal(ResponseStatus.Success, metadataResponse.Status);
         }
@@ -57,11 +58,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_DataNotFoundResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.DataNotFound >> 8));
-            byte sw2 = unchecked((byte)SWConstants.DataNotFound);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            var sw1 = (byte)(SWConstants.DataNotFound >> 8);
+            var sw2 = unchecked((byte)SWConstants.DataNotFound);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var metadataResponse = new GetMetadataResponse(responseApdu, 0x9A);
+            var metadataResponse = new GetMetadataResponse(responseApdu, slotNumber: 0x9A);
 
             Assert.Equal(ResponseStatus.NoData, metadataResponse.Status);
         }
@@ -69,11 +70,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Construct_FailResponseApdu_ExceptionOnGetData()
         {
-            byte sw1 = unchecked((byte)(SWConstants.WarningNvmUnchanged >> 8));
-            byte sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            var sw1 = (byte)(SWConstants.WarningNvmUnchanged >> 8);
+            var sw2 = unchecked((byte)SWConstants.WarningNvmUnchanged);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var metadataResponse = new GetMetadataResponse(responseApdu, 0x88);
+            var metadataResponse = new GetMetadataResponse(responseApdu, slotNumber: 0x88);
 
             _ = Assert.Throws<InvalidOperationException>(() => metadataResponse.GetData());
         }
@@ -81,7 +82,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_GetCorrectData()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x11, 0x02, 0x02, 0x03, 0x03, 0x03,
                 0x01, 0x01, 0x04, 0x43, 0x86, 0x41, 0x04, 0xC4,
@@ -98,8 +99,8 @@ namespace Yubico.YubiKey.Piv.Commands
 
             var responseApdu = new ResponseApdu(testData);
 
-            var metadataResponse = new GetMetadataResponse(responseApdu, 0x9C);
-            PivMetadata pivMetadata = metadataResponse.GetData();
+            var metadataResponse = new GetMetadataResponse(responseApdu, slotNumber: 0x9C);
+            var pivMetadata = metadataResponse.GetData();
 
             Assert.True(pivMetadata is PivMetadata);
         }
@@ -107,11 +108,11 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_DataNotFoundResponseApdu_ThrowsException()
         {
-            byte sw1 = unchecked((byte)(SWConstants.DataNotFound >> 8));
-            byte sw2 = unchecked((byte)SWConstants.DataNotFound);
-            var responseApdu = new ResponseApdu(new byte[] { sw1, sw2 });
+            var sw1 = (byte)(SWConstants.DataNotFound >> 8);
+            var sw2 = unchecked((byte)SWConstants.DataNotFound);
+            var responseApdu = new ResponseApdu(new[] { sw1, sw2 });
 
-            var metadataResponse = new GetMetadataResponse(responseApdu, 0x91);
+            var metadataResponse = new GetMetadataResponse(responseApdu, slotNumber: 0x91);
 
             _ = Assert.Throws<InvalidOperationException>(() => metadataResponse.GetData());
         }

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Linq;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -26,7 +25,7 @@ namespace Yubico.YubiKey.Piv.Commands
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
             _ = Assert.Throws<ArgumentNullException>(
-                () => new GenerateKeyPairResponse(null, 0x87, PivAlgorithm.Rsa2048));
+                () => new GenerateKeyPairResponse(responseApdu: null, slotNumber: 0x87, PivAlgorithm.Rsa2048));
 #pragma warning restore CS8625
         }
 
@@ -37,7 +36,7 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(0x11)]
         public void Constructor_InvalidSlot_ThrowsException(byte slotNumber)
         {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Success, PivAlgorithm.EccP256);
+            var responseApdu = GetResponseApdu(ResponseStatus.Success, PivAlgorithm.EccP256);
 
             _ = Assert.Throws<ArgumentException>(() =>
                 new GenerateKeyPairResponse(responseApdu, slotNumber, PivAlgorithm.EccP256));
@@ -46,10 +45,10 @@ namespace Yubico.YubiKey.Piv.Commands
         [Fact]
         public void Constructor_InvalidAlgorithm_ThrowsException()
         {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Success, PivAlgorithm.EccP256);
+            var responseApdu = GetResponseApdu(ResponseStatus.Success, PivAlgorithm.EccP256);
 
             _ = Assert.Throws<ArgumentException>(() =>
-                new GenerateKeyPairResponse(responseApdu, 0x88, PivAlgorithm.TripleDes));
+                new GenerateKeyPairResponse(responseApdu, slotNumber: 0x88, PivAlgorithm.TripleDes));
         }
 
         [Theory]
@@ -61,8 +60,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.EccP384)]
         public void GetData_InvalidKeyData_ThrowsException(PivAlgorithm algorithm)
         {
-            ResponseApdu responseApdu = GetBadDataResponseApdu(algorithm);
-            var response = new GenerateKeyPairResponse(responseApdu, 0x88, algorithm);
+            var responseApdu = GetBadDataResponseApdu(algorithm);
+            var response = new GenerateKeyPairResponse(responseApdu, slotNumber: 0x88, algorithm);
             _ = Assert.Throws<ArgumentException>(() => response.GetData());
         }
 
@@ -72,10 +71,10 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(ResponseStatus.Failed, SWConstants.FunctionNotSupported)]
         public void Constructor_SetsStatusWordCorrectly(ResponseStatus responseStatus, short expectedStatusWord)
         {
-            ResponseApdu responseApdu = GetResponseApdu(responseStatus, PivAlgorithm.EccP384);
-            var response = new GenerateKeyPairResponse(responseApdu, 0x89, PivAlgorithm.EccP384);
+            var responseApdu = GetResponseApdu(responseStatus, PivAlgorithm.EccP384);
+            var response = new GenerateKeyPairResponse(responseApdu, slotNumber: 0x89, PivAlgorithm.EccP384);
 
-            short StatusWord = response.StatusWord;
+            var StatusWord = response.StatusWord;
 
             Assert.Equal(expectedStatusWord, StatusWord);
         }
@@ -86,10 +85,10 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(ResponseStatus.Failed)]
         public void Constructor_SetsStatusCorrectly(ResponseStatus responseStatus)
         {
-            ResponseApdu responseApdu = GetResponseApdu(responseStatus, PivAlgorithm.EccP256);
-            var response = new GenerateKeyPairResponse(responseApdu, 0x8A, PivAlgorithm.EccP256);
+            var responseApdu = GetResponseApdu(responseStatus, PivAlgorithm.EccP256);
+            var response = new GenerateKeyPairResponse(responseApdu, slotNumber: 0x8A, PivAlgorithm.EccP256);
 
-            ResponseStatus Status = response.Status;
+            var Status = response.Status;
 
             Assert.Equal(responseStatus, Status);
         }
@@ -103,10 +102,10 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.EccP384)]
         public void Constructor_SetsAlgorithmCorrectly(PivAlgorithm algorithm)
         {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Success, algorithm);
-            var response = new GenerateKeyPairResponse(responseApdu, 0x8B, algorithm);
+            var responseApdu = GetResponseApdu(ResponseStatus.Success, algorithm);
+            var response = new GenerateKeyPairResponse(responseApdu, slotNumber: 0x8B, algorithm);
 
-            PivAlgorithm getAlgorithm = response.Algorithm;
+            var getAlgorithm = response.Algorithm;
 
             Assert.Equal(algorithm, getAlgorithm);
         }
@@ -118,10 +117,10 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivSlot.Retired20)]
         public void Constructor_SetsSlotNumCorrectly(byte slotNumber)
         {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Success, PivAlgorithm.Rsa2048);
+            var responseApdu = GetResponseApdu(ResponseStatus.Success, PivAlgorithm.Rsa2048);
             var response = new GenerateKeyPairResponse(responseApdu, slotNumber, PivAlgorithm.Rsa2048);
 
-            byte getSlotNumber = response.SlotNumber;
+            var getSlotNumber = response.SlotNumber;
 
             Assert.Equal(slotNumber, getSlotNumber);
         }
@@ -135,8 +134,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.EccP384)]
         public void GetData_FailResponse_ThrowsException(PivAlgorithm algorithm)
         {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Failed, algorithm);
-            var response = new GenerateKeyPairResponse(responseApdu, 0x8E, algorithm);
+            var responseApdu = GetResponseApdu(ResponseStatus.Failed, algorithm);
+            var response = new GenerateKeyPairResponse(responseApdu, slotNumber: 0x8E, algorithm);
 
             _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
         }
@@ -150,8 +149,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.EccP384)]
         public void GetData_AuthenticationRequiredResponse_ThrowsException(PivAlgorithm algorithm)
         {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.AuthenticationRequired, algorithm);
-            var response = new GenerateKeyPairResponse(responseApdu, 0x8E, algorithm);
+            var responseApdu = GetResponseApdu(ResponseStatus.AuthenticationRequired, algorithm);
+            var response = new GenerateKeyPairResponse(responseApdu, slotNumber: 0x8E, algorithm);
 
             _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
         }
@@ -165,14 +164,14 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(PivAlgorithm.EccP384)]
         public void GetData_ReturnsCorrectData(PivAlgorithm algorithm)
         {
-            ResponseApdu responseApdu = GetResponseApdu(ResponseStatus.Success, algorithm);
-            byte[] keyData = GetCorrectEncodingForAlgorithm(algorithm);
+            var responseApdu = GetResponseApdu(ResponseStatus.Success, algorithm);
+            var keyData = GetCorrectEncodingForAlgorithm(algorithm);
 
-            var response = new GenerateKeyPairResponse(responseApdu, 0x8F, algorithm);
-            PivPublicKey getData = response.GetData();
+            var response = new GenerateKeyPairResponse(responseApdu, slotNumber: 0x8F, algorithm);
+            var getData = response.GetData();
 
             var keyDataSpan = new ReadOnlySpan<byte>(keyData);
-            bool compareResult = keyDataSpan.SequenceEqual(getData.PivEncodedPublicKey.Span);
+            var compareResult = keyDataSpan.SequenceEqual(getData.PivEncodedPublicKey.Span);
 
             Assert.True(compareResult);
         }
@@ -190,12 +189,12 @@ namespace Yubico.YubiKey.Piv.Commands
             switch (responseStatus)
             {
                 default:
-                    byte[] errorResponse = new byte[2] { 0x6A, 0x81 };
+                    var errorResponse = new byte[2] { 0x6A, 0x81 };
                     responseData = errorResponse;
                     break;
 
                 case ResponseStatus.AuthenticationRequired:
-                    byte[] authResponse = new byte[2] { 0x69, 0x82 };
+                    var authResponse = new byte[2] { 0x69, 0x82 };
                     responseData = authResponse;
                     break;
 
@@ -209,8 +208,8 @@ namespace Yubico.YubiKey.Piv.Commands
 
         private static byte[] BuildResponseForAlgorithm(PivAlgorithm algorithm)
         {
-            byte[] encoding = GetCorrectEncodingForAlgorithm(algorithm);
-            byte[] returnValue = new byte[encoding.Length + 2];
+            var encoding = GetCorrectEncodingForAlgorithm(algorithm);
+            var returnValue = new byte[encoding.Length + 2];
             Array.Copy(encoding, returnValue, encoding.Length);
             returnValue[encoding.Length] = 0x90;
             returnValue[encoding.Length + 1] = 0x00;
@@ -311,7 +310,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     0x01, 0xC5, 0x28, 0xC3, 0xE8, 0xA1, 0x65, 0xCF,
                     0x39, 0x30, 0x66, 0x18, 0x6A, 0xE5, 0xAD, 0xFB,
                     0x82, 0x03, 0x01, 0x00, 0x01
-                },
+                }
             };
         }
 
@@ -321,7 +320,7 @@ namespace Yubico.YubiKey.Piv.Commands
         // ECC that is point || point.
         private static ResponseApdu GetBadDataResponseApdu(PivAlgorithm algorithm)
         {
-            byte[] responseData = algorithm switch
+            var responseData = algorithm switch
             {
                 PivAlgorithm.Rsa2048 => new byte[]
                 {
@@ -416,7 +415,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     0x39, 0x30, 0x66, 0x18, 0x6A, 0xE5, 0xAD,
                     0x82, 0x03, 0x01, 0x00, 0x01,
                     0x90, 0x00
-                },
+                }
             };
             return new ResponseApdu(responseData);
         }

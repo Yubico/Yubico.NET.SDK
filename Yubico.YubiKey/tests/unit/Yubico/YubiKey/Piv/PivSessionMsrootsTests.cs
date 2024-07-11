@@ -15,7 +15,6 @@
 using System;
 using System.IO;
 using Xunit;
-using Yubico.YubiKey.Cryptography;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv
@@ -26,7 +25,7 @@ namespace Yubico.YubiKey.Piv
         public void Write_TooMuchData_ThrowsOutOfRangeException()
         {
             var yubiKey = new HollowYubiKeyDevice();
-            byte[] inputData = new byte[16000];
+            var inputData = new byte[16000];
 
             using (var pivSession = new PivSession(yubiKey))
             {
@@ -38,7 +37,7 @@ namespace Yubico.YubiKey.Piv
         public void Write_NoKeyCollector_ThrowsInvalidOpException()
         {
             var yubiKey = new HollowYubiKeyDevice();
-            byte[] inputData = new byte[100];
+            var inputData = new byte[100];
 
             using (var pivSession = new PivSession(yubiKey))
             {
@@ -50,7 +49,7 @@ namespace Yubico.YubiKey.Piv
         public void Write_KeyCollectorFalse_ThrowsCanceledException()
         {
             var yubiKey = new HollowYubiKeyDevice();
-            byte[] inputData = new byte[100];
+            var inputData = new byte[100];
 
             using (var pivSession = new PivSession(yubiKey))
             {
@@ -63,7 +62,7 @@ namespace Yubico.YubiKey.Piv
         public void WriteStream_TooMuchData_ThrowsOutOfRangeException()
         {
             var yubiKey = new HollowYubiKeyDevice();
-            byte[] inputData = new byte[16000];
+            var inputData = new byte[16000];
             var memStream = new MemoryStream(inputData);
 
             using (var pivSession = new PivSession(yubiKey))
@@ -76,7 +75,7 @@ namespace Yubico.YubiKey.Piv
         public void WriteStream_NoKeyCollector_ThrowsInvalidOpException()
         {
             var yubiKey = new HollowYubiKeyDevice();
-            byte[] inputData = new byte[100];
+            var inputData = new byte[100];
             var memStream = new MemoryStream(inputData);
 
             using (var pivSession = new PivSession(yubiKey))
@@ -89,7 +88,7 @@ namespace Yubico.YubiKey.Piv
         public void WriteStream_KeyCollectorFalse_ThrowsCanceledException()
         {
             var yubiKey = new HollowYubiKeyDevice();
-            byte[] inputData = new byte[100];
+            var inputData = new byte[100];
             var memStream = new MemoryStream(inputData);
 
             using (var pivSession = new PivSession(yubiKey))

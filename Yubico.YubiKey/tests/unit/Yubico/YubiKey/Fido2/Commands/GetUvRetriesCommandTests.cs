@@ -14,7 +14,6 @@
 
 using System;
 using Xunit;
-using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.Fido2.Commands
 {
@@ -32,19 +31,19 @@ namespace Yubico.YubiKey.Fido2.Commands
         public void CreateCommandApdu_CreatesCorrectApdu()
         {
             var command = new GetUvRetriesCommand();
-            CommandApdu apdu = command.CreateCommandApdu();
+            var apdu = command.CreateCommandApdu();
 
-            byte[] expectedData = new byte[]
+            var expectedData = new byte[]
             {
                 0x06, // authenticatorClientPin (0x06)
                 0xA1, // map (1 entry)
                 0x02, 0x07 // subcommand = 7
             };
 
-            Assert.Equal(0, apdu.Cla);
-            Assert.Equal(0x10, apdu.Ins);
-            Assert.Equal(0, apdu.P1);
-            Assert.Equal(0, apdu.P2);
+            Assert.Equal(expected: 0, apdu.Cla);
+            Assert.Equal(expected: 0x10, apdu.Ins);
+            Assert.Equal(expected: 0, apdu.P1);
+            Assert.Equal(expected: 0, apdu.P2);
             Assert.True(apdu.Data.Span.SequenceEqual(expectedData));
         }
     }

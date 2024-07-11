@@ -13,9 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Security.Cryptography;
 using Xunit;
-using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Piv.Objects
 {
@@ -50,7 +48,7 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var admin = new AdminData();
 
-            Assert.Equal(0x005FFF00, admin.DataTag);
+            Assert.Equal(expected: 0x005FFF00, admin.DataTag);
         }
 
         [Fact]
@@ -58,8 +56,8 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var admin = new AdminData();
 
-            int definedTag = admin.GetDefinedDataTag();
-            Assert.Equal(0x005FFF00, definedTag);
+            var definedTag = admin.GetDefinedDataTag();
+            Assert.Equal(expected: 0x005FFF00, definedTag);
         }
 
         [Fact]
@@ -68,7 +66,7 @@ namespace Yubico.YubiKey.Piv.Objects
             using var admin = new AdminData();
             admin.DataTag = 0x005F0A01;
 
-            Assert.Equal(0x005F0A01, admin.DataTag);
+            Assert.Equal(expected: 0x005F0A01, admin.DataTag);
         }
 
         [Fact]
@@ -77,8 +75,8 @@ namespace Yubico.YubiKey.Piv.Objects
             using var admin = new AdminData();
             admin.DataTag = 0x005F0A01;
 
-            int definedTag = admin.GetDefinedDataTag();
-            Assert.Equal(0x005FFF00, definedTag);
+            var definedTag = admin.GetDefinedDataTag();
+            Assert.Equal(expected: 0x005FFF00, definedTag);
         }
 
         [Theory]
@@ -103,8 +101,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void SetSalt_Correct()
         {
-            byte[] fixedBytes = GetFixedBytes();
-            Array.Resize<byte>(ref fixedBytes, 16);
+            var fixedBytes = GetFixedBytes();
+            Array.Resize(ref fixedBytes, newSize: 16);
 
             using var admin = new AdminData();
             admin.SetSalt(fixedBytes);
@@ -113,7 +111,7 @@ namespace Yubico.YubiKey.Piv.Objects
             if (!(admin.Salt is null))
             {
                 var salt = (ReadOnlyMemory<byte>)admin.Salt;
-                bool isValid = MemoryExtensions.SequenceEqual<byte>(fixedBytes, salt.Span);
+                var isValid = MemoryExtensions.SequenceEqual(fixedBytes, salt.Span);
                 Assert.True(isValid);
             }
         }
@@ -122,7 +120,7 @@ namespace Yubico.YubiKey.Piv.Objects
         public void SetSalt_Null_NotEmpty()
         {
             using var admin = new AdminData();
-            admin.SetSalt(null);
+            admin.SetSalt(salt: null);
 
             Assert.False(admin.IsEmpty);
         }
@@ -139,8 +137,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void SetSalt_ThenNull_Correct()
         {
-            byte[] fixedBytes = GetFixedBytes();
-            Array.Resize<byte>(ref fixedBytes, 16);
+            var fixedBytes = GetFixedBytes();
+            Array.Resize(ref fixedBytes, newSize: 16);
 
             using var admin = new AdminData();
             admin.SetSalt(fixedBytes);
@@ -192,8 +190,8 @@ namespace Yubico.YubiKey.Piv.Objects
             var expected = new Span<byte>(new byte[] { 0x53, 0x00 });
             using var adminData = new AdminData();
 
-            byte[] encoding = adminData.Encode();
-            bool isValid = MemoryExtensions.SequenceEqual(expected, encoding);
+            var encoding = adminData.Encode();
+            var isValid = expected.SequenceEqual(encoding);
             Assert.True(isValid);
         }
 
@@ -207,9 +205,9 @@ namespace Yubico.YubiKey.Piv.Objects
             using var admin = new AdminData();
             admin.PukBlocked = false;
 
-            byte[] encoded = admin.Encode();
+            var encoded = admin.Encode();
 
-            bool isValid = MemoryExtensions.SequenceEqual<byte>(expected, encoded);
+            var isValid = expected.SequenceEqual(encoded);
             Assert.True(isValid);
         }
 
@@ -223,9 +221,9 @@ namespace Yubico.YubiKey.Piv.Objects
             using var admin = new AdminData();
             admin.PinProtected = true;
 
-            byte[] encoded = admin.Encode();
+            var encoded = admin.Encode();
 
-            bool isValid = MemoryExtensions.SequenceEqual<byte>(expected, encoded);
+            var isValid = expected.SequenceEqual(encoded);
             Assert.True(isValid);
         }
 
@@ -240,15 +238,15 @@ namespace Yubico.YubiKey.Piv.Objects
                 0xA6, 0xD3, 0xCB, 0x2C, 0x10, 0xF0, 0xCD, 0x2D
             });
 
-            byte[] fixedBytes = GetFixedBytes();
-            Array.Resize<byte>(ref fixedBytes, 16);
+            var fixedBytes = GetFixedBytes();
+            Array.Resize(ref fixedBytes, newSize: 16);
 
             using var admin = new AdminData();
             admin.SetSalt(fixedBytes);
 
-            byte[] encoded = admin.Encode();
+            var encoded = admin.Encode();
 
-            bool isValid = MemoryExtensions.SequenceEqual<byte>(expected, encoded);
+            var isValid = expected.SequenceEqual(encoded);
             Assert.True(isValid);
         }
 
@@ -264,8 +262,8 @@ namespace Yubico.YubiKey.Piv.Objects
                 0x83, 0x04, 0x00, 0x00, 0x00, 0x00
             });
 
-            byte[] fixedBytes = GetFixedBytes();
-            Array.Resize<byte>(ref fixedBytes, 16);
+            var fixedBytes = GetFixedBytes();
+            Array.Resize(ref fixedBytes, newSize: 16);
 
             using var admin = new AdminData();
             admin.PukBlocked = true;
@@ -274,16 +272,16 @@ namespace Yubico.YubiKey.Piv.Objects
             admin.PinLastUpdated = DateTime.UtcNow;
             if (!(admin.PinLastUpdated is null))
             {
-                long unixTimeSeconds = new DateTimeOffset((DateTime)admin.PinLastUpdated).ToUnixTimeSeconds();
-                expected[30] = (byte)(unixTimeSeconds >> 24);
-                expected[29] = (byte)(unixTimeSeconds >> 16);
-                expected[28] = (byte)(unixTimeSeconds >> 8);
-                expected[27] = (byte)unixTimeSeconds;
+                var unixTimeSeconds = new DateTimeOffset((DateTime)admin.PinLastUpdated).ToUnixTimeSeconds();
+                expected[index: 30] = (byte)(unixTimeSeconds >> 24);
+                expected[index: 29] = (byte)(unixTimeSeconds >> 16);
+                expected[index: 28] = (byte)(unixTimeSeconds >> 8);
+                expected[index: 27] = (byte)unixTimeSeconds;
             }
 
-            byte[] encoded = admin.Encode();
+            var encoded = admin.Encode();
 
-            bool isValid = MemoryExtensions.SequenceEqual<byte>(expected, encoded);
+            var isValid = expected.SequenceEqual(encoded);
             Assert.True(isValid);
         }
 
@@ -300,7 +298,7 @@ namespace Yubico.YubiKey.Piv.Objects
             });
 
             using var admin = new AdminData();
-            bool isValid = admin.TryDecode(encoding);
+            var isValid = admin.TryDecode(encoding);
             Assert.True(isValid);
         }
 
@@ -317,7 +315,7 @@ namespace Yubico.YubiKey.Piv.Objects
             });
 
             using var admin = new AdminData();
-            bool isValid = admin.TryDecode(encoding);
+            var isValid = admin.TryDecode(encoding);
             Assert.True(admin.PukBlocked);
         }
 
@@ -334,7 +332,7 @@ namespace Yubico.YubiKey.Piv.Objects
             });
 
             using var admin = new AdminData();
-            bool isValid = admin.TryDecode(encoding);
+            var isValid = admin.TryDecode(encoding);
             Assert.True(admin.PinProtected);
         }
 
@@ -349,14 +347,14 @@ namespace Yubico.YubiKey.Piv.Objects
                 0xA6, 0xD3, 0xCB, 0x2C, 0x10, 0xF0, 0xCD, 0x2D,
                 0x83, 0x04, 0x71, 0xB8, 0xE1, 0x61
             });
-            Memory<byte> expected = encoding.Slice(9, 16);
+            var expected = encoding.Slice(start: 9, length: 16);
 
             using var admin = new AdminData();
-            bool isValid = admin.TryDecode(encoding);
+            var isValid = admin.TryDecode(encoding);
             if (!(admin.Salt is null))
             {
                 var salt = (ReadOnlyMemory<byte>)admin.Salt;
-                isValid = MemoryExtensions.SequenceEqual<byte>(expected.Span, salt.Span);
+                isValid = expected.Span.SequenceEqual(salt.Span);
                 Assert.True(isValid);
             }
         }
@@ -372,15 +370,15 @@ namespace Yubico.YubiKey.Piv.Objects
                 0xA6, 0xD3, 0xCB, 0x2C, 0x10, 0xF0, 0xCD, 0x2D,
                 0x83, 0x04, 0x71, 0xB8, 0xE1, 0x61
             });
-            long unixTimeSeconds = ((long)encoding.Span[30] & 255) << 24;
-            unixTimeSeconds += ((long)encoding.Span[29] & 255) << 16;
-            unixTimeSeconds += ((long)encoding.Span[28] & 255) << 8;
-            unixTimeSeconds += (long)encoding.Span[27] & 255;
+            var unixTimeSeconds = ((long)encoding.Span[index: 30] & 255) << 24;
+            unixTimeSeconds += ((long)encoding.Span[index: 29] & 255) << 16;
+            unixTimeSeconds += ((long)encoding.Span[index: 28] & 255) << 8;
+            unixTimeSeconds += (long)encoding.Span[index: 27] & 255;
             var expectedOffset = DateTimeOffset.FromUnixTimeSeconds(unixTimeSeconds);
-            DateTime expected = expectedOffset.UtcDateTime;
+            var expected = expectedOffset.UtcDateTime;
 
             using var admin = new AdminData();
-            bool isValid = admin.TryDecode(encoding);
+            var isValid = admin.TryDecode(encoding);
             Assert.True(isValid);
             if (!(admin.PinLastUpdated is null))
             {
@@ -405,7 +403,7 @@ namespace Yubico.YubiKey.Piv.Objects
             });
 
             using var admin = new AdminData();
-            bool isValid = admin.TryDecode(encoding);
+            var isValid = admin.TryDecode(encoding);
             Assert.False(isValid);
         }
 
@@ -423,11 +421,11 @@ namespace Yubico.YubiKey.Piv.Objects
                 0x83, 0x04, 0x71, 0xB8, 0xE1, 0x61,
                 0x82, 0x10,
                 0xA6, 0xD3, 0xCB, 0x2C, 0x10, 0xF0, 0xCD, 0x2D,
-                0xA4, 0xC4, 0xD9, 0x23, 0x74, 0x59, 0x7F, 0x64,
+                0xA4, 0xC4, 0xD9, 0x23, 0x74, 0x59, 0x7F, 0x64
             });
 
             using var admin = new AdminData();
-            bool isValid = admin.TryDecode(encoding);
+            var isValid = admin.TryDecode(encoding);
             Assert.False(isValid);
         }
 
@@ -447,7 +445,7 @@ namespace Yubico.YubiKey.Piv.Objects
             });
 
             using var admin = new AdminData();
-            bool isValid = admin.TryDecode(encoding);
+            var isValid = admin.TryDecode(encoding);
             Assert.False(isValid);
         }
 

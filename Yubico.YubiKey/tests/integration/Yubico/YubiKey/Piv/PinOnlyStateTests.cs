@@ -27,8 +27,6 @@ namespace Yubico.YubiKey.Piv
         private const int AdminDataTag = 0x005FFF00;
         private const int PrintedTag = (int)PivDataTag.Printed;
         private readonly bool _alternateAlgorithm;
-        private readonly IYubiKeyDevice _yubiKey;
-        private readonly SpecifiedKeyCollector _specifiedCollector;
         private readonly Simple39KeyCollector _collectorObj;
         private readonly ReadOnlyMemory<byte> _defaultManagementKey;
         private readonly ReadOnlyMemory<byte> _defaultPin;
@@ -44,6 +42,9 @@ namespace Yubico.YubiKey.Piv
         {
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36
         };
+
+        private readonly SpecifiedKeyCollector _specifiedCollector;
+        private readonly IYubiKeyDevice _yubiKey;
 
         public PinOnlyStateTests()
         {
@@ -103,9 +104,9 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(_yubiKey))
             {
-                PivPinOnlyMode expectedMode = GetExpectedMode(mode, unavailable);
+                var expectedMode = GetExpectedMode(mode, unavailable);
 
-                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+                var currentMode = pivSession.GetPinOnlyMode();
                 Assert.Equal(expectedMode, currentMode);
             }
 
@@ -119,12 +120,12 @@ namespace Yubico.YubiKey.Piv
             {
                 Assert.Equal(PivAlgorithm.TripleDes, pivSession.ManagementKeyAlgorithm);
 
-                bool isValid = pivSession.TryAuthenticateManagementKey(_defaultManagementKey);
+                var isValid = pivSession.TryAuthenticateManagementKey(_defaultManagementKey);
                 Assert.True(isValid);
 
-                PivPinOnlyMode expectedMode = GetExpectedMode(PivPinOnlyMode.None, unavailable);
+                var expectedMode = GetExpectedMode(PivPinOnlyMode.None, unavailable);
 
-                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+                var currentMode = pivSession.GetPinOnlyMode();
 
                 Assert.Equal(expectedMode, currentMode);
 
@@ -145,10 +146,10 @@ namespace Yubico.YubiKey.Piv
         {
             using (var pivSession = new PivSession(_yubiKey))
             {
-                bool isValid = pivSession.TryAuthenticateManagementKey(_defaultManagementKey);
+                var isValid = pivSession.TryAuthenticateManagementKey(_defaultManagementKey);
                 Assert.True(isValid);
 
-                isValid = pivSession.TryVerifyPin(_defaultPin, out int? _);
+                isValid = pivSession.TryVerifyPin(_defaultPin, out var _);
                 Assert.True(isValid);
 
                 SetUnavailable(pivSession, unavailable);
@@ -160,8 +161,8 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.SetPinOnlyMode(PivPinOnlyMode.None, PivAlgorithm.TripleDes);
 
-                PivPinOnlyMode expectedMode = GetExpectedMode(PivPinOnlyMode.None, unavailable);
-                PivPinOnlyMode currentMode = pivSession.GetPinOnlyMode();
+                var expectedMode = GetExpectedMode(PivPinOnlyMode.None, unavailable);
+                var currentMode = pivSession.GetPinOnlyMode();
                 Assert.Equal(expectedMode, currentMode);
             }
         }
@@ -185,7 +186,7 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(_yubiKey))
             {
                 pivSession.KeyCollector = _specifiedCollector.SpecifiedKeyCollectorDelegate;
-                bool isValid = pivSession.TryAuthenticateManagementKey();
+                var isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
                 SetUnavailable(pivSession, unavailable);
@@ -194,10 +195,10 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(_yubiKey))
             {
                 pivSession.KeyCollector = _specifiedCollector.SpecifiedKeyCollectorDelegate;
-                PivPinOnlyMode recoveredMode = pivSession.TryRecoverPinOnlyMode();
+                var recoveredMode = pivSession.TryRecoverPinOnlyMode();
                 Assert.Equal(mode, recoveredMode);
 
-                PivPinOnlyMode getMode = pivSession.GetPinOnlyMode();
+                var getMode = pivSession.GetPinOnlyMode();
                 Assert.Equal(mode, getMode);
             }
         }
@@ -205,15 +206,15 @@ namespace Yubico.YubiKey.Piv
         private bool AreContentsExpected(
             PivSession pivSession, int tag, PivPinOnlyMode currentMode, PivPinOnlyMode unavailable)
         {
-            bool isValid = pivSession.TryVerifyPin(_defaultPin, out int? _);
+            var isValid = pivSession.TryVerifyPin(_defaultPin, out var _);
             if (!isValid)
             {
                 return false;
             }
 
             // What are we checking? AdminData or Printed?
-            PivPinOnlyMode currentCheck = PivPinOnlyMode.PinDerived;
-            PivPinOnlyMode unavailableCheck = PivPinOnlyMode.PinDerivedUnavailable;
+            var currentCheck = PivPinOnlyMode.PinDerived;
+            var unavailableCheck = PivPinOnlyMode.PinDerivedUnavailable;
             if (tag != AdminDataTag)
             {
                 currentCheck = PivPinOnlyMode.PinProtected;
@@ -225,7 +226,7 @@ namespace Yubico.YubiKey.Piv
             // If expected is 1, then the contents are expected to be correct.
             // If expected is 2, then the contents are expected to be not empty,
             // but not correct.
-            int expected = 0;
+            var expected = 0;
             if (unavailable.HasFlag(unavailableCheck))
             {
                 expected = 2;
@@ -236,7 +237,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             var getDataCommand = new GetDataCommand(tag);
-            GetDataResponse getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
+            var getDataResponse = pivSession.Connection.SendCommand(getDataCommand);
 
             if (getDataResponse.Status == ResponseStatus.NoData)
             {
@@ -248,9 +249,9 @@ namespace Yubico.YubiKey.Piv
                 return false;
             }
 
-            ReadOnlyMemory<byte> encodedData = getDataResponse.GetData();
+            var encodedData = getDataResponse.GetData();
 
-            bool isEmpty = false;
+            var isEmpty = false;
             if (tag == AdminDataTag)
             {
                 var adminData = new AdminData();
@@ -291,7 +292,7 @@ namespace Yubico.YubiKey.Piv
             if (unavailable.HasFlag(PivPinOnlyMode.PinProtectedUnavailable))
             {
                 var putCmd = new PutDataCommand(PrintedTag, unexpectedData);
-                PutDataResponse putRsp = pivSession.Connection.SendCommand(putCmd);
+                var putRsp = pivSession.Connection.SendCommand(putCmd);
                 if (putRsp.Status != ResponseStatus.Success)
                 {
                     throw new InvalidOperationException(putRsp.StatusMessage);
@@ -300,8 +301,8 @@ namespace Yubico.YubiKey.Piv
 
             if (unavailable.HasFlag(PivPinOnlyMode.PinDerivedUnavailable))
             {
-                var putCmd = new PutDataCommand(0x005FFF00, unexpectedData);
-                PutDataResponse putRsp = pivSession.Connection.SendCommand(putCmd);
+                var putCmd = new PutDataCommand(dataTag: 0x005FFF00, unexpectedData);
+                var putRsp = pivSession.Connection.SendCommand(putCmd);
                 if (putRsp.Status != ResponseStatus.Success)
                 {
                     throw new InvalidOperationException(putRsp.StatusMessage);
@@ -325,7 +326,7 @@ namespace Yubico.YubiKey.Piv
             // DATA says. That will be what currentMode says.
             // Even if Protected is actually set to unavailable, if ADMIN DATA
             // says Protected, that's what will be returned.
-            PivPinOnlyMode returnValue = PivPinOnlyMode.None;
+            var returnValue = PivPinOnlyMode.None;
             if (currentMode.HasFlag(PivPinOnlyMode.PinProtected))
             {
                 returnValue |= PivPinOnlyMode.PinProtected;

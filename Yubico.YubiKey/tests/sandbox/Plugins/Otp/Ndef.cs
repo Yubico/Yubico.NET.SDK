@@ -22,6 +22,11 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class Ndef : OtpPluginBase
     {
+        public Ndef(IOutput output) : base(output)
+        {
+            Parameters["slot"].Required = false;
+        }
+
         public override string Name => "NDEF";
 
         public override string Description => "Configure or read a slot to be used over NDEF (NFC).";
@@ -33,11 +38,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             | ParameterUse.Uri
             | ParameterUse.Utf16
             | ParameterUse.Read;
-
-        public Ndef(IOutput output) : base(output)
-        {
-            Parameters["slot"].Required = false;
-        }
 
         public override void HandleParameters()
         {
@@ -89,7 +89,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
                 while (_yubiKey is null && timer.Elapsed.TotalSeconds < 10)
                 {
-                    Thread.Sleep(500);
+                    Thread.Sleep(millisecondsTimeout: 500);
                     try
                     {
                         _yubiKey = GetYubiKey(_serialNumber, Transport.NfcSmartCard);
@@ -112,7 +112,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             if (exceptions.Count > 0)
             {
                 throw exceptions.Count == 1
-                    ? exceptions[0]
+                    ? exceptions[index: 0]
                     : new AggregateException(
                         $"{exceptions.Count} errors encountered.",
                         exceptions);
@@ -127,27 +127,40 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             if (_read)
             {
-                NdefDataReader reader = otp.ReadNdefTag();
+                var reader = otp.ReadNdefTag();
 
-                Uri uri() => reader.ToUri();
-                NdefText text() => reader.ToText();
+                Uri uri()
+                {
+                    return reader.ToUri();
+                }
 
-                string raw() =>
-                    reader.Type == NdefDataType.Uri
+                NdefText text()
+                {
+                    return reader.ToText();
+                }
+
+                string raw()
+                {
+                    return reader.Type == NdefDataType.Uri
                         ? uri().ToString()
                         : text().ToString();
+                }
 
-                string labeled() =>
-                    reader.Type == NdefDataType.Uri
+                string labeled()
+                {
+                    return reader.Type == NdefDataType.Uri
                         ? $"URI Read: {raw()}"
                         : $"Text Read: {raw()}";
+                }
 
-                string detailed() =>
-                    reader.Type == NdefDataType.Uri
+                string detailed()
+                {
+                    return reader.Type == NdefDataType.Uri
                         ? uriDetails(uri())
                         : textDetails(raw(), text().Language.Name, text().Encoding);
+                }
 
-                string output = Output.OutputLevel switch
+                var output = Output.OutputLevel switch
                 {
                     OutputLevel.Quiet => raw(),
                     OutputLevel.Normal => labeled(),
@@ -189,18 +202,16 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             return true;
 
-            string uriDetails(Uri uri) =>
-                string.Join(Eol, new[]
-                {
-                    $"URL: {uri}",
-                    $"Scheme: {uri.Scheme}",
-                    $"Host: {uri.Host}",
-                    $"Port: {uri.Port}",
-                    $"Path: {uri.AbsolutePath}"
-                });
+            string uriDetails(Uri uri)
+            {
+                return string.Join(Eol, $"URL: {uri}", $"Scheme: {uri.Scheme}", $"Host: {uri.Host}",
+                    $"Port: {uri.Port}", $"Path: {uri.AbsolutePath}");
+            }
 
-            string textDetails(string text, string lcid, NdefTextEncoding encoding) =>
-                $"Text: {text + Eol}LCID: {lcid + Eol}Encoding: {encoding}";
+            string textDetails(string text, string lcid, NdefTextEncoding encoding)
+            {
+                return $"Text: {text + Eol}LCID: {lcid + Eol}Encoding: {encoding}";
+            }
         }
     }
 }

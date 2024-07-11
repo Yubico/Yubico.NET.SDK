@@ -85,7 +85,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 _ = outputList.AppendLine("No credentials on this YubiKey");
             }
 
-            SampleMenu.WriteMessage(MessageType.Special, 0, outputList.ToString());
+            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, outputList.ToString());
         }
 
         private static void ReportOneResult(Credential credential, Code code)
@@ -103,7 +103,7 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
             _ = outputList.AppendLine($"Name      : {credential.Name}");
             _ = outputList.AppendLine();
 
-            SampleMenu.WriteMessage(MessageType.Special, 0, outputList.ToString());
+            SampleMenu.WriteMessage(MessageType.Special, numberToWrite: 0, outputList.ToString());
         }
     }
 }

@@ -122,7 +122,7 @@ namespace Yubico.YubiKey.Piv
 
         private static byte[] GetRandomDataBuffer(PivAlgorithm expectedAlgorithm)
         {
-            byte[] dataToSign = expectedAlgorithm switch
+            var dataToSign = expectedAlgorithm switch
             {
                 PivAlgorithm.Rsa1024 => new byte[128],
                 PivAlgorithm.Rsa2048 => new byte[256],

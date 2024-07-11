@@ -23,32 +23,32 @@ namespace Yubico.YubiKey.Scp03.Commands
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsHex80()
         {
-            Assert.Equal(0x80, GetInitializeUpdateCommandApdu().Cla);
+            Assert.Equal(expected: 0x80, GetInitializeUpdateCommandApdu().Cla);
         }
 
         [Fact]
         public void CreateCommandApdu_GetInsProperty_ReturnsHex50()
         {
-            Assert.Equal(0x50, GetInitializeUpdateCommandApdu().Ins);
+            Assert.Equal(expected: 0x50, GetInitializeUpdateCommandApdu().Ins);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP1Property_ReturnsZero()
         {
-            Assert.Equal(0, GetInitializeUpdateCommandApdu().P1);
+            Assert.Equal(expected: 0, GetInitializeUpdateCommandApdu().P1);
         }
 
         [Fact]
         public void CreateCommandApdu_GetP2Property_ReturnsZero()
         {
-            Assert.Equal(0, GetInitializeUpdateCommandApdu().P2);
+            Assert.Equal(expected: 0, GetInitializeUpdateCommandApdu().P2);
         }
 
         [Fact]
         public void CreateCommandApdu_GetData_ReturnsChallenge()
         {
-            CommandApdu commandApdu = GetInitializeUpdateCommandApdu();
-            byte[] challenge = GetChallenge();
+            var commandApdu = GetInitializeUpdateCommandApdu();
+            var challenge = GetChallenge();
 
             Assert.False(commandApdu.Data.IsEmpty);
             Assert.True(commandApdu.Data.Span.SequenceEqual(challenge));
@@ -57,13 +57,13 @@ namespace Yubico.YubiKey.Scp03.Commands
         [Fact]
         public void CreateCommandApdu_GetNc_Returns8()
         {
-            Assert.Equal(8, GetInitializeUpdateCommandApdu().Nc);
+            Assert.Equal(expected: 8, GetInitializeUpdateCommandApdu().Nc);
         }
 
         [Fact]
         public void CreateCommandApdu_GetNe_ReturnsZero()
         {
-            Assert.Equal(0, GetInitializeUpdateCommandApdu().Ne);
+            Assert.Equal(expected: 0, GetInitializeUpdateCommandApdu().Ne);
         }
 
         private static byte[] GetChallenge()
@@ -73,7 +73,7 @@ namespace Yubico.YubiKey.Scp03.Commands
 
         private static InitializeUpdateCommand GetInitializeUpdateCommand()
         {
-            return new InitializeUpdateCommand(0, GetChallenge());
+            return new InitializeUpdateCommand(keyVersionNumber: 0, GetChallenge());
         }
 
         private static CommandApdu GetInitializeUpdateCommandApdu()

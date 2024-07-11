@@ -41,7 +41,8 @@ namespace Yubico.YubiKey.Piv
                 0x5a, 0xa7, 0x94, 0xde, 0x68, 0x1b, 0xaa, 0x8b, 0x58, 0x95, 0x04, 0x22, 0xd6, 0xfc, 0x3f, 0xbc
             };
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, false, out _, out _, out var privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa1024, validAttest: false, out _, out _,
+                out var privateKeyPem);
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             var pivPrivateKey = privateKey.GetPivPrivateKey();
 
@@ -52,9 +53,9 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.ImportPrivateKey(0x89, pivPrivateKey, pinPolicy, PivTouchPolicy.Never);
+                pivSession.ImportPrivateKey(slotNumber: 0x89, pivPrivateKey, pinPolicy, PivTouchPolicy.Never);
 
-                var decryptedData = pivSession.Decrypt(0x89, dataToDecrypt);
+                var decryptedData = pivSession.Decrypt(slotNumber: 0x89, dataToDecrypt);
                 Assert.Equal(dataToDecrypt.Length, decryptedData.Length);
             }
         }
@@ -84,7 +85,8 @@ namespace Yubico.YubiKey.Piv
                 0x21, 0x00, 0xC5, 0xCD, 0x80, 0x23, 0x17, 0x2D, 0xB0, 0xFE, 0x9D, 0xF0, 0x28, 0x6C, 0x50, 0xBD
             };
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out _, out var privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, validAttest: false, out _, out _,
+                out var privateKeyPem);
             var privateKey = new KeyConverter(privateKeyPem.ToCharArray());
             var pivPrivateKey = privateKey.GetPivPrivateKey();
 
@@ -95,9 +97,9 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                pivSession.ImportPrivateKey(0x87, pivPrivateKey, pinPolicy, PivTouchPolicy.Never);
+                pivSession.ImportPrivateKey(slotNumber: 0x87, pivPrivateKey, pinPolicy, PivTouchPolicy.Never);
 
-                var decryptedData = pivSession.Decrypt(0x87, dataToDecrypt);
+                var decryptedData = pivSession.Decrypt(slotNumber: 0x87, dataToDecrypt);
                 Assert.Equal(dataToDecrypt.Length, decryptedData.Length);
             }
         }
@@ -124,14 +126,15 @@ namespace Yubico.YubiKey.Piv
                     RsaFormat.Sha256 => RSAEncryptionPadding.OaepSHA256,
                     RsaFormat.Sha384 => RSAEncryptionPadding.OaepSHA384,
                     RsaFormat.Sha512 => RSAEncryptionPadding.OaepSHA512,
-                    _ => RSAEncryptionPadding.OaepSHA1,
+                    _ => RSAEncryptionPadding.OaepSHA1
                 };
             }
 
             var dataToEncrypt = new byte[16];
             GetArbitraryData(dataToEncrypt);
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, false, out _, out var pubKeyPem, out var priKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, validAttest: false, out _, out var pubKeyPem,
+                out var priKeyPem);
             var pubKey = new KeyConverter(pubKeyPem.ToCharArray());
             var priKey = new KeyConverter(priKeyPem.ToCharArray());
 
@@ -184,7 +187,7 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ResetApplication();
 
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.Decrypt(0x9a, dataToDecrypt));
+                _ = Assert.Throws<InvalidOperationException>(() => pivSession.Decrypt(slotNumber: 0x9a, dataToDecrypt));
             }
         }
 
@@ -217,7 +220,7 @@ namespace Yubico.YubiKey.Piv
                 count = bufferToFill.Length;
             }
 
-            Array.Copy(arbitraryData, 0, bufferToFill, 0, count);
+            Array.Copy(arbitraryData, sourceIndex: 0, bufferToFill, destinationIndex: 0, count);
         }
     }
 }

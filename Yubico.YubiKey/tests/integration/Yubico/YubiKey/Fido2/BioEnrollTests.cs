@@ -13,10 +13,8 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 using Xunit;
-using Yubico.YubiKey.Fido2.Commands;
 using Yubico.YubiKey.TestUtilities;
 
 namespace Yubico.YubiKey.Fido2
@@ -43,7 +41,7 @@ namespace Yubico.YubiKey.Fido2
         {
             using (var fido2Session = new Fido2Session(Device))
             {
-                BioModality modality = fido2Session.GetBioModality();
+                var modality = fido2Session.GetBioModality();
 
                 Assert.Equal(BioModality.Fingerprint, modality);
             }
@@ -54,26 +52,26 @@ namespace Yubico.YubiKey.Fido2
         {
             using (var fido2Session = new Fido2Session(Device))
             {
-                FingerprintSensorInfo sensorInfo = fido2Session.GetFingerprintSensorInfo();
+                var sensorInfo = fido2Session.GetFingerprintSensorInfo();
 
-                Assert.Equal(1, sensorInfo.FingerprintKind);
-                Assert.Equal(16, sensorInfo.MaxCaptureCount);
-                Assert.Equal(15, sensorInfo.MaxFriendlyNameBytes);
+                Assert.Equal(expected: 1, sensorInfo.FingerprintKind);
+                Assert.Equal(expected: 16, sensorInfo.MaxCaptureCount);
+                Assert.Equal(expected: 15, sensorInfo.MaxFriendlyNameBytes);
             }
         }
 
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void EnrollFingerprint_Succeeds()
         {
-            string firstName = "SomeName";
-            string secondName = "Another Name";
+            var firstName = "SomeName";
+            var secondName = "Another Name";
             _callCancelCount = 0;
 
             using (var fido2Session = new Fido2Session(Device))
             {
                 fido2Session.KeyCollector = LocalKeyCollector;
 
-                TemplateInfo templateInfo = fido2Session.EnrollFingerprint(firstName, 5000);
+                var templateInfo = fido2Session.EnrollFingerprint(firstName, timeoutMilliseconds: 5000);
 
                 Assert.NotNull(templateInfo.FriendlyName);
                 Assert.Equal(firstName, templateInfo.FriendlyName);
@@ -81,9 +79,9 @@ namespace Yubico.YubiKey.Fido2
 
                 fido2Session.SetBioTemplateFriendlyName(templateInfo.TemplateId, secondName);
 
-                IReadOnlyList<TemplateInfo> fpList = fido2Session.EnumerateBioEnrollments();
-                bool isValid = false;
-                foreach (TemplateInfo info in fpList)
+                var fpList = fido2Session.EnumerateBioEnrollments();
+                var isValid = false;
+                foreach (var info in fpList)
                 {
                     if (info.FriendlyName.Equals(secondName))
                     {
@@ -105,7 +103,7 @@ namespace Yubico.YubiKey.Fido2
                 // isValid is currently true. If the template was deleted, that
                 // means the Remove worked, so leave it at true. If the template
                 // is still there, it failed, so set it to false.
-                foreach (TemplateInfo info in fpList)
+                foreach (var info in fpList)
                 {
                     if (info.TemplateId.Span.SequenceEqual(templateInfo.TemplateId.Span))
                     {
@@ -129,13 +127,14 @@ namespace Yubico.YubiKey.Fido2
             {
                 fido2Session.KeyCollector = LocalKeyCollector;
 
-                _ = Assert.Throws<OperationCanceledException>(() => fido2Session.EnrollFingerprint(null, 5000));
+                _ = Assert.Throws<OperationCanceledException>(() =>
+                    fido2Session.EnrollFingerprint(friendlyName: null, timeoutMilliseconds: 5000));
             }
         }
 
         private bool LocalKeyCollector(KeyEntryData arg)
         {
-            bool callCancel = _callCancelCount == 0 ? false : true;
+            var callCancel = _callCancelCount == 0 ? false : true;
 
             if (_callCancelCount > 0 && !(arg.LastBioEnrollSampleResult is null))
             {

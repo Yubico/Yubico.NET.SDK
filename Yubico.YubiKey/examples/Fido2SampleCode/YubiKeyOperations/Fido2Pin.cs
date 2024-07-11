@@ -16,7 +16,6 @@ using System;
 using Yubico.YubiKey.Fido2;
 using Yubico.YubiKey.Fido2.Commands;
 
-
 namespace Yubico.YubiKey.Sample.Fido2SampleCode
 {
     // This file contains the methods that demonstrate how to perform PIN

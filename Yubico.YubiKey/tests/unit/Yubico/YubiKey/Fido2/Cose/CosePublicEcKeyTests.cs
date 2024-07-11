@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         [Fact]
         public void Encode_ReturnsCorrect()
         {
-            byte[] correctValue = new byte[]
+            var correctValue = new byte[]
             {
                 0xa5, 0x01, 0x02, 0x03, 0x38, 0x18, 0x20, 0x01,
                 0x21, 0x58, 0x20,
@@ -34,17 +34,17 @@ namespace Yubico.YubiKey.Fido2.Cose
                 0x8A, 0x98, 0xF1, 0x10, 0xD3, 0x49, 0x7B, 0x02, 0x21, 0x00, 0xB7, 0x74, 0xDF, 0x0E, 0xF9, 0x9B
             };
 
-            byte[] xCoord = new byte[32];
-            byte[] yCoord = new byte[32];
+            var xCoord = new byte[32];
+            var yCoord = new byte[32];
 
-            Array.Copy(correctValue, 11, xCoord, 0, 32);
-            Array.Copy(correctValue, 46, yCoord, 0, 32);
+            Array.Copy(correctValue, sourceIndex: 11, xCoord, destinationIndex: 0, length: 32);
+            Array.Copy(correctValue, sourceIndex: 46, yCoord, destinationIndex: 0, length: 32);
 
             var eccKey = new CoseEcPublicKey(CoseEcCurve.P256, xCoord, yCoord);
 
             ReadOnlyMemory<byte> encodedKey = eccKey.Encode();
 
-            bool isValid = MemoryExtensions.SequenceEqual(correctValue, encodedKey.Span);
+            var isValid = MemoryExtensions.SequenceEqual(correctValue, encodedKey.Span);
 
             Assert.True(isValid);
         }
@@ -52,7 +52,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         [Fact]
         public void Decode_CorrectX()
         {
-            byte[] encodedKey = new byte[]
+            var encodedKey = new byte[]
             {
                 0xa5, 0x01, 0x02, 0x03, 0x38, 0x18, 0x20, 0x01,
                 0x21, 0x58, 0x20,
@@ -65,9 +65,9 @@ namespace Yubico.YubiKey.Fido2.Cose
 
             var eccKey = new CoseEcPublicKey(encodedKey);
 
-            var correctX = new Span<byte>(encodedKey, 11, 32);
+            var correctX = new Span<byte>(encodedKey, start: 11, length: 32);
 
-            bool isValid = MemoryExtensions.SequenceEqual(correctX, eccKey.XCoordinate.Span);
+            var isValid = correctX.SequenceEqual(eccKey.XCoordinate.Span);
 
             Assert.True(isValid);
         }
@@ -75,7 +75,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         [Fact]
         public void Decode_CorrectY()
         {
-            byte[] encodedKey = new byte[]
+            var encodedKey = new byte[]
             {
                 0xa5, 0x01, 0x02, 0x03, 0x38, 0x18, 0x20, 0x01,
                 0x21, 0x58, 0x20,
@@ -88,9 +88,9 @@ namespace Yubico.YubiKey.Fido2.Cose
 
             var eccKey = new CoseEcPublicKey(encodedKey);
 
-            var correctY = new Span<byte>(encodedKey, 46, 32);
+            var correctY = new Span<byte>(encodedKey, start: 46, length: 32);
 
-            bool isValid = MemoryExtensions.SequenceEqual(correctY, eccKey.YCoordinate.Span);
+            var isValid = correctY.SequenceEqual(eccKey.YCoordinate.Span);
 
             Assert.True(isValid);
         }
@@ -98,7 +98,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         [Fact]
         public void Decode_ECParameters_CorrectX()
         {
-            byte[] encodedKey = new byte[]
+            var encodedKey = new byte[]
             {
                 0xa5, 0x01, 0x02, 0x03, 0x38, 0x18, 0x20, 0x01,
                 0x21, 0x58, 0x20,
@@ -110,7 +110,7 @@ namespace Yubico.YubiKey.Fido2.Cose
             };
 
             var eccKey = new CoseEcPublicKey(encodedKey);
-            ECParameters ecParams = eccKey.ToEcParameters();
+            var ecParams = eccKey.ToEcParameters();
             Assert.NotNull(ecParams.Q.X);
             if (ecParams.Q.X is null)
             {
@@ -119,9 +119,9 @@ namespace Yubico.YubiKey.Fido2.Cose
 
             var xCoord = new Span<byte>(ecParams.Q.X);
 
-            var correctX = new Span<byte>(encodedKey, 11, 32);
+            var correctX = new Span<byte>(encodedKey, start: 11, length: 32);
 
-            bool isValid = MemoryExtensions.SequenceEqual(correctX, xCoord);
+            var isValid = correctX.SequenceEqual(xCoord);
 
             Assert.True(isValid);
         }
@@ -129,7 +129,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         [Fact]
         public void Decode_ECParameters_CorrectY()
         {
-            byte[] encodedKey = new byte[]
+            var encodedKey = new byte[]
             {
                 0xa5, 0x01, 0x02, 0x03, 0x38, 0x18, 0x20, 0x01,
                 0x21, 0x58, 0x20,
@@ -141,7 +141,7 @@ namespace Yubico.YubiKey.Fido2.Cose
             };
 
             var eccKey = new CoseEcPublicKey(encodedKey);
-            ECParameters ecParams = eccKey.ToEcParameters();
+            var ecParams = eccKey.ToEcParameters();
             Assert.NotNull(ecParams.Q.Y);
             if (ecParams.Q.Y is null)
             {
@@ -150,9 +150,9 @@ namespace Yubico.YubiKey.Fido2.Cose
 
             var yCoord = new Span<byte>(ecParams.Q.Y);
 
-            var correctY = new Span<byte>(encodedKey, 46, 32);
+            var correctY = new Span<byte>(encodedKey, start: 46, length: 32);
 
-            bool isValid = MemoryExtensions.SequenceEqual(correctY, yCoord);
+            var isValid = correctY.SequenceEqual(yCoord);
 
             Assert.True(isValid);
         }
@@ -160,7 +160,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         [Fact]
         public void FromECParameters_CorrectEncoding()
         {
-            byte[] correctEncoding = new byte[]
+            var correctEncoding = new byte[]
             {
                 0xa5, 0x01, 0x02, 0x03, 0x38, 0x18, 0x20, 0x01,
                 0x21, 0x58, 0x20,
@@ -177,15 +177,15 @@ namespace Yubico.YubiKey.Fido2.Cose
                 Curve = ECCurve.NamedCurves.nistP256,
                 Q = new ECPoint
                 {
-                    X = encodingSpan.Slice(11, 32).ToArray(),
-                    Y = encodingSpan.Slice(46, 32).ToArray(),
+                    X = encodingSpan.Slice(start: 11, length: 32).ToArray(),
+                    Y = encodingSpan.Slice(start: 46, length: 32).ToArray()
                 }
             };
 
             var eccKey = new CoseEcPublicKey(ecParams);
             ReadOnlyMemory<byte> encodedKey = eccKey.Encode();
 
-            bool isValid = MemoryExtensions.SequenceEqual(encodingSpan, encodedKey.Span);
+            var isValid = encodingSpan.SequenceEqual(encodedKey.Span);
 
             Assert.True(isValid);
         }

@@ -58,7 +58,10 @@ namespace Yubico.YubiKey.Pipelines
 
             // Act
 #pragma warning disable CS8625 // JUSTIFICATION: Null argument test case
-            void Action() => _ = transform.Invoke(null, typeof(object), typeof(object));
+            void Action()
+            {
+                _ = transform.Invoke(command: null, typeof(object), typeof(object));
+            }
 #pragma warning restore CS8625
 
             // Assert
@@ -95,7 +98,7 @@ namespace Yubico.YubiKey.Pipelines
             var transform = new ResponseChainingTransform(mockTransform.Object);
 
             // Act
-            ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
+            var actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
             // Assert
             Assert.Same(expectedResponse, actualResponse);
@@ -113,7 +116,7 @@ namespace Yubico.YubiKey.Pipelines
             var transform = new ResponseChainingTransform(mockTransform.Object);
 
             // Act
-            ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
+            var actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
             // Assert
             Assert.Same(expectedResponse, actualResponse);
@@ -133,11 +136,11 @@ namespace Yubico.YubiKey.Pipelines
             var transform = new ResponseChainingTransform(mockTransform.Object);
 
             // Act
-            ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
+            var actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
             // Assert
             mockTransform.Verify(x =>
-                x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()), Times.Exactly(2));
+                x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()), Times.Exactly(callCount: 2));
         }
 
         [Fact]
@@ -156,7 +159,7 @@ namespace Yubico.YubiKey.Pipelines
             var transform = new ResponseChainingTransform(mockTransform.Object);
 
             // Act
-            ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
+            var actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
             // Assert
             mockTransform.Verify(x =>
@@ -171,7 +174,7 @@ namespace Yubico.YubiKey.Pipelines
             var mockTransform = new Mock<IApduTransform>();
             var response1 = new ResponseApdu(new byte[] { 1, 2, 3, 4, SW1Constants.BytesAvailable, 0x00 });
             var response2 = new ResponseApdu(new byte[] { 5, 6, 7, 8, SW1Constants.Success, 0x00 });
-            byte[] expectedData = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
+            var expectedData = new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
             _ = mockTransform
                 .SetupSequence(x => x.Invoke(It.IsAny<CommandApdu>(), It.IsAny<Type>(), It.IsAny<Type>()))
                 .Returns(response1)
@@ -179,7 +182,7 @@ namespace Yubico.YubiKey.Pipelines
             var transform = new ResponseChainingTransform(mockTransform.Object);
 
             // Act
-            ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
+            var actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
             // Assert
             Assert.True(expectedData.AsSpan().SequenceEqual(actualResponse.Data.Span));
@@ -199,11 +202,11 @@ namespace Yubico.YubiKey.Pipelines
             var transform = new ResponseChainingTransform(mockTransform.Object);
 
             // Act
-            ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
+            var actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
             // Assert
             Assert.Equal(SW1Constants.NoPreciseDiagnosis, actualResponse.SW1);
-            Assert.Equal(0, actualResponse.SW2);
+            Assert.Equal(expected: 0, actualResponse.SW2);
         }
     }
 }

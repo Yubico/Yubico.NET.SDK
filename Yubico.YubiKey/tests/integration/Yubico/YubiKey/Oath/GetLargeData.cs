@@ -38,17 +38,17 @@ namespace Yubico.YubiKey.Oath
 
         private IEnumerable<Credential> FillWithRandCreds(IYubiKeyDevice testDevice)
         {
-            List<Credential> creds = new List<Credential>();
+            var creds = new List<Credential>();
 
             using (var oathSession = new OathSession(testDevice))
             {
                 // As documented, the OATH application can hold 32 creds
-                for (int i = 0; i < 32; i++)
+                for (var i = 0; i < 32; i++)
                 {
                     creds.Add(
                         oathSession.AddCredential(
                             "",
-                            RandomString(63)));
+                            RandomString(length: 63)));
                 }
 
                 return creds;
@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.Oath
 
         private IYubiKeyDevice GetCleanDevice(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
             return DeviceReset.ResetOath(testDevice);
         }
 
@@ -65,8 +65,8 @@ namespace Yubico.YubiKey.Oath
         [InlineData(StandardTestDevice.Fw5)]
         public void GetLotsOfCredentials(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = GetCleanDevice(testDeviceType);
-            IEnumerable<Credential>? expectedCredsOnDevice = FillWithRandCreds(testDevice);
+            var testDevice = GetCleanDevice(testDeviceType);
+            var expectedCredsOnDevice = FillWithRandCreds(testDevice);
             IEnumerable<Credential> actualCredsOnDevice;
 
             using (var oathSession = new OathSession(testDevice))

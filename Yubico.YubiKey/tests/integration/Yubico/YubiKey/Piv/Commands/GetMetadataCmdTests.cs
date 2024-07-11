@@ -58,7 +58,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                bool isValid = pivSession.TryAuthenticateManagementKey();
+                var isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
                 byte[] keyData =
@@ -69,25 +69,25 @@ namespace Yubico.YubiKey.Piv.Commands
                     0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68
                 };
 
-                int keyLength = algorithm switch
+                var keyLength = algorithm switch
                 {
                     PivAlgorithm.Aes128 => 16,
                     PivAlgorithm.Aes192 => 24,
-                    _ => 32,
+                    _ => 32
                 };
 
-                var mgmtKey = new ReadOnlyMemory<byte>(keyData, 0, keyLength);
+                var mgmtKey = new ReadOnlyMemory<byte>(keyData, start: 0, keyLength);
 
                 var setCmd = new SetManagementKeyCommand(mgmtKey, PivTouchPolicy.Never, algorithm);
 
-                SetManagementKeyResponse setRsp = pivSession.Connection.SendCommand(setCmd);
+                var setRsp = pivSession.Connection.SendCommand(setCmd);
                 Assert.Equal(ResponseStatus.Success, setRsp.Status);
 
                 var getCmd = new GetMetadataCommand(PivSlot.Management);
-                GetMetadataResponse getRsp = pivSession.Connection.SendCommand(getCmd);
+                var getRsp = pivSession.Connection.SendCommand(getCmd);
                 Assert.Equal(ResponseStatus.Success, getRsp.Status);
 
-                PivMetadata metadata = getRsp.GetData();
+                var metadata = getRsp.GetData();
                 Assert.Equal(algorithm, metadata.Algorithm);
             }
         }

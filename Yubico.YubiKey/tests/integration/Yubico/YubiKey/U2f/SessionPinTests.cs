@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Xunit;
 using Yubico.PlatformInterop;
@@ -34,17 +33,17 @@ namespace Yubico.YubiKey.U2f
                 }
             }
 
-            IEnumerable<IYubiKeyDevice> yubiKeys = YubiKeyDevice.FindByTransport(Transport.HidFido);
+            var yubiKeys = YubiKeyDevice.FindByTransport(Transport.HidFido);
             var yubiKeyList = yubiKeys.ToList();
             Assert.NotEmpty(yubiKeyList);
 
-            _yubiKeyDevice = yubiKeyList[0];
+            _yubiKeyDevice = yubiKeyList[index: 0];
         }
 
         [Fact]
         public void ChangePin_Succeeds()
         {
-            var keyCollector = new SimpleU2fKeyCollector(true);
+            var keyCollector = new SimpleU2fKeyCollector(isU2fPinSet: true);
 
             using (var u2fSession = new U2fSession(_yubiKeyDevice))
             {
@@ -77,7 +76,7 @@ namespace Yubico.YubiKey.U2f
             using (var u2fSession = new U2fSession(_yubiKeyDevice))
             {
                 // use wrong PIN.
-                bool isChanged = u2fSession.TryChangePin(newPin, currentPin);
+                var isChanged = u2fSession.TryChangePin(newPin, currentPin);
                 Assert.False(isChanged);
 
                 // Change the PIN.
@@ -97,7 +96,7 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void VerifyPin_Succeeds()
         {
-            var keyCollector = new SimpleU2fKeyCollector(true);
+            var keyCollector = new SimpleU2fKeyCollector(isU2fPinSet: true);
 
             using (var u2fSession = new U2fSession(_yubiKeyDevice))
             {
@@ -126,7 +125,7 @@ namespace Yubico.YubiKey.U2f
             using (var u2fSession = new U2fSession(_yubiKeyDevice))
             {
                 // Wrong PIN
-                bool isVerified = u2fSession.TryVerifyPin(wrongPin);
+                var isVerified = u2fSession.TryVerifyPin(wrongPin);
                 Assert.False(isVerified);
 
                 // Short PIN

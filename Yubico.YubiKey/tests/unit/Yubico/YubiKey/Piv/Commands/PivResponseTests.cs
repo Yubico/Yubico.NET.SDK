@@ -24,7 +24,7 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new PivResponse(null));
+            _ = Assert.Throws<ArgumentNullException>(() => new PivResponse(responseApdu: null));
 #pragma warning restore CS8625
         }
 

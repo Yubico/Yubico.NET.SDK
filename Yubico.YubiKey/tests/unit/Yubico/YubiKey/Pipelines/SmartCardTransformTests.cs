@@ -26,7 +26,7 @@ namespace Yubico.YubiKey.Pipelines
         public void Constructor_GivenNullConnection_ThrowsArgumentNullException()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => new SmartCardTransform(null));
+            _ = Assert.Throws<ArgumentNullException>(() => new SmartCardTransform(smartCardConnection: null));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -38,7 +38,7 @@ namespace Yubico.YubiKey.Pipelines
             var transform = new SmartCardTransform(mockConnection.Object);
 
             // Act
-            Exception? exception = Record.Exception(() => transform.Cleanup());
+            var exception = Record.Exception(() => transform.Cleanup());
 
             // Assert
             Assert.Null(exception);
@@ -68,7 +68,7 @@ namespace Yubico.YubiKey.Pipelines
         {
             // Arrange
             var mockConnection = new Mock<ISmartCardConnection>();
-            ResponseApdu expectedResponse = SuccessResponse();
+            var expectedResponse = SuccessResponse();
             _ = mockConnection
                 .Setup(m => m.Transmit(AnyCommandApdu()))
                 .Returns(expectedResponse);
@@ -76,16 +76,20 @@ namespace Yubico.YubiKey.Pipelines
             var transform = new SmartCardTransform(mockConnection.Object);
 
             // Act
-            ResponseApdu actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
+            var actualResponse = transform.Invoke(new CommandApdu(), typeof(object), typeof(object));
 
             // Assert
             Assert.Same(expectedResponse, actualResponse);
         }
 
-        private static CommandApdu AnyCommandApdu() =>
-            It.IsAny<CommandApdu>();
+        private static CommandApdu AnyCommandApdu()
+        {
+            return It.IsAny<CommandApdu>();
+        }
 
-        private static ResponseApdu SuccessResponse() =>
-            new ResponseApdu(new byte[] { 0x90, 0x00 });
+        private static ResponseApdu SuccessResponse()
+        {
+            return new ResponseApdu(new byte[] { 0x90, 0x00 });
+        }
     }
 }

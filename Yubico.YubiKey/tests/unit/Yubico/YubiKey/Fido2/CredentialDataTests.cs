@@ -12,15 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Xunit;
-using Yubico.Core.Tlv;
-using Yubico.YubiKey.Cryptography;
-using Yubico.YubiKey.Fido2.Commands;
-using Yubico.YubiKey.Fido2.Cose;
-using Yubico.YubiKey.Piv;
 
 namespace Yubico.YubiKey.Fido2
 {
@@ -29,23 +21,23 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Format_Correct()
         {
-            byte[] clientDataHash = new byte[]
+            var clientDataHash = new byte[]
             {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
             };
 
-            byte[] encoding = GetSampleEncoding();
+            var encoding = GetSampleEncoding();
 
             var cData = new MakeCredentialData(encoding);
-            bool isValid = cData.VerifyAttestation(clientDataHash);
+            var isValid = cData.VerifyAttestation(clientDataHash);
             Assert.True(isValid);
         }
 
         [Fact]
         public void Decode_AuthenticatorData_Correct()
         {
-            byte[] encoding = GetSampleAuthenticatorData();
+            var encoding = GetSampleAuthenticatorData();
 
             var aData = new AuthenticatorData(encoding);
             Assert.True(aData.UserPresence);

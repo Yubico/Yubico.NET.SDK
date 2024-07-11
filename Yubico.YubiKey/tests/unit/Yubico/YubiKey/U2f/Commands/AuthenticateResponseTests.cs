@@ -13,11 +13,7 @@
 // limitations under the License.
 
 using System;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Security.Cryptography;
 using Xunit;
-using Yubico.Core.Buffers;
 using Yubico.Core.Iso7816;
 
 namespace Yubico.YubiKey.U2f.Commands
@@ -28,7 +24,10 @@ namespace Yubico.YubiKey.U2f.Commands
         public void Constructor_GivenNullResponseApdu_ThrowsArgumentNullExceptionFromBase()
         {
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            static void action() => _ = new AuthenticateResponse(null);
+            static void action()
+            {
+                _ = new AuthenticateResponse(responseApdu: null);
+            }
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
 
             _ = Assert.Throws<ArgumentNullException>(action);
@@ -37,8 +36,8 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusWordCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var authResponse = new AuthenticateResponse(responseApdu);
@@ -49,8 +48,8 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_SuccessResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
-            byte sw2 = unchecked((byte)SWConstants.Success);
+            var sw1 = unchecked((byte)(SWConstants.Success >> 8));
+            var sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var authResponse = new AuthenticateResponse(responseApdu);
@@ -61,8 +60,8 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_ConditionsNotSatisfiedResponseApdu_SetsStatusCorrectly()
         {
-            byte sw1 = unchecked((byte)(SWConstants.ConditionsNotSatisfied >> 8));
-            byte sw2 = unchecked((byte)SWConstants.ConditionsNotSatisfied);
+            var sw1 = (byte)(SWConstants.ConditionsNotSatisfied >> 8);
+            var sw2 = unchecked((byte)SWConstants.ConditionsNotSatisfied);
             var responseApdu = new ResponseApdu(new byte[] { 0, 0, 0, sw1, sw2 });
 
             var authResponse = new AuthenticateResponse(responseApdu);

@@ -28,13 +28,13 @@ namespace Yubico.YubiKey.Piv.Commands
         public void Constructor_WrongKeyLength_ThrowsException(int keyLength)
         {
 #pragma warning disable CS0618 // testing special TripleDES, disable warning about using special TripleDES
-            byte[] keyData = new byte[keyLength];
-            for (int index = 0; index < keyLength; index++)
+            var keyData = new byte[keyLength];
+            for (var index = 0; index < keyLength; index++)
             {
                 keyData[index] = (byte)index;
             }
 
-            _ = Assert.Throws<ArgumentException>(() => _ = new TripleDesForManagementKey(keyData, true));
+            _ = Assert.Throws<ArgumentException>(() => _ = new TripleDesForManagementKey(keyData, isEncrypting: true));
 #pragma warning restore CS0618
         }
 
@@ -42,27 +42,28 @@ namespace Yubico.YubiKey.Piv.Commands
         public void ThreeBlocks_ProcessesAll()
         {
 #pragma warning disable CS0618 // testing special TripleDES, disable warning about using special TripleDES
-            byte[] keyData = new byte[]
+            var keyData = new byte[]
             {
                 0x5d, 0x71, 0xbe, 0x48, 0x9c, 0x9f, 0xe5, 0x14,
                 0xd0, 0x55, 0x68, 0xa2, 0xa1, 0xcb, 0x5e, 0x3b,
                 0x2b, 0xc7, 0x53, 0xc6, 0x11, 0xcd, 0x4d, 0xa4
             };
 
-            byte[] dataToEncrypt = new byte[]
+            var dataToEncrypt = new byte[]
             {
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
                 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18
             };
 
-            byte[] result = new byte[24];
+            var result = new byte[24];
 
-            using (var tDesObject = new TripleDesForManagementKey(keyData, true))
+            using (var tDesObject = new TripleDesForManagementKey(keyData, isEncrypting: true))
             {
-                int dataLength = tDesObject.TransformBlock(dataToEncrypt, 0, 24, result, 0);
+                var dataLength = tDesObject.TransformBlock(dataToEncrypt, inputOffset: 0, inputCount: 24, result,
+                    outputOffset: 0);
 
-                Assert.Equal(24, dataLength);
+                Assert.Equal(expected: 24, dataLength);
             }
 #pragma warning restore CS0618
         }
@@ -71,27 +72,27 @@ namespace Yubico.YubiKey.Piv.Commands
         public void SetParity_CorrectResult()
         {
 #pragma warning disable CS0618 // testing special TripleDES, disable warning about using special TripleDES
-            byte[] keyData = new byte[24];
-            byte[] allBytes = new byte[256];
-            int currentIndex = 0;
+            var keyData = new byte[24];
+            var allBytes = new byte[256];
+            var currentIndex = 0;
 
-            int nextIndex = 0;
+            var nextIndex = 0;
             while ((nextIndex = GetNextKeyData(keyData, nextIndex)) > 0)
             {
-                byte[] parityKey = TripleDesForManagementKey.SetParity(keyData);
-                byte[] dotNetParity = FixupKeyParity(keyData);
+                var parityKey = TripleDesForManagementKey.SetParity(keyData);
+                var dotNetParity = FixupKeyParity(keyData);
 
-                bool compareResult = dotNetParity.SequenceEqual(parityKey);
+                var compareResult = dotNetParity.SequenceEqual(parityKey);
 
                 Assert.True(compareResult);
 
-                int maxCount = 256;
+                var maxCount = 256;
                 if (nextIndex < 256)
                 {
                     maxCount = nextIndex;
                 }
 
-                int index = 0;
+                var index = 0;
                 for (; currentIndex < maxCount; currentIndex++)
                 {
                     allBytes[currentIndex] = parityKey[index];
@@ -105,19 +106,20 @@ namespace Yubico.YubiKey.Piv.Commands
         public void RunVector_CorrectResult()
         {
 #pragma warning disable CS0618 // testing special TripleDES, disable warning about using special TripleDES
-            byte[] keyData = new byte[24];
-            byte[] dataToProcess = new byte[8];
-            byte[] result = new byte[8];
-            byte[] expected = new byte[8];
+            var keyData = new byte[24];
+            var dataToProcess = new byte[8];
+            var result = new byte[8];
+            var expected = new byte[8];
 
-            int nextIndex = 0;
-            while ((nextIndex = GetNextVector(nextIndex, keyData, dataToProcess, expected, out bool isEncrypting)) > 0)
+            var nextIndex = 0;
+            while ((nextIndex = GetNextVector(nextIndex, keyData, dataToProcess, expected, out var isEncrypting)) > 0)
             {
                 using (var tDesObject = new TripleDesForManagementKey(keyData, isEncrypting))
                 {
-                    _ = tDesObject.TransformBlock(dataToProcess, 0, 8, result, 0);
+                    _ = tDesObject.TransformBlock(dataToProcess, inputOffset: 0, inputCount: 8, result,
+                        outputOffset: 0);
 
-                    bool compareResult = expected.SequenceEqual(result);
+                    var compareResult = expected.SequenceEqual(result);
                     Assert.True(compareResult);
                 }
             }
@@ -356,9 +358,9 @@ namespace Yubico.YubiKey.Piv.Commands
                     break;
             }
 
-            Array.Copy(newKeyData, keyData, 24);
-            Array.Copy(newData, dataToProcess, 8);
-            Array.Copy(newExpected, expectedResult, 8);
+            Array.Copy(newKeyData, keyData, length: 24);
+            Array.Copy(newData, dataToProcess, length: 8);
+            Array.Copy(newExpected, expectedResult, length: 8);
 
             return index + 1;
         }
@@ -378,8 +380,8 @@ namespace Yubico.YubiKey.Piv.Commands
                 return -1;
             }
 
-            byte currentValue = (byte)nextIndex;
-            for (int index = 0; index < 24; index++)
+            var currentValue = (byte)nextIndex;
+            for (var index = 0; index < 24; index++)
             {
                 keyData[index] = currentValue;
                 currentValue++;
@@ -392,16 +394,16 @@ namespace Yubico.YubiKey.Piv.Commands
         // containing the key data with the parity bits set.
         public static byte[] FixupKeyParity(byte[] key)
         {
-            byte[] oddParityKey = new byte[key.Length];
-            for (int index = 0; index < key.Length; index++)
+            var oddParityKey = new byte[key.Length];
+            for (var index = 0; index < key.Length; index++)
             {
                 // Get the bits we are interested in
                 oddParityKey[index] = (byte)(key[index] & 0xfe);
 
                 // Get the parity of the sum of the previous bits
-                byte tmp1 = (byte)((oddParityKey[index] & 0xF) ^ (oddParityKey[index] >> 4));
-                byte tmp2 = (byte)((tmp1 & 0x3) ^ (tmp1 >> 2));
-                byte sumBitsMod2 = (byte)((tmp2 & 0x1) ^ (tmp2 >> 1));
+                var tmp1 = (byte)((oddParityKey[index] & 0xF) ^ (oddParityKey[index] >> 4));
+                var tmp2 = (byte)((tmp1 & 0x3) ^ (tmp1 >> 2));
+                var sumBitsMod2 = (byte)((tmp2 & 0x1) ^ (tmp2 >> 1));
 
                 // We need to set the last bit in oddParityKey[index] to the negation
                 // of the last bit in sumBitsMod2

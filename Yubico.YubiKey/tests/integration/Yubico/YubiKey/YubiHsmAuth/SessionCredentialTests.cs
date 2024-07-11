@@ -28,7 +28,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void AddCredential_DefaultTestCred_AppContainsOneCred()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
             IReadOnlyList<CredentialRetryPair> credentialList;
 
@@ -48,7 +48,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryDeleteCredentialKeyCollector_CorrectMgmtKey_AppContainsZeroCreds()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
             YhaTestUtilities.AddDefaultAes128Credential(testDevice);
 
             IReadOnlyList<CredentialRetryPair> credentialList;
@@ -71,14 +71,14 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryDeleteCredentialKeyCollector_MgmtKeyRetry_AppContainsZeroCreds()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
             YhaTestUtilities.AddDefaultAes128Credential(testDevice);
 
             IReadOnlyList<CredentialRetryPair> credentialList;
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
-                SimpleKeyCollector keyCollector = new SimpleKeyCollector
+                var keyCollector = new SimpleKeyCollector
                 {
                     // Start with the incorrect management key, forcing a retry
                     UseDefaultValue = false
@@ -99,10 +99,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryDeleteCredentialKeyCollector_KeyCollectorReturnsFalse_ReturnsFalse()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
             YhaTestUtilities.AddDefaultAes128Credential(testDevice);
 
-            bool deleteCredSuccess = false;
+            var deleteCredSuccess = false;
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
@@ -120,7 +120,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryDeleteCredentialKeyCollector_WrongMgmtKey_ThrowsSecurityException()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
             YhaTestUtilities.AddDefaultAes128Credential(testDevice);
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
@@ -129,7 +129,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.AlternateValueCollectorDelegate;
 
                 // Test & postcondition
-                void tryDeleteCred() => yubiHsmAuthSession.TryDeleteCredential(YhaTestUtilities.DefaultCredLabel);
+                void tryDeleteCred()
+                {
+                    yubiHsmAuthSession.TryDeleteCredential(YhaTestUtilities.DefaultCredLabel);
+                }
 
                 _ = Assert.Throws<SecurityException>(tryDeleteCred);
             }
@@ -139,7 +142,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryDeleteCredentialKeyCollector_CredNotFound_ThrowsInvalidOpEx()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
             YhaTestUtilities.AddDefaultAes128Credential(testDevice);
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
@@ -148,7 +151,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.DefaultValueCollectorDelegate;
 
                 // Test & postcondition
-                void tryDeleteCred() => yubiHsmAuthSession.TryDeleteCredential(YhaTestUtilities.AlternateCredLabel);
+                void tryDeleteCred()
+                {
+                    yubiHsmAuthSession.TryDeleteCredential(YhaTestUtilities.AlternateCredLabel);
+                }
 
                 _ = Assert.Throws<InvalidOperationException>(tryDeleteCred);
             }
@@ -158,7 +164,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryDeleteCredentialKeyCollector_NoKeyCollector_ThrowsInvalidOpEx()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
             YhaTestUtilities.AddDefaultAes128Credential(testDevice);
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
@@ -166,7 +172,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 // Leave yubiHsmAuthSession.KeyCollector set to its default value of `null`
 
                 // Test & postcondition
-                void tryDeleteCred() => yubiHsmAuthSession.TryDeleteCredential(YhaTestUtilities.DefaultCredLabel);
+                void tryDeleteCred()
+                {
+                    yubiHsmAuthSession.TryDeleteCredential(YhaTestUtilities.DefaultCredLabel);
+                }
 
                 _ = Assert.Throws<InvalidOperationException>(tryDeleteCred);
             }
@@ -180,7 +189,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryAddCredentialKeyCollector_CorrectMgmtKey_AppContainsNewCred()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
             IReadOnlyList<CredentialRetryPair> credentialList;
 
@@ -195,7 +204,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
             }
 
             // Postconditions
-            Credential credInApp = credentialList.Single().Credential;
+            var credInApp = credentialList.Single().Credential;
             Assert.Equal(YhaTestUtilities.DefaultCredLabel, credInApp.Label);
         }
 
@@ -203,9 +212,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryAddCredentialKeyCollector_CorrectMgmtKey_ReturnsTrue()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
-            bool addCredSuccess = false;
+            var addCredSuccess = false;
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
@@ -223,12 +232,12 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryAddCredentialKeyCollector_MgmtKeyRetry_AppContainsNewCred()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
-            SimpleKeyCollector simpleKeyCollector = new SimpleKeyCollector
+            var simpleKeyCollector = new SimpleKeyCollector
             {
                 // Start with the incorrect management key, forcing a retry
-                UseDefaultValue = false,
+                UseDefaultValue = false
             };
             IReadOnlyList<CredentialRetryPair> credentialList;
 
@@ -243,7 +252,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
             }
 
             // Postconditions
-            Credential credInApp = credentialList.Single().Credential;
+            var credInApp = credentialList.Single().Credential;
             Assert.Equal(YhaTestUtilities.DefaultCredLabel, credInApp.Label);
         }
 
@@ -251,9 +260,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryAddCredentialKeyCollector_KeyCollectorReturnsFalse_ReturnsFalse()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
-            bool addCredSuccess = false;
+            var addCredSuccess = false;
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
@@ -271,7 +280,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryAddCredentialKeyCollector_WrongMgmtKeyNoRetries_ThrowsSecurityException()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
@@ -279,7 +288,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 yubiHsmAuthSession.KeyCollector = SimpleKeyCollector.AlternateValueCollectorDelegate;
 
                 // Test & postcondition
-                void tryAddCred() => yubiHsmAuthSession.TryAddCredential(YhaTestUtilities.DefaultAes128Cred);
+                void tryAddCred()
+                {
+                    yubiHsmAuthSession.TryAddCredential(YhaTestUtilities.DefaultAes128Cred);
+                }
 
                 _ = Assert.Throws<SecurityException>(tryAddCred);
             }
@@ -289,14 +301,17 @@ namespace Yubico.YubiKey.YubiHsmAuth
         public void TryAddCredentialKeyCollector_NoKeyCollector_ThrowsInvalidOpEx()
         {
             // Preconditions
-            IYubiKeyDevice testDevice = YhaTestUtilities.GetCleanDevice();
+            var testDevice = YhaTestUtilities.GetCleanDevice();
 
             using (var yubiHsmAuthSession = new YubiHsmAuthSession(testDevice))
             {
                 // Leave yubiHsmAuthSession.KeyCollector set to its default value of `null`
 
                 // Test & postcondition
-                void tryAddCred() => yubiHsmAuthSession.TryAddCredential(YhaTestUtilities.DefaultAes128Cred);
+                void tryAddCred()
+                {
+                    yubiHsmAuthSession.TryAddCredential(YhaTestUtilities.DefaultAes128Cred);
+                }
 
                 _ = Assert.Throws<InvalidOperationException>(tryAddCred);
             }

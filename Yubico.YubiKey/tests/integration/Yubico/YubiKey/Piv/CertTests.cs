@@ -31,7 +31,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096)]
         public void GetCert_Succeeds(StandardTestDevice targetDevice, PivAlgorithm algorithm)
         {
-            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out var certPem, out string _, out var privateKeyPem);
+            _ = SampleKeyPairs.GetKeysAndCertPem(algorithm, validAttest: true, out var certPem, out var _,
+                out var privateKeyPem);
 
             var certConverter = new CertConverter(certPem.ToCharArray());
             var certificate = certConverter.GetCertObject();
@@ -43,10 +44,10 @@ namespace Yubico.YubiKey.Piv
             var collectorObj = new Simple39KeyCollector();
             pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-            pivSession.ImportPrivateKey(0x90, pivPrivateKey);
-            pivSession.ImportCertificate(0x90, certificate);
+            pivSession.ImportPrivateKey(slotNumber: 0x90, pivPrivateKey);
+            pivSession.ImportCertificate(slotNumber: 0x90, certificate);
 
-            var getCert = pivSession.GetCertificate(0x90);
+            var getCert = pivSession.GetCertificate(slotNumber: 0x90);
             Assert.True(getCert.Equals(certificate));
         }
 
@@ -60,7 +61,8 @@ namespace Yubico.YubiKey.Piv
         public void GetCert_NoAuth_Succeeds(StandardTestDevice targetDevice, PivAlgorithm algorithm)
         {
             var isValid =
-                SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out var certPem, out _, out var privateKeyPem);
+                SampleKeyPairs.GetKeysAndCertPem(algorithm, validAttest: true, out var certPem, out _,
+                    out var privateKeyPem);
             Assert.True(isValid);
 
             var certConverter = new CertConverter(certPem.ToCharArray());
@@ -76,7 +78,7 @@ namespace Yubico.YubiKey.Piv
             // Try to generate a key pair. This should not succeed because
             // the mgmt key has not been authenticated.
             var genPairCommand = new GenerateKeyPairCommand(
-                0x86, algorithm, PivPinPolicy.Default, PivTouchPolicy.Never);
+                slotNumber: 0x86, algorithm, PivPinPolicy.Default, PivTouchPolicy.Never);
             var genPairResponse =
                 pivSession.Connection.SendCommand(genPairCommand);
             // A generation success is a test failure.

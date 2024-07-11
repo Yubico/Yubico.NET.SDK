@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using System;
-using System.Collections.Generic;
 using Xunit;
 using Yubico.YubiKey.TestUtilities;
 
@@ -31,11 +30,12 @@ namespace Yubico.YubiKey.Oath
             _fixture = fixture;
         }
 
-        [Theory, TestPriority(0)]
+        [Theory]
+        [TestPriority(priority: 0)]
         [InlineData(StandardTestDevice.Fw5)]
         public void AddCredentials(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -49,18 +49,19 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(1)]
+        [Theory]
+        [TestPriority(priority: 1)]
         [InlineData(StandardTestDevice.Fw5)]
         public void GetCredentials(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-                IList<Credential> data = oathSession.GetCredentials();
+                var data = oathSession.GetCredentials();
 
                 Assert.NotEmpty(data);
                 Assert.Contains(_fixture.TotpCredential, data);
@@ -70,57 +71,60 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(2)]
+        [Theory]
+        [TestPriority(priority: 2)]
         [InlineData(StandardTestDevice.Fw5)]
         public void CalculateAllCredentials(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-                IDictionary<Credential, Code> data = oathSession.CalculateAllCredentials();
+                var data = oathSession.CalculateAllCredentials();
                 Assert.NotEmpty(data);
             }
         }
 
-        [Theory, TestPriority(2)]
+        [Theory]
+        [TestPriority(priority: 2)]
         [InlineData(StandardTestDevice.Fw5)]
         public void CalculateTotpCredential(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-                Code data = oathSession.CalculateCredential(_fixture.TotpCredentialWithDefaultPeriod);
+                var data = oathSession.CalculateCredential(_fixture.TotpCredentialWithDefaultPeriod);
 
                 Assert.NotNull(data.Value);
                 _ = Assert.NotNull(data.ValidFrom);
                 _ = Assert.NotNull(data.ValidUntil);
 
-                int difference = (int)(data.ValidUntil! - data.ValidFrom!).Value.TotalSeconds;
+                var difference = (int)(data.ValidUntil! - data.ValidFrom!).Value.TotalSeconds;
 
-                Assert.Equal(30, difference);
+                Assert.Equal(expected: 30, difference);
             }
         }
 
-        [Theory, TestPriority(2)]
+        [Theory]
+        [TestPriority(priority: 2)]
         [InlineData(StandardTestDevice.Fw5)]
         public void CalculateHotpCredential(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-                Code data = oathSession.CalculateCredential(_fixture.HotpCredential);
+                var data = oathSession.CalculateCredential(_fixture.HotpCredential);
 
                 Assert.NotNull(data.Value);
                 _ = Assert.NotNull(data.ValidFrom);
@@ -129,18 +133,19 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(2)]
+        [Theory]
+        [TestPriority(priority: 2)]
         [InlineData(StandardTestDevice.Fw5)]
         public void CalculateTotpCredentialUsingParameters(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-                Code data = oathSession.CalculateCredential(
+                var data = oathSession.CalculateCredential(
                     "Microsoft",
                     "test@outlook.com",
                     CredentialType.Totp,
@@ -150,28 +155,29 @@ namespace Yubico.YubiKey.Oath
                 _ = Assert.NotNull(data.ValidFrom);
                 _ = Assert.NotNull(data.ValidUntil);
 
-                int difference = (int)(data.ValidUntil! - data.ValidFrom!).Value.TotalSeconds;
+                var difference = (int)(data.ValidUntil! - data.ValidFrom!).Value.TotalSeconds;
 
-                Assert.Equal(15, difference);
+                Assert.Equal(expected: 15, difference);
             }
         }
 
-        [Theory, TestPriority(2)]
+        [Theory]
+        [TestPriority(priority: 2)]
         [InlineData(StandardTestDevice.Fw5)]
         public void CalculateHotpCredentialUsingParameters(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-                Code data = oathSession.CalculateCredential(
+                var data = oathSession.CalculateCredential(
                     "Apple",
                     "test@icloud.com",
                     CredentialType.Hotp,
-                    0);
+                    period: 0);
 
                 Assert.NotNull(data.Value);
                 _ = Assert.NotNull(data.ValidFrom);
@@ -180,11 +186,12 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(2)]
+        [Theory]
+        [TestPriority(priority: 2)]
         [InlineData(StandardTestDevice.Fw5)]
         public void CalculateNotExistingCredential_ThrowsException(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -195,15 +202,16 @@ namespace Yubico.YubiKey.Oath
                     "Google",
                     "test@outlook.com",
                     CredentialType.Hotp,
-                    0));
+                    period: 0));
             }
         }
 
-        [Theory, TestPriority(3)]
+        [Theory]
+        [TestPriority(priority: 3)]
         [InlineData(StandardTestDevice.Fw5)]
         public void AddTotpWithTouchCredential(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -213,7 +221,7 @@ namespace Yubico.YubiKey.Oath
                 if (testDevice.HasFeature(YubiKeyFeature.OathTouchCredential))
                 {
                     oathSession.AddCredential(_fixture.TotpWithTouchCredential);
-                    IList<Credential> data = oathSession.GetCredentials();
+                    var data = oathSession.GetCredentials();
 
                     Assert.Contains(_fixture.TotpWithTouchCredential, data);
                 }
@@ -225,11 +233,12 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(3)]
+        [Theory]
+        [TestPriority(priority: 3)]
         [InlineData(StandardTestDevice.Fw5)]
         public void AddTotpWithSha512AlgorithmCredential(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -239,7 +248,7 @@ namespace Yubico.YubiKey.Oath
                 if (testDevice.HasFeature(YubiKeyFeature.OathSha512))
                 {
                     oathSession.AddCredential(_fixture.TotpWithSha512Credential);
-                    IList<Credential> data = oathSession.GetCredentials();
+                    var data = oathSession.GetCredentials();
 
                     Assert.Contains(_fixture.TotpWithSha512Credential, data);
                 }
@@ -251,22 +260,23 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(3)]
+        [Theory]
+        [TestPriority(priority: 3)]
         [InlineData(StandardTestDevice.Fw5)]
         public void AddHotpCredential(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-                Credential credential = oathSession.AddCredential(
+                var credential = oathSession.AddCredential(
                     "GitHub",
                     "test@gmail.com",
                     CredentialType.Hotp,
-                    0);
+                    period: 0);
 
                 Assert.Equal("GitHub", credential.Issuer);
                 Assert.Equal("test@gmail.com", credential.AccountName);
@@ -275,18 +285,19 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(3)]
+        [Theory]
+        [TestPriority(priority: 3)]
         [InlineData(StandardTestDevice.Fw5)]
         public void AddDefaultCredential(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-                Credential credential = oathSession.AddCredential("Google", "test@gmail.com");
+                var credential = oathSession.AddCredential("Google", "test@gmail.com");
 
                 Assert.Equal("Google", credential.Issuer);
                 Assert.Equal("test@gmail.com", credential.AccountName);
@@ -295,18 +306,19 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(3)]
+        [Theory]
+        [TestPriority(priority: 3)]
         [InlineData(StandardTestDevice.Fw5)]
         public void AddCredentialFromUri(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
                 var collectorObj = new SimpleOathKeyCollector();
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
-                Credential credential = oathSession.AddCredential(
+                var credential = oathSession.AddCredential(
                     "otpauth://totp/ACME%20Co:test@example.com?secret=HXDMVJECJJWSRB3HWIZR4IFUGFTMXBOZ&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30");
 
                 Assert.Equal("ACME Co", credential.Issuer);
@@ -315,16 +327,17 @@ namespace Yubico.YubiKey.Oath
                 Assert.Equal(CredentialType.Totp, credential.Type);
                 Assert.Equal(HashAlgorithm.Sha1, credential.Algorithm);
                 Assert.Equal(CredentialPeriod.Period30, credential.Period);
-                Assert.Equal(6, credential.Digits);
+                Assert.Equal(expected: 6, credential.Digits);
                 Assert.Null(credential.Counter);
             }
         }
 
-        [Theory, TestPriority(3)]
+        [Theory]
+        [TestPriority(priority: 3)]
         [InlineData(StandardTestDevice.Fw5)]
         public void AddInvalidCredential_ThrowsException(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -339,11 +352,12 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(4)]
+        [Theory]
+        [TestPriority(priority: 4)]
         [InlineData(StandardTestDevice.Fw5)]
         public void OverwriteCredential(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -361,18 +375,19 @@ namespace Yubico.YubiKey.Oath
 
                 oathSession.AddCredential(credential);
 
-                IList<Credential> data = oathSession.GetCredentials();
+                var data = oathSession.GetCredentials();
 
                 Assert.Contains(credential, data);
                 Assert.DoesNotContain(_fixture.HotpCredential, data);
             }
         }
 
-        [Theory, TestPriority(5)]
+        [Theory]
+        [TestPriority(priority: 5)]
         [InlineData(StandardTestDevice.Fw5)]
         public void RenameTotpCredentialWithDefaultPeriod(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -396,7 +411,7 @@ namespace Yubico.YubiKey.Oath
                         Algorithm = _fixture.TotpCredentialWithDefaultPeriod.Algorithm
                     };
 
-                    IList<Credential> data = oathSession.GetCredentials();
+                    var data = oathSession.GetCredentials();
                     Assert.DoesNotContain(_fixture.TotpCredentialWithDefaultPeriod, data);
                     Assert.Contains(renamedCredential, data);
                 }
@@ -412,11 +427,12 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(5)]
+        [Theory]
+        [TestPriority(priority: 5)]
         [InlineData(StandardTestDevice.Fw5)]
         public void RenameCredential(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -430,7 +446,7 @@ namespace Yubico.YubiKey.Oath
                         "Test",
                         "test@example.com");
 
-                    IList<Credential> data = oathSession.GetCredentials();
+                    var data = oathSession.GetCredentials();
                     Assert.DoesNotContain(_fixture.TotpCredential, data);
 
                     _fixture.TotpCredential.Issuer = "Test";
@@ -448,11 +464,12 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(5)]
+        [Theory]
+        [TestPriority(priority: 5)]
         [InlineData(StandardTestDevice.Fw5)]
         public void RenameNotExistingCredential_ThrowsException(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -468,11 +485,12 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(6)]
+        [Theory]
+        [TestPriority(priority: 6)]
         [InlineData(StandardTestDevice.Fw5)]
         public void RemoveNotExistingCredential_ThrowsException(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -484,11 +502,12 @@ namespace Yubico.YubiKey.Oath
             }
         }
 
-        [Theory, TestPriority(6)]
+        [Theory]
+        [TestPriority(priority: 6)]
         [InlineData(StandardTestDevice.Fw5)]
         public void RemoveCredentials(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -498,18 +517,19 @@ namespace Yubico.YubiKey.Oath
                 oathSession.RemoveCredential(_fixture.TotpWithTouchCredential);
                 oathSession.RemoveCredential(_fixture.TotpWithSha512Credential);
 
-                IList<Credential> data = oathSession.GetCredentials();
+                var data = oathSession.GetCredentials();
 
                 Assert.DoesNotContain(_fixture.TotpWithTouchCredential, data);
                 Assert.DoesNotContain(_fixture.TotpWithSha512Credential, data);
             }
         }
 
-        [Theory, TestPriority(6)]
+        [Theory]
+        [TestPriority(priority: 6)]
         [InlineData(StandardTestDevice.Fw5)]
         public void RemoveCredentialsWithIssuerAndAccount(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var oathSession = new OathSession(testDevice))
             {
@@ -517,12 +537,12 @@ namespace Yubico.YubiKey.Oath
                 oathSession.KeyCollector = collectorObj.SimpleKeyCollectorDelegate;
 
                 _ = oathSession.RemoveCredential("Twitter", "test@gmail.com");
-                Credential acmeCredential = oathSession.RemoveCredential("ACME Co", "test@example.com");
-                Credential googleCredential = oathSession.RemoveCredential("Google", "test@gmail.com");
-                Credential gitHubCredential = oathSession.RemoveCredential("GitHub", "test@gmail.com");
-                Credential appleCredential = oathSession.RemoveCredential("Apple", "test@icloud.com");
+                var acmeCredential = oathSession.RemoveCredential("ACME Co", "test@example.com");
+                var googleCredential = oathSession.RemoveCredential("Google", "test@gmail.com");
+                var gitHubCredential = oathSession.RemoveCredential("GitHub", "test@gmail.com");
+                var appleCredential = oathSession.RemoveCredential("Apple", "test@icloud.com");
 
-                IList<Credential> data = oathSession.GetCredentials();
+                var data = oathSession.GetCredentials();
 
                 Assert.DoesNotContain(_fixture.CredentialToDelete, data);
                 Assert.DoesNotContain(acmeCredential, data);
@@ -530,8 +550,8 @@ namespace Yubico.YubiKey.Oath
                 Assert.DoesNotContain(gitHubCredential, data);
                 Assert.DoesNotContain(appleCredential, data);
 
-                Credential emptyIssuerCredential = oathSession.RemoveCredential("", "test@example.com");
-                Credential renamedCredential = oathSession.RemoveCredential(
+                var emptyIssuerCredential = oathSession.RemoveCredential("", "test@example.com");
+                var renamedCredential = oathSession.RemoveCredential(
                     "Test",
                     "test@example.com",
                     CredentialType.Totp,

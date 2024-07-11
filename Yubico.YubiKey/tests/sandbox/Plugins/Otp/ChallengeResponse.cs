@@ -22,6 +22,15 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class ChallengeResponse : OtpPluginBase
     {
+        public ChallengeResponse(IOutput output) : base(output)
+        {
+            // We're reusing ParameterUse.Generate, so we'll update the description.
+            Parameters["generate"].Description = "Generate a random key. Conflicts with key, " +
+                                                 "TOTP, and generate.";
+            // We're reusing ParameterUse.Totp...
+            Parameters["totp"].Description = "Output key as base32 (generally used in TOTP applications).";
+        }
+
         public override string Name => "ChalResp";
 
         public override string Description => "Program a challenge-response credential.";
@@ -36,15 +45,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             | ParameterUse.Totp
             | ParameterUse.YubiOtp
             | ParameterUse.ShortHMAC;
-
-        public ChallengeResponse(IOutput output) : base(output)
-        {
-            // We're reusing ParameterUse.Generate, so we'll update the description.
-            Parameters["generate"].Description = "Generate a random key. Conflicts with key, " +
-                                                 "TOTP, and generate.";
-            // We're reusing ParameterUse.Totp...
-            Parameters["totp"].Description = "Output key as base32 (generally used in TOTP applications).";
-        }
 
         public override void HandleParameters()
         {
@@ -83,7 +83,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 }
             }
 
-            int expectedKeyLength =
+            var expectedKeyLength =
                 _yubiOtp
                     ? ConfigureChallengeResponse.YubiOtpKeySize
                     : ConfigureChallengeResponse.HmacSha1KeySize;
@@ -115,7 +115,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             if (exceptions.Count > 0)
             {
                 throw exceptions.Count == 1
-                    ? exceptions[0]
+                    ? exceptions[index: 0]
                     : new AggregateException(
                         $"{exceptions.Count} errors encountered.",
                         exceptions);
@@ -126,7 +126,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         {
             using var otp = new OtpSession(_yubiKey!);
 
-            ConfigureChallengeResponse op = otp.ConfigureChallengeResponse(_slot)
+            var op = otp.ConfigureChallengeResponse(_slot)
                 .UseCurrentAccessCode((SlotAccessCode)_currentAccessCode)
                 .SetNewAccessCode((SlotAccessCode)_newAccessCode)
                 .UseSmallChallenge(_useShortChallenge)
@@ -161,7 +161,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             if (_generate || _generateTotp || Output.OutputLevel > OutputLevel.Normal)
             {
-                int encodedKeySize =
+                var encodedKeySize =
                     _generateTotp
                         ? Base32.GetEncodedSize(_key.Length)
                         : _key.Length * 2;
@@ -169,7 +169,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Span<char> encodedKey = stackalloc char[encodedKeySize];
                 try
                 {
-                    ITextEncoding encoding =
+                    var encoding =
                         _generateTotp
                             ? (ITextEncoding)new Base32()
                             : _yubiOtp

@@ -15,7 +15,6 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using Xunit;
 using Xunit.Abstractions;
 using Yubico.YubiKey.Piv.Commands;
@@ -36,7 +35,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void SimplePutDataCommand(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
@@ -44,7 +43,7 @@ namespace Yubico.YubiKey.Piv
             {
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
-                bool isValid = pivSession.TryAuthenticateManagementKey();
+                var isValid = pivSession.TryAuthenticateManagementKey();
                 Assert.True(isValid);
 
                 pivSession.ResetApplication();
@@ -53,34 +52,34 @@ namespace Yubico.YubiKey.Piv
                 Assert.True(isValid);
 
                 byte[] putData = { 0x53, 0x04, 0x11, 0x22, 0x33, 0x44 };
-                for (int index = 0; index < 5; index++)
+                for (var index = 0; index < 5; index++)
                 {
                     var putCommand = new PutDataCommand(0x005fff11 + index, putData);
-                    PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
+                    var putResponse = pivSession.Connection.SendCommand(putCommand);
                     Assert.Equal(ResponseStatus.Success, putResponse.Status);
                 }
 
                 putData = new byte[] { 0x53, 0x00 };
-                for (int index = 0; index < 5; index++)
+                for (var index = 0; index < 5; index++)
                 {
                     var putCommand = new PutDataCommand(0x005fff11 + index, putData);
-                    PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
+                    var putResponse = pivSession.Connection.SendCommand(putCommand);
                     Assert.Equal(ResponseStatus.Success, putResponse.Status);
                 }
 
                 putData = new byte[] { 0x53, 0x05, 0x11, 0x22, 0x33, 0x44, 0x55 };
-                for (int index = 0; index < 5; index++)
+                for (var index = 0; index < 5; index++)
                 {
                     var putCommand = new PutDataCommand(0x005fff11 + index, putData);
-                    PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
+                    var putResponse = pivSession.Connection.SendCommand(putCommand);
                     Assert.Equal(ResponseStatus.Success, putResponse.Status);
                 }
 
                 putData = new byte[] { 0x53, 0x06, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
-                for (int index = 0; index < 5; index++)
+                for (var index = 0; index < 5; index++)
                 {
                     var putCommand = new PutDataCommand(0x005fff11 + index, putData);
-                    PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
+                    var putResponse = pivSession.Connection.SendCommand(putCommand);
                     Assert.Equal(ResponseStatus.Success, putResponse.Status);
                 }
             }
@@ -90,7 +89,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteDataSession(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
@@ -118,22 +117,22 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteDataSessionBig(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
+            using var rng = RandomObjectUtility.GetRandomObject(fixedBytes: null);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 var versionCommand = new VersionCommand();
-                VersionResponse versionResponse = pivSession.Connection.SendCommand(versionCommand);
+                var versionResponse = pivSession.Connection.SendCommand(versionCommand);
                 Assert.Equal(ResponseStatus.Success, versionResponse.Status);
 
-                FirmwareVersion versionNumber = versionResponse.GetData();
+                var versionNumber = versionResponse.GetData();
 
                 //                int maxLength = 10175;
-                int maxLength = 10150;
+                var maxLength = 10150;
                 if (versionNumber.Major >= 4)
                 {
                     //                    maxLength = 15295;
@@ -145,18 +144,18 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.ResetApplication();
 
-                byte[] putData = new byte[maxLength];
-                rng.GetBytes(putData, 0, putData.Length);
+                var putData = new byte[maxLength];
+                rng.GetBytes(putData, offset: 0, putData.Length);
 
                 pivSession.WriteMsroots(putData);
 
                 pivSession.WriteMsroots(ReadOnlySpan<byte>.Empty);
 
-                rng.GetBytes(putData, 0, putData.Length);
+                rng.GetBytes(putData, offset: 0, putData.Length);
                 var memStream = new MemoryStream(putData);
                 pivSession.WriteMsrootsStream(memStream);
 
-                rng.GetBytes(putData, 0, putData.Length);
+                rng.GetBytes(putData, offset: 0, putData.Length);
                 memStream = new MemoryStream(putData);
                 pivSession.WriteMsrootsStream(memStream);
             }
@@ -166,11 +165,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteReadMsroots_ByteArray(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
+            using var rng = RandomObjectUtility.GetRandomObject(fixedBytes: null);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -181,16 +180,16 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.DeleteMsroots();
 
-                int currentLength = 6000;
-                byte[] arbitraryData = new byte[currentLength];
-                rng.GetBytes(arbitraryData, 0, arbitraryData.Length);
+                var currentLength = 6000;
+                var arbitraryData = new byte[currentLength];
+                rng.GetBytes(arbitraryData, offset: 0, arbitraryData.Length);
 
                 pivSession.WriteMsroots(arbitraryData);
 
-                byte[] getData = pivSession.ReadMsroots();
+                var getData = pivSession.ReadMsroots();
                 Assert.True(getData.Length == currentLength);
 
-                bool compareResult = getData.SequenceEqual(arbitraryData);
+                var compareResult = getData.SequenceEqual(arbitraryData);
 
                 Assert.True(compareResult);
 
@@ -204,11 +203,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteReadMsroots_Stream(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
+            using var rng = RandomObjectUtility.GetRandomObject(fixedBytes: null);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -219,18 +218,18 @@ namespace Yubico.YubiKey.Piv
 
                 pivSession.DeleteMsroots();
 
-                int currentLength = 6000;
-                byte[] arbitraryData = new byte[currentLength];
-                rng.GetBytes(arbitraryData, 0, arbitraryData.Length);
+                var currentLength = 6000;
+                var arbitraryData = new byte[currentLength];
+                rng.GetBytes(arbitraryData, offset: 0, arbitraryData.Length);
 
                 pivSession.WriteMsroots(arbitraryData);
 
-                Stream getData = pivSession.ReadMsrootsStream();
+                var getData = pivSession.ReadMsrootsStream();
                 var binReader = new BinaryReader(getData);
-                byte[] theData = binReader.ReadBytes((int)getData.Length);
+                var theData = binReader.ReadBytes((int)getData.Length);
                 Assert.True(theData.Length == currentLength);
 
-                bool compareResult = theData.SequenceEqual(arbitraryData);
+                var compareResult = theData.SequenceEqual(arbitraryData);
 
                 Assert.True(compareResult);
 
@@ -244,11 +243,11 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteMsroots_Commands(StandardTestDevice testDeviceType)
         {
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             Assert.True(testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv));
 
-            using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
+            using var rng = RandomObjectUtility.GetRandomObject(fixedBytes: null);
 
             using (var pivSession = new PivSession(testDevice))
             {
@@ -257,18 +256,18 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                for (int bufferSize = 2806; bufferSize <= 2808; bufferSize++)
+                for (var bufferSize = 2806; bufferSize <= 2808; bufferSize++)
                 {
                     _output.WriteLine("buffer size: {0}", bufferSize);
 
                     pivSession.ResetApplication();
 
-                    bool isValid = pivSession.TryAuthenticateManagementKey();
+                    var isValid = pivSession.TryAuthenticateManagementKey();
                     Assert.True(isValid);
 
-                    byte[] putData = new byte[bufferSize];
-                    rng.GetBytes(putData, 0, putData.Length);
-                    int dataLength = bufferSize - 4;
+                    var putData = new byte[bufferSize];
+                    rng.GetBytes(putData, offset: 0, putData.Length);
+                    var dataLength = bufferSize - 4;
                     putData[0] = 0x53;
                     putData[1] = 0x82;
                     putData[2] = (byte)(dataLength >> 8);
@@ -287,25 +286,25 @@ namespace Yubico.YubiKey.Piv
 
         private static bool DoWriteAndWrite(PivSession pivSession, byte[] putData)
         {
-            for (int index = 0; index < 5; index++)
+            for (var index = 0; index < 5; index++)
             {
                 var putCommand = new PutDataCommand(0x005fff11 + index, putData);
-                PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
+                var putResponse = pivSession.Connection.SendCommand(putCommand);
                 Assert.Equal(ResponseStatus.Success, putResponse.Status);
             }
 
             byte[] noData = { 0x53, 0x00 };
-            for (int index = 0; index < 5; index++)
+            for (var index = 0; index < 5; index++)
             {
                 var putCommand = new PutDataCommand(0x005fff11 + index, noData);
-                PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
+                var putResponse = pivSession.Connection.SendCommand(putCommand);
                 Assert.Equal(ResponseStatus.Success, putResponse.Status);
             }
 
-            for (int index = 0; index < 5; index++)
+            for (var index = 0; index < 5; index++)
             {
                 var putCommand = new PutDataCommand(0x005fff11 + index, putData);
-                PutDataResponse putResponse = pivSession.Connection.SendCommand(putCommand);
+                var putResponse = pivSession.Connection.SendCommand(putCommand);
                 Assert.Equal(ResponseStatus.Success, putResponse.Status);
             }
 

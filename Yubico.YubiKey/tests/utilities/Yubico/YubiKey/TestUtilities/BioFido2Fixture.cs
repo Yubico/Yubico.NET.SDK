@@ -26,19 +26,11 @@ namespace Yubico.YubiKey.TestUtilities
 {
     public class BioFido2Fixture : SimpleIntegrationTestConnection
     {
-        private bool _disposed;
+        private readonly SHA256 _digester;
         private readonly Fido2ResetForTest _resetObj;
         private readonly List<RpInfo> _rpInfoList;
         private int _counter;
-        private readonly SHA256 _digester;
-
-        public Func<KeyEntryData, bool> KeyCollector { get; private set; }
-
-        // The list of Rps and the user identities for which credentials have
-        // been made.
-        public IReadOnlyList<RpInfo> RpInfoList => _rpInfoList;
-
-        public bool HasCredentials { get; private set; }
+        private bool _disposed;
 
         // Find the YubikKey Bio, reset it, then set the PIN to "123456"
         public BioFido2Fixture()
@@ -53,11 +45,19 @@ namespace Yubico.YubiKey.TestUtilities
             KeyCollector = _resetObj.KeyCollector;
             HasCredentials = false;
 
-            using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();
-            _counter = randomObject.GetInt32(0x000000001, 0x00010000);
-            _rpInfoList = new List<RpInfo>(5);
+            using var randomObject = CryptographyProviders.RngCreator();
+            _counter = randomObject.GetInt32(fromInclusive: 0x000000001, toExclusive: 0x00010000);
+            _rpInfoList = new List<RpInfo>(capacity: 5);
             _digester = CryptographyProviders.Sha256Creator();
         }
+
+        public Func<KeyEntryData, bool> KeyCollector { get; }
+
+        // The list of Rps and the user identities for which credentials have
+        // been made.
+        public IReadOnlyList<RpInfo> RpInfoList => _rpInfoList;
+
+        public bool HasCredentials { get; private set; }
 
         // Add credentials for an Rp.
         // This method will create a "random" relying party, then make the number
@@ -72,14 +72,14 @@ namespace Yubico.YubiKey.TestUtilities
             using (var fido2Session = new Fido2Session(Device))
             {
                 fido2Session.KeyCollector = KeyCollector;
-                for (int index = 0; index < discoverableCount; index++)
+                for (var index = 0; index < discoverableCount; index++)
                 {
-                    rp.AddUser(fido2Session, _digester, GetCounter(), true);
+                    rp.AddUser(fido2Session, _digester, GetCounter(), isDiscoverable: true);
                 }
 
-                for (int index = 0; index < nonDiscoverableCount; index++)
+                for (var index = 0; index < nonDiscoverableCount; index++)
                 {
-                    rp.AddUser(fido2Session, _digester, GetCounter(), false);
+                    rp.AddUser(fido2Session, _digester, GetCounter(), isDiscoverable: false);
                 }
             }
 
@@ -92,7 +92,7 @@ namespace Yubico.YubiKey.TestUtilities
         // If there is no match, throw an exception.
         public RpInfo MatchRelyingParty(RelyingParty relyingParty)
         {
-            for (int index = 0; index < _rpInfoList.Count; index++)
+            for (var index = 0; index < _rpInfoList.Count; index++)
             {
                 if (_rpInfoList[index].RelyingParty.Id.Equals(relyingParty.Id))
                 {
@@ -107,11 +107,11 @@ namespace Yubico.YubiKey.TestUtilities
         // matches the given RP and User.
         public Tuple<UserEntity, MakeCredentialData> MatchUser(RelyingParty relyingParty, UserEntity user)
         {
-            RpInfo rpInfo = MatchRelyingParty(relyingParty);
-            UserEntity[] userArray = rpInfo.Users.Keys.ToArray<UserEntity>();
-            for (int index = 0; index < userArray.Length; index++)
+            var rpInfo = MatchRelyingParty(relyingParty);
+            var userArray = rpInfo.Users.Keys.ToArray();
+            for (var index = 0; index < userArray.Length; index++)
             {
-                bool isMatch = MemoryExtensions.SequenceEqual<byte>(user.Id.Span, userArray[index].Id.Span);
+                var isMatch = user.Id.Span.SequenceEqual(userArray[index].Id.Span);
                 if (isMatch)
                 {
                     return Tuple.Create(userArray[index], rpInfo.Users[userArray[index]]);
@@ -149,9 +149,32 @@ namespace Yubico.YubiKey.TestUtilities
         private readonly Dictionary<UserEntity, MakeCredentialData> _users;
         private int _totalCount;
 
-        public RelyingParty RelyingParty { get; private set; }
+        public RpInfo(SHA256 digester, int counter)
+        {
+            var rpId = "rp" + counter.ToString("X4", CultureInfo.InvariantCulture) + ".com";
+            var rpName = "RelyingParty" + counter.ToString("D", CultureInfo.InvariantCulture);
 
-        public ReadOnlyMemory<byte> ClientDataHash { get; private set; }
+            RelyingParty = new RelyingParty(rpId)
+            {
+                Name = rpName
+            };
+
+            _users = new Dictionary<UserEntity, MakeCredentialData>(capacity: 5);
+
+            digester.Initialize();
+            // This is not the real ClientDataHash, but for this test code, it
+            // will work.
+            var digest = digester.ComputeHash(Encoding.UTF8.GetBytes(rpName));
+            ClientDataHash = new ReadOnlyMemory<byte>(digest);
+
+            digester.Initialize();
+            var idDigest = digester.ComputeHash(Encoding.UTF8.GetBytes(rpId));
+            RelyingPartyIdHash = new ReadOnlyMemory<byte>(idDigest);
+        }
+
+        public RelyingParty RelyingParty { get; }
+
+        public ReadOnlyMemory<byte> ClientDataHash { get; }
 
         public ReadOnlyMemory<byte> RelyingPartyIdHash { get; private set; }
 
@@ -162,43 +185,20 @@ namespace Yubico.YubiKey.TestUtilities
 
         public int NonDiscoverableCount => _totalCount - DiscoverableCount;
 
-        public RpInfo(SHA256 digester, int counter)
-        {
-            string rpId = "rp" + counter.ToString("X4", CultureInfo.InvariantCulture) + ".com";
-            string rpName = "RelyingParty" + counter.ToString("D", CultureInfo.InvariantCulture);
-
-            RelyingParty = new RelyingParty(rpId)
-            {
-                Name = rpName,
-            };
-
-            _users = new Dictionary<UserEntity, MakeCredentialData>(5);
-
-            digester.Initialize();
-            // This is not the real ClientDataHash, but for this test code, it
-            // will work.
-            byte[] digest = digester.ComputeHash(Encoding.UTF8.GetBytes(rpName));
-            ClientDataHash = new ReadOnlyMemory<byte>(digest);
-
-            digester.Initialize();
-            byte[] idDigest = digester.ComputeHash(Encoding.UTF8.GetBytes(rpId));
-            RelyingPartyIdHash = new ReadOnlyMemory<byte>(idDigest);
-        }
-
         public void AddUser(Fido2Session fido2Session, SHA256 digester, int counter, bool isDiscoverable)
         {
-            string userName = "user" + counter.ToString("X4", CultureInfo.InvariantCulture);
-            string displayName = "User " + counter.ToString("D", CultureInfo.InvariantCulture);
-            byte[] nameBytes = Encoding.UTF8.GetBytes(userName);
+            var userName = "user" + counter.ToString("X4", CultureInfo.InvariantCulture);
+            var displayName = "User " + counter.ToString("D", CultureInfo.InvariantCulture);
+            var nameBytes = Encoding.UTF8.GetBytes(userName);
             digester.Initialize();
-            byte[] digest = digester.ComputeHash(nameBytes);
+            var digest = digester.ComputeHash(nameBytes);
             digest[0] = 0;
             digest[0] = isDiscoverable ? (byte)1 : (byte)0;
 
             var userEntity = new UserEntity(new ReadOnlyMemory<byte>(digest))
             {
                 Name = userName,
-                DisplayName = displayName,
+                DisplayName = displayName
             };
 
             var makeParams = new MakeCredentialParameters(RelyingParty, userEntity)
@@ -211,12 +211,12 @@ namespace Yubico.YubiKey.TestUtilities
             _totalCount++;
             if (isDiscoverable)
             {
-                makeParams.AddOption(AuthenticatorOptions.rk, true);
+                makeParams.AddOption(AuthenticatorOptions.rk, optionValue: true);
                 DiscoverableCount++;
             }
 
             fido2Session.VerifyPin(PinUvAuthTokenPermissions.MakeCredential, RelyingParty.Id);
-            MakeCredentialData mcData = fido2Session.MakeCredential(makeParams);
+            var mcData = fido2Session.MakeCredential(makeParams);
 
             _users.Add(userEntity, mcData);
         }

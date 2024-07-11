@@ -32,19 +32,19 @@ namespace Yubico.YubiKey.Piv
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
-                bool isValid = pivSession.TryAuthenticateManagementKey(mgmtKey);
+                var isValid = pivSession.TryAuthenticateManagementKey(mgmtKey);
                 Assert.True(isValid);
 
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated,
                     pivSession.ManagementKeyAuthenticationResult);
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(0x86, PivAlgorithm.EccP256, PivPinPolicy.Default,
+                var publicKey = pivSession.GenerateKeyPair(slotNumber: 0x86, PivAlgorithm.EccP256, PivPinPolicy.Default,
                     PivTouchPolicy.None);
                 Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
             }
@@ -67,26 +67,26 @@ namespace Yubico.YubiKey.Piv
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             });
 
-            IYubiKeyDevice testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
+            var testDevice = IntegrationTestDeviceEnumeration.GetTestDevice(testDeviceType);
 
             using (var pivSession = new PivSession(testDevice))
             {
                 pivSession.ResetApplication();
-                bool isValid = pivSession.TryAuthenticateManagementKey(mgmtKey);
+                var isValid = pivSession.TryAuthenticateManagementKey(mgmtKey);
                 Assert.True(isValid);
 
                 Assert.True(pivSession.ManagementKeyAuthenticated);
                 Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated,
                     pivSession.ManagementKeyAuthenticationResult);
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(0x86, PivAlgorithm.EccP256, PivPinPolicy.Default,
+                var publicKey = pivSession.GenerateKeyPair(slotNumber: 0x86, PivAlgorithm.EccP256, PivPinPolicy.Default,
                     PivTouchPolicy.None);
                 Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
             }
 
             using (var pivSession = new PivSession(testDevice))
             {
-                bool isValid = pivSession.TryChangeManagementKey(mgmtKey, newKey);
+                var isValid = pivSession.TryChangeManagementKey(mgmtKey, newKey);
                 Assert.True(isValid);
 
                 isValid = pivSession.TryAuthenticateManagementKey(newKey);
@@ -95,10 +95,10 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(testDevice))
             {
-                bool isValid = pivSession.TryAuthenticateManagementKey(newKey);
+                var isValid = pivSession.TryAuthenticateManagementKey(newKey);
                 Assert.True(isValid);
 
-                PivPublicKey publicKey = pivSession.GenerateKeyPair(0x87, PivAlgorithm.EccP256, PivPinPolicy.Default,
+                var publicKey = pivSession.GenerateKeyPair(slotNumber: 0x87, PivAlgorithm.EccP256, PivPinPolicy.Default,
                     PivTouchPolicy.None);
                 Assert.Equal(PivAlgorithm.EccP256, publicKey.Algorithm);
             }

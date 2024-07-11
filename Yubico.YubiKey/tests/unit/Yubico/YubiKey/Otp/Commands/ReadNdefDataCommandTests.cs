@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System;
 using Xunit;
 using Yubico.Core.Iso7816;
 
@@ -25,7 +24,7 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ReadNdefDataCommand();
 
-            YubiKeyApplication application = command.Application;
+            var application = command.Application;
 
             Assert.Equal(YubiKeyApplication.OtpNdef, application);
         }
@@ -35,9 +34,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ReadNdefDataCommand();
 
-            byte cla = command.CreateCommandApdu().Cla;
+            var cla = command.CreateCommandApdu().Cla;
 
-            Assert.Equal(0, cla);
+            Assert.Equal(expected: 0, cla);
         }
 
         [Fact]
@@ -45,9 +44,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ReadNdefDataCommand();
 
-            byte ins = command.CreateCommandApdu().Ins;
+            var ins = command.CreateCommandApdu().Ins;
 
-            Assert.Equal(0xB0, ins);
+            Assert.Equal(expected: 0xB0, ins);
         }
 
         [Fact]
@@ -55,9 +54,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ReadNdefDataCommand();
 
-            byte p1 = command.CreateCommandApdu().P1;
+            var p1 = command.CreateCommandApdu().P1;
 
-            Assert.Equal(0, p1);
+            Assert.Equal(expected: 0, p1);
         }
 
         [Fact]
@@ -65,9 +64,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ReadNdefDataCommand();
 
-            byte p2 = command.CreateCommandApdu().P2;
+            var p2 = command.CreateCommandApdu().P2;
 
-            Assert.Equal(0, p2);
+            Assert.Equal(expected: 0, p2);
         }
 
         [Fact]
@@ -75,7 +74,7 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ReadNdefDataCommand();
 
-            ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
+            var data = command.CreateCommandApdu().Data;
 
             Assert.True(data.IsEmpty);
         }
@@ -85,9 +84,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ReadNdefDataCommand();
 
-            int nc = command.CreateCommandApdu().Nc;
+            var nc = command.CreateCommandApdu().Nc;
 
-            Assert.Equal(0, nc);
+            Assert.Equal(expected: 0, nc);
         }
 
         [Fact]
@@ -95,9 +94,9 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var command = new ReadNdefDataCommand();
 
-            int ne = command.CreateCommandApdu().Ne;
+            var ne = command.CreateCommandApdu().Ne;
 
-            Assert.Equal(0, ne);
+            Assert.Equal(expected: 0, ne);
         }
 
         [Fact]

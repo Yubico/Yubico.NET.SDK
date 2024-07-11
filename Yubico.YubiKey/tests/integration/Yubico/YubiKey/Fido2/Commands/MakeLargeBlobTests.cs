@@ -25,7 +25,7 @@ namespace Yubico.YubiKey.Fido2.Commands
     public class MakeLargeBlobTests : NeedPinToken
     {
         public MakeLargeBlobTests()
-            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, null)
+            : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, pin: null)
         {
         }
 
@@ -33,23 +33,23 @@ namespace Yubico.YubiKey.Fido2.Commands
         public void InitialLargeBlob_Succeeds()
         {
             var getInfoCmd = new GetInfoCommand();
-            GetInfoResponse getInfoRsp = Connection.SendCommand(getInfoCmd);
+            var getInfoRsp = Connection.SendCommand(getInfoCmd);
             Assert.Equal(ResponseStatus.Success, getInfoRsp.Status);
-            AuthenticatorInfo authInfo = getInfoRsp.GetData();
+            var authInfo = getInfoRsp.GetData();
             Assert.NotNull(authInfo.Options);
             if (!(authInfo.Options is null))
             {
-                int maxLargeBlobsLength = authInfo.MaximumSerializedLargeBlobArray ?? 0;
-                Assert.NotEqual(0, maxLargeBlobsLength);
-                bool isKey = authInfo.Options.TryGetValue("largeBlobs", out bool isAvailable);
+                var maxLargeBlobsLength = authInfo.MaximumSerializedLargeBlobArray ?? 0;
+                Assert.NotEqual(expected: 0, maxLargeBlobsLength);
+                var isKey = authInfo.Options.TryGetValue("largeBlobs", out var isAvailable);
                 Assert.True(isKey);
                 Assert.True(isAvailable);
             }
 
-            var getBlobCmd = new GetLargeBlobCommand(0, 900);
-            GetLargeBlobResponse getBlobRsp = Connection.SendCommand(getBlobCmd);
+            var getBlobCmd = new GetLargeBlobCommand(offset: 0, count: 900);
+            var getBlobRsp = Connection.SendCommand(getBlobCmd);
             Assert.Equal(ResponseStatus.Success, getBlobRsp.Status);
-            ReadOnlyMemory<byte> blobData = getBlobRsp.GetData();
+            var blobData = getBlobRsp.GetData();
             Assert.NotEmpty(blobData.ToArray());
         }
 
@@ -64,26 +64,26 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             using HashAlgorithm digester = CryptographyProviders.Sha256Creator();
 
-            byte[] dataPlusDigest = BuildDataPlusDigest(dataToStore, 0, dataToStore.Length, digester);
-            int offset = 0;
-            int totalLength = dataToStore.Length;
-            byte[] dataToAuth = BuildDataToAuth(dataPlusDigest, 0, dataPlusDigest.Length, offset, digester);
+            var dataPlusDigest = BuildDataPlusDigest(dataToStore, dataOffset: 0, dataToStore.Length, digester);
+            var offset = 0;
+            var totalLength = dataToStore.Length;
+            var dataToAuth = BuildDataToAuth(dataPlusDigest, dataOffset: 0, dataPlusDigest.Length, offset, digester);
 
             var protocol = new PinUvAuthProtocolTwo();
-            bool isValid = GetPinToken(
-                protocol, PinUvAuthTokenPermissions.LargeBlobWrite, out byte[] pinToken);
+            var isValid = GetPinToken(
+                protocol, PinUvAuthTokenPermissions.LargeBlobWrite, out var pinToken);
             Assert.True(isValid);
-            byte[] pinUvAuthParam = protocol.AuthenticateUsingPinToken(pinToken, dataToAuth);
+            var pinUvAuthParam = protocol.AuthenticateUsingPinToken(pinToken, dataToAuth);
 
             var setBlobCmd = new SetLargeBlobCommand(
                 dataPlusDigest, offset, totalLength + 16, pinUvAuthParam, (int)protocol.Protocol);
-            SetLargeBlobResponse setBlobRsp = Connection.SendCommand(setBlobCmd);
+            var setBlobRsp = Connection.SendCommand(setBlobCmd);
             Assert.Equal(ResponseStatus.Success, setBlobRsp.Status);
 
-            var getBlobCmd = new GetLargeBlobCommand(0, 900);
-            GetLargeBlobResponse getBlobRsp = Connection.SendCommand(getBlobCmd);
+            var getBlobCmd = new GetLargeBlobCommand(offset: 0, count: 900);
+            var getBlobRsp = Connection.SendCommand(getBlobCmd);
             Assert.Equal(ResponseStatus.Success, getBlobRsp.Status);
-            ReadOnlyMemory<byte> blobData = getBlobRsp.GetData();
+            var blobData = getBlobRsp.GetData();
             Assert.NotEmpty(blobData.ToArray());
         }
 
@@ -96,9 +96,9 @@ namespace Yubico.YubiKey.Fido2.Commands
                 throw new ArgumentNullException(nameof(digester.Hash));
             }
 
-            byte[] dataPlusDigest = new byte[dataLength + 16];
-            Array.Copy(inputData, 0, dataPlusDigest, 0, dataLength);
-            Array.Copy(digester.Hash, 0, dataPlusDigest, dataLength, 16);
+            var dataPlusDigest = new byte[dataLength + 16];
+            Array.Copy(inputData, sourceIndex: 0, dataPlusDigest, destinationIndex: 0, dataLength);
+            Array.Copy(digester.Hash, sourceIndex: 0, dataPlusDigest, dataLength, length: 16);
 
             return dataPlusDigest;
         }
@@ -113,8 +113,8 @@ namespace Yubico.YubiKey.Fido2.Commands
                 throw new ArgumentException(nameof(digester.Hash));
             }
 
-            byte[] dataToAuth = new byte[38 + digester.Hash.Length];
-            int index = 0;
+            var dataToAuth = new byte[38 + digester.Hash.Length];
+            var index = 0;
             for (; index < 32; index++)
             {
                 dataToAuth[index] = 0xff;
@@ -132,7 +132,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             index++;
             dataToAuth[index] = (byte)(offset >> 24);
             index++;
-            Array.Copy(digester.Hash, 0, dataToAuth, index, digester.Hash.Length);
+            Array.Copy(digester.Hash, sourceIndex: 0, dataToAuth, index, digester.Hash.Length);
 
             return dataToAuth;
         }

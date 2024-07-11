@@ -56,7 +56,7 @@ namespace Yubico.YubiKey.Piv
             };
 
             using var pivSession = new PivSession(yubiKey);
-            _ = Assert.Throws<NotSupportedException>(() => pivSession.CreateAttestationStatement(0x9A));
+            _ = Assert.Throws<NotSupportedException>(() => pivSession.CreateAttestationStatement(slotNumber: 0x9A));
         }
 
         [Fact]
@@ -108,12 +108,13 @@ namespace Yubico.YubiKey.Piv
                 },
                 AvailableUsbCapabilities = YubiKeyCapabilities.Piv
             };
-            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out X509Certificate2 cert, out _);
+            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out var cert, out _);
             Assert.True(isValid);
 
             using var pivSession = new PivSession(yubiKey);
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => pivSession.ReplaceAttestationKeyAndCertificate(null, cert));
+            _ = Assert.Throws<ArgumentNullException>(() =>
+                pivSession.ReplaceAttestationKeyAndCertificate(privateKey: null, cert));
 #pragma warning restore CS8625 // testing a null input.
         }
 
@@ -130,20 +131,20 @@ namespace Yubico.YubiKey.Piv
                 AvailableUsbCapabilities = YubiKeyCapabilities.Piv
             };
             var isValid =
-                SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out _, out PivPrivateKey privateKey);
+                SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out _, out var privateKey);
             Assert.True(isValid);
 
             using var pivSession = new PivSession(yubiKey);
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
             _ = Assert.Throws<ArgumentNullException>(() =>
-                pivSession.ReplaceAttestationKeyAndCertificate(privateKey, null));
+                pivSession.ReplaceAttestationKeyAndCertificate(privateKey, certificate: null));
 #pragma warning restore CS8625 // testing a null input.
         }
 
         [Fact]
         public void ReplaceAttest_Rsa1024_ThrowsException()
         {
-            var yubiKey = new HollowYubiKeyDevice(true)
+            var yubiKey = new HollowYubiKeyDevice(alwaysAuthenticatePiv: true)
             {
                 FirmwareVersion =
                 {
@@ -157,14 +158,14 @@ namespace Yubico.YubiKey.Piv
                 BadAttestationPairs.KeyRsa1024CertValid, out var privateKeyPem, out var certPem);
 
             var priKey = new KeyConverter(privateKeyPem.ToCharArray());
-            PivPrivateKey pivPrivateKey = priKey.GetPivPrivateKey();
+            var pivPrivateKey = priKey.GetPivPrivateKey();
 
             var certChars = certPem.ToCharArray();
-            var certDer = Convert.FromBase64CharArray(certChars, 27, certChars.Length - 52);
+            var certDer = Convert.FromBase64CharArray(certChars, offset: 27, certChars.Length - 52);
             var certObj = new X509Certificate2(certDer);
 
             using var pivSession = new PivSession(yubiKey);
-            var simpleCollector = new SimpleKeyCollector(false);
+            var simpleCollector = new SimpleKeyCollector(allowRetry: false);
             pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
 
             _ = Assert.Throws<ArgumentException>(() =>
@@ -177,7 +178,7 @@ namespace Yubico.YubiKey.Piv
         [InlineData(BadAttestationPairs.KeyEccP384CertVersion1)]
         public void ReplaceAttest_Version1Cert_ThrowsException(int whichPair)
         {
-            var yubiKey = new HollowYubiKeyDevice(true)
+            var yubiKey = new HollowYubiKeyDevice(alwaysAuthenticatePiv: true)
             {
                 FirmwareVersion =
                 {
@@ -190,14 +191,14 @@ namespace Yubico.YubiKey.Piv
             BadAttestationPairs.GetPair(whichPair, out var privateKeyPem, out var certPem);
 
             var priKey = new KeyConverter(privateKeyPem.ToCharArray());
-            PivPrivateKey pivPrivateKey = priKey.GetPivPrivateKey();
+            var pivPrivateKey = priKey.GetPivPrivateKey();
 
             var certChars = certPem.ToCharArray();
-            var certDer = Convert.FromBase64CharArray(certChars, 27, certChars.Length - 52);
+            var certDer = Convert.FromBase64CharArray(certChars, offset: 27, certChars.Length - 52);
             var certObj = new X509Certificate2(certDer);
 
             using var pivSession = new PivSession(yubiKey);
-            var simpleCollector = new SimpleKeyCollector(false);
+            var simpleCollector = new SimpleKeyCollector(allowRetry: false);
             pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
 
             _ = Assert.Throws<ArgumentException>(() =>
@@ -207,7 +208,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void ReplaceAttest_BigName_ThrowsException()
         {
-            var yubiKey = new HollowYubiKeyDevice(true)
+            var yubiKey = new HollowYubiKeyDevice(alwaysAuthenticatePiv: true)
             {
                 FirmwareVersion =
                 {
@@ -221,14 +222,14 @@ namespace Yubico.YubiKey.Piv
                 BadAttestationPairs.KeyRsa2048CertBigName, out var privateKeyPem, out var certPem);
 
             var priKey = new KeyConverter(privateKeyPem.ToCharArray());
-            PivPrivateKey pivPrivateKey = priKey.GetPivPrivateKey();
+            var pivPrivateKey = priKey.GetPivPrivateKey();
 
             var certChars = certPem.ToCharArray();
-            var certDer = Convert.FromBase64CharArray(certChars, 27, certChars.Length - 52);
+            var certDer = Convert.FromBase64CharArray(certChars, offset: 27, certChars.Length - 52);
             var certObj = new X509Certificate2(certDer);
 
             using var pivSession = new PivSession(yubiKey);
-            var simpleCollector = new SimpleKeyCollector(false);
+            var simpleCollector = new SimpleKeyCollector(allowRetry: false);
             pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
 
             _ = Assert.Throws<ArgumentException>(() =>

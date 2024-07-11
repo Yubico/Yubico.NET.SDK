@@ -48,23 +48,24 @@ namespace Yubico.YubiKey.TestUtilities
     {
         private readonly FirmwareVersion _firmwareVersion;
 
-        public InterIndustry.Commands.ISelectApplicationData? SelectApplicationData { get; set; }
-        public YubiKeyApplication Application { get; private set; }
-
-        public bool AlwaysAuthenticatePiv { get; set; }
-
         public HollowConnection(YubiKeyApplication yubikeyApplication, FirmwareVersion firmwareVersion)
         {
             Application = yubikeyApplication;
             _firmwareVersion = firmwareVersion;
         }
 
+        public YubiKeyApplication Application { get; private set; }
+
+        public bool AlwaysAuthenticatePiv { get; set; }
+
+        public ISelectApplicationData? SelectApplicationData { get; set; }
+
         public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
             where TResponse : IYubiKeyResponse
         {
             if (yubiKeyCommand is SelectApplicationCommand)
             {
-                byte[] responseData = new byte[] { 0x6A, 0x82 };
+                var responseData = new byte[] { 0x6A, 0x82 };
                 var responseApdu = new ResponseApdu(responseData);
                 return yubiKeyCommand.CreateResponseForApdu(responseApdu);
             }
@@ -73,7 +74,7 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 if (AlwaysAuthenticatePiv)
                 {
-                    byte[] responseData = new byte[]
+                    var responseData = new byte[]
                     {
                         0x7C, 0x0A, 0x80, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x90, 0x00
                     };
@@ -86,26 +87,26 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 if (AlwaysAuthenticatePiv)
                 {
-                    CommandApdu apdu = yubiKeyCommand.CreateCommandApdu();
-                    byte[] data = apdu.Data.ToArray();
-                    byte[] responseData = new byte[]
+                    var apdu = yubiKeyCommand.CreateCommandApdu();
+                    var data = apdu.Data.ToArray();
+                    var responseData = new byte[]
                     {
                         0x7C, 0x0A, 0x82, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x90, 0x00
                     };
-                    byte[] keyBytes = new byte[]
+                    var keyBytes = new byte[]
                     {
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
                     };
-                    Array.Copy(data, 14, responseData, 4, 8);
+                    Array.Copy(data, sourceIndex: 14, responseData, destinationIndex: 4, length: 8);
 
-                    using TripleDES tripleDes = CryptographyProviders.TripleDesCreator();
+                    using var tripleDes = CryptographyProviders.TripleDesCreator();
 
                     tripleDes.Mode = CipherMode.ECB;
                     tripleDes.Padding = PaddingMode.None;
-                    using ICryptoTransform encryptor = tripleDes.CreateEncryptor(keyBytes, null);
-                    _ = encryptor.TransformBlock(data, 14, 8, responseData, 4);
+                    using var encryptor = tripleDes.CreateEncryptor(keyBytes, rgbIV: null);
+                    _ = encryptor.TransformBlock(data, inputOffset: 14, inputCount: 8, responseData, outputOffset: 4);
 
                     var responseApdu = new ResponseApdu(responseData);
                     return yubiKeyCommand.CreateResponseForApdu(responseApdu);
@@ -114,24 +115,27 @@ namespace Yubico.YubiKey.TestUtilities
 
             if (yubiKeyCommand is ReadStatusCommand)
             {
-                byte[]? sw = new byte[sizeof(short)];
+                var sw = new byte[sizeof(short)];
                 BinaryPrimitives.WriteInt16BigEndian(sw, SWConstants.Success);
-                byte[] version = new byte[] { _firmwareVersion.Major, _firmwareVersion.Minor, _firmwareVersion.Patch };
+                var version = new[] { _firmwareVersion.Major, _firmwareVersion.Minor, _firmwareVersion.Patch };
                 var responseApdu = new ResponseApdu(version.Concat(new byte[] { 100, 0, 0, sw[0], sw[1] }).ToArray());
                 return yubiKeyCommand.CreateResponseForApdu(responseApdu);
             }
 
             if (yubiKeyCommand is GetDataCommand)
             {
-                byte[]? sw = new byte[sizeof(short)];
+                var sw = new byte[sizeof(short)];
                 BinaryPrimitives.WriteInt16BigEndian(sw, SWConstants.DataNotFound);
-                var responseApdu = new ResponseApdu(new byte[] { sw[0], sw[1] });
+                var responseApdu = new ResponseApdu(new[] { sw[0], sw[1] });
                 return yubiKeyCommand.CreateResponseForApdu(responseApdu);
             }
 
             throw new NotImplementedException();
         }
 
-        public void Dispose() => SelectApplicationData = null;
+        public void Dispose()
+        {
+            SelectApplicationData = null;
+        }
     }
 }

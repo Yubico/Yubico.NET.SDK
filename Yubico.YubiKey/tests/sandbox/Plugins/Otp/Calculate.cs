@@ -23,6 +23,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class Calculate : OtpPluginBase
     {
+        public Calculate(IOutput output) : base(output) { }
         public override string Name => "Calculate";
 
         public override string Description => "Perform a challenge-response operation.";
@@ -34,11 +35,9 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             | ParameterUse.Challenge
             | ParameterUse.YubiOtp;
 
-        public Calculate(IOutput output) : base(output) { }
-
         public override bool Execute()
         {
-            string result = string.Empty;
+            var result = string.Empty;
             using var otp = new OtpSession(_yubiKey!);
             if (!(_slot == Slot.ShortPress ? otp.IsShortPressConfigured : otp.IsLongPressConfigured))
             {
@@ -53,7 +52,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 // Important to use Console.WriteLine instead of Output.WriteLine
                 // here. It would be useless if output were being written to a file.
-                CalculateChallengeResponse op =
+                var op =
                     otp.CalculateChallengeResponse(_slot)
                         .UseTouchNotifier(() => Console.WriteLine("Touch the key."))
                         .UseYubiOtp(_yubiOtp);
@@ -147,9 +146,10 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 throw new AggregateException($"{exceptions.Count} errors encountered.",
                     exceptions);
             }
-            else if (exceptions.Count == 1)
+
+            if (exceptions.Count == 1)
             {
-                throw exceptions[0];
+                throw exceptions[index: 0];
             }
         }
     }

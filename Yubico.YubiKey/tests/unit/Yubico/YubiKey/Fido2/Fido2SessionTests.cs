@@ -23,12 +23,12 @@ namespace Yubico.YubiKey.Fido2
     public class Fido2SessionTests
     {
         [Fact]
-        void Constructor_NullYubiKeyDevice_ThrowsArgumentNullException()
+        private void Constructor_NullYubiKeyDevice_ThrowsArgumentNullException()
         {
             static void Action()
             {
 #pragma warning disable CS8625
-                _ = new Fido2Session(null);
+                _ = new Fido2Session(yubiKeyDevice: null);
 #pragma warning restore CS8625
             }
 
@@ -36,7 +36,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        void Constructor_ValidYubiKeyDevice_Succeeds()
+        private void Constructor_ValidYubiKeyDevice_Succeeds()
         {
             var mockYubiKey = new Mock<IYubiKeyDevice>();
             var mockConnection = new Mock<IYubiKeyConnection>();
@@ -57,7 +57,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        void Constructor_GivenValidYubiKeyDevice_ConnectsToFido2Application()
+        private void Constructor_GivenValidYubiKeyDevice_ConnectsToFido2Application()
         {
             var mockYubiKey = new Mock<IYubiKeyDevice>();
             var mockConnection = new Mock<IYubiKeyConnection>();
@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.Fido2
         }
 
         [Fact]
-        void GetAuthenticatorInfo_SendsGetInfoCommand()
+        private void GetAuthenticatorInfo_SendsGetInfoCommand()
         {
             var mockYubiKey = new Mock<IYubiKeyDevice>();
             var mockConnection = new Mock<IYubiKeyConnection>();

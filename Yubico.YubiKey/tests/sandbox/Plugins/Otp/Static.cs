@@ -14,15 +14,14 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Yubico.YubiKey.Otp;
 using Yubico.YubiKey.Otp.Commands;
-using Yubico.YubiKey.Otp.Operations;
 
 namespace Yubico.YubiKey.TestApp.Plugins.Otp
 {
     internal class Static : OtpPluginBase
     {
+        public Static(IOutput output) : base(output) { }
         public override string Name => "Static";
 
         public override string Description => "Configures a static password in a YubiKey OTP slot.";
@@ -37,8 +36,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             | ParameterUse.Slot
             | ParameterUse.Force
             | ParameterUse.NoEnter;
-
-        public Static(IOutput output) : base(output) { }
 
         public override void HandleParameters()
         {
@@ -91,9 +88,10 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 throw new AggregateException($"{exceptions.Count} errors encountered.",
                     exceptions);
             }
-            else if (exceptions.Count == 1)
+
+            if (exceptions.Count == 1)
             {
-                throw exceptions[0];
+                throw exceptions[index: 0];
             }
 
             // I was going to check the access codes here, but I think it's a
@@ -113,10 +111,10 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             try
             {
-                char[] password = Array.Empty<char>();
+                var password = Array.Empty<char>();
                 if (_generate)
                 {
-                    int len =
+                    var len =
                         _passwordLength > 0
                             ? _passwordLength
                             : SlotConfigureBase.MaxPasswordLength;
@@ -129,7 +127,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
                 try
                 {
-                    ConfigureStaticPassword op = otp.ConfigureStaticPassword(_slot)
+                    var op = otp.ConfigureStaticPassword(_slot)
                         .WithKeyboard(_keyboard)
                         .UseCurrentAccessCode((SlotAccessCode)_currentAccessCode)
                         .SetNewAccessCode((SlotAccessCode)_newAccessCode)
@@ -148,7 +146,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                     // If OutputLevel is None or Error, then no output here.
                     if (Output.OutputLevel > OutputLevel.Error)
                     {
-                        string output = string.Empty;
+                        var output = string.Empty;
                         // If it's generated, or set to verbose, output the password.
                         if (_generate || Output.OutputLevel > OutputLevel.Normal)
                         {
@@ -178,7 +176,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 }
                 finally
                 {
-                    for (int i = 0; i < password.Length; ++i)
+                    for (var i = 0; i < password.Length; ++i)
                     {
                         password[i] = (char)0xfe;
                     }

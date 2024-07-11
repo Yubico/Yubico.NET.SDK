@@ -22,27 +22,27 @@ namespace Yubico.YubiKey.Fido2.Cbor
         [Fact]
         public void EncodeDecode_MapWithIntKey_Succeeds()
         {
-            var w = new CborWriter(CborConformanceMode.Ctap2Canonical, true);
+            var w = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
 
             CborHelpers.BeginMap<int>(w)
-                .Entry(1, "test")
-                .Entry(2, "foo")
-                .Entry(-4, "bar")
+                .Entry(key: 1, "test")
+                .Entry(key: 2, "foo")
+                .Entry(key: -4, "bar")
                 .EndMap();
 
-            byte[] encoded = w.Encode();
+            var encoded = w.Encode();
 
             var m = new CborMap<int>(encoded);
 
-            Assert.Equal("test", m.ReadTextString(1));
-            Assert.Equal("foo", m.ReadTextString(2));
-            Assert.Equal("bar", m.ReadTextString(-4));
+            Assert.Equal("test", m.ReadTextString(key: 1));
+            Assert.Equal("foo", m.ReadTextString(key: 2));
+            Assert.Equal("bar", m.ReadTextString(key: -4));
         }
 
         [Fact]
         public void EncodeDecode_MapWithStringKey_Succeeds()
         {
-            var w = new CborWriter(CborConformanceMode.Ctap2Canonical, true);
+            var w = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
 
             CborHelpers.BeginMap<string>(w)
                 .Entry("a", "test")
@@ -50,7 +50,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 .Entry("xyz", "bar")
                 .EndMap();
 
-            byte[] encoded = w.Encode();
+            var encoded = w.Encode();
 
             var m = new CborMap<string>(encoded);
 

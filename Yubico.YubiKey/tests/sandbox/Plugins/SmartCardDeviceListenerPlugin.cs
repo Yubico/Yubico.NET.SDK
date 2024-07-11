@@ -46,10 +46,10 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
             listener.Arrived += (sender, args) =>
             {
-                using ISmartCardConnection? connection = args.Device.Connect();
+                using var connection = args.Device.Connect();
                 Console.WriteLine("Device arrived!");
 
-                using IDisposable? transaction = connection.BeginTransaction(out bool cardWasReset);
+                using var transaction = connection.BeginTransaction(out var cardWasReset);
                 _ = connection.Transmit(new SelectApplicationCommand(YubiKeyApplication.Management)
                     .CreateCommandApdu());
             };

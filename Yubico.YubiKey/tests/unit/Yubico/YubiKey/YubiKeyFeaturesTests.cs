@@ -302,7 +302,7 @@ namespace Yubico.YubiKey
             byte patch,
             bool expectedResult)
         {
-            var yubiKey = new HollowYubiKeyDevice()
+            var yubiKey = new HollowYubiKeyDevice
             {
                 AvailableUsbCapabilities = YubiKeyCapabilities.YubiHsmAuth
             };
@@ -311,7 +311,7 @@ namespace Yubico.YubiKey
             yubiKey.FirmwareVersion.Minor = minor;
             yubiKey.FirmwareVersion.Patch = patch;
 
-            bool actualResult = yubiKey.HasFeature(YubiKeyFeature.YubiHsmAuthApplication);
+            var actualResult = yubiKey.HasFeature(YubiKeyFeature.YubiHsmAuthApplication);
 
             Assert.Equal(expectedResult, actualResult);
         }

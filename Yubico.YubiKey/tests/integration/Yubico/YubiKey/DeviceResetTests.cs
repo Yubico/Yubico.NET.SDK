@@ -22,17 +22,17 @@ using Yubico.YubiKey.TestUtilities;
 namespace Yubico.YubiKey
 {
     /// <summary>
-    /// Executes device wide reset and check that PINs are set to default values (where applicable).
+    ///     Executes device wide reset and check that PINs are set to default values (where applicable).
     /// </summary>
     /// <remarks>
-    /// Device wide reset is only available on YubiKey Bio Multi-protocol Edition devices.
+    ///     Device wide reset is only available on YubiKey Bio Multi-protocol Edition devices.
     /// </remarks>
     public class DeviceResetTests
     {
-        private readonly ReadOnlyMemory<byte> _defaultPin = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("123456"));
-
         private readonly ReadOnlyMemory<byte> _complexPin =
             new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("11234567"));
+
+        private readonly ReadOnlyMemory<byte> _defaultPin = new ReadOnlyMemory<byte>(Encoding.ASCII.GetBytes("123456"));
 
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void Reset()

@@ -33,7 +33,7 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var history = new KeyHistory();
 
-            Assert.Equal(0x005FC10C, history.DataTag);
+            Assert.Equal(expected: 0x005FC10C, history.DataTag);
         }
 
         [Fact]
@@ -41,8 +41,8 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var history = new KeyHistory();
 
-            int definedTag = history.GetDefinedDataTag();
-            Assert.Equal(0x005FC10C, definedTag);
+            var definedTag = history.GetDefinedDataTag();
+            Assert.Equal(expected: 0x005FC10C, definedTag);
         }
 
         [Fact]
@@ -51,7 +51,7 @@ namespace Yubico.YubiKey.Piv.Objects
             using var history = new KeyHistory();
             history.DataTag = 0x005F2210;
 
-            Assert.Equal(0x005F2210, history.DataTag);
+            Assert.Equal(expected: 0x005F2210, history.DataTag);
         }
 
         [Fact]
@@ -60,8 +60,8 @@ namespace Yubico.YubiKey.Piv.Objects
             using var history = new KeyHistory();
             history.DataTag = 0x005F2210;
 
-            int definedTag = history.GetDefinedDataTag();
-            Assert.Equal(0x005FC10C, definedTag);
+            var definedTag = history.GetDefinedDataTag();
+            Assert.Equal(expected: 0x005FC10C, definedTag);
         }
 
         [Theory]
@@ -88,7 +88,7 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var history = new KeyHistory();
 
-            Assert.Equal(0, history.OnCardCertificates);
+            Assert.Equal(expected: 0, history.OnCardCertificates);
         }
 
         [Fact]
@@ -96,7 +96,7 @@ namespace Yubico.YubiKey.Piv.Objects
         {
             using var history = new KeyHistory();
 
-            Assert.Equal(0, history.OffCardCertificates);
+            Assert.Equal(expected: 0, history.OffCardCertificates);
         }
 
         [Fact]
@@ -173,7 +173,7 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void LongUrl_Throws()
         {
-            string someName = "file://users/certs/somelongname/evenlonger/reallylongname/needevenmore";
+            var someName = "file://users/certs/somelongname/evenlonger/reallylongname/needevenmore";
             someName += "/stillmoreneeded/118charactersisactuallyquitelong";
             using var history = new KeyHistory();
             history.OffCardCertificates = 4;
@@ -186,8 +186,8 @@ namespace Yubico.YubiKey.Piv.Objects
             var expected = new Span<byte>(new byte[] { 0x53, 0x00 });
             using var history = new KeyHistory();
 
-            byte[] encoding = history.Encode();
-            bool isValid = MemoryExtensions.SequenceEqual(expected, encoding);
+            var encoding = history.Encode();
+            var isValid = expected.SequenceEqual(encoding);
             Assert.True(isValid);
         }
 
@@ -202,9 +202,9 @@ namespace Yubico.YubiKey.Piv.Objects
             using var history = new KeyHistory();
             history.OffCardCertificates = 0;
 
-            byte[] encodedHistory = history.Encode();
+            var encodedHistory = history.Encode();
 
-            bool isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, encodedHistory);
+            var isValid = expectedValue.SequenceEqual(encodedHistory);
             Assert.True(isValid);
         }
 
@@ -219,9 +219,9 @@ namespace Yubico.YubiKey.Piv.Objects
             using var history = new KeyHistory();
             history.OnCardCertificates = 0;
 
-            byte[] encodedHistory = history.Encode();
+            var encodedHistory = history.Encode();
 
-            bool isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, encodedHistory);
+            var isValid = expectedValue.SequenceEqual(encodedHistory);
             Assert.True(isValid);
         }
 
@@ -242,9 +242,9 @@ namespace Yubico.YubiKey.Piv.Objects
             history.OffCardCertificates = 1;
             history.OffCardCertificateUrl = new Uri("file://user/certs");
 
-            byte[] encodedHistory = history.Encode();
+            var encodedHistory = history.Encode();
 
-            bool isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, encodedHistory);
+            var isValid = expectedValue.SequenceEqual(encodedHistory);
             Assert.True(isValid);
         }
 
@@ -261,9 +261,9 @@ namespace Yubico.YubiKey.Piv.Objects
             });
 
             using var history = new KeyHistory();
-            bool isValid = history.TryDecode(dataToDecode);
+            var isValid = history.TryDecode(dataToDecode);
             Assert.True(isValid);
-            Assert.Equal(1, history.OnCardCertificates);
+            Assert.Equal(expected: 1, history.OnCardCertificates);
         }
 
         [Fact]
@@ -279,9 +279,9 @@ namespace Yubico.YubiKey.Piv.Objects
             });
 
             using var history = new KeyHistory();
-            bool isValid = history.TryDecode(dataToDecode);
+            var isValid = history.TryDecode(dataToDecode);
             Assert.True(isValid);
-            Assert.Equal(2, history.OffCardCertificates);
+            Assert.Equal(expected: 2, history.OffCardCertificates);
         }
 
         [Fact]
@@ -296,18 +296,18 @@ namespace Yubico.YubiKey.Piv.Objects
                 0xFE, 0x00
             });
 
-            ReadOnlySpan<byte> expectedValue = dataToDecode.Span.Slice(10, 17);
+            var expectedValue = dataToDecode.Span.Slice(start: 10, length: 17);
 
             using var history = new KeyHistory();
-            bool isValid = history.TryDecode(dataToDecode);
+            var isValid = history.TryDecode(dataToDecode);
             Assert.True(isValid);
             Assert.NotNull(history.OffCardCertificateUrl);
 
             if (!(history.OffCardCertificateUrl is null))
             {
-                byte[] getUrl = Encoding.UTF8.GetBytes(history.OffCardCertificateUrl.AbsoluteUri);
+                var getUrl = Encoding.UTF8.GetBytes(history.OffCardCertificateUrl.AbsoluteUri);
 
-                isValid = MemoryExtensions.SequenceEqual<byte>(expectedValue, getUrl);
+                isValid = expectedValue.SequenceEqual(getUrl);
                 Assert.True(isValid);
             }
         }
@@ -321,9 +321,9 @@ namespace Yubico.YubiKey.Piv.Objects
             });
 
             using var history = new KeyHistory();
-            bool isValid = history.TryDecode(dataToDecode);
+            var isValid = history.TryDecode(dataToDecode);
             Assert.True(isValid);
-            Assert.Equal(0, history.OnCardCertificates);
+            Assert.Equal(expected: 0, history.OnCardCertificates);
         }
 
         [Fact]
@@ -335,9 +335,9 @@ namespace Yubico.YubiKey.Piv.Objects
             });
 
             using var history = new KeyHistory();
-            bool isValid = history.TryDecode(dataToDecode);
+            var isValid = history.TryDecode(dataToDecode);
             Assert.True(isValid);
-            Assert.Equal(0, history.OffCardCertificates);
+            Assert.Equal(expected: 0, history.OffCardCertificates);
         }
 
         [Fact]
@@ -349,7 +349,7 @@ namespace Yubico.YubiKey.Piv.Objects
             });
 
             using var history = new KeyHistory();
-            bool isValid = history.TryDecode(dataToDecode);
+            var isValid = history.TryDecode(dataToDecode);
             Assert.True(isValid);
             Assert.Null(history.OffCardCertificateUrl);
         }

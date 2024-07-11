@@ -30,7 +30,7 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                _ = Assert.Throws<ArgumentException>(() => pivSession.GetMetadata(0xff));
+                _ = Assert.Throws<ArgumentException>(() => pivSession.GetMetadata(slotNumber: 0xff));
             }
         }
 
@@ -43,30 +43,30 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                _ = Assert.Throws<NotSupportedException>(() => pivSession.GetMetadata(0x9A));
+                _ = Assert.Throws<NotSupportedException>(() => pivSession.GetMetadata(slotNumber: 0x9A));
             }
         }
 
         [Fact]
         public void Constructor_InvalidSlot_CorrectException()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x03, 0x02, 0x02, 0x00, 0x01, 0x05, 0x01, 0x01
             };
 
-            _ = Assert.Throws<ArgumentException>(() => new PivMetadata(testData, 0));
+            _ = Assert.Throws<ArgumentException>(() => new PivMetadata(testData, slotNumber: 0));
         }
 
         [Fact]
         public void Constructor_ValidInputMgmtKey_CorrectAlgorithm()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x03, 0x02, 0x02, 0x00, 0x01, 0x05, 0x01, 0x01
             };
 
-            var pivMetadata = new PivMetadata(testData, 0x9B);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0x9B);
 
             Assert.True(pivMetadata.Algorithm == PivAlgorithm.TripleDes);
         }
@@ -74,12 +74,12 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInputMgmtKey_CorrectPolicy()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x03, 0x02, 0x02, 0x00, 0x01, 0x05, 0x01, 0x01
             };
 
-            var pivMetadata = new PivMetadata(testData, 0x9B);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0x9B);
 
             Assert.True(pivMetadata.PinPolicy == PivPinPolicy.Default);
             Assert.True(pivMetadata.TouchPolicy == PivTouchPolicy.Never);
@@ -88,12 +88,12 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInputMgmtKey_CorrectStatus()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x03, 0x02, 0x02, 0x00, 0x01, 0x05, 0x01, 0x01
             };
 
-            var pivMetadata = new PivMetadata(testData, 0x9B);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0x9B);
 
             Assert.True(pivMetadata.KeyStatus == PivKeyStatus.Default);
         }
@@ -101,12 +101,12 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInputMgmtKey_NoKey()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x03, 0x02, 0x02, 0x00, 0x01, 0x05, 0x01, 0x01
             };
 
-            var pivMetadata = new PivMetadata(testData, 0x9B);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0x9B);
 
             Assert.True(pivMetadata.PublicKey.Algorithm == PivAlgorithm.None);
         }
@@ -114,12 +114,12 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInputMgmtKey_NoRetries()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x03, 0x02, 0x02, 0x00, 0x01, 0x05, 0x01, 0x01
             };
 
-            var pivMetadata = new PivMetadata(testData, 0x9B);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0x9B);
 
             Assert.True(pivMetadata.RetryCount == -1);
             Assert.True(pivMetadata.RetriesRemaining == -1);
@@ -129,42 +129,42 @@ namespace Yubico.YubiKey.Piv
         public void Constructor_InvalidTagLength01_CorrectException()
         {
             // Tag 01 must have a length of 1.
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x02, 0x03, 0x03, 0x02, 0x02, 0x00, 0x01, 0x05, 0x01, 0x01
             };
 
-            _ = Assert.Throws<InvalidOperationException>(() => new PivMetadata(testData, 0x9B));
+            _ = Assert.Throws<InvalidOperationException>(() => new PivMetadata(testData, slotNumber: 0x9B));
         }
 
         [Fact]
         public void Constructor_InvalidTagLength02_CorrectException()
         {
             // Tag 02 must have a length of 2.
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x03, 0x02, 0x01, 0x01, 0x05, 0x01, 0x01
             };
 
-            _ = Assert.Throws<InvalidOperationException>(() => new PivMetadata(testData, 0x9B));
+            _ = Assert.Throws<InvalidOperationException>(() => new PivMetadata(testData, slotNumber: 0x9B));
         }
 
         [Fact]
         public void Constructor_InvalidTagLength05_CorrectException()
         {
             // Tag 05 must have a length of 1.
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x03, 0x02, 0x02, 0x00, 0x01, 0x05, 0x02, 0x01, 0x01
             };
 
-            _ = Assert.Throws<InvalidOperationException>(() => new PivMetadata(testData, 0x9B));
+            _ = Assert.Throws<InvalidOperationException>(() => new PivMetadata(testData, slotNumber: 0x9B));
         }
 
         [Fact]
         public void Constructor_ValidInputPin_CorrectAlgorithm()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0xFF, 0x05, 0x01, 0x01, 0x06, 0x02, 0x05, 0x05
             };
@@ -177,7 +177,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInputPin_CorrectStatus()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0xFF, 0x05, 0x01, 0x00, 0x06, 0x02, 0x05, 0x05
             };
@@ -190,7 +190,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInputPin_CorrectRetries()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0xFF, 0x05, 0x01, 0x00, 0x06, 0x02, 0x04, 0x05
             };
@@ -204,7 +204,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInputPin_NoPolicy()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0xFF, 0x05, 0x01, 0x00, 0x06, 0x02, 0x04, 0x05
             };
@@ -218,12 +218,12 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInputPin_NoKey()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0xFF, 0x05, 0x01, 0x00, 0x06, 0x02, 0x04, 0x05
             };
 
-            var pivMetadata = new PivMetadata(testData, 0x80);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0x80);
 
             Assert.True(pivMetadata.PublicKey.Algorithm == PivAlgorithm.None);
         }
@@ -232,18 +232,18 @@ namespace Yubico.YubiKey.Piv
         public void Constructor_InvalidTagLength06_CorrectException()
         {
             // Tag 06 must have a length of 2.
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0xFF, 0x05, 0x01, 0x00, 0x06, 0x03, 0x04, 0x05, 0x06
             };
 
-            _ = Assert.Throws<InvalidOperationException>(() => new PivMetadata(testData, 0x9B));
+            _ = Assert.Throws<InvalidOperationException>(() => new PivMetadata(testData, slotNumber: 0x9B));
         }
 
         [Fact]
         public void Constructor_ValidInputF9_CorrectAlgorithm()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x07, 0x02, 0x02, 0x02, 0x01, 0x03,
                 0x01, 0x02, 0x04, 0x82, 0x01, 0x09, 0x81, 0x82,
@@ -282,7 +282,7 @@ namespace Yubico.YubiKey.Piv
                 0x9A, 0x71, 0x82, 0x03, 0x01, 0x00, 0x01
             };
 
-            var pivMetadata = new PivMetadata(testData, 0xF9);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0xF9);
 
             Assert.True(pivMetadata.Algorithm == PivAlgorithm.Rsa2048);
         }
@@ -290,7 +290,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInputF9_CorrectPolicy()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x07, 0x02, 0x02, 0x02, 0x01, 0x03,
                 0x01, 0x02, 0x04, 0x82, 0x01, 0x09, 0x81, 0x82,
@@ -329,7 +329,7 @@ namespace Yubico.YubiKey.Piv
                 0x9A, 0x71, 0x82, 0x03, 0x01, 0x00, 0x01
             };
 
-            var pivMetadata = new PivMetadata(testData, 0xF9);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0xF9);
 
             Assert.True(pivMetadata.PinPolicy == PivPinPolicy.Once);
             Assert.True(pivMetadata.TouchPolicy == PivTouchPolicy.Never);
@@ -338,7 +338,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInputF9_CorrectStatus()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x07, 0x02, 0x02, 0x02, 0x01, 0x03,
                 0x01, 0x02, 0x04, 0x82, 0x01, 0x09, 0x81, 0x82,
@@ -377,7 +377,7 @@ namespace Yubico.YubiKey.Piv
                 0x9A, 0x71, 0x82, 0x03, 0x01, 0x00, 0x01
             };
 
-            var pivMetadata = new PivMetadata(testData, 0xF9);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0xF9);
 
             Assert.True(pivMetadata.KeyStatus == PivKeyStatus.Imported);
         }
@@ -385,8 +385,8 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInputF9_CorrectKey()
         {
-            int keyOffset = 14;
-            byte[] testData = new byte[]
+            var keyOffset = 14;
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x07, 0x02, 0x02, 0x02, 0x01, 0x03,
                 0x01, 0x02, 0x04, 0x82, 0x01, 0x09, 0x81, 0x82,
@@ -425,7 +425,7 @@ namespace Yubico.YubiKey.Piv
                 0x9A, 0x71, 0x82, 0x03, 0x01, 0x00, 0x01
             };
 
-            var pivMetadata = new PivMetadata(testData, 0xF9);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0xF9);
 
             Assert.False(pivMetadata.PublicKey.YubiKeyEncodedPublicKey.IsEmpty);
             if (pivMetadata.PublicKey.YubiKeyEncodedPublicKey.IsEmpty)
@@ -436,7 +436,7 @@ namespace Yubico.YubiKey.Piv
             var keyDataSpan = new Span<byte>(testData);
             keyDataSpan = keyDataSpan[keyOffset..];
 
-            bool compareResult = keyDataSpan.SequenceEqual(pivMetadata.PublicKey.YubiKeyEncodedPublicKey.Span);
+            var compareResult = keyDataSpan.SequenceEqual(pivMetadata.PublicKey.YubiKeyEncodedPublicKey.Span);
 
             Assert.True(compareResult);
         }
@@ -444,7 +444,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInputF9_NoRetries()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x07, 0x02, 0x02, 0x02, 0x01, 0x03,
                 0x01, 0x02, 0x04, 0x82, 0x01, 0x09, 0x81, 0x82,
@@ -483,7 +483,7 @@ namespace Yubico.YubiKey.Piv
                 0x9A, 0x71, 0x82, 0x03, 0x01, 0x00, 0x01
             };
 
-            var pivMetadata = new PivMetadata(testData, 0xF9);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0xF9);
 
             Assert.True(pivMetadata.RetryCount == -1);
             Assert.True(pivMetadata.RetriesRemaining == -1);
@@ -492,7 +492,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_InvalidTagLength03_CorrectException()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x11, 0x02, 0x02, 0x02, 0x01, 0x03,
                 0x02, 0x01, 0x22, 0x04, 0x43, 0x86, 0x41, 0x04, 0xC4,
@@ -506,13 +506,13 @@ namespace Yubico.YubiKey.Piv
                 0x29, 0xC5, 0x98, 0x56, 0x07, 0xB5, 0x26
             };
 
-            _ = Assert.Throws<InvalidOperationException>(() => new PivMetadata(testData, 0x9A));
+            _ = Assert.Throws<InvalidOperationException>(() => new PivMetadata(testData, slotNumber: 0x9A));
         }
 
         [Fact]
         public void Constructor_ValidInput9A_CorrectAlgorithm()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x11, 0x02, 0x02, 0x02, 0x01, 0x03,
                 0x01, 0x01, 0x04, 0x43, 0x86, 0x41, 0x04, 0xC4,
@@ -526,7 +526,7 @@ namespace Yubico.YubiKey.Piv
                 0x29, 0xC5, 0x98, 0x56, 0x07, 0xB5, 0x26
             };
 
-            var pivMetadata = new PivMetadata(testData, 0x9A);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0x9A);
 
             Assert.True(pivMetadata.Algorithm == PivAlgorithm.EccP256);
         }
@@ -534,7 +534,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInput9A_CorrectPolicy()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x11, 0x02, 0x02, 0x03, 0x03, 0x03,
                 0x01, 0x01, 0x04, 0x43, 0x86, 0x41, 0x04, 0xC4,
@@ -548,7 +548,7 @@ namespace Yubico.YubiKey.Piv
                 0x29, 0xC5, 0x98, 0x56, 0x07, 0xB5, 0x26
             };
 
-            var pivMetadata = new PivMetadata(testData, 0x9A);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0x9A);
 
             Assert.True(pivMetadata.PinPolicy == PivPinPolicy.Always);
             Assert.True(pivMetadata.TouchPolicy == PivTouchPolicy.Cached);
@@ -557,7 +557,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInput9A_CorrectStatus()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x11, 0x02, 0x02, 0x03, 0x03, 0x03,
                 0x01, 0x01, 0x04, 0x43, 0x86, 0x41, 0x04, 0xC4,
@@ -571,7 +571,7 @@ namespace Yubico.YubiKey.Piv
                 0x29, 0xC5, 0x98, 0x56, 0x07, 0xB5, 0x26
             };
 
-            var pivMetadata = new PivMetadata(testData, 0x9A);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0x9A);
 
             Assert.True(pivMetadata.KeyStatus == PivKeyStatus.Generated);
         }
@@ -579,8 +579,8 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInput9A_CorrectKey()
         {
-            int keyOffset = 12;
-            byte[] testData = new byte[]
+            var keyOffset = 12;
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x11, 0x02, 0x02, 0x03, 0x03, 0x03,
                 0x01, 0x01, 0x04, 0x43, 0x86, 0x41, 0x04, 0xC4,
@@ -594,7 +594,7 @@ namespace Yubico.YubiKey.Piv
                 0x29, 0xC5, 0x98, 0x56, 0x07, 0xB5, 0x26
             };
 
-            var pivMetadata = new PivMetadata(testData, 0xF9);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0xF9);
 
             Assert.False(pivMetadata.PublicKey.YubiKeyEncodedPublicKey.IsEmpty);
             if (pivMetadata.PublicKey.YubiKeyEncodedPublicKey.IsEmpty)
@@ -605,7 +605,7 @@ namespace Yubico.YubiKey.Piv
             var keyDataSpan = new Span<byte>(testData);
             keyDataSpan = keyDataSpan[keyOffset..];
 
-            bool compareResult = keyDataSpan.SequenceEqual(pivMetadata.PublicKey.YubiKeyEncodedPublicKey.Span);
+            var compareResult = keyDataSpan.SequenceEqual(pivMetadata.PublicKey.YubiKeyEncodedPublicKey.Span);
 
             Assert.True(compareResult);
         }
@@ -613,7 +613,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_ValidInput9A_NoRetries()
         {
-            byte[] testData = new byte[]
+            var testData = new byte[]
             {
                 0x01, 0x01, 0x11, 0x02, 0x02, 0x03, 0x03, 0x03,
                 0x01, 0x01, 0x04, 0x43, 0x86, 0x41, 0x04, 0xC4,
@@ -627,7 +627,7 @@ namespace Yubico.YubiKey.Piv
                 0x29, 0xC5, 0x98, 0x56, 0x07, 0xB5, 0x26
             };
 
-            var pivMetadata = new PivMetadata(testData, 0x9A);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0x9A);
 
             Assert.True(pivMetadata.RetryCount == -1);
             Assert.True(pivMetadata.RetriesRemaining == -1);
@@ -636,9 +636,9 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_NoData_NoAlgorithm()
         {
-            byte[] testData = Array.Empty<byte>();
+            var testData = Array.Empty<byte>();
 
-            var pivMetadata = new PivMetadata(testData, 0x9B);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0x9B);
 
             Assert.True(pivMetadata.Algorithm == PivAlgorithm.None);
         }
@@ -646,9 +646,9 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_NoData_NoPolicy()
         {
-            byte[] testData = Array.Empty<byte>();
+            var testData = Array.Empty<byte>();
 
-            var pivMetadata = new PivMetadata(testData, 0x9B);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0x9B);
 
             Assert.True(pivMetadata.PinPolicy == PivPinPolicy.None);
             Assert.True(pivMetadata.TouchPolicy == PivTouchPolicy.None);
@@ -657,9 +657,9 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_NoData_NoStatus()
         {
-            byte[] testData = Array.Empty<byte>();
+            var testData = Array.Empty<byte>();
 
-            var pivMetadata = new PivMetadata(testData, 0x9B);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0x9B);
 
             Assert.True(pivMetadata.KeyStatus == PivKeyStatus.Unknown);
         }
@@ -667,9 +667,9 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_NoData_NoRetries()
         {
-            byte[] testData = Array.Empty<byte>();
+            var testData = Array.Empty<byte>();
 
-            var pivMetadata = new PivMetadata(testData, 0x80);
+            var pivMetadata = new PivMetadata(testData, slotNumber: 0x80);
 
             Assert.True(pivMetadata.RetryCount == -1);
             Assert.True(pivMetadata.RetriesRemaining == -1);
@@ -678,7 +678,7 @@ namespace Yubico.YubiKey.Piv
         [Fact]
         public void Constructor_NoData_NoKey()
         {
-            byte[] testData = Array.Empty<byte>();
+            var testData = Array.Empty<byte>();
 
             var pivMetadata = new PivMetadata(testData, PivSlot.Pin);
 

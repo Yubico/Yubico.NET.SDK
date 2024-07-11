@@ -29,8 +29,9 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         public OtpPluginBase(IOutput output) : base(output)
         {
             // First, add any converters that are not in the base class.
-            Converters[typeof(KeyboardLayout)] = (s) => StaticConverters.ParseEnum<KeyboardLayout>(s.Replace('-', '_'));
-            Converters[typeof(Slot)] = (s) => StaticConverters.ParseEnum<Slot>(s);
+            Converters[typeof(KeyboardLayout)] = s =>
+                StaticConverters.ParseEnum<KeyboardLayout>(s.Replace(oldChar: '-', newChar: '_'));
+            Converters[typeof(Slot)] = s => StaticConverters.ParseEnum<Slot>(s);
 
             // Next, we'll build the parameter collection by enumerating
             // the child class' ParametersUsed bitfield.
@@ -95,7 +96,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                                 Name = "Keyboard",
                                 Shortcut = "kb",
                                 Description = "Keyboard layout to use for the static password. " +
-                                              $@"Choices are {string.Join(',', Enum.GetNames(typeof(KeyboardLayout)))} [default: ModHex]",
+                                              $@"Choices are {string.Join(separator: ',', Enum.GetNames(typeof(KeyboardLayout)))} [default: ModHex]",
                                 Type = typeof(KeyboardLayout)
                             }),
                         ParameterUse.CurrentAccessCode => new KeyValuePair<string, Parameter>(
@@ -367,11 +368,11 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         public override Dictionary<string, Parameter> Parameters { get; }
 
         /// <summary>
-        /// Specify this in your class to determine which parameters you need.
+        ///     Specify this in your class to determine which parameters you need.
         /// </summary>
         /// <remarks>
-        /// The constructor will enumerate all of the parameters you specified
-        /// and populate the <see cref="Parameters"/> collection.
+        ///     The constructor will enumerate all of the parameters you specified
+        ///     and populate the <see cref="Parameters" /> collection.
         /// </remarks>
         protected abstract ParameterUse ParametersUsed { get; }
 
@@ -419,7 +420,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
             object? GetParameter(string name)
             {
-                if (Parameters.TryGetValue(name, out Parameter? param))
+                if (Parameters.TryGetValue(name, out var param))
                 {
                     return param.Value;
                 }
@@ -430,16 +431,16 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
         internal static byte[] SafeArrayResize(byte[] array)
         {
-            byte[] replacement = new byte[array.Length];
-            array.CopyTo(replacement, 0);
+            var replacement = new byte[array.Length];
+            array.CopyTo(replacement, index: 0);
             CryptographicOperations.ZeroMemory(array);
             return replacement;
         }
 
         internal static IYubiKeyDevice GetYubiKey(int? serialNumber, Transport transport = Transport.HidKeyboard)
         {
-            IEnumerable<IYubiKeyDevice> keys = YubiKeyDevice.FindByTransport(transport);
-            IYubiKeyDevice key = keys.FirstOrDefault() ?? throw new InvalidOperationException();
+            var keys = YubiKeyDevice.FindByTransport(transport);
+            var key = keys.FirstOrDefault() ?? throw new InvalidOperationException();
             if (serialNumber.HasValue)
             {
                 key = keys
@@ -447,13 +448,13 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                     .FirstOrDefault() ?? throw new InvalidOperationException();
                 if (key is null)
                 {
-                    string message = "YubiKey with serial number {0} was not found.{1}";
-                    string subMessage = string.Empty;
+                    var message = "YubiKey with serial number {0} was not found.{1}";
+                    var subMessage = string.Empty;
                     if (keys.Any())
                     {
-                        if (keys.Skip(1).Any())
+                        if (keys.Skip(count: 1).Any())
                         {
-                            string keystr = string.Join(", ", keys.Select(k => k.SerialNumber));
+                            var keystr = string.Join(", ", keys.Select(k => k.SerialNumber));
                             subMessage = $" Keys found: [{keystr}].";
                         }
                         else
@@ -462,11 +463,11 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                         }
                     }
 
-                    string exText = string.Format(message, serialNumber, subMessage);
+                    var exText = string.Format(message, serialNumber, subMessage);
                     throw new InvalidOperationException(exText);
                 }
             }
-            else if (keys.Skip(1).Any())
+            else if (keys.Skip(count: 1).Any())
             {
                 throw new InvalidOperationException(
                     "More than one YubiKey was found. You must remove extra keys " +
@@ -484,7 +485,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
 
         protected bool Verify(OtpSession otp, string? message = null)
         {
-            bool verify =
+            var verify =
                 _slot == Slot.ShortPress
                     ? otp.IsShortPressConfigured
                     : otp.IsLongPressConfigured;
@@ -516,6 +517,42 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             }
 
             return true;
+        }
+
+        [Flags]
+        protected enum ParameterUse
+        {
+            None = 0,
+            Slot = 0b1 << 0,
+            Force = 0b1 << 1,
+            NoEnter = 0b1 << 2,
+            CurrentAccessCode = 0b1 << 3,
+            NewAccessCode = 0b1 << 4,
+            Generate = 0b1 << 5,
+            Password = 0b1 << 6,
+            Length = 0b1 << 7,
+            SerialNumber = 0b1 << 8,
+            Keyboard = 0b1 << 9,
+            PublicId = 0b1 << 10,
+            PrivateId = 0b1 << 11,
+            Key = 0b1 << 12,
+            SerialAsPublicId = 0b1 << 13,
+            GeneratePrivateId = 0b1 << 14,
+            Totp = 0b1 << 15,
+            Digits = 0b1 << 16,
+            Challenge = 0b1 << 17,
+            Button = 0b1 << 18,
+            IMF = 0b1 << 19,
+            Prefix = 0b1 << 20,
+            YubiOtp = 0b1 << 21,
+            Upload = 0b1 << 22,
+            ShortHMAC = 0b1 << 23,
+            TotpKey = 0b1 << 24,
+            Text = 0b1 << 25,
+            Uri = 0b1 << 26,
+            Utf16 = 0b1 << 27,
+            Read = 0b1 << 28,
+            LanguageId = 0b1 << 29
         }
 
         #region Common Protected Fields
@@ -553,41 +590,5 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         protected string _lcid = string.Empty;
 
         #endregion
-
-        [Flags]
-        protected enum ParameterUse
-        {
-            None = 0,
-            Slot = 0b1 << 0,
-            Force = 0b1 << 1,
-            NoEnter = 0b1 << 2,
-            CurrentAccessCode = 0b1 << 3,
-            NewAccessCode = 0b1 << 4,
-            Generate = 0b1 << 5,
-            Password = 0b1 << 6,
-            Length = 0b1 << 7,
-            SerialNumber = 0b1 << 8,
-            Keyboard = 0b1 << 9,
-            PublicId = 0b1 << 10,
-            PrivateId = 0b1 << 11,
-            Key = 0b1 << 12,
-            SerialAsPublicId = 0b1 << 13,
-            GeneratePrivateId = 0b1 << 14,
-            Totp = 0b1 << 15,
-            Digits = 0b1 << 16,
-            Challenge = 0b1 << 17,
-            Button = 0b1 << 18,
-            IMF = 0b1 << 19,
-            Prefix = 0b1 << 20,
-            YubiOtp = 0b1 << 21,
-            Upload = 0b1 << 22,
-            ShortHMAC = 0b1 << 23,
-            TotpKey = 0b1 << 24,
-            Text = 0b1 << 25,
-            Uri = 0b1 << 26,
-            Utf16 = 0b1 << 27,
-            Read = 0b1 << 28,
-            LanguageId = 0b1 << 29
-        }
     }
 }

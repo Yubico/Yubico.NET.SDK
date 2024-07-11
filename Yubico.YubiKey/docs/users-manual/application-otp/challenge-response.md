@@ -41,7 +41,8 @@ To implement challenge-response authentication with a .NET application, the foll
 
 > [!NOTE]  
 > All YubiKey-host communication for challenge-response is done via the [HID communication protocol](xref:OtpHID).
-> Therefore, challenge-response authentication will only work when a YubiKey is physically plugged into a host over USB or
+> Therefore, challenge-response authentication will only work when a YubiKey is physically plugged into a host over USB
+> or
 > Lightning. Challenges and responses cannot be communicated wirelessly with NFC.
 
 ## Supported challenge-response algorithms
@@ -63,11 +64,14 @@ hashed) with a 20-byte secret key, resulting in a 6-10 digit HOTP as the respons
 
 > [!NOTE]  
 > Hashing/digesting is a one-way operation, meaning that once a block of data is hashed, it cannot be converted back
-> into its original form. Encryption, on the other hand, is a two-way operation. When a block of data is encrypted, it can
-> be decrypted back into its original form at any time. This is an important distinction because the validating party will
+> into its original form. Encryption, on the other hand, is a two-way operation. When a block of data is encrypted, it
+> can
+> be decrypted back into its original form at any time. This is an important distinction because the validating party
+> will
 > have to respond differently to Yubico OTP responses (encrypted) and HMAC-SHA1 responses (hashed). For Yubico OTP, the
 > validating party will have to decrypt the response and compare the result with the original challenge. For HMAC-SHA1,
-> the validating party will have to perform the same hashing operation with the original challenge and compare the result
+> the validating party will have to perform the same hashing operation with the original challenge and compare the
+> result
 > to the response received from the YubiKey.
 
 ## Challenge initiation and authentication
@@ -169,9 +173,11 @@ call ``CalculateChallengeResponse()``. With this method, you can:
 > [!NOTE]  
 > The size of the challenge sent to the YubiKey with ``UseChallenge()`` must align with the slot's configuration. If the
 > slot is configured to perform Yubico OTP, the challenge must
-> be [6 bytes](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.YubicoOtpChallengeSize) long. If the slot is
+> be [6 bytes](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.YubicoOtpChallengeSize) long. If the slot
+> is
 > configured for HMAC-SHA1, the challenge must
-> be [64 bytes](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.MaxHmacChallengeSize) long. However, if the
+> be [64 bytes](xref:Yubico.YubiKey.Otp.Operations.CalculateChallengeResponse.MaxHmacChallengeSize) long. However, if
+> the
 > slot has been configured with ``UseSmallChallenge()``, an HMAC-SHA1 challenge smaller than 64 bytes is acceptable. The
 > SDK will throw an exception if the challenge size does not match the YubiKey slot's configuration.
 

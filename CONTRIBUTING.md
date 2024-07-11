@@ -84,8 +84,8 @@ We use and recommend the following workflow:
 5. Make and commit your changes to your branch.
     - [Code Flow and PRs](./contributordocs/code-flow-and-pull-requests.md#getting-your-code-ready-for-review)
       explains how to build and test.
-   - Your commits must
-     be [signed](https://docs.github.com/en/github/authenticating-to-github/managing-commit-signature-verification/signing-commits).
+    - Your commits must
+      be [signed](https://docs.github.com/en/github/authenticating-to-github/managing-commit-signature-verification/signing-commits).
     - Please follow our [Commit Messages](#commit-messages) guidance.
 6. [Build the repository](./contributordocs/code-flow-and-pull-requests.md#getting-your-code-ready-for-review)
    with your changes.

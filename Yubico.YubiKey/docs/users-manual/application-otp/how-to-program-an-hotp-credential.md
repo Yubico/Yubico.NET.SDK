@@ -146,5 +146,6 @@ calling [UpdateSlot()](xref:OtpUpdateSlot).
 > [!NOTE]
 > If you call ``SetAllowUpdate(false)`` during the inital configuration, you will not be able to update these settings
 > with ``UpdateSlot()`` (the SDK will throw an exception). This can only be undone by reconfiguring the slot
-> with ``ConfigureHotp()``. It is not necessary to call ``SetAllowUpdate(true)`` during configuration because updates are
+> with ``ConfigureHotp()``. It is not necessary to call ``SetAllowUpdate(true)`` during configuration because updates
+> are
 > allowed by default. 

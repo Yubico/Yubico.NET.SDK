@@ -33,6 +33,7 @@ namespace Yubico.YubiKey.U2f.Commands
         private const int offsetData = offsetLc + lengthLc;
 
         #region Outer APDU
+
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
         {
@@ -86,9 +87,11 @@ namespace Yubico.YubiKey.U2f.Commands
 
             Assert.False(command.CreateCommandApdu().Data.IsEmpty);
         }
+
         #endregion Outer APDU
 
         #region Inner APDU
+
         [Fact]
         public void CreateCommandApdu_InnerCommandCla0x00()
         {
@@ -144,6 +147,7 @@ namespace Yubico.YubiKey.U2f.Commands
 
             Assert.Equal(actualInnerCommandP2, expectedInnerP2);
         }
+
         #endregion Inner APDU
 
         [Fact]

@@ -93,7 +93,7 @@ namespace Yubico.YubiKey.Piv
         /// True if <c>pinLength</c> is a valid PIV PIN length, or False otherwise.
         /// </returns>
         public static bool IsValidPinLength(int pinLength) =>
-          pinLength >= MinimumPinLength && pinLength <= MaximumPinLength;
+            pinLength >= MinimumPinLength && pinLength <= MaximumPinLength;
 
         /// <summary>
         /// Determine, based on the <paramref name="statusWord"/>, what the
@@ -126,7 +126,9 @@ namespace Yubico.YubiKey.Piv
         /// valid to be parsed.
         /// </exception>
         public static int GetRetriesRemaining(short statusWord) =>
-            HasRetryCount(statusWord) ? statusWord & StatusWordRetryMask : throw new InvalidOperationException();
+            HasRetryCount(statusWord)
+                ? statusWord & StatusWordRetryMask
+                : throw new InvalidOperationException();
 
         /// <summary>
         /// Tests whether the <paramref name="statusWord"/> contains the number

@@ -44,6 +44,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             {
                 return RequirementValue.Required;
             }
+
             if (permissions.HasFlag(PinUvAuthTokenPermissions.CredentialManagement))
             {
                 return RequirementValue.Optional;

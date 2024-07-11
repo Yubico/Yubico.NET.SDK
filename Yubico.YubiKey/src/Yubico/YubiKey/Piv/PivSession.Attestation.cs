@@ -337,6 +337,7 @@ namespace Yubico.YubiKey.Piv
                 tlvWriter.WriteByte(0x71, 0);
                 tlvWriter.WriteValue(0xfe, null);
             }
+
             byte[] encodedCert = tlvWriter.Encode();
 
             ImportPrivateKey(PivSlot.Attestation, privateKey);
@@ -449,7 +450,11 @@ namespace Yubico.YubiKey.Piv
 
         // Does the cert in the object share the algorithm and key size?
         // If the input arg isValidCert is false, don't check, just return false;
-        private static bool IsCertSameAlgorithm(bool isValidCert, X509Certificate2 certificate, int keySize, string algorithm)
+        private static bool IsCertSameAlgorithm(
+            bool isValidCert,
+            X509Certificate2 certificate,
+            int keySize,
+            string algorithm)
         {
             bool returnValue = false;
 
@@ -520,7 +525,7 @@ namespace Yubico.YubiKey.Piv
                         if (index >= tags.Length)
                         {
                             returnValue = value[4].Length < MaximumValidityValueLength &&
-                                          value[5].Length < MaximumNameValueLength;
+                                value[5].Length < MaximumNameValueLength;
                         }
                     }
                 }

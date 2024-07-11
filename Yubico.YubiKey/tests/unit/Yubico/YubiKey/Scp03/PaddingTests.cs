@@ -25,7 +25,9 @@ namespace Yubico.YubiKey.Scp03
         private static byte[] Get8BytePayload() => Hex.HexToBytes("0001020380050607");
         private static byte[] GetPadded8BytePayload() => Hex.HexToBytes("00010203800506078000000000000000");
         private static byte[] Get16BytePayload() => Hex.HexToBytes("000102038005060708090A0B0C0D0E0F");
-        private static byte[] GetPadded16BytePayload() => Hex.HexToBytes("000102038005060708090A0B0C0D0E0F80000000000000000000000000000000");
+
+        private static byte[] GetPadded16BytePayload() =>
+            Hex.HexToBytes("000102038005060708090A0B0C0D0E0F80000000000000000000000000000000");
 
         [Fact]
         public void PadToBlockSize_GivenNullPayload_ThrowsArgumentNullException()

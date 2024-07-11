@@ -30,7 +30,6 @@ namespace Yubico.YubiKey.Otp.Commands
         /// </summary>
         public SetDeviceInfoCommand()
         {
-
         }
 
         /// <summary>
@@ -41,7 +40,6 @@ namespace Yubico.YubiKey.Otp.Commands
         /// </param>
         public SetDeviceInfoCommand(SetDeviceInfoBaseCommand baseCommand) : base(baseCommand)
         {
-
         }
 
         /// <inheritdoc />

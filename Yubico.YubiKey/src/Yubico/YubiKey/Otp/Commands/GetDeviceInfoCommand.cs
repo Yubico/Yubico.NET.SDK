@@ -39,15 +39,15 @@ namespace Yubico.YubiKey.Otp.Commands
         /// </summary>
         public GetDeviceInfoCommand()
         {
-
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = OtpConstants.RequestSlotInstruction,
-            P1 = OtpConstants.GetDeviceInfoSlot
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Ins = OtpConstants.RequestSlotInstruction,
+                P1 = OtpConstants.GetDeviceInfoSlot
+            };
 
         /// <inheritdoc />
         public GetDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

@@ -20,7 +20,8 @@ namespace Yubico.YubiKey.Oath.Commands
 {
     public class DeleteCredentialCommandTests
     {
-        readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp, HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
+        readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp,
+            HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
 
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()

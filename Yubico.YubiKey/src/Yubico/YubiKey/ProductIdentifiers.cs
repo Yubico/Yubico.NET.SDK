@@ -18,7 +18,6 @@ namespace Yubico.YubiKey
 {
     internal class ProductIdentifiers
     {
-
         // YubiKey Version 1 and Version 2
         public const short YubiKeyV1V2 = 0x0010;
 
@@ -46,24 +45,25 @@ namespace Yubico.YubiKey
         // Security Key Series
         public const short SecurityKey = 0x0120;
 
-        public static IList<short> AllYubiKeys => new List<short>()
-        {
-            YubiKeyV1V2,
-            YubiKeyPlus,
-            YubiKeyNeoOtp,
-            YubiKeyNeoOtpCcid,
-            YubiKeyNeoU2f,
-            YubiKeyNeoOtpU2f,
-            YubiKeyNeoU2fCcid,
-            YubiKeyNeoOtpU2fCcid,
-            YubiKeyOtp,
-            YubiKeyFido,
-            YubiKeyOtpFido,
-            YubiKeyCcid,
-            YubiKeyOtpCcid,
-            YubiKeyFidoCcid,
-            YubiKeyOtpFidoCcid,
-            SecurityKey,
-        };
+        public static IList<short> AllYubiKeys =>
+            new List<short>()
+            {
+                YubiKeyV1V2,
+                YubiKeyPlus,
+                YubiKeyNeoOtp,
+                YubiKeyNeoOtpCcid,
+                YubiKeyNeoU2f,
+                YubiKeyNeoOtpU2f,
+                YubiKeyNeoU2fCcid,
+                YubiKeyNeoOtpU2fCcid,
+                YubiKeyOtp,
+                YubiKeyFido,
+                YubiKeyOtpFido,
+                YubiKeyCcid,
+                YubiKeyOtpCcid,
+                YubiKeyFidoCcid,
+                YubiKeyOtpFidoCcid,
+                SecurityKey,
+            };
     }
 }

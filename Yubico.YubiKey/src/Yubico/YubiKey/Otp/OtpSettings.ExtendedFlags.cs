@@ -47,8 +47,7 @@ namespace Yubico.YubiKey.Otp
         /// enabled by the device.
         /// </para>
         /// </remarks>
-        public T SetSerialNumberUsbVisible(bool setting = true) =>
-            ApplyFlag(Flag.SerialNumberUsbVisible, setting);
+        public T SetSerialNumberUsbVisible(bool setting = true) => ApplyFlag(Flag.SerialNumberUsbVisible, setting);
 
         /// <summary>
         /// Allows the serial number to be read by proprietary means, including being
@@ -58,15 +57,13 @@ namespace Yubico.YubiKey.Otp
         /// This is a device wide setting. If it is set in either configurable slot, it is considered
         /// enabled by the device.
         /// </remarks>
-        public T SetSerialNumberApiVisible(bool setting = true) =>
-            ApplyFlag(Flag.SerialNumberApiVisible, setting);
+        public T SetSerialNumberApiVisible(bool setting = true) => ApplyFlag(Flag.SerialNumberApiVisible, setting);
 
         /// <summary>
         /// Causes numeric characters to be sent as keystrokes from the numeric keypad rather than the
         /// normal numeric keys on an 84-key keyboard.
         /// </summary>
-        public T UseNumericKeypad(bool setting = true) =>
-            ApplyFlag(Flag.UseNumericKeypad, setting);
+        public T UseNumericKeypad(bool setting = true) => ApplyFlag(Flag.UseNumericKeypad, setting);
 
         /// <summary>
         /// Causes the trigger action of the YubiKey button to become faster.
@@ -75,8 +72,7 @@ namespace Yubico.YubiKey.Otp
         /// This only applies when one configuration is written. If both configurations are active,
         /// this setting has no effect.
         /// </remarks>
-        public T UseFastTrigger(bool setting = true) =>
-            ApplyFlag(Flag.FastTrigger, setting);
+        public T UseFastTrigger(bool setting = true) => ApplyFlag(Flag.FastTrigger, setting);
 
         /// <summary>
         /// Allows certain non-security related settings to be modified after the configuration
@@ -156,19 +152,16 @@ namespace Yubico.YubiKey.Otp
         /// </item>
         /// </list>
         /// </remarks>
-        public T AllowUpdate(bool setting = true) =>
-            ApplyFlag(Flag.AllowUpdate, setting);
+        public T AllowUpdate(bool setting = true) => ApplyFlag(Flag.AllowUpdate, setting);
 
         /// <summary>
         /// Allows a configuration to be stored without being accessible.
         /// </summary>
-        public T SetDormant(bool setting = true) =>
-            ApplyFlag(Flag.Dormant, setting);
+        public T SetDormant(bool setting = true) => ApplyFlag(Flag.Dormant, setting);
 
         /// <summary>
         /// Inverts the configured state of the LED.
         /// </summary>
-        public T SetInvertLed(bool setting = true) =>
-            ApplyFlag(Flag.InvertLed, setting);
+        public T SetInvertLed(bool setting = true) => ApplyFlag(Flag.InvertLed, setting);
     }
 }

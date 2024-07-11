@@ -137,6 +137,7 @@ namespace Yubico.YubiKey.Fido2
                     Type = stringMap.ReadTextString(KeyCredentialType),
                     Id = stringMap.ReadByteString(KeyCredentialId),
                 };
+
                 if (stringMap.Contains(KeyCredentialTransports))
                 {
                     IReadOnlyList<string> transports = stringMap.ReadArray<string>(KeyCredentialTransports);
@@ -145,6 +146,7 @@ namespace Yubico.YubiKey.Fido2
                         CredentialId.AddTransport(current);
                     }
                 }
+
                 AuthenticatorData = new AuthenticatorData(map.ReadByteString(KeyAuthData));
                 Signature = map.ReadByteString(KeySignature);
                 if (map.Contains(KeyUser))
@@ -156,6 +158,7 @@ namespace Yubico.YubiKey.Fido2
                         DisplayName = (string?)stringMap.ReadOptional<string>(KeyUserDisplayName)
                     };
                 }
+
                 NumberOfCredentials = (int?)map.ReadOptional<int>(KeyNumberCredentials);
                 UserSelected = (bool?)map.ReadOptional<bool>(KeyUserSelected);
                 _keyData = (byte[]?)map.ReadOptional<byte[]>(KeyLargeBlobKey);
@@ -201,6 +204,7 @@ namespace Yubico.YubiKey.Fido2
             _ = digester.TransformBlock(
                 AuthenticatorData.EncodedAuthenticatorData.ToArray(), 0,
                 AuthenticatorData.EncodedAuthenticatorData.Length, null, 0);
+
             _ = digester.TransformFinalBlock(clientDataHash.ToArray(), 0, clientDataHash.Length);
 
             using var ecdsaVfy = new EcdsaVerify(publicKey);

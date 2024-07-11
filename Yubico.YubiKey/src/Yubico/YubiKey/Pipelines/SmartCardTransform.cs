@@ -38,14 +38,13 @@ namespace Yubico.YubiKey.Pipelines
 
         public void Cleanup()
         {
-
         }
 
-        public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType) => _smartCardConnection.Transmit(command);
+        public ResponseApdu Invoke(CommandApdu command, Type commandType, Type responseType) =>
+            _smartCardConnection.Transmit(command);
 
         public void Setup()
         {
-
         }
     }
 }

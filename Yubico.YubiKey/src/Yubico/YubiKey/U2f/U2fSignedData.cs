@@ -28,6 +28,7 @@ namespace Yubico.YubiKey.U2f
     public abstract class U2fSignedData : U2fBuffer
     {
         private const int SignatureLength = 2 * CoordinateLength;
+
         // The longest possible BER signature is
         //  30 len
         //     02 coordLen+1 00 rVal
@@ -68,7 +69,9 @@ namespace Yubico.YubiKey.U2f
         // continues until the signature. Therefore, the data to verify is the
         // byte array _buffer until _signatureOffset.
         private protected bool VerifySignature(
-            EcdsaVerify verifier, ReadOnlyMemory<byte> applicationId, ReadOnlyMemory<byte> clientDataHash)
+            EcdsaVerify verifier,
+            ReadOnlyMemory<byte> applicationId,
+            ReadOnlyMemory<byte> clientDataHash)
         {
             ApplicationId = applicationId;
             ClientDataHash = clientDataHash;

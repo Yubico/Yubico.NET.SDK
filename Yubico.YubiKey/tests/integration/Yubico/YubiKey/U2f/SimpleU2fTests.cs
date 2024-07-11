@@ -32,7 +32,8 @@ namespace Yubico.YubiKey.U2f
             {
                 if (!SdkPlatformInfo.IsElevated)
                 {
-                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
+                    _ = Assert.Throws<UnauthorizedAccessException>(() =>
+                        YubiKeyDevice.FindByTransport(Transport.HidFido));
                     Assert.True(false);
                 }
             }
@@ -50,7 +51,8 @@ namespace Yubico.YubiKey.U2f
             {
                 if (!SdkPlatformInfo.IsElevated)
                 {
-                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
+                    _ = Assert.Throws<UnauthorizedAccessException>(() =>
+                        YubiKeyDevice.FindByTransport(Transport.HidFido));
                     Assert.True(false);
                 }
             }
@@ -123,7 +125,8 @@ namespace Yubico.YubiKey.U2f
             {
                 if (!SdkPlatformInfo.IsElevated)
                 {
-                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
+                    _ = Assert.Throws<UnauthorizedAccessException>(() =>
+                        YubiKeyDevice.FindByTransport(Transport.HidFido));
                     Assert.True(false);
                 }
             }
@@ -158,7 +161,8 @@ namespace Yubico.YubiKey.U2f
             {
                 if (!SdkPlatformInfo.IsElevated)
                 {
-                    _ = Assert.Throws<UnauthorizedAccessException>(() => YubiKeyDevice.FindByTransport(Transport.HidFido));
+                    _ = Assert.Throws<UnauthorizedAccessException>(() =>
+                        YubiKeyDevice.FindByTransport(Transport.HidFido));
                     Assert.True(false);
                 }
             }
@@ -202,7 +206,8 @@ namespace Yubico.YubiKey.U2f
         {
             public U2fHidTestingResponse(ResponseApdu responseApdu) :
                 base(responseApdu)
-            { }
+            {
+            }
 
             public ResponseApdu rspApdu => ResponseApdu;
         }

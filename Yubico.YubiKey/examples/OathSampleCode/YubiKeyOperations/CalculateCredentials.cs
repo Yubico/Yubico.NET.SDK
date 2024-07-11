@@ -23,7 +23,8 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
     public static class CalculateCredentials
     {
         // Get OTP (One-Time Password) values for all configured credentials on the YubiKey.
-        public static bool RunCalculateCredentials(IYubiKeyDevice yubiKey, Func<KeyEntryData, bool> KeyCollectorDelegate)
+        public static bool RunCalculateCredentials(
+            IYubiKeyDevice yubiKey, Func<KeyEntryData, bool> KeyCollectorDelegate)
         {
             using var oathSession = new OathSession(yubiKey);
             {

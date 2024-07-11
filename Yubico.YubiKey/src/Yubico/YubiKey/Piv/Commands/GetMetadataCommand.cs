@@ -83,6 +83,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             ExceptionMessages.InvalidSlot,
                             value));
                 }
+
                 _slotNumber = value;
             }
         }

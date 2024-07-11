@@ -20,6 +20,7 @@ namespace Yubico.YubiKey
     public class FirmwareVersion : IComparable<FirmwareVersion>, IComparable, IEquatable<FirmwareVersion>
     {
         #region Frequently Used Versions
+
         // Note that these are for internal use. It's expected that SDK users should call `.HasFeature` on the
         // YubiKey device to check for features instead of FW versions.
         internal static readonly FirmwareVersion All = new FirmwareVersion(1, 0, 0);
@@ -44,6 +45,7 @@ namespace Yubico.YubiKey
         internal static readonly FirmwareVersion V5_4_3 = new FirmwareVersion(5, 4, 3);
         internal static readonly FirmwareVersion V5_6_0 = new FirmwareVersion(5, 6, 0);
         internal static readonly FirmwareVersion V5_7_0 = new FirmwareVersion(5, 7, 0);
+
         #endregion
 
         public byte Major { get; set; }
@@ -78,7 +80,9 @@ namespace Yubico.YubiKey
                 return !(left is null);
             }
 
-            return left is null ? false : left.CompareTo(right) < 0;
+            return left is null
+                ? false
+                : left.CompareTo(right) < 0;
         }
 
         public static bool operator >=(FirmwareVersion left, FirmwareVersion right)
@@ -100,7 +104,9 @@ namespace Yubico.YubiKey
                 return !(left is null);
             }
 
-            return left is null ? false : left.CompareTo(right) <= 0;
+            return left is null
+                ? false
+                : left.CompareTo(right) <= 0;
         }
 
         public static bool operator ==(FirmwareVersion left, FirmwareVersion right)
@@ -118,8 +124,7 @@ namespace Yubico.YubiKey
             return left.CompareTo(right) == 0;
         }
 
-        public static bool operator !=(FirmwareVersion left, FirmwareVersion right) =>
-            !(left == right);
+        public static bool operator !=(FirmwareVersion left, FirmwareVersion right) => !(left == right);
 
         public override bool Equals([NotNullWhen(true)] object? obj)
         {
@@ -178,6 +183,7 @@ namespace Yubico.YubiKey
             {
                 return 0;
             }
+
             if (other is null)
             {
                 return 1;

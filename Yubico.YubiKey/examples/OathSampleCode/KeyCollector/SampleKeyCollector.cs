@@ -47,7 +47,8 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                     break;
 
                 case KeyEntryRequest.SetOathPassword:
-                    currentValue = CollectPassword("Current Password. If there is no current password just press Enter.");
+                    currentValue =
+                        CollectPassword("Current Password. If there is no current password just press Enter.");
                     newValue = CollectPassword("New Password");
                     break;
             }

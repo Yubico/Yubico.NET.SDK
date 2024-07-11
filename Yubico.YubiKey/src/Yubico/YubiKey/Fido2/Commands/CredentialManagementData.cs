@@ -248,6 +248,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         LargeBlobKey = cborReader.ReadByteString();
                         break;
                 }
+
                 count--;
             }
 

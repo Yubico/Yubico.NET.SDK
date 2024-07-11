@@ -45,7 +45,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </param>
         public ClientPinResponse(ResponseApdu responseApdu) : base(responseApdu)
         {
-
         }
 
         /// <inheritdoc />

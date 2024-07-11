@@ -40,13 +40,15 @@ namespace Yubico.YubiKey.Scp03.Commands
             _data = data;
         }
 
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Cla = GpExternalAuthenticateCla,
-            Ins = GpExternalAuthenticateIns,
-            P1 = GpHighestSecurityLevel,
-            Data = _data
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Cla = GpExternalAuthenticateCla,
+                Ins = GpExternalAuthenticateIns,
+                P1 = GpHighestSecurityLevel,
+                Data = _data
+            };
+
         public ExternalAuthenticateResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new ExternalAuthenticateResponse(responseApdu);
     }

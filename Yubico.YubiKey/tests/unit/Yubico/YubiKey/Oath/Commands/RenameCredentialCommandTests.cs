@@ -20,7 +20,9 @@ namespace Yubico.YubiKey.Oath.Commands
 {
     public class RenameCredentialCommandTests
     {
-        private readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp, HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
+        private readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp,
+            HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
+
         private readonly string newIssuer = "test";
         private readonly string newAccount = "test@example.com";
 

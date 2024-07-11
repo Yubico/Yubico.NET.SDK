@@ -40,9 +40,6 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     .AddFilter(level => level >= LogLevel.Information));
 
 
-
-
-
             IYubiKeyDevice? yubiKey = YubiKeyDevice.FindByTransport(Transport.All).First();
 
             // IYubiKeyDevice? yubiKey = YubiKeyDevice.FindByTransport(Transport.HidFido).First();

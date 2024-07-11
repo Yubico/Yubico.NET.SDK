@@ -24,7 +24,6 @@ namespace Yubico.YubiKey.U2f.Commands
     [Obsolete("This class has been replaced by GetPagedDeviceInfoResponse")]
     public sealed class GetDeviceInfoResponse : U2fResponse, IYubiKeyResponseWithData<YubiKeyDeviceInfo>
     {
-
         /// <summary>
         /// Constructs a GetDeviceInfoResponse instance based on a ResponseApdu received from the YubiKey.
         /// </summary>

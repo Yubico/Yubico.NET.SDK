@@ -62,7 +62,6 @@ namespace Yubico.YubiKey
         /// </summary>
         public MalformedYubiKeyResponseException()
         {
-
         }
 
         /// <summary>
@@ -72,7 +71,6 @@ namespace Yubico.YubiKey
         public MalformedYubiKeyResponseException(string message) :
             base(message)
         {
-
         }
 
         /// <summary>
@@ -83,13 +81,13 @@ namespace Yubico.YubiKey
         public MalformedYubiKeyResponseException(string message, Exception innerException) :
             base(message, innerException)
         {
-
         }
 
-        protected MalformedYubiKeyResponseException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
+        protected MalformedYubiKeyResponseException(
+            SerializationInfo serializationInfo,
+            StreamingContext streamingContext) :
             base(serializationInfo, streamingContext)
         {
-
         }
     }
 }

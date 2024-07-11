@@ -21,7 +21,8 @@ namespace Yubico.YubiKey.Oath.Commands
     /// <summary>
     /// Performs CALCULATE of OTP (One-Time Password) values for all available credentials on the YubiKey.
     /// </summary>
-    public class CalculateAllCredentialsCommand : OathChallengeResponseBaseCommand, IYubiKeyCommand<CalculateAllCredentialsResponse>
+    public class CalculateAllCredentialsCommand : OathChallengeResponseBaseCommand,
+                                                  IYubiKeyCommand<CalculateAllCredentialsResponse>
     {
         private const byte CalculateAllInstruction = 0xA4;
         private const byte ChallengeTag = 0x74;
@@ -83,5 +84,3 @@ namespace Yubico.YubiKey.Oath.Commands
             new CalculateAllCredentialsResponse(responseApdu);
     }
 }
-
-

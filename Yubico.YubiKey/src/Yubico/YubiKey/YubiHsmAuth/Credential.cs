@@ -184,7 +184,6 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </remarks>
         public Credential()
         {
-
         }
     }
 }

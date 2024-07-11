@@ -61,13 +61,16 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void TryChangePin_NoCollector_Succeeds()
         {
-            byte[] currentPin = {
+            byte[] currentPin =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
             };
-            byte[] newPin = {
+            byte[] newPin =
+            {
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46
             };
-            byte[] shortPin = {
+            byte[] shortPin =
+            {
                 0x61, 0x62, 0x63, 0x64, 0x65
             };
 
@@ -107,13 +110,16 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void TryVerifyPin_NoCollector_Succeeds()
         {
-            byte[] currentPin = {
+            byte[] currentPin =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
             };
-            byte[] wrongPin = {
+            byte[] wrongPin =
+            {
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18
             };
-            byte[] shortPin = {
+            byte[] shortPin =
+            {
                 0x61, 0x62, 0x63, 0x64, 0x65
             };
 

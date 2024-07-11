@@ -88,7 +88,8 @@ namespace Yubico.YubiKey.Otp
         [Theory]
         [InlineData(0x80, NdefTextEncoding.Utf16)]
         [InlineData(0, NdefTextEncoding.Utf8)]
-        public void ToText_GivenWellFormedData_ReturnsEncodingCorrectly(byte headerByte, NdefTextEncoding expectedEncoding)
+        public void ToText_GivenWellFormedData_ReturnsEncodingCorrectly(
+            byte headerByte, NdefTextEncoding expectedEncoding)
         {
             byte[] buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)'T', headerByte, 0, 1, 2 };
             var reader = new NdefDataReader(buffer);
@@ -285,7 +286,8 @@ namespace Yubico.YubiKey.Otp
         [InlineData(35, "urn:nfc:", "")]
         public void ToUri_GivenValidPrefixAndString_ReturnsValidUri(int prefixCode, string prefix, string suffix)
         {
-            byte[] buffer = new byte[] { 0, 8, 0xD1, 1, 4, (byte)'U', (byte)prefixCode, (byte)'a', (byte)'b', (byte)'c' };
+            byte[] buffer = new byte[]
+                { 0, 8, 0xD1, 1, 4, (byte)'U', (byte)prefixCode, (byte)'a', (byte)'b', (byte)'c' };
             var reader = new NdefDataReader(buffer);
 
             var value = reader.ToUri();

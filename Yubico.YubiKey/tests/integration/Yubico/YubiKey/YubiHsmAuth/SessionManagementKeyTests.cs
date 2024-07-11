@@ -21,6 +21,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
     public class SessionManagementKeyTests
     {
         #region GetRetries
+
         [Fact]
         public void GetMgmtKeyRetries_NoFailedAttempts_Returns8()
         {
@@ -67,9 +68,11 @@ namespace Yubico.YubiKey.YubiHsmAuth
             // Postconditions
             Assert.Equal(0, retriesRemaining);
         }
+
         #endregion
 
         #region TryChangeMgmtKey
+
         [Fact]
         public void TryChangeManagementKey_ValidKeys_ReturnsTrue()
         {
@@ -156,9 +159,11 @@ namespace Yubico.YubiKey.YubiHsmAuth
             // Postcondition
             Assert.Equal(expectedRetriesRemaining, actualRetriesRemaining);
         }
+
         #endregion
 
         #region ChangeMgmtKey
+
         [Fact]
         public void ChangeManagementKey_ValidKeys_MgmtKeyChanged()
         {
@@ -222,9 +227,11 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<SecurityException>(changeMgmtKey);
             }
         }
+
         #endregion
 
         #region KeyCollector
+
         [Fact]
         public void TryChangeMgmtKeyKeyCollector_NoKeyCollector_ThrowsInvalidOpEx()
         {
@@ -317,6 +324,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<SecurityException>(tryChangeMgmtKey);
             }
         }
+
         #endregion KeyCollector
     }
 }

@@ -19,28 +19,27 @@ namespace Yubico.YubiKey.Otp
     /// <summary>
     /// Extended properties and configuration settings.
     /// </summary>
-#pragma warning disable CA1815 // Justification: The instances of value type will not be
+    #pragma warning disable CA1815 // Justification: The instances of value type will not be
+
     // compared to each other
     public struct ExtendedFlags
-#pragma warning restore CA1815
+        #pragma warning restore CA1815
     {
         private byte _value;
-#pragma warning disable CA2225 // Justification: Not necessary to have the expected named alternative method
+        #pragma warning disable CA2225 // Justification: Not necessary to have the expected named alternative method
         /// <summary>
         /// Implicitly convert <see cref="ExtendedFlags"/> to a <see langword="byte"/>.
         /// </summary>
         /// <param name="flags">Flag object to convert.</param>
-        public static implicit operator byte(ExtendedFlags flags)
-            => flags._value;
+        public static implicit operator byte(ExtendedFlags flags) => flags._value;
 
         /// <summary>
         /// Implicitly convert a <see langword="byte"/> to a <see cref="ExtendedFlags"/>
         /// object.
         /// </summary>
         /// <param name="b">A byte containing the flags.</param>
-        public static implicit operator ExtendedFlags(byte b)
-            => new ExtendedFlags { _value = b };
-#pragma warning restore CA2225
+        public static implicit operator ExtendedFlags(byte b) => new ExtendedFlags { _value = b };
+        #pragma warning restore CA2225
         /// <summary>
         /// No extended flags are requested for this configuration.
         /// </summary>
@@ -123,6 +122,7 @@ namespace Yubico.YubiKey.Otp
                 | SerialNumberButtonVisible
                 | SerialNumberUsbVisible
                 | UseNumericKeypad;
+
             if ((_value & ~updatableFlags) != 0)
             {
                 throw new InvalidOperationException(ExceptionMessages.OtpConfigFlagsNotUpdatable);

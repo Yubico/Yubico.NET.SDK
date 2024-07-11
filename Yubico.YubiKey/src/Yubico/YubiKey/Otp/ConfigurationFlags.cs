@@ -20,29 +20,29 @@ namespace Yubico.YubiKey.Otp
     /// Flags that control the functionality of the programmed OTP slot. This includes switching the
     /// slot's mode.
     /// </summary>
-#pragma warning disable CA1815 // Justification: The instances of value type will not be
+    #pragma warning disable CA1815 // Justification: The instances of value type will not be
+
     // compared to each other
     public struct ConfigurationFlags
-#pragma warning restore CA1815
+        #pragma warning restore CA1815
     {
         private byte _value;
-#pragma warning disable CA2225 // Justification: Not necessary to have the expected
+        #pragma warning disable CA2225 // Justification: Not necessary to have the expected
+
         // named alternative method
         /// <summary>
         /// Implicitly convert <see cref="ConfigurationFlags"/> to a <see langword="byte"/>.
         /// </summary>
         /// <param name="flags">Flag object to convert.</param>
-        public static implicit operator byte(ConfigurationFlags flags)
-            => flags._value;
+        public static implicit operator byte(ConfigurationFlags flags) => flags._value;
 
         /// <summary>
         /// Implicitly convert a <see langword="byte"/> to a <see cref="ConfigurationFlags"/>
         /// object.
         /// </summary>
         /// <param name="b">A byte containing the flags.</param>
-        public static implicit operator ConfigurationFlags(byte b)
-            => new ConfigurationFlags { _value = b };
-#pragma warning restore CA2225
+        public static implicit operator ConfigurationFlags(byte b) => new ConfigurationFlags { _value = b };
+        #pragma warning restore CA2225
         /// <summary>
         /// No special configuration modifiers are requested for this configuration.
         /// </summary>

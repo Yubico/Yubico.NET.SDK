@@ -34,11 +34,13 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <inheritdoc/>
-        protected override ResponseStatusPair StatusCodeMap => StatusWord switch
-        {
-            SWConstants.FunctionNotSupported => new ResponseStatusPair(ResponseStatus.Success, ResponseStatusMessages.BaseSuccess),
-            _ => base.StatusCodeMap,
-        };
+        protected override ResponseStatusPair StatusCodeMap =>
+            StatusWord switch
+            {
+                SWConstants.FunctionNotSupported => new ResponseStatusPair(
+                    ResponseStatus.Success, ResponseStatusMessages.BaseSuccess),
+                _ => base.StatusCodeMap,
+            };
 
         /// <summary>
         /// Gets the response data, presented as a boolean value.
@@ -46,11 +48,12 @@ namespace Yubico.YubiKey.U2f.Commands
         /// <returns>
         /// Returns true if (and only if) the YubiKey U2F application is currently in "FIPS Approved mode".
         /// </returns>
-        public bool GetData() => StatusWord switch
-        {
-            SWConstants.Success => true,
-            SWConstants.FunctionNotSupported => false,
-            _ => throw new InvalidOperationException(StatusMessage),
-        };
+        public bool GetData() =>
+            StatusWord switch
+            {
+                SWConstants.Success => true,
+                SWConstants.FunctionNotSupported => false,
+                _ => throw new InvalidOperationException(StatusMessage),
+            };
     }
 }

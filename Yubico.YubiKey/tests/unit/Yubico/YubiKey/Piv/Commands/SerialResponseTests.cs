@@ -139,6 +139,5 @@ namespace Yubico.YubiKey.Piv.Commands
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(() => serialResponse.GetData());
         }
-
     }
 }

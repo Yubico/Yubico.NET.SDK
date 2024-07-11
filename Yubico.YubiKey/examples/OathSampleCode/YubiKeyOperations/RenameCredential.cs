@@ -50,7 +50,6 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                     credential.Period.Value);
 
                 ReportResult(renamedCredential);
-
             }
             return true;
         }
@@ -91,7 +90,8 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
             if (type == CredentialType.Totp)
             {
-                _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject, out CredentialPeriod? credentialPeriod);
+                _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject,
+                    out CredentialPeriod? credentialPeriod);
                 period = credentialPeriod.Value;
             }
 

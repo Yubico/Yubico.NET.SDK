@@ -196,7 +196,10 @@ namespace Yubico.YubiKey
 
             var rand = new Random();
             Transport[] transportValues =
-                new[] { /*Transport.HidFido,*/ Transport.HidKeyboard, Transport.SmartCard };
+                new[]
+                {
+                    /*Transport.HidFido,*/ Transport.HidKeyboard, Transport.SmartCard
+                };
 
             var transportTestValues = new Transport[numberOfRounds];
             for (int i = 0; i < transportTestValues.Length; i++)

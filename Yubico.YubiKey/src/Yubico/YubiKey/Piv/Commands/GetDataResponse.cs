@@ -68,7 +68,8 @@ namespace Yubico.YubiKey.Piv.Commands
         protected override ResponseStatusPair StatusCodeMap =>
             StatusWord switch
             {
-                SWConstants.AuthenticationMethodBlocked => new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.BaseAuthenticationMethodBlocked),
+                SWConstants.AuthenticationMethodBlocked => new ResponseStatusPair(
+                    ResponseStatus.AuthenticationRequired, ResponseStatusMessages.BaseAuthenticationMethodBlocked),
                 _ => base.StatusCodeMap,
             };
 
@@ -117,10 +118,11 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
-        public ReadOnlyMemory<byte> GetData() => StatusWord switch
-        {
-            SWConstants.Success => ResponseApdu.Data,
-            _ => throw new InvalidOperationException(StatusMessage),
-        };
+        public ReadOnlyMemory<byte> GetData() =>
+            StatusWord switch
+            {
+                SWConstants.Success => ResponseApdu.Data,
+                _ => throw new InvalidOperationException(StatusMessage),
+            };
     }
 }

@@ -116,11 +116,12 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             Label = label;
         }
 
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = DeleteCredentialInstruction,
-            Data = BuildDataField()
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Ins = DeleteCredentialInstruction,
+                Data = BuildDataField()
+            };
 
         public DeleteCredentialResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new DeleteCredentialResponse(responseApdu);
@@ -129,7 +130,8 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         {
             TlvWriter tlvWriter = new TlvWriter();
             tlvWriter.WriteValue(DataTagConstants.ManagementKey, _managementKey.Span);
-            tlvWriter.WriteString(DataTagConstants.Label,
+            tlvWriter.WriteString(
+                DataTagConstants.Label,
                 Label, Encoding.UTF8);
 
             byte[] returnValue = tlvWriter.Encode();

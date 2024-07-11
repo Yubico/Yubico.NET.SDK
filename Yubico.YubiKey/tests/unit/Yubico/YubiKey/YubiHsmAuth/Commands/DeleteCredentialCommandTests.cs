@@ -24,6 +24,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     {
         private static readonly byte[] _mgmtKey =
             new byte[16] { 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7 };
+
         private static readonly string _label = "abc";
 
         [Fact]

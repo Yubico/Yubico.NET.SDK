@@ -40,21 +40,19 @@ namespace Yubico.YubiKey.Otp.Commands
         /// </summary>
         public GetPagedDeviceInfoCommand()
         {
-
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = OtpConstants.RequestSlotInstruction,
-            P1 = OtpConstants.GetDeviceInfoSlot,
-            Data = new[] { Page }
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Ins = OtpConstants.RequestSlotInstruction,
+                P1 = OtpConstants.GetDeviceInfoSlot,
+                Data = new[] { Page }
+            };
 
         /// <inheritdoc />
         public GetPagedDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new GetPagedDeviceInfoResponse(responseApdu);
     }
-
-
 }

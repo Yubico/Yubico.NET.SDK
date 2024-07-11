@@ -206,10 +206,12 @@ namespace Yubico.YubiKey.Fido2
                 {
                     throw new Ctap2DataException(ExceptionMessages.Ctap2UnknownAttestationFormat);
                 }
+
                 if (map.Contains(KeyEnterpriseAttestation))
                 {
                     EnterpriseAttestation = map.ReadBoolean(KeyEnterpriseAttestation);
                 }
+
                 if (map.Contains(KeyLargeBlob))
                 {
                     LargeBlobKey = map.ReadByteString(KeyLargeBlob);
@@ -297,6 +299,7 @@ namespace Yubico.YubiKey.Fido2
             _ = digester.TransformBlock(
                 AuthenticatorData.EncodedAuthenticatorData.ToArray(), 0,
                 AuthenticatorData.EncodedAuthenticatorData.Length, null, 0);
+
             _ = digester.TransformFinalBlock(clientDataHash.ToArray(), 0, clientDataHash.Length);
 
             using var ecdsaVfy = new EcdsaVerify(AttestationCertificates[0]);

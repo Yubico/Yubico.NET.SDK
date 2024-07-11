@@ -133,8 +133,8 @@ namespace Yubico.YubiKey.Fido2
                 // For the next call, get the data starting where this call left
                 // off.
                 offset += currentData.Length;
-
-            } while (currentData.Length >= maxFragmentLength);
+            }
+            while (currentData.Length >= maxFragmentLength);
 
             // The data from the YubiKey is a map of 1, that one being a byte
             // string. The contents of the byte string is the serialized large
@@ -143,6 +143,7 @@ namespace Yubico.YubiKey.Fido2
             //      01 byte string
             var cborMap = new CborMap<int>(
                 fullEncoding.GetBuffer().AsMemory<byte>(0, (int)fullEncoding.Length));
+
             ReadOnlyMemory<byte> encodedArray = cborMap.ReadByteString(KeyEncodedArray);
 
             var returnValue = new SerializedLargeBlobArray(encodedArray);
@@ -155,9 +156,11 @@ namespace Yubico.YubiKey.Fido2
 
             // The standard says if the digest does not verify, the Large Blob is
             // the initial large blob.
-            byte[] initialLargeBlobArray = new byte[] {
+            byte[] initialLargeBlobArray = new byte[]
+            {
                 0x80, 0x76, 0xbe, 0x8b, 0x52, 0x8d, 0x00, 0x75, 0xf7, 0xaa, 0xe9, 0x8d, 0x6f, 0xa5, 0x7a, 0x6d, 0x3c
             };
+
             return new SerializedLargeBlobArray(initialLargeBlobArray);
         }
 
@@ -226,6 +229,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(serializedLargeBlobArray));
             }
+
             byte[] encodedArray = serializedLargeBlobArray.Encode();
 
             byte[] token = new byte[MaximumAuthTokenLength];
@@ -233,7 +237,9 @@ namespace Yubico.YubiKey.Fido2
             {
                 int offset = 0;
                 int remaining = encodedArray.Length;
-                int maxFragmentLength = AuthenticatorInfo.MaximumMessageSize ?? AuthenticatorInfo.DefaultMaximumMessageSize;
+                int maxFragmentLength =
+                    AuthenticatorInfo.MaximumMessageSize ?? AuthenticatorInfo.DefaultMaximumMessageSize;
+
                 maxFragmentLength -= MessageOverhead;
                 int currentLength;
                 bool forceToken = false;
@@ -244,12 +250,16 @@ namespace Yubico.YubiKey.Fido2
                 {
                     ReadOnlyMemory<byte> currentToken = GetAuthToken(
                         forceToken, PinUvAuthTokenPermissions.LargeBlobWrite, null);
+
                     currentToken.CopyTo(token.AsMemory());
 
-                    currentLength = remaining >= maxFragmentLength ? maxFragmentLength : remaining;
+                    currentLength = remaining >= maxFragmentLength
+                        ? maxFragmentLength
+                        : remaining;
 
                     byte[] dataToAuth = BuildDataToAuth(encodedArray, offset, currentLength, digester);
-                    byte[] pinUvAuthParam = AuthProtocol.AuthenticateUsingPinToken(token, 0, currentToken.Length, dataToAuth);
+                    byte[] pinUvAuthParam = AuthProtocol.AuthenticateUsingPinToken(
+                        token, 0, currentToken.Length, dataToAuth);
 
                     var command = new SetLargeBlobCommand(
                         new ReadOnlyMemory<byte>(encodedArray, offset, currentLength),
@@ -257,6 +267,7 @@ namespace Yubico.YubiKey.Fido2
                         encodedArray.Length,
                         pinUvAuthParam,
                         (int)AuthProtocol.Protocol);
+
                     SetLargeBlobResponse response = Connection.SendCommand(command);
                     if (response.Status == ResponseStatus.Success)
                     {
@@ -272,7 +283,8 @@ namespace Yubico.YubiKey.Fido2
                     {
                         throw new Fido2Exception(response.StatusMessage);
                     }
-                } while (remaining > 0);
+                }
+                while (remaining > 0);
             }
             finally
             {

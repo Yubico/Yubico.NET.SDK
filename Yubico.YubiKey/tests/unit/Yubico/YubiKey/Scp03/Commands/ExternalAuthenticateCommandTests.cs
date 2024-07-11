@@ -67,10 +67,12 @@ namespace Yubico.YubiKey.Scp03.Commands
         {
             return new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
         }
+
         private static ExternalAuthenticateCommand GetExternalAuthenticateCommand()
         {
             return new ExternalAuthenticateCommand(GetData());
         }
+
         private static CommandApdu GetExternalAuthenticateCommandApdu()
         {
             return GetExternalAuthenticateCommand().CreateCommandApdu();

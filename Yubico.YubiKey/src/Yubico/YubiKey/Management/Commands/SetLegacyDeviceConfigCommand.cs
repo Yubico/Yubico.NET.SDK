@@ -63,7 +63,6 @@ namespace Yubico.YubiKey.Management.Commands
             };
 
         /// <inheritdoc/>
-        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new YubiKeyResponse(responseApdu);
+        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new YubiKeyResponse(responseApdu);
     }
 }

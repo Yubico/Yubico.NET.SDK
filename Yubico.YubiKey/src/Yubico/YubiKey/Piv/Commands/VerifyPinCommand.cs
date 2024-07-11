@@ -144,15 +144,16 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = PivVerifyInstruction,
-            P2 = (byte)PivSlot.Pin,
-            Data = PivPinUtilities.CopySinglePinWithPadding(_pin),
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = PivVerifyInstruction,
+                P2 = (byte)PivSlot.Pin,
+                Data = PivPinUtilities.CopySinglePinWithPadding(_pin),
+            };
 
         /// <inheritdoc />
         public VerifyPinResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new VerifyPinResponse(responseApdu);
+            new VerifyPinResponse(responseApdu);
     }
 }

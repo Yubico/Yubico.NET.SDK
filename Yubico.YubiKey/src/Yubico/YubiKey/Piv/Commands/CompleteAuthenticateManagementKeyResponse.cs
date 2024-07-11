@@ -48,7 +48,8 @@ namespace Yubico.YubiKey.Piv.Commands
         protected override ResponseStatusPair StatusCodeMap =>
             StatusWord switch
             {
-                SWConstants.ConditionsNotSatisfied => new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivSecurityStatusNotSatisfied),
+                SWConstants.ConditionsNotSatisfied => new ResponseStatusPair(
+                    ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivSecurityStatusNotSatisfied),
                 _ => base.StatusCodeMap,
             };
 
@@ -154,7 +155,8 @@ namespace Yubico.YubiKey.Piv.Commands
                     {
                         if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> responseValue, ResponseTag))
                         {
-                            return MemoryExtensions.SequenceEqual(responseValue.Span, YubiKeyAuthenticationExpectedResponse.Span)
+                            return MemoryExtensions.SequenceEqual(
+                                responseValue.Span, YubiKeyAuthenticationExpectedResponse.Span)
                                 ? AuthenticateManagementKeyResult.MutualFullyAuthenticated
                                 : AuthenticateManagementKeyResult.MutualYubiKeyAuthenticationFailed;
                         }

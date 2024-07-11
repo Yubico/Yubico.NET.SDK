@@ -70,10 +70,12 @@ namespace Yubico.YubiKey.Scp03.Commands
         {
             return new byte[] { 1, 2, 3, 4, 5, 6, 7, 8 };
         }
+
         private static InitializeUpdateCommand GetInitializeUpdateCommand()
         {
             return new InitializeUpdateCommand(0, GetChallenge());
         }
+
         private static CommandApdu GetInitializeUpdateCommandApdu()
         {
             return GetInitializeUpdateCommand().CreateCommandApdu();

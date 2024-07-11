@@ -81,7 +81,8 @@ namespace Yubico.YubiKey.Otp.Commands
         {
             var expectedFirmwareVersion = new FirmwareVersion() { Major = 5, Minor = 3, Patch = 1 };
             byte expectedSequenceNumber = 0x42;
-            var responseApdu = new ResponseApdu(new byte[] {
+            var responseApdu = new ResponseApdu(new byte[]
+            {
                 expectedFirmwareVersion.Major,
                 expectedFirmwareVersion.Minor,
                 expectedFirmwareVersion.Patch,
@@ -89,7 +90,8 @@ namespace Yubico.YubiKey.Otp.Commands
                 0b0001_0101,
                 0x00,
                 0b1001_0000,
-                0x00 });
+                0x00
+            });
             var readStatusResponse = new ReadStatusResponse(responseApdu);
 
             OtpStatus otpStatus = readStatusResponse.GetData();

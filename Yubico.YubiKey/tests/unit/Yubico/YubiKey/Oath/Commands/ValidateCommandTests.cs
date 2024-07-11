@@ -29,7 +29,8 @@ namespace Yubico.YubiKey.Oath.Commands
         const byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
         const byte sw2 = unchecked((byte)SWConstants.Success);
 
-        private readonly ResponseApdu selectResponseApdu = new ResponseApdu(new byte[] {
+        private readonly ResponseApdu selectResponseApdu = new ResponseApdu(new byte[]
+        {
             0x79, 0x03, 0x05, 0x02, 0x04, 0x71, 0x08, 0xC0, 0xE3, 0xAF,
             0x27, 0xCC, 0x7A, 0x20, 0xEE, 0x74, 0x08, 0xF1, 0x03, 0xDA,
             0x89, 0x58, 0xE4, 0x40, 0x85, 0x7B, 0x01, 0x01, sw1, sw2

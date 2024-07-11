@@ -273,9 +273,10 @@ namespace Yubico.YubiKey.Cryptography
         /// <returns>
         /// <c>True</c> if the method is able to parse, <c>false</c> otherwise.
         /// </returns>
-        public static bool TryParsePkcs1Verify(ReadOnlySpan<byte> formattedSignature,
-                                               out int digestAlgorithm,
-                                               out byte[] digest)
+        public static bool TryParsePkcs1Verify(
+            ReadOnlySpan<byte> formattedSignature,
+            out int digestAlgorithm,
+            out byte[] digest)
         {
             digestAlgorithm = 0;
             digest = Array.Empty<byte>();
@@ -674,11 +675,12 @@ namespace Yubico.YubiKey.Cryptography
         /// <returns>
         /// <c>True</c> if the method is able to parse, <c>false</c> otherwise.
         /// </returns>
-        public static bool TryParsePkcs1Pss(ReadOnlySpan<byte> formattedSignature,
-                                            ReadOnlySpan<byte> digest,
-                                            int digestAlgorithm,
-                                            out byte[] mPrimeAndH,
-                                            out bool isVerified)
+        public static bool TryParsePkcs1Pss(
+            ReadOnlySpan<byte> formattedSignature,
+            ReadOnlySpan<byte> digest,
+            int digestAlgorithm,
+            out byte[] mPrimeAndH,
+            out bool isVerified)
         {
             mPrimeAndH = Array.Empty<byte>();
             isVerified = false;
@@ -1231,9 +1233,10 @@ namespace Yubico.YubiKey.Cryptography
         /// <c>True</c> if the method is able to parse, <c>false</c> otherwise.
         /// </returns>
         [MethodImpl(MethodImplOptions.NoInlining | MethodImplOptions.NoOptimization)]
-        public static bool TryParsePkcs1Oaep(ReadOnlySpan<byte> formattedData,
-                                             int digestAlgorithm,
-                                             out byte[] outputData)
+        public static bool TryParsePkcs1Oaep(
+            ReadOnlySpan<byte> formattedData,
+            int digestAlgorithm,
+            out byte[] outputData)
         {
             outputData = Array.Empty<byte>();
 
@@ -1419,12 +1422,13 @@ namespace Yubico.YubiKey.Cryptography
         // If this is Nested, set the output arg newReader to the newly-created
         // TlvReader. If this is Value, set the output arg value to the new
         // ReadOnlyMemory<byte>.
-        private static bool TryReadDer(bool isValid,
-                                       int readType,
-                                       int expectedTag,
-                                       TlvReader reader,
-                                       out TlvReader newReader,
-                                       out ReadOnlyMemory<byte> value)
+        private static bool TryReadDer(
+            bool isValid,
+            int readType,
+            int expectedTag,
+            TlvReader reader,
+            out TlvReader newReader,
+            out ReadOnlyMemory<byte> value)
         {
             value = ReadOnlyMemory<byte>.Empty;
             newReader = new TlvReader(value);
@@ -1462,11 +1466,12 @@ namespace Yubico.YubiKey.Cryptography
         // Otherwise, make sure the OID is one we support, and if it is, make
         // sure the params are what we support, and make sure the message digest
         // is the correct length.
-        private static bool TryParseOid(bool isValid,
-                                        ReadOnlyMemory<byte> oid,
-                                        ReadOnlyMemory<byte> oidParams,
-                                        ReadOnlyMemory<byte> digest,
-                                        out int algorithm)
+        private static bool TryParseOid(
+            bool isValid,
+            ReadOnlyMemory<byte> oid,
+            ReadOnlyMemory<byte> oidParams,
+            ReadOnlyMemory<byte> digest,
+            out int algorithm)
         {
             algorithm = 0;
             int digestLength = Sha1Length;
@@ -1553,13 +1558,14 @@ namespace Yubico.YubiKey.Cryptography
         // on the number of iterations as 13. Hence, we know we will never need a
         // counter of
         //   00 00 01 00
-        private static void PerformMgf1(byte[] seed,
-                                        int offsetSeed,
-                                        int seedLength,
-                                        byte[] target,
-                                        int offsetTarget,
-                                        int targetLength,
-                                        HashAlgorithm digester)
+        private static void PerformMgf1(
+            byte[] seed,
+            int offsetSeed,
+            int seedLength,
+            byte[] target,
+            int offsetTarget,
+            int targetLength,
+            HashAlgorithm digester)
         {
             int bytesRemaining = targetLength;
             int offset = offsetTarget;

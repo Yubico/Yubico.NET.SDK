@@ -45,7 +45,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteAdminData_Read_NotEmpty(StandardTestDevice testDeviceType)
         {
-            byte[] salt = {
+            byte[] salt =
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             };
@@ -82,7 +83,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteAdminData_Read_Correct(StandardTestDevice testDeviceType)
         {
-            byte[] salt = {
+            byte[] salt =
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
             };

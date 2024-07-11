@@ -49,10 +49,12 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        protected override ResponseStatusPair StatusCodeMap => CtapStatus switch
-        {
-            CtapStatus.InvalidParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseFunctionNotSupported),
-            _ => base.StatusCodeMap,
-        };
+        protected override ResponseStatusPair StatusCodeMap =>
+            CtapStatus switch
+            {
+                CtapStatus.InvalidParameter => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseFunctionNotSupported),
+                _ => base.StatusCodeMap,
+            };
     }
 }

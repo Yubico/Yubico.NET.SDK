@@ -72,7 +72,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// <param name="rmacKey">
         /// Sets <see cref="RmacKey"/>.
         /// </param>
-        public SessionKeys(ReadOnlyMemory<byte> encryptionKey, ReadOnlyMemory<byte> macKey, ReadOnlyMemory<byte> rmacKey)
+        public SessionKeys(
+            ReadOnlyMemory<byte> encryptionKey,
+            ReadOnlyMemory<byte> macKey,
+            ReadOnlyMemory<byte> rmacKey)
         {
             EncryptionKey = encryptionKey;
             MacKey = macKey;

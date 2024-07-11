@@ -134,12 +134,16 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// The <c>pinProtocol</c> is in a state indicating <c>Encapsulate</c>
         /// has not executed.
         /// </exception>
-        public ChangePinCommand(PinUvAuthProtocolBase pinProtocol, ReadOnlyMemory<byte> currentPin, ReadOnlyMemory<byte> newPin)
+        public ChangePinCommand(
+            PinUvAuthProtocolBase pinProtocol,
+            ReadOnlyMemory<byte> currentPin,
+            ReadOnlyMemory<byte> newPin)
         {
             if (pinProtocol is null)
             {
                 throw new ArgumentNullException(nameof(pinProtocol));
             }
+
             if (pinProtocol.PlatformPublicKey is null)
             {
                 throw new InvalidOperationException(
@@ -147,6 +151,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidCallOrder));
             }
+
             if (currentPin.Length > MaximumPinLength || newPin.Length > MaximumPinLength)
             {
                 throw new ArgumentException(
@@ -190,4 +195,3 @@ namespace Yubico.YubiKey.Fido2.Commands
             new ChangePinResponse(responseApdu);
     }
 }
-

@@ -23,6 +23,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
     public class SessionCredentialTests
     {
         #region DeleteCredential
+
         [Fact]
         public void AddCredential_DefaultTestCred_AppContainsOneCred()
         {
@@ -170,9 +171,11 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<InvalidOperationException>(tryDeleteCred);
             }
         }
+
         #endregion
 
         #region AddCredential
+
         [Fact]
         public void TryAddCredentialKeyCollector_CorrectMgmtKey_AppContainsNewCred()
         {
@@ -298,6 +301,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<InvalidOperationException>(tryAddCred);
             }
         }
+
         #endregion
     }
 }

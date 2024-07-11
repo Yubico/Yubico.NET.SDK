@@ -25,7 +25,9 @@ namespace Yubico.YubiKey.Cryptography
         private static byte[] GetKey() => Hex.HexToBytes("01020304050607080102030405060708");
         private static byte[] GetInput() => Hex.HexToBytes("01010101010101010101010101010101");
         private static byte[] GetShortInput() => Hex.HexToBytes("AAFA4DAC615236");
-        private static byte[] GetLongInput() => Hex.HexToBytes("00000000000000000000000600008001360CB43F4301B894CAAFA4DAC615236A");
+
+        private static byte[] GetLongInput() =>
+            Hex.HexToBytes("00000000000000000000000600008001360CB43F4301B894CAAFA4DAC615236A");
 
         [Fact]
         public void AesCmac_GivenNullKey_ThrowsArgumentNullException()
@@ -45,7 +47,8 @@ namespace Yubico.YubiKey.Cryptography
             byte[] cmac = new byte[16];
 
             // Act
-            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            using ICmacPrimitives cmacObj =
+                CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
             cmacObj.CmacInit(key);
             cmacObj.CmacUpdate(input);
             cmacObj.CmacFinal(cmac);
@@ -63,7 +66,8 @@ namespace Yubico.YubiKey.Cryptography
             byte[] cmac = new byte[16];
 
             // Act
-            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            using ICmacPrimitives cmacObj =
+                CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
             cmacObj.CmacInit(key);
             cmacObj.CmacUpdate(input);
             cmacObj.CmacFinal(cmac);
@@ -81,7 +85,8 @@ namespace Yubico.YubiKey.Cryptography
             byte[] cmac = new byte[16];
 
             // Act
-            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            using ICmacPrimitives cmacObj =
+                CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
             cmacObj.CmacInit(key);
             cmacObj.CmacUpdate(input);
             cmacObj.CmacFinal(cmac);

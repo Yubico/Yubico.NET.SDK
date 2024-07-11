@@ -57,10 +57,12 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 throw new ArgumentNullException(nameof(pivSession));
             }
+
             if (pivPublicKey is null)
             {
                 throw new ArgumentNullException(nameof(pivPublicKey));
             }
+
             if (!PivSlot.IsValidSlotNumberForSigning(slotNumber))
             {
                 throw new ArgumentException(
@@ -78,8 +80,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
 
             if (_algorithm.IsRsa())
             {
-                RSASignaturePadding paddingScheme = rsaPaddingMode == RSASignaturePaddingMode.Pss ?
-                    RSASignaturePadding.Pss : RSASignaturePadding.Pkcs1;
+                RSASignaturePadding paddingScheme = rsaPaddingMode == RSASignaturePaddingMode.Pss
+                    ? RSASignaturePadding.Pss
+                    : RSASignaturePadding.Pkcs1;
                 _defaultGenerator = X509SignatureGenerator.CreateForRSA((RSA)dotNetPublicKey, paddingScheme);
             }
             else if (_algorithm.IsEcc())
@@ -140,9 +143,9 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 "SHA384" => CryptographyProviders.Sha384Creator(),
                 "SHA512" => CryptographyProviders.Sha512Creator(),
                 _ => throw new ArgumentException(
-                         string.Format(
-                             CultureInfo.CurrentCulture,
-                             InvalidAlgorithmMessage)),
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        InvalidAlgorithmMessage)),
             };
 
             // If the algorithm is P-256, then make sure the digest is exactly 32

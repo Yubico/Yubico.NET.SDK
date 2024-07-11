@@ -50,7 +50,8 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 Console.WriteLine("Device arrived!");
 
                 using IDisposable? transaction = connection.BeginTransaction(out bool cardWasReset);
-                _ = connection.Transmit(new SelectApplicationCommand(YubiKeyApplication.Management).CreateCommandApdu());
+                _ = connection.Transmit(new SelectApplicationCommand(YubiKeyApplication.Management)
+                    .CreateCommandApdu());
             };
             listener.Removed += (sender, args) => Console.WriteLine("Device removed!");
             Console.WriteLine("Subscribed");

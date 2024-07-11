@@ -120,10 +120,19 @@ namespace Yubico.YubiKey
 
             // Valid UTF-8
             Assert.Null(DeviceInfoFor(partNumberTag).PartNumber);
-            Assert.Equal("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=+-", DeviceInfoFor(partNumberTag, FromHex("6162636465666768696A6B6C6D6E6F707172737475767778797A4142434445464748494A4B4C4D4E4F505152535455565758595A303132333435363738395F3D2B2D")).PartNumber);
-            Assert.Equal("ÖÄÅöäåěščřžýáíúůĚŠČŘŽÝÁÍÚŮ", DeviceInfoFor(partNumberTag, FromHex("C396C384C385C3B6C3A4C3A5C49BC5A1C48DC599C5BEC3BDC3A1C3ADC3BAC5AFC49AC5A0C48CC598C5BDC39DC381C38DC39AC5AE")).PartNumber);
+            Assert.Equal("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_=+-",
+                DeviceInfoFor(partNumberTag,
+                        FromHex(
+                            "6162636465666768696A6B6C6D6E6F707172737475767778797A4142434445464748494A4B4C4D4E4F505152535455565758595A303132333435363738395F3D2B2D"))
+                    .PartNumber);
+            Assert.Equal("ÖÄÅöäåěščřžýáíúůĚŠČŘŽÝÁÍÚŮ",
+                DeviceInfoFor(partNumberTag,
+                        FromHex(
+                            "C396C384C385C3B6C3A4C3A5C49BC5A1C48DC599C5BEC3BDC3A1C3ADC3BAC5AFC49AC5A0C48CC598C5BDC39DC381C38DC39AC5AE"))
+                    .PartNumber);
             Assert.Equal("😀", DeviceInfoFor(partNumberTag, FromHex("F09F9880")).PartNumber);
-            Assert.Equal("0123456789ABCDEF", DeviceInfoFor(partNumberTag, FromHex("30313233343536373839414243444546")).PartNumber);
+            Assert.Equal("0123456789ABCDEF",
+                DeviceInfoFor(partNumberTag, FromHex("30313233343536373839414243444546")).PartNumber);
 
             // Invalid UTF-8
             Assert.Null(DeviceInfoFor(partNumberTag, FromHex("c328")).PartNumber);

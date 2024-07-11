@@ -52,12 +52,14 @@ Actual:   0*/
                 fido2Session.KeyCollector = LocalKeyCollector;
 
                 IReadOnlyList<RelyingParty> rpList = fido2Session.EnumerateRelyingParties();
-                Assert.Equal(2, rpList.Count); //Failing test  Yubico.YubiKey.Fido2.Ctap2DataException: The FIDO2 info returned is invalid.
+                Assert.Equal(2,
+                    rpList.Count); //Failing test  Yubico.YubiKey.Fido2.Ctap2DataException: The FIDO2 info returned is invalid.
             }
         }
 
         [Fact]
-        public void EnumerateCreds_Succeeds() // Failing test, Yubico.YubiKey.Fido2.Ctap2DataException: The FIDO2 info returned is invalid.
+        public void
+            EnumerateCreds_Succeeds() // Failing test, Yubico.YubiKey.Fido2.Ctap2DataException: The FIDO2 info returned is invalid.
         {
             using (var fido2Session = new Fido2Session(Device))
             {

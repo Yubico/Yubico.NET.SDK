@@ -148,8 +148,10 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </param>
         public SetLargeBlobCommand(
             ReadOnlyMemory<byte> blobData,
-            int offset, int length,
-            ReadOnlyMemory<byte> pinUvAuthParam, int protocol)
+            int offset,
+            int length,
+            ReadOnlyMemory<byte> pinUvAuthParam,
+            int protocol)
         {
             _blobData = blobData.ToArray();
             _offset = offset;
@@ -161,7 +163,10 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <inheritdoc />
         public CommandApdu CreateCommandApdu()
         {
-            int count = _offset == 0 ? CborMapCountInit : CborMapCountUpdate;
+            int count = _offset == 0
+                ? CborMapCountInit
+                : CborMapCountUpdate;
+
             var cborWriter = new CborWriter(CborConformanceMode.Ctap2Canonical, convertIndefiniteLengthEncodings: true);
             cborWriter.WriteStartMap(count);
             cborWriter.WriteInt32(CborKeySet);
@@ -173,6 +178,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 cborWriter.WriteInt32(CborKeyLength);
                 cborWriter.WriteInt32(_length);
             }
+
             cborWriter.WriteInt32(CborKeyAuth);
             cborWriter.WriteByteString(_pinUvAuth);
             cborWriter.WriteInt32(CborKeyProtocol);

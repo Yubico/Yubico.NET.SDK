@@ -132,6 +132,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             ExceptionMessages.InvalidSlot,
                             value));
                 }
+
                 _slotNumber = value;
             }
         }
@@ -157,6 +158,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.InvalidAlgorithm));
                 }
+
                 _algorithm = value;
             }
         }
@@ -256,12 +258,13 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = PivGenerateKeyPairInstruction,
-            P2 = SlotNumber,
-            Data = BuildGenerateKeyPairApduData(),
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = PivGenerateKeyPairInstruction,
+                P2 = SlotNumber,
+                Data = BuildGenerateKeyPairApduData(),
+            };
 
         // Build a byte array that contains the data portion of the APDU.
         // This will build a list that does or does not contain the PIN and
@@ -276,6 +279,7 @@ namespace Yubico.YubiKey.Piv.Commands
                         ExceptionMessages.InvalidSlot,
                         _slotNumber));
             }
+
             if (_algorithm.IsValidAlgorithmForGenerate() == false)
             {
                 throw new InvalidOperationException(
@@ -284,9 +288,11 @@ namespace Yubico.YubiKey.Piv.Commands
                         ExceptionMessages.InvalidAlgorithm));
             }
 
-            byte[] data = {
+            byte[] data =
+            {
                 0xAC, 0x09, 0x80, 0x01, 0x00, 0xAA, 0x01, 0x00, 0xAB, 0x01, 0x00
             };
+
             data[IndexAlgorithmByte] = (byte)Algorithm;
             data[IndexTouchPolicyByte] = (byte)TouchPolicy;
             data[IndexPinPolicyByte] = (byte)PinPolicy;
@@ -299,6 +305,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 length -= PinPolicyCount;
                 valueLength -= PinPolicyCount;
             }
+
             if (TouchPolicy == PivTouchPolicy.Default || TouchPolicy == PivTouchPolicy.None)
             {
                 length -= TouchPolicyCount;
@@ -312,6 +319,6 @@ namespace Yubico.YubiKey.Piv.Commands
 
         /// <inheritdoc />
         public GenerateKeyPairResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new GenerateKeyPairResponse(responseApdu, SlotNumber, Algorithm);
+            new GenerateKeyPairResponse(responseApdu, SlotNumber, Algorithm);
     }
 }

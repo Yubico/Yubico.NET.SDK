@@ -71,12 +71,12 @@ namespace Yubico.YubiKey.Oath.Commands
         /// </returns>
         protected static byte[] CalculateSecret(ReadOnlyMemory<byte> password, ReadOnlyMemory<byte> salt)
         {
-#pragma warning disable CA5379, CA5387 // Do Not Use Weak Key Derivation Function Algorithm
+            #pragma warning disable CA5379, CA5387 // Do Not Use Weak Key Derivation Function Algorithm
             using (var pbkBytes = new Rfc2898DeriveBytes(password.ToArray(), salt.ToArray(), 1000))
             {
                 return pbkBytes.GetBytes(16);
             }
-#pragma warning restore CA5379, CA5387 // Do Not Use Weak Key Derivation Function Algorithm
+            #pragma warning restore CA5379, CA5387 // Do Not Use Weak Key Derivation Function Algorithm
         }
 
         /// <summary>
@@ -87,13 +87,12 @@ namespace Yubico.YubiKey.Oath.Commands
         /// </returns>
         protected static byte[] CalculateResponse(ReadOnlyMemory<byte> secret, ReadOnlyMemory<byte> message)
         {
-#pragma warning disable CA5350 // Do Not Use Weak Cryptographic Algorithms
+            #pragma warning disable CA5350 // Do Not Use Weak Cryptographic Algorithms
             using (var hmacSha1 = new HMACSHA1(secret.ToArray()))
-#pragma warning restore CA5350 // Do Not Use Weak Cryptographic Algorithms
+                #pragma warning restore CA5350 // Do Not Use Weak Cryptographic Algorithms
             {
                 return hmacSha1.ComputeHash(message.ToArray());
             }
         }
-
     }
 }

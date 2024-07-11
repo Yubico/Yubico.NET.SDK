@@ -50,7 +50,8 @@ namespace Yubico.YubiKey.TestApp.Plugins
             using var oathSession = new OathSession(yubiKey);
 
             // Copy URI string from Authenticator Test console and pass here.
-            var uri = new Uri("otpauth://totp/ACME%20Co:john@example.com?secret=23A3DQA6AB6CAQDKWQOHN4HGHBWASHX6&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30");
+            var uri = new Uri(
+                "otpauth://totp/ACME%20Co:john@example.com?secret=23A3DQA6AB6CAQDKWQOHN4HGHBWASHX6&issuer=ACME%20Co&algorithm=SHA1&digits=6&period=30");
             var credential = Credential.ParseUri(uri);
 
             oathSession.AddCredential(credential);

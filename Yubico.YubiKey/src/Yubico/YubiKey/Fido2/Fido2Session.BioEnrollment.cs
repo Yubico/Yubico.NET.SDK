@@ -47,7 +47,9 @@ namespace Yubico.YubiKey.Fido2
 
             var cmd = new GetBioModalityCommand();
             GetBioModalityResponse rsp = Connection.SendCommand(cmd);
-            int modality = rsp.Status == ResponseStatus.Success ? rsp.GetData() : 0;
+            int modality = rsp.Status == ResponseStatus.Success
+                ? rsp.GetData()
+                : 0;
 
             return modality switch
             {
@@ -79,8 +81,9 @@ namespace Yubico.YubiKey.Fido2
 
             var cmd = new GetFingerprintSensorInfoCommand();
             GetFingerprintSensorInfoResponse rsp = Connection.SendCommand(cmd);
-            return rsp.Status == ResponseStatus.Success ?
-                rsp.GetData() : throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
+            return rsp.Status == ResponseStatus.Success
+                ? rsp.GetData()
+                : throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
         }
 
         /// <summary>
@@ -283,6 +286,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 Request = KeyEntryRequest.EnrollFingerprint,
             };
+
             using var fingerprintTask = new TouchFingerprintTask(
                 keyCollector,
                 keyEntryData,
@@ -295,7 +299,10 @@ namespace Yubico.YubiKey.Fido2
                 var beginCmd = new BioEnrollBeginCommand(timeoutMilliseconds, currentToken, AuthProtocol);
                 BioEnrollBeginResponse beginRsp = Connection.SendCommand(beginCmd);
                 var currentRsp = (IYubiKeyResponseWithData<BioEnrollSampleResult>)beginRsp;
-                status = fingerprintTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : beginRsp.CtapStatus;
+                status = fingerprintTask.IsUserCanceled
+                    ? CtapStatus.KeepAliveCancel
+                    : beginRsp.CtapStatus;
+
                 generalErrorMsg = beginRsp.StatusMessage;
 
                 while (status == CtapStatus.Ok)
@@ -314,15 +321,21 @@ namespace Yubico.YubiKey.Fido2
                         timeoutMilliseconds,
                         currentToken,
                         AuthProtocol);
+
                     BioEnrollNextSampleResponse nextRsp = Connection.SendCommand(nextCmd);
                     currentRsp = (IYubiKeyResponseWithData<BioEnrollSampleResult>)nextRsp;
-                    status = fingerprintTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : nextRsp.CtapStatus;
+                    status = fingerprintTask.IsUserCanceled
+                        ? CtapStatus.KeepAliveCancel
+                        : nextRsp.CtapStatus;
+
                     generalErrorMsg = nextRsp.StatusMessage;
                 }
 
                 if (status == CtapStatus.Ok && !string.IsNullOrEmpty(returnName))
                 {
-                    var nameCmd = new BioEnrollSetFriendlyNameCommand(templateId, returnName, currentToken, AuthProtocol);
+                    var nameCmd = new BioEnrollSetFriendlyNameCommand(
+                        templateId, returnName, currentToken, AuthProtocol);
+
                     Fido2Response nameRsp = Connection.SendCommand(nameCmd);
 
                     if (nameRsp.Status != ResponseStatus.Success)

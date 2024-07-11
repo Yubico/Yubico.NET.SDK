@@ -54,7 +54,6 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </summary>
         public MoveKeyCommand()
         {
-
         }
 
         /// <summary>
@@ -88,9 +87,10 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             if (sourceSlot == destinationSlot)
             {
-                throw new InvalidOperationException(string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.InvalidSlotsSameSourceAndDestinationSlotsCannotBeTheSame));
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidSlotsSameSourceAndDestinationSlotsCannotBeTheSame));
             }
 
             ValidateSlot(sourceSlot);

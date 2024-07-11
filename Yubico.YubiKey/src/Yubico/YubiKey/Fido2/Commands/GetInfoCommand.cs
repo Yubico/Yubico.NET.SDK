@@ -54,7 +54,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public GetInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetInfoResponse(responseApdu);
+        public GetInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) => new GetInfoResponse(responseApdu);
     }
 }

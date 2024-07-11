@@ -67,10 +67,9 @@ namespace Yubico.YubiKey.Otp
         /// <exception cref="ArgumentException">
         /// Thrown if the length exceeds <see cref="MaxAccessCodeLength"/>
         /// </exception>
-#pragma warning disable CA2225 // Justification: Not necessary to have the expected named alternative method
-        public static explicit operator SlotAccessCode(byte[] bytes) =>
-            new SlotAccessCode(bytes);
-#pragma warning restore CA2225
+        #pragma warning disable CA2225 // Justification: Not necessary to have the expected named alternative method
+        public static explicit operator SlotAccessCode(byte[] bytes) => new SlotAccessCode(bytes);
+        #pragma warning restore CA2225
         /// <summary>
         /// Constant giving a reference to the maximum length of an access code.
         /// </summary>
@@ -83,19 +82,24 @@ namespace Yubico.YubiKey.Otp
         // exception.
 
         private static byte[] GetAccessCode(byte[] code) =>
+
             // Is the code too short?
             code.Length < SlotConfigureBase.AccessCodeLength
-            // If yes, add bytes to the end.
-            ? code.Concat(new byte[SlotConfigureBase.AccessCodeLength - code.Length]).ToArray()
-            // If not, is it too long?
-            : code.Length > SlotConfigureBase.AccessCodeLength
-                // If yes, throw an exception.
-                ? throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.AccessCodeTooLong,
-                        SlotConfigureBase.AccessCodeLength))
-                // Otherwise, we're all set.
-                : code;
+
+                // If yes, add bytes to the end.
+                ? code.Concat(new byte[SlotConfigureBase.AccessCodeLength - code.Length]).ToArray()
+
+                // If not, is it too long?
+                : code.Length > SlotConfigureBase.AccessCodeLength
+
+                    // If yes, throw an exception.
+                    ? throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.AccessCodeTooLong,
+                            SlotConfigureBase.AccessCodeLength))
+
+                    // Otherwise, we're all set.
+                    : code;
     }
 }

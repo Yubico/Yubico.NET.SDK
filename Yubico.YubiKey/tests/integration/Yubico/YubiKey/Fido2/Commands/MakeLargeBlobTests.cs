@@ -56,7 +56,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         [SkippableFact(typeof(DeviceNotFoundException))]
         public void SetLargeBlob_Succeeds()
         {
-            byte[] dataToStore = {
+            byte[] dataToStore =
+            {
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48, 0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F, 0x50,
                 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58
             };
@@ -118,6 +119,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             {
                 dataToAuth[index] = 0xff;
             }
+
             dataToAuth[index] = 0x0C;
             index++;
             dataToAuth[index] = 0x00;

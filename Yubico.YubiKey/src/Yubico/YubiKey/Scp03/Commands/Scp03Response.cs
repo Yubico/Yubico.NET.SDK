@@ -23,14 +23,14 @@ namespace Yubico.YubiKey.Scp03.Commands
         public Scp03Response(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
 
-        public virtual new ResponseStatus Status => StatusWord switch
-        {
-            SWConstants.Success => ResponseStatus.Success,
-            _ => ResponseStatus.Failed
-        };
+        public virtual new ResponseStatus Status =>
+            StatusWord switch
+            {
+                SWConstants.Success => ResponseStatus.Success,
+                _ => ResponseStatus.Failed
+            };
 
         public virtual void ThrowIfFailed()
         {

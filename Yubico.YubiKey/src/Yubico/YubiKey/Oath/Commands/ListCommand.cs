@@ -42,13 +42,13 @@ namespace Yubico.YubiKey.Oath.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = ListInstruction,
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Ins = ListInstruction,
+            };
 
         /// <inheritdoc />
-        public ListResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ListResponse(responseApdu);
+        public ListResponse CreateResponseForApdu(ResponseApdu responseApdu) => new ListResponse(responseApdu);
     }
 }

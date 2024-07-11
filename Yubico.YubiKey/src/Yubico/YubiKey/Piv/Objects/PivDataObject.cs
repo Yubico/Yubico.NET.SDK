@@ -155,8 +155,8 @@ namespace Yubico.YubiKey.Piv.Objects
             if (dataTag != GetDefinedDataTag())
             {
                 if (dataTag < MinVendorDataTag || dataTag > MaxVendorDataTag
-                   || (dataTag >= MinPivDataTag && dataTag <= MaxPivDataTag)
-                   || (dataTag >= MinYubicoDataTag && dataTag <= MaxYubicoDataTag))
+                    || (dataTag >= MinPivDataTag && dataTag <= MaxPivDataTag)
+                    || (dataTag >= MinYubicoDataTag && dataTag <= MaxYubicoDataTag))
                 {
                     return false;
                 }

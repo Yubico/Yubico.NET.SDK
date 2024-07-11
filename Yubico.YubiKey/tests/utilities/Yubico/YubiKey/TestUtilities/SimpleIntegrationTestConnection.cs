@@ -58,6 +58,7 @@ namespace Yubico.YubiKey.TestUtilities
                     _serialNumber = null;
                     _connection = null;
                 }
+
                 _disposed = true;
             }
         }

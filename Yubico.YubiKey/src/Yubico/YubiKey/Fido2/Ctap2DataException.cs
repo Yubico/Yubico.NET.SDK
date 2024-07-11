@@ -33,7 +33,6 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public Ctap2DataException()
         {
-
         }
 
         /// <summary>
@@ -42,7 +41,6 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="message">The message that describes the error.</param>
         public Ctap2DataException(string message) : base(message)
         {
-
         }
 
         /// <summary>
@@ -52,13 +50,11 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
         public Ctap2DataException(string message, Exception innerException) : base(message, innerException)
         {
-
         }
 
         protected Ctap2DataException(SerializationInfo serializationInfo, StreamingContext streamingContext) :
             base(serializationInfo, streamingContext)
         {
-
         }
     }
 }

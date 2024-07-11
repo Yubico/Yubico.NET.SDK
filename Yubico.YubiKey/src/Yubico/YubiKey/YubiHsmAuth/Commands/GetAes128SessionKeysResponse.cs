@@ -44,7 +44,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// </para>
     /// </remarks>
     public class GetAes128SessionKeysResponse : BaseYubiHsmAuthResponseWithRetries,
-        IYubiKeyResponseWithData<SessionKeys>
+                                                IYubiKeyResponseWithData<SessionKeys>
     {
         private const int encStart = 0;
         private const int macStart = 16;

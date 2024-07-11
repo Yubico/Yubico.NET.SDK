@@ -84,14 +84,14 @@ namespace Yubico.YubiKey.Piv
                     currentValue = _mgmtKey;
                     break;
 
-                    //                case KeyEntryRequest.ChangePivManagementKey:
-                    //                    if (keyEntryData.IsRetry == true)
-                    //                    {
-                    //                        return false;
-                    //                    }
-                    //                    currentValue = CollectMgmtKey();
-                    //                    newValue = CollectMgmtKey();
-                    //                    break;
+                //                case KeyEntryRequest.ChangePivManagementKey:
+                //                    if (keyEntryData.IsRetry == true)
+                //                    {
+                //                        return false;
+                //                    }
+                //                    currentValue = CollectMgmtKey();
+                //                    newValue = CollectMgmtKey();
+                //                    break;
             }
 
             if (newValue is null)

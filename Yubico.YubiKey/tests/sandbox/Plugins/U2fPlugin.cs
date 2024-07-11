@@ -65,6 +65,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                         EchoCommandTestSuite(u2fConnection);
                     }
                 }
+
                 if (_runRegisterTest)
                 {
                     using (IYubiKeyConnection u2fConnection = key.Connect(YubiKeyApplication.FidoU2f))
@@ -87,6 +88,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     }
                 }
             }
+
             return true;
         }
 
@@ -111,7 +113,8 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         private bool _runEchoTest, _runRegisterTest;
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization",
+            "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
         private void EchoCommandTestSuite(IYubiKeyConnection u2fConnection)
         {
             Output.WriteLine("\n\n***TestEchoCommand***");
@@ -165,8 +168,10 @@ namespace Yubico.YubiKey.TestApp.Plugins
             return randBytes;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
-        private bool TestSpanSequenceEqual<T>(ReadOnlySpan<T> span1, ReadOnlySpan<T> span2) where T : System.IComparable<T>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization",
+            "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
+        private bool TestSpanSequenceEqual<T>(ReadOnlySpan<T> span1, ReadOnlySpan<T> span2)
+            where T : System.IComparable<T>
         {
             if (span1.Length != span2.Length)
             {
@@ -188,7 +193,8 @@ namespace Yubico.YubiKey.TestApp.Plugins
             return true;
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization", "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Globalization",
+            "CA1303:Do not pass literals as localized parameters", Justification = "<Pending>")]
         private void PrintContext<T>(ReadOnlySpan<T> span1, ReadOnlySpan<T> span2, int? index, int plusMinusContext = 0)
         {
             int startIndex, endIndex;
@@ -210,11 +216,11 @@ namespace Yubico.YubiKey.TestApp.Plugins
             for (int i = startIndex; i < endIndex; i++)
             {
                 Output.WriteLine
-                    (
-                        $"|{i,7}" +
-                        $"|{(i < span1.Length ? span1[i]?.ToString() : "--"),7}" +
-                        $"|{(i < span2.Length ? span2[i]?.ToString() : "--"),7}|"
-                    );
+                (
+                    $"|{i,7}" +
+                    $"|{(i < span1.Length ? span1[i]?.ToString() : "--"),7}" +
+                    $"|{(i < span2.Length ? span2[i]?.ToString() : "--"),7}|"
+                );
             }
         }
     }

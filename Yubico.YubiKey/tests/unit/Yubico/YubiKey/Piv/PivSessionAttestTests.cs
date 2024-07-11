@@ -92,7 +92,8 @@ namespace Yubico.YubiKey.Piv
             var cert = new X509Certificate2();
 #pragma warning restore SYSLIB0026
             using var pivSession = new PivSession(yubiKey);
-            _ = Assert.Throws<NotSupportedException>(() => pivSession.ReplaceAttestationKeyAndCertificate(privateKey, cert));
+            _ = Assert.Throws<NotSupportedException>(() =>
+                pivSession.ReplaceAttestationKeyAndCertificate(privateKey, cert));
         }
 
         [Fact]
@@ -128,12 +129,14 @@ namespace Yubico.YubiKey.Piv
                 },
                 AvailableUsbCapabilities = YubiKeyCapabilities.Piv
             };
-            var isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out _, out PivPrivateKey privateKey);
+            var isValid =
+                SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out _, out PivPrivateKey privateKey);
             Assert.True(isValid);
 
             using var pivSession = new PivSession(yubiKey);
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<ArgumentNullException>(() => pivSession.ReplaceAttestationKeyAndCertificate(privateKey, null));
+            _ = Assert.Throws<ArgumentNullException>(() =>
+                pivSession.ReplaceAttestationKeyAndCertificate(privateKey, null));
 #pragma warning restore CS8625 // testing a null input.
         }
 
@@ -164,7 +167,8 @@ namespace Yubico.YubiKey.Piv
             var simpleCollector = new SimpleKeyCollector(false);
             pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
 
-            _ = Assert.Throws<ArgumentException>(() => pivSession.ReplaceAttestationKeyAndCertificate(pivPrivateKey, certObj));
+            _ = Assert.Throws<ArgumentException>(() =>
+                pivSession.ReplaceAttestationKeyAndCertificate(pivPrivateKey, certObj));
         }
 
         [Theory]
@@ -196,7 +200,8 @@ namespace Yubico.YubiKey.Piv
             var simpleCollector = new SimpleKeyCollector(false);
             pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
 
-            _ = Assert.Throws<ArgumentException>(() => pivSession.ReplaceAttestationKeyAndCertificate(pivPrivateKey, certObj));
+            _ = Assert.Throws<ArgumentException>(() =>
+                pivSession.ReplaceAttestationKeyAndCertificate(pivPrivateKey, certObj));
         }
 
         [Fact]
@@ -226,7 +231,8 @@ namespace Yubico.YubiKey.Piv
             var simpleCollector = new SimpleKeyCollector(false);
             pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
 
-            _ = Assert.Throws<ArgumentException>(() => pivSession.ReplaceAttestationKeyAndCertificate(pivPrivateKey, certObj));
+            _ = Assert.Throws<ArgumentException>(() =>
+                pivSession.ReplaceAttestationKeyAndCertificate(pivPrivateKey, certObj));
         }
     }
 }

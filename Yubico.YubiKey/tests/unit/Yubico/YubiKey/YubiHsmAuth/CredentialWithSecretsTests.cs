@@ -41,10 +41,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
         private const bool _touchRequired = true;
 
         private SampleCredWithSecrets _sampleCredWithSecrets => new SampleCredWithSecrets(
-                _sampleCredPassword,
-                _expectedKeyType,
-                _label,
-                _touchRequired);
+            _sampleCredPassword,
+            _expectedKeyType,
+            _label,
+            _touchRequired);
 
         [Fact]
         public void Constructor_KeyTypeAes128_ObjectKeyTypeAes128()

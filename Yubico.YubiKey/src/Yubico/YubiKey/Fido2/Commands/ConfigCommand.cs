@@ -239,8 +239,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public ConfigResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ConfigResponse(responseApdu);
+        public ConfigResponse CreateResponseForApdu(ResponseApdu responseApdu) => new ConfigResponse(responseApdu);
 
         // This implements CborHelpers.CborEncodeDelegate.
         private static byte[] WriteEncodedParams(byte[]? encodedParams) => encodedParams ?? Array.Empty<byte>();

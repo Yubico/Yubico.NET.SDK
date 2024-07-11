@@ -26,7 +26,6 @@ namespace Yubico.YubiKey.Otp.Commands
         public OtpResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
     }
 }

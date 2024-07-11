@@ -40,9 +40,8 @@ namespace Yubico.YubiKey.Oath.Commands
         /// The ResponseApdu returned by the YubiKey.
         /// </param>
         public CalculateAllCredentialsResponse(ResponseApdu responseApdu) :
-             base(responseApdu)
+            base(responseApdu)
         {
-
         }
 
         /// <summary>
@@ -168,4 +167,3 @@ namespace Yubico.YubiKey.Oath.Commands
         }
     }
 }
-

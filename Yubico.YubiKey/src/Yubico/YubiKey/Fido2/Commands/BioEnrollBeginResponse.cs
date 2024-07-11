@@ -58,10 +58,12 @@ namespace Yubico.YubiKey.Fido2.Commands
             throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
         }
 
-        protected override ResponseStatusPair StatusCodeMap => CtapStatus switch
-        {
-            CtapStatus.FpDatabaseFull => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseNoMoreSpaceInFile),
-            _ => base.StatusCodeMap,
-        };
+        protected override ResponseStatusPair StatusCodeMap =>
+            CtapStatus switch
+            {
+                CtapStatus.FpDatabaseFull => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseNoMoreSpaceInFile),
+                _ => base.StatusCodeMap,
+            };
     }
 }

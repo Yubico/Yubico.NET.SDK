@@ -139,7 +139,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void ChangeRetryCounts_Succeeds(StandardTestDevice testDeviceType)
         {
-            var mgmtKey = new ReadOnlyMemory<byte>(new byte[] {
+            var mgmtKey = new ReadOnlyMemory<byte>(new byte[]
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
@@ -192,7 +193,8 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(testDevice))
             {
-                bool isValid = pivSession.TryChangePinAndPukRetryCounts(mgmtKey, newPin, 7, 8, out int? retriesRemaining);
+                bool isValid =
+                    pivSession.TryChangePinAndPukRetryCounts(mgmtKey, newPin, 7, 8, out int? retriesRemaining);
                 Assert.True(isValid);
                 Assert.Null(retriesRemaining);
 

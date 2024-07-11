@@ -101,6 +101,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             {
                 throw new ArgumentNullException(nameof(pinProtocol));
             }
+
             if (pinProtocol.PlatformPublicKey is null)
             {
                 throw new InvalidOperationException(

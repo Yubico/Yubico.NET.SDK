@@ -133,6 +133,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             ExceptionMessages.InvalidSlot,
                             value));
                 }
+
                 _slotNumber = value;
             }
         }
@@ -161,8 +162,10 @@ namespace Yubico.YubiKey.Piv.Commands
         /// </value>
         public PivTouchPolicy TouchPolicy { get; set; }
 
-        private readonly byte[] _policy = new byte[maximumPolicyLength] {
-            0xAA, 0x01, 0x00, 0xAB, 0x01, 0x00 };
+        private readonly byte[] _policy = new byte[maximumPolicyLength]
+        {
+            0xAA, 0x01, 0x00, 0xAB, 0x01, 0x00
+        };
 
         // The default constructor explicitly defined. We don't want it to be
         // used.
@@ -223,6 +226,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 throw new ArgumentNullException(nameof(privateKey));
             }
+
             if (privateKey.EncodedPrivateKey.IsEmpty)
             {
                 throw new ArgumentException(
@@ -276,6 +280,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 throw new ArgumentNullException(nameof(privateKey));
             }
+
             if (privateKey.EncodedPrivateKey.IsEmpty)
             {
                 throw new ArgumentException(
@@ -292,13 +297,14 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = PivImportAsymmetricInstruction,
-            P1 = (byte)Algorithm,
-            P2 = SlotNumber,
-            Data = BuildImportAsymmetricApduData(),
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = PivImportAsymmetricInstruction,
+                P1 = (byte)Algorithm,
+                P2 = SlotNumber,
+                Data = BuildImportAsymmetricApduData(),
+            };
 
         // Build a new byte array containing the key data and policy data.
         // Build it in such a way that there will be no "reallocation".
@@ -329,6 +335,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     Array.Copy(_policy, pinPolicyCount, apduData, offset, touchPolicyCount);
                     length -= pinPolicyCount;
                 }
+
                 if (TouchPolicy == PivTouchPolicy.Default || TouchPolicy == PivTouchPolicy.None)
                 {
                     length -= touchPolicyCount;

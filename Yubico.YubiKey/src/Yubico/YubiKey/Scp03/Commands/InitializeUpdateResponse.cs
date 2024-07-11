@@ -41,7 +41,8 @@ namespace Yubico.YubiKey.Scp03.Commands
 
             if (responseApdu.Data.Length != 29)
             {
-                throw new ArgumentException(ExceptionMessages.IncorrectInitializeUpdateResponseData, nameof(responseApdu));
+                throw new ArgumentException(
+                    ExceptionMessages.IncorrectInitializeUpdateResponseData, nameof(responseApdu));
             }
 
             ReadOnlySpan<byte> responseData = responseApdu.Data.Span;

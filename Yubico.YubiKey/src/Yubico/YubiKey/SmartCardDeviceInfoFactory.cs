@@ -23,8 +23,7 @@ namespace Yubico.YubiKey
 {
     internal static class SmartCardDeviceInfoFactory
     {
-        public static YubiKeyDeviceInfo GetDeviceInfo(
-            ISmartCardDevice device)
+        public static YubiKeyDeviceInfo GetDeviceInfo(ISmartCardDevice device)
         {
             Logger log = Log.GetLogger();
 

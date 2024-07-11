@@ -86,13 +86,20 @@ namespace Yubico.YubiKey.Piv.Commands
                 {
                     case short statusWord when PivPinUtilities.HasRetryCount(statusWord):
                         int remainingRetries = PivPinUtilities.GetRetriesRemaining(statusWord);
-                        return new ResponseStatusPair(ResponseStatus.AuthenticationRequired, string.Format(CultureInfo.CurrentCulture, ResponseStatusMessages.PivPinPukFailedWithRetries, remainingRetries));
+                        return new ResponseStatusPair(
+                            ResponseStatus.AuthenticationRequired,
+                            string.Format(
+                                CultureInfo.CurrentCulture, ResponseStatusMessages.PivPinPukFailedWithRetries,
+                                remainingRetries));
 
                     case SWConstants.AuthenticationMethodBlocked:
-                        return new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivPinPukBlocked);
+                        return new ResponseStatusPair(
+                            ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivPinPukBlocked);
 
                     case SWConstants.SecurityStatusNotSatisfied:
-                        return new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivSecurityStatusNotSatisfied);
+                        return new ResponseStatusPair(
+                            ResponseStatus.AuthenticationRequired,
+                            ResponseStatusMessages.PivSecurityStatusNotSatisfied);
 
                     default:
                         return base.StatusCodeMap;
@@ -150,7 +157,9 @@ namespace Yubico.YubiKey.Piv.Commands
         /// Thrown if <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>
         /// or <see cref="ResponseStatus.AuthenticationRequired"/>.
         /// </exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0046:Convert to conditional expression", Justification = "Readability, avoiding nested conditionals.")]
+        [System.Diagnostics.CodeAnalysis.SuppressMessage(
+            "Style", "IDE0046:Convert to conditional expression",
+            Justification = "Readability, avoiding nested conditionals.")]
         public int? GetData()
         {
             if (Status != ResponseStatus.Success && Status != ResponseStatus.AuthenticationRequired)

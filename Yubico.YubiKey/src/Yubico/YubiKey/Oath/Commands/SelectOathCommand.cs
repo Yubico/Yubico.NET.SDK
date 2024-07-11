@@ -30,6 +30,6 @@ namespace Yubico.YubiKey.Oath.Commands
 
         /// <inheritdoc />
         public override SelectOathResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-                new SelectOathResponse(responseApdu);
+            new SelectOathResponse(responseApdu);
     }
 }

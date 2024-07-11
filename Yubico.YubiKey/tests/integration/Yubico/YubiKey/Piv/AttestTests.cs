@@ -40,7 +40,8 @@ namespace Yubico.YubiKey.Piv
                 isValid = PivSupport.ResetPiv(pivSession);
                 Assert.True(isValid);
 
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.CreateAttestationStatement(PivSlot.Authentication));
+                _ = Assert.Throws<InvalidOperationException>(() =>
+                    pivSession.CreateAttestationStatement(PivSlot.Authentication));
             }
         }
 
@@ -68,7 +69,8 @@ namespace Yubico.YubiKey.Piv
                 isValid = PivSupport.ImportKey(pivSession, PivSlot.Authentication);
                 Assert.True(isValid);
 
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.CreateAttestationStatement(PivSlot.Authentication));
+                _ = Assert.Throws<InvalidOperationException>(() =>
+                    pivSession.CreateAttestationStatement(PivSlot.Authentication));
             }
         }
 
@@ -80,7 +82,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384, StandardTestDevice.Fw5)]
         public void AttestGenerated(PivAlgorithm algorithm, StandardTestDevice testDeviceType)
         {
-            byte[] slotNumbers = {
+            byte[] slotNumbers =
+            {
                 0x9A, 0x9C, 0x9D, 0x9E,
                 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8A, 0x8B, 0x8C, 0x8D, 0x8E, 0x8F,
                 0x90, 0x91, 0x92, 0x93, 0x94, 0x95
@@ -238,7 +241,8 @@ namespace Yubico.YubiKey.Piv
 
         // Load a key and cert, but use the commands, so that the checks aren't
         // made and whatever key/cert pair is given is actually loaded.
-        private static bool LoadAttestationPairCommands(PivPrivateKey privateKey, X509Certificate certObj, IYubiKeyDevice testDevice)
+        private static bool LoadAttestationPairCommands(
+            PivPrivateKey privateKey, X509Certificate certObj, IYubiKeyDevice testDevice)
         {
             if (testDevice is null)
             {
@@ -260,6 +264,7 @@ namespace Yubico.YubiKey.Piv
                     tlvWriter.WriteByte(0x71, 0);
                     tlvWriter.WriteValue(0xfe, null);
                 }
+
                 byte[] encodedCert = tlvWriter.Encode();
 
                 var putCommand = new PutDataCommand(0x5FFF01, encodedCert);
@@ -283,7 +288,8 @@ namespace Yubico.YubiKey.Piv
                 var collectorObj = new Simple39KeyCollector();
                 pivSession.KeyCollector = collectorObj.Simple39KeyCollectorDelegate;
 
-                if (SampleKeyPairs.GetKeysAndCertPem(algorithm, isValidCert, out string certPem, out _, out string privateKeyPem) == false)
+                if (SampleKeyPairs.GetKeysAndCertPem(algorithm, isValidCert, out string certPem, out _,
+                        out string privateKeyPem) == false)
                 {
                     return false;
                 }

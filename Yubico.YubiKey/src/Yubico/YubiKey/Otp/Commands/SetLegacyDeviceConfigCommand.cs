@@ -61,7 +61,6 @@ namespace Yubico.YubiKey.Otp.Commands
             };
 
         /// <inheritdoc />
-        public OtpResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ReadStatusResponse(responseApdu);
+        public OtpResponse CreateResponseForApdu(ResponseApdu responseApdu) => new ReadStatusResponse(responseApdu);
     }
 }

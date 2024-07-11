@@ -183,7 +183,8 @@ namespace Yubico.YubiKey.Cryptography
             }
 
             ReadOnlySpan<byte> pubPoint = pivPublicKey is PivEccPublicKey eccKey
-                ? eccKey.PublicPoint : ReadOnlySpan<byte>.Empty;
+                ? eccKey.PublicPoint
+                : ReadOnlySpan<byte>.Empty;
 
             ECDsa = ConvertPublicKey(pubPoint.ToArray());
         }
@@ -353,7 +354,10 @@ namespace Yubico.YubiKey.Cryptography
             byte[] signature,
             bool isStandardSignature = true)
         {
-            byte[] sig = isStandardSignature ? ConvertSignature(signature, ECDsa.KeySize) : signature;
+            byte[] sig = isStandardSignature
+                ? ConvertSignature(signature, ECDsa.KeySize)
+                : signature;
+
             return ECDsa.VerifyHash(digestToVerify, sig);
         }
 
@@ -420,7 +424,6 @@ namespace Yubico.YubiKey.Cryptography
 
             throw new ArgumentException(ExceptionMessages.UnsupportedAlgorithm);
         }
-
 
         // Convert the signature from standard to the concatenation of r and s.
         private static byte[] ConvertSignature(byte[] signature, int publicKeyBitSize)

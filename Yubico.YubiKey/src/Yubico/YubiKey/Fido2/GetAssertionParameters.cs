@@ -195,8 +195,9 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="ArgumentNullException">
         /// The <c>credentialId</c> arg is null.
         /// </exception>
-        public void AllowCredential(CredentialId credentialId) => _allowList =
-            ParameterHelpers.AddToList<CredentialId>(credentialId, _allowList);
+        public void AllowCredential(CredentialId credentialId) =>
+            _allowList =
+                ParameterHelpers.AddToList<CredentialId>(credentialId, _allowList);
 
         /// <summary>
         /// Add an entry to the extensions list. Once an entry is added to the
@@ -224,8 +225,9 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="ArgumentNullException">
         /// The <c>extensionKey</c> or <c>encodedValue</c> arg is null.
         /// </exception>
-        public void AddExtension(string extensionKey, byte[] encodedValue) => _extensions =
-            ParameterHelpers.AddKeyValue<byte[]>(extensionKey, encodedValue, _extensions);
+        public void AddExtension(string extensionKey, byte[] encodedValue) =>
+            _extensions =
+                ParameterHelpers.AddKeyValue<byte[]>(extensionKey, encodedValue, _extensions);
 
         /// <summary>
         /// Add an entry to the list of options. Once an entry is added to the
@@ -249,8 +251,9 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="ArgumentNullException">
         /// The <c>optionKey</c> arg is null.
         /// </exception>
-        public void AddOption(string optionKey, bool optionValue) => _options =
-            ParameterHelpers.AddKeyValue<bool>(optionKey, optionValue, _options);
+        public void AddOption(string optionKey, bool optionValue) =>
+            _options =
+                ParameterHelpers.AddKeyValue<bool>(optionKey, optionValue, _options);
 
         /// <inheritdoc/>
         public byte[] CborEncode()
@@ -266,7 +269,8 @@ namespace Yubico.YubiKey.Fido2
                 .Entry(TagRp, RelyingParty.Id)
                 .Entry(TagClientDataHash, ClientDataHash)
                 .OptionalEntry<IReadOnlyList<ICborEncode>>(TagAllowList, CborHelpers.EncodeArrayOfObjects, AllowList)
-                .OptionalEntry<Dictionary<string, byte[]>>(TagExtensions, ParameterHelpers.EncodeKeyValues<byte[]>, _extensions)
+                .OptionalEntry<Dictionary<string, byte[]>>(
+                    TagExtensions, ParameterHelpers.EncodeKeyValues<byte[]>, _extensions)
                 .OptionalEntry<Dictionary<string, bool>>(TagOptions, ParameterHelpers.EncodeKeyValues<bool>, _options)
                 .OptionalEntry(TagPinUvAuth, PinUvAuthParam)
                 .OptionalEntry(TagProtocol, (int?)Protocol)

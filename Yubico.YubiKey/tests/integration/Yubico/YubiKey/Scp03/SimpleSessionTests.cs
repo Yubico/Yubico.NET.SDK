@@ -37,7 +37,8 @@ namespace Yubico.YubiKey.Scp03
 #pragma warning restore CS0618
 
             using var piv = new PivSession(scp03Device);
-            bool result = piv.TryVerifyPin(new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 }), out _);
+            bool result = piv.TryVerifyPin(new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 }),
+                out _);
             Assert.True(result);
 
             PivMetadata metadata = piv.GetMetadata(PivSlot.Pin)!;
@@ -85,7 +86,8 @@ namespace Yubico.YubiKey.Scp03
 
             using var scp03Keys = new StaticKeys();
 
-            bool isValid = device.TryConnectScp03(YubiKeyApplication.Piv, scp03Keys, out IScp03YubiKeyConnection? connection);
+            bool isValid = device.TryConnectScp03(YubiKeyApplication.Piv, scp03Keys,
+                out IScp03YubiKeyConnection? connection);
             using (connection)
             {
                 Assert.NotNull(connection);

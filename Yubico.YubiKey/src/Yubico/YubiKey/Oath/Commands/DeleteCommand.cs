@@ -87,7 +87,6 @@ namespace Yubico.YubiKey.Oath.Commands
         }
 
         /// <inheritdoc />
-        public DeleteResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new DeleteResponse(responseApdu);
+        public DeleteResponse CreateResponseForApdu(ResponseApdu responseApdu) => new DeleteResponse(responseApdu);
     }
 }

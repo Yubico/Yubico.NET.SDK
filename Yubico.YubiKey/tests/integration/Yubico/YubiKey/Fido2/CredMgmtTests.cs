@@ -84,11 +84,12 @@ namespace Yubico.YubiKey.Fido2
 
                 UserEntity ykUser = ykCredList[0].User;
 
-                Tuple<UserEntity, MakeCredentialData> userInfo = _bioFido2Fixture.MatchUser(rpInfo.RelyingParty, ykUser);
+                Tuple<UserEntity, MakeCredentialData>
+                    userInfo = _bioFido2Fixture.MatchUser(rpInfo.RelyingParty, ykUser);
                 ReadOnlyMemory<byte> targetKey = userInfo.Item2.LargeBlobKey
-                    ?? throw new InvalidOperationException("No matching User.");
+                                                 ?? throw new InvalidOperationException("No matching User.");
                 ReadOnlyMemory<byte> ykLargeBlobKey = ykCredList[0].LargeBlobKey
-                    ?? throw new InvalidOperationException("No matching User.");
+                                                      ?? throw new InvalidOperationException("No matching User.");
 
                 bool isValid = targetKey.Span.SequenceEqual(ykLargeBlobKey.Span);
                 Assert.True(isValid);
@@ -114,7 +115,8 @@ namespace Yubico.YubiKey.Fido2
 
                 fido2Session.DeleteCredential(credList[0].CredentialId);
 
-                credList = fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[2].RelyingParty);
+                credList = fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[2]
+                    .RelyingParty);
                 Assert.NotNull(credList);
                 Assert.True(credList.Count == count - 1);
             }
@@ -142,7 +144,8 @@ namespace Yubico.YubiKey.Fido2
 
                 fido2Session.UpdateUserInfoForCredential(credList[0].CredentialId, newInfo);
 
-                credList = fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[0].RelyingParty);
+                credList = fido2Session.EnumerateCredentialsForRelyingParty(_bioFido2Fixture.RpInfoList[0]
+                    .RelyingParty);
 
                 string displayName = credList[0].User.DisplayName ?? "";
                 Assert.Equal(updatedDisplayName, displayName);

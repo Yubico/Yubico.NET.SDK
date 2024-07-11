@@ -80,9 +80,9 @@ namespace Yubico.YubiKey.Piv.Commands
             }
 
             using Aes aesObject = CryptographyProviders.AesCreator();
-#pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB' per the standard
+            #pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB' per the standard
             aesObject.Mode = CipherMode.ECB;
-#pragma warning restore CA5358
+            #pragma warning restore CA5358
             aesObject.Padding = PaddingMode.None;
 
             byte[] keyData = Array.Empty<byte>();
@@ -90,11 +90,11 @@ namespace Yubico.YubiKey.Piv.Commands
             try
             {
                 keyData = managementKey.ToArray();
-#pragma warning disable CA5401 // Allow null IV because we're in ECB
-                _cryptoTransform = isEncrypting ?
-                    aesObject.CreateEncryptor(keyData, null) :
-                    aesObject.CreateDecryptor(keyData, null);
-#pragma warning restore CA5401
+                #pragma warning disable CA5401 // Allow null IV because we're in ECB
+                _cryptoTransform = isEncrypting
+                    ? aesObject.CreateEncryptor(keyData, null)
+                    : aesObject.CreateDecryptor(keyData, null);
+                #pragma warning restore CA5401
             }
             finally
             {
@@ -103,16 +103,23 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc/>
-        public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
+        public int TransformBlock(
+            byte[] inputBuffer,
+            int inputOffset,
+            int inputCount,
+            byte[] outputBuffer,
+            int outputOffset)
         {
             if (inputBuffer is null)
             {
                 throw new ArgumentNullException(nameof(inputBuffer));
             }
+
             if (outputBuffer is null)
             {
                 throw new ArgumentNullException(nameof(outputBuffer));
             }
+
             if (inputCount == 0 || (inputCount & 7) != 0)
             {
                 throw new ArgumentException(
@@ -120,6 +127,7 @@ namespace Yubico.YubiKey.Piv.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.IncorrectPlaintextLength));
             }
+
             if (inputOffset < 0 || inputBuffer.Length - inputOffset < inputCount ||
                 outputOffset < 0 || outputBuffer.Length - outputOffset < inputCount)
             {
@@ -128,6 +136,7 @@ namespace Yubico.YubiKey.Piv.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidOutputBuffer));
             }
+
             EnsureNotDisposed();
 
             _ = _cryptoTransform.TransformBlock(inputBuffer, inputOffset, inputCount, outputBuffer, outputOffset);
@@ -139,6 +148,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// When the object goes out of scope, this method is called. It will
         /// dispose local objects.
         /// </summary>
+
         // Note that .NET recommends a Dispose method call Dispose(true) and
         // GC.SuppressFinalize(this). The actual disposal is in the
         // Dispose(bool) method.

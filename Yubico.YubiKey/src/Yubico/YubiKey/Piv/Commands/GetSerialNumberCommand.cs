@@ -56,13 +56,14 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = PivGetSerialNumberInstruction,
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = PivGetSerialNumberInstruction,
+            };
 
         /// <inheritdoc />
         public GetSerialNumberResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new GetSerialNumberResponse(responseApdu);
+            new GetSerialNumberResponse(responseApdu);
     }
 }

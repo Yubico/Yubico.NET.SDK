@@ -93,6 +93,7 @@ namespace Yubico.YubiKey.TestUtilities
                     result.Add(Convert.ToByte(matchResults.Value, 16));
                     matchResults = matchResults.NextMatch();
                 }
+
                 return result.ToArray();
             }
 
@@ -125,6 +126,7 @@ namespace Yubico.YubiKey.TestUtilities
                         : word;
                     result.Add(ParseSingleByte(parse));
                 }
+
                 return result.ToArray();
             }
 
@@ -155,6 +157,7 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 return Convert.ToByte(match.Value, 16);
             }
+
             match = Regex.Match(s, @"^[\d]{1,3}");
             if (match.Success)
             {
@@ -163,8 +166,10 @@ namespace Yubico.YubiKey.TestUtilities
                 {
                     throw new ArgumentException($"[{s}] cannot be converted to a byte.");
                 }
+
                 return Convert.ToByte(value);
             }
+
             throw new ArgumentException($"[{s}] cannot be converted to a byte.");
         }
 
@@ -211,6 +216,7 @@ namespace Yubico.YubiKey.TestUtilities
                     return value;
                 }
             }
+
             throw new ArgumentException($"Value [{s}] could not be parsed as type [{typeof(T).Name}].");
         }
     }

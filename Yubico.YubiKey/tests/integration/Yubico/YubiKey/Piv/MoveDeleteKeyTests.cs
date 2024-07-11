@@ -43,7 +43,8 @@ namespace Yubico.YubiKey.Piv
 
             var generatedKeyPair = pivSession.GenerateKeyPair(sourceSlot, expectedAlgorithm, PivPinPolicy.None);
             var metadataForKeyPair = pivSession.GetMetadata(sourceSlot);
-            Assert.Equal(generatedKeyPair.YubiKeyEncodedPublicKey, metadataForKeyPair.PublicKey.YubiKeyEncodedPublicKey);
+            Assert.Equal(generatedKeyPair.YubiKeyEncodedPublicKey,
+                metadataForKeyPair.PublicKey.YubiKeyEncodedPublicKey);
 
             // Act
             pivSession.MoveKey(sourceSlot, destinationSlot);

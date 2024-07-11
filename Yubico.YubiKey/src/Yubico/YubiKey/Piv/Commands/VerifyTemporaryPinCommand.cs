@@ -133,6 +133,6 @@ namespace Yubico.YubiKey.Piv.Commands
 
         /// <inheritdoc />
         public VerifyTemporaryPinResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new VerifyTemporaryPinResponse(responseApdu);
+            new VerifyTemporaryPinResponse(responseApdu);
     }
 }

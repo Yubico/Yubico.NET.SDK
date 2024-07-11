@@ -80,10 +80,12 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                byte[] currentPin = {
+                byte[] currentPin =
+                {
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36
                 };
-                byte[] newPin = {
+                byte[] newPin =
+                {
                     0x39, 0x32, 0x33, 0x34, 0x35, 0x36
                 };
 
@@ -135,10 +137,12 @@ namespace Yubico.YubiKey.Piv
         {
             using (var pivSession = new PivSession(yubiKey))
             {
-                byte[] currentPin = {
+                byte[] currentPin =
+                {
                     0x31, 0x32, 0x33, 0x34, 0x35, 0x36
                 };
-                byte[] newPin = {
+                byte[] newPin =
+                {
                     0x39, 0x32, 0x33, 0x34, 0x35, 0x36
                 };
 
@@ -167,7 +171,8 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                byte[] currentPin = {
+                byte[] currentPin =
+                {
                     0x39, 0x32, 0x33, 0x34, 0x35, 0x36
                 };
 

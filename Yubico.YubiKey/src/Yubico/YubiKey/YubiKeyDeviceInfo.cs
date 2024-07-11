@@ -216,6 +216,7 @@ namespace Yubico.YubiKey
                             Minor = value[1],
                             Patch = value[2]
                         };
+
                         break;
                     case YubikeyDeviceManagementTags.ImageProcessorVersionTag:
                         deviceInfo.ImageProcessorVersion = new ImageProcessorVersion
@@ -224,6 +225,7 @@ namespace Yubico.YubiKey
                             Minor = value[1],
                             Patch = value[2]
                         };
+
                         break;
                     case YubikeyDeviceManagementTags.NfcRestrictedTag:
                         deviceInfo.IsNfcRestricted = value[0] == 1;
@@ -270,6 +272,7 @@ namespace Yubico.YubiKey
             {
                 return null;
             }
+
             try
             {
                 // .NET defaults to decode without error detection, this is to detect an error in the decoding when

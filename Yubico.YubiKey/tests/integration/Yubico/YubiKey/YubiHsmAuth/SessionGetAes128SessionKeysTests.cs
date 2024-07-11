@@ -21,7 +21,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
     public class SessionGetAes128SessionKeysTests
     {
         #region NonKeyCollector
+
         #region password
+
         [Fact]
         [Trait("Category", "FirmwareOrHardwareMissmatch")]
         public void GetAes128SessionKeys_TouchNotRequired_ReturnsTrueAndSessionKeys()
@@ -68,9 +70,11 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<SecurityException>(getSessionKeys);
             }
         }
+
         #endregion
 
         #region touch
+
         // When touch is required, the user should touch the YubiKey.
         //
         // It's recommended to use a debug break point in either the
@@ -123,6 +127,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<TimeoutException>(getSessionKeys);
             }
         }
+
         #endregion
 
         [Fact]
@@ -147,10 +152,13 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<InvalidOperationException>(getSessionKeys);
             }
         }
+
         #endregion
 
         #region KeyCollector
+
         #region password
+
         [Fact]
         public void TryGetAes128SessionKeys_TouchNotRequired_ReturnsTrueAndSessionKeys()
         {
@@ -267,9 +275,11 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<SecurityException>(tryGetSessionKeys);
             }
         }
+
         #endregion
 
         #region touch
+
         // When touch is requested, the user should touch the YubiKey.
         //
         // It's recommended to use a debug break point in either the
@@ -326,6 +336,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<TimeoutException>(tryGetSessionKeys);
             }
         }
+
         #endregion
 
         [Fact]
@@ -372,6 +383,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
                 _ = Assert.Throws<InvalidOperationException>(tryGetSessionKeys);
             }
         }
+
         #endregion KeyCollector
     }
 }

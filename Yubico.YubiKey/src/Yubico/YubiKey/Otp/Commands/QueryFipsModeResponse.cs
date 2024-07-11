@@ -34,7 +34,6 @@ namespace Yubico.YubiKey.Otp.Commands
         public QueryFipsModeResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
 
         /// <summary>

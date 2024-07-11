@@ -23,11 +23,12 @@ namespace Yubico.YubiKey.Oath.Commands
     {
         /// <inheritdoc/>
         protected override ResponseStatusPair StatusCodeMap =>
-           StatusWord switch
-           {
-               OathSWConstants.NoSuchObject => new ResponseStatusPair(ResponseStatus.NoData, ResponseStatusMessages.OathNoSuchObject),
-               _ => base.StatusCodeMap,
-           };
+            StatusWord switch
+            {
+                OathSWConstants.NoSuchObject => new ResponseStatusPair(
+                    ResponseStatus.NoData, ResponseStatusMessages.OathNoSuchObject),
+                _ => base.StatusCodeMap,
+            };
 
         /// <summary>
         /// Constructs a DeleteResponse instance based on a
@@ -37,9 +38,8 @@ namespace Yubico.YubiKey.Oath.Commands
         /// The ResponseApdu returned by the YubiKey.
         /// </param>
         public DeleteResponse(ResponseApdu responseApdu) :
-               base(responseApdu)
+            base(responseApdu)
         {
-
         }
     }
 }

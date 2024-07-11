@@ -54,7 +54,8 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.GenerateKeyPair(0x9A, PivAlgorithm.EccP256));
+                _ = Assert.Throws<InvalidOperationException>(() =>
+                    pivSession.GenerateKeyPair(0x9A, PivAlgorithm.EccP256));
             }
         }
 
@@ -66,7 +67,8 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                _ = Assert.Throws<OperationCanceledException>(() => pivSession.GenerateKeyPair(0x9A, PivAlgorithm.EccP256));
+                _ = Assert.Throws<OperationCanceledException>(() =>
+                    pivSession.GenerateKeyPair(0x9A, PivAlgorithm.EccP256));
             }
         }
 
@@ -150,7 +152,8 @@ namespace Yubico.YubiKey.Piv
             {
                 var simpleCollector = new SimpleKeyCollector(false);
                 pivSession.KeyCollector = simpleCollector.SimpleKeyCollectorDelegate;
-                bool isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out X509Certificate2 cert, out _);
+                bool isValid =
+                    SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out X509Certificate2 cert, out _);
 
                 _ = Assert.Throws<ArgumentException>(() => pivSession.ImportCertificate(0x81, cert));
             }
@@ -189,7 +192,8 @@ namespace Yubico.YubiKey.Piv
             using (var pivSession = new PivSession(yubiKey))
             {
                 pivSession.KeyCollector = ReturnFalseKeyCollectorDelegate;
-                bool isValid = SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out X509Certificate2 cert, out _);
+                bool isValid =
+                    SampleKeyPairs.GetMatchingKeyAndCert(PivAlgorithm.Rsa2048, out X509Certificate2 cert, out _);
                 Assert.True(isValid);
                 _ = Assert.Throws<OperationCanceledException>(() => pivSession.ImportCertificate(0x85, cert));
             }

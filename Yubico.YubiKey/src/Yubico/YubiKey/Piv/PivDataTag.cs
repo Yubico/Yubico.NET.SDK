@@ -22,7 +22,6 @@ namespace Yubico.YubiKey.Piv
     /// is requested (GET) or supplied (PUT). This enum has values for each of
     /// the tags defined in the PIV standard.
     /// </remarks>
-
     public enum PivDataTag
     {
         Unknown = 0,

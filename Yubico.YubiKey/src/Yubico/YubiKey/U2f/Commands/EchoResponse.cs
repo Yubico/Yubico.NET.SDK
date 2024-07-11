@@ -49,10 +49,11 @@ namespace Yubico.YubiKey.U2f.Commands
         /// <returns>
         /// The data in the response APDU, as a byte array.
         /// </returns>
-        public ReadOnlyMemory<byte> GetData() => Status switch
-        {
-            ResponseStatus.Success => ResponseApdu.Data,
-            _ => throw new InvalidOperationException(StatusMessage),
-        };
+        public ReadOnlyMemory<byte> GetData() =>
+            Status switch
+            {
+                ResponseStatus.Success => ResponseApdu.Data,
+                _ => throw new InvalidOperationException(StatusMessage),
+            };
     }
 }

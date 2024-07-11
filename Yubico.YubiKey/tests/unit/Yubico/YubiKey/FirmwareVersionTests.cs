@@ -290,7 +290,8 @@ namespace Yubico.YubiKey
         [InlineData(2, 0, 1, -1)]
         [InlineData(2, 1, 0, -1)]
         [InlineData(3, 0, 0, -1)]
-        public void VersionTwoZeroZero_IComparableFirmwareVersionCompareTo(byte major, byte minor, byte patch, int expected)
+        public void VersionTwoZeroZero_IComparableFirmwareVersionCompareTo(
+            byte major, byte minor, byte patch, int expected)
         {
             var fwTest = new FirmwareVersion(major, minor, patch);
 

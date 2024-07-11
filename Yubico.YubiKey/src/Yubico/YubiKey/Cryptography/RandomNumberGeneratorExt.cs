@@ -45,16 +45,19 @@ namespace Yubico.YubiKey.Cryptography
             {
                 throw new ArgumentNullException(nameof(rng));
             }
+
             if (fromInclusive >= toExclusive)
             {
-                throw new ArithmeticException(string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.ValueMustBeBetweenXandY,
-                    int.MinValue,
-                    (long)int.MaxValue + 1));
+                throw new ArithmeticException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.ValueMustBeBetweenXandY,
+                        int.MinValue,
+                        (long)int.MaxValue + 1));
             }
 
             uint range = (uint)toExclusive - (uint)fromInclusive - 1;
+
             // Mask away bits beyond our range.
             uint mask = range;
             mask |= mask >> 1;
@@ -69,6 +72,7 @@ namespace Yubico.YubiKey.Cryptography
                 rng.GetBytes(data);
                 result = mask & BitConverter.ToUInt32(data, 0);
             }
+
             return (int)result + fromInclusive;
         }
 
@@ -103,12 +107,14 @@ namespace Yubico.YubiKey.Cryptography
                 || toExclusive > 0x100
                 || fromInclusive >= toExclusive)
             {
-                throw new ArithmeticException(string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.ValueMustBeBetweenXandY,
-                    byte.MinValue,
-                    byte.MaxValue + 1));
+                throw new ArithmeticException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.ValueMustBeBetweenXandY,
+                        byte.MinValue,
+                        byte.MaxValue + 1));
             }
+
             return (byte)rng.GetInt32(fromInclusive, toExclusive);
         }
     }

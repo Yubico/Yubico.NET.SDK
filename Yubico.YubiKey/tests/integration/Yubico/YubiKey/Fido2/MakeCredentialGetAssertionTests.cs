@@ -23,7 +23,8 @@ namespace Yubico.YubiKey.Fido2
 {
     public class MakeCredentialGetAssertionTests
     {
-        static readonly byte[] _clientDataHash = {
+        static readonly byte[] _clientDataHash =
+        {
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
         };
@@ -136,7 +137,10 @@ namespace Yubico.YubiKey.Fido2
             {
                 // Set up a key collector
                 fido2.KeyCollector = KeyCollector;
-                int startCount = (int)fido2.AuthenticatorInfo.RemainingDiscoverableCredentials!; //RemainingDiscoverableCredentials is NULL on my two keys I tried with (USBA 5.4.3 Keychain and Nano)
+                int startCount =
+                    (int)fido2.AuthenticatorInfo
+                        .RemainingDiscoverableCredentials
+                    !; //RemainingDiscoverableCredentials is NULL on my two keys I tried with (USBA 5.4.3 Keychain and Nano)
 
                 // Verify the PIN
                 fido2.VerifyPin(); //Never completes on my 5.7 

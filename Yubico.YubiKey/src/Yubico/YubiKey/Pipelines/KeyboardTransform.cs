@@ -52,7 +52,6 @@ namespace Yubico.YubiKey.Pipelines
         /// </summary>
         public void Setup()
         {
-
         }
 
         /// <summary>
@@ -79,7 +78,9 @@ namespace Yubico.YubiKey.Pipelines
                     break;
                 case Otp.OtpConstants.RequestSlotInstruction:
                     bool configInstruction = responseType.IsAssignableFrom(typeof(Otp.Commands.ReadStatusResponse));
-                    _log.LogInformation($"Handling an OTP slot request {commandApdu.P1}. Configuring = {configInstruction}");
+                    _log.LogInformation(
+                        $"Handling an OTP slot request {commandApdu.P1}. Configuring = {configInstruction}");
+
                     HandleSlotRequestInstruction(commandApdu, frameReader, configInstruction);
                     break;
                 default:
@@ -98,7 +99,6 @@ namespace Yubico.YubiKey.Pipelines
         /// </summary>
         public void Cleanup()
         {
-
         }
 
         /// <summary>
@@ -115,7 +115,10 @@ namespace Yubico.YubiKey.Pipelines
         /// A boolean flag to indicate whether this is a command that sends configuration data, or
         /// a command that exercises certain non-NVRAM altering functionality.
         /// </param>
-        private void HandleSlotRequestInstruction(CommandApdu apdu, KeyboardFrameReader frameReader, bool configInstruction)
+        private void HandleSlotRequestInstruction(
+            CommandApdu apdu,
+            KeyboardFrameReader frameReader,
+            bool configInstruction)
         {
             KeyboardReport? report = null;
             foreach (KeyboardReport featureReport in apdu.GetHidReports())
@@ -156,12 +159,13 @@ namespace Yubico.YubiKey.Pipelines
                                     frameReader.UnexpectedEOR,
                                     frameReader.IsEndOfReadChain));
                         }
+
                         break;
                     }
 
                     report = new KeyboardReport(_hidConnection.GetReport());
-
-                } while (true);
+                }
+                while (true);
             }
             else
             {
@@ -211,9 +215,18 @@ namespace Yubico.YubiKey.Pipelines
             // would start with a 1ms sleep time, and double it each retry for
             // ten retries. This winds up being 1023ms. We will keep the sleep
             // doubling logic, but just timeout after 1023ms.
-            int timeLimitMs = shortTimeout ? 1023 : 14000;
-            int sleepDurationMs = shortTimeout ? 1 : 250;
-            int growthFactor = shortTimeout ? 2 : 1;
+            int timeLimitMs = shortTimeout
+                ? 1023
+                : 14000;
+
+            int sleepDurationMs = shortTimeout
+                ? 1
+                : 250;
+
+            int growthFactor = shortTimeout
+                ? 2
+                : 1;
+
             Stopwatch stopwatch = Stopwatch.StartNew();
 
             while (stopwatch.ElapsedMilliseconds < timeLimitMs)

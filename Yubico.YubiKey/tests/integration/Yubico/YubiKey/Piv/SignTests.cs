@@ -26,7 +26,6 @@ namespace Yubico.YubiKey.Piv
     public class SignTests
     {
         [SkippableTheory(typeof(DeviceNotFoundException))]
-
         [InlineData(false, StandardTestDevice.Fw5, PivPinPolicy.Always)]
         [InlineData(false, StandardTestDevice.Fw5, PivPinPolicy.Never)]
         [InlineData(true, StandardTestDevice.Fw5, PivPinPolicy.Always)]
@@ -37,7 +36,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(false, StandardTestDevice.Fw5Fips, PivPinPolicy.Never)]
         public void Sign_EccP256_Succeeds(bool useScp03, StandardTestDevice device, PivPinPolicy pinPolicy)
         {
-            byte[] dataToSign = {
+            byte[] dataToSign =
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20
             };
@@ -70,7 +70,6 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP256, 0x88)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x87)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP384, 0x89)]
-
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x86)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x87)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x87)]
@@ -122,79 +121,65 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha1, 1)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha256, 1)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha384, 1)]
-
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha1, 2)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha256, 2)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha384, 2)]
-
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha1, 1)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha256, 1)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha384, 1)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha512, 1)]
-
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha1, 2)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha256, 2)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha384, 2)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha512, 2)]
-
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha1, 1)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha256, 1)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha384, 1)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha512, 1)]
-
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha1, 2)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha256, 2)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha384, 2)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha512, 2)]
-
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha1, 1)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha256, 1)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha384, 1)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha512, 1)]
-
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha1, 2)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha256, 2)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha384, 2)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha512, 2)]
-
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha1, 1)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha256, 1)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha384, 1)]
-
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha1, 2)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha256, 2)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa1024, 0x92, RsaFormat.Sha384, 2)]
-
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha1, 1)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha256, 1)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha384, 1)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha512, 1)]
-
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha1, 2)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha256, 2)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha384, 2)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa2048, 0x93, RsaFormat.Sha512, 2)]
-
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha1, 1)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha256, 1)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha384, 1)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha512, 1)]
-
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha1, 2)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha256, 2)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha384, 2)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa3072, 0x94, RsaFormat.Sha512, 2)]
-
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha1, 1)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha256, 1)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha384, 1)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha512, 1)]
-
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha1, 2)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha256, 2)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha384, 2)]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.Rsa4096, 0x95, RsaFormat.Sha512, 2)]
-        public void SignRsa_VerifyCSharp_Correct(StandardTestDevice testDeviceType, PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm,
+        public void SignRsa_VerifyCSharp_Correct(
+            StandardTestDevice testDeviceType, PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm,
             int paddingScheme)
         {
             int keySizeBits = algorithm.KeySizeBits();
@@ -260,7 +245,8 @@ namespace Yubico.YubiKey.Piv
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5, PivAlgorithm.EccP256, 0x94)]
         [InlineData(StandardTestDevice.Fw5Fips, PivAlgorithm.EccP384, 0x95)]
-        public void SignEcc_VerifyCSharp_Correct(StandardTestDevice testDeviceType, PivAlgorithm algorithm, byte slotNumber)
+        public void SignEcc_VerifyCSharp_Correct(
+            StandardTestDevice testDeviceType, PivAlgorithm algorithm, byte slotNumber)
         {
             byte[] dataToSign = new byte[128];
             Random.Shared.NextBytes(dataToSign);
@@ -315,7 +301,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5Fips)]
         public void NoKeyInSlot_Sign_Exception(StandardTestDevice testDeviceType)
         {
-            byte[] dataToSign = {
+            byte[] dataToSign =
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f, 0x10,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18, 0x19, 0x1a, 0x1b, 0x1c, 0x1d, 0x1e, 0x1f, 0x20
             };
@@ -331,7 +318,8 @@ namespace Yubico.YubiKey.Piv
             _ = Assert.Throws<InvalidOperationException>(() => pivSession.Sign(0x9a, dataToSign));
         }
 
-        private static bool LoadKey(PivAlgorithm algorithm, byte slotNumber, PivPinPolicy pinPolicy,
+        private static bool LoadKey(
+            PivAlgorithm algorithm, byte slotNumber, PivPinPolicy pinPolicy,
             PivTouchPolicy touchPolicy, IYubiKeyDevice testDevice)
         {
             if (!testDevice.AvailableUsbCapabilities.HasFlag(YubiKeyCapabilities.Piv))

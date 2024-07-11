@@ -78,6 +78,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 return true;
             }
+
             // Anything other than true or false means the operation is not supported.
             if (epValue != OptionValue.False)
             {
@@ -342,6 +343,7 @@ namespace Yubico.YubiKey.Fido2
                 forceChangePin,
                 currentToken,
                 AuthProtocol);
+
             Fido2Response setRsp = Connection.SendCommand(setCmd);
             if (setRsp.CtapStatus == CtapStatus.PinAuthInvalid)
             {
@@ -352,6 +354,7 @@ namespace Yubico.YubiKey.Fido2
                     forceChangePin,
                     currentToken,
                     AuthProtocol);
+
                 setRsp = Connection.SendCommand(setCmd);
             }
 

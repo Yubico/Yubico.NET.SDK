@@ -50,6 +50,7 @@ namespace Yubico.YubiKey.Fido2
                             {
                                 req.SubmitValues(pin2, pin1);
                             }
+
                             break;
                         case KeyEntryRequest.VerifyFido2Pin:
                             if (req.IsRetry)
@@ -60,6 +61,7 @@ namespace Yubico.YubiKey.Fido2
                             {
                                 req.SubmitValue(pin1);
                             }
+
                             break;
                     }
 
@@ -94,7 +96,8 @@ namespace Yubico.YubiKey.Fido2
             using (var fido2 = new Fido2Session(yubiKey))
             {
                 fido2.KeyCollector = KeyCollector;
-                fido2.VerifyUv(PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion, "relyingParty1");
+                fido2.VerifyUv(PinUvAuthTokenPermissions.MakeCredential | PinUvAuthTokenPermissions.GetAssertion,
+                    "relyingParty1");
             }
         }
 

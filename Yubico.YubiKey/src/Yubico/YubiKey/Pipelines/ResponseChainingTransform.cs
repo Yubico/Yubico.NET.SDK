@@ -78,7 +78,9 @@ namespace Yubico.YubiKey.Pipelines
             return new ResponseApdu(tempBuffer.ToArray(), response.SW);
         }
 
-        protected virtual IYubiKeyCommand<YubiKeyResponse> CreateGetResponseCommand(CommandApdu originatingCommand, short SW2) =>
+        protected virtual IYubiKeyCommand<YubiKeyResponse> CreateGetResponseCommand(
+            CommandApdu originatingCommand,
+            short SW2) =>
             new InterIndustry.Commands.GetResponseCommand(originatingCommand, SW2);
 
         public void Setup() => _pipeline.Setup();

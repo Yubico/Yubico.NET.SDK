@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
 using System;
 using System.Globalization;
 using Yubico.Core.Iso7816;
@@ -70,13 +69,15 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
-        public PivBioMetadata GetData() => Status switch
-        {
-            ResponseStatus.Success => new PivBioMetadata(ResponseApdu.Data.ToArray()),
-            ResponseStatus.NoData => throw new NotSupportedException(string.Format(
+        public PivBioMetadata GetData() =>
+            Status switch
+            {
+                ResponseStatus.Success => new PivBioMetadata(ResponseApdu.Data.ToArray()),
+                ResponseStatus.NoData => throw new NotSupportedException(
+                    string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.BioMetadataNotSupported)),
-            _ => throw new InvalidOperationException(StatusMessage),
-        };
+                _ => throw new InvalidOperationException(StatusMessage),
+            };
     }
 }

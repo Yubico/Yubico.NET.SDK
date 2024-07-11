@@ -29,7 +29,6 @@ namespace Yubico.YubiKey
 
         public KeyboardFrameReader()
         {
-
         }
 
         public byte[] GetData() => _data.ToArray();

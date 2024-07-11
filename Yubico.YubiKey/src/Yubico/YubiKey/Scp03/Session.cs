@@ -72,7 +72,9 @@ namespace Yubico.YubiKey.Scp03
         /// </summary>
         /// <param name="initializeUpdateResponse">Response to the previous INITIALIZE_UPDATE</param>
         /// <param name="staticKeys">The secret static SCP03 keys shared by the host and card</param>
-        public void LoadInitializeUpdateResponse(InitializeUpdateResponse initializeUpdateResponse, StaticKeys staticKeys)
+        public void LoadInitializeUpdateResponse(
+            InitializeUpdateResponse initializeUpdateResponse,
+            StaticKeys staticKeys)
         {
             if (_hostChallenge is null)
             {
@@ -128,17 +130,21 @@ namespace Yubico.YubiKey.Scp03
         {
             if (_sessionKeys == null)
             {
-                throw new InvalidOperationException(ExceptionMessages.BuildExternalAuthenticatePriorToLoadInitializeUpdateResponse);
+                throw new InvalidOperationException(
+                    ExceptionMessages.BuildExternalAuthenticatePriorToLoadInitializeUpdateResponse);
             }
 
             if (_hostCryptogram is null)
             {
-                throw new InvalidOperationException(ExceptionMessages.BuildExternalAuthenticatePriorToLoadInitializeUpdateResponse);
+                throw new InvalidOperationException(
+                    ExceptionMessages.BuildExternalAuthenticatePriorToLoadInitializeUpdateResponse);
             }
 
             var eaCommandInitial = new ExternalAuthenticateCommand(_hostCryptogram);
             CommandApdu macdApdu;
-            (macdApdu, _macChainingValue) = ChannelMac.MacApdu(eaCommandInitial.CreateCommandApdu(), _sessionKeys.GetSessionMacKey(), _macChainingValue);
+            (macdApdu, _macChainingValue) = ChannelMac.MacApdu(
+                eaCommandInitial.CreateCommandApdu(), _sessionKeys.GetSessionMacKey(), _macChainingValue);
+
             var eaCommand = new ExternalAuthenticateCommand(macdApdu.Data.ToArray());
             return eaCommand;
         }
@@ -151,7 +157,8 @@ namespace Yubico.YubiKey.Scp03
         {
             if (_sessionKeys == null)
             {
-                throw new InvalidOperationException(ExceptionMessages.LoadExternalAuthenticateResponsePriorToLoadInitializUpdateResponse);
+                throw new InvalidOperationException(
+                    ExceptionMessages.LoadExternalAuthenticateResponsePriorToLoadInitializUpdateResponse);
             }
 
             if (externalAuthenticateResponse is null)
@@ -188,12 +195,16 @@ namespace Yubico.YubiKey.Scp03
             };
 
             byte[] commandData = command.Data.ToArray();
-            byte[] encryptedData = ChannelEncryption.EncryptData(commandData, _sessionKeys.GetSessionEncKey(), _encryptionCounter);
+            byte[] encryptedData = ChannelEncryption.EncryptData(
+                commandData, _sessionKeys.GetSessionEncKey(), _encryptionCounter);
+
             _encryptionCounter += 1;
             encodedCommand.Data = encryptedData;
 
             CommandApdu encodedApdu;
-            (encodedApdu, _macChainingValue) = ChannelMac.MacApdu(encodedCommand, _sessionKeys.GetSessionMacKey(), _macChainingValue);
+            (encodedApdu, _macChainingValue) = ChannelMac.MacApdu(
+                encodedCommand, _sessionKeys.GetSessionMacKey(), _macChainingValue);
+
             return encodedApdu;
         }
 
@@ -235,7 +246,7 @@ namespace Yubico.YubiKey.Scp03
                     responseData.Take(responseData.Length - 8).ToArray(),
                     _sessionKeys.GetSessionEncKey(),
                     _encryptionCounter - 1
-                );
+                    );
             }
 
             byte[] fullDecryptedResponse = new byte[decryptedData.Length + 2];

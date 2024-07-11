@@ -65,7 +65,8 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             get => _credentialPassword;
 
-            set => _credentialPassword = value.Length == RequiredCredentialPasswordLength
+            set =>
+                _credentialPassword = value.Length == RequiredCredentialPasswordLength
                     ? value
                     : throw new ArgumentException(
                         string.Format(

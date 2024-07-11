@@ -207,6 +207,7 @@ namespace Yubico.YubiKey.Piv
                 {
                     continue;
                 }
+
                 if (valueArray[tag - 1].IsEmpty == false)
                 {
                     continue;

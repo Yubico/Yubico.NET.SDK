@@ -44,6 +44,7 @@ namespace Yubico.YubiKey.Scp03
             {
                 throw new SecureChannelException(ExceptionMessages.IncorrectDerivationLength);
             }
+
             if (hostChallenge.Length != 8 || cardChallenge.Length != 8)
             {
                 throw new SecureChannelException(ExceptionMessages.InvalidChallengeLength);
@@ -59,7 +60,9 @@ namespace Yubico.YubiKey.Scp03
             cardChallenge.CopyTo(macInp, 24);
 
             byte[] cmac = new byte[16];
-            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            using ICmacPrimitives cmacObj =
+                CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+
             cmacObj.CmacInit(kdfKey);
             cmacObj.CmacUpdate(macInp);
             cmacObj.CmacFinal(cmac);
@@ -79,7 +82,8 @@ namespace Yubico.YubiKey.Scp03
             byte dataDerivationConstant,
             byte[] key,
             byte[] hostChallenge,
-            byte[] cardChallenge) => Derive(dataDerivationConstant, 0x40, key, hostChallenge, cardChallenge);
+            byte[] cardChallenge) =>
+            Derive(dataDerivationConstant, 0x40, key, hostChallenge, cardChallenge);
 
         public static SessionKeys DeriveSessionKeysFromStaticKeys(
             StaticKeys staticKeys,

@@ -117,6 +117,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.InvalidPinPukRetryCount));
                 }
+
                 _pinRetryCount = value;
             }
         }
@@ -139,6 +140,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.InvalidPinPukRetryCount));
                 }
+
                 _pukRetryCount = value;
             }
         }
@@ -185,15 +187,16 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = PivSetPinRetriesInstruction,
-            P1 = _pinRetryCount,
-            P2 = _pukRetryCount,
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = PivSetPinRetriesInstruction,
+                P1 = _pinRetryCount,
+                P2 = _pukRetryCount,
+            };
 
         /// <inheritdoc />
         public SetPinRetriesResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new SetPinRetriesResponse(responseApdu);
+            new SetPinRetriesResponse(responseApdu);
     }
 }

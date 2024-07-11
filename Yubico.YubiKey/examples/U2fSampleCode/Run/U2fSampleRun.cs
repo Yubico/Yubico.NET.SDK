@@ -77,7 +77,6 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                         menuItem = U2fMainMenuItem.Exit;
                     }
                 }
-
             } while (menuItem != U2fMainMenuItem.Exit);
         }
 

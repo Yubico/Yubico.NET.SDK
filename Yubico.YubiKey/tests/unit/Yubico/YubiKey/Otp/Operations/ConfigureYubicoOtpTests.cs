@@ -67,6 +67,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 {
                     _session.Dispose();
                 }
+
                 _disposedValue = true;
             }
         }

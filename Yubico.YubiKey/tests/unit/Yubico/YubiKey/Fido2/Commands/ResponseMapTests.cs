@@ -37,7 +37,8 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
-            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2NotAllowed, StringComparison.Ordinal);
+            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2NotAllowed,
+                StringComparison.Ordinal);
             Assert.True(isEqual == 0);
         }
 
@@ -58,7 +59,8 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
-            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2PinNotVerified, StringComparison.Ordinal);
+            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2PinNotVerified,
+                StringComparison.Ordinal);
             Assert.True(isEqual == 0);
         }
 
@@ -79,7 +81,8 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
-            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2PinBlocked, StringComparison.Ordinal);
+            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2PinBlocked,
+                StringComparison.Ordinal);
             Assert.True(isEqual == 0);
         }
 
@@ -100,7 +103,8 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
-            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2PinNotSet, StringComparison.Ordinal);
+            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2PinNotSet,
+                StringComparison.Ordinal);
             Assert.True(isEqual == 0);
         }
 
@@ -121,7 +125,8 @@ namespace Yubico.YubiKey.Fido2.Commands
 
             var rsp = new Fido2Response(new ResponseApdu(response));
 
-            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2Timeout, StringComparison.Ordinal);
+            int isEqual = string.Compare(rsp.StatusMessage, ResponseStatusMessages.Fido2Timeout,
+                StringComparison.Ordinal);
             Assert.True(isEqual == 0);
         }
     }

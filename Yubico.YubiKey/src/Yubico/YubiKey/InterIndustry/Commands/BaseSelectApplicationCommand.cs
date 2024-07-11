@@ -23,7 +23,7 @@ namespace Yubico.YubiKey.InterIndustry.Commands
     /// Selects a smart card application.
     /// </summary>
     public abstract class BaseSelectApplicationCommand<TSelectResponse> : ISelectApplicationCommand<TSelectResponse>
-            where TSelectResponse : ISelectApplicationResponse<ISelectApplicationData>
+        where TSelectResponse : ISelectApplicationResponse<ISelectApplicationData>
     {
         private const byte INS_SELECT = 0xA4;
 
@@ -70,12 +70,13 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         /// Creates a CommandApdu instance that instructs the smart card to select the previously
         /// specified application.
         /// </summary>
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = INS_SELECT,
-            P1 = P1_SELECT_BY_DF_NAME,
-            Data = _applicationId
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = INS_SELECT,
+                P1 = P1_SELECT_BY_DF_NAME,
+                Data = _applicationId
+            };
 
         /// <summary>
         /// Creates the appropriate response class that can parse the ResponseApdu.
@@ -84,5 +85,4 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         /// <returns></returns>
         public abstract TSelectResponse CreateResponseForApdu(ResponseApdu responseApdu);
     }
-
 }

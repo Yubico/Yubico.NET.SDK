@@ -45,7 +45,8 @@ namespace Yubico.YubiKey.Piv
             // The third 24 bytes is the 3DES key that is derived using a PIN of
             // "123456" and a salt of the first 16 bytes.
             // Then there will be 2048 random bytes.
-            specifiedBytes = new byte[SpecifiedStart] {
+            specifiedBytes = new byte[SpecifiedStart]
+            {
                 0x05, 0x01, 0xC9, 0x5E, 0x72, 0xAB, 0x58, 0x9E,
                 0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
                 0x6D, 0x82, 0x95, 0xA3, 0x74, 0xB7, 0x69, 0x2B,
@@ -499,8 +500,9 @@ namespace Yubico.YubiKey.Piv
                 new byte[] { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }
             );
 
-            PivPinOnlyMode newMode = mode == PivPinOnlyMode.PinProtected ?
-                PivPinOnlyMode.PinDerived : PivPinOnlyMode.PinProtected;
+            PivPinOnlyMode newMode = mode == PivPinOnlyMode.PinProtected
+                ? PivPinOnlyMode.PinDerived
+                : PivPinOnlyMode.PinProtected;
 
             using (var pivSession = new PivSession(yubiKey))
             {
@@ -692,7 +694,8 @@ namespace Yubico.YubiKey.Piv
 
                 Assert.Equal(PivPinOnlyMode.None, currentMode);
 
-                var mgmtKey = new ReadOnlyMemory<byte>(new byte[] {
+                var mgmtKey = new ReadOnlyMemory<byte>(new byte[]
+                {
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                     0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08

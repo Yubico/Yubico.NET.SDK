@@ -76,9 +76,11 @@ namespace Yubico.YubiKey.Pipelines
         internal void Setup(RandomNumberGenerator rng)
         {
             _pipeline.Setup();
+
             // Generate host challenge
             byte[] hostChallenge = new byte[8];
             rng.GetBytes(hostChallenge);
+
             // Perform IU/EA handshake
             PerformInitializeUpdate(hostChallenge);
             PerformExternalAuthenticate();
@@ -88,8 +90,10 @@ namespace Yubico.YubiKey.Pipelines
         {
             // Encode command
             CommandApdu encodedCommand = _session.EncodeCommand(command);
+
             // Pass along the encoded command
             ResponseApdu response = _pipeline.Invoke(encodedCommand, commandType, responseType);
+
             // Decode response and return it
 
             // Special carve out for SelectApplication here, since there will be nothing to decode
@@ -111,7 +115,9 @@ namespace Yubico.YubiKey.Pipelines
                 typeof(InitializeUpdateCommand),
                 typeof(InitializeUpdateResponse));
 
-            InitializeUpdateResponse initializeUpdateResponse = initializeUpdateCommand.CreateResponseForApdu(initializeUpdateResponseApdu);
+            InitializeUpdateResponse initializeUpdateResponse =
+                initializeUpdateCommand.CreateResponseForApdu(initializeUpdateResponseApdu);
+
             initializeUpdateResponse.ThrowIfFailed();
             _session.LoadInitializeUpdateResponse(initializeUpdateResponse, Scp03Keys);
         }
@@ -125,7 +131,9 @@ namespace Yubico.YubiKey.Pipelines
                 typeof(ExternalAuthenticateCommand),
                 typeof(ExternalAuthenticateResponse));
 
-            ExternalAuthenticateResponse externalAuthenticateResponse = externalAuthenticateCommand.CreateResponseForApdu(externalAuthenticateResponseApdu);
+            ExternalAuthenticateResponse externalAuthenticateResponse =
+                externalAuthenticateCommand.CreateResponseForApdu(externalAuthenticateResponseApdu);
+
             externalAuthenticateResponse.ThrowIfFailed();
             _session.LoadExternalAuthenticateResponse(externalAuthenticateResponse);
         }

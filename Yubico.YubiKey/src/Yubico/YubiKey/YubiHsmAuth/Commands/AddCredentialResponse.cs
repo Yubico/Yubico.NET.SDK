@@ -36,14 +36,15 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     {
         protected override ResponseStatusPair StatusCodeMap
         {
-            get => StatusWord switch
-            {
-                // A credential with that label already exists
-                SWConstants.AuthenticationMethodBlocked =>
-                    new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.YubiHsmAuthLabelConflict),
+            get =>
+                StatusWord switch
+                {
+                    // A credential with that label already exists
+                    SWConstants.AuthenticationMethodBlocked =>
+                        new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.YubiHsmAuthLabelConflict),
 
-                _ => base.StatusCodeMap,
-            };
+                    _ => base.StatusCodeMap,
+                };
         }
 
         /// <summary>

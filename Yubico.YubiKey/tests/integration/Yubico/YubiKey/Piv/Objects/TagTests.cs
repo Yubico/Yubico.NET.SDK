@@ -39,7 +39,8 @@ namespace Yubico.YubiKey.Piv
 
                     pivSession.AuthenticateManagementKey();
 
-                    byte[] arbitraryData = {
+                    byte[] arbitraryData =
+                    {
                         0x53, 0x02, 0x04, 0x00
                     };
 
@@ -82,7 +83,8 @@ namespace Yubico.YubiKey.Piv
 
                     pivSession.AuthenticateManagementKey();
 
-                    byte[] arbitraryData = {
+                    byte[] arbitraryData =
+                    {
                         0x53, 0x02, 0x04, 0x00
                     };
 

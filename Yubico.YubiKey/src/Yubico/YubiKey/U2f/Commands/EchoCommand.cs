@@ -87,7 +87,6 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <inheritdoc/>
-        public EchoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new EchoResponse(responseApdu);
+        public EchoResponse CreateResponseForApdu(ResponseApdu responseApdu) => new EchoResponse(responseApdu);
     }
 }

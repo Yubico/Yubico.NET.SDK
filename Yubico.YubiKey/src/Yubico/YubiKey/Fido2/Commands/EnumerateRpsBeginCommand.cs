@@ -60,8 +60,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// <param name="authProtocol">
         /// The Auth Protocol used to build the Auth Token.
         /// </param>
-        public EnumerateRpsBeginCommand(
-            ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
+        public EnumerateRpsBeginCommand(ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
             : base(new CredentialManagementCommand(SubCmdEnumerateRpsBegin, null, pinUvAuthToken, authProtocol))
         {
         }

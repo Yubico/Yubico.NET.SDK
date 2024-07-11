@@ -40,12 +40,13 @@ namespace Yubico.YubiKey
     /// Connecting to different YubiKeys at once is fine, just not to a single key.
     /// </para>
     /// </remarks>
+
     // JUSTIFICATION: This class is a singleton, which means its lifetime will span the process lifetime. It contains
     // a lock which is disposable, so we must call its Dispose method at some point. The only reasonable time to do that
     // is in this class's finalizer. This analyzer doesn't seem to see this and still warns.
-#pragma warning disable CA1001
+    #pragma warning disable CA1001
     internal class ConnectionManager
-#pragma warning restore CA1001
+        #pragma warning restore CA1001
     {
         // Easy thread-safe singleton pattern using Lazy<>
         private static readonly Lazy<ConnectionManager> _instance =
@@ -62,6 +63,7 @@ namespace Yubico.YubiKey
         /// <param name="device">A concrete device object from Yubico.Core.</param>
         /// <param name="application">An application of the YubiKey.</param>
         /// <returns>`true` if the device object supports the application, `false` otherwise.</returns>
+
         // This function uses C# 8.0 pattern matching to build a concise table.
         public static bool DeviceSupportsApplication(IDevice device, YubiKeyApplication application) =>
             (device, application) switch
@@ -69,8 +71,10 @@ namespace Yubico.YubiKey
                 // FIDO interface
                 (IHidDevice { UsagePage: HidUsagePage.Fido }, YubiKeyApplication.FidoU2f) => true,
                 (IHidDevice { UsagePage: HidUsagePage.Fido }, YubiKeyApplication.Fido2) => true,
+
                 // Keyboard interface
                 (IHidDevice { UsagePage: HidUsagePage.Keyboard }, YubiKeyApplication.Otp) => true,
+
                 // All Smart Card based interfaces
                 (ISmartCardDevice _, YubiKeyApplication.Management) => true,
                 (ISmartCardDevice _, YubiKeyApplication.Oath) => true,
@@ -78,10 +82,12 @@ namespace Yubico.YubiKey
                 (ISmartCardDevice _, YubiKeyApplication.OpenPgp) => true,
                 (ISmartCardDevice _, YubiKeyApplication.InterIndustry) => true,
                 (ISmartCardDevice _, YubiKeyApplication.YubiHsmAuth) => true,
+
                 // NB: Certain past models of YK NEO and YK 4 supported these applications over CCID
                 (ISmartCardDevice _, YubiKeyApplication.FidoU2f) => true,
                 (ISmartCardDevice _, YubiKeyApplication.Fido2) => true,
                 (ISmartCardDevice _, YubiKeyApplication.Otp) => true,
+
                 // NFC interface
                 (ISmartCardDevice { Kind: SmartCardConnectionKind.Nfc }, YubiKeyApplication.OtpNdef) => true,
                 _ => false
@@ -132,8 +138,7 @@ namespace Yubico.YubiKey
             IYubiKeyDevice yubiKeyDevice,
             IDevice device,
             YubiKeyApplication application,
-            [MaybeNullWhen(returnValue: false)]
-            out IYubiKeyConnection connection)
+            [MaybeNullWhen(returnValue: false)] out IYubiKeyConnection connection)
         {
             if (!DeviceSupportsApplication(device, application))
             {
@@ -221,8 +226,7 @@ namespace Yubico.YubiKey
             IYubiKeyDevice yubiKeyDevice,
             IDevice device,
             byte[] applicationId,
-            [MaybeNullWhen(returnValue: false)]
-            out IYubiKeyConnection connection)
+            [MaybeNullWhen(returnValue: false)] out IYubiKeyConnection connection)
         {
             var smartCardDevice = device as ISmartCardDevice;
 

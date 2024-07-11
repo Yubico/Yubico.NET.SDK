@@ -45,10 +45,11 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = GetDeviceInfoInstruction
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Ins = GetDeviceInfoInstruction
+            };
 
         /// <inheritdoc />
         public GetDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

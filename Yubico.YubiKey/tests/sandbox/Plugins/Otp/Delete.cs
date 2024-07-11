@@ -47,6 +47,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Output.WriteLine("Aborted.", OutputLevel.Error);
                 return false;
             }
+
             try
             {
                 otp.DeleteSlotConfiguration(_slot)

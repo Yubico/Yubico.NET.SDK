@@ -34,15 +34,15 @@ namespace Yubico.YubiKey.Otp.Commands
         /// </summary>
         public GetSerialNumberCommand()
         {
-
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = OtpConstants.RequestSlotInstruction,
-            P1 = OtpConstants.SerialNumberSlot
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = OtpConstants.RequestSlotInstruction,
+                P1 = OtpConstants.SerialNumberSlot
+            };
 
         /// <inheritdoc />
         public GetSerialNumberResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

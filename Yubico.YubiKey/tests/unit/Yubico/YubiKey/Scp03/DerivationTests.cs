@@ -31,25 +31,29 @@ namespace Yubico.YubiKey.Scp03
         [Fact]
         public void Derive_GivenBadChallengeLen_ThrowsSecureChannelException()
         {
-            _ = Assert.Throws<SecureChannelException>(() => Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40, GetKey(), GetBadChallenge(), GetCardChallenge()));
+            _ = Assert.Throws<SecureChannelException>(() => Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40,
+                GetKey(), GetBadChallenge(), GetCardChallenge()));
         }
 
         [Fact]
         public void Derive_GivenBadOutputLen_ThrowsSecureChannelException()
         {
-            _ = Assert.Throws<SecureChannelException>(() => Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0xC0, GetKey(), GetHostChallenge(), GetCardChallenge()));
+            _ = Assert.Throws<SecureChannelException>(() => Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0xC0,
+                GetKey(), GetHostChallenge(), GetCardChallenge()));
         }
 
         [Fact]
         public void Derive_GivenBadKey_ThrowsArgumentException()
         {
-            _ = Assert.Throws<ArgumentException>(() => Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40, GetBadKey(), GetHostChallenge(), GetCardChallenge()));
+            _ = Assert.Throws<ArgumentException>(() => Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40,
+                GetBadKey(), GetHostChallenge(), GetCardChallenge()));
         }
 
         [Fact]
         public void Derive_GivenCorrectVals_ReturnsCorrectHostCryptogram()
         {
-            byte[] hostCryptogram = Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40, GetKey(), GetHostChallenge(), GetCardChallenge());
+            byte[] hostCryptogram = Derivation.Derive(Derivation.DDC_HOST_CRYPTOGRAM, 0x40, GetKey(),
+                GetHostChallenge(), GetCardChallenge());
             Assert.Equal(GetCorrectDeriveOutput(), hostCryptogram);
         }
     }

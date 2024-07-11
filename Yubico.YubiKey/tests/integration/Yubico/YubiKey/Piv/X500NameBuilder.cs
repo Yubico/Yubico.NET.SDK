@@ -110,7 +110,6 @@ namespace Yubico.YubiKey.Piv
                             count++;
                         }
                     }
-
                 }
             }
 

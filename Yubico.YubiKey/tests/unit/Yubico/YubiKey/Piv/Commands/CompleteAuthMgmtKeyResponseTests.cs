@@ -25,19 +25,24 @@ namespace Yubico.YubiKey.Piv.Commands
         private const int ApduNoAuth = 2;
         private const int ApduError = 32;
 
-        static readonly ReadOnlyMemory<byte> _yubiKeyAuthenticationExpectedResponse = new byte[8] {
+        static readonly ReadOnlyMemory<byte> _yubiKeyAuthenticationExpectedResponse = new byte[8]
+        {
             0xAC, 0x29, 0xA4, 0x5E, 0x1F, 0x42, 0x8A, 0x23
         };
-        static readonly ReadOnlyMemory<byte> _wrongYubiKeyAuthenticationResponse = new byte[8] {
+
+        static readonly ReadOnlyMemory<byte> _wrongYubiKeyAuthenticationResponse = new byte[8]
+        {
             0xAC, 0x29, 0xA4, 0x00, 0x1F, 0x42, 0x8A, 0x23
         };
+
         static readonly ReadOnlyMemory<byte> _empty = ReadOnlyMemory<byte>.Empty;
 
         [Fact]
         public void Constructor_NullResponseApdu_ThrowsException()
         {
 #pragma warning disable CS8625 // testing null input, disable warning that null is passed to non-nullable arg.
-            _ = Assert.Throws<ArgumentNullException>(() => new CompleteAuthenticateManagementKeyResponse(null, _yubiKeyAuthenticationExpectedResponse));
+            _ = Assert.Throws<ArgumentNullException>(() =>
+                new CompleteAuthenticateManagementKeyResponse(null, _yubiKeyAuthenticationExpectedResponse));
 #pragma warning restore CS8625
         }
 
@@ -60,7 +65,8 @@ namespace Yubico.YubiKey.Piv.Commands
         public void ConstructorMutual_ResponseApdu_SetsStatusCorrectly(int responseFlag, ResponseStatus status)
         {
             ResponseApdu? responseApdu = GetResponseApdu(responseFlag);
-            var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
+            var response =
+                new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
 
             Assert.Equal(status, response.Status);
         }
@@ -84,7 +90,8 @@ namespace Yubico.YubiKey.Piv.Commands
         public void ConstructorMutual_ResponseApdu_SetsStatusWordCorrectly(int responseFlag, short statusWord)
         {
             ResponseApdu? responseApdu = GetResponseApdu(responseFlag);
-            var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
+            var response =
+                new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
 
             Assert.Equal(statusWord, response.StatusWord);
         }
@@ -93,7 +100,8 @@ namespace Yubico.YubiKey.Piv.Commands
         public void ErrorInput_GetData_ThrowException()
         {
             ResponseApdu? responseApdu = GetResponseApdu(ApduError);
-            var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
+            var response =
+                new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
 
             _ = Assert.Throws<InvalidOperationException>(() => response.GetData());
         }
@@ -102,7 +110,8 @@ namespace Yubico.YubiKey.Piv.Commands
         public void ConstructorSingle_GetDataNonEmptyYubiKeyAuthenticationResponse_ThrowsException()
         {
             ResponseApdu? responseApdu = GetResponseApdu(ApduSingle);
-            var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
+            var response =
+                new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
 
             _ = Assert.Throws<MalformedYubiKeyResponseException>(() => response.GetData());
         }
@@ -115,7 +124,8 @@ namespace Yubico.YubiKey.Piv.Commands
             AuthenticateManagementKeyResult expectedAuth)
         {
             ResponseApdu? responseApdu = GetResponseApdu(responseFlag);
-            var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
+            var response =
+                new CompleteAuthenticateManagementKeyResponse(responseApdu, _yubiKeyAuthenticationExpectedResponse);
 
             AuthenticateManagementKeyResult getData = response.GetData();
 
@@ -125,7 +135,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [Theory]
         [InlineData(ApduSingle, AuthenticateManagementKeyResult.SingleAuthenticated)]
         [InlineData(ApduNoAuth, AuthenticateManagementKeyResult.SingleAuthenticationFailed)]
-        public void ConstructorSingle_GetData_CorrectResult(int responseFlag, AuthenticateManagementKeyResult expectedAuth)
+        public void ConstructorSingle_GetData_CorrectResult(
+            int responseFlag, AuthenticateManagementKeyResult expectedAuth)
         {
             ResponseApdu? responseApdu = GetResponseApdu(responseFlag);
             var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _empty);
@@ -139,7 +150,8 @@ namespace Yubico.YubiKey.Piv.Commands
         public void YubiKeyFailAuth_GetData_CorrectResult()
         {
             ResponseApdu? responseApdu = GetResponseApdu(ApduMutual);
-            var response = new CompleteAuthenticateManagementKeyResponse(responseApdu, _wrongYubiKeyAuthenticationResponse);
+            var response =
+                new CompleteAuthenticateManagementKeyResponse(responseApdu, _wrongYubiKeyAuthenticationResponse);
 
             AuthenticateManagementKeyResult getData = response.GetData();
 
@@ -160,16 +172,20 @@ namespace Yubico.YubiKey.Piv.Commands
             byte noAuthSw2 = unchecked((byte)SWConstants.ConditionsNotSatisfied);
             byte errorSw1 = unchecked((byte)(SWConstants.FunctionNotSupported >> 8));
             byte errorSw2 = unchecked((byte)SWConstants.FunctionNotSupported);
-            byte[] apduMutual = new byte[] {
+            byte[] apduMutual = new byte[]
+            {
                 0x7C, 0x0A, 0x82, 0x08, 0xAC, 0x29, 0xA4, 0x5E, 0x1F, 0x42, 0x8A, 0x23, successSw1, successSw2
             };
-            byte[] apduSingle = new byte[] {
+            byte[] apduSingle = new byte[]
+            {
                 successSw1, successSw2
             };
-            byte[] apduNoAuth = new byte[] {
+            byte[] apduNoAuth = new byte[]
+            {
                 noAuthSw1, noAuthSw2
             };
-            byte[] apduError = new byte[] {
+            byte[] apduError = new byte[]
+            {
                 errorSw1, errorSw2
             };
 

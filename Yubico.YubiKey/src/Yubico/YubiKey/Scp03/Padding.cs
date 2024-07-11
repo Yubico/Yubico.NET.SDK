@@ -32,6 +32,7 @@ namespace Yubico.YubiKey.Scp03
             padded[payload.Length] = 0x80;
             return padded;
         }
+
         public static byte[] RemovePadding(byte[] paddedPayload)
         {
             if (paddedPayload is null)

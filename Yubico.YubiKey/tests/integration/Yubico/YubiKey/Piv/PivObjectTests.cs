@@ -46,7 +46,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteThenReadChuid_Data_Correct(StandardTestDevice testDeviceType)
         {
-            var expected = new ReadOnlySpan<byte>(new byte[] {
+            var expected = new ReadOnlySpan<byte>(new byte[]
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01
             });
 
@@ -88,7 +89,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void AltTag_WriteThenReadChuid_Data_Correct(StandardTestDevice testDeviceType)
         {
-            var expected = new ReadOnlySpan<byte>(new byte[] {
+            var expected = new ReadOnlySpan<byte>(new byte[]
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01
             });
 
@@ -131,7 +133,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteEmpty_Correct(StandardTestDevice testDeviceType)
         {
-            var expected = new ReadOnlySpan<byte>(new byte[] {
+            var expected = new ReadOnlySpan<byte>(new byte[]
+            {
                 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01
             });
 
@@ -212,7 +215,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(StandardTestDevice.Fw5)]
         public void WriteEmptyObject_DataEmpty(StandardTestDevice testDeviceType)
         {
-            var keyData = new ReadOnlyMemory<byte>(new byte[] {
+            var keyData = new ReadOnlyMemory<byte>(new byte[]
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
                 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57, 0x58

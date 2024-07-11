@@ -43,7 +43,8 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// completed.
     /// </para>
     /// </remarks>
-    public class EnumerateCredentialsGetNextCommand : CredentialMgmtSubCommand, IYubiKeyCommand<EnumerateCredentialsGetNextResponse>
+    public class EnumerateCredentialsGetNextCommand : CredentialMgmtSubCommand,
+                                                      IYubiKeyCommand<EnumerateCredentialsGetNextResponse>
     {
         private const int SubCmdGetEnumerateCredsGetNext = 0x05;
 

@@ -155,7 +155,9 @@ namespace Yubico.YubiKey.Scp03.Commands
             // If the currentKeys' KVN is not the same as the newKeys' KVN, then
             // this command is adding a key set and P1 is zero. Otherwise, this
             // command is replacing a key, so set P1 to the KVN of the currentKeys.
-            _p1Value = currentKeys.KeyVersionNumber == newKeys.KeyVersionNumber ? currentKeys.KeyVersionNumber : (byte)0;
+            _p1Value = currentKeys.KeyVersionNumber == newKeys.KeyVersionNumber
+                ? currentKeys.KeyVersionNumber
+                : (byte)0;
 
             // Build the data portion of the APDU
             //  new kvn || ENC data || MAC data || DEK data
@@ -195,17 +197,17 @@ namespace Yubico.YubiKey.Scp03.Commands
             }
         }
 
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Cla = GpPutKeyCla,
-            Ins = GpPutKeyIns,
-            P1 = _p1Value,
-            P2 = KeyIdentifier,
-            Data = _data
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Cla = GpPutKeyCla,
+                Ins = GpPutKeyIns,
+                P1 = _p1Value,
+                P2 = KeyIdentifier,
+                Data = _data
+            };
 
-        public PutKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new PutKeyResponse(responseApdu);
+        public PutKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new PutKeyResponse(responseApdu);
 
         // Build the key's data field. Place it into _data beginning at
         // dataOffset.
@@ -225,9 +227,11 @@ namespace Yubico.YubiKey.Scp03.Commands
 
             try
             {
-                byte[] dataToEncrypt = new byte[AesBlockSize] {
-                    1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1
+                byte[] dataToEncrypt = new byte[AesBlockSize]
+                {
+                    1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1
                 };
+
                 byte[] checkBlock = AesUtilities.BlockCipher(keyData, dataToEncrypt.AsSpan());
                 byte[] encryptedKey = AesUtilities.BlockCipher(encryptionKey, keyToBlock.Span);
 

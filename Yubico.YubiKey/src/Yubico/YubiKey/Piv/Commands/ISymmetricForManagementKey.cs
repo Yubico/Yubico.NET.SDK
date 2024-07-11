@@ -75,6 +75,11 @@ namespace Yubico.YubiKey.Piv.Commands
         /// 0 is not a valid input), the input or output buffers are not big
         /// enough for the specified offset and length.
         /// </exception>
-        public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset);
+        public int TransformBlock(
+            byte[] inputBuffer,
+            int inputOffset,
+            int inputCount,
+            byte[] outputBuffer,
+            int outputOffset);
     }
 }

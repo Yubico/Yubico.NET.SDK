@@ -50,7 +50,8 @@ namespace Yubico.YubiKey.TestApp.Plugins
             IYubiKeyDevice scp03Device = (device as YubiKeyDevice)!.WithScp03(new StaticKeys());
 #pragma warning restore CS0618
             using var piv = new PivSession(scp03Device);
-            bool result = piv.TryVerifyPin(new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 }), out _);
+            bool result = piv.TryVerifyPin(new ReadOnlyMemory<byte>(new byte[] { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 }),
+                out _);
             Output.WriteLine($"pin 123456: {result}");
 
             PivMetadata metadata = piv.GetMetadata(PivSlot.Pin)!;

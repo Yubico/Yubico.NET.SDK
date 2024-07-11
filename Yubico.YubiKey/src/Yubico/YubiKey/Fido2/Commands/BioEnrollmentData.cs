@@ -170,6 +170,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             {
                 TemplateId = new ReadOnlyMemory<byte>(templateId);
             }
+
             LastEnrollSampleStatus = (int?)cborMap.ReadOptional<int>(KeyLastEnrollStatus);
             RemainingSampleCount = (int?)cborMap.ReadOptional<int>(KeyRemainingSampleCount);
 
@@ -180,8 +181,10 @@ namespace Yubico.YubiKey.Fido2.Commands
                 foreach (CborMap<int> currentMap in templateList)
                 {
                     byte[] currentId = currentMap.ReadByteString(KeyTemplateInfoId).ToArray();
-                    string friendlyName = currentMap.Contains(KeyFriendlyName) ?
-                        currentMap.ReadTextString(KeyFriendlyName) : "";
+                    string friendlyName = currentMap.Contains(KeyFriendlyName)
+                        ? currentMap.ReadTextString(KeyFriendlyName)
+                        : "";
+
                     templateInfos.Add(new TemplateInfo(currentId, friendlyName));
                 }
 

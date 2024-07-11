@@ -183,8 +183,8 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             // The SDK's U2fSession class calls the origin data "applicationId"
             _keyCollector.Operation = U2fKeyCollectorOperation.Register;
             if (!U2fProtocol.Register(
-                _yubiKeyChosen, _keyCollector.U2fSampleKeyCollectorDelegate,
-                applicationId, clientDataHash, out RegistrationData registrationData))
+                    _yubiKeyChosen, _keyCollector.U2fSampleKeyCollectorDelegate,
+                    applicationId, clientDataHash, out RegistrationData registrationData))
             {
                 return false;
             }
@@ -236,14 +236,16 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             // So we'll determine if the keyHandle is valid before we try to
             // verify the credential.
             if (!U2fProtocol.VerifyKeyHandle(
-                _yubiKeyChosen, regData.ApplicationId, regData.ClientDataHash, regData.KeyHandle, out bool isVerified))
+                    _yubiKeyChosen, regData.ApplicationId, regData.ClientDataHash, regData.KeyHandle,
+                    out bool isVerified))
             {
                 return false;
             }
 
             if (!isVerified)
             {
-                SampleMenu.WriteMessage(MessageType.Title, 0, "Credential did not authenticate: key handle did not match.\n");
+                SampleMenu.WriteMessage(MessageType.Title, 0,
+                    "Credential did not authenticate: key handle did not match.\n");
                 return true;
             }
 
@@ -257,9 +259,9 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             // If it is able to compute a signature, we'll verify it below.
             _keyCollector.Operation = U2fKeyCollectorOperation.Authenticate;
             if (!U2fProtocol.Authenticate(
-                _yubiKeyChosen, _keyCollector.U2fSampleKeyCollectorDelegate,
-                regData.ApplicationId, regData.ClientDataHash, regData.KeyHandle,
-                out AuthenticationData authenticationData))
+                    _yubiKeyChosen, _keyCollector.U2fSampleKeyCollectorDelegate,
+                    regData.ApplicationId, regData.ClientDataHash, regData.KeyHandle,
+                    out AuthenticationData authenticationData))
             {
                 return false;
             }
@@ -272,7 +274,7 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             // method successfully completing the task it was designed to do,
             // namely, to determine if the credential authenticates.
             if (authenticationData.VerifySignature(
-                regData.UserPublicKey, regData.ApplicationId, regData.ClientDataHash))
+                    regData.UserPublicKey, regData.ApplicationId, regData.ClientDataHash))
             {
                 SampleMenu.WriteMessage(MessageType.Special, 0, "Credential authenticates");
             }
@@ -292,16 +294,19 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                 || _yubiKeyChosen.FirmwareVersion < new FirmwareVersion(4, 0, 0)
                 || !_yubiKeyChosen.IsFipsSeries)
             {
-                SampleMenu.WriteMessage(MessageType.Title, 0, "It is possible to reset the U2F application on only version 4");
+                SampleMenu.WriteMessage(MessageType.Title, 0,
+                    "It is possible to reset the U2F application on only version 4");
                 SampleMenu.WriteMessage(MessageType.Title, 0, "FIPS series YubiKeys.");
                 if (_yubiKeyChosen.IsFipsSeries)
                 {
-                    SampleMenu.WriteMessage(MessageType.Title, 0, "Although this is a FIPS series YubiKey, the version is");
+                    SampleMenu.WriteMessage(MessageType.Title, 0,
+                        "Although this is a FIPS series YubiKey, the version is");
                     SampleMenu.WriteMessage(MessageType.Title, 0, versionNumber + "\n");
                 }
                 else
                 {
-                    SampleMenu.WriteMessage(MessageType.Title, 0, "This YubiKey is version " + _yubiKeyChosen.FirmwareVersion.ToString());
+                    SampleMenu.WriteMessage(MessageType.Title, 0,
+                        "This YubiKey is version " + _yubiKeyChosen.FirmwareVersion.ToString());
                     SampleMenu.WriteMessage(MessageType.Title, 0, "and is not FIPS series.\n");
                 }
 
@@ -309,12 +314,16 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
             }
 
             SampleMenu.WriteMessage(MessageType.Title, 0, "DANGER!!!");
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Resetting the U2F application will mean losing all U2F credentials");
-            SampleMenu.WriteMessage(MessageType.Title, 0, "on this YubiKey, taking the U2F application out of FIPS mode, and");
-            SampleMenu.WriteMessage(MessageType.Title, 0, "preventing this YubiKey's U2F application from ever being put into");
+            SampleMenu.WriteMessage(MessageType.Title, 0,
+                "Resetting the U2F application will mean losing all U2F credentials");
+            SampleMenu.WriteMessage(MessageType.Title, 0,
+                "on this YubiKey, taking the U2F application out of FIPS mode, and");
+            SampleMenu.WriteMessage(MessageType.Title, 0,
+                "preventing this YubiKey's U2F application from ever being put into");
             SampleMenu.WriteMessage(MessageType.Title, 0, "FIPS mode again.\n");
 
-            string[] menuItems = new string[] {
+            string[] menuItems = new string[]
+            {
                 "Yes",
                 "No",
             };
@@ -325,7 +334,8 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                 return true;
             }
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "This is the YubiKey for which the U2F application will be reset.\n");
+            SampleMenu.WriteMessage(MessageType.Title, 0,
+                "This is the YubiKey for which the U2F application will be reset.\n");
 
             int? serial = _yubiKeyChosen.SerialNumber;
             if (serial is null)
@@ -343,8 +353,10 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
                 return true;
             }
 
-            SampleMenu.WriteMessage(MessageType.Title, 0, "To reset, when prompted, you will need to remove, then re-insert");
-            SampleMenu.WriteMessage(MessageType.Title, 0, "the YubiKey, then, when prompted, touch the YubiKey's contact.\n");
+            SampleMenu.WriteMessage(MessageType.Title, 0,
+                "To reset, when prompted, you will need to remove, then re-insert");
+            SampleMenu.WriteMessage(MessageType.Title, 0,
+                "the YubiKey, then, when prompted, touch the YubiKey's contact.\n");
             response = _menuObject.RunMenu("Do you want to continue?", menuItems);
             if (response != 0)
             {
@@ -369,11 +381,14 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
         private string GetClientComputedOrigin(string relyingPartyName)
         {
             SampleMenu.WriteMessage(MessageType.Title, 0, "The client (browser) determines with whom it is connected");
-            SampleMenu.WriteMessage(MessageType.Title, 0, "If everything is correct, it is the same as the appId supplied by the relying party");
+            SampleMenu.WriteMessage(MessageType.Title, 0,
+                "If everything is correct, it is the same as the appId supplied by the relying party");
             SampleMenu.WriteMessage(MessageType.Title, 0, "This is the listed appId:\n\n" + relyingPartyName);
             SampleMenu.WriteMessage(MessageType.Title, 0, "\nDo you want to say the client computed the same value?");
-            SampleMenu.WriteMessage(MessageType.Title, 0, "Or do you want to see what happens when they are different?");
-            string[] menuItems = new string[] {
+            SampleMenu.WriteMessage(MessageType.Title, 0,
+                "Or do you want to see what happens when they are different?");
+            string[] menuItems = new string[]
+            {
                 "The computed origin is the same as the appId",
                 "Enter a (possibly) different computed origin",
             };
@@ -392,7 +407,8 @@ namespace Yubico.YubiKey.Sample.U2fSampleCode
 
         private static string GetRelyingPartyChallenge()
         {
-            SampleMenu.WriteMessage(MessageType.Title, 0, "For this sample code, the challenge is a random value base-64 encoded\n");
+            SampleMenu.WriteMessage(MessageType.Title, 0,
+                "For this sample code, the challenge is a random value base-64 encoded\n");
 
             byte[] randomBytes = new byte[9];
             using RandomNumberGenerator randomObject = CryptographyProviders.RngCreator();

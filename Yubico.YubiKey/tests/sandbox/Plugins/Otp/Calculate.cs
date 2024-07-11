@@ -48,25 +48,26 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Output.WriteLine("Aborted.", OutputLevel.Error);
                 return false;
             }
+
             try
             {
                 // Important to use Console.WriteLine instead of Output.WriteLine
                 // here. It would be useless if output were being written to a file.
                 CalculateChallengeResponse op =
                     otp.CalculateChallengeResponse(_slot)
-                    .UseTouchNotifier(() => Console.WriteLine("Touch the key."))
-                    .UseYubiOtp(_yubiOtp);
+                        .UseTouchNotifier(() => Console.WriteLine("Touch the key."))
+                        .UseYubiOtp(_yubiOtp);
                 op =
                     _generateTotp
-                    ? op.UseTotp()
-                    : op.UseChallenge(_challenge);
+                        ? op.UseTotp()
+                        : op.UseChallenge(_challenge);
 
                 result =
                     _digits.HasValue
-                    ? op.GetCode(_digits.Value)
-                    : _yubiOtp
-                        ? ModHex.EncodeBytes(op.GetDataBytes().Span)
-                        : Hex.BytesToHex(op.GetDataBytes().Span).ToLower();
+                        ? op.GetCode(_digits.Value)
+                        : _yubiOtp
+                            ? ModHex.EncodeBytes(op.GetDataBytes().Span)
+                            : Hex.BytesToHex(op.GetDataBytes().Span).ToLower();
             }
             catch (Exception ex)
             {
@@ -80,8 +81,8 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 Output.WriteLine(
                     _digits.HasValue
-                    ? $"OTP Code is [{result}]"
-                    : $"Response is [{result}]");
+                        ? $"OTP Code is [{result}]"
+                        : $"Response is [{result}]");
             }
             else
             {
@@ -104,24 +105,29 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 exceptions.Add(
                     new ArgumentException("Invalid (or no) slot specified. " +
-                    "You must specify slot 1 (ShortPress) or 2 (LongPress)."));
+                                          "You must specify slot 1 (ShortPress) or 2 (LongPress)."));
             }
+
             if (_generateTotp && _challenge.Length != 0)
             {
                 exceptions.Add(new ArgumentException("Can't use both TOTP and a challenge."));
             }
+
             if (_digits.HasValue && _yubiOtp)
             {
                 exceptions.Add(new ArgumentException("You can't specify digits with Yubico OTP."));
             }
+
             if (_digits.HasValue && _digits != 6 && _digits != 8)
             {
                 exceptions.Add(new ArgumentException("The response must be either six (6) or eight (8) digits."));
             }
+
             if (!_challenge.Any() && !_generateTotp)
             {
                 exceptions.Add(new ArgumentException("You much choose either TOTP or provide a challenge."));
             }
+
             if (_yubiOtp && _challenge.Length < CalculateChallengeResponse.YubicoOtpChallengeSize)
             {
                 Array.Resize(ref _challenge, CalculateChallengeResponse.YubicoOtpChallengeSize);

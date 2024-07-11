@@ -188,7 +188,8 @@ namespace Yubico.YubiKey.Piv.Commands
             byte[] newPin = GetPinArray(7, 1);
             var changeRefDataCommand = new ChangeReferenceDataCommand(0x80, currentPin, newPin);
 
-            ChangeReferenceDataResponse changeRefDataResponse = changeRefDataCommand.CreateResponseForApdu(responseApdu);
+            ChangeReferenceDataResponse changeRefDataResponse =
+                changeRefDataCommand.CreateResponseForApdu(responseApdu);
 
             Assert.True(changeRefDataResponse is ChangeReferenceDataResponse);
         }

@@ -25,7 +25,9 @@ namespace Yubico.YubiKey.Oath.Commands
 {
     public class CalculateCredentialCommandTests
     {
-        readonly Credential _credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp, CredentialPeriod.Period30);
+        readonly Credential _credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp,
+            CredentialPeriod.Period30);
+
         readonly byte[] _fixedBytes = new byte[8] { 0xF1, 0x03, 0xDA, 0x89, 0x58, 0xE4, 0x40, 0x85 };
 
         [Fact]
@@ -135,7 +137,8 @@ namespace Yubico.YubiKey.Oath.Commands
         [Fact]
         public void CreateCommandApdu_HotpCredential_ReturnsCorrectDataAndLength()
         {
-            var hotpCredential = new Credential("Apple", "test@icloud.com", CredentialType.Hotp, CredentialPeriod.Undefined);
+            var hotpCredential =
+                new Credential("Apple", "test@icloud.com", CredentialType.Hotp, CredentialPeriod.Undefined);
             var command = new CalculateCredentialCommand(hotpCredential, ResponseFormat.Full);
 
             byte[] dataList =

@@ -75,7 +75,8 @@ namespace Yubico.YubiKey
         /// The YubiKey device does not have an available smart card interface or
         /// it does not support SCP03.
         /// </exception>
-        [Obsolete("The WithScp03 extension will be deprecated, please specify SCP03 during the Connect call.", error: false)]
+        [Obsolete(
+            "The WithScp03 extension will be deprecated, please specify SCP03 during the Connect call.", error: false)]
         public static IYubiKeyDevice WithScp03(this YubiKeyDevice device, StaticKeys scp03Keys) =>
             GetScp03Device(device, scp03Keys);
 
@@ -91,6 +92,7 @@ namespace Yubico.YubiKey
             {
                 throw new ArgumentNullException(nameof(device));
             }
+
             if (scp03Keys is null)
             {
                 throw new ArgumentNullException(nameof(scp03Keys));

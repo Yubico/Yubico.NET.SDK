@@ -28,6 +28,7 @@ namespace Yubico.YubiKey.Otp
     public interface IOtpSession : IDisposable
     {
         #region OTP Operation Object Factory
+
         /// <inheritdoc cref="OtpSession.CalculateChallengeResponse(Slot)"/>
         public CalculateChallengeResponse CalculateChallengeResponse(Slot slot);
 
@@ -51,9 +52,11 @@ namespace Yubico.YubiKey.Otp
 
         /// <inheritdoc cref="OtpSession.UpdateSlot(Slot)"/>
         public UpdateSlot UpdateSlot(Slot slot);
+
         #endregion
 
         #region Non-Builder Implementations
+
         /// <inheritdoc cref="OtpSession.DeleteSlot(Slot)"/>
         public void DeleteSlot(Slot slot);
 
@@ -62,9 +65,11 @@ namespace Yubico.YubiKey.Otp
 
         /// <inheritdoc cref="OtpSession.ReadNdefTag"/>
         public NdefDataReader ReadNdefTag();
+
         #endregion
 
         #region Properties
+
         /// <inheritdoc cref="OtpStatus.ShortPressConfigured"/>
         public bool IsShortPressConfigured { get; }
 
@@ -80,6 +85,7 @@ namespace Yubico.YubiKey.Otp
         internal FirmwareVersion FirmwareVersion { get; }
 
         internal IYubiKeyDevice YubiKey { get; }
+
         #endregion
     }
 }

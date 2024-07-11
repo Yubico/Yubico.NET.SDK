@@ -39,15 +39,15 @@ namespace Yubico.YubiKey.Oath.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = ResetInstruction,
-            P1 = 0xDE,
-            P2 = 0xAD
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Ins = ResetInstruction,
+                P1 = 0xDE,
+                P2 = 0xAD
+            };
 
         /// <inheritdoc />
-        public OathResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new OathResponse(responseApdu);
+        public OathResponse CreateResponseForApdu(ResponseApdu responseApdu) => new OathResponse(responseApdu);
     }
 }

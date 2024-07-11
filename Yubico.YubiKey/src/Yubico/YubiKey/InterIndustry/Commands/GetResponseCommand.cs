@@ -66,15 +66,17 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Cla = _Cla,
-            Ins = GetResponseInstruction,
-            Ne = _SW2 == 0 ? 256 : _SW2,
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Cla = _Cla,
+                Ins = GetResponseInstruction,
+                Ne = _SW2 == 0
+                    ? 256
+                    : _SW2,
+            };
 
         /// <inheritdoc />
-        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new YubiKeyResponse(responseApdu);
+        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new YubiKeyResponse(responseApdu);
     }
 }

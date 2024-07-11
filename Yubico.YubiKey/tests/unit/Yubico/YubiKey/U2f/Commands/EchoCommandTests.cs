@@ -150,7 +150,7 @@ namespace Yubico.YubiKey.U2f.Commands
         public void CreateCommandApdu_SetNonEmptyData_OuterCommandLcCorrect()
         {
             byte[] expectedInnerData = new byte[] { 0x01, 0x02, 0x03 };
-            byte[] expectedInnerLc = new byte[] { 0x00, 0x00, (byte)expectedInnerData.Length };  // Assumes 0 < len < 256
+            byte[] expectedInnerLc = new byte[] { 0x00, 0x00, (byte)expectedInnerData.Length }; // Assumes 0 < len < 256
 
             int expectedInnerCommandLength = lengthHeader + expectedInnerLc.Length + expectedInnerData.Length;
 
@@ -230,7 +230,7 @@ namespace Yubico.YubiKey.U2f.Commands
         public void CreateCommandApdu_SetNonEmptyData_InnerCommandLcCorrect()
         {
             byte[] expectedInnerData = new byte[] { 0x01, 0x02, 0x03 };
-            byte[] expectedInnerLc = new byte[] { 0x00, 0x00, (byte)expectedInnerData.Length };  // Assumes 0 < len < 256
+            byte[] expectedInnerLc = new byte[] { 0x00, 0x00, (byte)expectedInnerData.Length }; // Assumes 0 < len < 256
 
             var command = new EchoCommand(expectedInnerData);
             CommandApdu commandApdu = command.CreateCommandApdu();
@@ -250,7 +250,8 @@ namespace Yubico.YubiKey.U2f.Commands
             CommandApdu commandApdu = command.CreateCommandApdu();
 
             ReadOnlyMemory<byte> actualInnerCommandApdu = commandApdu.Data;
-            ReadOnlySpan<byte> actualInnerCommandData = actualInnerCommandApdu.Slice(offsetData, expectedInnerData.Length).Span;
+            ReadOnlySpan<byte> actualInnerCommandData =
+                actualInnerCommandApdu.Slice(offsetData, expectedInnerData.Length).Span;
 
             Assert.True(actualInnerCommandData.SequenceEqual(expectedInnerData));
         }

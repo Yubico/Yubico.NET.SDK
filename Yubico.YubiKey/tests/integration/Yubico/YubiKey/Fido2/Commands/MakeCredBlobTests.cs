@@ -22,12 +22,14 @@ namespace Yubico.YubiKey.Fido2.Commands
     [Trait("Category", "RequiresBio")]
     public class MakeCredBlobTests : NeedPinToken
     {
-        private readonly byte[] _clientDataHash = {
+        private readonly byte[] _clientDataHash =
+        {
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
         };
 
-        private readonly byte[] _credBlobValue = {
+        private readonly byte[] _credBlobValue =
+        {
             0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
             0x49, 0x4A, 0x4B, 0x4C, 0x4D, 0x4E, 0x4F, 0x50,
             0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
@@ -39,11 +41,12 @@ namespace Yubico.YubiKey.Fido2.Commands
             Name = "SomeRpName",
         };
 
-        private readonly UserEntity _user = new UserEntity(new ReadOnlyMemory<byte>(new byte[] { 0x11, 0x22, 0x33, 0x44 }))
-        {
-            Name = "SomeUserName",
-            DisplayName = "User",
-        };
+        private readonly UserEntity _user =
+            new UserEntity(new ReadOnlyMemory<byte>(new byte[] { 0x11, 0x22, 0x33, 0x44 }))
+            {
+                Name = "SomeUserName",
+                DisplayName = "User",
+            };
 
         public MakeCredBlobTests()
             : base(YubiKeyApplication.Fido2, StandardTestDevice.Fw5Bio, null)
@@ -82,6 +85,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                 isValid = aData.VerifyAssertion(cData.AuthenticatorData.CredentialPublicKey, _clientDataHash);
                 Assert.True(isValid);
             }
+
             isValid = CheckCredBlob(aData);
             Assert.True(isValid);
         }

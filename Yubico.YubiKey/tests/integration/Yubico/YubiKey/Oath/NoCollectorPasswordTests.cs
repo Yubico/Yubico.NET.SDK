@@ -35,7 +35,8 @@ namespace Yubico.YubiKey.Oath
                 Assert.False(oathSession.IsPasswordProtected);
 
                 var newCred = new Credential(
-                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp, HashAlgorithm.Sha256);
+                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp,
+                    HashAlgorithm.Sha256);
                 oathSession.AddCredential(newCred);
             }
 
@@ -156,7 +157,8 @@ namespace Yubico.YubiKey.Oath
                 Assert.False(oathSession.IsPasswordProtected);
 
                 var newCred = new Credential(
-                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp, HashAlgorithm.Sha256);
+                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp,
+                    HashAlgorithm.Sha256);
                 oathSession.AddCredential(newCred);
             }
 
@@ -215,7 +217,8 @@ namespace Yubico.YubiKey.Oath
                 Assert.False(oathSession.IsPasswordProtected);
 
                 var newCred = new Credential(
-                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp, HashAlgorithm.Sha256);
+                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp,
+                    HashAlgorithm.Sha256);
                 oathSession.AddCredential(newCred);
             }
 
@@ -260,7 +263,8 @@ namespace Yubico.YubiKey.Oath
                 Assert.False(oathSession.IsPasswordProtected);
 
                 var newCred = new Credential(
-                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp, HashAlgorithm.Sha256);
+                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp,
+                    HashAlgorithm.Sha256);
                 oathSession.AddCredential(newCred);
             }
 
@@ -330,7 +334,8 @@ namespace Yubico.YubiKey.Oath
                 Assert.False(isVerified);
 
                 var newCred = new Credential(
-                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp, HashAlgorithm.Sha256);
+                    "issuer", "account@yubico.com", CredentialPeriod.Undefined, CredentialType.Hotp,
+                    HashAlgorithm.Sha256);
                 oathSession.AddCredential(newCred);
             }
 

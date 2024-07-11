@@ -46,6 +46,9 @@ namespace Yubico.YubiKey.Otp
         }
 
         /// <inheritdoc/>
-        public override string ToString() => string.IsNullOrEmpty(Text) ? "(null or empty)" : Text;
+        public override string ToString() =>
+            string.IsNullOrEmpty(Text)
+                ? "(null or empty)"
+                : Text;
     }
 }

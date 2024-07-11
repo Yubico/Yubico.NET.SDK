@@ -39,7 +39,9 @@ namespace Yubico.YubiKey.Otp.Operations
         private string? _languageCode;
 
         internal ConfigureNdef(IYubiKeyConnection connection, IOtpSession session, Slot slot)
-            : base(connection, session, slot) { }
+            : base(connection, session, slot)
+        {
+        }
 
         /// <inheritdoc/>
         protected override void PreLaunchOperation()
@@ -58,7 +60,9 @@ namespace Yubico.YubiKey.Otp.Operations
                 throw new InvalidOperationException(ExceptionMessages.OtpNdefNoTypeChosen);
             }
 
-            _languageCode = string.IsNullOrEmpty(_languageCode) ? defaultLanguage : _languageCode;
+            _languageCode = string.IsNullOrEmpty(_languageCode)
+                ? defaultLanguage
+                : _languageCode;
         }
 
         /// <inheritdoc/>
@@ -68,13 +72,16 @@ namespace Yubico.YubiKey.Otp.Operations
                 ? NdefConfig.CreateUriConfig(_uri!)
                 : NdefConfig.CreateTextConfig(_text!, _languageCode!, _useUtf16);
 
-            ReadStatusResponse response = Connection.SendCommand(new ConfigureNdefCommand(OtpSlot!.Value, configBuffer.Span));
+            ReadStatusResponse response =
+                Connection.SendCommand(new ConfigureNdefCommand(OtpSlot!.Value, configBuffer.Span));
+
             if (response.Status != ResponseStatus.Success)
             {
-                throw new InvalidOperationException(string.Format(
-                    CultureInfo.CurrentCulture,
-                    ExceptionMessages.YubiKeyOperationFailed,
-                    response.StatusMessage));
+                throw new InvalidOperationException(
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.YubiKeyOperationFailed,
+                        response.StatusMessage));
             }
         }
 
@@ -102,6 +109,7 @@ namespace Yubico.YubiKey.Otp.Operations
 
                 _uri = uri;
             }
+
             return this;
         }
 
@@ -129,6 +137,7 @@ namespace Yubico.YubiKey.Otp.Operations
 
                 _text = text;
             }
+
             return this;
         }
 

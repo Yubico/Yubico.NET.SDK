@@ -40,14 +40,14 @@ namespace Yubico.YubiKey.Management.Commands
         /// </summary>
         public DeviceResetCommand()
         {
-
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = DeviceResetInstruction
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = DeviceResetInstruction
+            };
 
         /// <inheritdoc />
         public DeviceResetResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

@@ -41,7 +41,8 @@ namespace Yubico.YubiKey.Fido2.Cbor
         [Fact]
         public void ReadMap_IntAndStringKeys_Succeeds()
         {
-            byte[] encoding = new byte[] {
+            byte[] encoding = new byte[]
+            {
                 0xA3, 0x01, 0xA2, 0x03, 0x44, 0x11, 0x22, 0x33, 0x44, 0x04, 0x42, 0x11, 0x22, 0x02, 0xA2, 0x62,
                 0x5A, 0x31, 0x44, 0x11, 0x22, 0x33, 0x44, 0x62, 0x5A, 0x32, 0x42, 0x11, 0x22, 0x03, 0x82, 0x64,
                 0x59, 0x75, 0x62, 0x69, 0x63, 0x4B, 0x65, 0x79
@@ -87,6 +88,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                         {
                             return false;
                         }
+
                         break;
 
                     case 2:
@@ -95,6 +97,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                         {
                             return false;
                         }
+
                         break;
 
                     case 3:
@@ -103,6 +106,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                         {
                             return false;
                         }
+
                         break;
                 }
 

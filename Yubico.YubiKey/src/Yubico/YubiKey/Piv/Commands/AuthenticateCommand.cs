@@ -78,18 +78,20 @@ namespace Yubico.YubiKey.Piv.Commands
                             ExceptionMessages.InvalidSlot,
                             value));
                 }
+
                 _slotNumber = value;
             }
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = PivAuthenticateInstruction,
-            P1 = (byte)Algorithm,
-            P2 = SlotNumber,
-            Data = BuildGeneralAuthenticateApduData(),
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = PivAuthenticateInstruction,
+                P1 = (byte)Algorithm,
+                P2 = SlotNumber,
+                Data = BuildGeneralAuthenticateApduData(),
+            };
 
         /// <summary>
         /// Build a byte array contains the data portion of the APDU.

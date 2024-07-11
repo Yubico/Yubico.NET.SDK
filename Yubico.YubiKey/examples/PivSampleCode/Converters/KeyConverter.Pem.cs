@@ -117,6 +117,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                                 // object.
                                 rsaParams = rsaPrivateObject.ExportParameters(false);
                             }
+
                             return RSA.Create(rsaParams);
                         }
 
@@ -140,6 +141,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                                 // object.
                                 eccParams = eccPrivateObject.ExportParameters(false);
                             }
+
                             return ECDsa.Create(eccParams);
                         }
                 }
@@ -325,6 +327,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 return -1;
             }
+
             if (length > 0x80)
             {
                 int count = length & 0xf;
@@ -332,6 +335,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                 {
                     return -1;
                 }
+
                 increment += count;
                 length = 0;
                 while (count > 0)

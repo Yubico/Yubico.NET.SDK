@@ -32,7 +32,8 @@ namespace Yubico.YubiKey.Piv
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
             using X509Certificate2 caCert = GetCACert();
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out string pubKey, out string priKey);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out string pubKey,
+                out string priKey);
             var convertPublic = new KeyConverter(pubKey.ToCharArray());
             RSA dotNetPublicKey = convertPublic.GetRsaObject();
             var convertPrivate = new KeyConverter(priKey.ToCharArray());
@@ -60,7 +61,7 @@ namespace Yubico.YubiKey.Piv
             }
 
             // Now use a 2108-byte extension, to get a 3053-byte cert.
-            extensionSize += 3;//extensionSize++;
+            extensionSize += 3; //extensionSize++;
             extensionData = new byte[extensionSize];
             rng.GetBytes(extensionData, 0, extensionData.Length);
 
@@ -76,7 +77,8 @@ namespace Yubico.YubiKey.Piv
                 pivSession.ResetApplication();
 
                 pivSession.ImportPrivateKey(leafSlotNumber, pivPrivateKey);
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.ImportCertificate(leafSlotNumber, newCert));
+                _ = Assert.Throws<InvalidOperationException>(
+                    () => pivSession.ImportCertificate(leafSlotNumber, newCert));
             }
         }
 
@@ -88,7 +90,8 @@ namespace Yubico.YubiKey.Piv
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
             using X509Certificate2 caCert = GetCACert();
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out string pubKey, out string priKey);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out string pubKey,
+                out string priKey);
             var convertPublic = new KeyConverter(pubKey.ToCharArray());
             RSA dotNetPublicKey = convertPublic.GetRsaObject();
             var convertPrivate = new KeyConverter(priKey.ToCharArray());
@@ -120,7 +123,8 @@ namespace Yubico.YubiKey.Piv
 
                 // The next storage should fail.
                 pivSession.ImportPrivateKey(leafSlotNumber, pivPrivateKey);
-                _ = Assert.Throws<InvalidOperationException>(() => pivSession.ImportCertificate(leafSlotNumber, newCert));
+                _ = Assert.Throws<InvalidOperationException>(
+                    () => pivSession.ImportCertificate(leafSlotNumber, newCert));
             }
         }
 
@@ -132,7 +136,8 @@ namespace Yubico.YubiKey.Piv
             using RandomNumberGenerator rng = RandomObjectUtility.GetRandomObject(null);
             using X509Certificate2 caCert = GetCACert();
 
-            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out string pubKey, out string priKey);
+            _ = SampleKeyPairs.GetKeysAndCertPem(PivAlgorithm.Rsa2048, false, out _, out string pubKey,
+                out string priKey);
             var convertPublic = new KeyConverter(pubKey.ToCharArray());
             RSA dotNetPublicKey = convertPublic.GetRsaObject();
             var convertPrivate = new KeyConverter(priKey.ToCharArray());

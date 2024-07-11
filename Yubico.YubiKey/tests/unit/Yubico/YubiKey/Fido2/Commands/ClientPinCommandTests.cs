@@ -112,7 +112,8 @@ namespace Yubico.YubiKey.Fido2.Commands
         [Fact]
         public void NullKeyAgreement_CorrectApdu()
         {
-            byte[] expectedValue = new byte[] {
+            byte[] expectedValue = new byte[]
+            {
                 0x06, 0xA2, 0x01, 0x01, 0x02, 0x10
             };
 

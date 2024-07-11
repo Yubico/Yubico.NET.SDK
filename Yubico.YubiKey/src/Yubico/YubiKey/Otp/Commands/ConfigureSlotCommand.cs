@@ -24,6 +24,7 @@ namespace Yubico.YubiKey.Otp.Commands
     {
         /// <inheritdoc/>
         protected override byte ShortPressCode => OtpConstants.ConfigureShortPressSlot;
+
         /// <inheritdoc/>
         protected override byte LongPressCode => OtpConstants.ConfigureLongPressSlot;
 
@@ -53,6 +54,7 @@ namespace Yubico.YubiKey.Otp.Commands
 
             Span<byte> target = ConfigurationBuffer.Slice(FixedDataOffset, FixedDataLength);
             fixedData.CopyTo(target);
+
             // If the data is less than the buffer, make sure the rest is empty.
             if (fixedData.Length < FixedDataLength)
             {
@@ -61,6 +63,7 @@ namespace Yubico.YubiKey.Otp.Commands
                     target[i] = 0;
                 }
             }
+
             ConfigurationBuffer[FixedSizeOffset] = (byte)fixedData.Length;
         }
 

@@ -17,7 +17,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
-
 using static Yubico.YubiKey.Otp.NdefConstants;
 
 namespace Yubico.YubiKey.Otp
@@ -136,7 +135,9 @@ namespace Yubico.YubiKey.Otp
             {
                 bool bomPresent;
                 (encoding, bomPresent) = DetectCorrectUtf16Encoding(_data.AsSpan(textOffset));
-                textOffset += bomPresent ? 2 : 0;
+                textOffset += bomPresent
+                    ? 2
+                    : 0;
             }
 
             // Empty string specifies the invariant culture, which seems like the correct thing to do anyways.
@@ -145,7 +146,9 @@ namespace Yubico.YubiKey.Otp
 
             return new NdefText()
             {
-                Encoding = isUtf16 ? NdefTextEncoding.Utf16 : NdefTextEncoding.Utf8,
+                Encoding = isUtf16
+                    ? NdefTextEncoding.Utf16
+                    : NdefTextEncoding.Utf8,
                 Language = new CultureInfo(languageCode),
                 Text = text
             };
@@ -180,7 +183,10 @@ namespace Yubico.YubiKey.Otp
             string uriString = supportedUriPrefixes[prefixCode] + Encoding.ASCII.GetString(_data, 1, _data.Length - 1);
             bool isAbsolute = Uri.IsWellFormedUriString(uriString, UriKind.Absolute);
 
-            return new Uri(uriString, isAbsolute ? UriKind.Absolute : UriKind.Relative);
+            return new Uri(
+                uriString, isAbsolute
+                    ? UriKind.Absolute
+                    : UriKind.Relative);
         }
 
         private static (Encoding encoding, bool bomPresent) DetectCorrectUtf16Encoding(ReadOnlySpan<byte> stringData)
@@ -211,11 +217,14 @@ namespace Yubico.YubiKey.Otp
                     {
                         score[index % 2]++;
                     }
+
                     index++;
                 }
 
                 // RFC 2781 does say to give preference to big endian, so I guess that'll be the tie-breaker.
-                return score[0] >= score[1] ? (Encoding.BigEndianUnicode, false) : (Encoding.Unicode, false);
+                return score[0] >= score[1]
+                    ? (Encoding.BigEndianUnicode, false)
+                    : (Encoding.Unicode, false);
             }
         }
     }

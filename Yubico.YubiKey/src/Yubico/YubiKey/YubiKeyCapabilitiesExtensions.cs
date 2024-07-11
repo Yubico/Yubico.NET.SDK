@@ -18,8 +18,7 @@ namespace Yubico.YubiKey
 {
     internal static class YubiKeyCapabilitiesExtensions
     {
-        public static YubiKeyCapabilities ToDeviceInfoCapabilities(
-            this YubiKeyCapabilities yubiKeyCapabilities)
+        public static YubiKeyCapabilities ToDeviceInfoCapabilities(this YubiKeyCapabilities yubiKeyCapabilities)
         {
             if (yubiKeyCapabilities.HasFlag(YubiKeyCapabilities.All))
             {

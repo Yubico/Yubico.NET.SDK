@@ -219,6 +219,7 @@ namespace Yubico.YubiKey.Piv.Objects
                 {
                     tlvWriter.WriteValue(UrlTag, _urlBytes);
                 }
+
                 tlvWriter.WriteValue(UnusedTag, ReadOnlySpan<byte>.Empty);
             }
 
@@ -256,14 +257,17 @@ namespace Yubico.YubiKey.Piv.Objects
             {
                 isValid = tlvReader.TryReadByte(out onCard, OnCardTag);
             }
+
             if (isValid)
             {
                 isValid = tlvReader.TryReadByte(out offCard, OffCardTag);
             }
+
             if (isValid)
             {
                 isValid = tlvReader.TryReadValue(out offCardUrl, UrlTag);
             }
+
             if (isValid)
             {
                 isValid = tlvReader.TryReadValue(out ReadOnlyMemory<byte> unusedData, UnusedTag);

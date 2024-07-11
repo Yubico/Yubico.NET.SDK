@@ -195,6 +195,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new Ctap2DataException(ExceptionMessages.InvalidFido2Info);
             }
+
             EncodedArray = cborEncoding.Slice(0, cborEncoding.Length - DigestLength);
             Digest = cborEncoding.Slice(cborEncoding.Length - DigestLength, DigestLength);
 
@@ -212,6 +213,7 @@ namespace Yubico.YubiKey.Fido2
                 {
                     _entryList.Add(new LargeBlobEntry(cborReader.ReadEncodedValue()));
                 }
+
                 cborReader.ReadEndArray();
 
                 Entries = _entryList;
@@ -336,6 +338,7 @@ namespace Yubico.YubiKey.Fido2
                 {
                     cbor.WriteEncodedValue(new ReadOnlySpan<byte>(entry.CborEncode()));
                 }
+
                 cbor.WriteEndArray();
 
                 EncodedArray = new ReadOnlyMemory<byte>(cbor.Encode());

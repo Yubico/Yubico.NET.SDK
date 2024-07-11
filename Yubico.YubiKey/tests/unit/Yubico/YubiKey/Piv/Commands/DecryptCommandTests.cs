@@ -223,10 +223,12 @@ namespace Yubico.YubiKey.Piv.Commands
         // Get the TL TL TL prefix for each algorithm.
         private static byte[] GetDecryptDataPrefix(PivAlgorithm algorithm) => algorithm switch
         {
-            PivAlgorithm.Rsa2048 => new byte[] {
+            PivAlgorithm.Rsa2048 => new byte[]
+            {
                 0x7C, 0x82, 0x01, 0x06, 0x82, 0x00, 0x81, 0x82, 0x01, 0x00
             },
-            _ => new byte[] {
+            _ => new byte[]
+            {
                 0x7C, 0x81, 0x85, 0x82, 0x00, 0x81, 0x81, 0x80
             },
         };

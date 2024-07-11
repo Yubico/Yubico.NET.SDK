@@ -47,12 +47,13 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = ResetAppInstruction,
-            P1 = ResetAppP1,
-            P2 = ResetAppP2
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Ins = ResetAppInstruction,
+                P1 = ResetAppP1,
+                P2 = ResetAppP2
+            };
 
         /// <inheritdoc />
         public ResetApplicationResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

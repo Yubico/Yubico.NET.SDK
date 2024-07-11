@@ -60,7 +60,10 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         /// class's documentation for more information.
         /// </para>
         /// </remarks>
-        public int? RetriesRemaining => StatusWordContainsRetries ? (int?)(StatusWord & _retriesMask) : null;
+        public int? RetriesRemaining =>
+            StatusWordContainsRetries
+                ? (int?)(StatusWord & _retriesMask)
+                : null;
 
         /// <inheritdoc/>
         protected override ResponseStatusPair StatusCodeMap
@@ -70,11 +73,12 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
                 // Add special handling for the situation where the status word also contains the retry count
                 if (StatusWordContainsRetries)
                 {
-                    return new ResponseStatusPair(ResponseStatus.AuthenticationRequired,
-                            string.Format(
-                                CultureInfo.CurrentCulture,
-                                ResponseStatusMessages.YubiHsmAuthAuthenticationRequired,
-                                RetriesRemaining));
+                    return new ResponseStatusPair(
+                        ResponseStatus.AuthenticationRequired,
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ResponseStatusMessages.YubiHsmAuthAuthenticationRequired,
+                            RetriesRemaining));
                 }
 
                 return base.StatusCodeMap;

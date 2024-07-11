@@ -61,6 +61,7 @@ namespace Yubico.YubiKey.Otp
             byte[] frame = apdu.Data.ToArray()
                 .Concat(new byte[_yubiKeyFrameSize - apdu.Nc])
                 .ToArray();
+
             frame[_slotNumberOffset] = apdu.P1;
             AddCrc(frame);
 

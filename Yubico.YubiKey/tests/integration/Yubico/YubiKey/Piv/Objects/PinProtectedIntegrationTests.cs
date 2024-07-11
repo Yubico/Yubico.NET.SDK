@@ -102,7 +102,6 @@ namespace Yubico.YubiKey.Piv
                         bool isValid = mgmtKey.Span.SequenceEqual(getData.Span);
                         Assert.True(isValid);
                     }
-
                 }
                 finally
                 {
@@ -113,7 +112,8 @@ namespace Yubico.YubiKey.Piv
 
         private Memory<byte> GetArbitraryMgmtKey()
         {
-            byte[] keyData = {
+            byte[] keyData =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
                 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68

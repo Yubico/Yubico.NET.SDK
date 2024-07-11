@@ -105,6 +105,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                                 break;
                             }
                         }
+
                         while (sValue.Span[offsetS] == 0)
                         {
                             offsetS++;
@@ -176,6 +177,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     break;
                 }
             }
+
             while (signature[offsetS] == 0)
             {
                 offsetS++;

@@ -20,6 +20,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
     public class CredentialTests
     {
         #region constructor
+
         [Fact]
         public void Constructor_KeyTypeAes128_ObjectKeyTypeAes128()
         {
@@ -74,9 +75,9 @@ namespace Yubico.YubiKey.YubiHsmAuth
             string expectedLabel = new string('a', strLength);
 
             _ = Assert.Throws<ArgumentOutOfRangeException>(() => new Credential(
-                    CryptographicKeyType.Aes128,
-                    expectedLabel,
-                    false));
+                CryptographicKeyType.Aes128,
+                expectedLabel,
+                false));
         }
 
         [Fact]
@@ -85,15 +86,17 @@ namespace Yubico.YubiKey.YubiHsmAuth
             bool expectedTouchRequired = true;
 
             Credential cred = new Credential(
-                    CryptographicKeyType.Aes128,
-                    "test key",
-                    expectedTouchRequired);
+                CryptographicKeyType.Aes128,
+                "test key",
+                expectedTouchRequired);
 
             Assert.Equal(expectedTouchRequired, cred.TouchRequired);
         }
+
         #endregion
 
         #region KeyType Property
+
         [Fact]
         public void KeyType_GetSetAes128_KeyTypeIsAes128()
         {
@@ -137,9 +140,11 @@ namespace Yubico.YubiKey.YubiHsmAuth
             _ = Assert.Throws<ArgumentOutOfRangeException>(
                 () => cred.KeyType = invalidKeyType);
         }
+
         #endregion
 
         #region label property
+
         [Fact]
         public void MinLabelLength_Get_Returns1()
         {
@@ -199,9 +204,11 @@ namespace Yubico.YubiKey.YubiHsmAuth
             _ = Assert.Throws<ArgumentOutOfRangeException>(
                 () => cred.Label = expectedLabel);
         }
+
         #endregion
 
         #region touch property
+
         [Fact]
         public void TouchRequired_SetGetTrue_ReturnsTrue()
         {
@@ -217,6 +224,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
             Assert.Equal(expectedTouch, cred.TouchRequired);
         }
+
         #endregion
     }
 }

@@ -26,16 +26,17 @@ namespace Yubico.YubiKey
     internal class TestSmartCardDevice : ISmartCardDevice
     {
         public readonly static ISmartCardDevice AnyInstance = new TestSmartCardDevice()
-        { Kind = SmartCardConnectionKind.Any };
+            { Kind = SmartCardConnectionKind.Any };
 
         public readonly static ISmartCardDevice NfcInstance = new TestSmartCardDevice()
-        { Kind = SmartCardConnectionKind.Nfc };
+            { Kind = SmartCardConnectionKind.Nfc };
 
         public DateTime LastAccessed { get; } = DateTime.Now;
         public string Path { get; } = string.Empty;
         public string? ParentDeviceId { get; } = null;
         public AnswerToReset? Atr { get; }
         public SmartCardConnectionKind Kind { get; private set; }
+
         public ISmartCardConnection Connect()
         {
             throw new System.NotImplementedException();
@@ -54,6 +55,7 @@ namespace Yubico.YubiKey
         public short ProductId { get; }
         public short Usage { get; }
         public HidUsagePage UsagePage { get; private set; }
+
         public IHidConnection ConnectToFeatureReports()
         {
             throw new System.NotImplementedException();
@@ -90,7 +92,8 @@ namespace Yubico.YubiKey
 
         [Theory]
         [MemberData(nameof(SupportedApplicationTuples))]
-        public void DeviceSupportsApplication_GivenSupportedTuple_ReturnsTrue(IDevice device, YubiKeyApplication application)
+        public void DeviceSupportsApplication_GivenSupportedTuple_ReturnsTrue(
+            IDevice device, YubiKeyApplication application)
         {
             Assert.True(ConnectionManager.DeviceSupportsApplication(device, application));
         }
@@ -115,7 +118,8 @@ namespace Yubico.YubiKey
 
         [Theory]
         [MemberData(nameof(UnsupportedApplicationTuples))]
-        public void DeviceSupportsApplication_GivenUnsupportedTuple_ReturnsFalse(IDevice device, YubiKeyApplication application)
+        public void DeviceSupportsApplication_GivenUnsupportedTuple_ReturnsFalse(
+            IDevice device, YubiKeyApplication application)
         {
             Assert.False(ConnectionManager.DeviceSupportsApplication(device, application));
         }

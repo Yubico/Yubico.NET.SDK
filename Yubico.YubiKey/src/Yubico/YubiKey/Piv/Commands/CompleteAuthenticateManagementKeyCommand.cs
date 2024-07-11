@@ -159,6 +159,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 throw new ArgumentNullException(nameof(initializeAuthenticationResponse));
             }
+
             if (initializeAuthenticationResponse.Status != ResponseStatus.Success)
             {
                 throw new InvalidOperationException(
@@ -169,7 +170,9 @@ namespace Yubico.YubiKey.Piv.Commands
 
             Algorithm = initializeAuthenticationResponse.Algorithm;
 
-            (bool isMutual, ReadOnlyMemory<byte> clientAuthenticationChallenge) = initializeAuthenticationResponse.GetData();
+            (bool isMutual, ReadOnlyMemory<byte> clientAuthenticationChallenge) =
+                initializeAuthenticationResponse.GetData();
+
             _isMutual = isMutual;
 
             // With single auth, encrypt the challenge. Mutual decrypts.
@@ -180,7 +183,7 @@ namespace Yubico.YubiKey.Piv.Commands
 
             // JUSTIFICATION (disable 618): We are using the
             // *ForManagementKey classes in the way they were intended.
-#pragma warning disable 618
+            #pragma warning disable 618
             using ISymmetricForManagementKey symObject = Algorithm switch
             {
                 PivAlgorithm.TripleDes => new TripleDesForManagementKey(managementKey, !_isMutual),
@@ -192,14 +195,15 @@ namespace Yubico.YubiKey.Piv.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidAlgorithm)),
             };
-#pragma warning restore 618
+            #pragma warning restore 618
 
             _blockSize = symObject.BlockSize;
             _buffer = new byte[BlockCount * symObject.BlockSize];
             _dataMemory = new Memory<byte>(_buffer);
 
-            int copyCount = clientAuthenticationChallenge.Length >= _blockSize ?
-                _blockSize : clientAuthenticationChallenge.Length;
+            int copyCount = clientAuthenticationChallenge.Length >= _blockSize
+                ? _blockSize
+                : clientAuthenticationChallenge.Length;
 
             clientAuthenticationChallenge.CopyTo(_dataMemory.Slice(ClientChallengeOffset * _blockSize, copyCount));
 
@@ -230,6 +234,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     _blockSize,
                     _buffer,
                     YubiKeyChallengeOffset * _blockSize);
+
                 expectedWritten += _blockSize;
 
                 _expectedResponse = new ReadOnlyMemory<byte>(_buffer, ExpectedResponseOffset * _blockSize, _blockSize);
@@ -268,8 +273,12 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 if (_isMutual)
                 {
-                    tlvWriter.WriteValue(ClientResponseTag, _dataMemory.Slice(ClientResponseOffset * _blockSize, _blockSize).Span);
-                    tlvWriter.WriteValue(YubiKeyChallengeTag, _dataMemory.Slice(YubiKeyChallengeOffset * _blockSize, _blockSize).Span);
+                    tlvWriter.WriteValue(
+                        ClientResponseTag, _dataMemory.Slice(ClientResponseOffset * _blockSize, _blockSize).Span);
+
+                    tlvWriter.WriteValue(
+                        YubiKeyChallengeTag, _dataMemory.Slice(YubiKeyChallengeOffset * _blockSize, _blockSize).Span);
+
                     tlvWriter.WriteValue(EmptyTag, ReadOnlySpan<byte>.Empty);
                 }
                 else

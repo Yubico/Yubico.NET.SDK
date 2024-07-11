@@ -60,7 +60,9 @@ namespace Yubico.YubiKey.Fido2.Cbor
                 throw new Ctap2DataException(ExceptionMessages.Ctap2MissingRequiredField);
             }
 
-            int? numberElements = cbor.ReadStartMap() ?? throw new NotSupportedException(ExceptionMessages.Ctap2CborIndefiniteLength);
+            int? numberElements = cbor.ReadStartMap() ??
+                throw new NotSupportedException(ExceptionMessages.Ctap2CborIndefiniteLength);
+
             int count = numberElements.Value;
             _dict = new Dictionary<TKey, object?>(count);
 
@@ -152,6 +154,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                         returnValue.Add(typedValue);
                         continue;
                     }
+
                     break;
                 }
 
@@ -244,7 +247,6 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 throw new InvalidCastException(null, overflowException);
             }
-
         }
 
         /// <summary>
@@ -384,7 +386,8 @@ namespace Yubico.YubiKey.Fido2.Cbor
 
             if (typeof(TReadKey) == typeof(string))
             {
-                return (TReadKey)Convert.ChangeType(cbor.ReadTextString(), typeof(TReadKey), CultureInfo.InvariantCulture);
+                return (TReadKey)Convert.ChangeType(
+                    cbor.ReadTextString(), typeof(TReadKey), CultureInfo.InvariantCulture);
             }
 
             throw new InvalidOperationException(ExceptionMessages.TypeNotSupported);
@@ -393,21 +396,22 @@ namespace Yubico.YubiKey.Fido2.Cbor
         // Note that if the encoding specifies that the value is a negative
         // integer, we store the value as a long. If the encoding specifies that
         // the value is unsigned, we store the value as a ulong.
-        private static object? ProcessSingleElement(CborReader cbor) => cbor.PeekState() switch
-        {
-            CborReaderState.Undefined => null,
-            CborReaderState.UnsignedInteger => cbor.ReadUInt64(),
-            CborReaderState.NegativeInteger => cbor.ReadInt64(),
-            CborReaderState.ByteString => cbor.ReadByteString(),
-            CborReaderState.TextString => cbor.ReadTextString(),
-            CborReaderState.StartMap => ProcessSubMap(cbor),
-            CborReaderState.StartArray => ProcessArray(cbor),
-            CborReaderState.SinglePrecisionFloat => cbor.ReadSingle(),
-            CborReaderState.DoublePrecisionFloat => cbor.ReadDouble(),
-            CborReaderState.Null => ProcessNull(cbor),
-            CborReaderState.Boolean => cbor.ReadBoolean(),
-            _ => throw new NotSupportedException()
-        };
+        private static object? ProcessSingleElement(CborReader cbor) =>
+            cbor.PeekState() switch
+            {
+                CborReaderState.Undefined => null,
+                CborReaderState.UnsignedInteger => cbor.ReadUInt64(),
+                CborReaderState.NegativeInteger => cbor.ReadInt64(),
+                CborReaderState.ByteString => cbor.ReadByteString(),
+                CborReaderState.TextString => cbor.ReadTextString(),
+                CborReaderState.StartMap => ProcessSubMap(cbor),
+                CborReaderState.StartArray => ProcessArray(cbor),
+                CborReaderState.SinglePrecisionFloat => cbor.ReadSingle(),
+                CborReaderState.DoublePrecisionFloat => cbor.ReadDouble(),
+                CborReaderState.Null => ProcessNull(cbor),
+                CborReaderState.Boolean => cbor.ReadBoolean(),
+                _ => throw new NotSupportedException()
+            };
 
         private static object? ProcessNull(CborReader cbor)
         {

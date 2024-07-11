@@ -160,8 +160,10 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// The Auth Protocol used to build the Auth Token.
         /// </param>
         public CredentialManagementCommand(
-            int subCommand, byte[]? subCommandParams,
-            ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
+            int subCommand,
+            byte[]? subCommandParams,
+            ReadOnlyMemory<byte> pinUvAuthToken,
+            PinUvAuthProtocolBase authProtocol)
         {
             if (authProtocol is null)
             {
@@ -268,7 +270,9 @@ namespace Yubico.YubiKey.Fido2.Commands
                 throw new Ctap2DataException(ExceptionMessages.CborLengthMismatch);
             }
 
-            data[0] = isPreview ? CmdCredentialMgmtPreview : CmdAuthenticatorCredMgmt;
+            data[0] = isPreview
+                ? CmdCredentialMgmtPreview
+                : CmdAuthenticatorCredMgmt;
 
             return new CommandApdu()
             {

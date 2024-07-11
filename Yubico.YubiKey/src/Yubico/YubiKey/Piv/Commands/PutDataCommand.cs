@@ -226,6 +226,7 @@ namespace Yubico.YubiKey.Piv.Commands
                                 value));
                     }
                 }
+
                 _tag = value;
             }
         }
@@ -276,6 +277,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             ExceptionMessages.InvalidDataTag,
                             value));
                 }
+
                 _tag = (int)value;
             }
         }
@@ -302,6 +304,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.InvalidDataEncoding));
                 }
+
                 _encodedData = value;
             }
         }
@@ -359,7 +362,8 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The encodedData is not as specified for the given <c>tag</c>.
         /// </exception>
-        [ObsoleteAttribute("This constructor is obsolete. Use PutDataCommand(int, ReadOnlyMemory<byte>) instead", false)]
+        [ObsoleteAttribute(
+            "This constructor is obsolete. Use PutDataCommand(int, ReadOnlyMemory<byte>) instead", false)]
         public PutDataCommand(PivDataTag tag, ReadOnlyMemory<byte> encodedData)
         {
             Tag = tag;
@@ -399,13 +403,14 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = PivPutDataInstruction,
-            P1 = PivPutDataParameter1,
-            P2 = PivPutDataParameter2,
-            Data = BuildPutDataApduData(),
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = PivPutDataInstruction,
+                P1 = PivPutDataParameter1,
+                P2 = PivPutDataParameter2,
+                Data = BuildPutDataApduData(),
+            };
 
         // Build the data that is the Data portion of the APDU.
         // The data will be the concatenation of two TLVs:
@@ -475,7 +480,6 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public PutDataResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new PutDataResponse(responseApdu);
+        public PutDataResponse CreateResponseForApdu(ResponseApdu responseApdu) => new PutDataResponse(responseApdu);
     }
 }

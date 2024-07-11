@@ -25,7 +25,9 @@ namespace Yubico.YubiKey.Otp.Commands
     public class WriteScancodeMap : IYubiKeyCommand<ReadStatusResponse>
     {
         private const byte RequestSlotInstruction = 0x01;
+
         private const byte WriteScancodeMapSlot = 0x12;
+
         // Note that this is not ModHex, but it's what yubico_personalization
         // uses to write the map.
         private static string _defaultScancodeMap => "cbdefghijklnrtuvCBDEFGHIJKLNRTUV0123456789!\t\n";
@@ -58,7 +60,7 @@ namespace Yubico.YubiKey.Otp.Commands
                             ExceptionMessages.WrongHidCodeMapLength,
                             _scancodeMapLength,
                             value.Length),
-                            nameof(value));
+                        nameof(value));
                 }
 
                 _scancodeMap = value;
@@ -72,7 +74,6 @@ namespace Yubico.YubiKey.Otp.Commands
         public WriteScancodeMap() :
             this(DefaultScancodeMap)
         {
-
         }
 
         /// <summary>

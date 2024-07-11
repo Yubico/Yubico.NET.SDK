@@ -38,6 +38,7 @@ namespace Yubico.YubiKey.TestUtilities
         public Transport AvailableTransports => Transport.All;
 
         #region IYubiKeyDeviceInfo
+
         /// <inheritdoc />
         public YubiKeyCapabilities AvailableUsbCapabilities { get; set; }
 

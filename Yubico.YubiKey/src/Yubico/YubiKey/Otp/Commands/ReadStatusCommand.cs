@@ -35,14 +35,14 @@ namespace Yubico.YubiKey.Otp.Commands
         /// </summary>
         public ReadStatusCommand()
         {
-
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = OtpConstants.ReadStatusInstruction
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = OtpConstants.ReadStatusInstruction
+            };
 
         /// <inheritdoc />
         public ReadStatusResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

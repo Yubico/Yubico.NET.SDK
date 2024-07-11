@@ -25,16 +25,18 @@ namespace Yubico.YubiKey.Otp
         /// A <see langword="byte"/> containing the flags from <see cref="ExtendedFlags"/>l
         /// </summary>
         public byte Extended { get; set; }
+
         /// <summary>
         /// A <see langword="byte"/> containing the flags from <see cref="TicketFlags"/>l
         /// </summary>
         public byte Ticket { get; set; }
+
         /// <summary>
         /// A <see langword="byte"/> containing the flags from <see cref="ConfigurationFlags"/>l
         /// </summary>
         public byte Configuration { get; set; }
 
-#pragma warning disable CA2225, CA1065 // Justification: Not necessary to have the expected named alternative method
+        #pragma warning disable CA2225, CA1065 // Justification: Not necessary to have the expected named alternative method
         /// <summary>
         /// Implicitly extract <see cref="ExtendedFlags"/> from a <see cref="YubiKeyFlags"/> object.
         /// </summary>
@@ -76,6 +78,6 @@ namespace Yubico.YubiKey.Otp
 
             return flags.Configuration;
         }
-#pragma warning restore CA2225, CA1065
+        #pragma warning restore CA2225, CA1065
     }
 }

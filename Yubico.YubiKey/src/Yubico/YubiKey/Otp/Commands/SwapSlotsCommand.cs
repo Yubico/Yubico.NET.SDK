@@ -34,15 +34,15 @@ namespace Yubico.YubiKey.Otp.Commands
         /// </summary>
         public SwapSlotsCommand()
         {
-
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = OtpConstants.RequestSlotInstruction,
-            P1 = OtpConstants.SwapSlotsSlot
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = OtpConstants.RequestSlotInstruction,
+                P1 = OtpConstants.SwapSlotsSlot
+            };
 
         /// <inheritdoc />
         public ReadStatusResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

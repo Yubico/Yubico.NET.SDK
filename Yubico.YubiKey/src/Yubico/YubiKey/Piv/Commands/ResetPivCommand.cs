@@ -86,13 +86,13 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = ResetPivInstruction,
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = ResetPivInstruction,
+            };
 
         /// <inheritdoc />
-        public ResetPivResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new ResetPivResponse(responseApdu);
+        public ResetPivResponse CreateResponseForApdu(ResponseApdu responseApdu) => new ResetPivResponse(responseApdu);
     }
 }

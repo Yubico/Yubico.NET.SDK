@@ -146,7 +146,7 @@ namespace Yubico.YubiKey.Fido2
                     string.Format(
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.Ctap2CborUnexpectedValue),
-                        cborException);
+                    cborException);
             }
 
             if (Id is null)

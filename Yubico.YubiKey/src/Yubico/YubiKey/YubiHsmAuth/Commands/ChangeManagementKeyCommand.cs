@@ -110,11 +110,12 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         }
 
         /// <inheritdoc/>
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = SetManagementKeyInstruction,
-            Data = BuildDataField(),
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Ins = SetManagementKeyInstruction,
+                Data = BuildDataField(),
+            };
 
         /// <inheritdoc/>
         public ChangeManagementKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

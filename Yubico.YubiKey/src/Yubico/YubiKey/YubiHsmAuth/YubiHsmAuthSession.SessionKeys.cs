@@ -96,10 +96,11 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// <exception cref="TimeoutException">
         /// The operation timed out waiting for touch.
         /// </exception>
-        public SessionKeys GetAes128SessionKeys(string credentialLabel,
-                                                ReadOnlyMemory<byte> credentialPassword,
-                                                ReadOnlyMemory<byte> hostChallenge,
-                                                ReadOnlyMemory<byte> hsmDeviceChallenge)
+        public SessionKeys GetAes128SessionKeys(
+            string credentialLabel,
+            ReadOnlyMemory<byte> credentialPassword,
+            ReadOnlyMemory<byte> hostChallenge,
+            ReadOnlyMemory<byte> hsmDeviceChallenge)
         {
             GetAes128SessionKeysCommand getKeysCmd =
                 new GetAes128SessionKeysCommand(
@@ -115,10 +116,11 @@ namespace Yubico.YubiKey.YubiHsmAuth
             {
                 if (getKeysRsp.Status == ResponseStatus.AuthenticationRequired)
                 {
-                    throw new SecurityException(string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.YubiHsmAuthCredPasswordAuthFailed,
-                        getKeysRsp.RetriesRemaining));
+                    throw new SecurityException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.YubiHsmAuthCredPasswordAuthFailed,
+                            getKeysRsp.RetriesRemaining));
                 }
                 else if (getKeysRsp.Status == ResponseStatus.RetryWithTouch)
                 {
@@ -221,10 +223,11 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// <exception cref="TimeoutException">
         /// The operation timed out waiting for touch.
         /// </exception>
-        public bool TryGetAes128SessionKeys(string credentialLabel,
-                                            ReadOnlyMemory<byte> hostChallenge,
-                                            ReadOnlyMemory<byte> hsmDeviceChallenge,
-                                            [NotNullWhen(true)] out SessionKeys? sessionKeys)
+        public bool TryGetAes128SessionKeys(
+            string credentialLabel,
+            ReadOnlyMemory<byte> hostChallenge,
+            ReadOnlyMemory<byte> hsmDeviceChallenge,
+            [NotNullWhen(true)] out SessionKeys? sessionKeys)
         {
             sessionKeys = null;
 

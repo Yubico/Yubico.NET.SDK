@@ -53,13 +53,14 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             get => _encryptionKey;
 
-            set => _encryptionKey = value.Length == RequiredKeySize
-                ? value
-                : throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.YubiHsmAuthInvalidEncSize,
-                        value.Length));
+            set =>
+                _encryptionKey = value.Length == RequiredKeySize
+                    ? value
+                    : throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.YubiHsmAuthInvalidEncSize,
+                            value.Length));
         }
 
         /// <summary>
@@ -81,13 +82,14 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             get => _macKey;
 
-            set => _macKey = value.Length == RequiredKeySize
-                ? value
-                : throw new ArgumentException(
-                    string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.YubiHsmAuthInvalidMacSize,
-                        value.Length));
+            set =>
+                _macKey = value.Length == RequiredKeySize
+                    ? value
+                    : throw new ArgumentException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.YubiHsmAuthInvalidMacSize,
+                            value.Length));
         }
 
         /// <summary>

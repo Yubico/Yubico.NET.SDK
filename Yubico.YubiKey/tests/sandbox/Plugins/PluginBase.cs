@@ -132,6 +132,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
         /// Use this instead of literals so that platform differences are handled correctly.
         /// </remarks>
         public static string Eol => Environment.NewLine;
+
         public static int ConsoleWidth => Console.IsOutputRedirected ? 80 : Console.WindowWidth;
 
         /// <summary>

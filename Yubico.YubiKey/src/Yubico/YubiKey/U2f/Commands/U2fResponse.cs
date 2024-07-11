@@ -29,21 +29,28 @@ namespace Yubico.YubiKey.U2f.Commands
         /// status words. The messages match the status words' meanings
         /// as described in the FIDO U2F specifications.
         /// </summary>
-        protected override ResponseStatusPair StatusCodeMap => StatusWord switch
-        {
-            // U2F raw message status codes - FIDO U2F Raw Message Formats, section 3.3
-            SWConstants.ConditionsNotSatisfied => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.U2fConditionsNotSatisfied),
-            SWConstants.InvalidCommandDataParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fWrongData),
-            SWConstants.VerifyFail => new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.U2fPinNotVerified),
+        protected override ResponseStatusPair StatusCodeMap =>
+            StatusWord switch
+            {
+                // U2F raw message status codes - FIDO U2F Raw Message Formats, section 3.3
+                SWConstants.ConditionsNotSatisfied => new ResponseStatusPair(
+                    ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.U2fConditionsNotSatisfied),
+                SWConstants.InvalidCommandDataParameter => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.U2fWrongData),
+                SWConstants.VerifyFail => new ResponseStatusPair(
+                    ResponseStatus.AuthenticationRequired, ResponseStatusMessages.U2fPinNotVerified),
 
-            // U2FHID_ERROR - FIDO U2F HID Protocol, section 4.1.4
-            SWConstants.CommandNotAllowed => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidCommand),
-            SWConstants.InvalidParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidParameter),
-            SWConstants.WrongLength => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidLength),
-            SWConstants.NoPreciseDiagnosis => GetU2fHidErrorStatusPair(),
+                // U2FHID_ERROR - FIDO U2F HID Protocol, section 4.1.4
+                SWConstants.CommandNotAllowed => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidCommand),
+                SWConstants.InvalidParameter => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidParameter),
+                SWConstants.WrongLength => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.U2fHidErrorInvalidLength),
+                SWConstants.NoPreciseDiagnosis => GetU2fHidErrorStatusPair(),
 
-            _ => base.StatusCodeMap,
-        };
+                _ => base.StatusCodeMap,
+            };
 
         /// <summary>
         /// Bind a new instance of U2FResponse from the given response APDU
@@ -118,9 +125,9 @@ namespace Yubico.YubiKey.U2f.Commands
                     (byte)U2fHidStatus.Ctap1ErrTimeout => ResponseStatusMessages.U2fHidErrorMessageTimeout,
                     (byte)U2fHidStatus.Ctap1ErrChannelBusy => ResponseStatusMessages.U2fHidErrorChannelBusy,
                     _ => string.Format(
-                            System.Globalization.CultureInfo.CurrentCulture,
-                            ResponseStatusMessages.U2fHidErrorUnknown,
-                            errorCode),
+                        System.Globalization.CultureInfo.CurrentCulture,
+                        ResponseStatusMessages.U2fHidErrorUnknown,
+                        errorCode),
                 };
 
             return new ResponseStatusPair(ResponseStatus.Failed, responseMessage);

@@ -57,7 +57,9 @@ namespace Yubico.YubiKey.Pipelines
 
                 var partialApdu = new CommandApdu
                 {
-                    Cla = (byte)(command.Cla | (sourceData.IsEmpty ? 0 : 0x10)),
+                    Cla = (byte)(command.Cla | (sourceData.IsEmpty
+                        ? 0
+                        : 0x10)),
                     Ins = command.Ins,
                     P1 = command.P1,
                     P2 = command.P2,

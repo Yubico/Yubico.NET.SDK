@@ -89,14 +89,17 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 throw new ArgumentNullException(nameof(data));
             }
+
             if (offset < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(offset));
             }
+
             if (count < 0)
             {
                 throw new ArgumentOutOfRangeException(nameof(count));
             }
+
             if (offset + count > data.Length)
             {
                 throw new ArgumentException(ExceptionMessages.IncorrectDerivationLength);
@@ -189,7 +192,8 @@ namespace Yubico.YubiKey.TestUtilities
             _ = mock.Setup(rand => rand.GetBytes(It.IsAny<byte[]>()))
                 .Callback<byte[]>(randomBytes => redirect.GetBytes(randomBytes));
             _ = mock.Setup(rand => rand.GetBytes(It.IsAny<byte[]>(), It.IsAny<int>(), It.IsAny<int>()))
-                .Callback<byte[], int, int>((randomBytes, offset, count) => redirect.GetBytes(randomBytes, offset, count));
+                .Callback<byte[], int, int>((randomBytes, offset, count) =>
+                    redirect.GetBytes(randomBytes, offset, count));
 
             return mock.Object;
         }
@@ -217,6 +221,7 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 throw new ArgumentNullException(nameof(fixedBytes));
             }
+
             var randomUtility = new RandomObjectUtility(fixedBytes);
             randomUtility.ReplaceRandomProvider();
 

@@ -45,14 +45,16 @@ namespace Yubico.YubiKey.U2f.Commands
         [Fact]
         public void Constructor_GivenInvalidCommandDataParameterStatusWord_SetsResponseStatus()
         {
-            var response = new U2fResponse(new ResponseApdu(Array.Empty<byte>(), SWConstants.InvalidCommandDataParameter));
+            var response =
+                new U2fResponse(new ResponseApdu(Array.Empty<byte>(), SWConstants.InvalidCommandDataParameter));
             Assert.Equal(ResponseStatus.Failed, response.Status);
         }
 
         [Fact]
         public void Constructor_GivenInvalidCommandDataParameterStatusWord_SetsStatusMessage()
         {
-            var response = new U2fResponse(new ResponseApdu(Array.Empty<byte>(), SWConstants.InvalidCommandDataParameter));
+            var response =
+                new U2fResponse(new ResponseApdu(Array.Empty<byte>(), SWConstants.InvalidCommandDataParameter));
             Assert.Equal(ResponseStatusMessages.U2fWrongData, response.StatusMessage);
         }
 
@@ -170,10 +172,10 @@ namespace Yubico.YubiKey.U2f.Commands
             byte[] responseData = new byte[] { 0x77 };
             var response = new U2fResponse(new ResponseApdu(responseData, SWConstants.NoPreciseDiagnosis));
             Assert.Equal(string.Format(
-                            System.Globalization.CultureInfo.CurrentCulture,
-                            ResponseStatusMessages.U2fHidErrorUnknown,
-                            responseData[0]),
-                            response.StatusMessage);
+                    System.Globalization.CultureInfo.CurrentCulture,
+                    ResponseStatusMessages.U2fHidErrorUnknown,
+                    responseData[0]),
+                response.StatusMessage);
         }
     }
 }

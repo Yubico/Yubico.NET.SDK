@@ -49,6 +49,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                     cData = rsp.GetData();
                 }
             }
+
             Assert.Equal(48, cData.CredentialId.Id.Length);
         }
 
@@ -56,7 +57,8 @@ namespace Yubico.YubiKey.Fido2.Commands
             PinUvAuthProtocolBase protocol,
             out GetAssertionParameters assertionParams)
         {
-            byte[] clientDataHash = {
+            byte[] clientDataHash =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
             };

@@ -32,7 +32,9 @@ namespace Yubico.YubiKey.Fido2
             GetInfoResponse getInfoRsp = connection.SendCommand(getInfoCmd);
             Assert.Equal(ResponseStatus.Success, getInfoRsp.Status);
             AuthenticatorInfo authInfo = getInfoRsp.GetData();
-            Assert.Equal(32, authInfo.MaximumCredentialBlobLength); /* Assert.Equal() Failure: Values differExpected: 32 Actual: null */
+            Assert.Equal(32,
+                authInfo
+                    .MaximumCredentialBlobLength); /* Assert.Equal() Failure: Values differExpected: 32 Actual: null */
 
             int maxCredBlobLength = authInfo.MaximumCredentialBlobLength ?? 0;
             Assert.NotNull(authInfo.Extensions);

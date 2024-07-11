@@ -44,7 +44,8 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <c>largeBlobKey</c>, and <c>credentialCount</c>.
     /// </para>
     /// </remarks>
-    public class EnumerateCredentialsBeginCommand : CredentialMgmtSubCommand, IYubiKeyCommand<EnumerateCredentialsBeginResponse>
+    public class EnumerateCredentialsBeginCommand : CredentialMgmtSubCommand,
+                                                    IYubiKeyCommand<EnumerateCredentialsBeginResponse>
     {
         private const int SubCmdEnumerateCredsBegin = 0x04;
         private const int KeyRpIdHash = 1;
@@ -73,8 +74,9 @@ namespace Yubico.YubiKey.Fido2.Commands
             RelyingParty relyingParty,
             ReadOnlyMemory<byte> pinUvAuthToken,
             PinUvAuthProtocolBase authProtocol)
-            : base(new CredentialManagementCommand(
-            SubCmdEnumerateCredsBegin, EncodeParams(relyingParty), pinUvAuthToken, authProtocol))
+            : base(
+                new CredentialManagementCommand(
+                    SubCmdEnumerateCredsBegin, EncodeParams(relyingParty), pinUvAuthToken, authProtocol))
         {
         }
 

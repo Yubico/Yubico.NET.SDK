@@ -51,4 +51,3 @@ namespace Yubico.YubiKey.Fido2
         Optional = 2,
     }
 }
-

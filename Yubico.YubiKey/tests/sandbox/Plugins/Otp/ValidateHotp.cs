@@ -27,7 +27,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
         public override string Name => "ValidateHotp";
 
         public override string Description => "Validates a HOTP challenge. Important notice: " +
-            "This is a test tool not meant for secure operations!";
+                                              "This is a test tool not meant for secure operations!";
 
         protected override ParameterUse ParametersUsed =>
             ParameterUse.Key
@@ -42,16 +42,16 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             _ = Parameters.Remove("serial-number");
 
             Parameters["password"].Description = "This is the passcode to test. It should be numeric " +
-                "digits between 0 and 9. Other characters will cause an error. If you do not specify " +
-                "a passcode, then the passcode generated from the key and the initial moving factor " +
-                "will be printed. This passcode has to have the same number of digits specified by the " +
-                "digits parameter. If you don't specify, the default is six digits.";
+                                                 "digits between 0 and 9. Other characters will cause an error. If you do not specify " +
+                                                 "a passcode, then the passcode generated from the key and the initial moving factor " +
+                                                 "will be printed. This passcode has to have the same number of digits specified by the " +
+                                                 "digits parameter. If you don't specify, the default is six digits.";
 
             Parameters["initialmovingfactor"].Description = "Initial moving factor. This is the counter " +
-                "to use for the calculation. Because this plug-in is stateless, this counter will not be " +
-                "used beyond just the one calculation. Unlike programming the YubiKey, there is no " +
-                "constraint on the value being evenly dividable by 16. It still must be between 0 and " +
-                "1048560 (0xffff0).";
+                                                            "to use for the calculation. Because this plug-in is stateless, this counter will not be " +
+                                                            "used beyond just the one calculation. Unlike programming the YubiKey, there is no " +
+                                                            "constraint on the value being evenly dividable by 16. It still must be between 0 and " +
+                                                            "1048560 (0xffff0).";
         }
 
         public override void HandleParameters()
@@ -100,6 +100,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                         $"Error decoding passcode digits: {ex.Message}",
                         ex));
                 }
+
                 if (_password.Length != _digits)
                 {
                     exceptions.Add(new InvalidOperationException(
@@ -121,7 +122,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             }
 
 
-
             if (exceptions.Count > 0)
             {
                 throw exceptions.Count == 1
@@ -130,7 +130,6 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                         $"{exceptions.Count} errors encountered.",
                         exceptions);
             }
-
         }
 
         public override bool Execute()
@@ -153,6 +152,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Output.WriteLine(string.Empty, OutputLevel.Quiet);
                 return pass;
             }
+
             Output.Write("Code: ");
             Output.WriteLine(code, OutputLevel.Quiet);
 

@@ -46,7 +46,6 @@ namespace Yubico.YubiKey.Oath
         /// </summary>
         public Code()
         {
-
         }
 
         /// <summary>

@@ -82,10 +82,11 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
-        public PivMetadata GetData() => Status switch
-        {
-            ResponseStatus.Success => new PivMetadata(ResponseApdu.Data.ToArray(), SlotNumber),
-            _ => throw new InvalidOperationException(StatusMessage),
-        };
+        public PivMetadata GetData() =>
+            Status switch
+            {
+                ResponseStatus.Success => new PivMetadata(ResponseApdu.Data.ToArray(), SlotNumber),
+                _ => throw new InvalidOperationException(StatusMessage),
+            };
     }
 }

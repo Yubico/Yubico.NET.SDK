@@ -139,6 +139,7 @@ namespace Yubico.YubiKey.Piv.Objects
                 {
                     _adminDataBitField ^= PukBlockedBit;
                 }
+
                 IsEmpty = false;
             }
         }
@@ -160,6 +161,7 @@ namespace Yubico.YubiKey.Piv.Objects
                 {
                     _adminDataBitField ^= PinProtectedBit;
                 }
+
                 IsEmpty = false;
             }
         }
@@ -319,6 +321,7 @@ namespace Yubico.YubiKey.Piv.Objects
                     {
                         tlvWriter.WriteValue(SaltTag, _salt.Span);
                     }
+
                     if (!(PinLastUpdated is null))
                     {
                         long unixTimeSeconds = new DateTimeOffset((DateTime)PinLastUpdated).ToUnixTimeSeconds();
@@ -363,6 +366,7 @@ namespace Yubico.YubiKey.Piv.Objects
             {
                 isValid = tlvReader.TryReadNestedTlv(out tlvReader, AdminDataTag);
             }
+
             while (tlvReader.HasData)
             {
                 int nextTag = tlvReader.PeekTag();
@@ -485,7 +489,11 @@ namespace Yubico.YubiKey.Piv.Objects
             BinaryPrimitives.WriteUInt64LittleEndian(buffer, (ulong)unixTime);
             int index = Array.FindLastIndex(buffer, element => element != 0);
 
-            Array.Resize<byte>(ref buffer, index < 0 ? 1 : index + 1);
+            Array.Resize<byte>(
+                ref buffer, index < 0
+                    ? 1
+                    : index + 1);
+
             return buffer;
         }
 

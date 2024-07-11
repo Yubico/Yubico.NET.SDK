@@ -31,7 +31,9 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         // If you add a new keyboard, first look this up and add it here.
         // Here's a reference to find it: https://bit.ly/3u55gFt.
+
         #region LCID Codes
+
         public static string en_US = "00000409";
         public static string en_UK = "00000809";
         public static string de_DE = "00000407";
@@ -39,13 +41,16 @@ namespace Yubico.YubiKey.TestApp.Plugins
         public static string it_IT = "00000410";
         public static string es_US = "0000540a";
         public static string sv_SE = "0000410d";
+
         #endregion
 
         // This is where the keyboard layout actually gets loaded from.
         // Important: Even though the identifiers are presented with differing
         // cases, we're going to use all upper-case for the key and make the
         // matching not case-sensitive to avoid confusion.
+
         #region Keyboard Layouts
+
         private readonly Dictionary<string, (string LCID, IEnumerable<HidInfo>? Codes)> _keyboardLayouts =
             new Dictionary<string, (string LCID, IEnumerable<HidInfo>? Codes)>
             {
@@ -58,6 +63,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 ["SV_SE"] = (sv_SE, null),
                 ["MODHEX"] = (en_US, _modHexHidInfo)
             };
+
         #endregion
 
         public HidCodeTablePlugin(IOutput output) : base(output)
@@ -68,9 +74,9 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 Shortcut = "k",
                 Type = typeof(IEnumerable<string>),
                 Description =
-                        "A list (or single one of) keyboard IDs to print lookup tables for. " +
-                        $"If you're adding a new layout, you'll need to edit {Path.GetFileName(GetSourceFile())}. " +
-                        "If nothing is specified, all current supported layouts are printed."
+                    "A list (or single one of) keyboard IDs to print lookup tables for. " +
+                    $"If you're adding a new layout, you'll need to edit {Path.GetFileName(GetSourceFile())}. " +
+                    "If nothing is specified, all current supported layouts are printed."
             };
             Parameters["command"].Description =
                 "Possible values are 'info' and 'print'. The 'info' command prints a list of LCID IDs and bit values. " +
@@ -80,10 +86,12 @@ namespace Yubico.YubiKey.TestApp.Plugins
         }
 
         private bool _printLayouts;
+
         public override void HandleParameters()
         {
             // If none were specified, print them all.
-            IEnumerable<string> keyboards = (IEnumerable<string>)(Parameters["keyboardids"].Value ?? Array.Empty<string>());
+            IEnumerable<string> keyboards =
+                (IEnumerable<string>)(Parameters["keyboardids"].Value ?? Array.Empty<string>());
             _keyboards = keyboards.Any()
                 ? keyboards
                 : _keyboardLayouts.Keys;
@@ -100,10 +108,10 @@ namespace Yubico.YubiKey.TestApp.Plugins
         // looking for anything that might be separating LCID ID strings.
         public static IEnumerable<string> ParseStringCollection(string s)
             =>
-            s.Split(
-                new[] { ' ', ',', ':', ';', '/', '+' })
-                .Where(s => !string.IsNullOrWhiteSpace(s))
-                .Select(s => s.ToUpper());
+                s.Split(
+                        new[] { ' ', ',', ':', ';', '/', '+' })
+                    .Where(s => !string.IsNullOrWhiteSpace(s))
+                    .Select(s => s.ToUpper());
 
         public override bool Execute()
         {
@@ -137,19 +145,20 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     $"    // Keyboard Mapping for {name}." + Eol +
                     "    public sealed partial class HidCodeTranslator" + Eol +
                     "    {" + Eol +
-                    $"        private static HidCodeTranslator Get{(name == "ModHex" ? name : name.ToUpper())}()" + Eol +
+                    $"        private static HidCodeTranslator Get{(name == "ModHex" ? name : name.ToUpper())}()" +
+                    Eol +
                     "        {" + Eol +
                     "        var byChar = new Dictionary<char, byte>");
                 PrintItems("['{0}'] = 0x{1},");
 
                 Output.WriteLine(lineStart
-                    + "var byCode = new Dictionary<byte, char>");
+                                 + "var byCode = new Dictionary<byte, char>");
                 PrintItems("[0x{1}] = '{0}',");
 
                 Output.WriteLine(Eol + lineStart +
-                    $"return new HidCodeTranslator(byChar, byCode, KeyboardLayout.{name});" + Eol +
-                    "        }" + Eol +
-                    "    }" + Eol + "}" + Eol);
+                                 $"return new HidCodeTranslator(byChar, byCode, KeyboardLayout.{name});" + Eol +
+                                 "        }" + Eol +
+                                 "    }" + Eol + "}" + Eol);
 
                 void PrintItems(string template)
                 {
@@ -172,12 +181,15 @@ namespace Yubico.YubiKey.TestApp.Plugins
                                 prefix = itemLineStart;
                                 linePosition = item.Length + prefix.Length;
                             }
+
                             Output.Write($"{prefix}{item}");
                         }
                     }
+
                     Output.WriteLine(Eol + lineStart + "};");
                 }
             }
+
             return true;
         }
 
@@ -222,6 +234,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                     keyboardState[0x10] |= _shift;
                     keyboardState[NativeMethods.VK_LSHIFT] |= _shift;
                 }
+
                 int result = NativeMethods.ToAsciiEx(vkey, scanCode, keyboardState, output, 0, layout);
                 if (result == 1)
                 {
@@ -238,21 +251,26 @@ namespace Yubico.YubiKey.TestApp.Plugins
                         results.Add((st, shifted));
                     }
                 }
+
                 if (result != 1)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Got [{result}] from [0x{scanCode.ToString("x2")}] Shift [{shifted}]");
+                    System.Diagnostics.Debug.WriteLine(
+                        $"Got [{result}] from [0x{scanCode.ToString("x2")}] Shift [{shifted}]");
                 }
             }
+
             return results.ToArray();
         }
 
         #region Constants
+
         const byte _shift = 0x80;
         const int spacecount = 13;
         const int maxwidth = 90;
         const int indent = 4;
         static readonly string lineStart = new string(' ', spacecount);
         static readonly string itemLineStart = Eol + new string(' ', spacecount + indent);
+
         #endregion
 
         private static class NativeMethods
@@ -284,6 +302,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 PS2MakeCode = ps2Make;
                 PS2BreakCode = ps2Break;
             }
+
             public string Name { get; set; }
             public byte HidCode { get; }
             public byte PS2MakeCode { get; }
@@ -291,58 +310,58 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
             public static IEnumerable<HidInfo> Codes = new HidInfo[]
             {
-            new HidInfo(@"a A", 0x04, 0x1e, 0x9e),
-            new HidInfo(@"b B", 0x05, 0x30, 0xb0),
-            new HidInfo(@"c C", 0x06, 0x2e, 0xae),
-            new HidInfo(@"d D", 0x07, 0x20, 0xa0),
-            new HidInfo(@"e E", 0x08, 0x12, 0x92),
-            new HidInfo(@"f F", 0x09, 0x21, 0xa1),
-            new HidInfo(@"g G", 0x0a, 0x22, 0xa2),
-            new HidInfo(@"h H", 0x0b, 0x23, 0xa3),
-            new HidInfo(@"i I", 0x0c, 0x17, 0x97),
-            new HidInfo(@"j J", 0x0d, 0x24, 0xa4),
-            new HidInfo(@"k K", 0x0e, 0x25, 0xa5),
-            new HidInfo(@"l L", 0x0f, 0x26, 0xa6),
-            new HidInfo(@"m M", 0x10, 0x32, 0xb2),
-            new HidInfo(@"n N", 0x11, 0x31, 0xb1),
-            new HidInfo(@"o O", 0x12, 0x18, 0x98),
-            new HidInfo(@"p P", 0x13, 0x19, 0x99),
-            new HidInfo(@"q Q", 0x14, 0x10, 0x90),
-            new HidInfo(@"r R", 0x15, 0x13, 0x93),
-            new HidInfo(@"s S", 0x16, 0x1f, 0x9f),
-            new HidInfo(@"t T", 0x17, 0x14, 0x94),
-            new HidInfo(@"u U", 0x18, 0x16, 0x96),
-            new HidInfo(@"v V", 0x19, 0x2f, 0xaf),
-            new HidInfo(@"w W", 0x1a, 0x11, 0x91),
-            new HidInfo(@"x X", 0x1b, 0x2d, 0xad),
-            new HidInfo(@"y Y", 0x1c, 0x15, 0x95),
-            new HidInfo(@"z Z", 0x1d, 0x2c, 0xac),
-            new HidInfo(@"1 !", 0x1e, 0x02, 0x82),
-            new HidInfo(@"2 @", 0x1f, 0x03, 0x83),
-            new HidInfo(@"3 #", 0x20, 0x04, 0x84),
-            new HidInfo(@"4 $", 0x21, 0x05, 0x85),
-            new HidInfo(@"5 %", 0x22, 0x06, 0x86),
-            new HidInfo(@"6 ^", 0x23, 0x07, 0x87),
-            new HidInfo(@"7 &", 0x24, 0x08, 0x88),
-            new HidInfo(@"8 *", 0x25, 0x09, 0x89),
-            new HidInfo(@"9 (", 0x26, 0x0a, 0x8a),
-            new HidInfo(@"0 )", 0x27, 0x0b, 0x8b),
-            new HidInfo(@"Return", 0x28, 0x1c, 0x9c),
-            new HidInfo(@"Tab", 0x2b, 0x0f, 0x8f),
-            new HidInfo(@"Space", 0x2c, 0x39, 0xb9),
-            new HidInfo(@"- _", 0x2d, 0x0c, 0x8c),
-            new HidInfo(@"= +", 0x2e, 0x0d, 0x8d),
-            new HidInfo(@"[ {", 0x2f, 0x1a, 0x9a),
-            new HidInfo(@"] }", 0x30, 0x1b, 0x9b),
-            new HidInfo(@"\ |", 0x31, 0x2b, 0xab),
-            new HidInfo(@"Europe 1", 0x32, 0x2b, 0xab),
-            new HidInfo(@"; :", 0x33, 0x27, 0xa7),
-            new HidInfo(@"' """, 0x34, 0x28, 0xa8),
-            new HidInfo(@"` ~", 0x35, 0x29, 0xa9),
-            new HidInfo(@", <", 0x36, 0x33, 0xb3),
-            new HidInfo(@". >", 0x37, 0x34, 0xb4),
-            new HidInfo(@"/ ?", 0x38, 0x35, 0xb5),
-            new HidInfo(@"Europe 2", 0x64, 0x56, 0xd6)
+                new HidInfo(@"a A", 0x04, 0x1e, 0x9e),
+                new HidInfo(@"b B", 0x05, 0x30, 0xb0),
+                new HidInfo(@"c C", 0x06, 0x2e, 0xae),
+                new HidInfo(@"d D", 0x07, 0x20, 0xa0),
+                new HidInfo(@"e E", 0x08, 0x12, 0x92),
+                new HidInfo(@"f F", 0x09, 0x21, 0xa1),
+                new HidInfo(@"g G", 0x0a, 0x22, 0xa2),
+                new HidInfo(@"h H", 0x0b, 0x23, 0xa3),
+                new HidInfo(@"i I", 0x0c, 0x17, 0x97),
+                new HidInfo(@"j J", 0x0d, 0x24, 0xa4),
+                new HidInfo(@"k K", 0x0e, 0x25, 0xa5),
+                new HidInfo(@"l L", 0x0f, 0x26, 0xa6),
+                new HidInfo(@"m M", 0x10, 0x32, 0xb2),
+                new HidInfo(@"n N", 0x11, 0x31, 0xb1),
+                new HidInfo(@"o O", 0x12, 0x18, 0x98),
+                new HidInfo(@"p P", 0x13, 0x19, 0x99),
+                new HidInfo(@"q Q", 0x14, 0x10, 0x90),
+                new HidInfo(@"r R", 0x15, 0x13, 0x93),
+                new HidInfo(@"s S", 0x16, 0x1f, 0x9f),
+                new HidInfo(@"t T", 0x17, 0x14, 0x94),
+                new HidInfo(@"u U", 0x18, 0x16, 0x96),
+                new HidInfo(@"v V", 0x19, 0x2f, 0xaf),
+                new HidInfo(@"w W", 0x1a, 0x11, 0x91),
+                new HidInfo(@"x X", 0x1b, 0x2d, 0xad),
+                new HidInfo(@"y Y", 0x1c, 0x15, 0x95),
+                new HidInfo(@"z Z", 0x1d, 0x2c, 0xac),
+                new HidInfo(@"1 !", 0x1e, 0x02, 0x82),
+                new HidInfo(@"2 @", 0x1f, 0x03, 0x83),
+                new HidInfo(@"3 #", 0x20, 0x04, 0x84),
+                new HidInfo(@"4 $", 0x21, 0x05, 0x85),
+                new HidInfo(@"5 %", 0x22, 0x06, 0x86),
+                new HidInfo(@"6 ^", 0x23, 0x07, 0x87),
+                new HidInfo(@"7 &", 0x24, 0x08, 0x88),
+                new HidInfo(@"8 *", 0x25, 0x09, 0x89),
+                new HidInfo(@"9 (", 0x26, 0x0a, 0x8a),
+                new HidInfo(@"0 )", 0x27, 0x0b, 0x8b),
+                new HidInfo(@"Return", 0x28, 0x1c, 0x9c),
+                new HidInfo(@"Tab", 0x2b, 0x0f, 0x8f),
+                new HidInfo(@"Space", 0x2c, 0x39, 0xb9),
+                new HidInfo(@"- _", 0x2d, 0x0c, 0x8c),
+                new HidInfo(@"= +", 0x2e, 0x0d, 0x8d),
+                new HidInfo(@"[ {", 0x2f, 0x1a, 0x9a),
+                new HidInfo(@"] }", 0x30, 0x1b, 0x9b),
+                new HidInfo(@"\ |", 0x31, 0x2b, 0xab),
+                new HidInfo(@"Europe 1", 0x32, 0x2b, 0xab),
+                new HidInfo(@"; :", 0x33, 0x27, 0xa7),
+                new HidInfo(@"' """, 0x34, 0x28, 0xa8),
+                new HidInfo(@"` ~", 0x35, 0x29, 0xa9),
+                new HidInfo(@", <", 0x36, 0x33, 0xb3),
+                new HidInfo(@". >", 0x37, 0x34, 0xb4),
+                new HidInfo(@"/ ?", 0x38, 0x35, 0xb5),
+                new HidInfo(@"Europe 2", 0x64, 0x56, 0xd6)
             };
         }
     }

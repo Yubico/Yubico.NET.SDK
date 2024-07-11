@@ -53,25 +53,28 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 exceptions.Add(
                     new ArgumentException("You can only generate a password " +
-                    "or specify one, but not both."));
+                                          "or specify one, but not both."));
             }
+
             if (_password.Length > 0 && _passwordLength > 0)
             {
                 exceptions.Add(
                     new ArgumentException("You can't specify a password length " +
-                    "if you are specifying a password."));
+                                          "if you are specifying a password."));
             }
+
             if (_password.Length == 0 && !_generate)
             {
                 exceptions.Add(
                     new ArgumentException("You must select to generate a password " +
-                    "or specify a password to use."));
+                                          "or specify a password to use."));
             }
+
             if (!_generate && _passwordLength > 0)
             {
                 exceptions.Add(
                     new ArgumentException("It is not relevant to select a password " +
-                    "length if you have not selected to generate a password."));
+                                          "length if you have not selected to generate a password."));
             }
 
             try
@@ -107,6 +110,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Output.WriteLine("Aborted.", OutputLevel.Error);
                 return false;
             }
+
             try
             {
                 char[] password = Array.Empty<char>();
@@ -114,14 +118,15 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 {
                     int len =
                         _passwordLength > 0
-                        ? _passwordLength
-                        : SlotConfigureBase.MaxPasswordLength;
+                            ? _passwordLength
+                            : SlotConfigureBase.MaxPasswordLength;
                     password = new char[len];
                 }
                 else
                 {
                     password = _password.ToCharArray();
                 }
+
                 try
                 {
                     ConfigureStaticPassword op = otp.ConfigureStaticPassword(_slot)
@@ -137,6 +142,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                     {
                         op = op.SetPassword(password);
                     }
+
                     op.Execute();
 
                     // If OutputLevel is None or Error, then no output here.
@@ -163,6 +169,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                             // If it's not quiet, just output that it's done.
                             Output.WriteLine("Password set.");
                         }
+
                         if (!string.IsNullOrWhiteSpace(output))
                         {
                             Output.WriteLine(output, OutputLevel.Quiet);

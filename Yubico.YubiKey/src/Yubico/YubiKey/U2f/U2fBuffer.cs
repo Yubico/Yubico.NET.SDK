@@ -76,7 +76,11 @@ namespace Yubico.YubiKey.U2f
         /// Copy the buffer data into the _buffer beginning at the given offset.
         /// Throw an exception if the input length is not correct.
         /// </summary>
-        protected void SetBufferData(ReadOnlyMemory<byte> bufferData, int expectedLength, int offset, string variableName)
+        protected void SetBufferData(
+            ReadOnlyMemory<byte> bufferData,
+            int expectedLength,
+            int offset,
+            string variableName)
         {
             int badLength = -1;
             if (bufferData.Length != expectedLength)
@@ -85,8 +89,11 @@ namespace Yubico.YubiKey.U2f
             }
             else if (expectedLength + offset > _buffer.Length)
             {
-                badLength = _buffer.Length > offset ? _buffer.Length - offset : 0;
+                badLength = _buffer.Length > offset
+                    ? _buffer.Length - offset
+                    : 0;
             }
+
             if (badLength >= 0)
             {
                 throw new ArgumentException(

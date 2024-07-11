@@ -45,10 +45,11 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = ListCredentialsInstruction
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Ins = ListCredentialsInstruction
+            };
 
         /// <inheritdoc />
         public ListCredentialsResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

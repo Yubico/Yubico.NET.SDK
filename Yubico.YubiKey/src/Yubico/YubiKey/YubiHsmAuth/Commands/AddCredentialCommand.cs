@@ -109,11 +109,12 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         }
 
         /// <inheritdoc/>
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = AddCredentialInstruction,
-            Data = BuildDataField(),
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Ins = AddCredentialInstruction,
+                Data = BuildDataField(),
+            };
 
         /// <inheritdoc/>
         public AddCredentialResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
@@ -129,15 +130,19 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         {
             TlvWriter tlvWriter = new TlvWriter();
             tlvWriter.WriteValue(DataTagConstants.ManagementKey, _managementKey.Span);
-            tlvWriter.WriteString(DataTagConstants.Label,
+            tlvWriter.WriteString(
+                DataTagConstants.Label,
                 _credentialWithSecrets.Label, Encoding.UTF8);
 
             WriteCryptographicKeyType(tlvWriter);
             WriteKeys(tlvWriter);
             WriteCredentialPassword(tlvWriter);
 
-            tlvWriter.WriteByte(DataTagConstants.Touch,
-                _credentialWithSecrets.TouchRequired ? (byte)1 : (byte)0);
+            tlvWriter.WriteByte(
+                DataTagConstants.Touch,
+                _credentialWithSecrets.TouchRequired
+                    ? (byte)1
+                    : (byte)0);
 
             byte[] returnValue = tlvWriter.Encode();
             tlvWriter.Clear();
@@ -208,6 +213,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             tlvWriter.WriteValue(
                 DataTagConstants.EncryptionKey,
                 credentialWithSecrets.EncryptionKey.Span);
+
             tlvWriter.WriteValue(
                 DataTagConstants.MacKey,
                 credentialWithSecrets.MacKey.Span);

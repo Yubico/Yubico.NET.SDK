@@ -73,19 +73,21 @@ namespace Yubico.YubiKey.Scp03.Commands
         public DeleteKeyCommand(byte keyVersionNumber, bool isLastKey)
         {
             _data = new byte[3] { KvnTag, KvnLength, keyVersionNumber };
-            _p2Value = isLastKey ? GpDeleteLastKeyP2 : GpDeleteKeyP2;
+            _p2Value = isLastKey
+                ? GpDeleteLastKeyP2
+                : GpDeleteKeyP2;
         }
 
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Cla = GpDeleteKeyCla,
-            Ins = GpDeleteKeyIns,
-            P1 = GpDeleteKeyP1,
-            P2 = _p2Value,
-            Data = _data
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Cla = GpDeleteKeyCla,
+                Ins = GpDeleteKeyIns,
+                P1 = GpDeleteKeyP1,
+                P2 = _p2Value,
+                Data = _data
+            };
 
-        public Scp03Response CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new Scp03Response(responseApdu);
+        public Scp03Response CreateResponseForApdu(ResponseApdu responseApdu) => new Scp03Response(responseApdu);
     }
 }

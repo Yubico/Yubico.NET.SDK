@@ -33,8 +33,7 @@ namespace Yubico.YubiKey.U2f.Commands
         /// <param name="responseApdu">
         /// The ResponseApdu returned by the YubiKey.
         /// </param>
-        public GetPagedDeviceInfoResponse(
-            ResponseApdu responseApdu) :
+        public GetPagedDeviceInfoResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
         }

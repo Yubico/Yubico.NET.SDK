@@ -79,9 +79,10 @@ namespace Yubico.YubiKey
             int remainingSampleCount)
         {
             TemplateId = templateId;
-            LastEnrollSampleStatus = Enum.IsDefined(typeof(BioEnrollSampleStatus), lastEnrollSampleStatus) ?
-                (BioEnrollSampleStatus)lastEnrollSampleStatus
+            LastEnrollSampleStatus = Enum.IsDefined(typeof(BioEnrollSampleStatus), lastEnrollSampleStatus)
+                ? (BioEnrollSampleStatus)lastEnrollSampleStatus
                 : BioEnrollSampleStatus.Unknown;
+
             RemainingSampleCount = remainingSampleCount;
         }
     }

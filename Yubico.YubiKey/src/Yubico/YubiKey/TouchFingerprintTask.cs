@@ -108,6 +108,7 @@ namespace Yubico.YubiKey
             {
                 Request = keyEntryData.Request
             };
+
             _notifyTask = new Task(() => RunKeyCollectorTask(keyCollector));
             _ = _notifyTask.ContinueWith((t) => HandleTaskException(t), TaskScheduler.Current);
 
@@ -126,7 +127,12 @@ namespace Yubico.YubiKey
         }
 
         private void HandleTaskException(Task task) =>
-            task.Exception?.Handle((e) => { UserCancel(); return true; });
+            task.Exception?.Handle(
+                (e) =>
+                {
+                    UserCancel();
+                    return true;
+                });
 
         // If the caller is performing the same command this TouchFingerprintTask
         // object is concerned with, then return the IsUserCanceled.
@@ -155,7 +161,8 @@ namespace Yubico.YubiKey
         public void SdkUpdate(KeyEntryData keyEntryData)
         {
             KeyEntryRequest request = keyEntryData.Request == KeyEntryRequest.EnrollFingerprint
-                ? KeyEntryRequest.EnrollFingerprint : KeyEntryRequest.Release;
+                ? KeyEntryRequest.EnrollFingerprint
+                : KeyEntryRequest.Release;
 
             lock (_updateLock)
             {
@@ -200,7 +207,8 @@ namespace Yubico.YubiKey
                 {
                     Thread.Sleep(250);
                 }
-            } while (!isRelease);
+            }
+            while (!isRelease);
         }
 
         public void Dispose()

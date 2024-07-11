@@ -75,7 +75,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                 yubiKeyDeviceListener.Arrived += YubiKeyInserted;
                 yubiKeyDeviceListener.Removed += YubiKeyRemoved;
 
-                SampleMenu.WriteMessage(MessageType.Title, 0, "Remove and re-insert the YubiKey (" + ReinsertTimeoutString + " second timeout).");
+                SampleMenu.WriteMessage(MessageType.Title, 0,
+                    "Remove and re-insert the YubiKey (" + ReinsertTimeoutString + " second timeout).");
                 SampleMenu.WriteMessage(MessageType.Title, 0, "Then when instructed, touch the YubiKey's contact.\n");
 
                 // This task simply checks to see if the YubiKey in question has been
@@ -225,12 +226,15 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (serialNumberRemoved != SerialNumber)
             {
                 SampleMenu.WriteMessage(MessageType.Special, 0, "The YubiKey removed is not the expected YubiKey.");
-                SampleMenu.WriteMessage(MessageType.Title, 0, "expected serial number = " + SerialNumber.ToString(NumberFormatInfo.InvariantInfo));
-                SampleMenu.WriteMessage(MessageType.Title, 0, " removed serial number = " + serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
+                SampleMenu.WriteMessage(MessageType.Title, 0,
+                    "expected serial number = " + SerialNumber.ToString(NumberFormatInfo.InvariantInfo));
+                SampleMenu.WriteMessage(MessageType.Title, 0,
+                    " removed serial number = " + serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
             }
             else
             {
-                SampleMenu.WriteMessage(MessageType.Title, 0, " removed serial number = " + serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
+                SampleMenu.WriteMessage(MessageType.Title, 0,
+                    " removed serial number = " + serialNumberRemoved.ToString(NumberFormatInfo.InvariantInfo));
             }
         }
 
@@ -241,12 +245,15 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
             if (serialNumberInserted != SerialNumber)
             {
                 SampleMenu.WriteMessage(MessageType.Special, 0, "The YubiKey inserted is not the expected YubiKey.");
-                SampleMenu.WriteMessage(MessageType.Title, 0, "expected serial number = " + SerialNumber.ToString(NumberFormatInfo.InvariantInfo));
-                SampleMenu.WriteMessage(MessageType.Title, 0, "inserted serial number = " + serialNumberInserted.ToString(NumberFormatInfo.InvariantInfo));
+                SampleMenu.WriteMessage(MessageType.Title, 0,
+                    "expected serial number = " + SerialNumber.ToString(NumberFormatInfo.InvariantInfo));
+                SampleMenu.WriteMessage(MessageType.Title, 0,
+                    "inserted serial number = " + serialNumberInserted.ToString(NumberFormatInfo.InvariantInfo));
             }
             else
             {
-                SampleMenu.WriteMessage(MessageType.Title, 0, "inserted serial number = " + serialNumberInserted.ToString(NumberFormatInfo.InvariantInfo));
+                SampleMenu.WriteMessage(MessageType.Title, 0,
+                    "inserted serial number = " + serialNumberInserted.ToString(NumberFormatInfo.InvariantInfo));
                 _yubiKeyDevice = eventArgs.Device;
             }
         }

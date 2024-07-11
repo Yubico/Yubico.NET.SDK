@@ -98,11 +98,12 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
-        public byte[] GetData() => Status switch
-        {
-            ResponseStatus.Success => ExtractGeneralAuthenticateResponseData(),
-            _ => throw new InvalidOperationException(StatusMessage),
-        };
+        public byte[] GetData() =>
+            Status switch
+            {
+                ResponseStatus.Success => ExtractGeneralAuthenticateResponseData(),
+                _ => throw new InvalidOperationException(StatusMessage),
+            };
 
         /// <summary>
         /// Extract the data from a GeneralAuthenticate Response APDU, returning

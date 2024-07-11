@@ -95,6 +95,7 @@ namespace Yubico.YubiKey.U2f.Commands
 
             Assert.Equal(0x45, actualInnerCommandIns);
         }
+
         [Fact]
         public void CreateCommandApdu_InnerCommandGetP1Property_ReturnsZero()
         {

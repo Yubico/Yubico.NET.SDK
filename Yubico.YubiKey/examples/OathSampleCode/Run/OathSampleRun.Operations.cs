@@ -127,7 +127,8 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
             if (type == CredentialType.Totp)
             {
-                _ = ChooseCredentialProperties.RunChoosePeriodOption(_menuObject, out CredentialPeriod? credentialPeriod);
+                _ = ChooseCredentialProperties.RunChoosePeriodOption(_menuObject,
+                    out CredentialPeriod? credentialPeriod);
                 period = (CredentialPeriod)credentialPeriod;
             }
 
@@ -262,7 +263,8 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
 
             if (type == CredentialType.Totp)
             {
-                _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject, out CredentialPeriod? credentialPeriod);
+                _ = ChooseCredentialProperties.RunChoosePeriodOption(menuObject,
+                    out CredentialPeriod? credentialPeriod);
                 period = credentialPeriod.Value;
             }
 

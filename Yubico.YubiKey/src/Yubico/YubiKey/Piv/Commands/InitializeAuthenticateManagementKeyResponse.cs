@@ -42,7 +42,10 @@ namespace Yubico.YubiKey.Piv.Commands
     /// challenge.
     /// </para>
     /// </remarks>
-    public sealed class InitializeAuthenticateManagementKeyResponse : PivResponse, IYubiKeyResponseWithData<(bool isMutualAuth, ReadOnlyMemory<byte> clientAuthenticationChallenge)>
+    public sealed class InitializeAuthenticateManagementKeyResponse : PivResponse,
+                                                                      IYubiKeyResponseWithData<(bool isMutualAuth,
+                                                                      ReadOnlyMemory<byte> clientAuthenticationChallenge
+                                                                      )>
     {
         private const int NestedTag = 0x7C;
         private const int MutualAuthTag = 0x80;
@@ -124,6 +127,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     ResponseClass = nameof(InitializeAuthenticateManagementKeyResponse),
                 };
             }
+
             if (value.Length < TDesDataLength)
             {
                 throw new MalformedYubiKeyResponseException()
@@ -134,7 +138,9 @@ namespace Yubico.YubiKey.Piv.Commands
                 };
             }
 
-            int dataLength = value.Length < AesDataLength ? TDesDataLength : AesDataLength;
+            int dataLength = value.Length < AesDataLength
+                ? TDesDataLength
+                : AesDataLength;
 
             _tag1 = authTag;
 
@@ -154,10 +160,11 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
-        public (bool isMutualAuth, ReadOnlyMemory<byte> clientAuthenticationChallenge) GetData() => _clientAuthenticationChallenge switch
-        {
-            null => throw new InvalidOperationException(StatusMessage),
-            _ => (_tag1 == MutualAuthTag, _clientAuthenticationChallenge),
-        };
+        public (bool isMutualAuth, ReadOnlyMemory<byte> clientAuthenticationChallenge) GetData() =>
+            _clientAuthenticationChallenge switch
+            {
+                null => throw new InvalidOperationException(StatusMessage),
+                _ => (_tag1 == MutualAuthTag, _clientAuthenticationChallenge),
+            };
     }
 }

@@ -76,6 +76,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// This will be <c>null</c> until the <c>Encapsulate</c> method is
         /// called.
         /// </remarks>
+
         // Note that it is the responsibility of the subclass to overwrite any
         // buffers containing key data.
         public ReadOnlyMemory<byte>? EncryptionKey { get; protected set; }
@@ -89,6 +90,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
         /// This will be <c>null</c> until the <c>Encapsulate</c> method is
         /// called.
         /// </remarks>
+
         // Note that it is the responsibility of the subclass to overwrite any
         // buffers containing key data.
         public ReadOnlyMemory<byte>? AuthenticationKey { get; protected set; }
@@ -184,7 +186,8 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             var authPubKey = (CoseEcPublicKey)authenticatorPublicKey;
 
             // Create a local copy of the authenticatorPublicKey.
-            AuthenticatorPublicKey = new CoseEcPublicKey(CoseEcCurve.P256, authPubKey.XCoordinate, authPubKey.YCoordinate);
+            AuthenticatorPublicKey = new CoseEcPublicKey(
+                CoseEcCurve.P256, authPubKey.XCoordinate, authPubKey.YCoordinate);
 
             ECParameters? platformKeyPair = null;
             byte[] sharedValue = Array.Empty<byte>();
@@ -204,6 +207,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                 {
                     CryptographicOperations.ZeroMemory(platformKeyPair.Value.D);
                 }
+
                 CryptographicOperations.ZeroMemory(sharedValue);
             }
         }
@@ -401,6 +405,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 throw new ArgumentNullException(nameof(pinToken));
             }
+
             if (message is null)
             {
                 throw new ArgumentNullException(nameof(message));
@@ -453,6 +458,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
                 {
                     Initialize();
                 }
+
                 _disposed = true;
             }
         }

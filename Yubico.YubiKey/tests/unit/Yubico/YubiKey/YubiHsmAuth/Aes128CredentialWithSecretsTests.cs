@@ -22,8 +22,10 @@ namespace Yubico.YubiKey.YubiHsmAuth
     {
         private static readonly byte[] _password =
             new byte[16] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15 };
+
         private static readonly byte[] _encKey =
             new byte[16] { 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22, 24, 26, 28, 30 };
+
         private static readonly byte[] _macKey =
             new byte[16] { 1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29, 31 };
 
@@ -31,13 +33,14 @@ namespace Yubico.YubiKey.YubiHsmAuth
         private const bool _touchRequired = true;
 
         private Aes128CredentialWithSecrets _aes128Cred => new Aes128CredentialWithSecrets(
-                _password,
-                _encKey,
-                _macKey,
-                _label,
-                _touchRequired);
+            _password,
+            _encKey,
+            _macKey,
+            _label,
+            _touchRequired);
 
         #region constructor
+
         [Fact]
         public void Constructor_KeyTypeAes128()
         {
@@ -101,6 +104,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
 
             Assert.Equal(_touchRequired, aes128Cred.TouchRequired);
         }
+
         #endregion
 
         /* ADD ENC & MAC KEY GET/SET TESTS */

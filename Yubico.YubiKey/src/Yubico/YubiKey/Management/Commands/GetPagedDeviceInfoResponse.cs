@@ -22,7 +22,8 @@ namespace Yubico.YubiKey.Management.Commands
     /// The response to the <see cref="GetDeviceInfoCommand"/> command, containing the YubiKey's
     /// device configuration details.
     /// </summary>
-    public class GetPagedDeviceInfoResponse : YubiKeyResponse, IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>
+    public class GetPagedDeviceInfoResponse : YubiKeyResponse,
+                                              IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>
     {
         /// <summary>
         /// Constructs a GetPagedDeviceInfoResponse instance based on a ResponseApdu received from the YubiKey.
@@ -33,7 +34,6 @@ namespace Yubico.YubiKey.Management.Commands
         public GetPagedDeviceInfoResponse(ResponseApdu responseApdu)
             : base(responseApdu)
         {
-
         }
 
         /// <summary>
@@ -43,6 +43,8 @@ namespace Yubico.YubiKey.Management.Commands
         /// <exception cref="InvalidOperationException">Thrown when the response status is not successful.</exception>
         /// <exception cref="MalformedYubiKeyResponseException">Thrown when the APDU data length exceeds expected bounds or if the data conversion fails.</exception>
         public Dictionary<int, ReadOnlyMemory<byte>>
-            GetData() => GetDeviceInfoResponseHelper.ParseResponse(ResponseApdu, Status, StatusMessage, nameof(GetPagedDeviceInfoResponse));
+            GetData() =>
+            GetDeviceInfoResponseHelper.ParseResponse(
+                ResponseApdu, Status, StatusMessage, nameof(GetPagedDeviceInfoResponse));
     }
 }

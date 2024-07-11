@@ -46,26 +46,33 @@ namespace Yubico.YubiKey.Otp.Operations
         // plus any options the user selects. That means this operation has an empty
         // constructor.
         internal ConfigureChallengeResponse(IYubiKeyConnection connection, IOtpSession session, Slot slot)
-            : base(connection, session, slot) { }
+            : base(connection, session, slot)
+        {
+        }
 
         #region Private Fields
+
         // Key. 20 bytes for HMAC-SHA1, 16 bytes for Yubico OTP.
         private ReadOnlyMemory<byte> _key = Memory<byte>.Empty;
         private Memory<byte> _randomKey = Memory<byte>.Empty;
         private bool? _generateKey;
         private bool _validated;
         private bool? _useYubicoOtp;
+
         #endregion
 
         #region Size Constants
+
         /// <summary>
         /// The key for a Yubico OTP operation is 16 bytes.
         /// </summary>
         public const int YubiOtpKeySize = 16;
+
         /// <summary>
         /// The key for an HMAC-SHA1 operation is 20 bytes.
         /// </summary>
         public const int HmacSha1KeySize = 20;
+
         #endregion
 
         /// <inheritdoc/>
@@ -88,8 +95,9 @@ namespace Yubico.YubiKey.Otp.Operations
             // algorithms so that code paths stay as converged as possible.
             int keyBufferSize =
                 _useYubicoOtp!.Value
-                ? YubiOtpKeySize
-                : HmacSha1KeySize + 2;
+                    ? YubiOtpKeySize
+                    : HmacSha1KeySize + 2;
+
             Span<byte> keyBuffer = stackalloc byte[keyBufferSize];
             try
             {
@@ -152,6 +160,7 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         #region Properties for Builder Pattern
+
         /// <summary>
         /// Configures the challenge-response to use the HMAC-SHA1 algorithm.
         /// </summary>
@@ -165,6 +174,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.OnlyOneAlgorithm);
             }
+
             _useYubicoOtp = false;
             ProcessKey();
 
@@ -184,6 +194,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.OnlyOneAlgorithm);
             }
+
             _useYubicoOtp = true;
             ProcessKey();
 
@@ -208,6 +219,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.CantSpecifyKeyAndGenerate);
             }
+
             _generateKey = false;
             _key = bytes;
             ProcessKey();
@@ -235,6 +247,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.CantSpecifyKeyAndGenerate);
             }
+
             _generateKey = true;
             _randomKey = key;
             ProcessKey();
@@ -255,14 +268,20 @@ namespace Yubico.YubiKey.Otp.Operations
                 && !_validated)
             {
                 // Validate key size.
-                int keySize = _generateKey.Value ? _randomKey.Length : _key.Length;
-                int expectedKeySize = _useYubicoOtp.Value ? YubiOtpKeySize : HmacSha1KeySize;
+                int keySize = _generateKey.Value
+                    ? _randomKey.Length
+                    : _key.Length;
+
+                int expectedKeySize = _useYubicoOtp.Value
+                    ? YubiOtpKeySize
+                    : HmacSha1KeySize;
+
                 if (keySize != expectedKeySize)
                 {
                     throw new InvalidOperationException(
                         _useYubicoOtp.Value
-                        ? ExceptionMessages.YubicoKeyWrongSize
-                        : ExceptionMessages.HmacKeyWrongSize);
+                            ? ExceptionMessages.YubicoKeyWrongSize
+                            : ExceptionMessages.HmacKeyWrongSize);
                 }
 
                 // Handle generating.
@@ -271,6 +290,7 @@ namespace Yubico.YubiKey.Otp.Operations
                     using RandomNumberGenerator rng = CryptographyProviders.RngCreator();
                     rng.Fill(_randomKey.Span);
                     _key = _randomKey;
+
                     // From here forward, we use _key, so we'll release this
                     // reference.
                     _randomKey = Memory<byte>.Empty;
@@ -281,6 +301,7 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         #region Flags to Relay
+
         /// <summary>
         /// Set when the HMAC challenge will be less than 64-bytes.
         /// </summary>
@@ -306,14 +327,14 @@ namespace Yubico.YubiKey.Otp.Operations
 
         /// <inheritdoc cref="OtpSettings{T}.AllowUpdate(bool)"/>
         /// <returns>The current <see cref="ConfigureChallengeResponse"/> instance.</returns>
-        public ConfigureChallengeResponse SetAllowUpdate(bool setConfig = true) =>
-            Settings.AllowUpdate(setConfig);
+        public ConfigureChallengeResponse SetAllowUpdate(bool setConfig = true) => Settings.AllowUpdate(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.UseButtonTrigger(bool)"/>
         /// <returns>The current <see cref="ConfigureChallengeResponse"/> instance.</returns>
-        public ConfigureChallengeResponse UseButton(bool setConfig = true) =>
-            Settings.UseButtonTrigger(setConfig);
+        public ConfigureChallengeResponse UseButton(bool setConfig = true) => Settings.UseButtonTrigger(setConfig);
+
         #endregion
+
         #endregion
     }
 }

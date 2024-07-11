@@ -76,6 +76,7 @@ namespace Yubico.YubiKey.Fido2.Cose
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.UnsupportedAlgorithm));
                 }
+
                 _curve = value;
             }
         }

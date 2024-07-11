@@ -156,6 +156,7 @@ namespace Yubico.YubiKey.Piv.Commands
                                 value));
                     }
                 }
+
                 _tag = value;
             }
         }
@@ -184,6 +185,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             ExceptionMessages.InvalidDataTag,
                             value));
                 }
+
                 _tag = (int)value;
             }
         }
@@ -260,13 +262,14 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = PivGetDataInstruction,
-            P1 = PivGetDataParameter1,
-            P2 = PivGetDataParameter2,
-            Data = BuildGetDataApduData(),
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = PivGetDataInstruction,
+                P1 = PivGetDataParameter1,
+                P2 = PivGetDataParameter2,
+                Data = BuildGetDataApduData(),
+            };
 
         // Build the data that is the Data portion of the APDU.
         // This will be TLV 5C length Tag
@@ -275,10 +278,10 @@ namespace Yubico.YubiKey.Piv.Commands
             return _tag switch
             {
                 0 => throw new InvalidOperationException(
-                         string.Format(
-                             CultureInfo.CurrentCulture,
-                             ExceptionMessages.InvalidDataTag,
-                             _tag)),
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidDataTag,
+                        _tag)),
                 DiscoveryTag => new byte[] { PivGetDataTlvTag, 0x01, (byte)_tag },
                 BiometricGroupTemplateTag => new byte[] { PivGetDataTlvTag, 0x02, (byte)(_tag >> 8), (byte)_tag },
                 _ => new byte[] { PivGetDataTlvTag, 0x03, (byte)(_tag >> 16), (byte)(_tag >> 8), (byte)_tag },
@@ -286,7 +289,6 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public GetDataResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new GetDataResponse(responseApdu);
+        public GetDataResponse CreateResponseForApdu(ResponseApdu responseApdu) => new GetDataResponse(responseApdu);
     }
 }

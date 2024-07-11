@@ -93,6 +93,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 IsPreview = isPreview
             };
+
             GetCredentialMetadataResponse rsp = Connection.SendCommand(cmd);
 
             // If the error is PinAuthInvalid, try again.
@@ -125,6 +126,7 @@ namespace Yubico.YubiKey.Fido2
                     {
                         IsPreview = isPreview
                     };
+
                     rsp = Connection.SendCommand(cmd);
                 }
                 finally
@@ -187,6 +189,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 IsPreview = isPreview
             };
+
             EnumerateRpsBeginResponse rsp = Connection.SendCommand(cmd);
 
             // If the error is PinAuthInvalid, try again.
@@ -220,6 +223,7 @@ namespace Yubico.YubiKey.Fido2
                     {
                         IsPreview = isPreview
                     };
+
                     rsp = Connection.SendCommand(cmd);
                 }
                 finally
@@ -251,6 +255,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 IsPreview = isPreview
             };
+
             for (int index = 1; index < rpCount; index++)
             {
                 EnumerateRpsGetNextResponse nextRsp = Connection.SendCommand(nextCmd);
@@ -325,6 +330,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 IsPreview = isPreview
             };
+
             EnumerateCredentialsBeginResponse rsp = Connection.SendCommand(cmd);
 
             // If the error is PinAuthInvalid, try again.
@@ -345,11 +351,13 @@ namespace Yubico.YubiKey.Fido2
                 {
                     AuthTokenRelyingPartyId = relyingParty.Id;
                 }
+
                 currentToken = GetAuthToken(true, PinUvAuthTokenPermissions.CredentialManagement, null);
                 cmd = new EnumerateCredentialsBeginCommand(relyingParty, currentToken, AuthProtocol)
                 {
                     IsPreview = isPreview
                 };
+
                 rsp = Connection.SendCommand(cmd);
             }
 
@@ -375,6 +383,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 IsPreview = isPreview
             };
+
             for (int index = 1; index < credCount; index++)
             {
                 EnumerateCredentialsGetNextResponse nextRsp = Connection.SendCommand(nextCmd);
@@ -426,6 +435,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 IsPreview = isPreview
             };
+
             Fido2Response rsp = Connection.SendCommand(cmd);
 
             // If the error is PinAuthInvalid, try again.
@@ -438,6 +448,7 @@ namespace Yubico.YubiKey.Fido2
                 {
                     IsPreview = isPreview
                 };
+
                 rsp = Connection.SendCommand(cmd);
             }
 

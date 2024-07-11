@@ -92,6 +92,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             {
                 throw new ArgumentNullException(nameof(pinProtocol));
             }
+
             if (pinProtocol.PlatformPublicKey is null)
             {
                 throw new InvalidOperationException(
@@ -99,6 +100,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidCallOrder));
             }
+
             if (currentPin.Length > MaximumPinLength)
             {
                 throw new ArgumentException(

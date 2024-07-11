@@ -69,12 +69,14 @@ namespace Yubico.YubiKey.Otp
         public OtpSession(IYubiKeyDevice yubiKey)
         {
             if (yubiKey is null) { throw new ArgumentNullException(nameof(yubiKey)); }
+
             YubiKey = yubiKey;
             _connection = yubiKey.Connect(YubiKeyApplication.Otp);
             _otpStatus = _connection.SendCommand(new ReadStatusCommand()).GetData();
         }
 
         #region OTP Operation Object Factory
+
         /// <summary>
         /// Submits a challenge to the YubiKey OTP application to be calculated.
         /// </summary>
@@ -88,8 +90,7 @@ namespace Yubico.YubiKey.Otp
         /// </summary>
         /// <param name="slot">The identifier for the OTP application slot to configure.</param>
         /// <returns>Instance of <see cref="Operations.ConfigureYubicoOtp"/>.</returns>
-        public ConfigureYubicoOtp ConfigureYubicoOtp(Slot slot) =>
-            new ConfigureYubicoOtp(_connection, this, slot);
+        public ConfigureYubicoOtp ConfigureYubicoOtp(Slot slot) => new ConfigureYubicoOtp(_connection, this, slot);
 
         /// <summary>
         /// Removes a slot configuration in the YubiKey's OTP application.
@@ -109,13 +110,11 @@ namespace Yubico.YubiKey.Otp
 
         /// <inheritdoc cref="Operations.ConfigureHotp"/>
         /// <param name="slot">OTP Slot to configure.</param>
-        public ConfigureHotp ConfigureHotp(Slot slot) =>
-            new ConfigureHotp(_connection, this, slot);
+        public ConfigureHotp ConfigureHotp(Slot slot) => new ConfigureHotp(_connection, this, slot);
 
         /// <inheritdoc cref="Operations.ConfigureNdef"/>
         /// <param name="slot">OTP Slot to configure.</param>
-        public ConfigureNdef ConfigureNdef(Slot slot) =>
-            new ConfigureNdef(_connection, this, slot);
+        public ConfigureNdef ConfigureNdef(Slot slot) => new ConfigureNdef(_connection, this, slot);
 
         /// <summary>
         /// Sets a static password for an OTP application slot on a YubiKey.
@@ -139,11 +138,12 @@ namespace Yubico.YubiKey.Otp
         /// </summary>
         /// <param name="slot">The identifier for the OTP application slot to configure.</param>
         /// <inheritdoc cref="OtpSettings{T}.AllowUpdate(bool)" path="/remarks"/>
-        public UpdateSlot UpdateSlot(Slot slot) =>
-            new UpdateSlot(_connection, this, slot);
+        public UpdateSlot UpdateSlot(Slot slot) => new UpdateSlot(_connection, this, slot);
+
         #endregion
 
         #region Non-Builder Implementations
+
         /// <summary>
         /// Removes an OTP slot configuration and sets it to empty.
         /// </summary>
@@ -155,7 +155,7 @@ namespace Yubico.YubiKey.Otp
         /// <param name="slot">The <see cref="Slot"/> to reset to empty.</param>
         public void DeleteSlot(Slot slot) =>
             DeleteSlotConfiguration(slot)
-            .Execute();
+                .Execute();
 
         /// <summary>
         /// Swaps the configurations in the short and long press slots.
@@ -245,7 +245,9 @@ namespace Yubico.YubiKey.Otp
             ReadNdefDataResponse response;
             using (_connection = YubiKey.Connect(YubiKeyApplication.OtpNdef))
             {
-                OtpResponse selectResponse = _connection.SendCommand(new SelectNdefDataCommand() { FileID = NdefFileId.Ndef });
+                OtpResponse selectResponse =
+                    _connection.SendCommand(new SelectNdefDataCommand() { FileID = NdefFileId.Ndef });
+
                 if (selectResponse.Status != ResponseStatus.Success)
                 {
                     throw new InvalidOperationException(
@@ -266,6 +268,7 @@ namespace Yubico.YubiKey.Otp
         #endregion
 
         #region Properties
+
         /// <inheritdoc cref="OtpStatus.ShortPressConfigured"/>
         public bool IsShortPressConfigured => _otpStatus.ShortPressConfigured;
 
@@ -285,14 +288,17 @@ namespace Yubico.YubiKey.Otp
         FirmwareVersion IOtpSession.FirmwareVersion => FirmwareVersion;
 
         IYubiKeyDevice IOtpSession.YubiKey => YubiKey;
+
         #endregion
 
         /// <inheritdoc />
         public void Dispose() => _connection.Dispose();
 
         #region Private Fields
+
         private IYubiKeyConnection _connection;
         private readonly OtpStatus _otpStatus;
+
         #endregion
     }
 }

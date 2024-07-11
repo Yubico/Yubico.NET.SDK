@@ -24,19 +24,21 @@ namespace Yubico.YubiKey.Oath.Commands
     public class OathResponse : YubiKeyResponse
     {
         public OathResponse(ResponseApdu responseApdu) :
-               base(responseApdu)
+            base(responseApdu)
         {
-
         }
 
         /// <inheritdoc/>
         protected override ResponseStatusPair StatusCodeMap =>
-           StatusWord switch
-           {
-               OathSWConstants.GenericError => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.OathGenericError),
-               OathSWConstants.WrongSyntax => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.OathWrongSyntax),
-               SWConstants.SecurityStatusNotSatisfied => new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.OathSecurityStatusNotSatisfied),
-               _ => base.StatusCodeMap,
-           };
+            StatusWord switch
+            {
+                OathSWConstants.GenericError => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.OathGenericError),
+                OathSWConstants.WrongSyntax => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.OathWrongSyntax),
+                SWConstants.SecurityStatusNotSatisfied => new ResponseStatusPair(
+                    ResponseStatus.AuthenticationRequired, ResponseStatusMessages.OathSecurityStatusNotSatisfied),
+                _ => base.StatusCodeMap,
+            };
     }
 }

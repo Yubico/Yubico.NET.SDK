@@ -139,7 +139,6 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <inheritdoc />
-        public SetPinResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new SetPinResponse(responseApdu);
+        public SetPinResponse CreateResponseForApdu(ResponseApdu responseApdu) => new SetPinResponse(responseApdu);
     }
 }

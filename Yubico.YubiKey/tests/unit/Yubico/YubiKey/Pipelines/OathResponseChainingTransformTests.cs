@@ -160,7 +160,8 @@ namespace Yubico.YubiKey.Pipelines
 
             // Assert
             mockTransform.Verify(x =>
-                x.Invoke(It.Is<CommandApdu>(c => c.Ins == expectedIns), It.IsAny<Type>(), It.IsAny<Type>()), Times.Once);
+                    x.Invoke(It.Is<CommandApdu>(c => c.Ins == expectedIns), It.IsAny<Type>(), It.IsAny<Type>()),
+                Times.Once);
         }
 
         [Fact]

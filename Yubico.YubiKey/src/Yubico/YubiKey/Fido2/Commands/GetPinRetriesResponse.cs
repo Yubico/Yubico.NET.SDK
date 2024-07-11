@@ -19,7 +19,8 @@ namespace Yubico.YubiKey.Fido2.Commands
     /// <summary>
     /// This is the partner response class to the <see cref="GetPinRetriesCommand" /> command class.
     /// </summary>
-    public class GetPinRetriesResponse : Fido2Response, IYubiKeyResponseWithData<(int retriesRemaining, bool? powerCycleRequired)>
+    public class GetPinRetriesResponse : Fido2Response,
+                                         IYubiKeyResponseWithData<(int retriesRemaining, bool? powerCycleRequired)>
     {
         private readonly ClientPinResponse _response;
 

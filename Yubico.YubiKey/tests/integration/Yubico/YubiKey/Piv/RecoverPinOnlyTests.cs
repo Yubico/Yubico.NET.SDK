@@ -72,7 +72,8 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                var nonAdminData = new ReadOnlyMemory<byte>(new byte[] {
+                var nonAdminData = new ReadOnlyMemory<byte>(new byte[]
+                {
                     0x53, 0x0A, 0x04, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88
                 });
 
@@ -112,7 +113,8 @@ namespace Yubico.YubiKey.Piv
                 PivPinOnlyMode mode = pivSession.TryRecoverPinOnlyMode();
                 Assert.Equal(PivPinOnlyMode.PinProtected, mode);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated, pivSession.ManagementKeyAuthenticationResult);
+                Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated,
+                    pivSession.ManagementKeyAuthenticationResult);
                 mode = pivSession.GetPinOnlyMode();
                 Assert.True(mode.HasFlag(PivPinOnlyMode.PinProtected));
                 Assert.False(mode.HasFlag(PivPinOnlyMode.PinDerived));
@@ -147,7 +149,8 @@ namespace Yubico.YubiKey.Piv
 
             using (var pivSession = new PivSession(yubiKey))
             {
-                var nonPrintedData = new ReadOnlyMemory<byte>(new byte[] {
+                var nonPrintedData = new ReadOnlyMemory<byte>(new byte[]
+                {
                     0x53, 0x0A, 0x04, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88
                 });
 
@@ -187,7 +190,8 @@ namespace Yubico.YubiKey.Piv
                 PivPinOnlyMode mode = pivSession.TryRecoverPinOnlyMode();
                 Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
                 Assert.True(pivSession.ManagementKeyAuthenticated);
-                Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated, pivSession.ManagementKeyAuthenticationResult);
+                Assert.Equal(AuthenticateManagementKeyResult.MutualFullyAuthenticated,
+                    pivSession.ManagementKeyAuthenticationResult);
                 mode = pivSession.GetPinOnlyMode();
                 Assert.Equal(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, mode);
             }

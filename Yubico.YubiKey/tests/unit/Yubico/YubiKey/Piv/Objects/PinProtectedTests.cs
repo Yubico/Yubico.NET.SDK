@@ -125,7 +125,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Encode_NoKey_Correct()
         {
-            var expected = new Span<byte>(new byte[] {
+            var expected = new Span<byte>(new byte[]
+            {
                 0x53, 0x02, 0x88, 0x00
             });
 
@@ -141,7 +142,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Encode_WithKey_Correct()
         {
-            var expected = new Span<byte>(new byte[] {
+            var expected = new Span<byte>(new byte[]
+            {
                 0x53, 0x1C, 0x88, 0x1A, 0x89, 0x18,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
@@ -160,7 +162,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void TryDecode_NoKey_ReturnsTrue()
         {
-            var encodedData = new Memory<byte>(new byte[] {
+            var encodedData = new Memory<byte>(new byte[]
+            {
                 0x53, 0x02, 0x88, 0x00
             });
 
@@ -173,7 +176,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_NoKey_IsEmptyFalse()
         {
-            var encodedData = new Memory<byte>(new byte[] {
+            var encodedData = new Memory<byte>(new byte[]
+            {
                 0x53, 0x02, 0x88, 0x00
             });
 
@@ -186,7 +190,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_NoKey_CorrectMgmtKey()
         {
-            var encodedData = new Memory<byte>(new byte[] {
+            var encodedData = new Memory<byte>(new byte[]
+            {
                 0x53, 0x02, 0x88, 0x00
             });
 
@@ -199,7 +204,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void TryDecode_Full_ReturnsTrue()
         {
-            var encodedData = new Memory<byte>(new byte[] {
+            var encodedData = new Memory<byte>(new byte[]
+            {
                 0x53, 0x1C, 0x88, 0x1A, 0x89, 0x18,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
@@ -215,7 +221,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_Full_IsEmptyFalse()
         {
-            var encodedData = new Memory<byte>(new byte[] {
+            var encodedData = new Memory<byte>(new byte[]
+            {
                 0x53, 0x1C, 0x88, 0x1A, 0x89, 0x18,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
@@ -231,7 +238,8 @@ namespace Yubico.YubiKey.Piv.Objects
         [Fact]
         public void Decode_Full_MgmtKeyCorrect()
         {
-            var encodedData = new Memory<byte>(new byte[] {
+            var encodedData = new Memory<byte>(new byte[]
+            {
                 0x53, 0x1C, 0x88, 0x1A, 0x89, 0x18,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
@@ -252,7 +260,8 @@ namespace Yubico.YubiKey.Piv.Objects
 
         private Memory<byte> GetArbitraryMgmtKey()
         {
-            byte[] keyData = new byte[] {
+            byte[] keyData = new byte[]
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46, 0x47, 0x48,
                 0x61, 0x62, 0x63, 0x64, 0x65, 0x66, 0x67, 0x68

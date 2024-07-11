@@ -34,7 +34,6 @@ namespace Yubico.YubiKey.Fido2
         /// </summary>
         public Fido2Exception()
         {
-
         }
 
         /// <summary>
@@ -43,7 +42,6 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="message">The message that describes the error.</param>
         public Fido2Exception(string message) : base(message)
         {
-
         }
 
         /// <summary>
@@ -63,7 +61,6 @@ namespace Yubico.YubiKey.Fido2
         /// <param name="innerException">The exception that is the cause of the current exception.</param>
         public Fido2Exception(string message, Exception innerException) : base(message, innerException)
         {
-
         }
 
         /// <summary>
@@ -90,7 +87,6 @@ namespace Yubico.YubiKey.Fido2
         protected Fido2Exception(SerializationInfo serializationInfo, StreamingContext streamingContext) :
             base(serializationInfo, streamingContext)
         {
-
         }
     }
 }

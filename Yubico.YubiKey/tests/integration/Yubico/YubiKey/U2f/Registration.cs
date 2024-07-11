@@ -31,14 +31,16 @@ namespace Yubico.YubiKey.U2f
                 u2fSession.KeyCollector = k => k.Request switch
                 {
                     KeyEntryRequest.TouchRequest => true,
-                    _ => throw new NotSupportedException("Test requested a key that is not supported by this test case.")
+                    _ => throw new NotSupportedException(
+                        "Test requested a key that is not supported by this test case.")
                 };
 
                 byte[] applicationId = U2fSession.EncodeAndHashString("https://fido.example.com/app");
                 // This is not a well-formed challenge. That's OK - we're not really trying to log in here.
                 byte[] clientDataHash = U2fSession.EncodeAndHashString("FakeChallenge");
 
-                RegistrationData registrationData = u2fSession.Register(applicationId, clientDataHash, new TimeSpan(0, 0, 5));
+                RegistrationData registrationData =
+                    u2fSession.Register(applicationId, clientDataHash, new TimeSpan(0, 0, 5));
 
                 Assert.True(registrationData.VerifySignature(applicationId, clientDataHash));
             }

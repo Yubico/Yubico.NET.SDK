@@ -137,6 +137,7 @@ namespace Yubico.YubiKey.Scp03
             {
                 throw new ArgumentNullException(nameof(yubiKey));
             }
+
             if (scp03Keys is null)
             {
                 throw new ArgumentNullException(nameof(scp03Keys));
@@ -249,6 +250,7 @@ namespace Yubico.YubiKey.Scp03
             {
                 throw new ArgumentNullException(nameof(newKeySet));
             }
+
             var cmd = new PutKeyCommand(Connection.GetScp03Keys(), newKeySet);
             PutKeyResponse rsp = Connection.SendCommand(cmd);
             if (rsp.Status != ResponseStatus.Success)
@@ -308,6 +310,7 @@ namespace Yubico.YubiKey.Scp03
         /// It will close the session. The most important function of closing a
         /// session is to close the connection.
         /// </summary>
+
         // Note that .NET recommends a Dispose method call Dispose(true) and
         // GC.SuppressFinalize(this). The actual disposal is in the
         // Dispose(bool) method.

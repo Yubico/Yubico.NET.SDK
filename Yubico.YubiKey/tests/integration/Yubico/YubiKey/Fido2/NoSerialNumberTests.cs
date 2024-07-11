@@ -28,7 +28,8 @@ namespace Yubico.YubiKey.Fido2
             Assert.NotNull(device);
             if (device.SerialNumber is null)
             {
-                _ = Assert.Throws<InvalidOperationException>(() => IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5));
+                _ = Assert.Throws<InvalidOperationException>(() =>
+                    IntegrationTestDeviceEnumeration.GetTestDevice(StandardTestDevice.Fw5));
             }
         }
     }

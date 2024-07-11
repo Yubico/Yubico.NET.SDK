@@ -113,6 +113,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             ExceptionMessages.InvalidSlot,
                             value));
                 }
+
                 _slotNumber = value;
             }
         }
@@ -138,6 +139,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             CultureInfo.CurrentCulture,
                             ExceptionMessages.InvalidAlgorithm));
                 }
+
                 _algorithm = value;
             }
         }
@@ -183,10 +185,11 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
-        public PivPublicKey GetData() => Status switch
-        {
-            ResponseStatus.Success => PivPublicKey.Create(ResponseApdu.Data),
-            _ => throw new InvalidOperationException(StatusMessage),
-        };
+        public PivPublicKey GetData() =>
+            Status switch
+            {
+                ResponseStatus.Success => PivPublicKey.Create(ResponseApdu.Data),
+                _ => throw new InvalidOperationException(StatusMessage),
+            };
     }
 }

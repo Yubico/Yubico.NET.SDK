@@ -54,7 +54,9 @@ namespace Yubico.YubiKey.Fido2
         private const string KeyCredProtect = "credProtect";
         private const string KeyMinPinLength = "minPinLength";
 
-        private readonly List<Tuple<string, CoseAlgorithmIdentifier>> _algorithms = new List<Tuple<string, CoseAlgorithmIdentifier>>();
+        private readonly List<Tuple<string, CoseAlgorithmIdentifier>> _algorithms =
+            new List<Tuple<string, CoseAlgorithmIdentifier>>();
+
         private List<CredentialId>? _excludeList;
         private Dictionary<string, byte[]>? _extensions;
         private Dictionary<string, bool>? _options;
@@ -320,8 +322,9 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="ArgumentNullException">
         /// The <c>credentialId</c> arg is null.
         /// </exception>
-        public void ExcludeCredential(CredentialId credentialId) => _excludeList =
-            ParameterHelpers.AddToList<CredentialId>(credentialId, _excludeList);
+        public void ExcludeCredential(CredentialId credentialId) =>
+            _excludeList =
+                ParameterHelpers.AddToList<CredentialId>(credentialId, _excludeList);
 
         /// <summary>
         /// Add an entry to the extensions list.
@@ -348,8 +351,9 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="ArgumentNullException">
         /// The <c>extensionKey</c> or <c>encodedValue</c> arg is null.
         /// </exception>
-        public void AddExtension(string extensionKey, byte[] encodedValue) => _extensions =
-            ParameterHelpers.AddKeyValue<byte[]>(extensionKey, encodedValue, _extensions);
+        public void AddExtension(string extensionKey, byte[] encodedValue) =>
+            _extensions =
+                ParameterHelpers.AddKeyValue<byte[]>(extensionKey, encodedValue, _extensions);
 
         /// <summary>
         /// Specify that the YubiKey should return the minimum PIN length with
@@ -466,6 +470,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(authenticatorInfo));
             }
+
             if (credBlobValue is null)
             {
                 throw new ArgumentNullException(nameof(credBlobValue));
@@ -475,6 +480,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
             }
+
             if (credBlobValue.Length > authenticatorInfo.MaximumCredentialBlobLength)
             {
                 throw new ArgumentException(
@@ -646,10 +652,12 @@ namespace Yubico.YubiKey.Fido2
             {
                 return;
             }
+
             if (authenticatorInfo is null)
             {
                 throw new ArgumentNullException(nameof(authenticatorInfo));
             }
+
             if (!authenticatorInfo.Extensions.Contains<string>(KeyCredProtect))
             {
                 throw new NotSupportedException(ExceptionMessages.NotSupportedByYubiKeyVersion);
@@ -683,8 +691,9 @@ namespace Yubico.YubiKey.Fido2
         /// <exception cref="ArgumentNullException">
         /// The <c>optionKey</c> arg is null.
         /// </exception>
-        public void AddOption(string optionKey, bool optionValue) => _options =
-            ParameterHelpers.AddKeyValue<bool>(optionKey, optionValue, _options);
+        public void AddOption(string optionKey, bool optionValue) =>
+            _options =
+                ParameterHelpers.AddKeyValue<bool>(optionKey, optionValue, _options);
 
         /// <inheritdoc/>
         public byte[] CborEncode()
@@ -694,8 +703,10 @@ namespace Yubico.YubiKey.Fido2
                 .Entry(TagRp, RelyingParty)
                 .Entry(TagUserEntity, UserEntity)
                 .Entry(TagAlgorithmsList, EncodeAlgorithms, this)
-                .OptionalEntry<IReadOnlyList<ICborEncode>>(TagExcludeList, CborHelpers.EncodeArrayOfObjects, ExcludeList)
-                .OptionalEntry<Dictionary<string, byte[]>>(TagExtensions, ParameterHelpers.EncodeKeyValues<byte[]>, _extensions)
+                .OptionalEntry<IReadOnlyList<ICborEncode>>(
+                    TagExcludeList, CborHelpers.EncodeArrayOfObjects, ExcludeList)
+                .OptionalEntry<Dictionary<string, byte[]>>(
+                    TagExtensions, ParameterHelpers.EncodeKeyValues<byte[]>, _extensions)
                 .OptionalEntry<Dictionary<string, bool>>(TagOptions, ParameterHelpers.EncodeKeyValues<bool>, _options)
                 .OptionalEntry(TagPinUvAuth, PinUvAuthParam)
                 .OptionalEntry(TagProtocol, (int?)Protocol)
@@ -725,6 +736,7 @@ namespace Yubico.YubiKey.Fido2
                     .Entry(ParameterHelpers.TagAlg, alg)
                     .EndMap();
             }
+
             cbor.WriteEndArray();
 
             return cbor.Encode();

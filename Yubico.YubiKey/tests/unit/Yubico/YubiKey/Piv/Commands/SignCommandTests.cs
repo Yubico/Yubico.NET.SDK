@@ -290,4 +290,3 @@ namespace Yubico.YubiKey.Piv.Commands
         };
     }
 }
-

@@ -21,6 +21,5 @@ namespace Yubico.YubiKey.InterIndustry.Commands
     public interface ISelectApplicationCommand<TSelectResponse> : IYubiKeyCommand<TSelectResponse>
         where TSelectResponse : ISelectApplicationResponse<ISelectApplicationData>
     {
-
     }
 }

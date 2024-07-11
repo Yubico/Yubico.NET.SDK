@@ -49,7 +49,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// </summary>
         public VersionCommand() : this(RandomNumberGenerator.Create())
         {
-
         }
 
         /// <summary>
@@ -75,7 +74,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public VersionResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new VersionResponse(responseApdu);
+        public VersionResponse CreateResponseForApdu(ResponseApdu responseApdu) => new VersionResponse(responseApdu);
     }
 }

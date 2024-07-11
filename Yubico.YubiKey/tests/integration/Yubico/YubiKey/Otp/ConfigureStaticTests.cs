@@ -22,7 +22,6 @@ namespace Yubico.YubiKey.Otp
 {
     public class ConfigureStaticTests
     {
-
         [Trait("Category", "Simple")]
         [SkippableTheory(typeof(DeviceNotFoundException))]
         [InlineData(StandardTestDevice.Fw5)]

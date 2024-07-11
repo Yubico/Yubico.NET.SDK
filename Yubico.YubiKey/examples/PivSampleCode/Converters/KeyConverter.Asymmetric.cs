@@ -107,8 +107,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                             CultureInfo.CurrentCulture,
                             InvalidKeyDataMessage));
                 }
+
                 eccCurve = ECCurve.CreateFromValue("1.3.132.0.34");
             }
+
             var eccParams = new ECParameters
             {
                 Curve = (ECCurve)eccCurve

@@ -44,7 +44,10 @@ namespace Yubico.YubiKey.Fido2
                 throw new ArgumentNullException();
             }
 
-            List<T> returnList = currentList is null ? new List<T>() : currentList;
+            List<T> returnList = currentList is null
+                ? new List<T>()
+                : currentList;
+
             returnList.Add(itemToAdd);
 
             return returnList;
@@ -65,13 +68,16 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(theKey));
             }
+
             if (theValue is null)
             {
                 throw new ArgumentNullException(nameof(theValue));
             }
 
             Dictionary<string, TValue> returnDictionary =
-                currentDictionary is null ? new Dictionary<string, TValue>() : currentDictionary;
+                currentDictionary is null
+                    ? new Dictionary<string, TValue>()
+                    : currentDictionary;
 
             // If the key already exists, replace the current value in the
             // dictionary with this one.
@@ -129,6 +135,7 @@ namespace Yubico.YubiKey.Fido2
                     throw new NotSupportedException();
                 }
             }
+
             cbor.WriteEndMap();
 
             return cbor.Encode();

@@ -225,6 +225,7 @@ namespace Yubico.YubiKey
             yubiKey.FirmwareVersion.Minor = 6;
             Assert.False(yubiKey.HasFeature(YubiKeyFeature.ManagementNfcRestricted));
         }
+
         [Fact]
         public void CheckOtpFeatures()
         {

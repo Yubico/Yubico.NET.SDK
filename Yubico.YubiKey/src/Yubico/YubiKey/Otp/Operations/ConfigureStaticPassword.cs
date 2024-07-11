@@ -36,11 +36,13 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         #region Private Fields
+
         // .NET design guidelines say that we are consumers of this Memory<T>
         // object for the duration of this instance. However, once we have HID
         // codes, we won't be using it. It's strictly a place to keep the chars
         // until we know what keyboard layout we have.
         private ReadOnlyMemory<char> _password = Memory<char>.Empty;
+
         // We're going to hold these in separate references so that the one
         // for a specified password can remain read-only.
         private Memory<char> _generatedPassword = Memory<char>.Empty;
@@ -48,6 +50,7 @@ namespace Yubico.YubiKey.Otp.Operations
         private KeyboardLayout? _keyboardLayout;
         private bool? _generatePassword;
         private static readonly byte[] _excluded = { 0x28, 0x2b, 0x2c };
+
         #endregion
 
         /// <inheritdoc/>
@@ -59,6 +62,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 _passwordHidCodes = _passwordHidCodes
                     .Concat(new byte[SlotConfigureBase.MaxPasswordLength - _passwordHidCodes.Length])
                     .ToArray();
+
                 YubiKeyFlags ykFlags = Settings.YubiKeyFlags;
 
                 var cmd = new ConfigureSlotCommand
@@ -66,9 +70,12 @@ namespace Yubico.YubiKey.Otp.Operations
                     YubiKeyFlags = ykFlags,
                     OtpSlot = OtpSlot!.Value
                 };
+
                 cmd.SetFixedData(_passwordHidCodes.AsSpan(0, SlotConfigureBase.FixedDataLength));
                 cmd.SetUid(_passwordHidCodes.AsSpan(SlotConfigureBase.FixedDataLength, SlotConfigureBase.UidLength));
-                cmd.SetAesKey(_passwordHidCodes.AsSpan(SlotConfigureBase.FixedDataLength + SlotConfigureBase.UidLength));
+                cmd.SetAesKey(
+                    _passwordHidCodes.AsSpan(SlotConfigureBase.FixedDataLength + SlotConfigureBase.UidLength));
+
                 cmd.ApplyCurrentAccessCode(CurrentAccessCode);
                 cmd.SetAccessCode(NewAccessCode);
 
@@ -79,10 +86,10 @@ namespace Yubico.YubiKey.Otp.Operations
                     {
                         throw new InvalidOperationException(
                             string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.YubiKeyOperationFailed,
-                            response.StatusMessage
-                            ));
+                                CultureInfo.CurrentCulture,
+                                ExceptionMessages.YubiKeyOperationFailed,
+                                response.StatusMessage
+                                ));
                     }
                 }
                 finally
@@ -104,6 +111,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 exceptions.Add(new InvalidOperationException(ExceptionMessages.MustSpecifyOrGeneratePassword));
             }
+
             if (!_keyboardLayout.HasValue)
             {
                 exceptions.Add(new InvalidOperationException(ExceptionMessages.MustSpecifyKeyboardLayout));
@@ -128,6 +136,7 @@ namespace Yubico.YubiKey.Otp.Operations
         public const int AccessCodeLength = SlotConfigureBase.AccessCodeLength;
 
         #region Properties Specific to This Task
+
         /// <summary>
         /// Set the static password the slot on the YubiKey should be configured
         /// with.
@@ -169,6 +178,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.BothGenerateAndSpecify);
             }
+
             _generatePassword = false;
 
             // This check just catches passwords that are too long, or zero-length.
@@ -181,8 +191,9 @@ namespace Yubico.YubiKey.Otp.Operations
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.StaticPasswordInvalidLength,
                         MaxPasswordLength),
-                        nameof(password));
+                    nameof(password));
             }
+
             _password = password;
 
             // See if we have all the parts needed to generate a password and/or
@@ -222,6 +233,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.BothGenerateAndSpecify);
             }
+
             if (generatedPassword.Length < 1 || generatedPassword.Length > MaxPasswordLength)
             {
                 throw new ArgumentException(
@@ -230,6 +242,7 @@ namespace Yubico.YubiKey.Otp.Operations
                         ExceptionMessages.StaticPasswordInvalidLength,
                         MaxPasswordLength));
             }
+
             _generatePassword = true;
 
             _generatedPassword = generatedPassword;
@@ -287,49 +300,46 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         #region Flags to Relay
+
         /// <inheritdoc cref="OtpSettings{T}.AppendCarriageReturn(bool)"/>
         public ConfigureStaticPassword AppendCarriageReturn(bool setConfig = true) =>
             Settings.AppendCarriageReturn(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.SendTabFirst(bool)"/>
-        public ConfigureStaticPassword SendTabFirst(bool setConfig = true) =>
-            Settings.SendTabFirst(setConfig);
+        public ConfigureStaticPassword SendTabFirst(bool setConfig = true) => Settings.SendTabFirst(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.AppendTabToFixed(bool)"/>
-        public ConfigureStaticPassword AppendTabToFixed(bool setConfig) =>
-            Settings.AppendTabToFixed(setConfig);
+        public ConfigureStaticPassword AppendTabToFixed(bool setConfig) => Settings.AppendTabToFixed(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.AppendDelayToFixed(bool)"/>
         public ConfigureStaticPassword AppendDelayToFixed(bool setConfig = true) =>
             Settings.AppendDelayToFixed(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.Use10msPacing(bool)"/>
-        public ConfigureStaticPassword Use10msPacing(bool setConfig = true) =>
-            Settings.Use10msPacing(setConfig);
+        public ConfigureStaticPassword Use10msPacing(bool setConfig = true) => Settings.Use10msPacing(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.Use20msPacing(bool)"/>
-        public ConfigureStaticPassword Use20msPacing(bool setConfig = true) =>
-            Settings.Use20msPacing(setConfig);
+        public ConfigureStaticPassword Use20msPacing(bool setConfig = true) => Settings.Use20msPacing(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.UseNumericKeypad(bool)"/>
-        public ConfigureStaticPassword UseNumericKeypad(bool setConfig = true) =>
-            Settings.UseNumericKeypad(setConfig);
+        public ConfigureStaticPassword UseNumericKeypad(bool setConfig = true) => Settings.UseNumericKeypad(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.UseFastTrigger(bool)"/>
-        public ConfigureStaticPassword UseFastTrigger(bool setConfig = true) =>
-            Settings.UseFastTrigger(setConfig);
+        public ConfigureStaticPassword UseFastTrigger(bool setConfig = true) => Settings.UseFastTrigger(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.AllowUpdate(bool)"/>
-        public ConfigureStaticPassword SetAllowUpdate(bool setConfig = true) =>
-            Settings.AllowUpdate(setConfig);
+        public ConfigureStaticPassword SetAllowUpdate(bool setConfig = true) => Settings.AllowUpdate(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.AllowManualUpdate(bool)"/>
         public ConfigureStaticPassword AllowManualUpdate(bool setConfig = true) =>
             Settings.AllowManualUpdate(setConfig);
+
         #endregion
+
         #endregion
 
         #region Utility Methods
+
         private void PopulateHidCodesIfReady()
         {
             try
@@ -370,7 +380,6 @@ namespace Yubico.YubiKey.Otp.Operations
                 throw;
             }
 
-
             // This local function just generates the password from the possible
             // values in the keyboard layout. Populating the HID codes isn't done
             // here.
@@ -378,6 +387,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 Span<char> password = _generatedPassword.Span;
                 using RandomNumberGenerator rng = CryptographyProviders.RngCreator();
+
                 // Build the table of possible random characters.
                 byte[] hidTable = translator
                     .SupportedHidCodes
@@ -409,6 +419,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 }
             }
         }
+
         #endregion
     }
 }

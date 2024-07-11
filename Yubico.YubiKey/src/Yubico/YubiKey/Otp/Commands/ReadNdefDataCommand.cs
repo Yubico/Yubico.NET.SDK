@@ -45,14 +45,14 @@ namespace Yubico.YubiKey.Otp.Commands
         /// </summary>
         public ReadNdefDataCommand()
         {
-
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = ReadNdefDataInstruction
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Ins = ReadNdefDataInstruction
+            };
 
         /// <inheritdoc />
         public ReadNdefDataResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

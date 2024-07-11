@@ -116,6 +116,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 cbor.WriteTextString(currentString);
             }
+
             cbor.WriteEndArray();
 
             return cbor.Encode();
@@ -153,6 +154,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
             {
                 cbor.WriteEncodedValue(cborEncode.CborEncode());
             }
+
             cbor.WriteEndArray();
 
             return cbor.Encode();

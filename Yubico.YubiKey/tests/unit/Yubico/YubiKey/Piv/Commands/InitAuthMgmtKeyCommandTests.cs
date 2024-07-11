@@ -122,7 +122,8 @@ namespace Yubico.YubiKey.Piv.Commands
         [InlineData(2, 0x80)]
         public void CreateCommandApdu_GetData_ReturnsCorrect(int constructor, byte tag2)
         {
-            byte[] expected = new byte[4] {
+            byte[] expected = new byte[4]
+            {
                 0x7C, 0x02, tag2, 0x00
             };
             CommandApdu cmdApdu = GetInitAuthMgmtKeyCommandApdu(constructor);
@@ -145,7 +146,7 @@ namespace Yubico.YubiKey.Piv.Commands
             byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             byte sw2 = unchecked((byte)SWConstants.Success);
             var responseApdu = new ResponseApdu(
-              new byte[] { 0x7C, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
+                new byte[] { 0x7C, 0x0A, 0x81, 0x08, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, sw1, sw2 });
             var command = new InitializeAuthenticateManagementKeyCommand();
 
             InitializeAuthenticateManagementKeyResponse? response = command.CreateResponseForApdu(responseApdu);

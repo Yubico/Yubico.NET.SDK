@@ -42,19 +42,18 @@ namespace Yubico.YubiKey.Management.Commands
         /// </summary>
         public GetPagedDeviceInfoCommand()
         {
-
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = GetDeviceInfoInstruction,
-            P1 = Page
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = GetDeviceInfoInstruction,
+                P1 = Page
+            };
 
         /// <inheritdoc />
         public GetPagedDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
             new GetPagedDeviceInfoResponse(responseApdu);
     }
 }
-

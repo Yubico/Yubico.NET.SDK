@@ -18,7 +18,8 @@ using Yubico.YubiKey.Management.Commands;
 namespace Yubico.YubiKey.U2f.Commands
 {
     /// <inheritdoc/>
-    public sealed class SetLegacyDeviceConfigCommand : SetLegacyDeviceConfigBase, IYubiKeyCommand<SetLegacyDeviceConfigResponse>
+    public sealed class SetLegacyDeviceConfigCommand : SetLegacyDeviceConfigBase,
+                                                       IYubiKeyCommand<SetLegacyDeviceConfigResponse>
     {
         private const byte DeviceConfigurationInstruction = 0x40;
 

@@ -22,14 +22,17 @@ namespace Yubico.YubiKey.Fido2
 {
     public class MinPinLenTests : SimpleIntegrationTestConnection
     {
-        static readonly byte[] _clientDataHash = {
+        static readonly byte[] _clientDataHash =
+        {
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
         };
+
         static readonly RelyingParty _rp = new RelyingParty("rp.minpin.length")
         {
             Name = "RP MinPinLen"
         };
+
         static readonly UserEntity _userEntity = new UserEntity(new byte[] { 1, 2, 3, 4, 5 })
         {
             Name = "TestUser",

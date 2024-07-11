@@ -61,7 +61,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 {
                     exceptions.Add(
                         new InvalidOperationException("You must either specify a key " +
-                        "or specify that the key should be generated."));
+                                                      "or specify that the key should be generated."));
                 }
                 else if (_key.Length < ConfigureHotp.HmacKeySize)
                 {
@@ -84,7 +84,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
             {
                 exceptions.Add(
                     new InvalidOperationException("OATH-HOTP passwords must be six or eight " +
-                    "digits. If you don't specify, 6 is default."));
+                                                  "digits. If you don't specify, 6 is default."));
             }
 
             try
@@ -115,6 +115,7 @@ namespace Yubico.YubiKey.TestApp.Plugins.Otp
                 Output.WriteLine("Aborted.", OutputLevel.Error);
                 return false;
             }
+
             try
             {
                 ConfigureHotp op = GetOperation(otp);

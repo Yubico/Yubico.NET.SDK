@@ -56,13 +56,13 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = PivVersionInstruction,
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = PivVersionInstruction,
+            };
 
         /// <inheritdoc />
-        public VersionResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new VersionResponse(responseApdu);
+        public VersionResponse CreateResponseForApdu(ResponseApdu responseApdu) => new VersionResponse(responseApdu);
     }
 }

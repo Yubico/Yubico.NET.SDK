@@ -66,10 +66,12 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        protected override ResponseStatusPair StatusCodeMap => CtapStatus switch
-        {
-            CtapStatus.InvalidOption => new ResponseStatusPair(ResponseStatus.Success, ResponseStatusMessages.BaseSuccess),
-            _ => base.StatusCodeMap,
-        };
+        protected override ResponseStatusPair StatusCodeMap =>
+            CtapStatus switch
+            {
+                CtapStatus.InvalidOption => new ResponseStatusPair(
+                    ResponseStatus.Success, ResponseStatusMessages.BaseSuccess),
+                _ => base.StatusCodeMap,
+            };
     }
 }

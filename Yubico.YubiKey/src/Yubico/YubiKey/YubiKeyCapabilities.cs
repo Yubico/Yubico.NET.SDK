@@ -29,10 +29,10 @@ namespace Yubico.YubiKey
     /// interfaces. This is in contrast to the YubiKey 5 Series which takes an application-based
     /// approach to capabilities.
     /// </remarks>
-#pragma warning disable CA2217 // Justification: Enums here are FlagsAttribute
+    #pragma warning disable CA2217 // Justification: Enums here are FlagsAttribute
     [Flags]
     public enum YubiKeyCapabilities
-#pragma warning restore CA2217
+        #pragma warning restore CA2217
     {
         /// <summary>
         /// No enabled.

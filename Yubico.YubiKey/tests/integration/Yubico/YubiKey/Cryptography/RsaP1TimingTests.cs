@@ -192,6 +192,7 @@ namespace Yubico.YubiKey.Cryptography
             {
                 isValid = RsaFormat.TryParsePkcs1Decrypt(formattedData, out outputData);
             }
+
             timer.Stop();
 
             if (expectedLength == 0)
@@ -202,6 +203,7 @@ namespace Yubico.YubiKey.Cryptography
             {
                 Assert.Equal(expectedLength, outputData.Length);
             }
+
             return timer.ElapsedMilliseconds;
         }
 

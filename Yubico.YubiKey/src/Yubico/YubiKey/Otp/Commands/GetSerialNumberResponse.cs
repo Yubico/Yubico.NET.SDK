@@ -35,7 +35,6 @@ namespace Yubico.YubiKey.Otp.Commands
         public GetSerialNumberResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
 
         /// <summary>

@@ -28,7 +28,9 @@ namespace Yubico.YubiKey.Otp.Commands
         private const byte AutoEjectTimeoutTag = 0x06;
         private const byte ChallengeResponseTimeoutTag = 0x07;
         private const byte DeviceFlagsTag = 0x08;
+
         private const byte ConfigurationLockPresentTag = 0x0a;
+
         //private const byte ConfigurationUnlockTag = 0x0b;
         //private const byte ResetTag = 0x0c;
         private const byte NfcPrePersCapabilitiesTag = 0x0d;

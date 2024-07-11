@@ -116,7 +116,8 @@ namespace Yubico.YubiKey.Piv.Objects
         /// </summary>
         public ReadOnlyMemory<byte> UniqueCardIdentifier { get; private set; }
 
-        private readonly byte[] _uniqueCardIdentifier = new byte[] {
+        private readonly byte[] _uniqueCardIdentifier = new byte[]
+        {
             0xA0, 0x00, 0x00, 0x01, 0x16, 0xFF, 0x02,
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
         };
@@ -305,7 +306,6 @@ namespace Yubico.YubiKey.Piv.Objects
                 return true;
             }
 
-
             // We're looking for a CCC that is encoded as
             //   53 33
             //      F0 15
@@ -353,7 +353,8 @@ namespace Yubico.YubiKey.Piv.Objects
                 if (tlvReader.TryReadValue(out ReadOnlyMemory<byte> encodedUniqueId, UniqueCardIdTag))
                 {
                     if (encodedUniqueId.Length == UniqueCardIdLength &&
-                        MemoryExtensions.SequenceEqual<byte>(encodedUniqueId.Slice(AidOffset, AidLength).Span, ApplicationIdentifier.Span))
+                        MemoryExtensions.SequenceEqual<byte>(
+                            encodedUniqueId.Slice(AidOffset, AidLength).Span, ApplicationIdentifier.Span))
                     {
                         var dest = new Memory<byte>(_uniqueCardIdentifier);
                         encodedUniqueId.CopyTo(dest);
@@ -388,8 +389,9 @@ namespace Yubico.YubiKey.Piv.Objects
             {
                 if (elementList[index].Item2 == 0)
                 {
-                    returnValue = tlvReader.TryReadValue(out ReadOnlyMemory<byte> currentValue, elementList[index].Item1) &&
-                              currentValue.Length == elementList[index].Item2;
+                    returnValue = tlvReader.TryReadValue(
+                            out ReadOnlyMemory<byte> currentValue, elementList[index].Item1) &&
+                        currentValue.Length == elementList[index].Item2;
                 }
                 else
                 {
@@ -421,7 +423,8 @@ namespace Yubico.YubiKey.Piv.Objects
                 }
 
                 index++;
-            } while (index < elementList.Length);
+            }
+            while (index < elementList.Length);
         }
 
         // This array of tuples represents what we'll be encoding or decoding.
@@ -429,7 +432,8 @@ namespace Yubico.YubiKey.Piv.Objects
         // Item 2 is the length, it must be either 0 or 1.
         // Item 3 is the value, if the length is 0, this is ignored.
         private Tuple<int, int, byte>[] GetFixedTupleArray() =>
-            new Tuple<int, int, byte>[] {
+            new Tuple<int, int, byte>[]
+            {
                 new Tuple<int, int, byte>(ContainerVersionTag, 1, ContainerVersionNumber),
                 new Tuple<int, int, byte>(GrammarVersionTag, 1, GrammarVersionNumber),
                 new Tuple<int, int, byte>(UnusedTag1, 0, 0),

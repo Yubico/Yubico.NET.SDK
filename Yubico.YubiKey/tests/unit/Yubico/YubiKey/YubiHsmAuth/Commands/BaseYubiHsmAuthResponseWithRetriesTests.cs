@@ -29,8 +29,11 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
             public bool HasRetries => StatusWordContainsRetries;
         }
 
-        private const string AuthenticationRequired0RetriesStatusMessage = "Wrong password or authentication key. Retries remaining: 0.";
-        private const string AuthenticationRequired15RetriesStatusMessage = "Wrong password or authentication key. Retries remaining: 15.";
+        private const string AuthenticationRequired0RetriesStatusMessage =
+            "Wrong password or authentication key. Retries remaining: 0.";
+
+        private const string AuthenticationRequired15RetriesStatusMessage =
+            "Wrong password or authentication key. Retries remaining: 15.";
 
         [Theory]
         [InlineData(SWConstants.VerifyFail, ResponseStatus.AuthenticationRequired)]
@@ -70,7 +73,8 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         [Theory]
         [InlineData(SWConstants.VerifyFail, 0)]
         [InlineData(0x63cf, 15)]
-        public void RetriesRemaining_GivenSwWithRetryCount_ReturnsCorrectRetryCount(short responseSw, int? expectedCount)
+        public void RetriesRemaining_GivenSwWithRetryCount_ReturnsCorrectRetryCount(
+            short responseSw, int? expectedCount)
         {
             SampleYubiHsmAuthResponseWithRetries response = new SampleYubiHsmAuthResponseWithRetries(
                 new ResponseApdu(new byte[] { }, responseSw));

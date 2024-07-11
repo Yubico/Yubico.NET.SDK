@@ -119,8 +119,9 @@ namespace Yubico.YubiKey.Piv
         /// True if the method was able to create a new RSA public key object,
         /// false otherwise.
         /// </returns>
-        internal static bool TryCreate(out PivPublicKey publicKeyObject,
-                                       ReadOnlyMemory<byte> encodedPublicKey)
+        internal static bool TryCreate(
+            out PivPublicKey publicKeyObject,
+            ReadOnlyMemory<byte> encodedPublicKey)
         {
             var returnValue = new PivEccPublicKey();
             publicKeyObject = returnValue;

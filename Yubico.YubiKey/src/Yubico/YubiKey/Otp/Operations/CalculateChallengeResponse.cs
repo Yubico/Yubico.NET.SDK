@@ -29,9 +29,12 @@ namespace Yubico.YubiKey.Otp.Operations
     public class CalculateChallengeResponse : OperationBase<CalculateChallengeResponse>
     {
         internal CalculateChallengeResponse(IYubiKeyConnection connection, IOtpSession session, Slot slot)
-            : base(connection, session, slot) { }
+            : base(connection, session, slot)
+        {
+        }
 
         #region Size Constants
+
         /// <summary>
         /// Maximum length in bytes for an HMAC challenge.
         /// </summary>
@@ -51,9 +54,11 @@ namespace Yubico.YubiKey.Otp.Operations
         /// Maximum digits for an OTP (one-time password).
         /// </summary>
         public const int MaxOtpDigits = 10;
+
         #endregion
 
         #region Private Fields
+
         private byte[] _challenge = Array.Empty<byte>();
         private bool? _isTotp;
         private int _period = 30;
@@ -61,6 +66,7 @@ namespace Yubico.YubiKey.Otp.Operations
         private Action _touchNotify = () => Debug.WriteLine("YubiKey SDK: Default Touch Prompt");
         private ReadOnlyMemory<byte> _dataBytes;
         private int _dataInt;
+
         #endregion
 
         /// <inheritdoc/>
@@ -96,12 +102,15 @@ namespace Yubico.YubiKey.Otp.Operations
                         {
                             exceptions.Add(new InvalidOperationException(ExceptionMessages.HmacChallengeTooLong));
                         }
+
                         break;
                     case ChallengeResponseAlgorithm.YubicoOtp:
                         if (_challenge.Length != YubicoOtpChallengeSize)
                         {
-                            exceptions.Add(new InvalidOperationException(ExceptionMessages.YubicoOtpChallengeLengthInvalid));
+                            exceptions.Add(
+                                new InvalidOperationException(ExceptionMessages.YubicoOtpChallengeLengthInvalid));
                         }
+
                         break;
                 }
             }
@@ -139,13 +148,15 @@ namespace Yubico.YubiKey.Otp.Operations
                         OtpSlot!.Value,
                         _algorithm,
                         _challenge);
+
                     ChallengeResponseResponse response = Connection.SendCommand(cmd);
                     if (response.Status != ResponseStatus.Success)
                     {
-                        throw new InvalidOperationException(string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.YubiKeyOperationFailed,
-                            response.StatusMessage));
+                        throw new InvalidOperationException(
+                            string.Format(
+                                CultureInfo.CurrentCulture,
+                                ExceptionMessages.YubiKeyOperationFailed,
+                                response.StatusMessage));
                     }
 
                     _dataBytes = response.GetData();
@@ -153,6 +164,7 @@ namespace Yubico.YubiKey.Otp.Operations
                     if (_algorithm == ChallengeResponseAlgorithm.HmacSha1)
                     {
                         byte offset = (byte)(_dataBytes.Span[^1] & 0x0f);
+
                         // The ykman code reads this as a uint, but masks the top bit. I'll just do the same
                         // thing, but treat it as an int since that's CLS-compliant.
                         _dataInt = (int)BinaryPrimitives.ReadUInt32BigEndian(_dataBytes[offset..].Span) & 0x7fffffff;
@@ -192,6 +204,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.IntOrCodeOnlyWithHmac);
             }
+
             // We're calling Execute here because the base class orchestrates
             // validation through it.
             Execute();
@@ -210,6 +223,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new ArgumentOutOfRangeException(ExceptionMessages.OtpCodeDigitRange, nameof(digits));
             }
+
             return (GetDataInt() % (uint)Math.Pow(10, digits))
                 .ToString(CultureInfo.InvariantCulture).PadLeft(digits, '0');
         }
@@ -225,6 +239,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.BothTotpAndChallenge);
             }
+
             _isTotp = false;
             _challenge = challenge;
 
@@ -246,6 +261,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.BothTotpAndChallenge);
             }
+
             _isTotp = true;
 
             // ToUnixTimeSeconds returns a long, obviously in host order. The
@@ -349,8 +365,9 @@ namespace Yubico.YubiKey.Otp.Operations
         {
             _algorithm =
                 setting
-                ? ChallengeResponseAlgorithm.YubicoOtp
-                : ChallengeResponseAlgorithm.HmacSha1;
+                    ? ChallengeResponseAlgorithm.YubicoOtp
+                    : ChallengeResponseAlgorithm.HmacSha1;
+
             return this;
         }
     }

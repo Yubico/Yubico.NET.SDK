@@ -158,6 +158,7 @@ namespace Yubico.YubiKey.Fido2
                     AddTransport(entry);
                 }
             }
+
             bytesRead = cborMap.BytesRead;
         }
 
@@ -196,6 +197,7 @@ namespace Yubico.YubiKey.Fido2
             }
 
             _transports ??= new List<string>();
+
             // If the transport is already in the list, don't add it again.
             if (!_transports.Contains(transport))
             {
@@ -218,6 +220,7 @@ namespace Yubico.YubiKey.Fido2
                 cbor.WriteTextString(TagTransports);
                 cbor.WriteEncodedValue(CborHelpers.EncodeStringArray(Transports));
             }
+
             cbor.WriteEndMap();
 
             return cbor.Encode();

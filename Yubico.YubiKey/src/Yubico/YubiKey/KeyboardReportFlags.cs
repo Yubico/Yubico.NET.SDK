@@ -24,6 +24,4 @@ namespace Yubico.YubiKey
         ReadPending = 0x40,
         WritePending = 0x80,
     }
-
-
 }

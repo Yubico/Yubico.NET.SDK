@@ -151,8 +151,7 @@ namespace Yubico.YubiKey
         /// <returns>Boolean indicating whether the call was successful.</returns>
         bool TryConnect(
             YubiKeyApplication application,
-            [MaybeNullWhen(returnValue: false)]
-            out IYubiKeyConnection connection);
+            [MaybeNullWhen(returnValue: false)] out IYubiKeyConnection connection);
 
         /// <summary>
         /// Attempt to connect to the YubiKey device. The connection will be made
@@ -178,8 +177,7 @@ namespace Yubico.YubiKey
         bool TryConnectScp03(
             YubiKeyApplication application,
             StaticKeys scp03Keys,
-            [MaybeNullWhen(returnValue: false)]
-            out IScp03YubiKeyConnection connection);
+            [MaybeNullWhen(returnValue: false)] out IScp03YubiKeyConnection connection);
 
         /// <summary>
         /// Attempt to connect to the YubiKey device.
@@ -190,8 +188,7 @@ namespace Yubico.YubiKey
         /// <returns>Boolean indicating whether the call was successful.</returns>
         bool TryConnect(
             byte[] applicationId,
-            [MaybeNullWhen(returnValue: false)]
-            out IYubiKeyConnection connection);
+            [MaybeNullWhen(returnValue: false)] out IYubiKeyConnection connection);
 
         /// <summary>
         /// Attempt to connect to the YubiKey device. The connection will be made
@@ -217,8 +214,7 @@ namespace Yubico.YubiKey
         bool TryConnectScp03(
             byte[] applicationId,
             StaticKeys scp03Keys,
-            [MaybeNullWhen(returnValue: false)]
-            out IScp03YubiKeyConnection connection);
+            [MaybeNullWhen(returnValue: false)] out IScp03YubiKeyConnection connection);
 
         /// <summary>
         /// Sets which NFC features are enabled (and disabled).
@@ -662,7 +658,6 @@ namespace Yubico.YubiKey
             byte challengeResponseTimeout,
             bool touchEjectEnabled,
             int autoEjectTimeout = 0);
-
 
         /// <summary>
         /// Sets the <see cref="IYubiKeyDeviceInfo.IsNfcRestricted"/> on the <see cref="YubiKeyDeviceInfo"/>

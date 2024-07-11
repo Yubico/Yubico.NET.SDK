@@ -393,10 +393,11 @@ namespace Yubico.YubiKey.Piv
         // Common code, this performs either Signing, Decryption, or Key
         // Agreement. Just pass in the actual command to run, along with some
         // other information.
-        private byte[] PerformPrivateKeyOperation(byte slotNumber,
-                                                  IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> command,
-                                                  PivAlgorithm algorithm,
-                                                  string algorithmExceptionMessage)
+        private byte[] PerformPrivateKeyOperation(
+            byte slotNumber,
+            IYubiKeyCommand<IYubiKeyResponseWithData<byte[]>> command,
+            PivAlgorithm algorithm,
+            string algorithmExceptionMessage)
         {
             bool pinRequired = true;
 

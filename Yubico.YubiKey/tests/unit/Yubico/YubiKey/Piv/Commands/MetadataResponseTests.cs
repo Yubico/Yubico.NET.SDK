@@ -33,7 +33,8 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0x01, 0x01, 0xFF, 0x05, 0x01, 0x01, 0x06, 0x02, 0x05, 0x05, sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[]
+                { 0x01, 0x01, 0xFF, 0x05, 0x01, 0x01, 0x06, 0x02, 0x05, 0x05, sw1, sw2 });
 
             var metadataResponse = new GetMetadataResponse(responseApdu, 0x80);
 
@@ -45,7 +46,8 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             byte sw1 = unchecked((byte)(SWConstants.Success >> 8));
             byte sw2 = unchecked((byte)SWConstants.Success);
-            var responseApdu = new ResponseApdu(new byte[] { 0x01, 0x01, 0xFF, 0x05, 0x01, 0x01, 0x06, 0x02, 0x05, 0x05, sw1, sw2 });
+            var responseApdu = new ResponseApdu(new byte[]
+                { 0x01, 0x01, 0xFF, 0x05, 0x01, 0x01, 0x06, 0x02, 0x05, 0x05, sw1, sw2 });
 
             var metadataResponse = new GetMetadataResponse(responseApdu, 0x80);
 

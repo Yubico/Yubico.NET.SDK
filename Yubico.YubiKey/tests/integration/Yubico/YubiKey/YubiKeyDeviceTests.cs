@@ -404,7 +404,7 @@ namespace Yubico.YubiKey
         }
 
         [Theory(Skip = "NEO + yk4 require power cycle after each SetLegacyDeviceConfig, which is" +
-            "currently only practical to do manually with debug breakpoints.")]
+                       "currently only practical to do manually with debug breakpoints.")]
         [InlineData(StandardTestDevice.Fw3)]
         [InlineData(StandardTestDevice.Fw4Fips)]
         public void SetLegacyDeviceConfig_DisableFidoInterface_OnlyFidoDisabled(
@@ -426,7 +426,7 @@ namespace Yubico.YubiKey
         }
 
         [Theory(Skip = "NEO + yk4 require power cycle after each SetLegacyDeviceConfig, which is" +
-            "currently only practical to do manually with debug breakpoints.")]
+                       "currently only practical to do manually with debug breakpoints.")]
         [InlineData(StandardTestDevice.Fw3)]
         [InlineData(StandardTestDevice.Fw4Fips)]
         public void SetLegacyDeviceConfig_ChallengeResponse255Seconds_TimeoutSetTo255(
@@ -444,7 +444,7 @@ namespace Yubico.YubiKey
         }
 
         [Theory(Skip = "NEO + yk4 require power cycle after each SetLegacyDeviceConfig, which is" +
-            "currently only practical to do manually with debug breakpoints.")]
+                       "currently only practical to do manually with debug breakpoints.")]
         [InlineData(StandardTestDevice.Fw3)]
         [InlineData(StandardTestDevice.Fw4Fips)]
         public void SetLegacyDeviceConfig_ChallengeResponseZeroSeconds_DefaultValueSet(

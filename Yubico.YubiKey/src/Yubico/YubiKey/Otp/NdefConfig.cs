@@ -16,7 +16,6 @@ using System;
 using System.Diagnostics;
 using System.Globalization;
 using System.Text;
-
 using static Yubico.YubiKey.Otp.NdefConstants;
 
 namespace Yubico.YubiKey.Otp
@@ -72,7 +71,7 @@ namespace Yubico.YubiKey.Otp
                         NdefDataSize - 1,
                         utf8Length,
                         prefixCode),
-                        nameof(uri));
+                    nameof(uri));
             }
 
             byte[] buffer = CreateBuffer();
@@ -111,7 +110,9 @@ namespace Yubico.YubiKey.Otp
                 throw new ArgumentNullException(nameof(languageCode));
             }
 
-            Encoding encoding = encodeAsUtf16 ? Encoding.BigEndianUnicode : Encoding.UTF8;
+            Encoding encoding = encodeAsUtf16
+                ? Encoding.BigEndianUnicode
+                : Encoding.UTF8;
 
             int languageLength = Encoding.ASCII.GetByteCount(languageCode);
             int valueLength = encoding.GetByteCount(value);
@@ -124,7 +125,9 @@ namespace Yubico.YubiKey.Otp
                     nameof(languageCode));
             }
 
-            byte status = (byte)((0x3F & languageLength) | (encodeAsUtf16 ? 0x80 : 0x00));
+            byte status = (byte)((0x3F & languageLength) | (encodeAsUtf16
+                ? 0x80
+                : 0x00));
 
             if (totalLength > NdefDataSize)
             {
@@ -136,7 +139,7 @@ namespace Yubico.YubiKey.Otp
                         totalLength,
                         totalLength - languageLength,
                         languageLength),
-                        nameof(value));
+                    nameof(value));
             }
 
             byte[] buffer = CreateBuffer();
@@ -151,6 +154,7 @@ namespace Yubico.YubiKey.Otp
                 languageCode.Length,
                 buffer,
                 3);
+
             Debug.Assert(languageLength == bytesWritten);
 
             bytesWritten = encoding.GetBytes(value, 0, value.Length, buffer, 3 + languageLength);

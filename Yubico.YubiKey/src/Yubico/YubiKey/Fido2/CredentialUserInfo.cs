@@ -85,8 +85,7 @@ namespace Yubico.YubiKey.Fido2
             CredentialId credentialId,
             CoseKey credentialPublicKey,
             int credProtectPolicy,
-            ReadOnlyMemory<byte>? largeBlobKey = null
-            )
+            ReadOnlyMemory<byte>? largeBlobKey = null)
         {
             User = user;
             CredentialId = credentialId;

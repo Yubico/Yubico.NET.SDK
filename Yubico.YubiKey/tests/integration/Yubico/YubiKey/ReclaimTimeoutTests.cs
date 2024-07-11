@@ -48,7 +48,8 @@ namespace Yubico.YubiKey
             using Logger? log = new LoggerConfiguration()
                 .Enrich.With(new ThreadIdEnricher())
                 .WriteTo.Console(
-                    outputTemplate: "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
+                    outputTemplate:
+                    "{Timestamp:HH:mm:ss.fffffff} [{Level}] ({ThreadId})  {Message}{NewLine}{Exception}")
                 .CreateLogger();
 
             Log.LoggerFactory = LoggerFactory.Create(
@@ -73,6 +74,7 @@ namespace Yubico.YubiKey
             {
                 // Running the OtpSession constructor calls the OTP interface
             }
+
             sw1.Stop();
 
             var sw2 = Stopwatch.StartNew();
@@ -80,6 +82,7 @@ namespace Yubico.YubiKey
             {
                 // Running the PivSession constructor calls the SmartCard interface
             }
+
             sw2.Stop();
 
             var sw3 = Stopwatch.StartNew();
@@ -87,6 +90,7 @@ namespace Yubico.YubiKey
             {
                 // Running the Fido2Session constructor calls the FIDO interface
             }
+
             sw3.Stop();
 
             const long expectedLapse = 3000;

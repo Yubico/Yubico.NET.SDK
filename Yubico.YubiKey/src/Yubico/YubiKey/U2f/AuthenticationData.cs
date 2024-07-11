@@ -53,7 +53,9 @@ namespace Yubico.YubiKey.U2f
         private const int CounterOffset = UserPresenceOffset + 1;
         private const int ClientDataOffset = CounterOffset + CounterLength;
         private const int SignatureOffset = ClientDataOffset + ClientDataHashLength;
-        private const int PayloadLength = AppIdHashLength + ClientDataHashLength + CounterLength + MaxBerSignatureLength + 1;
+
+        private const int PayloadLength =
+            AppIdHashLength + ClientDataHashLength + CounterLength + MaxBerSignatureLength + 1;
 
         private readonly Logger _log = Log.GetLogger();
 
@@ -127,7 +129,9 @@ namespace Yubico.YubiKey.U2f
         /// otherwise.
         /// </returns>
         public bool VerifySignature(
-            ReadOnlyMemory<byte> userPublicKey, ReadOnlyMemory<byte> applicationId, ReadOnlyMemory<byte> clientDataHash)
+            ReadOnlyMemory<byte> userPublicKey,
+            ReadOnlyMemory<byte> applicationId,
+            ReadOnlyMemory<byte> clientDataHash)
         {
             _log.LogInformation("Verify a U2F AuthenticationData signature.");
 

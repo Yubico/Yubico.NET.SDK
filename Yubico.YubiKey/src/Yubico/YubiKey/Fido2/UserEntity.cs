@@ -132,6 +132,7 @@ namespace Yubico.YubiKey.Fido2
                 cbor.WriteTextString(TagDisplayName);
                 cbor.WriteTextString(DisplayName);
             }
+
             if (!(Name is null))
             {
                 cbor.WriteTextString(TagName);

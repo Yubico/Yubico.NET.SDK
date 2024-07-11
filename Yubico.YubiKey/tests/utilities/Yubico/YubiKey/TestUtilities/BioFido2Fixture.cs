@@ -49,6 +49,7 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 throw new InvalidOperationException("Could not Reset the YubiKey");
             }
+
             KeyCollector = _resetObj.KeyCollector;
             HasCredentials = false;
 

@@ -214,6 +214,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 expected = PivCommandResponseTestData.GetDataCommandExpectedApduData(tag);
             }
+
             byte[] encoding = PivCommandResponseTestData.PutDataEncoding(tag, true);
 
             expected.AddRange(encoding);
@@ -265,7 +266,6 @@ namespace Yubico.YubiKey.Piv.Commands
 
             return constructorToUse switch
             {
-
 #pragma warning disable CS0618 // Testing an obsolete feature
                 1 => new PutDataCommand(pivDataTag, data),
 #pragma warning restore CS0618

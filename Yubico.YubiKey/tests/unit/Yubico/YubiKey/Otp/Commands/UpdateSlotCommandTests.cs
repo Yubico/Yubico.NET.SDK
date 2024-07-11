@@ -98,7 +98,7 @@ namespace Yubico.YubiKey.Otp.Commands
             ReadOnlySpan<byte> dataSlice = data.Slice(UpdateSlotCommand.FixedDataLength
                                                       + UpdateSlotCommand.UidLength
                                                       + UpdateSlotCommand.AesKeyLength,
-                                                        UpdateSlotCommand.AccessCodeLength).Span;
+                UpdateSlotCommand.AccessCodeLength).Span;
 
             Assert.True(dataSlice.SequenceEqual(expectedAccessCode));
         }
@@ -272,7 +272,7 @@ namespace Yubico.YubiKey.Otp.Commands
                                                       + UpdateSlotCommand.AesKeyLength
                                                       + UpdateSlotCommand.AccessCodeLength
                                                       + 1),
-                                 currentByte => currentByte != 0);
+                currentByte => currentByte != 0);
         }
 
         [Fact]
@@ -283,10 +283,10 @@ namespace Yubico.YubiKey.Otp.Commands
 
             ReadOnlyMemory<byte> data = command.CreateCommandApdu().Data;
             ReadOnlySpan<byte> dataSlice = data.Slice(UpdateSlotCommand.FixedDataLength
-                                        + UpdateSlotCommand.UidLength
-                                        + UpdateSlotCommand.AesKeyLength
-                                        + UpdateSlotCommand.AccessCodeLength
-                                        + 4, 2).Span;
+                                                      + UpdateSlotCommand.UidLength
+                                                      + UpdateSlotCommand.AesKeyLength
+                                                      + UpdateSlotCommand.AccessCodeLength
+                                                      + 4, 2).Span;
 
             short actualReserved = BinaryPrimitives.ReadInt16LittleEndian(dataSlice);
 

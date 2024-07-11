@@ -65,7 +65,9 @@ namespace Yubico.YubiKey.U2f
         private const int KeyHandleOffset = ClientDataOffset + ClientDataHashLength;
         private const int PublicKeyOffset = KeyHandleOffset + KeyHandleLength;
         private const int SignatureOffset = PublicKeyOffset + PublicKeyLength;
-        private const int PayloadLength = AppIdHashLength + ClientDataHashLength + KeyHandleLength + PublicKeyLength + MaxBerSignatureLength + 1;
+
+        private const int PayloadLength = AppIdHashLength + ClientDataHashLength + KeyHandleLength + PublicKeyLength +
+            MaxBerSignatureLength + 1;
 
         private readonly Logger _log = Log.GetLogger();
 

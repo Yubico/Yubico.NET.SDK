@@ -283,7 +283,8 @@ namespace Yubico.YubiKey.Piv.Commands
     ///   CryptographicOperations.ZeroMemory(mgmtKey);
     /// </code>
     /// </remarks>
-    public sealed class InitializeAuthenticateManagementKeyCommand : IYubiKeyCommand<InitializeAuthenticateManagementKeyResponse>
+    public sealed class
+        InitializeAuthenticateManagementKeyCommand : IYubiKeyCommand<InitializeAuthenticateManagementKeyResponse>
     {
         private const byte AuthMgmtKeyInstruction = 0x87;
         private const byte AuthMgmtKeyParameter2 = 0x9B;
@@ -376,7 +377,8 @@ namespace Yubico.YubiKey.Piv.Commands
             //
             // The step 1 single auth data is this
             // Total len =  4: 7C 02 81 00
-            _data = new byte[Step1Length] {
+            _data = new byte[Step1Length]
+            {
                 0x7C, 0x02, 0x81, 0x00
             };
 
@@ -387,16 +389,17 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = AuthMgmtKeyInstruction,
-            P1 = (byte)Algorithm,
-            P2 = AuthMgmtKeyParameter2,
-            Data = _data,
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = AuthMgmtKeyInstruction,
+                P1 = (byte)Algorithm,
+                P2 = AuthMgmtKeyParameter2,
+                Data = _data,
+            };
 
         /// <inheritdoc />
         public InitializeAuthenticateManagementKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new InitializeAuthenticateManagementKeyResponse(responseApdu, Algorithm);
+            new InitializeAuthenticateManagementKeyResponse(responseApdu, Algorithm);
     }
 }

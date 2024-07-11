@@ -21,9 +21,9 @@ namespace Yubico.YubiKey
     /// </summary>
     /// <seealso cref="Yubico.YubiKey.YubiKeyDeviceInfo"/>
     [Flags]
-#pragma warning disable CA1711 // Justification: Keep using the variable name "DeviceFlags"
+    #pragma warning disable CA1711 // Justification: Keep using the variable name "DeviceFlags"
     public enum DeviceFlags
-#pragma warning restore CA1711
+        #pragma warning restore CA1711
     {
         /// <summary>
         /// No device flags are set.

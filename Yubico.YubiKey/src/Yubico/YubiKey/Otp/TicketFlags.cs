@@ -32,28 +32,27 @@ namespace Yubico.YubiKey.Otp
     /// <c>ref_string &lt;TAB&gt; fixed_string &lt;TAB&gt; OTP_string &lt;TAB&gt; &lt;CR&gt;</c>
     /// </para>
     /// </remarks>
-#pragma warning disable CA1815 // Justification: The instances of value type will not be
+    #pragma warning disable CA1815 // Justification: The instances of value type will not be
+
     // compared to each other
     public struct TicketFlags
-#pragma warning restore CA1815
+        #pragma warning restore CA1815
     {
         private byte _value;
-#pragma warning disable CA2225 // Justification: Not necessary to have the expected named alternative method
+        #pragma warning disable CA2225 // Justification: Not necessary to have the expected named alternative method
         /// <summary>
         /// Implicitly convert <see cref="TicketFlags"/> to a <see langword="byte"/>.
         /// </summary>
         /// <param name="flags">Flag object to convert.</param>
-        public static implicit operator byte(TicketFlags flags)
-            => flags._value;
+        public static implicit operator byte(TicketFlags flags) => flags._value;
 
         /// <summary>
         /// Implicitly convert a <see langword="byte"/> to a <see cref="TicketFlags"/>
         /// object.
         /// </summary>
         /// <param name="b">A byte containing the flags.</param>
-        public static implicit operator TicketFlags(byte b)
-            => new TicketFlags { _value = b };
-#pragma warning restore CA2225
+        public static implicit operator TicketFlags(byte b) => new TicketFlags { _value = b };
+        #pragma warning restore CA2225
         /// <summary>
         /// No ticket flags are requested for this configuration.
         /// </summary>

@@ -113,7 +113,8 @@ namespace Yubico.YubiKey.Piv.Commands
         private const int EqualKeyOneAndTwo = 12;
         private const int EqualKeyTwoAndThree = 23;
 
-        private static readonly byte[] parityBytes = new byte[] {
+        private static readonly byte[] parityBytes = new byte[]
+        {
             0x01, 0x01, 0x02, 0x02, 0x04, 0x04, 0x07, 0x07, 0x08, 0x08, 0x0b, 0x0b, 0x0d, 0x0d, 0x0e, 0x0e,
             0x10, 0x10, 0x13, 0x13, 0x15, 0x15, 0x16, 0x16, 0x19, 0x19, 0x1a, 0x1a, 0x1c, 0x1c, 0x1f, 0x1f,
             0x20, 0x20, 0x23, 0x23, 0x25, 0x25, 0x26, 0x26, 0x29, 0x29, 0x2a, 0x2a, 0x2c, 0x2c, 0x2f, 0x2f,
@@ -196,16 +197,23 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc/>
-        public int TransformBlock(byte[] inputBuffer, int inputOffset, int inputCount, byte[] outputBuffer, int outputOffset)
+        public int TransformBlock(
+            byte[] inputBuffer,
+            int inputOffset,
+            int inputCount,
+            byte[] outputBuffer,
+            int outputOffset)
         {
             if (inputBuffer is null)
             {
                 throw new ArgumentNullException(nameof(inputBuffer));
             }
+
             if (outputBuffer is null)
             {
                 throw new ArgumentNullException(nameof(outputBuffer));
             }
+
             if (inputCount == 0 || (inputCount & 7) != 0)
             {
                 throw new ArgumentException(
@@ -213,6 +221,7 @@ namespace Yubico.YubiKey.Piv.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.IncorrectPlaintextLength));
             }
+
             if (inputOffset < 0 || inputBuffer.Length - inputOffset < inputCount ||
                 outputOffset < 0 || outputBuffer.Length - outputOffset < inputCount)
             {
@@ -221,28 +230,33 @@ namespace Yubico.YubiKey.Piv.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidOutputBuffer));
             }
+
             EnsureNotDisposed();
 
             _ = _cryptoTransform.TransformBlock(inputBuffer, inputOffset, inputCount, outputBuffer, outputOffset);
 
             if (!(_cryptoTransformA is null) && !(_cryptoTransformB is null))
             {
-                _ = _cryptoTransformB.TransformBlock(outputBuffer, outputOffset, inputCount, outputBuffer, outputOffset);
-                _ = _cryptoTransformA.TransformBlock(outputBuffer, outputOffset, inputCount, outputBuffer, outputOffset);
+                _ = _cryptoTransformB.TransformBlock(
+                    outputBuffer, outputOffset, inputCount, outputBuffer, outputOffset);
+
+                _ = _cryptoTransformA.TransformBlock(
+                    outputBuffer, outputOffset, inputCount, outputBuffer, outputOffset);
             }
 
             return inputCount;
         }
-#pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
+        #pragma warning disable CA5401 // Justification: Allow the symmetric encryption to use
+
         // a non-default initialization vector
 
         // Build this object to use TripleDES with the given key.
         private ICryptoTransform BuildTripleDes(byte[] keyData)
         {
             using TripleDES tripleDesObject = CryptographyProviders.TripleDesCreator();
-#pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
+            #pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
             tripleDesObject.Mode = CipherMode.ECB;
-#pragma warning restore CA5358
+            #pragma warning restore CA5358
             tripleDesObject.Padding = PaddingMode.None;
 
             if (IsEncrypting)
@@ -261,17 +275,18 @@ namespace Yubico.YubiKey.Piv.Commands
 
             try
             {
-#pragma warning disable CA5351 // Justification: In this case, allow to build
+                #pragma warning disable CA5351 // Justification: In this case, allow to build
+
                 // the object using DES with the given key
                 if (DES.IsWeakKey(keyData))
                 {
                     return BuildDesWithWeakKey(keyData);
                 }
-#pragma warning restore CA5351
+                #pragma warning restore CA5351
                 using DES desObject = CryptographyProviders.DesCreator();
-#pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
+                #pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
                 desObject.Mode = CipherMode.ECB;
-#pragma warning restore CA5358
+                #pragma warning restore CA5358
                 desObject.Padding = PaddingMode.None;
 
                 if (IsEncrypting)
@@ -307,21 +322,26 @@ namespace Yubico.YubiKey.Piv.Commands
         // can.
         private ICryptoTransform BuildDesWithWeakKey(byte[] keyData)
         {
-            byte[] threeKeyData = new byte[] {
+            byte[] threeKeyData = new byte[]
+            {
                 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
                 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28
             };
-            byte[] keyDataA = new byte[] {
+
+            byte[] keyDataA = new byte[]
+            {
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18
             };
-            byte[] keyDataB = new byte[] {
+
+            byte[] keyDataB = new byte[]
+            {
                 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28
             };
 
             try
             {
-#pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
+                #pragma warning disable CA5358 // Allow the usage of cipher mode 'ECB'
                 using TripleDES tripleDesObject = CryptographyProviders.TripleDesCreator();
                 tripleDesObject.Mode = CipherMode.ECB;
                 tripleDesObject.Padding = PaddingMode.None;
@@ -329,9 +349,9 @@ namespace Yubico.YubiKey.Piv.Commands
                 using DES desObject = CryptographyProviders.DesCreator();
                 desObject.Mode = CipherMode.ECB;
                 desObject.Padding = PaddingMode.None;
-#pragma warning restore CA5358
+                #pragma warning restore CA5358
 
-#pragma warning disable CA5390 // Justification: In this case, allow to use the hard-code keys
+                #pragma warning disable CA5390 // Justification: In this case, allow to use the hard-code keys
                 if (IsEncrypting)
                 {
                     Array.Copy(keyData, 0, threeKeyData, 0, ValidDesKeyLength);
@@ -349,14 +369,14 @@ namespace Yubico.YubiKey.Piv.Commands
                 _cryptoTransformA = desObject.CreateDecryptor(keyDataA, null);
                 _cryptoTransformB = desObject.CreateEncryptor(keyDataB, null);
                 return tripleDesObject.CreateDecryptor(threeKeyData, null);
-#pragma warning restore CA5390
+                #pragma warning restore CA5390
             }
             finally
             {
                 CryptographicOperations.ZeroMemory(threeKeyData);
             }
         }
-#pragma warning restore CA5401
+        #pragma warning restore CA5401
 
         /// <summary>
         /// Create a new byte array containing the key data, but with the DES
@@ -397,15 +417,15 @@ namespace Yubico.YubiKey.Piv.Commands
         private static int CheckForEqualKeys(ReadOnlySpan<byte> keyData)
         {
             if (MemoryExtensions.SequenceEqual(
-                keyData.Slice(0, ValidDesKeyLength),
-                keyData.Slice(KeyOffsetSecond, ValidDesKeyLength)))
+                    keyData.Slice(0, ValidDesKeyLength),
+                    keyData.Slice(KeyOffsetSecond, ValidDesKeyLength)))
             {
                 return EqualKeyOneAndTwo;
             }
 
             if (MemoryExtensions.SequenceEqual(
-                keyData.Slice(KeyOffsetSecond, ValidDesKeyLength),
-                keyData.Slice(KeyOffsetThird, ValidDesKeyLength)))
+                    keyData.Slice(KeyOffsetSecond, ValidDesKeyLength),
+                    keyData.Slice(KeyOffsetThird, ValidDesKeyLength)))
             {
                 return EqualKeyTwoAndThree;
             }
@@ -417,6 +437,7 @@ namespace Yubico.YubiKey.Piv.Commands
         /// When the object goes out of scope, this method is called. It will
         /// dispose local objects.
         /// </summary>
+
         // Note that .NET recommends a Dispose method call Dispose(true) and
         // GC.SuppressFinalize(this). The actual disposal is in the
         // Dispose(bool) method.
@@ -436,6 +457,7 @@ namespace Yubico.YubiKey.Piv.Commands
             {
                 _cryptoTransformA.Dispose();
             }
+
             if (!(_cryptoTransformB is null))
             {
                 _cryptoTransformB.Dispose();

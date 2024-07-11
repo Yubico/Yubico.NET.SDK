@@ -34,15 +34,13 @@ namespace Yubico.YubiKey.Otp
         /// character".
         /// </para>
         /// </remarks>
-        public T SendReferenceString(bool setting = true) =>
-            ApplyFlag(Flag.SendReferenceString, setting);
+        public T SendReferenceString(bool setting = true) => ApplyFlag(Flag.SendReferenceString, setting);
 
         /// <summary>
         /// Reserved for compatibility with the YubiKey 1. Usage of this option is discouraged.
         /// </summary>
         [Obsolete("Reserved for compatibility with the YubiKey 1. Usage of this option is discouraged.")]
-        public T TicketFirst(bool setting = true) =>
-            ApplyFlag(Flag.TicketFirst, setting);
+        public T TicketFirst(bool setting = true) => ApplyFlag(Flag.TicketFirst, setting);
 
         /// <summary>
         /// Truncates the OTP string to 16 characters.
@@ -56,8 +54,7 @@ namespace Yubico.YubiKey.Otp
         /// In order to enable short ticket mode, you must also use <see cref="UseStaticTicketMode(bool)"/>.
         /// </para>
         /// </remarks>
-        public T ShortTicket(bool setting = true) =>
-            ApplyFlag(Flag.ShortTicket, setting);
+        public T ShortTicket(bool setting = true) => ApplyFlag(Flag.ShortTicket, setting);
 
         /// <summary>
         /// Configures the slow to emit a static password.
@@ -66,8 +63,7 @@ namespace Yubico.YubiKey.Otp
         /// This setting is not compatible with <see cref="UseStaticTicketMode(bool)"/>, or
         /// <see cref="ShortTicket(bool)"/>.
         /// </remarks>
-        public T UseStaticPasswordMode(bool setting = true) =>
-            ApplyFlag(Flag.StaticPasswordMode, setting);
+        public T UseStaticPasswordMode(bool setting = true) => ApplyFlag(Flag.StaticPasswordMode, setting);
 
         /// <summary>
         /// Configures the slot to use an eight-digit password for OATH-HOTP.
@@ -80,8 +76,7 @@ namespace Yubico.YubiKey.Otp
         /// By default, OATH-HOTP uses six-digit passwords.
         /// </para>
         /// </remarks>
-        public T Use8DigitHotp(bool setting = true) =>
-            ApplyFlag(Flag.Use8DigitHotp, setting);
+        public T Use8DigitHotp(bool setting = true) => ApplyFlag(Flag.Use8DigitHotp, setting);
 
         /// <summary>
         /// Adds an inter-character pacing time of 10ms between each keystroke.
@@ -90,8 +85,7 @@ namespace Yubico.YubiKey.Otp
         /// This setting is not compatible with <see cref="UseYubicoOtpChallengeResponseMode(bool)"/> nor
         /// <see cref="UseHmacSha1ChallengeResponseMode(bool)"/>.
         /// </remarks>
-        public T Use10msPacing(bool setting = true) =>
-            ApplyFlag(Flag.Use10msPacing, setting);
+        public T Use10msPacing(bool setting = true) => ApplyFlag(Flag.Use10msPacing, setting);
 
         /// <summary>
         /// Set when the HMAC message is less than 64 bytes.
@@ -106,8 +100,7 @@ namespace Yubico.YubiKey.Otp
         /// <see cref="UseHmacSha1ChallengeResponseMode(bool)"/>.
         /// </para>
         /// </remarks>
-        public T HmacLessThan64Bytes(bool setting = true) =>
-            ApplyFlag(Flag.HmacLessThan64Bytes, setting);
+        public T HmacLessThan64Bytes(bool setting = true) => ApplyFlag(Flag.HmacLessThan64Bytes, setting);
 
         /// <summary>
         /// Adds an inter-character pacing time of 20ms between each keystroke.
@@ -116,8 +109,7 @@ namespace Yubico.YubiKey.Otp
         /// This setting is <b>not</b> compatible with <see cref="UseYubicoOtpChallengeResponseMode(bool)"/> nor
         /// <see cref="UseHmacSha1ChallengeResponseMode(bool)"/>.
         /// </remarks>
-        public T Use20msPacing(bool setting = true) =>
-            ApplyFlag(Flag.Use20msPacing, setting);
+        public T Use20msPacing(bool setting = true) => ApplyFlag(Flag.Use20msPacing, setting);
 
         /// <summary>
         /// Require user acceptance by touching the YubiKey button for challenge-response operations 
@@ -126,15 +118,13 @@ namespace Yubico.YubiKey.Otp
         /// This setting must be used with <b>either</b> <see cref="UseYubicoOtpChallengeResponseMode(bool)"/>
         /// or <see cref="UseHmacSha1ChallengeResponseMode(bool)"/>.
         /// </remarks>
-        public T UseButtonTrigger(bool setting = true) =>
-            ApplyFlag(Flag.UseButtonTrigger, setting);
+        public T UseButtonTrigger(bool setting = true) => ApplyFlag(Flag.UseButtonTrigger, setting);
 
         /// <summary>
         /// Reserved for compatibility with the YubiKey 1. Usage of this option is discouraged.
         /// </summary>
         [Obsolete("Reserved for compatibility with the YubiKey 1. Usage of this option is discouraged.")]
-        public T AllowHidTrigger(bool setting = true) =>
-            ApplyFlag(Flag.AllowHidTrigger, setting);
+        public T AllowHidTrigger(bool setting = true) => ApplyFlag(Flag.AllowHidTrigger, setting);
 
         /// <summary>
         /// Enable use of mixed case characters for password generation.
@@ -147,8 +137,7 @@ namespace Yubico.YubiKey.Otp
         /// This setting is incompatible with <see cref="SetOathHotp(bool)"/>.
         /// </para>
         /// </remarks>
-        public T UseMixedCasePassword(bool setting = true) =>
-            ApplyFlag(Flag.UseMixedCasePassword, setting);
+        public T UseMixedCasePassword(bool setting = true) => ApplyFlag(Flag.UseMixedCasePassword, setting);
 
         /// <summary>
         /// Specifies that the first byte of the token identifier should be modhex.
@@ -158,8 +147,7 @@ namespace Yubico.YubiKey.Otp
         /// This setting must be used with <see cref="SetOathHotp(bool)"/>.
         /// </para>
         /// </remarks>
-        public T OathFixedModhex1(bool setting = true) =>
-            ApplyFlag(Flag.OathFixedModhex1, setting);
+        public T OathFixedModhex1(bool setting = true) => ApplyFlag(Flag.OathFixedModhex1, setting);
 
         /// <summary>
         /// Sets all dynamic fields to fixed values.
@@ -174,8 +162,7 @@ namespace Yubico.YubiKey.Otp
         /// <see cref="Flag.HmacSha1ChallengeResponse"/>.
         /// </para>
         /// </remarks>
-        public T UseStaticTicketMode(bool setting = true) =>
-            ApplyFlag(Flag.StaticTicket, setting);
+        public T UseStaticTicketMode(bool setting = true) => ApplyFlag(Flag.StaticTicket, setting);
 
         /// <summary>
         /// Enables Yubico OTP Challenge-Response Mode
@@ -219,8 +206,7 @@ namespace Yubico.YubiKey.Otp
         /// <see cref="Flag.HmacSha1ChallengeResponse"/>.
         /// </para>
         /// </remarks>
-        public T UseAlphaNumericPassword(bool setting = true) =>
-            ApplyFlag(Flag.UseAlphaNumericPassword, setting);
+        public T UseAlphaNumericPassword(bool setting = true) => ApplyFlag(Flag.UseAlphaNumericPassword, setting);
 
         /// <summary>
         /// Specifies that the first two bytes of the token identifier should be modhex.
@@ -228,8 +214,7 @@ namespace Yubico.YubiKey.Otp
         /// <remarks>
         /// This setting must be used with <see cref="SetOathHotp(bool)"/>.
         /// </remarks>
-        public T UseOathFixedModhex2(bool setting = true) =>
-            ApplyFlag(Flag.OathFixedModhex2, setting);
+        public T UseOathFixedModhex2(bool setting = true) => ApplyFlag(Flag.OathFixedModhex2, setting);
 
         /// <summary>
         /// Specifies that all bytes of the token identifier should be modhex.
@@ -237,8 +222,7 @@ namespace Yubico.YubiKey.Otp
         /// <remarks>
         /// This setting must be used with <see cref="SetOathHotp(bool)"/>.
         /// </remarks>
-        public T UseOathFixedModhex(bool setting = true) =>
-            ApplyFlag(Flag.OathFixedModhex, setting);
+        public T UseOathFixedModhex(bool setting = true) => ApplyFlag(Flag.OathFixedModhex, setting);
 
         /// <summary>
         /// Configures the slot to allow for user-triggered static password change.
@@ -250,7 +234,6 @@ namespace Yubico.YubiKey.Otp
         /// the change is confirmed and the new OTP is yielded. The static ticket flag must be set 
         /// before calling this method or an exception will occur. 
         /// </remarks>
-        public T AllowManualUpdate(bool setting = true) =>
-            ApplyFlag(Flag.AllowManualUpdate, setting);
+        public T AllowManualUpdate(bool setting = true) => ApplyFlag(Flag.AllowManualUpdate, setting);
     }
 }

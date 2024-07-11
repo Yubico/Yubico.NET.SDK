@@ -284,10 +284,10 @@ namespace Yubico.YubiKey.Oath
         /// an incorrect password was provided if authentication is required.
         /// </exception>
         public Credential AddCredential(
-          string? issuer,
-          string account,
-          CredentialType type = CredentialType.Totp,
-          CredentialPeriod period = CredentialPeriod.Period30)
+            string? issuer,
+            string account,
+            CredentialType type = CredentialType.Totp,
+            CredentialPeriod period = CredentialPeriod.Period30)
         {
             var credential = new Credential(issuer, account, type, period);
             AddCredential(credential);
@@ -321,9 +321,9 @@ namespace Yubico.YubiKey.Oath
         /// Unable to verify password either because <c>KeyCollector</c> was canceled by the user or
         /// an incorrect password was provided if authentication is required.
         /// </exception>
-#pragma warning disable CA1054 // Justification: In this case, URI parameter should be a string
+        #pragma warning disable CA1054 // Justification: In this case, URI parameter should be a string
         public Credential AddCredential(string stringFromURI)
-#pragma warning restore CA1054
+            #pragma warning restore CA1054
         {
             if (string.IsNullOrWhiteSpace(stringFromURI))
             {
@@ -504,12 +504,12 @@ namespace Yubico.YubiKey.Oath
         /// an incorrect password was provided if authentication is required.
         /// </exception>
         public Credential RenameCredential(
-          string? currentIssuer,
-          string currentAccount,
-          string? newIssuer,
-          string newAccount,
-          CredentialType currentType = CredentialType.Totp,
-          CredentialPeriod currentPeriod = CredentialPeriod.Period30)
+            string? currentIssuer,
+            string currentAccount,
+            string? newIssuer,
+            string newAccount,
+            CredentialType currentType = CredentialType.Totp,
+            CredentialPeriod currentPeriod = CredentialPeriod.Period30)
         {
             var credential = new Credential
             {

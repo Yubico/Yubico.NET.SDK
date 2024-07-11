@@ -39,15 +39,15 @@ namespace Yubico.YubiKey.U2f.Commands
         /// </summary>
         public GetPagedDeviceInfoCommand()
         {
-
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = GetDeviceInfoInstruction,
-            Data = new[] { Page }
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = GetDeviceInfoInstruction,
+                Data = new[] { Page }
+            };
 
         /// <inheritdoc />
         public GetPagedDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

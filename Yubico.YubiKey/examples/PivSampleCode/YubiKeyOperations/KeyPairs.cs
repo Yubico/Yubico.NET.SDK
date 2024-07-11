@@ -65,6 +65,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 throw new ArgumentNullException(nameof(privateKey));
             }
+
             if (publicKey is null)
             {
                 throw new ArgumentNullException(nameof(publicKey));

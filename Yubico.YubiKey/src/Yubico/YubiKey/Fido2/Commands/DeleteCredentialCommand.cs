@@ -61,14 +61,14 @@ namespace Yubico.YubiKey.Fido2.Commands
             CredentialId credentialId,
             ReadOnlyMemory<byte> pinUvAuthToken,
             PinUvAuthProtocolBase authProtocol)
-            : base(new CredentialManagementCommand(
-            SubCmdDeleteCredential, EncodeParams(credentialId), pinUvAuthToken, authProtocol))
+            : base(
+                new CredentialManagementCommand(
+                    SubCmdDeleteCredential, EncodeParams(credentialId), pinUvAuthToken, authProtocol))
         {
         }
 
         /// <inheritdoc />
-        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new Fido2Response(responseApdu);
+        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) => new Fido2Response(responseApdu);
 
         // This method encodes the parameters. For
         // DeleteCredentialCommand, the parameters consist of only the

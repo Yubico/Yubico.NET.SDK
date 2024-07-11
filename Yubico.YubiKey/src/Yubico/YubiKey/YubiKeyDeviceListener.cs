@@ -78,7 +78,8 @@ namespace Yubico.YubiKey
         {
             using var updateEvent = new ManualResetEvent(false);
 
-            _log.LogInformation("YubiKey device listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
+            _log.LogInformation(
+                "YubiKey device listener thread started. ThreadID is {ThreadID}.", Environment.CurrentManagedThreadId);
 
             _smartCardListener.Arrived += (s, e) =>
             {
@@ -108,7 +109,8 @@ namespace Yubico.YubiKey
             {
                 _ = updateEvent.WaitOne();
                 Thread.Sleep(200); // I really dislike sleeps, but here, it does seem like a good idea to give the
-                                   // system some time to quiet down in terms of PnP activity.
+
+                // system some time to quiet down in terms of PnP activity.
                 _ = updateEvent.Reset();
                 Update();
             }
@@ -169,7 +171,8 @@ namespace Yubico.YubiKey
                 }
                 catch (Exception ex) when (ex is SCardException || ex is PlatformApiException)
                 {
-                    _log.LogError("Encountered a YubiKey but was unable to connect to it. This interface will be ignored.");
+                    _log.LogError(
+                        "Encountered a YubiKey but was unable to connect to it. This interface will be ignored.");
 
                     continue;
                 }
@@ -255,7 +258,9 @@ namespace Yubico.YubiKey
             }
         }
 
-        private void MergeAndMarkExistingYubiKey(YubiKeyDevice mergeTarget, YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo)
+        private void MergeAndMarkExistingYubiKey(
+            YubiKeyDevice mergeTarget,
+            YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo)
         {
             _log.LogInformation(
                 "Device was not found in the cache, but appears to be YubiKey {Serial}. Merging devices.",
@@ -285,7 +290,9 @@ namespace Yubico.YubiKey
             _internalCache[existingEntry] = true;
         }
 
-        private void CreateAndMarkNewYubiKey(YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo, List<IYubiKeyDevice> addedYubiKeys)
+        private void CreateAndMarkNewYubiKey(
+            YubiKeyDevice.YubicoDeviceWithInfo deviceWithInfo,
+            List<IYubiKeyDevice> addedYubiKeys)
         {
             _log.LogInformation(
                 "Device appears to be a brand new YubiKey with serial {Serial}",
@@ -338,8 +345,8 @@ namespace Yubico.YubiKey
             try
             {
                 return SmartCardDevice
-                        .GetSmartCardDevices()
-                        .Where(d => d.IsYubicoDevice());
+                    .GetSmartCardDevices()
+                    .Where(d => d.IsYubicoDevice());
             }
             catch (PlatformInterop.SCardException e) { ErrorHandler(e); }
 
@@ -365,6 +372,7 @@ namespace Yubico.YubiKey
                 {
                     RwLock.Dispose();
                 }
+
                 _disposedValue = true;
             }
         }

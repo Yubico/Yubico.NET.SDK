@@ -22,7 +22,8 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
     /// command, containing the retries remaining for the management key.
     /// </summary>
     public sealed class GetManagementKeyRetriesResponse :
-        BaseYubiHsmAuthResponse, IYubiKeyResponseWithData<int>
+        BaseYubiHsmAuthResponse,
+        IYubiKeyResponseWithData<int>
     {
         /// <summary>
         /// Constructs a GetManagementKeyRetriesResponse instance based on a

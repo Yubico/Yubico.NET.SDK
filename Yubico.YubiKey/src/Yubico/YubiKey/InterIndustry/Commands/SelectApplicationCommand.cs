@@ -43,6 +43,7 @@ namespace Yubico.YubiKey.InterIndustry.Commands
         /// </summary>
         /// <param name="responseApdu"></param>
         /// <returns></returns>
-        public override GenericSelectResponse CreateResponseForApdu(ResponseApdu responseApdu) => new GenericSelectResponse(responseApdu);
+        public override GenericSelectResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
+            new GenericSelectResponse(responseApdu);
     }
 }

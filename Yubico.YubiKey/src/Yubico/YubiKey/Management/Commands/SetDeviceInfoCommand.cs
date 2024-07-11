@@ -31,7 +31,6 @@ namespace Yubico.YubiKey.Management.Commands
         /// </summary>
         public SetDeviceInfoCommand()
         {
-
         }
 
         /// <summary>
@@ -42,7 +41,6 @@ namespace Yubico.YubiKey.Management.Commands
         /// </param>
         public SetDeviceInfoCommand(SetDeviceInfoBaseCommand baseCommand) : base(baseCommand)
         {
-
         }
 
         /// <inheritdoc />
@@ -54,7 +52,6 @@ namespace Yubico.YubiKey.Management.Commands
             };
 
         /// <inheritdoc />
-        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new YubiKeyResponse(responseApdu);
+        public YubiKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) => new YubiKeyResponse(responseApdu);
     }
 }

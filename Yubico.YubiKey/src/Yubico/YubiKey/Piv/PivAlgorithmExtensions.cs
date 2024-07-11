@@ -39,16 +39,17 @@ namespace Yubico.YubiKey.Piv
         /// A boolean, true if the algorithm is one that can be used to generate
         /// a key pair, and false otherwise.
         /// </returns>
-        public static bool IsValidAlgorithmForGenerate(this PivAlgorithm algorithm) => algorithm switch
-        {
-            PivAlgorithm.Rsa1024 => true,
-            PivAlgorithm.Rsa2048 => true,
-            PivAlgorithm.Rsa3072 => true,
-            PivAlgorithm.Rsa4096 => true,
-            PivAlgorithm.EccP256 => true,
-            PivAlgorithm.EccP384 => true,
-            _ => false,
-        };
+        public static bool IsValidAlgorithmForGenerate(this PivAlgorithm algorithm) =>
+            algorithm switch
+            {
+                PivAlgorithm.Rsa1024 => true,
+                PivAlgorithm.Rsa2048 => true,
+                PivAlgorithm.Rsa3072 => true,
+                PivAlgorithm.Rsa4096 => true,
+                PivAlgorithm.EccP256 => true,
+                PivAlgorithm.EccP384 => true,
+                _ => false,
+            };
 
         /// <summary>
         /// The size of a key, in bits, of the given algorithm.
@@ -104,18 +105,19 @@ namespace Yubico.YubiKey.Piv
         /// <returns>
         /// An int, the size, in bits, of a key of the given algorithm.
         /// </returns>
-        public static int KeySizeBits(this PivAlgorithm algorithm) => algorithm switch
-        {
-            PivAlgorithm.Rsa1024 => 1024,
-            PivAlgorithm.Rsa2048 => 2048,
-            PivAlgorithm.Rsa3072 => 3072,
-            PivAlgorithm.Rsa4096 => 4096,
-            PivAlgorithm.EccP256 => 256,
-            PivAlgorithm.EccP384 => 384,
-            PivAlgorithm.TripleDes => 192,
-            PivAlgorithm.Pin => 64,
-            _ => 0,
-        };
+        public static int KeySizeBits(this PivAlgorithm algorithm) =>
+            algorithm switch
+            {
+                PivAlgorithm.Rsa1024 => 1024,
+                PivAlgorithm.Rsa2048 => 2048,
+                PivAlgorithm.Rsa3072 => 3072,
+                PivAlgorithm.Rsa4096 => 4096,
+                PivAlgorithm.EccP256 => 256,
+                PivAlgorithm.EccP384 => 384,
+                PivAlgorithm.TripleDes => 192,
+                PivAlgorithm.Pin => 64,
+                _ => 0,
+            };
 
         /// <summary>
         /// Determines if the given algorithm is RSA.
@@ -140,14 +142,15 @@ namespace Yubico.YubiKey.Piv
         /// <returns>
         /// A boolean, true if the algorithm is RSA, and false otherwise.
         /// </returns>
-        public static bool IsRsa(this PivAlgorithm algorithm) => algorithm switch
-        {
-            PivAlgorithm.Rsa1024 => true,
-            PivAlgorithm.Rsa2048 => true,
-            PivAlgorithm.Rsa3072 => true,
-            PivAlgorithm.Rsa4096 => true,
-            _ => false,
-        };
+        public static bool IsRsa(this PivAlgorithm algorithm) =>
+            algorithm switch
+            {
+                PivAlgorithm.Rsa1024 => true,
+                PivAlgorithm.Rsa2048 => true,
+                PivAlgorithm.Rsa3072 => true,
+                PivAlgorithm.Rsa4096 => true,
+                _ => false,
+            };
 
         /// <summary>
         /// Determines if the given algorithm is ECC.
@@ -172,11 +175,12 @@ namespace Yubico.YubiKey.Piv
         /// <returns>
         /// A boolean, true if the algorithm is ECC, and false otherwise.
         /// </returns>
-        public static bool IsEcc(this PivAlgorithm algorithm) => algorithm switch
-        {
-            PivAlgorithm.EccP256 => true,
-            PivAlgorithm.EccP384 => true,
-            _ => false,
-        };
+        public static bool IsEcc(this PivAlgorithm algorithm) =>
+            algorithm switch
+            {
+                PivAlgorithm.EccP256 => true,
+                PivAlgorithm.EccP384 => true,
+                _ => false,
+            };
     }
 }

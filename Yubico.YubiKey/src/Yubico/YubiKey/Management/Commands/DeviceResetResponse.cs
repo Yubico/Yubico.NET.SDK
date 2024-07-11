@@ -32,7 +32,6 @@ namespace Yubico.YubiKey.Management.Commands
         public DeviceResetResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
     }
 }

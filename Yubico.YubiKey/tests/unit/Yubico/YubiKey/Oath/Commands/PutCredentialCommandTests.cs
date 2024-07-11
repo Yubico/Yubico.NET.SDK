@@ -20,7 +20,8 @@ namespace Yubico.YubiKey.Oath.Commands
 {
     public class PutCredentialCommandTests
     {
-        readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp, HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
+        readonly Credential credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp,
+            HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, false);
 
         [Fact]
         public void CreateCommandApdu_GetClaProperty_ReturnsZero()
@@ -58,7 +59,8 @@ namespace Yubico.YubiKey.Oath.Commands
         public void CreateCommandApdu_GetDataAndNcProperties_ReturnsCorrectDataAndLength()
         {
             var command = new PutCommand { Credential = credential };
-            byte[] dataList = {
+            byte[] dataList =
+            {
                 0x71, 0x1A, 0x4D, 0x69, 0x63, 0x72, 0x6F, 0x73, 0x6F, 0x66,
                 0x74, 0x3A, 0x74, 0x65, 0x73, 0x74, 0x40, 0x6F, 0x75, 0x74,
                 0x6C, 0x6F, 0x6F, 0x6B, 0x2E, 0x63, 0x6F, 0x6D, 0x73, 0x10,
@@ -75,7 +77,8 @@ namespace Yubico.YubiKey.Oath.Commands
         [Fact]
         public void CreateCommandApdu_GetDataAndNcProperties_WithTouchRequiredProperty_ReturnsCorrectDataAndLength()
         {
-            var credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp, HashAlgorithm.Sha1, "tt", CredentialPeriod.Period30, 6, 0, true);
+            var credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Totp, HashAlgorithm.Sha1,
+                "tt", CredentialPeriod.Period30, 6, 0, true);
             var command = new PutCommand { Credential = credential };
             byte[] dataList =
             {
@@ -93,9 +96,11 @@ namespace Yubico.YubiKey.Oath.Commands
         }
 
         [Fact]
-        public void CreateCommandApdu_GetDataAndNcProperties_CredentialWithHotpTypeAndTouchRequiredProperty_ReturnsCorrectDataAndLength()
+        public void
+            CreateCommandApdu_GetDataAndNcProperties_CredentialWithHotpTypeAndTouchRequiredProperty_ReturnsCorrectDataAndLength()
         {
-            var credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Hotp, HashAlgorithm.Sha1, "tt", CredentialPeriod.Undefined, 6, 4, true);
+            var credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Hotp, HashAlgorithm.Sha1,
+                "tt", CredentialPeriod.Undefined, 6, 4, true);
             var command = new PutCommand { Credential = credential };
             byte[] dataList =
             {
@@ -116,7 +121,8 @@ namespace Yubico.YubiKey.Oath.Commands
         [Fact]
         public void CreateCommandApdu_GetDataAndNcProperties_CredentialWithHotpType_ReturnsCorrectDataAndLength()
         {
-            var credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Hotp, HashAlgorithm.Sha1, "tt", CredentialPeriod.Undefined, 6, 4, false);
+            var credential = new Credential("Microsoft", "test@outlook.com", CredentialType.Hotp, HashAlgorithm.Sha1,
+                "tt", CredentialPeriod.Undefined, 6, 4, false);
             var command = new PutCommand { Credential = credential };
             byte[] dataList =
             {

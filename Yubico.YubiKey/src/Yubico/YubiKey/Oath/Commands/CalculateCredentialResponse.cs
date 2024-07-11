@@ -30,11 +30,12 @@ namespace Yubico.YubiKey.Oath.Commands
 
         /// <inheritdoc/>
         protected override ResponseStatusPair StatusCodeMap =>
-           StatusWord switch
-           {
-               OathSWConstants.NoSuchObject => new ResponseStatusPair(ResponseStatus.NoData, ResponseStatusMessages.OathNoSuchObject),
-               _ => base.StatusCodeMap,
-           };
+            StatusWord switch
+            {
+                OathSWConstants.NoSuchObject => new ResponseStatusPair(
+                    ResponseStatus.NoData, ResponseStatusMessages.OathNoSuchObject),
+                _ => base.StatusCodeMap,
+            };
 
         /// <summary>
         /// The credential that was sent to calculate in CalculateCredentialCommand.
@@ -51,7 +52,7 @@ namespace Yubico.YubiKey.Oath.Commands
         /// The credential that was sent to calculate in CalculateCredentialCommand.
         /// </param>
         public CalculateCredentialResponse(ResponseApdu responseApdu, Credential credential) :
-             base(responseApdu)
+            base(responseApdu)
         {
             Credential = credential;
         }
@@ -106,7 +107,9 @@ namespace Yubico.YubiKey.Oath.Commands
 
             if (Credential.Period is null)
             {
-                Credential.Period = Credential.Type == CredentialType.Totp ? CredentialPeriod.Period30 : CredentialPeriod.Undefined;
+                Credential.Period = Credential.Type == CredentialType.Totp
+                    ? CredentialPeriod.Period30
+                    : CredentialPeriod.Undefined;
             }
 
             return new Code(response, (CredentialPeriod)Credential.Period);

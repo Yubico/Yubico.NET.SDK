@@ -60,10 +60,12 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void SetPin_Succeeds()
         {
-            byte[] currentPin = {
+            byte[] currentPin =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
             };
-            byte[] newPin = {
+            byte[] newPin =
+            {
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46
             };
 
@@ -99,10 +101,12 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void InvalidPin_CorrectError()
         {
-            byte[] currentPin = {
+            byte[] currentPin =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
             };
-            byte[] badPin = {
+            byte[] badPin =
+            {
                 0x41, 0x42, 0x43, 0x44
             };
 
@@ -114,10 +118,12 @@ namespace Yubico.YubiKey.U2f
         [Fact]
         public void VerifyPin_Succeeds()
         {
-            byte[] correctPin = {
+            byte[] correctPin =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
             };
-            byte[] wrongPin = {
+            byte[] wrongPin =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37
             };
 
@@ -153,10 +159,12 @@ namespace Yubico.YubiKey.U2f
         [SkippableFact]
         public void WrongPin_ThreeTimes() // Not sure how to run this test
         {
-            byte[] correctPin = {
+            byte[] correctPin =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
             };
-            byte[] wrongPin = {
+            byte[] wrongPin =
+            {
                 0x41, 0x42, 0x43, 0x44, 0x45, 0x46
             };
 

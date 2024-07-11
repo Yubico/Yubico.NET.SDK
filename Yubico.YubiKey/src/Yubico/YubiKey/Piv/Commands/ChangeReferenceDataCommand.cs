@@ -112,6 +112,7 @@ namespace Yubico.YubiKey.Piv.Commands
                             ExceptionMessages.InvalidSlot,
                             value));
                 }
+
                 _slotNumber = value;
             }
         }
@@ -166,12 +167,15 @@ namespace Yubico.YubiKey.Piv.Commands
         /// <exception cref="ArgumentException">
         /// The PIN or PUK is an incorrect length.
         /// </exception>
-        public ChangeReferenceDataCommand(byte slotNumber, ReadOnlyMemory<byte> currentValue, ReadOnlyMemory<byte> newValue)
+        public ChangeReferenceDataCommand(
+            byte slotNumber,
+            ReadOnlyMemory<byte> currentValue,
+            ReadOnlyMemory<byte> newValue)
         {
             SlotNumber = slotNumber;
 
             if (PivPinUtilities.IsValidPinLength(currentValue.Length) == false
-             || PivPinUtilities.IsValidPinLength(newValue.Length) == false)
+                || PivPinUtilities.IsValidPinLength(newValue.Length) == false)
             {
                 throw new ArgumentException(
                     string.Format(
@@ -184,15 +188,16 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = PivChangeReferenceInstruction,
-            P2 = SlotNumber,
-            Data = PivPinUtilities.CopyTwoPinsWithPadding(_currentValue, _newValue),
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = PivChangeReferenceInstruction,
+                P2 = SlotNumber,
+                Data = PivPinUtilities.CopyTwoPinsWithPadding(_currentValue, _newValue),
+            };
 
         /// <inheritdoc />
         public ChangeReferenceDataResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new ChangeReferenceDataResponse(responseApdu);
+            new ChangeReferenceDataResponse(responseApdu);
     }
 }

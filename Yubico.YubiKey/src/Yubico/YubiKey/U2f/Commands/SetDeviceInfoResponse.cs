@@ -42,10 +42,12 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <inheritdoc/>
-        protected override ResponseStatusPair StatusCodeMap => StatusWord switch
-        {
-            SWConstants.NoPreciseDiagnosis => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.BaseConditionsNotSatisfied),
-            _ => base.StatusCodeMap,
-        };
+        protected override ResponseStatusPair StatusCodeMap =>
+            StatusWord switch
+            {
+                SWConstants.NoPreciseDiagnosis => new ResponseStatusPair(
+                    ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.BaseConditionsNotSatisfied),
+                _ => base.StatusCodeMap,
+            };
     }
 }

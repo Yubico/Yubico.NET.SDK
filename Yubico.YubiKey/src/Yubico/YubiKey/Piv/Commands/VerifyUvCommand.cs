@@ -139,6 +139,6 @@ namespace Yubico.YubiKey.Piv.Commands
 
         /// <inheritdoc />
         public VerifyUvResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new VerifyUvResponse(responseApdu, RequestTemporaryPin);
+            new VerifyUvResponse(responseApdu, RequestTemporaryPin);
     }
 }

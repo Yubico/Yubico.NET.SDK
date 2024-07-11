@@ -26,7 +26,8 @@ namespace Yubico.YubiKey.Fido2.Cbor
         //   uint      0x02
         //   long      0x04
         //   ulong     0x08
-        private readonly ulong[] _ulongValues = new ulong[] {
+        private readonly ulong[] _ulongValues = new ulong[]
+        {
             0, 0x0F,
             1, 0x0F,
             2, 0x0F,
@@ -48,7 +49,9 @@ namespace Yubico.YubiKey.Fido2.Cbor
             0x420a57ce911d03d5, 0x0C,
             0xc20a57ce911d03d5, 0x08
         };
-        private readonly long[] _longValues = new long[] {
+
+        private readonly long[] _longValues = new long[]
+        {
             -1, 0x05,
             -7, 0x05,
             -23, 0x05,
@@ -284,6 +287,7 @@ namespace Yubico.YubiKey.Fido2.Cbor
                     index = -1;
                 }
             }
+
             cborWriter.WriteEndMap();
 
             return cborWriter.Encode();

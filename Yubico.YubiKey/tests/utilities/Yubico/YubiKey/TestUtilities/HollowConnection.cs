@@ -73,7 +73,8 @@ namespace Yubico.YubiKey.TestUtilities
             {
                 if (AlwaysAuthenticatePiv)
                 {
-                    byte[] responseData = new byte[] {
+                    byte[] responseData = new byte[]
+                    {
                         0x7C, 0x0A, 0x80, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x90, 0x00
                     };
                     var responseApdu = new ResponseApdu(responseData);
@@ -87,10 +88,12 @@ namespace Yubico.YubiKey.TestUtilities
                 {
                     CommandApdu apdu = yubiKeyCommand.CreateCommandApdu();
                     byte[] data = apdu.Data.ToArray();
-                    byte[] responseData = new byte[] {
+                    byte[] responseData = new byte[]
+                    {
                         0x7C, 0x0A, 0x82, 0x08, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x90, 0x00
                     };
-                    byte[] keyBytes = new byte[] {
+                    byte[] keyBytes = new byte[]
+                    {
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08

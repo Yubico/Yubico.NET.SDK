@@ -23,7 +23,8 @@ namespace Yubico.YubiKey.Scp03.Commands
     {
         public static ResponseApdu GetResponseApdu()
         {
-            return new ResponseApdu(new byte[] {
+            return new ResponseApdu(new byte[]
+            {
                 1, 2, 3, 4, 5, 6, 7, 8,
                 9, 10, 11, 12, 13, 14,
                 15, 16, 17, 18, 19, 20, 21, 22,
@@ -32,7 +33,9 @@ namespace Yubico.YubiKey.Scp03.Commands
             });
         }
 
-        private static IReadOnlyCollection<byte> GetDiversificationData() => GetResponseApdu().Data.Slice(0, 10).ToArray();
+        private static IReadOnlyCollection<byte> GetDiversificationData() =>
+            GetResponseApdu().Data.Slice(0, 10).ToArray();
+
         private static IReadOnlyCollection<byte> GetKeyInfo() => GetResponseApdu().Data.Slice(10, 3).ToArray();
         private static IReadOnlyCollection<byte> GetCardChallenge() => GetResponseApdu().Data.Slice(13, 8).ToArray();
         private static IReadOnlyCollection<byte> GetCardCryptogram() => GetResponseApdu().Data.Slice(21, 8).ToArray();
@@ -83,6 +86,7 @@ namespace Yubico.YubiKey.Scp03.Commands
             // Assert
             Assert.Equal(GetKeyInfo(), initializeUpdateResponse.KeyInfo);
         }
+
         [Fact]
         public void InitializeUpdateResponse_GivenResponseApdu_CardChallengeEqualsBytes13To21()
         {
@@ -95,6 +99,7 @@ namespace Yubico.YubiKey.Scp03.Commands
             // Assert
             Assert.Equal(GetCardChallenge(), initializeUpdateResponse.CardChallenge);
         }
+
         [Fact]
         public void InitializeUpdateResponse_GivenResponseApdu_CardCryptogramEqualsBytes21To29()
         {

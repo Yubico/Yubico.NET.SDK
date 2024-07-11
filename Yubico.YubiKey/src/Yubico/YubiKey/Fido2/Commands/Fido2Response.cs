@@ -35,27 +35,45 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// status words. The messages match the status words' meanings
         /// as described in the FIDO2 specifications.
         /// </summary>
-        protected override ResponseStatusPair StatusCodeMap => CtapStatus switch
-        {
-            CtapStatus.MissingParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseInvalidParameter),
-            CtapStatus.NoCredentials => new ResponseStatusPair(ResponseStatus.NoData, ResponseStatusMessages.Fido2NoCredentials),
-            CtapStatus.NotAllowed => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2NotAllowed),
-            CtapStatus.PinRequired => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinNotVerified),
-            CtapStatus.PinPolicyViolation => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.Fido2PinComplexityViolation),
-            CtapStatus.PinNotSet => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinNotSet),
-            CtapStatus.PinInvalid => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.Fido2PinNotVerified),
-            CtapStatus.PinBlocked => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinBlocked),
-            CtapStatus.PinAuthInvalid => new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.Fido2AuthInvalid),
-            CtapStatus.UvBlocked => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinBlocked),
-            CtapStatus.UvInvalid => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2PinNotVerified),
-            CtapStatus.ActionTimeout => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2Timeout),
-            CtapStatus.UserActionTimeout => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2Timeout),
-            CtapStatus.UnsupportedExtension => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2OptionExtension),
-            CtapStatus.UnsupportedOption => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2OptionExtension),
-            CtapStatus.InvalidOption => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2OptionExtension),
-            CtapStatus.CredentialExcluded => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2CredentialExcluded),
+        protected override ResponseStatusPair StatusCodeMap =>
+            CtapStatus switch
+            {
+                CtapStatus.MissingParameter => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseInvalidParameter),
+                CtapStatus.NoCredentials => new ResponseStatusPair(
+                    ResponseStatus.NoData, ResponseStatusMessages.Fido2NoCredentials),
+                CtapStatus.NotAllowed => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.Fido2NotAllowed),
+                CtapStatus.PinRequired => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.Fido2PinNotVerified),
+                CtapStatus.PinPolicyViolation => new ResponseStatusPair(
+                    ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.Fido2PinComplexityViolation),
+                CtapStatus.PinNotSet => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.Fido2PinNotSet),
+                CtapStatus.PinInvalid => new ResponseStatusPair(
+                    ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.Fido2PinNotVerified),
+                CtapStatus.PinBlocked => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.Fido2PinBlocked),
+                CtapStatus.PinAuthInvalid => new ResponseStatusPair(
+                    ResponseStatus.AuthenticationRequired, ResponseStatusMessages.Fido2AuthInvalid),
+                CtapStatus.UvBlocked => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.Fido2PinBlocked),
+                CtapStatus.UvInvalid => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.Fido2PinNotVerified),
+                CtapStatus.ActionTimeout => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.Fido2Timeout),
+                CtapStatus.UserActionTimeout => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.Fido2Timeout),
+                CtapStatus.UnsupportedExtension => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.Fido2OptionExtension),
+                CtapStatus.UnsupportedOption => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.Fido2OptionExtension),
+                CtapStatus.InvalidOption => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.Fido2OptionExtension),
+                CtapStatus.CredentialExcluded => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.Fido2CredentialExcluded),
 
-            _ => base.StatusCodeMap,
-        };
+                _ => base.StatusCodeMap,
+            };
     }
 }

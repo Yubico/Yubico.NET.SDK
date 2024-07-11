@@ -63,6 +63,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 throw new ArgumentNullException(nameof(plaintext));
             }
+
             if (length == 0 || length % BlockSize != 0 || offset + length > plaintext.Length)
             {
                 throw new ArgumentException(
@@ -107,6 +108,7 @@ namespace Yubico.YubiKey.Fido2.PinProtocols
             {
                 throw new ArgumentNullException(nameof(ciphertext));
             }
+
             // The first BlockSize bytes are the IV, so there should be at least
             // 2 blocks.
             if (length < 2 * BlockSize || length % BlockSize != 0 || offset + length > ciphertext.Length)

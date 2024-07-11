@@ -78,7 +78,7 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         public void GetData_DataTagAlgorithm_ExceptionMessageInvalidDataTag()
         {
             string expectedMessage = $"The value {DataTagConstants.CryptographicKeyType} is not " +
-                $"a data tag supported by the YubiKey application.";
+                                     $"a data tag supported by the YubiKey application.";
 
             byte[] dataWithoutSw = new byte[] { DataTagConstants.CryptographicKeyType, 1, 0 };
             ResponseApdu apdu = new ResponseApdu(dataWithoutSw, SWConstants.Success);

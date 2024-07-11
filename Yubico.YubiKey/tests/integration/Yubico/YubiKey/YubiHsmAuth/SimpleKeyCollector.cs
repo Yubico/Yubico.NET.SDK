@@ -37,8 +37,8 @@ namespace Yubico.YubiKey.YubiHsmAuth
         {
             bool returnValue =
                 UseDefaultValue
-                ? DefaultValueCollectorDelegate(keyEntryData)
-                : AlternateValueCollectorDelegate(keyEntryData);
+                    ? DefaultValueCollectorDelegate(keyEntryData)
+                    : AlternateValueCollectorDelegate(keyEntryData);
 
             UseDefaultValue = !UseDefaultValue;
             return returnValue;

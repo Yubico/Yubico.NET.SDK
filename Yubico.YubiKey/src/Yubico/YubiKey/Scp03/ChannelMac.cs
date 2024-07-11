@@ -24,7 +24,10 @@ namespace Yubico.YubiKey.Scp03
 {
     internal static class ChannelMac
     {
-        public static (CommandApdu macdApdu, byte[] newMacChainingValue) MacApdu(CommandApdu apdu, byte[] macKey, byte[] macChainingValue)
+        public static (CommandApdu macdApdu, byte[] newMacChainingValue) MacApdu(
+            CommandApdu apdu,
+            byte[] macKey,
+            byte[] macChainingValue)
         {
             if (macChainingValue.Length != 16)
             {
@@ -38,7 +41,9 @@ namespace Yubico.YubiKey.Scp03
             macChainingValue.CopyTo(macInp, 0);
             apduBytes.CopyTo(macInp, 16);
 
-            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            using ICmacPrimitives cmacObj =
+                CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+
             cmacObj.CmacInit(macKey);
             cmacObj.CmacUpdate(macInp);
             cmacObj.CmacFinal(macChainingValue);
@@ -68,7 +73,9 @@ namespace Yubico.YubiKey.Scp03
             macInp[16 + respDataLen] = SW1Constants.Success;
             macInp[16 + respDataLen + 1] = SWConstants.Success & 0xFF;
 
-            using ICmacPrimitives cmacObj = CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+            using ICmacPrimitives cmacObj =
+                CryptographyProviders.CmacPrimitivesCreator(CmacBlockCipherAlgorithm.Aes128);
+
             byte[] cmac = new byte[16];
             cmacObj.CmacInit(rmacKey);
             cmacObj.CmacUpdate(macInp);
@@ -80,7 +87,6 @@ namespace Yubico.YubiKey.Scp03
                 throw new SecureChannelException(ExceptionMessages.IncorrectRmac);
             }
         }
-
 
         private static byte[] ApduToBytes(CommandApdu apdu)
         {

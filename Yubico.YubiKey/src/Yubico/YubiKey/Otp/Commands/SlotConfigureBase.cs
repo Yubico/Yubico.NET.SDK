@@ -27,7 +27,8 @@ namespace Yubico.YubiKey.Otp.Commands
     public abstract class SlotConfigureBase : IYubiKeyCommand<ReadStatusResponse>
     {
         #region Offset Reference Constants
-#pragma warning disable CS1591 // Documenting this would be overkill.
+
+        #pragma warning disable CS1591 // Documenting this would be overkill.
         protected const int FixedDataOffset = 0;
         protected const int UidOffset = FixedDataOffset + FixedDataLength;
         protected const int AesKeyOffset = UidOffset + UidLength;
@@ -40,10 +41,12 @@ namespace Yubico.YubiKey.Otp.Commands
         protected const int CrcOffset = ReservedOffset + 2;
         protected const int CurrentAccessCodeOffset = CrcOffset + 2;
         protected const int ConfigurationStructSize = CurrentAccessCodeOffset + AccessCodeLength;
-#pragma warning restore CS1591
+        #pragma warning restore CS1591
+
         #endregion
 
         #region Component Size Reference Constants
+
         /// <summary>
         /// The required size for the FixedData buffer.
         /// </summary>
@@ -68,6 +71,7 @@ namespace Yubico.YubiKey.Otp.Commands
         /// The maximum length of a static password.
         /// </summary>
         internal const int MaxPasswordLength = FixedDataLength + UidLength + AesKeyLength;
+
         #endregion
 
         private readonly Memory<byte> _configurationBuffer = new byte[ConfigurationStructSize];
@@ -76,6 +80,7 @@ namespace Yubico.YubiKey.Otp.Commands
         /// Gets reference to the raw buffer that contains the configuration.
         /// </summary>
         protected Span<byte> ConfigurationBuffer => _configurationBuffer.Span;
+
         private Slot _otpSlot = Slot.ShortPress;
 
         /// <summary>
@@ -179,7 +184,8 @@ namespace Yubico.YubiKey.Otp.Commands
             if (accessCode.Length != AccessCodeLength)
             {
                 throw new ArgumentException(
-                    string.Format(CultureInfo.CurrentCulture,
+                    string.Format(
+                        CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidPropertyLength,
                         nameof(accessCode),
                         AccessCodeLength,
@@ -233,18 +239,20 @@ namespace Yubico.YubiKey.Otp.Commands
         /// </exception>
         public virtual YubiKeyFlags YubiKeyFlags
         {
-            get => new YubiKeyFlags
-            {
-                Extended = ExtendedFlags,
-                Ticket = TicketFlags,
-                Configuration = ConfigurationFlags
-            };
+            get =>
+                new YubiKeyFlags
+                {
+                    Extended = ExtendedFlags,
+                    Ticket = TicketFlags,
+                    Configuration = ConfigurationFlags
+                };
             set
             {
                 if (value is null)
                 {
                     throw new ArgumentNullException(nameof(value));
                 }
+
                 ExtendedFlags = value.Extended;
                 TicketFlags = value.Ticket;
                 ConfigurationFlags = value.Configuration;
@@ -268,7 +276,6 @@ namespace Yubico.YubiKey.Otp.Commands
                     : LongPressCode,
                 Data = ConfigurationBuffer.ToArray()
             };
-
         }
 
         /// <summary>

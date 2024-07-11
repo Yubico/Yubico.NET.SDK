@@ -33,12 +33,15 @@ namespace Yubico.YubiKey.Piv
         private readonly ReadOnlyMemory<byte> _defaultManagementKey;
         private readonly ReadOnlyMemory<byte> _defaultPin;
 
-        private readonly byte[] _keyBytes = {
+        private readonly byte[] _keyBytes =
+        {
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
             0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
         };
-        private readonly byte[] _pinBytes = {
+
+        private readonly byte[] _pinBytes =
+        {
             0x31, 0x32, 0x33, 0x34, 0x35, 0x36
         };
 
@@ -79,7 +82,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivPinOnlyMode.PinProtected, PivAlgorithm.Aes128, PivPinOnlyMode.PinDerivedUnavailable)]
         [InlineData(PivPinOnlyMode.PinDerived, PivAlgorithm.TripleDes, PivPinOnlyMode.PinProtectedUnavailable)]
         [InlineData(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, PivAlgorithm.Aes192, PivPinOnlyMode.None)]
-        [InlineData(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, PivAlgorithm.Aes128, PivPinOnlyMode.PinDerivedUnavailable)]
+        [InlineData(PivPinOnlyMode.PinProtected | PivPinOnlyMode.PinDerived, PivAlgorithm.Aes128,
+            PivPinOnlyMode.PinDerivedUnavailable)]
         public void ResetToNone_Success(
             PivPinOnlyMode mode, PivAlgorithm algorithm, PivPinOnlyMode unavailable)
         {
@@ -238,6 +242,7 @@ namespace Yubico.YubiKey.Piv
             {
                 return expected == 0;
             }
+
             if (getDataResponse.Status != ResponseStatus.Success)
             {
                 return false;
@@ -325,6 +330,7 @@ namespace Yubico.YubiKey.Piv
             {
                 returnValue |= PivPinOnlyMode.PinProtected;
             }
+
             if (currentMode.HasFlag(PivPinOnlyMode.PinDerived))
             {
                 returnValue |= PivPinOnlyMode.PinDerived;

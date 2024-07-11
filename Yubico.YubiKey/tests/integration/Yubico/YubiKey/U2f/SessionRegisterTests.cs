@@ -35,7 +35,8 @@ namespace Yubico.YubiKey.U2f
                 }
             }
 
-            IEnumerable<IYubiKeyDevice> yubiKeys = YubiKeyDevice.FindByTransport(Transport.HidFido | Transport.UsbSmartCard);
+            IEnumerable<IYubiKeyDevice> yubiKeys =
+                YubiKeyDevice.FindByTransport(Transport.HidFido | Transport.UsbSmartCard);
             var yubiKeyList = yubiKeys.ToList();
             Assert.NotEmpty(yubiKeyList);
 

@@ -28,15 +28,15 @@ namespace Yubico.YubiKey.Otp.Commands
         /// </summary>
         public QueryFipsModeCommand()
         {
-
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = OtpConstants.RequestSlotInstruction,
-            P1 = OtpConstants.QueryFipsSlot
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = OtpConstants.RequestSlotInstruction,
+                P1 = OtpConstants.QueryFipsSlot
+            };
 
         /// <inheritdoc />
         public QueryFipsModeResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

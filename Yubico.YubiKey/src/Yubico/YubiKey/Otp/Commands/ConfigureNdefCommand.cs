@@ -52,7 +52,6 @@ namespace Yubico.YubiKey.Otp.Commands
         public ConfigureNdefCommand(Slot slot, ReadOnlySpan<byte> configuration) :
             this(slot, configuration, ReadOnlySpan<byte>.Empty)
         {
-
         }
 
         /// <summary>
@@ -105,15 +104,16 @@ namespace Yubico.YubiKey.Otp.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = OtpConstants.RequestSlotInstruction,
-            P1 =
-                _ndefSlot == Slot.ShortPress
-                ? OtpConstants.ProgramNDEFShortPress
-                : OtpConstants.ProgramNDEFLongPress,
-            Data = _configurationBuffer
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Ins = OtpConstants.RequestSlotInstruction,
+                P1 =
+                    _ndefSlot == Slot.ShortPress
+                        ? OtpConstants.ProgramNDEFShortPress
+                        : OtpConstants.ProgramNDEFLongPress,
+                Data = _configurationBuffer
+            };
 
         /// <inheritdoc />
         public ReadStatusResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

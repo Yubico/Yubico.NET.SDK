@@ -68,6 +68,7 @@ namespace Yubico.YubiKey.U2f
             {
                 registerRsp = _fidoConnection.SendCommand(registerCmd);
             }
+
             Assert.Equal(ResponseStatus.Success, registerRsp.Status);
 
             RegistrationData regData = registerRsp.GetData();
@@ -81,6 +82,7 @@ namespace Yubico.YubiKey.U2f
             {
                 authRsp = _fidoConnection.SendCommand(authCmd);
             }
+
             Assert.Equal(ResponseStatus.Success, authRsp.Status);
             AuthenticationData authData = authRsp.GetData();
             Assert.False(authData.UserPresenceVerified);
@@ -109,6 +111,7 @@ namespace Yubico.YubiKey.U2f
             {
                 authRsp = _fidoConnection.SendCommand(authCmd);
             }
+
             Assert.Equal(ResponseStatus.Success, authRsp.Status);
             AuthenticationData authData = authRsp.GetData();
             Assert.False(authData.UserPresenceVerified);

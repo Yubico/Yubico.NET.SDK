@@ -60,7 +60,6 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <inheritdoc />
-        public ResetResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ResetResponse(responseApdu);
+        public ResetResponse CreateResponseForApdu(ResponseApdu responseApdu) => new ResetResponse(responseApdu);
     }
 }

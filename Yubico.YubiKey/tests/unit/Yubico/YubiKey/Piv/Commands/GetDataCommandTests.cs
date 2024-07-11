@@ -207,7 +207,8 @@ namespace Yubico.YubiKey.Piv.Commands
         {
             CommandApdu cmdApdu = GetDataCommandApdu(2, PivDataTag.Discovery);
 
-            var expected = new List<byte>(new byte[] {
+            var expected = new List<byte>(new byte[]
+            {
                 0x5C, 0x01, 0x7E
             });
 

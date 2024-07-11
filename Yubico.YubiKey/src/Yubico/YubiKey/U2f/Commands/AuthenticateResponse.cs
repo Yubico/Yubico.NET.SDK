@@ -47,10 +47,11 @@ namespace Yubico.YubiKey.U2f.Commands
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
-        public AuthenticationData GetData() => Status switch
-        {
-            ResponseStatus.Success => new AuthenticationData(ResponseApdu.Data),
-            _ => throw new InvalidOperationException(StatusMessage),
-        };
+        public AuthenticationData GetData() =>
+            Status switch
+            {
+                ResponseStatus.Success => new AuthenticationData(ResponseApdu.Data),
+                _ => throw new InvalidOperationException(StatusMessage),
+            };
     }
 }

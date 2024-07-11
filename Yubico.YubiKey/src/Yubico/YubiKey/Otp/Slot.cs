@@ -25,6 +25,7 @@ namespace Yubico.YubiKey.Otp
         /// cause an exception.
         /// </summary>
         None = 0,
+
         /// <summary>
         /// Refers to the configuration slot that is activated by a short duration touch of the YubiKey.
         /// This is also sometimes referred to as "Slot 1".

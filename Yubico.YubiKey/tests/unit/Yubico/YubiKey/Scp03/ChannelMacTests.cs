@@ -29,7 +29,9 @@ namespace Yubico.YubiKey.Scp03
         private static byte[] GetMcv() => Hex.HexToBytes("CB85E66F9DD7C009CB85E66F9DD7C009");
         private static byte[] GetBadMcv() => Hex.HexToBytes("B85E66F9DD7C09");
 
-        private static byte[] GetResponseForVerify() => Hex.HexToBytes("5F67E9E059DF3C52809DC9F6DDFBEF3E4C45691B2C8CDDD8");
+        private static byte[] GetResponseForVerify() =>
+            Hex.HexToBytes("5F67E9E059DF3C52809DC9F6DDFBEF3E4C45691B2C8CDDD8");
+
         private static byte[] GetBadResponse() => Hex.HexToBytes("5F67E9E059DF3C52809DC9F6DDFBEF3E4C45691B2C8CDDD9");
         private static byte[] GetMcvForVerify() => Hex.HexToBytes("53C2C04391250CCEC0213FF68C877EDA");
         private static byte[] GetRmacKey() => Hex.HexToBytes("38C0C6E3D0B6AED40FBB420B51399081");
@@ -56,19 +58,22 @@ namespace Yubico.YubiKey.Scp03
         [Fact]
         public void VerifyRmac_GivenBadKey_ThrowsArgumentException()
         {
-            _ = Assert.Throws<ArgumentException>(() => ChannelMac.VerifyRmac(GetResponseForVerify(), GetBadKey(), GetMcvForVerify()));
+            _ = Assert.Throws<ArgumentException>(() =>
+                ChannelMac.VerifyRmac(GetResponseForVerify(), GetBadKey(), GetMcvForVerify()));
         }
 
         [Fact]
         public void VerifyRmac_GivenBadMcv_ThrowsSecureChannelException()
         {
-            _ = Assert.Throws<SecureChannelException>(() => ChannelMac.VerifyRmac(GetResponseForVerify(), GetRmacKey(), GetBadMcv()));
+            _ = Assert.Throws<SecureChannelException>(() =>
+                ChannelMac.VerifyRmac(GetResponseForVerify(), GetRmacKey(), GetBadMcv()));
         }
 
         [Fact]
         public void VerifyRmac_GivenBadRmac_ThrowsSecureChannelException()
         {
-            _ = Assert.Throws<SecureChannelException>(() => ChannelMac.VerifyRmac(GetBadResponse(), GetRmacKey(), GetMcvForVerify()));
+            _ = Assert.Throws<SecureChannelException>(() =>
+                ChannelMac.VerifyRmac(GetBadResponse(), GetRmacKey(), GetMcvForVerify()));
         }
 
         [Fact]
@@ -76,6 +81,5 @@ namespace Yubico.YubiKey.Scp03
         {
             ChannelMac.VerifyRmac(GetResponseForVerify(), GetRmacKey(), GetMcvForVerify());
         }
-
     }
 }

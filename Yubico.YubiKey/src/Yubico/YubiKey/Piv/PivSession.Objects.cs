@@ -384,6 +384,7 @@ namespace Yubico.YubiKey.Piv
             {
                 throw new ArgumentNullException(nameof(pivDataObject));
             }
+
             _log.LogInformation("Write PivObject " + pivDataObject.GetType() + " to data tag 0x{0:X8}.");
 
             byte[] dataToStore = Array.Empty<byte>();

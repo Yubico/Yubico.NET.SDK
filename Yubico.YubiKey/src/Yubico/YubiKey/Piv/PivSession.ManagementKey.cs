@@ -650,7 +650,8 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public bool TryChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            _log.LogInformation("Try to change the management key, touch policy = {0}, algorithm = {1}.",
+            _log.LogInformation(
+                "Try to change the management key, touch policy = {0}, algorithm = {1}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
             CheckManagementKeyAlgorithm(newKeyAlgorithm, true);
@@ -761,7 +762,8 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public void ChangeManagementKey(PivTouchPolicy touchPolicy, PivAlgorithm newKeyAlgorithm)
         {
-            _log.LogInformation("Change the management key, touch policy = {0}, algorithm = {1}.",
+            _log.LogInformation(
+                "Change the management key, touch policy = {0}, algorithm = {1}.",
                 touchPolicy.ToString(), newKeyAlgorithm.ToString());
 
             if (TryChangeManagementKey(touchPolicy, newKeyAlgorithm) == false)
@@ -824,9 +826,10 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
         /// </exception>
-        public bool TryChangeManagementKey(ReadOnlyMemory<byte> currentKey,
-                                           ReadOnlyMemory<byte> newKey,
-                                           PivTouchPolicy touchPolicy = PivTouchPolicy.Default) =>
+        public bool TryChangeManagementKey(
+            ReadOnlyMemory<byte> currentKey,
+            ReadOnlyMemory<byte> newKey,
+            PivTouchPolicy touchPolicy = PivTouchPolicy.Default) =>
             TryChangeManagementKey(currentKey, newKey, touchPolicy, PivAlgorithm.TripleDes);
 
         /// <summary>
@@ -886,10 +889,11 @@ namespace Yubico.YubiKey.Piv
         /// Mutual authentication was performed and the YubiKey was not
         /// authenticated.
         /// </exception>
-        public bool TryChangeManagementKey(ReadOnlyMemory<byte> currentKey,
-                                           ReadOnlyMemory<byte> newKey,
-                                           PivTouchPolicy touchPolicy,
-                                           PivAlgorithm newKeyAlgorithm)
+        public bool TryChangeManagementKey(
+            ReadOnlyMemory<byte> currentKey,
+            ReadOnlyMemory<byte> newKey,
+            PivTouchPolicy touchPolicy,
+            PivAlgorithm newKeyAlgorithm)
         {
             CheckManagementKeyAlgorithm(newKeyAlgorithm, true);
 
@@ -898,10 +902,11 @@ namespace Yubico.YubiKey.Piv
 
         // Try to change the management key, even if the YubiKey is set to
         // PIN-derived.
-        private bool TryForcedChangeManagementKey(ReadOnlyMemory<byte> currentKey,
-                                                  ReadOnlyMemory<byte> newKey,
-                                                  PivTouchPolicy touchPolicy,
-                                                  PivAlgorithm newKeyAlgorithm)
+        private bool TryForcedChangeManagementKey(
+            ReadOnlyMemory<byte> currentKey,
+            ReadOnlyMemory<byte> newKey,
+            PivTouchPolicy touchPolicy,
+            PivAlgorithm newKeyAlgorithm)
         {
             if (TryAuthenticateManagementKey(currentKey, true))
             {
@@ -1025,9 +1030,10 @@ namespace Yubico.YubiKey.Piv
         // if the auth succeeds.
         // If auth works, return true, otherwise, return false.
         // Throw an exception if the YubiKey fails to auth.
-        private bool TryAuthenticateManagementKey(bool mutualAuthentication,
-                                                  ReadOnlySpan<byte> mgmtKey,
-                                                  PivAlgorithm algorithm)
+        private bool TryAuthenticateManagementKey(
+            bool mutualAuthentication,
+            ReadOnlySpan<byte> mgmtKey,
+            PivAlgorithm algorithm)
         {
             var initCommand = new InitializeAuthenticateManagementKeyCommand(mutualAuthentication, algorithm);
             InitializeAuthenticateManagementKeyResponse initResponse = Connection.SendCommand(initCommand);

@@ -294,6 +294,7 @@ namespace Yubico.YubiKey.Cryptography
             {
                 isValid = RsaFormat.TryParsePkcs1Oaep(formattedData, digestFlag, out outputData);
             }
+
             timer.Stop();
 
             if (expectedLength == 0)
@@ -390,10 +391,12 @@ namespace Yubico.YubiKey.Cryptography
             }
 
             // Use the seed to mask the DB.
-            PerformMgf1(buffer, 1, digestLength, buffer, digestLength + 1, buffer.Length - (digestLength + 1), digester);
+            PerformMgf1(buffer, 1, digestLength, buffer, digestLength + 1, buffer.Length - (digestLength + 1),
+                digester);
 
             // Use the masked DB to mask the seed.
-            PerformMgf1(buffer, digestLength + 1, buffer.Length - (digestLength + 1), buffer, 1, digestLength, digester);
+            PerformMgf1(buffer, digestLength + 1, buffer.Length - (digestLength + 1), buffer, 1, digestLength,
+                digester);
 
             return buffer;
         }

@@ -36,7 +36,8 @@ namespace Yubico.YubiKey.Piv
             _ = connection!.SendCommand(new GetSerialNumberCommand());
 
             Assert.NotNull(connection!.SelectApplicationData);
-            GenericSelectApplicationData? data = Assert.IsType<GenericSelectApplicationData>(connection.SelectApplicationData);
+            GenericSelectApplicationData? data =
+                Assert.IsType<GenericSelectApplicationData>(connection.SelectApplicationData);
 
             Assert.False(data!.RawData.IsEmpty);
         }

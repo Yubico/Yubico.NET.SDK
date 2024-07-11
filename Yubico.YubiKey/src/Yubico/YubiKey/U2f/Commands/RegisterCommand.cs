@@ -93,7 +93,6 @@ namespace Yubico.YubiKey.U2f.Commands
         }
 
         /// <inheritdoc />
-        public RegisterResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new RegisterResponse(responseApdu);
+        public RegisterResponse CreateResponseForApdu(ResponseApdu responseApdu) => new RegisterResponse(responseApdu);
     }
 }

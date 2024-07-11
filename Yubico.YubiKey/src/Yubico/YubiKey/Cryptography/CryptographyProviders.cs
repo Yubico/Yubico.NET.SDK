@@ -353,9 +353,9 @@ namespace Yubico.YubiKey.Cryptography
         /// </code>
         /// </para>
         /// </remarks>
-#pragma warning disable CA5350 // The PIV standard requires Triple-DES.
+        #pragma warning disable CA5350 // The PIV standard requires Triple-DES.
         public static Func<TripleDES> TripleDesCreator { get; set; } = TripleDES.Create;
-#pragma warning restore CA5350
+        #pragma warning restore CA5350
 
         /// <summary>
         /// This property is a delegate (function pointer). The method loaded
@@ -438,7 +438,8 @@ namespace Yubico.YubiKey.Cryptography
         /// </code>
         /// </para>
         /// </remarks>
-        public static Func<CmacBlockCipherAlgorithm, ICmacPrimitives> CmacPrimitivesCreator { get; set; } = CmacPrimitives.Create;
+        public static Func<CmacBlockCipherAlgorithm, ICmacPrimitives> CmacPrimitivesCreator { get; set; } =
+            CmacPrimitives.Create;
 
         /// <summary>
         /// This property is a delegate (function pointer). This method will return

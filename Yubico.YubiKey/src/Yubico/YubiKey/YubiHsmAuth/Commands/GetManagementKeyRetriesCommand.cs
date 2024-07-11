@@ -55,10 +55,11 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = MgmtRetriesInstruction
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Ins = MgmtRetriesInstruction
+            };
 
         /// <inheritdoc />
         public GetManagementKeyRetriesResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

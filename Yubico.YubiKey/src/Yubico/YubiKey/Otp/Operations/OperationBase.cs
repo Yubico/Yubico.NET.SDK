@@ -27,7 +27,6 @@ namespace Yubico.YubiKey.Otp.Operations
     /// </remarks>
     public abstract class OperationBase<T> where T : OperationBase<T>
     {
-
         /// <summary>
         /// The six-byte access code currently set to protect the OTP slot.
         /// </summary>
@@ -36,6 +35,7 @@ namespace Yubico.YubiKey.Otp.Operations
             get => _currentAccessCode.Span;
             set => _currentAccessCode = value.ToArray();
         }
+
         private Memory<byte> _currentAccessCode = new byte[SlotConfigureBase.AccessCodeLength];
 
         /// <summary>
@@ -46,6 +46,7 @@ namespace Yubico.YubiKey.Otp.Operations
             get => _newAccessCode.Span;
             set => _newAccessCode = value.ToArray();
         }
+
         private Memory<byte> _newAccessCode = new byte[SlotConfigureBase.AccessCodeLength];
 
         /// <summary>
@@ -163,6 +164,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.SlotNotSet);
             }
+
             PreLaunchOperation();
         }
 

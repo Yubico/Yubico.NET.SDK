@@ -66,7 +66,6 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                 {
                     menuItem = RunMenuItem(menuItem);
                 }
-
             } while (menuItem != OathMainMenuItem.Exit);
         }
 
@@ -90,7 +89,8 @@ namespace Yubico.YubiKey.Sample.OathSampleCode
                     return true;
 
                 default:
-                    return ChooseYubiKey.RunChooseYubiKey(false, _menuObject, Transport.UsbSmartCard, ref _yubiKeyChosen);
+                    return ChooseYubiKey.RunChooseYubiKey(false, _menuObject, Transport.UsbSmartCard,
+                        ref _yubiKeyChosen);
             }
         }
     }

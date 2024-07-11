@@ -24,8 +24,12 @@ namespace Yubico.YubiKey.Scp03
     {
         private static byte[] GetChallenge() => Hex.HexToBytes("360CB43F4301B894");
         private static byte[] GetCorrectInitializeUpdate() => Hex.HexToBytes("8050000008360CB43F4301B894");
-        private static byte[] GetInitializeUpdateResponse() => Hex.HexToBytes("010B001F002500000000FF0360CAAFA4DAC615236ADD5607216F3E115C9000");
-        private static byte[] GetCorrectExternalAuthenticate() => Hex.HexToBytes("848233001045330AB30BB1A079A8E7F77376DB9F2C");
+
+        private static byte[] GetInitializeUpdateResponse() =>
+            Hex.HexToBytes("010B001F002500000000FF0360CAAFA4DAC615236ADD5607216F3E115C9000");
+
+        private static byte[] GetCorrectExternalAuthenticate() =>
+            Hex.HexToBytes("848233001045330AB30BB1A079A8E7F77376DB9F2C");
 
         private static StaticKeys GetStaticKeys()
         {
@@ -101,7 +105,8 @@ namespace Yubico.YubiKey.Scp03
             Session sess = GetSession();
             var correctResponse = new InitializeUpdateResponse(new ResponseApdu(GetInitializeUpdateResponse()));
 #pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
-            _ = Assert.Throws<InvalidOperationException>(() => sess.LoadInitializeUpdateResponse(correctResponse, GetStaticKeys()));
+            _ = Assert.Throws<InvalidOperationException>(() =>
+                sess.LoadInitializeUpdateResponse(correctResponse, GetStaticKeys()));
 #pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
         }
 
@@ -111,7 +116,9 @@ namespace Yubico.YubiKey.Scp03
             // Arrange
             Session sess = GetSession();
             InitializeUpdateCommand initializeUpdateCommand = sess.BuildInitializeUpdate(0, GetChallenge());
-            sess.LoadInitializeUpdateResponse(initializeUpdateCommand.CreateResponseForApdu(new ResponseApdu(GetInitializeUpdateResponse())), GetStaticKeys());
+            sess.LoadInitializeUpdateResponse(
+                initializeUpdateCommand.CreateResponseForApdu(new ResponseApdu(GetInitializeUpdateResponse())),
+                GetStaticKeys());
 
             // Act
             ExternalAuthenticateCommand externalAuthenticateCommand = sess.BuildExternalAuthenticate();

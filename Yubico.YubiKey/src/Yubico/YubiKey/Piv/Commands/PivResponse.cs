@@ -29,7 +29,8 @@ namespace Yubico.YubiKey.Piv.Commands
         protected override ResponseStatusPair StatusCodeMap =>
             StatusWord switch
             {
-                SWConstants.SecurityStatusNotSatisfied => new ResponseStatusPair(ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivSecurityStatusNotSatisfied),
+                SWConstants.SecurityStatusNotSatisfied => new ResponseStatusPair(
+                    ResponseStatus.AuthenticationRequired, ResponseStatusMessages.PivSecurityStatusNotSatisfied),
                 _ => base.StatusCodeMap,
             };
 
@@ -43,7 +44,6 @@ namespace Yubico.YubiKey.Piv.Commands
         public PivResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
     }
 }

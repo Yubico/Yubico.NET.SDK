@@ -51,13 +51,11 @@ namespace Yubico.YubiKey.Piv
         /// </exception>
         public PivBioMetadata(ReadOnlyMemory<byte> responseData)
         {
-
             var tlvReader = new TlvReader(responseData);
 
             bool? isConfigured = null;
             int? attemptsRemaining = null;
             bool? hasTemporaryPin = null;
-
 
             while (tlvReader.HasData)
             {
@@ -86,20 +84,18 @@ namespace Yubico.YubiKey.Piv
                 }
             }
 
-
             if (isConfigured == null || attemptsRemaining == null || hasTemporaryPin == null)
             {
                 throw new InvalidOperationException(
-                        string.Format(
-                            CultureInfo.CurrentCulture,
-                            ExceptionMessages.InvalidApduResponseData));
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.InvalidApduResponseData));
             }
 
             IsConfigured = isConfigured.Value;
             AttemptsRemaining = attemptsRemaining.Value;
             HasTemporaryPin = hasTemporaryPin.Value;
         }
-
 
         /// <summary>
         /// Indicates whether biometrics are configured or not (fingerprints enrolled or not).

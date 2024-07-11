@@ -136,8 +136,9 @@ namespace Yubico.YubiKey.Piv
         /// True if the method was able to create a new RSA public key object,
         /// false otherwise.
         /// </returns>
-        internal static bool TryCreate(out PivPublicKey publicKeyObject,
-                                       ReadOnlyMemory<byte> encodedPublicKey)
+        internal static bool TryCreate(
+            out PivPublicKey publicKeyObject,
+            ReadOnlyMemory<byte> encodedPublicKey)
         {
             var returnValue = new PivRsaPublicKey();
             publicKeyObject = returnValue;
@@ -243,7 +244,10 @@ namespace Yubico.YubiKey.Piv
             // The keyOffsetIndex is 4 or 5 for the RSA key sizes we support.
             // The offset of 4 is correct for up to 128 bytes of data (size of RSA1024)
             // The offset of 5 is correct for up to 64 KiB of data - large enough to accomodate any existing larger RSA key sizes.
-            int keyOffsetIndex = Algorithm == PivAlgorithm.Rsa1024 ? 4 : 5;
+            int keyOffsetIndex = Algorithm == PivAlgorithm.Rsa1024
+                ? 4
+                : 5;
+
             YubiKeyEncodedKey = PivEncodedKey[keyOffsetIndex..];
 
             _modulus = new Memory<byte>(modulus.ToArray());

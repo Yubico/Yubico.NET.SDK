@@ -151,6 +151,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             {
                 throw new ArgumentNullException(nameof(requestorSlotContents));
             }
+
             if (signerSlotContents is null)
             {
                 throw new ArgumentNullException(nameof(signerSlotContents));
@@ -200,6 +201,7 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     {
                         return false;
                     }
+
                     count++;
                 }
                 else if (signerCert.Extensions[index] is X509KeyUsageExtension keyUsage)
@@ -208,8 +210,10 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                     {
                         return false;
                     }
+
                     count++;
                 }
+
                 index++;
             }
 
@@ -502,7 +506,8 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
             }
 
             var returnValue = RSA.Create();
-            returnValue.ImportSubjectPublicKeyInfo(certificate.PublicKey.GetRSAPublicKey().ExportSubjectPublicKeyInfo(), out int _);
+            returnValue.ImportSubjectPublicKeyInfo(certificate.PublicKey.GetRSAPublicKey().ExportSubjectPublicKeyInfo(),
+                out int _);
 
             return returnValue;
         }

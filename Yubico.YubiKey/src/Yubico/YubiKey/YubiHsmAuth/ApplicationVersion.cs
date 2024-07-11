@@ -47,6 +47,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </param>
         public ApplicationVersion(byte major, byte minor, byte patch)
             : base(major, minor, patch)
-        { }
+        {
+        }
     }
 }

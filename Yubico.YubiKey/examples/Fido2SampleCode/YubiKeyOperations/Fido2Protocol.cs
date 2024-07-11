@@ -149,7 +149,8 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
 
                 foreach (GetAssertionData assertionData in assertions)
                 {
-                    byte[] hmacSecret = assertionData.AuthenticatorData.GetHmacSecretExtension(fido2Session.AuthProtocol);
+                    byte[] hmacSecret =
+                        assertionData.AuthenticatorData.GetHmacSecretExtension(fido2Session.AuthProtocol);
                     hmacSecretList.Add(hmacSecret);
                 }
             }

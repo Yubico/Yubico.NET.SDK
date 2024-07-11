@@ -123,6 +123,7 @@ namespace Yubico.YubiKey
             /// Device information synthesized from various commands.
             /// </summary>
             public YubiKeyDeviceInfo Info { get; }
+
             public IDevice Device { get; }
 
             // Assumes that `device` is a YubiKey

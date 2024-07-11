@@ -33,7 +33,6 @@ namespace Yubico.YubiKey.Management.Commands
         public GetDeviceInfoResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
 
         /// <summary>

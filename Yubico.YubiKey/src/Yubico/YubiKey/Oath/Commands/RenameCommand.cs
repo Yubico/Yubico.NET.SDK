@@ -131,7 +131,6 @@ namespace Yubico.YubiKey.Oath.Commands
         }
 
         /// <inheritdoc />
-        public RenameResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new RenameResponse(responseApdu);
+        public RenameResponse CreateResponseForApdu(ResponseApdu responseApdu) => new RenameResponse(responseApdu);
     }
 }

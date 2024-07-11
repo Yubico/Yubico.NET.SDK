@@ -31,7 +31,6 @@ namespace Yubico.YubiKey.Otp.Commands
         public ReadNdefDataResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
 
         /// <summary>
@@ -43,7 +42,8 @@ namespace Yubico.YubiKey.Otp.Commands
         /// <exception cref="InvalidOperationException">
         /// Thrown when <see cref="YubiKeyResponse.Status"/> is not <see cref="ResponseStatus.Success"/>.
         /// </exception>
-        public ReadOnlyMemory<byte> GetData() => Status != ResponseStatus.Success
+        public ReadOnlyMemory<byte> GetData() =>
+            Status != ResponseStatus.Success
                 ? throw new InvalidOperationException(StatusMessage)
                 : ResponseApdu.Data;
     }

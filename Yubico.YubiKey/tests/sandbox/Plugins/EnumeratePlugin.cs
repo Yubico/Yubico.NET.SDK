@@ -22,19 +22,20 @@ namespace Yubico.YubiKey.TestApp.Plugins
     {
         public override string Name => "Enumeration";
 
-        public override string Description => "This plugin displays different types of YubiKeys, both in a scripted and interactive way.";
+        public override string Description =>
+            "This plugin displays different types of YubiKeys, both in a scripted and interactive way.";
 
         public EnumeratePlugin(IOutput output) : base(output)
         {
             Parameters["command"].Description = "[transport] The type of YubiKey transport to enumerate. "
-                + "Current valid transports are All, HidKeyboard, HidFido, UsbSmartCard, NfcSmartCard, "
-                + "and AllSmartCard. If this is not specified, interactive is assumed.";
+                                                + "Current valid transports are All, HidKeyboard, HidFido, UsbSmartCard, NfcSmartCard, "
+                                                + "and AllSmartCard. If this is not specified, interactive is assumed.";
             Parameters["interactive"] = new Parameter
             {
                 Name = "Interactive",
                 Shortcut = "i",
                 Description = "This mode prompts the user to select the YubiKey transport to "
-                             + "enumerate. If Command is also specified, it is executed first.",
+                              + "enumerate. If Command is also specified, it is executed first.",
                 Type = typeof(bool),
                 Required = false
             };
@@ -64,10 +65,12 @@ namespace Yubico.YubiKey.TestApp.Plugins
 
         private static ArgumentException GetArgumentException(string command)
         {
-            return new ArgumentException(string.Join(Eol, new[] {
-                $"[{ command }] is not valid. Valid commands are:",
+            return new ArgumentException(string.Join(Eol, new[]
+            {
+                $"[{command}] is not valid. Valid commands are:",
                 "  All", "  HidKeyboard", "  HidFido", "  UsbSmartCard",
-                "  NfcSmartCard", "  AllSmartCard" }));
+                "  NfcSmartCard", "  AllSmartCard"
+            }));
         }
 
         private bool OutputDevices(Transport transport)
@@ -78,11 +81,13 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 Output.WriteLine($"No keys found of type [{transport}]");
                 return false;
             }
+
             for (int i = 0; i < keys.Count; ++i)
             {
                 Output.WriteLine($"{Eol}YubiKey # {i + 1}{Eol + keys[i]}");
                 Output.WriteLine(new string('-', ConsoleWidth - 1));
             }
+
             Output.WriteLine(new string('=', ConsoleWidth - 1));
             Output.Write(Eol + Eol);
 
@@ -138,7 +143,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
             base.HandleParameters();
             string? interactive = (string?)Parameters["interactive"].Value;
             _interactive = interactive != null
-                && StaticConverters.ParseBool(interactive);
+                           && StaticConverters.ParseBool(interactive);
         }
 
         private bool _interactive;

@@ -320,7 +320,6 @@ namespace Yubico.YubiKey.Fido2
                 }
             }
 
-
             // Try to verify with Uv. If that doesn't work (or is not supported),
             // verify the PIN.
             if (DoVerifyUv(allPermissions, rpId, out string _) != CtapStatus.Ok)
@@ -370,7 +369,9 @@ namespace Yubico.YubiKey.Fido2
         // method operating would have already thrown an exception and will not
         // call this method.
         private ReadOnlyMemory<byte> GetAuthToken(
-            bool forceNewToken, PinUvAuthTokenPermissions permissions, string? relyingPartyId = null)
+            bool forceNewToken,
+            PinUvAuthTokenPermissions permissions,
+            string? relyingPartyId = null)
         {
             // If the caller is willing to use the existing AuthToken (force is
             // false), and it exists, return it.
@@ -541,6 +542,7 @@ namespace Yubico.YubiKey.Fido2
 
                         throw;
                     }
+
                     throw new SecurityException(ExceptionMessages.PinAlreadySet);
                 }
             }
@@ -925,13 +927,16 @@ namespace Yubico.YubiKey.Fido2
             {
                 while (keyCollector(keyEntryData))
                 {
-                    if (TryVerifyPin(keyEntryData.GetCurrentValue(), permissions, relyingPartyId, out int? retriesRemaining, out _))
+                    if (TryVerifyPin(
+                            keyEntryData.GetCurrentValue(), permissions, relyingPartyId, out int? retriesRemaining,
+                            out _))
                     {
                         return true;
                     }
 
                     keyEntryData.IsRetry = true;
-                    keyEntryData.RetriesRemaining = retriesRemaining!; // If we are retrying, we know this won't be null.
+                    keyEntryData.RetriesRemaining =
+                        retriesRemaining!; // If we are retrying, we know this won't be null.
 
                     if (keyEntryData.RetriesRemaining == 0)
                     {
@@ -1238,7 +1243,10 @@ namespace Yubico.YubiKey.Fido2
             }
         }
 
-        private CtapStatus DoVerifyUv(PinUvAuthTokenPermissions permissions, string? relyingPartyId, out string statusMessage)
+        private CtapStatus DoVerifyUv(
+            PinUvAuthTokenPermissions permissions,
+            string? relyingPartyId,
+            out string statusMessage)
         {
             if (AuthenticatorInfo.GetOptionValue("pinUvAuthToken") != OptionValue.True
                 || AuthenticatorInfo.GetOptionValue("uv") != OptionValue.True)
@@ -1246,6 +1254,7 @@ namespace Yubico.YubiKey.Fido2
                 statusMessage = "";
                 return CtapStatus.UnsupportedOption;
             }
+
             if (permissions == PinUvAuthTokenPermissions.None)
             {
                 statusMessage = ExceptionMessages.Fido2PermsMissing;
@@ -1262,6 +1271,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 Request = KeyEntryRequest.VerifyFido2Uv
             };
+
             using var touchTask = new TouchFingerprintTask(
                 keyCollector,
                 keyEntryData,
@@ -1273,7 +1283,10 @@ namespace Yubico.YubiKey.Fido2
                 do
                 {
                     GetPinUvAuthTokenResponse response = Connection.SendCommand(command);
-                    status = touchTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : response.CtapStatus;
+                    status = touchTask.IsUserCanceled
+                        ? CtapStatus.KeepAliveCancel
+                        : response.CtapStatus;
+
                     statusMessage = response.StatusMessage;
 
                     if (status == CtapStatus.Ok)
@@ -1291,7 +1304,8 @@ namespace Yubico.YubiKey.Fido2
                             status = CtapStatus.LimitExceeded;
                         }
                     }
-                } while (status == CtapStatus.UvInvalid);
+                }
+                while (status == CtapStatus.UvInvalid);
 
                 return status;
             }
@@ -1334,6 +1348,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(authProtocol));
             }
+
             _log.LogInformation("Set auth protocol: " + authProtocol.Protocol + ".");
 
             if (_disposeAuthProtocol)

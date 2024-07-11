@@ -28,6 +28,7 @@ namespace Yubico.YubiKey.Fido2.Cose
         /// The CBOR tag (key of key/value pair) for the COSE key type.
         /// </summary>
         protected const int TagKeyType = 1;
+
         /// <summary>
         /// The CBOR tag (key of key/value pair) for the COSE key algorithm.
         /// </summary>

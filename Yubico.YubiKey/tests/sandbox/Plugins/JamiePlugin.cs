@@ -78,6 +78,7 @@ namespace Yubico.YubiKey.TestApp.Plugins
                 Output.WriteLine(status.ToString()!);
                 result = response.Status == ResponseStatus.Success;
             }
+
             return result;
         }
 

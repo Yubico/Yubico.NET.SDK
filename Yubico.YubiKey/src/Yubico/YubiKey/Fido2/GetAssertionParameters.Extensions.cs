@@ -70,8 +70,7 @@ namespace Yubico.YubiKey.Fido2
         /// <see cref="MakeCredentialParameters.AddCredBlobExtension"/>.
         /// </para>
         /// </remarks>
-        public void RequestCredBlobExtension() =>
-            AddExtension(KeyCredBlob, new byte[] { 0xF5 });
+        public void RequestCredBlobExtension() => AddExtension(KeyCredBlob, new byte[] { 0xF5 });
 
         /// <summary>
         /// Specify that the YubiKey should return the "hmac-secret" with the
@@ -188,8 +187,7 @@ namespace Yubico.YubiKey.Fido2
         /// Either <c>salt1</c> is not exactly 32 bytes, or <c>salt2</c> is not
         /// null and is not exactly 32 bytes.
         /// </exception>
-        public void RequestHmacSecretExtension(
-            ReadOnlyMemory<byte> salt1, ReadOnlyMemory<byte>? salt2 = null)
+        public void RequestHmacSecretExtension(ReadOnlyMemory<byte> salt1, ReadOnlyMemory<byte>? salt2 = null)
         {
             _hmacSecretEncoding = null;
 
@@ -208,7 +206,10 @@ namespace Yubico.YubiKey.Fido2
 
             if (salt1.Length == HmacSecretSaltLength)
             {
-                int s2Len = salt2 is null ? HmacSecretSaltLength : salt2.Value.Length;
+                int s2Len = salt2 is null
+                    ? HmacSecretSaltLength
+                    : salt2.Value.Length;
+
                 _salt1 = salt1;
                 if (s2Len == HmacSecretSaltLength)
                 {
@@ -286,6 +287,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(authProtocol));
             }
+
             if (authProtocol.EncryptionKey is null || authProtocol.PlatformPublicKey is null)
             {
                 throw new InvalidOperationException(ExceptionMessages.Fido2NotEncapsulated);

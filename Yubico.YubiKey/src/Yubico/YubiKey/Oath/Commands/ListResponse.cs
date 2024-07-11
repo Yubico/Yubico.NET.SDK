@@ -117,4 +117,3 @@ namespace Yubico.YubiKey.Oath.Commands
         }
     }
 }
-

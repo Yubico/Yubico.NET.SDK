@@ -64,7 +64,8 @@ namespace Yubico.YubiKey.Piv
         [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha256, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha384, StandardTestDevice.Fw5)]
         [InlineData(PivAlgorithm.EccP384, 0x8b, RsaFormat.Sha512, StandardTestDevice.Fw5)]
-        public void KeyAgree_MatchesCSharp(PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm, StandardTestDevice testDeviceType)
+        public void KeyAgree_MatchesCSharp(
+            PivAlgorithm algorithm, byte slotNumber, int digestAlgorithm, StandardTestDevice testDeviceType)
         {
             // Build the correspondent objects.
             bool isValid = SampleKeyPairs.GetKeysAndCertPem(algorithm, true, out _, out _, out string privateKeyPem);

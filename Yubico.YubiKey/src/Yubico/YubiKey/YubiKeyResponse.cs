@@ -84,61 +84,104 @@ namespace Yubico.YubiKey
                 //
                 // These mappings are based off of ISO7816-4
                 //
-                SWConstants.Success => new ResponseStatusPair(ResponseStatus.Success, ResponseStatusMessages.BaseSuccess),
+                SWConstants.Success => new ResponseStatusPair(
+                    ResponseStatus.Success, ResponseStatusMessages.BaseSuccess),
 
                 // Warnings
-                SWConstants.WarningNvmUnchanged => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseWarningNvmUnchanged),
-                SWConstants.PartialCorruption => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BasePartialCorruption),
-                SWConstants.EOFReached => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseEOFReached),
-                SWConstants.FileDeactivated => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseFileDeactivated),
-                SWConstants.InvalidFileFormat => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseInvalidFileFormat),
-                SWConstants.FileTerminated => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseFileTerminated),
-                SWConstants.NoSensorData => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseNoSensorData),
+                SWConstants.WarningNvmUnchanged => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseWarningNvmUnchanged),
+                SWConstants.PartialCorruption => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BasePartialCorruption),
+                SWConstants.EOFReached => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseEOFReached),
+                SWConstants.FileDeactivated => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseFileDeactivated),
+                SWConstants.InvalidFileFormat => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseInvalidFileFormat),
+                SWConstants.FileTerminated => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseFileTerminated),
+                SWConstants.NoSensorData => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseNoSensorData),
 
-                SWConstants.WarningNvmChanged => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseWarningNvmChanged),
-                SWConstants.NoMoreSpaceInFile => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseNoMoreSpaceInFile),
+                SWConstants.WarningNvmChanged => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseWarningNvmChanged),
+                SWConstants.NoMoreSpaceInFile => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseNoMoreSpaceInFile),
 
                 // Errors
-                SWConstants.ExecutionError => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseExecutionError),
-                SWConstants.ResponseRequired => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseResponseRequired),
+                SWConstants.ExecutionError => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseExecutionError),
+                SWConstants.ResponseRequired => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseResponseRequired),
 
-                SWConstants.ErrorNvmChanged => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseErrorNvmChanged),
-                SWConstants.MemoryFailure => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseMemoryFailure),
+                SWConstants.ErrorNvmChanged => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseErrorNvmChanged),
+                SWConstants.MemoryFailure => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseMemoryFailure),
 
-                SWConstants.WrongLength => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseWrongLength),
+                SWConstants.WrongLength => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseWrongLength),
 
-                SWConstants.FunctionError => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseFunctionError),
-                SWConstants.LogicalChannelNotSupported => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseLogicalChannelNotSupported),
-                SWConstants.SecureMessagingNotSupported => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseSecureMessagingNotSupported),
-                SWConstants.LastCommandOfChainExpected => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseLastCommandOfChainExpected),
-                SWConstants.CommandChainingNotSupported => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseCommandChainingNotSupported),
+                SWConstants.FunctionError => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseFunctionError),
+                SWConstants.LogicalChannelNotSupported => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseLogicalChannelNotSupported),
+                SWConstants.SecureMessagingNotSupported => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseSecureMessagingNotSupported),
+                SWConstants.LastCommandOfChainExpected => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseLastCommandOfChainExpected),
+                SWConstants.CommandChainingNotSupported => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseCommandChainingNotSupported),
 
-                SWConstants.CommandNotAllowed => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseCommandNotAllowed),
-                SWConstants.IncompatibleCommand => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseIncompatibleCommand),
-                SWConstants.SecurityStatusNotSatisfied => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseSecurityStatusNotSatisfied),
-                SWConstants.AuthenticationMethodBlocked => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseAuthenticationMethodBlocked),
-                SWConstants.ReferenceDataUnusable => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseReferenceDataUnusable),
-                SWConstants.ConditionsNotSatisfied => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.BaseConditionsNotSatisfied),
-                SWConstants.CommandNotAllowedNoEF => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseCommandNotAllowedNoEF),
-                SWConstants.SecureMessageDataMissing => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseSecureMessageDataMissing),
-                SWConstants.SecureMessageMalformed => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseSecureMessageMalformed),
+                SWConstants.CommandNotAllowed => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseCommandNotAllowed),
+                SWConstants.IncompatibleCommand => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseIncompatibleCommand),
+                SWConstants.SecurityStatusNotSatisfied => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseSecurityStatusNotSatisfied),
+                SWConstants.AuthenticationMethodBlocked => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseAuthenticationMethodBlocked),
+                SWConstants.ReferenceDataUnusable => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseReferenceDataUnusable),
+                SWConstants.ConditionsNotSatisfied => new ResponseStatusPair(
+                    ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.BaseConditionsNotSatisfied),
+                SWConstants.CommandNotAllowedNoEF => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseCommandNotAllowedNoEF),
+                SWConstants.SecureMessageDataMissing => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseSecureMessageDataMissing),
+                SWConstants.SecureMessageMalformed => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseSecureMessageMalformed),
 
-                SWConstants.InvalidParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseInvalidParameter),
-                SWConstants.InvalidCommandDataParameter => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseInvalidCommandDataParameter),
-                SWConstants.FunctionNotSupported => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseFunctionNotSupported),
-                SWConstants.FileOrApplicationNotFound => new ResponseStatusPair(ResponseStatus.NoData, ResponseStatusMessages.BaseFileOrApplicationNotFound),
-                SWConstants.RecordNotFound => new ResponseStatusPair(ResponseStatus.NoData, ResponseStatusMessages.BaseRecordNotFound),
-                SWConstants.NotEnoughSpace => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseNotEnoughSpace),
-                SWConstants.InconsistentLengthWithTlv => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseInconsistentLengthWithTlv),
-                SWConstants.IncorrectP1orP2 => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseIncorrectP1orP2),
-                SWConstants.InconsistentLengthWithP1P2 => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseInconsistentLengthWithP1P2),
-                SWConstants.DataNotFound => new ResponseStatusPair(ResponseStatus.NoData, ResponseStatusMessages.BaseDataNotFound),
-                SWConstants.FileAlreadyExists => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseFileAlreadyExists),
-                SWConstants.DFNameAlreadyExists => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseDFNameAlreadyExists),
+                SWConstants.InvalidParameter => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseInvalidParameter),
+                SWConstants.InvalidCommandDataParameter => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseInvalidCommandDataParameter),
+                SWConstants.FunctionNotSupported => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseFunctionNotSupported),
+                SWConstants.FileOrApplicationNotFound => new ResponseStatusPair(
+                    ResponseStatus.NoData, ResponseStatusMessages.BaseFileOrApplicationNotFound),
+                SWConstants.RecordNotFound => new ResponseStatusPair(
+                    ResponseStatus.NoData, ResponseStatusMessages.BaseRecordNotFound),
+                SWConstants.NotEnoughSpace => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseNotEnoughSpace),
+                SWConstants.InconsistentLengthWithTlv => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseInconsistentLengthWithTlv),
+                SWConstants.IncorrectP1orP2 => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseIncorrectP1orP2),
+                SWConstants.InconsistentLengthWithP1P2 => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseInconsistentLengthWithP1P2),
+                SWConstants.DataNotFound => new ResponseStatusPair(
+                    ResponseStatus.NoData, ResponseStatusMessages.BaseDataNotFound),
+                SWConstants.FileAlreadyExists => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseFileAlreadyExists),
+                SWConstants.DFNameAlreadyExists => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseDFNameAlreadyExists),
 
-                SWConstants.InsNotSupported => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseInsNotSupported),
+                SWConstants.InsNotSupported => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseInsNotSupported),
 
-                SWConstants.ClaNotSupported => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseClaNotSupported),
+                SWConstants.ClaNotSupported => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.BaseClaNotSupported),
 
                 // Default
                 _ => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.BaseFailed),
@@ -168,14 +211,15 @@ namespace Yubico.YubiKey
         /// <inheritdoc />
         public string StatusMessage => StatusCodeMap.StatusMessage;
 
-        public override string ToString() => string.Join(
-            ", ",
-            new[]
-            {
-                $"Status: [{ StatusMessage }]",
-                $"Code[Status.{ Status }]",
-                $"APDU SW[0x{ ResponseApdu.SW.ToString("x4", CultureInfo.InvariantCulture) }]"
-            });
+        public override string ToString() =>
+            string.Join(
+                ", ",
+                new[]
+                {
+                    $"Status: [{StatusMessage}]",
+                    $"Code[Status.{Status}]",
+                    $"APDU SW[0x{ResponseApdu.SW.ToString("x4", CultureInfo.InvariantCulture)}]"
+                });
 
         /// <summary>
         /// Represents a ResponseStatus and StatusMessage pair returned by <see cref="StatusCodeMap"/>.

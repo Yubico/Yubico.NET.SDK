@@ -137,7 +137,8 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// </exception>
         public ApplicationVersion GetApplicationVersion()
         {
-            GetApplicationVersionResponse applicationVersionResponse = Connection.SendCommand(new GetApplicationVersionCommand());
+            GetApplicationVersionResponse applicationVersionResponse =
+                Connection.SendCommand(new GetApplicationVersionCommand());
 
             if (applicationVersionResponse.Status != ResponseStatus.Success)
             {
@@ -164,6 +165,7 @@ namespace Yubico.YubiKey.YubiHsmAuth
         /// <summary>
         /// When the YubiHsmAuthSession object goes out of scope, this method is called. It will close the session.
         /// </summary>
+
         // Note that .NET recommends a Dispose method call Dispose(true) and GC.SuppressFinalize(this).
         // The actual disposal is in the Dispose(bool) method.
         //

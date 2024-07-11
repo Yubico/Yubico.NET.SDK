@@ -60,10 +60,10 @@ namespace Yubico.YubiKey.TestApp
         public override string ToString() =>
             string.Join(", ", new[]
             {
-                (!string.IsNullOrWhiteSpace(Name) ? $"Name[{ Name }]" : string.Empty) +
+                (!string.IsNullOrWhiteSpace(Name) ? $"Name[{Name}]" : string.Empty) +
                 (!string.IsNullOrWhiteSpace(Shortcut) ? $"({Shortcut})" : string.Empty),
-                $"Type[{ Type }]",
-                Value != null ? $"Value[{ Value }]" : string.Empty
+                $"Type[{Type}]",
+                Value != null ? $"Value[{Value}]" : string.Empty
             }.Where(s => !string.IsNullOrWhiteSpace(s)));
     }
 }

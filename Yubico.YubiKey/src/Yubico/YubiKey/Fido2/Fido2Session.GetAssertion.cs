@@ -98,6 +98,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 throw new ArgumentNullException(nameof(parameters));
             }
+
             Func<KeyEntryData, bool> keyCollector = EnsureKeyCollector();
 
             byte[] token = new byte[MaximumAuthTokenLength];
@@ -164,7 +165,8 @@ namespace Yubico.YubiKey.Fido2
                 }
 
                 message = rsp.StatusMessage;
-            } while (forceToken);
+            }
+            while (forceToken);
 
             throw new Fido2Exception(message);
         }
@@ -178,6 +180,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 Request = KeyEntryRequest.TouchRequest,
             };
+
             using var touchTask = new TouchFingerprintTask(
                 keyCollector,
                 keyEntryData,
@@ -187,7 +190,10 @@ namespace Yubico.YubiKey.Fido2
             try
             {
                 GetAssertionResponse rsp = Connection.SendCommand(new GetAssertionCommand(parameters));
-                ctapStatus = touchTask.IsUserCanceled ? CtapStatus.KeepAliveCancel : rsp.CtapStatus;
+                ctapStatus = touchTask.IsUserCanceled
+                    ? CtapStatus.KeepAliveCancel
+                    : rsp.CtapStatus;
+
                 return rsp;
             }
             finally

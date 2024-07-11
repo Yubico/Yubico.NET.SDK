@@ -46,15 +46,21 @@ namespace Yubico.YubiKey.Otp.Operations
         // options the user selects are set. That means this operation has
         // an empty constructor.
         internal ConfigureYubicoOtp(IYubiKeyConnection connection, IOtpSession session, Slot slot)
-            : base(connection, session, slot) { }
+            : base(connection, session, slot)
+        {
+        }
 
         #region Private Fields
+
         // Can be up to sixteen bytes. In ykman, this is "fixed".
         private ReadOnlyMemory<byte> _publicIdentifier = Array.Empty<byte>();
+
         // Six byte value. In ykman, this is "uid".
         private ReadOnlyMemory<byte> _privateIdentifier = Array.Empty<byte>();
+
         // Sixteen byte value. In ykman, this is "key".
         private ReadOnlyMemory<byte> _key = Array.Empty<byte>();
+
         // The following bool? fields serve two purposes. They determine whether
         // the condition is true, and whether the condition has been set. This
         // allows us to prevent conflicting options, and we can prevent callers
@@ -62,21 +68,26 @@ namespace Yubico.YubiKey.Otp.Operations
         private bool? _useSerialAsPublicId;
         private bool? _generatePrivateId;
         private bool? _generateKey;
+
         #endregion
 
         #region Size Constants
+
         /// <summary>
         /// The count of bytes that are prepended to the Yubico OTP challenge.
         /// </summary>
         public const int PublicIdentifierMaxLength = 16;
+
         /// <summary>
         /// The count of bytes used as the private identifier for the Yubico OTP credential.
         /// </summary>
         public const int PrivateIdentifierSize = 6;
+
         /// <summary>
         /// The key size of the Yubico OTP credential.
         /// </summary>
         public const int KeySize = 16;
+
         #endregion
 
         /// <inheritdoc/>
@@ -89,6 +100,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 YubiKeyFlags = ykFlags,
                 OtpSlot = OtpSlot!.Value
             };
+
             try
             {
                 cmd.SetFixedData(_publicIdentifier.Span);
@@ -100,10 +112,11 @@ namespace Yubico.YubiKey.Otp.Operations
                 ReadStatusResponse response = Connection.SendCommand(cmd);
                 if (response.Status != ResponseStatus.Success)
                 {
-                    throw new InvalidOperationException(string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.YubiKeyOperationFailed,
-                        response.StatusMessage));
+                    throw new InvalidOperationException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.YubiKeyOperationFailed,
+                            response.StatusMessage));
                 }
             }
             finally
@@ -142,6 +155,7 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         #region Properties for Builder Pattern
+
         /// <summary>
         /// Explicitly sets the public ID of the Yubico OTP credential.
         /// </summary>
@@ -174,6 +188,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 exceptions.Add(
                     new InvalidOperationException(ExceptionMessages.CantSpecifyPublicIdAndUseSerial));
             }
+
             _useSerialAsPublicId = false;
 
             if (publicId.Length == 0 || publicId.Length > PublicIdentifierMaxLength)
@@ -225,6 +240,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 exceptions.Add(
                     new InvalidOperationException(ExceptionMessages.CantSpecifyPublicIdAndUseSerial));
             }
+
             _useSerialAsPublicId = true;
 
             int? serialNumber = Session.YubiKey.SerialNumber;
@@ -288,6 +304,7 @@ namespace Yubico.YubiKey.Otp.Operations
                 exceptions.Add(
                     new InvalidOperationException(ExceptionMessages.CantSpecifyPrivateIdAndGenerate));
             }
+
             _generatePrivateId = false;
 
             if (privateId.Length != PrivateIdentifierSize)
@@ -302,6 +319,7 @@ namespace Yubico.YubiKey.Otp.Operations
                     ? exceptions[0]
                     : new AggregateException(ExceptionMessages.MultipleExceptions, exceptions);
             }
+
             _privateIdentifier = privateId;
 
             return this;
@@ -327,6 +345,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.CantSpecifyPrivateIdAndGenerate);
             }
+
             _generatePrivateId = true;
 
             if (privateId.Length != PrivateIdentifierSize)
@@ -360,12 +379,14 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.CantSpecifyKeyAndGenerate);
             }
+
             _generateKey = false;
 
             if (key.Length != KeySize)
             {
                 throw new ArgumentException(ExceptionMessages.YubicoKeyWrongSize, nameof(key));
             }
+
             _key = key;
 
             return this;
@@ -389,12 +410,14 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.CantSpecifyKeyAndGenerate);
             }
+
             _generateKey = true;
 
             if (key.Length != KeySize)
             {
                 throw new ArgumentException(ExceptionMessages.YubicoKeyWrongSize, nameof(key));
             }
+
             _key = key;
 
             using RandomNumberGenerator rng = CryptographyProviders.RngCreator();
@@ -403,6 +426,7 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         #region Flags to Relay
+
         /// <inheritdoc cref="OtpSettings{T}.AppendCarriageReturn(bool)"/>
         /// <returns>The current <see cref="ConfigureYubicoOtp"/> instance.</returns>
         public ConfigureYubicoOtp AppendCarriageReturn(bool setConfig = true) =>
@@ -410,54 +434,46 @@ namespace Yubico.YubiKey.Otp.Operations
 
         /// <inheritdoc cref="OtpSettings{T}.SendTabFirst(bool)"/>
         /// <returns>The current <see cref="ConfigureYubicoOtp"/> instance.</returns>
-        public ConfigureYubicoOtp SendTabFirst(bool setConfig = true) =>
-            Settings.SendTabFirst(setConfig);
+        public ConfigureYubicoOtp SendTabFirst(bool setConfig = true) => Settings.SendTabFirst(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.AppendTabToFixed(bool)"/>
         /// <returns>The current <see cref="ConfigureYubicoOtp"/> instance.</returns>
-        public ConfigureYubicoOtp AppendTabToFixed(bool setConfig) =>
-            Settings.AppendTabToFixed(setConfig);
+        public ConfigureYubicoOtp AppendTabToFixed(bool setConfig) => Settings.AppendTabToFixed(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.AppendDelayToFixed(bool)"/>
         /// <returns>The current <see cref="ConfigureYubicoOtp"/> instance.</returns>
-        public ConfigureYubicoOtp AppendDelayToFixed(bool setConfig = true) =>
-            Settings.AppendDelayToFixed(setConfig);
+        public ConfigureYubicoOtp AppendDelayToFixed(bool setConfig = true) => Settings.AppendDelayToFixed(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.AppendDelayToOtp(bool)"/>
         /// <returns>The current <see cref="ConfigureYubicoOtp"/> instance.</returns>
-        public ConfigureYubicoOtp AppendDelayToOtp(bool setConfig = true) =>
-            Settings.AppendDelayToOtp(setConfig);
+        public ConfigureYubicoOtp AppendDelayToOtp(bool setConfig = true) => Settings.AppendDelayToOtp(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.Use10msPacing(bool)"/>
         /// <returns>The current <see cref="ConfigureYubicoOtp"/> instance.</returns>
-        public ConfigureYubicoOtp Use10msPacing(bool setConfig = true) =>
-            Settings.Use10msPacing(setConfig);
+        public ConfigureYubicoOtp Use10msPacing(bool setConfig = true) => Settings.Use10msPacing(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.Use20msPacing(bool)"/>
         /// <returns>The current <see cref="ConfigureYubicoOtp"/> instance.</returns>
-        public ConfigureYubicoOtp Use20msPacing(bool setConfig = true) =>
-            Settings.Use20msPacing(setConfig);
+        public ConfigureYubicoOtp Use20msPacing(bool setConfig = true) => Settings.Use20msPacing(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.UseNumericKeypad(bool)"/>
         /// <returns>The current <see cref="ConfigureYubicoOtp"/> instance.</returns>
-        public ConfigureYubicoOtp UseNumericKeypad(bool setConfig = true) =>
-            Settings.UseNumericKeypad(setConfig);
+        public ConfigureYubicoOtp UseNumericKeypad(bool setConfig = true) => Settings.UseNumericKeypad(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.UseFastTrigger(bool)"/>
         /// <returns>The current <see cref="ConfigureYubicoOtp"/> instance.</returns>
-        public ConfigureYubicoOtp UseFastTrigger(bool setConfig = true) =>
-            Settings.UseFastTrigger(setConfig);
+        public ConfigureYubicoOtp UseFastTrigger(bool setConfig = true) => Settings.UseFastTrigger(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.AllowUpdate(bool)"/>
         /// <returns>The current <see cref="ConfigureYubicoOtp"/> instance.</returns>
-        public ConfigureYubicoOtp SetAllowUpdate(bool setConfig = true) =>
-            Settings.AllowUpdate(setConfig);
+        public ConfigureYubicoOtp SetAllowUpdate(bool setConfig = true) => Settings.AllowUpdate(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.SendReferenceString(bool)"/>
         /// <returns>The current <see cref="ConfigureYubicoOtp"/> instance.</returns>
-        public ConfigureYubicoOtp SendReferenceString(bool setConfig = true) =>
-            Settings.SendReferenceString(setConfig);
+        public ConfigureYubicoOtp SendReferenceString(bool setConfig = true) => Settings.SendReferenceString(setConfig);
+
         #endregion
+
         #endregion
     }
 }

@@ -187,8 +187,7 @@ namespace Yubico.YubiKey.Fido2.Commands
         public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
-        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ConfigResponse(responseApdu);
+        public Fido2Response CreateResponseForApdu(ResponseApdu responseApdu) => new ConfigResponse(responseApdu);
 
         // This method encodes the parameters. For
         // SetMinPINLength, the parameters consist of the minPinLength, list of

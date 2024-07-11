@@ -40,7 +40,8 @@ namespace Yubico.YubiKey.Fido2
         {
             var mockYubiKey = new Mock<IYubiKeyDevice>();
             var mockConnection = new Mock<IYubiKeyConnection>();
-            var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
+            var mockResponse =
+                new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
             _ = mockConnection
                 .Setup(c => c.SendCommand(It.IsAny<IYubiKeyCommand<IYubiKeyResponse>>()))
@@ -60,7 +61,8 @@ namespace Yubico.YubiKey.Fido2
         {
             var mockYubiKey = new Mock<IYubiKeyDevice>();
             var mockConnection = new Mock<IYubiKeyConnection>();
-            var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
+            var mockResponse =
+                new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
             _ = mockConnection
                 .Setup(c => c.SendCommand(It.IsAny<IYubiKeyCommand<IYubiKeyResponse>>()))
@@ -80,7 +82,8 @@ namespace Yubico.YubiKey.Fido2
         {
             var mockYubiKey = new Mock<IYubiKeyDevice>();
             var mockConnection = new Mock<IYubiKeyConnection>();
-            var mockResponse = new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
+            var mockResponse =
+                new GetInfoResponse(new ResponseApdu(Fido2InfoTests.GetSampleEncoded(), SWConstants.Success));
 
             _ = mockConnection
                 .Setup(c => c.SendCommand(It.IsAny<IYubiKeyCommand<IYubiKeyResponse>>()))

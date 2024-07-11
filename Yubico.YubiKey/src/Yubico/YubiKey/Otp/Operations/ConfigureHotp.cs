@@ -69,6 +69,7 @@ namespace Yubico.YubiKey.Otp.Operations
 
                 // Get a span that points to the bytes for the IMF.
                 Span<byte> imf = hotpKey[HmacKeySize..];
+
                 // Write it in network order (big endian).
                 BinaryPrimitives.WriteUInt16BigEndian(imf, _imf);
 
@@ -82,10 +83,11 @@ namespace Yubico.YubiKey.Otp.Operations
                 ReadStatusResponse response = Connection.SendCommand(cmd);
                 if (response.Status != ResponseStatus.Success)
                 {
-                    throw new InvalidOperationException(string.Format(
-                        CultureInfo.CurrentCulture,
-                        ExceptionMessages.YubiKeyOperationFailed,
-                        response.StatusMessage));
+                    throw new InvalidOperationException(
+                        string.Format(
+                            CultureInfo.CurrentCulture,
+                            ExceptionMessages.YubiKeyOperationFailed,
+                            response.StatusMessage));
                 }
             }
             finally
@@ -104,6 +106,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 exceptions.Add(new InvalidOperationException(ExceptionMessages.MustChooseOrGenerateKey));
             }
+
             if (exceptions.Count > 0)
             {
                 throw exceptions.Count == 1
@@ -113,6 +116,7 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         #region Properties for Builder Pattern
+
         /// <summary>
         /// Set the initial moving factor for the credential.
         /// </summary>
@@ -124,6 +128,7 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new ArgumentException(ExceptionMessages.InvalidImfValue, nameof(imf));
             }
+
             _imf = (ushort)(imf >> 4);
             return this;
         }
@@ -157,12 +162,14 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.CantSpecifyKeyAndGenerate);
             }
+
             _generateKey = false;
 
             if (key.Length != HmacKeySize)
             {
                 throw new ArgumentException(ExceptionMessages.HmacKeyWrongSize, nameof(key));
             }
+
             _key = key;
 
             return this;
@@ -188,12 +195,14 @@ namespace Yubico.YubiKey.Otp.Operations
             {
                 throw new InvalidOperationException(ExceptionMessages.CantSpecifyKeyAndGenerate);
             }
+
             _generateKey = true;
 
             if (key.Length != HmacKeySize)
             {
                 throw new ArgumentException(ExceptionMessages.HmacKeyWrongSize, nameof(key));
             }
+
             _key = key;
 
             using RandomNumberGenerator rng = CryptographyProviders.RngCreator();
@@ -202,72 +211,65 @@ namespace Yubico.YubiKey.Otp.Operations
         }
 
         #region Flags to Relay
+
         /// <inheritdoc cref="OtpSettings{T}.Use8DigitHotp(bool)"/>
         /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
-        public ConfigureHotp Use8Digits(bool setConfig = true) =>
-            Settings.Use8DigitHotp(setConfig);
+        public ConfigureHotp Use8Digits(bool setConfig = true) => Settings.Use8DigitHotp(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.AppendCarriageReturn(bool)"/>
         /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
-        public ConfigureHotp AppendCarriageReturn(bool setConfig = true) =>
-            Settings.AppendCarriageReturn(setConfig);
+        public ConfigureHotp AppendCarriageReturn(bool setConfig = true) => Settings.AppendCarriageReturn(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.AllowUpdate(bool)"/>
         /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
-        public ConfigureHotp SetAllowUpdate(bool setConfig = true) =>
-            Settings.AllowUpdate(setConfig);
+        public ConfigureHotp SetAllowUpdate(bool setConfig = true) => Settings.AllowUpdate(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.SendTabFirst(bool)"/>
         /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
-        public ConfigureHotp SendTabFirst(bool setConfig = true) =>
-            Settings.SendTabFirst(setConfig);
+        public ConfigureHotp SendTabFirst(bool setConfig = true) => Settings.SendTabFirst(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.AppendTabToFixed(bool)"/>
         /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
-        public ConfigureHotp AppendTabToFixed(bool setConfig) =>
-            Settings.AppendTabToFixed(setConfig);
+        public ConfigureHotp AppendTabToFixed(bool setConfig) => Settings.AppendTabToFixed(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.AppendDelayToFixed(bool)"/>
         /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
-        public ConfigureHotp AppendDelayToFixed(bool setConfig = true) =>
-            Settings.AppendDelayToFixed(setConfig);
+        public ConfigureHotp AppendDelayToFixed(bool setConfig = true) => Settings.AppendDelayToFixed(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.AppendDelayToOtp(bool)"/>
         /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
-        public ConfigureHotp AppendDelayToOtp(bool setConfig = true) =>
-            Settings.AppendDelayToOtp(setConfig);
+        public ConfigureHotp AppendDelayToOtp(bool setConfig = true) => Settings.AppendDelayToOtp(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.Use10msPacing(bool)"/>
         /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
-        public ConfigureHotp Use10msPacing(bool setConfig = true) =>
-            Settings.Use10msPacing(setConfig);
+        public ConfigureHotp Use10msPacing(bool setConfig = true) => Settings.Use10msPacing(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.Use20msPacing(bool)"/>
         /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
-        public ConfigureHotp Use20msPacing(bool setConfig = true) =>
-            Settings.Use20msPacing(setConfig);
+        public ConfigureHotp Use20msPacing(bool setConfig = true) => Settings.Use20msPacing(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.UseNumericKeypad(bool)"/>
         /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
-        public ConfigureHotp UseNumericKeypad(bool setConfig = true) =>
-            Settings.UseNumericKeypad(setConfig);
+        public ConfigureHotp UseNumericKeypad(bool setConfig = true) => Settings.UseNumericKeypad(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.UseFastTrigger(bool)"/>
         /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
-        public ConfigureHotp UseFastTrigger(bool setConfig = true) =>
-            Settings.UseFastTrigger(setConfig);
+        public ConfigureHotp UseFastTrigger(bool setConfig = true) => Settings.UseFastTrigger(setConfig);
 
         /// <inheritdoc cref="OtpSettings{T}.SendReferenceString(bool)"/>
         /// <returns>The current <see cref="ConfigureHotp"/> instance.</returns>
-        public ConfigureHotp SendReferenceString(bool setConfig = true) =>
-            Settings.SendReferenceString(setConfig);
+        public ConfigureHotp SendReferenceString(bool setConfig = true) => Settings.SendReferenceString(setConfig);
+
         #endregion
+
         #endregion
 
         #region Private Fields
+
         private ReadOnlyMemory<byte> _key = Memory<byte>.Empty;
         private ushort _imf;
         private bool? _generateKey;
+
         #endregion
     }
 }

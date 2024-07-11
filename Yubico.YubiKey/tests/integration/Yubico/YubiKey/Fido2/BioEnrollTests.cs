@@ -158,6 +158,7 @@ namespace Yubico.YubiKey.Fido2
                     {
                         arg.SignalUserCancel();
                     }
+
                     Console.WriteLine("Fingerprint requested.");
                     break;
                 case KeyEntryRequest.EnrollFingerprint:
@@ -165,6 +166,7 @@ namespace Yubico.YubiKey.Fido2
                     {
                         arg.SignalUserCancel();
                     }
+
                     Console.WriteLine("Fingerprint needed.");
                     break;
                 case KeyEntryRequest.Release:

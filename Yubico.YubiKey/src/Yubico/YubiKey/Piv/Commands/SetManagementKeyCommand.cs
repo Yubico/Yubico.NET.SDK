@@ -260,18 +260,19 @@ namespace Yubico.YubiKey.Piv.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = PivSetManagementKeyInstruction,
-            P1 = PivSetManagementKeyInstruction,
-            P2 = TouchPolicy switch
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
             {
-                PivTouchPolicy.Always => TouchPolicyP2Always,
-                PivTouchPolicy.Cached => TouchPolicyP2Cached,
-                _ => TouchPolicyP2Never,
-            },
-            Data = BuildSetManagementKeyApduData(),
-        };
+                Ins = PivSetManagementKeyInstruction,
+                P1 = PivSetManagementKeyInstruction,
+                P2 = TouchPolicy switch
+                {
+                    PivTouchPolicy.Always => TouchPolicyP2Always,
+                    PivTouchPolicy.Cached => TouchPolicyP2Cached,
+                    _ => TouchPolicyP2Never,
+                },
+                Data = BuildSetManagementKeyApduData(),
+            };
 
         // Build a byte array that contains the data portion of the APDU.
         // It should be Alg 9B Len key
@@ -290,6 +291,6 @@ namespace Yubico.YubiKey.Piv.Commands
 
         /// <inheritdoc />
         public SetManagementKeyResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-          new SetManagementKeyResponse(responseApdu);
+            new SetManagementKeyResponse(responseApdu);
     }
 }

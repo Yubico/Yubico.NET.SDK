@@ -44,10 +44,11 @@ namespace Yubico.YubiKey.YubiHsmAuth.Commands
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = GetApplicationVersionInstruction
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
+            {
+                Ins = GetApplicationVersionInstruction
+            };
 
         /// <inheritdoc />
         public GetApplicationVersionResponse CreateResponseForApdu(ResponseApdu responseApdu) =>

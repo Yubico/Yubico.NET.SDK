@@ -27,7 +27,8 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_RepeatKey_Throws()
         {
-            byte[] encodedData = new byte[] {
+            byte[] encodedData = new byte[]
+            {
                 0xa4, 0x01, 0x81, 0x66, 0x55, 0x32, 0x46, 0x5f, 0x56, 0x32, 0x01, 0x81, 0x68, 0x46, 0x49, 0x44,
                 0x4f, 0x5f, 0x32, 0x5f, 0x30, 0x11, 0x01, 0x14, 0x02
             };
@@ -38,7 +39,8 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Versions_Correct()
         {
-            string[] correctStrings = new string[] {
+            string[] correctStrings = new string[]
+            {
                 "U2F_V2",
                 "FIDO_2_0",
                 "FIDO_2_1_PRE"
@@ -55,7 +57,8 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Extensions_Correct()
         {
-            string[] correctStrings = new string[] {
+            string[] correctStrings = new string[]
+            {
                 "credProtect",
                 "hmac-secret"
             };
@@ -68,6 +71,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 return;
             }
+
             bool isValid = CompareStringLists(correctStrings, fido2Info.Extensions);
 
             Assert.True(isValid);
@@ -85,7 +89,8 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Aaguid_Correct()
         {
-            byte[] correctValue = new byte[] {
+            byte[] correctValue = new byte[]
+            {
                 0x2f, 0xc0, 0x57, 0x9f, 0x81, 0x13, 0x47, 0xea, 0xb1, 0x16, 0xbb, 0x5a, 0x8d, 0xb9, 0x20, 0x2a
             };
 
@@ -100,10 +105,12 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Options_Correct()
         {
-            string[] correctKeys = new string[] {
+            string[] correctKeys = new string[]
+            {
                 "rk", "up", "plat", "clientPin", "credentialMgmtPreview"
             };
-            bool[] correctValues = new bool[] {
+            bool[] correctValues = new bool[]
+            {
                 true, true, false, false, true
             };
 
@@ -169,7 +176,8 @@ namespace Yubico.YubiKey.Fido2
         public void Decode_PinUvAuthProtocols_Correct()
         {
             // These must be in the correct order.
-            var correctValues = new PinUvAuthProtocol[] {
+            var correctValues = new PinUvAuthProtocol[]
+            {
                 PinUvAuthProtocol.ProtocolTwo,
                 PinUvAuthProtocol.ProtocolOne,
             };
@@ -246,7 +254,8 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Transports_Correct()
         {
-            string[] correctStrings = new string[] {
+            string[] correctStrings = new string[]
+            {
                 "usb",
                 "nfc"
             };
@@ -259,6 +268,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 return;
             }
+
             bool isValid = CompareStringLists(correctStrings, fido2Info.Transports);
 
             Assert.True(isValid);
@@ -276,11 +286,13 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Algorithms_Correct()
         {
-            var correctAlgs = new CoseAlgorithmIdentifier[] {
+            var correctAlgs = new CoseAlgorithmIdentifier[]
+            {
                 CoseAlgorithmIdentifier.ES256,
                 CoseAlgorithmIdentifier.EdDSA
             };
-            string[] correctTypes = new string[] {
+            string[] correctTypes = new string[]
+            {
                 "public-key",
                 "public-key"
             };
@@ -473,10 +485,12 @@ namespace Yubico.YubiKey.Fido2
         [Fact]
         public void Decode_Certifications_Correct()
         {
-            string[] correctKeys = new string[] {
+            string[] correctKeys = new string[]
+            {
                 "FIDO"
             };
-            int[] correctValues = new int[] {
+            int[] correctValues = new int[]
+            {
                 2
             };
 
@@ -604,6 +618,7 @@ namespace Yubico.YubiKey.Fido2
             {
                 return false;
             }
+
             if (correctInts.Length != candidate.Count)
             {
                 return false;
@@ -713,7 +728,8 @@ namespace Yubico.YubiKey.Fido2
             //                           9d 06 19 f9 4a 0e e5 81
             //                        1a
             //                           80 00 00 00
-            byte[] encodedData = new byte[] {
+            byte[] encodedData = new byte[]
+            {
                 0xb5, 0x01, 0x83, 0x66, 0x55, 0x32, 0x46, 0x5f, 0x56, 0x32, 0x68, 0x46, 0x49, 0x44, 0x4f, 0x5f,
                 0x32, 0x5f, 0x30, 0x6c, 0x46, 0x49, 0x44, 0x4f, 0x5f, 0x32, 0x5f, 0x31, 0x5f, 0x50, 0x52, 0x45,
                 0x02, 0x82, 0x6b, 0x63, 0x72, 0x65, 0x64, 0x50, 0x72, 0x6f, 0x74, 0x65, 0x63, 0x74, 0x6b, 0x68,
@@ -754,7 +770,8 @@ namespace Yubico.YubiKey.Fido2
             //                    50
             //                      2f c0 57 9f 81 13 47 ea b1 16 bb 5a 8d b9 20 2a
 
-            byte[] encodedData = new byte[] {
+            byte[] encodedData = new byte[]
+            {
                 0xa2, 0x01, 0x83, 0x66, 0x55, 0x32, 0x46, 0x5f, 0x56, 0x32, 0x68, 0x46, 0x49, 0x44, 0x4f, 0x5f,
                 0x32, 0x5f, 0x30, 0x6c, 0x46, 0x49, 0x44, 0x4f, 0x5f, 0x32, 0x5f, 0x31, 0x5f, 0x50, 0x52, 0x45,
                 0x03, 0x50, 0x2f, 0xc0, 0x57, 0x9f, 0x81, 0x13, 0x47, 0xea, 0xb1, 0x16, 0xbb, 0x5a, 0x8d, 0xb9,

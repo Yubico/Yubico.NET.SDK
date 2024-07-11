@@ -23,4 +23,3 @@ namespace Yubico.YubiKey
         public byte Page { get; set; }
     }
 }
-

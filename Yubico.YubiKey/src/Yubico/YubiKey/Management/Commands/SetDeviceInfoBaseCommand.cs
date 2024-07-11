@@ -51,7 +51,6 @@ namespace Yubico.YubiKey.Management.Commands
         /// </summary>
         public byte? ChallengeResponseTimeout { get; set; }
 
-
         /// <summary>
         /// The CCID auto-eject timeout (in seconds). This field is only meaningful if the
         /// TouchEject flag in DeviceFlags is set. <see langword="null"/> to leave unchanged.
@@ -121,7 +120,6 @@ namespace Yubico.YubiKey.Management.Commands
         /// </summary>
         protected SetDeviceInfoBaseCommand()
         {
-
         }
 
         protected SetDeviceInfoBaseCommand(SetDeviceInfoBaseCommand baseCommand)
@@ -162,7 +160,7 @@ namespace Yubico.YubiKey.Management.Commands
                         ExceptionMessages.LockCodeWrongLength,
                         LockCodeLength,
                         lockCode.Length),
-                        nameof(lockCode));
+                    nameof(lockCode));
             }
 
             if (_lockCode is byte[] clearMe)
@@ -187,7 +185,7 @@ namespace Yubico.YubiKey.Management.Commands
                         ExceptionMessages.LockCodeWrongLength,
                         LockCodeLength,
                         lockCode.Length),
-                        nameof(lockCode));
+                    nameof(lockCode));
             }
 
             if (_unlockCode is byte[] clearMe)
@@ -270,7 +268,8 @@ namespace Yubico.YubiKey.Management.Commands
 
             if (TemporaryTouchThreshold.HasValue)
             {
-                buffer.WriteByte(YubikeyDeviceManagementTags.TempTouchThresholdTag, (byte)TemporaryTouchThreshold.Value);
+                buffer.WriteByte(
+                    YubikeyDeviceManagementTags.TempTouchThresholdTag, (byte)TemporaryTouchThreshold.Value);
             }
 
             return buffer.Encode();

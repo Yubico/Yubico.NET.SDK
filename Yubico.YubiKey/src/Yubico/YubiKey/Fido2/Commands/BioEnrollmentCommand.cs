@@ -163,8 +163,10 @@ namespace Yubico.YubiKey.Fido2.Commands
         /// The Auth Protocol used to build the Auth Token.
         /// </param>
         public BioEnrollmentCommand(
-            int subCommand, byte[]? subCommandParams,
-            ReadOnlyMemory<byte> pinUvAuthToken, PinUvAuthProtocolBase authProtocol)
+            int subCommand,
+            byte[]? subCommandParams,
+            ReadOnlyMemory<byte> pinUvAuthToken,
+            PinUvAuthProtocolBase authProtocol)
         {
             if (authProtocol is null)
             {

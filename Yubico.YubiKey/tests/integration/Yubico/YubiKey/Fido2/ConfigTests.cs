@@ -38,7 +38,8 @@ namespace Yubico.YubiKey.Fido2
                 OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("ep");
                 bool isSet = fido2Session.TryEnableEnterpriseAttestation();
 
-                bool shouldSupportEnterpriseAttestation = optionValue == OptionValue.True || optionValue == OptionValue.False;
+                bool shouldSupportEnterpriseAttestation =
+                    optionValue == OptionValue.True || optionValue == OptionValue.False;
                 if (shouldSupportEnterpriseAttestation)
                 {
                     Assert.True(isSet);
@@ -47,7 +48,6 @@ namespace Yubico.YubiKey.Fido2
                 {
                     Assert.False(isSet);
                 }
-
             }
         }
 
@@ -109,7 +109,8 @@ namespace Yubico.YubiKey.Fido2
             {
                 fido2Session.KeyCollector = LocalKeyCollector;
 
-                _ = Assert.NotNull(fido2Session.AuthenticatorInfo.ForcePinChange); // Does not work on my USBAKeychain 5.4.3 (Assert.NotNull() Failure: Value of type 'Nullable<bool>' does not have a value)
+                _ = Assert.NotNull(fido2Session.AuthenticatorInfo
+                    .ForcePinChange); // Does not work on my USBAKeychain 5.4.3 (Assert.NotNull() Failure: Value of type 'Nullable<bool>' does not have a value)
                 Assert.False(fido2Session.AuthenticatorInfo.ForcePinChange!);
 
                 OptionValue optionValue = fido2Session.AuthenticatorInfo.GetOptionValue("setMinPINLength");
@@ -155,7 +156,8 @@ namespace Yubico.YubiKey.Fido2
 
         private bool VerifyExtension(Fido2Session fido2Session)
         {
-            byte[] clientDataHash = {
+            byte[] clientDataHash =
+            {
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38,
                 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36, 0x37, 0x38
             };

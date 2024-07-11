@@ -21,7 +21,8 @@ namespace Yubico.YubiKey.Oath.Commands
     /// <summary>
     /// The response to the <see cref="SelectOathCommand"/> command, containing the YubiKey's OATH application info.
     /// </summary>
-    public class SelectOathResponse : OathResponse, InterIndustry.Commands.ISelectApplicationResponse<OathApplicationData>
+    public class SelectOathResponse : OathResponse,
+                                      InterIndustry.Commands.ISelectApplicationResponse<OathApplicationData>
     {
         private const byte VersionTag = 0x79;
         private const byte NameTag = 0x71;
@@ -76,6 +77,7 @@ namespace Yubico.YubiKey.Oath.Commands
                             Minor = firmwareValue[1],
                             Patch = firmwareValue[2]
                         };
+
                         break;
 
                     case NameTag:
@@ -108,4 +110,3 @@ namespace Yubico.YubiKey.Oath.Commands
         }
     }
 }
-

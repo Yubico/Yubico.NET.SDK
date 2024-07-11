@@ -27,11 +27,13 @@ namespace Yubico.YubiKey.Oath.Commands
 
         /// <inheritdoc/>
         protected override ResponseStatusPair StatusCodeMap =>
-           StatusWord switch
-           {
-               OathSWConstants.NoSuchObject => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.OathAuthNotEnabled),
-               _ => base.StatusCodeMap,
-           };
+            StatusWord switch
+            {
+                OathSWConstants.NoSuchObject => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.OathAuthNotEnabled),
+                _ => base.StatusCodeMap,
+            };
+
         /// <summary>
         /// Gets the response.
         /// </summary>
@@ -78,4 +80,3 @@ namespace Yubico.YubiKey.Oath.Commands
         }
     }
 }
-

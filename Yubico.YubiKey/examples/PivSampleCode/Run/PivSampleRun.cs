@@ -89,7 +89,6 @@ namespace Yubico.YubiKey.Sample.PivSampleCode
                         menuItem = PivMainMenuItem.Exit;
                     }
                 }
-
             } while (menuItem != PivMainMenuItem.Exit);
         }
 

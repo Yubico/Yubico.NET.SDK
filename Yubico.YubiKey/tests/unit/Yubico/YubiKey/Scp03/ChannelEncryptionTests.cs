@@ -22,10 +22,15 @@ namespace Yubico.YubiKey.Scp03
     {
         private static byte[] GetKey() => Hex.HexToBytes("404142434445464748494A4B4C4D4E4F");
         private static byte[] GetPayload() => Hex.HexToBytes("000102030405060708090A0B0C0D0E0F010203");
-        private static byte[] GetCorrectEncryptOutput() => Hex.HexToBytes("CB85E66F9DD7CD73F98810F393DB27825434DCE62EB12625D74018388DF2C6D0");
+
+        private static byte[] GetCorrectEncryptOutput() =>
+            Hex.HexToBytes("CB85E66F9DD7CD73F98810F393DB27825434DCE62EB12625D74018388DF2C6D0");
 
         private static byte[] GetKeyForDecrypt() => Hex.HexToBytes("7A3F4BB6F7081D7E25437674CCA306CB");
-        private static byte[] GetBadlyPaddedCiphertext() => Hex.HexToBytes("000102030405060708090A0B0C0D0E0F000102030405060708090A0B0C0D0E0F");
+
+        private static byte[] GetBadlyPaddedCiphertext() =>
+            Hex.HexToBytes("000102030405060708090A0B0C0D0E0F000102030405060708090A0B0C0D0E0F");
+
         private static byte[] GetCiphertext() => Hex.HexToBytes("5F67E9E059DF3C52809DC9F6DDFBEF3E");
         private static byte[] GetCorrectDecryptedOutput() => Hex.HexToBytes("050301");
         private static byte[] GetBadKey() => Hex.HexToBytes("40414243");
@@ -34,7 +39,8 @@ namespace Yubico.YubiKey.Scp03
         [Fact]
         public void EncryptData_GivenBadKey_ThrowsArgumentException()
         {
-            _ = Assert.Throws<ArgumentException>(() => ChannelEncryption.EncryptData(GetPayload(), GetBadKey(), GetEncryptionCounter()));
+            _ = Assert.Throws<ArgumentException>(() =>
+                ChannelEncryption.EncryptData(GetPayload(), GetBadKey(), GetEncryptionCounter()));
         }
 
         [Fact]
@@ -55,7 +61,8 @@ namespace Yubico.YubiKey.Scp03
         [Fact]
         public void DecryptData_GivenBadKey_ThrowsArgumentException()
         {
-            _ = Assert.Throws<ArgumentException>(() => ChannelEncryption.DecryptData(GetPayload(), GetBadKey(), GetEncryptionCounter()));
+            _ = Assert.Throws<ArgumentException>(() =>
+                ChannelEncryption.DecryptData(GetPayload(), GetBadKey(), GetEncryptionCounter()));
         }
 
         [Fact]

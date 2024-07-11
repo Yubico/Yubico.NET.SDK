@@ -36,7 +36,10 @@ namespace Yubico.YubiKey
 
         public ISelectApplicationData? SelectApplicationData { get; set; }
 
-        protected SmartCardConnection(ISmartCardDevice smartCardDevice, YubiKeyApplication application, byte[]? applicationId)
+        protected SmartCardConnection(
+            ISmartCardDevice smartCardDevice,
+            YubiKeyApplication application,
+            byte[]? applicationId)
         {
             if (applicationId is null && application == YubiKeyApplication.Unknown)
             {
@@ -98,43 +101,52 @@ namespace Yubico.YubiKey
             SelectApplication();
         }
 
-        private bool IsOath => _yubiKeyApplication == YubiKeyApplication.Oath
-            || (_applicationId != null && _applicationId.SequenceEqual(YubiKeyApplicationExtensions.GetIso7816ApplicationId(YubiKeyApplication.Oath)));
+        private bool IsOath =>
+            _yubiKeyApplication == YubiKeyApplication.Oath
+            || (_applicationId != null && _applicationId.SequenceEqual(
+                YubiKeyApplicationExtensions.GetIso7816ApplicationId(YubiKeyApplication.Oath)));
 
         private IApduTransform AddResponseChainingTransform(IApduTransform pipeline) =>
             IsOath
-            ? new OathResponseChainingTransform(pipeline)
-            : new ResponseChainingTransform(pipeline);
+                ? new OathResponseChainingTransform(pipeline)
+                : new ResponseChainingTransform(pipeline);
 
         private void SelectApplication()
         {
-            IYubiKeyCommand<ISelectApplicationResponse<ISelectApplicationData>> selectApplicationCommand = _yubiKeyApplication switch
-            {
-                YubiKeyApplication.Oath => new Oath.Commands.SelectOathCommand(),
-                YubiKeyApplication.Unknown => new SelectApplicationCommand(_applicationId!),
-                _ => new SelectApplicationCommand(_yubiKeyApplication),
-            };
+            IYubiKeyCommand<ISelectApplicationResponse<ISelectApplicationData>> selectApplicationCommand =
+                _yubiKeyApplication switch
+                {
+                    YubiKeyApplication.Oath => new Oath.Commands.SelectOathCommand(),
+                    YubiKeyApplication.Unknown => new SelectApplicationCommand(_applicationId!),
+                    _ => new SelectApplicationCommand(_yubiKeyApplication),
+                };
 
-            _log.LogInformation("Selecting smart card application [{AID}]", Hex.BytesToHex(_applicationId ?? _yubiKeyApplication.GetIso7816ApplicationId()));
+            _log.LogInformation(
+                "Selecting smart card application [{AID}]",
+                Hex.BytesToHex(_applicationId ?? _yubiKeyApplication.GetIso7816ApplicationId()));
+
             ResponseApdu responseApdu = _smartCardConnection.Transmit(selectApplicationCommand.CreateCommandApdu());
 
             if (responseApdu.SW != SWConstants.Success)
             {
                 throw new ApduException(
-                      string.Format(
-                          CultureInfo.CurrentCulture,
-                          ExceptionMessages.SmartCardPipelineSetupFailed,
-                          responseApdu.SW))
-                {
-                    SW = responseApdu.SW
-                };
+                    string.Format(
+                        CultureInfo.CurrentCulture,
+                        ExceptionMessages.SmartCardPipelineSetupFailed,
+                        responseApdu.SW))
+                    {
+                        SW = responseApdu.SW
+                    };
             }
 
-            ISelectApplicationResponse<ISelectApplicationData>? response = selectApplicationCommand.CreateResponseForApdu(responseApdu);
+            ISelectApplicationResponse<ISelectApplicationData>? response =
+                selectApplicationCommand.CreateResponseForApdu(responseApdu);
+
             SelectApplicationData = response.GetData();
         }
 
-        public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand) where TResponse : IYubiKeyResponse
+        public TResponse SendCommand<TResponse>(IYubiKeyCommand<TResponse> yubiKeyCommand)
+            where TResponse : IYubiKeyResponse
         {
             using (IDisposable _ = _smartCardConnection.BeginTransaction(out bool cardWasReset))
             {

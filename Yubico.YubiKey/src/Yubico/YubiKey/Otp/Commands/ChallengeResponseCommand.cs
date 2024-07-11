@@ -107,7 +107,9 @@ namespace Yubico.YubiKey.Otp.Commands
         /// <inheritdoc/>
         public CommandApdu CreateCommandApdu()
         {
-            byte otpSlot = OtpSlot == Slot.ShortPress ? ShortPressSlot : LongPressSlot;
+            byte otpSlot = OtpSlot == Slot.ShortPress
+                ? ShortPressSlot
+                : LongPressSlot;
 
             if (Algorithm == ChallengeResponseAlgorithm.HmacSha1)
             {

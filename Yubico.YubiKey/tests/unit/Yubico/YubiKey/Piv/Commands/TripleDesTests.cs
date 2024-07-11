@@ -42,13 +42,15 @@ namespace Yubico.YubiKey.Piv.Commands
         public void ThreeBlocks_ProcessesAll()
         {
 #pragma warning disable CS0618 // testing special TripleDES, disable warning about using special TripleDES
-            byte[] keyData = new byte[] {
+            byte[] keyData = new byte[]
+            {
                 0x5d, 0x71, 0xbe, 0x48, 0x9c, 0x9f, 0xe5, 0x14,
                 0xd0, 0x55, 0x68, 0xa2, 0xa1, 0xcb, 0x5e, 0x3b,
                 0x2b, 0xc7, 0x53, 0xc6, 0x11, 0xcd, 0x4d, 0xa4
             };
 
-            byte[] dataToEncrypt = new byte[] {
+            byte[] dataToEncrypt = new byte[]
+            {
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18,
                 0x21, 0x22, 0x23, 0x24, 0x25, 0x26, 0x27, 0x28,
                 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0x18
@@ -88,6 +90,7 @@ namespace Yubico.YubiKey.Piv.Commands
                 {
                     maxCount = nextIndex;
                 }
+
                 int index = 0;
                 for (; currentIndex < maxCount; currentIndex++)
                 {
@@ -143,174 +146,210 @@ namespace Yubico.YubiKey.Piv.Commands
                     return -1;
 
                 case 0:
-                    newKeyData = new byte[] {
+                    newKeyData = new byte[]
+                    {
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
                     };
-                    newData = new byte[] {
+                    newData = new byte[]
+                    {
                         0xfa, 0x17, 0xb0, 0xc7, 0x4a, 0x46, 0xb0, 0xa7
                     };
-                    newExpected = new byte[] {
+                    newExpected = new byte[]
+                    {
                         0x14, 0xcf, 0xc6, 0x5e, 0xea, 0xba, 0xdf, 0x1d
                     };
                     break;
 
                 case 1:
-                    newKeyData = new byte[] {
+                    newKeyData = new byte[]
+                    {
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
                     };
-                    newData = new byte[] {
+                    newData = new byte[]
+                    {
                         0x0a, 0x77, 0x73, 0x0a, 0xaa, 0x1e, 0xc5, 0x66
                     };
-                    newExpected = new byte[] {
+                    newExpected = new byte[]
+                    {
                         0x34, 0x69, 0x5a, 0xdd, 0x8b, 0x09, 0x49, 0x2c
                     };
                     isEncrypting = false;
                     break;
 
                 case 2:
-                    newKeyData = new byte[] {
+                    newKeyData = new byte[]
+                    {
                         0x31, 0x40, 0x51, 0x61, 0x70, 0x80, 0x91, 0xA1,
                         0x30, 0x41, 0x50, 0x60, 0x70, 0x81, 0x91, 0xA1,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
                     };
-                    newData = new byte[] {
+                    newData = new byte[]
+                    {
                         0xfa, 0x17, 0xb0, 0xc7, 0x4a, 0x46, 0xb0, 0xa7
                     };
-                    newExpected = new byte[] {
+                    newExpected = new byte[]
+                    {
                         0x14, 0xcf, 0xc6, 0x5e, 0xea, 0xba, 0xdf, 0x1d
                     };
                     break;
 
                 case 3:
-                    newKeyData = new byte[] {
+                    newKeyData = new byte[]
+                    {
                         0x31, 0x40, 0x51, 0x61, 0x70, 0x80, 0x91, 0xA1,
                         0x30, 0x41, 0x50, 0x60, 0x70, 0x81, 0x91, 0xA1,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
                     };
-                    newData = new byte[] {
+                    newData = new byte[]
+                    {
                         0x0a, 0x77, 0x73, 0x0a, 0xaa, 0x1e, 0xc5, 0x66
                     };
-                    newExpected = new byte[] {
+                    newExpected = new byte[]
+                    {
                         0x34, 0x69, 0x5a, 0xdd, 0x8b, 0x09, 0x49, 0x2c
                     };
                     isEncrypting = false;
                     break;
 
                 case 4:
-                    newKeyData = new byte[] {
+                    newKeyData = new byte[]
+                    {
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
                     };
-                    newData = new byte[] {
+                    newData = new byte[]
+                    {
                         0x14, 0xcf, 0xc6, 0x5e, 0xea, 0xba, 0xdf, 0x1d
                     };
-                    newExpected = new byte[] {
+                    newExpected = new byte[]
+                    {
                         0x33, 0x7e, 0xd7, 0x9a, 0x5e, 0x20, 0xd6, 0x1e
                     };
                     break;
 
                 case 5:
-                    newKeyData = new byte[] {
+                    newKeyData = new byte[]
+                    {
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08,
                         0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01, 0x01
                     };
-                    newData = new byte[] {
+                    newData = new byte[]
+                    {
                         0x2b, 0x46, 0x73, 0x0e, 0x85, 0x26, 0x4f, 0xec
                     };
-                    newExpected = new byte[] {
+                    newExpected = new byte[]
+                    {
                         0xd8, 0xc4, 0xa2, 0x74, 0xec, 0x1c, 0x3e, 0x7b
                     };
                     isEncrypting = false;
                     break;
 
                 case 6:
-                    newKeyData = new byte[] {
+                    newKeyData = new byte[]
+                    {
                         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                         0x36, 0x2C, 0x95, 0xA4, 0x02, 0x58, 0xBD, 0x8E,
                         0x37, 0x2D, 0x94, 0xA5, 0x03, 0x59, 0xBC, 0x8F
                     };
-                    newData = new byte[] {
+                    newData = new byte[]
+                    {
                         0xfa, 0x17, 0xb0, 0xc7, 0x4a, 0x46, 0xb0, 0xa7
                     };
-                    newExpected = new byte[] {
+                    newExpected = new byte[]
+                    {
                         0x60, 0x46, 0xbf, 0xb8, 0x0e, 0x27, 0x04, 0x16
                     };
                     break;
 
                 case 7:
-                    newKeyData = new byte[] {
+                    newKeyData = new byte[]
+                    {
                         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                         0x36, 0x2C, 0x95, 0xA4, 0x02, 0x58, 0xBD, 0x8E,
                         0x37, 0x2D, 0x94, 0xA5, 0x03, 0x59, 0xBC, 0x8F
                     };
-                    newData = new byte[] {
+                    newData = new byte[]
+                    {
                         0x0a, 0x77, 0x73, 0x0a, 0xaa, 0x1e, 0xc5, 0x66
                     };
-                    newExpected = new byte[] {
+                    newExpected = new byte[]
+                    {
                         0x2b, 0xc7, 0x53, 0xc6, 0x11, 0xcd, 0x4d, 0xa4
                     };
                     isEncrypting = false;
                     break;
 
                 case 8:
-                    newKeyData = new byte[] {
+                    newKeyData = new byte[]
+                    {
                         0xE0, 0xE0, 0xE0, 0xE0, 0xF0, 0xF0, 0xF0, 0xF1,
                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
                     };
-                    newData = new byte[] {
+                    newData = new byte[]
+                    {
                         0xd0, 0x55, 0x68, 0xa2, 0xa1, 0xcb, 0x5e, 0x3b
                     };
-                    newExpected = new byte[] {
+                    newExpected = new byte[]
+                    {
                         0xc9, 0xa0, 0x1c, 0x6b, 0xbd, 0xbc, 0x2c, 0x69
                     };
                     break;
 
                 case 9:
-                    newKeyData = new byte[] {
+                    newKeyData = new byte[]
+                    {
                         0xE0, 0xE0, 0xE0, 0xE0, 0xF0, 0xF0, 0xF0, 0xF1,
                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
                     };
-                    newData = new byte[] {
+                    newData = new byte[]
+                    {
                         0xa7, 0x37, 0x0b, 0x6e, 0x08, 0xed, 0xd9, 0x4b
                     };
-                    newExpected = new byte[] {
+                    newExpected = new byte[]
+                    {
                         0x5d, 0x71, 0xbe, 0x48, 0x9c, 0x9f, 0xe5, 0x14
                     };
                     isEncrypting = false;
                     break;
 
                 case 10:
-                    newKeyData = new byte[] {
+                    newKeyData = new byte[]
+                    {
                         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                         0x1F, 0x1F, 0x1F, 0x1E, 0x0E, 0x0E, 0x0E, 0x0F
                     };
-                    newData = new byte[] {
+                    newData = new byte[]
+                    {
                         0xd0, 0x55, 0x68, 0xa2, 0xa1, 0xcb, 0x5e, 0x3b
                     };
-                    newExpected = new byte[] {
+                    newExpected = new byte[]
+                    {
                         0x87, 0x1c, 0x67, 0xe8, 0xf2, 0xf4, 0xc2, 0xea
                     };
                     break;
 
                 case 11:
-                    newKeyData = new byte[] {
+                    newKeyData = new byte[]
+                    {
                         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                         0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
                         0x1F, 0x1F, 0x1F, 0x1E, 0x0E, 0x0E, 0x0F, 0x0E
                     };
-                    newData = new byte[] {
+                    newData = new byte[]
+                    {
                         0xa7, 0x37, 0x0b, 0x6e, 0x08, 0xed, 0xd9, 0x4b
                     };
-                    newExpected = new byte[] {
+                    newExpected = new byte[]
+                    {
                         0xf1, 0xdd, 0x37, 0xe1, 0x60, 0xfe, 0xed, 0xcb
                     };
                     isEncrypting = false;
@@ -371,6 +410,7 @@ namespace Yubico.YubiKey.Piv.Commands
                     oddParityKey[index] |= 1;
                 }
             }
+
             return oddParityKey;
         }
     }

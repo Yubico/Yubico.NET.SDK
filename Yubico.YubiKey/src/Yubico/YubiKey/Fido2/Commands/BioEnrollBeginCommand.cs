@@ -85,10 +85,11 @@ namespace Yubico.YubiKey.Fido2.Commands
         //     03 int
         private static byte[]? EncodeParams(int? timeoutMilliseconds)
         {
-            return timeoutMilliseconds is null ? null
+            return timeoutMilliseconds is null
+                ? null
                 : new CborMapWriter<int>()
-                .Entry(KeyTimeout, timeoutMilliseconds.Value)
-                .Encode();
+                    .Entry(KeyTimeout, timeoutMilliseconds.Value)
+                    .Encode();
         }
     }
 }

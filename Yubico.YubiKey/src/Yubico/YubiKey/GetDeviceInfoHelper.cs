@@ -30,8 +30,7 @@ namespace Yubico.YubiKey
         /// <typeparam name="TCommand">The specific type of IGetPagedDeviceInfoCommand, e.g. GetPagedDeviceInfoCommand, which will then allow for returning the appropriate response.</typeparam>
         /// <param name="connection">The connection interface to communicate with a YubiKey.</param>
         /// <returns>A YubiKeyDeviceInfo? object containing all relevant device information if successful, otherwise null.</returns>
-        public static YubiKeyDeviceInfo? GetDeviceInfo<TCommand>(
-            IYubiKeyConnection connection)
+        public static YubiKeyDeviceInfo? GetDeviceInfo<TCommand>(IYubiKeyConnection connection)
             where TCommand
             : IGetPagedDeviceInfoCommand<IYubiKeyResponseWithData<Dictionary<int, ReadOnlyMemory<byte>>>>,
             new()

@@ -45,11 +45,14 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        protected override ResponseStatusPair StatusCodeMap => CtapStatus switch
-        {
-            CtapStatus.NotAllowed => new ResponseStatusPair(ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.Fido2ResetProcess),
-            CtapStatus.ActionTimeout => new ResponseStatusPair(ResponseStatus.Failed, ResponseStatusMessages.Fido2ResetTimeout),
-            _ => base.StatusCodeMap,
-        };
+        protected override ResponseStatusPair StatusCodeMap =>
+            CtapStatus switch
+            {
+                CtapStatus.NotAllowed => new ResponseStatusPair(
+                    ResponseStatus.ConditionsNotSatisfied, ResponseStatusMessages.Fido2ResetProcess),
+                CtapStatus.ActionTimeout => new ResponseStatusPair(
+                    ResponseStatus.Failed, ResponseStatusMessages.Fido2ResetTimeout),
+                _ => base.StatusCodeMap,
+            };
     }
 }

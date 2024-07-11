@@ -51,7 +51,9 @@ namespace Yubico.YubiKey.Fido2
         private const int KeyNonce = 2;
         private const int KeyOrigSize = 3;
         private const int NonceSize = 12;
+
         private const int GcmTagSize = 16;
+
         // To write out associated info, which is
         //   62 6C 6F 62 || littleEndian64(originalSize)
         private const int AssociatedDataSize = 12;
@@ -242,7 +244,8 @@ namespace Yubico.YubiKey.Fido2
             {
                 var associatedData = new Span<byte>(new byte[AssociatedDataSize]);
                 BinaryPrimitives.WriteInt32BigEndian(associatedData, AssociatedBlob);
-                BinaryPrimitives.WriteInt64LittleEndian(associatedData.Slice(AssociatedSizeOffset), (long)OriginalDataLength);
+                BinaryPrimitives.WriteInt64LittleEndian(
+                    associatedData.Slice(AssociatedSizeOffset), (long)OriginalDataLength);
 
                 IAesGcmPrimitives decryptor = CryptographyProviders.AesGcmPrimitivesCreator();
                 bool returnValue = decryptor.DecryptAndVerify(
@@ -306,6 +309,7 @@ namespace Yubico.YubiKey.Fido2
                 IAesGcmPrimitives encryptor = CryptographyProviders.AesGcmPrimitivesCreator();
                 encryptor.EncryptAndAuthenticate(
                     largeBlobKey.Span, Nonce.Span, dataToEncrypt, encryptedData, gcmTag, associatedData);
+
                 Array.Copy(encryptedData, 0, ciphertext, 0, encryptedData.Length);
                 Array.Copy(gcmTag, 0, ciphertext, encryptedData.Length, gcmTag.Length);
 

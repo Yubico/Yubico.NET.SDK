@@ -43,23 +43,22 @@ namespace Yubico.YubiKey.Otp.Commands
         /// </summary>
         public SelectNdefDataCommand()
         {
-
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu()
-        {
-            Ins = SelectNdefDataInstruction,
-            P2 = SelectNdefParameter2,
-            Data = new byte[]
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu()
             {
-                (byte)(((short)FileID >> 8) & 0xFF),
-                (byte)((short)FileID & 0xFF)
-            }
-        };
+                Ins = SelectNdefDataInstruction,
+                P2 = SelectNdefParameter2,
+                Data = new byte[]
+                {
+                    (byte)(((short)FileID >> 8) & 0xFF),
+                    (byte)((short)FileID & 0xFF)
+                }
+            };
 
         /// <inheritdoc />
-        public OtpResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new OtpResponse(responseApdu);
+        public OtpResponse CreateResponseForApdu(ResponseApdu responseApdu) => new OtpResponse(responseApdu);
     }
 }

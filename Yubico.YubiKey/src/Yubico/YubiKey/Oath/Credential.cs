@@ -108,7 +108,10 @@ namespace Yubico.YubiKey.Oath
         public string? Issuer
         {
             get => _issuer;
-            set => _issuer = string.IsNullOrWhiteSpace(value) ? null : value;
+            set =>
+                _issuer = string.IsNullOrWhiteSpace(value)
+                    ? null
+                    : value;
         }
 
         /// <summary>
@@ -148,14 +151,12 @@ namespace Yubico.YubiKey.Oath
             {
                 if (value != null)
                 {
-
                     var regexSecret = new Regex(@"[A-Za-z2-7=]*");
 
                     if (regexSecret.Match(value).Value != value)
                     {
                         throw new InvalidOperationException(ExceptionMessages.InvalidCredentialSecret);
                     }
-
                 }
 
                 _secret = value;
@@ -233,7 +234,10 @@ namespace Yubico.YubiKey.Oath
         /// </remarks>
         public int? Counter
         {
-            get => Type == CredentialType.Hotp ? _counter : null;
+            get =>
+                Type == CredentialType.Hotp
+                    ? _counter
+                    : null;
             set => _counter = value;
         }
 
@@ -267,7 +271,10 @@ namespace Yubico.YubiKey.Oath
         /// <exception cref="InvalidOperationException">
         /// A required parameter is missing or the name exceeds the maximum length.
         /// </exception>
-        public string Name => IsValidNameLength ? _buildName() : throw new InvalidOperationException(ExceptionMessages.InvalidCredentialNameLength);
+        public string Name =>
+            IsValidNameLength
+                ? _buildName()
+                : throw new InvalidOperationException(ExceptionMessages.InvalidCredentialNameLength);
 
         /// <summary>
         /// Checks the name length, which cannot be more than 64 bytes in UTF-8 encoding.
@@ -360,7 +367,12 @@ namespace Yubico.YubiKey.Oath
         /// <param name="algorithm">
         /// The types of hash algorithm.
         /// </param> 
-        public Credential(string? issuer, string account, CredentialPeriod period, CredentialType type, HashAlgorithm algorithm)
+        public Credential(
+            string? issuer,
+            string account,
+            CredentialPeriod period,
+            CredentialType type,
+            HashAlgorithm algorithm)
         {
             Issuer = issuer;
             AccountName = account;
@@ -399,7 +411,16 @@ namespace Yubico.YubiKey.Oath
         /// <param name="requireTouch">
         /// The credential requires the user to touch the key to generate a one-time password.
         /// </param>
-        public Credential(string? issuer, string account, CredentialType type, HashAlgorithm algorithm, string secret, CredentialPeriod period, int digits, int? counter, bool requireTouch)
+        public Credential(
+            string? issuer,
+            string account,
+            CredentialType type,
+            HashAlgorithm algorithm,
+            string secret,
+            CredentialPeriod period,
+            int digits,
+            int? counter,
+            bool requireTouch)
         {
             Issuer = issuer;
             AccountName = account;
@@ -418,7 +439,9 @@ namespace Yubico.YubiKey.Oath
         /// <returns>
         /// The triple of extracted period, issuer, and account.
         /// </returns>
-        internal static (CredentialPeriod period, string? issuer, string account) ParseLabel(string label, CredentialType type)
+        internal static (CredentialPeriod period, string? issuer, string account) ParseLabel(
+            string label,
+            CredentialType type)
         {
             CredentialPeriod period = CredentialPeriod.Period30;
             string? issuer = null;
@@ -509,7 +532,9 @@ namespace Yubico.YubiKey.Oath
 
             string secret = parsedUri["secret"];
 
-            CredentialType type = uri.Host == "totp" ? CredentialType.Totp : CredentialType.Hotp;
+            CredentialType type = uri.Host == "totp"
+                ? CredentialType.Totp
+                : CredentialType.Hotp;
 
             HashAlgorithm algorithm = HashAlgorithm.Sha1;
             string algorithmString = parsedUri["algorithm"];
@@ -544,8 +569,9 @@ namespace Yubico.YubiKey.Oath
             int digits = DefaultDigits;
             string digitsString = parsedUri["digits"];
 
-            if (!string.IsNullOrWhiteSpace(digitsString) && !int.TryParse(digitsString, NumberStyles.Any,
-                CultureInfo.InvariantCulture, out digits))
+            if (!string.IsNullOrWhiteSpace(digitsString) && !int.TryParse(
+                    digitsString, NumberStyles.Any,
+                    CultureInfo.InvariantCulture, out digits))
             {
                 digits = DefaultDigits;
             }
@@ -571,14 +597,18 @@ namespace Yubico.YubiKey.Oath
             }
 
             string counterString = parsedUri["counter"];
-            int? counter = int.TryParse(counterString, NumberStyles.Integer, CultureInfo.InvariantCulture, out int result) ? result : (int?)null;
+            int? counter = int.TryParse(
+                counterString, NumberStyles.Integer, CultureInfo.InvariantCulture, out int result)
+                ? result
+                : (int?)null;
 
             if (issuer != null)
             {
                 issuer = Uri.UnescapeDataString(issuer);
             }
 
-            return new Credential(issuer, Uri.UnescapeDataString(account), type, algorithm, secret, period, digits, counter, false);
+            return new Credential(
+                issuer, Uri.UnescapeDataString(account), type, algorithm, secret, period, digits, counter, false);
         }
 
         /// <summary>
@@ -589,7 +619,9 @@ namespace Yubico.YubiKey.Oath
         /// </returns>
         private static (string? issuer, string account) ParseUriPath(string path, string? defaultIssuer)
         {
-            string tempPath = path.StartsWith("/", true, CultureInfo.InvariantCulture) ? path.Substring(1) : path;
+            string tempPath = path.StartsWith("/", true, CultureInfo.InvariantCulture)
+                ? path.Substring(1)
+                : path;
 
             if (tempPath.Length > MaximumUrlLength)
             {
@@ -606,7 +638,9 @@ namespace Yubico.YubiKey.Oath
             return (defaultIssuer, tempPath);
         }
 
-        [SuppressMessage("Globalization", "CA1307:Specify StringComparison for clarity", Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
+        [SuppressMessage(
+            "Globalization", "CA1307:Specify StringComparison for clarity",
+            Justification = "Method needs to compile for both netstandard 2.0 and 2.1")]
         public override int GetHashCode()
         {
             int hash = base.GetHashCode();

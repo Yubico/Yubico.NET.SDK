@@ -134,6 +134,7 @@ namespace Yubico.YubiKey.Fido2.Commands
             {
                 throw new ArgumentNullException(nameof(pinProtocol));
             }
+
             if (pinProtocol.PlatformPublicKey is null)
             {
                 throw new InvalidOperationException(
@@ -141,6 +142,7 @@ namespace Yubico.YubiKey.Fido2.Commands
                         CultureInfo.CurrentCulture,
                         ExceptionMessages.InvalidCallOrder));
             }
+
             if (newPin.Length > MaximumPinLength)
             {
                 throw new ArgumentException(
@@ -170,7 +172,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         public CommandApdu CreateCommandApdu() => _command.CreateCommandApdu();
 
         /// <inheritdoc />
-        public SetPinResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new SetPinResponse(responseApdu);
+        public SetPinResponse CreateResponseForApdu(ResponseApdu responseApdu) => new SetPinResponse(responseApdu);
     }
 }

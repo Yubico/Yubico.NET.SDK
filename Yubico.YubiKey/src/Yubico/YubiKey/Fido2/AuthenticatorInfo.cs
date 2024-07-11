@@ -331,11 +331,13 @@ namespace Yubico.YubiKey.Fido2
                 {
                     Extensions = cborMap.ReadArray<string>(KeyExtensions);
                 }
+
                 if (cborMap.Contains(KeyOptions))
                 {
                     CborMap<string> optionsMap = cborMap.ReadMap<string>(KeyOptions);
                     Options = optionsMap.AsDictionary<bool>();
                 }
+
                 MaximumMessageSize = (int?)cborMap.ReadOptional<int>(KeyMaxMsgSize);
                 if (cborMap.Contains(KeyPinUvAuthProtocols))
                 {
@@ -345,18 +347,22 @@ namespace Yubico.YubiKey.Fido2
                     {
                         translator.Add((PinUvAuthProtocol)temp[index]);
                     }
+
                     PinUvAuthProtocols = translator;
                 }
+
                 MaximumCredentialCountInList = (int?)cborMap.ReadOptional<int>(KeyMaxCredentialCountInList);
                 MaximumCredentialIdLength = (int?)cborMap.ReadOptional<int>(KeyMaxCredentialIdLength);
                 if (cborMap.Contains(KeyTransports))
                 {
                     Transports = (IReadOnlyList<string>)cborMap.ReadArray<string>(KeyTransports);
                 }
+
                 if (cborMap.Contains(KeyAlgorithms))
                 {
                     ReadAlgorithms(cborMap);
                 }
+
                 MaximumSerializedLargeBlobArray = (int?)cborMap.ReadOptional<int>(KeyMaxSerializedLargeBlobArray);
                 ForcePinChange = (bool?)cborMap.ReadOptional<bool>(KeyForcePinChange);
                 MinimumPinLength = (int?)cborMap.ReadOptional<int>(KeyMinPinLength);
@@ -370,6 +376,7 @@ namespace Yubico.YubiKey.Fido2
                     CborMap<string> certMap = cborMap.ReadMap<string>(KeyCertifications);
                     Certifications = certMap.AsDictionary<int>();
                 }
+
                 RemainingDiscoverableCredentials = (int?)cborMap.ReadOptional<int>(KeyRemainingDiscoverableCredentials);
                 if (cborMap.Contains(KeyVendorPrototypeConfigCommands))
                 {
@@ -387,6 +394,7 @@ namespace Yubico.YubiKey.Fido2
                             int64List.Add(0);
                         }
                     }
+
                     VendorPrototypeConfigCommands = int64List;
                 }
             }
@@ -430,7 +438,9 @@ namespace Yubico.YubiKey.Fido2
             {
                 if (Options.ContainsKey(option))
                 {
-                    return Options[option] ? OptionValue.True : OptionValue.False;
+                    return Options[option]
+                        ? OptionValue.True
+                        : OptionValue.False;
                 }
             }
 

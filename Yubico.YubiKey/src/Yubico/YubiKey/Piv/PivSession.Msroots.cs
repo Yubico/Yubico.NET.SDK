@@ -329,6 +329,7 @@ namespace Yubico.YubiKey.Piv
             {
                 maxLength = NewMaximumObjectLength;
             }
+
             if (length > maxLength * MsrootsObjectCount)
             {
                 throw new ArgumentOutOfRangeException(
@@ -355,6 +356,7 @@ namespace Yubico.YubiKey.Piv
             int offset = 0;
             byte[] buffer = new byte[maxLength + MaximumTlvLength];
             var encoding = new Memory<byte>(buffer);
+
             // Write to every MSROOTS data object. If there is no data left,
             // we'll write no data, meaning we're making sure an object is empty.
             // Do this in case there was any data left over from a previous write.
@@ -477,7 +479,8 @@ namespace Yubico.YubiKey.Piv
         {
             int totalLength = 0;
             int count = 0;
-            var contentArray = (ReadOnlyMemory<byte>[])Array.CreateInstance(typeof(ReadOnlyMemory<byte>), MsrootsObjectCount);
+            var contentArray = (ReadOnlyMemory<byte>[])Array.CreateInstance(
+                typeof(ReadOnlyMemory<byte>), MsrootsObjectCount);
 
             for (int index = 0; index < MsrootsObjectCount; index++)
             {
@@ -488,6 +491,7 @@ namespace Yubico.YubiKey.Piv
                 {
                     break;
                 }
+
                 if (getResponse.Status != ResponseStatus.Success)
                 {
                     throw new InvalidOperationException(

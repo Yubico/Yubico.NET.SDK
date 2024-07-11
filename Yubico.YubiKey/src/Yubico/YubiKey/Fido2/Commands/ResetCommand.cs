@@ -55,7 +55,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         }
 
         /// <inheritdoc />
-        public ResetResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
-            new ResetResponse(responseApdu);
+        public ResetResponse CreateResponseForApdu(ResponseApdu responseApdu) => new ResetResponse(responseApdu);
     }
 }

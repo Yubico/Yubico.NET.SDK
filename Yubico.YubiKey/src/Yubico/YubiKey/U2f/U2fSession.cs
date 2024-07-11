@@ -309,9 +309,10 @@ namespace Yubico.YubiKey.U2f
         /// method that directly verifies the PIN.
         /// </para>
         /// </remarks>
-        public RegistrationData Register(ReadOnlyMemory<byte> applicationId,
-                                         ReadOnlyMemory<byte> clientDataHash,
-                                         TimeSpan timeout)
+        public RegistrationData Register(
+            ReadOnlyMemory<byte> applicationId,
+            ReadOnlyMemory<byte> clientDataHash,
+            TimeSpan timeout)
         {
             _log.LogInformation("Register a new U2F credential.");
             RegisterResponse response = CommonRegister(applicationId, clientDataHash, timeout, true);
@@ -416,10 +417,11 @@ namespace Yubico.YubiKey.U2f
         /// <c>KeyCollector</c> will be necessary.
         /// </para>
         /// </remarks>
-        public bool TryRegister(ReadOnlyMemory<byte> applicationId,
-                                ReadOnlyMemory<byte> clientDataHash,
-                                TimeSpan timeout,
-                                [MaybeNullWhen(returnValue: false)] out RegistrationData registrationData)
+        public bool TryRegister(
+            ReadOnlyMemory<byte> applicationId,
+            ReadOnlyMemory<byte> clientDataHash,
+            TimeSpan timeout,
+            [MaybeNullWhen(returnValue: false)] out RegistrationData registrationData)
         {
             _log.LogInformation("Try to register a new U2F credential.");
             RegisterResponse response = CommonRegister(applicationId, clientDataHash, timeout, false);
@@ -441,10 +443,11 @@ namespace Yubico.YubiKey.U2f
         // This will return the RegisterResponse. The caller can check the
         // Status and if Success, get the RegistrationData. If not, either return
         // false or call GetData to force an exception.
-        private RegisterResponse CommonRegister(ReadOnlyMemory<byte> applicationId,
-                                                ReadOnlyMemory<byte> clientDataHash,
-                                                TimeSpan timeout,
-                                                bool throwOnCancel)
+        private RegisterResponse CommonRegister(
+            ReadOnlyMemory<byte> applicationId,
+            ReadOnlyMemory<byte> clientDataHash,
+            TimeSpan timeout,
+            bool throwOnCancel)
         {
             Task? touchMessageTask = null;
             var keyEntryData = new KeyEntryData();
@@ -567,13 +570,15 @@ namespace Yubico.YubiKey.U2f
         /// A boolean, <c>true</c> if the key handle matches, <c>false</c>
         /// otherwise.
         /// </returns>
-        public bool VerifyKeyHandle(ReadOnlyMemory<byte> applicationId,
-                                    ReadOnlyMemory<byte> clientDataHash,
-                                    ReadOnlyMemory<byte> keyHandle)
+        public bool VerifyKeyHandle(
+            ReadOnlyMemory<byte> applicationId,
+            ReadOnlyMemory<byte> clientDataHash,
+            ReadOnlyMemory<byte> keyHandle)
         {
             _log.LogInformation("Verify a U2F key handle.");
 
-            var command = new AuthenticateCommand(U2fAuthenticationType.CheckOnly, applicationId, clientDataHash,
+            var command = new AuthenticateCommand(
+                U2fAuthenticationType.CheckOnly, applicationId, clientDataHash,
                 keyHandle);
 
             AuthenticateResponse response = Connection.SendCommand(command);
@@ -688,11 +693,12 @@ namespace Yubico.YubiKey.U2f
         /// The input data was invalid (e.g. the appId was not 32 bytes) or else
         /// the key handle was not correct for the appId.
         /// </exception>
-        public AuthenticationData Authenticate(ReadOnlyMemory<byte> applicationId,
-                                               ReadOnlyMemory<byte> clientDataHash,
-                                               ReadOnlyMemory<byte> keyHandle,
-                                               TimeSpan timeout,
-                                               bool requireProofOfPresence = true)
+        public AuthenticationData Authenticate(
+            ReadOnlyMemory<byte> applicationId,
+            ReadOnlyMemory<byte> clientDataHash,
+            ReadOnlyMemory<byte> keyHandle,
+            TimeSpan timeout,
+            bool requireProofOfPresence = true)
         {
             _log.LogInformation("Authenticate a U2F credential.");
 
@@ -761,12 +767,13 @@ namespace Yubico.YubiKey.U2f
         /// <exception cref="TimeoutException">
         /// The user presence check timed out.
         /// </exception>
-        public bool TryAuthenticate(ReadOnlyMemory<byte> applicationId,
-                                    ReadOnlyMemory<byte> clientDataHash,
-                                    ReadOnlyMemory<byte> keyHandle,
-                                    TimeSpan timeout,
-                                    [MaybeNullWhen(returnValue: false)] out AuthenticationData authenticationData,
-                                    bool requireProofOfPresence = true)
+        public bool TryAuthenticate(
+            ReadOnlyMemory<byte> applicationId,
+            ReadOnlyMemory<byte> clientDataHash,
+            ReadOnlyMemory<byte> keyHandle,
+            TimeSpan timeout,
+            [MaybeNullWhen(returnValue: false)] out AuthenticationData authenticationData,
+            bool requireProofOfPresence = true)
         {
             _log.LogInformation("Try to authenticate a U2F credential.");
 
@@ -789,11 +796,12 @@ namespace Yubico.YubiKey.U2f
         // AuthenticateResponse. The caller can check the Status and if Success,
         // get the AuthenticationData. If not, either return false or call
         // GetData to force an exception.
-        private AuthenticateResponse CommonAuthenticate(ReadOnlyMemory<byte> applicationId,
-                                                        ReadOnlyMemory<byte> clientDataHash,
-                                                        ReadOnlyMemory<byte> keyHandle,
-                                                        TimeSpan timeout,
-                                                        bool requireProofOfPresence)
+        private AuthenticateResponse CommonAuthenticate(
+            ReadOnlyMemory<byte> applicationId,
+            ReadOnlyMemory<byte> clientDataHash,
+            ReadOnlyMemory<byte> keyHandle,
+            TimeSpan timeout,
+            bool requireProofOfPresence)
         {
             Task? touchMessageTask = null;
             var keyEntryData = new KeyEntryData();
@@ -924,7 +932,9 @@ namespace Yubico.YubiKey.U2f
                 }
             }
 
-            return secondsToUse == 0 ? TimeSpan.MaxValue : TimeSpan.FromSeconds(secondsToUse);
+            return secondsToUse == 0
+                ? TimeSpan.MaxValue
+                : TimeSpan.FromSeconds(secondsToUse);
         }
     }
 }

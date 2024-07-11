@@ -91,7 +91,6 @@ namespace Yubico.YubiKey.Sample.Fido2SampleCode
                         menuItem = Fido2MainMenuItem.Exit;
                     }
                 }
-
             } while (menuItem != Fido2MainMenuItem.Exit);
         }
 

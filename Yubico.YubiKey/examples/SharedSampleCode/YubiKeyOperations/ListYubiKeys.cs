@@ -36,7 +36,8 @@ namespace Yubico.YubiKey.Sample.SharedCode
 
         private static void ReportResult(IEnumerable<IYubiKeyDevice> yubiKeyEnumerable)
         {
-            IEnumerable<IYubiKeyDevice> yubiKeyDevices = yubiKeyEnumerable as IYubiKeyDevice[] ?? yubiKeyEnumerable.ToArray();
+            IEnumerable<IYubiKeyDevice> yubiKeyDevices =
+                yubiKeyEnumerable as IYubiKeyDevice[] ?? yubiKeyEnumerable.ToArray();
 
             // Are there any?
             string outputList = "No YubiKeys found";
@@ -50,11 +51,13 @@ namespace Yubico.YubiKey.Sample.SharedCode
                     {
                         serial = (int)current.SerialNumber;
                     }
+
                     string serialNumber = serial.ToString(CultureInfo.InvariantCulture);
 
                     string versionNumber = current.FirmwareVersion.ToString();
                     outputList += "\n   " + serialNumber + " : " + versionNumber;
                 }
+
                 outputList += "\n";
             }
 

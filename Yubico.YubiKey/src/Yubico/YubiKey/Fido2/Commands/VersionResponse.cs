@@ -35,7 +35,6 @@ namespace Yubico.YubiKey.Fido2.Commands
         public VersionResponse(ResponseApdu responseApdu) :
             base(responseApdu)
         {
-
         }
 
         /// <inheritdoc/>

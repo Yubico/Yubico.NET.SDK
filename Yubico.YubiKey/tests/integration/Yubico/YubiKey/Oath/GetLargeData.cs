@@ -47,8 +47,8 @@ namespace Yubico.YubiKey.Oath
                 {
                     creds.Add(
                         oathSession.AddCredential(
-                        "",
-                        RandomString(63)));
+                            "",
+                            RandomString(63)));
                 }
 
                 return creds;

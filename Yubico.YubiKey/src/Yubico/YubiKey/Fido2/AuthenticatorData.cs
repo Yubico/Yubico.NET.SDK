@@ -171,6 +171,7 @@ namespace Yubico.YubiKey.Fido2
             offset++;
             SignatureCounter = BinaryPrimitives.ReadInt32BigEndian(
                 EncodedAuthenticatorData.Span.Slice(offset, SignCountLength));
+
             offset += SignCountLength;
 
             if (attestedData)
@@ -179,12 +180,14 @@ namespace Yubico.YubiKey.Fido2
                 offset += AaguidLength;
                 int credentialIdLength = BinaryPrimitives.ReadInt16BigEndian(
                     EncodedAuthenticatorData.Span.Slice(offset, CredentialIdLengthLength));
+
                 offset += CredentialIdLengthLength;
                 CredentialId = new CredentialId() { Id = EncodedAuthenticatorData.Slice(offset, credentialIdLength) };
                 offset += credentialIdLength;
                 CredentialPublicKey = CoseKey.Create(EncodedAuthenticatorData[offset..], out int bytesRead);
                 offset += bytesRead;
             }
+
             // For some versions of the YubiKey, it is possible there is no
             // extensions data, yet the extensions bit is set. This generally
             // happens if the caller requested extension data, but the YubiKey
@@ -203,6 +206,7 @@ namespace Yubico.YubiKey.Fido2
                     extensionList.Add(extensionKey, cbor.ReadEncodedValue().ToArray());
                     count--;
                 }
+
                 cbor.ReadEndMap();
 
                 Extensions = extensionList;

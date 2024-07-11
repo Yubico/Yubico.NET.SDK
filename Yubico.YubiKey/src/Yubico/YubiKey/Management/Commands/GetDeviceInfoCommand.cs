@@ -41,14 +41,14 @@ namespace Yubico.YubiKey.Management.Commands
         /// </summary>
         public GetDeviceInfoCommand()
         {
-
         }
 
         /// <inheritdoc />
-        public CommandApdu CreateCommandApdu() => new CommandApdu
-        {
-            Ins = GetDeviceInfoInstruction
-        };
+        public CommandApdu CreateCommandApdu() =>
+            new CommandApdu
+            {
+                Ins = GetDeviceInfoInstruction
+            };
 
         /// <inheritdoc />
         public GetDeviceInfoResponse CreateResponseForApdu(ResponseApdu responseApdu) =>
